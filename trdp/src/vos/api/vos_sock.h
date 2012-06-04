@@ -1,0 +1,396 @@
+/**********************************************************************************************************************/
+/**
+ * @file            vos_sock.h
+ *
+ * @brief           Typedefs for OS abstraction
+ *
+ * @details         This is the declaration for the OS independend socket interface
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Bernd Loehr, NewTec GmbH
+ *
+ * @remarks All rights reserved. Reproduction, modification, use or disclosure
+ *          to third parties without express authority is forbidden,
+ *          Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *
+ *
+ * $Id$
+ *
+ */
+
+#ifndef VOS_SOCK_H
+#define VOS_SOCK_H
+
+/***********************************************************************************************************************
+ * INCLUDES
+ */
+
+#include "vos_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/***********************************************************************************************************************
+ * DEFINES
+ */
+
+/** The maximum number of concurrent usable sockets  */
+#define VOS_MAX_SOCKET_CNT  80
+/**	The maximum hops a multicast packet can go	*/
+#define VOS_TTL_MULTICAST   64
+
+/***********************************************************************************************************************
+ * TYPEDEFS
+ */
+
+/** Common socket options  */
+typedef struct
+{
+    UINT8   qos;            /**< quality/type of service 0...7					*/
+    UINT8   ttl;            /**< time to live for unicast (default 64)			*/
+    UINT8   ttl_multicast;  /**< time to live for multicast						*/
+    BOOL    reuseAddrPort;  /**< allow reuse of address and port				*/
+    BOOL    nonBlocking;    /**< use non blocking calls							*/
+} VOS_SOCK_OPT_T;
+
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+
+/**********************************************************************************************************************/
+/** Byte swapping 2 Bytes.
+ *
+ *  @param[in]          val             Initial value.
+ *  @retval             swapped value
+ */
+
+EXT_DECL UINT16 vos_htons(
+    UINT16      val);
+
+/**********************************************************************************************************************/
+/** Byte swapping 2 Bytes.
+ *
+ *  @param[in]          val             Initial value.
+ *  @retval             swapped value
+ */
+
+EXT_DECL UINT16 vos_ntohs(
+    UINT16      val);
+
+/**********************************************************************************************************************/
+/** Byte swapping 4 Bytes.
+ *
+ *  @param[in]          val             Initial value.
+ *  @retval             swapped value
+ */
+
+EXT_DECL UINT32 vos_htonl(
+    UINT32      val);
+
+/**********************************************************************************************************************/
+/** Byte swapping 4 Bytes.
+ *
+ *  @param[in]          val             Initial value.
+ *  @retval             swapped value
+ */
+
+EXT_DECL UINT32 vos_ntohl(
+    UINT32      val);
+
+/*	Sockets	*/
+
+/**********************************************************************************************************************/
+/** Initialize the socket library.
+ *  Must be called once before any other call
+ *
+ *  @retval         VOS_NO_ERR			no error
+ *  @retval         VOS_SOCK_ERR		sockets not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockInit (
+    void);
+
+/**********************************************************************************************************************/
+/** Create an UDP socket.
+ *  Return a socket descriptor for further calls. The socket options are optional and can be
+ *	applied later.
+ *	Note: Some target systems might not support every option.
+ *
+ *  @param[out]     pSock			pointer to socket descriptor returned
+ *  @param[in]      pOptions		pointer to socket options (optional)
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_PARAM_ERR	pSock == NULL
+ *  @retval         VOS_SOCK_ERR	socket not available or option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockOpenUDP (
+    INT32                   *pSock,
+    const VOS_SOCK_OPT_T    *pOptions);
+
+/**********************************************************************************************************************/
+/** Create a TCP socket.
+ *  Return a socket descriptor for further calls. The socket options are optional and can be
+ *	applied later.
+ *
+ *  @param[out]     pSock			pointer to socket descriptor returned
+ *  @param[in]      pOptions		pointer to socket options (optional)
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_PARAM_ERR	pSock == NULL
+ *  @retval         VOS_SOCK_ERR	socket not available or option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockOpenTCP (
+    INT32                   *pSock,
+    const VOS_SOCK_OPT_T    *pOptions);
+
+/**********************************************************************************************************************/
+/** Close a socket.
+ *  Release any resources aquired by this socket
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ */
+
+EXT_DECL VOS_ERR_T vos_sockClose (
+    INT32 sock);
+
+/**********************************************************************************************************************/
+/** Set socket options.
+ *  Note: Some target systems might not support each option.
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      pOptions		pointer to socket options (optional)
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_SOCK_ERR	socket not available or option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockSetOptions (
+    INT32                   sock,
+    const VOS_SOCK_OPT_T    *pOptions);
+
+/**********************************************************************************************************************/
+/** Join a multicast group.
+ *  Note: Some target systems might not support this option.
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      mcAddress		multicast group to join
+ *  @param[in]      ipAddress		depicts interface on which to join, default 0 for any
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_SOCK_ERR	option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockJoinMC (
+    INT32   sock,
+    UINT32  mcAddress,
+    UINT32  ipAddress);
+
+/**********************************************************************************************************************/
+/** Leave a multicast group.
+ *  Note: Some target systems might not support this option.
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      mcAddress		multicast group to join
+ *  @param[in]      ipAddress		depicts interface on which to leave, default 0 for any
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_SOCK_ERR	option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockLeaveMC (
+    INT32   sock,
+    UINT32  mcAddress,
+    UINT32  ipAddress);
+
+/**********************************************************************************************************************/
+/** Send UDP data.
+ *  Send data to the given address and port.
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      pBuffer			pointer to data to send
+ *  @param[in]      size			size of the data to send
+ *  @param[in]      ipAddress		destination IP
+ *  @param[in]      port			destination port
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_IO_ERR		data could not be sent
+ *  @retval         VOS_MEM_ERR		resource error
+ */
+
+EXT_DECL VOS_ERR_T vos_sockSendUDP (
+    INT32       sock,
+    const UINT8 *pBuffer,
+    UINT32      size,
+    UINT32      ipAddress,
+    UINT16      port);
+
+/**********************************************************************************************************************/
+/** Receive UDP data.
+ *  The caller must provide a sufficient sized buffer. If the supplied buffer is smaller than the bytes received, *pSize
+ *	will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
+ *	If the socket was created in blocking-mode (default), then this call will block and will only return if data has
+ *	been received or the socket was closed or an error occured.
+ *	If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[out]     pBuffer			pointer to applications data buffer
+ *  @param[in,out]  pSize			pointer to the received data size
+ *  @param[out]     pIPAddr			source IP
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_IO_ERR		data could not be read
+ *  @retval         VOS_MEM_ERR		resource error
+ *  @retval         VOS_NODATA_ERR	no data in non-blocking
+ */
+
+EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
+    INT32   sock,
+    UINT8   *pBuffer,
+    INT32   *pSize,
+    UINT32  *pIPAddr);
+
+/**********************************************************************************************************************/
+/** Bind a socket to an address and port.
+ *
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      ipAddress		source IP to receive from, 0 for any
+ *  @param[in]      port			port to receive from
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_IO_ERR		Input/Output error
+ *  @retval         VOS_MEM_ERR		resource error
+ */
+
+EXT_DECL VOS_ERR_T vos_sockBind (
+    INT32   sock,
+    UINT32  ipAddress,
+    UINT16  port);
+
+/**********************************************************************************************************************/
+/** Listen for incoming TCP connections.
+ *
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      backlog			maximum connection attempts if system is busy
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_IO_ERR		Input/Output error
+ *  @retval         VOS_MEM_ERR		resource error
+ */
+
+EXT_DECL VOS_ERR_T vos_sockListen (
+    INT32   sock,
+    UINT32  backlog);
+
+/**********************************************************************************************************************/
+/** Accept an incoming TCP connection.
+ *  Accept incoming connections on the provided socket. May block and will return a new socket descriptor when
+ *	accepting a connection. The original socket *pSock, remains open.
+ *
+ *  @param[in]      sock			Socket descriptor
+ *  @param[out]     pSock			Pointer to socket descriptor, on exit new socket
+ *  @param[out]     pIPAddress		source IP to receive on, 0 for any
+ *  @param[out]     pPort			port to receive on, 20548 for PD
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_PARAM_ERR	NULL parameter, parameter error
+ *  @retval         VOS_UNKNOWN_ERR	sock descriptor unknown error
+ */
+
+EXT_DECL VOS_ERR_T vos_sockAccept (
+    INT32   sock,
+    INT32   *pSock,
+    UINT32  *pIPAddress,
+    UINT16  *pPort);
+
+/**********************************************************************************************************************/
+/** Open a TCP connection.
+ *
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      ipAddress		destination IP
+ *  @param[in]      port			destination port
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_IO_ERR		Input/Output error
+ *  @retval         VOS_MEM_ERR		resource error
+ */
+
+EXT_DECL VOS_ERR_T vos_sockConnect (
+    INT32   sock,
+    UINT32  ipAddress,
+    UINT16  port);
+
+/**********************************************************************************************************************/
+/** Send TCP data.
+ *  Send data to the given socket.
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[in]      pBuffer			pointer to data to send
+ *  @param[in]      size			size of the data to send
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_IO_ERR		data could not be sent
+ *  @retval         VOS_MEM_ERR		resource error
+ */
+
+EXT_DECL VOS_ERR_T vos_sockSendTCP (
+    INT32       sock,
+    const UINT8 *pBuffer,
+    UINT32      size);
+
+/**********************************************************************************************************************/
+/** Receive TCP data.
+ *  The caller must provide a sufficient sized buffer. If the supplied buffer is smaller than the bytes received, *pSize
+ *	will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
+ *	If the socket was created in blocking-mode (default), then this call will block and will only return if data has
+ *	been received or the socket was closed or an error occured.
+ *	If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *
+ *  @param[in]      sock			socket descriptor
+ *  @param[out]     pBuffer			pointer to applications data buffer
+ *  @param[in,out]  pSize			pointer to the received data size
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_IO_ERR		data could not be read
+ *  @retval         VOS_MEM_ERR		resource error
+ *  @retval         VOS_NODATA_ERR	no data in non-blocking
+ */
+
+EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
+    INT32   sock,
+    UINT8   *pBuffer,
+    INT32   *pSize
+    );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* VOS_SOCK_H */

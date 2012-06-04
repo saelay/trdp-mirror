@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created with Liquid XML Studio 1.0.8.0 (http://www.liquid-technologies.com) -->
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:annotation>
+    <xs:documentation>
+#===========================================================================
+#  COPYRIGHT     : (c) 2012 Bombardier Inc. or its subsidiaries
+#===========================================================================
+#
+#  PRODUCT       : TRDP
+#
+#  MODULE        : trdp-config.xsd
+#
+#  ABSTRACT      : XML Schema for TRDP configuration configuration
+#
+#  VERSION       : 1.0.0.0
+#
+#===========================================================================
+</xs:documentation>
+  </xs:annotation>
+  <xs:simpleType name="name-type">
+    <xs:annotation>
+      <xs:documentation>A string representing a name. Names must start with either a letter or an underscore and may be followed by letters, underscores or digits.      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Za-z_][A-Za-z0-9_]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="name8">
+    <xs:annotation>
+      <xs:documentation>A name with a length of up to 8 characters.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="name-type">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="8"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="name15">
+    <xs:annotation>
+      <xs:documentation>A name with a length of up to 15 characters.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="name-type">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="15"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="name30">
+    <xs:annotation>
+      <xs:documentation>A name with a length of up to 30 characters.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="name-type">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="30"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ip-address">
+    <xs:annotation>
+      <xs:documentation>An IP address in dotted-quad notation, e.g. 10.0.1.43.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern
+        value="(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
+      />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="uint8">
+    <xs:restriction base="xs:unsignedByte"/>
+  </xs:simpleType>
+  <xs:simpleType name="uint16">
+    <xs:annotation>
+      <xs:documentation>A 16-bit unsigned integer</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedShort"/>
+  </xs:simpleType>
+  <xs:simpleType name="uint32">
+    <xs:annotation>
+      <xs:documentation>A 32-bit unsigned integer</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:unsignedInt"/>
+  </xs:simpleType>
+  <xs:element name="device">
+    <xs:annotation>
+      <xs:documentation>The top-level element.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="mapped-device"/>
+        <xs:element minOccurs="0" ref="bus-interface"/>
+        <xs:element minOccurs="0" ref="data-set-list"/>
+        <xs:element minOccurs="0" ref="com-parameter-list"/>
+        <xs:element minOccurs="0" ref="device-configuration"/>
+        <xs:element minOccurs="0" ref="debug"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="name15">
+        <xs:annotation>
+          <xs:documentation>Name of the device. Currently not used.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="type" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Type of the device, e.g. "VCU-C", informal only.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="bus-interface">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="telegram"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="name8" use="optional">
+        <xs:annotation>
+          <xs:documentation>Name of the bus interface. When importing the file in MTPE the name of the bus interface will be set to this name if specified. Not used by IPTCom.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="type" use="optional">
+        <xs:annotation>
+          <xs:documentation>Type of the bus interface. Currently not used.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="MVB"/>
+            <xs:enumeration value="ETH"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="address" use="optional">
+        <xs:annotation>
+          <xs:documentation>Address of the bus interface. This can either be an IP address or an MVB device address. If specified the value will be overtaken when importing the file into the MTPE. Not used by IPTCom.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:union memberTypes="ip-address uint8"/>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="com-parameter-list">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="com-parameter"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-set-list">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="data-set"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="data-set">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="1" maxOccurs="unbounded" ref="element"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="name30" use="optional">
+        <xs:annotation>
+          <xs:documentation/>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="id" type="uint32" use="required">
+        <xs:annotation>
+          <xs:documentation>ID for dataset</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="debug">
+    <xs:complexType>
+      <xs:attribute name="file-name" type="xs:string" use="optional"/>
+      <xs:attribute default="65536" name="file-size" type="uint32"/>
+      <xs:attribute name="level" use="optional">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="E"/>
+            <xs:enumeration value="e"/>
+            <xs:enumeration value="W"/>
+            <xs:enumeration value="w"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="info" use="optional">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="A"/>
+            <xs:enumeration value="a"/>
+            <xs:enumeration value="D"/>
+            <xs:enumeration value="d"/>
+            <xs:enumeration value="T"/>
+            <xs:enumeration value="t"/>
+            <xs:enumeration value="C"/>
+            <xs:enumeration value="c"/>
+            <xs:enumeration value="F"/>
+            <xs:enumeration value="f"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="mapped-source">
+              <xs:complexType>
+               <xs:attribute name="id" type="uint32" use="required"/>
+               <xs:attribute name="uri" type="xs:string" use="required"/>
+               <xs:attribute name="name" type="name30" use="optional"/>
+               <xs:attribute name="smi1" type="uint32"/>
+               <xs:attribute name="smi2" type="uint32"/>
+              </xs:complexType>
+  </xs:element>
+
+ <xs:element name="mapped-destination">
+              <xs:complexType>
+               <xs:attribute name="id" type="uint32" use="required"/>
+               <xs:attribute name="uri" type="xs:string" use="required"/>
+               <xs:attribute name="name" type="name30" use="optional"/>
+               <xs:attribute name="smi1" type="uint32"/>
+               <xs:attribute name="smi2" type="uint32"/>
+              </xs:complexType>
+ </xs:element>
+
+ <xs:element name="mapped-telegram">
+          <xs:complexType>
+           <xs:attribute name="com-id" type="uint32" use="required"/>
+           <xs:attribute name="name" type="name30" use="optional"/>
+           <xs:sequence>
+             <xs:element minOccurs="0" maxOccurs="unbounded" ref="mapped-source"/>
+            </xs:sequence>
+            <xs:sequence>
+             <xs:element minOccurs="0" maxOccurs="unbounded" ref="mapped-destination"/>
+            </xs:sequence>
+           </xs:complexType>
+ </xs:element>
+
+   <xs:element name="mapped-device">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="mapped-telegram"/>
+       </xs:sequence>
+       <xs:attribute name="host-name" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>Device host name</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="leader-name"/>
+      <xs:attribute name="host-ip" type="ip-address"/>
+      <xs:attribute name="leader-ip" type="ip-address"/>
+     
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="device-configuration">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="mem-block-list"/>
+        <xs:element minOccurs="0" ref="trdp-process"/>
+        <xs:element minOccurs="0" ref="pd-com-parameter"/>
+        <xs:element minOccurs="0" ref="md-com-parameter"/>
+      </xs:sequence>
+      <xs:attribute default="4194304" name="memory-size" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Size of IPTCom dynamically allocated memory</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="host-name"/>
+      <xs:attribute name="leader-name"/>
+      <xs:attribute name="host-ip" type="ip-address"/>
+      <xs:attribute name="leader-ip" type="ip-address"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="trdp-process">
+    <xs:complexType>
+      <xs:attribute name="cycle-time" type="uint32" use="optional" default="10000">
+        <xs:annotation>
+          <xs:documentation>Cycle time of the IPTCom thread/task</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute default="no" name="blocking">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="yes"/>
+            <xs:enumeration value="no"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="on" name="traffic-shaping">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="64" name="priority">
+        <xs:simpleType>
+          <xs:restriction base="uint32">
+            <xs:maxInclusive value="255"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="md-com-parameter">
+    <xs:complexType>
+      <xs:attribute default="1000000" name="confirm-timeout" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Default time-out in ms for receiving acknowledge message</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute default="5000000" name="reply-timeout" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Default time-out in ms for receiving response message(s)</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute default="64" name="ttl" type="uint32"/>
+      <xs:attribute default="3" name="qos" type="uint32"/>
+      <xs:attribute default="UDP" name="protocol">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="TCP"/>
+            <xs:enumeration value="UDP"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="off" name="marshall">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="20550" name="udp-port" type="uint32"/>
+      <xs:attribute default="20550" name="tcp-port" type="uint32"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="md-parameter">
+    <xs:complexType>
+      <xs:attribute name="confirm-timeout" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Acknowledge time-out im ms.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="reply-timeout" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Response time-out in ms</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute default="off" name="marshall">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="UDP" name="protocol">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="TCP"/>
+            <xs:enumeration value="UDP"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="mem-block">
+    <xs:complexType>
+      <xs:attribute name="size" use="required">
+        <xs:annotation>
+          <xs:documentation>Size of memory block</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="uint32">
+            <xs:enumeration value="32"/>
+            <xs:enumeration value="64"/>
+            <xs:enumeration value="128"/>
+            <xs:enumeration value="256"/>
+            <xs:enumeration value="512"/>
+            <xs:enumeration value="1024"/>
+            <xs:enumeration value="2048"/>
+            <xs:enumeration value="4096"/>
+            <xs:enumeration value="8192"/>
+            <xs:enumeration value="16384"/>
+            <xs:enumeration value="32768"/>
+            <xs:enumeration value="65536"/>
+            <xs:enumeration value="131072"/>
+            <xs:enumeration value="262144"/>
+            <xs:enumeration value="524288"/>
+           </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="preallocate" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Number of preallocated memory blocks with the defined size</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="mem-block-list">
+    <xs:complexType>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="mem-block"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="com-parameter">
+    <xs:complexType>
+      <xs:attribute name="id" type="uint32" use="required">
+        <xs:annotation>
+          <xs:documentation>ID of the parameter set.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="qos" use="optional">
+        <xs:annotation>
+          <xs:documentation>Quality of Service, what priority level data should be sent with.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="uint32">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="7"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="64" name="ttl" use="optional">
+        <xs:annotation>
+          <xs:documentation>How many hops a message should live.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="uint32">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="255"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="pd-com-parameter">
+    <xs:complexType>
+      <xs:attribute default="100000" name="timeout-value" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Timeout value in ms before considering received process data as invalid. Disabled if 0 or not specified.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute default="zero" name="validity-behavior" use="optional">
+        <xs:annotation>
+          <xs:documentation>Behavior when received process data is invalid.
+zero = zero values
+keep = keep the last value</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="zero"/>
+            <xs:enumeration value="keep"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="64" name="ttl" type="uint32"/>
+      <xs:attribute default="5" name="qos" type="uint32"/>
+      <xs:attribute default="off" name="marshall">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="20548" name="port" type="uint32"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="pd-parameter">
+    <xs:complexType>
+      <xs:attribute name="timeout" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Time-out value in ms before considering received process data as invalid. Disabled if 0 or not specified.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="validity-behavior" use="optional" default="zero">
+        <xs:annotation>
+          <xs:documentation>Behavior when received process data is invalid.
+0 = zero values
+1 = keep values as is</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="zero"/>
+            <xs:enumeration value="keep"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="cycle" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Cycle time in ms describing how often a process data should be transmitted.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute default="0" name="redundant" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>0 = not redundant, otherwise redundancy group ID</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute default="off" name="marshall">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="source">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="1" minOccurs="0" ref="sdt-parameter"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="uint32" use="required">
+        <xs:annotation>
+          <xs:documentation>Source identifier</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="uri1" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>Source URI for PD / MD. Used for PD filtering on the receiver side to only  receive data from a specific end device(s).</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="uri2" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>Second source URI for PD. Used for filtering on the receiver side to only  receive data from a specific end device(s). Used e.g. for redundant devices.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="telegram-name" type="name30" use="optional">
+        <xs:annotation>
+          <xs:documentation>Name of the telegram associated with this filter. Not used by IPTCom but required when importing the configuration into the MTPE.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="destination">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="1" minOccurs="0" ref="sdt-parameter"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="uint32" use="required"/>
+      <xs:attribute name="uri" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="element">
+    <xs:complexType>
+      <xs:attribute name="name" type="name30" use="optional">
+        <xs:annotation>
+          <xs:documentation>Name of  the data set element. Not used by IPTCom but required when importing the file into the MTPE. Also displayed in the IPT-Spy.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="type" use="required">
+        <xs:annotation>
+          <xs:documentation>Either the name of a type like "INT8" or "UINT32" or a numerical data-set ID for nested data types.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:union memberTypes="name30 uint32"/>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="1" name="array-size" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>0 = Array with dynamic size
+1= single value
+&gt;1 Number of elements in array</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="sdt-parameter">
+    <xs:complexType>
+      <xs:attribute name="smi1" type="uint32" use="required"/>
+      <xs:attribute name="smi2" type="uint32" default="0"/>
+      <xs:attribute name="udv" type="uint16" use="required"/>
+      <xs:attribute name="rx-period" type="uint16"/>
+      <xs:attribute name="tx-period" type="uint16"/>
+      <xs:attribute name="n-rxsafe" type="uint8" default="3" use="optional"/>
+      <xs:attribute name="n-guard" type="uint16" default="100" use="optional"/>
+      <xs:attribute name="cm-thr" type="uint32" default="10"/>
+     </xs:complexType>
+  </xs:element>
+  <xs:element name="telegram">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="md-parameter"/>
+        <xs:element minOccurs="0" ref="pd-parameter"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="source"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="destination"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="name30" use="optional"/>
+      <xs:attribute name="com-id" type="uint32" use="required">
+        <xs:annotation>
+          <xs:documentation>ID for exchange parameter. Required for IPT telegrams.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="data-set-id" type="uint32" use="required">
+        <xs:annotation>
+          <xs:documentation>ID for dataset to bve exchanged.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="com-parameter-id" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>ID for communication parameter to be used.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

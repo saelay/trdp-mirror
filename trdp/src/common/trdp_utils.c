@@ -1,0 +1,432 @@
+/******************************************************************************/
+/**
+ * @file            trdp_utils.c
+ *
+ * @brief           Helper functions for TRDP communication
+ *
+ * @details
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Bernd Loehr, NewTec GmbH
+ *
+ * @remarks All rights reserved. Reproduction, modification, use or disclosure
+ *          to third parties without express authority is forbidden,
+ *          Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *
+ *
+ * $Id$
+ *
+ */
+
+/*******************************************************************************
+ * INCLUDES
+ */
+
+#include <stdio.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "vos_sock.h"
+#include "trdp_private.h"
+#include "trdp_utils.h"
+
+/*******************************************************************************
+ * DEFINES
+ */
+
+/*******************************************************************************
+ * TYPEDEFS
+ */
+
+/******************************************************************************
+ *   Locals
+ */
+static INT32 sCurrentMaxSocketCnt = 0;
+
+/******************************************************************************
+ *   Globals
+ */
+
+/******************************************************************************/
+/** Determine if we are Big or Little endian
+ *
+ *  @retval         != 0		we are big endian
+ *  @retval         0           we are little endian
+ */
+int am_big_endian ()
+{
+    int32_t one = 1;
+    return !(*((char *)(&one)));
+}
+
+
+/******************************************************************************/
+/** Find the packet which has to be send next
+ *
+ *  @param[in]      pHead           pointer to first queue element
+ *  @param[in]      pNow			Current time
+ *  @param[out]     ppNextElement	pointer to pointer to PD element
+ *  @retval         != NULL         pointer to PD packet
+ *  @retval         NULL            No PD packet found
+ */
+PD_ELE_T *trdp_util_getnext (
+    PD_ELE_T                *pHead,
+    const struct timeval    *pNow,
+    PD_ELE_T                * *ppNextElement)
+{
+    PD_ELE_T *pQueueIter = pHead;
+
+    /*	Find the packet which has to be sent/received next:	*/
+    while (pQueueIter)
+    {
+        if (timercmp(&pQueueIter->timeToGo, pNow, <=))
+        {
+            *ppNextElement = pQueueIter;
+            return pQueueIter;
+        }
+
+        pQueueIter = pQueueIter->pNext;
+    }
+    return NULL;
+}
+
+/******************************************************************************/
+/** Get the packet size from the raw data size
+ *
+ *  @param[in]      dataSize            net data size (without padding or FCS)
+ *  @retval         packet size         the size of the complete packet to
+ *                                      be sent or received
+ */
+UINT32 trdp_packetSizePD (
+    UINT32 dataSize)
+{
+    UINT32 packetSize = sizeof(PD_HEADER_T) + dataSize + sizeof(UINT32);
+
+    /*  padding to 4 */
+    if ((dataSize & 0x3) > 0)
+    {
+        packetSize += 4 - dataSize % 4;
+    }
+
+    return packetSize;
+}
+
+/******************************************************************************/
+/** Return the element with same comId
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      comId           ComID to search for
+ *  @retval         != NULL         pointer to PD element
+ *  @retval         NULL            No PD element found
+ */
+PD_ELE_T *trdp_queue_find_comId (
+    PD_ELE_T    * *ppHead,
+    uint32_t    comId)
+{
+    PD_ELE_T *iterPD;
+
+    if (ppHead == NULL || *ppHead == NULL || comId == 0)
+    {
+        return NULL;
+    }
+
+    for (iterPD = *ppHead; iterPD != NULL; iterPD = iterPD->pNext)
+    {
+        if (iterPD->addr.comId == comId)
+        {
+            return iterPD;
+        }
+    }
+    return NULL;
+}
+
+/******************************************************************************/
+/** Return the element with same comId
+ *
+ *  @param[in]      pHead           pointer to head of queue
+ *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @retval         != NULL         pointer to PD element
+ *  @retval         NULL            No PD element found
+ */
+PD_ELE_T *trdp_queue_find_addr (
+    PD_ELE_T        *pHead,
+    TRDP_ADDRESSES  *addr)
+{
+    PD_ELE_T *iterPD;
+
+    if (pHead == NULL || addr == NULL)
+    {
+        return NULL;
+    }
+
+    for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
+    {
+        /*  We match if src/dst address is zero or found */
+        if (iterPD->addr.comId == addr->comId &&
+            (addr->srcIpAddr == 0 || iterPD->addr.srcIpAddr ==
+             addr->srcIpAddr) &&
+            (addr->destIpAddr == 0 || iterPD->addr.destIpAddr ==
+             addr->destIpAddr))
+        {
+            return iterPD;
+        }
+    }
+    return NULL;
+}
+
+/******************************************************************************/
+/** Delete an element
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pDelete         pointer to element to delete
+ */
+void    trdp_queue_del_element (
+    PD_ELE_T    * *ppHead,
+    PD_ELE_T    *pDelete)
+{
+    PD_ELE_T *iterPD;
+
+    if (ppHead == NULL || *ppHead == NULL || pDelete == NULL)
+    {
+        return;
+    }
+
+    /*	handle removal of first element	*/
+    if (pDelete == *ppHead)
+    {
+        *ppHead = pDelete->pNext;
+        return;
+    }
+
+    for (iterPD = *ppHead; iterPD != NULL; iterPD = iterPD->pNext)
+    {
+        if (iterPD->pNext && iterPD->pNext == pDelete)
+        {
+            iterPD->pNext = pDelete->pNext;
+            return;
+        }
+    }
+}
+
+/******************************************************************************/
+/** Append an element at end of queue
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pNew            pointer to element to append
+ */
+void    trdp_queue_app_last (
+    PD_ELE_T    * *ppHead,
+    PD_ELE_T    *pNew)
+{
+    PD_ELE_T *iterPD;
+
+    if (ppHead == NULL || pNew == NULL)
+    {
+        return;
+    }
+    if (*ppHead == NULL)
+    {
+        *ppHead = pNew;
+        return;
+    }
+
+    for (iterPD = *ppHead; iterPD->pNext != NULL; iterPD = iterPD->pNext)
+    {
+        ;
+    }
+    iterPD->pNext = pNew;
+}
+
+/******************************************************************************/
+/** Insert an element at front of queue
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pNew            pointer to element to insert
+ */
+void    trdp_queue_ins_first (
+    PD_ELE_T    * *ppHead,
+    PD_ELE_T    *pNew)
+{
+    if (ppHead == NULL || pNew == NULL)
+    {
+        return;
+    }
+
+    pNew->pNext = *ppHead;
+    *ppHead     = pNew;
+}
+
+
+/******************************************************************************/
+/** Handle the socket pool: Initialize it
+ *
+ *  @param[in]      iface		pointer to the socket pool
+ */
+void trdp_initSockets (TRDP_SOCKETS_T iface[])
+{
+    int index;
+    /*	Clear the socket pool	*/
+    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+    {
+        iface[index].sock = -1;
+    }
+}
+
+/******************************************************************************/
+/** Handle the socket pool: Request a socket from our socket pool
+ *
+ *  @param[in,out]  iface			socket pool
+ *  @param[in]      params			parameters to use
+ *  @param[in]      srcIP			IP to bind to (0 = any address)
+ *	@param[in]		usage			type and port to bind to
+ *	@param[in]		options			blocking/nonblocking
+ *	@param[out]		pIndex			returned index of socket pool
+ *	@retval			TRDP_NO_ERR
+ *	@retval			TRDP_PARAM_ERR
+ */
+TRDP_ERR_T  trdp_requestSocket (
+    TRDP_SOCKETS_T          iface[],
+    const TRDP_SEND_PARAM_T *params,
+    TRDP_IP_ADDR_T          srcIP,
+    TRDP_SOCK_TYPE_T        usage,
+    TRDP_OPTION_T           options,
+    INT32                   *pIndex)
+{
+    VOS_SOCK_OPT_T  sock_options;
+    INT32           index, emptySock = 0;
+    TRDP_ERR_T      err = TRDP_NO_ERR;
+
+    if (iface == NULL || params == NULL || pIndex == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    /*	We loop through the table of open/used sockets,
+        if we find a usable one (with the same socket options) we take it.
+        We remember already closed sockets on the way to be able to fill up gaps	*/
+    for (index = 0; index < sCurrentMaxSocketCnt; index++)
+    {
+        if (iface[index].sock > -1 &&
+            iface[index].bindAddr == srcIP &&
+            iface[index].type == usage &&
+            iface[index].sendParam.qos == params->qos &&
+            iface[index].sendParam.ttl == params->ttl)
+        {
+            /*	Use that socket	*/
+            *pIndex = index;
+            iface[index].usage++;
+            return err;
+        }
+        else if (iface[index].sock == -1 && emptySock == 0)
+        {
+            /*	Remember the last empty slot	*/
+            emptySock = index;
+        }
+    }
+
+    /*	Not found, create a new socket	*/
+    if (index < VOS_MAX_SOCKET_CNT)
+    {
+        if (emptySock != 0 && index != emptySock)
+        {
+            index = emptySock;
+        }
+        else
+        {
+            sCurrentMaxSocketCnt = index + 1;
+        }
+
+
+        iface[index].sock           = -1;
+        iface[index].bindAddr       = srcIP;
+        iface[index].type           = usage;
+        iface[index].sendParam.qos  = params->qos;
+        iface[index].sendParam.ttl  = params->ttl;
+
+        sock_options.qos    = params->qos;
+        sock_options.ttl    = params->ttl;
+        sock_options.ttl_multicast  = VOS_TTL_MULTICAST;
+        sock_options.reuseAddrPort  = TRUE;
+        sock_options.nonBlocking    =
+            (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
+
+        switch (usage)
+        {
+            case TRDP_SOCK_PD:
+            case TRDP_SOCK_MD_UDP:
+                if (vos_sockOpenUDP(&iface[index].sock,
+                                    &sock_options) != VOS_NO_ERR)
+                {
+                    vos_printf(VOS_LOG_ERROR, "Socket create for UDP failed!\n");
+                    *pIndex = -1;
+                    err     = TRDP_SOCK_ERR;
+                }
+                else
+                {
+                    iface[index].usage = 1;
+                    *pIndex = index;
+                }
+
+                break;
+            case TRDP_SOCK_MD_TCP:
+                if (vos_sockOpenTCP(&iface[index].sock,
+                                    &sock_options) != VOS_NO_ERR)
+                {
+                    vos_printf(VOS_LOG_ERROR, "Socket create for TCP failed!\n");
+                    *pIndex = -1;
+                    err     = TRDP_SOCK_ERR;
+                }
+                else
+                {
+                    iface[index].usage = 1;
+                    *pIndex = index;
+                }
+                break;
+            default:
+                *pIndex = -1;
+                err     = TRDP_SOCK_ERR;
+                break;
+        }
+    }
+    else
+    {
+        err = TRDP_MEM_ERR;
+    }
+
+    return err;
+}
+
+/******************************************************************************/
+/** Handle the socket pool: Release a socket from our socket pool
+ *
+ *  @param[in,out]  iface			socket pool
+ *	@param[in]		index			index of socket to release
+ *	@retval			TRDP_NO_ERR
+ *	@retval			TRDP_PARAM_ERR
+ */
+TRDP_ERR_T  trdp_releaseSocket (
+    TRDP_SOCKETS_T  iface[],
+    INT32           index)
+{
+    TRDP_ERR_T err = TRDP_PARAM_ERR;
+
+    if (iface == NULL)
+    {
+        return err;
+    }
+
+    if (iface[index].sock > -1)
+    {
+        if (--iface[index].usage == 0)
+        {
+            /*	Close that socket, nobody uses it anymore	*/
+            vos_sockClose(iface[index].sock);
+            iface[index].sock = -1;
+        }
+        err = TRDP_NO_ERR;
+    }
+
+    return err;
+}
