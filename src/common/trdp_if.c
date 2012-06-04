@@ -32,6 +32,7 @@
 #include "trdp_utils.h"
 #include "trdp_pdcom.h"
 #include "vos_thread.h"
+#include "vos_sock.h"
 
 /*******************************************************************************
  * TYPEDEFS
@@ -97,9 +98,9 @@ BOOL    trdp_isValidSession (
  *
  *	@retval			&sSession
  */
-TRDP_APP_SESSION_T    *trdp_sessionQueue (void)
+TRDP_APP_SESSION_T *trdp_sessionQueue (void)
 {
-	return &sSession;
+    return &sSession;
 }
 
 /**********************************************************************************************************************/
@@ -765,7 +766,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock,
                               (fd_set *)pFileDesc))
                 {
-                    FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
+                    FD_SET(appHandle->iface[iterPD->socketIdx].sock,
+                           (fd_set *)pFileDesc);
                 }
             }
         }
@@ -885,12 +887,14 @@ EXT_DECL TRDP_ERR_T tlc_process (
                 theMessage.msgType      = vos_ntohs(iterPD->frameHead.msgType);
                 theMessage.seqCount     = vos_ntohl(
                         iterPD->frameHead.sequenceCounter);
-                theMessage.protVersion  = vos_ntohs(
+                theMessage.protVersion = vos_ntohs(
                         iterPD->frameHead.protocolVersion);
-                theMessage.subs         = vos_ntohs(
+                theMessage.subs = vos_ntohs(
                         iterPD->frameHead.subsAndReserved);
-                theMessage.offsetAddr   = vos_ntohs(iterPD->frameHead.offsetAddress);
-                theMessage.replyComId   = vos_ntohl(iterPD->frameHead.replyComId);
+                theMessage.offsetAddr   = vos_ntohs(
+                        iterPD->frameHead.offsetAddress);
+                theMessage.replyComId   = vos_ntohl(
+                        iterPD->frameHead.replyComId);
                 theMessage.replyIpAddr  = vos_ntohl(
                         iterPD->frameHead.replyIpAddress);
                 theMessage.pUserRef     = iterPD->userRef;
@@ -1102,7 +1106,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                 trdp_queue_app_last(&appHandle->pRcvQueue, newPD);
 
                 /*	Join a multicast group */
-                if (IN_MULTICAST(newPD->addr.mcGroup) &&
+                if (vos_IsMulticast(newPD->addr.mcGroup) &&
                     !(newPD->privFlags & TRDP_MC_JOINT))
                 {
                     vos_sockJoinMC(appHandle->iface[index].sock,
