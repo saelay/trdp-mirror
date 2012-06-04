@@ -275,18 +275,18 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.destIpAddr   = pExistingElement->addr.destIpAddr;
             theMessage.topoCount    = vos_ntohl(
                     pExistingElement->frameHead.topoCount);
-            theMessage.msgType      = vos_ntohs(pExistingElement->frameHead.msgType);
-            theMessage.seqCount     = vos_ntohl(
+            theMessage.msgType  = vos_ntohs(pExistingElement->frameHead.msgType);
+            theMessage.seqCount = vos_ntohl(
                     pExistingElement->frameHead.sequenceCounter);
-            theMessage.protVersion  = vos_ntohs(
+            theMessage.protVersion = vos_ntohs(
                     pExistingElement->frameHead.protocolVersion);
-            theMessage.subs         = vos_ntohs(
+            theMessage.subs = vos_ntohs(
                     pExistingElement->frameHead.subsAndReserved);
-            theMessage.offsetAddr   = vos_ntohs(
+            theMessage.offsetAddr = vos_ntohs(
                     pExistingElement->frameHead.offsetAddress);
-            theMessage.replyComId   = vos_ntohl(
+            theMessage.replyComId = vos_ntohl(
                     pExistingElement->frameHead.replyComId);
-            theMessage.replyIpAddr  = vos_ntohl(
+            theMessage.replyIpAddr = vos_ntohl(
                     pExistingElement->frameHead.replyIpAddress);
             theMessage.pUserRef     = pExistingElement->userRef;      /* TBD: User reference given with the local subscribe?   */
             theMessage.resultCode   = TRDP_NO_ERR;
@@ -318,10 +318,10 @@ void    trdp_pdUpdate (
         vos_htonl(vos_ntohl(pPacket->frameHead.sequenceCounter) + 1);
 
     /* Compute CRC32   */
-    myCRC   = vos_crc32(myCRC,
-                        (UINT8 *)&pPacket->frameHead,
-                        pPacket->grossSize - 4);
-    *pFCS   = MAKE_LE(myCRC);
+    myCRC = vos_crc32(myCRC,
+                      (UINT8 *)&pPacket->frameHead,
+                      pPacket->grossSize - 4);
+    *pFCS = MAKE_LE(myCRC);
 }
 
 /******************************************************************************/

@@ -66,8 +66,8 @@ typedef struct
  *  @retval             swapped value
  */
 
-EXT_DECL UINT16 vos_htons(
-    UINT16      val);
+EXT_DECL UINT16 vos_htons (
+    UINT16 val);
 
 /**********************************************************************************************************************/
 /** Byte swapping 2 Bytes.
@@ -76,8 +76,8 @@ EXT_DECL UINT16 vos_htons(
  *  @retval             swapped value
  */
 
-EXT_DECL UINT16 vos_ntohs(
-    UINT16      val);
+EXT_DECL UINT16 vos_ntohs (
+    UINT16 val);
 
 /**********************************************************************************************************************/
 /** Byte swapping 4 Bytes.
@@ -86,8 +86,8 @@ EXT_DECL UINT16 vos_ntohs(
  *  @retval             swapped value
  */
 
-EXT_DECL UINT32 vos_htonl(
-    UINT32      val);
+EXT_DECL UINT32 vos_htonl (
+    UINT32 val);
 
 /**********************************************************************************************************************/
 /** Byte swapping 4 Bytes.
@@ -96,8 +96,20 @@ EXT_DECL UINT32 vos_htonl(
  *  @retval             swapped value
  */
 
-EXT_DECL UINT32 vos_ntohl(
-    UINT32      val);
+EXT_DECL UINT32 vos_ntohl (
+    UINT32 val);
+
+/**********************************************************************************************************************/
+/** Check if the supplied address is a multicast group address.
+ *
+ *  @param[in]          ipAddress        IP address to check.
+ *  @retval             TRUE		address is multicast
+ *  @retval             FALSE		address is not a multicast address
+ */
+
+EXT_DECL BOOL vos_IsMulticast (
+    UINT32 ipAddress);
+
 
 /*	Sockets	*/
 

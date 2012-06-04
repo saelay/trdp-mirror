@@ -58,7 +58,7 @@ struct VOS_MUTEX_T
 /***********************************************************************************************************************
  *  LOCALS
  */
-//extern struct ifreq gIfr;
+/* extern struct ifreq gIfr; */
 
 /**********************************************************************************************************************/
 /** Cyclic thread functions.
@@ -517,11 +517,11 @@ EXT_DECL INT32 vos_cmpTime (
     {
         return 0;
     }
-	if (timercmp(pTime, pCmp, >))
+    if (timercmp(pTime, pCmp, >))
     {
         return 1;
     }
-	if (timercmp(pTime, pCmp, <))
+    if (timercmp(pTime, pCmp, <))
     {
         return -1;
     }
@@ -543,28 +543,28 @@ EXT_DECL VOS_ERR_T vos_getUuid (
 #ifdef __APPLE__
     uuid_generate_time(pUuID);
 #else
-	/*	TBD, preliminary quick 'n dirty solution	*/
-    VOS_TIME_T	current;
+    /*	TBD, preliminary quick 'n dirty solution	*/
+    VOS_TIME_T current;
     vos_getTime(&current);
-    
-    pUuID[0] = current.tv_usec & 0xFF;
-    pUuID[1] = (current.tv_usec & 0xFF00) >> 8;
-    pUuID[2] = (current.tv_usec & 0xFF0000) >> 16;
-    pUuID[3] = (current.tv_usec & 0xFF000000) >> 24;
-    pUuID[4] = current.tv_sec & 0xFF;
-    pUuID[5] = (current.tv_sec & 0xFF00) >> 8;
-    pUuID[6] = (current.tv_sec & 0xFF0000) >> 16;
-    pUuID[7] = ((current.tv_sec & 0x0F000000) >> 24) | 0x4;	/*	pseudo-random version	*/
-    pUuID[8] = 0xAA;
-    pUuID[9] = 0x55;
-    pUuID[10] = 1 /*gIfr.ifr_hwaddr.sa_data[0]*/;
-    pUuID[10] = 2 /*gIfr.ifr_hwaddr.sa_data[1]*/;
-    pUuID[10] = 3 /*gIfr.ifr_hwaddr.sa_data[2]*/;
-    pUuID[10] = 4 /*gIfr.ifr_hwaddr.sa_data[3]*/;
-    pUuID[10] = 5 /*gIfr.ifr_hwaddr.sa_data[4]*/;
-    pUuID[10] = 6 /*gIfr.ifr_hwaddr.sa_data[5]*/;
 
-	pUuID[11] = 0xAA;
+    pUuID[0]    = current.tv_usec & 0xFF;
+    pUuID[1]    = (current.tv_usec & 0xFF00) >> 8;
+    pUuID[2]    = (current.tv_usec & 0xFF0000) >> 16;
+    pUuID[3]    = (current.tv_usec & 0xFF000000) >> 24;
+    pUuID[4]    = current.tv_sec & 0xFF;
+    pUuID[5]    = (current.tv_sec & 0xFF00) >> 8;
+    pUuID[6]    = (current.tv_sec & 0xFF0000) >> 16;
+    pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*	pseudo-random version	*/
+    pUuID[8]    = 0xAA;
+    pUuID[9]    = 0x55;
+    pUuID[10]   = 1 /*gIfr.ifr_hwaddr.sa_data[0]*/;
+    pUuID[10]   = 2 /*gIfr.ifr_hwaddr.sa_data[1]*/;
+    pUuID[10]   = 3 /*gIfr.ifr_hwaddr.sa_data[2]*/;
+    pUuID[10]   = 4 /*gIfr.ifr_hwaddr.sa_data[3]*/;
+    pUuID[10]   = 5 /*gIfr.ifr_hwaddr.sa_data[4]*/;
+    pUuID[10]   = 6 /*gIfr.ifr_hwaddr.sa_data[5]*/;
+
+    pUuID[11] = 0xAA;
 #endif
     return VOS_NO_ERR;
 }

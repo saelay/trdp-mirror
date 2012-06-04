@@ -44,8 +44,8 @@
  */
 
 /*
-TRDP_STATISTICS_T	gStats;
-*/
+   TRDP_STATISTICS_T	gStats;
+ */
 
 /******************************************************************************
  *   Globals
@@ -215,7 +215,7 @@ EXT_DECL TRDP_ERR_T tlc_resetStatistics (
         return TRDP_NOINIT_ERR;
     }
 
-	memset(&appHandle->stats, 0, sizeof(appHandle->stats));
-    
+    memset(&appHandle->stats, 0, sizeof(appHandle->stats));
+
     return TRDP_NO_ERR;
 }

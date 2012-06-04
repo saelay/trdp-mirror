@@ -51,14 +51,14 @@
  * DEFINITIONS
  */
 
-#define VOS_DEFAULT_IFACE	"eth0"
+#define VOS_DEFAULT_IFACE  "eth0"
 
 /***********************************************************************************************************************
  *  LOCALS
  */
 
-uint32_t    gNumberOfOpenSockets = 0;
-//struct ifreq 	gIfr;
+uint32_t gNumberOfOpenSockets = 0;
+/* struct ifreq     gIfr; */
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
@@ -71,30 +71,43 @@ uint32_t    gNumberOfOpenSockets = 0;
  *  @retval             swapped value
  */
 
-EXT_DECL UINT16 vos_htons(
-    UINT16      val)
+EXT_DECL UINT16 vos_htons (
+    UINT16 val)
 {
-	return htons(val);
+    return htons(val);
 }
 
-EXT_DECL UINT16 vos_ntohs(
-    UINT16      val)
+EXT_DECL UINT16 vos_ntohs (
+    UINT16 val)
 {
-	return ntohs(val);
+    return ntohs(val);
 }
 
-EXT_DECL UINT32 vos_htonl(
-    UINT32      val)
+EXT_DECL UINT32 vos_htonl (
+    UINT32 val)
 {
-	return htonl(val);
+    return htonl(val);
 }
 
-EXT_DECL UINT32 vos_ntohl(
-    UINT32      val)
+EXT_DECL UINT32 vos_ntohl (
+    UINT32 val)
 {
-	return ntohl(val);
+    return ntohl(val);
 }
 
+/**********************************************************************************************************************/
+/** Check if the supplied address is a multicast group address.
+ *
+ *  @param[in]          ipAddress        IP address to check.
+ *  @retval             TRUE		address is multicast
+ *  @retval             FALSE		address is not a multicast address
+ */
+
+EXT_DECL BOOL vos_IsMulticast (
+    UINT32 ipAddress)
+{
+    return IN_MULTICAST(ipAddress);
+}
 
 /*	Sockets	*/
 
@@ -149,11 +162,11 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     }
 
 #if 0
- 	/*	get the MAC address; we will construct our UUID from this (but not on the Mac ;-)	*/
- 	gIfr.ifr_addr.sa_family = AF_INET;
- 	strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ-1);
+    /*	get the MAC address; we will construct our UUID from this (but not on the Mac ;-)	*/
+    gIfr.ifr_addr.sa_family = AF_INET;
+    strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ - 1);
 
- 	ioctl(pSock, SIOCGIFHWADDR, &gIfr);
+    ioctl(pSock, SIOCGIFHWADDR, &gIfr);
 #endif
 
     *pSock = (INT32) sock;
