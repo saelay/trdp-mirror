@@ -49,6 +49,10 @@ static UINT32 sTopoCount = 0;
  * LOCAL FUNCTIONS
  */
 
+/******************************************************************************
+ * GLOBAL FUNCTIONS
+ */
+
 /******************************************************************************/
 /** Check if the session handle is valid
  *
@@ -57,7 +61,7 @@ static UINT32 sTopoCount = 0;
  *	@retval			TRUE		is valid
  *	@retval			FALSE		is invalid
  */
-BOOL    isValidSession (
+BOOL    trdp_isValidSession (
     TRDP_APP_SESSION_T pSessionHandle)
 {
     TRDP_SESSION_PT pSession = NULL;
@@ -88,9 +92,15 @@ BOOL    isValidSession (
     return found;
 }
 
-/******************************************************************************
- * GLOBAL FUNCTIONS
+/******************************************************************************/
+/** Get the session queue head pointer
+ *
+ *	@retval			&sSession
  */
+TRDP_APP_SESSION_T    *trdp_sessionQueue (void)
+{
+	return &sSession;
+}
 
 /**********************************************************************************************************************/
 /** Initialize the TRDP stack.
@@ -326,7 +336,7 @@ TRDP_ERR_T tlc_reinit (
 {
     PD_ELE_T *iterPD;
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -375,7 +385,7 @@ TRDP_ERR_T tlp_setRedundant (
     UINT32              redId,
     BOOL                leader)
 {
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -414,7 +424,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
     {
         return TRDP_PARAM_ERR;
     }
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -508,7 +518,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         return TRDP_PARAM_ERR;
     }
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -617,7 +627,7 @@ TRDP_ERR_T  tlp_unpublish (
         return TRDP_PARAM_ERR;
     }
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -670,7 +680,7 @@ TRDP_ERR_T tlp_put (
         return TRDP_PARAM_ERR;
     }
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -720,7 +730,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     TRDP_TIME_T now;
     PD_ELE_T    *iterPD;
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -819,7 +829,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
     TRDP_TIME_T now;
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -1015,7 +1025,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         return TRDP_PARAM_ERR;
     }
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -1136,7 +1146,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
         return TRDP_PARAM_ERR;
     }
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -1195,7 +1205,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         return TRDP_PARAM_ERR;
     }
 
-    if (!isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }

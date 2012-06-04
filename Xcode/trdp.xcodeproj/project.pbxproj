@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
 		73821FB51508DC780046E0AC /* trdp_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F2A150777B00046E0AC /* trdp_types.h */; };
 		73821FB61508DC790046E0AC /* trdp_if_light.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F29150777B00046E0AC /* trdp_if_light.h */; };
 		73821FC11508DCCA0046E0AC /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
@@ -76,6 +77,7 @@
 		7312929D1535BEA1006B3A88 /* SingleThreadedWorkflowPDpolling.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = SingleThreadedWorkflowPDpolling.pdf; sourceTree = "<group>"; };
 		7312929E1535BEA1006B3A88 /* TCNOpen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TCNOpen.png; sourceTree = "<group>"; };
 		731C72D51521A60A009DE48A /* refman.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = refman.pdf; sourceTree = "<group>"; };
+		7373E4AF157CE42C0084966B /* trdp_if.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_if.h; sourceTree = "<group>"; };
 		73821F29150777B00046E0AC /* trdp_if_light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_if_light.h; sourceTree = "<group>"; };
 		73821F2A150777B00046E0AC /* trdp_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_types.h; sourceTree = "<group>"; };
 		73821F2F150777B00046E0AC /* trdp_if.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_if.c; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 		73821F2C150777B00046E0AC /* common */ = {
 			isa = PBXGroup;
 			children = (
+				7373E4AF157CE42C0084966B /* trdp_if.h */,
 				73821F2F150777B00046E0AC /* trdp_if.c */,
 				73821F36150777B00046E0AC /* trdp_private.h */,
 				73821F30150777B00046E0AC /* trdp_mdcom.c */,
@@ -280,8 +283,8 @@
 				73821F35150777B00046E0AC /* trdp_pdcom.h */,
 				73821F39150777B00046E0AC /* trdp_utils.c */,
 				73821F3A150777B00046E0AC /* trdp_utils.h */,
-				7387F505157795FE00DBAB73 /* trdp_stats.h */,
 				7387F506157795FE00DBAB73 /* trdp_stats.c */,
+				7387F505157795FE00DBAB73 /* trdp_stats.h */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -489,6 +492,7 @@
 				73F458BE152F332600D1C522 /* trdp_private.h in Headers */,
 				73B6907915446B8C004968FA /* trdp_utils.h in Headers */,
 				7387F507157795FE00DBAB73 /* trdp_stats.h in Headers */,
+				7373E4B0157CE42C0084966B /* trdp_if.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

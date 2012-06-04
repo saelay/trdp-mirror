@@ -27,9 +27,6 @@
  * INCLUDES
  */
 
-#include <stdio.h>
-#include <stdint.h>
-
 #include "trdp_private.h"
 #include "vos_utils.h"
 
