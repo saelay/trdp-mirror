@@ -270,7 +270,7 @@ EXT_DECL TRDP_ERR_T tau_addr2CarId (
 EXT_DECL TRDP_ERR_T tau_addr2CarNo (
     UINT8             *pCarNo, 
     UINT8             *pTopoCnt,
-    TRDP_IP_ADDR       ipAddr);
+    TRDP_IP_ADDR      ipAddr);
 
 
 
@@ -289,7 +289,7 @@ EXT_DECL TRDP_ERR_T tau_addr2CarNo (
 EXT_DECL TRDP_ERR_T tau_addr2IecCarNo (
     UINT8             *pIecCarNo, 
     UINT8             *pTopoCnt,
-    TRDP_IP_ADDR       ipAddr);
+    TRDP_IP_ADDR      ipAddr);
 
 
 /* ---------------------------------------------------------------------------- */
@@ -309,7 +309,7 @@ EXT_DECL TRDP_ERR_T tau_addr2IecCarNo (
  */
 EXT_DECL TRDP_ERR_T tau_cstNo2CstId     (
     TRDP_LABEL_T      cstId,     
-    UINT32           *pTopoCnt,   
+    UINT32            *pTopoCnt,   
     UINT8             cstNo);
 
 
@@ -328,7 +328,7 @@ EXT_DECL TRDP_ERR_T tau_cstNo2CstId     (
  */
 EXT_DECL TRDP_ERR_T tau_iecCstNo2CstId     (
     TRDP_LABEL_T      cstId,     
-    UINT32           *pTopoCnt,   
+    UINT32            *pTopoCnt,   
     UINT8             iecCstNo);
 
 
@@ -348,10 +348,10 @@ EXT_DECL TRDP_ERR_T tau_iecCstNo2CstId     (
  *
  */
 EXT_DECL TRDP_ERR_T tau_label2CstId (
-    TRDP_LABEL_T          cstId,
-    UINT32               *pTopoCnt,
-    const TRDP_LABEL_T    carLabel,
-    const TRDP_LABEL_T    cstLabel); 
+    TRDP_LABEL_T        cstId,
+    UINT32              *pTopoCnt,
+    const TRDP_LABEL_T  carLabel,
+    const TRDP_LABEL_T  cstLabel); 
 
 
 /**********************************************************************************************************************/
@@ -369,7 +369,7 @@ EXT_DECL TRDP_ERR_T tau_label2CstId (
 EXT_DECL TRDP_ERR_T tau_label2CstNo (
     UINT8               *pCstNo,
     UINT32              *pTopoCnt, 
-    const TRDP_LABEL_T   carLabel);
+    const TRDP_LABEL_T  carLabel);
 
 
 /**********************************************************************************************************************/
@@ -387,7 +387,7 @@ EXT_DECL TRDP_ERR_T tau_label2CstNo (
 EXT_DECL TRDP_ERR_T tau_label2IecCstNo (
     UINT8               *pIecCstNo,
     UINT32              *pTopoCnt, 
-    const TRDP_LABEL_T   carLabel);
+    const TRDP_LABEL_T  carLabel);
 
 
 /* ---------------------------------------------------------------------------- */
@@ -405,9 +405,9 @@ EXT_DECL TRDP_ERR_T tau_label2IecCstNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2CstId      (
-     TRDP_LABEL_T        cstId,     
+     TRDP_LABEL_T       cstId,     
      UINT32             *pTopoCnt,     
-     TRDP_IP_ADDR        ipAddr);
+     TRDP_IP_ADDR       ipAddr);
 
 
 /**********************************************************************************************************************/
@@ -425,7 +425,7 @@ EXT_DECL TRDP_ERR_T tau_addr2CstId      (
 EXT_DECL TRDP_ERR_T tau_addr2CstNo (
     UINT8          *pCstNo,
     UINT32         *pTopoCnt, 
-    TRDP_IP_ADDR    addr);
+    TRDP_IP_ADDR   ipAddr);
   
 
 /**********************************************************************************************************************/
@@ -443,7 +443,7 @@ EXT_DECL TRDP_ERR_T tau_addr2CstNo (
 EXT_DECL TRDP_ERR_T tau_addr2IecCstNo (
     UINT8          *pIecCstNo,
     UINT32         *pTopoCnt, 
-    TRDP_IP_ADDR    addr);
+    TRDP_IP_ADDR   ipAddr);
 
 /* ---------------------------------------------------------------------------- */
 
