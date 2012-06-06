@@ -533,7 +533,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
     /*	Look for existing element	*/
 
-    if (trdp_queue_find_addr(appHandle->pSndQueue, &pubHandle) != NULL)
+    if (trdp_queueFindAddr(appHandle->pSndQueue, &pubHandle) != NULL)
     {
         ret = TRDP_NOPUB_ERR;
     }
@@ -592,7 +592,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         trdp_pdInit(pNewElement, TRDP_MSG_PD, topoCount);
 
         /*	Insert at front	*/
-        trdp_queue_ins_first(&appHandle->pSndQueue, pNewElement);
+        trdp_queueInsFirst(&appHandle->pSndQueue, pNewElement);
 
         *pPubHandle = &pNewElement->addr;
 
@@ -640,10 +640,10 @@ TRDP_ERR_T  tlp_unpublish (
     }
 
     /*	Remove from queue?	*/
-    pElement = trdp_queue_find_addr(appHandle->pSndQueue, pubHandle);
+    pElement = trdp_queueFindAddr(appHandle->pSndQueue, pubHandle);
     if (pElement != NULL)
     {
-        trdp_queue_del_element(&appHandle->pSndQueue, pElement);
+        trdp_queueDelElement(&appHandle->pSndQueue, pElement);
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
     }
@@ -693,7 +693,7 @@ TRDP_ERR_T tlp_put (
     }
 
     /*	Find the published queue entry	*/
-    pElement = trdp_queue_find_addr(appHandle->pSndQueue, pubHandle);
+    pElement = trdp_queueFindAddr(appHandle->pSndQueue, pubHandle);
 
     if (pElement != NULL)
     {
@@ -1053,7 +1053,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
     /*	Look for existing element	*/
 
-    if (trdp_queue_find_addr(appHandle->pRcvQueue, &subHandle) != NULL)
+    if (trdp_queueFindAddr(appHandle->pRcvQueue, &subHandle) != NULL)
     {
         ret = TRDP_NOSUB_ERR;
     }
@@ -1103,7 +1103,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                 vos_addTime(&newPD->timeToGo, &newPD->interval);
 
                 /*  append this subscribtion to our receive queue */
-                trdp_queue_app_last(&appHandle->pRcvQueue, newPD);
+                trdp_queueAppLast(&appHandle->pRcvQueue, newPD);
 
                 /*	Join a multicast group */
                 if (vos_IsMulticast(newPD->addr.mcGroup) &&
@@ -1162,10 +1162,10 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     }
 
     /*	Remove from queue?	*/
-    pElement = trdp_queue_find_addr(appHandle->pSndQueue, subHandle);
+    pElement = trdp_queueFindAddr(appHandle->pSndQueue, subHandle);
     if (pElement != NULL)
     {
-        trdp_queue_del_element(&appHandle->pSndQueue, pElement);
+        trdp_queueDelElement(&appHandle->pSndQueue, pElement);
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
     }
@@ -1221,7 +1221,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
     }
 
     /*	Find the published queue entry	*/
-    pElement = trdp_queue_find_addr(appHandle->pRcvQueue, subHandle);
+    pElement = trdp_queueFindAddr(appHandle->pRcvQueue, subHandle);
 
     if (pElement == NULL)
     {
