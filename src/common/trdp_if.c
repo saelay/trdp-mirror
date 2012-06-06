@@ -698,7 +698,7 @@ TRDP_ERR_T tlp_put (
     if (pElement != NULL)
     {
         ret = trdp_pdPut(pElement,
-                         appHandle->marshall.pCbMarshall,
+                         appHandle->marshall.pfCbMarshall,
                          appHandle->marshall.pRefCon,
                          pData,
                          dataSize);
@@ -877,7 +877,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
             !(iterPD->privFlags & TRDP_TIMED_OUT))
         {
             /* Packet is late! We inform the user about this:	*/
-            if (appHandle->pdDefault.pCbFunction != NULL)
+            if (appHandle->pdDefault.pfCbFunction != NULL)
             {
                 TRDP_PD_INFO_T theMessage;
                 theMessage.comId        = iterPD->addr.comId;
@@ -900,7 +900,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
                 theMessage.pUserRef     = iterPD->userRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
-                appHandle->pdDefault.pCbFunction(appHandle->pdDefault.pRefCon,
+                appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
                                                  &theMessage, NULL, 0);
             }
 
@@ -1261,7 +1261,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         else if (pktFlags == TRDP_FLAGS_MARSHALL)
         {
             ret = trdp_pdGet(pElement,
-                             appHandle->marshall.pCbUnmarshall,
+                             appHandle->marshall.pfCbUnmarshall,
                              appHandle->marshall.pRefCon,
                              pData,
                              *pDataSize);

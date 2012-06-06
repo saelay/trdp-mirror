@@ -611,7 +611,6 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      msgType				Type of message: 'Mp', 'Me', or 'Mq'
- *  @param[in]      pUserRef			user supplied value returned with reply
  *  @param[in]      pSessionId			Session ID returned by indication
  *  @param[in]      topoCount			topocount to use
  *  @param[in]      comId				comId of packet to be sent
@@ -619,8 +618,6 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  *  @param[in]      destIpAddr			where to send the packet to
  *  @param[in]      pktFlags			optional marshalling
  *  @param[in]      userStatus			Info for requester about application errors
- *  @param[in]      replyState			Info for requester about stack errors
- *  @param[in]      replyTimeout		timeout for reply
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -635,7 +632,6 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  */
 EXT_DECL TRDP_ERR_T tlm_reply (
     TRDP_APP_SESSION_T      appHandle,
-    TRDP_MSG_T              msgType,
     void                    *pUserRef,
     TRDP_UUID_T             *pSessionId,
     UINT32                  topoCount,
@@ -644,15 +640,91 @@ EXT_DECL TRDP_ERR_T tlm_reply (
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
     UINT16                  userStatus,
-    TRDP_REPLY_STATUS_T     replyState,
-    UINT32                  replyTimeout,                    /* only if confirmation requested */
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
     const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI);
 
+
+/**********************************************************************************************************************/
+/** Send a MD reply message.
+ *  Send a MD reply message after receiving a request and ask for confirmation. 
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pUserRef			user supplied value returned with reply
+ *  @param[in]      pSessionId			Session ID returned by indication
+ *  @param[in]      topoCount			topocount to use
+ *  @param[in]      comId				comId of packet to be sent
+ *  @param[in]      srcIpAddr			own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr			where to send the packet to
+ *  @param[in]      pktFlags			optional marshalling
+ *  @param[in]      userStatus			Info for requester about application errors
+ *  @param[in]      confirmTimeout		timeout for confirmation
+ *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
+ *  @param[in]      pData               pointer to packet data / dataset
+ *  @param[in]      dataSize            size of packet data
+ *  @param[in]      srcURI              only user part of source URI
+ *  @param[in]      destURI             only user part of destination URI
+ *
+ *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR		out of memory
+ *  @retval         TRDP_NO_SESSION_ERR	no such session
+ *  @retval         TRDP_NOINIT_ERR		handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlm_replyQuery (
+    TRDP_APP_SESSION_T      appHandle,
+    void                    *pUserRef,
+    TRDP_UUID_T             *pSessionId,
+    UINT32                  topoCount,
+    UINT32                  comId,
+    TRDP_IP_ADDR_T          srcIpAddr,
+    TRDP_IP_ADDR_T          destIpAddr,
+    TRDP_FLAGS_T            pktFlags,
+    UINT16                  userStatus,
+    UINT32                  confirmTimeout,
+    const TRDP_SEND_PARAM_T *pSendParam,
+    const UINT8             *pData,
+    UINT32                  dataSize,
+    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   destURI);
+
+
+/**********************************************************************************************************************/
+/** Send a MD reply message.
+ *  Send a MD error reply message after receiving an request
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pSessionId			Session ID returned by indication
+ *  @param[in]      topoCount			topocount to use
+ *  @param[in]      comId				comId of packet to be sent
+ *  @param[in]      srcIpAddr			own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr			where to send the packet to
+ *  @param[in]      replyState			Info for requester about stack errors
+ *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
+ *  @param[in]      srcURI              only user part of source URI
+ *  @param[in]      destURI             only user part of destination URI
+ *
+ *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR		out of memory
+ *  @retval         TRDP_NO_SESSION_ERR	no such session
+ *  @retval         TRDP_NOINIT_ERR		handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlm_replyErr (
+    TRDP_APP_SESSION_T      appHandle,
+    TRDP_UUID_T             *pSessionId,
+    UINT32                  topoCount,
+    UINT32                  comId,
+    TRDP_IP_ADDR_T          srcIpAddr,
+    TRDP_IP_ADDR_T          destIpAddr,
+    TRDP_REPLY_STATUS_T     replyState,
+    const TRDP_SEND_PARAM_T *pSendParam,
+    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   destURI);
 #endif /* MD_SUPPORT	*/
+
 
 /*******************************************************************************
 
