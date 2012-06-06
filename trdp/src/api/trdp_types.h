@@ -144,11 +144,11 @@ typedef VOS_TIME_T TRDP_TIME_T;
 /**	File descriptor set compatible with fd_set / select.
  */
 /*typedef struct
-   {
+{
     UINT32  fd_count;
     INT32   fds_bits[VOS_MAX_SOCKET_CNT];
-   } TRDP_FDS_T;
- */
+} TRDP_FDS_T;
+*/
 typedef struct fd_set TRDP_FDS_T;
 /*#define TRDP_FDS_T	fd_set */
 
@@ -524,8 +524,8 @@ typedef TRDP_ERR_T (*TRDP_UNMARSHALL_T)(
 /** Marshaling/unmarshalling configuration	*/
 typedef struct
 {
-    TRDP_MARSHALL_T     pCbMarshall;            /**< Pointer to marshall callback function      */
-    TRDP_UNMARSHALL_T   pCbUnmarshall;          /**< Pointer to unmarshall callback function    */
+    TRDP_MARSHALL_T     pfCbMarshall;           /**< Pointer to marshall callback function      */
+    TRDP_UNMARSHALL_T   pfCbUnmarshall;         /**< Pointer to unmarshall callback function    */
     void                *pRefCon;               /**< Pointer to user context for call back      */
 } TRDP_MARSHALL_CONFIG_T;
 
@@ -549,7 +549,7 @@ typedef void (*TRDP_PD_CALLBACK_T)(
 /** Default PD configuration	*/
 typedef struct
 {
-    TRDP_PD_CALLBACK_T  pCbFunction;            /**< Pointer to PD callback function			*/
+    TRDP_PD_CALLBACK_T  pfCbFunction;           /**< Pointer to PD callback function			*/
     void                *pRefCon;               /**< Pointer to user context for call back      */
     TRDP_SEND_PARAM_T   sendParam;              /**< Default send parameters			*/
     TRDP_FLAGS_T        flags;                  /**< Default flags for PD packets				*/
@@ -579,7 +579,7 @@ typedef void (*TRDP_MD_CALLBACK_T)(
  */
 typedef struct
 {
-    TRDP_MD_CALLBACK_T  pCbFunction;            /**< Pointer to MD callback function			*/
+    TRDP_MD_CALLBACK_T  pfCbFunction;           /**< Pointer to MD callback function			*/
     void                *pRefCon;               /**< Pointer to user context for call back      */
     TRDP_SEND_PARAM_T   sendParam;              /**< Default send parameters			*/
     TRDP_FLAGS_T        flags;                  /**< Default flags for MD packets				*/
