@@ -300,7 +300,7 @@ EXT_DECL TRDP_ERR_T tau_getCarDevCnt (
  *                                   Memory needs to be provided by application. Set NULL if not used.
  *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
- *  @param[in]	    fctCnt           Maximal number of functions to be returned in provided buffer.
+ *  @param[in]	    maxFctCnt        Maximal number of functions to be returned in provided buffer.
  *
  *  @retval         TRDP_NO_ERR	     no error
  *  @retval         TRDP_PARAM_ERR   Parameter error
@@ -380,7 +380,7 @@ EXT_DECL TRDP_ERR_T tau_getCarInfo (
  *                                   Memory needs to be provided by application. Set NULL if not used.
  *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
- *  @param[in]	    carPropLen       Length of provided buffer for consist properties.
+ *  @param[in]	    cstPropLen       Length of provided buffer for consist properties.
  *
  *  @retval         TRDP_NO_ERR	     no error
  *  @retval         TRDP_PARAM_ERR   Parameter error
@@ -420,7 +420,7 @@ EXT_DECL TRDP_ERR_T tau_getTrnInfo (
  *  @param[out]	    pCstOrient       Pointer to the consist orientation to be returned
  *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *  @param[in]	    carLabel         carLabel = NULL means own car if cstLabel == NULL
- *  @param[in]	    cstLabek         cstLabel = NULL means own consist
+ *  @param[in]	    cstLabel         cstLabel = NULL means own consist
  *
  *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_PARAM_ERR    Parameter error
@@ -441,7 +441,7 @@ EXT_DECL TRDP_ERR_T tau_getCarOrient (
  *  @param[out]	    pIecCstOrient    Pointer to the IEC consist orientation to be returned
  *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *  @param[in]	    carLabel         carLabel = NULL means own car if cstLabel == NULL
- *  @param[in]	    cstLabek         cstLabel = NULL means own consist
+ *  @param[in]	    cstLabel         cstLabel = NULL means own consist
  *
  *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_PARAM_ERR    Parameter error

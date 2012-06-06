@@ -610,7 +610,7 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  *  Send a MD reply message after receiving an request
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      msgType				Type of message: 'Mp', 'Me', or 'Mq'
+ *  @param[in]      pUserRef			user supplied value returned with reply
  *  @param[in]      pSessionId			Session ID returned by indication
  *  @param[in]      topoCount			topocount to use
  *  @param[in]      comId				comId of packet to be sent
