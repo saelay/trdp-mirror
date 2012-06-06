@@ -71,7 +71,7 @@ int am_big_endian ()
  *  @retval         != NULL         pointer to PD packet
  *  @retval         NULL            No PD packet found
  */
-PD_ELE_T *trdp_util_getnext (
+PD_ELE_T *trdp_utilGetNext (
     PD_ELE_T                *pHead,
     const struct timeval    *pNow,
     PD_ELE_T                * *ppNextElement)
@@ -121,7 +121,7 @@ UINT32 trdp_packetSizePD (
  *  @retval         != NULL         pointer to PD element
  *  @retval         NULL            No PD element found
  */
-PD_ELE_T *trdp_queue_find_comId (
+PD_ELE_T *trdp_queueFindComId (
     PD_ELE_T    * *ppHead,
     uint32_t    comId)
 {
@@ -150,7 +150,7 @@ PD_ELE_T *trdp_queue_find_comId (
  *  @retval         != NULL         pointer to PD element
  *  @retval         NULL            No PD element found
  */
-PD_ELE_T *trdp_queue_find_addr (
+PD_ELE_T *trdp_queueFindAddr (
     PD_ELE_T        *pHead,
     TRDP_ADDRESSES  *addr)
 {
@@ -182,7 +182,7 @@ PD_ELE_T *trdp_queue_find_addr (
  *  @param[in]      ppHead          pointer to pointer to head of queue
  *  @param[in]      pDelete         pointer to element to delete
  */
-void    trdp_queue_del_element (
+void    trdp_queueDelElement (
     PD_ELE_T    * *ppHead,
     PD_ELE_T    *pDelete)
 {
@@ -216,7 +216,7 @@ void    trdp_queue_del_element (
  *  @param[in]      ppHead          pointer to pointer to head of queue
  *  @param[in]      pNew            pointer to element to append
  */
-void    trdp_queue_app_last (
+void    trdp_queueAppLast (
     PD_ELE_T    * *ppHead,
     PD_ELE_T    *pNew)
 {
@@ -245,7 +245,7 @@ void    trdp_queue_app_last (
  *  @param[in]      ppHead          pointer to pointer to head of queue
  *  @param[in]      pNew            pointer to element to insert
  */
-void    trdp_queue_ins_first (
+void    trdp_queueInsFirst (
     PD_ELE_T    * *ppHead,
     PD_ELE_T    *pNew)
 {
