@@ -28,17 +28,12 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
-#include <sys/time.h>
-#include <errno.h>
+/*
+   #include <stdint.h>
+   #include <sys/time.h>
+   #include <errno.h>
+ */
 
-
-#ifdef __APPLE__
-#include <libkern/OSByteOrder.h>
-#define bswap_32(a)  OSSwapInt32(a)
-#else
-#include <byteswap.h>
-#endif
 
 #include "trdp_private.h"
 #include "vos_utils.h"
@@ -48,7 +43,11 @@
  * DEFINES
  */
 
-#define MAKE_LE(a)  ((am_big_endian()) ? bswap_32(a) : (a))
+#define Swap32(val)     (UINT32)(((0xFF000000 & (UINT32)val) >> 24) | \
+                                 ((0x00FF0000 & (UINT32)val) >> 8)  | \
+                                 ((0x0000FF00 & (UINT32)val) << 8)  | \
+                                 ((0x000000FF & (UINT32)val) << 24))
+#define MAKE_LE(a)      ((am_big_endian()) ? Swap32(a) : (a))
 
 /*******************************************************************************
  * TYPEDEFS
@@ -69,43 +68,38 @@
 extern int          am_big_endian ();
 extern TRDP_LOG_T   gDebugLevel;
 
-PD_ELE_T    *trdp_utilGetNext (
-    PD_ELE_T                *pHead,
-    const struct timeval    *pNow,
-    PD_ELE_T                **ppEle);
-
-PD_ELE_T    *trdp_queueFindComId (
-    PD_ELE_T    **pHead,
+PD_ELE_T            *trdp_queueFindComId (
+    PD_ELE_T    * *pHead,
     UINT32      comId);
 
-PD_ELE_T    *trdp_queueFindAddr (
+PD_ELE_T            *trdp_queueFindAddr (
     PD_ELE_T        *pHead,
     TRDP_ADDRESSES  *pAddr);
 
-void    trdp_queueDelElement (
-    PD_ELE_T    **pHead,
+void        trdp_queueDelElement (
+    PD_ELE_T    * *pHead,
     PD_ELE_T    *pDelete);
 
-void    trdp_queueAppLast (
-    PD_ELE_T    **pHead,
+void        trdp_queueAppLast (
+    PD_ELE_T    * *pHead,
     PD_ELE_T    *pNew);
 
-void    trdp_queueInsFirst (
-    PD_ELE_T    **pHead,
+void        trdp_queueInsFirst (
+    PD_ELE_T    * *pHead,
     PD_ELE_T    *pNew);
 
-void    trdp_initSockets (
-    TRDP_SOCKETS_T  iface[]);
+void        trdp_initSockets(
+    TRDP_SOCKETS_T iface[]);
 
-TRDP_ERR_T  trdp_requestSocket (
-    TRDP_SOCKETS_T          iface[],
-    const TRDP_SEND_PARAM_T *params,
-    TRDP_IP_ADDR_T          srcIP,
-    TRDP_SOCK_TYPE_T        usage,
-    TRDP_OPTION_T           options,
-    INT32                   *pIndex);
+TRDP_ERR_T  trdp_requestSocket(
+    TRDP_SOCKETS_T iface[],
+    const TRDP_SEND_PARAM_T * params,
+    TRDP_IP_ADDR_T srcIP,
+    TRDP_SOCK_TYPE_T usage,
+    TRDP_OPTION_T options,
+    INT32                   * pIndex);
 
-TRDP_ERR_T  trdp_releaseSocket (
+TRDP_ERR_T trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
     INT32 index);
 

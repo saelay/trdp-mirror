@@ -26,8 +26,6 @@
  * INCLUDES
  */
 
-#include <stddef.h>
-#include <stdint.h>
 #include "trdp_types.h"
 #include "vos_thread.h"
 
@@ -121,7 +119,7 @@ typedef struct
     UINT16  offsetAddress;                  /**< for process data in traffic store                      */
     UINT32  replyComId;                     /**< used in PD request										*/
     UINT32  replyIpAddress;                 /**< used for PD request									*/
-} __attribute__((packed)) PD_HEADER_T;
+} GNU_PACKED PD_HEADER_T;
 
 /** TRDP message data header - network order and alignment	*/
 typedef struct
@@ -137,7 +135,7 @@ typedef struct
     UINT32  replyTimeout;                   /**< in us											*/
     UINT8   sourceURI[32];                  /**<	User part of URI							*/
     UINT8   destinationURI[32];             /**<	User part of URI							*/
-} __attribute__((packed)) MD_HEADER_T;
+} GNU_PACKED MD_HEADER_T;
 
 /** Queue element for PD packets to send or receive	*/
 typedef struct PD_ELE
@@ -150,8 +148,8 @@ typedef struct PD_ELE
     TRDP_TIME_T         interval;               /**< time out value for received packets or
                                                     interval for packets to send (set from ms)			*/
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv				*/
-    INT32               dataSize;               /**< net data size										*/
-    INT32               grossSize;              /**< complete packet size (header, data, padding, FCS)	*/
+    UINT32              dataSize;               /**< net data size										*/
+    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)	*/
     INT32               socketIdx;              /**< index into the socket list							*/
     const void          *userRef;               /**< from subscribe()									*/
     PD_HEADER_T         frameHead;              /**< Packet	header in network byte order				*/
