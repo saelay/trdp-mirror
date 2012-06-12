@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
-		7373E782157F8D030084966B /* tau_tci.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E781157F8D030084966B /* tau_tci.h */; };
 		73821FB51508DC780046E0AC /* trdp_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F2A150777B00046E0AC /* trdp_types.h */; };
 		73821FB61508DC790046E0AC /* trdp_if_light.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F29150777B00046E0AC /* trdp_if_light.h */; };
 		73821FC11508DCCA0046E0AC /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
@@ -462,7 +461,6 @@
 				73B6907915446B8C004968FA /* trdp_utils.h in Headers */,
 				7387F507157795FE00DBAB73 /* trdp_stats.h in Headers */,
 				7373E4B0157CE42C0084966B /* trdp_if.h in Headers */,
-				7373E782157F8D030084966B /* tau_tci.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
