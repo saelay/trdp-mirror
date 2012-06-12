@@ -23,7 +23,6 @@
  * INCLUDES
  */
 
-#include <stdlib.h>
 #include <string.h>
 
 #include "trdp_types.h"
@@ -409,7 +408,7 @@ TRDP_ERR_T  trdp_pdSend (
     VOS_ERR_T err = VOS_NO_ERR;
 
     err = vos_sockSendUDP(pdSock,
-                          (uint8_t *)&pPacket->frameHead,
+                          (UINT8 *)&pPacket->frameHead,
                           pPacket->grossSize,
                           pPacket->addr.destIpAddr,
                           IP_PD_UDP_PORT);

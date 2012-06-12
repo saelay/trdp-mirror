@@ -80,8 +80,8 @@ TRDP_ERR_T  trdp_sendMD (
 TRDP_ERR_T  trdp_rcvMD (
     int         mdSock,
     MD_HEADER_T * *ppPacket,
-    ssize_t     *pSize,
-    uint32_t    *pIPAddr)
+    INT32       *pSize,
+    UINT32      *pIPAddr)
 {
     TRDP_ERR_T err = TRDP_UNKNOWN_ERR;
 

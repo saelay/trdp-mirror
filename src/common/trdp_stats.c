@@ -24,7 +24,6 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
 #include <string.h>
 
 #include "trdp_stats.h"

@@ -24,8 +24,6 @@
  */
 
 #include <string.h>
-#include <sys/select.h>
-#include <arpa/inet.h>
 
 #include "trdp_types.h"
 #include "trdp_if_light.h"
@@ -54,7 +52,7 @@ static UINT32 sTopoCount = 0;
  * GLOBAL FUNCTIONS
  */
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Check if the session handle is valid
  *
  *
@@ -93,7 +91,7 @@ BOOL    trdp_isValidSession (
     return found;
 }
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Get the session queue head pointer
  *
  *	@retval			&sSession
@@ -136,6 +134,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
 {
     TRDP_ERR_T      ret         = TRDP_NO_ERR;
     TRDP_SESSION_PT pSession    = NULL;
+    VOS_ERR_T       err         = VOS_NO_ERR;
 
     if (pAppHandle == NULL)
     {
@@ -157,7 +156,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
         {
             vos_memInit(pMemConfig->p, pMemConfig->size, pMemConfig->prealloc);
         }
-        VOS_ERR_T err = vos_mutexCreate(&sSessionMutex);
+        err = vos_mutexCreate(&sSessionMutex);
         if (err != VOS_NO_ERR)
         {
             vos_printf(VOS_LOG_ERROR,
@@ -250,7 +249,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
     return ret;
 }
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Un-Initialize
  *  Clean up when app quits. Mainly used for debugging/test runs
  *
@@ -325,7 +324,7 @@ TRDP_ERR_T tlc_terminate (
     return ret;
 }
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Re-Initialize
  *  Should be called by the application when a link-down/link-up event
  *	has occured during normal operation.
@@ -443,7 +442,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
     return TRDP_NO_ERR;
 }
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Set new topocount for trainwide communication
  *
  *	This value is used for validating outgoing and incoming packets only!
@@ -891,17 +890,17 @@ EXT_DECL TRDP_ERR_T tlc_process (
                         iterPD->frameHead.protocolVersion);
                 theMessage.subs = vos_ntohs(
                         iterPD->frameHead.subsAndReserved);
-                theMessage.offsetAddr   = vos_ntohs(
+                theMessage.offsetAddr = vos_ntohs(
                         iterPD->frameHead.offsetAddress);
-                theMessage.replyComId   = vos_ntohl(
+                theMessage.replyComId = vos_ntohl(
                         iterPD->frameHead.replyComId);
-                theMessage.replyIpAddr  = vos_ntohl(
+                theMessage.replyIpAddr = vos_ntohl(
                         iterPD->frameHead.replyIpAddress);
                 theMessage.pUserRef     = iterPD->userRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
                 appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
-                                                 &theMessage, NULL, 0);
+                                                  &theMessage, NULL, 0);
             }
 
             /*	Prevent repeated time out events	*/
@@ -1085,7 +1084,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             {
                 /*	Initialize some fields	*/
 
-                if (IN_MULTICAST(destIpAddr))
+                if (vos_isMulticast(destIpAddr))
                 {
                     newPD->addr.mcGroup = destIpAddr;
                 }
@@ -1106,7 +1105,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                 trdp_queueAppLast(&appHandle->pRcvQueue, newPD);
 
                 /*	Join a multicast group */
-                if (vos_IsMulticast(newPD->addr.mcGroup) &&
+                if (vos_isMulticast(newPD->addr.mcGroup) &&
                     !(newPD->privFlags & TRDP_MC_JOINT))
                 {
                     vos_sockJoinMC(appHandle->iface[index].sock,
@@ -1274,7 +1273,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
     if (pPdInfo != NULL)
     {
-        pPdInfo->comId = pElement->addr.comId;
+        pPdInfo->comId          = pElement->addr.comId;
         pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
         pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
         pPdInfo->topoCount      = vos_ntohl(pElement->frameHead.topoCount);

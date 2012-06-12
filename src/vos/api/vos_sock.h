@@ -28,6 +28,12 @@
 
 #include "vos_types.h"
 
+#ifdef WIN32
+#include <Winsock2.h>
+#else
+#include <sys/select.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -107,7 +113,7 @@ EXT_DECL UINT32 vos_ntohl (
  *  @retval             FALSE		address is not a multicast address
  */
 
-EXT_DECL BOOL vos_IsMulticast (
+EXT_DECL BOOL vos_isMulticast (
     UINT32 ipAddress);
 
 

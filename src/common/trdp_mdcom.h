@@ -49,7 +49,7 @@ TRDP_ERR_T  trdp_sendMD (
 TRDP_ERR_T  trdp_rcvMD (
     int         sock,
     MD_HEADER_T * *pPacket,
-    ssize_t     *pSize,
-    uint32_t    *pIPAddr);
+    INT32       *pSize,
+    UINT32      *pIPAddr);
 
 #endif
