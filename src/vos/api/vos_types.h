@@ -26,14 +26,6 @@
  * INCLUDES
  */
 
-#include <stddef.h>
-
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <stdint.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,40 +34,33 @@ extern "C" {
  * DEFINES
  */
 
-#ifdef WIN32
-#define UINT8   unsigned char
-#define UINT16  unsigned short
-#define UINT32  unsigned int
-#define INT8    char
-#define INT16   signed short
-#define INT32   signed int
-#define BOOL    int
-#define CHAR8   char
-#endif
+#if defined(WIN32)
 
-#ifndef UINT8
-    #define UINT8  uint8_t
-#endif
-#ifndef UINT16
-    #define UINT16  uint16_t
-#endif
-#ifndef UINT32
-    #define UINT32  uint32_t
-#endif
-#ifndef INT8
-    #define INT8  int8_t
-#endif
-#ifndef INT16
-    #define INT16  int16_t
-#endif
-#ifndef INT32
-    #define INT32  int32_t
-#endif
-#ifndef BOOL
-    #define BOOL  int
-#endif
-#ifndef CHAR8
-    #define CHAR8  char
+typedef unsigned char  UINT8;
+typedef unsigned short UINT16;
+typedef unsigned int   UINT32;
+typedef char           INT8;
+typedef signed short   INT16;
+typedef signed int     INT32;
+typedef int            BOOL;
+typedef char           CHAR8;
+
+
+#elif defined(POSIX)
+
+#include <stdint.h>
+
+typedef uint8_t  UINT8;
+typedef uint16_t UINT16;
+typedef uint32_t UINT32;
+typedef int8_t   INT8;
+typedef int16_t  INT16;
+typedef int32_t  INT32;
+typedef int      BOOL;
+typedef char     CHAR8;
+
+#else
+#error "Standard types must be defined for each target!"
 #endif
 
 /*	Special handling for Windows DLLs	*/
@@ -94,6 +79,7 @@ extern "C" {
 
 #endif
 
+/*	Compiler dependent alignment options	*/
 #undef GNU_PACKED
 #define GNU_PACKED
 

@@ -23,8 +23,6 @@
  * INCLUDES
  */
 
-#include "vos_sock.h"
-#include "trdp_private.h"
 #include "trdp_utils.h"
 
 /*******************************************************************************

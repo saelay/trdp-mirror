@@ -26,7 +26,6 @@
  * INCLUDES
  */
 
-#include "trdp_types.h"
 #include "trdp_if_light.h"
 
 #ifdef __cplusplus
