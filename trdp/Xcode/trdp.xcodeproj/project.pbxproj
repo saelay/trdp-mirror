@@ -383,7 +383,7 @@
 			children = (
 				73E05263151352CE0058D590 /* api */,
 				73E0535E15136BF60058D590 /* common */,
-				73E05268151352CE0058D590 /* css */,
+				73E05268151352CE0058D590 /* vxWorks */,
 				73E05269151352CE0058D590 /* integrity */,
 				73E0526A151352CE0058D590 /* posix */,
 				73E0526B151352CE0058D590 /* windows */,
@@ -403,11 +403,11 @@
 			path = api;
 			sourceTree = "<group>";
 		};
-		73E05268151352CE0058D590 /* css */ = {
+		73E05268151352CE0058D590 /* vxWorks */ = {
 			isa = PBXGroup;
 			children = (
 			);
-			path = css;
+			path = vxWorks;
 			sourceTree = "<group>";
 		};
 		73E05269151352CE0058D590 /* integrity */ = {
@@ -716,6 +716,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = receiveSelect;
 			};
 			name = Debug;
@@ -742,6 +743,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = receivePolling;
 			};
 			name = Debug;
@@ -789,6 +791,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = sendHello;
 			};
 			name = Debug;
