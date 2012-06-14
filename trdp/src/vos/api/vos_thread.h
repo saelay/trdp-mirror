@@ -39,6 +39,9 @@ extern "C" {
 #define __cdecl
 #endif
 
+#ifdef WIN32
+#include <winsock2.h>
+#else
 #ifndef timerisset
 # define timerisset(tvp)  ((tvp)->tv_sec || (tvp)->tv_usec)
 #endif
@@ -73,6 +76,7 @@ extern "C" {
             (result)->tv_usec += 1000000;                  \
         }                                                  \
     } while (0)
+#endif
 #endif
 
 

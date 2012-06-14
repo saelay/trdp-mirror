@@ -105,6 +105,10 @@ typedef struct TRDP_SOCKETS
     UINT16              usage;              /**< No. of current users of this socket					*/
 } TRDP_SOCKETS_T;
 
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 /** TRDP process data header - network order and alignment	*/
 typedef struct
 {
@@ -137,6 +141,10 @@ typedef struct
     UINT8   destinationURI[32];             /**<	User part of URI							*/
 } GNU_PACKED MD_HEADER_T;
 
+#ifdef WIN32
+#pragma pack(pop)
+#endif
+       
 /** Queue element for PD packets to send or receive	*/
 typedef struct PD_ELE
 {
