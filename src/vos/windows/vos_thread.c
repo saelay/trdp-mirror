@@ -14,6 +14,7 @@
  * @remarks         All rights reserved. Reproduction, modification, use or disclosure
  *                  to third parties without express authority is forbidden,
  *                  Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *                  vos_thread.c uses pthreads-w32 (http://sourceware.org/pthreads-win32/) under LGPL license
  *
  *
  * $Id$
@@ -23,9 +24,6 @@
 #ifndef WIN32
 #error \
     "You are trying to compile the WIN32 implementation of vos_thread.c - either define WIN32 or exclude this file!"
-#else
-#error \
-    "You are trying to compile the WIN32 implementation of vos_thread.c - this file is not yet adapted!"
 #endif
 
 /***********************************************************************************************************************
@@ -34,12 +32,15 @@
 
 #include <errno.h>
 #include <time.h>
-#include <process.h> /* _beginthread, _endthread */
-//#include <semaphore.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <string.h>
 
 #include "vos_thread.h"
 #include "vos_mem.h"
 #include "vos_utils.h"
+
+#define VOS_MAX_THREADS 100
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -47,6 +48,9 @@
 
 const size_t   cDefaultStackSize   = 16 * 1024;
 const UINT32   cMutextMagic        = 0x1234FEDC;
+
+static vosTreadInitialised = FALSE;
+static pthread_t threadHandle[VOS_MAX_THREADS];
 
 struct VOS_MUTEX_T
 {
@@ -101,10 +105,39 @@ void cyclicThread (
  *  @retval         VOS_INIT_ERR		threading not supported
  */
 
-EXT_DECL VOS_ERR_T vos_threadInit (
-    void)
+EXT_DECL VOS_ERR_T vos_threadInit (void)
 {
+	memset(threadHandle, 0, sizeof(threadHandle)); 
+    vosTreadInitialised = TRUE;
+    
     return VOS_NO_ERR;
+}
+
+
+/**********************************************************************************************************************/
+/** Search a free Handle place in the thread handle list.
+ *
+ *  @retval         pointer to a free thread handle or NULL if not available
+ */
+
+pthread_t *vos_getFreeThreadHandle (void)
+{
+    pthread_t *pHandle = NULL;
+
+	if (vosTreadInitialised)
+    {
+        UINT32 i;
+
+        for (i=0; i<sizeof(threadHandle)/sizeof(pthread_t); i++)
+        {
+            if (threadHandle[i].p == NULL)
+            {
+                return (&threadHandle[i]);
+            }
+        }
+    }
+
+    return pHandle;
 }
 
 
@@ -139,10 +172,15 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     VOS_THREAD_FUNC_T       pFunction,
     void                    *pArguments)
 {
-    pthread_t           hThread;
+    pthread_t           *pThreadHandle;
     pthread_attr_t      threadAttrib;
     struct sched_param  schedParam;  /* scheduling priority */
     int retCode;
+
+	if ((pThreadHandle = vos_getFreeThreadHandle()) == NULL)
+	{
+		return VOS_THREAD_ERR;
+	}
 
     if (interval > 0)
     {
@@ -235,8 +273,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     }
 
     /* Create the thread */
-    retCode = pthread_create(&hThread, &threadAttrib, (void *(*)(
-                                                           void *))pFunction,
+    retCode = pthread_create( pThreadHandle,
+		                     &threadAttrib,
+							 (void *(*)(void *))pFunction,
                              pArguments);
     if (retCode != 0)
     {
@@ -247,7 +286,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         return VOS_THREAD_ERR;
     }
 
-    *pThread = (VOS_THREAD_T) hThread;
+    *pThread = (VOS_THREAD_T) pThreadHandle;
 
     /* Destroy thread attributes */
     retCode = pthread_attr_destroy(&threadAttrib);
@@ -280,7 +319,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
 {
     int retCode;
 
-    retCode = pthread_cancel((pthread_t)thread);
+    retCode = pthread_cancel(*(pthread_t *)thread);
     if (retCode != 0)
     {
         vos_printf(VOS_LOG_ERROR,
@@ -288,6 +327,11 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
                    retCode );
         return VOS_THREAD_ERR;
     }
+	else
+	{
+		memset(threadHandle, 0, sizeof(pthread_t));
+	}
+
     return VOS_NO_ERR;
 }
 
@@ -308,7 +352,7 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
     int policy;
     struct sched_param param;
 
-    retValue = pthread_getschedparam((pthread_t)thread, &policy, &param);
+    retValue = pthread_getschedparam(*(pthread_t *)thread, &policy, &param);
 
     return (retValue == 0 ? VOS_NO_ERR : VOS_PARAM_ERR);
 }
@@ -331,26 +375,15 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
 EXT_DECL VOS_ERR_T vos_threadDelay (
     UINT32 delay)
 {
-    struct timespec wanted_delay;
-    struct timespec remaining_delay;
-    int ret;
+    struct timespec timespec_delay;
 
-    if (delay == 0)
+    timespec_delay.tv_sec     = delay / 1000000;
+    timespec_delay.tv_nsec    = (delay % 1000000) * 1000;
+
+    if (pthread_delay_np(&timespec_delay) !=0)
     {
         return VOS_PARAM_ERR;
     }
-
-    wanted_delay.tv_sec     = delay / 1000000;
-    wanted_delay.tv_nsec    = (delay % 1000000) * 1000;
-    do
-    {
-        ret = nanosleep(&wanted_delay, &remaining_delay);
-        if (ret == -1 && errno == EINTR)
-        {
-            wanted_delay = remaining_delay;
-        }
-    }
-    while (errno == EINTR);
 
     return VOS_NO_ERR;
 }
@@ -368,33 +401,15 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
 EXT_DECL VOS_ERR_T vos_getTime (
     VOS_TIME_T *pTime)
 {
-    struct timeval myTime;
 
     if (pTime == NULL)
     {
         return VOS_PARAM_ERR;
     }
 
-#ifndef _POSIX_TIMERS
+	_time32((__time32_t *)&(pTime->tv_sec));
 
-    /*	On systems without monotonic clock support,
-        changing the system clock during operation
-        might interrupt process data packet transmissions!	*/
-
-    gettimeofday(&myTime, NULL);
-
-#else
-
-    struct timespec currentTime;
-
-    clock_gettime(CLOCK_MONOTONIC, &currentTime);
-
-    TIMESPEC_TO_TIMEVAL(&myTime, &currentTime);
-
-#endif
-
-    pTime->tv_sec   = myTime.tv_sec;
-    pTime->tv_usec  = myTime.tv_usec;
+     pTime->tv_usec  = 0;
 
     return VOS_NO_ERR;
 }
@@ -409,22 +424,27 @@ EXT_DECL VOS_ERR_T vos_getTime (
 
 EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 {
-    static char     pTimeString[32];
-    struct timeval  curTime;
-    struct tm       *curTimeTM;
+    static char     timeString[32];
+  	time_t          curTime;
+    struct tm       curTimeTM;
 
-    gettimeofday(&curTime, NULL);
-    curTimeTM = localtime(&curTime.tv_sec);
-    sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
-            curTimeTM->tm_year,
-            curTimeTM->tm_mon,
-            curTimeTM->tm_mday,
-            curTimeTM->tm_hour,
-            curTimeTM->tm_min,
-            curTimeTM->tm_sec,
-            (long) curTime.tv_usec / 1000L);
+	memset(timeString, 0, sizeof(timeString));
+    time(&curTime);
+    if (localtime_s(&curTimeTM, &curTime) == 0)
+	{
+		sprintf_s(timeString,
+			      sizeof(timeString),
+			      "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
+                  curTimeTM.tm_year,
+                  curTimeTM.tm_mon,
+                  curTimeTM.tm_mday,
+                  curTimeTM.tm_hour,
+                  curTimeTM.tm_min,
+                  curTimeTM.tm_sec,
+                  0);
+	}
 
-    return pTimeString;
+    return timeString;
 }
 
 
@@ -461,14 +481,21 @@ EXT_DECL VOS_ERR_T vos_addTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pAdd)
 {
-    VOS_TIME_T ltime;
+    VOS_TIME_T lTime;
 
     if (pTime == NULL || pAdd == NULL)
     {
         return VOS_PARAM_ERR;
     }
-    timeradd(pTime, pAdd, &ltime);
-    *pTime = ltime;
+
+    lTime.tv_usec = pTime->tv_usec+pAdd->tv_usec;
+    lTime.tv_sec = pTime->tv_sec+pAdd->tv_sec;
+    if (!((lTime.tv_usec >= pTime->tv_usec) && (lTime.tv_usec >= pAdd->tv_usec)))
+    {
+        lTime.tv_sec++;
+    }
+
+    *pTime = lTime;
     return VOS_NO_ERR;
 }
 
@@ -486,14 +513,22 @@ EXT_DECL VOS_ERR_T vos_subTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pSub)
 {
-    VOS_TIME_T ltime;
+    VOS_TIME_T lTime;
 
     if (pTime == NULL || pSub == NULL)
     {
         return VOS_PARAM_ERR;
     }
-    timersub(pTime, pSub, &ltime);
-    *pTime = ltime;
+
+    lTime.tv_usec = pTime->tv_usec+pSub->tv_usec;
+    lTime.tv_sec = pTime->tv_sec+pSub->tv_sec;
+    if (pSub->tv_usec > pTime->tv_usec)
+    {
+        lTime.tv_sec--;
+    }
+
+    *pTime = lTime;
+    
     return VOS_NO_ERR;
 }
 
