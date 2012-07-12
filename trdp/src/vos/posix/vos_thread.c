@@ -32,12 +32,15 @@
 #include <stdint.h>
 #include <errno.h>
 #include <sys/time.h>
-#ifdef __APPLE__
-#include <uuid/uuid.h>
-#endif
 #include <pthread.h>
 #include <semaphore.h>
 #include <sched.h>
+
+#ifdef __APPLE__
+#include <uuid/uuid.h>
+#else
+#include "vos_sock.h"
+#endif
 
 #include "vos_thread.h"
 #include "vos_mem.h"
@@ -60,7 +63,6 @@ struct VOS_MUTEX_T
 /***********************************************************************************************************************
  *  LOCALS
  */
-/* extern struct ifreq gIfr; */
 
 /**********************************************************************************************************************/
 /** Cyclic thread functions.
@@ -129,7 +131,6 @@ EXT_DECL VOS_ERR_T vos_threadInit (
  *  @retval         VOS_NOINIT_ERR	invalid handle
  *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
  *  @retval         VOS_THREAD_ERR	thread creation error
- *  @retval         VOS_INIT_ERR	no threads available
  */
 
 EXT_DECL VOS_ERR_T vos_threadCreate (
@@ -340,7 +341,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
 
     if (delay == 0)
     {
-    	/*	yield cpu to other processes   */
+        /*	yield cpu to other processes   */
         if (sched_yield() != 0)
         {
             return VOS_PARAM_ERR;
@@ -541,7 +542,7 @@ EXT_DECL INT32 vos_cmpTime (
  *
  *  @param[out]     pUuID			Pointer to a universal unique identifier
  *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_UNKNOWN_ERR	Could not create UUID
  */
 
 EXT_DECL VOS_ERR_T vos_getUuid (
@@ -550,8 +551,9 @@ EXT_DECL VOS_ERR_T vos_getUuid (
 #ifdef __APPLE__
     uuid_generate_time(pUuID);
 #else
-    /*	TBD, preliminary quick 'n dirty solution	*/
-    VOS_TIME_T current;
+    /*	Manually creating a UUID from time stamp and MAC address	*/
+    static UINT16   count = 1;
+    VOS_TIME_T      current;
     vos_getTime(&current);
 
     pUuID[0]    = current.tv_usec & 0xFF;
@@ -562,17 +564,20 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     pUuID[5]    = (current.tv_sec & 0xFF00) >> 8;
     pUuID[6]    = (current.tv_sec & 0xFF0000) >> 16;
     pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*	pseudo-random version	*/
-    pUuID[8]    = 0xAA;
-    pUuID[9]    = 0x55;
-    pUuID[10]   = 1 /*gIfr.ifr_hwaddr.sa_data[0]*/;
-    pUuID[10]   = 2 /*gIfr.ifr_hwaddr.sa_data[1]*/;
-    pUuID[10]   = 3 /*gIfr.ifr_hwaddr.sa_data[2]*/;
-    pUuID[10]   = 4 /*gIfr.ifr_hwaddr.sa_data[3]*/;
-    pUuID[10]   = 5 /*gIfr.ifr_hwaddr.sa_data[4]*/;
-    pUuID[10]   = 6 /*gIfr.ifr_hwaddr.sa_data[5]*/;
 
-    pUuID[11] = 0xAA;
+    /* we always increment these values, this definitely makes the UUID unique */
+    pUuID[8]    = (UINT8) (count & 0xFF);
+    pUuID[9]    = (UINT8) (count >> 8);
+    count++;
+
+    /*	Copy the mac address into the rest of the array	*/
+    err = vos_sockGetMAC(&pUuID[10]);
+    if (err != VOS_NO_ERR)
+    {
+        return VOS_UNKNOWN_ERR;
+    }
 #endif
+
     return VOS_NO_ERR;
 }
 
