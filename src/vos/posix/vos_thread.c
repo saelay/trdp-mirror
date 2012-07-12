@@ -37,6 +37,7 @@
 #endif
 #include <pthread.h>
 #include <semaphore.h>
+#include <sched.h>
 
 #include "vos_thread.h"
 #include "vos_mem.h"
@@ -339,7 +340,12 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
 
     if (delay == 0)
     {
-        return VOS_PARAM_ERR;
+    	/*	yield cpu to other processes   */
+        if (sched_yield() != 0)
+        {
+            return VOS_PARAM_ERR;
+        }
+        return VOS_NO_ERR;
     }
 
     wanted_delay.tv_sec     = delay / 1000000;
