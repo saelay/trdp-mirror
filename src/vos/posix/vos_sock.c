@@ -57,8 +57,8 @@
  *  LOCALS
  */
 
-uint32_t gNumberOfOpenSockets = 0;
-/* struct ifreq     gIfr; */
+uint32_t        gNumberOfOpenSockets = 0;
+struct ifreq    gIfr;
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
@@ -121,7 +121,68 @@ EXT_DECL BOOL vos_isMulticast (
 
 EXT_DECL VOS_ERR_T vos_sockInit (void)
 {
+    memset(&gIfr, 0, sizeof(gIfr));
     return VOS_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Return the MAC address of the default adapter.
+ *
+ *  @param[out]     pMAC            return MAC address.
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_PARAM_ERR	pMAC == NULL
+ *  @retval         VOS_SOCK_ERR	socket not available or option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockGetMAC (
+    UINT8 pMAC[6])
+{
+#ifdef IFHWADDRLEN
+    int sock;
+    int i;
+
+    if (pMAC == NULL)
+    {
+        vos_printf(VOS_LOG_ERROR, "Parameter error");
+        return VOS_PARAM_ERR;
+    }
+
+    /* Not every system supports this!	*/
+
+
+    /*	Has it been determined before?	*/
+
+    for(i = 0; i < IFHWADDRLEN && gIfr.ifr_hwaddr.sa_data[i] != 0; i++)
+    {
+        ;
+    }
+
+    if (i >= 6) /*	needs to be determined	*/
+    {
+
+        if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) == -1)
+        {
+            vos_printf(VOS_LOG_ERROR, "socket call failed\n");
+            return VOS_SOCK_ERR;
+        }
+
+        /*	get the MAC address; we will construct our UUID from this (if UUID generation is not supported)	*/
+        gIfr.ifr_addr.sa_family = AF_INET;
+        strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ - 1);
+
+        ioctl(sock, SIOCGIFHWADDR, &gIfr);
+
+        close(sock);
+    }
+
+    for( i = 0; i < IFHWADDRLEN; i++ )
+    {
+        pMAC[i] = (UINT8) gIfr.ifr_hwaddr.sa_data[i];
+    }
+    return VOS_NO_ERR;
+#else
+    return VOS_SOCK_ERR;
+#endif
 }
 
 /**********************************************************************************************************************/
@@ -160,14 +221,6 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         close(sock);
         return VOS_SOCK_ERR;
     }
-
-#if 0
-    /*	get the MAC address; we will construct our UUID from this (but not on the Mac ;-)	*/
-    gIfr.ifr_addr.sa_family = AF_INET;
-    strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ - 1);
-
-    ioctl(pSock, SIOCGIFHWADDR, &gIfr);
-#endif
 
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
