@@ -44,8 +44,10 @@ extern "C" {
 
 /** The maximum number of concurrent usable sockets  */
 #define VOS_MAX_SOCKET_CNT  80
+
 /**	The maximum hops a multicast packet can go	*/
 #define VOS_TTL_MULTICAST   64
+
 
 /***********************************************************************************************************************
  * TYPEDEFS

@@ -39,6 +39,9 @@ extern "C" {
 #define __cdecl
 #endif
 
+/** The maximum number of concurrent usable threads  */
+#define VOS_MAX_THREAD_CNT 100
+
 #ifdef WIN32
 #include <winsock2.h>
 #else

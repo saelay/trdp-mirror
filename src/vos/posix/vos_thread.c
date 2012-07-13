@@ -54,6 +54,8 @@
 const size_t    cDefaultStackSize   = 16 * 1024;
 const uint32_t  cMutextMagic        = 0x1234FEDC;
 
+BOOL            vosThreadInitialised = FALSE;
+
 struct VOS_MUTEX_T
 {
     UINT32          magicNo;
@@ -109,6 +111,8 @@ void cyclicThread (
 EXT_DECL VOS_ERR_T vos_threadInit (
     void)
 {
+    vosThreadInitialised = TRUE;
+
     return VOS_NO_ERR;
 }
 
@@ -147,6 +151,11 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     pthread_attr_t      threadAttrib;
     struct sched_param  schedParam;  /* scheduling priority */
     int retCode;
+
+    if (!vosTreadInitialised)
+    {
+        return VOS_INIT_ERR;
+    }
 
     if (interval > 0)
     {
@@ -554,6 +563,7 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     /*	Manually creating a UUID from time stamp and MAC address	*/
     static UINT16   count = 1;
     VOS_TIME_T      current;
+    
     vos_getTime(&current);
 
     pUuID[0]    = current.tv_usec & 0xFF;
@@ -571,8 +581,7 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     count++;
 
     /*	Copy the mac address into the rest of the array	*/
-    err = vos_sockGetMAC(&pUuID[10]);
-    if (err != VOS_NO_ERR)
+    if (vos_sockGetMAC(&pUuID[10]) != VOS_NO_ERR)
     {
         return VOS_UNKNOWN_ERR;
     }
