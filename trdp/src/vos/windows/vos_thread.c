@@ -29,18 +29,17 @@
 /***********************************************************************************************************************
  * INCLUDES
  */
-
 #include <errno.h>
+#include <sys/timeb.h>
 #include <time.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <string.h>
 
 #include "vos_thread.h"
+#include "vos_sock.h"
 #include "vos_mem.h"
 #include "vos_utils.h"
-
-#define VOS_MAX_THREADS 100
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -49,8 +48,9 @@
 const size_t   cDefaultStackSize   = 16 * 1024;
 const UINT32   cMutextMagic        = 0x1234FEDC;
 
-static vosTreadInitialised = FALSE;
-static pthread_t threadHandle[VOS_MAX_THREADS];
+UINT16    uuidCycle = 0;
+BOOL      vosTreadInitialised = FALSE;
+pthread_t threadHandle[VOS_MAX_THREAD_CNT];
 
 struct VOS_MUTEX_T
 {
@@ -176,6 +176,11 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     pthread_attr_t      threadAttrib;
     struct sched_param  schedParam;  /* scheduling priority */
     int retCode;
+
+    if (!vosTreadInitialised)
+    {
+        return VOS_INIT_ERR;
+    }
 
 	if ((pThreadHandle = vos_getFreeThreadHandle()) == NULL)
 	{
@@ -319,6 +324,11 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
 {
     int retCode;
 
+    if (!vosTreadInitialised)
+    {
+        return VOS_INIT_ERR;
+    }
+
     retCode = pthread_cancel(*(pthread_t *)thread);
     if (retCode != 0)
     {
@@ -352,6 +362,11 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
     int policy;
     struct sched_param param;
 
+    if (!vosTreadInitialised)
+    {
+        return VOS_INIT_ERR;
+    }
+    
     retValue = pthread_getschedparam(*(pthread_t *)thread, &policy, &param);
 
     return (retValue == 0 ? VOS_NO_ERR : VOS_PARAM_ERR);
@@ -401,15 +416,17 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
 EXT_DECL VOS_ERR_T vos_getTime (
     VOS_TIME_T *pTime)
 {
+    struct __timeb32 curTime;
 
     if (pTime == NULL)
     {
         return VOS_PARAM_ERR;
     }
 
-	_time32((__time32_t *)&(pTime->tv_sec));
+	 _ftime32_s( &curTime );
 
-     pTime->tv_usec  = 0;
+     pTime->tv_sec  = curTime.time;
+     pTime->tv_usec = curTime.millitm*10;
 
     return VOS_NO_ERR;
 }
@@ -424,24 +441,25 @@ EXT_DECL VOS_ERR_T vos_getTime (
 
 EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 {
-    static char     timeString[32];
-  	time_t          curTime;
-    struct tm       curTimeTM;
+    static char      timeString[32];
+  	struct __timeb32 curTime; 
+    struct tm        curTimeTM;
 
 	memset(timeString, 0, sizeof(timeString));
-    time(&curTime);
-    if (localtime_s(&curTimeTM, &curTime) == 0)
+     _ftime32_s( &curTime );
+
+    if (_localtime32_s(&curTimeTM, &curTime.time) == 0)
 	{
 		sprintf_s(timeString,
 			      sizeof(timeString),
-			      "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
+			      "%04d%02d%02d-%02d:%02d:%02d.%03hd ",
                   curTimeTM.tm_year,
                   curTimeTM.tm_mon,
                   curTimeTM.tm_mday,
                   curTimeTM.tm_hour,
                   curTimeTM.tm_min,
                   curTimeTM.tm_sec,
-                  0);
+                  curTime.millitm);
 	}
 
     return timeString;
@@ -577,8 +595,10 @@ EXT_DECL VOS_ERR_T vos_getUuid (
 #ifdef __APPLE__
     uuid_generate_time(pUuID);
 #else
-    /*	TBD, preliminary quick 'n dirty solution	*/
-    VOS_TIME_T current;
+    /*	Manually creating a UUID from time stamp and MAC address	*/
+    static UINT16   count = 1;
+    VOS_TIME_T      current;
+
     vos_getTime(&current);
 
     pUuID[0]    = current.tv_usec & 0xFF;
@@ -589,16 +609,18 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     pUuID[5]    = (current.tv_sec & 0xFF00) >> 8;
     pUuID[6]    = (current.tv_sec & 0xFF0000) >> 16;
     pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*	pseudo-random version	*/
-    pUuID[8]    = 0xAA;
-    pUuID[9]    = 0x55;
-    pUuID[10]   = 1 /*gIfr.ifr_hwaddr.sa_data[0]*/;
-    pUuID[10]   = 2 /*gIfr.ifr_hwaddr.sa_data[1]*/;
-    pUuID[10]   = 3 /*gIfr.ifr_hwaddr.sa_data[2]*/;
-    pUuID[10]   = 4 /*gIfr.ifr_hwaddr.sa_data[3]*/;
-    pUuID[10]   = 5 /*gIfr.ifr_hwaddr.sa_data[4]*/;
-    pUuID[10]   = 6 /*gIfr.ifr_hwaddr.sa_data[5]*/;
 
-    pUuID[11] = 0xAA;
+    /* we always increment these values, this definitely makes the UUID unique */
+    pUuID[8]    = (UINT8) (count & 0xFF);
+    pUuID[9]    = (UINT8) (count >> 8);
+    count++;
+
+    /*	Copy the mac address into the rest of the array	*/
+    if (vos_sockGetMAC(&pUuID[10]) != VOS_NO_ERR)
+    {
+        return VOS_UNKNOWN_ERR;
+    }
+
 #endif
     return VOS_NO_ERR;
 }

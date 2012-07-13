@@ -37,16 +37,14 @@
 #include <fcntl.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-/*
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <net/if.h>
-*/
+#include <lm.h>
 
 #include "vos_utils.h"
 #include "vos_sock.h"
 #include "vos_thread.h"
+
+#pragma comment(lib, "IPHLPAPI.lib")
+
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -58,8 +56,9 @@
  *  LOCALS
  */
 
-UINT32 gNumberOfOpenSockets = 0;
-/* struct ifreq     gIfr; */
+BOOL          vosSockInitialised = FALSE;
+UINT32        gNumberOfOpenSockets = 0;
+UINT8         mac[6]; 
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
@@ -122,8 +121,86 @@ EXT_DECL BOOL vos_isMulticast (
 
 EXT_DECL VOS_ERR_T vos_sockInit (void)
 {
+    memset(mac, 0, sizeof(mac));
+    vosSockInitialised = TRUE;
+
     return VOS_NO_ERR;
 }
+
+/**********************************************************************************************************************/
+/** Return the MAC address of the default adapter.
+ *
+ *  @param[out]     pMAC            return MAC address.
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_PARAM_ERR	pMAC == NULL
+ *  @retval         VOS_SOCK_ERR	socket not available or option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockGetMAC (
+    UINT8 pMAC[6])
+{
+    UINT32 i;
+
+    if (vosSockInitialised == FALSE)
+    {
+        return VOS_INIT_ERR;
+    }
+
+    if (pMAC == NULL)
+    {
+        vos_printf(VOS_LOG_ERROR, "Parameter error");
+        return VOS_PARAM_ERR;
+    }
+
+    /*	Has it been determined before?	*/
+    for(i = 0; (i < sizeof(mac)) && (mac[i] != 0); i++)
+    {
+        ;
+    }
+
+    if (i >= 6) /*	needs to be determined	*/
+    {
+        /* for NetBIOS */
+        DWORD dwEntriesRead;
+        DWORD dwTotalEntries;
+        BYTE *pbBuffer;
+        WKSTA_TRANSPORT_INFO_0 *pwkti;
+
+        /* Get MAC address via NetBIOS's enumerate function */
+        NET_API_STATUS dwStatus = NetWkstaTransportEnum(
+                                    NULL, // [in] server name
+                                    0, // [in] data structure to return
+                                    &pbBuffer, // [out] pointer to buffer
+                                    MAX_PREFERRED_LENGTH, // [in] maximum length
+                                    &dwEntriesRead, // [out] counter of elements actually enumerated
+                                    &dwTotalEntries, // [out] total number of elements that could be enumerated
+                                    NULL); // [in/out] resume handle
+
+ 
+        pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer; 
+ 
+        /* first address is 00000000, skip it */
+        swscanf_s(
+            (wchar_t *)pwkti[1].wkti0_transport_address,
+            L"%2hx%2hx%2hx%2hx%2hx%2hx",
+            &mac[0],
+            &mac[1],
+            &mac[2],
+            &mac[3],
+            &mac[4],
+            &mac[5]);
+ 
+        /* Release pbBuffer allocated by NetWkstaTransportEnum */
+        dwStatus = NetApiBufferFree(pbBuffer);
+    }
+    
+    for( i = 0; i < sizeof(mac); i++ )
+    {
+        pMAC[i] = (UINT8) mac[i];
+    }
+    return VOS_NO_ERR;
+}
+
 
 /**********************************************************************************************************************/
 /** Create an UDP socket.
@@ -144,6 +221,11 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 {
     SOCKET sock;
 
+    if (!vosSockInitialised)
+    {
+        return VOS_INIT_ERR;
+    }
+
     if (pSock == NULL)
     {
         vos_printf(VOS_LOG_ERROR, "Parameter error");
@@ -161,14 +243,6 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         closesocket(sock);
         return VOS_SOCK_ERR;
     }
-
-#if 0
-    /*	get the MAC address; we will construct our UUID from this (but not on the Mac ;-)	*/
-    gIfr.ifr_addr.sa_family = AF_INET;
-    strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ - 1);
-
-    ioctl(pSock, SIOCGIFHWADDR, &gIfr);
-#endif
 
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
@@ -192,6 +266,11 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
     const VOS_SOCK_OPT_T    *pOptions)
 {
     SOCKET sock;
+
+    if (!vosSockInitialised)
+    {
+        return VOS_INIT_ERR;
+    }
 
     if (pSock == NULL)
     {
@@ -647,6 +726,10 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
             switch (errno)
             {
                 case EINTR:         break;
+                case ECONNABORTED:  break;
+#if defined (EPROTO)
+                case EPROTO:        break;
+#endif
                 default:
                     vos_printf(VOS_LOG_ERROR,
                                "Error calling accept listenFd(%d): %s",
