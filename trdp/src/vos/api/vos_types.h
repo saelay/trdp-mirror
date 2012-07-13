@@ -79,6 +79,11 @@ typedef char     CHAR8;
 
 #endif
 
+#ifndef TRUE
+    #define TRUE    (1)
+    #define FALSE   (0)
+#endif
+
 /*	Compiler dependent alignment options	*/
 #undef GNU_PACKED
 #define GNU_PACKED
