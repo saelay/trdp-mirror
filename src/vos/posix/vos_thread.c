@@ -42,6 +42,7 @@
 #include "vos_sock.h"
 #endif
 
+#include "vos_types.h"
 #include "vos_thread.h"
 #include "vos_mem.h"
 #include "vos_utils.h"
@@ -152,7 +153,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     struct sched_param  schedParam;  /* scheduling priority */
     int retCode;
 
-    if (!vosTreadInitialised)
+    if (!vosThreadInitialised)
     {
         return VOS_INIT_ERR;
     }

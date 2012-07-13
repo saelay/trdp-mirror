@@ -41,7 +41,12 @@
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#ifdef __linux 
+#include <linux/if.h>
+#else
 #include <net/if.h>
+#endif
 
 #include "vos_utils.h"
 #include "vos_sock.h"

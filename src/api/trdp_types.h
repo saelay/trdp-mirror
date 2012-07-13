@@ -58,11 +58,6 @@ extern "C" {
     #define USE_HEAP  0                 /**< If this is set, we can allocate dynamically memory	*/
 #endif
 
-#ifndef TRUE
-    #define TRUE    (1)
-    #define FALSE   (0)
-#endif
-
 /*	Special handling for Windows DLLs	*/
 #ifdef WIN32
     #ifdef DLL_EXPORT
