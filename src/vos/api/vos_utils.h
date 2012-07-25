@@ -40,6 +40,11 @@ extern "C" {
 extern VOS_PRINT_DBG_T gPDebugFunction;
 extern void *gRefCon;
 
+/** String size definitions for the debug output functions */
+#define VOS_MAX_PRNT_STR_SIZE   256         /**< Max. size of the debug/error string of debug function */
+#define VOS_MAX_FRMT_SIZE       64          /**< Max. size of the 'format' part */
+#define VOS_MAX_ERR_STR_SIZE    (VOS_MAX_PRNT_STR_SIZE - VOS_MAX_FRMT_SIZE) /**< Max. size of the error part */
+
 /** Debug output macro without formatting options	*/
 #define vos_print(level, string)  {if(gPDebugFunction != NULL)          \
                                    {gPDebugFunction(gRefCon,            \
@@ -53,7 +58,7 @@ extern void *gRefCon;
 #ifdef WIN32
 #define vos_printf(level, format, ...)                \
     {if (gPDebugFunction != NULL)                     \
-     {   char str[256];                               \
+     {   char str[VOS_MAX_PRNT_STR_SIZE];                               \
          _snprintf_s(str, sizeof(str), _TRUNCATE, format, __VA_ARGS__); \
          vos_print(level, str);                       \
      }                                                \
@@ -61,7 +66,7 @@ extern void *gRefCon;
 #else
 #define vos_printf(level, format, args ...)           \
     {if (gPDebugFunction != NULL)                     \
-     {   char str[256];                               \
+     {   char str[VOS_MAX_PRNT_STR_SIZE];                               \
          snprintf(str, sizeof(str), format, ## args); \
          vos_print(level, str);                       \
      }                                                \
