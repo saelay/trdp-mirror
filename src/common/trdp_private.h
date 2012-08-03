@@ -34,7 +34,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.0.4"
+#define LIB_VERSION  "0.0.0.5"
 
 #ifndef IP_PD_UDP_PORT
 #define IP_PD_UDP_PORT  20548                   /**< process data UDP port  */
@@ -150,11 +150,11 @@ typedef struct PD_ELE
 {
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL					*/
     TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber						*/
-    /* UINT32          currentSequenceCounter;     / **< the last send sequence counter                     * / */
+    UINT32              curSeqCnt;              /**< the last send sequence counter                     */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags										*/
     TRDP_FLAGS_T        pktFlags;               /**< flags												*/
     TRDP_TIME_T         interval;               /**< time out value for received packets or
-                                                    interval for packets to send (set from ms)			*/
+                                                     interval for packets to send (set from ms)			*/
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv				*/
     UINT32              dataSize;               /**< net data size										*/
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)	*/

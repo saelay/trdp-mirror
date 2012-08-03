@@ -65,7 +65,6 @@ void    trdp_pdInit (
         return;
     }
 
-    pPacket->frameHead.sequenceCounter  = 0;
     pPacket->frameHead.protocolVersion  = vos_htons(IP_PD_PROTO_VER);
     pPacket->frameHead.topoCount        = vos_htonl(topoCount);
     pPacket->frameHead.comId            = vos_htonl(pPacket->addr.comId);
@@ -98,11 +97,7 @@ TRDP_ERR_T trdp_pdPut (
         memcpy(pPacket->data, pData, dataSize);
         return TRDP_NO_ERR;
     }
-    return marshall(refCon,
-                    pPacket->addr.comId,
-                    pData,
-                    pPacket->data,
-                    &dataSize);
+    return marshall(refCon, pPacket->addr.comId, pData, pPacket->data, &dataSize);
 }
 
 /******************************************************************************/
@@ -126,11 +121,7 @@ TRDP_ERR_T trdp_pdGet (
         memcpy(pPacket->data, pData, dataSize);
         return TRDP_NO_ERR;
     }
-    return unmarshall(refCon,
-                      pPacket->addr.comId,
-                      pData,
-                      pPacket->data,
-                      &dataSize);
+    return unmarshall(refCon, pPacket->addr.comId, pData, pPacket->data, &dataSize);
 }
 
 /******************************************************************************/
@@ -181,8 +172,7 @@ TRDP_ERR_T  trdp_pdReceive (
 
     /*	Get the packet from the wire:	*/
 
-    if (vos_sockReceiveUDP(sock, (UINT8 *) &pNewElement->frameHead, &recSize,
-                           &subHandle.srcIpAddr) != VOS_NO_ERR)
+    if (vos_sockReceiveUDP(sock, (UINT8 *) &pNewElement->frameHead, &recSize, &subHandle.srcIpAddr) != VOS_NO_ERR)
     {
         return TRDP_WIRE_ERR;
     }
@@ -198,8 +188,7 @@ TRDP_ERR_T  trdp_pdReceive (
     if (vos_ntohl(pNewElement->frameHead.topoCount) &&
         vos_ntohl(pNewElement->frameHead.topoCount) != appHandle->topoCount)
     {
-        vos_printf(VOS_LOG_INFO,
-                   "PD data with wrong topocount ignored (comId %u, topo %u)\n",
+        vos_printf(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
                    vos_ntohl(pNewElement->frameHead.comId),
                    vos_ntohl(pNewElement->frameHead.topoCount));
         return TRDP_TOPO_ERR;
@@ -214,8 +203,7 @@ TRDP_ERR_T  trdp_pdReceive (
     if (pExistingElement == NULL)
     {
         /*	We are not interested in this packet (TBD: maybe another session?)	*/
-        vos_printf(VOS_LOG_INFO, "Ignoring comId %u, no subscription\n",
-                   vos_ntohl(pNewElement->frameHead.comId));
+        vos_printf(VOS_LOG_INFO, "Ignoring comId %u, no subscription\n", vos_ntohl(pNewElement->frameHead.comId));
         return TRDP_NO_ERR;
     }
 
@@ -228,16 +216,13 @@ TRDP_ERR_T  trdp_pdReceive (
             vos_ntohl(pExistingElement->frameHead.sequenceCounter) <
             vos_ntohl(pNewElement->frameHead.sequenceCounter))
         {
-            vos_printf(VOS_LOG_INFO, "Old PD data ignored (comId %u)\n",
-                       vos_ntohl(pNewElement->frameHead.comId));
+            vos_printf(VOS_LOG_INFO, "Old PD data ignored (comId %u)\n", vos_ntohl(pNewElement->frameHead.comId));
             return TRDP_NO_ERR;
         }
     }
 
     /*  Has the data changed?   */
-    newData = memcmp(pNewElement->data,
-                     pExistingElement->data,
-                     pNewElement->dataSize);
+    newData = memcmp(pNewElement->data, pExistingElement->data, pNewElement->dataSize);
 
     /*	Get the current time and compute the next time this packet should be
         received.	*/
@@ -272,21 +257,14 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.comId        = pExistingElement->addr.comId;
             theMessage.srcIpAddr    = pExistingElement->addr.srcIpAddr;
             theMessage.destIpAddr   = pExistingElement->addr.destIpAddr;
-            theMessage.topoCount    = vos_ntohl(
-                    pExistingElement->frameHead.topoCount);
-            theMessage.msgType  = vos_ntohs(pExistingElement->frameHead.msgType);
-            theMessage.seqCount = vos_ntohl(
-                    pExistingElement->frameHead.sequenceCounter);
-            theMessage.protVersion = vos_ntohs(
-                    pExistingElement->frameHead.protocolVersion);
-            theMessage.subs = vos_ntohs(
-                    pExistingElement->frameHead.subsAndReserved);
-            theMessage.offsetAddr = vos_ntohs(
-                    pExistingElement->frameHead.offsetAddress);
-            theMessage.replyComId = vos_ntohl(
-                    pExistingElement->frameHead.replyComId);
-            theMessage.replyIpAddr = vos_ntohl(
-                    pExistingElement->frameHead.replyIpAddress);
+            theMessage.topoCount    = vos_ntohl( pExistingElement->frameHead.topoCount);
+            theMessage.msgType      = vos_ntohs(pExistingElement->frameHead.msgType);
+            theMessage.seqCount     = vos_ntohl( pExistingElement->frameHead.sequenceCounter);
+            theMessage.protVersion  = vos_ntohs( pExistingElement->frameHead.protocolVersion);
+            theMessage.subs         = vos_ntohs( pExistingElement->frameHead.subsAndReserved);
+            theMessage.offsetAddr   = vos_ntohs( pExistingElement->frameHead.offsetAddress);
+            theMessage.replyComId   = vos_ntohl( pExistingElement->frameHead.replyComId);
+            theMessage.replyIpAddr  = vos_ntohl( pExistingElement->frameHead.replyIpAddress);
             theMessage.pUserRef     = pExistingElement->userRef;      /* TBD: User reference given with the local subscribe?   */
             theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -309,18 +287,15 @@ void    trdp_pdUpdate (
     PD_ELE_T *pPacket)
 {
     UINT32  myCRC   = vos_crc32(0L, NULL, 0);
-    UINT32  *pFCS   =
-        (UINT32 *)((UINT8 *)&pPacket->frameHead + pPacket->grossSize - 4);
+    UINT32  *pFCS   = (UINT32 *)((UINT8 *)&pPacket->frameHead + pPacket->grossSize - 4);
 
     /* increment counter with each telegram */
-    pPacket->frameHead.sequenceCounter =
-        vos_htonl(vos_ntohl(pPacket->frameHead.sequenceCounter) + 1);
+    pPacket->frameHead.sequenceCounter = vos_htonl(pPacket->curSeqCnt);
+    pPacket->curSeqCnt++;
 
     /* Compute CRC32   */
-    myCRC = vos_crc32(myCRC,
-                      (UINT8 *)&pPacket->frameHead,
-                      pPacket->grossSize - 4);
-    *pFCS = MAKE_LE(myCRC);
+    myCRC   = vos_crc32(myCRC, (UINT8 *)&pPacket->frameHead, pPacket->grossSize - 4);
+    *pFCS   = MAKE_LE(myCRC);
 }
 
 /******************************************************************************/
@@ -345,13 +320,11 @@ TRDP_ERR_T trdp_pdCheck (
         packetSize > MAX_PD_PACKET_SIZE)
     {
         sPDComStats.headerInFrameErr++;
-        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n",
-                   (UINT32) packetSize);
+        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", (UINT32) packetSize);
         err = TRDP_WIRE_ERR;
     }
     /*	Check protocol version	*/
-    else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) !=
-             (IP_PD_PROTO_VER & 0xFF000000))
+    else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (IP_PD_PROTO_VER & 0xFF000000))
     {
         sPDComStats.headerInProtoErr++;
         vos_printf(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
@@ -370,8 +343,7 @@ TRDP_ERR_T trdp_pdCheck (
         if (*pFCS != MAKE_LE(myCRC))
         {
             sPDComStats.headerInCRCErr++;
-            vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n",
-                       *(UINT32 *)((UINT8 *) pPacket + len),
+            vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", *(UINT32 *)((UINT8 *) pPacket + len),
                        MAKE_LE(myCRC));
             err = TRDP_WIRE_ERR;
         }
@@ -381,8 +353,7 @@ TRDP_ERR_T trdp_pdCheck (
                  vos_ntohs(pPacket->msgType) != TRDP_MSG_PE)
         {
             sPDComStats.headerInFrameErr++;
-            vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n",
-                       vos_ntohs(pPacket->msgType));
+            vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
             err = TRDP_WIRE_ERR;
         }
         else

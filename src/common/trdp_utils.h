@@ -46,14 +46,6 @@
 /*******************************************************************************
  * TYPEDEFS
  */
-/*
-   typedef enum trdp_log_level
-   {
-      TRDP_LOG_DBG	= 0x1,
-      TRDP_LOG_INFO	= 0x2,
-      TRDP_LOG_ERR	= 0x4
-   } TRDP_LOG_T;
- */
 
 /*******************************************************************************
  * GLOBAL FUNCTIONS
@@ -70,22 +62,22 @@ PD_ELE_T            *trdp_queueFindAddr (
     PD_ELE_T        *pHead,
     TRDP_ADDRESSES  *pAddr);
 
-void        trdp_queueDelElement (
+void                trdp_queueDelElement (
     PD_ELE_T    * *pHead,
     PD_ELE_T    *pDelete);
 
-void        trdp_queueAppLast (
+void                trdp_queueAppLast (
     PD_ELE_T    * *pHead,
     PD_ELE_T    *pNew);
 
-void        trdp_queueInsFirst (
+void                trdp_queueInsFirst (
     PD_ELE_T    * *pHead,
     PD_ELE_T    *pNew);
 
-void        trdp_initSockets(
+void                trdp_initSockets(
     TRDP_SOCKETS_T iface[]);
 
-TRDP_ERR_T  trdp_requestSocket(
+TRDP_ERR_T          trdp_requestSocket(
     TRDP_SOCKETS_T iface[],
     const TRDP_SEND_PARAM_T * params,
     TRDP_IP_ADDR_T srcIP,
@@ -100,10 +92,15 @@ TRDP_ERR_T trdp_releaseSocket(
 /*  Compute actual packet size from datasize    */
 UINT32  trdp_packetSizePD (
     UINT32 dataSize);
+
 void    trdp_print (
     TRDP_MSG_T  level,
     const char  *str);
 
-
+/*  Get initial Sequence No	*/
+UINT32 trdp_getSeqCnt (
+    UINT32          comID,
+    TRDP_MSG_T      msgType,
+    TRDP_IP_ADDR_T  srcIP);
 
 #endif
