@@ -463,6 +463,9 @@ EXT_DECL VOS_ERR_T vos_clearTime (
     {
         return VOS_PARAM_ERR;
     }
+
+    timerclear(pTime);
+
     return VOS_NO_ERR;
 }
 
