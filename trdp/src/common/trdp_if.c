@@ -30,8 +30,6 @@
 #include "trdp_pdcom.h"
 #include "vos_sock.h"
 
-//#include "winsock2.h"
-
 /*******************************************************************************
  * TYPEDEFS
  */
@@ -42,7 +40,7 @@
 
 static TRDP_APP_SESSION_T   sSession        = NULL;
 static VOS_MUTEX_T          sSessionMutex   = NULL;
-static UINT32               sTopoCount = 0;
+static UINT32 sTopoCount = 0;
 
 /******************************************************************************
  * LOCAL FUNCTIONS
@@ -159,8 +157,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
         err = vos_mutexCreate(&sSessionMutex);
         if (err != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_ERROR,
-                       "TRDP init failed while creating session mutex\n");
+            vos_printf(VOS_LOG_ERROR, "TRDP init failed while creating session mutex\n");
             return TRDP_PARAM_ERR;
         }
 
@@ -464,7 +461,7 @@ void       tlc_setTopoCount (UINT32 topoCount)
  *  @param[in]      topoCount			valid topocount, 0 for local consist
  *  @param[in]      srcIpAddr			own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr			where to send the packet to
- *  @param[in]      interval			frequency of PD packet (>= 10ms) in usec
+ *  @param[in]      interval			frequency of PD packet (>= 10ms) in usec, 0 if PD PULL
  *  @param[in]      redId		        0 - Non-redundant, > 0 valid redundancy group
  *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
@@ -508,7 +505,13 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     }
 
     if (pData != NULL &&
-        (dataSize == 0 || interval < TIMER_GRANULARITY))
+        dataSize == 0)
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    if (interval != 0 &&
+        interval < TIMER_GRANULARITY)
     {
         return TRDP_PARAM_ERR;
     }
@@ -575,17 +578,30 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
     if (ret == TRDP_NO_ERR && pNewElement != NULL)
     {
-        vos_getTime(&nextTime);
-        tv_interval.tv_sec  = interval / 1000000;
-        tv_interval.tv_usec = interval % 1000000;
-        vos_addTime(&nextTime, &tv_interval);
+        /* PD PULL?	Packet will be sent on request only	*/
+        if (0 == interval)
+        {
+            vos_clearTime(&pNewElement->interval);
+            vos_clearTime(&pNewElement->timeToGo);
+        }
+        else
+        {
+            vos_getTime(&nextTime);
+            tv_interval.tv_sec  = interval / 1000000;
+            tv_interval.tv_usec = interval % 1000000;
+            vos_addTime(&nextTime, &tv_interval);
+            pNewElement->interval   = tv_interval;
+            pNewElement->timeToGo   = nextTime;
+        }
 
         /*	Update the internal data */
         pNewElement->addr       = pubHandle;
-        pNewElement->timeToGo   = nextTime;
-        pNewElement->interval   = tv_interval;
         pNewElement->pktFlags   = pktFlags;
         pNewElement->privFlags  = TRDP_PRIV_NONE;
+        
+        /*	Find a possible redundant entry in one of the other sessions and sync the sequence counter!	*/
+        
+		pNewElement->curSeqCnt = trdp_getSeqCnt(pNewElement->addr.comId, TRDP_MSG_PD, pNewElement->addr.srcIpAddr);
 
         /*	Compute the header fields */
         trdp_pdInit(pNewElement, TRDP_MSG_PD, topoCount);
@@ -750,8 +766,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     /*	Find the packet which has to be received next:	*/
     for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if (!timerisset(&appHandle->interval) ||
-            timercmp(&iterPD->timeToGo, &appHandle->interval, <=))
+        if (timerisset(&iterPD->interval) &&            /* not PD PULL?	*/
+            (!timerisset(&appHandle->interval) ||
+             timercmp(&iterPD->timeToGo, &appHandle->interval, <=)))
         {
             appHandle->interval = iterPD->timeToGo;
 
@@ -762,11 +779,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 appHandle->iface[iterPD->socketIdx].sock != -1 &&
                 appHandle->option & TRDP_OPTION_BLOCK)
             {
-                if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock,
-                              (fd_set *)pFileDesc))
+                if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))
                 {
-                    FD_SET(appHandle->iface[iterPD->socketIdx].sock,
-                           (fd_set *)pFileDesc);
+                    FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
                 }
             }
         }
@@ -775,8 +790,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     /*	Find the packet which has to be sent even earlier:	*/
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if (!timerisset(&appHandle->interval) ||
-            timercmp(&iterPD->timeToGo, &appHandle->interval, <=))
+        if (timerisset(&iterPD->interval) &&            /* not PD PULL?	*/
+            (!timerisset(&appHandle->interval) ||
+             timercmp(&iterPD->timeToGo, &appHandle->interval, <=)))
         {
             appHandle->interval = iterPD->timeToGo;
         }
@@ -848,8 +864,10 @@ EXT_DECL TRDP_ERR_T tlc_process (
     /*	Find the packet which has to be sent next:	*/
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if (timercmp(&iterPD->timeToGo, &now, <=))
+        if (timerisset(&iterPD->interval) &&            /* not PD PULL?	*/
+            timercmp(&iterPD->timeToGo, &now, <=))
         {
+        	/*  Update the sequence counter and re-compute CRC	*/
             trdp_pdUpdate(iterPD);
 
             /*	Send the packet if it is not redundant	*/
@@ -857,7 +875,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
                 (!appHandle->beQuiet ||
                  (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
             {
-                trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD);
+                /* We pass the error to the application, but we keep on going	*/
+                err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD);
             }
 
             /*	set new time	*/
@@ -884,23 +903,16 @@ EXT_DECL TRDP_ERR_T tlc_process (
                 theMessage.destIpAddr   = iterPD->addr.destIpAddr;
                 theMessage.topoCount    = vos_ntohl(iterPD->frameHead.topoCount);
                 theMessage.msgType      = vos_ntohs(iterPD->frameHead.msgType);
-                theMessage.seqCount     = vos_ntohl(
-                        iterPD->frameHead.sequenceCounter);
-                theMessage.protVersion = vos_ntohs(
-                        iterPD->frameHead.protocolVersion);
-                theMessage.subs = vos_ntohs(
-                        iterPD->frameHead.subsAndReserved);
-                theMessage.offsetAddr = vos_ntohs(
-                        iterPD->frameHead.offsetAddress);
-                theMessage.replyComId = vos_ntohl(
-                        iterPD->frameHead.replyComId);
-                theMessage.replyIpAddr = vos_ntohl(
-                        iterPD->frameHead.replyIpAddress);
+                theMessage.seqCount     = vos_ntohl(iterPD->frameHead.sequenceCounter);
+                theMessage.protVersion  = vos_ntohs(iterPD->frameHead.protocolVersion);
+                theMessage.subs         = vos_ntohs(iterPD->frameHead.subsAndReserved);
+                theMessage.offsetAddr   = vos_ntohs(iterPD->frameHead.offsetAddress);
+                theMessage.replyComId   = vos_ntohl(iterPD->frameHead.replyComId);
+                theMessage.replyIpAddr  = vos_ntohl(iterPD->frameHead.replyIpAddress);
                 theMessage.pUserRef     = iterPD->userRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
-                appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
-                                                  &theMessage, NULL, 0);
+                appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, &theMessage, NULL, 0);
             }
 
             /*	Prevent repeated time out events	*/
@@ -927,24 +939,21 @@ EXT_DECL TRDP_ERR_T tlc_process (
              iterPD = iterPD->pNext)
         {
             if (iterPD->socketIdx != -1 &&
-                FD_ISSET(appHandle->iface[iterPD->socketIdx].sock,
-                         (fd_set *) pRfds))                                                 /*	PD frame received?	*/
+                FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))     /*	PD frame received?	*/
             {
                 /*	Compare the received data to the data in our receive queue
                     Call user's callback if data changed	*/
-                err =
-                    trdp_pdReceive(appHandle,
-                                   appHandle->iface[iterPD->socketIdx].sock);
+
+                err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
+
                 if (err != TRDP_NO_ERR &&
                     err != TRDP_TIMEOUT_ERR)
                 {
-                    vos_printf(VOS_LOG_ERROR,
-                               "Error receiving PD packet (Err: %d)\n",
-                               err);
+                    vos_printf(VOS_LOG_ERROR, "Error receiving PD packet (Err: %d)\n", err);
                 }
+
                 (*pCount)--;
-                FD_CLR(appHandle->iface[iterPD->socketIdx].sock,
-                       (fd_set *)pRfds);
+                FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds);
             }
         }
     }
@@ -977,6 +986,51 @@ EXT_DECL TRDP_ERR_T tlc_process (
     vos_mutexUnlock(appHandle->mutex);
 
     return err;
+}
+
+/**********************************************************************************************************************/
+/** Initiate sending PD messages (PULL).
+ *  Send a PD request message
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      subHandle			handle from related subscribe
+ *  @param[in]      comId				comId of packet to be sent
+ *  @param[in]      topoCount			valid topocount, 0 for local consist
+ *  @param[in]      srcIpAddr			own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr			where to send the packet to
+ *  @param[in]      redId				0 - Non-redundant, > 0 valid redundancy group
+ *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
+ *  @param[in]      pData               pointer to packet data / dataset
+ *  @param[in]      dataSize            size of packet data
+ *  @param[in]      replyComId          comId of reply
+ *  @param[in]      replyIpAddr         IP for reply
+ *  @param[in]      subs                substitution (Ladder)
+ *  @param[in]      offsetAddr          offset (Ladder)
+ *
+ *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR		could not insert (out of memory)
+ *  @retval         TRDP_NOINIT_ERR		handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlp_request (
+    TRDP_APP_SESSION_T      appHandle,
+    TRDP_SUB_T              subHandle,
+    UINT32                  comId,
+    UINT32                  topoCount,
+    TRDP_IP_ADDR_T          srcIpAddr,
+    TRDP_IP_ADDR_T          destIpAddr,
+    UINT32                  redId,
+    TRDP_FLAGS_T            pktFlags,
+    const TRDP_SEND_PARAM_T *pSendParam,
+    const UINT8             *pData,
+    UINT32                  dataSize,
+    UINT32                  replyComId,
+    TRDP_IP_ADDR_T          replyIpAddr,
+    BOOL                    subs,
+    UINT16                  offsetAddr)
+{
+	return TRDP_NOINIT_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -1108,8 +1162,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                 if (vos_isMulticast(newPD->addr.mcGroup) &&
                     !(newPD->privFlags & TRDP_MC_JOINT))
                 {
-                    vos_sockJoinMC(appHandle->iface[index].sock,
-                                   newPD->addr.mcGroup,
+                    vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup,
                                    0);
                     /*	Remember we did this	*/
                     newPD->privFlags |= TRDP_MC_JOINT;
@@ -1237,8 +1290,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         /*	Call the receive function if we are in non blocking mode	*/
         if (!(appHandle->option & TRDP_OPTION_BLOCK))
         {
-            trdp_pdReceive(appHandle,
-                           appHandle->iface[pElement->socketIdx].sock);
+            trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
         }
 
         /*	Get the current time	*/

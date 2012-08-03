@@ -24,6 +24,7 @@
  */
 
 #include "trdp_utils.h"
+#include "trdp_if.h"
 
 /*******************************************************************************
  * DEFINES
@@ -392,4 +393,62 @@ TRDP_ERR_T  trdp_releaseSocket (
     }
 
     return err;
+}
+
+/******************************************************************************/
+/** Get the initial sequence counter for the comID/message type and subnet (source IP).
+ *  If the comID/srcIP is not found elsewhere, return 0 -
+ *	else return its current sequence number (the redundant packet needs the same seqNo)
+ *
+ *	Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
+ *		  but shall be the same for redundant telegrams (subnet/srcIP).
+ *
+ *  @param[in]      comID			socket pool
+ *	@param[in]		msgType			PD/MD type
+ *  @param[in]      srcIP			Source IP address
+ *
+ *	@retval			return the sequence number
+ */
+
+UINT32  trdp_getSeqCnt (
+    UINT32          comId,
+    TRDP_MSG_T      msgType,
+    TRDP_IP_ADDR_T  srcIpAddr)
+{
+    TRDP_SESSION_PT pSession        = (TRDP_SESSION_PT)trdp_sessionQueue();
+    PD_ELE_T        *pSendElement   = NULL;
+
+    if (0 == comId || 0 == srcIpAddr)
+    {
+        return 0;
+    }
+
+    /*	For process data look at the PD send queue only	*/
+    if (TRDP_MSG_PD == msgType ||
+        TRDP_MSG_PR == msgType ||
+        TRDP_MSG_PE == msgType)
+    {
+        /*	Loop thru all sessions	*/
+        while (pSession)
+        {
+            pSendElement = pSession->pSndQueue;
+            while (pSendElement)
+            {
+                if (pSendElement->addr.comId == comId &&
+                    pSendElement->addr.srcIpAddr != srcIpAddr)
+                {
+                    return pSendElement->curSeqCnt;
+                }
+                pSendElement = pSendElement->pNext;
+            }
+            pSession = pSession->pNext;
+        }
+    }
+#if MD_SUPPORT
+    else
+    {
+        #error
+    }
+#endif
+    return 0;   /*	Not found, initial value is zero	*/
 }
