@@ -46,12 +46,13 @@ extern "C" {
 /**  Hence the exact max. uri length is:                                      */
 /**  7 + (6 * 15) + 5 * (sizeof (separator)) + 1(terminating 0)               */
 /**  to facilitate alignment the size will be increased by 1 byte             */
-#define TRDP_MAX_LABEL_LEN      16                            /**< label length incl. terminating '0' */
-#define TRDP_MAX_URI_USER_LEN   (2 * TRDP_MAX_LABEL_LEN)      /**< URI user part incl. terminating '0' */
-#define TRDP_MAX_URI_HOST_LEN   (4 * TRDP_MAX_LABEL_LEN)      /**< URI host part length incl. terminating '0' */
-#define TRDP_MAX_URI_LEN        ((6 * TRDP_MAX_LABEL_LEN) + 8) /**< URI length incl. terminating '0' and 1 padding byte */
-#define TRDP_MAX_FILE_NAME_LEN  128                           /**< path and file name length incl. terminating '0' */
-/* #define TRDP_MAX_SOCKET_CNT    80 */
+#define TRDP_MAX_LABEL_LEN      16                              /**< label length incl. terminating '0' */
+#define TRDP_MAX_URI_USER_LEN   (2 * TRDP_MAX_LABEL_LEN)        /**< URI user part incl. terminating '0' */
+#define TRDP_MAX_URI_HOST_LEN   (4 * TRDP_MAX_LABEL_LEN)        /**< URI host part length incl. terminating '0' */
+#define TRDP_MAX_URI_LEN        ((6 * TRDP_MAX_LABEL_LEN) + 8)  /**< URI length incl. terminating '0' and 1 padding byte */
+#define TRDP_MAX_FILE_NAME_LEN  128                             /**< path and file name length incl. terminating '0' */
+
+#define TDRP_VAR_SIZE           0                               /**< Variable size dataset	*/
 
 
 #ifndef USE_HEAP
@@ -302,7 +303,7 @@ typedef struct
     INT32                   id;           /**< dataset identifier */
     UINT16                  reserved1;    /**< Reserved for future use, must be zero  */
     UINT16                  numElement;   /**< Number of elements */
-    TRDP_DATASET_ELEMENT_T  *pElement;    /**< Pointer to a dataset element, used as array */
+    TRDP_DATASET_ELEMENT_T  pElement[0];  /**< Pointer to a dataset element, used as array */
 } TRDP_DATASET_T;
 
 
