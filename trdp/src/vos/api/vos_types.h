@@ -36,28 +36,32 @@ extern "C" {
 
 #if defined(WIN32)
 
-typedef unsigned char  UINT8;
+typedef unsigned char UINT8;
 typedef unsigned short UINT16;
-typedef unsigned int   UINT32;
-typedef char           INT8;
-typedef signed short   INT16;
-typedef signed int     INT32;
-typedef int            BOOL;
-typedef char           CHAR8;
+typedef unsigned int UINT32;
+typedef unsigned long long UINT64;
+typedef char INT8;
+typedef signed short INT16;
+typedef signed int INT32;
+typedef signed long long INT64;
+typedef int BOOL;
+typedef char CHAR8;
 
 
 #elif defined(POSIX)
 
 #include <stdint.h>
 
-typedef uint8_t  UINT8;
+typedef uint8_t UINT8;
 typedef uint16_t UINT16;
 typedef uint32_t UINT32;
-typedef int8_t   INT8;
-typedef int16_t  INT16;
-typedef int32_t  INT32;
-typedef int      BOOL;
-typedef char     CHAR8;
+typedef uint64_t UINT64;
+typedef int8_t INT8;
+typedef int16_t INT16;
+typedef int32_t INT32;
+typedef int64_t INT64;
+typedef int BOOL;
+typedef char CHAR8;
 
 #else
 #error "Standard types must be defined for each target!"
