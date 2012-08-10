@@ -27,6 +27,7 @@
  */
 
 #include <stdio.h>
+#include <stddef.h>
 #include "vos_types.h"
 
 #ifdef __cplusplus
@@ -56,21 +57,30 @@ extern void *gRefCon;
 
 /** Debug output macro with formatting options	*/
 #ifdef WIN32
-#define vos_printf(level, format, ...)                \
-    {if (gPDebugFunction != NULL)                     \
+#define vos_printf(level, format, ...)                                  \
+    {if (gPDebugFunction != NULL)                                       \
      {   char str[VOS_MAX_PRNT_STR_SIZE];                               \
          _snprintf_s(str, sizeof(str), _TRUNCATE, format, __VA_ARGS__); \
-         vos_print(level, str);                       \
-     }                                                \
+         vos_print(level, str);                                         \
+     }                                                                  \
     }
 #else
 #define vos_printf(level, format, args ...)           \
     {if (gPDebugFunction != NULL)                     \
-     {   char str[VOS_MAX_PRNT_STR_SIZE];                               \
+     {   char str[VOS_MAX_PRNT_STR_SIZE];             \
          snprintf(str, sizeof(str), format, ## args); \
          vos_print(level, str);                       \
      }                                                \
     }
+#endif
+
+/** Alignment macros	*/
+#if defined(alignof)
+#define ALIGNOF(type)   alignof(type)
+#elif defined(__alignof__)
+#define ALIGNOF(type)   __alignof__(type)
+#else
+#define ALIGNOF(type)   offsetof(struct { char c; type member; }, member)
 #endif
 
 /***********************************************************************************************************************
