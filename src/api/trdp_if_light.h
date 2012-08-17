@@ -257,6 +257,7 @@ EXT_DECL TRDP_ERR_T tlp_unpublish (
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_PUB_ERR		not published
  *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_COMID_ERR		ComID not found when marshalling
  */
 EXT_DECL TRDP_ERR_T tlp_put (
     TRDP_APP_SESSION_T  appHandle,
@@ -412,6 +413,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
  *  @retval         TRDP_SUB_ERR		not subscribed
  *  @retval         TRDP_TIMEOUT_ERR	packet timed out
  *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_COMID_ERR		ComID not found when marshalling
  */
 EXT_DECL TRDP_ERR_T tlp_get (
     TRDP_APP_SESSION_T  appHandle,
@@ -649,7 +651,7 @@ EXT_DECL TRDP_ERR_T tlm_reply (
 
 /**********************************************************************************************************************/
 /** Send a MD reply message.
- *  Send a MD reply message after receiving a request and ask for confirmation. 
+ *  Send a MD reply message after receiving a request and ask for confirmation.
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef			user supplied value returned with reply
