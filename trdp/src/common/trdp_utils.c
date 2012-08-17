@@ -403,9 +403,9 @@ TRDP_ERR_T  trdp_releaseSocket (
  *	Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
  *		  but shall be the same for redundant telegrams (subnet/srcIP).
  *
- *  @param[in]      comID			socket pool
+ *  @param[in]      comID			comID to look for
  *	@param[in]		msgType			PD/MD type
- *  @param[in]      srcIP			Source IP address
+ *  @param[in]      srcIpAddr		Source IP address
  *
  *	@retval			return the sequence number
  */
@@ -440,6 +440,66 @@ UINT32  trdp_getSeqCnt (
                     return pSendElement->curSeqCnt;
                 }
                 pSendElement = pSendElement->pNext;
+            }
+            pSession = pSession->pNext;
+        }
+    }
+#if MD_SUPPORT
+    else
+    {
+        #error
+    }
+#endif
+    return 0;   /*	Not found, initial value is zero	*/
+}
+
+/******************************************************************************/
+/** Check the sequence counter for the comID/message type and subnet (source IP)
+ *  has already been received.
+ *
+ *	Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
+ *		  but shall be the same for redundant telegrams (subnet/srcIP).
+ *
+ *  @param[in]      seqCnt			sequence counter received
+ *  @param[in]      comID			comID to look for
+ *	@param[in]		msgType			PD/MD type
+ *  @param[in]      srcIP			Source IP address
+ *
+ *	@retval			return the sequence number
+ */
+
+BOOL  trdp_isRcvSeqCnt (
+    UINT32          seqCnt,
+    UINT32          comId,
+    TRDP_MSG_T      msgType,
+    TRDP_IP_ADDR_T  srcIP)
+{
+    TRDP_SESSION_PT pSession        = (TRDP_SESSION_PT)trdp_sessionQueue();
+    PD_ELE_T        *pRcvElement    = NULL;
+
+    if (0 == comId || 0 == srcIP)
+    {
+        return 0;
+    }
+
+    /*	For process data look at the PD recv queue only	*/
+    if (TRDP_MSG_PD == msgType ||
+        TRDP_MSG_PR == msgType ||
+        TRDP_MSG_PE == msgType)
+    {
+        /*	Loop thru all sessions	*/
+        while (pSession)
+        {
+            pRcvElement = pSession->pRcvQueue;
+            while (pRcvElement)
+            {
+                if (pRcvElement->addr.comId == comId &&
+                    pRcvElement->addr.srcIpAddr != srcIP,
+                    pRcvElement->curSeqCnt == seqCnt)
+                {
+                    return TRUE;
+                }
+                pRcvElement = pRcvElement->pNext;
             }
             pSession = pSession->pNext;
         }

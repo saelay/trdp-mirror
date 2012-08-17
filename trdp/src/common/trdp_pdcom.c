@@ -207,7 +207,16 @@ TRDP_ERR_T  trdp_pdReceive (
         return TRDP_NO_ERR;
     }
 
-    /*	Check if sequencecounter is OK	*/
+    /*	Check if sequence counter is OK	*/
+    /*		Is this packet a redundant version?	*/
+    if (trdp_isRcvSeqCnt(vos_ntohl(pNewElement->frameHead.sequenceCounter), subHandle.comId,
+                         vos_ntohs(pNewElement->frameHead.msgType), subHandle.srcIpAddr))
+    {
+        vos_printf(VOS_LOG_INFO, "Redundant PD data ignored (comId %u)\n", vos_ntohl(pNewElement->frameHead.comId));
+        return TRDP_NO_ERR;
+    }
+
+    /*		Is this packet a duplicate?	*/
     if (vos_ntohl(pNewElement->frameHead.sequenceCounter) <
         vos_ntohl(pExistingElement->frameHead.sequenceCounter))
     {
@@ -224,8 +233,7 @@ TRDP_ERR_T  trdp_pdReceive (
     /*  Has the data changed?   */
     newData = memcmp(pNewElement->data, pExistingElement->data, pNewElement->dataSize);
 
-    /*	Get the current time and compute the next time this packet should be
-        received.	*/
+    /*	Get the current time and compute the next time this packet should be received.	*/
     vos_getTime(&pExistingElement->timeToGo);
     vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
 
@@ -290,8 +298,8 @@ void    trdp_pdUpdate (
     UINT32  *pFCS   = (UINT32 *)((UINT8 *)&pPacket->frameHead + pPacket->grossSize - 4);
 
     /* increment counter with each telegram */
-    pPacket->frameHead.sequenceCounter = vos_htonl(pPacket->curSeqCnt);
     pPacket->curSeqCnt++;
+    pPacket->frameHead.sequenceCounter = vos_htonl(pPacket->curSeqCnt);
 
     /* Compute CRC32   */
     myCRC   = vos_crc32(myCRC, (UINT8 *)&pPacket->frameHead, pPacket->grossSize - 4);
