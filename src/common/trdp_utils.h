@@ -93,13 +93,15 @@ TRDP_ERR_T trdp_releaseSocket(
 UINT32  trdp_packetSizePD (
     UINT32 dataSize);
 
-void    trdp_print (
-    TRDP_MSG_T  level,
-    const char  *str);
-
 /*  Get initial Sequence No	*/
-UINT32 trdp_getSeqCnt (
+UINT32  trdp_getSeqCnt (
     UINT32          comID,
+    TRDP_MSG_T      msgType,
+    TRDP_IP_ADDR_T  srcIP);
+
+BOOL trdp_isRcvSeqCnt (
+    UINT32          seqCnt,
+    UINT32          comId,
     TRDP_MSG_T      msgType,
     TRDP_IP_ADDR_T  srcIP);
 

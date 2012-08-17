@@ -598,10 +598,12 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         pNewElement->addr       = pubHandle;
         pNewElement->pktFlags   = pktFlags;
         pNewElement->privFlags  = TRDP_PRIV_NONE;
-        
-        /*	Find a possible redundant entry in one of the other sessions and sync the sequence counter!	*/
-        
-		pNewElement->curSeqCnt = trdp_getSeqCnt(pNewElement->addr.comId, TRDP_MSG_PD, pNewElement->addr.srcIpAddr);
+
+        /*	Find a possible redundant entry in one of the other sessions and sync the sequence counter!
+            curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
+            it will be incremented when sending...	*/
+
+        pNewElement->curSeqCnt = trdp_getSeqCnt(pNewElement->addr.comId, TRDP_MSG_PD, pNewElement->addr.srcIpAddr) - 1;
 
         /*	Compute the header fields */
         trdp_pdInit(pNewElement, TRDP_MSG_PD, topoCount);
@@ -681,6 +683,7 @@ TRDP_ERR_T  tlp_unpublish (
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_NOPUB_ERR		not published
  *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_COMID_ERR		ComID not found when marshalling
  */
 TRDP_ERR_T tlp_put (
     TRDP_APP_SESSION_T  appHandle,
@@ -867,7 +870,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
         if (timerisset(&iterPD->interval) &&            /* not PD PULL?	*/
             timercmp(&iterPD->timeToGo, &now, <=))
         {
-        	/*  Update the sequence counter and re-compute CRC	*/
+            /*  Update the sequence counter and re-compute CRC	*/
             trdp_pdUpdate(iterPD);
 
             /*	Send the packet if it is not redundant	*/
@@ -1030,7 +1033,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     BOOL                    subs,
     UINT16                  offsetAddr)
 {
-	return TRDP_NOINIT_ERR;
+    return TRDP_NOINIT_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -1243,6 +1246,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
  *  @retval         TRDP_SUB_ERR		not subscribed
  *  @retval         TRDP_TIMEOUT_ERR	packet timed out
  *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_COMID_ERR		ComID not found when marshalling
  */
 EXT_DECL TRDP_ERR_T tlp_get (
     TRDP_APP_SESSION_T  appHandle,
