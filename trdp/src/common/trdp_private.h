@@ -144,13 +144,13 @@ typedef struct
 #ifdef WIN32
 #pragma pack(pop)
 #endif
-       
+
 /** Queue element for PD packets to send or receive	*/
 typedef struct PD_ELE
 {
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL					*/
     TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber						*/
-    UINT32              curSeqCnt;              /**< the last send sequence counter                     */
+    UINT32              curSeqCnt;              /**< the last sent or received sequence counter         */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags										*/
     TRDP_FLAGS_T        pktFlags;               /**< flags												*/
     TRDP_TIME_T         interval;               /**< time out value for received packets or

@@ -292,6 +292,51 @@ EXT_DECL VOS_ERR_T vos_sharedClose (
     VOS_SHRD_T  handle,
     const UINT8 *pMemoryArea);
 
+/**********************************************************************************************************************/
+/*	Sorting/Searching																										      */
+/**********************************************************************************************************************/
+
+/**********************************************************************************************************************/
+/** Sort an array.
+ *  This is just a wrapper for the standard qsort function.
+ *
+ *  @param[in,out]	pBuf			Pointer to the array to sort
+ *  @param[in]      num				number of elements
+ *  @param[in]      size			size of one element
+ *  @param[in]      compare			Pointer to compare function
+ *  @retval         none
+ */
+
+EXT_DECL void vos_qsort (
+    void        *pBuf,
+    UINT32      num,
+    UINT32      size,
+    int         (*compare)(
+        const   void *,
+        const   void *));
+
+
+/**********************************************************************************************************************/
+/** Binary search in a sorted array.
+ *  This is just a wrapper for the standard qsort function.
+ *
+ *  @param[in]      pKey			Key to search for
+ *  @param[in]      pBuf			Pointer to the array to sort
+ *  @param[in]      num				number of elements
+ *  @param[in]      size			size of one element
+ *  @param[in]      compare			Pointer to compare function
+ *  @retval
+ */
+
+EXT_DECL void *vos_bsearch (
+    const void  *pKey,
+    const void  *pBuf,
+    UINT32      num,
+    UINT32      size,
+    int         (*compare)(
+        const   void *,
+        const   void *));
+
 
 
 #ifdef __cplusplus
