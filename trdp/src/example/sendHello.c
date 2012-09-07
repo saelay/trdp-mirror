@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-//#include <sys/time.h>
+/* #include <sys/time.h> */
 #include <sys/select.h>
 
 #include "trdp_if_light.h"
@@ -64,8 +64,8 @@ void usage (const char *appName)
  */
 int main (int argc, char *argv[])
 {
-    int     ip[4];
-    INT32   hugeCounter = 0;
+    int                 ip[4];
+    INT32               hugeCounter = 0;
     TRDP_APP_SESSION_T  appHandle;  /*	Our identifier to the library instance	*/
     TRDP_PUB_T          pubHandle;  /*	Our identifier to the publication	*/
     UINT32              comId = PD_COMID;
@@ -107,8 +107,8 @@ int main (int argc, char *argv[])
                     exit(1);
                 }
                 destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
             }
-            break;
             case 't':
             {   /*  read ip    */
                 if (sscanf(optarg, "%u.%u.%u.%u",
@@ -118,8 +118,8 @@ int main (int argc, char *argv[])
                     exit(1);
                 }
                 destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
             }
-            break;
             case 'd':
             {   /*  data    */
                 char    c;
@@ -139,8 +139,8 @@ int main (int argc, char *argv[])
                 memcpy(data, optarg, dataSize);
                 outputBuffer        = data; /* move the pointer to the new data */
                 outputBufferSize    = dataSize;
+                break;
             }
-            break;
             case 'v':   /*  version */
                 printf("%s: Version %s\t(%s - %s)\n",
                        argv[0], APP_VERSION, __DATE__, __TIME__);
@@ -154,10 +154,10 @@ int main (int argc, char *argv[])
         }
     }
 
-	if (destIP == 0)
+    if (destIP == 0)
     {
-       	fprintf(stderr, "No destination address given!\n");
-    	usage(argv[0]);
+        fprintf(stderr, "No destination address given!\n");
+        usage(argv[0]);
         return 1;
     }
 
