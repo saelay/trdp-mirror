@@ -269,41 +269,39 @@ typedef struct
 /**	Dataset element definition	*/
 typedef enum
 {
-    TRDP_BOOLEAN    = -1,   /**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
-    TRDP_CHAR8      = -2,   /**< char, can be used also as UTF8  */
-    TRDP_UTF16      = -3,   /**< Unicode UTF-16 character  */
-    TRDP_INT8       = -4,   /**< Signed integer, 8 bit  */
-    TRDP_INT16      = -5,   /**< Signed integer, 16 bit  */
-    TRDP_INT32      = -6,   /**< Signed integer, 32 bit  */
-    TRDP_INT64      = -7,   /**< Signed integer, 64 bit  */
-    TRDP_UINT8      = -8,   /**< Unsigned integer, 8 bit  */
-    TRDP_UINT16     = -9,   /**< Unsigned integer, 16 bit  */
-    TRDP_UINT32     = -10,  /**< Unsigned integer, 32 bit  */
-    TRDP_UINT64     = -11,  /**< Unsigned integer, 64 bit  */
-    TRDP_REAL32     = -12,  /**< Floating point real, 32 bit  */
-    TRDP_REAL64     = -13,  /**< Floating point real, 64 bit  */
-    TRDP_STRING     = -14,  /**< Zero-terminated array of CHAR8, fixed size  */
-    TRDP_ARRAY      = -15,  /**< Array  */
-    TRDP_RECORD     = -16,  /**< Record  */
-    TRDP_TIMEDATE32 = -17,  /**< 32 bit UNIX time  */
-    TRDP_TIMEDATE48 = -18,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
-    TRDP_TIMEDATE64 = -19   /**< 32 bit UNIX time + 32 bit miliseconds  */
+    TRDP_BOOLEAN    = 1,   /**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+    TRDP_CHAR8      = 2,   /**< char, can be used also as UTF8  */
+    TRDP_UTF16      = 3,   /**< Unicode UTF-16 character  */
+    TRDP_INT8       = 4,   /**< Signed integer, 8 bit  */
+    TRDP_INT16      = 5,   /**< Signed integer, 16 bit  */
+    TRDP_INT32      = 6,   /**< Signed integer, 32 bit  */
+    TRDP_INT64      = 7,   /**< Signed integer, 64 bit  */
+    TRDP_UINT8      = 8,   /**< Unsigned integer, 8 bit  */
+    TRDP_UINT16     = 9,   /**< Unsigned integer, 16 bit  */
+    TRDP_UINT32     = 10,  /**< Unsigned integer, 32 bit  */
+    TRDP_UINT64     = 11,  /**< Unsigned integer, 64 bit  */
+    TRDP_REAL32     = 12,  /**< Floating point real, 32 bit  */
+    TRDP_REAL64     = 13,  /**< Floating point real, 64 bit  */
+    TRDP_STRING     = 14,  /**< Zero-terminated array of CHAR8, fixed size  */
+    TRDP_TIMEDATE32 = 15,  /**< 32 bit UNIX time  */
+    TRDP_TIMEDATE48 = 16,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
+    TRDP_TIMEDATE64 = 17   /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
 } TRDP_DATA_TYPE_T;
 
 /**	Dataset element definition	*/
 typedef struct
 {
-    INT32   type;            /**< Data type or dataset id */
+    UINT32  type;            /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000 */
     UINT32  size;            /**< Number of items or TDRP_VAR_SIZE (0) */
 } TRDP_DATASET_ELEMENT_T;
 
 /**	Dataset definition	*/
 typedef struct
 {
-    INT32                   id;           /**< dataset identifier */
+    UINT32                  id;           /**< dataset identifier > 1000 */
     UINT16                  reserved1;    /**< Reserved for future use, must be zero  */
     UINT16                  numElement;   /**< Number of elements */
-    TRDP_DATASET_ELEMENT_T  pElement[0];  /**< Pointer to a dataset element, used as array */
+    TRDP_DATASET_ELEMENT_T  pElement[];   /**< Pointer to a dataset element, used as array */
 } TRDP_DATASET_T;
 
 
