@@ -197,9 +197,9 @@ typedef enum
 /** How invalid PD shall be handled    */
 typedef enum
 {
-    TRDP_TO_INVALID         = 0,
-    TRDP_TO_SET_TO_ZERO     = 1,
-    TRDP_TO_KEEP_LAST_VALUE = 2
+    TRDP_TO_SET_TO_ZERO     = 0x1,      /**< If set, data will be reset to zero on time out         */
+    /* TRDP_TO_KEEP_LAST_VALUE */       /**< If not set, last received values will be returned      */
+    TRDP_TO_PULL            = 0x2       /**< Identify telegram as subscribed/requested via PULL     */
 } TRDP_TO_BEHAVIOR_T;
 
 /**	Process data info from received telegram; allows the application to generate responses.
@@ -208,19 +208,19 @@ typedef enum
  */
 typedef struct
 {
-    TRDP_IP_ADDR_T  srcIpAddr;      /**< source IP address for filtering		*/
-    TRDP_IP_ADDR_T  destIpAddr;     /**< destination IP address for filtering	*/
-    UINT32          seqCount;       /**< sequence counter                      */
-    UINT16          protVersion;    /**< Protocol version                      */
-    TRDP_MSG_T      msgType;        /**< Protocol ('PD', 'MD', ...)			*/
-    UINT32          comId;          /**< ComID									*/
-    UINT32          topoCount;      /**< received topocount					*/
-    BOOL            subs;           /**< substitution							*/
-    UINT16          offsetAddr;     /**< offset address for ladder architecture */
-    UINT32          replyComId;     /**< ComID for reply (request only)		*/
-    TRDP_IP_ADDR_T  replyIpAddr;    /**< IP address for reply (request only)	*/
-    const void      *pUserRef;      /**< User reference given with the local subscribe   */
-    TRDP_ERR_T      resultCode;     /**< error code							*/
+    TRDP_IP_ADDR_T  srcIpAddr;      /**< source IP address for filtering                */
+    TRDP_IP_ADDR_T  destIpAddr;     /**< destination IP address for filtering           */
+    UINT32          seqCount;       /**< sequence counter                               */
+    UINT16          protVersion;    /**< Protocol version                               */
+    TRDP_MSG_T      msgType;        /**< Protocol ('PD', 'MD', ...)                     */
+    UINT32          comId;          /**< ComID                                          */
+    UINT32          topoCount;      /**< received topocount                             */
+    BOOL            subs;           /**< substitution                                   */
+    UINT16          offsetAddr;     /**< offset address for ladder architecture         */
+    UINT32          replyComId;     /**< ComID for reply (request only)                 */
+    TRDP_IP_ADDR_T  replyIpAddr;    /**< IP address for reply (request only)            */
+    const void      *pUserRef;      /**< User reference given with the local subscribe  */
+    TRDP_ERR_T      resultCode;     /**< error code                                     */
 } TRDP_PD_INFO_T;
 
 
