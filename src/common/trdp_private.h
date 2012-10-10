@@ -34,7 +34,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.0.5"
+#define LIB_VERSION  "0.0.0.6"
 
 #ifndef IP_PD_UDP_PORT
 #define IP_PD_UDP_PORT  20548                   /**< process data UDP port      */
@@ -42,6 +42,10 @@
 #ifndef IP_MD_UDP_PORT
 #define IP_MD_UDP_PORT  20550                   /**< message data UDP port      */
 #endif
+#ifndef IP_MD_TCP_PORT
+#define IP_MD_TCP_PORT  20550                   /**< message data TCP port      */
+#endif
+
 
 #define IP_PD_PROTO_VER             0x0100      /**< Protocol version           */
 #define IP_MD_PROTO_VER             0x0100
@@ -58,7 +62,7 @@
 #define MD_DEFAULT_QOS              0
 #define MD_DEFAULT_TTL              64
 
-#define MIN_PD_HEADER_SIZE          sizeof(PD_HEADER_T)     /**< PD header size without FCS */
+#define MIN_PD_HEADER_SIZE          sizeof(PD_HEADER_T)     /**< PD header size with FCS */
 #define MAX_PD_DATA_SIZE            1436
 #define MAX_PD_PACKET_SIZE          MAX_PD_DATA_SIZE + MIN_PD_HEADER_SIZE
 #define MAX_MD_PACKET_SIZE          1024 * 64
@@ -73,9 +77,11 @@
 /** Internal flags for packets    */
 typedef enum
 {
-    TRDP_PRIV_NONE  = 0,
-    TRDP_MC_JOINT   = 0x1,
-    TRDP_TIMED_OUT  = 0x2                   /**< if set, informed the user                              */
+    TRDP_PRIV_NONE      = 0,
+    TRDP_MC_JOINT       = 0x1,
+    TRDP_TIMED_OUT      = 0x2,              /**< if set, informed the user                              */
+    TRDP_REQ_2B_SENT    = 0x4,              /**< if set, the request needs to be sent                   */
+    TRDP_PULL_SUB       = 0x8               /**< if set, its a PULL subscription                        */
 } TRDP_PRIV_FLAGS_T;
 
 /** Socket usage    */
@@ -89,10 +95,10 @@ typedef enum
 /** Hidden handle definition, used as unique addressing item    */
 typedef struct TRDP_HANDLE
 {
-    UINT32          comId;                  /**< comId for packets to send/receive                      */
-    TRDP_IP_ADDR_T  srcIpAddr;              /**< source IP for PD                                       */
-    TRDP_IP_ADDR_T  destIpAddr;             /**< destination IP for PD                                  */
-    TRDP_IP_ADDR_T  mcGroup;                /**< multicast group to join for PD                         */
+    UINT32              comId;              /**< comId for packets to send/receive                      */
+    TRDP_IP_ADDR_T      srcIpAddr;          /**< source IP for PD                                       */
+    TRDP_IP_ADDR_T      destIpAddr;         /**< destination IP for PD                                  */
+    TRDP_IP_ADDR_T      mcGroup;            /**< multicast group to join for PD                         */
 } TRDP_ADDRESSES, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
 /** Socket item    */
@@ -152,12 +158,14 @@ typedef struct PD_ELE
 {
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                    */
     TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber                     */
+    TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip   */
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter         */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                      */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                              */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
                                                      interval for packets to send (set from ms)         */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv             */
+    TRDP_TO_BEHAVIOR_T  toBehavior;             /**< timeout behavior for packets                       */
     UINT32              dataSize;               /**< net data size                                      */
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)  */
     INT32               socketIdx;              /**< index into the socket list                         */

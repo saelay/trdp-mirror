@@ -55,7 +55,7 @@ extern int          am_big_endian ();
 extern TRDP_LOG_T   gDebugLevel;
 
 PD_ELE_T            *trdp_queueFindComId (
-    PD_ELE_T    * *pHead,
+    PD_ELE_T    *pHead,
     UINT32      comId);
 
 PD_ELE_T            *trdp_queueFindAddr (

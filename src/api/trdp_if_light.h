@@ -65,33 +65,46 @@ typedef struct TRDP_HANDLE *TRDP_SUB_T;
 /**********************************************************************************************************************/
 /** Initialize the TRDP stack.
  *
- *	tlc_init returns in pAppHandle a unique handle to be used in further calls to the stack.
+ *    tlc_init returns in pAppHandle a unique handle to be used in further calls to the stack.
+ *
+ *  @param[in]      pPrintDebugString   Pointer to debug print function
+ *  @param[in]      pMemConfig          Pointer to memory configuration
+ *
+ *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_MEM_ERR           memory allocation failed
+ *  @retval         TRDP_PARAM_ERR         initialization error
+ */
+EXT_DECL TRDP_ERR_T tlc_init (
+    const TRDP_PRINT_DBG_T          pPrintDebugString,
+    const TRDP_MEM_CONFIG_T         *pMemConfig);
+
+/**********************************************************************************************************************/
+/** Open a session with the TRDP stack.
+ *
+ *    tlc_openSession returns in pAppHandle a unique handle to be used in further calls to the stack.
  *
  *  @param[out]     pAppHandle          A handle for further calls to the trdp stack
- *  @param[in]      ownIpAddr           Own IP address, can be different for each process
- *                                      in multiprocessing systems
- *  @param[in]      leaderIpAddr		IP address of redundancy leader
- *  @param[in]      pPrintDebugString	Pointer to debug print function
+ *  @param[in]      ownIpAddr           Own IP address, can be different for each process in multihoming systems,
+ *                                      if zero, the default interface / IP will be used.
+ *  @param[in]      leaderIpAddr        IP address of redundancy leader
  *  @param[in]      pMarshall           Pointer to marshalling configuration
  *  @param[in]      pPdDefault          Pointer to default PD configuration
  *  @param[in]      pMdDefault          Pointer to default MD configuration
- *  @param[in]      pMemConfig          Pointer to memory configuration
  *  @param[in]      option              options for library behavior
- *  @retval         TRDP_NO_ERR			no error
- *  @retval         TRDP_PARAM_ERR		initialization error
- *  @retval         TRDP_SOCK_ERR		socket error
+ *
+ *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_INIT_ERR          not yet inited
+ *  @retval         TRDP_PARAM_ERR         parameter error
+ *  @retval         TRDP_SOCK_ERR          socket error
  */
-EXT_DECL TRDP_ERR_T tlc_init (
+EXT_DECL TRDP_ERR_T tlc_openSession (
     TRDP_APP_SESSION_T              *pAppHandle,
     TRDP_IP_ADDR_T                  ownIpAddr,
     TRDP_IP_ADDR_T                  leaderIpAddr,
-    const TRDP_PRINT_DBG_T          pPrintDebugString,
     const TRDP_MARSHALL_CONFIG_T    *pMarshall,
     const TRDP_PD_CONFIG_T          *pPdDefault,
     const TRDP_MD_CONFIG_T          *pMdDefault,
-    const TRDP_MEM_CONFIG_T         *pMemConfig,
-    TRDP_OPTION_T                   option
-    );
+    TRDP_OPTION_T                   option);
 
 /**********************************************************************************************************************/
 /** Re-Initialize.
@@ -99,27 +112,37 @@ EXT_DECL TRDP_ERR_T tlc_init (
  *	has occured during normal operation.
  *	We need to re-join the multicast groups...
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @retval         TRDP_NO_ERR			no error
  *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_PARAM_ERR		handle NULL
  */
-EXT_DECL TRDP_ERR_T tlc_reinit (
+EXT_DECL TRDP_ERR_T tlc_reinitSession (
+    TRDP_APP_SESSION_T appHandle);
+
+
+/**********************************************************************************************************************/
+/** Close a session.
+ *  Clean up and release all resources of that session
+ *
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_PARAM_ERR		handle NULL
+ */
+EXT_DECL TRDP_ERR_T tlc_closeSession(
     TRDP_APP_SESSION_T appHandle);
 
 
 /**********************************************************************************************************************/
 /** Un-Initialize.
- *  Clean up when app quits. Mainly used for debugging/test runs. No further calls to library allowed
+ *  Clean up and close all sessions. Mainly used for debugging/test runs. No further calls to library allowed
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
  *  @retval         TRDP_NO_ERR			no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
- *  @retval         TRDP_PARAM_ERR		handle NULL
  */
-EXT_DECL TRDP_ERR_T tlc_terminate (
-    TRDP_APP_SESSION_T appHandle);
+EXT_DECL TRDP_ERR_T tlc_terminate (void);
 
-
+    
 /**********************************************************************************************************************/
 /** Set new topocount for trainwide communication.
  *

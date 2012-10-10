@@ -80,23 +80,23 @@ UINT32 trdp_packetSizePD (
 /******************************************************************************/
 /** Return the element with same comId
  *
- *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pHead           pointer to head of queue
  *  @param[in]      comId           ComID to search for
  *  @retval         != NULL         pointer to PD element
  *  @retval         NULL            No PD element found
  */
 PD_ELE_T *trdp_queueFindComId (
-    PD_ELE_T    * *ppHead,
+    PD_ELE_T    *pHead,
     UINT32      comId)
 {
     PD_ELE_T *iterPD;
 
-    if (ppHead == NULL || *ppHead == NULL || comId == 0)
+    if (pHead == NULL || comId == 0)
     {
         return NULL;
     }
 
-    for (iterPD = *ppHead; iterPD != NULL; iterPD = iterPD->pNext)
+    for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
         if (iterPD->addr.comId == comId)
         {
@@ -479,7 +479,7 @@ BOOL  trdp_isRcvSeqCnt (
 
     if (0 == comId || 0 == srcIP)
     {
-        return 0;
+        return FALSE;
     }
 
     /*	For process data look at the PD recv queue only	*/
@@ -494,7 +494,7 @@ BOOL  trdp_isRcvSeqCnt (
             while (pRcvElement)
             {
                 if (pRcvElement->addr.comId == comId &&
-                    pRcvElement->addr.srcIpAddr != srcIP,
+                    pRcvElement->addr.srcIpAddr != srcIP &&
                     pRcvElement->curSeqCnt == seqCnt)
                 {
                     return TRUE;
@@ -510,5 +510,5 @@ BOOL  trdp_isRcvSeqCnt (
         #error
     }
 #endif
-    return 0;   /*	Not found, initial value is zero	*/
+    return FALSE;   /*	Not found, initial value is zero	*/
 }

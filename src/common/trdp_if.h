@@ -49,9 +49,9 @@ extern "C" {
 /** Check if the session handle is valid
  *
  *
- *  @param[in]      pSessionHandle		pointer to packet data (dataset)
- *	@retval			TRUE		is valid
- *	@retval			FALSE		is invalid
+ *  @param[in]      pSessionHandle    pointer to packet data (dataset)
+ *  @retval         TRUE              is valid
+ *  @retval         FALSE             is invalid
  */
 BOOL trdp_isValidSession (
     TRDP_APP_SESSION_T pSessionHandle);
@@ -59,7 +59,7 @@ BOOL trdp_isValidSession (
 /**********************************************************************************************************************/
 /** Get the session queue head pointer
  *
- *	@retval			&sSession
+ *  @retval	        &sSession
  */
 TRDP_APP_SESSION_T *trdp_sessionQueue (
     void);
