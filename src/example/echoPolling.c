@@ -105,12 +105,18 @@ int main (int argc, char * *argv)
     int     rv = 0;
 
     /*	Init the library for non-blocking operation	*/
-    if (tlc_init(&appHandle,
+    if (tlc_init(&dbgOut,                            /* actually printf					*/
+                 &dynamicConfig) != TRDP_NO_ERR)
+    {
+        printf("Initialization error\n");
+        return 1;
+    }
+    
+    /*	Init the library for non-blocking operation	*/
+    if (tlc_openSession(&appHandle,
                  0, 0,                              /* use default IP address/interface */
-                 dbgOut,                            /* actually printf					*/
                  NULL,                              /* no Marshalling					*/
                  &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
-                 &dynamicConfig,                    /* Use application supplied memory	*/
                  TRDP_OPTION_NONE) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
@@ -137,7 +143,7 @@ int main (int argc, char * *argv)
     if (err != TRDP_NO_ERR)
     {
         printf("prep pd receive error\n");
-        tlc_terminate(appHandle);
+        tlc_terminate();
         return 1;
     }
 
@@ -162,7 +168,7 @@ int main (int argc, char * *argv)
     if (err != TRDP_NO_ERR)
     {
         printf("prep pd publish error\n");
-        tlc_terminate(appHandle);
+        tlc_terminate();
         return 1;
     }
 
@@ -260,7 +266,7 @@ int main (int argc, char * *argv)
     tlp_unpublish(appHandle, pubHandle);
     tlp_unsubscribe(appHandle, subHandle);
 
-    tlc_terminate(appHandle);
+    tlc_terminate();
 
     return rv;
 }
