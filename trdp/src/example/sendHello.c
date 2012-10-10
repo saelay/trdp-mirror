@@ -1,4 +1,4 @@
-/******************************************************************************/
+/**********************************************************************************************************************/
 /**
  * @file            sendHello.c
  *
@@ -17,7 +17,7 @@
  *
  */
 
-/*******************************************************************************
+/***********************************************************************************************************************
  * INCLUDES
  */
 #include <stdio.h>
@@ -30,7 +30,7 @@
 #include "trdp_if_light.h"
 #include "vos_thread.h"
 
-/*******************************************************************************
+/***********************************************************************************************************************
  * DEFINITIONS
  */
 #define APP_VERSION     "1.0"
@@ -56,7 +56,8 @@ void usage (const char *appName)
            );
 }
 
-/******************************************************************************/
+
+/**********************************************************************************************************************/
 /** main entry
  *
  *  @retval         0		no error
@@ -70,8 +71,7 @@ int main (int argc, char *argv[])
     TRDP_PUB_T          pubHandle;  /*	Our identifier to the publication	*/
     UINT32              comId = PD_COMID;
     TRDP_ERR_T          err;
-    TRDP_PD_CONFIG_T    pdConfiguration =
-    {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
+    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
 
     int                 rv = 0;
@@ -81,12 +81,13 @@ int main (int argc, char *argv[])
 
     /*	Generate some data, that we want to send, when nothing was specified. */
     UINT8               *outputBuffer;
-    UINT8               exampleData[1000]   = "";
-    int                 outputBufferSize    = 100;
-    outputBuffer = exampleData;
+    UINT8               exampleData[DATA_MAX]   = "Hello World";
+    int                 outputBufferSize    = strlen("Hello World");
 
     UINT8               data[DATA_MAX];
     int                 ch;
+
+    outputBuffer = exampleData;
 
     if (argc <= 1)
     {
@@ -162,18 +163,25 @@ int main (int argc, char *argv[])
     }
 
     /*	Init the library  */
-    if (tlc_init(&appHandle,
-                 0, 0,                      /* use default IP address */
-                 NULL,                      /* no logging	*/
-                 NULL,                      /* no Marshalling	*/
-                 &pdConfiguration, NULL,    /* system defaults for PD and MD	*/
-                 &dynamicConfig,            /* Use application supplied memory	*/
-                 TRDP_OPTION_BLOCK) != TRDP_NO_ERR)
+    if (tlc_init(NULL,                              /* no logging	*/
+                 &dynamicConfig) != TRDP_NO_ERR)    /* Use application supplied memory	*/
+        
     {
         printf("Initialization error\n");
         return 1;
     }
 
+    /*	Open a session  */
+    if (tlc_openSession(&appHandle,
+                 0, 0,                      /* use default IP address */
+                 NULL,                      /* no Marshalling	*/
+                 &pdConfiguration, NULL,    /* system defaults for PD and MD	*/
+                 TRDP_OPTION_BLOCK) != TRDP_NO_ERR)
+    {
+        printf("Initialization error\n");
+        return 1;
+    }
+    
     /*	Copy the packet into the internal send queue, prepare for sending.	*/
     /*	If we change the data, just re-publish it	*/
     err = tlp_publish(  appHandle,                  /*	our application identifier	*/
@@ -195,7 +203,7 @@ int main (int argc, char *argv[])
     if (err != TRDP_NO_ERR)
     {
         printf("prep pd error\n");
-        tlc_terminate(appHandle);
+        tlc_terminate();
         return 1;
     }
 
@@ -218,19 +226,16 @@ int main (int argc, char *argv[])
 
         /*
            Compute the min. timeout value for select.
-           This way we can guarantee that PDs are sent in time...
-           (A requirement for the IPT Wire Protocol)
+           This way we can guarantee that PDs are sent in time
+           with minimum CPU load and minimum jitter.
          */
-        tlc_getInterval(appHandle,
-                        (TRDP_TIME_T *) &tv,
-                        (TRDP_FDS_T *) &rfds,
-                        &noDesc);
+        tlc_getInterval(appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
 
         /*
            The wait time for select must consider cycle times and timeouts of
            the PD packets received or sent.
            If we need to poll something faster than the lowest PD cycle,
-           we need to set the maximum time out our self
+           we need to set the maximum time out our self.
          */
         if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
         {
@@ -245,11 +250,11 @@ int main (int argc, char *argv[])
 
         /*
            Check for overdue PDs (sending and receiving)
-           Send any PDs if it's time...
+           Send any pending PDs if it's time...
            Detect missing PDs...
            'rv' will be updated to show the handled events, if there are
            more than one...
-           The callback function will be called from within the trdp_work
+           The callback function will be called from within the tlc_process
            function (in it's context and thread)!
          */
         tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
@@ -266,9 +271,7 @@ int main (int argc, char *argv[])
 
         sprintf((char *)outputBuffer, "Just a Counter: %d", hugeCounter++);
 
-        err =
-            tlp_put(appHandle, pubHandle, outputBuffer,
-                    strlen((char *)outputBuffer));
+        err = tlp_put(appHandle, pubHandle, outputBuffer, strlen((char *)outputBuffer));
         if (err != TRDP_NO_ERR)
         {
             printf("put pd error\n");
@@ -282,6 +285,6 @@ int main (int argc, char *argv[])
      */
     tlp_unpublish(appHandle, pubHandle);
 
-    tlc_terminate(appHandle);
+    tlc_terminate();
     return rv;
 }
