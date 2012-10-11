@@ -19,7 +19,7 @@ TARGET_FLAG = POSIX
 
 VOS_PATH = src/vos/$(TARGET_VOS)
 
-vpath %.c src/common src/example src/vos/common $(VOS_PATH)
+vpath %.c src/common src/example src/vos/common $(VOS_PATH) test
 vpath %.h src/api src/vos/api src/common src/vos/common
 
 INCPATH = src/api
@@ -76,6 +76,7 @@ all:		outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello
+test:		outdir $(OUTDIR)/test_server # $(OUTDIR)/test_client
 doc:		doc/latex/refman.pdf
 
 $(OUTDIR)/trdp_if.o:	trdp_if.c
@@ -117,6 +118,14 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
+$(OUTDIR)/test_server:   test_server_main.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) test/test_server_main.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
 outdir:
 		$(MD) $(OUTDIR)
 
@@ -139,6 +148,7 @@ help:
 	@echo " " >&2
 	@echo "Other builds:" >&2
 	@echo "  * make demo      - build the sample applications" >&2
+	@echo "  * make test      - build the test server application" >&2
 	@echo "  * make clean     - remove all binaries and objects of the current target" >&2
 	@echo "  * make libtrdp	  - build the static library, only" >&2
 	@echo " " >&2
