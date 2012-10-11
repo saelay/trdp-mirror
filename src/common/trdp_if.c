@@ -1502,7 +1502,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         if (timercmp(&pElement->timeToGo, &now, >))
         {
             /*    Packet is late    */
-            if (appHandle->pdDefault.toBehavior & TRDP_TO_SET_TO_ZERO)
+            if (appHandle->pdDefault.toBehavior == TRDP_TO_SET_TO_ZERO)
             {
                 memset(pData, 0, *pDataSize);
             }
