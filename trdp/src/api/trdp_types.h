@@ -197,9 +197,8 @@ typedef enum
 /** How invalid PD shall be handled    */
 typedef enum
 {
-    TRDP_TO_SET_TO_ZERO     = 0x1,      /**< If set, data will be reset to zero on time out         */
-    /* TRDP_TO_KEEP_LAST_VALUE */       /**< If not set, last received values will be returned      */
-    TRDP_TO_PULL            = 0x2       /**< Identify telegram as subscribed/requested via PULL     */
+    TRDP_TO_SET_TO_ZERO     = 1,      /**< If set, data will be reset to zero on time out         */
+    TRDP_TO_KEEP_LAST_VALUE = 2       /**< If not set, last received values will be returned      */
 } TRDP_TO_BEHAVIOR_T;
 
 /**	Process data info from received telegram; allows the application to generate responses.
