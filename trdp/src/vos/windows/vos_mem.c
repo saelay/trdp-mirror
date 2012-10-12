@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <search.h>
 #include <fcntl.h>
 
 #include "vos_types.h"
@@ -639,4 +640,58 @@ EXT_DECL VOS_ERR_T vos_sharedClose (
     vos_printf(VOS_LOG_ERROR,
                "vos_shared function not implemented\n");
     return VOS_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Sort an array.
+ *  This is just a wrapper for the standard qsort function.
+ *
+ *  @param[in,out]	pBuf			Pointer to the array to sort
+ *  @param[in]      num				number of elements
+ *  @param[in]      size			size of one element
+ *  @param[in]      compare			Pointer to compare function
+ *										return -n if arg1 < arg2,
+ *										return 0  if arg1 == arg2,
+ *										return +n if arg1 > arg2
+ *									where n is an integer != 0
+ *  @retval         none
+ */
+
+EXT_DECL void vos_qsort (
+    void        *pBuf,
+    UINT32      num,
+    UINT32      size,
+    int         (*compare)(
+        const   void *,
+        const   void *))
+{
+    qsort(pBuf, num, size, compare);
+}
+
+/**********************************************************************************************************************/
+/** Binary search in a sorted array.
+ *  This is just a wrapper for the standard qsort function.
+ *
+ *  @param[in]      pKey			Key to search for
+ *  @param[in]      pBuf			Pointer to the array to sort
+ *  @param[in]      num				number of elements
+ *  @param[in]      size			size of one element
+ *  @param[in]      compare			Pointer to compare function
+ *										return -n if arg1 < arg2,
+ *										return 0  if arg1 == arg2,
+ *										return +n if arg1 > arg2
+ *									where n is an integer != 0
+ *  @retval         Pointer to found element or NULL
+ */
+
+EXT_DECL void *vos_bsearch (
+    const void  *pKey,
+    const void  *pBuf,
+    UINT32      num,
+    UINT32      size,
+    int         (*compare)(
+        const   void *,
+        const   void *))
+{
+    return bsearch(pKey, pBuf, num, size, compare);
 }
