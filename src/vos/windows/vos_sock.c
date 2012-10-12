@@ -141,7 +141,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 {
     UINT32 i;
 
-    if (vosSockInitialised == FALSE)
+    if (!vosSockInitialised)
     {
         return VOS_INIT_ERR;
     }
