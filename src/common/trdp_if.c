@@ -28,7 +28,9 @@
 #include "trdp_if_light.h"
 #include "trdp_utils.h"
 #include "trdp_pdcom.h"
+#include "trdp_stats.h"
 #include "vos_sock.h"
+#include "vos_mem.h"
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -97,7 +99,7 @@ BOOL    trdp_isValidSession (
  */
 TRDP_APP_SESSION_T *trdp_sessionQueue (void)
 {
-    return &sSession;
+    return (TRDP_APP_SESSION_T*)sSession;
 }
 
 /**********************************************************************************************************************/
@@ -152,6 +154,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
 #if MD_SUPPORT
         /* Init MD  here... */
 #endif
+
 
         if (ret == TRDP_NO_ERR)
         {
@@ -269,6 +272,9 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     /*    Clear the socket pool    */
     trdp_initSockets(pSession->iface);
 
+    /*    Clear the statistics for this session */
+    trdp_initStats(pSession);
+
 #if MD_SUPPORT
 
     ret = trdp_initMD(pSession);
@@ -322,7 +328,6 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
     if (sSession == (TRDP_SESSION_PT) appHandle)
     {
         sSession    = sSession->pNext;
-        pSession    = (TRDP_SESSION_PT) appHandle;
         found       = TRUE;
     }
     else
@@ -529,9 +534,34 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *
  *  @param[in]      topoCount            New topoCount value
  */
-void       tlc_setTopoCount (UINT32 topoCount)
+EXT_DECL void tlc_setTopoCount (UINT32 topoCount)
 {
+    TRDP_SESSION_PT pSession;
+    vos_mutexLock(sSessionMutex);
+    
     sTopoCount = topoCount;
+
+    /*  Set the topoCount for each session  */
+    pSession = sSession;
+    
+    while (pSession)
+    {
+        pSession->topoCount = topoCount;
+        pSession = pSession->pNext;
+    }
+
+}
+
+/**********************************************************************************************************************/
+/** Get current topocount
+ *
+ *    This value is used for validating outgoing and incoming packets only!
+ *
+ *  @retval      topoCount            Current topoCount value
+ */
+UINT32 trdp_getTopoCount (void)
+{
+    return sTopoCount;
 }
 
 /**********************************************************************************************************************/
@@ -942,7 +972,9 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
     vos_clearTime(&appHandle->interval);
 
-    /*    Find and send the packet which has to be sent next:    */
+    /******************************************************
+        Find and send the packets which has to be sent next:    
+     ******************************************************/
 
     err = trdp_pdSendQueued(appHandle);
     
@@ -958,10 +990,15 @@ EXT_DECL TRDP_ERR_T tlc_process (
     /*    Examine receive queue for late packets    */
     for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if (timerisset(&iterPD->timeToGo) &&                    /*  Prevent timing out of PULLed data too early */
+        if (timerisset(&iterPD->interval) &&
+            timerisset(&iterPD->timeToGo) &&                    /*  Prevent timing out of PULLed data too early */
             timercmp(&iterPD->timeToGo, &now, <=) &&            /*  late?   */
             !(iterPD->privFlags & TRDP_TIMED_OUT))              /*  and not already flagged ?   */
         {
+            /*  Update some statistics  */
+            appHandle->stats.pd.numTimeout++;
+            iterPD->lastErr = TRDP_TIMEOUT_ERR;
+
             /* Packet is late! We inform the user about this:    */
             if (appHandle->pdDefault.pfCbFunction != NULL)
             {
@@ -1185,10 +1222,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
                     pReqElement->addr.destIpAddr    = destIpAddr;
                     pReqElement->addr.srcIpAddr     = srcIpAddr;
                     pReqElement->addr.mcGroup       = 0;
-
                     pReqElement->pktFlags           = pktFlags;
                     
-
                     /*    Enter this request into the send queue.    */
 
                     trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
@@ -1208,15 +1243,20 @@ EXT_DECL TRDP_ERR_T tlp_request (
         /*    Compute the header fields */
         trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, subs, offsetAddr, replyComId, replyIpAddr);
         
-        ret = tlp_put(appHandle, &pReqElement->addr, pData, dataSize);
-
+        if (dataSize > 0)
+        {
+            ret = tlp_put(appHandle, &pReqElement->addr, pData, dataSize);
+        }
 
         /*  This flag triggers sending in tlc_process (one shot)  */
         pReqElement->privFlags  |= TRDP_REQ_2B_SENT;
 
         /*    Set the current time and start time out of subscribed packet  */
-        vos_getTime(&pSubPD->timeToGo);
-        vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
+        if (timerisset(&pSubPD->interval))
+        {
+            vos_getTime(&pSubPD->timeToGo);
+            vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
+        }
     }
     
     vos_mutexUnlock(appHandle->mutex);
@@ -1264,7 +1304,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     UINT32          grossDataSize;
     TRDP_TIME_T     now;
     TRDP_ERR_T      ret         = TRDP_NO_ERR;
-    TRDP_ADDRESSES  subHandle   = {comId, srcIpAddr1, destIpAddr, 0};
+    TRDP_ADDRESSES  subHandle;
     INT32           index;
 
     /*    Check params    */
@@ -1281,7 +1321,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     /*    Check params    */
     if (comId == 0 ||
         maxDataSize > MAX_PD_PACKET_SIZE ||
-        timeout < TIMER_GRANULARITY)
+        (timeout != 0 && timeout < TIMER_GRANULARITY))
     {
         return TRDP_PARAM_ERR;
     }
@@ -1290,6 +1330,21 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
     {
         return TRDP_NOINIT_ERR;
+    }
+
+    /*  Create an addressing item   */
+
+    subHandle.comId = comId;
+    subHandle.srcIpAddr = srcIpAddr1;
+    subHandle.destIpAddr = destIpAddr;
+
+    if (vos_isMulticast(destIpAddr))
+    {
+        subHandle.mcGroup = destIpAddr;
+    }
+    else
+    {
+        subHandle.mcGroup = 0;
     }
 
     /*    Get the current time    */
@@ -1307,7 +1362,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
         ret = trdp_requestSocket(appHandle->iface,
                                  &appHandle->pdDefault.sendParam,
-                                 destIpAddr,
+                                 (destIpAddr == 0)? appHandle->realIP : destIpAddr,
                                  TRDP_SOCK_PD,
                                  appHandle->option,
                                  &index);
@@ -1349,7 +1404,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                 newPD->userRef          = pUserRef;
                 newPD->socketIdx        = index;
 
-                if (toBehavior & TRDP_PULL_SUB)
+                if (timeout == 0)
                 {
                     vos_clearTime(&newPD->timeToGo);
                 }
@@ -1486,7 +1541,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         /*    Check the supplied buffer size    */
         if (pElement->dataSize > *pDataSize)
         {
-            ret = TRDP_PARAM_ERR;
+            return TRDP_PARAM_ERR;
         }
 
         /*    Call the receive function if we are in non blocking mode    */
@@ -1526,7 +1581,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         }
     }
 
-    if (pPdInfo != NULL)
+    if (pPdInfo != NULL && pElement != NULL)
     {
         pPdInfo->comId          = pElement->addr.comId;
         pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
