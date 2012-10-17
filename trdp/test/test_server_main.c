@@ -303,7 +303,7 @@ int main (int argc, char * *argv)
         }
         else
         {
-            printf("looping...\n");
+            //printf("."); fflush(stdout);
         }
         
         /*  Advance counter */
