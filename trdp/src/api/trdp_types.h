@@ -28,7 +28,7 @@
 
 #include "vos_types.h"
 #include "vos_mem.h"
-#include "vos_sock.h"
+//#include "vos_sock.h"
 
 #ifdef __cplusplus
 extern "C" {

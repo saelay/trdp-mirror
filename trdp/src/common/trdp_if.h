@@ -46,6 +46,15 @@ extern "C" {
  */
 
 /**********************************************************************************************************************/
+/** Get current topocount
+ *
+ *    This value is used for validating outgoing and incoming packets only!
+ *
+ *  @retval      topoCount            Current topoCount value
+ */
+UINT32 trdp_getTopoCount (void);
+    
+/**********************************************************************************************************************/
 /** Check if the session handle is valid
  *
  *

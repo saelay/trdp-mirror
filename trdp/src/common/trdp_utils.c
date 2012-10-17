@@ -107,7 +107,7 @@ PD_ELE_T *trdp_queueFindComId (
 }
 
 /******************************************************************************/
-/** Return the element with same comId
+/** Return the element with same comId and IP addresses
  *
  *  @param[in]      pHead           pointer to head of queue
  *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
@@ -127,12 +127,12 @@ PD_ELE_T *trdp_queueFindAddr (
 
     for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        /*  We match if src/dst address is zero or found */
+        /*  We match if src/dst/mc address is zero or matches */
         if (iterPD->addr.comId == addr->comId &&
-            (addr->srcIpAddr == 0 || iterPD->addr.srcIpAddr ==
-             addr->srcIpAddr) &&
-            (addr->destIpAddr == 0 || iterPD->addr.destIpAddr ==
-             addr->destIpAddr))
+            (addr->srcIpAddr == 0 || iterPD->addr.srcIpAddr == addr->srcIpAddr) &&
+            (addr->destIpAddr == 0 || iterPD->addr.destIpAddr == addr->destIpAddr) &&
+            (addr->mcGroup == 0 || iterPD->addr.mcGroup == addr->mcGroup)
+           )
         {
             return iterPD;
         }
@@ -309,12 +309,11 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
 
-        sock_options.qos    = params->qos;
-        sock_options.ttl    = params->ttl;
+        sock_options.qos            = params->qos;
+        sock_options.ttl            = params->ttl;
         sock_options.ttl_multicast  = VOS_TTL_MULTICAST;
         sock_options.reuseAddrPort  = TRUE;
-        sock_options.nonBlocking    =
-            (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
+        sock_options.nonBlocking    = (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
 
         switch (usage)
         {
@@ -331,8 +330,8 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     iface[index].usage = 1;
                     *pIndex = index;
+                    vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
                 }
-
                 break;
             case TRDP_SOCK_MD_TCP:
                 if (vos_sockOpenTCP(&iface[index].sock,
@@ -453,8 +452,8 @@ UINT32  trdp_getSeqCnt (
     return 0;   /*	Not found, initial value is zero	*/
 }
 
-/******************************************************************************/
-/** Check the sequence counter for the comID/message type and subnet (source IP)
+/**********************************************************************************************************************/
+/** Check if the sequence counter for the comID/message type and subnet (source IP)
  *  has already been received.
  *
  *	Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,

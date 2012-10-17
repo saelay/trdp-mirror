@@ -28,7 +28,10 @@
 #include "trdp_types.h"
 #include "trdp_utils.h"
 #include "trdp_pdcom.h"
+#include "trdp_if.h"
+#include "trdp_stats.h"
 #include "vos_sock.h"
+#include "vos_mem.h"
 
 /*******************************************************************************
  * DEFINES
@@ -44,7 +47,6 @@
  *   Locals
  */
 
-static TRDP_PD_STATS_T sPDComStats;
 
 /******************************************************************************/
 /** Initialize/construct the packet
@@ -95,8 +97,6 @@ TRDP_ERR_T trdp_pdPut (
     UINT32          dataSize)
 {
     TRDP_ERR_T  ret   = TRDP_NO_ERR;
-    UINT32      myCRC = vos_crc32(0L, NULL, 0);
-    UINT8       *pDest = pPacket->data + dataSize;
 
     if (pPacket == NULL || pData == NULL || dataSize == 0)
     {
@@ -112,8 +112,28 @@ TRDP_ERR_T trdp_pdPut (
         ret = marshall(refCon, pPacket->addr.comId, pData, pPacket->data, &dataSize);
     }
 
+    if (TRDP_NO_ERR == ret)
+    {
+        trdp_pdDataUpdate(pPacket);
+        /*  Update some statistics  */
+        pPacket->updPkts++;
+
+    }
+    return ret;
+}
+
+/******************************************************************************/
+/** Add padding and update data CRC
+ *  
+ */
+void trdp_pdDataUpdate (
+    PD_ELE_T        *pPacket)
+{
+    UINT32      myCRC = vos_crc32(0L, NULL, 0);
+    UINT8       *pDest = pPacket->data + pPacket->dataSize;
+
     /*  Pad with zero bytes */
-    UINT32 padding = 4 - (dataSize & 0x3);
+    UINT32 padding = 4 - (pPacket->dataSize & 0x3);
     if (padding < 4)
     {
         while (padding--)
@@ -123,14 +143,8 @@ TRDP_ERR_T trdp_pdPut (
     }
     
     /*  Compute data checksum   */
-    if (TRDP_NO_ERR == ret)
-    {
-        /* Compute CRC32   */
-        myCRC   = vos_crc32(myCRC, (UINT8 *)&pPacket->data, dataSize);
-        *(UINT32*)pDest    = MAKE_LE(myCRC);
-        
-    }
-    return ret;
+    myCRC   = vos_crc32(myCRC, (UINT8 *)&pPacket->data, pPacket->dataSize);
+    *(UINT32*)pDest    = MAKE_LE(myCRC);
 }
 
 /******************************************************************************/
@@ -148,6 +162,9 @@ TRDP_ERR_T trdp_pdGet (
     {
         return TRDP_PARAM_ERR;
     }
+
+    /*  Update some statistics  */
+    pPacket->updPkts++;
 
     if (unmarshall == NULL)
     {
@@ -198,6 +215,10 @@ TRDP_ERR_T  trdp_pdSendQueued (
             {
                 /* We pass the error to the application, but we keep on going    */
                 err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD);
+                if (err == TRDP_NO_ERR)
+                {
+                    appHandle->stats.pd.numSend++;
+                }
             }
             
             /* Reset "immediate" flag for request or requested packet */
@@ -277,15 +298,28 @@ TRDP_ERR_T  trdp_pdReceive (
 
     /*	Is packet sane?	*/
     err = trdp_pdCheck(&pNewElement->frameHead, recSize);
-    if (err != TRDP_NO_ERR)
+    
+    /*  Update statistics   */
+    switch (err)
     {
-        return err;
+        case TRDP_NO_ERR:
+            appHandle->stats.pd.numRcv++;
+            break;
+        case TRDP_CRC_ERR:
+            appHandle->stats.pd.numCrcErr++;
+            return err;
+        case TRDP_WIRE_ERR:
+            appHandle->stats.pd.numProtErr++;
+            return err;
+        default:
+            return err;
     }
 
     /*	Check topocount	*/
     if (vos_ntohl(pNewElement->frameHead.topoCount) &&
         vos_ntohl(pNewElement->frameHead.topoCount) != appHandle->topoCount)
     {
+        appHandle->stats.pd.numTopoErr++;
         vos_printf(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
                    vos_ntohl(pNewElement->frameHead.comId),
                    vos_ntohl(pNewElement->frameHead.topoCount));
@@ -301,6 +335,28 @@ TRDP_ERR_T  trdp_pdReceive (
                          vos_ntohs(pNewElement->frameHead.msgType), subHandle.srcIpAddr))
     {
         vos_printf(VOS_LOG_INFO, "Redundant PD data ignored (comId %u)\n", vos_ntohl(pNewElement->frameHead.comId));
+        return TRDP_NO_ERR;
+    }
+
+    /*  Handle statistics request  */
+    if (vos_ntohl(pNewElement->frameHead.comId) == GSTAT_REQUEST_COMID)
+    {
+        pNewElement->addr.comId = GSTAT_REPLY_COMID;
+        pNewElement->addr.destIpAddr = vos_ntohl(pNewElement->frameHead.replyIpAddress);
+
+        trdp_pdInit (pNewElement, TRDP_MSG_PD, appHandle->topoCount, 0, 0, 0, 0);
+ 
+        trdp_pdPrepareStats(appHandle, pNewElement);
+
+        /*  Update the sequence counter and re-compute CRC    */
+        trdp_pdUpdate(pNewElement);
+        
+        /*    Send the statistics packet    */
+        err = trdp_pdSend(sock, pNewElement);
+        if (err == TRDP_NO_ERR)
+        {
+            appHandle->stats.pd.numSend++;
+        }
         return TRDP_NO_ERR;
     }
 
@@ -363,6 +419,10 @@ TRDP_ERR_T  trdp_pdReceive (
         /*	Get the current time and compute the next time this packet should be received.	*/
         vos_getTime(&pExistingElement->timeToGo);
         vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
+        
+        /*  Update some statistics  */
+        pExistingElement->numRxTx++;
+        pExistingElement->lastErr = TRDP_NO_ERR;
 
         if (informUser)
         {
@@ -472,7 +532,6 @@ TRDP_ERR_T trdp_pdCheck (
     if (packetSize < MIN_PD_HEADER_SIZE ||
         packetSize > MAX_PD_PACKET_SIZE)
     {
-        sPDComStats.headerInFrameErr++;
         vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", (UINT32) packetSize);
         err = TRDP_WIRE_ERR;
     }
@@ -483,7 +542,6 @@ TRDP_ERR_T trdp_pdCheck (
     
     if (pPacket->frameCheckSum != MAKE_LE(myCRC))
     {
-        sPDComStats.headerInCRCErr++;
         vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
         err = TRDP_CRC_ERR;
     }
@@ -491,7 +549,6 @@ TRDP_ERR_T trdp_pdCheck (
     /*	Check protocol version	*/
     else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (IP_PD_PROTO_VER & 0xFF000000))
     {
-        sPDComStats.headerInProtoErr++;
         vos_printf(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
                    vos_ntohs(pPacket->protocolVersion),
                    IP_PD_PROTO_VER);
@@ -503,7 +560,6 @@ TRDP_ERR_T trdp_pdCheck (
              vos_ntohs(pPacket->msgType) != TRDP_MSG_PR ||
              vos_ntohs(pPacket->msgType) != TRDP_MSG_PE)
     {
-        sPDComStats.headerInFrameErr++;
         vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
         err = TRDP_WIRE_ERR;
     }
@@ -515,8 +571,7 @@ TRDP_ERR_T trdp_pdCheck (
 
         if (*pDataFCS != MAKE_LE(myCRC))
         {
-            sPDComStats.headerInCRCErr++;
-            vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
+            vos_printf(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
             err = TRDP_CRC_ERR;
         }
     }
@@ -560,10 +615,6 @@ TRDP_ERR_T  trdp_pdSend (
     {
         vos_printf(VOS_LOG_ERROR, "trdp_pdSend failed\n");
         return TRDP_IO_ERR;
-    }
-    else
-    {
-        sPDComStats.headerOutPackets++;
     }
     return TRDP_NO_ERR;
 }
