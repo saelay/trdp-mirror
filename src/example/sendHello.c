@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-/* #include <sys/time.h> */
 #include <sys/select.h>
 
 #include "trdp_if_light.h"

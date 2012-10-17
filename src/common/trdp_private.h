@@ -28,6 +28,7 @@
 
 #include "trdp_types.h"
 #include "vos_thread.h"
+#include "vos_sock.h"
 
 
 /***********************************************************************************************************************
@@ -50,7 +51,38 @@
 #define IP_PD_PROTO_VER             0x0100      /**< Protocol version           */
 #define IP_MD_PROTO_VER             0x0100
 
-#define ECHO_COMID                  110         /**< comid used for echo        */
+#define ECHO_COMID                  10          /**< MD comid used for echo                                         */
+#define GSTAT_REQUEST_COMID         11          /**< PD pull/MD request telegram to retrieve TRDP global statistics */
+#define GSTAT_REPLY_COMID           12          /**< PD pull/MD reply telegram with TRDP global statistics          */
+#define DSTAT_REQUEST_COMID         13          /**< MD request telegram to retrieve TRDP detailed statistics       */
+#define DSTAT_REPLY_COMID           14          /**< MD reply telegram with TRDP detailed statistics                */
+
+/* more reserved comIds:
+
+            100	PD push Inauguration state and topo count telegram
+            101	PD pull request telegram to retrieve dynamic train configuration information
+            102	PD pull reply telegram with dynamic train configuration information
+            103	MD request telegram to retrieve static consist and car information
+            104	MD reply telegram with static consist and car information
+            105	MD request telegram to retrieve device information for a given consist/car/device
+            106	MD reply telegram with device information for a given consist/car/device
+            107	MD request telegram to retrieve consist and car properties for a given consist/car
+            108	MD reply telegram with consist and car properties for a given consist/car
+            109	MD request telegram to retrieve device properties for a given consist/car/device
+            110	MD reply telegram with device properties for a given consist/car/device
+            111	MD request telegram for manual insertion of a given consist/car
+            112	MD reply telegram for manual insertion of a given consist/car
+
+            120..129	IPTSwitch Control&Monitoring Interface
+            125	MD Data (Version) Request Telegram
+            126	MD Counter Telegram
+            127	MD Dynamic Configuration Telegram
+            128	MD Dynamic Configuration Telegram Response
+            129	PD Dynamic Configuration Telegram (redundant TS to TS IPC)
+
+            400..415 	SDTv2 validation test
+*/
+
 #define TIMER_GRANULARITY           10000       /**< granularity in us          */
 
 #define MD_DEFAULT_REPLY_TIMEOUT    10000000    /**< default reply time out 10s    */
@@ -160,6 +192,9 @@ typedef struct PD_ELE
     TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber                     */
     TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip   */
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter         */
+    UINT32              numRxTx;                /**< Counter for received packets (statistics)          */
+    UINT32              updPkts;                /**< Counter for updated packets (statistics)           */
+    TRDP_ERR_T          lastErr;                /**< Last error (timeout)                               */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                      */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                              */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
@@ -216,27 +251,5 @@ typedef struct TRDP_SESSION
     TRDP_STATISTICS_T       stats;      /**< statistics of this session                   */
 } TRDP_SESSION_T, *TRDP_SESSION_PT;
 
-/** Process data statistics */
-typedef struct TRDP_PD_STATISTICS
-{
-    UINT32  headerInPackets;            /**< Incoming packets                 */
-    UINT32  headerInCRCErr;             /**< Incoming CRC errors              */
-    UINT32  headerInProtoErr;           /**< Incoming protocol errors         */
-    UINT32  headerInTimeOuts;           /**< Incoming timing errors           */
-    UINT32  headerInFrameErr;           /**< Incoming timing errors           */
-    UINT32  headerOutPackets;           /**< Outgoing packets                 */
-} TRDP_PD_STATS_T;
-
-/** Message data statistics */
-typedef struct TRDP_MD_STATISTICS
-{
-    UINT32  headerInPackets;            /**< Incoming packets                 */
-    UINT32  headerInCRCErr;             /**< Incoming CRC errors              */
-    UINT32  headerInProtoErr;           /**< Incoming protocol errors         */
-    UINT32  headerInTimeOuts;           /**< Incoming timing errors           */
-    UINT32  headerInFrameErr;           /**< Incoming timing errors           */
-    UINT32  headerOutPackets;           /**< Outgoing packets                 */
-    UINT32  headerAckErr;               /**< Missing acknowledge              */
-} TRDP_MD_STATS_T;
 
 #endif

@@ -677,15 +677,15 @@ EXT_DECL TRDP_ERR_T tlm_reply (
  *  Send a MD reply message after receiving a request and ask for confirmation.
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pUserRef			user supplied value returned with reply
- *  @param[in]      pSessionId			Session ID returned by indication
- *  @param[in]      topoCount			topocount to use
- *  @param[in]      comId				comId of packet to be sent
- *  @param[in]      srcIpAddr			own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      destIpAddr			where to send the packet to
- *  @param[in]      pktFlags			optional marshalling
- *  @param[in]      userStatus			Info for requester about application errors
- *  @param[in]      confirmTimeout		timeout for confirmation
+ *  @param[in]      pUserRef            user supplied value returned with reply
+ *  @param[in]      pSessionId          Session ID returned by indication
+ *  @param[in]      topoCount           topocount to use
+ *  @param[in]      comId               comId of packet to be sent
+ *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr          where to send the packet to
+ *  @param[in]      pktFlags            optional marshalling
+ *  @param[in]      userStatus          Info for requester about application errors
+ *  @param[in]      confirmTimeout      timeout for confirmation
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -694,9 +694,9 @@ EXT_DECL TRDP_ERR_T tlm_reply (
  *
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR		out of memory
- *  @retval         TRDP_NO_SESSION_ERR	no such session
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NO_SESSION_ERR no such session
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlm_replyQuery (
     TRDP_APP_SESSION_T      appHandle,
@@ -721,21 +721,21 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
  *  Send a MD error reply message after receiving an request
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pSessionId			Session ID returned by indication
- *  @param[in]      topoCount			topocount to use
- *  @param[in]      comId				comId of packet to be sent
- *  @param[in]      srcIpAddr			own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      destIpAddr			where to send the packet to
- *  @param[in]      replyState			Info for requester about stack errors
+ *  @param[in]      pSessionId          Session ID returned by indication
+ *  @param[in]      topoCount           topocount to use
+ *  @param[in]      comId               comId of packet to be sent
+ *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr          where to send the packet to
+ *  @param[in]      replyState          Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      srcURI              only user part of source URI
  *  @param[in]      destURI             only user part of destination URI
  *
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR		out of memory
- *  @retval         TRDP_NO_SESSION_ERR	no such session
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NO_SESSION_ERR no such session
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlm_replyErr (
     TRDP_APP_SESSION_T      appHandle,
@@ -772,17 +772,17 @@ EXT_DECL const CHAR8 *tlc_getVersion (
 
 /**********************************************************************************************************************/
 /** Return statistics.
- *  Memory for statistics information will be reserved by tlc layer and needs to be freed by the user.
+ *  Memory for statistics information must be preserved by the user.
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     ppStatistics        Statistics for this application session
+ *  @param[out]     pStatistics         Pointer to statistics for this application session
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
 EXT_DECL TRDP_ERR_T tlc_getStatistics (
     TRDP_APP_SESSION_T  appHandle,
-    TRDP_STATISTICS_T   * *ppStatistics);
+    TRDP_STATISTICS_T   *pStatistics);
 
 
 /**********************************************************************************************************************/
@@ -791,15 +791,15 @@ EXT_DECL TRDP_ERR_T tlc_getStatistics (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     pNumSubs            Pointer to the number of subscriptions
- *  @param[out]     ppStatistics         Pointer to a list with the subscription statistics information
+ *  @param[out]     ppStatistics        Pointer to a list with the subscription statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
 EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumSubs,
-    TRDP_SUBS_STATISTICS_T  * *ppStatistics);
+    TRDP_SUBS_STATISTICS_T  *pStatistics);
 
 
 /**********************************************************************************************************************/
@@ -810,13 +810,13 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
  *  @param[out]     pNumPub             Pointer to the number of publishers
  *  @param[out]     ppStatistics        Pointer to a list with the publish statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
 EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumPub,
-    TRDP_PUB_STATISTICS_T   * *ppStatistics);
+    TRDP_PUB_STATISTICS_T   *pStatistics);
 
 
 /**********************************************************************************************************************/
@@ -833,7 +833,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
 EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumList,
-    TRDP_LIST_STATISTICS_T  * *ppStatistics);
+    TRDP_LIST_STATISTICS_T  *pStatistics);
 
 
 /**********************************************************************************************************************/
@@ -850,7 +850,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
 EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumRed,
-    TRDP_RED_STATISTICS_T   * *ppStatistics);
+    TRDP_RED_STATISTICS_T   *pStatistics);
 
 
 /**********************************************************************************************************************/
@@ -867,7 +867,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
 EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
     TRDP_APP_SESSION_T  appHandle,
     UINT16              *pNumJoin,
-    UINT32              * *ppIpAddr);
+    UINT32              *pIpAddr);
 
 
 /**********************************************************************************************************************/

@@ -27,6 +27,7 @@
  * INCLUDES
  */
 
+#include "trdp_if_light.h"
 #include "trdp_private.h"
 #include "vos_utils.h"
 
@@ -39,9 +40,13 @@
  * TYPEDEFS
  */
 
+
 /*******************************************************************************
  * GLOBAL FUNCTIONS
  */
+
+void    trdp_initStats(TRDP_APP_SESSION_T appHandle);
+void    trdp_pdPrepareStats (TRDP_APP_SESSION_T appHandle, PD_ELE_T *pPacket);
 
 
 #endif

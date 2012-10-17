@@ -45,7 +45,6 @@ extern "C" {
 #define __cdecl
 #endif
 
-#define VOS_MEM_NBLOCKSIZES         15  /*<< Number of different sizes of memory allocation blocks */
 #define VOS_MEM_MAX_PREALLOCATE     10  /*<< Max blocks to pre-allocate */
 
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
@@ -82,7 +81,8 @@ typedef enum
     TRDP_MEM_BLK_65536,
     TRDP_MEM_BLK_131072,
     TRDP_MEM_BLK_262144,
-    TRDP_MEM_BLK_524288
+    TRDP_MEM_BLK_524288,
+    VOS_MEM_NBLOCKSIZES         /*<< Total number of different sizes of memory allocation blocks */
 } VOS_MEM_BLK_T;
 
 /***********************************************************************************************************************
@@ -152,19 +152,28 @@ EXT_DECL VOS_ERR_T vos_memFree (
 /**********************************************************************************************************************/
 /** Return used and available memory (of memory area above).
  *
- *  @param[out]     pAllocatedMemory	Pointer to allocated memory size
- *  @param[out]     pFreeMemory			Pointer to free memory size
- *  @param[out]     pFragMem			Pointer to list of used memoryblocks
- *  @retval         VOS_NO_ERR			no error
- *  @retval         VOS_INIT_ERR	    module not initialised
- *  @retval         VOS_PARAM_ERR		parameter out of range/invalid
+ *  @param[out]     pAllocatedMemory    Pointer to allocated memory size
+ *  @param[out]     pFreeMemory         Pointer to free memory size
+ *  @param[out]     pMinFree            Pointer to minimal free memory size in statistics interval
+ *  @param[out]     pNumAllocBlocks     Pointer to number of allocated memory blocks
+ *  @param[out]     pNumAllocErr        Pointer to number of allocation errors
+ *  @param[out]     pNumFreeErr         Pointer to number of free errors
+ *  @param[out]     allocBlockSize      Pointer to list of allocated memory blocks
+ *  @param[out]     usedBlockSize       Pointer to list of used memoryblocks
+ *  @retval         VOS_NO_ERR          no error
+ *  @retval         VOS_INIT_ERR        module not initialised
+ *  @retval         VOS_PARAM_ERR       parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_memCount(
-    UINT32  * pAllocatedMemory,
-    UINT32  * pFreeMemory,
-    UINT32  * pFragMem[VOS_MEM_NBLOCKSIZES]);
-
+    UINT32  *pAllocatedMemory,
+    UINT32  *pFreeMemory,
+    UINT32  *pMinFree, 
+    UINT32  *pNumAllocBlocks,
+    UINT32  *pNumAllocErr,
+    UINT32  *pNumFreeErr,
+    UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES],
+    UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES]);
 
 /**********************************************************************************************************************/
 /*	Queues																										      */

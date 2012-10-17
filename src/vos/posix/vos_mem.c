@@ -462,22 +462,39 @@ EXT_DECL VOS_ERR_T vos_memFree (
 /**********************************************************************************************************************/
 /** Return used and available memory (of memory area above).
  *
- *  @param[out]     pAllocatedMemory       Pointer to allocated memory size
- *  @param[out]     pFreeMemory            Pointer to free memory size
- *  @param[out]     pFragMem               Pointer to list of used memoryblocks
- *  @retval         VOS_NO_ERR             no error
- *  @retval         VOS_INIT_ERR           module not initialised
- *  @retval         VOS_PARAM_ERR          parameter out of range/invalid
+ *  @param[out]     pAllocatedMemory    Pointer to allocated memory size
+ *  @param[out]     pFreeMemory         Pointer to free memory size
+ *  @param[out]     pMinFree            Pointer to minimal free memory size in statistics interval
+ *  @param[out]     pNumAllocBlocks     Pointer to number of allocated memory blocks
+ *  @param[out]     pNumAllocErr        Pointer to number of allocation errors
+ *  @param[out]     pNumFreeErr         Pointer to number of free errors
+ *  @param[out]     allocBlockSize      Pointer to list of allocated memory blocks
+ *  @param[out]     usedBlockSize       Pointer to list of used memoryblocks
+ *  @retval         VOS_NO_ERR          no error
+ *  @retval         VOS_INIT_ERR        module not initialised
+ *  @retval         VOS_PARAM_ERR       parameter out of range/invalid
  */
 
-EXT_DECL VOS_ERR_T vos_memCount (
+EXT_DECL VOS_ERR_T vos_memCount(
     UINT32  *pAllocatedMemory,
     UINT32  *pFreeMemory,
-    UINT32  *pFragMem[VOS_MEM_NBLOCKSIZES])
+    UINT32  *pMinFree,
+    UINT32  *pNumAllocBlocks,
+    UINT32  *pNumAllocErr,
+    UINT32  *pNumFreeErr,
+    UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES],
+    UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES])
 {
+    int i;
     /* TBD: This code is not working, use heap memory allocation */
     vos_printf(VOS_LOG_ERROR,
                "vos_memCount not implemented\n");
+    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    {
+        allocBlockSize[i] = 0;
+        usedBlockSize[i] = 0;
+    }
+
     return VOS_INIT_ERR;
 }
 
