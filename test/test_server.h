@@ -28,8 +28,8 @@
 /**********************************************************************************************************************/
 
 #define PD_TEST1_UNI_COMID      20001
-#define PD_TEST1_UNI_CYCLE      100000
-#define PD_TEST1_UNI_TIMEOUT    500000
+#define PD_TEST1_UNI_CYCLE      10000000
+#define PD_TEST1_UNI_TIMEOUT    5 * PD_TEST1_UNI_CYCLE
 #define PD_TEST1_UNI_DST_IP     PD_TESTCLIENT_IP
 #define PD_TEST1_UNI_SRC_IP     PD_TESTSERVER_IP
 
@@ -76,8 +76,8 @@ struct myDataSet20001
 /* PD multicast Test2                                                                                                 */
 /**********************************************************************************************************************/
 #define PD_TEST2_MC_COMID      20002
-#define PD_TEST2_MC_CYCLE      10000
-#define PD_TEST2_MC_TIMEOUT    30000
+#define PD_TEST2_MC_CYCLE      5000000
+#define PD_TEST2_MC_TIMEOUT    3 * PD_TEST2_MC_CYCLE
 #define PD_TEST2_MC_DST_IP     PD_TESTMULTICAST_IP
 #define PD_TEST2_MC_SRC_IP     PD_TESTSERVER_IP
 
@@ -105,8 +105,8 @@ struct myDataSet20002
 /**********************************************************************************************************************/
 /* Receive and Send as echo:	*/
 #define PD_TEST3_UNI_COMID      20003
-#define PD_TEST3_UNI_CYCLE      10000
-#define PD_TEST3_UNI_TIMEOUT    30000
+#define PD_TEST3_UNI_CYCLE      1000000
+#define PD_TEST3_UNI_TIMEOUT    30 * PD_TEST3_UNI_CYCLE
 #define PD_TEST3_UNI_DST_IP     PD_TESTSERVER_IP
 #define PD_TEST3_UNI_SRC_IP     PD_TESTCLIENT_IP
 
