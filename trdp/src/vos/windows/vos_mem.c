@@ -93,9 +93,9 @@ typedef struct
     UINT32  queuReadErrCnt;      /* No of queue read errors */
 } VOS_STATISTIC;
 
-struct VOS_QUEUE_T
+struct VOS_QUEUE
 {
-    struct VOS_QUEUE_T  *pNext;
+    struct VOS_QUEUE    *pNext;
     void                *pData;
     size_t              size;
 };
