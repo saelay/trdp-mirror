@@ -49,6 +49,7 @@ extern "C" {
 typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
 typedef struct TRDP_HANDLE *TRDP_PUB_T;
 typedef struct TRDP_HANDLE *TRDP_SUB_T;
+typedef struct TRDP_HANDLE *TRDP_LIS_T;
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -605,7 +606,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
  */
 EXT_DECL TRDP_ERR_T tlm_addListener (
     TRDP_APP_SESSION_T      appHandle,
-    UINT32                  *pListenHandle,
+    TRDP_LIS_T           	*pListenHandle,
     const void              *pUserRef,
     UINT32                  comId, /* muliple ComID handled in layer above  */
     UINT32                  topoCount,
@@ -787,14 +788,16 @@ EXT_DECL TRDP_ERR_T tlc_getStatistics (
 
 /**********************************************************************************************************************/
 /** Return PD subscription statistics.
- *  Memory for statistics information will be reserved by tlc layer and needs to be freed by the user.
+ *  Memory for statistics information must be provided by the user.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pNumSubs            Pointer to the number of subscriptions
- *  @param[out]     ppStatistics        Pointer to a list with the subscription statistics information
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in,out]  pNumSubs            In: The number of subscriptions requested
+ *                                      Out: Number of subscriptions returned
+ *  @param[in,out]  pStatistics         Pointer to an array with the subscription statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -804,14 +807,15 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
 
 /**********************************************************************************************************************/
 /** Return PD publish statistics.
- *  Memory for statistics information will be reserved by tlc layer and needs to be freed by the user.
+ *  Memory for statistics information must be provided by the user.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pNumPub             Pointer to the number of publishers
- *  @param[out]     ppStatistics        Pointer to a list with the publish statistics information
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in,out]  pNumPub             Pointer to the number of publishers
+ *  @param[out]     pStatistics         Pointer to a list with the publish statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -821,66 +825,65 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
 
 /**********************************************************************************************************************/
 /** Return MD listener statistics.
- *  Memory for statistics information will be reserved by tlc layer and needs to be freed by the user.
+ *  Memory for statistics information must be provided by the user.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pNumList            Pointer to the number of listeners
- *  @param[out]     ppStatistics        Pointer to a list with the listener statistics information
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in,out]  pNumList            Pointer to the number of listeners
+ *  @param[out]     pStatistics         Pointer to a list with the listener statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumList,
     TRDP_LIST_STATISTICS_T  *pStatistics);
 
-
 /**********************************************************************************************************************/
 /** Return redundancy group statistics.
- *  Memory for statistics information will be reserved by tlc layer and needs to be freed by the user.
+ *  Memory for statistics information must be provided by the user.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pNumRed             Pointer to the number of redundancy groups
- *  @param[out]     ppStatistics        Pointer to a list with the redundancy group information
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in,out]  pNumRed             Pointer to the number of redundancy groups
+ *  @param[out]     pStatistics         Pointer to a list with the redundancy group information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumRed,
     TRDP_RED_STATISTICS_T   *pStatistics);
 
-
 /**********************************************************************************************************************/
 /** Return join statistics.
- *  Memory for statistics information will be reserved by tlc layer and needs to be freed by the user.
+ *  Memory for statistics information must be provided by the user.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pNumJoin            Pointer to the number of joined IP Adresses
- *  @param[out]     ppIpAddr            Pointer to a list with the joined IP adresses
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in,out]  pNumJoin            Pointer to the number of joined IP Adresses
+ *  @param[out]     pIpAddr             Pointer to a list with the joined IP adresses
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_NODATA_ERR     there are more items than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
     TRDP_APP_SESSION_T  appHandle,
     UINT16              *pNumJoin,
     UINT32              *pIpAddr);
 
-
 /**********************************************************************************************************************/
 /** Reset statistics.
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
 EXT_DECL TRDP_ERR_T tlc_resetStatistics (
     TRDP_APP_SESSION_T appHandle);
-
 
 /* tbd */
 
