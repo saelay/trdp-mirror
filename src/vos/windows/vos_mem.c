@@ -690,7 +690,7 @@ EXT_DECL void vos_qsort (
  *										return -n if arg1 < arg2,
  *										return 0  if arg1 == arg2,
  *										return +n if arg1 > arg2
- *									where n is an integer != 0
+ *									    where n is an integer != 0
  *  @retval         Pointer to found element or NULL
  */
 

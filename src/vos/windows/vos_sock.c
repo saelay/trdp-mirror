@@ -112,11 +112,11 @@ EXT_DECL BOOL vos_isMulticast (
 /**********************************************************************************************************************/
 /** Convert IP address.
  *
- *  @param[in]          ipAddress   IP address as dotted decimal.
+ *  @param[in]          pDottedIP   IP address as dotted decimal.
  *  @retval             address in UINT32 in host endianess
  */
 EXT_DECL UINT32 vos_dottedIP (
-                              const CHAR8 *pDottedIP)
+	const CHAR8 *pDottedIP)
 {
     return vos_ntohl(inet_addr(pDottedIP));
 }
@@ -129,11 +129,11 @@ EXT_DECL UINT32 vos_dottedIP (
  */
 
 EXT_DECL const CHAR8 *vos_ipDotted (
-                                    UINT32 IPaddress)
+	 UINT32 ipAddress)
 {
     static CHAR8   dotted[16];
-    sprintf(dotted, "%u.%u.%u.%u", IPaddress >> 24, (IPaddress >> 16) & 0xFF ,
-            (IPaddress >> 8) & 0xFF, IPaddress & 0xFF);
+    sprintf(dotted, "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF ,
+            (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
     return dotted;
 }
 

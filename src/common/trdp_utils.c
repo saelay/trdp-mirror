@@ -402,7 +402,7 @@ TRDP_ERR_T  trdp_releaseSocket (
  *	Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
  *		  but shall be the same for redundant telegrams (subnet/srcIP).
  *
- *  @param[in]      comID			comID to look for
+ *  @param[in]      comId			comID to look for
  *	@param[in]		msgType			PD/MD type
  *  @param[in]      srcIpAddr		Source IP address
  *
@@ -460,7 +460,7 @@ UINT32  trdp_getSeqCnt (
  *		  but shall be the same for redundant telegrams (subnet/srcIP).
  *
  *  @param[in]      seqCnt			sequence counter received
- *  @param[in]      comID			comID to look for
+ *  @param[in]      comId			comID to look for
  *	@param[in]		msgType			PD/MD type
  *  @param[in]      srcIP			Source IP address
  *
