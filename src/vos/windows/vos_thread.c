@@ -52,7 +52,7 @@ UINT16    uuidCycle = 0;
 BOOL      vosTreadInitialised = FALSE;
 pthread_t threadHandle[VOS_MAX_THREAD_CNT];
 
-struct VOS_MUTEX_T
+struct VOS_MUTEX
 {
     UINT32          magicNo;
     pthread_mutex_t mutexId;

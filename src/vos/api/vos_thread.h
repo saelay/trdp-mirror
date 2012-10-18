@@ -109,10 +109,10 @@ typedef enum
 } VOS_SEMA_STATE_T;
 
 /** Hidden mutex handle definition	*/
-typedef struct VOS_MUTEX_T *VOS_MUTEX_T;
+typedef struct VOS_MUTEX  *VOS_MUTEX_T;
 
 /** Hidden semaphore handle definition	*/
-typedef struct VOS_SEMA_T *VOS_SEMA_T;
+typedef struct VOS_SEMA   *VOS_SEMA_T;
 
 /** Hidden thread handle definition	*/
 typedef void *VOS_THREAD_T;
