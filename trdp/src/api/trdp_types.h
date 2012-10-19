@@ -604,6 +604,17 @@ typedef enum
     TRDP_OPTION_TRAFFIC_SHAPING = 0x02  /**< Use traffic shaping - distribute packet sending    */
 } TRDP_OPTION_T;
 
+/**********************************************************************************************************************/
+/** Various flags/general TRDP options for library initialization
+ */
+{
+    TRDP_LABEL_T  hostName;         /**< Host name  */
+    TRDP_LABEL_T  hostName;         /**< Leader name dependant on redundancy concept   */
+    UINT32        cycleTime;        /**< TRDP main process cycle time in us  */
+    UINT32        priority;         /**< TRDP main process cycle time (0-255, 0=default, 255=highest)   */
+    TRDP_OPTION_T options;          /**< TRDP options */
+}
+
 
 #ifdef __cplusplus
 }
