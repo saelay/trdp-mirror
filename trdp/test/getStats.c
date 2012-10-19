@@ -198,12 +198,14 @@ void myPDcallBack (
  */
 int main (int argc, char * *argv)
 {
-    TRDP_APP_SESSION_T  appHandle;  /*	Our identifier to the library instance	*/
-    TRDP_SUB_T          subHandle;  /*	Our identifier to the subscription	*/
-    TRDP_ERR_T          err;
-    TRDP_PD_CONFIG_T    pdConfiguration =
-    {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_APP_SESSION_T  	appHandle;  /*	Our identifier to the library instance	*/
+    TRDP_SUB_T          	subHandle;  /*	Our identifier to the subscription	*/
+    TRDP_ERR_T          	err;
+    TRDP_PD_CONFIG_T    	pdConfiguration = {myPDcallBack, NULL, {0, 0},
+                                        	TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_PROCESS_CONFIG_T	processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+
     int                 rv = 0;
     int                 ch;
     int                 ip[4];
@@ -215,8 +217,7 @@ int main (int argc, char * *argv)
         {
             case 't':
             {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
                 {
                     usage(argv[0]);
                     exit(1);
@@ -225,8 +226,7 @@ int main (int argc, char * *argv)
                 break;
             }
             case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n",
-                       argv[0], APP_VERSION, __DATE__, __TIME__);
+                printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
                 exit(0);
                 break;
             case 'h':
@@ -251,7 +251,7 @@ int main (int argc, char * *argv)
                  PD_OWN_IP, 0,                              /* use default IP addresses */
                  NULL,                              /* no Marshalling	*/
                  &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
-                 TRDP_OPTION_BLOCK) != TRDP_NO_ERR)
+                 &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;

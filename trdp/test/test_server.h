@@ -40,7 +40,7 @@ TRDP_DATASET_T gDataSet20001 =
     {
         {TRDP_INT8, 1}, {TRDP_INT16, 1}, {TRDP_INT32, 1}, {TRDP_INT64, 1},
         {TRDP_UINT8, 1}, {TRDP_UINT16, 1}, {TRDP_UINT32, 1}, {TRDP_UINT64, 1},
-        {TRDP_REAL32, 1}, {TRDP_REAL64, 1}, {TRDP_STRING, 1}
+        {TRDP_REAL32, 1}, {TRDP_REAL64, 1}, {TRDP_UINT8, 16}
     }
 };
 
@@ -67,7 +67,7 @@ struct myDataSet20001
     65535,
     0x12345678,
     0x1234567890123456,
-    0.12345,
+    0.12345678f,
     0.12345678,
     "Hello World"
 };
@@ -86,7 +86,7 @@ TRDP_DATASET_T gDataSet20002 =
 {
     PD_TEST2_MC_COMID, 0,  11,
     {
-        {TRDP_INT32, 1}, {TRDP_STRING, 1}
+        {TRDP_INT32, 1}, {TRDP_UINT8, 16}
     }
 };
 
@@ -115,7 +115,7 @@ TRDP_DATASET_T gDataSet20003 =
 {
     PD_TEST3_UNI_COMID, 0,  11,
     {
-        {TRDP_INT32, 1}, {TRDP_STRING, 1}
+        {TRDP_INT32, 1}, {TRDP_UINT8, 16}
     }
 };
 
