@@ -1,3 +1,7 @@
+The DLLs were exptracted from pthreads-w32-2-9-1-release.zip.
+This file was downloaded from http://sources.redhat.com/pthreads-win32/
+
+
 Here are DLLs, for a 32bit Windows installation.
 
 
