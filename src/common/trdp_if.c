@@ -199,7 +199,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     const TRDP_MARSHALL_CONFIG_T    *pMarshall,
     const TRDP_PD_CONFIG_T          *pPdDefault,
     const TRDP_MD_CONFIG_T          *pMdDefault,
-    const TRDP_PROCESS_CONFIG       *pProcessConfig)
+    const TRDP_PROCESS_CONFIG_T     *pProcessConfig)
 {
     TRDP_ERR_T      ret         = TRDP_NO_ERR;
     TRDP_SESSION_PT pSession    = NULL;
