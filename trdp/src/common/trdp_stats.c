@@ -112,7 +112,7 @@ EXT_DECL TRDP_ERR_T tlc_getStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR	    there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -149,7 +149,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     }
     if (index >= *pNumSubs && iter != NULL)
     {
-        err = TRDP_NODATA_ERR;
+        err = TRDP_MEM_ERR;
     }
     *pNumSubs = index;
     return err;
@@ -165,7 +165,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR     there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -204,7 +204,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     }
     if (index >= *pNumPub && iter != NULL)
     {
-        err = TRDP_NODATA_ERR;
+        err = TRDP_MEM_ERR;
     }
     *pNumPub = index;
     return err;
@@ -220,7 +220,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR     	there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -246,7 +246,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR     there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -272,7 +272,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more items than requested
+ *  @retval         TRDP_MEM_ERR        there are more items than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
     TRDP_APP_SESSION_T  appHandle,
@@ -301,7 +301,7 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 
     if (index >= *pNumJoin && iter != NULL)
     {
-        err = TRDP_NODATA_ERR;
+        err = TRDP_MEM_ERR;
     }
 
     *pNumJoin = index;
