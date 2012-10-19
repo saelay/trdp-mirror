@@ -91,7 +91,9 @@ EXT_DECL TRDP_ERR_T tlc_init (
  *  @param[in]      pMarshall           Pointer to marshalling configuration
  *  @param[in]      pPdDefault          Pointer to default PD configuration
  *  @param[in]      pMdDefault          Pointer to default MD configuration
- *  @param[in]      option              options for library behavior
+ *  @param[in]      pProcessConfig      Pointer to process configuration
+ *                                      only option parameter is used here to define session behavior
+ *                                      all other parameters are only used to feed statistics
  *
  *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_INIT_ERR          not yet inited
@@ -105,7 +107,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     const TRDP_MARSHALL_CONFIG_T    *pMarshall,
     const TRDP_PD_CONFIG_T          *pPdDefault,
     const TRDP_MD_CONFIG_T          *pMdDefault,
-    TRDP_OPTION_T                   option);
+    const TRDP_PROCESS_CONFIG_T     *pProcessConfig);
 
 /**********************************************************************************************************************/
 /** Re-Initialize.
@@ -789,15 +791,16 @@ EXT_DECL TRDP_ERR_T tlc_getStatistics (
 /**********************************************************************************************************************/
 /** Return PD subscription statistics.
  *  Memory for statistics information must be provided by the user.
+ * The reserved length is given via pNumSub implicitely.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumSubs            In: The number of subscriptions requested
  *                                      Out: Number of subscriptions returned
  *  @param[in,out]  pStatistics         Pointer to an array with the subscription statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR    handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -808,6 +811,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
 /**********************************************************************************************************************/
 /** Return PD publish statistics.
  *  Memory for statistics information must be provided by the user.
+ * The reserved length is given via pNumPub implicitely.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumPub             Pointer to the number of publishers
@@ -815,7 +819,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -826,6 +830,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
 /**********************************************************************************************************************/
 /** Return MD listener statistics.
  *  Memory for statistics information must be provided by the user.
+ * The reserved length is given via pNumLis implicitely.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumList            Pointer to the number of listeners
@@ -833,7 +838,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -843,6 +848,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
 /**********************************************************************************************************************/
 /** Return redundancy group statistics.
  *  Memory for statistics information must be provided by the user.
+ * The reserved length is given via pNumRed implicitely.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumRed             Pointer to the number of redundancy groups
@@ -850,7 +856,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -859,7 +865,8 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
 
 /**********************************************************************************************************************/
 /** Return join statistics.
- *  Memory for statistics information must be provided by the user.
+ *  Memory for statistics information must be provided by the user. must be provided by the user.
+ * The reserved length is given via pNumJoin implicitely.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumJoin            Pointer to the number of joined IP Adresses
@@ -867,7 +874,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
  *  @retval         TRDP_NO_ERR	        no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_NODATA_ERR     there are more items than requested
+ *  @retval         TRDP_MEM_ERR        there are more items than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
     TRDP_APP_SESSION_T  appHandle,

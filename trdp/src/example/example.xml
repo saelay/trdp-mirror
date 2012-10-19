@@ -67,6 +67,19 @@ TIMEDATE64	17	32 bit seconds and 32 bit microseconds
         <element name="ip" type="8" array-size="4" />
         <element name="load" type="5" unit="load-unit" scale="0.01"  offset="-1" />
       </data-set>
+      <data-set name="marshall test" id="1000">
+        <element name="INT8" type="4" />
+        <element name="INT16" type="5" />
+        <element name="INT32" type="6" />
+        <element name="INT64" type="7" />
+        <element name="UINT8" type="8" />
+        <element name="UINT16" type="9" />
+        <element name="UINT32" type="10" />
+        <element name="UINT64" type="11" />
+        <element name="REAL32" type="12" />
+        <element name="REAL64" type="13" />
+        <element name="STRING" type="14" />
+      </data-set>
    </data-set-list>
    
    <debug  />
