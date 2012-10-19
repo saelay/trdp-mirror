@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP", "Win32TRDP.vcxproj", "{4E059552-03FF-4EE4-A868-C2253289E9F6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDPrun", "..\Win32TRDPrun\Win32TRDPrun.vcxproj", "{5621DA34-F2D0-43E1-9C8C-C1F270CBDACB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E059552-03FF-4EE4-A868-C2253289E9F6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4E059552-03FF-4EE4-A868-C2253289E9F6}.Debug|Win32.Build.0 = Debug|Win32
+		{4E059552-03FF-4EE4-A868-C2253289E9F6}.Release|Win32.ActiveCfg = Release|Win32
+		{4E059552-03FF-4EE4-A868-C2253289E9F6}.Release|Win32.Build.0 = Release|Win32
+		{5621DA34-F2D0-43E1-9C8C-C1F270CBDACB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5621DA34-F2D0-43E1-9C8C-C1F270CBDACB}.Debug|Win32.Build.0 = Debug|Win32
+		{5621DA34-F2D0-43E1-9C8C-C1F270CBDACB}.Release|Win32.ActiveCfg = Release|Win32
+		{5621DA34-F2D0-43E1-9C8C-C1F270CBDACB}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>libtrdp</ProjectName>
     <ProjectGuid>{4E059552-03FF-4EE4-A868-C2253289E9F6}</ProjectGuid>
     <RootNamespace>Win32Test</RootNamespace>
     <Keyword>Win32Proj</Keyword>
@@ -56,35 +55,62 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>$(ProjectDir)pthread/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <PostBuildEvent>
+      <Command>copy $(ProjectDir)pthread\pthreadVC2.* $(TargetDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;MD_SUPPORT=0;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>..\..\src\vos\api;..\..\src\api;..\..\src\vos\windows\pthread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Lib>
+      <AdditionalDependencies>$(ProjectDir)pthread/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PostBuildEvent>
+      <Command>copy $(ProjectDir)pthread\pthreadVC2.* $(TargetDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\common\trdp_if.c" />
-    <ClCompile Include="..\..\src\common\trdp_mdcom.c" />
-    <ClCompile Include="..\..\src\common\trdp_pdcom.c" />
-    <ClCompile Include="..\..\src\common\trdp_stats.c" />
+    <ClCompile Include="..\..\src\common\trdp_if.c">
+      <DeploymentContent>false</DeploymentContent>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\trdp_pdcom.c">
+      <DeploymentContent>false</DeploymentContent>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\trdp_stats.c">
+      <DeploymentContent>false</DeploymentContent>
+    </ClCompile>
     <ClCompile Include="..\..\src\common\trdp_utils.c" />
-    <ClCompile Include="..\..\src\vos\common\vos_utils.c" />
     <ClCompile Include="..\..\src\vos\windows\vos_mem.c" />
     <ClCompile Include="..\..\src\vos\windows\vos_sock.c" />
     <ClCompile Include="..\..\src\vos\windows\vos_thread.c" />
+    <ClCompile Include="..\..\src\vos\common\vos_utils.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\common\trdp_if.h" />
-    <ClInclude Include="..\..\src\common\trdp_mdcom.h" />
     <ClInclude Include="..\..\src\common\trdp_pdcom.h" />
     <ClInclude Include="..\..\src\common\trdp_private.h" />
     <ClInclude Include="..\..\src\common\trdp_stats.h" />
     <ClInclude Include="..\..\src\common\trdp_utils.h" />
+    <ClInclude Include="..\..\src\vos\windows\pthread\pthread.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\..\src\vos\windows\pthread\sched.h" />
+    <ClInclude Include="..\..\src\vos\windows\pthread\semaphore.h" />
     <ClInclude Include="..\..\src\vos\api\vos_mem.h" />
     <ClInclude Include="..\..\src\vos\api\vos_sock.h" />
     <ClInclude Include="..\..\src\vos\api\vos_thread.h" />
@@ -97,6 +123,9 @@
     <ClInclude Include="..\..\src\api\tau_xml.h" />
     <ClInclude Include="..\..\src\api\trdp_if_light.h" />
     <ClInclude Include="..\..\src\api\trdp_types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Win32TRDP.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />

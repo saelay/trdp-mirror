@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
-	Name="libtrdp"
+	Version="9,00"
+	Name="Win32TRDP"
 	ProjectGUID="{4E059552-03FF-4EE4-A868-C2253289E9F6}"
 	RootNamespace="Win32Test"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -40,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\vos\api;..\..\src\api"
+				AdditionalIncludeDirectories="..\..\src\vos\api;..\..\src\api;..\..\src\vos\windows\pthread"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;MD_SUPPORT=0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,6 +62,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="$(ProjectDir)pthread/pthreadVC2.lib"
+				AdditionalLibraryDirectories=""
+				SuppressStartupBanner="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -191,12 +195,44 @@
 				RelativePath="..\..\src\common\trdp_utils.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\vos\windows\vos_mem.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\vos\windows\vos_sock.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\vos\windows\vos_thread.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\vos\common\vos_utils.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="VOS"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\src\vos\windows\pthread\pthread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\vos\windows\pthread\sched.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\vos\windows\pthread\semaphore.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\src\vos\api\vos_mem.h"
 				>
@@ -223,9 +259,15 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\Win32TRDP.rc"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="API"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
 				RelativePath="..\..\src\api\tau_addr.h"
