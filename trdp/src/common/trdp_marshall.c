@@ -314,13 +314,6 @@ EXT_DECL TRDP_ERR_T marshall (
                     }
                     break;
                 }
-                case TRDP_STRING:
-                {
-                    strncpy((char *)pDst, (char *)pSrc, 16);
-                    pDst    += 16;
-                    pSrc    += 16;
-                    break;
-                }
                 case TRDP_UTF16:
                 case TRDP_INT16:
                 case TRDP_UINT16:
@@ -446,13 +439,6 @@ EXT_DECL TRDP_ERR_T unmarshall (
                     {
                         *pDst++ = *pSrc++;
                     }
-                    break;
-                }
-                case TRDP_STRING:
-                {
-                    strncpy((char *)pDst, (char *)pSrc, 16);
-                    pDst    += 16;
-                    pSrc    += 16;
                     break;
                 }
                 case TRDP_UTF16:
