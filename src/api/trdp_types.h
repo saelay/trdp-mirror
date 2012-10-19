@@ -281,10 +281,9 @@ typedef enum
     TRDP_UINT64     = 11,  /**< Unsigned integer, 64 bit  */
     TRDP_REAL32     = 12,  /**< Floating point real, 32 bit  */
     TRDP_REAL64     = 13,  /**< Floating point real, 64 bit  */
-    TRDP_STRING     = 14,  /**< Zero-terminated array of CHAR8, fixed size  */
-    TRDP_TIMEDATE32 = 15,  /**< 32 bit UNIX time  */
-    TRDP_TIMEDATE48 = 16,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
-    TRDP_TIMEDATE64 = 17   /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
+    TRDP_TIMEDATE32 = 14,  /**< 32 bit UNIX time  */
+    TRDP_TIMEDATE48 = 15,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
+    TRDP_TIMEDATE64 = 16   /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
 } TRDP_DATA_TYPE_T;
 
 /**	Dataset element definition	*/
@@ -384,6 +383,8 @@ typedef struct
     TRDP_IP_ADDR_T          leaderIpAddr; /**< leader IP address */
     UINT32                  processPrio;  /**< priority of TRDP process */
     UINT32                  processCycle; /**< cycle time of TRDP process in microseconds */
+    UINT32                  numJoin;      /**< number of joins */
+    UINT32                  numRed;       /**< number of redundancy groups */
     TRDP_MEM_STATISTICS_T   mem;          /**< memory statistics */
     TRDP_PD_STATISTICS_T    pd;           /**< pd statistics */
     TRDP_MD_STATISTICS_T    md;           /**< md statistics */
