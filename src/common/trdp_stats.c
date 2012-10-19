@@ -43,7 +43,7 @@
  *   Locals
  */
 
-void    trdp_UpdateStats (TRDP_APP_SESSION_T  appHandle);
+void trdp_UpdateStats (TRDP_APP_SESSION_T appHandle);
 
 /******************************************************************************
  *   Globals
@@ -55,18 +55,18 @@ void    trdp_UpdateStats (TRDP_APP_SESSION_T  appHandle);
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  */
-void trdp_initStats(
-    TRDP_APP_SESSION_T  appHandle)
+void trdp_initStats (
+    TRDP_APP_SESSION_T appHandle)
 {
     int int0, int1, int2, int3;
-    
+
     if (appHandle == NULL)
     {
         return;
     }
 
     memset(&appHandle->stats, 0, sizeof(TRDP_STATISTICS_T));
-    
+
     sscanf(tlc_getVersion(), "%d.%d.%d.%d", &int0, &int1, &int2, &int3);
     appHandle->stats.version = int0 << 24 | int1 << 16 | int2 << 8 | int3;
 }
@@ -78,7 +78,7 @@ void trdp_initStats(
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pStatistics         Pointer to statistics for this application session
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
 EXT_DECL TRDP_ERR_T tlc_getStatistics (
@@ -97,7 +97,7 @@ EXT_DECL TRDP_ERR_T tlc_getStatistics (
     trdp_UpdateStats(appHandle);
 
     *pStatistics = appHandle->stats;
-    
+
     return TRDP_NO_ERR;
 }
 
@@ -110,9 +110,9 @@ EXT_DECL TRDP_ERR_T tlc_getStatistics (
  *                                      Out: Number of subscriptions returned
  *  @param[in,out]  pStatistics         Pointer to an array with the subscription statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR	    there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -139,12 +139,13 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[index].comId        = iter->addr.comId;     /* Subscribed ComId                                   */
         pStatistics[index].joinedAddr   = iter->addr.mcGroup;   /* Joined IP address                                  */
         pStatistics[index].filterAddr   = iter->addr.srcIpAddr; /* Filter IP address                                  */
-        pStatistics[index].callBack     = (UINT32)iter->userRef;/* Reference for call back function if used           */
+        pStatistics[index].callBack     = (UINT32)iter->userRef; /* Reference for call back function if used
+                                                                             */
         pStatistics[index].timeout      = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
-                                                                /* Time-out value in us. 0 = No time-out supervision  */
-        pStatistics[index].toBehav      = iter->toBehavior;     /* Behaviour at time-out                              */
-        pStatistics[index].numRecv      = iter->numRxTx;         /* Number of packets received for this subscription.  */
-        pStatistics[index].status       = iter->lastErr;        /* Receive status information                         */
+        /* Time-out value in us. 0 = No time-out supervision  */
+        pStatistics[index].toBehav  = iter->toBehavior;         /* Behaviour at time-out                              */
+        pStatistics[index].numRecv  = iter->numRxTx;            /* Number of packets received for this subscription.  */
+        pStatistics[index].status   = iter->lastErr;            /* Receive status information                         */
 
     }
     if (index >= *pNumSubs && iter != NULL)
@@ -163,7 +164,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
  *  @param[in,out]  pNumPub             Pointer to the number of publishers
  *  @param[out]     pStatistics         Pointer to a list with the publish statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR     there are more subscriptions than requested
  */
@@ -175,32 +176,32 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     TRDP_ERR_T  err = TRDP_NO_ERR;
     PD_ELE_T    *iter;
     UINT16      index;
-    
+
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
-    
+
     if (pNumPub == NULL || pStatistics == NULL || *pNumPub == 0)
     {
         return TRDP_PARAM_ERR;
     }
-   
+
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
     for (index = 0, iter = appHandle->pRcvQueue; index < *pNumPub && iter != NULL; index++, iter = iter->pNext)
     {
-        pStatistics[index].comId        = iter->addr.comId;     /* Published ComId                                    */
-        pStatistics[index].destAddr     = iter->addr.destIpAddr;/* IP address of destination for this publishing.     */
+        pStatistics[index].comId    = iter->addr.comId;         /* Published ComId                                    */
+        pStatistics[index].destAddr = iter->addr.destIpAddr;    /* IP address of destination for this publishing.     */
 
         /* TBD: */
-        pStatistics[index].redId        = appHandle->redID;     /* Redundancy group id                                */
-        pStatistics[index].redState     = 0;                    /* Redundancy state                                   */
+        pStatistics[index].redId    = appHandle->redID;         /* Redundancy group id                                */
+        pStatistics[index].redState = 0;                        /* Redundancy state                                   */
 
-        pStatistics[index].cycle        = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
-                                                                /* Interval/cycle in us. 0 = No time-out supervision  */
-        pStatistics[index].numSend      = iter->numRxTx;        /* Number of packets sent for this publisher.         */
-        pStatistics[index].numPut       = iter->updPkts;        /* Updated packets (via put)                          */
-        
+        pStatistics[index].cycle = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
+        /* Interval/cycle in us. 0 = No time-out supervision  */
+        pStatistics[index].numSend  = iter->numRxTx;            /* Number of packets sent for this publisher.         */
+        pStatistics[index].numPut   = iter->updPkts;            /* Updated packets (via put)                          */
+
     }
     if (index >= *pNumPub && iter != NULL)
     {
@@ -218,9 +219,9 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
  *  @param[in,out]  pNumList            Pointer to the number of listeners
  *  @param[out]     pStatistics         Pointer to a list with the listener statistics information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR     	there are more subscriptions than requested
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
 EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     TRDP_APP_SESSION_T      appHandle,
@@ -244,7 +245,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
  *  @param[in,out]  pNumRed             Pointer to the number of redundancy groups
  *  @param[out]     pStatistics         Pointer to a list with the redundancy group information
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR     there are more subscriptions than requested
  */
@@ -270,7 +271,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
  *  @param[in,out]  pNumJoin            Pointer to the number of joined IP Adresses
  *  @param[out]     pIpAddr             Pointer to a list with the joined IP adresses
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        there are more items than requested
  */
@@ -282,21 +283,21 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
     TRDP_ERR_T  err = TRDP_NO_ERR;
     PD_ELE_T    *iter;
     UINT16      index;
-    
+
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
-    
+
     if (pNumJoin == NULL || pIpAddr == NULL || *pNumJoin == 0)
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
     for (index = 0, iter = appHandle->pRcvQueue; index < *pNumJoin && iter != NULL; index++, iter = iter->pNext)
     {
-        *pIpAddr++  = iter->addr.mcGroup;                       /* Subscribed MC address.                       */
+        *pIpAddr++ = iter->addr.mcGroup;                        /* Subscribed MC address.                       */
     }
 
     if (index >= *pNumJoin && iter != NULL)
@@ -306,7 +307,7 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 
     *pNumJoin = index;
 
-    return TRDP_NO_ERR;
+    return err;
 }
 
 /**********************************************************************************************************************/
@@ -314,7 +315,7 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @retval         TRDP_NO_ERR	        no error
- *  @retval         TRDP_NOINIT_ERR		handle invalid
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
 EXT_DECL TRDP_ERR_T tlc_resetStatistics (
@@ -336,11 +337,11 @@ EXT_DECL TRDP_ERR_T tlc_resetStatistics (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  */
 void    trdp_UpdateStats (
-    TRDP_APP_SESSION_T  appHandle)
+    TRDP_APP_SESSION_T appHandle)
 {
     /*  Get a new time stamp    */
-    vos_getTime (&appHandle->stats.timeStamp);
-    
+    vos_getTime(&appHandle->stats.timeStamp);
+
     /*  Update memory statsp    */
     vos_memCount(&appHandle->stats.mem.total,
                  &appHandle->stats.mem.free,
@@ -363,10 +364,10 @@ void    trdp_pdPrepareStats (
     TRDP_APP_SESSION_T  appHandle,
     PD_ELE_T            *pPacket)
 {
-    TRDP_STATISTICS_T   *pData;
+    TRDP_STATISTICS_T *pData;
     int i;
 
-    if (pData == NULL || appHandle == NULL)
+    if (pPacket == NULL || appHandle == NULL)
     {
         return;
     }
@@ -375,66 +376,66 @@ void    trdp_pdPrepareStats (
 
     /*  The statistics structure is naturally aligned - all 32 Bits, we can cast and just eventually swap the values! */
 
-    pData = (TRDP_STATISTICS_T*) pPacket->data;
+    pData = (TRDP_STATISTICS_T *) pPacket->data;
 
     /*  Fill in the values  */
     pData->version = vos_htonl(appHandle->stats.version);
-    pData->timeStamp.tv_sec = vos_htonl(appHandle->stats.timeStamp.tv_sec);
-    pData->timeStamp.tv_usec = vos_htonl(appHandle->stats.timeStamp.tv_usec);
-    pData->upTime = vos_htonl(appHandle->stats.upTime);
-    pData->statisticTime = vos_htonl(appHandle->stats.statisticTime);
-    pData->ownIpAddr = vos_htonl(appHandle->stats.ownIpAddr);
-    pData->leaderIpAddr = vos_htonl(appHandle->stats.leaderIpAddr);
-    pData->processPrio = vos_htonl(appHandle->stats.processPrio);
-    pData->processCycle = vos_htonl(appHandle->stats.processCycle);
+    pData->timeStamp.tv_sec     = vos_htonl(appHandle->stats.timeStamp.tv_sec);
+    pData->timeStamp.tv_usec    = vos_htonl(appHandle->stats.timeStamp.tv_usec);
+    pData->upTime           = vos_htonl(appHandle->stats.upTime);
+    pData->statisticTime    = vos_htonl(appHandle->stats.statisticTime);
+    pData->ownIpAddr        = vos_htonl(appHandle->stats.ownIpAddr);
+    pData->leaderIpAddr     = vos_htonl(appHandle->stats.leaderIpAddr);
+    pData->processPrio      = vos_htonl(appHandle->stats.processPrio);
+    pData->processCycle     = vos_htonl(appHandle->stats.processCycle);
 
     /*  Memory  */
-    pData->mem.total = vos_htonl(appHandle->stats.mem.total);
-    pData->mem.free = vos_htonl(appHandle->stats.mem.free);
-    pData->mem.minFree = vos_htonl(appHandle->stats.mem.minFree);
-    pData->mem.numAllocBlocks = vos_htonl(appHandle->stats.mem.numAllocBlocks);
-    pData->mem.numAllocErr = vos_htonl(appHandle->stats.mem.numAllocErr);
-    pData->mem.numFreeErr = vos_htonl(appHandle->stats.mem.numFreeErr);
+    pData->mem.total            = vos_htonl(appHandle->stats.mem.total);
+    pData->mem.free             = vos_htonl(appHandle->stats.mem.free);
+    pData->mem.minFree          = vos_htonl(appHandle->stats.mem.minFree);
+    pData->mem.numAllocBlocks   = vos_htonl(appHandle->stats.mem.numAllocBlocks);
+    pData->mem.numAllocErr      = vos_htonl(appHandle->stats.mem.numAllocErr);
+    pData->mem.numFreeErr       = vos_htonl(appHandle->stats.mem.numFreeErr);
 
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        pData->mem.allocBlockSize[i] = vos_htonl(appHandle->stats.mem.allocBlockSize[i]);
-        pData->mem.usedBlockSize[i] = vos_htonl(appHandle->stats.mem.usedBlockSize[i]);
+        pData->mem.allocBlockSize[i]    = vos_htonl(appHandle->stats.mem.allocBlockSize[i]);
+        pData->mem.usedBlockSize[i]     = vos_htonl(appHandle->stats.mem.usedBlockSize[i]);
     }
 
     /* Process data */
-    pData->pd.defQos = vos_htonl(appHandle->stats.pd.defQos);
-    pData->pd.defTtl = vos_htonl(appHandle->stats.pd.defTtl);
-    pData->pd.defTimeout = vos_htonl(appHandle->stats.pd.defTimeout);
-    pData->pd.numSubs = vos_htonl(appHandle->stats.pd.numSubs);
-    pData->pd.numPub = vos_htonl(appHandle->stats.pd.numPub);
-    pData->pd.numRcv = vos_htonl(appHandle->stats.pd.numRcv);
-    pData->pd.numCrcErr = vos_htonl(appHandle->stats.pd.numCrcErr);
-    pData->pd.numProtErr = vos_htonl(appHandle->stats.pd.numProtErr);
-    pData->pd.numTopoErr = vos_htonl(appHandle->stats.pd.numTopoErr);
-    pData->pd.numNoSubs = vos_htonl(appHandle->stats.pd.numNoSubs);
-    pData->pd.numNoPub = vos_htonl(appHandle->stats.pd.numNoPub);
-    pData->pd.numTimeout = vos_htonl(appHandle->stats.pd.numTimeout);
-    pData->pd.numSend = vos_htonl(appHandle->stats.pd.numSend);
-    
+    pData->pd.defQos        = vos_htonl(appHandle->stats.pd.defQos);
+    pData->pd.defTtl        = vos_htonl(appHandle->stats.pd.defTtl);
+    pData->pd.defTimeout    = vos_htonl(appHandle->stats.pd.defTimeout);
+    pData->pd.numSubs       = vos_htonl(appHandle->stats.pd.numSubs);
+    pData->pd.numPub        = vos_htonl(appHandle->stats.pd.numPub);
+    pData->pd.numRcv        = vos_htonl(appHandle->stats.pd.numRcv);
+    pData->pd.numCrcErr     = vos_htonl(appHandle->stats.pd.numCrcErr);
+    pData->pd.numProtErr    = vos_htonl(appHandle->stats.pd.numProtErr);
+    pData->pd.numTopoErr    = vos_htonl(appHandle->stats.pd.numTopoErr);
+    pData->pd.numNoSubs     = vos_htonl(appHandle->stats.pd.numNoSubs);
+    pData->pd.numNoPub      = vos_htonl(appHandle->stats.pd.numNoPub);
+    pData->pd.numTimeout    = vos_htonl(appHandle->stats.pd.numTimeout);
+    pData->pd.numSend       = vos_htonl(appHandle->stats.pd.numSend);
+
     /* Message data */
-    pData->md.defQos = vos_htonl(appHandle->stats.md.defQos);
-    pData->md.defTtl = vos_htonl(appHandle->stats.md.defTtl);
-    pData->md.defReplyTimeout = vos_htonl(appHandle->stats.md.defReplyTimeout);
+    pData->md.defQos    = vos_htonl(appHandle->stats.md.defQos);
+    pData->md.defTtl    = vos_htonl(appHandle->stats.md.defTtl);
+    pData->md.defReplyTimeout   = vos_htonl(appHandle->stats.md.defReplyTimeout);
     pData->md.defConfirmTimeout = vos_htonl(appHandle->stats.md.defConfirmTimeout);
-    pData->md.numList = vos_htonl(appHandle->stats.md.numList);
-    pData->md.numRcv = vos_htonl(appHandle->stats.md.numRcv);
-    pData->md.numCrcErr = vos_htonl(appHandle->stats.md.numCrcErr);
-    pData->md.numProtErr = vos_htonl(appHandle->stats.md.numProtErr);
-    pData->md.numTopoErr = vos_htonl(appHandle->stats.md.numTopoErr);
-    pData->md.numNoListener = vos_htonl(appHandle->stats.md.numNoListener);
-    pData->md.numReplyTimeout = vos_htonl(appHandle->stats.md.numReplyTimeout);
+    pData->md.numList           = vos_htonl(appHandle->stats.md.numList);
+    pData->md.numRcv            = vos_htonl(appHandle->stats.md.numRcv);
+    pData->md.numCrcErr         = vos_htonl(appHandle->stats.md.numCrcErr);
+    pData->md.numProtErr        = vos_htonl(appHandle->stats.md.numProtErr);
+    pData->md.numTopoErr        = vos_htonl(appHandle->stats.md.numTopoErr);
+    pData->md.numNoListener     = vos_htonl(appHandle->stats.md.numNoListener);
+    pData->md.numReplyTimeout   = vos_htonl(appHandle->stats.md.numReplyTimeout);
     pData->md.numConfirmTimeout = vos_htonl(appHandle->stats.md.numConfirmTimeout);
-    pData->md.numSend = vos_htonl(appHandle->stats.md.numSend);
+    pData->md.numSend           = vos_htonl(appHandle->stats.md.numSend);
 
     pPacket->dataSize = sizeof(TRDP_STATISTICS_T);
 
     /*  Compute the CRC */
     trdp_pdDataUpdate(pPacket);
-    
+
 }
