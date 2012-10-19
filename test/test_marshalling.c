@@ -59,8 +59,8 @@ TRDP_DATASET_T gDataSet1000 =
             1
         },
         {
-            TRDP_STRING,
-            1
+            TRDP_CHAR8,
+            16
         }
     }
 };

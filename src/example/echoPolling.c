@@ -28,7 +28,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "trdp_if_light.h"
+#include "trdp_if.h"
 #include "vos_thread.h"
 
 /* Some sample comId definitions	*/
@@ -91,13 +91,14 @@ void dbgOut (
  */
 int main (int argc, char * *argv)
 {
-    TRDP_APP_SESSION_T  appHandle;  /*	Our identifier to the library instance	*/
-    TRDP_SUB_T          subHandle;  /*	Our identifier to the subscription	*/
-    TRDP_PUB_T          pubHandle;  /*	Our identifier to the publication	*/
-    TRDP_ERR_T          err;
-    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 0}, TRDP_FLAGS_NONE,
+    TRDP_APP_SESSION_T      appHandle;  /*	Our identifier to the library instance	*/
+    TRDP_SUB_T              subHandle;  /*	Our identifier to the subscription	*/
+    TRDP_PUB_T              pubHandle;  /*	Our identifier to the publication	*/
+    TRDP_ERR_T              err;
+    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                            10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
 
     TRDP_PD_INFO_T      myPDInfo;
     UINT32  receivedSize;
@@ -117,7 +118,7 @@ int main (int argc, char * *argv)
                  0, 0,                              /* use default IP address/interface */
                  NULL,                              /* no Marshalling					*/
                  &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
-                 TRDP_OPTION_NONE) != TRDP_NO_ERR)
+                 &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
@@ -155,7 +156,7 @@ int main (int argc, char * *argv)
                         0,                          /*	local consist only				*/
                         0,                          /*	default source IP				*/
                         PD_COMID2_DST_IP,           /*	where to send to				*/
-                        PD_COMID2_CYCLE,            /*	Cycle time in ms				*/
+                        PD_COMID2_CYCLE,            /*	Cycle time in us				*/
                         0,                          /*	not redundant					*/
                         TRDP_FLAGS_NONE,            /*	Don't use callback for errors	*/
                         NULL,                       /*	default qos and ttl				*/

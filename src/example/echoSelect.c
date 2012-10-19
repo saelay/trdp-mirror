@@ -143,6 +143,7 @@ int main (int argc, char * *argv)
     {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
      10000000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
 
 
@@ -160,7 +161,7 @@ int main (int argc, char * *argv)
                  0, 0,                              /* use default IP addresses */
                  NULL,                              /* no Marshalling	*/
                  &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
-                 TRDP_OPTION_BLOCK) != TRDP_NO_ERR)
+                 &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;

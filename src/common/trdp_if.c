@@ -229,6 +229,12 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     pSession->realIP    = ownIpAddr;
     pSession->virtualIP = leaderIpAddr;
+    
+    if (pProcessConfig != NULL)
+    {
+    	pSession->option = pProcessConfig->options;
+        
+    }
 
     if (pMarshall != NULL)
     {
