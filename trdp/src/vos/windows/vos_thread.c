@@ -653,7 +653,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
         return VOS_PARAM_ERR;
     }
 
-    *pMutex = (VOS_MUTEX_T) vos_memAlloc(sizeof (struct VOS_MUTEX_T));
+    *pMutex = (VOS_MUTEX_T) vos_memAlloc(sizeof (struct VOS_MUTEX));
 
     if (*pMutex == NULL)
     {
