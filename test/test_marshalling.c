@@ -16,11 +16,23 @@ TRDP_DATASET_T gDataSet1000 =
 {
     1000,       /*	dataset/com ID  */
     0,          /*	reserved		*/
-    11,         /*	No of elements	*/
+    16,         /*	No of elements	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
-            TRDP_INT8,      /*	data type		*/
+            TRDP_BOOLEAN8,  /*	data type		*/
             1               /*	no of elements	*/
+        },
+        {
+            TRDP_CHAR8,
+            1
+        },
+       {
+            TRDP_UTF16,
+            1
+        },
+        {
+            TRDP_INT8,
+            1           
         },
         {
             TRDP_INT16,
@@ -59,6 +71,14 @@ TRDP_DATASET_T gDataSet1000 =
             1
         },
         {
+            TRDP_TIMEDATE32,
+            1
+        },
+        {
+            TRDP_TIMEDATE64,
+            1
+        },
+        {
             TRDP_CHAR8,
             16
         }
@@ -67,6 +87,9 @@ TRDP_DATASET_T gDataSet1000 =
 
 struct myDataSet1000
 {
+    UINT8   bool8_1;
+    char    char8_1;
+    INT16   utf16_1;
     INT8    int8_1;
     INT16   int16_1;
     INT32   int32_1;
@@ -77,9 +100,14 @@ struct myDataSet1000
     UINT64  uint64_1;
     float   float32_1;
     double  float64_1;
+    UINT32  timedate32_1;
+    UINT64  timedate64_1;
     char    string[16];
 } gMyDataSet1000 =
 {
+    1,
+    'A',
+    0xaa55;
     -1,
     4096,
     0x12345678,
@@ -90,6 +118,8 @@ struct myDataSet1000
     0x1234567890123456,
     0.12345,
     0.12345678,
+    0x01234567;
+    0x0123456789ABCDEF;
     "Hello World"
 };
 
