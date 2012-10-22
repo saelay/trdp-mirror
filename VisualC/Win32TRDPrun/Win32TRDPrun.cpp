@@ -146,7 +146,8 @@ int main (int argc, char *argv[])
 						0, 0,					/* use default IP address */
 						NULL,					/* no Marshalling */
 						&pdConfiguration, NULL, /* system defaults for PD and MD */
-						TRDP_OPTION_BLOCK) != TRDP_NO_ERR)
+						NULL					/* Pointer to process configuration */
+						) != TRDP_NO_ERR)
 	{
 			printf("Initialization error\n");
 			return 1;
