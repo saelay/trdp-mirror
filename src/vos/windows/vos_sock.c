@@ -45,12 +45,13 @@
 
 #pragma comment(lib, "IPHLPAPI.lib")
 
+// include the needed windows network libraries
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "Netapi32.lib")
 
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-
-#define VOS_DEFAULT_IFACE  "eth0"
 
 /***********************************************************************************************************************
  *  LOCALS
@@ -248,6 +249,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     const VOS_SOCK_OPT_T    *pOptions)
 {
     SOCKET sock;
+	WSADATA WsaDat;
 
     if (!vosSockInitialised)
     {
@@ -259,8 +261,14 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         vos_printf(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
+	
+	// The windows socket library has to be prepared, before it could be used
+    if (WSAStartup(MAKEWORD(2,2), &WsaDat) != 0){
+		vos_printf(VOS_LOG_ERROR, "Windows socket API failed\n");
+		return VOS_SOCK_ERR;
+    }
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET )
+    if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP)) == INVALID_SOCKET )
     {
         vos_printf(VOS_LOG_ERROR, "socket call failed\n");
         return VOS_SOCK_ERR;
@@ -359,6 +367,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sockOptValue = 0;
+	u_long value;
 
     if (pOptions)
     {
@@ -381,7 +390,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (1 == pOptions->nonBlocking)
         {
-            if (ioctlsocket((SOCKET)sock, FIONBIO, (u_long *) TRUE) == SOCKET_ERROR)
+            value = TRUE;
+			if (ioctlsocket(sock, FIONBIO, &value) == SOCKET_ERROR)
             {
                 vos_printf(VOS_LOG_ERROR, "non blocking failed\n");
                 return VOS_SOCK_ERR;
