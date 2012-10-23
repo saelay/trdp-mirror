@@ -302,6 +302,13 @@ typedef struct
     TRDP_DATASET_ELEMENT_T  pElement[];   /**< Pointer to a dataset element, used as array */
 } TRDP_DATASET_T;
 
+/**	Dataset element definition	*/
+typedef struct
+{
+    UINT32  comId;              /**< comId */
+    UINT32  datasetId;          /**< corresponding dataset Id */
+} TRDP_COMID_DSID_MAP_T;
+
 
 
 /**********************************************************************************************************************/
