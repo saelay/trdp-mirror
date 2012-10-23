@@ -48,8 +48,12 @@ typedef struct
 /***********************************************************************************************************************
  * LOCALS
  */
-static TRDP_DATASET_T   *sDataSets  = NULL;
-static UINT32           sNumEntries = 0;
+
+static TRDP_COMID_DSID_MAP_T   *sComIdDsIdMap  = NULL;
+static UINT32                  sNumComId = 0;
+
+static TRDP_DATASET_T          *sDataSets  = NULL;
+static UINT32                  sNumEntries = 0;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -209,6 +213,35 @@ static int dataset_compare (
 
 
 /**********************************************************************************************************************/
+/**	ComId/dataset mapping compare function
+ *
+ *  @param[in]      pArg1		Pointer to first element
+ *  @param[in]      pArg2		Pointer to second element
+ *
+ *  @retval         -1 if arg1 < arg2
+ *  @retval          0 if arg1 == arg2
+ *  @retval          1 if arg1 > arg2
+ */
+static int comId_compare (
+    const void  *pArg1,
+    const void  *pArg2)
+{
+    if (((TRDP_COMID_DSID_MAP_T *)pArg1)->comId < ((TRDP_COMID_DSID_MAP_T *)pArg2)->comId)
+    {
+        return -1;
+    }
+    else if (((TRDP_COMID_DSID_MAP_T *)pArg1)->comId > ((TRDP_COMID_DSID_MAP_T *)pArg2)->comId)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+/**********************************************************************************************************************/
 /**	Return the dataset for the comID
  *
  *
@@ -220,19 +253,14 @@ static int dataset_compare (
 static TRDP_DATASET_T *find_DS (
     UINT32 comID)
 {
-#if 0
-    UINT32 index;
-    for (index = 0; index < sNumEntries; index++)
+    TRDP_COMID_DSID_MAP_T	key1 = {comID, 0};
+    
+	TRDP_DATASET_T *key2 = vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+    if (key2 != NULL)
     {
-        if (sDataSets[index].id == comID)
-        {
-            return &sDataSets[index];
-        }
+    	return vos_bsearch(key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T), dataset_compare);
     }
-#else
-    TRDP_DATASET_T key = {comID, 0, 0};
-    return vos_bsearch(&key, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T), dataset_compare);
-#endif
+
     return NULL;
 }
 
@@ -350,7 +378,24 @@ EXT_DECL TRDP_ERR_T marshall (
                     break;
                 }
                 case TRDP_TIMEDATE48:
+                {
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+                    UINT16 *pSrc16;
+                    while (noOfItems-- > 0)
+                    {
+                        *pDst++ = (UINT8) (*pSrc32 >> 24);
+                        *pDst++ = (UINT8) (*pSrc32 >> 16);
+                        *pDst++ = (UINT8) (*pSrc32 >> 8);
+                        *pDst++ = (UINT8) (*pSrc32 & 0xFF);
+                        pSrc32++;
+                        pSrc16 = (UINT16*) pSrc32;
+                        *pDst++ = (UINT8) (*pSrc16 >> 8);
+                        *pDst++ = (UINT8) (*pSrc16 & 0xFF);
+                        pSrc32++;
+                    }
+                    pSrc = (UINT8 *) pSrc32;
                     break;
+                }
                 case TRDP_INT64:
                 case TRDP_UINT64:
                 case TRDP_REAL64:
@@ -475,7 +520,24 @@ EXT_DECL TRDP_ERR_T unmarshall (
                     break;
                 }
                 case TRDP_TIMEDATE48:
+                {
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
+                    UINT16 *pDst16;
+                    while (noOfItems-- > 0)
+                    {
+                        *pDst32 = *pSrc++ >> 24;
+                        *pDst32 += *pSrc++ >> 16;
+                        *pDst32 += *pSrc++ >> 8;
+                        *pDst32 += *pSrc++;
+                        pDst32++;
+                        pDst16 = (UINT16 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT16));
+                        *pDst16 = *pSrc++ >> 8;
+                        *pDst16 += *pSrc++;
+                        pDst16++;
+                    }
+                    pDst = (UINT8 *) pDst16;
                     break;
+                }
                 case TRDP_INT64:
                 case TRDP_UINT64:
                 case TRDP_REAL64:
@@ -490,7 +552,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
     return TRDP_NO_ERR;
 }
 
-/******************************************************************************
+/**********************************************************************************************************************
  * GLOBAL FUNCTIONS
  */
 
@@ -500,6 +562,8 @@ EXT_DECL TRDP_ERR_T unmarshall (
  *	functions (until tlc_terminate()).
  *
  *  @param[in,out]  ppRefCon         Returns a pointer to be used for the reference context of marshalling/unmarshalling
+ *  @param[in]	    numComId         Number of datasets found in the configuration
+ *  @param[in]	    pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
  *  @param[in]	    numDataSet       Number of datasets found in the configuration
  *  @param[in]	    pDataset         Pointer to an array of structures of type TRDP_DATASET_T
  *
@@ -510,14 +574,23 @@ EXT_DECL TRDP_ERR_T unmarshall (
  */
 
 EXT_DECL TRDP_ERR_T tau_initMarshall (
-    void            * *ppRefCon,
-    UINT32          numDataSet,
-    TRDP_DATASET_T  *pDataset)
+    void                    **ppRefCon,
+    UINT32                  numComId,
+    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,        
+    UINT32                  numDataSet,
+    TRDP_DATASET_T          *pDataset)
 {
-    if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0)
+    if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
     {
         return TRDP_PARAM_ERR;
     }
+
+    /*	Save the pointer to the comId mapping table	*/
+    sComIdDsIdMap   = pComIdDsIdMap;
+    sNumComId = numComId;
+    
+    /* sort the table	*/
+    vos_qsort(pComIdDsIdMap, numComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
 
     /*	Save the pointer to the table	*/
     sDataSets   = pDataset;

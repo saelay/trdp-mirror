@@ -75,9 +75,11 @@ extern "C" {
  */
 
 EXT_DECL TRDP_ERR_T tau_initMarshall(
-    void * *ppRefCon,
-    UINT32 numDataSet,
-    TRDP_DATASET_T pDataset[]);
+    void                    **ppRefCon,
+    UINT32                  numComId,
+    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,        
+    UINT32                  numDataSet,
+    TRDP_DATASET_T          pDataset[]);
 
 /**********************************************************************************************************************/
 /**	marshall function.
