@@ -16,7 +16,7 @@ TRDP_DATASET_T gDataSet1000 =
 {
     1000,       /*	dataset/com ID  */
     0,          /*	reserved		*/
-    16,         /*	No of elements	*/
+    32,         /*	No of elements	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_BOOLEAN8,  /*	data type		*/
@@ -75,12 +75,76 @@ TRDP_DATASET_T gDataSet1000 =
             1
         },
         {
+            TRDP_TIMEDATE48,
+            1
+        },
+        {
             TRDP_TIMEDATE64,
             1
         },
         {
+            TRDP_BOOLEAN8,  /*	data type		*/
+            4               /*	no of elements	*/
+        },
+        {
             TRDP_CHAR8,
             16
+        },
+       {
+            TRDP_UTF16,
+            4
+        },
+        {
+            TRDP_INT8,
+            4           
+        },
+        {
+            TRDP_INT16,
+            4
+        },
+        {
+            TRDP_INT32,
+            4
+        },
+        {
+            TRDP_INT64,
+            4
+        },
+        {
+            TRDP_UINT8,
+            4
+        },
+        {
+            TRDP_UINT16,
+            4
+        },
+        {
+            TRDP_UINT32,
+            4
+        },
+        {
+            TRDP_UINT64,
+            4
+        },
+        {
+            TRDP_REAL32,
+            4
+        },
+        {
+            TRDP_REAL64,
+            4
+        },
+        {
+            TRDP_TIMEDATE32,
+            4
+        },
+        {
+            TRDP_TIMEDATE48,
+            4
+        },
+        {
+            TRDP_TIMEDATE64,
+            4
         }
     }
 };
@@ -100,14 +164,30 @@ struct myDataSet1000
     UINT64  uint64_1;
     float   float32_1;
     double  float64_1;
-    UINT32  timedate32_1;
-    UINT64  timedate64_1;
+    TIMEDATE32  timedate32_1;
+    TIMEDATE48  timedate48_1;
+    TIMEDATE64  timedate64_1;
+    UINT8   bool8_4[4];
     char    string[16];
+    INT16   utf16_4[4];
+    INT8    int8_4[4];
+    INT16   int16_4[4];
+    INT32   int32_4[4];
+    INT64   int64_4[4];
+    UINT8   uint8_4[4];
+    UINT16  uint16_4[4];
+    UINT32  uint32_4[4];
+    UINT64  uint64_4[4];
+    float   float32_4[4];
+    double  float64_4[4];
+    TIMEDATE32  timedate32_4[4];
+    TIMEDATE48  timedate48_4[4];
+    TIMEDATE64  timedate64_4[4];
 } gMyDataSet1000 =
 {
     1,
     'A',
-    0xaa55;
+    0xaa55,
     -1,
     4096,
     0x12345678,
@@ -118,9 +198,25 @@ struct myDataSet1000
     0x1234567890123456,
     0.12345,
     0.12345678,
-    0x01234567;
-    0x0123456789ABCDEF;
-    "Hello World"
+    0x01234567,
+    {0x01234567, 0x89AB},
+    {0x01234567, 0x89ABCDEF},
+    {1,0,1,0},
+    "Hello World",
+    {0xaa51, 0xaa52, 0xaa53, 0}
+    {-1, -2, -3, -4}
+    {4091, 4092, 4093, 4094},  
+    {0x12345678, 0x12345678, 0x12345678, 0x12345678},
+    {0x1234567890123451, 0x1234567890123452, 0x1234567890123453, 0x1234567890123454},
+    {251, 252, 253, 254},
+    {65531, 65532, 65533, 65534},
+    {0x12345671, 0x12345672, 0x12345673, 0x12345674},
+    {0x1234567890123456, 0x1234567890123456, 0x1234567890123456, 0x1234567890123456},
+    {0.12345, 12345, 12345, 12345},
+    {0.12345678, 0.12345678, 0.12345678, 0.12345678},
+    {0x01234567, 0x01234567,0x01234567,0x01234567},
+    {{0x01234567, 0x89AB},{0x01234567, 0x89AB},{0x01234567, 0x89AB},{0x01234567, 0x89AB}},
+    {{0x01234567, 0x89ABCDEF},{0x01234567, 0x89ABCDEF},{0x01234567, 0x89ABCDEF}}
 };
 
 UINT8 gDstDataBuffer[1500];

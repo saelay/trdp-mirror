@@ -149,6 +149,23 @@ typedef struct
     UINT32  tv_usec;        /**< Micro seconds (max. value 999999)				*/
 } VOS_TIME_T;
 
+
+#ifndef TIMEDATE32
+#define TIMEDATE32 UINT32
+#endif
+
+#ifndef TIMEDATE48
+typedef struct
+{
+    UINT32  sec;         /**< full seconds                                   */
+    UINT16  ticks;        /**< Micro seconds (max. value 999999)				*/
+} TIMEDATE48;
+#endif
+
+#ifndef TIMEDATE64
+#define TIMEDATE64 VOS_TIME_T
+#endif
+
 /***********************************************************************************************************************
  * PROTOTYPES
  */
