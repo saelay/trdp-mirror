@@ -80,14 +80,14 @@ TRDP_DATASET_T gDataSet993 =
     }
 };
 
-TRDP_DATASET_T gDataSet999 =
+TRDP_DATASET_T gDataSet1000 =
 {
-    999,        /*	dataset/com ID  */
+    1000,        /*	dataset/com ID  */
     0,          /*	reserved		*/
     65,         /*	No of elements	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
-            TRDP_BOOLEAN8,  /*	data type		*/
+            TRDP_BOOLEAN,  /*	data type		*/
             1               /*	no of elements	*/
         },
         {
@@ -151,7 +151,7 @@ TRDP_DATASET_T gDataSet999 =
             1
         },
         {
-            TRDP_BOOLEAN8,  /*	data type		*/
+            TRDP_BOOLEAN,  /*	data type		*/
             4               /*	no of elements	*/
         },
         {
@@ -219,7 +219,7 @@ TRDP_DATASET_T gDataSet999 =
             1
         },
         {
-            TRDP_BOOLEAN8,  /*	data type		*/
+            TRDP_BOOLEAN,  /*	data type		*/
             0               /*	no of elements	*/
         },
         {
@@ -349,6 +349,19 @@ TRDP_DATASET_T gDataSet999 =
     }
 };
 
+TRDP_DATASET_T gDataSet1001 =
+{
+    1001,       /*	dataset/com ID  */
+    0,          /*	reserved		*/
+    1,         /*	No of elements, var size	*/
+    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+        {
+            TRDP_UINT8,
+            0
+        }
+    }
+};
+
 struct myDataSet990
 {
     UINT8   level;
@@ -419,11 +432,11 @@ struct myDataSet1000
     INT16   int16_0[4];
     UINT16  size_int32;
     INT32   int32_0[4];
-    UINT16  size_int32;
-    INT64   int64_0[4];
     UINT16  size_int64;
-    UINT8   uint8_0[4];
+    INT64   int64_0[4];
     UINT16  size_uint8;
+    UINT8   uint8_0[4];
+    UINT16  size_uint16;
     UINT16  uint16_0[4];
     UINT16  size_uint32;
     UINT32  uint32_0[4];
@@ -440,7 +453,7 @@ struct myDataSet1000
     UINT16  size_timedate64;
     TIMEDATE64  timedate64_0[4];
     struct myDataSet993 ds;
-} gMyDataSet999 =
+} gMyDataSet1000 =
 {
     1,                               /* BOOL8 */
     'A',
@@ -462,7 +475,7 @@ struct myDataSet1000
     "Hello old World",
     {0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x0040, 0x0041, 0x0042, 0x0043, 0x0044, 0},
     {0x12, 0x34, 0x55, 0x78},
-    {0x1234, 0x5678, 0x9ABC, 0xDEF0}
+    {0x1234, 0x5678, 0x9ABC, 0xDEF0},	/* index == 20	*/
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     {0x123456789ABCDEF1, 0x123456789ABCDEF2, 0x123456789ABCDEF3, 0x123456789ABCDEF4},
     {0x01, 0x23, 0x45, 0x67},
@@ -473,7 +486,7 @@ struct myDataSet1000
     {0.12345671, 0.12345672, 0.12345673, 0.12345674},
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     {{0x12345671, 0x89A1},{0x12345672, 0x89A2},{0x12345673, 0x89A3},{0x12345674, 0x89A4}},
-    {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}}
+    {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
     4,
     {1,0,1,0},                       /* BOOL8 array var size */
     16,
@@ -509,6 +522,21 @@ struct myDataSet1000
     {1, {2, {3, {4, "Nested Datasets"}}}}
 };
 
+struct myDataSet1001
+{
+	UINT16	size;
+	UINT8	array[4];
+} gMyDataSet1001 =
+{
+    4,
+    {1,0,1,0}                       /* UINT8 array var size */
+};
+
+TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
+    {1000, 1000},
+    {1001, 1001}
+};
+
 UINT8 gDstDataBuffer[1500];
 
 int main ()
@@ -518,12 +546,12 @@ int main ()
     TRDP_ERR_T  err;
     UINT32      bufSize;
 
-    err = tau_initMarshall((void *)&refCon, 1, &gDataSet1000);
+    err = tau_initMarshall((void *)&refCon, 2, gComIdMap, 1, &gDataSet1001);
 
     bufSize = sizeof(gDstDataBuffer);
     memset(gDstDataBuffer, 0, bufSize);
 
-    err = tau_marshall(refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize);
+    err = tau_marshall (refCon, 1001, (UINT8 *) &gMyDataSet1001, gDstDataBuffer, &bufSize);
 
     printf("ComID: 0x%0X\n", gDataSet1000.id);
     printf("  INT8 0x%02hhx,  INT16 0x%04hx,  INT32 0x%04x,  INT64 0x%08llx\n",
@@ -536,10 +564,9 @@ int main ()
            gMyDataSet1000.uint16_1,
            gMyDataSet1000.uint32_1,
            gMyDataSet1000.uint64_1);
-    printf(" float %f, double %lf String '%s'\n",
+    printf(" float %f, double %lf\n",
            gMyDataSet1000.float32_1,
-           gMyDataSet1000.float64_1,
-           gMyDataSet1000.string);
+           gMyDataSet1000.float64_1);
 
     for (index = 0; index < 8; index++)
     {
