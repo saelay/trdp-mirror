@@ -415,8 +415,8 @@ TRDP_ERR_T  trdp_pdReceive (
 
         /*  Has the data changed?   */
         informUser = memcmp(pNewElement->data, pExistingElement->data, pNewElement->dataSize);
-
-        /*	Get the current time and compute the next time this packet should be received.	*/
+        
+	/*	Get the current time and compute the next time this packet should be received.	*/
         vos_getTime(&pExistingElement->timeToGo);
         vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
         
@@ -563,12 +563,12 @@ TRDP_ERR_T trdp_pdCheck (
         vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
         err = TRDP_WIRE_ERR;
     }
-
     /*	Check Data CRC (FCS)	*/
     else if (pPacket->datasetLength > 0)
     {
-        myCRC = vos_crc32(myCRC, (UINT8 *)pPacket + sizeof(PD_HEADER_T), pPacket->datasetLength);
-
+	myCRC = 0; // reset the initialization value for the CRC
+        myCRC = vos_crc32(myCRC, (UINT8 *)pPacket + sizeof(PD_HEADER_T), vos_ntohl(pPacket->datasetLength));
+	
         if (*pDataFCS != MAKE_LE(myCRC))
         {
             vos_printf(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
