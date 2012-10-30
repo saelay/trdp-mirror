@@ -23,7 +23,7 @@ vpath %.c src/common src/example src/vos/common $(VOS_PATH) test
 vpath %.h src/api src/vos/api src/common src/vos/common
 
 INCPATH = src/api
-VOS_INCPATH = src/vos/api
+VOS_INCPATH = src/vos/api -I src/common
 BUILD_PATH = bld/$(TARGET_VOS)
 
 ifdef TARGET
@@ -76,7 +76,7 @@ all:		outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello
-test:		outdir $(OUTDIR)/test_server # $(OUTDIR)/test_client
+test:		outdir $(OUTDIR)/test_server $(OUTDIR)/test_client
 doc:		doc/latex/refman.pdf
 
 $(OUTDIR)/trdp_if.o:	trdp_if.c
@@ -119,8 +119,16 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/test_server:   test_server_main.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
+			@$(ECHO) ' ### Building test server application $(@F)'
 			$(CC) test/test_server_main.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/test_client:   test_client_main.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building test client application $(@F)'
+			$(CC) test/test_client_main.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
