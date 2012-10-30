@@ -556,8 +556,8 @@ TRDP_ERR_T trdp_pdCheck (
     }
 
     /*	Check type	*/
-    else if (vos_ntohs(pPacket->msgType) != TRDP_MSG_PD ||
-             vos_ntohs(pPacket->msgType) != TRDP_MSG_PR ||
+    else if (vos_ntohs(pPacket->msgType) != TRDP_MSG_PD &&
+             vos_ntohs(pPacket->msgType) != TRDP_MSG_PR &&
              vos_ntohs(pPacket->msgType) != TRDP_MSG_PE)
     {
         vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
