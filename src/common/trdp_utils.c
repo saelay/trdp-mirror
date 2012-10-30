@@ -261,6 +261,7 @@ TRDP_ERR_T  trdp_requestSocket (
     VOS_SOCK_OPT_T  sock_options;
     INT32           index, emptySock = 0;
     TRDP_ERR_T      err = TRDP_NO_ERR;
+    UINT32	    port = 0; /* port, where the server listens on FIXME (this could be found somewhere in the configuration file)*/
 
     if (iface == NULL || params == NULL || pIndex == NULL)
     {
@@ -318,7 +319,12 @@ TRDP_ERR_T  trdp_requestSocket (
         switch (usage)
         {
             case TRDP_SOCK_PD:
+		port = 20548; //FIXME configuration file!
             case TRDP_SOCK_MD_UDP:
+		if (port <= 0) // only set the port, when this is a MD communication
+		{
+			port = 20550; //FIXME configuration file!
+		}
                 if (vos_sockOpenUDP(&iface[index].sock,
                                     &sock_options) != VOS_NO_ERR)
                 {
@@ -330,7 +336,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     iface[index].usage = 1;
                     *pIndex = index;
-                    vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
+                    vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
                 }
                 break;
             case TRDP_SOCK_MD_TCP:
