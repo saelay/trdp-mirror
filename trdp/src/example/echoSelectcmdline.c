@@ -47,6 +47,7 @@
 
 #define GBUFFER_SIZE   128
 CHAR8 gBuffer[GBUFFER_SIZE] = "Hello World";
+CHAR8 gInputBuffer[GBUFFER_SIZE] = "";
 
 
 /**********************************************************************************************************************/
@@ -98,12 +99,12 @@ void myPDcallBack (
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
-            printf("ComID %d received\n", pMsg->comId);
+            printf("> ComID %d received\n", pMsg->comId);
             if (pData)
             {
-                memcpy(gBuffer, pData,
-                       ((sizeof(gBuffer) <
-                         dataSize) ? sizeof(gBuffer) : dataSize));
+                memcpy(gInputBuffer, pData,
+                       ((sizeof(gInputBuffer) <
+                         dataSize) ? sizeof(gInputBuffer) : dataSize));
             }
             break;
 
@@ -200,12 +201,6 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-
-
-
-
-
-
     /*	Init the library for callback operation	(PD only) */
     if (tlc_init(dbgOut,                            /* actually printf	*/
                  &dynamicConfig                    /* Use application supplied memory	*/
@@ -235,7 +230,7 @@ int main (int argc, char * *argv)
                          NULL,
                          PD_COMID1,                 /*	ComID								*/
                          0,                         /*	topocount: local consist only		*/
-                         0 /* no source filtering, was 'destIP' before */,
+                         destIP,
                          0,
                          0,                         /*	Default destination	(or MC Group)   */
                          PD_COMID1_TIMEOUT,         /*	Time out in us						*/
@@ -342,7 +337,8 @@ int main (int argc, char * *argv)
             //printf("looping...\n");
         }
 
-        sprintf((char *)gBuffer, "Ping for the %dth. time.\0", hugeCounter++);
+        /* Update the information, that is sent */
+        sprintf((char *)gBuffer, "Ping for the %dth. time.", hugeCounter++);
         err = tlp_put(appHandle, pubHandle, (const UINT8 *) gBuffer, strlen(gBuffer)  + 1 /* +1 for the ending zero */);
         if (err != TRDP_NO_ERR)
         {
@@ -350,6 +346,14 @@ int main (int argc, char * *argv)
             rv = 1;
             break;
         }
+
+        /* Display received information */
+        if (gInputBuffer[0] > 0) //FIXME Better solution would be: global flag, that is set in the callback function to indicate new data
+        {
+            printf("# %s ", gInputBuffer);
+            memset(gInputBuffer, 0, sizeof(gInputBuffer));
+        }
+
 
     }   /*	Bottom of while-loop	*/
 
