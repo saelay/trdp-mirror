@@ -11,6 +11,9 @@
 	
    <bus-interface-list>
       <bus-interface network-id="1" name="eth0">
+		  <telegram name="send_hello" com-id="1000" data-set-id="1000">
+			<!-- inside "md-parameter" or "pd-parameter" with optional stuff -->
+         </telegram>
          <telegram name="telgr1" com-id="1001" data-set-id="1" >
              <!-- inside "md-parameter" or "pd-parameter" with optional stuff -->
          </telegram>
@@ -18,7 +21,7 @@
            <source id="1" uri1="dev1.car1.consist1.lTrain" uri2="dev2.car1.conist1.lTrain" name="test connection 1">
                <sdt-parameter smi1="1234" udv="56" rx-period="500" tx-period="2000" />
            </source>
-           <destination id="10" uri="dev3.car1.conist1.lTrain" ><name="Another connection">
+           <destination id="10" uri="dev3.car1.conist1.lTrain" name="Another connection">
 	<sdt-parameter smi1="2345" udv="67" rx-period="100" tx-period="500" />
            </destination>
          </telegram>
@@ -52,10 +55,9 @@ UINT32		10	Unsigned integer, 32 bit
 UINT64		11	Unsigned integer, 64 bit
 REAL32		12	Floating point real, 32 bit
 REAL64		13	Floating point real, 64 bit
-STRING		14	Zero-terminated array of CHAR8, fixed size
-TIMEDATE32	15	32 bit UNIX time
-TIMEDATE48	16	48 bit TCN time (32 bit seconds and 16 bit ticks)
-TIMEDATE64	17	32 bit seconds and 32 bit microseconds
+TIMEDATE32	14	32 bit UNIX time
+TIMEDATE48	15	48 bit TCN time (32 bit seconds and 16 bit ticks)
+TIMEDATE64	16	32 bit seconds and 32 bit microseconds
    -->
    <data-set-list>
       <data-set name="hello_world_dataset" id="1">
@@ -67,7 +69,11 @@ TIMEDATE64	17	32 bit seconds and 32 bit microseconds
         <element name="ip" type="8" array-size="4" />
         <element name="load" type="5" unit="load-unit" scale="0.01"  offset="-1" />
       </data-set>
-      <data-set name="marshall test" id="1000">
+	  <data-set name="send_hello_data" id="1000">
+        <element name="string"  type="2" array-size="0" />
+		<element name="string2" type="2" array-size="0" />
+      </data-set>
+      <data-set name="marshall_test" id="3">
         <element name="INT8" type="4" />
         <element name="INT16" type="5" />
         <element name="INT32" type="6" />
