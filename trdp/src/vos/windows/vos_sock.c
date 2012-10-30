@@ -36,7 +36,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <winsock2.h>
-#include <ws2tcpip.h>
+#include <Ws2tcpip.h>
 #include <lm.h>
 
 #include "vos_utils.h"
@@ -52,6 +52,11 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
+#ifndef UNICODE
+#define UNICODE
+#endif
+
+#define WIN32_LEAN_AND_MEAN
 
 /***********************************************************************************************************************
  *  LOCALS
@@ -268,7 +273,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 		return VOS_SOCK_ERR;
     }
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP)) == INVALID_SOCKET )
+    if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET )
     {
         vos_printf(VOS_LOG_ERROR, "socket call failed\n");
         return VOS_SOCK_ERR;
@@ -615,21 +620,20 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   *pSize,
     UINT32  *pIPAddr)
 {
-    struct sockaddr_in  srcAddr;
+    struct sockaddr_in			srcAddr;
     int                 sockLen = sizeof(srcAddr);
     int                 rcvSize = 0;
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
     rcvSize = recvfrom(sock,
-                       pBuffer,
+                       (char *) pBuffer,
                        *pSize,
                        0,
-                       (struct sockaddr *) &srcAddr,
+                       (SOCKADDR *) &srcAddr,
                        &sockLen);
 
     *pIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
-
     if (rcvSize == SOCKET_ERROR && errno == EAGAIN)
     {
         *pSize = 0;
@@ -638,7 +642,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     else if (rcvSize == SOCKET_ERROR)
     {
         *pSize = 0;
-        vos_printf(VOS_LOG_ERROR, "recvfrom failed (%s)\n", strerror(errno));
+        vos_printf(VOS_LOG_ERROR, "recvfrom failed [rcvSize=%d] (%s)\n", rcvSize, strerror(errno));
         return VOS_IO_ERR;
     }
 

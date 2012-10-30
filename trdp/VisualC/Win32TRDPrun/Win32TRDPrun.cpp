@@ -114,13 +114,12 @@ int main (int argc, char *argv[])
 	/*ip[3] = 127;
 	ip[2] = 0;
 	ip[1] = 0;
-	ip[0] = 1;*/
-	// set it to the IP address of the virtual machine
-	ip[3] = 192;
-	ip[2] = 168;
-	ip[1] = 56;
-	ip[0] = 15;
+	ip[0] = 1;
 	destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+	*/
+
+	// set it to the IP address of the virtual machine
+	destIP = 0x0A000065; // 10.0.0.101
     
 	if (destIP == 0)
     {
@@ -187,6 +186,7 @@ int main (int argc, char *argv[])
         INT32   noDesc;
         struct timeval  tv;
         struct timeval  max_tv = {0, 100000};
+		int textLength;
 
         /*
            Prepare the file descriptor set for the select call.
@@ -240,14 +240,16 @@ int main (int argc, char *argv[])
         }
         else
         {
-            printf("looping...\n");
+			// do some other stuff bv  
+            //printf("looping...\n");
         }
 
-        sprintf((char *)outputBuffer, "Just a Counter: %d", hugeCounter++);
+        textLength = sprintf((char *)outputBuffer, "Just a Counter: %d", hugeCounter++) + 1 /* one is needed to mark the end of the string*/;
+		textLength += sprintf((char *) (outputBuffer + textLength), "TRDP Stack %s (%s - %s)", APP_VERSION, __DATE__, __TIME__) + 1 /* one is needed to mark the end of the string*/;
 
         err =
             tlp_put(appHandle, pubHandle, outputBuffer,
-                    strlen((char *)outputBuffer));
+                    textLength);
         if (err != TRDP_NO_ERR)
         {
             printf("put pd error\n");
