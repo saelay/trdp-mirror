@@ -1,6 +1,6 @@
 /**********************************************************************************************************************/
 /**
- * @file            test_server_main.c
+ * @file            test_client_main.c
  *
  * @brief           Test sender/receiver/responder for TRDP
  *
@@ -8,7 +8,7 @@
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
- * @author          Bernd Loehr, NewTec GmbH
+ * @author          Florian Weispfenning
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
@@ -33,7 +33,7 @@
 #include "test_server.h"
 
 
-CHAR8   gBuffer[32]     = "Hello World";
+CHAR8   gBuffer[32]     = "Hello Server from Client";
 BOOL    gKeepOnRunning  = TRUE;
 
 /**********************************************************************************************************************/
@@ -142,40 +142,33 @@ int main (int argc, char * *argv)
     /*  Subscribe to control PD     */
 
     memset(gBuffer, 0, sizeof(gBuffer));
-
     err = tlp_subscribe( appHandle,                /*   our application identifier          */
                          &subHandle,               /*   our subscription identifier         */
                          NULL,
-                         PD_TEST_GEN_UNI_COMID,       /*   ComID                               */
+                         PD_TEST1_UNI_COMID,       /*   ComID                               */
                          0,                        /*   topocount: local consist only       */
-                         0 /* noo filtering PD_TEST_GEN_UNI_SRC_IP*/,      /*   Source IP filter                    */
+                         0 /* noo filtering PD_TEST1_UNI_DST_IP*/,      /*   Source IP filter  (invert IP, because we are the client)  ?!?                  */
                          0,
                          0,                        /*   Default destination	(or MC Group)   */
                          PD_TEST_GEN_UNI_TIMEOUT,     /*   Time out in us                      */
                          TRDP_TO_SET_TO_ZERO,      /*   delete invalid data	on timeout      */
-                         sizeof(gMyDataSet999)); /*   net data size                       */
+                         sizeof(gMyDataSet20001)); /*   net data size                       */
 
-    if (err != TRDP_NO_ERR)
-    {
-        printf("tlp_subscribe error\n");
-        tlc_terminate();
-        return 1;
-    }
 
     /*	Publish Unicast PD  */
 
     err = tlp_publish(appHandle,                    /*    our application identifier  */
                       &pubHandleUC,                 /*    our pulication identifier   */
-                      PD_TEST1_UNI_COMID,           /*    ComID to send               */
+                      PD_TEST_GEN_UNI_COMID,        /*    ComID to send               */
                       0,                            /*    local consist only          */
                       0,                            /*    default source IP           */
-                      PD_TEST1_UNI_DST_IP,          /*    where to send to            */
-                      PD_TEST1_UNI_CYCLE,           /*    Cycle time in ms            */
+                      PD_TEST_GEN_UNI_SRC_IP,       /*    where to send to    (invert IP, because we are the client)        */
+                      PD_TEST_GEN_UNI_CYCLE,        /*    Cycle time in ms            */
                       0,                            /*    not redundant               */
                       TRDP_FLAGS_CALLBACK,          /*    Use callback for errors     */
                       NULL,                         /*    default qos and ttl         */
-                      (UINT8 *)&gMyDataSet20001,    /*    initial data                */
-                      sizeof(gMyDataSet20001),      /*    data size                   */
+                      (UINT8 *)&gMyDataSet999,      /*    initial data                */
+                      sizeof(gMyDataSet999),        /*    data size                   */
                       FALSE,                        /*    no ladder                   */
                       0);                           /*    no ladder                   */
 
@@ -187,22 +180,22 @@ int main (int argc, char * *argv)
         return 1;
     }
 
+
     /*
      Enter the main processing loop.
      */
     while (gKeepOnRunning)
     {
+        fd_set  rfds;
         INT32   noOfDesc;
         struct timeval  tv;
         struct timeval  max_tv = {0, 100000};
-    	fd_set  rfds;
-	
+
         /*
          Prepare the file descriptor set for the select call.
          Additional descriptors can be added here.
          */
         FD_ZERO(&rfds);
-
         /*
          Compute the min. timeout value for select and return descriptors to wait for.
          This way we can guarantee that PDs are sent in time...
@@ -228,9 +221,10 @@ int main (int argc, char * *argv)
          Select() will wait for ready descriptors or timeout,
          what ever comes first.
          */
+
         rv = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
-        
-	/*
+
+        /*
          Check for overdue PDs (sending and receiving)
          Send any PDs if it's time...
          Detect missing PDs...
@@ -255,8 +249,8 @@ int main (int argc, char * *argv)
         }
 
         /*  Advance counter */
-	gMyDataSet20001.uint16_1++;
-        tlp_put(appHandle, pubHandleUC, (const UINT8 *) &gMyDataSet20001, sizeof(gMyDataSet20001));
+	gMyDataSet999.uint16_1++; // update the frame (increment the boolean)
+        tlp_put(appHandle, pubHandleUC, (const UINT8 *) &gMyDataSet999, sizeof(gMyDataSet999));
 
     }   /*	Bottom of while-loop */
 
@@ -264,7 +258,6 @@ int main (int argc, char * *argv)
      *	We always clean up behind us!
      */
     tlp_unpublish(appHandle, pubHandleUC);
-    tlp_unsubscribe(appHandle, subHandle);
 
     tlc_closeSession(appHandle);
     tlc_terminate();
