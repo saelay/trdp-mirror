@@ -75,7 +75,7 @@ endif
 all:		outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
-demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello
+demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello
 test:		outdir $(OUTDIR)/test_server $(OUTDIR)/test_client
 doc:		doc/latex/refman.pdf
 
@@ -101,6 +101,16 @@ $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			    
 			$(STRIP) $@
 
+			
+$(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(SUBDIRS)/example/echoSelectcmdline.c \
+				$(CFLAGS) $(INCLUDES) -o $@\
+				-ltrdp \
+			    $(LDFLAGS) \
+			    
+			$(STRIP) $@
+			
 $(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/echoPolling.c \
