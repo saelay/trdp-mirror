@@ -944,6 +944,10 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     }
     vos_mutexUnlock(appHandle->mutex);
 
+
+    //FIXME set a maximumount of sockets to check
+    *pNoDesc = VOS_MAX_SOCKET_CNT;
+
     return TRDP_NO_ERR;
 }
 
@@ -1046,7 +1050,6 @@ EXT_DECL TRDP_ERR_T tlc_process (
     else if (pCount != NULL && *pCount > 0)
     {
         /*    Check the sockets for received PD packets    */
-
         for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
         {
             if (iterPD->socketIdx != -1 &&
