@@ -39,12 +39,13 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+
+#ifdef __linux
+#include <linux/if.h>
+#include <linux/in.h>
+#else
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-#ifdef __linux 
-#include <linux/if.h>
-#else
 #include <net/if.h>
 #endif
 
@@ -617,6 +618,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
                        &sockLen);
 
     *pIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
+    vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr);
 
     if (rcvSize == -1 && errno == EAGAIN)
     {
