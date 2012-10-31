@@ -40,7 +40,7 @@
 typedef struct
 {
     INT32       level;
-    const UINT8 *pSrc;      /**< source pointer			*/
+    UINT8 		*pSrc;      /**< source pointer			*/
     UINT8       *pDst;      /**< destination pointer	*/
     UINT8       *pDstEnd;   /**< last destination		*/
 } TAU_MARSHALL_INFO_T;
@@ -52,7 +52,7 @@ typedef struct
 static TRDP_COMID_DSID_MAP_T   *sComIdDsIdMap  = NULL;
 static UINT32                  sNumComId = 0;
 
-static TRDP_DATASET_T          *sDataSets  = NULL;
+static TRDP_DATASET_T          **sDataSets  = NULL;
 static UINT32                  sNumEntries = 0;
 
 /***********************************************************************************************************************
@@ -67,12 +67,13 @@ static UINT32                  sNumEntries = 0;
  *
  *  @retval         aligned pointer
  */
-static inline const UINT8 *alignePtr (
+static inline UINT8 *alignePtr (
     const UINT8 *pSrc,
     UINT32      alignment)
 {
     alignment--;
-    return ((UINT32) pSrc & alignment) ? pSrc + alignment : pSrc;
+
+    return (UINT8 *) (((UINT32) pSrc + alignment) & ~alignment);
 }
 
 /**********************************************************************************************************************/
@@ -93,28 +94,32 @@ static inline void unpackedCopy64 (
 #if __BIG_ENDIAN__
 {
     UINT32  size    = noOfItems * sizeof(UINT64);
-    UINT8   *pDst8  = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
+    UINT8   *pDst8  = alignePtr(*ppDst, ALIGNOF(UINT64));
     memcpy(pDst8, *ppSrc, size);
     *ppSrc  = (UINT8 *) *ppSrc + size;
     *ppDst  = (UINT8 *) pDst8 + size;
 }
 #elif __LITTLE_ENDIAN__
 {
-    UINT8 *pSrc8 = (UINT8 *) (((UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64))) + 1);
-    *ppSrc = (UINT8 *) pSrc8;
+    UINT8   *pDst8 = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
+    UINT8   *pSrc8 = *ppSrc;
     while (noOfItems--)
     {
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
+        *pDst8++ = *(pSrc8 + 7);
+        *pDst8++ = *(pSrc8 + 6);
+        *pDst8++ = *(pSrc8 + 5);
+        *pDst8++ = *(pSrc8 + 4);
+        *pDst8++ = *(pSrc8 + 3);
+        *pDst8++ = *(pSrc8 + 2);
+        *pDst8++ = *(pSrc8 + 1);
+        *pDst8++ = *pSrc8;
+        pSrc8 += 8;
     }
+    *ppSrc = (UINT8 *) pSrc8;
+    *ppDst = (UINT8 *) pDst8;
 }
 #else
+	#error "Endianess not defined"
 #endif
 
 /**********************************************************************************************************************/
@@ -132,56 +137,22 @@ static inline void packedCopy64 (
     UINT8   * *ppDst,
     UINT32  noOfItems)
 
-#if __BIG_ENDIAN__
-{
-    UINT8 *pSrc8 = (UINT8 *) alignePtr(*ppSrc, ALIGNOF(UINT64));
-    while (noOfItems--)
-    {
-        **ppDst++   = *pSrc8++;
-        **ppDst++   = *pSrc8++;
-        **ppDst++   = *pSrc8++;
-        **ppDst++   = *pSrc8++;
-        **ppDst++   = *pSrc8++;
-        **ppDst++   = *pSrc8++;
-        **ppDst++   = *pSrc8++;
-        **ppDst++   = *pSrc8++;
-    }
-    *ppSrc = (UINT8 *) pSrc8;
-}
-#elif __LITTLE_ENDIAN__
-{
-    UINT8 *pSrc8 = (UINT8 *) (((UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64))) + 1);
-    *ppSrc = (UINT8 *) pSrc8;
-    while (noOfItems--)
-    {
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-        *(*ppDst)++ = *--pSrc8;
-    }
-}
-#else
 {
     UINT64 *pSrc64 = (UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64));
     while (noOfItems--)
     {
-        *pDst++ = (UINT8) (*pSrc64 >> 56);
-        *pDst++ = (UINT8) (*pSrc64 >> 48);
-        *pDst++ = (UINT8) (*pSrc64 >> 40);
-        *pDst++ = (UINT8) (*pSrc64 >> 32);
-        *pDst++ = (UINT8) (*pSrc64 >> 24);
-        *pDst++ = (UINT8) (*pSrc64 >> 16);
-        *pDst++ = (UINT8) (*pSrc64 >> 8);
-        *pDst++ = (UINT8) (*pSrc64 & 0xFF);
+        *(*ppDst)++ = (UINT8) (*pSrc64 >> 56);
+        *(*ppDst)++ = (UINT8) (*pSrc64 >> 48);
+        *(*ppDst)++ = (UINT8) (*pSrc64 >> 40);
+        *(*ppDst)++ = (UINT8) (*pSrc64 >> 32);
+        *(*ppDst)++ = (UINT8) (*pSrc64 >> 24);
+        *(*ppDst)++ = (UINT8) (*pSrc64 >> 16);
+        *(*ppDst)++ = (UINT8) (*pSrc64 >> 8);
+        *(*ppDst)++ = (UINT8) (*pSrc64 & 0xFF);
         pSrc64++;
     }
-    pSrc = (UINT8 *) pSrc64;
+    *ppSrc = (UINT8 *) pSrc64;
 }
-#endif
 
 /**********************************************************************************************************************/
 /**	Dataset compare function
@@ -211,6 +182,33 @@ static int dataset_compare (
     }
 }
 
+/**********************************************************************************************************************/
+/**	Dataset compare function
+ *
+ *  @param[in]      pArg1		Pointer to key
+ *  @param[in]      pArg2		Pointer to array element
+ *
+ *  @retval         -1 if arg1 < arg2
+ *  @retval          0 if arg1 == arg2
+ *  @retval          1 if arg1 > arg2
+ */
+static int dataset_compare_deref (
+    const void  *pArg1,
+    const void  *pArg2)
+{
+    if (((TRDP_DATASET_T *)pArg1)->id < (*(TRDP_DATASET_T **)pArg2)->id)
+    {
+        return -1;
+    }
+    else if (((TRDP_DATASET_T *)pArg1)->id > (*(TRDP_DATASET_T **)pArg2)->id)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 /**********************************************************************************************************************/
 /**	ComId/dataset mapping compare function
@@ -245,20 +243,48 @@ static int comId_compare (
 /**	Return the dataset for the comID
  *
  *
- *  @param[in]      comID           Pointer to align
+ *  @param[in]      comID           
+ *
+ *  @retval         NULL if not found
+ *  @retval         pointer to dataset
+ */
+static TRDP_DATASET_T *find_DS_from_ComId (
+    UINT32 comID)
+{
+    TRDP_COMID_DSID_MAP_T	key1 = {comID, 0};
+    TRDP_DATASET_T 			**key3;	
+    
+	TRDP_DATASET_T *key2 = vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+    if (key2 != NULL)
+    {
+    	key3 = vos_bsearch(key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+        if (key3 != NULL)
+        {
+            return *key3;
+        }
+    }
+
+    return NULL;
+}
+
+/**********************************************************************************************************************/
+/**	Return the dataset for the datasetID
+ *
+ *
+ *  @param[in]      datasetID           dataset ID to find
  *
  *  @retval         NULL if not found
  *  @retval         pointer to dataset
  */
 static TRDP_DATASET_T *find_DS (
-    UINT32 comID)
+    UINT32 datasetID)
 {
-    TRDP_COMID_DSID_MAP_T	key1 = {comID, 0};
-    
-	TRDP_DATASET_T *key2 = vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
-    if (key2 != NULL)
+	TRDP_DATASET_T  key2 = {datasetID, 0, 0};
+    TRDP_DATASET_T  **key3;
+  	key3 = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+    if (key3 != NULL)
     {
-    	return vos_bsearch(key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T), dataset_compare);
+        return *key3;
     }
 
     return NULL;
@@ -285,7 +311,7 @@ EXT_DECL TRDP_ERR_T marshall (
     TRDP_ERR_T  err;
     UINT16      index;
     UINT32      var_size    = 0;
-    UINT8 const *pSrc       = pInfo->pSrc;
+    UINT8       *pSrc;
     UINT8       *pDst       = pInfo->pDst;
 
     /* Restrict recursion */
@@ -294,6 +320,10 @@ EXT_DECL TRDP_ERR_T marshall (
     {
         return TRDP_STATE_ERR;
     }
+
+	/*	Align on struct boundary first	*/
+    
+	pSrc = alignePtr(pInfo->pSrc, ALIGNOF(struct {UINT8 a;}));
 
     /*	Loop over all datasets in the array	*/
 
@@ -307,7 +337,7 @@ EXT_DECL TRDP_ERR_T marshall (
         }
 
         /*	Is this a composite type?	*/
-        if (pDataset->pElement[index].type > 1000)
+        if (pDataset->pElement[index].type > TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
             {
@@ -377,10 +407,9 @@ EXT_DECL TRDP_ERR_T marshall (
                     pSrc = (UINT8 *) pSrc32;
                     break;
                 }
-                case TRDP_TIMEDATE48:
+                case TRDP_TIMEDATE64:
                 {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
-                    UINT16 *pSrc16;
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE64 a;}));
                     while (noOfItems-- > 0)
                     {
                         *pDst++ = (UINT8) (*pSrc32 >> 24);
@@ -388,25 +417,50 @@ EXT_DECL TRDP_ERR_T marshall (
                         *pDst++ = (UINT8) (*pSrc32 >> 8);
                         *pDst++ = (UINT8) (*pSrc32 & 0xFF);
                         pSrc32++;
-                        pSrc16 = (UINT16*) pSrc32;
-                        *pDst++ = (UINT8) (*pSrc16 >> 8);
-                        *pDst++ = (UINT8) (*pSrc16 & 0xFF);
+                        *pDst++ = (UINT8) (*pSrc32 >> 24);
+                        *pDst++ = (UINT8) (*pSrc32 >> 16);
+                        *pDst++ = (UINT8) (*pSrc32 >> 8);
+                        *pDst++ = (UINT8) (*pSrc32 & 0xFF);
                         pSrc32++;
                     }
                     pSrc = (UINT8 *) pSrc32;
                     break;
                 }
+                case TRDP_TIMEDATE48:
+                {
+                	/*	This is not a base type but a structure	*/
+                    UINT32 *pSrc32;
+                    UINT16 *pSrc16;
+                    while (noOfItems-- > 0)
+                    {
+                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE48 a;}));
+                        *pDst++ = (UINT8) (*pSrc32 >> 24);
+                        *pDst++ = (UINT8) (*pSrc32 >> 16);
+                        *pDst++ = (UINT8) (*pSrc32 >> 8);
+                        *pDst++ = (UINT8) (*pSrc32 & 0xFF);
+                        pSrc32++;
+                        pSrc16 = (UINT16 *) alignePtr((UINT8*) pSrc32, ALIGNOF(UINT16));
+                        *pDst++ = (UINT8) (*pSrc16 >> 8);
+                        *pDst++ = (UINT8) (*pSrc16 & 0xFF);
+                        pSrc32++;
+                    	pSrc = (UINT8 *) pSrc32;
+                    }
+                    break;
+                }
                 case TRDP_INT64:
                 case TRDP_UINT64:
                 case TRDP_REAL64:
-                case TRDP_TIMEDATE64:
-                    packedCopy64((UINT8 * *) &pSrc, &pDst, noOfItems);
+                    packedCopy64( &pSrc, &pDst, noOfItems);
                     break;
                 default:
                     break;
             }
         }
+    	pInfo->pDst = pDst;
+    	pInfo->pSrc = pSrc;
     }
+    
+    
     return TRDP_NO_ERR;
 }
 
@@ -430,7 +484,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
     TRDP_ERR_T  err;
     UINT16      index;
     UINT32      var_size    = 0;
-    UINT8 const *pSrc       = pInfo->pSrc;
+    UINT8       *pSrc       = pInfo->pSrc;
     UINT8       *pDst       = pInfo->pDst;
 
     /* Restrict recursion */
@@ -451,7 +505,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
             noOfItems = var_size;
         }
         /*	Is this a composite type?	*/
-        if (pDataset->pElement[index].type > 1000)
+        if (pDataset->pElement[index].type > TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
             {
@@ -493,7 +547,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
                     UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
                     while (noOfItems-- > 0)
                     {
-                        *pDst16 = *pSrc++ >> 8;
+                        *pDst16 = *pSrc++ << 8;
                         *pDst16 += *pSrc++;
                         /*	possible variable source size	*/
                         var_size = *pDst16;
@@ -510,9 +564,9 @@ EXT_DECL TRDP_ERR_T unmarshall (
                     UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
                     while (noOfItems-- > 0)
                     {
-                        *pDst32 = *pSrc++ >> 24;
-                        *pDst32 += *pSrc++ >> 16;
-                        *pDst32 += *pSrc++ >> 8;
+                        *pDst32 = *pSrc++ << 24;
+                        *pDst32 += *pSrc++ << 16;
+                        *pDst32 += *pSrc++ << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
                     }
@@ -521,34 +575,59 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 }
                 case TRDP_TIMEDATE48:
                 {
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
+                	/*	This is not a base type but a structure	*/
+                    UINT32 *pDst32;
                     UINT16 *pDst16;
                     while (noOfItems-- > 0)
                     {
-                        *pDst32 = *pSrc++ >> 24;
-                        *pDst32 += *pSrc++ >> 16;
-                        *pDst32 += *pSrc++ >> 8;
+						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE48 a;}));
+                        *pDst32 = *pSrc++ << 24;
+                        *pDst32 += *pSrc++ << 16;
+                        *pDst32 += *pSrc++ << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
                         pDst16 = (UINT16 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT16));
-                        *pDst16 = *pSrc++ >> 8;
+                        *pDst16 = *pSrc++ << 8;
                         *pDst16 += *pSrc++;
-                        pDst16++;
+                        pDst32++;
+                    	pDst = (UINT8 *) pDst32;
                     }
-                    pDst = (UINT8 *) pDst16;
+                    break;
+                }
+                case TRDP_TIMEDATE64:
+                {
+                	/*	This is not a base type but a structure	*/
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE64 a;}));
+                    while (noOfItems-- > 0)
+                    {
+                        *pDst32 = *pSrc++ << 24;
+                        *pDst32 += *pSrc++ << 16;
+                        *pDst32 += *pSrc++ << 8;
+                        *pDst32 += *pSrc++;
+                        pDst32++;
+                        pDst32 = (UINT32 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT32));
+                        *pDst32 = *pSrc++ << 24;
+                        *pDst32 += *pSrc++ << 16;
+                        *pDst32 += *pSrc++ << 8;
+                        *pDst32 += *pSrc++;
+                        pDst32++;
+                    }
+                    pDst = (UINT8 *) pDst32;
                     break;
                 }
                 case TRDP_INT64:
                 case TRDP_UINT64:
                 case TRDP_REAL64:
-                case TRDP_TIMEDATE64:
                     unpackedCopy64((UINT8 * *) &pSrc, &pDst, noOfItems);
                     break;
                 default:
                     break;
             }
         }
+    	pInfo->pDst = pDst;
+    	pInfo->pSrc = pSrc;
     }
+
     return TRDP_NO_ERR;
 }
 
@@ -565,7 +644,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
  *  @param[in]	    numComId         Number of datasets found in the configuration
  *  @param[in]	    pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
  *  @param[in]	    numDataSet       Number of datasets found in the configuration
- *  @param[in]	    pDataset         Pointer to an array of structures of type TRDP_DATASET_T
+ *  @param[in]	    pDataset         Pointer to an array of pointers to structures of type TRDP_DATASET_T
  *
  *  @retval         TRDP_NO_ERR		no error
  *  @retval         TRDP_MEM_ERR	provided buffer to small
@@ -578,7 +657,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
     UINT32                  numComId,
     TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,        
     UINT32                  numDataSet,
-    TRDP_DATASET_T          *pDataset)
+    TRDP_DATASET_T          *pDataset[])
 {
     if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
     {
@@ -597,7 +676,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
     sNumEntries = numDataSet;
 
     /* sort the table	*/
-    vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T), dataset_compare);
+    vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T*), dataset_compare);
 
     return TRDP_NO_ERR;
 }
@@ -622,7 +701,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
 EXT_DECL TRDP_ERR_T tau_marshall (
     void        *pRefCon,
     UINT32      comId,
-    const UINT8 *pSrc,
+    UINT8 		*pSrc,
     UINT8       *pDest,
     UINT32      *pDestSize)
 {
@@ -634,7 +713,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
         return TRDP_PARAM_ERR;
     }
 
-    pDataset = find_DS(comId);
+    pDataset = find_DS_from_ComId(comId);
 
     if (NULL == pDataset)   /* Not in our DB	*/
     {
@@ -669,7 +748,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 EXT_DECL TRDP_ERR_T tau_unmarshall (
     void        *pRefCon,
     UINT32      comId,
-    const UINT8 *pSrc,
+    UINT8       *pSrc,
     UINT8       *pDest,
     UINT32      *pDestSize)
 {
@@ -682,7 +761,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
         return TRDP_PARAM_ERR;
     }
 
-    pDataset = find_DS(comId);
+    pDataset = find_DS_from_ComId(comId);
 
     if (NULL == pDataset)   /* Not in our DB	*/
     {
