@@ -35,11 +35,11 @@
 /* Some sample comId definitions	*/
 
 /* Expect receiving:	*/
-#define PD_COMID1               2000
+#define PD_COMID1               1000
 #define PD_COMID1_CYCLE         100000
 #define PD_COMID1_TIMEOUT       1200000
 #define PD_COMID1_DATA_SIZE     32
-#define PD_COMID1_SRC_IP        0x0A000064      /*	Sender's IP: 10.0.0.100		*/
+#define PD_COMID1_SRC_IP        0x0       /*	Sender's IP: 10.0.0.100		*/
 
 /* Send as echo:	*/
 #define PD_COMID2               2001
@@ -103,12 +103,10 @@ void myPDcallBack (
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
-            printf("ComID %d received\n", pMsg->comId);
-            if (pData)
+            printf("ComID %d received (%d Bytes)\n", pMsg->comId, dataSize);
+            if (pData && dataSize > 0)
             {
-                memcpy(gBuffer, pData,
-                       ((sizeof(gBuffer) <
-                         dataSize) ? sizeof(gBuffer) : dataSize));
+                printf("Msg: %s\n", pData);
             }
             break;
 
@@ -139,10 +137,9 @@ int main (int argc, char * *argv)
     TRDP_SUB_T          subHandle;  /*	Our identifier to the subscription	*/
     TRDP_PUB_T          pubHandle;  /*	Our identifier to the publication	*/
     TRDP_ERR_T          err;
-    TRDP_PD_CONFIG_T    pdConfiguration =
-    {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
-     10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_PD_CONFIG_T    pdConfiguration     = {myPDcallBack, NULL, {0, 0},
+                                               TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MEM_CONFIG_T   dynamicConfig       = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
 
@@ -191,7 +188,7 @@ int main (int argc, char * *argv)
     }
 
     /*	Publish another PD		*/
-
+#if 0
     err = tlp_publish(  appHandle,                  /*	our application identifier	*/
                         &pubHandle,                 /*	our pulication identifier	*/
                         PD_COMID2,                  /*	ComID to send				*/
@@ -206,7 +203,7 @@ int main (int argc, char * *argv)
                         sizeof(gBuffer),            /*	data size					*/
                         FALSE,                      /*	no ladder					*/
                         0);                         /*	no ladder					*/
-
+#endif
 
     if (err != TRDP_NO_ERR)
     {
@@ -280,7 +277,7 @@ int main (int argc, char * *argv)
         }
         else
         {
-            printf("looping...\n");
+            //printf("looping...\n");
         }
 
     }   /*	Bottom of while-loop	*/
