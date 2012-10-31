@@ -129,9 +129,9 @@ PD_ELE_T *trdp_queueFindAddr (
     {
         /*  We match if src/dst/mc address is zero or matches */
         if (iterPD->addr.comId == addr->comId &&
-            (addr->srcIpAddr == 0 || iterPD->addr.srcIpAddr == addr->srcIpAddr) &&
-            (addr->destIpAddr == 0 || iterPD->addr.destIpAddr == addr->destIpAddr) &&
-            (addr->mcGroup == 0 || iterPD->addr.mcGroup == addr->mcGroup)
+            (iterPD->addr.srcIpAddr == 0 || iterPD->addr.srcIpAddr == addr->srcIpAddr) &&
+            (iterPD->addr.destIpAddr == 0 || iterPD->addr.destIpAddr == addr->destIpAddr) &&
+            (iterPD->addr.mcGroup == 0 || iterPD->addr.mcGroup == addr->mcGroup)
            )
         {
             return iterPD;
