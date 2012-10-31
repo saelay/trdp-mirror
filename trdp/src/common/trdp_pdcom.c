@@ -344,6 +344,7 @@ TRDP_ERR_T  trdp_pdReceive (
         return TRDP_NO_ERR;
     }
 
+
     /*  Handle statistics request  */
     if (vos_ntohl(pNewElement->frameHead.comId) == GSTAT_REQUEST_COMID)
     {
@@ -421,6 +422,9 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  This might have not been set!   */
         pExistingElement->dataSize = vos_ntohl(pNewElement->frameHead.datasetLength);
 
+        /*	Remember this sequence count value	*/
+        pExistingElement->curSeqCnt = vos_ntohl(pNewElement->frameHead.sequenceCounter);
+
         /*  Has the data changed?   */
         informUser = memcmp(pNewElement->data, pExistingElement->data, pExistingElement->dataSize);
 
@@ -431,12 +435,14 @@ TRDP_ERR_T  trdp_pdReceive (
 
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
-        pExistingElement->lastErr = TRDP_NO_ERR;
+        pExistingElement->lastErr   = TRDP_NO_ERR;
+        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
 
         if (informUser)
         {
             /*  Copy some values from the old entry */
             pNewElement->addr       = pExistingElement->addr;
+            pNewElement->curSeqCnt  = pExistingElement->curSeqCnt;
             pNewElement->privFlags  = pExistingElement->privFlags;
             pNewElement->pktFlags   = pExistingElement->pktFlags;
             pNewElement->interval   = pExistingElement->interval;
@@ -450,7 +456,7 @@ TRDP_ERR_T  trdp_pdReceive (
             trdp_queueDelElement(&appHandle->pRcvQueue, pExistingElement);
             trdp_queueInsFirst(&appHandle->pRcvQueue, pNewElement);
 
-            // remember the pointer of the new Element, so the callbackfunction (see below calls the correct values)
+            /* remember the pointer of the new Element, so the callbackfunction (see below calls the correct values) */
             pPulledElement = pNewElement;
 
             /*  One block is always kept    */

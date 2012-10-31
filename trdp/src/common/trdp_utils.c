@@ -46,7 +46,7 @@ static INT32 sCurrentMaxSocketCnt = 0;
 /******************************************************************************/
 /** Determine if we are Big or Little endian
  *
- *  @retval         != 0		we are big endian
+ *  @retval         != 0        we are big endian
  *  @retval         0           we are little endian
  */
 int am_big_endian ()
@@ -132,7 +132,7 @@ PD_ELE_T *trdp_queueFindAddr (
             (iterPD->addr.srcIpAddr == 0 || iterPD->addr.srcIpAddr == addr->srcIpAddr) &&
             (iterPD->addr.destIpAddr == 0 || iterPD->addr.destIpAddr == addr->destIpAddr) &&
             (iterPD->addr.mcGroup == 0 || iterPD->addr.mcGroup == addr->mcGroup)
-           )
+            )
         {
             return iterPD;
         }
@@ -157,7 +157,7 @@ void    trdp_queueDelElement (
         return;
     }
 
-    /*	handle removal of first element	*/
+    /* handle removal of first element */
     if (pDelete == *ppHead)
     {
         *ppHead = pDelete->pNext;
@@ -226,12 +226,12 @@ void    trdp_queueInsFirst (
 /******************************************************************************/
 /** Handle the socket pool: Initialize it
  *
- *  @param[in]      iface		pointer to the socket pool
+ *  @param[in]      iface          pointer to the socket pool
  */
 void trdp_initSockets (TRDP_SOCKETS_T iface[])
 {
     int index;
-    /*	Clear the socket pool	*/
+    /* Clear the socket pool */
     for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
     {
         iface[index].sock = -1;
@@ -241,14 +241,14 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
 /******************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
  *
- *  @param[in,out]  iface			socket pool
- *  @param[in]      params			parameters to use
- *  @param[in]      srcIP			IP to bind to (0 = any address)
- *	@param[in]		usage			type and port to bind to
- *	@param[in]		options			blocking/nonblocking
- *	@param[out]		pIndex			returned index of socket pool
- *	@retval			TRDP_NO_ERR
- *	@retval			TRDP_PARAM_ERR
+ *  @param[in,out]  iface           socket pool
+ *  @param[in]      params          parameters to use
+ *  @param[in]      srcIP           IP to bind to (0 = any address)
+ *  @param[in]      usage           type and port to bind to
+ *  @param[in]      options         blocking/nonblocking
+ *  @param[out]     pIndex          returned index of socket pool
+ *  @retval	        TRDP_NO_ERR
+ *  @retval	        TRDP_PARAM_ERR
  */
 TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCKETS_T          iface[],
@@ -260,17 +260,18 @@ TRDP_ERR_T  trdp_requestSocket (
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           index, emptySock = 0;
-    TRDP_ERR_T      err = TRDP_NO_ERR;
-    UINT32	    port = 0; /* port, where the server listens on FIXME (this could be found somewhere in the configuration file)*/
+    TRDP_ERR_T      err     = TRDP_NO_ERR;
+    UINT32          port    = 0; /* port, where the server listens on FIXME (this could be found somewhere in the
+                                   configuration file)*/
 
     if (iface == NULL || params == NULL || pIndex == NULL)
     {
         return TRDP_PARAM_ERR;
     }
 
-    /*	We loop through the table of open/used sockets,
+    /*  We loop through the table of open/used sockets,
         if we find a usable one (with the same socket options) we take it.
-        We remember already closed sockets on the way to be able to fill up gaps	*/
+        We remember already closed sockets on the way to be able to fill up gaps  */
     for (index = 0; index < sCurrentMaxSocketCnt; index++)
     {
         if (iface[index].sock > -1 &&
@@ -279,19 +280,19 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[index].sendParam.qos == params->qos &&
             iface[index].sendParam.ttl == params->ttl)
         {
-            /*	Use that socket	*/
+            /* Use that socket */
             *pIndex = index;
             iface[index].usage++;
             return err;
         }
         else if (iface[index].sock == -1 && emptySock == 0)
         {
-            /*	Remember the last empty slot	*/
+            /* Remember the last empty slot */
             emptySock = index;
         }
     }
 
-    /*	Not found, create a new socket	*/
+    /* Not found, create a new socket */
     if (index < VOS_MAX_SOCKET_CNT)
     {
         if (emptySock != 0 && index != emptySock)
@@ -310,8 +311,8 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
 
-        sock_options.qos            = params->qos;
-        sock_options.ttl            = params->ttl;
+        sock_options.qos    = params->qos;
+        sock_options.ttl    = params->ttl;
         sock_options.ttl_multicast  = VOS_TTL_MULTICAST;
         sock_options.reuseAddrPort  = TRUE;
         sock_options.nonBlocking    = (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
@@ -319,12 +320,12 @@ TRDP_ERR_T  trdp_requestSocket (
         switch (usage)
         {
             case TRDP_SOCK_PD:
-		port = 20548; //FIXME configuration file!
+                port = 20548; /* FIXME configuration file! */
             case TRDP_SOCK_MD_UDP:
-		if (port <= 0) // only set the port, when this is a MD communication
-		{
-			port = 20550; //FIXME configuration file!
-		}
+                if (port <= 0) /* only set the port, when this is a MD communication */
+                {
+                    port = 20550; /* FIXME configuration file! */
+                }
                 if (vos_sockOpenUDP(&iface[index].sock,
                                     &sock_options) != VOS_NO_ERR)
                 {
@@ -370,10 +371,10 @@ TRDP_ERR_T  trdp_requestSocket (
 /******************************************************************************/
 /** Handle the socket pool: Release a socket from our socket pool
  *
- *  @param[in,out]  iface			socket pool
- *	@param[in]		index			index of socket to release
- *	@retval			TRDP_NO_ERR
- *	@retval			TRDP_PARAM_ERR
+ *  @param[in,out]  iface           socket pool
+ *  @param[in]      index           index of socket to release
+ *  @retval	        TRDP_NO_ERR
+ *  @retval	        TRDP_PARAM_ERR
  */
 TRDP_ERR_T  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
@@ -390,7 +391,7 @@ TRDP_ERR_T  trdp_releaseSocket (
     {
         if (--iface[index].usage == 0)
         {
-            /*	Close that socket, nobody uses it anymore	*/
+            /* Close that socket, nobody uses it anymore */
             vos_sockClose(iface[index].sock);
             iface[index].sock = -1;
         }
@@ -403,16 +404,16 @@ TRDP_ERR_T  trdp_releaseSocket (
 /******************************************************************************/
 /** Get the initial sequence counter for the comID/message type and subnet (source IP).
  *  If the comID/srcIP is not found elsewhere, return 0 -
- *	else return its current sequence number (the redundant packet needs the same seqNo)
+ *  else return its current sequence number (the redundant packet needs the same seqNo)
  *
- *	Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
- *		  but shall be the same for redundant telegrams (subnet/srcIP).
+ *  Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
+ *        but shall be the same for redundant telegrams (subnet/srcIP).
  *
- *  @param[in]      comId			comID to look for
- *	@param[in]		msgType			PD/MD type
- *  @param[in]      srcIpAddr		Source IP address
+ *  @param[in]      comId           comID to look for
+ *  @param[in]      msgType	        PD/MD type
+ *  @param[in]      srcIpAddr       Source IP address
  *
- *	@retval			return the sequence number
+ *  @retval	        return the sequence number
  */
 
 UINT32  trdp_getSeqCnt (
@@ -462,15 +463,15 @@ UINT32  trdp_getSeqCnt (
 /** Check if the sequence counter for the comID/message type and subnet (source IP)
  *  has already been received.
  *
- *	Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
- *		  but shall be the same for redundant telegrams (subnet/srcIP).
+ *  Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
+ *         but shall be the same for redundant telegrams (subnet/srcIP).
  *
- *  @param[in]      seqCnt			sequence counter received
- *  @param[in]      comId			comID to look for
- *	@param[in]		msgType			PD/MD type
- *  @param[in]      srcIP			Source IP address
+ *  @param[in]      seqCnt          sequence counter received
+ *  @param[in]      comId           comID to look for
+ *  @param[in]      msgType         PD/MD type
+ *  @param[in]      srcIP           Source IP address
  *
- *	@retval			return the sequence number
+ *  @retval	        return the sequence number
  */
 
 BOOL  trdp_isRcvSeqCnt (
@@ -499,10 +500,18 @@ BOOL  trdp_isRcvSeqCnt (
             while (pRcvElement)
             {
                 if (pRcvElement->addr.comId == comId &&
-                    pRcvElement->addr.srcIpAddr != srcIP &&
-                    pRcvElement->curSeqCnt == seqCnt)
+                    pRcvElement->addr.srcIpAddr != srcIP)
                 {
-                    return TRUE;
+                    if (pRcvElement->curSeqCnt == seqCnt)
+                    {
+                        return TRUE;
+                    }
+                    else
+                    {
+                        pRcvElement->curSeqCnt = seqCnt;
+                        return FALSE;
+                    }
+
                 }
                 pRcvElement = pRcvElement->pNext;
             }
@@ -515,5 +524,5 @@ BOOL  trdp_isRcvSeqCnt (
         #error
     }
 #endif
-    return FALSE;   /*	Not found, initial value is zero	*/
+    return FALSE;   /* Not found, initial value is zero */
 }
