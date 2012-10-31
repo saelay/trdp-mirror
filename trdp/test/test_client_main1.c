@@ -31,10 +31,14 @@
 #include "trdp_if_light.h"
 #include "vos_thread.h"
 #include "test_server.h"
+#include "test_general.h"
 
+#define HEADINGTEXT "Test session 1 is starting...\n" \
+                    "=============================\n"
 
-CHAR8   gBuffer[32]     = "Hello Server from Client";
 BOOL    gKeepOnRunning  = TRUE;
+BOOL    gNewDatareceived = FALSE;
+UINT16  gTimeoutFailures = 0;
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -56,7 +60,7 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s", pTime, catStr[category], pFile, LineNumber, pMsgStr);
+    fprintf(stderr, "%s %s %s:%d %s", pTime, catStr[category], pFile, LineNumber, pMsgStr);
 }
 
 
@@ -80,24 +84,26 @@ void myPDcallBack (
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
-            printf("ComID %d received\n", pMsg->comId);
-            if (pData)
+            printf("> ComID %d received\n", pMsg->comId);
+            if (pData && pMsg->comId == PD_TEST_ECHO_UNI_COMID)
             {
-                memcpy(gBuffer, pData,
-                       ((sizeof(gBuffer) <
-                         dataSize) ? sizeof(gBuffer) : dataSize));
+                memcpy(&gMyDataSet998, pData,
+                       ((sizeof(gMyDataSet998) <
+                         dataSize) ? sizeof(gMyDataSet998) : dataSize));
+
+                gNewDatareceived = TRUE;
             }
             break;
 
         case TRDP_TIMEOUT_ERR:
             /* The application can decide here if old data shall be invalidated or kept */
-            printf("Packet timed out (ComID %d, SrcIP: %u)\n",
+            printf("> Packet timed out (ComID %d, SrcIP: %u)\n",
                    pMsg->comId,
                    pMsg->srcIpAddr);
-            memset(gBuffer, 0, sizeof(gBuffer));
+            memset(&gMyDataSet998, 0, sizeof(gMyDataSet998));
 
         default:
-            printf("Error on packet received (ComID %d), err = %d\n",
+            printf("> Error on packet received (ComID %d), err = %d\n",
                    pMsg->comId,
                    pMsg->resultCode);
             break;
@@ -121,6 +127,18 @@ int main (int argc, char * *argv)
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
+    UINT32 destIP;
+
+
+    printf(HEADINGTEXT);
+
+    /* Parse the given commandline arguments */
+    rv = trdp_test_general_parseCommandLineArguments(argc, argv, &destIP);
+    if (rv != 0)
+        return rv;
+
+    /* clear memory before using it */
+    memset(&gMyDataSet998, 0, sizeof(gMyDataSet998) );
 
     /*	Init the library for callback operation */
     if (tlc_init(dbgOut, &dynamicConfig) != TRDP_NO_ERR)
@@ -140,19 +158,17 @@ int main (int argc, char * *argv)
     }
 
     /*  Subscribe to control PD     */
-
-    memset(gBuffer, 0, sizeof(gBuffer));
-    err = tlp_subscribe( appHandle,                /*   our application identifier          */
-                         &subHandle,               /*   our subscription identifier         */
+    err = tlp_subscribe( appHandle,                 /*   our application identifier          */
+                         &subHandle,                /*   our subscription identifier         */
                          NULL,
-                         PD_TEST1_UNI_COMID,       /*   ComID                               */
-                         0,                        /*   topocount: local consist only       */
-                         0 /* noo filtering PD_TEST1_UNI_DST_IP*/,      /*   Source IP filter  (invert IP, because we are the client)  ?!?                  */
+                         PD_TEST_ECHO_UNI_COMID,    /*   ComID                               */
+                         0,                         /*   topocount: local consist only       */
+                         destIP,                    /*   Source IP filter                   */
                          0,
-                         0,                        /*   Default destination	(or MC Group)   */
-                         PD_TEST_GEN_UNI_TIMEOUT,     /*   Time out in us                      */
-                         TRDP_TO_SET_TO_ZERO,      /*   delete invalid data	on timeout      */
-                         sizeof(gMyDataSet20001)); /*   net data size                       */
+                         0,                         /*   Default destination	(or MC Group)   */
+                         PD_TEST_ECHO_UNI_TIMEOUT,  /*   Time out in us                      */
+                         TRDP_TO_SET_TO_ZERO,       /*   delete invalid data	on timeout      */
+                         sizeof(gMyDataSet998));    /*   net data size                       */
 
 
     /*	Publish Unicast PD  */
@@ -162,7 +178,7 @@ int main (int argc, char * *argv)
                       PD_TEST_GEN_UNI_COMID,        /*    ComID to send               */
                       0,                            /*    local consist only          */
                       0,                            /*    default source IP           */
-                      PD_TEST_GEN_UNI_SRC_IP,       /*    where to send to    (invert IP, because we are the client)        */
+                      destIP,                       /*    where to send to            */
                       PD_TEST_GEN_UNI_CYCLE,        /*    Cycle time in ms            */
                       0,                            /*    not redundant               */
                       TRDP_FLAGS_CALLBACK,          /*    Use callback for errors     */
@@ -179,7 +195,6 @@ int main (int argc, char * *argv)
         tlc_terminate();
         return 1;
     }
-
 
     /*
      Enter the main processing loop.
@@ -248,8 +263,26 @@ int main (int argc, char * *argv)
             /* printf("."); fflush(stdout); */
         }
 
+        /* Display received information and check it for correctness */
+        if (gNewDatareceived)
+        {
+            printf("# cycletime is %10d us\n", vos_ntohl(gMyDataSet998.cycletime));
+
+            /* This check is made, to secure, that the TRDP stack handles the timeout parameter (in a perfect world, this code will never be reached)*/
+            if (vos_ntohl(gMyDataSet998.cycletime) >= PD_TEST_ECHO_UNI_TIMEOUT)
+            {
+                printf("The cycle timeout was %d and the maximum is %d.\n", vos_ntohl(gMyDataSet998.cycletime), PD_TEST_ECHO_UNI_TIMEOUT);
+                gTimeoutFailures++;
+                // ignore the first two timeout-failure (this occures because there are no two packages transmitted)
+                if (gTimeoutFailures > 2)
+                    gKeepOnRunning = FALSE;
+            }
+            memset(&gMyDataSet998, 0, sizeof(gMyDataSet998));
+            gNewDatareceived = FALSE;
+        }
+
         /*  Advance counter */
-	gMyDataSet999.uint16_1++; // update the frame (increment the boolean)
+        gMyDataSet999.uint16_1++; // update the frame (that the server won't ignore it as twice the same data)
         tlp_put(appHandle, pubHandleUC, (const UINT8 *) &gMyDataSet999, sizeof(gMyDataSet999));
 
     }   /*	Bottom of while-loop */

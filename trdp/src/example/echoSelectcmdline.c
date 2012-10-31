@@ -110,13 +110,13 @@ void myPDcallBack (
 
         case TRDP_TIMEOUT_ERR:
             /* The application can decide here if old data shall be invalidated or kept	*/
-            printf("Packet timed out (ComID %d, SrcIP: %u)\n",
+            printf("> Packet timed out (ComID %d, SrcIP: %u)\n",
                    pMsg->comId,
                    pMsg->srcIpAddr);
             memset(gBuffer, 0, GBUFFER_SIZE);
 
         default:
-            printf("Error on packet received (ComID %d), err = %d\n",
+            printf("> Error on packet received (ComID %d), err = %d\n",
                    pMsg->comId,
                    pMsg->resultCode);
             break;
@@ -156,8 +156,6 @@ int main (int argc, char * *argv)
     UINT32              destIP = 0;
     int                 ch;
     UINT32              hugeCounter = 0;
-
-
 
     /****** Parsing the command line arguments */
     if (argc <= 1)
@@ -353,8 +351,6 @@ int main (int argc, char * *argv)
             printf("# %s ", gInputBuffer);
             memset(gInputBuffer, 0, sizeof(gInputBuffer));
         }
-
-
     }   /*	Bottom of while-loop	*/
 
     /*

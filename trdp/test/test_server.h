@@ -9,10 +9,12 @@
 #ifndef trdp_test_server_h
 #define trdp_test_server_h
 
+
+
 #include "tau_marshall.h"
 
 /*  IP addresses:
- 
+
     test_server <----.....----> test_client
 
 */
@@ -21,7 +23,7 @@
 #define PD_TESTCLIENT_IP        0x0a000065      /*	Client's IP: 10.0.0.101         */
 #define PD_TESTMULTICAST_IP     0xef000000      /*	Multicast Group: 239.0.0.0		*/
 
-/* 
+/*
  Test dataset definitions
  */
 
@@ -29,12 +31,9 @@
 /* PD unicast test with generic test dataset                                                                          */
 /**********************************************************************************************************************/
 
-#define PD_TEST_GEN_UNI_COMID   999
-#define PD_TEST_GEN_UNI_CYCLE      10000000
-#define PD_TEST_GEN_UNI_TIMEOUT    5 * PD_TEST_GEN_UNI_CYCLE
-#define PD_TEST_GEN_UNI_DST_IP     PD_TESTCLIENT_IP
-#define PD_TEST_GEN_UNI_SRC_IP     PD_TESTSERVER_IP
-
+#define PD_TEST_GEN_UNI_COMID       999
+#define PD_TEST_GEN_UNI_CYCLE       100000
+#define PD_TEST_GEN_UNI_TIMEOUT     5 * PD_TEST_GEN_UNI_CYCLE
 
 /*	Test data sets	*/
 TRDP_DATASET_T gDataSet990 =
@@ -125,7 +124,7 @@ TRDP_DATASET_T gDataSet999 =
         },
         {
             TRDP_INT8,
-            1           
+            1
         },
         {
             TRDP_INT16,
@@ -189,7 +188,7 @@ TRDP_DATASET_T gDataSet999 =
         },
         {
             TRDP_INT8,
-            4           
+            4
         },
         {
             TRDP_INT16,
@@ -269,7 +268,7 @@ TRDP_DATASET_T gDataSet999 =
         },
         {
             TRDP_INT8,
-            0           
+            0
         },
         {
             TRDP_UINT16,
@@ -369,6 +368,31 @@ TRDP_DATASET_T gDataSet999 =
         },
         {
             993,
+            1
+        }
+    }
+};
+
+
+/**
+ * Echo-dataset, that is returned by the server
+ */
+TRDP_DATASET_T gDataSet998 =
+{
+    998,        /*	dataset/com ID  */
+    0,          /*	reserved		*/
+    3,         /*	No of elements	*/
+    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+        {
+            TRDP_UINT32,    /*	data type		*/
+            1               /*	no of elements	*/
+        },
+        {
+            TRDP_CHAR8,
+            0
+        },
+        {
+            999,
             1
         }
     }
@@ -535,112 +559,17 @@ struct myDataSet1000
 };
 
 
+#define PD_TEST_ECHO_UNI_COMID       998
+#define PD_TEST_ECHO_UNI_CYCLE       (PD_TEST_GEN_UNI_CYCLE)
+#define PD_TEST_ECHO_UNI_TIMEOUT     5 * PD_TEST_GEN_UNI_CYCLE
 
-/**********************************************************************************************************************/
-/* PD unicast Test1                                                                                                   */
-/**********************************************************************************************************************/
-
-#define PD_TEST1_UNI_COMID      20001
-#define PD_TEST1_UNI_CYCLE      10000000
-#define PD_TEST1_UNI_TIMEOUT    5 * PD_TEST1_UNI_CYCLE
-#define PD_TEST1_UNI_DST_IP     PD_TESTCLIENT_IP
-#define PD_TEST1_UNI_SRC_IP     PD_TESTSERVER_IP
-
-/*	Test data set	*/
-TRDP_DATASET_T gDataSet20001 =
+struct myDataSet998
 {
-    PD_TEST1_UNI_COMID, 0,  11,
-    {
-        {TRDP_INT8, 1}, {TRDP_INT16, 1}, {TRDP_INT32, 1}, {TRDP_INT64, 1},
-        {TRDP_UINT8, 1}, {TRDP_UINT16, 1}, {TRDP_UINT32, 1}, {TRDP_UINT64, 1},
-        {TRDP_REAL32, 1}, {TRDP_REAL64, 1}, {TRDP_UINT8, 16}
-    }
-};
+    UINT32  cycletime;
+    char*   custom_message; /*For this attribute the memory must be allocated manualy */
 
-struct myDataSet20001
-{
-    INT8    int8_1;
-    INT16   int16_1;
-    INT32   int32_1;
-    INT64   int64_1;
-    UINT8   uint8_1;
-    UINT16  uint16_1;
-    UINT32  uint32_1;
-    UINT64  uint64_1;
-    float   float32_1;
-    double  float64_1;
-    char    string[16];
-} gMyDataSet20001 =
-{
-    -1,
-    4096,
-    0x12345678,
-    0x1234567890123456,
-    255,
-    65535,
-    0x12345678,
-    0x1234567890123456,
-    0.12345678f,
-    0.12345678,
-    "Hello World"
-};
-
-/**********************************************************************************************************************/
-/* PD multicast Test2                                                                                                 */
-/**********************************************************************************************************************/
-#define PD_TEST2_MC_COMID      20002
-#define PD_TEST2_MC_CYCLE      5000000
-#define PD_TEST2_MC_TIMEOUT    3 * PD_TEST2_MC_CYCLE
-#define PD_TEST2_MC_DST_IP     PD_TESTMULTICAST_IP
-#define PD_TEST2_MC_SRC_IP     PD_TESTSERVER_IP
-
-/*	Test2 data set	*/
-TRDP_DATASET_T gDataSet20002 =
-{
-    PD_TEST2_MC_COMID, 0,  11,
-    {
-        {TRDP_INT32, 1}, {TRDP_UINT8, 16}
-    }
-};
-
-struct myDataSet20002
-{
-    INT32   counter;
-    char    string[16];
-} gMyDataSet20002 =
-{
-    0, "Hello World"
-};
-
-
-/**********************************************************************************************************************/
-/* PD receive/echo Test3                                                                                              */
-/**********************************************************************************************************************/
-/* Receive and Send as echo:	*/
-#define PD_TEST3_UNI_COMID      20003
-#define PD_TEST3_UNI_CYCLE      1000000
-#define PD_TEST3_UNI_TIMEOUT    30 * PD_TEST3_UNI_CYCLE
-#define PD_TEST3_UNI_DST_IP     PD_TESTSERVER_IP
-#define PD_TEST3_UNI_SRC_IP     PD_TESTCLIENT_IP
-
-/*	Test2 data set	*/
-TRDP_DATASET_T gDataSet20003 =
-{
-    PD_TEST3_UNI_COMID, 0,  11,
-    {
-        {TRDP_INT32, 1}, {TRDP_UINT8, 16}
-    }
-};
-
-struct myDataSet20003
-{
-    INT32   counter;
-    char    string[16];
-} gMyDataSet20003 =
-{
-    0, "PULL Test"
-};
-
+    struct myDataSet1000 echoDataset;
+} gMyDataSet998;
 
 /**********************************************************************************************************************/
 

@@ -120,13 +120,13 @@ EXT_DECL TRDP_ERR_T tlc_init (
 {
     TRDP_ERR_T      ret = TRDP_NO_ERR;
     VOS_ERR_T       err = VOS_NO_ERR;
-    
+
     /*    Only the first session will allocate memory    and the mutex */
     if (sInited == FALSE)
     {
         /*    Initialize VOS    */
         vos_init(NULL, pPrintDebugString);
-        
+
         if (pMemConfig == NULL)
         {
             err = vos_memInit(NULL, 0, NULL);
@@ -150,7 +150,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
                 ret = TRDP_PARAM_ERR;
             }
         }
-        
+
 #if MD_SUPPORT
         /* Init MD  here... */
 #endif
@@ -163,7 +163,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
         }
         return ret;
     }
-    
+
     else
     {
         vos_printf(VOS_LOG_ERROR, "TRDP already inited\n");
@@ -185,7 +185,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
  *  @param[in]      pMdDefault          Pointer to default MD configuration
  *  @param[in]      pProcessConfig      Pointer to process configuration
  *                                      only option parameter is used here to define session behavior
- *                                      all other parameters are only used to feed statistics 
+ *                                      all other parameters are only used to feed statistics
  *
  *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_INIT_ERR          not yet inited
@@ -229,11 +229,11 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     pSession->realIP    = ownIpAddr;
     pSession->virtualIP = leaderIpAddr;
-    
+
     if (pProcessConfig != NULL)
     {
     	pSession->option = pProcessConfig->options;
-        
+
     }
 
     if (pMarshall != NULL)
@@ -395,8 +395,8 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
 {
     TRDP_SESSION_PT pSession = NULL;
     TRDP_ERR_T      ret = TRDP_INIT_ERR;
-    
-    
+
+
     if (sInited == TRUE)
     {
         /*    Close all sessions    */
@@ -404,7 +404,7 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
         {
             tlc_closeSession(pSession);
         }
-        
+
         /* Release memory?  */
         vos_memDelete(NULL);
         sInited = FALSE;
@@ -546,12 +546,12 @@ EXT_DECL void tlc_setTopoCount (UINT32 topoCount)
 {
     TRDP_SESSION_PT pSession;
     vos_mutexLock(sSessionMutex);
-    
+
     sTopoCount = topoCount;
 
     /*  Set the topoCount for each session  */
     pSession = sSession;
-    
+
     while (pSession)
     {
         pSession->topoCount = topoCount;
@@ -655,7 +655,6 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     }
 
     /*    Look for existing element    */
-
     if (trdp_queueFindAddr(appHandle->pSndQueue, &pubHandle) != NULL)
     {
         ret = TRDP_NOPUB_ERR;
@@ -831,7 +830,6 @@ TRDP_ERR_T tlp_put (
 
     /*    Find the published queue entry    */
     pElement = trdp_queueFindAddr(appHandle->pSndQueue, pubHandle);
-
     if (pElement != NULL)
     {
         ret = trdp_pdPut(pElement,
@@ -985,17 +983,17 @@ EXT_DECL TRDP_ERR_T tlc_process (
     vos_clearTime(&appHandle->interval);
 
     /******************************************************
-        Find and send the packets which has to be sent next:    
+        Find and send the packets which has to be sent next:
      ******************************************************/
 
     err = trdp_pdSendQueued(appHandle);
-    
+
     if (err != TRDP_NO_ERR)
     {
         /*  We do not break here, only report error */
         vos_printf(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
     }
-    
+
     /*    Update the current time    */
     vos_getTime(&now);
 
@@ -1154,12 +1152,12 @@ EXT_DECL TRDP_ERR_T tlp_request (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
-    
+
     /*    Check params    */
     if (comId == 0 ||
         dataSize > MAX_PD_PACKET_SIZE ||
@@ -1167,15 +1165,15 @@ EXT_DECL TRDP_ERR_T tlp_request (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     /*    Reserve mutual access    */
     if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
     {
         return TRDP_NOINIT_ERR;
     }
-    
+
     /*    Look for existing subscription element    */
-    
+
     pSubPD = trdp_queueFindAddr(appHandle->pRcvQueue, (TRDP_ADDRESSES*) subHandle);
 
     if (pSubPD == NULL)
@@ -1205,7 +1203,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                  */
                 pReqElement->dataSize   = dataSize;
                 pReqElement->grossSize  = trdp_packetSizePD(dataSize);
-                
+
                 /*    Get a socket    */
                 ret = trdp_requestSocket(appHandle->iface,
                                          (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
@@ -1213,7 +1211,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                                          TRDP_SOCK_PD,
                                          appHandle->option,
                                          &pReqElement->socketIdx);
-                
+
                 if (ret != TRDP_NO_ERR)
                 {
                     vos_memFree(pReqElement);
@@ -1221,12 +1219,12 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 }
                 else
                 {
-            
+
                     /*  Mark this element as a PD PULL.  Request will be sent on tlc_process time.    */
 
                     vos_clearTime(&pReqElement->interval);
                     vos_clearTime(&pReqElement->timeToGo);
-                    
+
                     /*  Update the internal data */
 
                     pReqElement->addr.comId         = comId;
@@ -1234,7 +1232,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                     pReqElement->addr.srcIpAddr     = srcIpAddr;
                     pReqElement->addr.mcGroup       = 0;
                     pReqElement->pktFlags           = pktFlags;
-                    
+
                     /*    Enter this request into the send queue.    */
 
                     trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
@@ -1242,7 +1240,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
             }
         }
     }
-    
+
     if (ret == TRDP_NO_ERR && pReqElement != NULL)
     {
         /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
@@ -1253,7 +1251,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
         /*    Compute the header fields */
         trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, subs, offsetAddr, replyComId, replyIpAddr);
-        
+
         if (dataSize > 0)
         {
             ret = tlp_put(appHandle, &pReqElement->addr, pData, dataSize);
@@ -1269,7 +1267,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
             vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
         }
     }
-    
+
     vos_mutexUnlock(appHandle->mutex);
 
     return ret;
