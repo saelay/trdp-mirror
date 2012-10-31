@@ -5,6 +5,7 @@
  *  Created by Bernd Löhr on 13.08.12.
  *  Copyright 2012 NewTec GmbH. All rights reserved.
  *
+ *	$ID:$
  */
 
 #include <stdio.h>
@@ -16,7 +17,7 @@ TRDP_DATASET_T gDataSet990 =
 {
     990,       /*	dataset/com ID  */
     0,          /*	reserved		*/
-    1,         /*	No of elements, var size	*/
+    2,         /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
@@ -33,7 +34,7 @@ TRDP_DATASET_T gDataSet991 =
 {
     991,       /*	dataset/com ID  */
     0,          /*	reserved		*/
-    1,         /*	No of elements, var size	*/
+    2,         /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
@@ -50,7 +51,7 @@ TRDP_DATASET_T gDataSet992 =
 {
     992,       /*	dataset/com ID  */
     0,          /*	reserved		*/
-    1,         /*	No of elements, var size	*/
+    2,         /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
@@ -67,7 +68,7 @@ TRDP_DATASET_T gDataSet993 =
 {
     993,       /*	dataset/com ID  */
     0,          /*	reserved		*/
-    1,         /*	No of elements, var size	*/
+    2,         /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
@@ -150,7 +151,7 @@ TRDP_DATASET_T gDataSet1000 =
             TRDP_TIMEDATE64,
             1
         },
-        {
+        {	/* 16	*/
             TRDP_BOOLEAN,  /*	data type		*/
             4               /*	no of elements	*/
         },
@@ -215,7 +216,7 @@ TRDP_DATASET_T gDataSet1000 =
             4
         },
         {
-            TRDP_UINT16,
+            TRDP_UINT16,	/* 32	*/
             1
         },
         {
@@ -349,17 +350,36 @@ TRDP_DATASET_T gDataSet1000 =
     }
 };
 
-TRDP_DATASET_T gDataSet1001 =
+TRDP_DATASET_T	gDataSet1001 = 
 {
     1001,       /*	dataset/com ID  */
     0,          /*	reserved		*/
-    1,         /*	No of elements, var size	*/
+    3,         /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+        {
+            TRDP_TIMEDATE64,	/*	Array	*/
+            4
+        },
+        {
+            TRDP_UINT16,		/*	Size of variable dataset	*/
+            1
+        },
         {
             TRDP_UINT8,
             0
         }
     }
+};
+
+/*	Will be sorted by tau_initMarshall	*/
+TRDP_DATASET_T*	gDataSets[] =
+{
+    &gDataSet1001,
+    &gDataSet1000,
+    &gDataSet990,
+    &gDataSet991,
+    &gDataSet992,
+    &gDataSet993
 };
 
 struct myDataSet990
@@ -469,7 +489,7 @@ struct myDataSet1000
     0.12345,
     0.12345678,
     0x12345678,
-    {0x12345678, 0x9ABC},
+    {0x12345678, 0x9ABC},			/* 14	*/
     {0x12345678, 0x9ABCDEF0},
     {1,0,1,0},                      /* BOOL8 array fixed size */
     "Hello old World",
@@ -487,7 +507,7 @@ struct myDataSet1000
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     {{0x12345671, 0x89A1},{0x12345672, 0x89A2},{0x12345673, 0x89A3},{0x12345674, 0x89A4}},
     {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
-    4,
+    4,								/* 32	*/
     {1,0,1,0},                       /* BOOL8 array var size */
     16,
     "Hello old World",
@@ -498,7 +518,7 @@ struct myDataSet1000
     4,
     {0x1234, 0x5678, 0x9ABC, 0xDEF0},
     4,
-    {0x12345671, 0x12345672, 0x12345673, 0x12345674},
+    {0x12345671, 0x12345672, 0x12345673, 0x12345674},	/* 43	*/
     4,
     {0x123456789ABCDEF1, 0x123456789ABCDEF2, 0x123456789ABCDEF3, 0x123456789ABCDEF4},
     4,
@@ -524,35 +544,78 @@ struct myDataSet1000
 
 struct myDataSet1001
 {
-	UINT16	size;
-	UINT8	array[4];
+    TIMEDATE64  timedate64_4[4];
+	UINT16		size;
+	UINT8		array[4];
 } gMyDataSet1001 =
 {
+	{{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
     4,
     {1,0,1,0}                       /* UINT8 array var size */
 };
+
 
 TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
     {1000, 1000},
     {1001, 1001}
 };
 
-UINT8 gDstDataBuffer[1500];
+UINT8 					gDstDataBuffer[1500];
+struct myDataSet1000	gMyDataSet1000Copy;
+struct myDataSet1001	gMyDataSet1001Copy;
 
+/***********************************************************************************************************************
+	Test marshalling and unmarshalling of test dataset
+***********************************************************************************************************************/
 int main ()
 {
-    INT32       index;
+    /*INT32       index;*/
     UINT32      *refCon;
     TRDP_ERR_T  err;
     UINT32      bufSize;
 
-    err = tau_initMarshall((void *)&refCon, 2, gComIdMap, 1, &gDataSet1001);
+    err = tau_initMarshall((void *)&refCon, 2, gComIdMap, 6, gDataSets);
+
+	if (err != TRDP_NO_ERR)
+    {
+        printf("tau_initMarshall returns error %d\n", err);
+        return 1;
+    }
 
     bufSize = sizeof(gDstDataBuffer);
     memset(gDstDataBuffer, 0, bufSize);
 
-    err = tau_marshall (refCon, 1001, (UINT8 *) &gMyDataSet1001, gDstDataBuffer, &bufSize);
+    err = tau_marshall (refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize);
 
+	if (err != TRDP_NO_ERR)
+    {
+        printf("tau_marshall returns error %d\n", err);
+        return 1;
+    }
+
+	bufSize = sizeof(gMyDataSet1000Copy);
+    memset(&gMyDataSet1000Copy, 0, bufSize);
+
+    err = tau_unmarshall (refCon, 1000, gDstDataBuffer, (UINT8 *) &gMyDataSet1000Copy, &bufSize);
+
+	if (err != TRDP_NO_ERR)
+    {
+        printf("tau_unmarshall returns error %d\n", err);
+        return 1;
+    }
+    
+	if (memcmp(&gMyDataSet1000, &gMyDataSet1000Copy, sizeof(gMyDataSet1000)) != 0)
+	{
+        printf("Something's wrong in the state of Marshalling!\n");
+        return 1;
+        
+    }
+    else
+    {
+        printf("Marshalling and Unmarshalling data matched!\n");
+    }
+
+	/*
     printf("ComID: 0x%0X\n", gDataSet1000.id);
     printf("  INT8 0x%02hhx,  INT16 0x%04hx,  INT32 0x%04x,  INT64 0x%08llx\n",
            gMyDataSet1000.int8_1,
@@ -581,7 +644,7 @@ int main ()
                gDstDataBuffer[index * 8 + 7]
                );
     }
+	*/
 
-
-    return err;
+    return 0;
 }
