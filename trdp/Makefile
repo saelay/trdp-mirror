@@ -53,17 +53,20 @@ else
 CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=0
 endif
 
-ifeq ($(DEBUG),1)
-CFLAGS += -g -O -DDEBUG
-else
-CFLAGS += -Os  -DNO_DEBUG
-endif
-
 SUBDIRS	= src
 INCLUDES = -I $(INCPATH) -I $(VOS_INCPATH) -I $(VOS_PATH)
 OUTDIR = $(BUILD_PATH)
 
 LDFLAGS = -L $(OUTDIR) 
+
+ifeq ($(DEBUG),1)
+CFLAGS += -g -O -DDEBUG
+LDFLAGS += -g
+# Display the strip command and do not execut it
+STRIP = $(ECHO) "do NOT strip: " 
+else
+CFLAGS += -Os  -DNO_DEBUG
+endif
 
 VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o
 TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o $(VOS_OBJS)
