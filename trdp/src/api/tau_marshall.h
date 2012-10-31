@@ -65,8 +65,10 @@ extern "C" {
  *
  *
  *  @param[in,out]  ppRefCon         Returns a pointer to be used for the reference context of marshalling/unmarshalling
+ *  @param[in]	    numComId         Number of datasets found in the configuration
+ *  @param[in]	    pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
  *  @param[in]	    numDataSet       Number of datasets found in the configuration
- *  @param[in]	    pDataset         Pointer to an array of structures of type TRDP_DATASET_T
+ *  @param[in]	    pDataset         Pointer to an array of pointers to structures of type TRDP_DATASET_T
  *
  *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
@@ -79,7 +81,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
     UINT32                  numComId,
     TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,        
     UINT32                  numDataSet,
-    TRDP_DATASET_T          pDataset[]);
+    TRDP_DATASET_T          *pDataset[]);
 
 /**********************************************************************************************************************/
 /**	marshall function.
@@ -100,7 +102,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
 EXT_DECL TRDP_ERR_T tau_marshall (
     void        *pRefCon,
     UINT32      comId,
-    const UINT8 *pSrc,
+    UINT8 		*pSrc,
     UINT8       *pDest,
     UINT32      *pDestSize);
 
@@ -148,7 +150,7 @@ typedef TRDP_ERR_T tau_marshallDs (
 EXT_DECL TRDP_ERR_T tau_unmarshall (
     void        *pRefCon,
     UINT32      comId,
-    const UINT8 *pSrc,
+    UINT8       *pSrc,
     UINT8       *pDest,
     UINT32      *pDestSize);
 
