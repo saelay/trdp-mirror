@@ -96,7 +96,7 @@ TRDP_ERR_T trdp_pdPut (
     const UINT8     *pData,
     UINT32          dataSize)
 {
-    TRDP_ERR_T  ret   = TRDP_NO_ERR;
+    TRDP_ERR_T ret = TRDP_NO_ERR;
 
     if (pPacket == NULL || pData == NULL || dataSize == 0)
     {
@@ -127,13 +127,13 @@ TRDP_ERR_T trdp_pdPut (
  *
  */
 void trdp_pdDataUpdate (
-    PD_ELE_T        *pPacket)
+    PD_ELE_T *pPacket)
 {
-    UINT32      myCRC = vos_crc32(0L, NULL, 0);
-    UINT8       *pDest = pPacket->data + pPacket->dataSize;
+    UINT32  myCRC   = vos_crc32(0L, NULL, 0);
+    UINT8   *pDest  = pPacket->data + pPacket->dataSize;
 
     /*  Pad with zero bytes */
-    UINT32 padding = 4 - (pPacket->dataSize & 0x3);
+    UINT32  padding = 4 - (pPacket->dataSize & 0x3);
     if (padding < 4)
     {
         while (padding--)
@@ -143,8 +143,8 @@ void trdp_pdDataUpdate (
     }
 
     /*  Compute data checksum   */
-    myCRC   = vos_crc32(myCRC, (UINT8 *)&pPacket->data, pPacket->dataSize);
-    *(UINT32*)pDest    = MAKE_LE(myCRC);
+    myCRC = vos_crc32(myCRC, (UINT8 *)&pPacket->data, pPacket->dataSize);
+    *(UINT32 *)pDest = MAKE_LE(myCRC);
 }
 
 /******************************************************************************/
@@ -266,10 +266,10 @@ TRDP_ERR_T  trdp_pdReceive (
     static PD_ELE_T *pNewElement        = NULL; /*  This points to our buffer in hand   */
     PD_ELE_T        *pExistingElement   = NULL;
     PD_ELE_T        *pPulledElement;
-    TRDP_ERR_T      err = TRDP_NO_ERR;
-    TRDP_ERR_T      resultCode = TRDP_NO_ERR;
-    INT32           recSize;
-    BOOL            informUser = FALSE;
+    TRDP_ERR_T      err         = TRDP_NO_ERR;
+    TRDP_ERR_T      resultCode  = TRDP_NO_ERR;
+    INT32 recSize;
+    BOOL informUser = FALSE;
     TRDP_ADDRESSES  subHandle;
 
 
@@ -347,10 +347,10 @@ TRDP_ERR_T  trdp_pdReceive (
     /*  Handle statistics request  */
     if (vos_ntohl(pNewElement->frameHead.comId) == GSTAT_REQUEST_COMID)
     {
-        pNewElement->addr.comId = GSTAT_REPLY_COMID;
-        pNewElement->addr.destIpAddr = vos_ntohl(pNewElement->frameHead.replyIpAddress);
+        pNewElement->addr.comId         = GSTAT_REPLY_COMID;
+        pNewElement->addr.destIpAddr    = vos_ntohl(pNewElement->frameHead.replyIpAddress);
 
-        trdp_pdInit (pNewElement, TRDP_MSG_PD, appHandle->topoCount, 0, 0, 0, 0);
+        trdp_pdInit(pNewElement, TRDP_MSG_PD, appHandle->topoCount, 0, 0, 0, 0);
 
         trdp_pdPrepareStats(appHandle, pNewElement);
 
@@ -387,7 +387,7 @@ TRDP_ERR_T  trdp_pdReceive (
             }
 
             /* trigger immediate sending of PD  */
-            pPulledElement->privFlags  |= TRDP_REQ_2B_SENT;
+            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;
 
             if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
             {
@@ -418,10 +418,14 @@ TRDP_ERR_T  trdp_pdReceive (
             }
         }
 
-        /*  Has the data changed?   */
-        informUser = memcmp(pNewElement->data, pExistingElement->data, vos_ntohl(pNewElement->frameHead.datasetLength));
+        /*  This might have not been set!   */
+        pExistingElement->dataSize = vos_ntohl(pNewElement->frameHead.datasetLength);
 
-	/*	Get the current time and compute the next time this packet should be received.	*/
+        /*  Has the data changed?   */
+        informUser = memcmp(pNewElement->data, pExistingElement->data, pExistingElement->dataSize);
+
+        /*	Get the current time and compute the next time this packet should be received.	*/
+
         vos_getTime(&pExistingElement->timeToGo);
         vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
 
@@ -450,7 +454,7 @@ TRDP_ERR_T  trdp_pdReceive (
             pPulledElement = pNewElement;
 
             /*  One block is always kept    */
-            memset(pExistingElement, 0, sizeof(PD_ELE_T));
+            /* memset(pExistingElement, 0, sizeof(PD_ELE_T)); */
 
             /* The new element pointer is updated to the existing */
             pNewElement = pExistingElement;
@@ -470,8 +474,8 @@ TRDP_ERR_T  trdp_pdReceive (
         pNewElement->dataSize           = vos_ntohl(pNewElement->frameHead.datasetLength);
         pNewElement->grossSize          = trdp_packetSizePD(pNewElement->dataSize);
         pNewElement->socketIdx          = 0;
-        pNewElement->userRef            = 0;
-        resultCode                      = TRDP_NOSUB_ERR;
+        pNewElement->userRef = 0;
+        resultCode = TRDP_NOSUB_ERR;
     }
 
     if (informUser)
@@ -480,18 +484,19 @@ TRDP_ERR_T  trdp_pdReceive (
         if (appHandle->pdDefault.pfCbFunction != NULL)
         {
             TRDP_PD_INFO_T theMessage;
-            theMessage.comId        = pPulledElement->addr.comId;
-            theMessage.srcIpAddr    = pPulledElement->addr.srcIpAddr;
-            theMessage.destIpAddr   = pPulledElement->addr.destIpAddr;
-            theMessage.topoCount    = vos_ntohl(pPulledElement->frameHead.topoCount);
-            theMessage.msgType      = vos_ntohs(pPulledElement->frameHead.msgType);
-            theMessage.seqCount     = vos_ntohl(pPulledElement->frameHead.sequenceCounter);
-            theMessage.protVersion  = vos_ntohs(pPulledElement->frameHead.protocolVersion);
-            theMessage.subs         = vos_ntohs(pPulledElement->frameHead.subsAndReserved);
-            theMessage.offsetAddr   = vos_ntohs(pPulledElement->frameHead.offsetAddress);
-            theMessage.replyComId   = vos_ntohl(pPulledElement->frameHead.replyComId);
-            theMessage.replyIpAddr  = vos_ntohl(pPulledElement->frameHead.replyIpAddress);
-            theMessage.pUserRef     = pPulledElement->userRef;      /* TBD: User reference given with the local subscribe?   */
+            theMessage.comId        = pNewElement->addr.comId;
+            theMessage.srcIpAddr    = pNewElement->addr.srcIpAddr;
+            theMessage.destIpAddr   = pNewElement->addr.destIpAddr;
+            theMessage.topoCount    = vos_ntohl(pNewElement->frameHead.topoCount);
+            theMessage.msgType      = vos_ntohs(pNewElement->frameHead.msgType);
+            theMessage.seqCount     = vos_ntohl(pNewElement->frameHead.sequenceCounter);
+            theMessage.protVersion  = vos_ntohs(pNewElement->frameHead.protocolVersion);
+            theMessage.subs         = vos_ntohs(pNewElement->frameHead.subsAndReserved);
+            theMessage.offsetAddr   = vos_ntohs(pNewElement->frameHead.offsetAddress);
+            theMessage.replyComId   = vos_ntohl(pNewElement->frameHead.replyComId);
+            theMessage.replyIpAddr  = vos_ntohl(pNewElement->frameHead.replyIpAddress);
+            theMessage.pUserRef     = pNewElement->userRef;      /* TBD: User reference given with the local subscribe?
+                                                                     */
             theMessage.resultCode   = resultCode;
 
             appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
@@ -511,15 +516,15 @@ TRDP_ERR_T  trdp_pdReceive (
 void    trdp_pdUpdate (
     PD_ELE_T *pPacket)
 {
-    UINT32  myCRC = vos_crc32(0L, NULL, 0);
+    UINT32 myCRC = vos_crc32(0L, NULL, 0);
 
     /* increment counter with each telegram */
     pPacket->curSeqCnt++;
     pPacket->frameHead.sequenceCounter = vos_htonl(pPacket->curSeqCnt);
 
     /* Compute CRC32   */
-    myCRC   = vos_crc32(myCRC, (UINT8 *)&pPacket->frameHead, sizeof(PD_HEADER_T) - sizeof(UINT32));
-    pPacket->frameHead.frameCheckSum    = MAKE_LE(myCRC);
+    myCRC = vos_crc32(myCRC, (UINT8 *)&pPacket->frameHead, sizeof(PD_HEADER_T) - sizeof(UINT32));
+    pPacket->frameHead.frameCheckSum = MAKE_LE(myCRC);
 }
 
 /******************************************************************************/
@@ -555,7 +560,6 @@ TRDP_ERR_T trdp_pdCheck (
         vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
         err = TRDP_CRC_ERR;
     }
-
     /*	Check protocol version	*/
     else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (IP_PD_PROTO_VER & 0xFF000000))
     {
@@ -564,7 +568,6 @@ TRDP_ERR_T trdp_pdCheck (
                    IP_PD_PROTO_VER);
         err = TRDP_WIRE_ERR;
     }
-
     /*	Check type	*/
     else if (vos_ntohs(pPacket->msgType) != TRDP_MSG_PD &&
              vos_ntohs(pPacket->msgType) != TRDP_MSG_PR &&
@@ -576,8 +579,8 @@ TRDP_ERR_T trdp_pdCheck (
     /*	Check Data CRC (FCS)	*/
     else if (pPacket->datasetLength > 0)
     {
-	myCRC = 0; // reset the initialization value for the CRC
-        myCRC = vos_crc32(myCRC, (UINT8 *)pPacket + sizeof(PD_HEADER_T), vos_ntohl(pPacket->datasetLength));
+        myCRC   = 0; /* reset the initialization value for the CRC */
+        myCRC   = vos_crc32(myCRC, (UINT8 *)pPacket + sizeof(PD_HEADER_T), vos_ntohl(pPacket->datasetLength));
 
         if (*pDataFCS != MAKE_LE(myCRC))
         {
@@ -602,11 +605,11 @@ TRDP_ERR_T trdp_pdCheck (
  *  @retval         TRDP_IO_ERR
  */
 TRDP_ERR_T  trdp_pdSend (
-    INT32           pdSock,
-    PD_ELE_T        *pPacket)
+    INT32       pdSock,
+    PD_ELE_T    *pPacket)
 {
-    VOS_ERR_T err = VOS_NO_ERR;
-    UINT32      destIp = pPacket->addr.destIpAddr;
+    VOS_ERR_T   err     = VOS_NO_ERR;
+    UINT32      destIp  = pPacket->addr.destIpAddr;
 
     /*  check for temporary address (PD PULL):  */
     if (pPacket->pullIpAddress != 0)
