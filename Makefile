@@ -79,7 +79,7 @@ all:		outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello
-test:		outdir $(OUTDIR)/test_server $(OUTDIR)/test_client
+test:		outdir $(OUTDIR)/test_server $(OUTDIR)/test_client1
 doc:		doc/latex/refman.pdf
 
 $(OUTDIR)/trdp_if.o:	trdp_if.c
@@ -134,14 +134,16 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 $(OUTDIR)/test_server:   test_server_main.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building test server application $(@F)'
 			$(CC) test/test_server_main.c \
+			    test/test_general.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/test_client:   test_client_main.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/test_client1:   test_client_main1.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building test client application $(@F)'
-			$(CC) test/test_client_main.c \
+			$(CC) test/test_client_main1.c \
+			    test/test_general.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@

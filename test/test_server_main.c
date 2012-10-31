@@ -31,10 +31,12 @@
 #include "trdp_if_light.h"
 #include "vos_thread.h"
 #include "test_server.h"
+#include "test_general.h"
 
-
-CHAR8   gBuffer[32]     = "Hello World";
+CHAR8   gInputBuffer[sizeof(gMyDataSet999)] = "\0";
 BOOL    gKeepOnRunning  = TRUE;
+
+VOS_TIME_T  gLastupdateTime;
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -56,7 +58,8 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s", pTime, catStr[category], pFile, LineNumber, pMsgStr);
+    /** all output to standard error -> it could be piped to somewhere ese */
+    fprintf(stderr, "%s %s %s:%d %s", pTime, catStr[category], pFile, LineNumber, pMsgStr);
 }
 
 
@@ -75,29 +78,40 @@ void myPDcallBack (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
+    VOS_TIME_T  currentTime;
+    UINT32      timediff;
 
     /*	Check why we have been called */
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
-            printf("ComID %d received\n", pMsg->comId);
+            printf("> ComID %d received\n", pMsg->comId);
             if (pData)
             {
-                memcpy(gBuffer, pData,
-                       ((sizeof(gBuffer) <
-                         dataSize) ? sizeof(gBuffer) : dataSize));
+                memcpy(gInputBuffer, pData,
+                       ((sizeof(gInputBuffer) <
+                         dataSize) ? sizeof(gInputBuffer) : dataSize));
+
+                /* make the timemeasurement */
+                vos_getTime(&currentTime);
+                if (gLastupdateTime.tv_sec > 0 && gLastupdateTime.tv_usec)
+                {
+                    test_general_calcTimediff(&timediff, currentTime, gLastupdateTime);
+                    gMyDataSet998.cycletime = vos_htonl(timediff);
+                }
+                gLastupdateTime = currentTime;
             }
             break;
 
         case TRDP_TIMEOUT_ERR:
             /* The application can decide here if old data shall be invalidated or kept */
-            printf("Packet timed out (ComID %d, SrcIP: %u)\n",
+            printf("> Packet timed out (ComID %d, SrcIP: %u)\n",
                    pMsg->comId,
                    pMsg->srcIpAddr);
-            memset(gBuffer, 0, sizeof(gBuffer));
+            memset(gInputBuffer, 0, sizeof(gInputBuffer));
 
         default:
-            printf("Error on packet received (ComID %d), err = %d\n",
+            printf("> Error on packet received (ComID %d), err = %d\n",
                    pMsg->comId,
                    pMsg->resultCode);
             break;
@@ -121,6 +135,16 @@ int main (int argc, char * *argv)
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
+    UINT32 destIP;
+
+    /* Parse the given commandline arguments */
+    rv = trdp_test_general_parseCommandLineArguments(argc, argv, &destIP);
+    if (rv != 0)
+        return rv;
+
+    /* clean data before using it */
+    memset(&gLastupdateTime, 0, sizeof(gLastupdateTime));
+    memset(&gMyDataSet998, 0, sizeof(gMyDataSet998));
 
     /*	Init the library for callback operation */
     if (tlc_init(dbgOut, &dynamicConfig) != TRDP_NO_ERR)
@@ -140,20 +164,17 @@ int main (int argc, char * *argv)
     }
 
     /*  Subscribe to control PD     */
-
-    memset(gBuffer, 0, sizeof(gBuffer));
-
-    err = tlp_subscribe( appHandle,                /*   our application identifier          */
-                         &subHandle,               /*   our subscription identifier         */
+    err = tlp_subscribe( appHandle,                 /*   our application identifier          */
+                         &subHandle,                /*   our subscription identifier         */
                          NULL,
-                         PD_TEST_GEN_UNI_COMID,       /*   ComID                               */
-                         0,                        /*   topocount: local consist only       */
-                         0 /* noo filtering PD_TEST_GEN_UNI_SRC_IP*/,      /*   Source IP filter                    */
+                         PD_TEST_GEN_UNI_COMID,     /*   ComID                               */
+                         0,                         /*   topocount: local consist only       */
+                         destIP,                    /*   Source IP filter                    */
                          0,
-                         0,                        /*   Default destination	(or MC Group)   */
-                         PD_TEST_GEN_UNI_TIMEOUT,     /*   Time out in us                      */
-                         TRDP_TO_SET_TO_ZERO,      /*   delete invalid data	on timeout      */
-                         sizeof(gMyDataSet999)); /*   net data size                       */
+                         0,                         /*   Default destination	(or MC Group)   */
+                         PD_TEST_GEN_UNI_TIMEOUT,   /*   Time out in us                      */
+                         TRDP_TO_SET_TO_ZERO,       /*   delete invalid data	on timeout      */
+                         sizeof(gMyDataSet999));    /*   net data size                       */
 
     if (err != TRDP_NO_ERR)
     {
@@ -166,16 +187,16 @@ int main (int argc, char * *argv)
 
     err = tlp_publish(appHandle,                    /*    our application identifier  */
                       &pubHandleUC,                 /*    our pulication identifier   */
-                      PD_TEST1_UNI_COMID,           /*    ComID to send               */
+                      PD_TEST_ECHO_UNI_COMID,   /*    ComID to send               */
                       0,                            /*    local consist only          */
                       0,                            /*    default source IP           */
-                      PD_TEST1_UNI_DST_IP,          /*    where to send to            */
-                      PD_TEST1_UNI_CYCLE,           /*    Cycle time in ms            */
+                      destIP,                       /*    where to send to            */
+                      PD_TEST_ECHO_UNI_CYCLE,   /*    Cycle time in ms            */
                       0,                            /*    not redundant               */
                       TRDP_FLAGS_CALLBACK,          /*    Use callback for errors     */
                       NULL,                         /*    default qos and ttl         */
-                      (UINT8 *)&gMyDataSet20001,    /*    initial data                */
-                      sizeof(gMyDataSet20001),      /*    data size                   */
+                      (UINT8 *)&gMyDataSet998,      /*    initial data                */
+                      sizeof(gMyDataSet998),        /*    data size                   */
                       FALSE,                        /*    no ladder                   */
                       0);                           /*    no ladder                   */
 
@@ -196,7 +217,7 @@ int main (int argc, char * *argv)
         struct timeval  tv;
         struct timeval  max_tv = {0, 100000};
     	fd_set  rfds;
-	
+
         /*
          Prepare the file descriptor set for the select call.
          Additional descriptors can be added here.
@@ -229,8 +250,8 @@ int main (int argc, char * *argv)
          what ever comes first.
          */
         rv = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
-        
-	/*
+
+        /*
          Check for overdue PDs (sending and receiving)
          Send any PDs if it's time...
          Detect missing PDs...
@@ -239,7 +260,6 @@ int main (int argc, char * *argv)
          The callback function will be called from within the trdp_work
          function (in it's context and thread)!
          */
-
         tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 
         /*
@@ -254,9 +274,16 @@ int main (int argc, char * *argv)
             /* printf("."); fflush(stdout); */
         }
 
-        /*  Advance counter */
-	gMyDataSet20001.uint16_1++;
-        tlp_put(appHandle, pubHandleUC, (const UINT8 *) &gMyDataSet20001, sizeof(gMyDataSet20001));
+        /*** Echo dataset ***/
+
+        /* Display received information */
+        if (gInputBuffer[0] > 0) //FIXME Better solution would be: global flag, that is set in the callback function to indicate new data
+        {
+            memcpy(&(gMyDataSet998.echoDataset), &gInputBuffer, trdp_general_min(sizeof(gInputBuffer), sizeof(gMyDataSet998.echoDataset)) );
+            memset(gInputBuffer, 0, sizeof(gInputBuffer));
+        }
+
+        tlp_put(appHandle, pubHandleUC, (const UINT8 *) &gMyDataSet998, sizeof(gMyDataSet998));
 
     }   /*	Bottom of while-loop */
 
