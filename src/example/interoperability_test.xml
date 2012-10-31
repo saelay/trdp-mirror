@@ -11,9 +11,10 @@
 	
    <bus-interface-list>
       <bus-interface network-id="1" name="eth0">
-         <telegram name="compeltetelegram" com-id="999" data-set-id="999" >
+         <telegram name="compelte_telegram" com-id="999" data-set-id="999" >
              <!-- inside "md-parameter" or "pd-parameter" with optional stuff -->
          </telegram>
+         <telegram name="complete_telegram_echo" com-id="998" data-set-id="998" />
       </bus-interface>
    </bus-interface-list>
    
@@ -31,6 +32,11 @@
    </com-parameter-list>
    
    <data-set-list>
+      <data-set name="testecho_dataset" id="998">
+		<element name="cycletime" type="10" />
+		<element name="custom_message" type="2" array-size="0" />
+		<element name="marshall_test_data" type="999" />	
+      </data-set>
       <data-set name="marshall_test" id="999">
 		<!-- present all element once -->
 		<element name="BOOL" type="1" />
