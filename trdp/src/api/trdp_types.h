@@ -382,9 +382,9 @@ typedef struct
 typedef struct
 {
     UINT32                  version;      /**< TRDP version  */
-    TRDP_TIME_T             timeStamp;    /**< actual time stamp */
-    UINT32                  upTime;       /**< time in sec since last initialisation */
-    UINT32                  statisticTime; /**< time in sec since last reset of statistics */
+    TIMEDATE64              timeStamp;    /**< actual time stamp */
+    TIMEDATE32              upTime;       /**< time in sec since last initialisation */
+    TIMEDATE32              statisticTime; /**< time in sec since last reset of statistics */
     TRDP_LABEL_T            hostName;     /**< host name */
     TRDP_LABEL_T            leaderName;   /**< leader host name */
     TRDP_IP_ADDR_T          ownIpAddr;    /**< own IP address */
