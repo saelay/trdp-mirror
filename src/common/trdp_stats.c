@@ -339,6 +339,9 @@ EXT_DECL TRDP_ERR_T tlc_resetStatistics (
 void    trdp_UpdateStats (
     TRDP_APP_SESSION_T appHandle)
 {
+    PD_ELE_T    *iter;
+    UINT16      index;
+
     /*  Get a new time stamp    */
     vos_getTime(&appHandle->stats.timeStamp);
 
@@ -352,6 +355,15 @@ void    trdp_UpdateStats (
                  appHandle->stats.mem.allocBlockSize,
                  appHandle->stats.mem.allocBlockSize);
 
+    /*  Count our subscriptions */
+    for (index = 0, iter = appHandle->pRcvQueue; iter != NULL; index++, iter = iter->pNext) {;}
+
+    appHandle->stats.pd.numSubs = index;
+
+    /*  Count our publishers */
+    for (index = 0, iter = appHandle->pSndQueue; iter != NULL; index++, iter = iter->pNext) {;}
+    
+    appHandle->stats.pd.numPub = index;
 }
 
 /**********************************************************************************************************************/
@@ -376,18 +388,18 @@ void    trdp_pdPrepareStats (
 
     /*  The statistics structure is naturally aligned - all 32 Bits, we can cast and just eventually swap the values! */
 
-    pData = (TRDP_STATISTICS_T *) pPacket->data;
+    pData = (TRDP_STATISTICS_T *) pPacket->pFrame->data;
 
     /*  Fill in the values  */
-    pData->version = vos_htonl(appHandle->stats.version);
+    pData->version              = vos_htonl(appHandle->stats.version);
     pData->timeStamp.tv_sec     = vos_htonl(appHandle->stats.timeStamp.tv_sec);
     pData->timeStamp.tv_usec    = vos_htonl(appHandle->stats.timeStamp.tv_usec);
-    pData->upTime           = vos_htonl(appHandle->stats.upTime);
-    pData->statisticTime    = vos_htonl(appHandle->stats.statisticTime);
-    pData->ownIpAddr        = vos_htonl(appHandle->stats.ownIpAddr);
-    pData->leaderIpAddr     = vos_htonl(appHandle->stats.leaderIpAddr);
-    pData->processPrio      = vos_htonl(appHandle->stats.processPrio);
-    pData->processCycle     = vos_htonl(appHandle->stats.processCycle);
+    pData->upTime               = vos_htonl(appHandle->stats.upTime);
+    pData->statisticTime        = vos_htonl(appHandle->stats.statisticTime);
+    pData->ownIpAddr            = vos_htonl(appHandle->stats.ownIpAddr);
+    pData->leaderIpAddr         = vos_htonl(appHandle->stats.leaderIpAddr);
+    pData->processPrio          = vos_htonl(appHandle->stats.processPrio);
+    pData->processCycle         = vos_htonl(appHandle->stats.processCycle);
 
     /*  Memory  */
     pData->mem.total            = vos_htonl(appHandle->stats.mem.total);
@@ -419,8 +431,8 @@ void    trdp_pdPrepareStats (
     pData->pd.numSend       = vos_htonl(appHandle->stats.pd.numSend);
 
     /* Message data */
-    pData->md.defQos    = vos_htonl(appHandle->stats.md.defQos);
-    pData->md.defTtl    = vos_htonl(appHandle->stats.md.defTtl);
+    pData->md.defQos            = vos_htonl(appHandle->stats.md.defQos);
+    pData->md.defTtl            = vos_htonl(appHandle->stats.md.defTtl);
     pData->md.defReplyTimeout   = vos_htonl(appHandle->stats.md.defReplyTimeout);
     pData->md.defConfirmTimeout = vos_htonl(appHandle->stats.md.defConfirmTimeout);
     pData->md.numList           = vos_htonl(appHandle->stats.md.numList);

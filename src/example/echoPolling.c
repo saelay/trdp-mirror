@@ -34,11 +34,11 @@
 /* Some sample comId definitions	*/
 
 /* Expect receiving:	*/
-#define PD_COMID1               2000
-#define PD_COMID1_CYCLE         100000
-#define PD_COMID1_TIMEOUT       1200000         /* 1.2 s	*/
+#define PD_COMID1               1000
+#define PD_COMID1_CYCLE         1000000
+#define PD_COMID1_TIMEOUT       3000000         /* 3 s	*/
 #define PD_COMID1_DATA_SIZE     32
-#define PD_COMID1_SRC_IP        0x0A000064      /*	Sender's IP: 10.0.0.100		*/
+#define PD_COMID1_SRC_IP        0x0             /*	Sender's IP: 10.0.0.100		*/
 
 /* Send as echo:	*/
 #define PD_COMID2               2001
@@ -215,8 +215,7 @@ int main (int argc, char * *argv)
          */
 
         receivedSize = sizeof(gBuffer);
-        err =
-            tlp_get(appHandle,
+        err = tlp_get(appHandle,
                     subHandle,
                     TRDP_FLAGS_NONE,
                     &myPDInfo,
@@ -249,7 +248,7 @@ int main (int argc, char * *argv)
         {
             printf("Error on packet received (ComID %d), err = %d\n",
                    myPDInfo.comId,
-                   myPDInfo.resultCode);
+                   err);
         }
 
         /*
