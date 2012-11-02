@@ -44,7 +44,7 @@
 #define PD_COMID1_TIMEOUT       5000000
 #define PD_COMID1_DATA_SIZE     sizeof(TRDP_STATISTICS_T)
 //#define PD_COMID1_SRC_IP        vos_dottedIP("192.168.2.4")     /*	Sender's IP		*/
-#define PD_COMID1_SRC_IP        vos_dottedIP("10.0.0.200")     /*	Sender's IP		*/
+#define PD_COMID1_SRC_IP        vos_dottedIP("10.64.8.3")     /*	Sender's IP		*/
 
 /* Send as request:	*/
 #define PD_COMID2               11
@@ -54,15 +54,17 @@
 /* We use dynamic memory	*/
 #define RESERVED_MEMORY  10000
 
-#define APP_VERSION  "0.0.0.1"
+#define APP_VERSION  "0.0.0.2"
 
-TRDP_STATISTICS_T gBuffer;
+TRDP_STATISTICS_T   gBuffer;
+BOOL                gKeepOnRunning = TRUE;
 
 void print_stats(
     TRDP_STATISTICS_T*  pData)
 {
     int i;
 
+    printf("\n--------------------\n");
     printf("version:        %u\n", vos_ntohl(pData->version));
     printf("timestamp:      %u:%u\n", vos_ntohl(pData->timeStamp.tv_sec), vos_ntohl(pData->timeStamp.tv_usec));
     printf("upTime:         %u\n", vos_ntohl(pData->upTime));
@@ -79,14 +81,20 @@ void print_stats(
     printf("mem.numAllocErr:    %u\n", vos_ntohl(pData->mem.numAllocErr));
     printf("mem.numFreeErr:     %u\n", vos_ntohl(pData->mem.numFreeErr));
 
+    printf("mem.allocBlockSizes: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-       printf("mem.allocBlockSize[%d]:     %u\n", i, vos_ntohl(pData->mem.allocBlockSize[i]));
-       printf("mem.usedBlockSize[%d]:      %u\n", i, vos_ntohl(pData->mem.usedBlockSize[i]));
+        printf("%u, ", i, vos_ntohl(pData->mem.allocBlockSize[i]));
     }
     
+    printf("\nmem.usedBlockSize:   ");
+    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    {
+        printf("%u, ", i, vos_ntohl(pData->mem.usedBlockSize[i]));
+    }
+
     /* Process data */
-    printf("pd.defQos:      %u\n", vos_ntohl(pData->pd.defQos));
+    printf("\npd.defQos:      %u\n", vos_ntohl(pData->pd.defQos));
     printf("pd.defTtl:      %u\n", vos_ntohl(pData->pd.defTtl));
     printf("pd.defTimeout:  %u\n", vos_ntohl(pData->pd.defTimeout));
     printf("pd.numSubs:     %u\n", vos_ntohl(pData->pd.numSubs));
@@ -171,6 +179,7 @@ void myPDcallBack (
                 if (pMsg->comId == 12)
                 {
                     print_stats(&gBuffer);
+                    gKeepOnRunning = FALSE;
                 }
             }
             break;
@@ -248,7 +257,7 @@ int main (int argc, char * *argv)
     
     /*	Open a session for callback operation	(PD only) */
     if (tlc_openSession(&appHandle,
-                 PD_OWN_IP, 0,                              /* use default IP addresses */
+                 PD_OWN_IP, 0,                      /* use default IP addresses */
                  NULL,                              /* no Marshalling	*/
                  &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
                  &processConfig) != TRDP_NO_ERR)
@@ -266,7 +275,7 @@ int main (int argc, char * *argv)
                          NULL,
                          PD_COMID1,                 /*	ComID								*/
                          0,                         /*	topocount: local consist only		*/
-                         PD_COMID1_SRC_IP,          /*	Source IP filter					*/
+                         0,                         /*	Source IP filter					*/
                          0,
                          PD_OWN_IP,                 /*	Default destination	(or MC Group)   */
                          PD_COMID1_TIMEOUT,         /*	Time out in us						*/
@@ -282,7 +291,7 @@ int main (int argc, char * *argv)
 
     /*	Request statistics PD		*/
 
-    err = tlp_request(appHandle, subHandle, PD_COMID2, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, PD_COMID1_SRC_IP, 0, 0);
+    err = tlp_request(appHandle, subHandle, PD_COMID2, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0, 0, 0);
 
     if (err != TRDP_NO_ERR)
     {
@@ -295,12 +304,12 @@ int main (int argc, char * *argv)
     /*
         Enter the main processing loop.
      */
-    while (1)
+    while (gKeepOnRunning)
     {
         fd_set  rfds;
         INT32   noOfDesc;
         struct timeval  tv;
-        struct timeval  max_tv = {0, 100000};
+        struct timeval  max_tv = {5, 0};
 
         /*
             Prepare the file descriptor set for the select call.

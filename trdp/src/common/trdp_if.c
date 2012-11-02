@@ -203,6 +203,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 {
     TRDP_ERR_T      ret         = TRDP_NO_ERR;
     TRDP_SESSION_PT pSession    = NULL;
+    TRDP_PUB_T      dummyPubHndl;
 
     if (pAppHandle == NULL)
     {
@@ -300,6 +301,23 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     pSession->pNext = sSession;
     sSession        = pSession;
     *pAppHandle     = pSession;
+    
+    /*  Publish our statistics packet   */
+    ret = tlp_publish(pSession,                 /*	our application identifier	*/
+                      &dummyPubHndl,            /*	our pulication identifier	*/
+                      GSTAT_REPLY_COMID,        /*	ComID to send				*/
+                      0,                        /*	local consist only			*/
+                      0,                        /*	default source IP			*/
+                      0,                        /*	where to send to			*/
+                      0,                        /*	Cycle time in ms			*/
+                      0,                        /*	not redundant				*/
+                      TRDP_FLAGS_NONE,          /*	No callbacks                */
+                      NULL,                     /*	default qos and ttl			*/
+                      NULL,                     /*	initial data                */
+                      sizeof(TRDP_STATISTICS_T),/*	max data size               */
+                      FALSE,                    /*	no ladder					*/
+                      0);                       /*	no ladder					*/
+
     vos_mutexUnlock(sSessionMutex);
 
     return ret;
@@ -670,8 +688,11 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         {
             /*
                Compute the overal packet size
-               Add padding bytes to align to 32 bits
              */
+            if (dataSize == 0)
+            {
+                //dataSize = MAX_PD_DATA_SIZE;
+            }
             pNewElement->dataSize   = dataSize;
             pNewElement->grossSize  = trdp_packetSizePD(dataSize);
 
@@ -688,6 +709,16 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             {
                 vos_memFree(pNewElement);
                 pNewElement = NULL;
+            }
+            else
+            {
+                /*  Alloc the corresponding data buffer  */
+                pNewElement->pFrame = (PD_PACKET_T*) vos_memAlloc(pNewElement->grossSize);
+                if (pNewElement->pFrame == NULL)
+                {
+                    vos_memFree(pNewElement);
+                    pNewElement = NULL;
+                }
             }
         }
     }
@@ -731,7 +762,10 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
         *pPubHandle = &pNewElement->addr;
 
-        ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
+        if (pData != NULL && dataSize > 0)
+        {
+            ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
+        }
     }
 
     vos_mutexUnlock(appHandle->mutex);
@@ -779,6 +813,7 @@ TRDP_ERR_T  tlp_unpublish (
     if (pElement != NULL)
     {
         trdp_queueDelElement(&appHandle->pSndQueue, pElement);
+        vos_memFree(pElement->pFrame);
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
     }
@@ -944,8 +979,10 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 
 
     //FIXME set a maximumount of sockets to check
-    *pNoDesc = VOS_MAX_SOCKET_CNT;
-
+    if (pNoDesc != NULL)
+    {
+        *pNoDesc = VOS_MAX_SOCKET_CNT;
+    }
     return TRDP_NO_ERR;
 }
 
@@ -1016,14 +1053,14 @@ EXT_DECL TRDP_ERR_T tlc_process (
                 theMessage.comId        = iterPD->addr.comId;
                 theMessage.srcIpAddr    = iterPD->addr.srcIpAddr;
                 theMessage.destIpAddr   = iterPD->addr.destIpAddr;
-                theMessage.topoCount    = vos_ntohl(iterPD->frameHead.topoCount);
-                theMessage.msgType      = vos_ntohs(iterPD->frameHead.msgType);
-                theMessage.seqCount     = vos_ntohl(iterPD->frameHead.sequenceCounter);
-                theMessage.protVersion  = vos_ntohs(iterPD->frameHead.protocolVersion);
-                theMessage.subs         = vos_ntohs(iterPD->frameHead.subsAndReserved);
-                theMessage.offsetAddr   = vos_ntohs(iterPD->frameHead.offsetAddress);
-                theMessage.replyComId   = vos_ntohl(iterPD->frameHead.replyComId);
-                theMessage.replyIpAddr  = vos_ntohl(iterPD->frameHead.replyIpAddress);
+                theMessage.topoCount    = vos_ntohl(iterPD->pFrame->frameHead.topoCount);
+                theMessage.msgType      = vos_ntohs(iterPD->pFrame->frameHead.msgType);
+                theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
+                theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
+                theMessage.subs         = vos_ntohs(iterPD->pFrame->frameHead.subsAndReserved);
+                theMessage.offsetAddr   = vos_ntohs(iterPD->pFrame->frameHead.offsetAddress);
+                theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
+                theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
                 theMessage.pUserRef     = iterPD->userRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
@@ -1203,39 +1240,51 @@ EXT_DECL TRDP_ERR_T tlp_request (
                  */
                 pReqElement->dataSize   = dataSize;
                 pReqElement->grossSize  = trdp_packetSizePD(dataSize);
+				pReqElement->pFrame = (PD_PACKET_T*) vos_memAlloc(pReqElement->grossSize);
 
-                /*    Get a socket    */
-                ret = trdp_requestSocket(appHandle->iface,
-                                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
-                                         srcIpAddr,
-                                         TRDP_SOCK_PD,
-                                         appHandle->option,
-                                         &pReqElement->socketIdx);
-
-                if (ret != TRDP_NO_ERR)
+				if (pReqElement->pFrame == NULL)
                 {
                     vos_memFree(pReqElement);
                     pReqElement = NULL;
                 }
+                
                 else
                 {
 
-                    /*  Mark this element as a PD PULL.  Request will be sent on tlc_process time.    */
+                    /*    Get a socket    */
+                    ret = trdp_requestSocket(appHandle->iface,
+                                             (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
+                                             srcIpAddr,
+                                             TRDP_SOCK_PD,
+                                             appHandle->option,
+                                             &pReqElement->socketIdx);
 
-                    vos_clearTime(&pReqElement->interval);
-                    vos_clearTime(&pReqElement->timeToGo);
+                    if (ret != TRDP_NO_ERR)
+                    {
+                        vos_memFree(pReqElement->pFrame);
+                        vos_memFree(pReqElement);
+                        pReqElement = NULL;
+                    }
+                    else
+                    {
 
-                    /*  Update the internal data */
+                        /*  Mark this element as a PD PULL.  Request will be sent on tlc_process time.    */
 
-                    pReqElement->addr.comId         = comId;
-                    pReqElement->addr.destIpAddr    = destIpAddr;
-                    pReqElement->addr.srcIpAddr     = srcIpAddr;
-                    pReqElement->addr.mcGroup       = 0;
-                    pReqElement->pktFlags           = pktFlags;
+                        vos_clearTime(&pReqElement->interval);
+                        vos_clearTime(&pReqElement->timeToGo);
 
-                    /*    Enter this request into the send queue.    */
+                        /*  Update the internal data */
 
-                    trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
+                        pReqElement->addr.comId         = comId;
+                        pReqElement->addr.destIpAddr    = destIpAddr;
+                        pReqElement->addr.srcIpAddr     = srcIpAddr;
+                        pReqElement->addr.mcGroup       = 0;
+                        pReqElement->pktFlags           = pktFlags;
+
+                        /*    Enter this request into the send queue.    */
+
+                        trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
+                    }
                 }
             }
         }
@@ -1379,7 +1428,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         {
             /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
 
-            grossDataSize = maxDataSize + sizeof(PD_HEADER_T) + sizeof(UINT32);
+            grossDataSize = trdp_packetSizePD(maxDataSize);
 
             /*    Allocate a buffer for this kind of packets    */
 
@@ -1391,52 +1440,62 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             }
             else
             {
-                /*    Initialize some fields    */
-
-                if (vos_isMulticast(destIpAddr))
+                /*  Alloc the corresponding data buffer  */
+                newPD->pFrame = (PD_PACKET_T*) vos_memAlloc(grossDataSize);
+                if (newPD->pFrame == NULL)
                 {
-                    newPD->addr.mcGroup = destIpAddr;
+                    vos_memFree(newPD);
+                    newPD = NULL;
+                    ret = TRDP_MEM_ERR;
                 }
                 else
                 {
-                    newPD->addr.mcGroup = 0;
-                }
+                    /*    Initialize some fields    */
 
-                newPD->addr.comId       = comId;
-                newPD->addr.srcIpAddr   = srcIpAddr1;
-                newPD->addr.destIpAddr  = destIpAddr;
-                newPD->interval.tv_sec  = timeout / 1000000;
-                newPD->interval.tv_usec = timeout % 1000000;
-                newPD->timeToGo         = newPD->interval;
-                newPD->toBehavior       = toBehavior;
-                newPD->grossSize        = grossDataSize;
-                newPD->userRef          = pUserRef;
-                newPD->socketIdx        = index;
+                    if (vos_isMulticast(destIpAddr))
+                    {
+                        newPD->addr.mcGroup = destIpAddr;
+                    }
+                    else
+                    {
+                        newPD->addr.mcGroup = 0;
+                    }
 
-                if (timeout == 0)
-                {
-                    vos_clearTime(&newPD->timeToGo);
-                }
-                else
-                {
-                    vos_getTime(&newPD->timeToGo);
-                    vos_addTime(&newPD->timeToGo, &newPD->interval);
-                }
-                /*  append this subscription to our receive queue */
-                trdp_queueAppLast(&appHandle->pRcvQueue, newPD);
+                    newPD->addr.comId       = comId;
+                    newPD->addr.srcIpAddr   = srcIpAddr1;
+                    newPD->addr.destIpAddr  = destIpAddr;
+                    newPD->interval.tv_sec  = timeout / 1000000;
+                    newPD->interval.tv_usec = timeout % 1000000;
+                    newPD->timeToGo         = newPD->interval;
+                    newPD->toBehavior       = toBehavior;
+                    newPD->grossSize        = grossDataSize;
+                    newPD->userRef          = pUserRef;
+                    newPD->socketIdx        = index;
 
-                /*    Join a multicast group */
-                if (newPD->addr.mcGroup != 0)
-                {
-                    vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, 0);
-                    /*    Remember we did this    */
-                    newPD->privFlags |= TRDP_MC_JOINT;
+                    if (timeout == 0)
+                    {
+                        vos_clearTime(&newPD->timeToGo);
+                    }
+                    else
+                    {
+                        vos_getTime(&newPD->timeToGo);
+                        vos_addTime(&newPD->timeToGo, &newPD->interval);
+                    }
+                    /*  append this subscription to our receive queue */
+                    trdp_queueAppLast(&appHandle->pRcvQueue, newPD);
+
+                    /*    Join a multicast group */
+                    if (newPD->addr.mcGroup != 0)
+                    {
+                        vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, 0);
+                        /*    Remember we did this    */
+                        newPD->privFlags |= TRDP_MC_JOINT;
+                    }
+                    *pSubHandle = &newPD->addr;
+                    ret         = TRDP_NO_ERR;
                 }
-                *pSubHandle = &newPD->addr;
-                ret         = TRDP_NO_ERR;
             }
         }
-
     }
 
     vos_mutexUnlock(appHandle->mutex);
@@ -1483,6 +1542,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     if (pElement != NULL)
     {
         trdp_queueDelElement(&appHandle->pSndQueue, pElement);
+        vos_memFree(pElement->pFrame);
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
     }
@@ -1595,14 +1655,14 @@ EXT_DECL TRDP_ERR_T tlp_get (
         pPdInfo->comId          = pElement->addr.comId;
         pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
         pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
-        pPdInfo->topoCount      = vos_ntohl(pElement->frameHead.topoCount);
-        pPdInfo->msgType        = vos_ntohs(pElement->frameHead.msgType);
-        pPdInfo->seqCount       = vos_ntohl(pElement->frameHead.sequenceCounter);
-        pPdInfo->protVersion    = vos_ntohs(pElement->frameHead.protocolVersion);
-        pPdInfo->subs           = vos_ntohs(pElement->frameHead.subsAndReserved);
-        pPdInfo->offsetAddr     = vos_ntohs(pElement->frameHead.offsetAddress);
-        pPdInfo->replyComId     = vos_ntohl(pElement->frameHead.replyComId);
-        pPdInfo->replyIpAddr    = vos_ntohl(pElement->frameHead.replyIpAddress);
+        pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
+        pPdInfo->msgType        = vos_ntohs(pElement->pFrame->frameHead.msgType);
+        pPdInfo->seqCount       = vos_ntohl(pElement->pFrame->frameHead.sequenceCounter);
+        pPdInfo->protVersion    = vos_ntohs(pElement->pFrame->frameHead.protocolVersion);
+        pPdInfo->subs           = vos_ntohs(pElement->pFrame->frameHead.subsAndReserved);
+        pPdInfo->offsetAddr     = vos_ntohs(pElement->pFrame->frameHead.offsetAddress);
+        pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
+        pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
         pPdInfo->pUserRef       = pElement->userRef;        /* TBD: User reference given with the local subscribe?   */
         pPdInfo->resultCode     = TRDP_NO_ERR;
     }
