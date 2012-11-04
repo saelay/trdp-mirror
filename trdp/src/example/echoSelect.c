@@ -175,7 +175,7 @@ int main (int argc, char * *argv)
                          0,                         /*	topocount: local consist only		*/
                          0,          				/*	Source IP filter					*/
                          0,
-                         0,                         /*	Default destination	(or MC Group)   */
+                         0xEF000000,                         /*	Default destination	(or MC Group)   */
                          PD_COMID1_TIMEOUT,         /*	Time out in us						*/
                          TRDP_TO_SET_TO_ZERO,       /*  delete invalid data	on timeout      */
                          sizeof(gBuffer));          /*	net data size						*/

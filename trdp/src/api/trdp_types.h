@@ -485,7 +485,7 @@ typedef VOS_LOG_T TRDP_LOG_T;
 typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
     void        *pRefCon,
     UINT32      comId,
-    const UINT8 *pSrc,
+    UINT8 		*pSrc,
     UINT8       *pDst,
     UINT32      *pDstSize);
 
@@ -509,7 +509,7 @@ typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
 typedef TRDP_ERR_T (*TRDP_UNMARSHALL_T)(
     void        *pRefCon,
     UINT32      comId,
-    const UINT8 *pSrc,
+    UINT8 		*pSrc,
     UINT8       *pDst,
     UINT32      *pDstSize);
 

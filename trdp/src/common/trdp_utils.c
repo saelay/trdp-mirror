@@ -246,6 +246,7 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  *  @param[in]      srcIP           IP to bind to (0 = any address)
  *  @param[in]      usage           type and port to bind to
  *  @param[in]      options         blocking/nonblocking
+ *  @param[in]      rcvOnly         only used for receiving
  *  @param[out]     pIndex          returned index of socket pool
  *  @retval	        TRDP_NO_ERR
  *  @retval	        TRDP_PARAM_ERR
@@ -256,6 +257,7 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_IP_ADDR_T          srcIP,
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
+    BOOL					rcvOnly,
     INT32                   *pIndex)
 {
     VOS_SOCK_OPT_T  sock_options;
@@ -278,7 +280,8 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[index].bindAddr == srcIP &&
             iface[index].type == usage &&
             iface[index].sendParam.qos == params->qos &&
-            iface[index].sendParam.ttl == params->ttl)
+            iface[index].sendParam.ttl == params->ttl &&
+            iface[index].rcvOnly == rcvOnly)
         {
             /* Use that socket */
             *pIndex = index;
@@ -310,6 +313,7 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].type           = usage;
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
+        iface[index].rcvOnly 		= rcvOnly;
 
         sock_options.qos    = params->qos;
         sock_options.ttl    = params->ttl;
@@ -326,8 +330,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     port = 20550; /* FIXME configuration file! */
                 }
-                if (vos_sockOpenUDP(&iface[index].sock,
-                                    &sock_options) != VOS_NO_ERR)
+                if (vos_sockOpenUDP(&iface[index].sock, &sock_options) != VOS_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "Socket create for UDP failed!\n");
                     *pIndex = -1;
@@ -337,7 +340,10 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     iface[index].usage = 1;
                     *pIndex = index;
-                    vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
+                    if (rcvOnly)
+                    {
+                        vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
+                    }
                 }
                 break;
             case TRDP_SOCK_MD_TCP:

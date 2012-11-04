@@ -37,7 +37,7 @@
 #include <sched.h>
 
 #ifdef __APPLE__
-#include <uuid/uuid.h>
+//#include <uuid/uuid.h>
 #else
 #include "vos_sock.h"
 #endif

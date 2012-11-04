@@ -83,6 +83,7 @@ TRDP_ERR_T          trdp_requestSocket(
     TRDP_IP_ADDR_T srcIP,
     TRDP_SOCK_TYPE_T usage,
     TRDP_OPTION_T options,
+	BOOL					rcvOnly,
     INT32                   * pIndex);
 
 TRDP_ERR_T trdp_releaseSocket(
