@@ -1,10 +1,10 @@
 /**********************************************************************************************************************/
 /**
- * @file            getStats.c
+ * @file            getStatsMarshall.c
  *
  * @brief           Test application for TRDP statistics
  *
- * @details			Send PD Pull request for statistics and display them
+ * @details			Send PD Pull request for statistics and display them by unmarshalling them
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -30,6 +30,8 @@
 #include <sys/select.h>
 
 #include "trdp_if_light.h"
+#include "tau_marshall.h"
+
 #include "vos_thread.h"
 #include "vos_sock.h"
 #include "vos_utils.h"
@@ -59,54 +61,166 @@
 TRDP_STATISTICS_T   gBuffer;
 BOOL                gKeepOnRunning = TRUE;
 
+/**********************************************************************************************************************/
+/*
+ *  Dataset definitions
+ */
+#define	TRDP_STATS_DS_ID		111
+#define	TRDP_MEM_STATS_DS_ID	TRDP_STATS_DS_ID + 1
+#define	TRDP_PD_STATS_DS_ID		TRDP_MEM_STATS_DS_ID + 1
+#define	TRDP_MD_STATS_DS_ID		TRDP_PD_STATS_DS_ID + 1
+
+/*	Statistics data set	*/
+
+TRDP_DATASET_T gMemStatisticsDS =
+{
+    TRDP_MEM_STATS_DS_ID,		/*	dataset/com ID  */
+    0,          				/*	reserved		*/
+    3,          /*	No of elements, var size	*/
+    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+        {
+            TRDP_UINT32,
+            6
+        },
+        {
+            TRDP_UINT32,
+            15
+        },
+        {
+            TRDP_UINT32,
+            15
+        }
+	}
+};
+
+TRDP_DATASET_T gPDStatisticsDS =
+{
+    TRDP_PD_STATS_DS_ID,		/*	dataset/com ID  */
+    0,          				/*	reserved		*/
+    1,          /*	No of elements, var size	*/
+    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+        {
+            TRDP_UINT32,
+            13
+        }
+	}
+};
+
+TRDP_DATASET_T gMDStatisticsDS =
+{
+    TRDP_MD_STATS_DS_ID,		/*	dataset/com ID  */
+    0,          				/*	reserved		*/
+    1,          /*	No of elements, var size	*/
+    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+        {
+            TRDP_UINT32,
+            13
+        }
+	}
+};
+
+TRDP_DATASET_T gStatisticsDS =
+{
+    TRDP_STATS_DS_ID,       /*	dataset/com ID  */
+    0,          /*	reserved		*/
+    8,          /*	No of elements, var size	*/
+    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+        {
+            TRDP_UINT32,
+            1
+        },
+        {
+            TRDP_TIMEDATE64,
+            1
+        },
+        {
+            TRDP_TIMEDATE32,
+            2
+        },
+        {
+            TRDP_CHAR8,
+            16
+        },
+        {
+            TRDP_CHAR8,
+            16
+        },
+        {
+            TRDP_MEM_STATS_DS_ID,
+            1
+        },
+        {
+            TRDP_PD_STATS_DS_ID,
+            1
+        },
+        {
+            TRDP_MD_STATS_DS_ID,
+            1
+        },
+    }
+};
+
+/*	Will be sorted by tau_initMarshall	*/
+TRDP_DATASET_T*	gDataSets[] =
+{
+    &gStatisticsDS,
+    &gMemStatisticsDS,
+    &gPDStatisticsDS,
+    &gMDStatisticsDS
+};
+
+TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
+    {PD_COMID1, TRDP_STATS_DS_ID}
+};
+
 void print_stats(
     TRDP_STATISTICS_T*  pData)
 {
     int i;
 
     printf("\n--------------------\n");
-    printf("version:        %u\n", vos_ntohl(pData->version));
-    printf("timestamp:      %u:%u\n", vos_ntohl(pData->timeStamp.tv_sec), vos_ntohl(pData->timeStamp.tv_usec));
-    printf("upTime:         %u\n", vos_ntohl(pData->upTime));
-    printf("statisticTime:  %u\n", vos_ntohl(pData->statisticTime));
-    printf("ownIpAddr:      %u\n", vos_ntohl(pData->ownIpAddr));
-    printf("leaderIpAddr:   %u\n", vos_ntohl(pData->leaderIpAddr));
-    printf("processPrio:    %u\n", vos_ntohl(pData->processPrio));
-    printf("processCycle:   %u\n", vos_ntohl(pData->processCycle));
+    printf("version:        %u\n", pData->version);
+    printf("timestamp:      %u:%u\n", pData->timeStamp.tv_sec, pData->timeStamp.tv_usec);
+    printf("upTime:         %u\n", pData->upTime);
+    printf("statisticTime:  %u\n", pData->statisticTime);
+    printf("ownIpAddr:      %u\n", pData->ownIpAddr);
+    printf("leaderIpAddr:   %u\n", pData->leaderIpAddr);
+    printf("processPrio:    %u\n", pData->processPrio);
+    printf("processCycle:   %u\n", pData->processCycle);
 
-    printf("mem.total:          %u\n", vos_ntohl(pData->mem.total));
-    printf("mem.free:           %u\n", vos_ntohl(pData->mem.free));
-    printf("mem.minFree:        %u\n", vos_ntohl(pData->mem.minFree));
-    printf("mem.numAllocBlocks: %u\n", vos_ntohl(pData->mem.numAllocBlocks));
-    printf("mem.numAllocErr:    %u\n", vos_ntohl(pData->mem.numAllocErr));
-    printf("mem.numFreeErr:     %u\n", vos_ntohl(pData->mem.numFreeErr));
+    printf("mem.total:          %u\n", pData->mem.total);
+    printf("mem.free:           %u\n", pData->mem.free);
+    printf("mem.minFree:        %u\n", pData->mem.minFree);
+    printf("mem.numAllocBlocks: %u\n", pData->mem.numAllocBlocks);
+    printf("mem.numAllocErr:    %u\n", pData->mem.numAllocErr);
+    printf("mem.numFreeErr:     %u\n", pData->mem.numFreeErr);
 
     printf("mem.allocBlockSizes: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, vos_ntohl(pData->mem.allocBlockSize[i]));
+        printf("%u, ", i, pData->mem.allocBlockSize[i]);
     }
     
     printf("\nmem.usedBlockSize:   ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, vos_ntohl(pData->mem.usedBlockSize[i]));
+        printf("%u, ", i, pData->mem.usedBlockSize[i]);
     }
 
     /* Process data */
-    printf("\npd.defQos:      %u\n", vos_ntohl(pData->pd.defQos));
-    printf("pd.defTtl:      %u\n", vos_ntohl(pData->pd.defTtl));
-    printf("pd.defTimeout:  %u\n", vos_ntohl(pData->pd.defTimeout));
-    printf("pd.numSubs:     %u\n", vos_ntohl(pData->pd.numSubs));
-    printf("pd.numPub:      %u\n", vos_ntohl(pData->pd.numPub));
-    printf("pd.numRcv :     %u\n", vos_ntohl(pData->pd.numRcv));
-    printf("pd.numCrcErr:   %u\n", vos_ntohl(pData->pd.numCrcErr));
-    printf("pd.numProtErr:  %u\n", vos_ntohl(pData->pd.numProtErr));
-    printf("pd.numTopoErr:  %u\n", vos_ntohl(pData->pd.numTopoErr));
-    printf("pd.numNoSubs:   %u\n", vos_ntohl(pData->pd.numNoSubs));
-    printf("pd.numNoPub:    %u\n", vos_ntohl(pData->pd.numNoPub));
-    printf("pd.numTimeout:  %u\n", vos_ntohl(pData->pd.numTimeout));
-    printf("pd.numSend:     %u\n", vos_ntohl(pData->pd.numSend));
+    printf("\npd.defQos:      %u\n", pData->pd.defQos);
+    printf("pd.defTtl:      %u\n", pData->pd.defTtl);
+    printf("pd.defTimeout:  %u\n", pData->pd.defTimeout);
+    printf("pd.numSubs:     %u\n", pData->pd.numSubs);
+    printf("pd.numPub:      %u\n", pData->pd.numPub);
+    printf("pd.numRcv :     %u\n", pData->pd.numRcv);
+    printf("pd.numCrcErr:   %u\n", pData->pd.numCrcErr);
+    printf("pd.numProtErr:  %u\n", pData->pd.numProtErr);
+    printf("pd.numTopoErr:  %u\n", pData->pd.numTopoErr);
+    printf("pd.numNoSubs:   %u\n", pData->pd.numNoSubs);
+    printf("pd.numNoPub:    %u\n", pData->pd.numNoPub);
+    printf("pd.numTimeout:  %u\n", pData->pd.numTimeout);
+    printf("pd.numSend:     %u\n", pData->pd.numSend);
     printf("--------------------\n");
 }
 
@@ -173,11 +287,9 @@ void myPDcallBack (
             printf("ComID %d received\n", pMsg->comId);
             if (pData)
             {
-                memcpy(&gBuffer, pData,
-                       ((sizeof(gBuffer) <
-                         dataSize) ? sizeof(gBuffer) : dataSize));
                 if (pMsg->comId == 12)
                 {
+            		tau_unmarshall(NULL, pMsg->comId, pData, (UINT8*) &gBuffer, &dataSize);
                     print_stats(&gBuffer);
                     gKeepOnRunning = FALSE;
                 }
@@ -214,11 +326,13 @@ int main (int argc, char * *argv)
                                         	TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T	processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_MARSHALL_CONFIG_T	marshall = {NULL, tau_unmarshall, 0};
 
     int                 rv = 0;
     int                 ch;
     int                 ip[4];
     UINT32              destIP = PD_COMID2_DST_IP;
+    UINT32      		*refCon;
 
     while ((ch = getopt(argc, argv, "t:h?v")) != -1)
     {
@@ -254,11 +368,17 @@ int main (int argc, char * *argv)
         printf("Initialization error\n");
         return 1;
     }
+
+	if (tau_initMarshall((void *)&refCon, 1, gComIdMap, sizeof(gDataSets)/sizeof(TRDP_DATASET_T*), gDataSets) != TRDP_NO_ERR)
+    {
+        printf("Marshalling initialization error\n");
+        return 1;
+    }
     
     /*	Open a session for callback operation	(PD only) */
     if (tlc_openSession(&appHandle,
                  PD_OWN_IP, 0,                      /* use default IP addresses */
-                 NULL,                              /* no Marshalling	*/
+                 &marshall,                         /* marshalling	*/
                  &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
                  &processConfig) != TRDP_NO_ERR)
     {
