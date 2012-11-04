@@ -7,21 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		732D278A162DBD1D009D7857 /* trdp_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* trdp_marshall.c */; };
 		732D278C162DBD1D009D7857 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
-		732D2793162DBD84009D7857 /* getStats.c in Sources */ = {isa = PBXBuildFile; fileRef = 732D2792162DBD84009D7857 /* getStats.c */; };
 		732D2794162DBD84009D7857 /* getStats.c in Sources */ = {isa = PBXBuildFile; fileRef = 732D2792162DBD84009D7857 /* getStats.c */; };
 		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
 		737B18C315D901A700724FEF /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E0536115136CC90058D590 /* vos_utils.c */; };
-		737B18C415D901AB00724FEF /* vos_sock.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E052721513537C0058D590 /* vos_sock.c */; };
-		737B18C515D901AC00724FEF /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 731291FE15341A58006B3A88 /* vos_mem.c */; };
-		737B18C615D901AC00724FEF /* vos_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E0535C1513685D0058D590 /* vos_thread.c */; };
-		737B18CA15D901C200724FEF /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
 		737B18CF15D901F000724FEF /* test_marshalling.c in Sources */ = {isa = PBXBuildFile; fileRef = 737B18CE15D901F000724FEF /* test_marshalling.c */; };
-		737B190215D924B800724FEF /* trdp_if.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F2F150777B00046E0AC /* trdp_if.c */; };
-		737B190315D924BB00724FEF /* trdp_pdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F34150777B00046E0AC /* trdp_pdcom.c */; };
-		737B190415D924BC00724FEF /* trdp_stats.c in Sources */ = {isa = PBXBuildFile; fileRef = 7387F506157795FE00DBAB73 /* trdp_stats.c */; };
-		737B1AC815DE9AF500724FEF /* trdp_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* trdp_marshall.c */; };
+		7381BE521643FAD2003BC539 /* echoSelect.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F3C150777B00046E0AC /* echoSelect.c */; };
+		7381BE5C1643FB36003BC539 /* echoSelectcmdline.c in Sources */ = {isa = PBXBuildFile; fileRef = 7381BE511643FAC4003BC539 /* echoSelectcmdline.c */; };
+		7381BE5D1643FB3E003BC539 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		7381BEE316442A26003BC539 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		7381BF0316442C5C003BC539 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		7381BF0516442C90003BC539 /* getStatsMarshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 7381BEF916442C14003BC539 /* getStatsMarshall.c */; };
 		73821FB51508DC780046E0AC /* trdp_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F2A150777B00046E0AC /* trdp_types.h */; };
 		73821FB61508DC790046E0AC /* trdp_if_light.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F29150777B00046E0AC /* trdp_if_light.h */; };
 		73821FC11508DCCA0046E0AC /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
@@ -35,8 +31,6 @@
 		73BA394E1625B1FD00686E9E /* test_server_main.c in Sources */ = {isa = PBXBuildFile; fileRef = 73BA394D1625B1FC00686E9E /* test_server_main.c */; };
 		73BA394F1625B91400686E9E /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73D6657C15D3D88700A352D4 /* trdp_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* trdp_marshall.c */; };
-		73D665DD15D560F700A352D4 /* trdp_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* trdp_marshall.c */; };
-		73E051B515122D040058D590 /* echoSelect.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F3C150777B00046E0AC /* echoSelect.c */; };
 		73E0526C151352CF0058D590 /* vos_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05264151352CE0058D590 /* vos_mem.h */; };
 		73E0526D151352CF0058D590 /* vos_sock.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05265151352CE0058D590 /* vos_sock.h */; };
 		73E0526E151352CF0058D590 /* vos_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05266151352CE0058D590 /* vos_thread.h */; };
@@ -138,6 +132,10 @@
 		737B18CD15D901F000724FEF /* test_marshalling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test_marshalling.h; sourceTree = "<group>"; };
 		737B18CE15D901F000724FEF /* test_marshalling.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_marshalling.c; sourceTree = "<group>"; };
 		737B1A9515DB930F00724FEF /* trdp_marshall_fast.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_marshall_fast.c; sourceTree = "<group>"; };
+		7381BE511643FAC4003BC539 /* echoSelectcmdline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = echoSelectcmdline.c; sourceTree = "<group>"; };
+		7381BE581643FB1A003BC539 /* selectcmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = selectcmd; sourceTree = BUILT_PRODUCTS_DIR; };
+		7381BEF916442C14003BC539 /* getStatsMarshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = getStatsMarshall.c; sourceTree = "<group>"; };
+		7381BEFF16442C4B003BC539 /* getStatsMarshall */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = getStatsMarshall; sourceTree = BUILT_PRODUCTS_DIR; };
 		73821F29150777B00046E0AC /* trdp_if_light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_if_light.h; sourceTree = "<group>"; };
 		73821F2A150777B00046E0AC /* trdp_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_types.h; sourceTree = "<group>"; };
 		73821F2F150777B00046E0AC /* trdp_if.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_if.c; sourceTree = "<group>"; wrapsLines = 0; };
@@ -228,6 +226,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7381BEE316442A26003BC539 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7381BE561643FB1A003BC539 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7381BE5D1643FB3E003BC539 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7381BEFD16442C4B003BC539 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7381BF0316442C5C003BC539 /* libtrdp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,6 +316,8 @@
 				737B18BE15D9015800724FEF /* test_marshalling */,
 				73BA39431625B1D200686E9E /* testserver */,
 				732D2790162DBD1D009D7857 /* getStats */,
+				7381BE581643FB1A003BC539 /* selectcmd */,
+				7381BEFF16442C4B003BC539 /* getStatsMarshall */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -381,6 +398,7 @@
 			isa = PBXGroup;
 			children = (
 				73821F3C150777B00046E0AC /* echoSelect.c */,
+				7381BE511643FAC4003BC539 /* echoSelectcmdline.c */,
 				738220021508E3710046E0AC /* echoPolling.c */,
 				73821F3D150777B00046E0AC /* sendHello.c */,
 			);
@@ -476,6 +494,7 @@
 		73821F7C150777D40046E0AC /* test */ = {
 			isa = PBXGroup;
 			children = (
+				7381BEF916442C14003BC539 /* getStatsMarshall.c */,
 				732D2792162DBD84009D7857 /* getStats.c */,
 				737B18CD15D901F000724FEF /* test_marshalling.h */,
 				737B18CE15D901F000724FEF /* test_marshalling.c */,
@@ -637,6 +656,38 @@
 			productReference = 737B18BE15D9015800724FEF /* test_marshalling */;
 			productType = "com.apple.product-type.tool";
 		};
+		7381BE571643FB1A003BC539 /* selectcmd */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7381BE6B1643FB9E003BC539 /* Build configuration list for PBXNativeTarget "selectcmd" */;
+			buildPhases = (
+				7381BE551643FB1A003BC539 /* Sources */,
+				7381BE561643FB1A003BC539 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = selectcmd;
+			productName = selectcmd;
+			productReference = 7381BE581643FB1A003BC539 /* selectcmd */;
+			productType = "com.apple.product-type.tool";
+		};
+		7381BEFE16442C4B003BC539 /* getStatsMarshall */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7381BF0416442C7A003BC539 /* Build configuration list for PBXNativeTarget "getStatsMarshall" */;
+			buildPhases = (
+				7381BEFC16442C4B003BC539 /* Sources */,
+				7381BEFD16442C4B003BC539 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = getStatsMarshall;
+			productName = getStatsMarshall;
+			productReference = 7381BEFF16442C4B003BC539 /* getStatsMarshall */;
+			productType = "com.apple.product-type.tool";
+		};
 		73821FBB1508DCA80046E0AC /* receiveSelect */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 73821FC01508DCC70046E0AC /* Build configuration list for PBXNativeTarget "receiveSelect" */;
@@ -754,6 +805,8 @@
 				737B18BD15D9015800724FEF /* test_marshalling */,
 				73BA39421625B1D200686E9E /* testserver */,
 				732D2785162DBD1D009D7857 /* getStats */,
+				7381BE571643FB1A003BC539 /* selectcmd */,
+				7381BEFE16442C4B003BC539 /* getStatsMarshall */,
 			);
 		};
 /* End PBXProject section */
@@ -763,7 +816,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				732D278A162DBD1D009D7857 /* trdp_marshall.c in Sources */,
 				732D2794162DBD84009D7857 /* getStats.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -773,15 +825,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				737B18C315D901A700724FEF /* vos_utils.c in Sources */,
-				737B18C415D901AB00724FEF /* vos_sock.c in Sources */,
-				737B18C515D901AC00724FEF /* vos_mem.c in Sources */,
-				737B18C615D901AC00724FEF /* vos_thread.c in Sources */,
-				737B18CA15D901C200724FEF /* trdp_utils.c in Sources */,
 				737B18CF15D901F000724FEF /* test_marshalling.c in Sources */,
-				737B190215D924B800724FEF /* trdp_if.c in Sources */,
-				737B190315D924BB00724FEF /* trdp_pdcom.c in Sources */,
-				737B190415D924BC00724FEF /* trdp_stats.c in Sources */,
-				737B1AC815DE9AF500724FEF /* trdp_marshall.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7381BE551643FB1A003BC539 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7381BE5C1643FB36003BC539 /* echoSelectcmdline.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7381BEFC16442C4B003BC539 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7381BF0516442C90003BC539 /* getStatsMarshall.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -789,8 +849,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				73E051B515122D040058D590 /* echoSelect.c in Sources */,
-				73D665DD15D560F700A352D4 /* trdp_marshall.c in Sources */,
+				7381BE521643FAD2003BC539 /* echoSelect.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -831,7 +890,6 @@
 				73B6907A15446B8D004968FA /* trdp_utils.c in Sources */,
 				7387F508157795FE00DBAB73 /* trdp_stats.c in Sources */,
 				73D6657C15D3D88700A352D4 /* trdp_marshall.c in Sources */,
-				732D2793162DBD84009D7857 /* getStats.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -906,7 +964,10 @@
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = (
+					ppc,
+					"$(ARCHS_STANDARD_32_64_BIT)",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -920,7 +981,10 @@
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = (
+					ppc,
+					"$(ARCHS_STANDARD_32_64_BIT)",
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -991,6 +1055,70 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = test_marshalling;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		7381BE5A1643FB1B003BC539 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
+				PREBINDING = NO;
+				PRODUCT_NAME = selectcmd;
+			};
+			name = Debug;
+		};
+		7381BE5B1643FB1B003BC539 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
+				PREBINDING = NO;
+				PRODUCT_NAME = selectcmd;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		7381BF0116442C4C003BC539 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
+				PREBINDING = NO;
+				PRODUCT_NAME = getStatsMarshall;
+			};
+			name = Debug;
+		};
+		7381BF0216442C4C003BC539 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
+				PREBINDING = NO;
+				PRODUCT_NAME = getStatsMarshall;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1179,6 +1307,24 @@
 			buildConfigurations = (
 				737B18C015D9015900724FEF /* Debug */,
 				737B18C115D9015900724FEF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7381BE6B1643FB9E003BC539 /* Build configuration list for PBXNativeTarget "selectcmd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7381BE5A1643FB1B003BC539 /* Debug */,
+				7381BE5B1643FB1B003BC539 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7381BF0416442C7A003BC539 /* Build configuration list for PBXNativeTarget "getStatsMarshall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7381BF0116442C4C003BC539 /* Debug */,
+				7381BF0216442C4C003BC539 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
