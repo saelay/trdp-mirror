@@ -703,6 +703,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                     srcIpAddr,
                     TRDP_SOCK_PD,
                     appHandle->option,
+                    FALSE,
                     &pNewElement->socketIdx);
 
             if (ret != TRDP_NO_ERR)
@@ -1257,6 +1258,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                                              srcIpAddr,
                                              TRDP_SOCK_PD,
                                              appHandle->option,
+                                             FALSE,
                                              &pReqElement->socketIdx);
 
                     if (ret != TRDP_NO_ERR)
@@ -1420,15 +1422,14 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
         ret = trdp_requestSocket(appHandle->iface,
                                  &appHandle->pdDefault.sendParam,
-                                 (destIpAddr == 0)? appHandle->realIP : destIpAddr,
+                                 appHandle->realIP,
                                  TRDP_SOCK_PD,
                                  appHandle->option,
+                                 TRUE,
                                  &index);
         if (ret == TRDP_NO_ERR)
         {
             /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
-
-            grossDataSize = trdp_packetSizePD(maxDataSize);
 
             /*    Allocate a buffer for this kind of packets    */
 
@@ -1441,7 +1442,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             else
             {
                 /*  Alloc the corresponding data buffer  */
-                newPD->pFrame = (PD_PACKET_T*) vos_memAlloc(grossDataSize);
+                newPD->pFrame = (PD_PACKET_T*) vos_memAlloc(MAX_PD_PACKET_SIZE);
                 if (newPD->pFrame == NULL)
                 {
                     vos_memFree(newPD);

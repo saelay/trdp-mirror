@@ -168,11 +168,14 @@ static int dataset_compare (
     const void  *pArg1,
     const void  *pArg2)
 {
-    if (((TRDP_DATASET_T *)pArg1)->id < ((TRDP_DATASET_T *)pArg2)->id)
+	TRDP_DATASET_T	*p1 = *(TRDP_DATASET_T **)pArg1;
+	TRDP_DATASET_T	*p2 = *(TRDP_DATASET_T **)pArg2;
+
+    if (p1->id < p2->id)
     {
         return -1;
     }
-    else if (((TRDP_DATASET_T *)pArg1)->id > ((TRDP_DATASET_T *)pArg2)->id)
+    else if (p1->id > p2->id)
     {
         return 1;
     }
@@ -196,11 +199,14 @@ static int dataset_compare_deref (
     const void  *pArg1,
     const void  *pArg2)
 {
-    if (((TRDP_DATASET_T *)pArg1)->id < (*(TRDP_DATASET_T **)pArg2)->id)
+	TRDP_DATASET_T	*p1 = (TRDP_DATASET_T *)pArg1;
+	TRDP_DATASET_T	*p2 = *(TRDP_DATASET_T **)pArg2;
+
+    if (p1->id < p2->id)
     {
         return -1;
     }
-    else if (((TRDP_DATASET_T *)pArg1)->id > (*(TRDP_DATASET_T **)pArg2)->id)
+    else if (p1->id > p2->id)
     {
         return 1;
     }
@@ -254,10 +260,11 @@ static TRDP_DATASET_T *find_DS_from_ComId (
     TRDP_COMID_DSID_MAP_T	key1 = {comID, 0};
     TRDP_DATASET_T 			**key3;	
     
-	TRDP_DATASET_T *key2 = vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+	TRDP_COMID_DSID_MAP_T *key2 = vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
     if (key2 != NULL)
     {
-    	key3 = vos_bsearch(key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+    	TRDP_DATASET_T	key22 = {key2->datasetId, 0, 0};
+    	key3 = vos_bsearch(&key22, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
         if (key3 != NULL)
         {
             return *key3;

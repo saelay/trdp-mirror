@@ -448,11 +448,10 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "joining MC: %s\n",
-                   inet_ntoa(mreq.imr_multiaddr));
+        vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", 
+                    inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
 
-        if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq,
-                       sizeof(mreq)) == -1)
+        if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
             vos_print(VOS_LOG_WARNING, "setsockopt IP_ADD_MEMBERSHIP failed\n");
             err = VOS_SOCK_ERR;
@@ -501,11 +500,11 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "leaving MC: %s\n",
-                   inet_ntoa(mreq.imr_multiaddr));
-
-        if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq,
-                       sizeof(mreq)) == -1)
+        vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", 
+                   inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
+        
+        
+        if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
             vos_print(VOS_LOG_WARNING, "setsockopt IP_DROP_MEMBERSHIP failed\n");
             err = VOS_SOCK_ERR;
