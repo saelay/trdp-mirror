@@ -55,6 +55,7 @@ extern int gIsActive;
 {
 	setIP((char*)[[ipAddress stringValue] UTF8String]);
 	dataChanged = true;
+    pd_updatePublisher(false);
 	pd_updateData((uint8_t*)dataArray, sizeof(dataArray));
 }
 
@@ -73,17 +74,80 @@ extern int gIsActive;
 		gIsActive = 0;
 	}
 	dataChanged = true;
-    pd_stop(!gIsActive);
+    pd_updatePublisher(gIsActive);
 }
 
 - (IBAction) comIDChanged:(id)sender
 {
 	setComID((uint32_t)[sender intValue]);
+    pd_updatePublisher(false);
 }
 - (IBAction) intervalChanged:(id)sender
 {
 	setInterval((uint32_t)[sender intValue]);
+    pd_updatePublisher(false);
 }
+
+- (IBAction) ipChangedRec1:(id)sender
+{
+	setIPRec(0, (char*)[[ipAddress stringValue] UTF8String]);
+    pd_updateSubscriber(0);
+}
+
+- (IBAction) comIDChangedRec1:(id)sender
+{
+	setComIDRec(0,(uint32_t)[sender intValue]);
+    pd_updateSubscriber(0);
+}
+
+- (IBAction) ipChangedRec2:(id)sender
+{
+	setIPRec(1,(char*)[[ipAddress stringValue] UTF8String]);
+    pd_updateSubscriber(1);
+}
+
+- (IBAction) comIDChangedRec2:(id)sender
+{
+	setComIDRec(1,(uint32_t)[sender intValue]);
+    pd_updateSubscriber(1);
+}
+
+- (IBAction) ipChangedRec3:(id)sender
+{
+	setIPRec(2,(char*)[[ipAddress stringValue] UTF8String]);
+    pd_updateSubscriber(2);
+}
+
+- (IBAction) comIDChangedRec3:(id)sender
+{
+	setComIDRec(2,(uint32_t)[sender intValue]);
+    pd_updateSubscriber(2);
+}
+
+- (IBAction) ipChangedRec4:(id)sender
+{
+	setIPRec(3,(char*)[[ipAddress stringValue] UTF8String]);
+    pd_updateSubscriber(3);
+}
+
+- (IBAction) comIDChangedRec4:(id)sender
+{
+	setComIDRec(3, (uint32_t)[sender intValue]);
+    pd_updateSubscriber(3);
+}
+
+- (IBAction) ipChangedRec5:(id)sender
+{
+	setIPRec(4, (char*)[[ipAddress stringValue] UTF8String]);
+    pd_updateSubscriber(4);
+}
+
+- (IBAction) comIDChangedRec5:(id)sender
+{
+	setComIDRec(4, (uint32_t)[sender intValue]);
+    pd_updateSubscriber(4);
+}
+
 
 - (void)doIt
 {

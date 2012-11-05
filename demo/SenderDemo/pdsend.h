@@ -48,6 +48,8 @@ void pd_deinit();
 
 void pd_stop(BOOL redundant);
 
+void pd_updatePublisher(BOOL stop);
+void pd_updateSubscriber(int index);
 void pd_updateData(
 	uint8_t	*pData,
 	size_t	dataSize);
@@ -57,6 +59,9 @@ pd_receive_packet_t* pd_get(int index);
 void setIP(const char* ipAddr);
 void setComID(uint32_t comID);
 void setInterval(uint32_t interval);
+
+void setIPRec(int index, const char* ipAddr);
+void setComIDRec(int index, uint32_t comID);
 
 //int pd_loop();
 int pd_loop2();

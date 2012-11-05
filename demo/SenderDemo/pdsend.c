@@ -129,8 +129,26 @@ void setComID(uint32_t comID)
 /******************************************************************************/
 void setInterval(uint32_t interval)
 {
-	gInterval = interval;
+	gInterval = interval * 1000;
 }
+
+/******************************************************************************/
+void setIPRec(int index, const char* ipAddr)
+{
+	strcpy(gRec[index].srcIP, ipAddr);
+}
+
+/******************************************************************************/
+void setComIDRec(int index, uint32_t comID)
+{
+	gRec[index].comID  = comID;
+}
+
+void pd_updateSubscriber(int index)
+{
+    pd_sub(&gRec[index]);
+}
+
 
 /******************************************************************************/
 void pd_stop(BOOL redundant)
@@ -214,6 +232,27 @@ void pd_deinit()
 }
 
 /******************************************************************************/
+void pd_updatePublisher(BOOL stop)
+{
+    TRDP_ERR_T  err;
+    err = tlp_unpublish(gAppHandle, gPubHandle);
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tlp_unpublish error %d\n", err);
+    }
+    gPubHandle = NULL;
+    if (stop == FALSE)
+    {
+        err = tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
+                TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize, 0, 0);
+        if (err != TRDP_NO_ERR)
+        {
+            printf("tlp_publish error %d\n", err);
+        }
+    }
+}
+
+/******************************************************************************/
 void pd_updateData(
 	uint8_t	*pData,
 	size_t	dataSize)
@@ -250,6 +289,11 @@ uint32_t  gray2hex(uint32_t   in)
 void pd_sub(
     pd_receive_packet_t*    recPacket)
 {
+    if (recPacket->subHandle != 0)
+    {
+        tlp_unsubscribe(gAppHandle, recPacket->subHandle);
+        recPacket->subHandle = NULL;
+    }
     TRDP_ERR_T err = tlp_subscribe(
                         gAppHandle,                 /*	our application identifier			*/
                         &recPacket->subHandle,       /*	our subscription identifier			*/
@@ -367,7 +411,7 @@ void callBack(
             
         case TRDP_TIMEOUT_ERR:
             /* The application can decide here if old data shall be invalidated or kept	*/
-            printf("Packet timed out (ComID %d, SrcIP: %u)\n", pMsg->comId, pMsg->srcIpAddr);
+            printf("Packet timed out (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
 
             switch (pMsg->comId)
             {
@@ -402,9 +446,9 @@ void callBack(
             }
             
         default:
-            printf("Error on packet received (ComID %d), err = %d\n",
-                   pMsg->comId,
-                   pMsg->resultCode);
+            //printf("Error on packet received (ComID %d), err = %d\n",
+            //       pMsg->comId,
+            //       pMsg->resultCode);
             break;
     }
 }
@@ -438,9 +482,9 @@ int pd_loop2()
 			
 			if (err != TRDP_NO_ERR)
 			{
-				printf("prep pd error\n");
-				tlc_terminate();
-				return 1;
+				printf("put pd error\n");
+				//tlc_terminate();
+				//return 1;
 			}
 			gDataChanged = 0;
 		}
