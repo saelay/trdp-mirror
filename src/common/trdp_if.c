@@ -673,7 +673,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     }
 
     /*    Look for existing element    */
-    if (trdp_queueFindAddr(appHandle->pSndQueue, &pubHandle) != NULL)
+    if (trdp_queueFindPubAddr(appHandle->pSndQueue, &pubHandle) != NULL)
     {
         ret = TRDP_NOPUB_ERR;
     }
@@ -810,7 +810,7 @@ TRDP_ERR_T  tlp_unpublish (
     }
 
     /*    Remove from queue?    */
-    pElement = trdp_queueFindAddr(appHandle->pSndQueue, pubHandle);
+    pElement = trdp_queueFindPubAddr(appHandle->pSndQueue, pubHandle);
     if (pElement != NULL)
     {
         trdp_queueDelElement(&appHandle->pSndQueue, pElement);
@@ -865,7 +865,7 @@ TRDP_ERR_T tlp_put (
     }
 
     /*    Find the published queue entry    */
-    pElement = trdp_queueFindAddr(appHandle->pSndQueue, pubHandle);
+    pElement = trdp_queueFindPubAddr(appHandle->pSndQueue, pubHandle);
     if (pElement != NULL)
     {
         ret = trdp_pdPut(pElement,
@@ -1212,7 +1212,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
     /*    Look for existing subscription element    */
 
-    pSubPD = trdp_queueFindAddr(appHandle->pRcvQueue, (TRDP_ADDRESSES*) subHandle);
+    pSubPD = trdp_queueFindSubAddr(appHandle->pRcvQueue, (TRDP_ADDRESSES*) subHandle);
 
     if (pSubPD == NULL)
     {
@@ -1412,7 +1412,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
     /*    Look for existing element    */
 
-    if (trdp_queueFindAddr(appHandle->pRcvQueue, &subHandle) != NULL)
+    if (trdp_queueFindSubAddr(appHandle->pRcvQueue, &subHandle) != NULL)
     {
         ret = TRDP_NOSUB_ERR;
     }
@@ -1539,7 +1539,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     }
 
     /*    Remove from queue?    */
-    pElement = trdp_queueFindAddr(appHandle->pSndQueue, subHandle);
+    pElement = trdp_queueFindSubAddr(appHandle->pSndQueue, subHandle);
     if (pElement != NULL)
     {
         trdp_queueDelElement(&appHandle->pSndQueue, pElement);
@@ -1600,7 +1600,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
     }
 
     /*    Find the published queue entry    */
-    pElement = trdp_queueFindAddr(appHandle->pRcvQueue, subHandle);
+    pElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, subHandle);
 
     if (pElement == NULL)
     {
