@@ -397,7 +397,7 @@ int main (int argc, char * *argv)
                          0,                         /*	topocount: local consist only		*/
                          0,                         /*	Source IP filter					*/
                          0,
-                         PD_OWN_IP,                 /*	Default destination	(or MC Group)   */
+                         0xEF000000,/*PD_OWN_IP, */                /*	Default destination	(or MC Group)   */
                          PD_COMID1_TIMEOUT,         /*	Time out in us						*/
                          TRDP_TO_SET_TO_ZERO,       /*  delete invalid data	on timeout      */
                          sizeof(gBuffer));          /*	net data size						*/
@@ -411,7 +411,7 @@ int main (int argc, char * *argv)
 
     /*	Request statistics PD		*/
 
-    err = tlp_request(appHandle, subHandle, PD_COMID2, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0, 0, 0);
+    err = tlp_request(appHandle, subHandle, PD_COMID2, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0xEF000000, 0, 0);
 
     if (err != TRDP_NO_ERR)
     {
