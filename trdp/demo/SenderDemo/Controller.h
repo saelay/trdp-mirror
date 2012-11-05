@@ -61,4 +61,16 @@
 - (IBAction) ipChanged:(id)sender;
 - (IBAction) comIDChanged:(id)sender;
 - (IBAction) intervalChanged:(id)sender;
+
+- (IBAction) ipChangedRec1:(id)sender;
+- (IBAction) comIDChangedRec1:(id)sender;
+- (IBAction) ipChangedRec2:(id)sender;
+- (IBAction) comIDChangedRec2:(id)sender;
+- (IBAction) ipChangedRec3:(id)sender;
+- (IBAction) comIDChangedRec3:(id)sender;
+- (IBAction) ipChangedRec4:(id)sender;
+- (IBAction) comIDChangedRec4:(id)sender;
+- (IBAction) ipChangedRec5:(id)sender;
+- (IBAction) comIDChangedRec5:(id)sender;
+
 @end
