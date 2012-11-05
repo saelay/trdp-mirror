@@ -52,11 +52,11 @@
  */
 
 pd_receive_packet_t     gRec[] = {
-    {0, PD_COMID1, PD_COMID1_TIMEOUT, "10.128.128.4", 0, "", 0, 1},
-    {0, PD_COMID1, PD_COMID1_TIMEOUT, "10.129.1.60", 0, "", 0, 1},
-    {0, PD_COMID2, PD_COMID2_TIMEOUT, "10.128.128.4", 0, "", 0, 1},
-    {0, PD_COMID2, PD_COMID2_TIMEOUT, "10.129.1.60", 0, "", 0, 1},
-    {0, PD_COMID3, PD_COMID3_TIMEOUT, "10.129.1.60", 0, "", 0, 1},
+    {0, PD_COMID1, PD_COMID1_TIMEOUT, "10.0.0.200", 0, "", 0, 1},
+    {0, PD_COMID1, PD_COMID1_TIMEOUT, "10.0.0.201", 0, "", 0, 1},
+    {0, PD_COMID2, PD_COMID2_TIMEOUT, "10.0.0.202", 0, "", 0, 1},
+    {0, PD_COMID2, PD_COMID2_TIMEOUT, "10.0.0.203", 0, "", 0, 1},
+    {0, PD_COMID3, PD_COMID3_TIMEOUT, "10.0.0.204", 0, "", 0, 1},
     {0, 0,0,"",0,"", 0, 1}
 };
 

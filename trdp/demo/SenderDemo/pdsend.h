@@ -11,8 +11,8 @@
 #include "vos_thread.h"
 
 #define PD_COMID0			2000
-#define PD_COMID0_CYCLE		100000
-#define PD_COMID0_TIMEOUT	1200000
+#define PD_COMID0_CYCLE		1000000
+#define PD_COMID0_TIMEOUT	3200000
 
 #define PD_COMID1			2001
 #define PD_COMID1_CYCLE		100000

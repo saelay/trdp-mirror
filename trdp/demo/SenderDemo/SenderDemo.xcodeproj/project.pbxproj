@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08014BB91647E2E20065AADD /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 08014BB81647E2E20065AADD /* libtrdp.a */; };
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		735EA8361472EADD007D831D /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 735EA8351472EADD007D831D /* Controller.m */; };
-		738EE9E61636F9AD00C3BB60 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 738EE9E51636F9AD00C3BB60 /* libtrdp.a */; };
 		738EEA031636FAA300C3BB60 /* api in Resources */ = {isa = PBXBuildFile; fileRef = 738EEA021636FAA300C3BB60 /* api */; };
 		738EEA091636FC2900C3BB60 /* Bombardier.png in Resources */ = {isa = PBXBuildFile; fileRef = 738EEA041636FC2900C3BB60 /* Bombardier.png */; };
 		738EEA0A1636FC2900C3BB60 /* Engineering.png in Resources */ = {isa = PBXBuildFile; fileRef = 738EEA051636FC2900C3BB60 /* Engineering.png */; };
@@ -23,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		08014BB81647E2E20065AADD /* libtrdp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtrdp.a; path = ../../bld/darwin/Debug/libtrdp.a; sourceTree = SOURCE_ROOT; };
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -33,7 +34,6 @@
 		32CA4F630368D1EE00C91783 /* SenderDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SenderDemo_Prefix.pch; sourceTree = "<group>"; };
 		735EA8341472EADD007D831D /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		735EA8351472EADD007D831D /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
-		738EE9E51636F9AD00C3BB60 /* libtrdp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtrdp.a; path = ../../bld/darwin/Debug/libtrdp.a; sourceTree = "<group>"; };
 		738EEA021636FAA300C3BB60 /* api */ = {isa = PBXFileReference; lastKnownFileType = folder; name = api; path = ../../src/api; sourceTree = "<group>"; };
 		738EEA041636FC2900C3BB60 /* Bombardier.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Bombardier.png; path = Resources/Bombardier.png; sourceTree = "<group>"; };
 		738EEA051636FC2900C3BB60 /* Engineering.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Engineering.png; path = Resources/Engineering.png; sourceTree = "<group>"; };
@@ -52,7 +52,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				738EE9E61636F9AD00C3BB60 /* libtrdp.a in Frameworks */,
+				08014BB91647E2E20065AADD /* libtrdp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,7 +136,7 @@
 			isa = PBXGroup;
 			children = (
 				738EEA021636FAA300C3BB60 /* api */,
-				738EE9E51636F9AD00C3BB60 /* libtrdp.a */,
+				08014BB81647E2E20065AADD /* libtrdp.a */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
@@ -257,7 +257,6 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../XCodeECN/build/Debug\"",
 					"\"$(SRCROOT)/../../bld/darwin/Debug\"",
 				);
 				PRODUCT_NAME = SenderDemo;

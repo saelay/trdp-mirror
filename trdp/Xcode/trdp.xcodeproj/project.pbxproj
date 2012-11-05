@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08014D1316483ED90065AADD /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		08014D1816483F240065AADD /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08014D1716483F240065AADD /* Cocoa.framework */; };
+		08014D34164840030065AADD /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 08014D23164840020065AADD /* Controller.m */; };
+		08014D35164840030065AADD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 08014D25164840020065AADD /* InfoPlist.strings */; };
+		08014D36164840030065AADD /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 08014D27164840030065AADD /* MainMenu.xib */; };
+		08014D38164840030065AADD /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 08014D2A164840030065AADD /* main.m */; };
+		08014D39164840030065AADD /* pdsend.c in Sources */ = {isa = PBXBuildFile; fileRef = 08014D2B164840030065AADD /* pdsend.c */; };
+		08014D3A164840030065AADD /* Bombardier.png in Resources */ = {isa = PBXBuildFile; fileRef = 08014D2E164840030065AADD /* Bombardier.png */; };
+		08014D3B164840030065AADD /* Engineering.png in Resources */ = {isa = PBXBuildFile; fileRef = 08014D2F164840030065AADD /* Engineering.png */; };
+		08014D3C164840030065AADD /* FARsystems.png in Resources */ = {isa = PBXBuildFile; fileRef = 08014D30164840030065AADD /* FARsystems.png */; };
+		08014D3D164840030065AADD /* NewTec.png in Resources */ = {isa = PBXBuildFile; fileRef = 08014D31164840030065AADD /* NewTec.png */; };
+		08014D3E164840030065AADD /* Siemens.png in Resources */ = {isa = PBXBuildFile; fileRef = 08014D32164840030065AADD /* Siemens.png */; };
 		732D278C162DBD1D009D7857 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		732D2794162DBD84009D7857 /* getStats.c in Sources */ = {isa = PBXBuildFile; fileRef = 732D2792162DBD84009D7857 /* getStats.c */; };
 		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
@@ -49,6 +61,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		08014D1116483EC10065AADD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
+		08014D3F164840510065AADD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
+		08014D41164840560065AADD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
 		732D2787162DBD1D009D7857 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -107,6 +140,22 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		08014D0B16483EAD0065AADD /* SenderDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SenderDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		08014D1716483F240065AADD /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		08014D22164840020065AADD /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Controller.h; path = SenderDemo/Controller.h; sourceTree = "<group>"; };
+		08014D23164840020065AADD /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Controller.m; path = SenderDemo/Controller.m; sourceTree = "<group>"; };
+		08014D26164840030065AADD /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		08014D28164840030065AADD /* MainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
+		08014D29164840030065AADD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SenderDemo/Info.plist; sourceTree = "<group>"; };
+		08014D2A164840030065AADD /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = SenderDemo/main.m; sourceTree = "<group>"; };
+		08014D2B164840030065AADD /* pdsend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pdsend.c; path = SenderDemo/pdsend.c; sourceTree = "<group>"; };
+		08014D2C164840030065AADD /* pdsend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pdsend.h; path = SenderDemo/pdsend.h; sourceTree = "<group>"; };
+		08014D2E164840030065AADD /* Bombardier.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Bombardier.png; sourceTree = "<group>"; };
+		08014D2F164840030065AADD /* Engineering.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Engineering.png; sourceTree = "<group>"; };
+		08014D30164840030065AADD /* FARsystems.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FARsystems.png; sourceTree = "<group>"; };
+		08014D31164840030065AADD /* NewTec.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NewTec.png; sourceTree = "<group>"; };
+		08014D32164840030065AADD /* Siemens.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Siemens.png; sourceTree = "<group>"; };
+		08014D33164840030065AADD /* SenderDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SenderDemo_Prefix.pch; path = SenderDemo/SenderDemo_Prefix.pch; sourceTree = "<group>"; };
 		731291FE15341A58006B3A88 /* vos_mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_mem.c; sourceTree = "<group>"; };
 		731292971535BEA1006B3A88 /* SingleThreadedWorkflowMD.graffle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = SingleThreadedWorkflowMD.graffle; sourceTree = "<group>"; };
 		731292981535BEA1006B3A88 /* SingleThreadedWorkflowMD.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = SingleThreadedWorkflowMD.pdf; sourceTree = "<group>"; };
@@ -214,6 +263,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		08014D0916483EAD0065AADD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08014D1316483ED90065AADD /* libtrdp.a in Frameworks */,
+				08014D1816483F240065AADD /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		732D278B162DBD1D009D7857 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -288,6 +346,55 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		08014D1616483F240065AADD /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				08014D1716483F240065AADD /* Cocoa.framework */,
+			);
+			name = "Linked Frameworks";
+			path = ../Xcode;
+			sourceTree = "<group>";
+		};
+		08014D1D16483FC50065AADD /* SenderDemo */ = {
+			isa = PBXGroup;
+			children = (
+				08014D22164840020065AADD /* Controller.h */,
+				08014D23164840020065AADD /* Controller.m */,
+				08014D24164840020065AADD /* English.lproj */,
+				08014D29164840030065AADD /* Info.plist */,
+				08014D2A164840030065AADD /* main.m */,
+				08014D2B164840030065AADD /* pdsend.c */,
+				08014D2C164840030065AADD /* pdsend.h */,
+				08014D2D164840030065AADD /* Resources */,
+				08014D33164840030065AADD /* SenderDemo_Prefix.pch */,
+				08014D1616483F240065AADD /* Linked Frameworks */,
+			);
+			name = SenderDemo;
+			sourceTree = "<group>";
+		};
+		08014D24164840020065AADD /* English.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				08014D25164840020065AADD /* InfoPlist.strings */,
+				08014D27164840030065AADD /* MainMenu.xib */,
+			);
+			name = English.lproj;
+			path = SenderDemo/English.lproj;
+			sourceTree = "<group>";
+		};
+		08014D2D164840030065AADD /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				08014D2E164840030065AADD /* Bombardier.png */,
+				08014D2F164840030065AADD /* Engineering.png */,
+				08014D30164840030065AADD /* FARsystems.png */,
+				08014D31164840030065AADD /* NewTec.png */,
+				08014D32164840030065AADD /* Siemens.png */,
+			);
+			name = Resources;
+			path = SenderDemo/Resources;
+			sourceTree = "<group>";
+		};
 		08FB7794FE84155DC02AAC07 /* trdp */ = {
 			isa = PBXGroup;
 			children = (
@@ -318,6 +425,7 @@
 				732D2790162DBD1D009D7857 /* getStats */,
 				7381BE581643FB1A003BC539 /* selectcmd */,
 				7381BEFF16442C4B003BC539 /* getStatsMarshall */,
+				08014D0B16483EAD0065AADD /* SenderDemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -424,6 +532,7 @@
 		73821F41150777D30046E0AC /* demo */ = {
 			isa = PBXGroup;
 			children = (
+				08014D1D16483FC50065AADD /* SenderDemo */,
 			);
 			name = demo;
 			path = ../demo;
@@ -623,6 +732,24 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
+		08014D0A16483EAD0065AADD /* SenderDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 08014D1016483EAE0065AADD /* Build configuration list for PBXNativeTarget "SenderDemo" */;
+			buildPhases = (
+				08014D0716483EAD0065AADD /* Resources */,
+				08014D0816483EAD0065AADD /* Sources */,
+				08014D0916483EAD0065AADD /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				08014D1216483EC10065AADD /* PBXTargetDependency */,
+			);
+			name = SenderDemo;
+			productName = SenderDemo;
+			productReference = 08014D0B16483EAD0065AADD /* SenderDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
 		732D2785162DBD1D009D7857 /* getStats */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 732D278D162DBD1D009D7857 /* Build configuration list for PBXNativeTarget "getStats" */;
@@ -666,6 +793,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				08014D40164840510065AADD /* PBXTargetDependency */,
 			);
 			name = selectcmd;
 			productName = selectcmd;
@@ -682,6 +810,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				08014D42164840560065AADD /* PBXTargetDependency */,
 			);
 			name = getStatsMarshall;
 			productName = getStatsMarshall;
@@ -807,11 +936,39 @@
 				732D2785162DBD1D009D7857 /* getStats */,
 				7381BE571643FB1A003BC539 /* selectcmd */,
 				7381BEFE16442C4B003BC539 /* getStatsMarshall */,
+				08014D0A16483EAD0065AADD /* SenderDemo */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		08014D0716483EAD0065AADD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08014D35164840030065AADD /* InfoPlist.strings in Resources */,
+				08014D36164840030065AADD /* MainMenu.xib in Resources */,
+				08014D3A164840030065AADD /* Bombardier.png in Resources */,
+				08014D3B164840030065AADD /* Engineering.png in Resources */,
+				08014D3C164840030065AADD /* FARsystems.png in Resources */,
+				08014D3D164840030065AADD /* NewTec.png in Resources */,
+				08014D3E164840030065AADD /* Siemens.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		08014D0816483EAD0065AADD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08014D34164840030065AADD /* Controller.m in Sources */,
+				08014D38164840030065AADD /* main.m in Sources */,
+				08014D39164840030065AADD /* pdsend.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		732D2788162DBD1D009D7857 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -896,6 +1053,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		08014D1216483EC10065AADD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 08014D1116483EC10065AADD /* PBXContainerItemProxy */;
+		};
+		08014D40164840510065AADD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 08014D3F164840510065AADD /* PBXContainerItemProxy */;
+		};
+		08014D42164840560065AADD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 08014D41164840560065AADD /* PBXContainerItemProxy */;
+		};
 		732D2786162DBD1D009D7857 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
@@ -928,7 +1100,80 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		08014D25164840020065AADD /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				08014D26164840030065AADD /* InfoPlist.strings */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		08014D27164840030065AADD /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				08014D28164840030065AADD /* MainMenu.xib */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
+		08014D0E16483EAE0065AADD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ../demo/SenderDemo/SenderDemo_Prefix.pch;
+				HEADER_SEARCH_PATHS = (
+					../../src/vos/api,
+					../../src/api,
+				);
+				INFOPLIST_FILE = ../demo/SenderDemo/Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../bld/darwin/Debug\"",
+				);
+				OTHER_CFLAGS = "-DPOSIX";
+				OTHER_LDFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = SenderDemo;
+				SDKROOT = "";
+			};
+			name = Debug;
+		};
+		08014D0F16483EAE0065AADD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "SenderDemo-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = SenderDemo;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		1DEB91EC08733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1275,6 +1520,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		08014D1016483EAE0065AADD /* Build configuration list for PBXNativeTarget "SenderDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08014D0E16483EAE0065AADD /* Debug */,
+				08014D0F16483EAE0065AADD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1DEB91EB08733DB70010E9CD /* Build configuration list for PBXNativeTarget "trdp Posix" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
