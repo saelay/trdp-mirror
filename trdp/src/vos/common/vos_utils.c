@@ -150,6 +150,7 @@ VOS_ERR_T vos_init (
  *  @param[in]          dataLen     length in bytes of data.
  *  @retval             crc32 according to IEEE802.3
  */
+#if 0
 UINT32 vos_crc32 (
     UINT32      crc,
     const UINT8 *pData,
@@ -170,3 +171,21 @@ UINT32 vos_crc32 (
     }
     return crc;
 }
+
+#else
+
+UINT32 vos_crc32 (
+                  UINT32      crc,
+                  const UINT8 *pData,
+                  UINT32      dataLen)
+{
+    
+    UINT32 i;
+    for (i = 0; i < dataLen; i++)
+    {
+        crc = (crc >> 8)^crc_table[(crc ^pData[i]) & 0xff];
+    }
+    return crc;
+}
+#endif
+

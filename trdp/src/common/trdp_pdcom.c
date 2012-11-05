@@ -109,7 +109,7 @@ TRDP_ERR_T trdp_pdPut (
     }
     else
     {
-        ret = marshall(refCon, pPacket->addr.comId, pData, pPacket->pFrame->data, &dataSize);
+        ret = marshall(refCon, pPacket->addr.comId, (UINT8 *) pData, pPacket->pFrame->data, &dataSize);
     }
 
     if (TRDP_NO_ERR == ret)
@@ -129,7 +129,7 @@ TRDP_ERR_T trdp_pdPut (
 void trdp_pdDataUpdate (
     PD_ELE_T *pPacket)
 {
-    UINT32  myCRC   = vos_crc32(0L, NULL, 0);
+    UINT32  myCRC   = vos_crc32(0xFFFFFFFF, NULL, 0);
     UINT8   *pDest  = pPacket->pFrame->data + pPacket->dataSize;
 
     /*  Pad with zero bytes */
@@ -171,7 +171,7 @@ TRDP_ERR_T trdp_pdGet (
         memcpy(pPacket->pFrame->data, pData, dataSize);
         return TRDP_NO_ERR;
     }
-    return unmarshall(refCon, pPacket->addr.comId, pData, pPacket->pFrame->data, &dataSize);
+    return unmarshall(refCon, pPacket->addr.comId, (UINT8 *)pData, pPacket->pFrame->data, &dataSize);
 }
 
 /******************************************************************************/
@@ -328,6 +328,7 @@ TRDP_ERR_T  trdp_pdReceive (
     /*  Compute the subscription handle */
     subHandle.comId = vos_ntohl(pNewFrame->frameHead.comId);
 
+#if 0
     /*	Check if sequence counter is OK
         Is this packet a redundant one?	*/
     if (trdp_isRcvSeqCnt(vos_ntohl(pNewFrame->frameHead.sequenceCounter), subHandle.comId,
@@ -336,7 +337,8 @@ TRDP_ERR_T  trdp_pdReceive (
         vos_printf(VOS_LOG_INFO, "Redundant PD data ignored (comId %u)\n", vos_ntohl(pNewFrame->frameHead.comId));
         return TRDP_NO_ERR;
     }
-
+#endif
+    
     /*  It might be a PULL request      */
     if (vos_ntohs(pNewFrame->frameHead.msgType) == TRDP_MSG_PR)
     {
@@ -392,7 +394,7 @@ TRDP_ERR_T  trdp_pdReceive (
     }
 
     /*	Examine subscription queue, are we interested in this PD?	*/
-    pExistingElement = trdp_queueFindAddr(appHandle->pRcvQueue, &subHandle);
+    pExistingElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, &subHandle);
 
     if (pExistingElement != NULL)
     {
@@ -497,7 +499,7 @@ TRDP_ERR_T  trdp_pdReceive (
 void    trdp_pdUpdate (
     PD_ELE_T *pPacket)
 {
-    UINT32 myCRC = vos_crc32(0L, NULL, 0);
+    UINT32 myCRC = vos_crc32(0xFFFFFFFF, NULL, 0);
 
     /* increment counter with each telegram */
     pPacket->curSeqCnt++;
@@ -520,7 +522,7 @@ TRDP_ERR_T trdp_pdCheck (
     PD_HEADER_T *pPacket,
     INT32       packetSize)
 {
-    UINT32      myCRC       = vos_crc32(0L, NULL, 0);
+    UINT32      myCRC       = vos_crc32(0xFFFFFFFF, NULL, 0);
     UINT32      *pDataFCS   = (UINT32 *)((UINT8 *)pPacket + packetSize - 4);
     TRDP_ERR_T  err         = TRDP_NO_ERR;
 
@@ -560,7 +562,7 @@ TRDP_ERR_T trdp_pdCheck (
     /*	Check Data CRC (FCS)	*/
     else if (pPacket->datasetLength > 0)
     {
-        myCRC   = 0; /* reset the initialization value for the CRC */
+        myCRC   = 0xFFFFFFFF; /* reset the initialization value for the CRC */
         myCRC   = vos_crc32(myCRC, (UINT8 *)pPacket + sizeof(PD_HEADER_T), vos_ntohl(pPacket->datasetLength));
 
         if (*pDataFCS != MAKE_LE(myCRC))
