@@ -5,7 +5,7 @@
  * @brief           Typedefs for TRDP communication
  *
  * @details
- *
+ *F
  * @note            Project: TCNOpen TRDP prototype stack
  *
  * @author          Bernd Loehr, NewTec GmbH
@@ -284,7 +284,7 @@ typedef enum
     TRDP_TIMEDATE32 = 14,  /**< 32 bit UNIX time  */
     TRDP_TIMEDATE48 = 15,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
     TRDP_TIMEDATE64 = 16,  /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
-    TRDP_TYPE_MAX   = 99   /**< Values greater are considered nested datasets */
+    TRDP_TYPE_MAX   = 30   /**< Values greater are considered nested datasets */
 } TRDP_DATA_TYPE_T;
 
 /**	Dataset element definition	*/
@@ -395,7 +395,8 @@ typedef struct
     UINT32                  numRed;       /**< number of redundancy groups */
     TRDP_MEM_STATISTICS_T   mem;          /**< memory statistics */
     TRDP_PD_STATISTICS_T    pd;           /**< pd statistics */
-    TRDP_MD_STATISTICS_T    md;           /**< md statistics */
+    TRDP_MD_STATISTICS_T    udpMd;        /**< UDP md statistics */
+    TRDP_MD_STATISTICS_T    tcpMd;        /**< TCP md statistics */
 } TRDP_STATISTICS_T;
 
 /** Table containing particular PD subscription information. */
