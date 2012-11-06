@@ -42,14 +42,15 @@
  * GLOBAL FUNCTIONS
  */
 
+TRDP_ERR_T  trdp_mdSend (
+    INT32           pdSock,
+    const MD_ELE_T  *pPacket);
 
-TRDP_ERR_T  trdp_sendMD (
-    int     sock,
-    const   MD_ELE_T *);
-TRDP_ERR_T  trdp_rcvMD (
-    int         sock,
-    MD_HEADER_T * *pPacket,
-    INT32       *pSize,
-    UINT32      *pIPAddr);
+void    trdp_mdUpdate (
+    MD_ELE_T *pPacket);
+
+TRDP_ERR_T  trdp_mdReceive (
+    TRDP_SESSION_PT appHandle,
+                            INT32           sock);
 
 #endif
