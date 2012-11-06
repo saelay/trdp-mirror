@@ -90,7 +90,7 @@ extern int gIsActive;
 
 - (IBAction) ipChangedRec1:(id)sender
 {
-	setIPRec(0, (char*)[[ipAddress stringValue] UTF8String]);
+	setIPRec(0, (char*)[[rec1IP stringValue] UTF8String]);
     pd_updateSubscriber(0);
 }
 
@@ -102,7 +102,7 @@ extern int gIsActive;
 
 - (IBAction) ipChangedRec2:(id)sender
 {
-	setIPRec(1,(char*)[[ipAddress stringValue] UTF8String]);
+	setIPRec(1,(char*)[[rec2IP stringValue] UTF8String]);
     pd_updateSubscriber(1);
 }
 
@@ -114,7 +114,7 @@ extern int gIsActive;
 
 - (IBAction) ipChangedRec3:(id)sender
 {
-	setIPRec(2,(char*)[[ipAddress stringValue] UTF8String]);
+	setIPRec(2,(char*)[[rec3IP stringValue] UTF8String]);
     pd_updateSubscriber(2);
 }
 
@@ -126,7 +126,7 @@ extern int gIsActive;
 
 - (IBAction) ipChangedRec4:(id)sender
 {
-	setIPRec(3,(char*)[[ipAddress stringValue] UTF8String]);
+	setIPRec(3,(char*)[[rec4IP stringValue] UTF8String]);
     pd_updateSubscriber(3);
 }
 
@@ -138,7 +138,7 @@ extern int gIsActive;
 
 - (IBAction) ipChangedRec5:(id)sender
 {
-	setIPRec(4, (char*)[[ipAddress stringValue] UTF8String]);
+	setIPRec(4, (char*)[[rec5IP stringValue] UTF8String]);
     pd_updateSubscriber(4);
 }
 
