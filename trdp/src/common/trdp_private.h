@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.0.8"
+#define LIB_VERSION  "0.0.0.9"
 
 #ifndef IP_PD_UDP_PORT
 #define IP_PD_UDP_PORT  20548                   /**< process data UDP port      */
@@ -105,6 +105,27 @@
 /***********************************************************************************************************************
  * TYPEDEFS
  */
+ 
+/** Internal MD state */
+typedef enum
+{
+	TRDP_MD_ELE_ST_NONE                =  0,  /**< neutral value                                               */
+                                          
+	TRDP_MD_ELE_ST_TX_NOTIFY_ARM       =  1,  /**< ready to send notify MD                                     */
+	TRDP_MD_ELE_ST_TX_REQUEST_ARM      =  2,  /**< ready to send request MD                                    */
+	TRDP_MD_ELE_ST_TX_REPLY_ARM        =  3,  /**< ready to send reply MD                                      */
+	TRDP_MD_ELE_ST_TX_REPLYQUERY_ARM   =  4,  /**< ready to send reply with confirm request MD                 */
+	TRDP_MD_ELE_ST_TX_CONFIRM_ARM      =  5,  /**< ready to send confirm MD                                    */
+	TRDP_MD_ELE_ST_TX_ERROR_ARM        =  6,  /**< ready to send error MD                                      */
+	                                      
+	TRDP_MD_ELE_ST_TX_REQUEST_W4Y      =  7,  /**< request sent, wait for reply                                */
+	TRDP_MD_ELE_ST_TX_REPLYQUERY_W4C   =  8,  /**< reply send, with confirm request MD                         */
+	
+	TRDP_MD_ELE_ST_RX_ARM              =  9,  /**< armed listener                                              */
+	TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY   = 10,  /**< request received, wait for application reply send           */
+	TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF  = 11   /**< reply conf. rq. rx, wait for application conf send          */
+	
+} TRDP_MD_ELE_ST_T;
 
 /** Internal flags for packets    */
 typedef enum
@@ -219,15 +240,35 @@ typedef struct PD_ELE
 /** Queue element for MD packets to send or receive or acknowledge    */
 typedef struct MD_ELE
 {
-    struct MD_ELE       *pNext;                 /**< pointer to next element or NULL                    */
-    TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber                     */
-    TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                      */
+    struct MD_ELE       *pNext;                 /**< pointer to next element or NULL					*/
+    TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber						*/
+    TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags										*/
+    TRDP_FLAGS_T        pktFlags;               /**< flags												*/
     TRDP_TIME_T         interval;               /**< time out value for received packets or
                                                     interval for packets to send (set from ms)          */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv             */
     INT32               dataSize;               /**< net data size                                      */
-    INT32               socketIdx;              /**< index into the socket list                         */
-    MD_HEADER_T         frameHead;              /**< Packet    header in network byte order             */
+    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)	*/
+    INT32               socketIdx;              /**< index into the socket list							*/
+	TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                    */
+	UINT8               sessionID[16];          /**< UUID as a byte stream                              */
+	union
+	{
+		struct
+		{
+			UINT32                comId;                  /**< filter on incoming MD by comId                     */
+		} caller;
+		struct
+		{
+			const void            *pUserRef;              /**< user reference for call_back from addListener()	*/
+			UINT32                comId;                  /**< filter on incoming MD by comId                     */
+			UINT32                topoCount;              /**< set by user: ETB to use, '0' to deacticate         */
+			TRDP_IP_ADDR_T        destIpAddr;             /**< filter on incoming MD by destination IP address    */
+			TRDP_FLAGS_T          pktFlags;               /**< marshalling option                                 */
+			TRDP_URI_USER_T       destURI;                /**< filter on incoming MD by destination URI           */
+		} listener; /**< Listener arguments */
+	} u;
+    MD_HEADER_T         frameHead;              /**< Packet	header in network byte order                */
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
     /*    ... data + FCS ... */
 } MD_ELE_T;
@@ -250,11 +291,13 @@ typedef struct TRDP_SESSION
     TRDP_MD_CONFIG_T        mdDefault;
     TRDP_MEM_CONFIG_T       memConfig;
     TRDP_OPTION_T           option;
-    TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use    */
-    PD_ELE_T                *pSndQueue; /**< pointer to first element of send queue       */
-    PD_ELE_T                *pRcvQueue; /**< pointer to first element of rcv queue        */
-    MD_ELE_T                *pMDQueue;  /**< pointer to first element of MD session       */
-    TRDP_STATISTICS_T       stats;      /**< statistics of this session                   */
+    TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use	*/
+    PD_ELE_T                *pSndQueue; /**< pointer to first element of send queue		*/
+    PD_ELE_T                *pRcvQueue; /**< pointer to first element of rcv queue		*/
+    MD_ELE_T                *pMDSndQueue;  /**< pointer to first element of send MD queue	*/
+    MD_ELE_T                *pMDRcvQueue;  /**< pointer to first element of recv MD queue	*/
+	MD_ELE_T                *pMDRcvEle; /**< pointer to received MD element */
+    TRDP_STATISTICS_T       stats;      /**< statistics of this session                 */
 } TRDP_SESSION_T, *TRDP_SESSION_PT;
 
 

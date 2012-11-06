@@ -54,34 +54,46 @@
 extern int          am_big_endian ();
 extern TRDP_LOG_T   gDebugLevel;
 
-PD_ELE_T            *trdp_queueFindComId (
+PD_ELE_T    *trdp_queueFindComId (
     PD_ELE_T    *pHead,
     UINT32      comId);
 
-PD_ELE_T            *trdp_queueFindPubAddr (
+PD_ELE_T    *trdp_queueFindSubAddr (
     PD_ELE_T        *pHead,
     TRDP_ADDRESSES  *pAddr);
 
-PD_ELE_T            *trdp_queueFindSubAddr (
-    PD_ELE_T        *pHead,
-    TRDP_ADDRESSES  *pAddr);
+MD_ELE_T *trdp_MDqueueFindAddr (
+    MD_ELE_T        *pHead,
+    TRDP_ADDRESSES  *addr);
 
-void                trdp_queueDelElement (
+PD_ELE_T    *trdp_queueFindPubAddr (
+    PD_ELE_T        *pHead,
+    TRDP_ADDRESSES  *addr);
+
+void    trdp_queueDelElement (
     PD_ELE_T    * *pHead,
     PD_ELE_T    *pDelete);
 
-void                trdp_queueAppLast (
+void    trdp_MDqueueDelElement (
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pDelete);
+
+void    trdp_MDqueueInsFirst (
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pNew);
+
+void    trdp_queueAppLast (
     PD_ELE_T    * *pHead,
     PD_ELE_T    *pNew);
 
-void                trdp_queueInsFirst (
+void    trdp_queueInsFirst (
     PD_ELE_T    * *pHead,
     PD_ELE_T    *pNew);
 
-void                trdp_initSockets(
+void    trdp_initSockets(
     TRDP_SOCKETS_T iface[]);
 
-TRDP_ERR_T          trdp_requestSocket(
+TRDP_ERR_T  trdp_requestSocket(
     TRDP_SOCKETS_T iface[],
     const TRDP_SEND_PARAM_T * params,
     TRDP_IP_ADDR_T srcIP,

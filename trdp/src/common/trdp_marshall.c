@@ -373,6 +373,9 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_INT8:
                 case TRDP_UINT8:
                 {
+                    /*	possible variable source size	*/
+                    var_size = *pSrc;
+
                     while (noOfItems-- > 0)
                     {
                         *pDst++ = *pSrc++;
@@ -403,6 +406,10 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_TIMEDATE32:
                 {
                     UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+
+                    /*	possible variable source size	*/
+                    var_size = *pSrc32;
+
                     while (noOfItems-- > 0)
                     {
                         *pDst++ = (UINT8) (*pSrc32 >> 24);
@@ -543,7 +550,8 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 {
                     while (noOfItems-- > 0)
                     {
-                        *pDst++ = *pSrc++;
+                        var_size = *pSrc++;
+                        *pDst++ = var_size;
                     }
                     break;
                 }
@@ -575,6 +583,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
                         *pDst32 += *pSrc++ << 16;
                         *pDst32 += *pSrc++ << 8;
                         *pDst32 += *pSrc++;
+                        var_size = *pDst32;
                         pDst32++;
                     }
                     pDst = (UINT8 *) pDst32;

@@ -153,8 +153,9 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void);
  *
  *  @param[in]      topoCount			New topocount value
  */
-EXT_DECL void tlc_setTopoCount (
-    UINT32 topoCount);
+EXT_DECL TRDP_ERR_T tlc_setTopoCount (
+    TRDP_APP_SESSION_T  appHandle,
+    UINT32              topoCount);
 
 
 /**********************************************************************************************************************/
@@ -503,6 +504,7 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *  @param[in]      pktFlags			OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      noOfRepliers		number of expected repliers, 0 if unknown
  *  @param[in]      replyTimeout		timeout for reply
+ *  @param[in]      noOfRetries		    number of retries
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -525,6 +527,7 @@ EXT_DECL TRDP_ERR_T tlm_request (
     TRDP_FLAGS_T            pktFlags,
     UINT32                  noOfRepliers,
     UINT32                  replyTimeout,
+    UINT32                  noOfRetries,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
@@ -630,7 +633,7 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
  */
 EXT_DECL TRDP_ERR_T tlm_delListener (
     TRDP_APP_SESSION_T  appHandle,
-    UINT32              listenHandle);
+    TRDP_LIS_T          listenHandle);
 
 
 /**********************************************************************************************************************/

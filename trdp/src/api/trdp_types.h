@@ -119,7 +119,8 @@ typedef enum
     TRDP_WIRE_ERR           = -19,  /**<                                    */
     TRDP_TOPO_ERR           = -20,  /**< Invalid topo count                 */
     TRDP_COMID_ERR          = -21,  /**< Unknown ComId                      */
-    TRDP_STATE_ERR          = -22,  /**< Call in wrong state				*/
+    TRDP_STATE_ERR          = -22,  /**< Call in wrong state		*/
+    TRDP_APPTIMEOUT_ERR     = -23,  /**< Application Timeout            */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                  */
 } TRDP_ERR_T;
 

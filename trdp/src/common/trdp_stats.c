@@ -431,19 +431,19 @@ void    trdp_pdPrepareStats (
     pData->pd.numSend       = vos_htonl(appHandle->stats.pd.numSend);
 
     /* Message data */
-    pData->md.defQos            = vos_htonl(appHandle->stats.md.defQos);
-    pData->md.defTtl            = vos_htonl(appHandle->stats.md.defTtl);
-    pData->md.defReplyTimeout   = vos_htonl(appHandle->stats.md.defReplyTimeout);
-    pData->md.defConfirmTimeout = vos_htonl(appHandle->stats.md.defConfirmTimeout);
-    pData->md.numList           = vos_htonl(appHandle->stats.md.numList);
-    pData->md.numRcv            = vos_htonl(appHandle->stats.md.numRcv);
-    pData->md.numCrcErr         = vos_htonl(appHandle->stats.md.numCrcErr);
-    pData->md.numProtErr        = vos_htonl(appHandle->stats.md.numProtErr);
-    pData->md.numTopoErr        = vos_htonl(appHandle->stats.md.numTopoErr);
-    pData->md.numNoListener     = vos_htonl(appHandle->stats.md.numNoListener);
-    pData->md.numReplyTimeout   = vos_htonl(appHandle->stats.md.numReplyTimeout);
-    pData->md.numConfirmTimeout = vos_htonl(appHandle->stats.md.numConfirmTimeout);
-    pData->md.numSend           = vos_htonl(appHandle->stats.md.numSend);
+    pData->udpMd.defQos            = vos_htonl(appHandle->stats.udpMd.defQos);
+    pData->udpMd.defTtl            = vos_htonl(appHandle->stats.udpMd.defTtl);
+    pData->udpMd.defReplyTimeout   = vos_htonl(appHandle->stats.udpMd.defReplyTimeout);
+    pData->udpMd.defConfirmTimeout = vos_htonl(appHandle->stats.udpMd.defConfirmTimeout);
+    pData->udpMd.numList           = vos_htonl(appHandle->stats.udpMd.numList);
+    pData->udpMd.numRcv            = vos_htonl(appHandle->stats.udpMd.numRcv);
+    pData->udpMd.numCrcErr         = vos_htonl(appHandle->stats.udpMd.numCrcErr);
+    pData->udpMd.numProtErr        = vos_htonl(appHandle->stats.udpMd.numProtErr);
+    pData->udpMd.numTopoErr        = vos_htonl(appHandle->stats.udpMd.numTopoErr);
+    pData->udpMd.numNoListener     = vos_htonl(appHandle->stats.udpMd.numNoListener);
+    pData->udpMd.numReplyTimeout   = vos_htonl(appHandle->stats.udpMd.numReplyTimeout);
+    pData->udpMd.numConfirmTimeout = vos_htonl(appHandle->stats.udpMd.numConfirmTimeout);
+    pData->udpMd.numSend           = vos_htonl(appHandle->stats.udpMd.numSend);
 
     pPacket->dataSize = sizeof(TRDP_STATISTICS_T);
 

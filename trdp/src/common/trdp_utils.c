@@ -173,6 +173,40 @@ PD_ELE_T *trdp_queueFindSubAddr (
 }
 
 /******************************************************************************/
+/** Return the element with same comId from MD queue
+ *
+ *  @param[in]      pHead           pointer to head of queue
+ *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @retval         != NULL         pointer to PD element
+ *  @retval         NULL            No PD element found
+ */
+MD_ELE_T *trdp_MDqueueFindAddr (
+                                MD_ELE_T        *pHead,
+                                TRDP_ADDRESSES  *addr)
+{
+    MD_ELE_T *iterMD;
+    
+    if (pHead == NULL || addr == NULL)
+    {
+        return NULL;
+    }
+    
+    for (iterMD = pHead; iterMD != NULL; iterMD = iterMD->pNext)
+    {
+        /*  We match if src/dst address is zero or found */
+        if (iterMD->addr.comId == addr->comId &&
+            (addr->srcIpAddr == 0 || iterMD->addr.srcIpAddr ==
+             addr->srcIpAddr) &&
+            (addr->destIpAddr == 0 || iterMD->addr.destIpAddr ==
+             addr->destIpAddr))
+        {
+            return iterMD;
+        }
+    }
+    return NULL;
+}
+
+/******************************************************************************/
 /** Delete an element
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -201,6 +235,40 @@ void    trdp_queueDelElement (
         if (iterPD->pNext && iterPD->pNext == pDelete)
         {
             iterPD->pNext = pDelete->pNext;
+            return;
+        }
+    }
+}
+
+/******************************************************************************/
+/** Delete an element from MD queue
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pDelete         pointer to element to delete
+ */
+void    trdp_MDqueueDelElement (
+                                MD_ELE_T    * *ppHead,
+                                MD_ELE_T    *pDelete)
+{
+    MD_ELE_T *iterMD;
+    
+    if (ppHead == NULL || *ppHead == NULL || pDelete == NULL)
+    {
+        return;
+    }
+    
+    /*	handle removal of first element	*/
+    if (pDelete == *ppHead)
+    {
+        *ppHead = pDelete->pNext;
+        return;
+    }
+    
+    for (iterMD = *ppHead; iterMD != NULL; iterMD = iterMD->pNext)
+    {
+        if (iterMD->pNext && iterMD->pNext == pDelete)
+        {
+            iterMD->pNext = pDelete->pNext;
             return;
         }
     }
@@ -250,6 +318,25 @@ void    trdp_queueInsFirst (
         return;
     }
 
+    pNew->pNext = *ppHead;
+    *ppHead     = pNew;
+}
+
+/******************************************************************************/
+/** Insert an element at front of MD queue
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pNew            pointer to element to insert
+ */
+void    trdp_MDqueueInsFirst (
+                              MD_ELE_T    * *ppHead,
+                              MD_ELE_T    *pNew)
+{
+    if (ppHead == NULL || pNew == NULL)
+    {
+        return;
+    }
+    
     pNew->pNext = *ppHead;
     *ppHead     = pNew;
 }
@@ -491,7 +578,7 @@ UINT32  trdp_getSeqCnt (
 #if MD_SUPPORT
     else
     {
-        #error
+       // #error
     }
 #endif
     return 0;   /*	Not found, initial value is zero	*/
@@ -559,7 +646,7 @@ BOOL  trdp_isRcvSeqCnt (
 #if MD_SUPPORT
     else
     {
-        #error
+       // #error
     }
 #endif
     return FALSE;   /* Not found, initial value is zero */
