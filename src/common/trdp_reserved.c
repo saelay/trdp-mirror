@@ -235,11 +235,11 @@ TRDP_DATASET_T dsGlobalStaistics =    /* global statistics */
             1
         },
         {
-            CHAR8,   /**< host name */
+            TRDP_CHAR8,   /**< host name */
             16
         },
         {
-            CHAR8,   /**< leader host name */  
+            TRDP_CHAR8,   /**< leader host name */  
             16
         },
         {
@@ -334,12 +334,12 @@ TRDP_DATASET_T dsSubsStatisticsArray =       /* pub statistics */
     2,          /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
-            UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */  
             1
         },
         {
-             TRDP_SUBS_STATISTICS_DSID,       /*	dataset/com ID  */
-             0
+            TRDP_SUBS_STATISTICS_DSID,       /*	dataset/com ID  */
+            0
         }
     }
 };
@@ -389,12 +389,12 @@ TRDP_DATASET_T dsPubStatisticsArray =       /* pub statistics */
     2,          /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
-            UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */  
             1
         },
         {
-             TRDP_PUB_STATISTICS_DSID,       /*	dataset/com ID  */
-             0
+            TRDP_PUB_STATISTICS_DSID,       /*	dataset/com ID  */
+            0
         }
     }
 };
@@ -444,12 +444,12 @@ TRDP_DATASET_T dsListStatisticsArray =      /* md listener statistics */
     2,          /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
-            UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */  
             1
         },
         {
-             TRDP_LIST_STATISTICS_DSID,       /*	dataset/com ID  */
-             0
+            TRDP_LIST_STATISTICS_DSID,       /*	dataset/com ID  */
+            0
         }
     }
 };
@@ -483,8 +483,8 @@ TRDP_DATASET_T dsRedStatisticsArray =      /* md listener statistics */
             1
         },
         {
-             TRDP_RED_STATISTICS_DSID,       /*	redundancy statistics  */
-             0
+            TRDP_RED_STATISTICS_DSID,       /*	redundancy statistics  */
+            0
         }
     }
 };
@@ -500,8 +500,8 @@ TRDP_DATASET_T dsJoinStatisticsArray =      /* md join statistics */
             1
         },
         {
-             TRDP_UINT32,       /*	joined IP addr  */
-             0
+            TRDP_UINT32,       /*	joined IP addr  */
+            0
         }
     }
 };
