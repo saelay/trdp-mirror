@@ -82,23 +82,28 @@ extern "C" {
 /**********************************************************************************************************************/
 /**                          TRDP reserved data set id's in the range 1 ... 1000                                      */
 /**********************************************************************************************************************/
-#define TRDP_STATISTICS_REQUEST_DSID  31
-#define TRDP_MEM_STATISTICS_DSID      32
-#define TRDP_PD_STATISTICS_DSID       33
-#define TRDP_MD_STATISTICS_DSID       34
-#define TRDP_GLOBAL_STATISTICS_DSID   35
-#define TRDP_SUBS_STATISTICS_DSID     36
-#define TRDP_PUB_STATISTICS_DSID      37
-#define TRDP_RED_STATISTICS_DSID      38
-#define TRDP_JOIN_STATISTICS_DSID     39
-#define TRDP_LIST_STATISTIC_DSIDS     40
+#define TRDP_STATISTICS_REQUEST_DSID      31
+#define TRDP_MEM_STATISTICS_DSID          32
+#define TRDP_PD_STATISTICS_DSID           33
+#define TRDP_MD_STATISTICS_DSID           34
+#define TRDP_GLOBAL_STATISTICS_DSID       35
+#define TRDP_SUBS_STATISTICS_DSID         36
+#define TRDP_SUBS_STATISTICS_ARRAY_DSID   37
+#define TRDP_PUB_STATISTICS_DSID          38
+#define TRDP_PUB_STATISTICS_ARRAY_DSID    39
+#define TRDP_RED_STATISTICS_DSID          40
+#define TRDP_RED_STATISTICS_ARRAY_DSID    41
+#define TRDP_JOIN_STATISTICS_DSID         42
+#define TRDP_JOIN_STATISTICS_ARRAY_DSID   43
+#define TRDP_LIST_STATISTIC_DSID          44
+#define TRDP_LIST_STATISTIC_ARRAY_DSID    45
 
-#define TRDP_NEST1_TEST_DSID          990
-#define TRDP_NEST2_TEST_DSID          991
-#define TRDP_NEST3_TEST_DSID          992
-#define TRDP_NEST4_TEST_DSID          993
+#define TRDP_NEST1_TEST_DSID             990
+#define TRDP_NEST2_TEST_DSID             991
+#define TRDP_NEST3_TEST_DSID             992
+#define TRDP_NEST4_TEST_DSID             993
         
-#define TRDP_TEST_DSID                1000
+#define TRDP_TEST_DSID                  1000
 
 
 /***********************************************************************************************************************
@@ -118,32 +123,32 @@ typedef struct
 {
     UINT32 size;                    /**< length of the var size array */
     TRDP_SUBS_STATISTICS_T subs[1]; /**< subscriber, array length of 1 as placeholder for a variable length */
-} TRDP_SUBS_STATISTICS_DS_T;
+} TRDP_SUBS_STATISTICS_ARRAY_DS_T;
 
 typedef struct 
 {
     UINT32 size;                    /**< length of the var size array */
     TRDP_PUBS_STATISTICS_T pub[1];  /**< publisher, array length of 1 as placeholder for a variable length */
-} TRDP_PUB_STATISTICS_DS_T;
+} TRDP_PUB_STATISTICS_ARRAY_DS_T;
 
 typedef struct 
 {
     UINT32 size;                    /**< length of the var size array */
     TRDP_LIST_STATISTICS_T list[1]; /**< listener, array length of 1 as placeholder for a variable length */
-} TRDP_LIST_STATISTICS_DS_T;
+} TRDP_LIST_STATISTICS_ARRAY_DS_T;
 
 
 typedef struct 
 {
     UINT32 size;                    /**< length of the var size array */
     TRDP_RED_STATISTICS_T red[1];   /**< redundancy group, array length of 1 as placeholder for a variable length */
-} TRDP_RED_STATISTICS_DS_T;
+} TRDP_RED_STATISTICS_ARRAY_DS_T;
 
 typedef struct 
 {
     UINT32 size;                    /**< length of the var size array */
     UINT32 addr[1];                 /**< joined address, array length of 1 as placeholder for a variable length */
-} TRDP_JOIN_STATISTICS_DS_T;
+} TRDP_JOIN_STATISTICS_ARRAY_DS_T;
 
 
 /**********************************************************************************************************************/
