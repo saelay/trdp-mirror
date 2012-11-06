@@ -167,7 +167,7 @@ help:
 	@echo "Edit the paths in the top part of this Makefile to suit your environment." >&2
 	@echo "Then call 'make' or 'make all' to build everything." >&2
 	@echo "To build debug binaries, append 'DEBUG=TRUE' to the make command " >&2
-	@echo "To include message data support, append 'MD_SUPPORT=TRUE' to the make command " >&2
+	@echo "To include message data support, append 'MD_SUPPORT=1' to the make command " >&2
 	@echo " " >&2
 	@echo "Other builds:" >&2
 	@echo "  * make demo      - build the sample applications" >&2
