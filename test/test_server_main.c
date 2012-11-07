@@ -4,7 +4,9 @@
  *
  * @brief           Test sender/receiver/responder for TRDP
  *
- * @details	        Receive and send process data, single threaded using select() and heap memory
+ * @details	        Server, that replies to the different clients.
+ * 					Each client is built to handle a unique test.
+ *					The server must run on an device with only ONE interface. (the multicast join is done on the first device)
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -32,8 +34,12 @@
 #include "vos_thread.h"
 #include "test_server.h"
 #include "test_general.h"
+#include "trdp_types.h"
 
-CHAR8   gInputBuffer[sizeof(gMyDataSet999)] = "\0";
+#define PULL_RESPONSE_SIZE	25
+
+UINT8   gInputBuffer[sizeof(gMyDataSet999)] = "\0";
+CHAR8	gPullresponse[PULL_RESPONSE_SIZE];
 BOOL    gKeepOnRunning  = TRUE;
 
 VOS_TIME_T  gLastupdateTime;
@@ -58,7 +64,7 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    /** all output to standard error -> it could be piped to somewhere ese */
+    /** all output to standard error -> it could be piped to somewhere else */
     fprintf(stderr, "%s %s %s:%d %s", pTime, catStr[category], pFile, LineNumber, pMsgStr);
 }
 
@@ -105,9 +111,9 @@ void myPDcallBack (
 
         case TRDP_TIMEOUT_ERR:
             /* The application can decide here if old data shall be invalidated or kept */
-            printf("> Packet timed out (ComID %d, SrcIP: %u)\n",
+            printf("> Packet timed out (ComID %d, SrcIP: %s)\n",
                    pMsg->comId,
-                   pMsg->srcIpAddr);
+                   vos_ipDotted(pMsg->srcIpAddr));
             memset(gInputBuffer, 0, sizeof(gInputBuffer));
 
         default:
@@ -128,20 +134,26 @@ int main (int argc, char * *argv)
 {
     TRDP_APP_SESSION_T      appHandle;      /*  The session instance */
     TRDP_SUB_T              subHandle;      /*  Our identifier to the subscription */
+    TRDP_SUB_T              subHandleMC;    /*  Our identifier to the multicast subscription */
     TRDP_PUB_T              pubHandleUC;    /*  Our identifier to the unicast publication */
+    TRDP_PUB_T				pubHandleUCpull; /*  Our identifier to the PULL request publication */
+    TRDP_SUB_T				subHandlePullreq; /*  Our subscriber to the multicast subscription */
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
                                                TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
-    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"server", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
-    UINT32 destIP;
+    // all values, that could be set via the commandline:
+    UINT32 cmdl_destIP, cmdl_cycletime, cmdl_timeout, cmdl_srcIP = 0;
 
     /* Parse the given commandline arguments */
-    rv = trdp_test_general_parseCommandLineArguments(argc, argv, &destIP);
+    rv = trdp_test_general_parseCommandLineArguments(argc, argv, 
+			&cmdl_destIP, &cmdl_cycletime, &cmdl_timeout, &cmdl_srcIP);
+			
     if (rv != 0)
         return rv;
-
+    
     /* clean data before using it */
     memset(&gLastupdateTime, 0, sizeof(gLastupdateTime));
     memset(&gMyDataSet998, 0, sizeof(gMyDataSet998));
@@ -164,15 +176,36 @@ int main (int argc, char * *argv)
     }
 
     /*  Subscribe to control PD     */
+    memset(&gMyDataSet999, 0, sizeof(gMyDataSet999));
     err = tlp_subscribe( appHandle,                 /*   our application identifier          */
                          &subHandle,                /*   our subscription identifier         */
                          NULL,
                          PD_TEST_GEN_UNI_COMID,     /*   ComID                               */
                          0,                         /*   topocount: local consist only       */
-                         destIP,                    /*   Source IP filter                    */
+                         cmdl_destIP,               /*   Source IP filter                    */
                          0,
                          0,                         /*   Default destination	(or MC Group)   */
-                         PD_TEST_GEN_UNI_TIMEOUT,   /*   Time out in us                      */
+                         cmdl_timeout,   			/*   Time out in us                      */
+                         TRDP_TO_SET_TO_ZERO,       /*   delete invalid data	on timeout      */
+                         sizeof(gMyDataSet999));    /*   net data size                       */
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tlp_subscribe error\n");
+        tlc_terminate();
+        return 1;
+    }
+    
+    /*  Subscribe to control multicast PD */
+    err = tlp_subscribe( appHandle,                 /*   our application identifier          */
+                         &subHandleMC,                /*   our subscription identifier         */
+                         NULL,
+                         PD_TEST_GEN_UNI_COMID,     /*   ComID                               */
+                         0,                         /*   topocount: local consist only       */
+                         0, /* don't filter, needed for static package */				/*   Source IP filter                    */
+                         0,
+                         PD_TESTMULTICAST_IP,		/*   Default destination	(or MC Group)   */
+                         cmdl_timeout,   			/*   Time out in us                      */
                          TRDP_TO_SET_TO_ZERO,       /*   delete invalid data	on timeout      */
                          sizeof(gMyDataSet999));    /*   net data size                       */
 
@@ -183,15 +216,36 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-    /*	Publish Unicast PD  */
 
+    /*  Subscribe to custom PD PULL request */
+	err = tlp_subscribe( appHandle,                 /*   our application identifier          */
+						 &subHandlePullreq,         /*   our subscription identifier         */
+						 NULL,
+						 PD_TEST_PULL_COMID,     	/*   ComID                               */
+						 0,                         /*   topocount: local consist only       */
+						 0, 						/* don't filter, needed for static package */				/*   Source IP filter                    */
+						 0,
+						 0,							/*   Default destination	(or MC Group)   */
+						 cmdl_timeout,   			/*   Time out in us                      */
+						 TRDP_TO_SET_TO_ZERO,       /*   delete invalid data	on timeout      */
+						 sizeof(gMyDataSet999));    /*   net data size                       */
+
+	if (err != TRDP_NO_ERR)
+	{
+		printf("tlp_subscribe error\n");
+		tlc_terminate();
+		return 1;
+	}
+
+
+    /*	Publish Unicast PD  status package */
     err = tlp_publish(appHandle,                    /*    our application identifier  */
                       &pubHandleUC,                 /*    our pulication identifier   */
-                      PD_TEST_ECHO_UNI_COMID,   /*    ComID to send               */
+                      PD_TEST_ECHO_UNI_COMID,   	/*    ComID to send               */
                       0,                            /*    local consist only          */
                       0,                            /*    default source IP           */
-                      destIP,                       /*    where to send to            */
-                      PD_TEST_ECHO_UNI_CYCLE,   /*    Cycle time in ms            */
+                      cmdl_destIP,                  /*    where to send to            */
+                      cmdl_cycletime,   			/*    Cycle time in ms            */
                       0,                            /*    not redundant               */
                       TRDP_FLAGS_CALLBACK,          /*    Use callback for errors     */
                       NULL,                         /*    default qos and ttl         */
@@ -200,13 +254,35 @@ int main (int argc, char * *argv)
                       FALSE,                        /*    no ladder                   */
                       0);                           /*    no ladder                   */
 
-
     if (err != TRDP_NO_ERR)
     {
         printf("prep pd publish error\n");
         tlc_terminate();
         return 1;
     }
+
+    /*	Publish Unicast PD  package [PULL] stuff */
+	err = tlp_publish(appHandle,                    /*    our application identifier  */
+					  &pubHandleUCpull,             /*    our publication identifier   */
+					  PD_TEST_PULL_REPLY_COMID,   	/*    ComID to send               */
+					  0,                            /*    local consist only          */
+					  0,                            /*    default source IP           */
+					  0 /* everyone */,				/*    where to send to            */
+					  0,   							/*    Cycle time in ms            */
+					  0,                            /*    not redundant               */
+					  TRDP_FLAGS_CALLBACK,          /*    Use callback for errors     */
+					  NULL,                         /*    default qos and ttl         */
+					  (UINT8 *)&gPullresponse,      /*    initial data                */
+					  PULL_RESPONSE_SIZE,        	/*    data size                   */
+					  FALSE,                        /*    no ladder                   */
+					  0);                           /*    no ladder                   */
+
+	if (err != TRDP_NO_ERR)
+	{
+		printf("prep pd publish error\n");
+		tlc_terminate();
+		return 1;
+	}
 
     /*
      Enter the main processing loop.
@@ -274,7 +350,12 @@ int main (int argc, char * *argv)
             /* printf("."); fflush(stdout); */
         }
 
+
+
         /*** Echo dataset ***/
+        sprintf(&gPullresponse, "Actual time is %s", vos_getTimeStamp() );
+        tlp_put(appHandle, pubHandleUCpull, (const UINT8 *) &gPullresponse, PULL_RESPONSE_SIZE);
+
 
         /* Display received information */
         if (gInputBuffer[0] > 0) //FIXME Better solution would be: global flag, that is set in the callback function to indicate new data

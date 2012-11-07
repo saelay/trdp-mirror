@@ -30,6 +30,7 @@
 
 #include "trdp_if_light.h"
 #include "vos_thread.h"
+#include "vos_sock.h"
 #include "test_server.h"
 #include "test_general.h"
 
@@ -97,10 +98,11 @@ void myPDcallBack (
 
         case TRDP_TIMEOUT_ERR:
             /* The application can decide here if old data shall be invalidated or kept */
-            printf("> Packet timed out (ComID %d, SrcIP: %u)\n",
+            printf("> Packet timed out (ComID %d, SrcIP: %s)\n",
                    pMsg->comId,
-                   pMsg->srcIpAddr);
+                   vos_ipDotted(pMsg->srcIpAddr));
             memset(&gMyDataSet998, 0, sizeof(gMyDataSet998));
+            break;
 
         default:
             printf("> Error on packet received (ComID %d), err = %d\n",
@@ -127,14 +129,16 @@ int main (int argc, char * *argv)
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
-    UINT32 destIP;
 
+	// all values, that could be set via the commandline:
+    UINT32 cmdl_destIP, cmdl_cycletime, cmdl_timeout, cmdl_srcIP = 0;
 
     printf(HEADINGTEXT);
 
     /* Parse the given commandline arguments */
-    rv = trdp_test_general_parseCommandLineArguments(argc, argv, &destIP);
-    if (rv != 0)
+    rv = trdp_test_general_parseCommandLineArguments(argc, argv, 
+			&cmdl_destIP, &cmdl_cycletime, &cmdl_timeout, &cmdl_srcIP);
+	if (rv != 0)		
         return rv;
 
     /* clear memory before using it */
@@ -163,10 +167,10 @@ int main (int argc, char * *argv)
                          NULL,
                          PD_TEST_ECHO_UNI_COMID,    /*   ComID                               */
                          0,                         /*   topocount: local consist only       */
-                         destIP,                    /*   Source IP filter                   */
+                         cmdl_destIP,               /*   Source IP filter                   */
                          0,
                          0,                         /*   Default destination	(or MC Group)   */
-                         PD_TEST_ECHO_UNI_TIMEOUT,  /*   Time out in us                      */
+                         cmdl_timeout,  			/*   Time out in us                      */
                          TRDP_TO_SET_TO_ZERO,       /*   delete invalid data	on timeout      */
                          sizeof(gMyDataSet998));    /*   net data size                       */
 
@@ -178,8 +182,8 @@ int main (int argc, char * *argv)
                       PD_TEST_GEN_UNI_COMID,        /*    ComID to send               */
                       0,                            /*    local consist only          */
                       0,                            /*    default source IP           */
-                      destIP,                       /*    where to send to            */
-                      PD_TEST_GEN_UNI_CYCLE,        /*    Cycle time in ms            */
+                      cmdl_destIP,                  /*    where to send to            */
+                      cmdl_cycletime,		        /*    Cycle time in ms            */
                       0,                            /*    not redundant               */
                       TRDP_FLAGS_CALLBACK,          /*    Use callback for errors     */
                       NULL,                         /*    default qos and ttl         */
@@ -266,12 +270,18 @@ int main (int argc, char * *argv)
         /* Display received information and check it for correctness */
         if (gNewDatareceived)
         {
-            printf("# cycletime is %10d us\n", vos_ntohl(gMyDataSet998.cycletime));
+			TRDP_TEST_DYNAMIC_SIZE_T* outputMessageStruct = (TRDP_TEST_DYNAMIC_SIZE_T*) gMyDataSet998.custom_message;
+            printf("# cycletime is %10d us, resultcode=%d\n", /* msg=%s,  */
+				vos_ntohl(gMyDataSet998.cycletime),
+				/* (char *) outputMessageStruct->pData, */
+				vos_ntohl(gMyDataSet998.resultcode)
+				); 
+			//FIXME: The different resultcodes are also to be documented in the test-plan
 
             /* This check is made, to secure, that the TRDP stack handles the timeout parameter (in a perfect world, this code will never be reached)*/
-            if (vos_ntohl(gMyDataSet998.cycletime) >= PD_TEST_ECHO_UNI_TIMEOUT)
+            if (vos_ntohl(gMyDataSet998.cycletime) >= cmdl_timeout)
             {
-                printf("The cycle timeout was %d and the maximum is %d.\n", vos_ntohl(gMyDataSet998.cycletime), PD_TEST_ECHO_UNI_TIMEOUT);
+                printf("The cycle timeout was %d and the maximum is %d.\n", vos_ntohl(gMyDataSet998.cycletime), cmdl_timeout);
                 gTimeoutFailures++;
                 // ignore the first two timeout-failure (this occures because there are no two packages transmitted)
                 if (gTimeoutFailures > 2)
