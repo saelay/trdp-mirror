@@ -65,6 +65,7 @@ BOOL                gKeepOnRunning = TRUE;
 /*
  *  Dataset definitions
  */
+#if 0
 #define	TRDP_STATS_DS_ID		111
 #define	TRDP_MEM_STATS_DS_ID	TRDP_STATS_DS_ID + 1
 #define	TRDP_PD_STATS_DS_ID		TRDP_MEM_STATS_DS_ID + 1
@@ -172,6 +173,9 @@ TRDP_DATASET_T*	gDataSets[] =
 TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
     {PD_COMID1, TRDP_STATS_DS_ID}
 };
+#endif
+
+#include "trdp_reserved.h"
 
 void print_stats(
     TRDP_STATISTICS_T*  pData)
