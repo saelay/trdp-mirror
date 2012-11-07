@@ -93,6 +93,7 @@
 
 #define MD_DEFAULT_QOS              0
 #define MD_DEFAULT_TTL              64
+#define MD_DEFAULT_RETRIES          2
 
 #define MIN_PD_HEADER_SIZE          sizeof(PD_HEADER_T)     /**< PD header size with FCS */
 #define MAX_PD_DATA_SIZE            1436
