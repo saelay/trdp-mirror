@@ -13,7 +13,7 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.1.0.1
+#  VERSION       : 1.1.0.2
 #
 #===========================================================================
 </xs:documentation>
@@ -394,6 +394,7 @@
       </xs:attribute>
       <xs:attribute name="ttl" default="64" type="uint32" use="optional"/>
       <xs:attribute name="qos" default="3" type="uint32" use="optional"/>
+      <xs:attribute name="retries" default="2" type="uint32" use="optional"/>
       <xs:attribute name="protocol" default="UDP" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
@@ -514,6 +515,17 @@
           <xs:restriction base="uint32">
             <xs:minInclusive value="0"/>
             <xs:maxInclusive value="255"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+     <xs:attribute name="retries" default="2" use="optional">
+        <xs:annotation>
+          <xs:documentation>Number of retries for MD request</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="uint32">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="5"/>
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
