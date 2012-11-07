@@ -537,6 +537,9 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 {
                     return err;
                 }
+                pDst = pInfo->pDst;
+                pSrc = pInfo->pSrc;
+
             }
         }
         else
