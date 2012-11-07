@@ -8,7 +8,7 @@
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
- * @author          Bernd Loehr, NewTec GmbH
+ * @author          Simone Pachera, FARsystems
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
@@ -39,26 +39,10 @@
  * TYPEDEFS
  */
 
-/* ############## TBD! ###################*/
-
-/** Message data statistics */
-typedef struct TRDP_MD_STATISTICS
-{
-    UINT32  headerInPackets;            /**< Incoming packets				*/
-    UINT32  headerInCRCErr;             /**< Incoming CRC errors			*/
-    UINT32  headerInProtoErr;           /**< Incoming protocol errors		*/
-    UINT32  headerInTimeOuts;           /**< Incoming timing errors			*/
-    UINT32  headerInFrameErr;           /**< Incoming timing errors			*/
-    UINT32  headerOutPackets;           /**< Outgoing packets				*/
-    UINT32  headerAckErr;               /**< Missing acknowledge			*/
-} TRDP_MD_STATS_T;
 
 /******************************************************************************
  *   Locals
  */
-
-//static TRDP_MD_STATS_T sMDComStats;
-
 
 /******************************************************************************/
 /** Send MD packet
@@ -487,8 +471,8 @@ TRDP_ERR_T  trdp_mdReceive (
 								theMessage.replyStatus  = vos_ntohs(pH->replyStatus);
 						 memcpy(theMessage.sessionId    , pH->sessionID,16);
 								theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
-						 memcpy(theMessage.destURI      , pH->destinationURI,32);
-						 memcpy(theMessage.srcURI       , pH->sourceURI,32);
+						 memcpy(theMessage.destURI      , pH->destinationURI,TRDP_MAX_URI_USER_LEN);
+						 memcpy(theMessage.srcURI       , pH->sourceURI,TRDP_MAX_URI_USER_LEN);
 								theMessage.noOfReplies  = 0;
 								theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
 								theMessage.resultCode   = TRDP_NO_ERR;
@@ -548,7 +532,7 @@ TRDP_ERR_T  trdp_mdReceive (
 											iterMD->u.listener.comId = l_comId;
 											iterMD->u.listener.topoCount = l_topoCount;
 											iterMD->u.listener.destIpAddr = appHandle->pMDRcvEle->addr.srcIpAddr;
-											memcpy(iterMD->u.listener.destURI, pH->destinationURI, 32);
+											memcpy(iterMD->u.listener.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
 										}
 													
 										/* copy message to proper listener */
@@ -569,8 +553,8 @@ TRDP_ERR_T  trdp_mdReceive (
 											theMessage.replyStatus  = vos_ntohs(pH->replyStatus);
 									 memcpy(theMessage.sessionId    , pH->sessionID,16);
 											theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
-									 memcpy(theMessage.destURI      , pH->destinationURI,32);
-									 memcpy(theMessage.srcURI       , pH->sourceURI,32);
+									 memcpy(theMessage.destURI      , pH->destinationURI,TRDP_MAX_URI_USER_LEN);
+									 memcpy(theMessage.srcURI       , pH->sourceURI,TRDP_MAX_URI_USER_LEN);
 											theMessage.noOfReplies  = 0;
 											theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
 											theMessage.resultCode   = TRDP_NO_ERR;
@@ -618,8 +602,8 @@ TRDP_ERR_T  trdp_mdReceive (
 											theMessage.replyStatus  = vos_ntohs(pH->replyStatus);
 									 memcpy(theMessage.sessionId    , pH->sessionID,16);
 											theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
-									 memcpy(theMessage.destURI      , pH->destinationURI,32);
-									 memcpy(theMessage.srcURI       , pH->sourceURI,32);
+									 memcpy(theMessage.destURI      , pH->destinationURI,TRDP_MAX_URI_USER_LEN);
+									 memcpy(theMessage.srcURI       , pH->sourceURI,TRDP_MAX_URI_USER_LEN);
 											theMessage.noOfReplies  = 0;
 											theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
 											theMessage.resultCode   = TRDP_NO_ERR;

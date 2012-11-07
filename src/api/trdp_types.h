@@ -54,7 +54,6 @@ extern "C" {
 
 #define TDRP_VAR_SIZE           0                               /**< Variable size dataset	*/
 
-
 #ifndef USE_HEAP
     #define USE_HEAP  0                 /**< If this is set, we can allocate dynamically memory	*/
 #endif
@@ -259,6 +258,7 @@ typedef struct
 {
     UINT8   qos;
     UINT8   ttl;
+    UINT8   retries;
 } TRDP_SEND_PARAM_T;
 
 
