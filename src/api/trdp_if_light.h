@@ -527,7 +527,6 @@ EXT_DECL TRDP_ERR_T tlm_request (
     TRDP_FLAGS_T            pktFlags,
     UINT32                  noOfRepliers,
     UINT32                  replyTimeout,
-    UINT32                  noOfRetries,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,

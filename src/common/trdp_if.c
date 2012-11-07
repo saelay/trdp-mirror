@@ -270,8 +270,9 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     {
         pSession->pdDefault.sendParam.qos   = PD_DEFAULT_QOS;
         pSession->pdDefault.sendParam.ttl   = PD_DEFAULT_TTL;
+        pSession->pdDefault.sendParam.retries = 0;
         pSession->pdDefault.port            = IP_PD_UDP_PORT;
-    }
+   }
 
     if (pMdDefault != NULL)
     {
@@ -285,6 +286,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         pSession->mdDefault.tcpPort         = IP_MD_TCP_PORT;
         pSession->mdDefault.sendParam.qos   = MD_DEFAULT_QOS;
         pSession->mdDefault.sendParam.ttl   = MD_DEFAULT_TTL;
+        pSession->mdDefault.sendParam.retries = MD_DEFAULT_RETRIES;
     }
 
 
@@ -323,20 +325,20 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     *pAppHandle     = pSession;
     
     /*  Publish our statistics packet   */
-    ret = tlp_publish(pSession,                 /*	our application identifier	*/
-                      &dummyPubHndl,            /*	our pulication identifier	*/
-                      GSTAT_REPLY_COMID,        /*	ComID to send				*/
-                      0,                        /*	local consist only			*/
-                      0,                        /*	default source IP			*/
-                      0,                        /*	where to send to			*/
-                      0,                        /*	Cycle time in ms			*/
-                      0,                        /*	not redundant				*/
-                      TRDP_FLAGS_NONE,          /*	No callbacks                */
-                      NULL,                     /*	default qos and ttl			*/
-                      NULL,                     /*	initial data                */
-                      sizeof(TRDP_STATISTICS_T),/*	max data size               */
-                      FALSE,                    /*	no ladder					*/
-                      0);                       /*	no ladder					*/
+    ret = tlp_publish(pSession,                     /*	our application identifier	*/
+                      &dummyPubHndl,                /*	our pulication identifier	*/
+                      TRDP_GLOBAL_STATISTICS_COMID, /*	ComID to send				*/
+                      0,                            /*	local consist only			*/
+                      0,                            /*	default source IP			*/
+                      0,                            /*	where to send to			*/
+                      0,                            /*	Cycle time in ms			*/
+                      0,                            /*	not redundant				*/
+                      TRDP_FLAGS_NONE,              /*	No callbacks                */
+                      NULL,                         /*	default qos and ttl			*/
+                      NULL,                         /*	initial data                */
+                      sizeof(TRDP_STATISTICS_T),    /*	max data size               */
+                      FALSE,                        /*	no ladder					*/
+                      0);                           /*	no ladder					*/
 
     vos_mutexUnlock(sSessionMutex);
 
@@ -1134,21 +1136,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
 			if (iterMD->socketIdx != -1 && (!appHandle->beQuiet ||(iterMD->pktFlags & TRDP_FLAGS_REDUNDANT)))
 			{
 				trdp_mdUpdate(iterMD);
-                
-				// DEBUG
-				vos_printf(VOS_LOG_ERROR,
-                           "Send data size: %d, packet size: %d\n",
-                           vos_ntohl(iterMD->frameHead.datasetLength), iterMD->grossSize);
-				vos_printf(VOS_LOG_ERROR,
-                           "Send Cnt: %d\n",
-                           ((UINT32 *) iterMD->data)[0]);
-				vos_printf(VOS_LOG_ERROR,
-                           "Send Data: %s\n",
-                           iterMD->data + 4);
-				vos_printf(VOS_LOG_ERROR,
-                           "Send CRC32: 0x%08x\n",
-                           vos_ntohl(((UINT32 *)((UINT8 *)&iterMD->frameHead + iterMD->grossSize - 4))[0]));
-				
+                				
 				err = trdp_mdSend(appHandle->iface[iterMD->socketIdx].sock, iterMD);
                 
                 if (err == TRDP_NO_ERR)
@@ -2231,7 +2219,7 @@ static TRDP_ERR_T tlm_common_send (
             {
                 int i;
                 int v = (sourceURI == NULL) ? 0 : 1;
-                for(i=0;i<32;i++)
+                for(i=0;i<TRDP_MAX_URI_USER_LEN;i++)
                 {
                     v = v ? sourceURI[i] : 0;
                     pNewElement->frameHead.sourceURI[i] = v;
@@ -2240,7 +2228,7 @@ static TRDP_ERR_T tlm_common_send (
             {
                 int i;
                 int v = (destURI == NULL) ? 0 : 1;
-                for(i=0;i<32;i++)
+                for(i=0;i<TRDP_MAX_URI_USER_LEN;i++)
                 {
                     v = v ? destURI[i] : 0;
                     pNewElement->frameHead.destinationURI[i] = v;
@@ -2393,7 +2381,6 @@ TRDP_ERR_T tlm_request (
                         TRDP_FLAGS_T            pktFlags,
                         UINT32                  noOfRepliers,
                         UINT32                  replyTimeout,
-                        UINT32                  noOfRetries,
                         const TRDP_SEND_PARAM_T *pSendParam,
                         const UINT8             *pData,
                         UINT32                  dataSize,
@@ -2488,7 +2475,7 @@ TRDP_ERR_T tlm_addListener (
                 if (iterMD->u.listener.destIpAddr != destIpAddr) continue;
                 
                 /* check for dest URI */
-                if (0 != memcmp(iterMD->u.listener.destURI,destURI,sizeof(destURI))) continue;
+                if (0 != memcmp(iterMD->u.listener.destURI,destURI, TRDP_MAX_URI_USER_LEN)) continue;
                 
                 /* Found: do not duplicate. */
                 errv = TRDP_NOPUB_ERR;
@@ -2520,7 +2507,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->u.listener.topoCount = topoCount;
                 pNewElement->u.listener.destIpAddr= destIpAddr;
                 pNewElement->u.listener.pktFlags  = pktFlags;
-                memcpy(pNewElement->u.listener.destURI,destURI,sizeof(destURI));
+                memcpy(pNewElement->u.listener.destURI,destURI,TRDP_MAX_URI_USER_LEN);
                 
                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                 {
@@ -2540,7 +2527,7 @@ TRDP_ERR_T tlm_addListener (
                                               0,
                                               TRDP_SOCK_MD_UDP,
                                               appHandle->option,
-                                              FALSE,
+                                              TRUE,
                                               &pNewElement->socketIdx
                                               );
                     
@@ -2584,7 +2571,7 @@ TRDP_ERR_T tlm_addListener (
     /* return listener reference to caller */
     if (pListenHandle != NULL)
     {
-        *pListenHandle = pNewElement;
+        *pListenHandle = (TRDP_LIS_T)pNewElement;
     }
     
     return errv;
@@ -2654,7 +2641,7 @@ TRDP_ERR_T tlm_delListener (
 				}
                 
 				/* if not listener or not match */
-				if (!islis || iterMD != listenHandle)
+				if (!islis || iterMD != (MD_ELE_T*)listenHandle)
 				{
 					/* move to next */
 					iterMD_pre = iterMD;
