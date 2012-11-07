@@ -92,6 +92,77 @@ typedef CHAR8 TRDP_URI_USER_T[TRDP_MAX_URI_USER_LEN];
 
 typedef CHAR8 TRDP_FILE_NAME_T[TRDP_MAX_FILE_NAME_LEN];
 
+/**********************************************************************************************************************/
+/**                          TRDP reserved COMID's in the range 1 ... 1000                                            */
+/**********************************************************************************************************************/
+
+#define TRDP_COMID_ECHO                   10
+    
+#define TRDP_STATISTICS_REQUEST_COMID     31
+#define TRDP_GLOBAL_STATISTICS_COMID      35
+#define TRDP_SUBS_STATISTICS_COMID        36
+#define TRDP_PUB_STATISTICS_COMID         37
+#define TRDP_RED_STATISTICS_COMID         38
+#define TRDP_JOIN_STATISTICS_COMID        39
+#define TRDP_UDP_LIST_STATISTICS_COMID    40
+#define TRDP_TCP_LIST_STATISTICS_COMID    41
+#define TRDP_TEST_COMID                   1000
+    
+    /* more reserved comIds:
+     
+     100	PD push Inauguration state and topo count telegram
+     101	PD pull request telegram to retrieve dynamic train configuration information
+     102	PD pull reply telegram with dynamic train configuration information
+     103	MD request telegram to retrieve static consist and car information
+     104	MD reply telegram with static consist and car information
+     105	MD request telegram to retrieve device information for a given consist/car/device
+     106	MD reply telegram with device information for a given consist/car/device
+     107	MD request telegram to retrieve consist and car properties for a given consist/car
+     108	MD reply telegram with consist and car properties for a given consist/car
+     109	MD request telegram to retrieve device properties for a given consist/car/device
+     110	MD reply telegram with device properties for a given consist/car/device
+     111	MD request telegram for manual insertion of a given consist/car
+     112	MD reply telegram for manual insertion of a given consist/car
+     
+     120..129	IPTSwitch Control&Monitoring Interface
+     125	MD Data (Version) Request Telegram
+     126	MD Counter Telegram
+     127	MD Dynamic Configuration Telegram
+     128	MD Dynamic Configuration Telegram Response
+     129	PD Dynamic Configuration Telegram (redundant TS to TS IPC)
+     
+     400..415 	SDTv2 validation test
+     */
+    
+    
+/**********************************************************************************************************************/
+/**                          TRDP reserved data set id's in the range 1 ... 1000                                      */
+/**********************************************************************************************************************/
+
+#define TRDP_STATISTICS_REQUEST_DSID      31
+#define TRDP_MEM_STATISTICS_DSID          32
+#define TRDP_PD_STATISTICS_DSID           33
+#define TRDP_MD_STATISTICS_DSID           34
+#define TRDP_GLOBAL_STATISTICS_DSID       35
+#define TRDP_SUBS_STATISTICS_DSID         36
+#define TRDP_SUBS_STATISTICS_ARRAY_DSID   37
+#define TRDP_PUB_STATISTICS_DSID          38
+#define TRDP_PUB_STATISTICS_ARRAY_DSID    39
+#define TRDP_RED_STATISTICS_DSID          40
+#define TRDP_RED_STATISTICS_ARRAY_DSID    41
+#define TRDP_JOIN_STATISTICS_DSID         42
+#define TRDP_JOIN_STATISTICS_ARRAY_DSID   43
+#define TRDP_LIST_STATISTIC_DSID          44
+#define TRDP_LIST_STATISTIC_ARRAY_DSID    45
+    
+#define TRDP_NEST1_TEST_DSID             990
+#define TRDP_NEST2_TEST_DSID             991
+#define TRDP_NEST3_TEST_DSID             992
+#define TRDP_NEST4_TEST_DSID             993
+    
+#define TRDP_TEST_DSID                  1000
+    
+    
 
 /** Return codes for all API functions  */
 typedef enum
