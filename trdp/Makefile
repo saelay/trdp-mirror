@@ -57,7 +57,9 @@ SUBDIRS	= src
 INCLUDES = -I $(INCPATH) -I $(VOS_INCPATH) -I $(VOS_PATH)
 OUTDIR = $(BUILD_PATH)
 
-LDFLAGS = -L $(OUTDIR) 
+LDFLAGS = -L $(OUTDIR)
+# files, all tests need to run 
+SRC_TEST = test/test_general.c
 
 ifeq ($(DEBUG),1)
 CFLAGS += -g -O -DDEBUG
@@ -79,7 +81,14 @@ all:		outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello
-test:		outdir $(OUTDIR)/test_server $(OUTDIR)/test_client1
+test:		outdir $(OUTDIR)/getstats		$(OUTDIR)/test_server \
+											$(OUTDIR)/test_client1 \
+											$(OUTDIR)/test_client2 \
+											$(OUTDIR)/test_client3 \
+											$(OUTDIR)/test_client4 \
+											$(OUTDIR)/test_client10 \
+											$(OUTDIR)/test_client_main_Monday
+
 doc:		doc/latex/refman.pdf
 
 $(OUTDIR)/trdp_if.o:	trdp_if.c
@@ -131,10 +140,28 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
+$(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building statistics commandline tool $(@F)'
+			$(CC) test/getStats.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+
 $(OUTDIR)/test_server:   test_server_main.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building test server application $(@F)'
 			$(CC) test/test_server_main.c \
-			    test/test_general.c \
+			    $(SRC_TEST) \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/test_client_main_Monday:   test_client_main_Monday.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building test client application $(@F)'
+			$(CC) test/test_client_main_Monday.c \
+			    $(SRC_TEST) \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
@@ -143,7 +170,43 @@ $(OUTDIR)/test_server:   test_server_main.c  $(OUTDIR)/libtrdp.a
 $(OUTDIR)/test_client1:   test_client_main1.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building test client application $(@F)'
 			$(CC) test/test_client_main1.c \
-			    test/test_general.c \
+			    $(SRC_TEST) \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/test_client2:   test_client_main2.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building test client application $(@F)'
+			$(CC) test/test_client_main2.c \
+			    $(SRC_TEST) \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+			
+$(OUTDIR)/test_client3:   test_client_main3.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building test client application $(@F)'
+			$(CC) test/test_client_main3.c \
+			    $(SRC_TEST) \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/test_client4:   test_client_main4.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building test client application $(@F)'
+			$(CC) test/test_client_main4.c \
+			    $(SRC_TEST) \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/test_client10:   test_client_main10.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building test client application $(@F)'
+			$(CC) test/test_client_main10.c \
+			    $(SRC_TEST) \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
