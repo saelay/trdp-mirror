@@ -101,6 +101,8 @@ TRDP_ERR_T trdp_mdCheck (
     INT32           packetSize)
 {
 	TRDP_ERR_T  err = TRDP_NO_ERR;
+	
+	UINT32  l_datasetLength = vos_ntohl(pPacket->datasetLength);
 
 	/* size shall be in MIN..MAX */
 	if (TRDP_NO_ERR == err)
@@ -110,7 +112,7 @@ TRDP_ERR_T trdp_mdCheck (
 			packetSize > MAX_MD_PACKET_SIZE)
 		{
 			appHandle->stats.udpMd.numProtErr++;
-			vos_printf(VOS_LOG_INFO, "MDframe size error (%u)\n",
+			vos_printf(VOS_LOG_ERROR, "MDframe size error (%u)\n",
 				(UINT32) packetSize);
 			err = TRDP_WIRE_ERR;
 		}
@@ -124,7 +126,7 @@ TRDP_ERR_T trdp_mdCheck (
 		if (crc32 != 0)
 		{
 			appHandle->stats.udpMd.numCrcErr++;
-			vos_printf(VOS_LOG_INFO, "MDframe header crc error.\n");
+			vos_printf(VOS_LOG_ERROR, "MDframe header crc error.\n");
 			err = TRDP_WIRE_ERR;
 		}
 		
@@ -132,11 +134,16 @@ TRDP_ERR_T trdp_mdCheck (
 		if(packetSize > sizeof(MD_HEADER_T))
 		{
 			// Check only if we have some data
-			UINT32 crc32 = vos_crc32(0xffffffff,(UINT8 *) pPacket + sizeof(MD_HEADER_T), packetSize);
-			if (crc32 != 0)
+			UINT32 crc32 = vos_crc32(0xffffffff,(UINT8 *) pPacket + sizeof(MD_HEADER_T), l_datasetLength);
+			UINT32 le_crc32 = MAKE_LE(crc32);
+			
+			UINT8 *pDataCRC = (UINT8 *) pPacket + packetSize - 4;
+			UINT32 pktCRC = ((UINT32 *) pDataCRC)[0];
+			
+			if (le_crc32 != pktCRC)
 			{
 				appHandle->stats.udpMd.numCrcErr++;
-				vos_printf(VOS_LOG_INFO, "MDframe data crc error.\n");
+				vos_printf(VOS_LOG_ERROR, "MDframe data crc error.\n");
 				err = TRDP_WIRE_ERR;
 			}
 		}
@@ -150,7 +157,7 @@ TRDP_ERR_T trdp_mdCheck (
 		if ((l_protocolVersion & TRDP_PROTOCOL_VERSION_CHECK_MASK) != (IP_MD_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK))
 		{
 			appHandle->stats.udpMd.numProtErr++;
-			vos_printf(VOS_LOG_INFO, "MDframe protocol error (%04x != %04x))\n",
+			vos_printf(VOS_LOG_ERROR, "MDframe protocol error (%04x != %04x))\n",
 				l_protocolVersion,
 				IP_MD_PROTO_VER);
 			err = TRDP_WIRE_ERR;
@@ -177,7 +184,7 @@ TRDP_ERR_T trdp_mdCheck (
 			default:
 				{
 					appHandle->stats.udpMd.numProtErr++;
-					vos_printf(VOS_LOG_INFO, "MDframe type error, received %04x\n",
+					vos_printf(VOS_LOG_ERROR, "MDframe type error, received %04x\n",
 						l_msgType);
 					err = TRDP_WIRE_ERR;
 				}
@@ -198,7 +205,7 @@ TRDP_ERR_T trdp_mdCheck (
 		if (packetSize < expectedLength)
 		{
 			appHandle->stats.udpMd.numProtErr++;
-			vos_printf(VOS_LOG_INFO, "MDframe invalid length, received %d, expected %d\n",
+			vos_printf(VOS_LOG_ERROR, "MDframe invalid length, received %d, expected %d\n",
 				packetSize,
 				expectedLength);
 			err = TRDP_WIRE_ERR;
