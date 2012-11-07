@@ -30,6 +30,9 @@
 #include "test_general.h"
 
 
+#define DEFAULT_TIMEOUTFACTOR	2
+#define TRDP_TEST_GENERAL_MICROSECOND (1000000)
+
 /**********************************************************************************************************************/
 /** Print a sensible usage message */
 void usage (const char *appName)
@@ -38,28 +41,38 @@ void usage (const char *appName)
     printf("This tool sends PD messages to an ED and displayes received PD packages.\n"
            "Arguments are:\n"
            "-t target IP address\n"
+           "-c cycle time in us\n"
+           "-o timeout, also in us (must be larger than the cycle time) [optional, default: 2x cycle time]\n"
+           "-s source IP address (of local interface to bind on)\n"
            "-v print version and quit\n"
            );
 }
 
 /**********************************************************************************************************************/
 /** main entry
- * @param[out]      destIP         given IP address (could be used as target IP address)
- *
+ * @param[out]      destIP		given IP address (could be used as target IP address)
+ * @param[out]      cycletime	specify the time in us, the package will be sent again	
+ * @param[out]      timeout		Time after receiving, that has to pass until a connection is declared as dead.
+ * @param[out]      srcIP		IP address of local interface, to use [optional]
+ * 
  *  @retval         0       no error
  *  @retval         1       some error
  */
-int trdp_test_general_parseCommandLineArguments(int argc, char * *argv, UINT32* destIP)
+int trdp_test_general_parseCommandLineArguments(int argc, char * *argv, 
+			UINT32* destIP, UINT32* cycletime, UINT32* timeout, UINT32* srcIP)
 {
     int                 ip[4];
     int                 ch;
 
     /* check if there is memory available */
-    if (destIP == 0)
+    if (destIP == 0 || cycletime == 0 || timeout == 0)
     {
         return 1;
     }
-
+    
+    /* reset the timeout */
+    *timeout = 0;
+    
     /****** Parsing the command line arguments */
     if (argc <= 1)
     {
@@ -67,10 +80,31 @@ int trdp_test_general_parseCommandLineArguments(int argc, char * *argv, UINT32* 
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:h?v")) != -1)
+    while ((ch = getopt(argc, argv, "t:c:o:s:h?v")) != -1)
     {
         switch (ch)
         {
+			case 'c':
+            {   /*  read cycle time */
+                if (sscanf(optarg, "%u",
+                           cycletime) < 1)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                break;
+            }
+            case 'o':            
+            {
+				/*  read timeout */
+                if (sscanf(optarg, "%u",
+                           timeout) < 1)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                break;
+            }
             case 't':
             {   /*  read ip    */
                 if (sscanf(optarg, "%u.%u.%u.%u",
@@ -87,6 +121,17 @@ int trdp_test_general_parseCommandLineArguments(int argc, char * *argv, UINT32* 
                        argv[0], APP_VERSION, __DATE__, __TIME__);
                 exit(0);
                 break;
+            case 's':
+            {   /*  read ip    */            
+                if (sscanf(optarg, "%u.%u.%u.%u",
+                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                {
+					usage(argv[0]);
+					return 1;
+                }
+                *srcIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
             case 'h':
             case '?':
             default:
@@ -101,10 +146,24 @@ int trdp_test_general_parseCommandLineArguments(int argc, char * *argv, UINT32* 
         usage(argv[0]);
         return 1;
     }
+    
+    /* set the default timeout, if it was not specified by the user */
+    if (*timeout == 0)
+    {
+		*timeout = DEFAULT_TIMEOUTFACTOR * (*cycletime);
+	}
+    
+    /* Check if there is an cycletime set */
+    if (*cycletime == 0)
+    {
+        fprintf(stderr, "No time for each cycle is given!\n");
+        usage(argv[0]);
+        return 1;
+    }
+    
     return 0;
 }
 
-#define TRDP_TEST_GENERAL_MICROSECOND (1000000)
 
 /**********************************************************************************************************************/
 /** Calculate the difference between two time values

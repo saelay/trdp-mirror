@@ -32,8 +32,11 @@
 /**********************************************************************************************************************/
 
 #define PD_TEST_GEN_UNI_COMID       999
-#define PD_TEST_GEN_UNI_CYCLE       100000
-#define PD_TEST_GEN_UNI_TIMEOUT     5 * PD_TEST_GEN_UNI_CYCLE
+#define PD_TEST_PULL_COMID       	997 /* Separate ComId for a request [testing the PULL logic] */
+#define PD_TEST_PULL_REPLY_COMID    995 /* Separate ComId for a request [testing the PULL logic] */
+#define PD_TEST_ECHO_UNI_COMID      998
+#define	PD_TESTSERVER_MESSAGE_MAX_SIZE 256
+#define PD_TEST_GIGANTIC_PD      	996
 
 /*	Test data sets	*/
 TRDP_DATASET_T gDataSet990 =
@@ -375,7 +378,10 @@ TRDP_DATASET_T gDataSet999 =
 
 
 /**
- * Echo-dataset, that is returned by the server
+ * Echo-dataset, that is returned by the server:
+ * - cycletime
+ * - returncode (status, of the last received package)
+ * - values of dataset 999
  */
 TRDP_DATASET_T gDataSet998 =
 {
@@ -385,6 +391,10 @@ TRDP_DATASET_T gDataSet998 =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT32,    /*	data type		*/
+            1               /*	no of elements	*/
+        },
+        {
+            TRDP_UINT32,    /*	data type 		*/
             1               /*	no of elements	*/
         },
         {
@@ -559,14 +569,13 @@ struct myDataSet1000
 };
 
 
-#define PD_TEST_ECHO_UNI_COMID       998
-#define PD_TEST_ECHO_UNI_CYCLE       (PD_TEST_GEN_UNI_CYCLE)
-#define PD_TEST_ECHO_UNI_TIMEOUT     5 * PD_TEST_GEN_UNI_CYCLE
-
 struct myDataSet998
 {
     UINT32  cycletime;
-    char*   custom_message; /*For this attribute the memory must be allocated manualy */
+    UINT32	resultcode;
+    
+    /* the first two bytes are needed for the length of the dynamic size: */
+    char	custom_message[PD_TESTSERVER_MESSAGE_MAX_SIZE + 2];
 
     struct myDataSet1000 echoDataset;
 } gMyDataSet998;
