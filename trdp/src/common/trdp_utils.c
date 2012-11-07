@@ -380,9 +380,9 @@ TRDP_ERR_T  trdp_requestSocket (
     INT32                   *pIndex)
 {
     VOS_SOCK_OPT_T  sock_options;
-    INT32           index, emptySock = 0;
+    INT32           index, emptySock = -1;
     TRDP_ERR_T      err     = TRDP_NO_ERR;
-    UINT32          port    = 0; /* port, where the server listens on FIXME (this could be found somewhere in the
+    UINT32          port    = IP_MD_TCP_PORT; /* port, where the server listens on FIXME (this could be found somewhere in the
                                    configuration file)*/
 
     if (iface == NULL || params == NULL || pIndex == NULL)
@@ -395,7 +395,7 @@ TRDP_ERR_T  trdp_requestSocket (
         We remember already closed sockets on the way to be able to fill up gaps  */
     for (index = 0; index < sCurrentMaxSocketCnt; index++)
     {
-        if (iface[index].sock > -1 &&
+        if (iface[index].sock != -1 &&
             iface[index].bindAddr == srcIP &&
             iface[index].type == usage &&
             iface[index].sendParam.qos == params->qos &&
@@ -407,9 +407,9 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[index].usage++;
             return err;
         }
-        else if (iface[index].sock == -1 && emptySock == 0)
+        else if (iface[index].sock == -1 && emptySock == -1)
         {
-            /* Remember the last empty slot */
+            /* Remember the first empty slot */
             emptySock = index;
         }
     }
@@ -417,7 +417,7 @@ TRDP_ERR_T  trdp_requestSocket (
     /* Not found, create a new socket */
     if (index < VOS_MAX_SOCKET_CNT)
     {
-        if (emptySock != 0 && index != emptySock)
+        if (emptySock != -1 && index != emptySock)
         {
             index = emptySock;
         }
@@ -443,11 +443,11 @@ TRDP_ERR_T  trdp_requestSocket (
         switch (usage)
         {
             case TRDP_SOCK_PD:
-                port = 20548; /* FIXME configuration file! */
+                port = IP_PD_UDP_PORT; /* FIXME configuration file! */
             case TRDP_SOCK_MD_UDP:
                 if (port <= 0) /* only set the port, when this is a MD communication */
                 {
-                    port = 20550; /* FIXME configuration file! */
+                    port = IP_MD_UDP_PORT; /* FIXME configuration file! */
                 }
                 if (vos_sockOpenUDP(&iface[index].sock, &sock_options) != VOS_NO_ERR)
                 {

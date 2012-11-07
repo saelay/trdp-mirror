@@ -343,12 +343,12 @@ TRDP_ERR_T  trdp_pdReceive (
     if (vos_ntohs(pNewFrame->frameHead.msgType) == TRDP_MSG_PR)
     {
         /*  Handle statistics request  */
-        if (vos_ntohl(pNewFrame->frameHead.comId) == GSTAT_REQUEST_COMID)
+        if (vos_ntohl(pNewFrame->frameHead.comId) == TRDP_STATISTICS_REQUEST_COMID)
         {
-            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, GSTAT_REPLY_COMID);
+            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATISTICS_COMID);
             if ( pPulledElement != NULL)
             {
-                pPulledElement->addr.comId         = GSTAT_REPLY_COMID;
+                pPulledElement->addr.comId         = TRDP_GLOBAL_STATISTICS_COMID;
                 pPulledElement->addr.destIpAddr    = vos_ntohl(pNewFrame->frameHead.replyIpAddress);
                 
                 trdp_pdInit(pPulledElement, TRDP_MSG_PD, appHandle->topoCount, 0, 0, 0, 0);
