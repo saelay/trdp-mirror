@@ -170,12 +170,13 @@ TRDP_DATASET_T*	gDataSets[] =
     &gMDStatisticsDS
 };
 
-TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
-    {PD_COMID1, TRDP_STATS_DS_ID}
-};
 #endif
 
 #include "trdp_reserved.h"
+
+extern TRDP_COMID_DSID_MAP_T	gComIdMap[];
+extern TRDP_DATASET_T           *gDataSets[];
+extern const UINT32             cNoOfDatasets;
 
 void print_stats(
     TRDP_STATISTICS_T*  pData)
@@ -373,7 +374,7 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-	if (tau_initMarshall((void *)&refCon, 1, gComIdMap, sizeof(gDataSets)/sizeof(TRDP_DATASET_T*), gDataSets) != TRDP_NO_ERR)
+	if (tau_initMarshall((void *)&refCon, 1, gComIdMap, cNoOfDatasets, gDataSets) != TRDP_NO_ERR)
     {
         printf("Marshalling initialization error\n");
         return 1;

@@ -212,7 +212,7 @@ TRDP_DATASET_T dsMdStatistics =    /* md statistics */
     }
 };
 
-TRDP_DATASET_T dsGlobalStaistics =    /* global statistics */
+TRDP_DATASET_T dsGlobalStatistics =    /* global statistics */
 {
     TRDP_GLOBAL_STATISTICS_DSID,         /*	dataset/com ID  */
     0,          /*	reserved		*/
@@ -401,7 +401,7 @@ TRDP_DATASET_T dsPubStatisticsArray =       /* pub statistics */
 
 TRDP_DATASET_T dsListStatistics =    /* md listener statistics */
 {
-    TRDP_LIST_STATISTICS_DSID,         /*	dataset/com ID  */
+    TRDP_LIST_STATISTIC_DSID,         /*	dataset/com ID  */
     0,          /*	reserved		*/
     7,         /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
@@ -439,7 +439,7 @@ TRDP_DATASET_T dsListStatistics =    /* md listener statistics */
 
 TRDP_DATASET_T dsListStatisticsArray =      /* md listener statistics */
 {
-    TRDP_LIST_STATISTICS_ARRAY_DSID,         /*	dataset/com ID  */
+    TRDP_LIST_STATISTIC_ARRAY_DSID,         /*	dataset/com ID  */
     0,          /*	reserved		*/
     2,          /*	No of elements, var size	*/
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
@@ -448,7 +448,7 @@ TRDP_DATASET_T dsListStatisticsArray =      /* md listener statistics */
             1
         },
         {
-            TRDP_LIST_STATISTICS_DSID,       /*	dataset/com ID  */
+            TRDP_LIST_STATISTIC_DSID,       /*	dataset/com ID  */
             0
         }
     }
@@ -517,24 +517,6 @@ TRDP_DATASET_T dsNest1Test =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT32,
-            1
-        },
-        {
-            TRDP_CHAR8,
-            16
-        }
-    }
-};
-
-/*	Test data sets	*/
-TRDP_DATASET_T dsNest1Test =
-{
-    TRDP_NEST1_TEST_DSID,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
-        {
-            TRDP_UINT8,
             1
         },
         {
@@ -864,5 +846,40 @@ TRDP_DATASET_T dsTest =
     }
 };
 
+TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
+    {TRDP_TEST_DSID, TRDP_TEST_DSID},
+    {TRDP_STATISTICS_REQUEST_COMID, TRDP_STATISTICS_REQUEST_DSID},
+    {TRDP_GLOBAL_STATISTICS_COMID, TRDP_GLOBAL_STATISTICS_DSID},
+    {TRDP_SUBS_STATISTICS_COMID, TRDP_SUBS_STATISTICS_DSID},
+    {TRDP_PUB_STATISTICS_COMID, TRDP_PUB_STATISTICS_DSID},
+    {TRDP_RED_STATISTICS_COMID , TRDP_RED_STATISTICS_DSID},
+    {TRDP_JOIN_STATISTICS_COMID , TRDP_JOIN_STATISTICS_DSID},
+    {TRDP_UDP_LIST_STATISTICS_COMID, TRDP_LIST_STATISTIC_DSID},
+    {TRDP_TCP_LIST_STATISTICS_COMID, TRDP_LIST_STATISTIC_DSID}
+};
+
+/*	Will be sorted by tau_initMarshall	*/
+TRDP_DATASET_T*	gDataSets[] =
+{
+    &dsStatisticsRequest,
+    &dsMemStatistics,
+    &dsGlobalStatistics,
+    &dsSubsStatistics,
+    &dsSubsStatisticsArray,
+    &dsPubStatistics,
+    &dsPubStatisticsArray,
+    &dsListStatistics,
+    &dsListStatisticsArray,
+    &dsRedStatistics,
+    &dsRedStatisticsArray,
+    &dsJoinStatisticsArray,
+    &dsNest1Test,
+    &dsNest2Test,
+    &dsNest3Test,
+    &dsNest4Test,
+    &dsTest    
+};
+
+const UINT32    cNoOfDatasets = sizeof(gDataSets)/sizeof(TRDP_DATASET_T*);
 
 #endif /* TRDP_RESERVED_C */ 
