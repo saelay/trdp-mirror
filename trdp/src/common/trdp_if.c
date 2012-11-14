@@ -49,18 +49,69 @@ static VOS_MUTEX_T          sSessionMutex   = NULL;
 static UINT32               sTopoCount      = 0;
 static BOOL                 sInited         = FALSE;
 
-/***********************************************************************************************************************
+/* MESSAGE DATA TCP LOCAL PARAMETERS */
+static INT32 listen_sd = 0;
+static INT32 max_sd = 0;
+fd_set master_set;
+
+/******************************************************************************
  * LOCAL FUNCTIONS
  */
 
+
+/**********************************************************************************************************************/
 TRDP_ERR_T trdp_initMD(TRDP_SESSION_PT pSession)
 {
 	VOS_ERR_T result = TRDP_NO_ERR;
+	VOS_SOCK_OPT_T	trdp_sock_opt;
+	// Backlog = maximum connection atempts if system is busy.
+	UINT32 backlog = 10;
 	
 	if((pSession->mdDefault.flags & TRDP_FLAGS_TCP) != 0) //TCP is used
 	{
-		vos_printf(VOS_LOG_ERROR, "TRDP initMD TCP not yet implemented\n");
-		return TRDP_UNKNOWN_ERR;
+		/* Define the common TCP socket options */
+		trdp_sock_opt.qos    = 3; //(default should be 5 for PD and 3 for MD)
+		trdp_sock_opt.ttl    = 64; //Time to live (default should be 64)
+		trdp_sock_opt.ttl_multicast  = 0;
+		trdp_sock_opt.reuseAddrPort  = TRUE;
+
+		/* The socket is defined non-blocking */
+		trdp_sock_opt.nonBlocking    =	TRUE;
+
+		result = vos_sockOpenTCP(&listen_sd, &trdp_sock_opt);
+
+		 if (result != VOS_NO_ERR)
+		 {
+			 vos_printf(result,
+							   "TRDP vos_sockOpenTCP failed opening the socket\n");
+			 return TRDP_PARAM_ERR;
+		 }
+
+		result = vos_sockBind(listen_sd, pSession->realIP, pSession->mdDefault.tcpPort);
+
+		if (result != VOS_NO_ERR)
+		{
+			vos_printf(result,
+					   "TRDP vos_sockBind failed binding the socket\n");
+			return TRDP_PARAM_ERR;
+		}
+
+
+		result = vos_sockListen(listen_sd,backlog);
+
+		if (result != VOS_NO_ERR)
+		{
+			vos_printf(result,
+					   "TRDP vos_sockListen failed\n");
+			return TRDP_PARAM_ERR;
+		}
+
+		vos_printf(VOS_LOG_INFO, "Socket information (listen_sd=%d)\n", listen_sd);
+		FD_SET(listen_sd, (fd_set*)&master_set);
+		max_sd = listen_sd + 1;
+
+		return  TRDP_NO_ERR;
+
 	}
 	else
 	{
@@ -988,7 +1039,14 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     }
 
 #if MD_SUPPORT
-    /*    TBD: Check message data timeouts here    */
+    /*	TBD: Check message data timeouts here	*/
+
+    FD_ZERO((fd_set *)pFileDesc);
+
+    memcpy(pFileDesc, &master_set, sizeof(master_set));
+
+    *pNoDesc = max_sd;
+
 #endif
 
     /*    if lowest time is not zero   */
@@ -1136,7 +1194,29 @@ EXT_DECL TRDP_ERR_T tlc_process (
 			if (iterMD->socketIdx != -1 && (!appHandle->beQuiet ||(iterMD->pktFlags & TRDP_FLAGS_REDUNDANT)))
 			{
 				trdp_mdUpdate(iterMD);
-                				
+
+				if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+				{
+					if((appHandle->iface[iterMD->socketIdx].usage == 1)
+						|| ((appHandle->iface[iterMD->socketIdx].usage > 1) && (iterMD->connectDone == FALSE)))
+					{
+						if((iterMD->stateEle == TRDP_MD_ELE_ST_TX_NOTIFY_ARM)
+								|| (iterMD->stateEle == TRDP_MD_ELE_ST_TX_REQUEST_ARM))
+						{
+							/* Connect() the socket */
+							if (vos_sockConnect(appHandle->iface[iterMD->socketIdx].sock,
+									iterMD->addr.destIpAddr, appHandle->mdDefault.tcpPort) != VOS_NO_ERR)
+							{
+								vos_printf(VOS_LOG_ERROR, "Socket connection for TCP failed!\n");
+								continue;
+							}else
+							{
+								iterMD->connectDone = TRUE;
+							}
+						}
+					}
+				}
+
 				err = trdp_mdSend(appHandle->iface[iterMD->socketIdx].sock, iterMD);
                 
                 if (err == TRDP_NO_ERR)
@@ -1145,6 +1225,29 @@ EXT_DECL TRDP_ERR_T tlc_process (
                 }
 				if (nextstate == TRDP_MD_ELE_ST_NONE)
 				{
+
+					if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)//TCP
+					{
+						if(appHandle->iface[iterMD->socketIdx].usage == 1)
+						{
+							vos_sockClose(appHandle->iface[iterMD->socketIdx].sock);
+						}else
+						{
+							appHandle->iface[iterMD->socketIdx].usage--;
+						}
+
+						/* Deleting socket from the iface [] */
+						vos_printf(VOS_LOG_INFO, "Deleting socket (Num = %d) from the iface\n", appHandle->iface[iterMD->socketIdx].sock);
+						vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", iterMD->socketIdx);
+						appHandle->iface[iterMD->socketIdx].sock=-1;
+						appHandle->iface[iterMD->socketIdx].sendParam.qos = 0;
+						appHandle->iface[iterMD->socketIdx].sendParam.ttl = 0;
+						appHandle->iface[iterMD->socketIdx].usage = 0;
+						appHandle->iface [iterMD->socketIdx].bindAddr = 0;
+						appHandle->iface[iterMD->socketIdx].type = 0;
+
+					}
+
 					/* Remove element from queue */
 					trdp_MDqueueDelElement(&appHandle->pMDSndQueue,iterMD);
 					
@@ -1197,42 +1300,234 @@ EXT_DECL TRDP_ERR_T tlc_process (
     }
 
 #if MD_SUPPORT
-    if (pRfds == NULL || pCount == NULL)
+
+    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
     {
-        int i;
-        /* polling mode */
-        
-        /* flags for polling sockets */
-        UINT8 skxp[VOS_MAX_SOCKET_CNT];
-        
-        /* initial: FALSE */
-        for(i=0;i<VOS_MAX_SOCKET_CNT;i++)
-            skxp[i] = 0;
-        
-        /* search for listener sockets */
-        MD_ELE_T * iterMD;
-        for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
-        {
-            /* valid socket for armed listener */
-            if (appHandle->iface[iterMD->socketIdx].sock != -1)
-            {
-                /* index to poll */
-                skxp[iterMD->socketIdx] = 1;
-            }
-        }
-        
-        /* scan for sockets */
-        for(i=0;i<VOS_MAX_SOCKET_CNT;i++)
-        {
-            if (skxp[i])
-            {
-                err = trdp_mdReceive(appHandle,appHandle->iface[i].sock);
-            }
-        }
-    }
-    else
+    	INT32 i;
+		INT32 new_sd;
+		MD_ELE_T    *iterMD = NULL;
+		TRDP_ERR_T result;
+		TRDP_ERR_T  err = TRDP_NO_ERR;
+		int index;
+
+
+		/*	Check the socket for received MD packets	*/
+
+		/*	Check the input params	*/
+
+		if (pRfds == NULL || pCount == NULL)
+		{
+			/* polling mode */
+		}
+		else if (pCount != NULL && *pCount > 0)
+		{
+			/*	Check the sockets for received MD packets	*/
+
+			/**********************************************************/
+			/* One or more descriptors are readable.  Need to         */
+			/* determine which ones they are.                         */
+			/**********************************************************/
+
+			/****************************************************/
+			/* Check to see if this is the TCP listening socket */
+			/****************************************************/
+
+			vos_printf(VOS_LOG_INFO, "\n----- CHECKING READY DESCRIPTORS -----\n");
+
+			if (FD_ISSET(listen_sd, (fd_set*)pRfds))
+			{
+				/****************************************************/
+				/* A TCP connection request in the listen socket.   */
+				/****************************************************/
+				(*pCount)--;
+
+				/*************************************************/
+				/* Accept all incoming connections that are      */
+				/* queued up on the listening socket.              */
+				/*************************************************/
+				do
+				{
+					/**********************************************/
+					/* Accept each incoming connection.           */
+					/* Check any failure on accept          	  */
+					/**********************************************/
+
+					UINT32	newIp;
+					newIp = appHandle->realIP;
+
+					result = vos_sockAccept(listen_sd, &new_sd, &newIp, &(appHandle->mdDefault.tcpPort));
+					vos_printf(VOS_LOG_INFO, "Accepted socket: %d\n", new_sd);
+
+
+					if (new_sd < 0)
+					{
+
+						if(result == VOS_NO_ERR)
+						{
+							vos_printf(VOS_LOG_INFO,
+									   "TRDP no more connections to accept\n");
+							break;
+						}else
+						{
+								vos_printf(result,
+										   "TRDP vos_sockListen failed\n");
+
+								/* Callback the error to the application  */
+								if (appHandle->mdDefault.pfCbFunction != NULL)
+								{
+									TRDP_MD_INFO_T theMessage;
+									theMessage.topoCount    = appHandle->topoCount;
+									theMessage.resultCode   = TRDP_SOCK_ERR;
+									theMessage.srcIpAddr = newIp;
+									appHandle->mdDefault.pfCbFunction(appHandle->mdDefault.pRefCon,
+																	  &theMessage, NULL, 0);
+								}
+
+								continue;
+						}
+
+					}
+
+
+					/* Callback to the application that a new message has been accepted */
+
+					if (appHandle->mdDefault.pfCbFunction != NULL)
+					{
+						TRDP_MD_INFO_T theMessage;
+						theMessage.topoCount    = appHandle->topoCount;
+						//theMessage.msgType 		= TRDP_MSG_ACCEPT;
+						theMessage.resultCode   = TRDP_NO_ERR;
+						theMessage.srcIpAddr = newIp;
+
+						appHandle->mdDefault.pfCbFunction(appHandle->mdDefault.pRefCon,
+														  &theMessage, NULL, 0);
+					}
+
+					/* There is one more socket to manage */
+
+					/*Add the socket in the master_set */
+					FD_SET(new_sd, &master_set);
+
+					if(new_sd > (max_sd - 1))
+					{
+						max_sd = new_sd + 1;
+					}
+
+					//TODO: Manage if a second connection has been
+					//received from the same device.
+
+					/* Save the new socket in the iface */
+					TRDP_ERR_T  errv = TRDP_NO_ERR;
+
+					errv = trdp_requestSocket(
+						appHandle->iface,
+						&appHandle->mdDefault.sendParam,
+						newIp,
+						TRDP_SOCK_MD_TCP,
+						TRDP_OPTION_BLOCK,
+						TRUE,
+						&new_sd
+						);
+
+					if(errv != TRDP_NO_ERR)
+					{
+						//error
+					}
+
+					/**********************************************/
+					/* Loop back up and accept another incoming   */
+					/* connection                                 */
+					/**********************************************/
+				} while (new_sd != -1);
+
+			}
+
+
+			/* Check Receive Data */
+
+			INT32 index;
+			INT32 find_sock;
+
+			for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+			{
+				if((appHandle->iface[index].sock != -1) && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP))
+				{
+					if(FD_ISSET(appHandle->iface[index].sock, (fd_set *) pRfds))
+					{
+						(*pCount)--;
+						FD_CLR(appHandle->iface[index].sock, (fd_set *)pRfds);
+
+						err = trdp_mdReceive(appHandle,appHandle->iface[index].sock);
+
+						if (err != TRDP_NO_ERR )
+						{
+							/* The received ComId is not subscribed or other possible errors*/
+
+							if(appHandle->iface[index].usage == 1)
+							{
+								vos_sockClose(appHandle->iface[index].sock);
+
+							}else
+							{
+								appHandle->iface[index].usage--;
+							}
+
+							/* Deleting socket from the iface [] */
+							vos_printf(VOS_LOG_INFO, "Deleting socket (Nº = %d) from the iface\n", appHandle->iface[index].sock);
+							vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
+							appHandle->iface[index].sock=-1;
+							appHandle->iface[index].sendParam.qos = 0;
+							appHandle->iface[index].sendParam.ttl = 0;
+							appHandle->iface[index].usage = 0;
+							appHandle->iface [index].bindAddr = 0;
+							appHandle->iface[index].type = 0;
+						}
+					}
+				}
+			}
+		}
+
+    }else
     {
-        /* select() mode */
+    	/* UDP */
+
+		if (pRfds == NULL || pCount == NULL)
+		{
+			int i;
+			/* polling mode */
+
+			/* flags for polling sockets */
+			UINT8 skxp[VOS_MAX_SOCKET_CNT];
+
+			/* initial: FALSE */
+			for(i=0;i<VOS_MAX_SOCKET_CNT;i++)
+				skxp[i] = 0;
+
+			/* search for listener sockets */
+			MD_ELE_T * iterMD;
+			for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+			{
+				/* valid socket for armed listener */
+				if (appHandle->iface[iterMD->socketIdx].sock != -1)
+				{
+					/* index to poll */
+					skxp[iterMD->socketIdx] = 1;
+				}
+			}
+			
+			/* scan for sockets */
+			for(i=0;i<VOS_MAX_SOCKET_CNT;i++)
+			{
+				if (skxp[i])
+				{
+					err = trdp_mdReceive(appHandle,appHandle->iface[i].sock);
+				}
+			}
+		}
+		else
+		{
+		/* select() mode */
+		}
     }
 	
     /* check for timeout session */
@@ -1274,7 +1569,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
                             theMessage.replyTimeout = vos_ntohl(iterMD->frameHead.replyTimeout);
                             memcpy(theMessage.destURI      , iterMD->u.listener.destURI,32);
                             memcpy(theMessage.srcURI       , iterMD->frameHead.sourceURI,32);
-                            theMessage.noOfReplies  = 0;
+                            theMessage.numReplies  = 0;
                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                             theMessage.resultCode   = TRDP_APPTIMEOUT_ERR;
                             
@@ -1328,7 +1623,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
                             theMessage.replyTimeout = vos_ntohl(iterMD->frameHead.replyTimeout);
                             memcpy(theMessage.destURI      , iterMD->frameHead.destinationURI,32);
                             memcpy(theMessage.srcURI       , iterMD->frameHead.sourceURI,32);
-                            theMessage.noOfReplies  = 0;
+                            theMessage.numReplies  = 0;
                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                             theMessage.resultCode   = TRDP_TIMEOUT_ERR;
                             
@@ -2148,21 +2443,66 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->dataSize  = dataSize;
             pNewElement->grossSize = grossSize;
             
-            /* socket to send UDP MD */
-            errv = trdp_requestSocket(
-                                      appHandle->iface,
-                                      (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
-                                      srcIpAddr,
-                                      TRDP_SOCK_MD_UDP,
-                                      appHandle->option,
-                                      FALSE,                        /*  Receive only    */
-                                      &pNewElement->socketIdx
-                                      );
             
-            if (TRDP_NO_ERR != errv)
-            {
-                /* Error getting socket */
-                break;
+            if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+			{
+				MD_ELE_T *iterMD;
+				BOOL found_socket = FALSE;
+
+				for(iterMD = appHandle->pMDSndQueue; iterMD != NULL;)
+				{
+					if((iterMD->u.listener.destIpAddr == destIpAddr) && (iterMD->socketIdx > -1))
+					{
+						appHandle->iface[iterMD->socketIdx].usage++;
+						pNewElement->socketIdx = iterMD->socketIdx;
+						pNewElement->connectDone = TRUE;
+						found_socket = TRUE;
+						break;
+					}
+				}
+
+				if(found_socket == FALSE)
+				{
+					/* socket to send TCP MD */
+					errv = trdp_requestSocket(
+						appHandle->iface,
+						(pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
+						srcIpAddr,
+						TRDP_SOCK_MD_TCP,
+						TRDP_OPTION_BLOCK,
+						FALSE,
+						&pNewElement->socketIdx
+						);
+
+					if (TRDP_NO_ERR != errv)
+					{
+						/* Error getting socket */
+						break;
+					}else
+					{
+						pNewElement->connectDone = FALSE;
+					}
+				}
+
+
+			}else
+			{
+				/* socket to send UDP MD */
+				errv = trdp_requestSocket(
+										  appHandle->iface,
+										  (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
+										  srcIpAddr,
+										  TRDP_SOCK_MD_UDP,
+										  appHandle->option,
+										  FALSE,                        /*  Receive only    */
+										  &pNewElement->socketIdx
+										  );
+
+				if (TRDP_NO_ERR != errv)
+				{
+					/* Error getting socket */
+					break;
+				}
             }
             
             /* arm for sending */
@@ -2512,16 +2852,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->u.listener.pktFlags  = pktFlags;
                 memcpy(pNewElement->u.listener.destURI,destURI,TRDP_MAX_URI_USER_LEN);
                 
-                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-                {
-                    /* socket to receive TCP MD */
-                    
-                    /* not yet implemented */
-                    vos_printf(VOS_LOG_ERROR, "TRDP tlm_addListener() TCP not yet implemented\n");
-                    
-                    errv = TRDP_NOINIT_ERR;
-                }
-                else
+                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) == 0)
                 {
                     /* socket to receive UDP MD */
                     errv = trdp_requestSocket(
