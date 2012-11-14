@@ -115,8 +115,8 @@ PD_ELE_T *trdp_queueFindComId (
  *  @retval         NULL            No PD element found
  */
 PD_ELE_T *trdp_queueFindPubAddr (
-    PD_ELE_T        *pHead,
-    TRDP_ADDRESSES  *addr)
+    PD_ELE_T          *pHead,
+    TRDP_ADDRESSES_T  *addr)
 {
     PD_ELE_T *iterPD;
 
@@ -149,8 +149,8 @@ PD_ELE_T *trdp_queueFindPubAddr (
  *  @retval         NULL            No PD element found
  */
 PD_ELE_T *trdp_queueFindSubAddr (
-    PD_ELE_T        *pHead,
-    TRDP_ADDRESSES  *addr)
+    PD_ELE_T          *pHead,
+    TRDP_ADDRESSES_T  *addr)
 {
     PD_ELE_T *iterPD;
     
@@ -181,8 +181,8 @@ PD_ELE_T *trdp_queueFindSubAddr (
  *  @retval         NULL            No PD element found
  */
 MD_ELE_T *trdp_MDqueueFindAddr (
-                                MD_ELE_T        *pHead,
-                                TRDP_ADDRESSES  *addr)
+                                MD_ELE_T          *pHead,
+                                TRDP_ADDRESSES_T  *addr)
 {
     MD_ELE_T *iterMD;
     

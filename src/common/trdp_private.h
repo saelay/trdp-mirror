@@ -148,7 +148,7 @@ typedef struct TRDP_HANDLE
     TRDP_IP_ADDR_T      srcIpAddr;          /**< source IP for PD                                       */
     TRDP_IP_ADDR_T      destIpAddr;         /**< destination IP for PD                                  */
     TRDP_IP_ADDR_T      mcGroup;            /**< multicast group to join for PD                         */
-} TRDP_ADDRESSES, *TRDP_PUB_PT, *TRDP_SUB_PT;
+} TRDP_ADDRESSES_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
 /** Socket item    */
 typedef struct TRDP_SOCKETS
@@ -214,7 +214,7 @@ typedef struct
 typedef struct PD_ELE
 {
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                    */
-    TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber                     */
+    TRDP_ADDRESSES_T     addr;                   /**< handle of publisher/subscriber                     */
     TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip   */
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter         */
     UINT32              numRxTx;                /**< Counter for received packets (statistics)          */
@@ -237,7 +237,7 @@ typedef struct PD_ELE
 typedef struct MD_ELE
 {
     struct MD_ELE       *pNext;                 /**< pointer to next element or NULL					*/
-    TRDP_ADDRESSES      addr;                   /**< handle of publisher/subscriber						*/
+    TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber						*/
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags										*/
     TRDP_FLAGS_T        pktFlags;               /**< flags												*/
     TRDP_TIME_T         interval;               /**< time out value for received packets or

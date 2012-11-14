@@ -352,8 +352,8 @@ void    trdp_UpdateStats (
                  &appHandle->stats.mem.numAllocBlocks,
                  &appHandle->stats.mem.numAllocErr,
                  &appHandle->stats.mem.numFreeErr,
-                 appHandle->stats.mem.allocBlockSize,
-                 appHandle->stats.mem.allocBlockSize);
+                 appHandle->stats.mem.preAllocBlockSize,
+                 appHandle->stats.mem.usedBlockSize);
 
     /*  Count our subscriptions */
     for (index = 0, iter = appHandle->pRcvQueue; iter != NULL; index++, iter = iter->pNext) {;}
@@ -411,7 +411,7 @@ void    trdp_pdPrepareStats (
 
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        pData->mem.allocBlockSize[i]    = vos_htonl(appHandle->stats.mem.allocBlockSize[i]);
+        pData->mem.preAllocBlockSize[i]    = vos_htonl(appHandle->stats.mem.preAllocBlockSize[i]);
         pData->mem.usedBlockSize[i]     = vos_htonl(appHandle->stats.mem.usedBlockSize[i]);
     }
 

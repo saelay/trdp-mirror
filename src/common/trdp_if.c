@@ -649,26 +649,26 @@ UINT32 trdp_getTopoCount (
  *  @retval         TRDP_NOPUB_ERR         Already published
  */
 EXT_DECL TRDP_ERR_T tlp_publish (
-    TRDP_APP_SESSION_T      appHandle,
+    TRDP_APP_SESSION_T       appHandle,
     TRDP_PUB_T              *pPubHandle,
-    UINT32                  comId,
-    UINT32                  topoCount,
-    TRDP_IP_ADDR_T          srcIpAddr,
-    TRDP_IP_ADDR_T          destIpAddr,
-    UINT32                  interval,
-    UINT32                  redId,
-    TRDP_FLAGS_T            pktFlags,
+    UINT32                   comId,
+    UINT32                   topoCount,
+    TRDP_IP_ADDR_T           srcIpAddr,
+    TRDP_IP_ADDR_T           destIpAddr,
+    UINT32                   interval,
+    UINT32                   redId,
+    TRDP_FLAGS_T             pktFlags,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
-    UINT32                  dataSize,
-    BOOL                    subs,
-    UINT16                  offsetAddress)
+    UINT32                   dataSize,
+    BOOL                     subs,
+    UINT16                   offsetAddress)
 {
-    PD_ELE_T        *pNewElement = NULL;
-    TRDP_TIME_T     nextTime;
-    TRDP_TIME_T     tv_interval;
-    TRDP_ERR_T      ret         = TRDP_NO_ERR;
-    TRDP_ADDRESSES  pubHandle   = {comId, srcIpAddr, destIpAddr, 0};
+    PD_ELE_T         *pNewElement = NULL;
+    TRDP_TIME_T       nextTime;
+    TRDP_TIME_T       tv_interval;
+    TRDP_ERR_T        ret         = TRDP_NO_ERR;
+    TRDP_ADDRESSES_T  pubHandle   = {comId, srcIpAddr, destIpAddr, 0};
 
     /*    Check params    */
     if (comId == 0)
@@ -1443,7 +1443,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
     /*    Look for existing subscription element    */
 
-    pSubPD = trdp_queueFindSubAddr(appHandle->pRcvQueue, (TRDP_ADDRESSES*) subHandle);
+    pSubPD = trdp_queueFindSubAddr(appHandle->pRcvQueue, (TRDP_ADDRESSES_T*) subHandle);
 
     if (pSubPD == NULL)
     {
@@ -1591,12 +1591,12 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T        *newPD = NULL;
-    UINT32          grossDataSize;
-    TRDP_TIME_T     now;
-    TRDP_ERR_T      ret         = TRDP_NO_ERR;
-    TRDP_ADDRESSES  subHandle;
-    INT32           index;
+    PD_ELE_T         *newPD = NULL;
+    UINT32            grossDataSize;
+    TRDP_TIME_T       now;
+    TRDP_ERR_T        ret         = TRDP_NO_ERR;
+    TRDP_ADDRESSES_T  subHandle;
+    INT32             index;
 
     /*    Check params    */
     if (comId == 0 || pSubHandle == NULL)
@@ -2137,7 +2137,10 @@ static TRDP_ERR_T tlm_common_send (
             
             
             /* Prepare element data */
-            pNewElement->addr = (TRDP_ADDRESSES) { .comId = comId, .srcIpAddr = srcIpAddr, .destIpAddr = destIpAddr, .mcGroup=0 };
+            pNewElement->addr.comId = comId;
+            pNewElement->addr.srcIpAddr = srcIpAddr;
+            pNewElement->addr.destIpAddr = destIpAddr;
+            pNewElement->addr.mcGroup = 0;
             pNewElement->privFlags = TRDP_PRIV_NONE;
             pNewElement->pktFlags  = pktFlags;
             pNewElement->interval  = tv_interval;
