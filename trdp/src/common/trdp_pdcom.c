@@ -271,7 +271,7 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_ERR_T      resultCode  = TRDP_NO_ERR;
     INT32 recSize;
     BOOL informUser = FALSE;
-    TRDP_ADDRESSES  subHandle = { 0, 0, 0, 0};
+    TRDP_ADDRESSES_T  subHandle = { 0, 0, 0, 0};
 
 
     /*  Get a buffer    */

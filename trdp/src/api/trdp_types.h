@@ -312,13 +312,14 @@ typedef struct
     TRDP_MSG_T          msgType;      /**< Protocol ('PD', 'MD', ...)			*/
     UINT32              comId;        /**< ComID								*/
     UINT32              topoCount;    /**< received topocount					*/
+    UINT16              numRetries;  /**< actual number of retries             */
     UINT16              userStatus;   /**< error code, user stat                */
     TRDP_REPLY_STATUS_T replyStatus;  /**< reply status			                */
     TRDP_UUID_T         sessionId;    /**< for response							*/
     UINT32              replyTimeout; /**< reply timeout in us given with the request */
     TRDP_URI_USER_T     destURI;      /**< destination URI user part from MD header	  */
     TRDP_URI_USER_T     srcURI;       /**< source URI user part from MD header        */
-    UINT32              noOfReplies;  /**< actual number of replies for the request   */
+    UINT32              numReplies;   /**< actual number of replies for the request   */
     const void          *pUserRef;    /**< User reference given with the local call   */
     TRDP_ERR_T          resultCode;   /**< error code								  */
 } TRDP_MD_INFO_T;
@@ -327,9 +328,9 @@ typedef struct
 /**	Quality/type of service and time to live	*/
 typedef struct
 {
-    UINT8   qos;
-    UINT8   ttl;
-    UINT8   retries;
+    UINT8   qos;       /**< Quality of service (default should be 5 for PD and 3 for MD)  */
+    UINT8   ttl;       /**< Time to live (default should be 64)  */
+    UINT8   retries;   /**< Maximum number of retries for UDP MD if one reply is expected, default should be 2   */
 } TRDP_SEND_PARAM_T;
 
 
@@ -401,14 +402,14 @@ typedef struct
 /** Structure containing all general memory statistics information. */
 typedef struct
 {
-    UINT32  total;                              /**< total memory size */
-    UINT32  free;                               /**< free memory size */
-    UINT32  minFree;                            /**< minimal free memory size in statistics interval */
-    UINT32  numAllocBlocks;                     /**< allocated memory blocks */
-    UINT32  numAllocErr;                        /**< allocation errors */
-    UINT32  numFreeErr;                         /**< free errors */
-    UINT32  allocBlockSize[TRDP_MEM_BLK_524288 + 1];     /**< allocated memory blocks */
-    UINT32  usedBlockSize[TRDP_MEM_BLK_524288 + 1];      /**< used memory blocks */
+    UINT32  total;                                      /**< total memory size */
+    UINT32  free;                                       /**< free memory size */
+    UINT32  minFree;                                    /**< minimal free memory size in statistics interval */
+    UINT32  numAllocBlocks;                             /**< allocated memory blocks */
+    UINT32  numAllocErr;                                /**< allocation errors */
+    UINT32  numFreeErr;                                 /**< free errors */
+    UINT32  preAllocBlockSize[TRDP_MEM_BLK_524288 + 1]; /**< preallocated memory blocks */
+    UINT32  usedBlockSize[TRDP_MEM_BLK_524288 + 1];     /**< used memory blocks */
 } TRDP_MEM_STATISTICS_T;
 
 
@@ -650,8 +651,9 @@ typedef struct
     void                *pRefCon;               /**< Pointer to user context for call back      */
     TRDP_SEND_PARAM_T   sendParam;              /**< Default send parameters			*/
     TRDP_FLAGS_T        flags;                  /**< Default flags for MD packets				*/
-    UINT32              replyTimeout;           /**< Default timeout in us                      */
-    UINT32              confirmTimeout;         /**< Default timeout in us                      */
+    UINT32              replyTimeout;           /**< Default reply timeout in us                */
+    UINT32              confirmTimeout;         /**< Default confirmation timeout in us         */
+    UINT32              connectTimeout;         /**< Default connection timeout in us           */
     UINT32              udpPort;                /**< Port to be used for UDP MD communication   */
     UINT32              tcpPort;                /**< Port to be used for TCP MD communication   */
 } TRDP_MD_CONFIG_T;
