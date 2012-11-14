@@ -384,17 +384,27 @@
     <xs:complexType>
       <xs:attribute name="confirm-timeout" default="1000000" type="uint32" use="optional">
         <xs:annotation>
-          <xs:documentation>Default time-out in ms for receiving acknowledge message in microsecons.</xs:documentation>
+          <xs:documentation>Default time-out for receiving acknowledge message in microsecons.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="reply-timeout" default="5000000" type="uint32" use="optional">
         <xs:annotation>
-          <xs:documentation>Default time-out in ms for receiving response message(s) in microseconds.</xs:documentation>
+          <xs:documentation>Default time-out for receiving response message(s) in microseconds.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="connect-timeout" default="60000000" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Default time-out for closing a not used TCP connection in microseconds.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="ttl" default="64" type="uint32" use="optional"/>
       <xs:attribute name="qos" default="3" type="uint32" use="optional"/>
-      <xs:attribute name="retries" default="2" type="uint32" use="optional"/>
+      <xs:attribute name="retries" default="2" type="uint32" use="optional">
+        <xs:annotation>
+          <xs:documentation>Maximum number of retries for UDP MD with one expected reply.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
       <xs:attribute name="protocol" default="UDP" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
@@ -536,7 +546,7 @@
     <xs:complexType>
       <xs:attribute name="timeout-value" default="100000" type="uint32" use="optional">
         <xs:annotation>
-          <xs:documentation>Timeout value in ms before considering received process data as invalid. Disabled if 0 or not specified.</xs:documentation>
+          <xs:documentation>Timeout value in microseconds before considering received process data as invalid. Disabled if 0 or not specified.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="validity-behavior" default="zero" use="optional">
