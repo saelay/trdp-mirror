@@ -266,11 +266,18 @@ TRDP_ERR_T  trdp_mdSend (
 {
     VOS_ERR_T err = VOS_NO_ERR;
 
-    err = vos_sockSendUDP(pdSock,
+	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+    {
+    	err = vos_sockSendTCP(pdSock, (UINT8 *)&pPacket->frameHead, pPacket->grossSize);
+
+    }else
+    {    
+		err = vos_sockSendUDP(pdSock,
                           (UINT8 *)&pPacket->frameHead,
                           pPacket->grossSize,
                           pPacket->addr.destIpAddr,
                           IP_MD_UDP_PORT);
+	}
 
     if (err != VOS_NO_ERR)
     {
@@ -302,12 +309,22 @@ TRDP_ERR_T  trdp_mdRecv (
 	
 	int Size = pPacket->grossSize;
 	
-	err = vos_sockReceiveUDP(
+	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+	{
+		err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &Size);
+		vos_printf(VOS_LOG_INFO, "vos_sockReceiveTCP Size = %d\n",Size);
+		err = VOS_NO_ERR;
+
+	}else
+	{
+
+		err = vos_sockReceiveUDP(
                 mdSock,
 				(UINT8 *)&pPacket->frameHead,
 				&Size,
 				&pPacket->addr.srcIpAddr);
-				
+	}
+
 	pPacket->dataSize = Size;
 	
 	if (err == VOS_NODATA_ERR)
@@ -370,6 +387,7 @@ TRDP_ERR_T  trdp_mdReceive (
 	
 	memset(appHandle->pMDRcvEle,0,sizeof(MD_ELE_T));
 	appHandle->pMDRcvEle->grossSize = MAX_MD_PACKET_SIZE;
+	appHandle->pMDRcvEle->pktFlags	= appHandle->mdDefault.flags;
     }
 
     /* get packet */
@@ -480,7 +498,7 @@ TRDP_ERR_T  trdp_mdReceive (
 								theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
 						 memcpy(theMessage.destURI      , pH->destinationURI,TRDP_MAX_URI_USER_LEN);
 						 memcpy(theMessage.srcURI       , pH->sourceURI,TRDP_MAX_URI_USER_LEN);
-								theMessage.noOfReplies  = 0;
+								theMessage.numReplies  = 0;
 								theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
 								theMessage.resultCode   = TRDP_NO_ERR;
 								
@@ -489,6 +507,44 @@ TRDP_ERR_T  trdp_mdReceive (
 									&theMessage,
 									(UINT8 *)pH,lF);
 							}
+
+							/* TCP and Notify message */
+							if (((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0) && (TRDP_MSG_MN == l_msgType))
+							{
+								int find_sock;
+								int sock_position;
+
+								for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+								{
+									if((appHandle->iface[find_sock].sock == sock)
+											&& (appHandle->iface[find_sock].sock != -1))
+									{
+										sock_position = find_sock;
+										break;
+									}
+								}
+
+								if(appHandle->iface[sock_position].usage == 1)
+								{
+									vos_printf(VOS_LOG_INFO, "vos_sockClose (Num = %d) from the iface\n", appHandle->iface[sock_position].sock);
+									vos_sockClose(appHandle->iface[sock_position].sock);
+								}else
+								{
+									appHandle->iface[sock_position].usage--;
+								}
+
+								/* Delete the socket from the iface */
+								vos_printf(VOS_LOG_INFO, "Deleting socket (Num = %d) from the iface\n", appHandle->iface[sock_position].sock);
+								vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", sock_position);
+								appHandle->iface[sock_position].sock=-1;
+								appHandle->iface[sock_position].sendParam.qos = 0;
+								appHandle->iface[sock_position].sendParam.ttl = 0;
+								appHandle->iface[sock_position].usage = 0;
+								appHandle->iface [sock_position].bindAddr = 0;
+								appHandle->iface[sock_position].type = 0;
+
+							}
+
 						}
 						break;
 						
@@ -562,7 +618,7 @@ TRDP_ERR_T  trdp_mdReceive (
 											theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
 									 memcpy(theMessage.destURI      , pH->destinationURI,TRDP_MAX_URI_USER_LEN);
 									 memcpy(theMessage.srcURI       , pH->sourceURI,TRDP_MAX_URI_USER_LEN);
-											theMessage.noOfReplies  = 0;
+											theMessage.numReplies  = 0;
 											theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
 											theMessage.resultCode   = TRDP_NO_ERR;
 											
@@ -573,6 +629,46 @@ TRDP_ERR_T  trdp_mdReceive (
 												
 										}
 										
+
+										/* TCP and Reply/ReplyError message */
+										if (((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+												&& ((TRDP_MSG_MP == l_msgType) || (TRDP_MSG_ME == l_msgType)))
+										{
+											int find_sock;
+											int sock_position;
+
+											for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+											{
+												if((appHandle->iface[find_sock].sock == sock)
+													&& (appHandle->iface[find_sock].sock != -1))
+												{
+													sock_position = find_sock;
+													break;
+												}
+											}
+
+											if(appHandle->iface[sock_position].usage == 1)
+											{
+												vos_printf(VOS_LOG_INFO, "vos_sockClose (Nº = %d) from the iface\n", appHandle->iface[sock_position].sock);
+												vos_sockClose(appHandle->iface[sock_position].sock);
+											}else
+											{
+												appHandle->iface[sock_position].usage--;
+											}
+
+											/* Delete the socket from the iface */
+											vos_printf(VOS_LOG_INFO, "Deleting socket (Nº = %d) from the iface\n", appHandle->iface[sock_position].sock);
+											vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", sock_position);
+											appHandle->iface[sock_position].sock=-1;
+											appHandle->iface[sock_position].sendParam.qos = 0;
+											appHandle->iface[sock_position].sendParam.ttl = 0;
+											appHandle->iface[sock_position].usage = 0;
+											appHandle->iface [sock_position].bindAddr = 0;
+											appHandle->iface[sock_position].type = 0;
+
+										}
+
+
 										/* Remove element from queue */
 										trdp_MDqueueDelElement(&appHandle->pMDSndQueue,sender_ele);
 										
@@ -611,7 +707,7 @@ TRDP_ERR_T  trdp_mdReceive (
 											theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
 									 memcpy(theMessage.destURI      , pH->destinationURI,TRDP_MAX_URI_USER_LEN);
 									 memcpy(theMessage.srcURI       , pH->sourceURI,TRDP_MAX_URI_USER_LEN);
-											theMessage.noOfReplies  = 0;
+											theMessage.numReplies  = 0;
 											theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
 											theMessage.resultCode   = TRDP_NO_ERR;
 											
@@ -621,6 +717,45 @@ TRDP_ERR_T  trdp_mdReceive (
 												(UINT8 *)pH,lF);
 										}
 										
+
+										/* TCP and Reply/ReplyError message */
+										if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+										{
+											int find_sock;
+											int sock_position;
+
+											for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+											{
+												if((appHandle->iface[find_sock].sock == sock)
+														&& (appHandle->iface[find_sock].sock != -1))
+												{
+													sock_position = find_sock;
+													break;
+												}
+											}
+
+											if(appHandle->iface[sock_position].usage == 1)
+											{
+												vos_printf(VOS_LOG_INFO, "vos_sockClose (Nº = %d) from the iface\n", appHandle->iface[sock_position].sock);
+												vos_sockClose(appHandle->iface[sock_position].sock);
+											}else
+											{
+												appHandle->iface[sock_position].usage--;
+											}
+
+											/* Delete the socket from the iface */
+											vos_printf(VOS_LOG_INFO, "Deleting socket (Nº = %d) from the iface\n", appHandle->iface[sock_position].sock);
+											vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", sock_position);
+											appHandle->iface[sock_position].sock=-1;
+											appHandle->iface[sock_position].sendParam.qos = 0;
+											appHandle->iface[sock_position].sendParam.ttl = 0;
+											appHandle->iface[sock_position].usage = 0;
+											appHandle->iface [sock_position].bindAddr = 0;
+											appHandle->iface[sock_position].type = 0;
+
+										}
+
+
 										/* Remove element from queue */
 										trdp_MDqueueDelElement(&appHandle->pMDSndQueue,sender_ele);
 										

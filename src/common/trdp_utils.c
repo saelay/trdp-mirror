@@ -400,7 +400,8 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[index].type == usage &&
             iface[index].sendParam.qos == params->qos &&
             iface[index].sendParam.ttl == params->ttl &&
-            iface[index].rcvOnly == rcvOnly)
+            (iface[index].rcvOnly == rcvOnly ||
+            usage == TRDP_SOCK_MD_TCP))
         {
             /* Use that socket */
             *pIndex = index;
@@ -439,6 +440,13 @@ TRDP_ERR_T  trdp_requestSocket (
         sock_options.ttl_multicast  = VOS_TTL_MULTICAST;
         sock_options.reuseAddrPort  = TRUE;
         sock_options.nonBlocking    = (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
+
+        if((usage == TRDP_SOCK_MD_TCP) && (rcvOnly == TRUE))
+        {
+        	iface[index].sock       = *pIndex;
+        	iface[index].usage 		= 1;
+        	return err;
+        }
 
         switch (usage)
         {
