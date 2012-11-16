@@ -46,6 +46,7 @@
 #include "vos_thread.h"
 #include "vos_mem.h"
 #include "vos_utils.h"
+#include "vos_private.h"
 
 
 /***********************************************************************************************************************
@@ -53,15 +54,9 @@
  */
 
 const size_t    cDefaultStackSize   = 16 * 1024;
-const uint32_t  cMutextMagic        = 0x1234FEDC;
+const UINT32    cMutextMagic        = 0x1234FEDC;
 
 BOOL            vosThreadInitialised = FALSE;
-
-struct VOS_MUTEX
-{
-    UINT32          magicNo;
-    pthread_mutex_t mutexId;
-};
 
 /***********************************************************************************************************************
  *  LOCALS
@@ -655,32 +650,78 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
     return VOS_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** Create a recursive mutex.
+ *  Fill in a mutex handle. The mutex storage must be already allocated.
+ *
+ *  @param[out]     pMutex			Pointer to mutex handle
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_PARAM_ERR	pMutex == NULL
+ *  @retval         VOS_MUTEX_ERR	no mutex available
+ */
+
+EXT_DECL VOS_ERR_T vos_localMutexCreate (
+    struct VOS_MUTEX *pMutex)
+{
+    int err = 0;
+    pthread_mutexattr_t attr;
+    
+    if (pMutex == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
+    
+    err = pthread_mutexattr_init(&attr);
+    if (err == 0)
+    {
+        err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+        if (err == 0)
+        {
+            err = pthread_mutex_init(&pMutex->mutexId, &attr);
+        }
+        pthread_mutexattr_destroy(&attr);
+    }
+    
+    if (err == 0)
+    {
+        pMutex->magicNo = cMutextMagic;
+    }
+    else
+    {
+        vos_printf(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
+        return VOS_MUTEX_ERR;
+    }
+    
+    return VOS_NO_ERR;
+}
+
 
 /**********************************************************************************************************************/
 /** Delete a mutex.
  *  Release the resources taken by the mutex.
  *
- *  @param[in]      mutex			mutex handle
+ *  @param[in]      pMutex			mutex handle
  *  @retval         VOS_NO_ERR		no error
  *  @retval         VOS_PARAM_ERR	pMutex == NULL or wrong type
  *  @retval         VOS_MUTEX_ERR	no such mutex
  */
 
 EXT_DECL VOS_ERR_T vos_mutexDelete (
-    VOS_MUTEX_T mutex)
+    VOS_MUTEX_T pMutex)
 {
     int err;
 
-    if (mutex == NULL || mutex->magicNo != cMutextMagic)
+    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
         return VOS_PARAM_ERR;
     }
 
-    err = pthread_mutex_destroy(&mutex->mutexId);
+    err = pthread_mutex_destroy(&pMutex->mutexId);
     if (err == 0)
     {
-        vos_memFree(mutex);
-        mutex->magicNo = 0;
+        pMutex->magicNo = 0;
+        vos_memFree(pMutex);
     }
     else
     {
@@ -695,26 +736,61 @@ EXT_DECL VOS_ERR_T vos_mutexDelete (
 
 
 /**********************************************************************************************************************/
+/** Delete a mutex.
+ *  Release the resources taken by the mutex.
+ *
+ *  @param[in]      pMutex			Pointer to mutex struct
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_PARAM_ERR	pMutex == NULL or wrong type
+ *  @retval         VOS_MUTEX_ERR	no such mutex
+ */
+
+EXT_DECL VOS_ERR_T vos_mutexLocalDelete (
+    struct VOS_MUTEX *pMutex)
+{
+    int err;
+
+    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    {
+        return VOS_PARAM_ERR;
+    }
+
+    err = pthread_mutex_destroy(&pMutex->mutexId);
+    if (err == 0)
+    {
+        pMutex->magicNo = 0;
+    }
+    else
+    {
+        vos_printf(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
+        return VOS_MUTEX_ERR;
+    }
+
+    return VOS_NO_ERR;
+}
+
+
+/**********************************************************************************************************************/
 /** Take a mutex.
  *  Wait for the mutex to become available (lock).
  *
- *  @param[in]      mutex			mutex handle
+ *  @param[in]      pMutex			mutex handle
  *  @retval         VOS_NO_ERR		no error
  *  @retval         VOS_PARAM_ERR	pMutex == NULL or wrong type
  *  @retval         VOS_MUTEX_ERR	no such mutex
  */
 
 EXT_DECL VOS_ERR_T vos_mutexLock (
-    VOS_MUTEX_T mutex)
+    VOS_MUTEX_T pMutex)
 {
     int err;
 
-    if (mutex == NULL || mutex->magicNo != cMutextMagic)
+    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
         return VOS_PARAM_ERR;
     }
 
-    err = pthread_mutex_lock(&mutex->mutexId);
+    err = pthread_mutex_lock(&pMutex->mutexId);
     if (err != 0)
     {
         vos_printf(VOS_LOG_ERROR,
@@ -731,23 +807,23 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
 /** Try to take a mutex.
  *  If mutex is can't be taken VOS_MUTEX_ERR is returned.
  *
- *  @param[in]      mutex			mutex handle
+ *  @param[in]      pMutex			mutex handle
  *  @retval         VOS_NO_ERR		no error
  *  @retval         VOS_PARAM_ERR	pMutex == NULL or wrong type
  *  @retval         VOS_MUTEX_ERR	mutex not locked
  */
 
 EXT_DECL VOS_ERR_T vos_mutexTryLock (
-    VOS_MUTEX_T mutex)
+    VOS_MUTEX_T pMutex)
 {
     int err;
 
-    if (mutex == NULL || mutex->magicNo != cMutextMagic)
+    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
         return VOS_PARAM_ERR;
     }
 
-    err = pthread_mutex_trylock(&mutex->mutexId);
+    err = pthread_mutex_trylock(&pMutex->mutexId);
     if (err == EBUSY)
     {
         return VOS_MUTEX_ERR;
@@ -768,23 +844,23 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
 /** Release a mutex.
  *  Unlock the mutex.
  *
- *  @param[in]      mutex			mutex handle
+ *  @param[in]      pMutex			mutex handle
  *  @retval         VOS_NO_ERR		no error
  *  @retval         VOS_PARAM_ERR	pMutex == NULL or wrong type
  *  @retval         VOS_MUTEX_ERR	no such mutex
  */
 
 EXT_DECL VOS_ERR_T vos_mutexUnlock (
-    VOS_MUTEX_T mutex)
+    VOS_MUTEX_T pMutex)
 {
     int err;
 
-    if (mutex == NULL || mutex->magicNo != cMutextMagic)
+    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
         return VOS_PARAM_ERR;
     }
 
-    err = pthread_mutex_unlock(&mutex->mutexId);
+    err = pthread_mutex_unlock(&pMutex->mutexId);
     if (err != 0)
     {
         vos_printf(VOS_LOG_ERROR,

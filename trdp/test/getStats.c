@@ -33,6 +33,7 @@
 #include "vos_thread.h"
 #include "vos_sock.h"
 #include "vos_utils.h"
+#include "vos_mem.h"
 
 /* Some sample comId definitions	*/
 
@@ -52,9 +53,10 @@
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
 /* We use dynamic memory	*/
-#define RESERVED_MEMORY  10000
+#define RESERVED_MEMORY  64000
+#define PREALLOCATE		{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
-#define APP_VERSION  "0.0.0.2"
+#define APP_VERSION  "0.0.0.3"
 
 TRDP_STATISTICS_T   gBuffer;
 BOOL                gKeepOnRunning = TRUE;
@@ -212,13 +214,14 @@ int main (int argc, char * *argv)
     TRDP_ERR_T          	err;
     TRDP_PD_CONFIG_T    	pdConfiguration = {myPDcallBack, NULL, {0, 0},
                                         	TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, PREALLOCATE};
     TRDP_PROCESS_CONFIG_T	processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
     int                 rv = 0;
     int                 ch;
     int                 ip[4];
     UINT32              destIP = PD_COMID2_DST_IP;
+    int					count = 0, i;
 
     while ((ch = getopt(argc, argv, "t:h?v")) != -1)
     {
@@ -368,6 +371,34 @@ int main (int argc, char * *argv)
             printf(".");
             fflush(stdout);
         }
+        
+        if (count++ > 10)
+        {
+        	UINT32  allocatedMemory;
+            UINT32  freeMemory;
+            UINT32  minFree;
+            UINT32  numAllocBlocks;
+            UINT32  numAllocErr;
+            UINT32  numFreeErr;
+            UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES];
+            UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];
+            vos_memCount(&allocatedMemory, &freeMemory, &minFree, &numAllocBlocks, &numAllocErr, &numFreeErr,
+            				allocBlockSize, usedBlockSize);
+            printf("Memory usage:\n");
+            printf(" allocatedMemory:	%u\n", allocatedMemory);
+            printf(" freeMemory:		%u\n", freeMemory);
+            printf(" minFree:			%u\n", minFree);
+            printf(" numAllocBlocks:	%u\n", numAllocBlocks);
+            printf(" numAllocErr:		%u\n", numAllocErr);
+            printf(" numFreeErr:		%u\n", numFreeErr);
+            printf(" allocBlockSize:	");
+            for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+            {
+                printf("%08u ", allocBlockSize[i]);
+            }
+            printf("\n\n");
+            count = 0;
+         }
 
     }   /*	Bottom of while-loop	*/
 
