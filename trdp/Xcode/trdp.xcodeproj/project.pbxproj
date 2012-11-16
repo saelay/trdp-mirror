@@ -23,6 +23,7 @@
 		08CE2082164962BB0038151B /* trdp_mdcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F31150777B00046E0AC /* trdp_mdcom.h */; };
 		08CE2085164962BE0038151B /* trdp_mdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F30150777B00046E0AC /* trdp_mdcom.c */; };
 		08CE2192164A91B30038151B /* trdp_reserved.c in Sources */ = {isa = PBXBuildFile; fileRef = 08CE2172164A6E130038151B /* trdp_reserved.c */; };
+		7327CA881656AB080020536A /* vos_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 7327CA871656AB080020536A /* vos_private.h */; };
 		732D278C162DBD1D009D7857 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		732D2794162DBD84009D7857 /* getStats.c in Sources */ = {isa = PBXBuildFile; fileRef = 732D2792162DBD84009D7857 /* getStats.c */; };
 		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
@@ -178,12 +179,13 @@
 		7312929D1535BEA1006B3A88 /* SingleThreadedWorkflowPDpolling.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = SingleThreadedWorkflowPDpolling.pdf; sourceTree = "<group>"; };
 		7312929E1535BEA1006B3A88 /* TCNOpen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TCNOpen.png; sourceTree = "<group>"; };
 		731C72D51521A60A009DE48A /* refman.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = refman.pdf; sourceTree = "<group>"; };
+		7327CA871656AB080020536A /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_private.h; sourceTree = "<group>"; };
+		7327CB0A1656BE450020536A /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vos_private.h; path = ../src/vos/posix/vos_private.h; sourceTree = SOURCE_ROOT; };
 		732D2790162DBD1D009D7857 /* getStats */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = getStats; sourceTree = BUILT_PRODUCTS_DIR; };
 		732D2792162DBD84009D7857 /* getStats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = getStats.c; sourceTree = "<group>"; };
 		7357C9E015B04EEC004484E1 /* pthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pthread.h; sourceTree = "<group>"; };
 		7357C9E115B04EEC004484E1 /* sched.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sched.h; sourceTree = "<group>"; };
 		7357C9E215B04EEC004484E1 /* semaphore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = semaphore.h; sourceTree = "<group>"; };
-		7357C9E315B04EEC004484E1 /* vos_mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_mem.c; sourceTree = "<group>"; };
 		7357C9E415B04EEC004484E1 /* vos_sock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_sock.c; sourceTree = "<group>"; };
 		7357C9E515B04EEC004484E1 /* vos_thread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_thread.c; sourceTree = "<group>"; };
 		735918F21625BE100036DD6F /* test_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test_server.h; sourceTree = "<group>"; };
@@ -685,7 +687,7 @@
 		73E0526A151352CE0058D590 /* posix */ = {
 			isa = PBXGroup;
 			children = (
-				731291FE15341A58006B3A88 /* vos_mem.c */,
+				7327CA871656AB080020536A /* vos_private.h */,
 				73E052721513537C0058D590 /* vos_sock.c */,
 				73E0535C1513685D0058D590 /* vos_thread.c */,
 			);
@@ -696,7 +698,7 @@
 			isa = PBXGroup;
 			children = (
 				7357C9DF15B04EEC004484E1 /* pthread */,
-				7357C9E315B04EEC004484E1 /* vos_mem.c */,
+				7327CB0A1656BE450020536A /* vos_private.h */,
 				7357C9E415B04EEC004484E1 /* vos_sock.c */,
 				7357C9E515B04EEC004484E1 /* vos_thread.c */,
 			);
@@ -707,6 +709,7 @@
 			isa = PBXGroup;
 			children = (
 				73E0536115136CC90058D590 /* vos_utils.c */,
+				731291FE15341A58006B3A88 /* vos_mem.c */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -731,6 +734,7 @@
 				7373E4B0157CE42C0084966B /* trdp_if.h in Headers */,
 				08CE20721649613C0038151B /* trdp_pdcom.h in Headers */,
 				08CE2082164962BB0038151B /* trdp_mdcom.h in Headers */,
+				7327CA881656AB080020536A /* vos_private.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
