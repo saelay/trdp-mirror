@@ -54,9 +54,10 @@
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
 /* We use dynamic memory	*/
-#define RESERVED_MEMORY  10000
+#define RESERVED_MEMORY  64000
+#define PREALLOCATE		{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
-#define APP_VERSION  "0.0.0.2"
+#define APP_VERSION  "0.0.0.3"
 
 TRDP_STATISTICS_T   gBuffer;
 BOOL                gKeepOnRunning = TRUE;

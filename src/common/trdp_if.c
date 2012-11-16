@@ -115,7 +115,7 @@ TRDP_ERR_T trdp_initMD(TRDP_SESSION_PT pSession)
 	}
 	else
 	{
-		vos_printf(VOS_LOG_ERROR, "TRDP initMD UDP initialization WIP\n");
+		vos_printf(VOS_LOG_INFO, "TRDP initMD UDP initialization WIP\n");
 	}
 	return  result;
 }
@@ -192,7 +192,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
     TRDP_ERR_T      ret = TRDP_NO_ERR;
     VOS_ERR_T       err = VOS_NO_ERR;
 
-    /*    Only the first session will allocate memory    and the mutex */
+    /*    Init memory subsystem and the session mutex */
     if (sInited == FALSE)
     {
         /*    Initialize VOS    */
@@ -1887,7 +1887,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     UINT32              maxDataSize)
 {
     PD_ELE_T         *newPD = NULL;
-    UINT32            grossDataSize;
     TRDP_TIME_T       now;
     TRDP_ERR_T        ret         = TRDP_NO_ERR;
     TRDP_ADDRESSES_T  subHandle;
@@ -1995,7 +1994,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->interval.tv_usec = timeout % 1000000;
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       = toBehavior;
-                    newPD->grossSize        = grossDataSize;
+                    newPD->grossSize        = MAX_PD_PACKET_SIZE ;
                     newPD->userRef          = pUserRef;
                     newPD->socketIdx        = index;
 

@@ -20,11 +20,6 @@
  *
  */
 
-#ifndef POSIX
-#error \
-    "You are trying to compile the POSIX implementation of vos_memory.c - either define POSIX or exclude this file!"
-#endif
-
 /***********************************************************************************************************************
  * INCLUDES
  */
@@ -42,18 +37,18 @@
 #include "vos_utils.h"
 #include "vos_mem.h"
 #include "vos_thread.h"
+#include "vos_private.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
  */
 
-struct memBlock
+typedef struct memBlock
 {
     UINT32          size;           /* Size of the data part of the block */
     struct memBlock *pNext;         /* Pointer to next block in linked list */
                                     /* Data area follows here */
-};
-typedef struct memBlock MEM_BLOCK;
+} MEM_BLOCK_T;
 
 typedef struct
 {
@@ -63,26 +58,28 @@ typedef struct
     UINT32  allocErrCnt;          /* No of allocated memory errors */
     UINT32  freeErrCnt;           /* No of free memory errors */
     UINT32  blockCnt[VOS_MEM_NBLOCKSIZES];  /* D:o per block size */
+    UINT32  preAlloc[VOS_MEM_NBLOCKSIZES];  /* Pre allocated per block size */
 
-} MEM_STATISTIC;
+} MEM_STATISTIC_T;
 
 typedef struct
 {
-    VOS_SEMA_T  sem;              /* Memory allocation semaphore */
-    UINT8       *pArea;           /* Pointer to start of memory area */
-    UINT8       *pFreeArea;       /* Pointer to start of free part of memory area */
-    UINT32      memSize;          /* Size of memory area */
-    UINT32      allocSize;        /* Size of allocated area */
-    UINT32      noOfBlocks;       /* No of blocks */
+    struct VOS_MUTEX	mutex;        	/* Memory allocation semaphore */
+    UINT8       		*pArea;			/* Pointer to start of memory area */
+    UINT8       		*pFreeArea;		/* Pointer to start of free part of memory area */
+    UINT32      		memSize;		/* Size of memory area */
+    UINT32      		allocSize;		/* Size of allocated area */
+    UINT32      		noOfBlocks;		/* No of blocks */
+    BOOL				wasMalloced;	/* needs to be freed in the end */
 
     /* Free block header array, one entry for each possible free block size */
     struct
     {
-        UINT32      size;         /* Block size */
-        MEM_BLOCK   *pFirst;      /* Pointer to first free block */
+        UINT32      	size;        	/* Block size */
+        MEM_BLOCK_T   	*pFirst;      	/* Pointer to first free block */
     } freeBlock[VOS_MEM_NBLOCKSIZES];
-    MEM_STATISTIC memCnt;         /* Statistic counters */
-} MEM_CONTROL;
+    MEM_STATISTIC_T memCnt;         	/* Statistic counters */
+} MEM_CONTROL_T;
 
 typedef struct
 {
@@ -105,9 +102,14 @@ struct VOS_QUEUE
  *  LOCALS
  */
 
-static UINT8        *gMemoryArea    = NULL;
-static size_t       gMemorySize     = 0;
-static MEM_CONTROL  gMem;
+static MEM_CONTROL_T  gMem = {
+	{0,0},NULL,NULL,0L,0L,0L,FALSE,
+	{
+    	{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},
+     	{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL},{0L, NULL}
+    },
+    {0,0,0,0,0,{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},VOS_MEM_PREALLOCATE}
+};
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
@@ -115,14 +117,15 @@ static MEM_CONTROL  gMem;
 
 
 /**********************************************************************************************************************/
-/*    Memory
-                                                                                                               */
+/*    Memory                                                                                                          */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
 /** Initialize the memory unit.
- *  Init a supplied block of memory and prepare it for use with vos_alloc and vos_dealloc. The used block sizes can
- *    be supplied and will be preallocated.
+ *  Init a supplied block of memory and prepare it for use with vos_memAlloc and vos_memFree. The used block sizes can
+ *  be supplied and will be preallocated.
+ *  If half of the overall size of the requested memory area would be pre-allocated, either by the default
+ *  pre-allocation table or a provided one, no pre-allocation takes place.
  *
  *  @param[in]      pMemoryArea        Pointer to memory area to use
  *  @param[in]      size               Size of provided memory area
@@ -130,6 +133,7 @@ static MEM_CONTROL  gMem;
  *  @retval         VOS_NO_ERR         no error
  *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  *  @retval         VOS_MEM_ERR        no memory available
+ *  @retval         VOS_MUTEX_ERR      no mutex available
  */
 
 EXT_DECL VOS_ERR_T vos_memInit (
@@ -138,47 +142,96 @@ EXT_DECL VOS_ERR_T vos_memInit (
     const UINT32    fragMem[VOS_MEM_NBLOCKSIZES])
 {
     int     i, j, max;
+    UINT32	minSize = 0;
     UINT32  blockSize[VOS_MEM_NBLOCKSIZES]      = VOS_MEM_BLOCKSIZES;   /* Different block sizes */
-    UINT32  preAllocate[VOS_MEM_NBLOCKSIZES]    = VOS_MEM_PREALLOCATE;  /* No of blocks that should be pre-allocated */
-    unsigned char *p[VOS_MEM_MAX_PREALLOCATE];
+    UINT8   *p[VOS_MEM_MAX_PREALLOCATE];
 
-    /* TBD: This code is not working, use heap memory allocation */
-    return VOS_NO_ERR;
+    /* Initialize memory */
 
+    gMem.memSize = size;
+    gMem.allocSize = 0;
+    gMem.noOfBlocks = 0;
+    gMem.memCnt.freeSize = size;
+    gMem.memCnt.minFreeSize = size;
+    gMem.memCnt.allocCnt = 0;
+    gMem.memCnt.allocErrCnt = 0;
+    gMem.memCnt.freeErrCnt = 0;
+
+    /*  Create the memory mutex   */
+    if (vos_localMutexCreate(&gMem.mutex) != VOS_NO_ERR)
+    {
+        vos_printf(VOS_LOG_ERROR, "vos_memInit Mutex creation failed\n");
+        return VOS_MUTEX_ERR;
+    }
+
+	for (i = 0; i < VOS_MEM_MAX_PREALLOCATE; i++)
+    {
+        p[i] = NULL;
+    }
+
+	/*	Check if we should prealloc some memory	*/
     if (fragMem != NULL)
     {
-        for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    	for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
         {
-            preAllocate[i] = fragMem[i];
+            if (fragMem[i] != 0)
+            {
+                break;
+            }
         }
+    }
+
+	if (i < VOS_MEM_NBLOCKSIZES)
+    {
+        
+	    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    	{
+        	gMem.memCnt.preAlloc[i] = fragMem[i];
+            minSize += gMem.memCnt.preAlloc[i] * blockSize[i];
+    	}
     }
 
     if (pMemoryArea == NULL && size == 0)       /* This means we will use standard malloc calls    */
     {
         gMem.noOfBlocks = 0;
-        gMemorySize     = 0;
-        gMemoryArea     = NULL;
+        gMem.memSize    = 0;
+        gMem.pArea      = NULL;
         return VOS_NO_ERR;
     }
 
-    if (pMemoryArea == NULL && size != 0)       /* We must allocate memory from the heap    */
+    if (pMemoryArea == NULL && size != 0)       /* We must allocate memory from the heap once   */
     {
-        gMemoryArea = (UINT8 *) malloc(size);
-        if (gMemoryArea == NULL)
+        gMem.pArea = (UINT8 *) malloc(size);
+        if (gMem.pArea == NULL)
         {
             return VOS_MEM_ERR;
         }
+        gMem.wasMalloced = TRUE;
     }
 
+	/*  Can we pre-allocate the memory? If more than half of the memory would be occupied, we don't even try...  */
+    if (minSize > size/2)
+    {
+	    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    	{
+        	gMem.memCnt.preAlloc[i] = 0;
+        }
+        vos_printf(VOS_LOG_INFO, "vos_memInit Pre-Allocation disabled\n");
+    }
+
+    minSize = 0;
+
+    gMem.pFreeArea = gMem.pArea;
     gMem.noOfBlocks = VOS_MEM_NBLOCKSIZES;
-    gMemorySize     = size;
+    gMem.memSize     = size;
 
     /* Initialize free block headers */
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        gMem.freeBlock[i].pFirst    = (MEM_BLOCK *)NULL;
+        gMem.freeBlock[i].pFirst    = (MEM_BLOCK_T *)NULL;
         gMem.freeBlock[i].size      = blockSize[i];
-        max = preAllocate[i];
+        max = gMem.memCnt.preAlloc[i];
+        minSize += blockSize[i];
 
         if (max > VOS_MEM_MAX_PREALLOCATE)
         {
@@ -188,11 +241,20 @@ EXT_DECL VOS_ERR_T vos_memInit (
         for (j = 0; j < max; j++)
         {
             p[j] = vos_memAlloc(blockSize[i]);
+            if (p[j] == NULL)
+            {
+                vos_printf(VOS_LOG_ERROR, "vos_memInit Pre-Allocation size exceeds overall memory size!!! (%u > %u)\n",
+                							minSize, size);
+            	break;
+            }
         }
 
         for (j = 0; j < max; j++)
         {
-            vos_memFree(p[j]);
+        	if (p[j])
+            {
+	            vos_memFree(p[j]);
+            }
         }
     }
 
@@ -213,8 +275,17 @@ EXT_DECL VOS_ERR_T vos_memInit (
 EXT_DECL VOS_ERR_T vos_memDelete (
     UINT8 *pMemoryArea)
 {
-    /* TBD: This code is not working, use heap memory allocation */
-    return VOS_NO_ERR;
+	if (pMemoryArea == gMem.pArea)
+    {
+		vos_mutexLocalDelete(&gMem.mutex);
+        if (gMem.wasMalloced)
+        {
+            free(pMemoryArea);
+        }
+        memset(&gMem, 0, sizeof(gMem));
+    	return VOS_NO_ERR;
+    }
+    return VOS_PARAM_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -230,11 +301,17 @@ EXT_DECL UINT8 *vos_memAlloc (
     UINT32 size)
 {
     UINT32      i, blockSize;
-    MEM_BLOCK   *pBlock;
+    MEM_BLOCK_T   *pBlock;
 
-    /* TBD: This code is not working, use heap memory allocation */
+    if (size == 0)
+    {
+        gMem.memCnt.allocErrCnt++;
+        vos_printf(VOS_LOG_ERROR, "vos_memAlloc Requested size = %u\n", size);
+        return NULL;
+    }
+
     /*    Use standard heap memory    */
-    if (gMemorySize == 0 && gMemoryArea == NULL)
+    if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
         UINT8 *p = malloc(size);
         if (p != NULL)
@@ -243,11 +320,6 @@ EXT_DECL UINT8 *vos_memAlloc (
             vos_printf(VOS_LOG_DBG, "vos_memAlloc %p Requested size = 0x%x\n", p, size);
         }
         return p;
-    }
-
-    if (!size)
-    {
-        return (UINT8 *)NULL; /* No block size big enough */
     }
 
     /* Adjust size to get one which is a multiple of UINT32's */
@@ -266,15 +338,13 @@ EXT_DECL UINT8 *vos_memAlloc (
     {
         gMem.memCnt.allocErrCnt++;
 
-        vos_printf(VOS_LOG_ERROR,
-                   "vos_memAlloc No block size big enough. Requested size=%d\n",
-                   size);
+        vos_printf(VOS_LOG_ERROR, "vos_memAlloc No block size big enough. Requested size=%d\n", size);
 
         return NULL; /* No block size big enough */
     }
 
     /* Get memory sempahore */
-    if (vos_semaTake(gMem.sem, 0) != VOS_NO_ERR)
+    if (vos_mutexLock(&gMem.mutex) != VOS_NO_ERR)
     {
         gMem.memCnt.allocErrCnt++;
 
@@ -298,13 +368,12 @@ EXT_DECL UINT8 *vos_memAlloc (
         /* There was no suitable free block, create one from the free area */
 
         /* Enough free memory left ? */
-        if ((gMem.allocSize + blockSize + sizeof(MEM_BLOCK)) < gMem.memSize)
+        if ((gMem.allocSize + blockSize + sizeof(MEM_BLOCK_T)) < gMem.memSize)
         {
-            pBlock = (MEM_BLOCK *) gMem.pFreeArea; /*lint !e826 Allocation of MEM_BLOCK from free area*/
+            pBlock = (MEM_BLOCK_T *) gMem.pFreeArea; /*lint !e826 Allocation of MEM_BLOCK from free area*/
 
-            gMem.pFreeArea = (UINT8 *) gMem.pFreeArea +
-                (sizeof(MEM_BLOCK) + blockSize);
-            gMem.allocSize += blockSize + sizeof(MEM_BLOCK);
+            gMem.pFreeArea = (UINT8 *) gMem.pFreeArea + (sizeof(MEM_BLOCK_T) + blockSize);
+            gMem.allocSize += blockSize + sizeof(MEM_BLOCK_T);
             gMem.memCnt.blockCnt[i]++;
         }
         else
@@ -324,7 +393,6 @@ EXT_DECL UINT8 *vos_memAlloc (
                     gMem.freeBlock[i].pFirst = pBlock->pNext;
 
                     blockSize = gMem.freeBlock[i].size;
-
                 }
             }
             if (pBlock == NULL)
@@ -336,7 +404,7 @@ EXT_DECL UINT8 *vos_memAlloc (
     }
 
     /* Release semaphore */
-    if (vos_semaGive(gMem.sem) != VOS_NO_ERR)
+    if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "IPTVosPutSemR ERROR\n");
     }
@@ -345,7 +413,7 @@ EXT_DECL UINT8 *vos_memAlloc (
     {
         /* Fill in size in memory header of the block. To be used when it is returned.*/
         pBlock->size            = blockSize;
-        gMem.memCnt.freeSize    -= blockSize + sizeof(MEM_BLOCK);
+        gMem.memCnt.freeSize    -= blockSize + sizeof(MEM_BLOCK_T);
         if (gMem.memCnt.freeSize < gMem.memCnt.minFreeSize)
         {
             gMem.memCnt.minFreeSize = gMem.memCnt.freeSize;
@@ -353,7 +421,7 @@ EXT_DECL UINT8 *vos_memAlloc (
         gMem.memCnt.allocCnt++;
 
         /* Return pointer to data area, not the memory block itself */
-        return (UINT8 *) pBlock + sizeof(MEM_BLOCK);
+        return (UINT8 *) pBlock + sizeof(MEM_BLOCK_T);
     }
     else
     {
@@ -378,23 +446,22 @@ EXT_DECL VOS_ERR_T vos_memFree (
     int         ret = VOS_NO_ERR;
     UINT32      i;
     UINT32      blockSize;
-    MEM_BLOCK   *pBlock;
+    MEM_BLOCK_T   *pBlock;
 
-    /* TBD: This code is not working, use heap memory allocation */
+    /* Param check */
+    if (pMemBlock == NULL)
+    {
+        gMem.memCnt.freeErrCnt++;
+        vos_printf(VOS_LOG_ERROR, "vos_memFree ERROR NULL pointer\n");
+        return VOS_PARAM_ERR;
+    }
+
     /*    Use standard heap memory    */
-    if (gMemorySize == 0 && gMemoryArea == NULL)
+    if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
         vos_printf(VOS_LOG_DBG, "vos_memFree %p\n", pMemBlock);
         free(pMemBlock);
         return VOS_NO_ERR;
-    }
-
-    if (pMemBlock == NULL)
-    {
-        gMem.memCnt.freeErrCnt++;
-
-        vos_printf(VOS_LOG_ERROR, "vos_memFree ERROR NULL pointer\n");
-        return VOS_PARAM_ERR;
     }
 
     /* Check that the returned memory is within the allocated area */
@@ -402,15 +469,12 @@ EXT_DECL VOS_ERR_T vos_memFree (
         ((UINT8 *)pMemBlock >= (gMem.pArea + gMem.memSize)))
     {
         gMem.memCnt.freeErrCnt++;
-
-        vos_printf(
-            VOS_LOG_ERROR,
-            "vos_memFree ERROR returned memory not within allocated memory\n");
+        vos_printf(VOS_LOG_ERROR, "vos_memFree ERROR returned memory not within allocated memory\n");
         return VOS_PARAM_ERR;
     }
 
     /* Get memory sempahore */
-    if (vos_semaTake(gMem.sem, 0) != VOS_NO_ERR)
+    if (vos_mutexLock(&gMem.mutex) != VOS_NO_ERR)
     {
         gMem.memCnt.freeErrCnt++;
 
@@ -419,7 +483,7 @@ EXT_DECL VOS_ERR_T vos_memFree (
     }
 
     /* Set block pointer to start of block, before the returned pointer */
-    pBlock      = (MEM_BLOCK *) ((UINT8 *) pMemBlock - sizeof(MEM_BLOCK));
+    pBlock      = (MEM_BLOCK_T *) ((UINT8 *) pMemBlock - sizeof(MEM_BLOCK_T));
     blockSize   = pBlock->size;
 
     /* Find appropriate free block item */
@@ -440,8 +504,9 @@ EXT_DECL VOS_ERR_T vos_memFree (
     }
     else
     {
-        gMem.memCnt.freeSize += blockSize + sizeof(MEM_BLOCK);
+        gMem.memCnt.freeSize += blockSize + sizeof(MEM_BLOCK_T);
         gMem.memCnt.allocCnt--;
+
         /* Put the returned block first in the linked list */
         pBlock->pNext = gMem.freeBlock[i].pFirst;
         gMem.freeBlock[i].pFirst = pBlock;
@@ -451,7 +516,7 @@ EXT_DECL VOS_ERR_T vos_memFree (
     }
 
     /* Release semaphore */
-    if(vos_semaGive(gMem.sem) != VOS_NO_ERR)
+    if(vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "vos_memFree can't release semaphore\n");
     }
@@ -488,182 +553,23 @@ EXT_DECL VOS_ERR_T vos_memCount(
     UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES])
 {
     int i;
-    /* TBD: This code is not working, use heap memory allocation */
-    vos_printf(VOS_LOG_ERROR,
-               "vos_memCount not implemented\n");
+
+    *pAllocatedMemory = gMem.memSize;
+    *pFreeMemory = gMem.memCnt.freeSize;
+    *pMinFree = gMem.memCnt.minFreeSize;
+    *pNumAllocBlocks = gMem.memCnt.allocCnt;
+    *pNumAllocErr = gMem.memCnt.allocErrCnt;
+    *pNumFreeErr = gMem.memCnt.freeErrCnt;
+    
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        allocBlockSize[i] = 0;
-        usedBlockSize[i] = 0;
+        usedBlockSize[i] = gMem.memCnt.blockCnt[i];
+        allocBlockSize[i] = gMem.memCnt.preAlloc[i];
     }
 
     return VOS_INIT_ERR;
 }
 
-
-/**********************************************************************************************************************/
-/*    Queues
-                                                                                                               */
-/**********************************************************************************************************************/
-
-/**********************************************************************************************************************/
-/** Initialize a message queue.
- *  Returns a handle for further calls
- *
- *  @param[in]      pKey              Unique identifier (file name)
- *  @param[out]     pQueueID          Pointer to returned queue handle
- *  @param[in]      maxNoMsg          maximum number of messages
- *  @param[in]      maxLength         maximum size of one messages
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
- *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
- *  @retval         VOS_INIT_ERR      not supported
- *  @retval         VOS_QUEUE_ERR     error creating queue
- */
-
-EXT_DECL VOS_ERR_T vos_queueCreate (
-    const CHAR8 *pKey,
-    VOS_QUEUE_T *pQueueID,
-    UINT32      maxNoMsg,
-    UINT32      maxLength)
-{
-    /* TBD      */
-    vos_printf(VOS_LOG_ERROR,
-               "vos_queueCreate not implemented\n");
-    return VOS_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/** Destroy a message queue.
- *  Free all resources used by this queue
- *
- *  @param[in]      queueID            Queue handle
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- */
-
-EXT_DECL VOS_ERR_T vos_queueDestroy (
-    VOS_QUEUE_T queueID)
-{
-    /* TBD      */
-    vos_printf(VOS_LOG_ERROR,
-               "vos_queue function not implemented\n");
-    return VOS_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/** Send a message.
- *
- *
- *  @param[in]      queueID            Queue handle
- *  @param[in]      pMsg               Pointer to message to be sent
- *  @param[in]      size               Message size
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- *  @retval         VOS_QUEUE_FULL     queue is full
- */
-
-EXT_DECL VOS_ERR_T vos_queueSend (
-    VOS_QUEUE_T queueID,
-    const UINT8 *pMsg,
-    UINT32      size)
-{
-    /* TBD      */
-    vos_printf(VOS_LOG_ERROR,
-               "vos_queue function not implemented\n");
-    return VOS_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/** Get a message.
- *
- *
- *  @param[in]      queueID            Queue handle
- *  @param[out]     pMsg               Pointer to message to be received
- *  @param[in,out]  pSize              Pointer to max. message size on entry, actual size on exit
- *  @param[in]      usTimeout          Maximum time to wait for a message in usec
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- *  @retval         VOS_QUEUE_ERR      queue is empty
- */
-
-EXT_DECL VOS_ERR_T vos_queueReceive (
-    VOS_QUEUE_T queueID,
-    UINT8       *pMsg,
-    UINT32      *pSize,
-    UINT32      usTimeout)
-{
-    /* TBD      */
-    vos_printf(VOS_LOG_ERROR,
-               "vos_queue function not implemented\n");
-    return VOS_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/*    Shared memory
-                                                                                                               */
-/**********************************************************************************************************************/
-
-/**********************************************************************************************************************/
-/** Create a shared memory area or attach to existing one.
- *  The first call with the a specified key will create a shared memory area with the supplied size and will return
- *  a handle and a pointer to that area. If the area already exists, the area will be attached.
- *    This function is not available in each target implementation.
- *
- *  @param[in]      pKey               Unique identifier (file name)
- *  @param[out]     pHandle            Pointer to returned handle
- *  @param[out]     ppMemoryArea       Pointer to pointer to memory area
- *  @param[in,out]  pSize              Pointer to size of area to allocate, on return actual size after attach
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- *  @retval         VOS_MEM_ERR        no memory available
- */
-
-EXT_DECL VOS_ERR_T vos_sharedOpen (
-    const CHAR8 *pKey,
-    VOS_SHRD_T  *pHandle,
-    UINT8       * *ppMemoryArea,
-    UINT32      *pSize)
-{
-    /* TBD      */
-    vos_printf(VOS_LOG_ERROR,
-               "vos_shared function not implemented\n");
-    return VOS_NO_ERR;
-}
-
-
-/**********************************************************************************************************************/
-/** Close connection to the shared memory area.
- *  If the area was created by the calling process, the area will be closed (freed). If the area was attached,
- *  it will be detached.
- *    This function is not available in each target implementation.
- *
- *  @param[in]      handle             Returned handle
- *  @param[in]      pMemoryArea        Pointer to memory area
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- */
-
-EXT_DECL VOS_ERR_T vos_sharedClose (
-    VOS_SHRD_T  handle,
-    const UINT8 *pMemoryArea)
-{
-    /* TBD      */
-    vos_printf(VOS_LOG_ERROR,
-               "vos_shared function not implemented\n");
-    return VOS_NO_ERR;
-}
 
 /**********************************************************************************************************************/
 /** Sort an array.
