@@ -170,7 +170,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
         p[i] = NULL;
     }
 
-    /*	Check if we should prealloc some memory	*/
+    /*  Check if we should prealloc some memory */
     if (fragMem != NULL)
     {
         for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)

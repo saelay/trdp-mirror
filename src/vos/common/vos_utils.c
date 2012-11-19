@@ -4,7 +4,7 @@
  *
  * @brief           Common functions for VOS
  *
- * @details			Common functions of the abstraction layer. Mainly debugging support.
+ * @details         Common functions of the abstraction layer. Mainly debugging support.
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
