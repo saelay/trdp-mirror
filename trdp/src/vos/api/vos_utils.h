@@ -74,7 +74,7 @@ extern void *gRefCon;
     }
 #endif
 
-/** Alignment macros	*/
+/** Alignment macros  */
 #if defined(alignof)
 #define ALIGNOF(type)   alignof(type)
 #elif defined(__alignof__)

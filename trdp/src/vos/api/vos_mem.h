@@ -56,7 +56,7 @@ extern "C" {
  * TYPEDEFS
  */
 
-/** Opaque queue define	*/
+/** Opaque queue define */
 typedef struct VOS_QUEUE *VOS_QUEUE_T;
 typedef struct VOS_SHRD *VOS_SHRD_T;
 
@@ -136,10 +136,10 @@ EXT_DECL UINT8 *vos_memAlloc (
 /**********************************************************************************************************************/
 /** Deallocate a block of memory (from memory area above).
  *
- *  @param[in]      pMemBlock		Pointer to memory block to be freed
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @param[in]      pMemBlock       Pointer to memory block to be freed
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_memFree (
@@ -173,8 +173,7 @@ EXT_DECL VOS_ERR_T vos_memCount(
 
 
 /**********************************************************************************************************************/
-/*  Sorting/Searching
-       */
+/*  Sorting/Searching                                                                                                 */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
