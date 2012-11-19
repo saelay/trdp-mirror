@@ -448,8 +448,8 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", 
-                    inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
+        vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n",
+                   inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
 
         if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
@@ -500,10 +500,10 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", 
+        vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n",
                    inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
-        
-        
+
+
         if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
             vos_print(VOS_LOG_WARNING, "setsockopt IP_DROP_MEMBERSHIP failed\n");
@@ -736,38 +736,38 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
     UINT32  *pIPAddress,
     UINT16  *pPort)
 {
-   struct sockaddr_in srcAddress;
-	int connFd = -1;
+    struct sockaddr_in srcAddress;
+    int connFd = -1;
 
-	if (pSock == NULL || pIPAddress == NULL || pPort == NULL)
-	{
-		return VOS_PARAM_ERR;
-	}
+    if (pSock == NULL || pIPAddress == NULL || pPort == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
 
-	memset((char *)&srcAddress, 0, sizeof(srcAddress));
+    memset((char *)&srcAddress, 0, sizeof(srcAddress));
 
-	srcAddress.sin_family       = AF_INET;
-	srcAddress.sin_addr.s_addr  = vos_htonl(*pIPAddress);
-	srcAddress.sin_port         = vos_htons(*pPort);
+    srcAddress.sin_family       = AF_INET;
+    srcAddress.sin_addr.s_addr  = vos_htonl(*pIPAddress);
+    srcAddress.sin_port         = vos_htons(*pPort);
 
-	for (;; )
-	{
-		socklen_t sockLen = sizeof(srcAddress);
-		//
-		connFd = accept(sock, (struct sockaddr *) &srcAddress, &sockLen);
-		if (connFd < 0)
-		{
-			switch (errno)
-			{
-				/*Accept return -1 and errno = EWOULDBLOCK,
-				when there is no more connection requests.*/
-				case EWOULDBLOCK:
-				{
-					*pSock      = connFd;
-					return VOS_NO_ERR;
-				}
-				case EINTR:         break;
-				case ECONNABORTED:  break;
+    for (;; )
+    {
+        socklen_t sockLen = sizeof(srcAddress);
+        /*  */
+        connFd = accept(sock, (struct sockaddr *) &srcAddress, &sockLen);
+        if (connFd < 0)
+        {
+            switch (errno)
+            {
+                /*Accept return -1 and errno = EWOULDBLOCK,
+                when there is no more connection requests.*/
+                case EWOULDBLOCK:
+                {
+                    *pSock = connFd;
+                    return VOS_NO_ERR;
+                }
+                case EINTR:         break;
+                case ECONNABORTED:  break;
 #if defined (EPROTO)
                 case EPROTO:        break;
 #endif
@@ -922,7 +922,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             bufferSize  -= rcvSize;
             pBuffer     += rcvSize;
-            *pSize		+= rcvSize;
+            *pSize      += rcvSize;
         }
         if (rcvSize == 0)
         {
