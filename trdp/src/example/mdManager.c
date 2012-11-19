@@ -16,6 +16,7 @@
 #include "trdp_private.h"
 #include "trdp_utils.h"
 
+
 #define TRDP_IP4_ADDR(a,b,c,d) ( (am_big_endian()) ? \
 	((UINT32)((a) & 0xFF) << 24) | ((UINT32)((b) & 0xFF) << 16) | ((UINT32)((c) & 0xFF) << 8) | ((UINT32)((d) & 0xFF)) : \
 	((UINT32)((d) & 0xFF) << 24) | ((UINT32)((c) & 0xFF) << 16) | ((UINT32)((b) & 0xFF) << 8) | ((UINT32)((a) & 0xFF)))
@@ -268,7 +269,7 @@ static void queue_procricz()
 		printf("replyTimeout      = %d\n"   ,msg.Msg.replyTimeout);
 		printf("destURI           = ");      print_uri(msg.Msg.destURI); printf("\n");
 		printf("srcURI            = ");      print_uri(msg.Msg.srcURI); printf("\n");
-		printf("noOfReplies       = %d\n"   ,msg.Msg.noOfReplies);
+		printf("numReplies       = %d\n"   	,msg.Msg.numReplies);
 		printf("pUserRef          = %p\n"   ,msg.Msg.pUserRef);
 		printf("resultCode        = %d\n"   ,msg.Msg.resultCode);
 		
@@ -423,7 +424,7 @@ static void md_indication(
 	printf("replyTimeout      = %d\n"   ,pMsg->replyTimeout);
 	printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
 	printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
-	printf("noOfReplies       = %d\n"   ,pMsg->noOfReplies);
+	printf("numReplies       = %d\n"   ,pMsg->numReplies);
 	printf("pUserRef          = %p\n"   ,pMsg->pUserRef);
 	printf("resultCode        = %d\n"   ,pMsg->resultCode);
 	
@@ -447,7 +448,8 @@ static void md_indication(
 static int test_initialize()
 {
 	TRDP_ERR_T errv;
-	
+	TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, HEAP_MEMORY_SIZE, {}};
+	TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 	memset(&md_config,0,sizeof(md_config));
 	memset(&mem_config,0,sizeof(mem_config));
 	
@@ -472,26 +474,34 @@ static int test_initialize()
 	md_config.udpPort        = IP_MD_UDP_PORT;
 	md_config.tcpPort        = IP_MD_UDP_PORT;
 	
-	/* Inizialize TRDP */
-	errv = tlc_init(
-		&appHandle,
-		0, /* default Ip address */
-		0, /* default Ip address */
-		private_debug_printf, /* debug print function */
-		NULL, /* marshall config */
-		NULL, /* PD configuration */
-		&md_config, /* MD configuration */
-		&mem_config, /* Memory Configuration */
-		TRDP_OPTION_BLOCK /* option */
-		);
+
+	/*  Init the library for non-blocking operation     */
+	    if (tlc_init(&private_debug_printf,                            /* actually printf                                 */
+			 &dynamicConfig) != TRDP_NO_ERR)
+	    {
+		printf("Initialization error\n");
+		return 1;
+	    }
 	if (errv != TRDP_NO_ERR)
 	{
 		fprintf(stderr,"tlc_init() error = %d\n",errv);
 		exit(EXIT_FAILURE);
 	}
 	
+	/*	Open a session for callback operation */
+	errv = tlc_openSession(&appHandle,
+			0, 0,                              /* use default IP addresses */
+			NULL,                              /* no Marshalling */
+			NULL, &md_config,             /* system defaults for PD and MD	*/
+			&processConfig);
+	if (errv != TRDP_NO_ERR)
+	{
+		fprintf(stderr,"tlc_openSession() error = %d\n",errv);
+		exit(EXIT_FAILURE);
+	}
+
 	/* set network topo counter */
-	tlc_setTopoCount(151);
+	tlc_setTopoCount(appHandle, 151);
 	
 	return 0;
 }
@@ -505,7 +515,7 @@ static int test_notify()
 	int szout = sprintf(outbuf,"tlm_notify %d",(int)time(0));
 	errv = tlm_notify(
 		appHandle,
-		(void *)0x1000CAFE, /* user ref */
+		NULL, /* user ref */
 		123, /* comId */
 		150, /* topoCount */
 		0,   /* own IP address from trdp stack */
@@ -590,7 +600,6 @@ static int test_receiver()
 
 static int test_main_proc()
 {
-	TRDP_ERR_T errv;
 	int loop;
 
 	/* main process loop */
@@ -605,7 +614,7 @@ static int test_main_proc()
 		
 		/* printf("sizeof(fd_set)=%d\n",(int)sizeof(fd_set)); */
 		
-		errv = tlc_getInterval(
+		tlc_getInterval(
 			appHandle,
 			(TRDP_TIME_T *)&tv,
 			(TRDP_FDS_T *)&rfds,
@@ -620,7 +629,7 @@ static int test_main_proc()
 		
 		
 		/* Polling Mode */
-		errv = tlc_process(appHandle,NULL,NULL);
+		tlc_process(appHandle,NULL,NULL);
 		//printf("tlc_process()=%d\n",errv);
 		
 		/* call back process */

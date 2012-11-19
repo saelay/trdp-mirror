@@ -1386,7 +1386,8 @@ static void md_indication(
 static int test_initialize()
 {
     TRDP_ERR_T errv;
-    
+    TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, HEAP_MEMORY_SIZE, {}};
+
     memset(&md_config,0,sizeof(md_config));
     memset(&mem_config,0,sizeof(mem_config));
     
@@ -1412,25 +1413,17 @@ static int test_initialize()
     md_config.tcpPort        = IP_MD_UDP_PORT;
     
     /* Inizialize TRDP */
-    errv = tlc_init(
-	&appHandle,
-	0, /* default Ip address */
-	0, /* default Ip address */
-	private_debug_printf, /* debug print function */
-	NULL, /* marshall config */
-	NULL, /* PD configuration */
-	&md_config, /* MD configuration */
-	&mem_config, /* Memory Configuration */
-	TRDP_OPTION_BLOCK /* option */
-	);
+    /*  Init the library for non-blocking operation     */
+    errv = tlc_init(&private_debug_printf,                            /* actually printf                                 */
+		 &dynamicConfig);
     if (errv != TRDP_NO_ERR)
     {
 	fprintf(stderr,"tlc_init() error = %d\n",errv);
 	exit(EXIT_FAILURE);
     }
-    
+
     /* set network topo counter */
-    tlc_setTopoCount(151);
+    tlc_setTopoCount(appHandle, 151);
 
     return 0;
 }
@@ -1545,8 +1538,6 @@ static int testRequestSend(
 // Test main loop
 static int test_main_proc()
 {
-    TRDP_ERR_T errv;
-
     /* main process loop */
     int run = 1;
     int cliCmd = 0;
@@ -1620,7 +1611,7 @@ static int test_main_proc()
 	
 	// printf("sizeof(fd_set)=%d\n",(int)sizeof(fd_set));
 	
-	errv = tlc_getInterval(
+	tlc_getInterval(
 	    appHandle,
 	    (TRDP_TIME_T *)&tv,
 	    (TRDP_FDS_T *)&rfds,
@@ -1635,7 +1626,7 @@ static int test_main_proc()
 	
 	
 	// Polling Mode
-	errv = tlc_process(appHandle,NULL,NULL);
+	tlc_process(appHandle,NULL,NULL);
 	//fprintf(stderr,"tlc_process()=%d\n",errv);
 	
 	// call back process
