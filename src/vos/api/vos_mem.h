@@ -4,16 +4,12 @@
  *
  * @brief           Memory and queue functions for OS abstraction
  *
- * @details			This module provides three services: 1. A memory control supervison
- *					- Private memory management with optimised fragmentation handling
- *					- A message queue handler (system-wide on supported systems)
- *					- Access to shared memory (on supported systems only)
- *					Within the prototype TRDP stack, only the memory management unit is currently in use.
+ * @details         This module provides memory control supervison
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
  * @author          Bernd Loehr, NewTec GmbH
- *					Peter Brander (Memory scheme)
+ *                  Peter Brander (Memory scheme)
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
@@ -45,7 +41,7 @@ extern "C" {
 #define __cdecl
 #endif
 
-#define VOS_MEM_MAX_PREALLOCATE     10  /*<< Max blocks to pre-allocate */
+#define VOS_MEM_MAX_PREALLOCATE  10     /*<< Max blocks to pre-allocate */
 
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
     the overal size of the used memory allocation area is larger. */
@@ -90,20 +86,20 @@ typedef enum
  */
 
 /**********************************************************************************************************************/
-/*	Memory																										      */
+/*  Memory                                                                                                            */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
 /** Initialize the memory unit.
  *  Init a supplied block of memory and prepare it for use with vos_alloc and vos_dealloc. The used block sizes can
- *	be supplied and will be preallocated.
+ *  be supplied and will be preallocated.
  *
- *  @param[in]      pMemoryArea		Pointer to memory area to use
- *  @param[in]      size			Size of provided memory area
- *  @param[in]      fragMem			Pointer to list of preallocate block sizes, used to fragment memory for large blocks
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_MEM_ERR		no memory available
+ *  @param[in]      pMemoryArea     Pointer to memory area to use
+ *  @param[in]      size            Size of provided memory area
+ *  @param[in]      fragMem         Pointer to list of preallocate block sizes, used to fragment memory for large blocks
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_MEM_ERR     no memory available
  */
 
 EXT_DECL VOS_ERR_T vos_memInit (
@@ -113,13 +109,13 @@ EXT_DECL VOS_ERR_T vos_memInit (
 
 /**********************************************************************************************************************/
 /** Delete the memory area.
- *	This will eventually invalidate any previously allocated memory blocks! It should be called last before the
+ *  This will eventually invalidate any previously allocated memory blocks! It should be called last before the
  *  application quits. No further access to the memory blocks is allowed after this call.
  *
- *  @param[in]      pMemoryArea		Pointer to memory area to use
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @param[in]      pMemoryArea     Pointer to memory area to use
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_memDelete (
@@ -128,7 +124,7 @@ EXT_DECL VOS_ERR_T vos_memDelete (
 /**********************************************************************************************************************/
 /** Allocate a block of memory (from memory area above).
  *
- *  @param[in]      size			Size of requested block
+ *  @param[in]      size            Size of requested block
  *
  *  @retval         Pointer to memory area
  *  @retval         NULL if no memory available
@@ -166,153 +162,29 @@ EXT_DECL VOS_ERR_T vos_memFree (
  */
 
 EXT_DECL VOS_ERR_T vos_memCount(
-    UINT32  *pAllocatedMemory,
-    UINT32  *pFreeMemory,
-    UINT32  *pMinFree, 
-    UINT32  *pNumAllocBlocks,
-    UINT32  *pNumAllocErr,
-    UINT32  *pNumFreeErr,
-    UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES],
-    UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES]);
-
-/**********************************************************************************************************************/
-/*	Queues																										      */
-/**********************************************************************************************************************/
-
-/**********************************************************************************************************************/
-/** Initialize a message queue.
- *  Returns a handle for further calls
- *
- *  @param[in]      pKey			Unique identifier (file name)
- *  @param[out]     pQueueID		Pointer to returned queue handle
- *  @param[in]      maxNoMsg		maximum number of messages
- *  @param[in]      maxLength		maximum size of one messages
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_INIT_ERR	not supported
- *  @retval         VOS_QUEUE_ERR	error creating queue
- */
-
-EXT_DECL VOS_ERR_T vos_queueCreate (
-    const CHAR8 *pKey,
-    VOS_QUEUE_T *pQueueId,
-    UINT32      maxNoMsg,
-    UINT32      maxLength);
-
-/**********************************************************************************************************************/
-/** Destroy a message queue.
- *  Free all resources used by this queue
- *
- *  @param[in]      queueID			Queue handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- */
-
-EXT_DECL VOS_ERR_T vos_queueDestroy (
-    VOS_QUEUE_T queueID);
-
-/**********************************************************************************************************************/
-/** Send a message.
- *
- *
- *  @param[in]      queueID			Queue handle
- *  @param[in]      pMsg			Pointer to message to be sent
- *  @param[in]      size			Message size
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_QUEUE_FULL	queue is full
- */
-
-EXT_DECL VOS_ERR_T vos_queueSend (
-    VOS_QUEUE_T queueID,
-    const UINT8 *pMsg,
-    UINT32      size);
-
-/**********************************************************************************************************************/
-/** Get a message.
- *
- *
- *  @param[in]      queueID			Queue handle
- *  @param[out]     pMsg			Pointer to message to be received
- *  @param[in,out]  pSize			Pointer to max. message size on entry, actual size on exit
- *  @param[in]      usTimeout		Maximum time to wait for a message in usec
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_QUEUE_ERR	queue is empty
- */
-
-EXT_DECL VOS_ERR_T vos_queueReceive (
-    VOS_QUEUE_T queueID,
-    UINT8       *pMsg,
-    UINT32      *pSize,
-    UINT32      usTimeout);
-
-/**********************************************************************************************************************/
-/*	Shared memory																										      */
-/**********************************************************************************************************************/
-
-/**********************************************************************************************************************/
-/** Create a shared memory area or attach to existing one.
- *  The first call with the a specified key will create a shared memory area with the supplied size and will return
- *  a handle and a pointer to that area. If the area already exists, the area will be attached.
- *	This function is not available in each target implementation.
- *
- *  @param[in]      pKey			Unique identifier (file name)
- *  @param[out]     pHandle			Pointer to returned handle
- *  @param[out]     ppMemoryArea	Pointer to pointer to memory area
- *  @param[in,out]  pSize			Pointer to size of area to allocate, on return actual size after attach
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_MEM_ERR		no memory available
- */
-
-EXT_DECL VOS_ERR_T vos_sharedOpen (
-    const CHAR8 *pKey,
-    VOS_SHRD_T  *pHandle,
-    UINT8       * *ppMemoryArea,
-    UINT32      *pSize);
+    UINT32  * pAllocatedMemory,
+    UINT32  * pFreeMemory,
+    UINT32  * pMinFree,
+    UINT32  * pNumAllocBlocks,
+    UINT32  * pNumAllocErr,
+    UINT32  * pNumFreeErr,
+    UINT32 allocBlockSize[VOS_MEM_NBLOCKSIZES],
+    UINT32 usedBlockSize[VOS_MEM_NBLOCKSIZES]);
 
 
 /**********************************************************************************************************************/
-/** Close connection to the shared memory area.
- *  If the area was created by the calling process, the area will be closed (freed). If the area was attached,
- *  it will be detached.
- *	This function is not available in each target implementation.
- *
- *  @param[in]      handle			Returned handle
- *  @param[in]      pMemoryArea		Pointer to memory area
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- */
-
-EXT_DECL VOS_ERR_T vos_sharedClose (
-    VOS_SHRD_T  handle,
-    const UINT8 *pMemoryArea);
-
-/**********************************************************************************************************************/
-/*	Sorting/Searching																										      */
+/*  Sorting/Searching
+       */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
 /** Sort an array.
  *  This is just a wrapper for the standard qsort function.
  *
- *  @param[in,out]	pBuf			Pointer to the array to sort
- *  @param[in]      num				number of elements
- *  @param[in]      size			size of one element
- *  @param[in]      compare			Pointer to compare function
+ *  @param[in,out]  pBuf            Pointer to the array to sort
+ *  @param[in]      num             number of elements
+ *  @param[in]      size            size of one element
+ *  @param[in]      compare         Pointer to compare function
  *  @retval         none
  */
 
@@ -329,11 +201,11 @@ EXT_DECL void vos_qsort (
 /** Binary search in a sorted array.
  *  This is just a wrapper for the standard qsort function.
  *
- *  @param[in]      pKey			Key to search for
- *  @param[in]      pBuf			Pointer to the array to sort
- *  @param[in]      num				number of elements
- *  @param[in]      size			size of one element
- *  @param[in]      compare			Pointer to compare function
+ *  @param[in]      pKey            Key to search for
+ *  @param[in]      pBuf            Pointer to the array to sort
+ *  @param[in]      num             number of elements
+ *  @param[in]      size            size of one element
+ *  @param[in]      compare         Pointer to compare function
  *  @retval
  */
 

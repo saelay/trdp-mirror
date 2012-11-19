@@ -4,7 +4,7 @@
  *
  * @brief           Threading functions for OS abstraction
  *
- * @details			Thread-, semaphore- and time-handling functions
+ * @details            Thread-, semaphore- and time-handling functions
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 /** The maximum number of concurrent usable threads  */
-#define VOS_MAX_THREAD_CNT 100
+#define VOS_MAX_THREAD_CNT  100
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -87,34 +87,34 @@ extern "C" {
  * TYPEDEFS
  */
 
-/** Thread policy matching pthread/Posix defines	*/
+/** Thread policy matching pthread/Posix defines    */
 typedef enum
 {
-    VOS_THREAD_POLICY_OTHER,        /*	Default	for the target system	*/
-    VOS_THREAD_POLICY_FIFO,         /*  First come, first serve	*/
-    VOS_THREAD_POLICY_RR            /*	Round robin	*/
+    VOS_THREAD_POLICY_OTHER,        /*  Default for the target system    */
+    VOS_THREAD_POLICY_FIFO,         /*  First come, first serve          */
+    VOS_THREAD_POLICY_RR            /*  Round robin                      */
 } VOS_THREAD_POLICY_T;
 
-/** Thread priority range from 1 (highest) to 255 (lowest), 0 default of the target system	*/
+/** Thread priority range from 1 (highest) to 255 (lowest), 0 default of the target system    */
 typedef UINT8 VOS_THREAD_PRIORITY_T;
 
-/** Thread function definition	*/
+/** Thread function definition    */
 typedef void (__cdecl * VOS_THREAD_FUNC_T)(void *pArg);
 
-/** State of the semaphore	*/
+/** State of the semaphore    */
 typedef enum
 {
     VOS_SEMA_EMPTY  = 0,
     VOS_SEMA_FULL   = 1
 } VOS_SEMA_STATE_T;
 
-/** Hidden mutex handle definition	*/
-typedef struct VOS_MUTEX  *VOS_MUTEX_T;
+/** Hidden mutex handle definition    */
+typedef struct VOS_MUTEX *VOS_MUTEX_T;
 
-/** Hidden semaphore handle definition	*/
-typedef struct VOS_SEMA   *VOS_SEMA_T;
+/** Hidden semaphore handle definition    */
+typedef struct VOS_SEMA *VOS_SEMA_T;
 
-/** Hidden thread handle definition	*/
+/** Hidden thread handle definition    */
 typedef void *VOS_THREAD_T;
 
 
@@ -123,7 +123,8 @@ typedef void *VOS_THREAD_T;
  */
 
 /**********************************************************************************************************************/
-/*	Threads																										      */
+/*    Threads
+                                                                                                               */
 /**********************************************************************************************************************/
 
 
@@ -131,8 +132,8 @@ typedef void *VOS_THREAD_T;
 /** Initialize the thread library.
  *  Must be called once before any other call
  *
- *  @retval         VOS_NO_ERR			no error
- *  @retval         VOS_INIT_ERR		threading not supported
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      threading not supported
  */
 
 EXT_DECL VOS_ERR_T vos_threadInit (
@@ -143,18 +144,18 @@ EXT_DECL VOS_ERR_T vos_threadInit (
  *  Create a thread and return a thread handle for further requests. Not each parameter may be supported by all
  *  target systems!
  *
- *  @param[out]     pThread         Pointer to returned thread handle
- *  @param[in]      pName			Pointer to name of the thread (optional)
- *  @param[in]      policy			Scheduling policy (FIFO, Round Robin or other)
- *  @param[in]      priority		Scheduling priority (1...255 (highest), default 0)
- *  @param[in]      interval		Interval for cyclic threads in us (optional)
- *  @param[in]      stackSize		Minimum stacksize, default 0: 16kB
- *  @param[in]      pFunction	    Pointer to the thread function
- *  @param[in]      pArguments		Pointer to the thread function parameters
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @param[out]     pThread           Pointer to returned thread handle
+ *  @param[in]      pName             Pointer to name of the thread (optional)
+ *  @param[in]      policy            Scheduling policy (FIFO, Round Robin or other)
+ *  @param[in]      priority          Scheduling priority (1...255 (highest), default 0)
+ *  @param[in]      interval          Interval for cyclic threads in us (optional)
+ *  @param[in]      stackSize         Minimum stacksize, default 0: 16kB
+ *  @param[in]      pFunction         Pointer to the thread function
+ *  @param[in]      pArguments        Pointer to the thread function parameters
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_threadCreate (
@@ -170,13 +171,13 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
 /**********************************************************************************************************************/
 /** Terminate a thread.
  *  This call will terminate the thread with the given threadId and release all resources. Depending on the
- *	underlying architectures, it may just block until the thread ran out.
+ *    underlying architectures, it may just block until the thread ran out.
  *
- *  @param[in]      thread          Thread handle (or NULL if current thread)
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @param[in]      thread            Thread handle (or NULL if current thread)
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_threadTerminate (
@@ -186,11 +187,11 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
 /** Is the thread still active?
  *  This call will return VOS_NO_ERR if the thread is still active, VOS_PARAM_ERR in case it ran out.
  *
- *  @param[in]      thread          Thread handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @param[in]      thread            Thread handle
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_threadIsActive (
@@ -198,16 +199,17 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
 
 
 /**********************************************************************************************************************/
-/*	Timers																										      */
+/*    Timers
+                                                                                                               */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
 /** Delay the execution of the current thread by the given delay in us.
  *
  *
- *  @param[in]      delay           Delay in us
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
+ *  @param[in]      delay             Delay in us
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
  */
 
 EXT_DECL VOS_ERR_T vos_threadDelay (
@@ -217,9 +219,9 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
 /** Return the current time in sec and us
  *
  *
- *  @param[out]     pTime			Pointer to time value
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
+ *  @param[out]     pTime             Pointer to time value
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
  */
 
 EXT_DECL VOS_ERR_T vos_getTime (
@@ -228,10 +230,10 @@ EXT_DECL VOS_ERR_T vos_getTime (
 
 /**********************************************************************************************************************/
 /** Get a time-stamp string.
- *	Get a time-stamp string for debugging in the form "yyyymmdd-hh:mm:ss.ms"
- *	Depending on the used OS / hardware the time might not be a real-time stamp but relative from start of system.
+ *    Get a time-stamp string for debugging in the form "yyyymmdd-hh:mm:ss.ms"
+ *    Depending on the used OS / hardware the time might not be a real-time stamp but relative from start of system.
  *
- *  @retval         timestamp		"yyyymmdd-hh:mm:ss.ms"
+ *  @retval         timestamp        "yyyymmdd-hh:mm:ss.ms"
  */
 
 EXT_DECL const CHAR8 *vos_getTimeStamp (
@@ -242,9 +244,9 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (
 /** Clear the time stamp
  *
  *
- *  @param[out]     pTime			Pointer to time value
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_PARAM_ERR	parameter must not be NULL
+ *  @param[out]     pTime             Pointer to time value
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_PARAM_ERR     parameter must not be NULL
  */
 
 EXT_DECL VOS_ERR_T vos_clearTime (
@@ -254,10 +256,10 @@ EXT_DECL VOS_ERR_T vos_clearTime (
 /** Add the second to the first time stamp, return sum in first
  *
  *
- *  @param[in, out]     pTime			Pointer to time value
- *  @param[in]          pAdd			Pointer to time value
- *  @retval             VOS_NO_ERR		no error
- *  @retval             VOS_PARAM_ERR	parameter must not be NULL
+ *  @param[in, out]     pTime            Pointer to time value
+ *  @param[in]          pAdd             Pointer to time value
+ *  @retval             VOS_NO_ERR       no error
+ *  @retval             VOS_PARAM_ERR    parameter must not be NULL
  */
 
 EXT_DECL VOS_ERR_T vos_addTime (
@@ -268,10 +270,10 @@ EXT_DECL VOS_ERR_T vos_addTime (
 /** Subtract the second from the first time stamp, return diff in first
  *
  *
- *  @param[in, out]     pTime			Pointer to time value
- *  @param[in]          pSub			Pointer to time value
- *  @retval             VOS_NO_ERR		no error
- *  @retval             VOS_PARAM_ERR	parameter must not be NULL
+ *  @param[in, out]     pTime            Pointer to time value
+ *  @param[in]          pSub             Pointer to time value
+ *  @retval             VOS_NO_ERR       no error
+ *  @retval             VOS_PARAM_ERR    parameter must not be NULL
  */
 
 EXT_DECL VOS_ERR_T vos_subTime (
@@ -282,11 +284,11 @@ EXT_DECL VOS_ERR_T vos_subTime (
 /** Compare the second from the first time stamp, return diff in first
  *
  *
- *  @param[in, out]     pTime			Pointer to time value
- *  @param[in]          pCmp			Pointer to time value to compare
- *  @retval             0				pTime == pCmp
- *  @retval             -1				pTime < pCmp
- *  @retval             1				pTime > pCmp
+ *  @param[in, out]     pTime            Pointer to time value
+ *  @param[in]          pCmp             Pointer to time value to compare
+ *  @retval             0                pTime == pCmp
+ *  @retval             -1               pTime < pCmp
+ *  @retval             1                pTime > pCmp
  */
 
 EXT_DECL INT32 vos_cmpTime (
@@ -297,9 +299,9 @@ EXT_DECL INT32 vos_cmpTime (
 /** Get a universal unique identifier according to RFC 4122 time based version.
  *
  *
- *  @param[out]     pUuID			Pointer to a universal unique identifier
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_UNKNOWN_ERR	Could not create UUID
+ *  @param[out]     pUuID             Pointer to a universal unique identifier
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_UNKNOWN_ERR   Could not create UUID
  */
 
 EXT_DECL VOS_ERR_T vos_getUuid (
@@ -307,18 +309,19 @@ EXT_DECL VOS_ERR_T vos_getUuid (
 
 
 /**********************************************************************************************************************/
-/*	Mutex & Semaphores																								  */
+/*    Mutex & Semaphores
+                                                                                                   */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
 /** Create a mutex.
  *  Return a mutex handle. The mutex will be available at creation.
  *
- *  @param[out]     pMutex			Pointer to mutex handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_PARAM_ERR	pMutex == NULL
- *  @retval         VOS_MUTEX_ERR	no mutex available
+ *  @param[out]     pMutex           Pointer to mutex handle
+ *  @retval         VOS_NO_ERR       no error
+ *  @retval         VOS_INIT_ERR     module not initialised
+ *  @retval         VOS_PARAM_ERR    pMutex == NULL
+ *  @retval         VOS_MUTEX_ERR    no mutex available
  */
 
 EXT_DECL VOS_ERR_T vos_mutexCreate (
@@ -328,11 +331,11 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
 /** Delete a mutex.
  *  Release the resources taken by the mutex.
  *
- *  @param[in]      mutex			mutex handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_MUTEX_ERR	no such mutex
+ *  @param[in]      mutex             mutex handle
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_MUTEX_ERR     no such mutex
  */
 
 EXT_DECL VOS_ERR_T vos_mutexDelete (
@@ -342,10 +345,10 @@ EXT_DECL VOS_ERR_T vos_mutexDelete (
 /** Take a mutex.
  *  Wait for the mutex to become available (lock).
  *
- *  @param[in]      mutex			mutex handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @param[in]      mutex             mutex handle
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
  */
 
 EXT_DECL VOS_ERR_T vos_mutexLock (
@@ -355,11 +358,11 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
 /** Try to take a mutex.
  *  If mutex is can't be taken VOS_MUTEX_ERR is returned.
  *
- *  @param[in]      mutex			mutex handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_MUTEX_ERR	no mutex available
+ *  @param[in]      mutex             mutex handle
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_MUTEX_ERR     no mutex available
  */
 
 EXT_DECL VOS_ERR_T vos_mutexTryLock (
@@ -370,10 +373,10 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
 /** Release a mutex.
  *  Unlock the mutex.
  *
- *  @param[in]      mutex			mutex handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @param[in]      mutex             mutex handle
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
  */
 
 EXT_DECL VOS_ERR_T vos_mutexUnlock (
@@ -384,12 +387,12 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
 /** Create a semaphore.
  *  Return a semaphore handle. Depending on the initial state the semaphore will be available on creation or not.
  *
- *  @param[out]     pSema           Pointer to semaphore handle
- *  @param[in]      initialState	The initial state of the sempahore
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_SEMA_ERR	no semaphore available
+ *  @param[out]     pSema             Pointer to semaphore handle
+ *  @param[in]      initialState      The initial state of the sempahore
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR      no semaphore available
  */
 
 EXT_DECL VOS_ERR_T vos_semaCreate (
@@ -400,10 +403,10 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 /** Delete a semaphore.
  *  This will eventually release any processes waiting for the semaphore.
  *
- *  @param[in]      sema            semaphore handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @param[in]      sema              semaphore handle
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
  */
 
 EXT_DECL VOS_ERR_T vos_semaDelete (
@@ -413,13 +416,13 @@ EXT_DECL VOS_ERR_T vos_semaDelete (
 /** Take a semaphore.
  *  Try to get (decrease) a semaphore.
  *
- *  @param[in]      sema            semaphore handle
- *  @param[in]      timeout         Max. time in us to wait, 0 means forever
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_SEMA_ERR	could not get semaphore in time
+ *  @param[in]      sema              semaphore handle
+ *  @param[in]      timeout           Max. time in us to wait, 0 means forever
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR      could not get semaphore in time
  */
 
 EXT_DECL VOS_ERR_T vos_semaTake (
@@ -431,11 +434,11 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 /** Give a semaphore.
  *  Release (increase) a semaphore.
  *
- *  @param[in]      sema            semaphore handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_SEM_ERR		could not release semaphore
+ *  @param[in]      sema               semaphore handle
+ *  @retval         VOS_NO_ERR         no error
+ *  @retval         VOS_INIT_ERR       module not initialised
+ *  @retval         VOS_NOINIT_ERR     invalid handle
+ *  @retval         VOS_SEM_ERR        could not release semaphore
  */
 
 EXT_DECL VOS_ERR_T vos_semaGive (
