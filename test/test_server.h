@@ -38,6 +38,8 @@
 #define	PD_TESTSERVER_MESSAGE_MAX_SIZE 256
 #define PD_TEST_GIGANTIC_PD      	996
 
+#define MD_TEST_COMID       		901
+
 /*	Test data sets	*/
 TRDP_DATASET_T gDataSet990 =
 {
@@ -584,7 +586,7 @@ struct myDataSet998
 
 
 /* We use dynamic memory	*/
-#define RESERVED_MEMORY  10000
+#define RESERVED_MEMORY  900000
 
 
 #endif
