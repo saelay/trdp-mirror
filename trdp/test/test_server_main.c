@@ -35,14 +35,18 @@
 #include "test_server.h"
 #include "test_general.h"
 #include "trdp_types.h"
+#include "vos_types.h"
+#include "trdp_private.h"
 
-#define PULL_RESPONSE_SIZE	25
+#define PULL_RESPONSE_SIZE	50
 
 UINT8   gInputBuffer[sizeof(gMyDataSet999)] = "\0";
 CHAR8	gPullresponse[PULL_RESPONSE_SIZE];
 BOOL    gKeepOnRunning  = TRUE;
 
 VOS_TIME_T  gLastupdateTime;
+
+static const int gUser_env = 12345678; // needed for MD listener
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -115,7 +119,7 @@ void myPDcallBack (
                    pMsg->comId,
                    vos_ipDotted(pMsg->srcIpAddr));
             memset(gInputBuffer, 0, sizeof(gInputBuffer));
-
+            break;
         default:
             printf("> Error on packet received (ComID %d), err = %d\n",
                    pMsg->comId,
@@ -123,6 +127,47 @@ void myPDcallBack (
             break;
     }
 }
+
+/**********************************************************************************************************************/
+/** callback routine for receiving TRDP traffic
+ *
+ *  @param[in]      pRefCon         user supplied context pointer
+ *  @param[in]      pMsg            pointer to header/packet infos
+ *  @param[in]      pData           pointer to data block
+ *  @param[in]      dataSize        pointer to data size
+ *  @retval         none
+ */
+void myMDcallBack (
+    void                    *pRefCon,
+    const TRDP_PD_INFO_T    *pMsg,
+    UINT8                   *pData,
+    UINT32                  dataSize)
+{
+
+    /*	Check why we have been called */
+    switch (pMsg->resultCode)
+    {
+        case TRDP_NO_ERR:
+            printf("MD> ComID %d received\n", pMsg->comId);
+            break;
+
+        case TRDP_TIMEOUT_ERR:
+            /* The application can decide here if old data shall be invalidated or kept */
+            printf("MD> Packet (type=%x) timed out (ComID %d, SrcIP: %s)\n",
+            		pMsg->msgType,
+            		pMsg->comId,
+            		vos_ipDotted(pMsg->srcIpAddr));
+            break;
+        default:
+            printf("MD> Error on packet (type=%x) received (ComID %d), err = %d\n",
+            		pMsg->msgType,
+            		pMsg->comId,
+            		pMsg->resultCode
+                   );
+            break;
+    }
+}
+
 
 /**********************************************************************************************************************/
 /** main entry
@@ -138,9 +183,20 @@ int main (int argc, char * *argv)
     TRDP_PUB_T              pubHandleUC;    /*  Our identifier to the unicast publication */
     TRDP_PUB_T				pubHandleUCpull; /*  Our identifier to the PULL request publication */
     TRDP_SUB_T				subHandlePullreq; /*  Our subscriber to the multicast subscription */
+    TRDP_LIS_T				lstHandleMD;	/* Our listener handle for Multicast */
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                               TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+                                               TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO,
+                                               IP_PD_UDP_PORT};
+    TRDP_MD_CONFIG_T		mdConfiguration = { myMDcallBack /* Pointer to MD callback function (use excatly the same as for PD)*/
+        		, NULL	/* Pointer to user context for call back */
+        		, {0, 0} /* Default send parameters */
+        		, TRDP_FLAGS_CALLBACK /* Default flags for MD packets */
+                , 10000000 	/* Default reply timeout in us*/
+                , 100000 	/* Default confirmation timeout in us*/
+                , 100000 	/* Default connection timeout in us */
+                , IP_MD_UDP_PORT 	/* Port to be used for UDP MD communication*/
+                , IP_MD_TCP_PORT 	/* Port to be used for TCP MD communication */ };
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"server", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
@@ -167,9 +223,9 @@ int main (int argc, char * *argv)
 
     /*	Open a session for callback operation */
     if (tlc_openSession(&appHandle,
-                        0, 0,                              /* use default IP addresses */
-                        NULL,                              /* no Marshalling */
-                        &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
+                        0, 0,                              	/* use default IP addresses */
+                        NULL,                              	/* no Marshalling */
+                        &pdConfiguration, &mdConfiguration,	/* system defaults for PD and MD	*/
                         &processConfig) != TRDP_NO_ERR)
     {
         return 1;
@@ -181,7 +237,7 @@ int main (int argc, char * *argv)
                          &subHandle,                /*   our subscription identifier         */
                          NULL,
                          PD_TEST_GEN_UNI_COMID,     /*   ComID                               */
-                         0,                         /*   topocount: local consist only       */
+                         4321,                      /*   topocount: local consist only       */
                          cmdl_destIP,               /*   Source IP filter                    */
                          0,
                          0,                         /*   Default destination	(or MC Group)   */
@@ -201,7 +257,7 @@ int main (int argc, char * *argv)
                          &subHandleMC,                /*   our subscription identifier         */
                          NULL,
                          PD_TEST_GEN_UNI_COMID,     /*   ComID                               */
-                         0,                         /*   topocount: local consist only       */
+                         4321,                         /*   topocount: local consist only       */
                          0, /* don't filter, needed for static package */				/*   Source IP filter                    */
                          0,
                          PD_TESTMULTICAST_IP,		/*   Default destination	(or MC Group)   */
@@ -284,6 +340,24 @@ int main (int argc, char * *argv)
 		return 1;
 	}
 
+
+	/* we are also interested in MD stuff */
+	err = tlm_addListener(
+				appHandle,
+				&lstHandleMD,
+				&gUser_env,
+				MD_TEST_COMID,
+				0,
+				vos_htonl(0) /*cmdl_destIP*/,
+				0,
+				"test");
+	if (err != TRDP_NO_ERR)
+	{
+		fprintf(stderr,"tlm_addListener() error = %d\n",err);
+		exit(EXIT_FAILURE);
+	}
+
+
     /*
      Enter the main processing loop.
      */
@@ -336,7 +410,12 @@ int main (int argc, char * *argv)
          The callback function will be called from within the trdp_work
          function (in it's context and thread)!
          */
-        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+
+        //tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+
+        /*FIXME the code only receives packages when no fds are given */
+        tlc_process(appHandle, NULL, NULL);
+
 
         /*
          Handle other ready descriptors...

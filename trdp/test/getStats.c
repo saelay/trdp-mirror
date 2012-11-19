@@ -30,6 +30,7 @@
 #include <sys/select.h>
 
 #include "trdp_if_light.h"
+#include "trdp_types.h"
 #include "vos_thread.h"
 #include "vos_sock.h"
 #include "vos_utils.h"
@@ -40,7 +41,6 @@
 #define PD_OWN_IP               0 //vos_dottedIP("192.168.2.2")
 
 /* Expect receiving:	*/
-#define PD_COMID1               12
 #define PD_COMID1_CYCLE         0
 #define PD_COMID1_TIMEOUT       5000000
 #define PD_COMID1_DATA_SIZE     sizeof(TRDP_STATISTICS_T)
@@ -48,7 +48,6 @@
 #define PD_COMID1_SRC_IP        vos_dottedIP("10.64.8.203")     /*	Sender's IP		*/
 
 /* Send as request:	*/
-#define PD_COMID2               11
 #define PD_COMID2_DATA_SIZE     0
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
@@ -83,10 +82,10 @@ void print_stats(
     printf("mem.numAllocErr:    %u\n", vos_ntohl(pData->mem.numAllocErr));
     printf("mem.numFreeErr:     %u\n", vos_ntohl(pData->mem.numFreeErr));
 
-    printf("mem.allocBlockSizes: ");
+    printf("mem.preAllocBlockSize: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, vos_ntohl(pData->mem.allocBlockSize[i]));
+        printf("%u, ", i, vos_ntohl(pData->mem.preAllocBlockSize[i]));
     }
     
     printf("\nmem.usedBlockSize:   ");
@@ -178,7 +177,7 @@ void myPDcallBack (
                 memcpy(&gBuffer, pData,
                        ((sizeof(gBuffer) <
                          dataSize) ? sizeof(gBuffer) : dataSize));
-                if (pMsg->comId == 12)
+                if (pMsg->comId == TRDP_GLOBAL_STATISTICS_COMID)
                 {
                     print_stats(&gBuffer);
                     gKeepOnRunning = FALSE;
@@ -276,7 +275,7 @@ int main (int argc, char * *argv)
     err = tlp_subscribe( appHandle,                 /*	our application identifier			*/
                          &subHandle,                /*	our subscription identifier			*/
                          NULL,
-                         PD_COMID1,                 /*	ComID								*/
+                         TRDP_GLOBAL_STATISTICS_COMID,                 /*	ComID								*/
                          0,                         /*	topocount: local consist only		*/
                          0,                         /*	Source IP filter					*/
                          0,
@@ -294,7 +293,7 @@ int main (int argc, char * *argv)
 
     /*	Request statistics PD		*/
 
-    err = tlp_request(appHandle, subHandle, PD_COMID2, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0, 0, 0);
+    err = tlp_request(appHandle, subHandle, TRDP_STATISTICS_REQUEST_COMID, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0, 0, 0);
 
     if (err != TRDP_NO_ERR)
     {
