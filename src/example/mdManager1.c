@@ -653,7 +653,8 @@ static void md_indication(
 static int test_initialize()
 {
 	TRDP_ERR_T errv;
-	
+	TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, HEAP_MEMORY_SIZE, {}};
+
 	memset(&md_config,0,sizeof(md_config));
 	memset(&mem_config,0,sizeof(mem_config));
 	
@@ -679,17 +680,15 @@ static int test_initialize()
 	md_config.tcpPort        = IP_MD_UDP_PORT;
 	
 	/* Inizialize TRDP */
-	errv = tlc_init(
-		&appHandle,
-		0, /* default Ip address */
-		0, /* default Ip address */
-		private_debug_printf, /* debug print function */
-		NULL, /* marshall config */
-		NULL, /* PD configuration */
-		&md_config, /* MD configuration */
-		&mem_config, /* Memory Configuration */
-		TRDP_OPTION_BLOCK /* option */
-		);
+	/*  Init the library for non-blocking operation     */
+            if (tlc_init(&private_debug_printf,                            /* actually printf                                 */
+                         &dynamicConfig) != TRDP_NO_ERR)
+            {
+                printf("Initialization error\n");
+                return 1;
+            }
+
+
 	if (errv != TRDP_NO_ERR)
 	{
 		fprintf(stderr,"tlc_init() error = %d\n",errv);
@@ -697,7 +696,7 @@ static int test_initialize()
 	}
 	
 	/* set network topo counter */
-	tlc_setTopoCount(151);
+	tlc_setTopoCount(&appHandle, 151);
 	
 	return 0;
 }
