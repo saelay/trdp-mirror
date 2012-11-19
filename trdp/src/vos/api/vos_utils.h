@@ -46,7 +46,7 @@ extern void *gRefCon;
 #define VOS_MAX_FRMT_SIZE       64          /**< Max. size of the 'format' part */
 #define VOS_MAX_ERR_STR_SIZE    (VOS_MAX_PRNT_STR_SIZE - VOS_MAX_FRMT_SIZE) /**< Max. size of the error part */
 
-/** Debug output macro without formatting options	*/
+/** Debug output macro without formatting options */
 #define vos_print(level, string)  {if(gPDebugFunction != NULL)          \
                                    {gPDebugFunction(gRefCon,            \
                                                     (level),            \
@@ -55,7 +55,7 @@ extern void *gRefCon;
                                                     (UINT16)(__LINE__), \
                                                     (string)); }}
 
-/** Debug output macro with formatting options	*/
+/** Debug output macro with formatting options */
 #ifdef WIN32
 #define vos_printf(level, format, ...)                                  \
     {if (gPDebugFunction != NULL)                                       \

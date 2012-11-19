@@ -67,7 +67,7 @@ typedef char CHAR8;
 #error "Standard types must be defined for each target!"
 #endif
 
-/*	Special handling for Windows DLLs	*/
+/*    Special handling for Windows DLLs    */
 #ifdef WIN32
     #ifdef DLL_EXPORT
         #define EXT_DECL    __declspec(dllexport)
@@ -88,7 +88,7 @@ typedef char CHAR8;
     #define FALSE   (0)
 #endif
 
-/*	Compiler dependent alignment options	*/
+/*    Compiler dependent alignment options    */
 #undef GNU_PACKED
 #define GNU_PACKED
 
@@ -108,30 +108,30 @@ typedef char CHAR8;
 /** Return codes for all VOS API functions  */
 typedef enum
 {
-    VOS_NO_ERR          = 0,    /**< No error										*/
-    VOS_PARAM_ERR       = -1,   /**< Necessary parameter missing or out of range	*/
-    VOS_INIT_ERR        = -2,   /**< Call without valid initialization				*/
-    VOS_NOINIT_ERR      = -3,   /**< The supplied handle/reference is not valid     */
-    VOS_TIMEOUT_ERR     = -4,   /**< Timout                                         */
-    VOS_NODATA_ERR      = -5,   /**< Non blocking mode: no data received			*/
-    VOS_SOCK_ERR        = -6,   /**< Socket option not supported                    */
-    VOS_IO_ERR          = -7,   /**< Socket IO error, data can't be received/sent	*/
-    VOS_MEM_ERR         = -8,   /**< No more memory available           */
-    VOS_SEMA_ERR        = -9,   /**< Semaphore not available            */
-    VOS_QUEUE_ERR       = -10,  /**< Queue empty                        */
-    VOS_QUEUE_FULL_ERR  = -11,  /**< Queue full                         */
-    VOS_MUTEX_ERR       = -12,  /**< Mutex not available                */
-    VOS_THREAD_ERR      = -13,  /**< Thread creation error			    */
-    VOS_UNKNOWN_ERR     = -99   /**< Unknown error                      */
+    VOS_NO_ERR          = 0,    /**< No error                                        */
+    VOS_PARAM_ERR       = -1,   /**< Necessary parameter missing or out of range     */
+    VOS_INIT_ERR        = -2,   /**< Call without valid initialization               */
+    VOS_NOINIT_ERR      = -3,   /**< The supplied handle/reference is not valid      */
+    VOS_TIMEOUT_ERR     = -4,   /**< Timout                                          */
+    VOS_NODATA_ERR      = -5,   /**< Non blocking mode: no data received             */
+    VOS_SOCK_ERR        = -6,   /**< Socket option not supported                     */
+    VOS_IO_ERR          = -7,   /**< Socket IO error, data can't be received/sent    */
+    VOS_MEM_ERR         = -8,   /**< No more memory available                        */
+    VOS_SEMA_ERR        = -9,   /**< Semaphore not available                         */
+    VOS_QUEUE_ERR       = -10,  /**< Queue empty                                     */
+    VOS_QUEUE_FULL_ERR  = -11,  /**< Queue full                                      */
+    VOS_MUTEX_ERR       = -12,  /**< Mutex not available                             */
+    VOS_THREAD_ERR      = -13,  /**< Thread creation error                           */
+    VOS_UNKNOWN_ERR     = -99   /**< Unknown error                                   */
 } VOS_ERR_T;
 
-/** Categories for logging	*/
+/** Categories for logging    */
 typedef enum
 {
-    VOS_LOG_ERROR   = 0,        /**< This is a critical error				*/
-    VOS_LOG_WARNING = 1,        /**< This is a warning						*/
-    VOS_LOG_INFO    = 2,        /**< This is an info						*/
-    VOS_LOG_DBG     = 3,        /**< This is a debug info					*/
+    VOS_LOG_ERROR   = 0,        /**< This is a critical error                 */
+    VOS_LOG_WARNING = 1,        /**< This is a warning                        */
+    VOS_LOG_INFO    = 2,        /**< This is an info                          */
+    VOS_LOG_DBG     = 3,        /**< This is a debug info                     */
 } VOS_LOG_T;
 
 #ifdef _UUID_T
@@ -140,13 +140,13 @@ typedef uuid_t VOS_UUID_T;      /**< universal unique identifier according to RF
 typedef UINT8 VOS_UUID_T[16];   /**< universal unique identifier according to RFC 4122, time based version */
 #endif
 
-/**	Timer value compatible with timeval / select.
+/**    Timer value compatible with timeval / select.
  * Relative or absolute date, depending on usage
  */
 typedef struct
 {
-    UINT32  tv_sec;         /**< full seconds                                   */
-    UINT32  tv_usec;        /**< Micro seconds (max. value 999999)				*/
+    UINT32  tv_sec;         /**< full seconds                                     */
+    UINT32  tv_usec;        /**< Micro seconds (max. value 999999)                */
 } VOS_TIME_T;
 
 
@@ -157,8 +157,8 @@ typedef struct
 #ifndef TIMEDATE48
 typedef struct
 {
-    UINT32  sec;         /**< full seconds                                   */
-    UINT16  ticks;        /**< Micro seconds (max. value 999999)				*/
+    UINT32  sec;         /**< full seconds                                      */
+    UINT16  ticks;       /**< Micro seconds (max. value 999999)                 */
 } TIMEDATE48;
 #endif
 
@@ -171,18 +171,18 @@ typedef struct
  */
 
 /**********************************************************************************************************************/
-/**	Function definition for error/debug output.
+/**    Function definition for error/debug output.
  *  The function will be called for logging and error message output. The user can decide, what kind of info will
- *	be logged by filtering the category.
+ *    be logged by filtering the category.
  *
- *  @param[in]	    *pRefCon    pointer to user context
- *  @param[in]		category	Log category (Error, Warning, Info etc.)
- *  @param[in]		pTime		pointer to NULL-terminated string of time stamp
- *  @param[in]		pFile		pointer to NULL-terminated string of source module
- *  @param[in]		LineNumber	Line number
- *  @param[in]		pMsgStr     pointer to NULL-terminated string
+ *  @param[in]        *pRefCon      pointer to user context
+ *  @param[in]        category      Log category (Error, Warning, Info etc.)
+ *  @param[in]        pTime         pointer to NULL-terminated string of time stamp
+ *  @param[in]        pFile         pointer to NULL-terminated string of source module
+ *  @param[in]        LineNumber    Line number
+ *  @param[in]        pMsgStr       pointer to NULL-terminated string
  *
- *  @retval         none
+ *  @retval           none
  *
  */
 
@@ -198,10 +198,10 @@ typedef void (*VOS_PRINT_DBG_T)(
 /** Initialize the vos library.
  *  This is used to set the output function for all VOS error and debug output.
  *
- *  @param[in]	    *pRefCon            user context
- *  @param[in]	    *pDebugOutput       pointer to debug output function
- *  @retval         VOS_NO_ERR			no error
- *  @retval         VOS_INIT_ERR		unsupported
+ *  @param[in]        *pRefCon            user context
+ *  @param[in]        *pDebugOutput       pointer to debug output function
+ *  @retval           VOS_NO_ERR          no error
+ *  @retval           VOS_INIT_ERR        unsupported
  */
 
 EXT_DECL VOS_ERR_T vos_init (
