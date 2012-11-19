@@ -692,7 +692,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
  *  @retval         VOS_MUTEX_ERR	no mutex available
  */
 
-EXT_DECL VOS_ERR_T vos_localMutexCreate (
+EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
     struct VOS_MUTEX *pMutex)
 {
     int err = 0;

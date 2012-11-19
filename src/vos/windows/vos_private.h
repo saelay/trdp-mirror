@@ -45,7 +45,7 @@ struct VOS_MUTEX
     pthread_mutex_t mutexId;
 };
 
-VOS_ERR_T vos_localMutexCreate (struct VOS_MUTEX *pMutex);
+VOS_ERR_T vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
 VOS_ERR_T vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 
 #ifdef __cplusplus
