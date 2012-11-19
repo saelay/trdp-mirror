@@ -17,7 +17,7 @@
  *                  vos_thread.c uses pthreads-w32 (http://sourceware.org/pthreads-win32/) under LGPL license
  *
  *
- * $Id: trdp_if.c 141 2012-11-16 18:30:30Z bloehr $
+ * $Id$
  *
  */
 
