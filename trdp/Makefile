@@ -80,14 +80,11 @@ endif
 all:		outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
-demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello
+demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello 
+example:	outdir $(OUTDIR)/mdManager
 test:		outdir $(OUTDIR)/getstats		$(OUTDIR)/test_server \
 											$(OUTDIR)/test_client1 \
-											$(OUTDIR)/test_client2 \
-											$(OUTDIR)/test_client3 \
-											$(OUTDIR)/test_client4 \
-											$(OUTDIR)/test_client10 \
-											$(OUTDIR)/test_client_main_Monday
+											$(OUTDIR)/test_client20
 
 doc:		doc/latex/refman.pdf
 
@@ -176,38 +173,20 @@ $(OUTDIR)/test_client1:   test_client_main1.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/test_client2:   test_client_main2.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/test_client20:   test_client_main20.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building test client application $(@F)'
-			$(CC) test/test_client_main2.c \
+			$(CC) test/test_client_main20.c \
 			    $(SRC_TEST) \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
 			
-$(OUTDIR)/test_client3:   test_client_main3.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building test client application $(@F)'
-			$(CC) test/test_client_main3.c \
-			    $(SRC_TEST) \
+$(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building example MD application $(@F)'
+			$(CC) $(SUBDIRS)/example/mdManager.c \
 			    -ltrdp \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-
-$(OUTDIR)/test_client4:   test_client_main4.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building test client application $(@F)'
-			$(CC) test/test_client_main4.c \
-			    $(SRC_TEST) \
-			    -ltrdp \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-
-$(OUTDIR)/test_client10:   test_client_main10.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building test client application $(@F)'
-			$(CC) test/test_client_main10.c \
-			    $(SRC_TEST) \
-			    -ltrdp \
+			    -luuid -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -235,6 +214,7 @@ help:
 	@echo "Other builds:" >&2
 	@echo "  * make demo      - build the sample applications" >&2
 	@echo "  * make test      - build the test server application" >&2
+	@echo "  * make example   - build the example for MD communication, but needs libuuid!" >&2
 	@echo "  * make clean     - remove all binaries and objects of the current target" >&2
 	@echo "  * make libtrdp	  - build the static library, only" >&2
 	@echo " " >&2
