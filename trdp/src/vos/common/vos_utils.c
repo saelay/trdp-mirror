@@ -32,11 +32,6 @@
  * DEFINITIONS
  */
 
-#define DO1(buf)    crc = crc_table[((int)crc ^ (*(buf)++)) & 0xff] ^ (crc >> 8); /**< */
-#define DO2(buf)    {DO1(buf); DO1(buf); }  /**< */
-#define DO4(buf)    {DO2(buf); DO2(buf); }  /**< */
-#define DO8(buf)    {DO4(buf); DO4(buf); }  /**< */
-
 
 /***********************************************************************************************************************
  * GLOBALS
@@ -127,7 +122,7 @@ static const UINT32 crc_table[256] =
  * GLOBAL FUNCTIONS
  */
 
-/*	Init	*/
+/*  Init  */
 
 VOS_ERR_T vos_init (
     void            *pRefCon,
@@ -150,42 +145,17 @@ VOS_ERR_T vos_init (
  *  @param[in]          dataLen     length in bytes of data.
  *  @retval             crc32 according to IEEE802.3
  */
-#if 0
+
 UINT32 vos_crc32 (
     UINT32      crc,
     const UINT8 *pData,
     UINT32      dataLen)
 {
-    while (dataLen >= 8)
-    {
-        DO8(pData);
-        dataLen -= 8;
-    }
-    if (dataLen)
-    {
-        do
-        {
-            DO1(pData);
-        }
-        while (--dataLen);
-    }
-    return crc;
-}
 
-#else
-
-UINT32 vos_crc32 (
-                  UINT32      crc,
-                  const UINT8 *pData,
-                  UINT32      dataLen)
-{
-    
     UINT32 i;
     for (i = 0; i < dataLen; i++)
     {
-        crc = (crc >> 8)^crc_table[(crc ^pData[i]) & 0xff];
+        crc = (crc >> 8) ^ crc_table[(crc ^ pData[i]) & 0xff];
     }
     return crc;
 }
-#endif
-
