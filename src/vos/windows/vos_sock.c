@@ -1,10 +1,10 @@
 /**********************************************************************************************************************/
 /**
- * @file            vos_sock.c
+ * @file            windows/vos_sock.c
  *
  * @brief           Socket functions
  *
- * @details			OS abstraction of IP socket functions for UDP and TCP
+ * @details         OS abstraction of IP socket functions for UDP and TCP
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -45,7 +45,7 @@
 
 #pragma comment(lib, "IPHLPAPI.lib")
 
-// include the needed windows network libraries
+/* include the needed windows network libraries */
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "Netapi32.lib")
 
@@ -62,9 +62,9 @@
  *  LOCALS
  */
 
-BOOL          vosSockInitialised = FALSE;
-UINT32        gNumberOfOpenSockets = 0;
-UINT8         mac[6]; 
+BOOL    vosSockInitialised      = FALSE;
+UINT32  gNumberOfOpenSockets    = 0;
+UINT8   mac[6];
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
@@ -122,7 +122,7 @@ EXT_DECL BOOL vos_isMulticast (
  *  @retval             address in UINT32 in host endianess
  */
 EXT_DECL UINT32 vos_dottedIP (
-	const CHAR8 *pDottedIP)
+    const CHAR8 *pDottedIP)
 {
     return vos_ntohl(inet_addr(pDottedIP));
 }
@@ -135,10 +135,10 @@ EXT_DECL UINT32 vos_dottedIP (
  */
 
 EXT_DECL const CHAR8 *vos_ipDotted (
-	 UINT32 ipAddress)
+    UINT32 ipAddress)
 {
-    static CHAR8   dotted[16];
-    sprintf(dotted, "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF ,
+    static CHAR8 dotted[16];
+    sprintf(dotted, "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
             (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
     return dotted;
 }
@@ -195,24 +195,24 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
     if (i >= 6) /*	needs to be determined	*/
     {
         /* for NetBIOS */
-        DWORD dwEntriesRead;
-        DWORD dwTotalEntries;
-        BYTE *pbBuffer;
-        WKSTA_TRANSPORT_INFO_0 *pwkti;
+        DWORD   dwEntriesRead;
+        DWORD   dwTotalEntries;
+        BYTE    *pbBuffer;
+        WKSTA_TRANSPORT_INFO_0  *pwkti;
 
         /* Get MAC address via NetBIOS's enumerate function */
-        NET_API_STATUS dwStatus = NetWkstaTransportEnum(
-                                    NULL, // [in] server name
-                                    0, // [in] data structure to return
-                                    &pbBuffer, // [out] pointer to buffer
-                                    MAX_PREFERRED_LENGTH, // [in] maximum length
-                                    &dwEntriesRead, // [out] counter of elements actually enumerated
-                                    &dwTotalEntries, // [out] total number of elements that could be enumerated
-                                    NULL); // [in/out] resume handle
+        NET_API_STATUS          dwStatus = NetWkstaTransportEnum(
+                NULL,                     /* [in] server name */
+                0,                     /* [in] data structure to return */
+                &pbBuffer,                     /* [out] pointer to buffer */
+                MAX_PREFERRED_LENGTH,                     /* [in] maximum length */
+                &dwEntriesRead,                     /* [out] counter of elements actually enumerated */
+                &dwTotalEntries,                     /* [out] total number of elements that could be enumerated */
+                NULL);                     /* [in/out] resume handle */
 
- 
-        pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer; 
- 
+
+        pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
+
         /* first address is 00000000, skip it */
         swscanf_s(
             (wchar_t *)pwkti[1].wkti0_transport_address,
@@ -223,11 +223,11 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
             &mac[3],
             &mac[4],
             &mac[5]);
- 
+
         /* Release pbBuffer allocated by NetWkstaTransportEnum */
         dwStatus = NetApiBufferFree(pbBuffer);
     }
-    
+
     for( i = 0; i < sizeof(mac); i++ )
     {
         pMAC[i] = (UINT8) mac[i];
@@ -253,8 +253,8 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     INT32                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
-    SOCKET sock;
-	WSADATA WsaDat;
+    SOCKET  sock;
+    WSADATA WsaDat;
 
     if (!vosSockInitialised)
     {
@@ -266,11 +266,12 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         vos_printf(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
-	
-	// The windows socket library has to be prepared, before it could be used
-    if (WSAStartup(MAKEWORD(2,2), &WsaDat) != 0){
-		vos_printf(VOS_LOG_ERROR, "Windows socket API failed\n");
-		return VOS_SOCK_ERR;
+
+    /* The windows socket library has to be prepared, before it could be used */
+    if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
+    {
+        vos_printf(VOS_LOG_ERROR, "Windows socket API failed\n");
+        return VOS_SOCK_ERR;
     }
 
     if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET )
@@ -371,8 +372,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
     INT32                   sock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
-    int sockOptValue = 0;
-	u_long value;
+    int     sockOptValue = 0;
+    u_long  value;
 
     if (pOptions)
     {
@@ -396,7 +397,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         if (1 == pOptions->nonBlocking)
         {
             value = TRUE;
-			if (ioctlsocket(sock, FIONBIO, &value) == SOCKET_ERROR)
+            if (ioctlsocket(sock, FIONBIO, &value) == SOCKET_ERROR)
             {
                 vos_printf(VOS_LOG_ERROR, "non blocking failed\n");
                 return VOS_SOCK_ERR;
@@ -620,9 +621,9 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   *pSize,
     UINT32  *pIPAddr)
 {
-    struct sockaddr_in			srcAddr;
-    int                 sockLen = sizeof(srcAddr);
-    int                 rcvSize = 0;
+    struct sockaddr_in srcAddr;
+    int sockLen = sizeof(srcAddr);
+    int rcvSize = 0;
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
@@ -901,7 +902,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     int rcvSize     = 0;
     int bufferSize  = (size_t) *pSize;
 
-    if (sock == INVALID_SOCKET  || pBuffer == NULL || pSize == NULL)
+    if (sock == INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }

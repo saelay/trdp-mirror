@@ -1,10 +1,10 @@
 /**********************************************************************************************************************/
 /**
- * @file            vos_private.h
+ * @file            windows/vos_private.h
  *
  * @brief           Private definitions for the OS abstraction layer
  *
- * @details			
+ * @details
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -34,19 +34,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /***********************************************************************************************************************
  * DEFINES
  */
-    
+
 struct VOS_MUTEX
 {
     UINT32          magicNo;
     pthread_mutex_t mutexId;
 };
 
-VOS_ERR_T vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
-VOS_ERR_T vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
+VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
+VOS_ERR_T   vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 
 #ifdef __cplusplus
 }

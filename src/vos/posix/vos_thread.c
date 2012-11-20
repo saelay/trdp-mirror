@@ -1,10 +1,10 @@
 /**********************************************************************************************************************/
 /**
- * @file            vos_thread.c
+ * @file            posix/vos_thread.c
  *
  * @brief           Multitasking functions
  *
- * @details			OS abstraction of thread-handling functions
+ * @details         OS abstraction of thread-handling functions
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -92,7 +92,8 @@ void cyclicThread (
 
 
 /**********************************************************************************************************************/
-/*  Threads	                                                                                                          */
+/*  Threads
+                                                                                                               */
 /**********************************************************************************************************************/
 
 
@@ -346,7 +347,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
 
     if (delay == 0)
     {
-        /*	yield cpu to other processes   */
+        /*    yield cpu to other processes   */
         if (sched_yield() != 0)
         {
             return VOS_PARAM_ERR;
@@ -391,9 +392,9 @@ EXT_DECL VOS_ERR_T vos_getTime (
 
 #ifndef _POSIX_TIMERS
 
-    /*	On systems without monotonic clock support,
+    /*    On systems without monotonic clock support,
         changing the system clock during operation
-        might interrupt process data packet transmissions!	*/
+        might interrupt process data packet transmissions!    */
 
     gettimeofday(&myTime, NULL);
 
@@ -515,6 +516,66 @@ EXT_DECL VOS_ERR_T vos_subTime (
 }
 
 /**********************************************************************************************************************/
+/** Divide the first time value by the second, return quotient in first
+ *
+ *
+ *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in]          div             Divisor
+ *  @retval             VOS_NO_ERR      no error
+ *  @retval             VOS_PARAM_ERR   parameter must not be NULL
+ */
+
+EXT_DECL VOS_ERR_T vos_divTime (
+    VOS_TIME_T  *pTime,
+    UINT32      div)
+{
+    UINT32 temp;
+    if (pTime == NULL || div == 0)
+    {
+        return VOS_PARAM_ERR;
+    }
+
+    temp = pTime->tv_sec % div;
+    pTime->tv_sec /= div;
+    if (temp > 0)
+    {
+        pTime->tv_usec += temp * 1000000;
+    }
+    pTime->tv_usec /= div;
+    return VOS_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Multiply the first time by the second, return product in first
+ *
+ *
+ *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in]          mul             Factor
+ *  @retval             VOS_NO_ERR      no error
+ *  @retval             VOS_PARAM_ERR   parameter must not be NULL
+ */
+
+EXT_DECL VOS_ERR_T vos_mulTime (
+    VOS_TIME_T  *pTime,
+    UINT32      mul)
+{
+    if (pTime == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
+    pTime->tv_sec   *= mul;
+    pTime->tv_usec  *= mul;
+    while (pTime->tv_usec >= 1000000)
+    {
+        pTime->tv_sec++;
+        pTime->tv_usec -= 1000000;
+    }
+    ;
+
+    return VOS_NO_ERR;
+}
+
+/**********************************************************************************************************************/
 /** Compare the second from the first time stamp, return diff in first
  *
  *
@@ -559,7 +620,7 @@ EXT_DECL VOS_ERR_T vos_getUuid (
 #ifdef __APPLE__
     uuid_generate_time(pUuID);
 #else
-    /*	Manually creating a UUID from time stamp and MAC address	*/
+    /*    Manually creating a UUID from time stamp and MAC address    */
     static UINT16   count = 1;
     VOS_TIME_T      current;
 
@@ -572,14 +633,14 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     pUuID[4]    = current.tv_sec & 0xFF;
     pUuID[5]    = (current.tv_sec & 0xFF00) >> 8;
     pUuID[6]    = (current.tv_sec & 0xFF0000) >> 16;
-    pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*	pseudo-random version	*/
+    pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*    pseudo-random version    */
 
     /* we always increment these values, this definitely makes the UUID unique */
     pUuID[8]    = (UINT8) (count & 0xFF);
     pUuID[9]    = (UINT8) (count >> 8);
     count++;
 
-    /*	Copy the mac address into the rest of the array	*/
+    /*    Copy the mac address into the rest of the array    */
     if (vos_sockGetMAC(&pUuID[10]) != VOS_NO_ERR)
     {
         return VOS_UNKNOWN_ERR;
@@ -941,7 +1002,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_INIT_ERR    module not initialised
  *  @retval         VOS_NOINIT_ERR  invalid handle
- *  @retval         VOS_SEM_ERR	    could not release semaphore
+ *  @retval         VOS_SEM_ERR        could not release semaphore
  */
 
 EXT_DECL VOS_ERR_T vos_semaGive (
