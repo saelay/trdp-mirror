@@ -28,7 +28,6 @@
 
 #include "trdp_if_light.h"
 #include "vos_thread.h"
-#include "test_trafficShaping.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
