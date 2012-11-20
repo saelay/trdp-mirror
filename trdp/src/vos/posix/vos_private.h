@@ -1,6 +1,6 @@
 /**********************************************************************************************************************/
 /**
- * @file            vos_private.h
+ * @file            posix/vos_private.h
  *
  * @brief           Private definitions for the OS abstraction layer
  *

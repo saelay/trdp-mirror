@@ -296,6 +296,34 @@ EXT_DECL INT32 vos_cmpTime (
     const VOS_TIME_T    *pCmp);
 
 /**********************************************************************************************************************/
+/** Divide the first time by the second, return quotient in first
+ *
+ *
+ *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in]          div             Divisor
+ *  @retval             VOS_NO_ERR      no error
+ *  @retval             VOS_PARAM_ERR   parameter must not be NULL
+ */
+
+EXT_DECL VOS_ERR_T vos_divTime (
+    VOS_TIME_T  *pTime,
+    UINT32      div);
+
+/**********************************************************************************************************************/
+/** Multiply the first time by the second, return product in first
+*
+*
+*  @param[in, out]     pTime           Pointer to time value
+*  @param[in]          mul             Factor
+*  @retval             VOS_NO_ERR      no error
+*  @retval             VOS_PARAM_ERR   parameter must not be NULL
+*/
+
+EXT_DECL VOS_ERR_T vos_mulTime (
+    VOS_TIME_T  *pTime,
+    UINT32      mul);
+
+/**********************************************************************************************************************/
 /** Get a universal unique identifier according to RFC 4122 time based version.
  *
  *
@@ -331,7 +359,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
 /** Delete a mutex.
  *  Release the resources taken by the mutex.
  *
- *  @param[in]      mutex             mutex handle
+ *  @param[in]      pMutex            mutex handle
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
@@ -339,26 +367,26 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
  */
 
 EXT_DECL VOS_ERR_T vos_mutexDelete (
-    VOS_MUTEX_T mutex);
+    VOS_MUTEX_T pMutex);
 
 /**********************************************************************************************************************/
 /** Take a mutex.
  *  Wait for the mutex to become available (lock).
  *
- *  @param[in]      mutex             mutex handle
+ *  @param[in]      pMutex            mutex handle
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
  */
 
 EXT_DECL VOS_ERR_T vos_mutexLock (
-    VOS_MUTEX_T mutex);
+    VOS_MUTEX_T pMutex);
 
 /**********************************************************************************************************************/
 /** Try to take a mutex.
  *  If mutex is can't be taken VOS_MUTEX_ERR is returned.
  *
- *  @param[in]      mutex             mutex handle
+ *  @param[in]      pMutex            mutex handle
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
@@ -366,83 +394,22 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
  */
 
 EXT_DECL VOS_ERR_T vos_mutexTryLock (
-    VOS_MUTEX_T mutex);
+    VOS_MUTEX_T pMutex);
 
 
 /**********************************************************************************************************************/
 /** Release a mutex.
  *  Unlock the mutex.
  *
- *  @param[in]      mutex             mutex handle
+ *  @param[in]      pMutex            mutex handle
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
  */
 
 EXT_DECL VOS_ERR_T vos_mutexUnlock (
-    VOS_MUTEX_T mutex);
+    VOS_MUTEX_T pMutex);
 
-
-/**********************************************************************************************************************/
-/** Create a semaphore.
- *  Return a semaphore handle. Depending on the initial state the semaphore will be available on creation or not.
- *
- *  @param[out]     pSema             Pointer to semaphore handle
- *  @param[in]      initialState      The initial state of the sempahore
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
- *  @retval         VOS_SEMA_ERR      no semaphore available
- */
-
-EXT_DECL VOS_ERR_T vos_semaCreate (
-    VOS_SEMA_T          *pSema,
-    VOS_SEMA_STATE_T    initialState);
-
-/**********************************************************************************************************************/
-/** Delete a semaphore.
- *  This will eventually release any processes waiting for the semaphore.
- *
- *  @param[in]      sema              semaphore handle
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
- */
-
-EXT_DECL VOS_ERR_T vos_semaDelete (
-    VOS_SEMA_T sema);
-
-/**********************************************************************************************************************/
-/** Take a semaphore.
- *  Try to get (decrease) a semaphore.
- *
- *  @param[in]      sema              semaphore handle
- *  @param[in]      timeout           Max. time in us to wait, 0 means forever
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
- *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
- *  @retval         VOS_SEMA_ERR      could not get semaphore in time
- */
-
-EXT_DECL VOS_ERR_T vos_semaTake (
-    VOS_SEMA_T  sema,
-    UINT32      timeout);
-
-
-/**********************************************************************************************************************/
-/** Give a semaphore.
- *  Release (increase) a semaphore.
- *
- *  @param[in]      sema               semaphore handle
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_SEM_ERR        could not release semaphore
- */
-
-EXT_DECL VOS_ERR_T vos_semaGive (
-    VOS_SEMA_T sema);
 
 
 #ifdef __cplusplus
