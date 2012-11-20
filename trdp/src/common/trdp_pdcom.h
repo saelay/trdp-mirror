@@ -78,5 +78,7 @@ TRDP_ERR_T trdp_pdReceive (
     TRDP_SESSION_PT pSessionHandle,
     INT32           sock);
 
+TRDP_ERR_T trdp_pdDistribute (
+	PD_ELE_T    *pSndQueue);
 
 #endif
