@@ -76,8 +76,8 @@ typedef struct TRDP_HANDLE *TRDP_LIS_T;
  *  @retval         TRDP_PARAM_ERR         initialization error
  */
 EXT_DECL TRDP_ERR_T tlc_init (
-    const TRDP_PRINT_DBG_T          pPrintDebugString,
-    const TRDP_MEM_CONFIG_T         *pMemConfig);
+    const TRDP_PRINT_DBG_T  pPrintDebugString,
+    const TRDP_MEM_CONFIG_T *pMemConfig);
 
 /**********************************************************************************************************************/
 /** Open a session with the TRDP stack.
@@ -133,7 +133,7 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
  *  @retval         TRDP_NOINIT_ERR		handle invalid
  *  @retval         TRDP_PARAM_ERR		handle NULL
  */
-EXT_DECL TRDP_ERR_T tlc_closeSession(
+EXT_DECL TRDP_ERR_T tlc_closeSession (
     TRDP_APP_SESSION_T appHandle);
 
 
@@ -145,7 +145,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession(
  */
 EXT_DECL TRDP_ERR_T tlc_terminate (void);
 
-    
+
 /**********************************************************************************************************************/
 /** Set new topocount for trainwide communication.
  *
@@ -508,7 +508,7 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      srcURI              only functional group of source URI
+ *  @param[in]      sourceURI           only functional group of source URI
  *  @param[in]      destURI             only functional group of destination URI
  *
  *  @retval         TRDP_NO_ERR	        no error
@@ -530,7 +530,7 @@ EXT_DECL TRDP_ERR_T tlm_request (
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
-    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI);
 
 
@@ -549,7 +549,7 @@ EXT_DECL TRDP_ERR_T tlm_request (
  *  @param[in]      userStatus			Info for requester about application errors
  *  @param[in]      replyStatus			Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
- *  @param[in]      srcURI              only functional group of source URI
+ *  @param[in]      sourceURI           only functional group of source URI
  *  @param[in]      destURI             only functional group of destination URI
  *
  *  @retval         TRDP_NO_ERR	        no error
@@ -570,7 +570,7 @@ EXT_DECL TRDP_ERR_T tlm_confirm (
     UINT16                  userStatus,
     TRDP_REPLY_STATUS_T     replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
-    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI);
 
 
@@ -610,7 +610,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
  */
 EXT_DECL TRDP_ERR_T tlm_addListener (
     TRDP_APP_SESSION_T      appHandle,
-    TRDP_LIS_T           	*pListenHandle,
+    TRDP_LIS_T              *pListenHandle,
     const void              *pUserRef,
     UINT32                  comId, /* muliple ComID handled in layer above  */
     UINT32                  topoCount,
@@ -651,7 +651,7 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      srcURI              only user part of source URI
+ *  @param[in]      sourceURI           only user part of source URI
  *  @param[in]      destURI             only user part of destination URI
  *
  *  @retval         TRDP_NO_ERR	        no error
@@ -673,7 +673,7 @@ EXT_DECL TRDP_ERR_T tlm_reply (
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
-    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI);
 
 
@@ -694,7 +694,7 @@ EXT_DECL TRDP_ERR_T tlm_reply (
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      srcURI              only user part of source URI
+ *  @param[in]      sourceURI           only user part of source URI
  *  @param[in]      destURI             only user part of destination URI
  *
  *  @retval         TRDP_NO_ERR	        no error
@@ -717,7 +717,7 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
-    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI);
 
 
@@ -733,7 +733,7 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      replyState          Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
- *  @param[in]      srcURI              only user part of source URI
+ *  @param[in]      sourceURI           only user part of source URI
  *  @param[in]      destURI             only user part of destination URI
  *
  *  @retval         TRDP_NO_ERR	        no error
@@ -751,7 +751,7 @@ EXT_DECL TRDP_ERR_T tlm_replyErr (
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_REPLY_STATUS_T     replyState,
     const TRDP_SEND_PARAM_T *pSendParam,
-    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI);
 #endif /* MD_SUPPORT	*/
 

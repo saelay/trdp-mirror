@@ -115,8 +115,8 @@ PD_ELE_T *trdp_queueFindComId (
  *  @retval         NULL            No PD element found
  */
 PD_ELE_T *trdp_queueFindPubAddr (
-    PD_ELE_T          *pHead,
-    TRDP_ADDRESSES_T  *addr)
+    PD_ELE_T            *pHead,
+    TRDP_ADDRESSES_T    *addr)
 {
     PD_ELE_T *iterPD;
 
@@ -149,16 +149,16 @@ PD_ELE_T *trdp_queueFindPubAddr (
  *  @retval         NULL            No PD element found
  */
 PD_ELE_T *trdp_queueFindSubAddr (
-    PD_ELE_T          *pHead,
-    TRDP_ADDRESSES_T  *addr)
+    PD_ELE_T            *pHead,
+    TRDP_ADDRESSES_T    *addr)
 {
     PD_ELE_T *iterPD;
-    
+
     if (pHead == NULL || addr == NULL)
     {
         return NULL;
     }
-    
+
     for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
         /*  We match if src/dst/mc address is zero or matches */
@@ -181,16 +181,16 @@ PD_ELE_T *trdp_queueFindSubAddr (
  *  @retval         NULL            No PD element found
  */
 MD_ELE_T *trdp_MDqueueFindAddr (
-                                MD_ELE_T          *pHead,
-                                TRDP_ADDRESSES_T  *addr)
+    MD_ELE_T            *pHead,
+    TRDP_ADDRESSES_T    *addr)
 {
     MD_ELE_T *iterMD;
-    
+
     if (pHead == NULL || addr == NULL)
     {
         return NULL;
     }
-    
+
     for (iterMD = pHead; iterMD != NULL; iterMD = iterMD->pNext)
     {
         /*  We match if src/dst address is zero or found */
@@ -247,23 +247,23 @@ void    trdp_queueDelElement (
  *  @param[in]      pDelete         pointer to element to delete
  */
 void    trdp_MDqueueDelElement (
-                                MD_ELE_T    * *ppHead,
-                                MD_ELE_T    *pDelete)
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pDelete)
 {
     MD_ELE_T *iterMD;
-    
+
     if (ppHead == NULL || *ppHead == NULL || pDelete == NULL)
     {
         return;
     }
-    
+
     /*	handle removal of first element	*/
     if (pDelete == *ppHead)
     {
         *ppHead = pDelete->pNext;
         return;
     }
-    
+
     for (iterMD = *ppHead; iterMD != NULL; iterMD = iterMD->pNext)
     {
         if (iterMD->pNext && iterMD->pNext == pDelete)
@@ -329,14 +329,14 @@ void    trdp_queueInsFirst (
  *  @param[in]      pNew            pointer to element to insert
  */
 void    trdp_MDqueueInsFirst (
-                              MD_ELE_T    * *ppHead,
-                              MD_ELE_T    *pNew)
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pNew)
 {
     if (ppHead == NULL || pNew == NULL)
     {
         return;
     }
-    
+
     pNew->pNext = *ppHead;
     *ppHead     = pNew;
 }
@@ -376,7 +376,7 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_IP_ADDR_T          srcIP,
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
-    BOOL					rcvOnly,
+    BOOL                    rcvOnly,
     INT32                   *pIndex)
 {
     VOS_SOCK_OPT_T  sock_options;
@@ -401,7 +401,7 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[index].sendParam.qos == params->qos &&
             iface[index].sendParam.ttl == params->ttl &&
             (iface[index].rcvOnly == rcvOnly ||
-            usage == TRDP_SOCK_MD_TCP))
+             usage == TRDP_SOCK_MD_TCP))
         {
             /* Use that socket */
             *pIndex = index;
@@ -433,7 +433,7 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].type           = usage;
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
-        iface[index].rcvOnly 		= rcvOnly;
+        iface[index].rcvOnly        = rcvOnly;
 
         sock_options.qos    = params->qos;
         sock_options.ttl    = params->ttl;
@@ -443,9 +443,9 @@ TRDP_ERR_T  trdp_requestSocket (
 
         if((usage == TRDP_SOCK_MD_TCP) && (rcvOnly == TRUE))
         {
-        	iface[index].sock       = *pIndex;
-        	iface[index].usage 		= 1;
-        	return err;
+            iface[index].sock   = *pIndex;
+            iface[index].usage  = 1;
+            return err;
         }
 
         switch (usage)
@@ -457,6 +457,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     port = IP_MD_UDP_PORT; /* FIXME configuration file! */
                 }
+                sock_options.nonBlocking = TRUE; /* MD UDP sockets are always non blocking because they are polled */
                 if (vos_sockOpenUDP(&iface[index].sock, &sock_options) != VOS_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "Socket create for UDP failed!\n");
@@ -586,7 +587,7 @@ UINT32  trdp_getSeqCnt (
 #if MD_SUPPORT
     else
     {
-       // #error
+        /* #error */
     }
 #endif
     return 0;   /*	Not found, initial value is zero	*/
@@ -654,7 +655,7 @@ BOOL  trdp_isRcvSeqCnt (
 #if MD_SUPPORT
     else
     {
-       // #error
+        /* #error */
     }
 #endif
     return FALSE;   /* Not found, initial value is zero */

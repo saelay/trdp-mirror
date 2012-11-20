@@ -2732,7 +2732,7 @@ TRDP_ERR_T tlm_notify (
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      srcURI              only functional group of source URI
+ *  @param[in]      sourceURI           only functional group of source URI
  *  @param[in]      destURI             only functional group of destination URI
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -2754,7 +2754,7 @@ TRDP_ERR_T tlm_request (
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
-    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI)
 {
     return tlm_common_send(
@@ -2775,7 +2775,7 @@ TRDP_ERR_T tlm_request (
                pSendParam,
                pData,
                dataSize,
-               srcURI,
+               sourceURI,
                destURI
                );
 }
@@ -2909,7 +2909,7 @@ TRDP_ERR_T tlm_addListener (
                        Bind shall be executed only once at socket creation
                      */
                     if (errv == TRDP_NO_ERR &&
-                        appHandle->iface[pNewElement->socketIdx].usage == 1)
+                        appHandle->iface[pNewElement->socketIdx].usage == 0)
                     {
                         /* bind socket */
                         errv = vos_sockBind(
@@ -3256,7 +3256,7 @@ TRDP_ERR_T tlm_replyErr (
  *  @param[in]      userStatus          Info for requester about application errors
  *  @param[in]      replyStatus         Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
- *  @param[in]      srcURI              only functional group of source URI
+ *  @param[in]      sourceURI           only functional group of source URI
  *  @param[in]      destURI             only functional group of destination URI
  *
  *  @retval         TRDP_NO_ERR            no error
@@ -3277,7 +3277,7 @@ TRDP_ERR_T tlm_confirm (
     UINT16                  userStatus,
     TRDP_REPLY_STATUS_T     replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
-    const TRDP_URI_USER_T   srcURI,
+    const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI)
 {
     return tlm_common_send(
@@ -3298,7 +3298,7 @@ TRDP_ERR_T tlm_confirm (
                pSendParam,
                NULL,            /* pData */
                0,               /* dataSize */
-               srcURI,
+               sourceURI,
                destURI
                );
 }

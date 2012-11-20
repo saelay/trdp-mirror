@@ -47,10 +47,10 @@
 /******************************************************************************/
 /** Send MD packet
  *
- *  @param[in]      mdSock			socket descriptor
- *  @param[in]      pPacket			pointer to packet to be sent
+ *  @param[in]      mdSock          socket descriptor
+ *  @param[in]      pPacket         pointer to packet to be sent
  *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_UNKNOWN_ERR	error
+ *  @retval         TRDP_UNKNOWN_ERR    error
  */
 TRDP_ERR_T  trdp_sendMD (
     int             mdSock,
@@ -70,12 +70,12 @@ TRDP_ERR_T  trdp_sendMD (
 /******************************************************************************/
 /** Receive MD packet
  *
- *  @param[in]      mdSock			socket descriptor
- *  @param[out]     ppPacket		pointer to pointer to received packet
- *  @param[out]     pSize			pointer to size of received packet
- *  @param[out]     pIPAddr			pointer to source IP address of packet
+ *  @param[in]      mdSock          socket descriptor
+ *  @param[out]     ppPacket        pointer to pointer to received packet
+ *  @param[out]     pSize           pointer to size of received packet
+ *  @param[out]     pIPAddr         pointer to source IP address of packet
  *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_UNKNOWN_ERR	error
+ *  @retval         TRDP_UNKNOWN_ERR    error
  */
 TRDP_ERR_T  trdp_rcvMD (
     int         mdSock,
@@ -92,9 +92,9 @@ TRDP_ERR_T  trdp_rcvMD (
 /******************************************************************************/
 /** Check for incoming md packet
  *
- *  @param[in]      appHandle		session pointer
- *  @param[in]      pPacket			pointer to the packet to check
- *  @param[in]      packetSize		size of the packet
+ *  @param[in]      appHandle       session pointer
+ *  @param[in]      pPacket         pointer to the packet to check
+ *  @param[in]      packetSize      size of the packet
  */
 TRDP_ERR_T trdp_mdCheck (
     TRDP_SESSION_PT appHandle,
@@ -132,7 +132,7 @@ TRDP_ERR_T trdp_mdCheck (
         }
 
         /* Data CRC */
-        if(packetSize > sizeof(MD_HEADER_T))
+        if(l_datasetLength > 0)
         {
             /* Check only if we have some data */
             UINT32  crc32       = vos_crc32(0xffffffff, (UINT8 *) pPacket + sizeof(MD_HEADER_T), l_datasetLength);
@@ -224,7 +224,7 @@ TRDP_ERR_T trdp_mdCheck (
 /******************************************************************************/
 /** Update the header values
  *
- *  @param[in]      pPacket			pointer to the packet to update
+ *  @param[in]      pPacket         pointer to the packet to update
  */
 void    trdp_mdUpdate (
     MD_ELE_T *pPacket)
@@ -250,8 +250,8 @@ void    trdp_mdUpdate (
 
     /*
        Calculate CRC for message packet
-       if(pPacket->frameHead.datasetLength > 0)
      */
+    if(pPacket->frameHead.datasetLength > 0)
     {
         myCRC1 = vos_crc32(myCRC1,
                            &pPacket->data[0],
@@ -263,8 +263,8 @@ void    trdp_mdUpdate (
 /******************************************************************************/
 /** Send MD packet
  *
- *  @param[in]      pdSock			socket descriptor
- *  @param[in]      pPacket			pointer to packet to be sent
+ *  @param[in]      pdSock          socket descriptor
+ *  @param[in]      pPacket         pointer to packet to be sent
  *  @retval         != NULL         error
  */
 TRDP_ERR_T  trdp_mdSend (
@@ -304,9 +304,9 @@ TRDP_ERR_T  trdp_mdSend (
 /******************************************************************************/
 /** Receive MD packet
  *
- *  @param[in]      appHandle		session pointer
- *  @param[in]      mdSock			socket descriptor
- *  @param[in]      pPacket			pointer to received packet
+ *  @param[in]      appHandle       session pointer
+ *  @param[in]      mdSock          socket descriptor
+ *  @param[in]      pPacket         pointer to received packet
  *  @retval         != NULL         error
  */
 TRDP_ERR_T  trdp_mdRecv (
@@ -368,16 +368,16 @@ TRDP_ERR_T  trdp_mdRecv (
 /** Receiving MD messages
  *  Read the receive socket for arriving MDs, copy the packet to a new MD_ELE_T
  *  Check for protocol errors and dispatch to proper receive queue.
- *	Call user's callback if needed
+ *  Call user's callback if needed
  *
- *	@param[in]		appHandle			session pointer
- *  @param[in]		sock				the socket to read from
+ *  @param[in]      appHandle           session pointer
+ *  @param[in]      sock                the socket to read from
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_WIRE_ERR       protocol error (late packet, version mismatch)
  *  @retval         TRDP_QUEUE_ERR      not in queue
- *  @retval         TRDP_CRC_ERR		header checksum
- *  @retval         TRDP_TOPOCOUNT_ERR	invalid topocount
+ *  @retval         TRDP_CRC_ERR        header checksum
+ *  @retval         TRDP_TOPOCOUNT_ERR  invalid topocount
  */
 TRDP_ERR_T  trdp_mdReceive (
     TRDP_SESSION_PT appHandle,
