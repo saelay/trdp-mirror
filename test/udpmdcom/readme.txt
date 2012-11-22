@@ -1,3 +1,7 @@
+(22/11/2012 - s.pachera, FAR Systems s.p.a.)
+Check repository integration: OK.
+
+
 (20/11/2012 - s.pachera, FAR Systems s.p.a.)
 UDPMDCom modification to TRDP repository rev. 158
 	Created folder test/udpmdcom
