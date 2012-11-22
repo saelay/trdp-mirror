@@ -278,7 +278,7 @@ help:
 
 
 clean:
-	$(RM) -r $(OUTDIR)/*
+	$(RM) -r bld/*
 	$(RM) -r doc/latex/*
 
 
