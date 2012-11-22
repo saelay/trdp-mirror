@@ -75,9 +75,9 @@ extern void *gRefCon;
 #endif
 
 /** Alignment macros  */
-#if defined(alignof)
-#define ALIGNOF(type)   alignof(type)
-#elif defined(__alignof__)
+#ifdef WIN32
+#define ALIGNOF(type)   __alignof(type)
+#elif defined(__GNUC__)
 #define ALIGNOF(type)   __alignof__(type)
 #else
 #define ALIGNOF(type)   offsetof(struct { char c; type member; }, member)
