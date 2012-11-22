@@ -17,6 +17,12 @@
  *
  */
 
+/* check if the needed functionality is present */
+#if (MD_SUPPORT == 1)
+/* the needed MD_SUPPORT was granted */
+#else
+#error "This test needs MD_SUPPORT with the value '1'"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
