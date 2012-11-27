@@ -318,10 +318,10 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
-        pSession->pdDefault.sendParam.qos       = PD_DEFAULT_QOS;
-        pSession->pdDefault.sendParam.ttl       = PD_DEFAULT_TTL;
+        pSession->pdDefault.sendParam.qos       = TRDP_PD_DEFAULT_QOS;
+        pSession->pdDefault.sendParam.ttl       = TRDP_PD_DEFAULT_TTL;
         pSession->pdDefault.sendParam.retries   = 0;
-        pSession->pdDefault.port = IP_PD_UDP_PORT;
+        pSession->pdDefault.port                = TRDP_PD_UDP_PORT;
     }
 
     if (pMdDefault != NULL)
@@ -330,13 +330,13 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
-        pSession->mdDefault.replyTimeout        = MD_DEFAULT_REPLY_TIMEOUT;
-        pSession->mdDefault.confirmTimeout      = MD_DEFAULT_CONFIRM_TIMEOUT;
-        pSession->mdDefault.udpPort             = IP_MD_UDP_PORT;
-        pSession->mdDefault.tcpPort             = IP_MD_TCP_PORT;
-        pSession->mdDefault.sendParam.qos       = MD_DEFAULT_QOS;
-        pSession->mdDefault.sendParam.ttl       = MD_DEFAULT_TTL;
-        pSession->mdDefault.sendParam.retries   = MD_DEFAULT_RETRIES;
+        pSession->mdDefault.replyTimeout        = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+        pSession->mdDefault.confirmTimeout      = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+        pSession->mdDefault.udpPort             = TRDP_MD_UDP_PORT;
+        pSession->mdDefault.tcpPort             = TRDP_MD_TCP_PORT;
+        pSession->mdDefault.sendParam.qos       = TRDP_MD_DEFAULT_QOS;
+        pSession->mdDefault.sendParam.ttl       = TRDP_MD_DEFAULT_TTL;
+        pSession->mdDefault.sendParam.retries   = TRDP_MD_DEFAULT_RETRIES;
     }
 
 
@@ -733,7 +733,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     }
 
     if (interval != 0 &&
-        interval < TIMER_GRANULARITY)
+        interval < TRDP_TIMER_GRANULARITY)
     {
         return TRDP_PARAM_ERR;
     }
@@ -1745,7 +1745,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
     /*    Check params    */
     if (comId == 0 ||
-        dataSize > MAX_PD_PACKET_SIZE ||
+        dataSize > TRDP_MAX_PD_PACKET_SIZE ||
         destIpAddr == 0)
     {
         return TRDP_PARAM_ERR;
@@ -1925,8 +1925,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
     /*    Check params    */
     if (comId == 0 ||
-        maxDataSize > MAX_PD_PACKET_SIZE ||
-        (timeout != 0 && timeout < TIMER_GRANULARITY))
+        maxDataSize > TRDP_MAX_PD_PACKET_SIZE ||
+        (timeout != 0 && timeout < TRDP_TIMER_GRANULARITY))
     {
         return TRDP_PARAM_ERR;
     }
@@ -1987,7 +1987,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             else
             {
                 /*  Alloc the corresponding data buffer  */
-                newPD->pFrame = (PD_PACKET_T *) vos_memAlloc(MAX_PD_PACKET_SIZE);
+                newPD->pFrame = (PD_PACKET_T *) vos_memAlloc(TRDP_MAX_PD_PACKET_SIZE);
                 if (newPD->pFrame == NULL)
                 {
                     vos_memFree(newPD);
@@ -2014,7 +2014,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->interval.tv_usec = timeout % 1000000;
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       = toBehavior;
-                    newPD->grossSize        = MAX_PD_PACKET_SIZE;
+                    newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
                     newPD->userRef      = pUserRef;
                     newPD->socketIdx    = index;
 
@@ -2579,7 +2579,7 @@ static TRDP_ERR_T tlm_common_send (
 
             /* Prepare header */
             pNewElement->frameHead.sequenceCounter  = vos_htonl(0);
-            pNewElement->frameHead.protocolVersion  = vos_htons(IP_MD_PROTO_VER);
+            pNewElement->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
             pNewElement->frameHead.msgType          = vos_htons(msgType);
             pNewElement->frameHead.comId            = vos_htonl(comId);
             pNewElement->frameHead.topoCount        = vos_htonl(topoCount);
@@ -2873,7 +2873,7 @@ TRDP_ERR_T tlm_addListener (
         if (TRDP_NO_ERR == errv)
         {
             /* Room for MD element */
-            pNewElement = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T) + MAX_MD_PACKET_SIZE - sizeof(MD_HEADER_T));
+            pNewElement = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T) + TRDP_MAX_MD_PACKET_SIZE - sizeof(MD_HEADER_T));
             if (NULL == pNewElement)
             {
                 errv = TRDP_MEM_ERR;
@@ -2881,7 +2881,7 @@ TRDP_ERR_T tlm_addListener (
             else
             {
                 /* max size for incoming telegram */
-                pNewElement->grossSize = MAX_MD_PACKET_SIZE;
+                pNewElement->grossSize = TRDP_MAX_MD_PACKET_SIZE;
 
                 /* initial state for RX ready to receive */
                 pNewElement->stateEle = TRDP_MD_ELE_ST_RX_ARM;

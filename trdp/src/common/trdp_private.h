@@ -37,66 +37,35 @@
 
 #define LIB_VERSION  "0.0.1.0"
 
-#ifndef IP_PD_UDP_PORT
-#define IP_PD_UDP_PORT  20548                   /**< process data UDP port      */
+#ifndef TRDP_PD_UDP_PORT
+#define TRDP_PD_UDP_PORT                20548       /**< process data UDP port          */
 #endif
-#ifndef IP_MD_UDP_PORT
-#define IP_MD_UDP_PORT  20550                   /**< message data UDP port      */
+#ifndef TRDP_MD_UDP_PORT
+#define TRDP_MD_UDP_PORT                20550       /**< message data UDP port          */
 #endif
-#ifndef IP_MD_TCP_PORT
-#define IP_MD_TCP_PORT  20550                   /**< message data TCP port      */
+#ifndef TRDP_MD_TCP_PORT
+#define TRDP_MD_TCP_PORT                20550       /**< message data TCP port          */
 #endif
 
+#define TRDP_PROTO_VER                  0x0100      /**< Protocol version               */
 
-#define IP_PD_PROTO_VER             0x0100      /**< Protocol version           */
-#define IP_MD_PROTO_VER             0x0100
+#define TRDP_TIMER_GRANULARITY          10000       /**< granularity in us              */
 
+#define TRDP_MD_DEFAULT_REPLY_TIMEOUT   10000000    /**< default reply time out 10s     */
+#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT 10000000    /**< default reply time out 10s     */
 
-/* more reserved comIds:
+#define TRDP_PD_DEFAULT_QOS              0
+#define TRDP_PD_DEFAULT_TTL              64
 
-            100	PD push Inauguration state and topo count telegram
-            101	PD pull request telegram to retrieve dynamic train configuration information
-            102	PD pull reply telegram with dynamic train configuration information
-            103	MD request telegram to retrieve static consist and car information
-            104	MD reply telegram with static consist and car information
-            105	MD request telegram to retrieve device information for a given consist/car/device
-            106	MD reply telegram with device information for a given consist/car/device
-            107	MD request telegram to retrieve consist and car properties for a given consist/car
-            108	MD reply telegram with consist and car properties for a given consist/car
-            109	MD request telegram to retrieve device properties for a given consist/car/device
-            110	MD reply telegram with device properties for a given consist/car/device
-            111	MD request telegram for manual insertion of a given consist/car
-            112	MD reply telegram for manual insertion of a given consist/car
+#define TRDP_MD_DEFAULT_QOS              0
+#define TRDP_MD_DEFAULT_TTL              64
+#define TRDP_MD_DEFAULT_RETRIES          2
 
-            120..129	IPTSwitch Control&Monitoring Interface
-            125	MD Data (Version) Request Telegram
-            126	MD Counter Telegram
-            127	MD Dynamic Configuration Telegram
-            128	MD Dynamic Configuration Telegram Response
-            129	PD Dynamic Configuration Telegram (redundant TS to TS IPC)
+#define TRDP_MIN_PD_HEADER_SIZE          sizeof(PD_HEADER_T)     /**< PD header size with FCS */
+#define TRDP_MAX_PD_DATA_SIZE            1436
+#define TRDP_MAX_PD_PACKET_SIZE          (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
+#define TRDP_MAX_MD_PACKET_SIZE          (1024 * 64)
 
-            400..415 	SDTv2 validation test
-*/
-
-#define TIMER_GRANULARITY           10000       /**< granularity in us          */
-
-#define MD_DEFAULT_REPLY_TIMEOUT    10000000    /**< default reply time out 10s    */
-#define MD_DEFAULT_CONFIRM_TIMEOUT  10000000    /**< default reply time out 10s    */
-
-#define PD_DEFAULT_QOS              0
-#define PD_DEFAULT_TTL              64
-
-#define MD_DEFAULT_QOS              0
-#define MD_DEFAULT_TTL              64
-#define MD_DEFAULT_RETRIES          2
-
-#define MIN_PD_HEADER_SIZE          sizeof(PD_HEADER_T)     /**< PD header size with FCS */
-#define MAX_PD_DATA_SIZE            1436
-#define MAX_PD_PACKET_SIZE          MAX_PD_DATA_SIZE + MIN_PD_HEADER_SIZE
-#define MAX_MD_PACKET_SIZE          1024 * 64
-
-/** Default value in milliseconds for waiting on acknowledge message */
-#define ACK_TIME_OUT_VAL_DEF  500
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -202,8 +171,8 @@ typedef struct
 /** TRDP PD packet    */
 typedef struct
 {
-    PD_HEADER_T         frameHead;                  /**< Packet    header in network byte order         */
-    UINT8               data[MAX_PD_PACKET_SIZE];   /**< data ready to be sent or received (with CRCs)  */
+    PD_HEADER_T         frameHead;                       /**< Packet    header in network byte order         */
+    UINT8               data[TRDP_MAX_PD_PACKET_SIZE];   /**< data ready to be sent or received (with CRCs)  */
 } GNU_PACKED PD_PACKET_T;
 
 #ifdef WIN32
@@ -264,7 +233,7 @@ typedef struct MD_ELE
             TRDP_URI_USER_T       destURI;      /**< filter on incoming MD by destination URI           */
         } listener; /**< Listener arguments */
     } u;
-    BOOL				connectDone;
+    BOOL                connectDone;
     MD_HEADER_T         frameHead;              /**< Packet	header in network byte order                */
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
     /*    ... data + FCS ... */
@@ -273,28 +242,28 @@ typedef struct MD_ELE
 /** Session/application variables store */
 typedef struct TRDP_SESSION
 {
-    struct TRDP_SESSION     *pNext;     /**< Pointer to next session                    */
-    VOS_MUTEX_T             mutex;      /**< protect this session                       */
-    TRDP_IP_ADDR_T          realIP;     /**< Real IP address                            */
-    TRDP_IP_ADDR_T          virtualIP;  /**< Virtual IP address                         */
-    BOOL                    beQuiet;    /**< if set, only react on ownIP requests       */
-    UINT32                  redID;      /**< redundant comId                            */
-    UINT32                  topoCount;  /**< current valid topocount or zero            */
-    TRDP_TIME_T             interval;   /**< Store for next select interval             */
+    struct TRDP_SESSION     *pNext;             /**< Pointer to next session                    */
+    VOS_MUTEX_T             mutex;              /**< protect this session                       */
+    TRDP_IP_ADDR_T          realIP;             /**< Real IP address                            */
+    TRDP_IP_ADDR_T          virtualIP;          /**< Virtual IP address                         */
+    BOOL                    beQuiet;            /**< if set, only react on ownIP requests       */
+    UINT32                  redID;              /**< redundant comId                            */
+    UINT32                  topoCount;          /**< current valid topocount or zero            */
+    TRDP_TIME_T             interval;           /**< Store for next select interval             */
     TRDP_TIME_T             nextJob;
     TRDP_PRINT_DBG_T        pPrintDebugString;
     TRDP_MARSHALL_CONFIG_T  marshall;
-    TRDP_PD_CONFIG_T        pdDefault;  /**< Default configuration for process data     */
+    TRDP_PD_CONFIG_T        pdDefault;          /**< Default configuration for process data     */
     TRDP_MD_CONFIG_T        mdDefault;
     TRDP_MEM_CONFIG_T       memConfig;
     TRDP_OPTION_T           option;
-    TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use	*/
-    PD_ELE_T                *pSndQueue; /**< pointer to first element of send queue		*/
-    PD_ELE_T                *pRcvQueue; /**< pointer to first element of rcv queue		*/
-    MD_ELE_T                *pMDSndQueue;  /**< pointer to first element of send MD queue	*/
-    MD_ELE_T                *pMDRcvQueue;  /**< pointer to first element of recv MD queue	*/
-	MD_ELE_T                *pMDRcvEle; /**< pointer to received MD element */
-    TRDP_STATISTICS_T       stats;      /**< statistics of this session                 */
+    TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use       */
+    PD_ELE_T                *pSndQueue;         /**< pointer to first element of send queue     */
+    PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue      */
+    MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue  */
+    MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue  */
+	MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element             */
+    TRDP_STATISTICS_T       stats;              /**< statistics of this session                 */
 } TRDP_SESSION_T, *TRDP_SESSION_PT;
 
 
