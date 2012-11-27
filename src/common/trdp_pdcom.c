@@ -74,7 +74,7 @@ void    trdp_pdInit (
         return;
     }
 
-    pPacket->pFrame->frameHead.protocolVersion  = vos_htons(IP_PD_PROTO_VER);
+    pPacket->pFrame->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
     pPacket->pFrame->frameHead.topoCount        = vos_htonl(topoCount);
     pPacket->pFrame->frameHead.comId            = vos_htonl(pPacket->addr.comId);
     pPacket->pFrame->frameHead.msgType          = vos_htons(type);
@@ -277,7 +277,7 @@ TRDP_ERR_T  trdp_pdReceive (
     /*  Get a buffer    */
     if (pNewFrame == NULL)
     {
-        pNewFrame = (PD_PACKET_T *) vos_memAlloc(MAX_PD_PACKET_SIZE);
+        pNewFrame = (PD_PACKET_T *) vos_memAlloc(TRDP_MAX_PD_PACKET_SIZE);
         if (pNewFrame == NULL)
         {
             vos_printf(VOS_LOG_ERROR, "Receiving PD: Out of receive buffers!\n");
@@ -285,9 +285,9 @@ TRDP_ERR_T  trdp_pdReceive (
         }
     }
     /* clean memory before using it */
-    memset(pNewFrame, 0, MAX_PD_PACKET_SIZE);
+    memset(pNewFrame, 0, TRDP_MAX_PD_PACKET_SIZE);
 
-    recSize = MAX_PD_PACKET_SIZE;
+    recSize = TRDP_MAX_PD_PACKET_SIZE;
 
     /*  Get the packet from the wire:  */
     if (vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr) != VOS_NO_ERR)
@@ -526,8 +526,8 @@ TRDP_ERR_T trdp_pdCheck (
     TRDP_ERR_T  err         = TRDP_NO_ERR;
 
     /*  Check size	*/
-    if (packetSize < MIN_PD_HEADER_SIZE ||
-        packetSize > MAX_PD_PACKET_SIZE)
+    if (packetSize < TRDP_MIN_PD_HEADER_SIZE ||
+        packetSize > TRDP_MAX_PD_PACKET_SIZE)
     {
         vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", (UINT32) packetSize);
         err = TRDP_WIRE_ERR;
@@ -543,11 +543,11 @@ TRDP_ERR_T trdp_pdCheck (
         err = TRDP_CRC_ERR;
     }
     /*  Check protocol version  */
-    else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (IP_PD_PROTO_VER & 0xFF000000))
+    else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (TRDP_PROTO_VER & 0xFF000000))
     {
         vos_printf(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
                    vos_ntohs(pPacket->protocolVersion),
-                   IP_PD_PROTO_VER);
+                   TRDP_PROTO_VER);
         err = TRDP_WIRE_ERR;
     }
     /*  Check type  */
@@ -607,7 +607,7 @@ TRDP_ERR_T  trdp_pdSend (
                           (UINT8 *)&pPacket->pFrame->frameHead,
                           pPacket->grossSize,
                           destIp,
-                          IP_PD_UDP_PORT);
+                          TRDP_PD_UDP_PORT);
 
     if (err != VOS_NO_ERR)
     {
