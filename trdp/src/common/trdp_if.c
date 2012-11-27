@@ -1364,6 +1364,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
                     /* Check any failure on accept                */
                     /**********************************************/
 
+                    TRDP_ERR_T errv = TRDP_NO_ERR;
                     UINT32 newIp;
                     newIp = appHandle->realIP;
 
@@ -1432,7 +1433,6 @@ EXT_DECL TRDP_ERR_T tlc_process (
                      */
 
                     /* Save the new socket in the iface */
-                    TRDP_ERR_T errv = TRDP_NO_ERR;
 
                     errv = trdp_requestSocket(
                             appHandle->iface,
@@ -1459,45 +1459,45 @@ EXT_DECL TRDP_ERR_T tlc_process (
             }
 
 
-            /* Check Receive Data */
-
-            INT32 index;
-
-            for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
             {
-                if((appHandle->iface[index].sock != -1) && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP))
+                /* Check Receive Data */
+                INT32 index;
+
+                for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
                 {
-                    if(FD_ISSET(appHandle->iface[index].sock, (fd_set *) pRfds))
+                    if((appHandle->iface[index].sock != -1) && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP))
                     {
-                        (*pCount)--;
-                        FD_CLR(appHandle->iface[index].sock, (fd_set *)pRfds);
-
-                        err = trdp_mdReceive(appHandle, appHandle->iface[index].sock);
-
-                        if (err != TRDP_NO_ERR )
+                        if(FD_ISSET(appHandle->iface[index].sock, (fd_set *) pRfds))
                         {
-                            /* The received ComId is not subscribed or other possible errors*/
+                            (*pCount)--;
+                            FD_CLR(appHandle->iface[index].sock, (fd_set *)pRfds);
 
-                            if(appHandle->iface[index].usage == 1)
+                            err = trdp_mdReceive(appHandle, appHandle->iface[index].sock);
+
+                            if (err != TRDP_NO_ERR )
                             {
-                                vos_sockClose(appHandle->iface[index].sock);
+                                /* The received ComId is not subscribed or other possible errors*/
+                                 
+                                if(appHandle->iface[index].usage == 1)
+                                {
+                                    vos_sockClose(appHandle->iface[index].sock);
+                                }
+                                else
+                                {
+                                    appHandle->iface[index].usage--;
+                                }
 
-                            }
-                            else
-                            {
-                                appHandle->iface[index].usage--;
-                            }
-
-                            /* Deleting socket from the iface [] */
-                            vos_printf(VOS_LOG_INFO, "Deleting socket (Nº = %d) from the iface\n",
+                                /* Deleting socket from the iface [] */
+                                vos_printf(VOS_LOG_INFO, "Deleting socket (Nº = %d) from the iface\n",
                                        appHandle->iface[index].sock);
-                            vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
-                            appHandle->iface[index].sock = -1;
-                            appHandle->iface[index].sendParam.qos   = 0;
-                            appHandle->iface[index].sendParam.ttl   = 0;
-                            appHandle->iface[index].usage           = 0;
-                            appHandle->iface [index].bindAddr       = 0;
-                            appHandle->iface[index].type = 0;
+                                vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
+                                appHandle->iface[index].sock = -1;
+                                appHandle->iface[index].sendParam.qos   = 0;
+                                appHandle->iface[index].sendParam.ttl   = 0;
+                                appHandle->iface[index].usage           = 0;
+                                appHandle->iface [index].bindAddr       = 0;
+                                appHandle->iface[index].type            = 0;
+                            }
                         }
                     }
                 }
@@ -1524,14 +1524,16 @@ EXT_DECL TRDP_ERR_T tlc_process (
             }
 
             /* search for listener sockets */
-            MD_ELE_T *iterMD;
-            for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
             {
-                /* valid socket for armed listener */
-                if (appHandle->iface[iterMD->socketIdx].sock != -1)
+                MD_ELE_T *iterMD;
+                for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
                 {
-                    /* index to poll */
-                    skxp[iterMD->socketIdx] = 1;
+                    /* valid socket for armed listener */
+                    if (appHandle->iface[iterMD->socketIdx].sock != -1)
+                    {
+                        /* index to poll */
+                        skxp[iterMD->socketIdx] = 1;
+                    }
                 }
             }
 
@@ -1552,10 +1554,11 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
     /* check for timeout session */
     {
+        MD_ELE_T *iterMD;
+        
         /*    Update the current time    */
         vos_getTime(&now);
 
-        MD_ELE_T *iterMD;
         /* timeout on receive queue */
         for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
         {
