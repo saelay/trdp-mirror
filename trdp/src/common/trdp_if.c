@@ -1592,7 +1592,10 @@ EXT_DECL TRDP_ERR_T tlc_process (
                             theMessage.replyTimeout = vos_ntohl(iterMD->frameHead.replyTimeout);
                             memcpy(theMessage.destURI, iterMD->u.listener.destURI, 32);
                             memcpy(theMessage.srcURI, iterMD->frameHead.sourceURI, 32);
-                            theMessage.numReplies   = 0;
+                            theMessage.noOfRepliers = iterMD->noOfRepliers;
+							theMessage.numReplies   = 0;
+                            theMessage.numRetriesMax = 0;
+							theMessage.numRetries   = 0;
                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                             theMessage.resultCode   = TRDP_APPTIMEOUT_ERR;
 
@@ -1624,8 +1627,39 @@ EXT_DECL TRDP_ERR_T tlc_process (
                     vos_addTime(&tmpt, &iterMD->interval); /* interval is timeout velue */
                     if (0 > vos_cmpTime(&tmpt, &now)) /* timeout overflow */
                     {
-                        /*  */
                         vos_printf(VOS_LOG_INFO, "MD send session timeout: remove st=%d\n", iterMD->stateEle);
+
+						// Increment number of reties
+						iterMD->numRetries++;
+						
+						// Handle UDP retries for single reply expeced
+						UINT32 delSender = 0;
+						if(
+							(iterMD->stateEle == TRDP_MD_ELE_ST_TX_REQUEST_W4Y) // Request
+							&&
+							(iterMD->noOfRepliers == 1) 						// Single reply expected
+							&&
+							(iterMD->numRetriesMax > 0)							// Retries allowed
+							&&
+							(iterMD->numRetries < iterMD->numRetriesMax) 		// Retries below maximum allowed
+							)
+						{
+							// Update timeout
+							TRDP_TIME_T nextTime;
+
+							vos_getTime(&nextTime);
+							vos_addTime(&nextTime, &iterMD->interval);
+							
+							iterMD->timeToGo = nextTime;
+							
+							// Re-arm send
+							iterMD->stateEle = TRDP_MD_ELE_ST_TX_REQUEST_ARM;
+						}
+						else
+						{
+							// Remove sender after callback
+							delSender = 1;
+						}
 
                         /* Execute callback */
                         if(appHandle->mdDefault.pfCbFunction != NULL)
@@ -1645,7 +1679,10 @@ EXT_DECL TRDP_ERR_T tlc_process (
                             theMessage.replyTimeout = vos_ntohl(iterMD->frameHead.replyTimeout);
                             memcpy(theMessage.destURI, iterMD->frameHead.destinationURI, 32);
                             memcpy(theMessage.srcURI, iterMD->frameHead.sourceURI, 32);
-                            theMessage.numReplies   = 0;
+                            theMessage.noOfRepliers = iterMD->noOfRepliers;
+							theMessage.numReplies   = iterMD->numReplies;
+                            theMessage.numRetriesMax = iterMD->numRetriesMax;
+							theMessage.numRetries   = iterMD->numRetries;
                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                             theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
@@ -1655,13 +1692,19 @@ EXT_DECL TRDP_ERR_T tlc_process (
                                 (UINT8 *)&iterMD->frameHead, iterMD->grossSize);
                         }
 
-                        /* Remove element from queue */
-                        trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
+						if(delSender == 1)
+						{
+							/* Remove element from queue */
+							trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
 
-                        /* free element */
-                        vos_memFree(iterMD);
-
-                        restart = 1;
+							/* free element */
+							vos_memFree(iterMD);
+							
+							vos_printf(VOS_LOG_INFO, "MD send session timeout: remove st=%d\n", iterMD->stateEle);
+							
+							// Recheck
+							restart = 1;
+						}
                     }
                 }
                 break;
@@ -2461,7 +2504,32 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->timeToGo           = nextTime;
             pNewElement->dataSize           = dataSize;
             pNewElement->grossSize          = grossSize;
+			pNewElement->numReplies 		= 0;
+			pNewElement->numRetries 		= 0;
+			pNewElement->numRetriesMax 		= (pSendParam != NULL) ? pSendParam->retries : (appHandle->mdDefault.sendParam.retries);
+            //vos_printf(VOS_LOG_ERROR, "numRetriesMax: %u, %u, %u, \n", pNewElement->numRetriesMax, (pSendParam != NULL) ? pSendParam->retries : 100000,  appHandle->mdDefault.sendParam.retries);
 
+			if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+			{
+				// No multiple responce expected for TCP
+				pNewElement->noOfRepliers       = 1;
+				
+				// No retries on TCP
+				pNewElement->numRetriesMax		= 0;
+			}
+			else if(vos_isMulticast(destIpAddr))
+			{
+				// Multiple responce expected only for multicast
+				pNewElement->noOfRepliers       = noOfRepliers;
+
+				// No retries on UDP multicast
+				pNewElement->numRetriesMax		= 0;
+			}
+			else
+			{
+				// No multiple responce expected for no multicast IP address
+				pNewElement->noOfRepliers       = 1;
+			}
 
             if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
             {
@@ -2830,7 +2898,7 @@ TRDP_ERR_T tlm_addListener (
     /* mutex protected */
     {
 
-        /* DEBUG: enabling following code it is possible to have only one listener for comID/Adress/Destination */
+        /* NOTE: enabling following code it is possible to have only one listener for comID/Adress/Destination */
 #if 0
         {
             MD_ELE_T *iterMD;
@@ -2907,10 +2975,7 @@ TRDP_ERR_T tlm_addListener (
                             &pNewElement->socketIdx
                             );
 
-                    /*
-                       FAR 16/10/2012
-                       Bind shall be executed only once at socket creation
-                     */
+                    // Bind shall be executed only once at socket creation
                     if (errv == TRDP_NO_ERR &&
                         appHandle->iface[pNewElement->socketIdx].usage == 0)
                     {
@@ -2920,6 +2985,25 @@ TRDP_ERR_T tlm_addListener (
                                 0,
                                 appHandle->mdDefault.udpPort);
                     }
+					
+					// Check if destination address is multicast, if yes join into this group
+					// TODO: check if this is ok or need to be done in other way
+					if (vos_isMulticast(destIpAddr))
+					{
+						// Set multicast group address
+						pNewElement->addr.mcGroup = destIpAddr;
+						
+						// Join group
+						// Note: disable multicast loop back
+						vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, 0);
+
+						// Set multicast flag
+						pNewElement->privFlags |= TRDP_MC_JOINT;
+					}
+					else
+					{
+						pNewElement->addr.mcGroup = 0;
+					}
                 }
 
                 if (TRDP_NO_ERR != errv)

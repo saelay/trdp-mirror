@@ -458,6 +458,18 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         {
             err = VOS_NO_ERR;
         }
+		
+		// Disable multicast loop back
+		UINT32 enMcLb = 0;
+		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1)
+		{
+			vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_TTL failed\n");
+            err = VOS_SOCK_ERR;
+        }
+        else
+        {
+            err = (err == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
+        }
     }
     else
     {
