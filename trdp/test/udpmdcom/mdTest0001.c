@@ -1265,8 +1265,8 @@ static int test_initialize()
 	memset(&md_config,0,sizeof(md_config));
 	md_config.pfCbFunction = md_indication;
 	md_config.pRefCon      = (void *)0x12345678;
-	md_config.sendParam.qos = MD_DEFAULT_QOS;
-	md_config.sendParam.ttl = MD_DEFAULT_TTL;
+	md_config.sendParam.qos = TRDP_MD_DEFAULT_QOS;
+	md_config.sendParam.ttl = TRDP_MD_DEFAULT_QOS;
 	md_config.flags = 0
 		| TRDP_FLAGS_NONE      * 0
 		| TRDP_FLAGS_REDUNDANT * 0
@@ -1274,10 +1274,10 @@ static int test_initialize()
 		| TRDP_FLAGS_CALLBACK  * 1
 		| TRDP_FLAGS_TCP       * 0 /* 1=TCP, 0=UDP */
 		;
-	md_config.replyTimeout   = MD_DEFAULT_REPLY_TIMEOUT;
-	md_config.confirmTimeout = MD_DEFAULT_CONFIRM_TIMEOUT;
-	md_config.udpPort        = IP_MD_UDP_PORT;
-	md_config.tcpPort        = IP_MD_UDP_PORT;
+	md_config.replyTimeout   = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+	md_config.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+	md_config.udpPort        = TRDP_MD_UDP_PORT;
+	md_config.tcpPort        = TRDP_MD_UDP_PORT;
 
 	/*	Init the library  */
 	errv = tlc_init(
