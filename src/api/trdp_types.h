@@ -313,13 +313,15 @@ typedef struct
     TRDP_MSG_T          msgType;      /**< Protocol ('PD', 'MD', ...)                 */
     UINT32              comId;        /**< ComID                                      */
     UINT32              topoCount;    /**< received topocount                         */
-    UINT16              numRetries;  /**< actual number of retries                    */
+    UINT32              numRetries;   /**< actual number of retries                    */
+	UINT32              numRetriesMax;/**< maximun number of retries for request to a know dev*/
     UINT16              userStatus;   /**< error code, user stat                      */
     TRDP_REPLY_STATUS_T replyStatus;  /**< reply status                               */
     TRDP_UUID_T         sessionId;    /**< for response                               */
     UINT32              replyTimeout; /**< reply timeout in us given with the request */
     TRDP_URI_USER_T     destURI;      /**< destination URI user part from MD header   */
     TRDP_URI_USER_T     srcURI;       /**< source URI user part from MD header        */
+	UINT32				noOfRepliers; /**< number of expected repliers, 0 if unknown  */
     UINT32              numReplies;   /**< actual number of replies for the request   */
     const void          *pUserRef;    /**< User reference given with the local call   */
     TRDP_ERR_T          resultCode;   /**< error code                                 */

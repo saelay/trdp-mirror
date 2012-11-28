@@ -537,7 +537,10 @@ TRDP_ERR_T  trdp_mdReceive (
                             theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
                             memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                             memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-                            theMessage.numReplies   = 0;
+							theMessage.noOfRepliers = 0;
+							theMessage.numReplies   = 0;
+                            theMessage.numRetriesMax = 0;
+							theMessage.numRetries   = 0;
                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                             theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -620,31 +623,61 @@ TRDP_ERR_T  trdp_mdReceive (
                                 /* reply ok or reply error */
                                 if (l_msgType == TRDP_MSG_MP || l_msgType == TRDP_MSG_MQ || l_msgType == TRDP_MSG_ME)
                                 {
-
+									UINT32 removeMdSendElement = 0;
+								
+									// Info
                                     vos_printf(VOS_LOG_INFO,
                                                "MD RX/TX match (comId %u, topo %u)\n",
                                                l_comId,
                                                l_topoCount);
 
-                                    /* if received reply with confirm request .... */
-                                    if (l_msgType == TRDP_MSG_MQ)
-                                    {
-                                        /* ... move the listener waiting for sending confirm telegram */
-                                        iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
+									// Increment number of received replies
+									sender_ele->numReplies++;
 
-                                        /* copy session id to listener */
-                                        memcpy(&iterMD->sessionID, &sender_ele->sessionID, 16);
+									// Handle multiple replies
+									if(sender_ele->noOfRepliers == 1)
+									{
+										// Handle single expected replies
+										
+										// If received reply with confirm request
+										// Handle only for single expected reply
+										if (l_msgType == TRDP_MSG_MQ)
+										{
+											/* ... move the listener waiting for sending confirm telegram */
+											iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
 
-                                        /* forward timeout */
-                                        iterMD->timeToGo    = sender_ele->timeToGo;
-                                        iterMD->interval    = sender_ele->interval;
+											/* copy session id to listener */
+											memcpy(&iterMD->sessionID, &sender_ele->sessionID, 16);
 
-                                        /* Copy other identification arams */
-                                        iterMD->u.listener.comId        = l_comId;
-                                        iterMD->u.listener.topoCount    = l_topoCount;
-                                        iterMD->u.listener.destIpAddr   = appHandle->pMDRcvEle->addr.srcIpAddr;
-                                        memcpy(iterMD->u.listener.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
-                                    }
+											/* forward timeout */
+											iterMD->timeToGo    = sender_ele->timeToGo;
+											iterMD->interval    = sender_ele->interval;
+
+											/* Copy other identification arams */
+											iterMD->u.listener.comId        = l_comId;
+											iterMD->u.listener.topoCount    = l_topoCount;
+											iterMD->u.listener.destIpAddr   = appHandle->pMDRcvEle->addr.srcIpAddr;
+											memcpy(iterMD->u.listener.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
+										}
+										
+										// Reply reception done, remove send element
+										removeMdSendElement = 1;
+									}
+									else if(sender_ele->noOfRepliers > 1)
+									{
+										// Handle multiple known expected replies
+										
+										if(sender_ele->noOfRepliers == sender_ele->numReplies)
+										{
+											// Reply reception done, remove send element
+											removeMdSendElement = 1;
+										}
+									}
+									else
+									{
+										// Handle multiple unknown replies
+										// Send element removed by timeout because nomber of repliers is unknow
+									}
 
                                     /* copy message to proper listener */
                                     memcpy(&iterMD->frameHead, pH, lF);
@@ -666,7 +699,10 @@ TRDP_ERR_T  trdp_mdReceive (
                                         theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
                                         memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                         memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-                                        theMessage.numReplies   = 0;
+										theMessage.noOfRepliers = sender_ele->noOfRepliers;
+                                        theMessage.numReplies   = sender_ele->numReplies;
+										theMessage.numRetriesMax = sender_ele->numRetriesMax;
+										theMessage.numRetries   = sender_ele->numRetries;
                                         theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                         theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -684,8 +720,11 @@ TRDP_ERR_T  trdp_mdReceive (
                                     {
                                         int find_sock;
                                         int sock_position;
-
-                                        for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+										
+										// Remove sender, multiple reply are supported only in UDP
+										removeMdSendElement = 1;
+                                        
+										for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
                                         {
                                             if((appHandle->iface[find_sock].sock == sock)
                                                && (appHandle->iface[find_sock].sock != -1))
@@ -721,12 +760,15 @@ TRDP_ERR_T  trdp_mdReceive (
 
                                     }
 
+                                    // Handle send element
+									if(removeMdSendElement == 1)
+									{
+										/* Remove element from queue */
+										trdp_MDqueueDelElement(&appHandle->pMDSndQueue, sender_ele);
 
-                                    /* Remove element from queue */
-                                    trdp_MDqueueDelElement(&appHandle->pMDSndQueue, sender_ele);
-
-                                    /* free element */
-                                    vos_memFree(sender_ele);
+										/* free element */
+										vos_memFree(sender_ele);
+									}
 
                                     /* stop loop */
                                     break;
@@ -760,7 +802,10 @@ TRDP_ERR_T  trdp_mdReceive (
                                         theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
                                         memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                         memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
+										theMessage.noOfRepliers = 0;
                                         theMessage.numReplies   = 0;
+										theMessage.numRetriesMax = 0;
+										theMessage.numRetries   = 0;
                                         theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                         theMessage.resultCode   = TRDP_NO_ERR;
 
