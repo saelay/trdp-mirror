@@ -110,7 +110,7 @@ TRDP_ERR_T trdp_mdCheck (
     {
         /* Min size is sizeof(MD_HEADER_T) because in case of no data no further data and data crc32 are added */
         if (packetSize < (sizeof(MD_HEADER_T)) ||
-            packetSize > MAX_MD_PACKET_SIZE)
+            packetSize > TRDP_MAX_MD_PACKET_SIZE)
         {
             appHandle->stats.udpMd.numProtErr++;
             vos_printf(VOS_LOG_ERROR, "MDframe size error (%u)\n",
@@ -156,12 +156,12 @@ TRDP_ERR_T trdp_mdCheck (
         UINT16 l_protocolVersion = vos_ntohs(pPacket->protocolVersion);
         #define TRDP_PROTOCOL_VERSION_CHECK_MASK  0xFF00
         if ((l_protocolVersion & TRDP_PROTOCOL_VERSION_CHECK_MASK) !=
-            (IP_MD_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK))
+            (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK))
         {
             appHandle->stats.udpMd.numProtErr++;
             vos_printf(VOS_LOG_ERROR, "MDframe protocol error (%04x != %04x))\n",
                        l_protocolVersion,
-                       IP_MD_PROTO_VER);
+                       TRDP_PROTO_VER);
             err = TRDP_WIRE_ERR;
         }
     }
@@ -284,7 +284,7 @@ TRDP_ERR_T  trdp_mdSend (
                               (UINT8 *)&pPacket->frameHead,
                               pPacket->grossSize,
                               pPacket->addr.destIpAddr,
-                              IP_MD_UDP_PORT);
+                              TRDP_MD_UDP_PORT);
     }
 
     if (err != VOS_NO_ERR)
@@ -388,7 +388,7 @@ TRDP_ERR_T  trdp_mdReceive (
     /* get buffer at 1st call */
     if (appHandle->pMDRcvEle == NULL)
     {
-        appHandle->pMDRcvEle = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T) + MAX_MD_PACKET_SIZE - sizeof(MD_HEADER_T));
+        appHandle->pMDRcvEle = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T) + TRDP_MAX_MD_PACKET_SIZE - sizeof(MD_HEADER_T));
         if (NULL == appHandle->pMDRcvEle)
         {
             vos_printf(VOS_LOG_ERROR, "Receiving MD: Out of receive buffers!\n");
@@ -396,7 +396,7 @@ TRDP_ERR_T  trdp_mdReceive (
         }
 
         memset(appHandle->pMDRcvEle, 0, sizeof(MD_ELE_T));
-        appHandle->pMDRcvEle->grossSize = MAX_MD_PACKET_SIZE;
+        appHandle->pMDRcvEle->grossSize = TRDP_MAX_MD_PACKET_SIZE;
         appHandle->pMDRcvEle->pktFlags  = appHandle->mdDefault.flags;
     }
 

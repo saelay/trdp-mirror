@@ -187,7 +187,7 @@ int main (int argc, char * *argv)
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
                                                TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO,
-                                               IP_PD_UDP_PORT};
+                                               TRDP_PD_UDP_PORT};
     TRDP_MD_CONFIG_T		mdConfiguration = { myMDcallBack /* Pointer to MD callback function (use excatly the same as for PD)*/
         		, NULL	/* Pointer to user context for call back */
         		, {0, 0} /* Default send parameters */
@@ -195,8 +195,8 @@ int main (int argc, char * *argv)
                 , 10000000 	/* Default reply timeout in us*/
                 , 100000 	/* Default confirmation timeout in us*/
                 , 100000 	/* Default connection timeout in us */
-                , IP_MD_UDP_PORT 	/* Port to be used for UDP MD communication*/
-                , IP_MD_TCP_PORT 	/* Port to be used for TCP MD communication */ };
+                , TRDP_MD_UDP_PORT 	/* Port to be used for UDP MD communication*/
+                , TRDP_MD_TCP_PORT 	/* Port to be used for TCP MD communication */ };
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"server", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
@@ -411,10 +411,10 @@ int main (int argc, char * *argv)
          function (in it's context and thread)!
          */
 
-        //tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 
         /*FIXME the code only receives packages when no fds are given */
-        tlc_process(appHandle, NULL, NULL);
+        //tlc_process(appHandle, NULL, NULL);
 
 
         /*
