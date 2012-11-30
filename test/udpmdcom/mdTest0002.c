@@ -4,10 +4,13 @@
  *
  * @brief	UDPMDCom teat application
  *
- * @details	Test applicatio. In Testmode 1 start transactions, in Testmode 2 respond to transactins.
+ * @details	Test application. In Testmode 1 start transactions, in Testmode 2 and 3 respond to transactions.
  *
  * @note	Project: TCNOpen TRDP prototype stack
- *		Version 0.0: s.pachera (FAR). First issues, derived from mdTest0001.c example application. Add some elements for multicast support
+ *		Version 0.0: s.pachera (FAR).
+ *			First issues, derived from mdTest0001.c example application.
+ *			Add basic multicast test for Notify, Request and Reply without confirmation
+ *			Removed log 2 file support, no more needed
  *
  * @author	Simone Pachera  (FAR Systems)
  *
@@ -46,6 +49,7 @@
 #include "trdp_if_light.h"
 #include "trdp_private.h"
 #include "trdp_utils.h"
+#include "../api/trdp_types.h"
 
 #define TRDP_IP4_ADDR(a,b,c,d) ( (am_big_endian()) ? \
 	((UINT32)((a) & 0xFF) << 24) | ((UINT32)((b) & 0xFF) << 16) | ((UINT32)((c) & 0xFF) << 8) | ((UINT32)((d) & 0xFF)) : \
@@ -100,7 +104,8 @@ static int            x_request;
 static int            x_reqconf;
 static int            x_receiver;
 static TRDP_IP_ADDR_T x_ip4_dest;
-static int            x_l2f;		// Enable log 2 file
+static TRDP_IP_ADDR_T x_ip4_mc_01;
+static TRDP_IP_ADDR_T x_ip4_mc_02;
 static int            x_period;		// Main loop period in ms
 static int            x_testmode;	// Test mode: dev1 o dev 2
 
@@ -128,175 +133,55 @@ typedef struct
 // Cli tests
 // IP address set to tagg value, overrided during application init loaded from command line arguments
 //   0 = Dev2 address
-//   1 = multicast address
+//   1 = Multicast address
 cli_test cliTests[] =
 {
-	{'1', "TST-0001", "Notify, Send Notify to Dev2 (no listener).", 0, 1001, 151, 0, 1},
-	{'2', "TST-0002", "Notify, Send Notify to Dev2.", 0, 1002, 151, 0, 1},
-	{'3', "TST-0003", "Notify, Send Notify to Dev2 (listener in different comID).", 0, 1004, 151, 0, 1},
-	{'4', "TST-0004", "Request-Reply, Send Request to Dev2 (no listener).", 1, 2001, 151, 0, 1},
-	{'5', "TST-0005", "Request-Reply, Send Request to Dev2.", 1, 2002, 151, 0, 1},
-	{'6', "TST-0006", "Request-Reply, Send Request to Dev2 (listener in different comID).", 1, 2003, 151, 0, 1},
-	{'7', "TST-0007", "Request-Reply-Confirm, Send Request to Dev2.", 1, 3001, 151, 0, 1},
-	{'8', "TST-0008", "Request-Reply-Confirm, Send Request to Dev2, no confirm sent.", 1, 3002, 151, 0, 1},
-	{'9', "TST-0009", "Multicast Notify, Send Multicast Notify.", 0, 4001, 151, 1, 0},
-	{'a', "TST-0010", "Multicast Request, Send Multicast Request, 2 expected repliers, 0 reply.", 1, 5001, 151, 1, 2},
-	{'b', "TST-0011", "Multicast Request, Send Multicast Request, 2 expected repliers, 1 reply.", 1, 5002, 151, 1, 2},
-	{'c', "TST-0012", "Multicast Request, Send Multicast Request, 2 expected repliers, 2 reply.", 1, 5003, 151, 1, 2}
+	{'1', "TEST-0001", "Notify, Send Notify to Dev2 (no listener).", 0, 1001, 151, 0, 1},
+	{'2', "TEST-0002", "Notify, Send Notify to Dev2.", 0, 1002, 151, 0, 1},
+	{'3', "TEST-0003", "Notify, Send Notify to Dev2 (listener in different comID).", 0, 1003, 151, 0, 1},
+	{'4', "TEST-0004", "Request-Reply, Send Request to Dev2 (no listener).", 1, 2001, 151, 0, 1},
+	{'5', "TEST-0005", "Request-Reply, Send Request to Dev2.", 1, 2002, 151, 0, 1},
+	{'6', "TEST-0006", "Request-Reply, Send Request to Dev2 (listener in different comID).", 1, 2003, 151, 0, 1},
+	{'7', "TEST-0007", "Request-Reply-Confirm, Send Request to Dev2.", 1, 3001, 151, 0, 1},
+	{'8', "TEST-0008", "Request-Reply-Confirm, Send Request to Dev2, no confirm sent.", 1, 3002, 151, 0, 1},
+	{'9', "TEST-0009", "Multicast Notify, Send Multicast Notify.", 0, 4001, 151, 1, 0},
+	{'a', "TEST-0010", "Multicast Request-Reply, 2 expected repliers, 0 reply.", 1, 5001, 151, 2, 2},
+	{'b', "TEST-0011", "Multicast Request-Reply, 2 expected repliers, 1 reply.", 1, 5002, 151, 2, 2},
+	{'c', "TEST-0012", "Multicast Request-Reply, 2 expected repliers, 2 reply.", 1, 5003, 151, 2, 2},
+	{'d', "TEST-0013", "Multicast Request-Reply, unknown expected repliers, 0 reply.", 1, 6001, 151, 2, 0},
+	{'e', "TEST-0014", "Multicast Request-Reply, unknown expected repliers, 1 reply.", 1, 6002, 151, 2, 0},
+	{'f', "TEST-0015", "Multicast Request-Reply, unknown expected repliers, 2 reply.", 1, 6003, 151, 2, 0},
+	{'g', "TEST-0013", "Multicast Request-Reply-Confirm, 2 expected repliers, 0 confirm sent.", 1, 7001, 151, 2, 2},
+	{'i', "TEST-0014", "Multicast Request-Reply-Confirm, 2 expected repliers, 1 confirm sent.", 1, 7002, 151, 2, 2},
+	{'l', "TEST-0015", "Multicast Request-Reply-Confirm, 2 expected repliers, 2 confirm sent.", 1, 7003, 151, 2, 2}
 };
 
 
-// *** Log2file: Start ***
-
-// Global variables
-int	l2fPipeFd[2];	// Communication pipe
-pid_t   l2fWriterPid;	// Writer server PID
-
-
-// Write log to file
-int l2fFlush(char *logMsg)
+// Get cli_test element from comId
+int cliTestGetElementFromComID(int comID)
 {
-    // Open file in append mode
-    FILE *flog = fopen("trdp.log", "a");
-    
-    // Append string to file
-    fprintf(flog, "%s\n", logMsg);
-
-    // Close file
-    fclose(flog);
-    
-    return 0;
-}
-
-// Log file writer
-void l2fWriterServer()
-{
-    // Arbitrary buffer size
-    char pipeMsg[1025];
-	
-    // Readed message size
-    int pipeMsgSize = 0;
-    
-    // Close client side pipe
-    close(l2fPipeFd[1]);
-
-    // Write messages to file
-    while(1)
-    {
-		// Check if parent task is diede
-		if(getppid() < 2)
-		{
-			fprintf(stderr,"l2fWriterServer(): error, parent task is died.\n");
-			exit(EXIT_FAILURE);
-		}
-
-		// Read message from file
-		pipeMsgSize = read(l2fPipeFd[0], pipeMsg, sizeof(pipeMsg));
-	
-		// Check for pipe close
-		if(pipeMsgSize < 0)
-		{
-			fprintf(stderr,"l2fWriterServer(): pipe closed.\n");
-			exit(EXIT_FAILURE);
-		}
-
-		pipeMsg[1024] = '\0'; // Tap, in case of problems
-	
-		// Write to file
-		l2fFlush(pipeMsg);
-    }
-}
-
-
-// Init writer task
-int l2fInit(void)
-{   
-    // Init server pipe
-    pipe(l2fPipeFd);
-    
-    // Create file writer server
-    l2fWriterPid = fork();
-    
-    // Fork ok, start server
-    if(l2fWriterPid == 0)
-    {
-	// Server start
-	l2fWriterServer();
-	
-	// Abnormal termination, server never end before application
-	perror("l2fInit(): server abnormal exit.");
-	exit(1);
-    }
-    // Fork error
-    else if(l2fWriterPid == -1)
-    {
-	perror("l2fInit(): server fork error.");
-	exit(1);
-    }
-    
-    // Close server side pipe
-    close(l2fPipeFd[0]);
-    
-    // Parent, return only
-    return 0;
-}
-
-
-// Send log string to server
-int l2fLog(char *logString)
-{
-    struct tm *logtm;
-    struct timeval tv; 
-    long milliseconds;
-
-    // Skip log if no init done
-    if(l2fWriterPid == 0)
-	return 1;
-
-    gettimeofday (&tv, NULL); 
-    milliseconds = tv.tv_usec / 1000; 
-    logtm = localtime(&tv.tv_sec);
-
-    // Prepare string
-    char tmpString[1024];
-    sprintf(
-	tmpString,
-	"%04d-%02d-%02d %02d:%02d:%02d.%03ld - %s",
-	1900 + logtm->tm_year, logtm->tm_mon + 1,
-	logtm->tm_mday, logtm->tm_hour, logtm->tm_min, logtm->tm_sec,
-	milliseconds,
-	logString);
-
-    // Send to server using pipe
-    write(l2fPipeFd[1], tmpString, (strlen(tmpString)+1));
-    
-    return 0;
-}
-
-// Stop log
-int l2fStop(void)
-{
-    // Kill l2f writer
-    if(l2fWriterPid != 0)
-    {
-	int l2fKillRet;
-	l2fKillRet = kill(l2fWriterPid, SIGKILL);
-	if(l2fKillRet < 0)
+	// Check if array is initialized
+	if(cliTests == NULL)
 	{
-	    perror("l2fStop(): unable to kill writer task.");
+		// Initialization error
+		return -1;
 	}
-	else
-	{    
-	    int exitStatus;
-	    waitpid(l2fWriterPid,&exitStatus, 0);
-	}
-    }
+	
+	// Find element
+	int n = 0;
+	for(n = 0; n < sizeof(cliTests)/sizeof(cli_test); n++)
+		if(cliTests[n].comID == comID)
+			return n;
+	
+	// Not nound
+	return -1;
+}
 
-    // Close pipe
-    close(l2fPipeFd[1]);
-    
-    return 0;
-}    
+
+// Reception FSM status, reset by command execution start, incremented and used in message queue handling function
+static int rx_test_fsm_state = 0;
+
+
 
 // Convert an IP address to string
 char * miscIpToString(int ipAdd, char *strTmp)
@@ -348,7 +233,6 @@ char *miscSession2String(const UINT8 *p)
 
 // Convert URI to String
 char *miscUriToString(const CHAR8 *p)
-#include "../api/trdp_types.h"
 {
     int i;
     char *strTmp;
@@ -657,14 +541,123 @@ static int queue_receivemessage(trdp_apl_cbenv_t * msg)
 // Send counters
 static int testReplySendID = 0;
 static int testReplyQSendID = 0;
-static int testConfirmSendID = 0;
+
+// Send a confirm
+static int testConfirmSend(trdp_apl_cbenv_t msg)
+{
+    TRDP_ERR_T errv;
+
+    // Send confirm
+	errv = tlm_confirm (
+		appHandle,
+		(void *)0x1100CAFE,
+		(const TRDP_UUID_T *)&msg.Msg.sessionId,
+		msg.Msg.comId,
+		msg.Msg.topoCount,
+		msg.Msg.destIpAddr,
+		msg.Msg.srcIpAddr,
+		0, // pktFlags
+		0, //  userStatus
+		0, // replystatus
+		NULL, // send param
+		msg.Msg.destURI,
+		msg.Msg.srcURI
+	);
+
+    //
+    if (errv != TRDP_NO_ERR)
+    {
+		fprintf(stderr,"testConfirmSend(): error = %d\n",errv);
+		exit(EXIT_FAILURE);
+    }
+    
+    // LOG
+    fprintf(stderr, "testConfirmSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    
+    return 0;
+}
+
+// Send a reply
+static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
+{
+    TRDP_ERR_T errv;
+
+    // Send reply
+	errv = tlm_reply (
+		appHandle,
+		(void *)0x2000CAFE,
+		&msg.Msg.sessionId,
+		msg.Msg.topoCount,
+		msg.Msg.comId,
+		msg.Msg.destIpAddr,
+		msg.Msg.srcIpAddr,
+		0, /* pktFlags */
+		0, /*  userStatus */
+		NULL, /* send param */
+		(UINT8 *) &mdTestData,
+		sizeof(mdTestData),
+		msg.Msg.destURI,
+		msg.Msg.srcURI
+	);
+
+    //
+    if (errv != TRDP_NO_ERR)
+    {
+		fprintf(stderr,"testReplySend(): error = %d\n",errv);
+		exit(EXIT_FAILURE);
+    }
+    
+    // LOG
+    fprintf(stderr, "testReplySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    
+    return 0;
+}
+
+// Send a replyQuery
+static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
+{
+    TRDP_ERR_T errv;
+
+    // Send reply query
+	errv = tlm_replyQuery (
+		appHandle,
+		(void *)0x2000CAFE,
+		&msg.Msg.sessionId,
+		msg.Msg.topoCount,
+		msg.Msg.comId,
+		msg.Msg.destIpAddr,
+		msg.Msg.srcIpAddr,
+		0, /* pktFlags */
+		0, /*  userStatus */
+		2*1000*1000, /* confirm timeout */
+		NULL, /* send param */
+		(UINT8 *) &mdTestData,
+		sizeof(mdTestData),
+		msg.Msg.destURI,
+		msg.Msg.srcURI
+	);
+
+    //
+    if (errv != TRDP_NO_ERR)
+    {
+		fprintf(stderr,"testReplyQuerySend(): error = %d\n",errv);
+		exit(EXIT_FAILURE);
+    }
+    
+    // LOG
+    fprintf(stderr, "testReplyQuerySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    
+    return 0;
+}
 
 
 // MD application server
 // Process queue elements pushed by call back function
 static void queue_procricz()
 {
-	char strTmp[2048]; // Debug string
+	char strIp[16];
+	char strTstName[128];	// Debug string
+	
 	trdp_apl_cbenv_t msg;
 	
     int rc = queue_receivemessage(&msg);
@@ -675,8 +668,7 @@ static void queue_procricz()
     {
 		// Message info
 		fprintf(stderr,"md_indication(r=%p d=%p l=%d)\n",msg.pRefCon,msg.pData,msg.dataSize);
-	// 
-		char strIp[16];
+		fprintf(stderr,"rx_test_fsm_state = %d\n"   ,rx_test_fsm_state);
 		fprintf(stderr,"srcIpAddr         = %s\n",  miscIpToString(msg.Msg.srcIpAddr, strIp));
 		fprintf(stderr,"destIpAddr        = %s\n",  miscIpToString(msg.Msg.destIpAddr, strIp));
 		fprintf(stderr,"seqCount          = %d\n"   ,msg.Msg.seqCount);
@@ -699,47 +691,52 @@ static void queue_procricz()
 		fprintf(stderr,"resultCode        = %d\n"   ,msg.Msg.resultCode);
 		
 		print_memory(msg.pData,msg.dataSize);
-		
-		// TODO
-		//char *strTmp;
-		//strTmp = miscEnv2String(msg);
-		//l2fLog(strTmp);
-		//free(strTmp);
-		//strTmp = NULL;
     }
 
-
+	// Get test id
+	int tstId = cliTestGetElementFromComID(msg.Msg.comId);
+	if(tstId < 0)
+	{
+		// Error
+		fprintf(stderr, "[ERROR] queue_procricz()\n  Test undefined for comId %u\n", msg.Msg.comId);
+		sprintf(strTstName, "Callback ERROR [%u, UNDEFINED TEST, %u]", x_testmode, msg.Msg.comId);
+	}
+	else
+	{
+		sprintf(strTstName, "Callback [%u, %s, %u]", x_testmode, cliTests[tstId].tstName, cliTests[tstId].comID);
+	}
+	
     // Dev 1
     if(x_testmode == 1)
     {
 		switch(msg.Msg.comId)
 		{
-			// TEST-0001: no listener for comId 1001, non callback execution expected
-
-			// TEST-0002: no listener for comId 1002, non callback execution expected
-			
-			// TEST-0003: listener for comId 1003, non callback execution expected
-
 			case 2001:
 			{
-				// TEST-0004: no Reply for comID 2001, timeout callback execution expected
 				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
-				{    
-					fprintf(stderr,"[TEST-0004: OK] queue_procricz(): timeout callback execution for comID 2001\n");
-					l2fLog("[TEST-0004: OK] queue_procricz(): timeout callback execution for comID 2001.");
+				{
+					if(rx_test_fsm_state == 0)
+					{
+						fprintf(stderr, "%s: timeout 1.\n", strTstName);
+					}
+					else if(rx_test_fsm_state == 1)
+					{
+						fprintf(stderr, "%s: timeout 2.\n", strTstName);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+					}
 				}
 				else
-				{    
-					fprintf(stderr,"[TEST-0004: ERROR] queue_procricz(): callback result expected %u, found %u.\n", TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0004: ERROR] queue_procricz(): callback result expected %u, found %u.", TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+				{
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 2002:
 			{
-				// TEST-0005: listener for comId 2002, callback execution expected for Reply without confirmation request
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					if(msg.Msg.msgType == TRDP_MSG_MP)
@@ -748,115 +745,80 @@ static void queue_procricz()
 						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
 						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
-						
+
 						//
-						fprintf(stderr,"[TEST-0005: OK] queue_procricz()\n  Callback executed for comID 2002\n  Reply without confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0005: OK] queue_procricz()\n  Callback executed for comID 2002\n  Reply without confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: Reply payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 					}
 					else
 					{
-						fprintf(stderr,"[TEST-0005: ERROR] queue_procricz()\n  Callback executed for comID 2002\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0005: ERROR] queue_procricz()\n  Callback executed for comID 2002\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						l2fLog(strTmp);		
-					} 
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+					}
 				}
 				else
 				{
-					fprintf(stderr,"[TEST-0005: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0005: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
-					break;
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
-			
+
 			case 2003:
 			{
-				// TEST-0006: no Reply for comID 2003, timeout callback execution expected
 				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
 				{    
-					fprintf(stderr,"[TEST-0006: OK] queue_procricz(): timeout callback execution for comID 2003\n");
-					l2fLog("[TEST-0006: OK] queue_procricz(): timeout callback execution for comID 2003.");
+					if(rx_test_fsm_state == 0)
+					{
+						fprintf(stderr, "%s: timeout 1.\n", strTstName);
+					}
+					else if(rx_test_fsm_state == 1)
+					{
+						fprintf(stderr, "%s: timeout 2.\n", strTstName);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+					}
 				}
 				else
 				{    
-					fprintf(stderr,"[TEST-0006: ERROR] queue_procricz(): callback result expected %u, found %u.\n", TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0006: ERROR] queue_procricz(): callback result expected %u, found %u.", TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 3001:
 			{
-				// TEST-0007: listener for comId 3001 MD Request, callback execution expected for Reply with confirmation request
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					if(msg.Msg.msgType == TRDP_MSG_MQ)
 					{
-						// Get data
+						// Get payload
 						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
 						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
-						//
-						fprintf(stderr,"[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001 MD ReplyQuery reception\n  Reply with confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001 MD ReplyQuery reception\n  Reply with confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
-						
+						fprintf(stderr, "%s: MD ReplyQuery, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
-						// Send confirm
-						testConfirmSendID++;
-						TRDP_ERR_T errv = tlm_confirm (
-							appHandle,
-							(void *)0x2000CAFE,
-							(const TRDP_UUID_T *)&msg.Msg.sessionId,
-							msg.Msg.comId,
-							msg.Msg.topoCount,
-							msg.Msg.destIpAddr,
-							msg.Msg.srcIpAddr,
-							0, // pktFlags
-							0, //  userStatus
-							0, // replystatus
-							NULL, // send param
-							msg.Msg.destURI,
-							msg.Msg.srcURI
-						);
+						// Send Confirm
+						testConfirmSend(msg);
 						
-						if (errv != TRDP_NO_ERR)
-						{
-							fprintf(stderr,"queue_procricz(): tlm_confirm() error = %d\n",errv);
-							exit(EXIT_FAILURE);
-						}
-
-						
-						//
-						fprintf(stderr,"[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001\n  Confirm sent\n");
-						sprintf(strTmp, "[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001\n  Confirm sent\n");
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: Confirm sent\n", strTstName);
 					}
 					else
 					{
 						// Error
-						fprintf(stderr,"[TEST-0007: ERROR] queue_procricz()\n  Callback executed for comID 3001\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0007: ERROR] queue_procricz()\n  Callback executed for comID 3001\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
 					} 
 				}
 				else
 				{
 					// Error
-					fprintf(stderr,"[TEST-0007: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0007: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 3002:
 			{
-				// TEST-0008: listener for comId 3002 MD Request, callback execution expected for Reply with confirmation request
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					if(msg.Msg.msgType == TRDP_MSG_MQ)
@@ -867,68 +829,57 @@ static void queue_procricz()
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
 						// No send confirm to check Confirm timeout in Dev2
-						fprintf(stderr,"[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 MD ReplyQuery reception\n  Reply with confirmation request\n  Cnt = %u\n  testId = %s\n  No send confirm to check Confirm timeout in Dev2\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 MD ReplyQuery reception\n  Reply with confirmation request\n  Cnt = %u\n  testId = %s\n No send confirm to check Confirm timeout in Dev2\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 					}
 					else
 					{
 						// Error
-						fprintf(stderr,"[TEST-0008: ERROR] queue_procricz()\n  Callback executed for comID 3001\n  Expected msgType %u but received %u\n", TRDP_MSG_MQ, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0008: ERROR] queue_procricz()\n  Callback executed for comID 3001\n  Expected msgType %u but received %u\n", TRDP_MSG_MQ, msg.Msg.msgType);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
 					}
 				}
 				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
 				{
 					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-					fprintf(stderr,"[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 Application timeout\n");
-					sprintf(strTmp, "[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 Application timeout\n");
-					l2fLog(strTmp);
+					fprintf(stderr, "%s: Application timeout on not sended confirm.\n", strTstName);
 				}
 				else
 				{
 					// Error
-					fprintf(stderr, "[TEST-0008: ERROR] queue_procricz(): msg.Msg.resultCode expected %u or %u, found %u.\n", TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0008: ERROR] queue_procricz(): msg.Msg.resultCode expected %u or %u, found %u.\n", TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
-				} 
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
+				}
 			}
 			break;
 
-			// TEST-0009: no listener for comId 4001, non callback execution expected
-
 			case 5001:
-				// TEST-0010: listener for comId 5001, 2 expected replies, 0 received
 				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
 				{
 					if(msg.Msg.numReplies == 0)
 					{
-						fprintf(stderr,"[TEST-0010: OK] queue_procricz(): timeout callback execution for comID 5001\n");
-						sprintf(strTmp, "[TEST-0010: OK] queue_procricz(): timeout callback execution for comID 5001\n");
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
 					}
 					else
 					{
-						fprintf(stderr, "[TEST-0010: ERROR] queue_procricz(): timeout callback execution for comID 5002\n expected %d replies, found %d.\n", 0, msg.Msg.numReplies);
-						sprintf(strTmp, "[TEST-0010: ERROR] queue_procricz():  timeout callback execution for comID 5002\n expected %d replies, found %d.\n", 0, msg.Msg.numReplies);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s ERROR: timeout, expected %d replies, found %d.\n", strTstName, 0, msg.Msg.numReplies);
 					}
 				}
 				else
 				{
-					fprintf(stderr,"[TEST-0010: ERROR] queue_procricz(): msg.Msg.resultCode expected %d, found %d.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0010: ERROR] queue_procricz(): msg.Msg.resultCode expected %d, found %d.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr,"%s ERROR: resultCode expected %d, found %d.\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			break;
 			
 			case 5002:
 			{
-				// TEST-0011: listener for comId 5002, callback execution expected for Reply without confirmation request
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
-					// 1) Reception, 2 replies expected, 1 received			
+					// 1) Reception
+					if(rx_test_fsm_state != 0)
+					{
+						fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 0, rx_test_fsm_state);
+						break;
+					}
+
+					// 2 replies expected, 1 received
 					if(msg.Msg.msgType == TRDP_MSG_MP)
 					{
 						// Get data
@@ -939,50 +890,126 @@ static void queue_procricz()
 						//
 						if(msg.Msg.numReplies == 1)
 						{
-							fprintf(stderr,"[TEST-0011: OK] queue_procricz()\n  Callback executed for comID 5002\n  Reply without confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-							sprintf(strTmp, "[TEST-0011: OK] queue_procricz()\n  Callback executed for comID 5002\n  Reply without confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-							l2fLog(strTmp);
+							fprintf(stderr,"%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
 						}
 						else
 						{
-							fprintf(stderr, "[TEST-0011: ERROR] queue_procricz(): expected %u replies, found %u.\n", 1, msg.Msg.numReplies);
-							sprintf(strTmp, "[TEST-0011: ERROR] queue_procricz(): expected %u replies, found %u.\n", 1, msg.Msg.numReplies);
-							l2fLog(strTmp);
+							fprintf(stderr, "%s ERROR: expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
 						}
 					}
 				}
 				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
 				{
-					// 2) Timeout, 2 replies expected, 1 received
+					// 2) Timeout
+					if(rx_test_fsm_state != 1)
+					{
+						fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 1, rx_test_fsm_state);
+						break;
+					}
+
+					// 2 replies expected, 1 received
 					if(msg.Msg.numReplies == 1)
 					{
-						fprintf(stderr,"[TEST-0011: OK] queue_procricz(): timeout callback execution for comID 5002\n");
-						sprintf(strTmp, "[TEST-0011: OK] queue_procricz(): timeout callback execution for comID 5002\n");
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
 					}
 					else
 					{
-						fprintf(stderr, "[TEST-0011: ERROR] queue_procricz(): timeout callback execution for comID 5002\n expected %u replies, found %u.\n", 1, msg.Msg.numReplies);
-						sprintf(strTmp, "[TEST-0011: ERROR] queue_procricz():  timeout callback execution for comID 5002\n expected %u replies, found %u.\n", 1, msg.Msg.numReplies);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s ERROR: timeout, expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
 					}
 				}
 				else
 				{
 					// Unexpected  result code
-					fprintf(stderr, "[TEST-0011: ERROR] queue_procricz(): msg.Msg.resultCode expected %d or %d, found %d.\n", TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0011: ERROR] queue_procricz(): msg.Msg.resultCode expected %d or %d, found %d.\n", TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d.\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 5003:
 			{
-				// TEST-0012: listener for comId 5003, callback execution expected for Reply without confirmation request
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
-					// 1) Reception, 2 replies expected, 2 received			
+					// 2 replies expected, 2 received
+					if(msg.Msg.msgType == TRDP_MSG_MP)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						// Reply 1
+						if(rx_test_fsm_state == 0)
+						{
+							if(msg.Msg.numReplies == 1)
+							{
+								fprintf(stderr,"%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+							}
+							else
+							{
+								fprintf(stderr, "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
+							}
+						}
+						else if(rx_test_fsm_state == 1)
+						{
+							if(msg.Msg.numReplies == 2)
+							{
+								fprintf(stderr,"%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+							}
+							else
+							{
+								fprintf(stderr, "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
+							}
+						}
+						else
+						{
+							fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+						}
+					}
+				}
+				else
+				{
+					// Unexpected  result code
+					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
+			case 6001:
+				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				{
+					if(rx_test_fsm_state != 0)
+					{
+						fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
+						break;
+					}
+
+					if(msg.Msg.numReplies == 0)
+					{
+						fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: timeout, expected %d replies, found %d\n", strTstName, 0, msg.Msg.numReplies);
+					}
+				}
+				else
+				{
+					fprintf(stderr, "%s ERROR: resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+				}
+			break;
+
+			case 6002:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					// 1) Reception
+					if(rx_test_fsm_state != 0)
+					{
+						fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
+						break;
+					}
+
+					// Unknown replies expected, 1 received			
 					if(msg.Msg.msgType == TRDP_MSG_MP)
 					{
 						// Get data
@@ -991,36 +1018,147 @@ static void queue_procricz()
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
 						//
-						if((msg.Msg.numReplies == 1) || (msg.Msg.numReplies == 2))
+						if(msg.Msg.numReplies == 1)
 						{
-							fprintf(stderr, "[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Reply without confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-							sprintf(strTmp, "[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Reply without confirmation request\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-							l2fLog(strTmp);
+							fprintf(stderr, "%s: Reply, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 						}
 						else
 						{
-							fprintf(stderr, "[TEST-0012: ERROR] queue_procricz(): expected 1 or 2 replies, found %u.\n", msg.Msg.numReplies);
-							sprintf(strTmp, "[TEST-0012: ERROR] queue_procricz(): expected 1 or 2 replies, found %u.\n", msg.Msg.numReplies);
-							l2fLog(strTmp);
+							fprintf(stderr, "%s ERROR: expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
 						}
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				{
+					// 2) Timeout
+					if(rx_test_fsm_state != 1)
+					{
+						fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 1, rx_test_fsm_state);
+						break;
+					}
+
+					// Unknown replies expected, 1 received
+					if(msg.Msg.numReplies == 1)
+					{
+						fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
 					}
 				}
 				else
 				{
 					// Unexpected  result code
-					fprintf(stderr, "[TEST-0012: ERROR] queue_procricz(): msg.Msg.resultCode expected %d or %d, found %d.\n", TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0012: ERROR] queue_procricz(): msg.Msg.resultCode expected %d or %d, found %d.\n", TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
+			case 6003:
+			{
+				// TEST-0015: listener for comId 6003, callback execution expected for Reply without confirmation request
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					// 1) Reception, unknown replies expected, 1 received			
+					if(msg.Msg.msgType == TRDP_MSG_MP)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+
+						if(rx_test_fsm_state == 0)
+						{
+							if(msg.Msg.numReplies == 1)
+							{
+								fprintf(stderr, "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
+							}
+							else
+							{
+								fprintf(stderr, "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
+							}
+						}
+						else if(rx_test_fsm_state == 1)
+						{
+							if(msg.Msg.numReplies == 2)
+							{
+								fprintf(stderr, "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
+							}
+							else
+							{
+								fprintf(stderr, "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
+							}
+						}
+						else
+						{
+							fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+						}
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				{
+					if(rx_test_fsm_state != 2)
+					{
+						fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
+						break;
+					}
+
+					// Timeout, unknown replies expected, 2 received
+					if(msg.Msg.numReplies == 2)
+					{
+						fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 2, msg.Msg.numReplies);
+					}
+				}
+				else
+				{
+					// Unexpected  result code
+					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
+			case 7001:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					if(msg.Msg.msgType == TRDP_MSG_MQ)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						// No send confirm to check Confirm timeout in Dev2
+						fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+					}
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
+				{
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					fprintf(stderr, "%s: Application timeout on not sended confirm.\n", strTstName);
+				}
+				else
+				{
+					// Error
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			default:
 			{
-				// LOG
-				fprintf(stderr,"[ERROR] queue_procricz(): Unexpected message with comID = %d\n", msg.Msg.comId);
-				//sprintf(trdpLogString, "queue_procricz(): Message code = x%04X unhandled",msg.Msg.msgType);
-				//l2fLog(trdpLogString);
+				// Error
+				fprintf(stderr, "%s ERROR]: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
 			}
 			break;
 		}
@@ -1032,10 +1170,12 @@ static void queue_procricz()
 		switch(msg.Msg.comId)
 		{
 			case 1001:
+			case 1003:
+			case 1004:
+			case 2001:
+			case 2003:
 			{
-				// TEST-0001: no listener for comId 1001, non callback execution expected
-				fprintf(stderr,"[TEST-0001: ERROR] queue_procricz(): no callback execution expected for comID 1001\n");
-				l2fLog("[TEST-0001: ERROR] queue_procricz(): no callback execution expected for comID 1001.");
+				fprintf(stderr, "%s ERROR: no callback execution expected\n", strTstName);
 			}
 			break;
 
@@ -1052,47 +1192,22 @@ static void queue_procricz()
 						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
-						fprintf(stderr,"[TEST-0002: OK] queue_procricz()\n  Callback executed for comID 1002\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0002: OK] queue_procricz()\n  Callback executed for comID 1002\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: notify recived, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 					}
 					else
 					{
-						fprintf(stderr,"[TEST-0002: ERROR] queue_procricz()\n  Callback executed for comID 1002\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0002: ERROR] queue_procricz()\n  Callback executed for comID 1002\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
 					} 
 				}
 				else
 				{
-					fprintf(stderr,"[TEST-0002: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0002: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
-					break;
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
-
 			}
 			break;
 			
-			case 1003:
-			{
-				// TEST-0003: listener for comId 1003, Notify sent to 1004, non callback execution expected
-				fprintf(stderr,"[TEST-0003: ERROR] queue_procricz(): no callback execution expected for comID 1003\n");
-				l2fLog("[TEST-0003: ERROR] queue_procricz(): no callback execution expected for comID 1003.");
-			}
-			break;
-			
-			case 2001:
-			{
-				// TEST-0004: no listener for comId 2001, non callback execution expected
-				fprintf(stderr,"[TEST-0004: ERROR] queue_procricz(): no callback execution expected for comID 2001.\n");
-				l2fLog("[TEST-0004: ERROR] queue_procricz(): no callback execution expected for comID 2001.");
-			}
-			break;
-
 			case 2002:
 			{
-				// TEST-0005: listener for comId 2002, callback execution expected for Reply
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					// Check type
@@ -1103,10 +1218,7 @@ static void queue_procricz()
 						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
-						//
-						fprintf(stderr,"[TEST-0005: OK] queue_procricz()\n  Callback executed for comID 2002\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0005: OK] queue_procricz()\n  Callback executed for comID 2002\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 						
 						// Send MD Reply
 						TRDP_MD_TEST_DS_T mdTestData1;    
@@ -1114,62 +1226,26 @@ static void queue_procricz()
 						mdTestData1.cnt = vos_htonl(testReplySendID);
 						sprintf(mdTestData1.testId,"MD Reply test");
 						
-						TRDP_ERR_T errv = tlm_reply (
-							appHandle,
-							(void *)0x2000CAFE,
-							&msg.Msg.sessionId,
-							msg.Msg.topoCount,
-							msg.Msg.comId,
-							msg.Msg.destIpAddr,
-							msg.Msg.srcIpAddr,
-							0, /* pktFlags */
-							0, /*  userStatus */
-							NULL, /* send param */
-							(UINT8 *) &mdTestData1,
-							sizeof(mdTestData1),
-							msg.Msg.destURI,
-							msg.Msg.srcURI
-						);
+						testReplySend(msg, mdTestData1);
 						
-						if (errv != TRDP_NO_ERR)
-						{
-							fprintf(stderr,"queue_procricz(): tlm_reply() error = %d\n",errv);
-							exit(EXIT_FAILURE);
-						}
-
-						//
-						fprintf(stderr,"[TEST-0005: OK] queue_procricz()\n  Callback executed for comID 2002\n  Reply sent\n");
-						sprintf(strTmp, "[TEST-0005: OK] queue_procricz()\n  Callback executed for comID 2002\n  Reply sent\n");
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: Reply sent\n", strTstName);
 					}
 					else
 					{
-						fprintf(stderr,"[TEST-0005: ERROR] queue_procricz()\n  Callback executed for comID 2002\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0005: ERROR] queue_procricz()\n  Callback executed for comID 2002\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
 					}
 				}
 				else
 				{
-					fprintf(stderr,"[TEST-0005: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0005: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
-					break;
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
-			
-			case 2003:
-			{
-				// TEST-0006: listener for comId 2003, Request sent to 1004, non callback execution expected
-				fprintf(stderr,"[TEST-0006: ERROR] queue_procricz(): no callback execution expected for comID 2003.\n");
-				l2fLog("[TEST-0006: ERROR] queue_procricz(): no callback execution expected for comID 2003.");
-			}
-			break;
-			
+
 			case 3001:
+			case 7002:
+			case 7003:
 			{
-				// TEST-0007: listener for comId 3001, callback execution expected for Reply with confirmation request
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					// Check type
@@ -1181,9 +1257,7 @@ static void queue_procricz()
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
 						//
-						fprintf(stderr,"[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001 MD Request reception\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001 MD Request reception\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 						
 						// Send MD Reply
 						TRDP_MD_TEST_DS_T mdTestData1;    
@@ -1191,61 +1265,30 @@ static void queue_procricz()
 						mdTestData1.cnt = vos_htonl(testReplyQSendID);
 						sprintf(mdTestData1.testId,"MD ReplyQ test");
 						
-						TRDP_ERR_T errv = tlm_replyQuery (
-							appHandle,
-							(void *)0x2000CAFE,
-							&msg.Msg.sessionId,
-							msg.Msg.topoCount,
-							msg.Msg.comId,
-							msg.Msg.destIpAddr,
-							msg.Msg.srcIpAddr,
-							0, /* pktFlags */
-							0, /*  userStatus */
-							2*1000*1000, /* confirm timeout */
-							NULL, /* send param */
-							(UINT8 *) &mdTestData1,
-							sizeof(mdTestData1),
-							msg.Msg.destURI,
-							msg.Msg.srcURI
-						);
-						
-						if (errv != TRDP_NO_ERR)
-						{
-							fprintf(stderr,"queue_procricz(): tlm_replyQuery() error = %d\n",errv);
-							exit(EXIT_FAILURE);
-						}
-
-						//
-						fprintf(stderr,"[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001\n  ReplyQ sent\n");
-						sprintf(strTmp, "[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001\n  ReplyQ sent\n");
-						l2fLog(strTmp);
+						testReplyQuerySend(msg, mdTestData1);
+					
+						fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
 					}
 					else if(msg.Msg.msgType == TRDP_MSG_MC)
 					{
 						//
-						fprintf(stderr,"[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001 MD Confirm reception\n");
-						sprintf(strTmp, "[TEST-0007: OK] queue_procricz()\n  Callback executed for comID 3001 MD Confirm reception\n");
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: MD Confirm received\n", strTstName);
 					}
 					else
 					{
-						fprintf(stderr,"[TEST-0007: ERROR] queue_procricz()\n  Callback executed for comID 3001\n  Unexpected msgType %d and resultCode %d\n", msg.Msg.msgType, msg.Msg.resultCode);
-						sprintf(strTmp, "[TEST-0007: ERROR] queue_procricz()\n  Callback executed for comID 3001\n  Unexpected msgType %d and resultCode %d\n", msg.Msg.msgType, msg.Msg.resultCode);
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
 					}
 				}
 				else
 				{
-					fprintf(stderr,"[TEST-0007: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0007: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 			
 			case 3002:
+			case 7001:
 			{
-				// TEST-0008: listener for comId 3002, callback execution expected for Reply with confirmation but with timeout
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					// Check type
@@ -1257,76 +1300,42 @@ static void queue_procricz()
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
 						//
-						fprintf(stderr,"[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 MD Request reception\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 MD Request reception\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 						
 						// Send MD Reply
 						TRDP_MD_TEST_DS_T mdTestData1;    
 						testReplyQSendID++;
 						mdTestData1.cnt = vos_htonl(testReplyQSendID);
 						sprintf(mdTestData1.testId,"MD ReplyQ test");
-						
-						TRDP_ERR_T errv = tlm_replyQuery (
-							appHandle,
-							(void *)0x2000CAFE,
-							&msg.Msg.sessionId,
-							msg.Msg.topoCount,
-							msg.Msg.comId,
-							msg.Msg.destIpAddr,
-							msg.Msg.srcIpAddr,
-							0, /* pktFlags */
-							0, /*  userStatus */
-							2*1000*1000, /* confirm timeout */
-							NULL, /* send param */
-							(UINT8 *) &mdTestData1,
-							sizeof(mdTestData1),
-							msg.Msg.destURI,
-							msg.Msg.srcURI
-						);
-						
-						if (errv != TRDP_NO_ERR)
-						{
-							fprintf(stderr,"queue_procricz(): tlm_replyQuery() error = %d\n",errv);
-							exit(EXIT_FAILURE);
-						}
 
-						//
-						fprintf(stderr,"[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002\n  ReplyQ sent\n");
-						sprintf(strTmp, "[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002\n  ReplyQ sent\n");
-						l2fLog(strTmp);
+						testReplyQuerySend(msg, mdTestData1);
+					
+						fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
 					}
 				}
 				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
 				{
 					if(msg.Msg.msgType == TRDP_MSG_MQ)
 					{
-						// Confirmation timeout is generated with ReplyQ msgType beacuse it is the one waiting the confirmation
-						fprintf(stderr,"[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 MD Confirm reception timeout\n");
-						sprintf(strTmp, "[TEST-0008: OK] queue_procricz()\n  Callback executed for comID 3002 MD Confirm reception timeout\n");
-						l2fLog(strTmp);
+						// Confirmation timeout is generated with ReplyQ msgType because it is the one waiting the confirmation
+						fprintf(stderr, "%s: confirm reception timeout\n", strTstName);
 					}
 					else
 					{
 						// Error
-						fprintf(stderr,"[TEST-0008: ERROR] queue_procricz()\n  Callback executed for comID 3002\n  Unexpected msgType %d and resultCode %d\n", msg.Msg.msgType, msg.Msg.resultCode);
-						sprintf(strTmp, "[TEST-0008: ERROR] queue_procricz()\n  Callback executed for comID 3002\n  Unexpected msgType %d and resultCode %d\n", msg.Msg.msgType, msg.Msg.resultCode);
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
 					}
 				}
 				else
 				{
 					// Error
-					fprintf(stderr, "[TEST-0008: ERROR] queue_procricz(): msg.Msg.resultCode expected %u or %u, found %u.\n", TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0008: ERROR] queue_procricz(): msg.Msg.resultCode expected %u or %u, found %u.\n", TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
 				}
 			}
-			break;	    
+			break;
 
 			case 4001:
 			{
-				// TEST-0009: listener for comId 4001 on multicast address, callback execution expected
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					// Check type
@@ -1337,30 +1346,26 @@ static void queue_procricz()
 						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
-						fprintf(stderr,"[TEST-0009: OK] queue_procricz()\n  Callback executed for comID 4001\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0009: OK] queue_procricz()\n  Callback executed for comID 4001\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 					}
 					else
 					{
-						fprintf(stderr,"[TEST-0009: ERROR] queue_procricz()\n  Callback executed for comID 4001\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0009: ERROR] queue_procricz()\n  Callback executed for comID 4001\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
 					} 
 				}
 				else
 				{
 					// Error
-					fprintf(stderr,"[TEST-0009: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0009: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 5002:
+			case 5003:
+			case 6002:
+			case 6003:
 			{
-				// TEST-0011: listener for comId 5002 on multicast address, callback execution expected for Reply
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
 					// Check type
@@ -1372,9 +1377,7 @@ static void queue_procricz()
 						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 						
 						//
-						fprintf(stderr,"[TEST-0011: OK] queue_procricz()\n  Callback executed for comID 5002\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0011: OK] queue_procricz()\n  Callback executed for comID 5002\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
+						fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 						
 						// Send MD Reply
 						TRDP_MD_TEST_DS_T mdTestData1;    
@@ -1382,127 +1385,26 @@ static void queue_procricz()
 						mdTestData1.cnt = vos_htonl(testReplySendID);
 						sprintf(mdTestData1.testId,"MD Reply test");
 						
-						TRDP_ERR_T errv = tlm_reply (
-							appHandle,
-							(void *)0x4000CAFE,
-							&msg.Msg.sessionId,
-							msg.Msg.topoCount,
-							msg.Msg.comId,
-							msg.Msg.destIpAddr,
-							msg.Msg.srcIpAddr,
-							0, /* pktFlags */
-							0, /*  userStatus */
-							NULL, /* send param */
-							(UINT8 *) &mdTestData1,
-							sizeof(mdTestData1),
-							msg.Msg.destURI,
-							msg.Msg.srcURI
-						);
-						
-						if (errv != TRDP_NO_ERR)
-						{
-							fprintf(stderr,"queue_procricz(): tlm_reply() error = %d\n",errv);
-							exit(EXIT_FAILURE);
-						}
-
-						//
-						fprintf(stderr,"[TEST-0011: OK] queue_procricz()\n  Callback executed for comID 5002\n  Reply sent\n");
-						sprintf(strTmp, "[TEST-0011: OK] queue_procricz()\n  Callback executed for comID 5002\n  Reply sent\n");
-						l2fLog(strTmp);
+						testReplySend(msg, mdTestData1);
+						fprintf(stderr, "%s: Reply sent\n", strTstName);
 					}
 					else
 					{
 						// Error
-						fprintf(stderr,"[TEST-0011: ERROR] queue_procricz()\n  Callback executed for comID 5002\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0011: ERROR] queue_procricz()\n  Callback executed for comID 5002\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-						l2fLog(strTmp);		
+						fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
 					}
 				}
 				else
 				{
 					// Error
-					fprintf(stderr,"[TEST-0011: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0011: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
-				}
-			}
-			break;
-
-			case 5003:
-			{
-				// TEST-0012: listener for comId 5003 on multicast address, callback execution expected for Reply
-				if(msg.Msg.resultCode == TRDP_NO_ERR)
-				{
-					// Check type
-					if(msg.Msg.msgType == TRDP_MSG_MR)
-					{
-						// Get data
-						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
-						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
-						
-						//
-						fprintf(stderr,"[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						sprintf(strTmp, "[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-						l2fLog(strTmp);
-						
-						// Send MD Reply
-						TRDP_MD_TEST_DS_T mdTestData1;    
-						testReplySendID++;
-						mdTestData1.cnt = vos_htonl(testReplySendID);
-						sprintf(mdTestData1.testId,"MD Reply test");
-						
-						TRDP_ERR_T errv = tlm_reply (
-							appHandle,
-							(void *)0x5000CAFE,
-							&msg.Msg.sessionId,
-							msg.Msg.topoCount,
-							msg.Msg.comId,
-							msg.Msg.destIpAddr,
-							msg.Msg.srcIpAddr,
-							0, /* pktFlags */
-							0, /*  userStatus */
-							NULL, /* send param */
-							(UINT8 *) &mdTestData1,
-							sizeof(mdTestData1),
-							msg.Msg.destURI,
-							msg.Msg.srcURI
-						);
-						
-						if (errv != TRDP_NO_ERR)
-						{
-							fprintf(stderr,"queue_procricz(): tlm_reply() error = %d\n",errv);
-							exit(EXIT_FAILURE);
-						}
-
-						//
-						fprintf(stderr,"[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Reply sent\n");
-						sprintf(strTmp, "[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Reply sent\n");
-						l2fLog(strTmp);
-					}
-					else
-					{
-						fprintf(stderr,"[TEST-0012: ERROR] queue_procricz()\n  Callback executed for comID 5003\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-						sprintf(strTmp, "[TEST-0012: ERROR] queue_procricz()\n  Callback executed for comID 5003\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-						l2fLog(strTmp);		
-					}
-				}
-				else
-				{
-					// Error
-					fprintf(stderr,"[TEST-0012: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0012: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			default:
 			{
-				// LOG
-				fprintf(stderr,"[ERROR] queue_procricz(): Unexpected message with comID = x%04X\n", msg.Msg.comId);
-				//sprintf(trdpLogString, "queue_procricz(): Message code = x%04X unhandled",msg.Msg.msgType);
-				//l2fLog(trdpLogString);
+				fprintf(stderr, "%s ERROR: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
 			}
 			break;
 		}
@@ -1515,113 +1417,128 @@ static void queue_procricz()
 		{
 			case 4001:
 			{
-				// TEST-0009: listener for comId 4001 on multicast address, callback execution expected
-				if(msg.Msg.resultCode != TRDP_NO_ERR)
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
-					fprintf(stderr,"[TEST-0009: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0009: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
-					break;
-				}
-				
-				// Check type
-				if(msg.Msg.msgType == TRDP_MSG_MN)
-				{
-					// Get data
-					UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
-					TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-					mdTestData->cnt = vos_ntohl(mdTestData->cnt);
-					
-					fprintf(stderr,"[TEST-0009: OK] queue_procricz()\n  Callback executed for comID 4001\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-					sprintf(strTmp, "[TEST-0009: OK] queue_procricz()\n  Callback executed for comID 4001\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-					l2fLog(strTmp);
+					// Check type
+					if(msg.Msg.msgType == TRDP_MSG_MN)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						fprintf(stderr, "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+					} 
 				}
 				else
 				{
-					fprintf(stderr,"[TEST-0009: ERROR] queue_procricz()\n  Callback executed for comID 4001\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-					sprintf(strTmp, "[TEST-0009: ERROR] queue_procricz()\n  Callback executed for comID 4001\n  Expected msgType %u but received %u\n", TRDP_MSG_MN, msg.Msg.msgType);
-					l2fLog(strTmp);		
-				} 
+					// Error
+					fprintf(stderr, "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+				}
 			}
 			break;
 
 			case 5003:
+			case 6003:
 			{
-				// TEST-0012: listener for comId 5003 on multicast address, callback execution expected for Reply
-				if(msg.Msg.resultCode != TRDP_NO_ERR)
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
-					fprintf(stderr,"[TEST-0012: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.\n", TRDP_NO_ERR, msg.Msg.resultCode);
-					sprintf(strTmp, "[TEST-0012: ERROR] queue_procricz(): msg.Msg.resultCode expected %u, found %u.", TRDP_NO_ERR, msg.Msg.resultCode);
-					l2fLog(strTmp);
-					break;
-				}
-				
-				// Check type
-				if(msg.Msg.msgType == TRDP_MSG_MR)
-				{
-					// Get data
-					UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
-					TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-					mdTestData->cnt = vos_ntohl(mdTestData->cnt);
-					
-					//
-					fprintf(stderr,"[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-					sprintf(strTmp, "[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Cnt = %u\n  testId = %s\n", mdTestData->cnt, mdTestData->testId);
-					l2fLog(strTmp);
-					
-					// Send MD Reply
-					TRDP_MD_TEST_DS_T mdTestData1;    
-					testReplySendID++;
-					mdTestData1.cnt = vos_htonl(testReplySendID);
-					sprintf(mdTestData1.testId,"MD Reply test");
-					
-					TRDP_ERR_T errv = tlm_reply (
-						appHandle,
-						(void *)0x5000CAFE,
-						&msg.Msg.sessionId,
-						msg.Msg.topoCount,
-						msg.Msg.comId,
-						msg.Msg.destIpAddr,
-						msg.Msg.srcIpAddr,
-						0, /* pktFlags */
-						0, /*  userStatus */
-						NULL, /* send param */
-						(UINT8 *) &mdTestData1,
-						sizeof(mdTestData1),
-						msg.Msg.destURI,
-						msg.Msg.srcURI
-					);
-					
-					if (errv != TRDP_NO_ERR)
+					// Check type
+					if(msg.Msg.msgType == TRDP_MSG_MR)
 					{
-						fprintf(stderr,"queue_procricz(): tlm_reply() error = %d\n",errv);
-						exit(EXIT_FAILURE);
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						//
+						fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+						
+						// Send MD Reply
+						TRDP_MD_TEST_DS_T mdTestData1;    
+						testReplySendID++;
+						mdTestData1.cnt = vos_htonl(testReplySendID);
+						sprintf(mdTestData1.testId,"MD Reply test");
+						
+						testReplySend(msg, mdTestData1);
+						fprintf(stderr, "%s: Reply sent\n", strTstName);
 					}
-
-					//
-					fprintf(stderr,"[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Reply sent\n");
-					sprintf(strTmp, "[TEST-0012: OK] queue_procricz()\n  Callback executed for comID 5003\n  Reply sent\n");
-					l2fLog(strTmp);
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
+					}
 				}
 				else
 				{
-					fprintf(stderr,"[TEST-0012: ERROR] queue_procricz()\n  Callback executed for comID 5003\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-					sprintf(strTmp, "[TEST-0012: ERROR] queue_procricz()\n  Callback executed for comID 5003\n  Expected msgType %u but received %u\n", TRDP_MSG_MR, msg.Msg.msgType);
-					l2fLog(strTmp);		
+					// Error
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
-			
+
+			case 7001:
+			case 7002:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					// Check type
+					if(msg.Msg.msgType == TRDP_MSG_MR)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						//
+						fprintf(stderr, "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+						
+						// Send MD Reply
+						TRDP_MD_TEST_DS_T mdTestData1;    
+						testReplyQSendID++;
+						mdTestData1.cnt = vos_htonl(testReplyQSendID);
+						sprintf(mdTestData1.testId,"MD ReplyQ test");
+
+						testReplyQuerySend(msg, mdTestData1);
+					
+						fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				{
+					if(msg.Msg.msgType == TRDP_MSG_MQ)
+					{
+						// Confirmation timeout is generated with ReplyQ msgType because it is the one waiting the confirmation
+						fprintf(stderr, "%s: confirm reception timeout\n", strTstName);
+					}
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
+					}
+				}
+				else
+				{
+					// Error
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
 			default:
 			{
-				// LOG
-				fprintf(stderr,"[ERROR] queue_procricz(): Unexpected message with comID = x%04X\n", msg.Msg.comId);
-				//sprintf(trdpLogString, "queue_procricz(): Message code = x%04X unhandled",msg.Msg.msgType);
-				//l2fLog(trdpLogString);
+				fprintf(stderr, "%s ERROR: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
 			}
 			break;
 		}
 	}
+	
+	// Increment current FSM state
+	rx_test_fsm_state++;
 }
 
 
@@ -1784,9 +1701,6 @@ static int testNotifySend(
 
     // LOG
     fprintf(stderr,"testNotifySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, x_ip4_dest);
-    char strTmp[2048];
-    sprintf(strTmp, "testNotifySend(): comID = %u, topoCount = %u, dstIP = x%08X", comId, topoCount, x_ip4_dest);
-    l2fLog(strTmp);
     
     return 0;
 }
@@ -1841,13 +1755,10 @@ static int testRequestSend(
     
     // LOG
     fprintf(stderr,"testRequestSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, x_ip4_dest);
-    char strTmp[2048];
-    sprintf(strTmp, "testRequestSend(): comID = %u, topoCount = %u, dstIP = x%08X", comId, topoCount, x_ip4_dest);
-    l2fLog(strTmp);
-    
     
     return 0;
 }
+
 
 // Test main loop
 static int test_main_proc()
@@ -1878,6 +1789,9 @@ static int test_main_proc()
 				// Check command
 				if(cliTests[n].cliChar == cliCmd)
 				{
+					// Reset test FSM
+					rx_test_fsm_state = 0;
+
 					// Send Notify
 					if(cliTests[n].sendType == 0)
 					{
@@ -1967,11 +1881,9 @@ static int testAddListener(
 }
 
 // Listeners env
-static const int test0001_lenv  = 10001001; // Not used
 static const int test0002_lenv  = 10001002; // Dev2 Listener, comID 1002 Notify
 static const int test0003_lenv  = 10001004; // Dev2 Listener, ComID 1003 Notify
 static const int test0004_lenv1 = 10002001; // Dev1 Listener, comID 2001 Reply
-static const int test0004_lenv2 = 20002001; // Not used
 static const int test0005_lenv1 = 10002002; // Dev1 Listener, comID 2002 Reply
 static const int test0005_lenv2 = 20002002; // Dev1 Listener, comID 2002 Request
 static const int test0006_lenv1 = 10002003; // Dev1 Listener, comID 2003 Reply
@@ -1980,14 +1892,29 @@ static const int test0007_lenv1 = 10003001; // Dev1 Listener, comID 2002 Reply
 static const int test0007_lenv2 = 20003001; // Dev1 Listener, comID 2002 Request, Confirm
 static const int test0008_lenv1 = 10003002; // Dev1 Listener, comID 2003 Reply
 static const int test0008_lenv2 = 20003002; // Dev1 Listener, comID 2002 Request, Confirm
-static const int test0009_lenv2 = 20004001; // Dev2 Listener, comID 2002 Notify Multicast
-static const int test0010_lenv1 = 10005001; // Dev1 Listener, comID 5001 Reply
-static const int test0010_lenv2 = 20005001; // Dev2 Listener, comID 5001 Multicast Request, Singlecast Confirm
-static const int test0011_lenv1 = 10005002; // Dev1 Listener, comID 5002 Reply
-static const int test0011_lenv2 = 20005002; // Dev2 Listener, comID 5002 Multicast Request, Singlecast Confirm
-static const int test0012_lenv1 = 10005003; // Dev1 Listener, comID 5003 Reply
-static const int test0012_lenv2 = 20005003; // Dev2 Listener, comID 5003 Multicast Request, Singlecast Confirm
-static const int test0012_lenv3 = 30005003; // Dev3 Listener, comID 5003 Multicast Request, Singlecast Confirm
+static const int test0009_lenv2 = 20004001; // Dev2 Listener, comID 2002 Multicast Notify
+static const int test0010_lenv1 = 10005001; // Dev1 Listener, comID 5001 Reply, 2 expected 0 received
+static const int test0010_lenv2 = 20005001; // Dev2 Listener, comID 5001 Multicast Request
+static const int test0011_lenv1 = 10005002; // Dev1 Listener, comID 5002 Reply, 2 expected 1 received
+static const int test0011_lenv2 = 20005002; // Dev2 Listener, comID 5002 Multicast Request
+static const int test0012_lenv1 = 10005003; // Dev1 Listener, comID 5003 Reply, 2 expected 2 received
+static const int test0012_lenv2 = 20005003; // Dev2 Listener, comID 5003 Multicast Request
+static const int test0012_lenv3 = 30005003; // Dev3 Listener, comID 5003 Multicast Request
+static const int test0013_lenv1 = 10006001; // Dev1 Listener, comID 6001 Reply, unknown expected 0 received
+static const int test0014_lenv1 = 10006002; // Dev1 Listener, comID 6002 Reply, unknown expected 1 received
+static const int test0014_lenv2 = 20006002; // Dev2 Listener, comID 6002 Multicast Request
+static const int test0015_lenv1 = 10006003; // Dev1 Listener, comID 6003 Reply, unknown expected 2 received
+static const int test0015_lenv2 = 20006003; // Dev2 Listener, comID 6003 Multicast Request
+static const int test0015_lenv3 = 30006003; // Dev3 Listener, comID 6003 Multicast Request
+static const int test0016_lenv1 = 10007001; // Dev1 Listener, comID 7001 Reply, 2 expected 2 received, 0 confirm sent
+static const int test0016_lenv2 = 20007001; // Dev2 Listener, comID 7001 Multicast Request, Singlecast Confirm
+static const int test0016_lenv3 = 30007001; // Dev3 Listener, comID 7001 Multicast Request, Singlecast Confirm
+static const int test0017_lenv1 = 10007002; // Dev1 Listener, comID 7002 Reply, 2 expected 2 received
+static const int test0017_lenv2 = 20007002; // Dev2 Listener, comID 7002 Multicast Request, Singlecast Confirm
+static const int test0017_lenv3 = 30007002; // Dev3 Listener, comID 7002 Multicast Request, Singlecast Confirm
+static const int test0018_lenv1 = 10007003; // Dev1 Listener, comID 7003 Reply, 2 expected 2 received
+static const int test0018_lenv2 = 20007003; // Dev2 Listener, comID 7003 Multicast Request, Singlecast Confirm
+static const int test0018_lenv3 = 30007003; // Dev3 Listener, comID 7003 Multicast Request, Singlecast Confirm
 
 
 // Init listeners
@@ -1996,12 +1923,6 @@ static int testInitListeners()
     // Dev1 mode listeners
     if(x_testmode == 1)
     {
-		// TEST-0001: no listener
-		
-		// TEST-0002: no listener
-
-		// TEST-0003: no listener
-
 		// TEST-0004: listener for comID 2001 Reply
 		testAddListener(&test0004_lenv1, 2001, 0, "");
 		
@@ -2016,9 +1937,7 @@ static int testInitListeners()
 
 		// TEST-0008: listener for comID 3002 Reply
 		testAddListener(&test0008_lenv1, 3002, 0, "");
-		
-		// TEST-0009: no listener
-		
+				
 		// TEST-0010: listener for comID 5001 Reply 
 		testAddListener(&test0010_lenv1, 5001, 0, "");
 		
@@ -2027,20 +1946,34 @@ static int testInitListeners()
 		
 		// TEST-0012: listener for comID 5003 Reply 
 		testAddListener(&test0012_lenv1, 5003, 0, "");
+		
+		// TEST-0013: listener for comID 6001 Reply 
+		testAddListener(&test0013_lenv1, 6001, 0, "");
+		
+		// TEST-0014: listener for comID 6002 Reply 
+		testAddListener(&test0014_lenv1, 6002, 0, "");
+		
+		// TEST-0015: listener for comID 6003 Reply 
+		testAddListener(&test0015_lenv1, 6003, 0, "");
+		
+		// TEST-0016: listener for comID 7001 Reply 
+		testAddListener(&test0016_lenv1, 7001, 0, "");
+		
+		// TEST-0017: listener for comID 7002 Reply 
+		testAddListener(&test0017_lenv1, 7002, 0, "");
+		
+		// TEST-0018: listener for comID 7003 Reply 
+		testAddListener(&test0018_lenv1, 7003, 0, "");
     }
     
     // Dev2 mode listeners
     if(x_testmode == 2)
     {
-		// TEST-0001: no listener
-		
 		// TEST-0002: listener
 		testAddListener(&test0002_lenv, 1002, 0, "");
 
 		// TEST-0003: listener
 		testAddListener(&test0003_lenv, 1004, 0, "");
-
-		// TEST-0004: no listener
 		
 		// TEST-0005: listener for comID 2002 Request
 		testAddListener(&test0005_lenv2, 2002, 0, "");
@@ -2055,35 +1988,54 @@ static int testInitListeners()
 		testAddListener(&test0008_lenv2, 3002, 0, "");
 
 		// TEST-0009: listener for comID 4001 Multicast Notify
-		testAddListener(&test0009_lenv2, 4001, TRDP_IP4_ADDR(225,0,0,5), "");
-		
-		// TEST-0010: no listener
+		testAddListener(&test0009_lenv2, 4001, x_ip4_mc_01, "");
 		
 		// TEST-0011: comID 5002 Multicast Request, Singlecast Confirm
-		testAddListener(&test0011_lenv2, 5002, TRDP_IP4_ADDR(225,0,0,5), "");
+		testAddListener(&test0011_lenv2, 5002, x_ip4_mc_02, "");
 		
 		// TEST-0012: comID 5003 Multicast Request, Singlecast Confirm
-		testAddListener(&test0012_lenv2, 5003, TRDP_IP4_ADDR(225,0,0,5), "");
+		testAddListener(&test0012_lenv2, 5003, x_ip4_mc_02, "");
+		
+		// TEST-0014: comID 6002 Multicast Request, Singlecast Confirm
+		testAddListener(&test0014_lenv2, 6002, x_ip4_mc_02, "");
+		
+		// TEST-0015: comID 6003 Multicast Request, Singlecast Confirm
+		testAddListener(&test0015_lenv2, 6003, x_ip4_mc_02, "");
+		
+		// TEST-0016: comID 7001 Multicast Request, Singlecast Confirm
+		testAddListener(&test0016_lenv2, 7001, x_ip4_mc_02, "");
+
+		// TEST-0017: comID 7002 Multicast Request, Singlecast Confirm
+		testAddListener(&test0017_lenv2, 7002, x_ip4_mc_02, "");
+		
+		// TEST-0018: comID 7003 Multicast Request, Singlecast Confirm
+		testAddListener(&test0018_lenv2, 7003, x_ip4_mc_02, "");
     }
 
     // Dev3 mode listeners
     if(x_testmode == 3)
     {
 		// TEST-0009: listener for comID 4001 Multicast Notify
-		testAddListener(&test0009_lenv2, 4001, TRDP_IP4_ADDR(225,0,0,5), "");
-		
-		// TEST-0010: no listener
-		
-		// TEST-0011: no listener
+		testAddListener(&test0009_lenv2, 4001, x_ip4_mc_01, "");
 		
 		// TEST-0012: comID 5003 Multicast Request, Singlecast Confirm
-		testAddListener(&test0012_lenv2, 5003, TRDP_IP4_ADDR(225,0,0,5), "");
+		testAddListener(&test0012_lenv2, 5003, x_ip4_mc_02, "");
+		
+		// TEST-0015: comID 6003 Multicast Request, Singlecast Confirm
+		testAddListener(&test0015_lenv2, 6003, x_ip4_mc_02, "");
+		
+		// TEST-0016: comID 7001 Multicast Request, Singlecast Confirm
+		testAddListener(&test0016_lenv3, 7001, x_ip4_mc_02, "");
+
+		// TEST-0017: comID 7002 Multicast Request, Singlecast Confirm
+		testAddListener(&test0017_lenv3, 7002, x_ip4_mc_02, "");
+		
+		// TEST-0018: comID 7003 Multicast Request, Singlecast Confirm
+		testAddListener(&test0018_lenv3, 7003, x_ip4_mc_02, "");
     }
 
     // LOG
     fprintf(stderr,"testInitListeners(): done.\n");
-    l2fLog("testInitListeners(): done.");
-
     return 0;
 }
 
@@ -2106,7 +2058,7 @@ void cliInteractiveCli()
 			fprintf(stderr,"cliInteractiveCli(): error, parent task is died\n");
 			exit(EXIT_FAILURE);
 		}
-		
+
 		// Prompt
 		printf("\n");
 		printf("Test mode: Dev%u\n", x_testmode);
@@ -2205,7 +2157,7 @@ int cliInit()
 
 static void cmdlinerr(int argc, char * argv[])
 {
-    fprintf(stderr,"usage: %s [--dest a.b.c.d] [--l2f] [--period <perido in ms>]  [--testmode <1/2>]\n",argv[0]);
+    fprintf(stderr,"usage: %s [--dest a.b.c.d] [--period <perido in ms>]  [--testmode <1/2>]\n",argv[0]);
 }
 
 #define needargs(n) { if ((n) > (argc - i)) { cmdlinerr(argc,argv); exit(EXIT_FAILURE); } }
@@ -2221,7 +2173,8 @@ int main(int argc, char * argv[])
 	x_reqconf  = 0;
 	x_receiver = 0;
 	x_ip4_dest = TRDP_IP4_ADDR(192,168,190,129);
-	x_l2f 	   = 0;
+	x_ip4_mc_01 = TRDP_IP4_ADDR(225,0,0,5);
+	x_ip4_mc_02 = TRDP_IP4_ADDR(225,0,0,6);
 	x_period   = 100; // Defaul main loop period
 	x_testmode = 1;
 	
@@ -2239,11 +2192,6 @@ int main(int argc, char * argv[])
 				exit(EXIT_FAILURE);
 			}
 			x_ip4_dest = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-			continue;
-		}
-		if (0 == strcmp(argv[i],"--l2f"))
-		{
-			x_l2f = 1;
 			continue;
 		}
 		if (0 == strcmp(argv[i],"--period"))
@@ -2273,21 +2221,10 @@ int main(int argc, char * argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	// Log system init
-	if(x_l2f == 1)
-	{
-	    l2fInit();
-	    // Sllep to wait server start (workaound becaus einit return before server start)
-	    usleep(2*1000*1000);
-	}
-
 	//fprintf(stderr, "MD_HEADER_T size: %u\n", sizeof(MD_HEADER_T));
 	
 	// Log test mode
-	char strTmp[2048];
-	sprintf(strTmp, "main: start with testmode %u.", x_testmode);
-	fprintf(stderr, strTmp);
-	//l2fLog(strTmp);
+	fprintf(stderr, "main: start with testmode %u.", x_testmode);
 
 	
 	// Init test patterns destination IP
@@ -2300,10 +2237,16 @@ int main(int argc, char * argv[])
 			cliTests[n].dstIP = x_ip4_dest;
 		}
 		
-		// IP Multicat destination
+		// IP Multicat destination 1
 		else if(cliTests[n].dstIP == 1)
 		{
-			cliTests[n].dstIP = TRDP_IP4_ADDR(225,0,0,5);
+			cliTests[n].dstIP = x_ip4_mc_01;
+		}
+
+		// IP Multicat destination 2
+		else if(cliTests[n].dstIP == 2)
+		{
+			cliTests[n].dstIP = x_ip4_mc_02;
 		}
 		
 		// Not expected
@@ -2317,35 +2260,18 @@ int main(int argc, char * argv[])
 	
 	// Init queue
 	queue_initialize();
-	//l2fLog("main: queue_initialize() done.");
 
 	// Init 4 test
 	test_initialize();
-	//l2fLog("main: test_initialize() done.");
 
 	// Init command line interface
 	cliInit();
-	//l2fLog("main: cliInit() done.");
 	
 	// Add listeners
 	testInitListeners();
-	//l2fLog("main: testInitListeners() done.");
-
 
 	// Main loop
-	//char tmpStr[100];
-	//sprintf(tmpStr, "main: test_main_proc() with period %ums.", x_period);
-	//l2fLog(tmpStr);
 	test_main_proc();
 
-	//l2fLog("main: end.");
-
-	// Only to get last l2f messages logged
-	//usleep(2*1000*1000);
-	
-	// Stop log
-	//l2fStop();
-
 	return(0);
-
 }
