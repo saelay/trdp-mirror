@@ -746,38 +746,38 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
     UINT32  *pIPAddress,
     UINT16  *pPort)
 {
-    struct sockaddr_in srcAddress;
-    int connFd = -1;
+   struct sockaddr_in srcAddress;
+	int connFd = -1;
 
-    if (pSock == NULL || pIPAddress == NULL || pPort == NULL)
-    {
-        return VOS_PARAM_ERR;
-    }
+	if (pSock == NULL || pIPAddress == NULL || pPort == NULL)
+	{
+		return VOS_PARAM_ERR;
+	}
 
-    memset((char *)&srcAddress, 0, sizeof(srcAddress));
+	memset((char *)&srcAddress, 0, sizeof(srcAddress));
 
-    srcAddress.sin_family       = AF_INET;
-    srcAddress.sin_addr.s_addr  = vos_htonl(*pIPAddress);
-    srcAddress.sin_port         = vos_htons(*pPort);
+	srcAddress.sin_family       = AF_INET;
+	srcAddress.sin_addr.s_addr  = vos_htonl(*pIPAddress);
+	srcAddress.sin_port         = vos_htons(*pPort);
 
-    for (;; )
-    {
-        socklen_t sockLen = sizeof(srcAddress);
-        /*  */
-        connFd = accept(sock, (struct sockaddr *) &srcAddress, &sockLen);
-        if (connFd < 0)
-        {
-            switch (errno)
-            {
-                /*Accept return -1 and errno = EWOULDBLOCK,
-                when there is no more connection requests.*/
-                case EWOULDBLOCK:
-                {
-                    *pSock = connFd;
-                    return VOS_NO_ERR;
-                }
-                case EINTR:         break;
-                case ECONNABORTED:  break;
+	for (;; )
+	{
+		socklen_t sockLen = sizeof(srcAddress);
+		//
+		connFd = accept(sock, (struct sockaddr *) &srcAddress, &sockLen);
+		if (connFd < 0)
+		{
+			switch (errno)
+			{
+				/*Accept return -1 and errno = EWOULDBLOCK,
+				when there is no more connection requests.*/
+				case EWOULDBLOCK:
+				{
+					*pSock      = connFd;
+					return VOS_NO_ERR;
+				}
+				case EINTR:         break;
+				case ECONNABORTED:  break;
 #if defined (EPROTO)
                 case EPROTO:        break;
 #endif
@@ -913,7 +913,8 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize)
+    INT32   *pSize,
+    BOOL blocking)
 {
     ssize_t rcvSize     = 0;
     size_t  bufferSize  = (size_t) *pSize;
@@ -932,8 +933,16 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             bufferSize  -= rcvSize;
             pBuffer     += rcvSize;
-            *pSize      += rcvSize;
+            *pSize		+= rcvSize;
         }
+
+
+        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (blocking == FALSE))
+        {
+        	return VOS_NO_ERR;
+        }
+
+
         if (rcvSize == 0)
         {
             return VOS_NODATA_ERR;

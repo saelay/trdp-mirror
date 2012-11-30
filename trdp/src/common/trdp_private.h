@@ -53,6 +53,7 @@
 
 #define TRDP_MD_DEFAULT_REPLY_TIMEOUT   10000000    /**< default reply time out 10s     */
 #define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT 10000000    /**< default reply time out 10s     */
+#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  	300000000   /**< Socket connection time out 5 minutes    */
 
 #define TRDP_PD_DEFAULT_QOS              0
 #define TRDP_PD_DEFAULT_TTL              64
@@ -119,6 +120,15 @@ typedef struct TRDP_HANDLE
     TRDP_IP_ADDR_T      mcGroup;            /**< multicast group to join for PD                         */
 } TRDP_ADDRESSES_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
+
+/** TCP parameters    */
+typedef struct TRDP_SOCKET_TCP
+{
+    TRDP_IP_ADDR_T  cornerIp;				/**< The other TCP corner Ip		                      */
+    TRDP_TIME_T  connectionTimeout;			/**< TCP socket connection Timeout	                      */
+}TRDP_SOCKET_TCP_T;
+
+
 /** Socket item    */
 typedef struct TRDP_SOCKETS
 {
@@ -128,6 +138,7 @@ typedef struct TRDP_SOCKETS
     TRDP_SOCK_TYPE_T    type;               /**< Usage of this socket                                   */
     BOOL				rcvOnly;			/**< Used for receiving										*/
     UINT16              usage;              /**< No. of current users of this socket                    */
+    TRDP_SOCKET_TCP_T	tcpParams;			/**< Params used for TCP				                    */
 } TRDP_SOCKETS_T;
 
 #ifdef WIN32

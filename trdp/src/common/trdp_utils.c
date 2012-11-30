@@ -303,6 +303,37 @@ void    trdp_queueAppLast (
     iterPD->pNext = pNew;
 }
 
+
+/******************************************************************************/
+/** Append an element at end of queue
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pNew            pointer to element to append
+ */
+void    trdp_MDqueueAppLast (
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pNew)
+{
+    MD_ELE_T *iterMD;
+
+    if (ppHead == NULL || pNew == NULL)
+    {
+        return;
+    }
+    if (*ppHead == NULL)
+    {
+        *ppHead = pNew;
+        return;
+    }
+
+    for (iterMD = *ppHead; iterMD->pNext != NULL; iterMD = iterMD->pNext)
+    {
+        ;
+    }
+    iterMD->pNext = pNew;
+}
+
+
 /******************************************************************************/
 /** Insert an element at front of queue
  *
@@ -377,7 +408,8 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
     BOOL                    rcvOnly,
-    INT32                   *pIndex)
+    INT32                   *pIndex,
+	TRDP_IP_ADDR_T			cornerIp)
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           index, emptySock = -1;
@@ -400,12 +432,18 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[index].type == usage &&
             iface[index].sendParam.qos == params->qos &&
             iface[index].sendParam.ttl == params->ttl &&
-            (iface[index].rcvOnly == rcvOnly ||
-             usage == TRDP_SOCK_MD_TCP))
+            iface[index].rcvOnly == rcvOnly &&
+            ((usage != TRDP_SOCK_MD_TCP) ||
+            ((usage == TRDP_SOCK_MD_TCP) && (iface[index].tcpParams.cornerIp == cornerIp))))
         {
             /* Use that socket */
             *pIndex = index;
-            iface[index].usage++;
+
+            if(((usage != TRDP_SOCK_MD_TCP)) || ((usage == TRDP_SOCK_MD_TCP) && (iface[index].usage > 0)))
+            {
+            	iface[index].usage++;
+            }
+
             return err;
         }
         else if (iface[index].sock == -1 && emptySock == -1)
@@ -434,6 +472,9 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
         iface[index].rcvOnly        = rcvOnly;
+		iface[index].tcpParams.connectionTimeout.tv_sec = 0;
+        iface[index].tcpParams.connectionTimeout.tv_usec = 0;
+        iface[index].tcpParams.cornerIp = cornerIp;
 
         sock_options.qos    = params->qos;
         sock_options.ttl    = params->ttl;
@@ -443,9 +484,10 @@ TRDP_ERR_T  trdp_requestSocket (
 
         if((usage == TRDP_SOCK_MD_TCP) && (rcvOnly == TRUE))
         {
-            iface[index].sock   = *pIndex;
-            iface[index].usage  = 1;
-            return err;
+        	iface[index].sock       = *pIndex;
+        	*pIndex					= index;
+        	iface[index].usage 		= 0;
+        	return err;
         }
 
         switch (usage)

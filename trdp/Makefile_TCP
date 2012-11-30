@@ -1,0 +1,64 @@
+UNAME := $(shell uname)
+
+VOS_POSIX=src/vos/posix
+VOS_CMM=src/vos/common
+VOS_INC=src/vos/api
+COM_CMM=src/common
+COM_INC=src/common
+API_INC=src/api
+
+RM=rm -f
+
+BLDDIR=bld/posix
+
+PROJ_MDM=$(BLDDIR)/mdManagerTCP
+
+TRDPLIB=$(BLDDIR)/libtrdp.a
+
+OSLIB= -ltrdp
+ifeq ($(UNAME),Linux)
+OSLIB += -lpthread
+OSLIB += -luuid
+OSLIB += -lrt
+endif
+ifeq ($(UNAME),QNX)
+OSLIB += -lsocket
+endif
+
+OBJLIB=\
+	$(COM_CMM)/trdp_stats.o \
+	$(COM_CMM)/trdp_mdcom.o \
+	$(COM_CMM)/trdp_pdcom.o \
+	$(COM_CMM)/trdp_utils.o \
+	$(COM_CMM)/trdp_if.o \
+		\
+	$(VOS_CMM)/vos_utils.o \
+		\
+	$(VOS_POSIX)/vos_sock.o \
+	$(VOS_POSIX)/vos_thread.o \
+		\
+		\
+	$(BLDDIR)/vos_mem.o \
+		
+
+OBJPRJ_MDM= src/example/mdManagerTCP.o
+
+CFLAGS=-Wall -D_GNU_SOURCE -DPOSIX -I$(VOS_INC) -I$(COM_INC) -I$(API_INC) -DMD_SUPPORT=1
+
+ifeq ($(DEBUG),1)
+CFLAGS += -g -O -DDEBUG
+else
+CFLAGS += -Os  -DNO_DEBUG
+endif
+
+$(PROJ_MDM) : $(TRDPLIB) $(OBJPRJ_MDM) 
+	$(CC) -o $(PROJ_MDM) $(OBJPRJ_MDM) -L $(BLDDIR) $(OSLIB)
+
+
+$(TRDPLIB) : $(OBJLIB)
+	$(AR) cr $(TRDPLIB) $(OBJLIB)
+
+all: $(TRDPLIB) $(PROJ_MDM)
+
+clean:
+	$(RM) $(OBJLIB) $(OBJPRJ_MDM) $(TRDPLIB) $(PROJ_MDM)
