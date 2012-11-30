@@ -319,13 +319,36 @@ TRDP_ERR_T  trdp_mdRecv (
     int         Size = pPacket->grossSize;
 
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
-    {
-        err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &Size);
-        vos_printf(VOS_LOG_INFO, "vos_sockReceiveTCP Size = %d\n", Size);
-        err = VOS_NO_ERR;
+	{
+		/* Read Header */
+		err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &Size, FALSE);
+		vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n",Size);
 
-    }
-    else
+		if(err == VOS_NODATA_ERR)
+		{
+			vos_printf(VOS_LOG_INFO, "trdp_mdRecv - The socket = %u has been closed \n",mdSock);
+			return TRDP_NODATA_ERR;
+		}
+
+		if(err != VOS_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed (Reading the msg Header) = %d\n",err);
+			return TRDP_IO_ERR;
+		}
+
+		/* Get the rest of the message length */
+		int data_size;
+		data_size = vos_ntohl(pPacket->frameHead.datasetLength) + sizeof(pPacket->frameHead.frameCheckSum);
+
+		/*Read Data + CRC */
+		err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->data[0], &data_size, FALSE);
+		vos_printf(VOS_LOG_INFO, "Read Data + CRC Size = %d\n",data_size);
+
+		Size = Size + data_size;
+		//pPacket->grossSize = Size;
+
+
+	}else
     {
 
         err = vos_sockReceiveUDP(
@@ -396,7 +419,18 @@ TRDP_ERR_T  trdp_mdReceive (
         }
 
         memset(appHandle->pMDRcvEle, 0, sizeof(MD_ELE_T));
-        appHandle->pMDRcvEle->grossSize = TRDP_MAX_MD_PACKET_SIZE;
+
+		if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+		{
+			/* Received telegram size = telegram header + data(fixed to 32) + CRC
+			 * TODO The data size should be got from the header->datasetLength (to be dinamic),
+			 * and then call to read() function until all the data is read. */
+			appHandle->pMDRcvEle->grossSize = sizeof(appHandle->pMDRcvEle->frameHead);
+		}else
+		{
+			appHandle->pMDRcvEle->grossSize = TRDP_MAX_MD_PACKET_SIZE;
+		}
+     
         appHandle->pMDRcvEle->pktFlags  = appHandle->mdDefault.flags;
     }
 
@@ -418,6 +452,26 @@ TRDP_ERR_T  trdp_mdReceive (
                    appHandle->pMDRcvEle->dataSize);
 
         /* Display incoming header */
+
+
+		/* TCP cornerIp */
+		if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+		{
+			int find_sock;
+
+			for(find_sock=0;find_sock<VOS_MAX_SOCKET_CNT;find_sock++)
+			{
+				if((appHandle->iface[find_sock].sock > -1) && (appHandle->iface[find_sock].sock == sock))
+				{
+					break;
+				}
+			}
+			
+
+			appHandle->pMDRcvEle->addr.srcIpAddr = appHandle->iface[find_sock].tcpParams.cornerIp;
+
+		}
+
 
         {
             int i;
@@ -544,52 +598,54 @@ TRDP_ERR_T  trdp_mdReceive (
                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                             theMessage.resultCode   = TRDP_NO_ERR;
 
-                            appHandle->mdDefault.pfCbFunction(
-                                appHandle->mdDefault.pRefCon,
-                                &theMessage,
-                                (UINT8 *)pH, lF);
+
+							if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+							{
+								appHandle->mdDefault.pfCbFunction(
+									appHandle->mdDefault.pRefCon,
+									&theMessage,
+									(UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
+							}else
+							{
+								appHandle->mdDefault.pfCbFunction(
+									appHandle->mdDefault.pRefCon,
+									&theMessage,
+									(UINT8 *)pH, lF);
+							}
                         }
 
                         /* TCP and Notify message */
-                        if (((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0) && (TRDP_MSG_MN == l_msgType))
-                        {
-                            int find_sock;
-                            int sock_position;
+						if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+						{
 
-                            for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
-                            {
-                                if((appHandle->iface[find_sock].sock == sock)
-                                   && (appHandle->iface[find_sock].sock != -1))
-                                {
-                                    sock_position = find_sock;
-                                    break;
-                                }
-                            }
+							if(TRDP_MSG_MR == l_msgType)
+							{
 
-                            if(appHandle->iface[sock_position].usage == 1)
-                            {
-                                vos_printf(VOS_LOG_INFO, "vos_sockClose (Num = %d) from the iface\n",
-                                           appHandle->iface[sock_position].sock);
-                                vos_sockClose(appHandle->iface[sock_position].sock);
-                            }
-                            else
-                            {
-                                appHandle->iface[sock_position].usage--;
-                            }
+								int find_sock;
+								int sock_position;
 
-                            /* Delete the socket from the iface */
-                            vos_printf(VOS_LOG_INFO, "Deleting socket (Num = %d) from the iface\n",
-                                       appHandle->iface[sock_position].sock);
-                            vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", sock_position);
-                            appHandle->iface[sock_position].sock = -1;
-                            appHandle->iface[sock_position].sendParam.qos   = 0;
-                            appHandle->iface[sock_position].sendParam.ttl   = 0;
-                            appHandle->iface[sock_position].usage           = 0;
-                            appHandle->iface [sock_position].bindAddr       = 0;
-                            appHandle->iface[sock_position].type = 0;
+								for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+								{
+									if((appHandle->iface[find_sock].sock == sock)
+											&& (appHandle->iface[find_sock].sock != -1)
+											&& (appHandle->iface[find_sock].rcvOnly == 1))
+									{
+										sock_position = find_sock;
+										break;
+									}
+								}
 
-                        }
+								appHandle->iface[sock_position].usage++;
+								vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage incremented to (Num = %d)\n",
+										appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
 
+								/* Save the socket position in the listener */
+								iterMD->socketIdx = sock_position;
+								vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
+									iterMD->socketIdx);
+							}
+
+						}
                     }
                     break;
 
@@ -706,59 +762,84 @@ TRDP_ERR_T  trdp_mdReceive (
                                         theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                         theMessage.resultCode   = TRDP_NO_ERR;
 
-                                        appHandle->mdDefault.pfCbFunction(
-                                            appHandle->mdDefault.pRefCon,
-                                            &theMessage,
-                                            (UINT8 *)pH, lF);
+
+										if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+										{
+											appHandle->mdDefault.pfCbFunction(
+												appHandle->mdDefault.pRefCon,
+												&theMessage,
+												(UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
+										}else
+										{
+											appHandle->mdDefault.pfCbFunction(
+												appHandle->mdDefault.pRefCon,
+												&theMessage,
+												(UINT8 *)pH, lF);
+										}
 
                                     }
 
 
                                     /* TCP and Reply/ReplyError message */
-                                    if (((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-                                        && ((TRDP_MSG_MP == l_msgType) || (TRDP_MSG_ME == l_msgType)))
-                                    {
-                                        int find_sock;
-                                        int sock_position;
-										
-										// Remove sender, multiple reply are supported only in UDP
-										removeMdSendElement = 1;
-                                        
+									if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+									{
+
+										int find_sock;
+										int sock_position;
+
 										for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
-                                        {
-                                            if((appHandle->iface[find_sock].sock == sock)
-                                               && (appHandle->iface[find_sock].sock != -1))
-                                            {
-                                                sock_position = find_sock;
-                                                break;
-                                            }
-                                        }
+										{
+											if((appHandle->iface[find_sock].sock == sock)
+												&& (appHandle->iface[find_sock].sock != -1)
+												&& (appHandle->iface[find_sock].rcvOnly == FALSE))
+											{
+												sock_position = find_sock;
+												break;
+											}
+										}
 
-                                        if(appHandle->iface[sock_position].usage == 1)
-                                        {
-                                            vos_printf(VOS_LOG_INFO,
-                                                       "vos_sockClose (Nº = %d) from the iface\n",
-                                                       appHandle->iface[sock_position].sock);
-                                            vos_sockClose(appHandle->iface[sock_position].sock);
-                                        }
-                                        else
-                                        {
-                                            appHandle->iface[sock_position].usage--;
-                                        }
+										iterMD->socketIdx = sock_position;
 
-                                        /* Delete the socket from the iface */
-                                        vos_printf(VOS_LOG_INFO,
-                                                   "Deleting socket (Nº = %d) from the iface\n",
-                                                   appHandle->iface[sock_position].sock);
-                                        vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", sock_position);
-                                        appHandle->iface[sock_position].sock = -1;
-                                        appHandle->iface[sock_position].sendParam.qos   = 0;
-                                        appHandle->iface[sock_position].sendParam.ttl   = 0;
-                                        appHandle->iface[sock_position].usage           = 0;
-                                        appHandle->iface [sock_position].bindAddr       = 0;
-                                        appHandle->iface[sock_position].type = 0;
+										if((TRDP_MSG_MP == l_msgType) || (TRDP_MSG_ME == l_msgType))
+										{
 
-                                    }
+											appHandle->iface[sock_position].usage--;
+											vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
+													appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
+
+
+											/* If there is no at least one session using the socket, start the socket connectionTimeout */
+											if((appHandle->iface[sock_position].usage == 0) && (appHandle->iface[sock_position].rcvOnly == FALSE))
+											{
+												vos_printf(VOS_LOG_INFO, "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
+														appHandle->iface[sock_position].sock);
+
+
+												// Start the socket connectionTimeout
+												TRDP_TIME_T tmpt_interval, tmpt_now;
+												tmpt_interval.tv_sec = appHandle->mdDefault.connectTimeout / 1000000;
+												tmpt_interval.tv_usec = appHandle->mdDefault.connectTimeout % 1000000;
+
+												vos_getTime(&tmpt_now);
+												vos_addTime(&tmpt_now, &tmpt_interval);
+
+												memcpy(&appHandle->iface[sock_position].tcpParams.connectionTimeout, &tmpt_now, sizeof(TRDP_TIME_T));
+
+											}
+
+										}
+
+
+										if (TRDP_MSG_MQ == l_msgType)
+										{
+											/* Save the socket position in the listener */
+											iterMD->socketIdx = sock_position;
+											vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
+													iterMD->socketIdx);
+										}
+
+									}
+
 
                                     // Handle send element
 									if(removeMdSendElement == 1)
@@ -809,54 +890,48 @@ TRDP_ERR_T  trdp_mdReceive (
                                         theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                         theMessage.resultCode   = TRDP_NO_ERR;
 
-                                        appHandle->mdDefault.pfCbFunction(
-                                            appHandle->mdDefault.pRefCon,
-                                            &theMessage,
-                                            (UINT8 *)pH, lF);
+
+										if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+										{
+											appHandle->mdDefault.pfCbFunction(
+												appHandle->mdDefault.pRefCon,
+												&theMessage,
+												(UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
+										}else
+										{
+											appHandle->mdDefault.pfCbFunction(
+												appHandle->mdDefault.pRefCon,
+												&theMessage,
+												(UINT8 *)pH, lF);
+										}
                                     }
 
 
-                                    /* TCP and Reply/ReplyError message */
-                                    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-                                    {
-                                        int find_sock;
-                                        int sock_position;
+                                    /* TCP and Confirm message */
+									if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+									{
+										int find_sock;
+										int sock_position;
 
-                                        for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
-                                        {
-                                            if((appHandle->iface[find_sock].sock == sock)
-                                               && (appHandle->iface[find_sock].sock != -1))
-                                            {
-                                                sock_position = find_sock;
-                                                break;
-                                            }
-                                        }
+										for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+										{
+											if((appHandle->iface[find_sock].sock == sock)
+													&& (appHandle->iface[find_sock].sock != -1)
+													&& (appHandle->iface[find_sock].rcvOnly == 1))
+											{
+												sock_position = find_sock;
+												break;
+											}
+										}
 
-                                        if(appHandle->iface[sock_position].usage == 1)
-                                        {
-                                            vos_printf(VOS_LOG_INFO,
-                                                       "vos_sockClose (Nº = %d) from the iface\n",
-                                                       appHandle->iface[sock_position].sock);
-                                            vos_sockClose(appHandle->iface[sock_position].sock);
-                                        }
-                                        else
-                                        {
-                                            appHandle->iface[sock_position].usage--;
-                                        }
+										iterMD->socketIdx = sock_position;
 
-                                        /* Delete the socket from the iface */
-                                        vos_printf(VOS_LOG_INFO,
-                                                   "Deleting socket (Nº = %d) from the iface\n",
-                                                   appHandle->iface[sock_position].sock);
-                                        vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", sock_position);
-                                        appHandle->iface[sock_position].sock = -1;
-                                        appHandle->iface[sock_position].sendParam.qos   = 0;
-                                        appHandle->iface[sock_position].sendParam.ttl   = 0;
-                                        appHandle->iface[sock_position].usage           = 0;
-                                        appHandle->iface [sock_position].bindAddr       = 0;
-                                        appHandle->iface[sock_position].type = 0;
+										appHandle->iface[sock_position].usage--;
+										vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
+												appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
 
-                                    }
+									}
+
 
 
                                     /* Remove element from queue */

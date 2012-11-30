@@ -38,8 +38,8 @@
 #endif
 
 
-#define MD_DEFAULT_IP_1        0xC0A866B3 /* Sender's IP: 192.168.102.179	Decimal: 3232261811	/ 10.0.0.203 - 0xA0000CB*/
-#define MD_DEFAULT_IP_2        0xC0A866B4 /* Caller's IP: 192.168.102.180	Decimal: 3232261811	/ 10.0.0.204 - 0xA0000CC*/
+#define MD_DEFAULT_IP_1        0xC0A867B3 /* Sender's IP: 192.168.102.179	Decimal: 3232261811	/ 10.0.0.203 - 0xA0000CB*/
+#define MD_DEFAULT_IP_2        0xC0A867B4 /* Caller's IP: 192.168.102.180	Decimal: 3232261811	/ 10.0.0.204 - 0xA0000CC*/
 
 #define SOURCE_URI "user@host"
 #define DEST_URI "user@host"
@@ -85,7 +85,7 @@ typedef struct
 typedef struct
 {
 	TRDP_UUID_T pSessionId;
-	TRDP_IP_ADDR_T srcIp;
+	TRDP_IP_ADDR_T cornerIp;
 	UINT32 comId;
 	TRDP_SESSION_STATE sessionState;
 }APP_SESSION_TEST_T;
@@ -139,48 +139,42 @@ void get_IPs()
 }
 
 
-
-/* QUEUE FUNCTIONS */
-
-/* send message trough queue */
-static void queue_sendmessage(trdp_apl_cbenv_t * msg)
+static void print_memory(const void *p, const int l)
 {
-	int rc;
-	char * p_bf = (char *)msg;
-	int    l_bf = sizeof(*msg) - sizeof(msg->dummy);
-	rc = mq_send(trdp_mq,p_bf,l_bf,0);
-	if (-1 == rc)
+	if (p != NULL || l > 0)
 	{
-		perror("mq_send()");
-		exit(EXIT_FAILURE);
-	}else
-	{
-		printf("Message (comId = %d) added in the application queue\n"
-				, msg->Msg.comId);
+		int i,j;
+		const UINT8 *b = p;
+		for(i = 0; i < l; i += 16)
+		{
+			printf("%04X ", i );
+			/**/
+			for(j = 0; j < 16; j++)
+			{
+				if (j == 8) printf("- ");
+				if ((i+j) < l)
+				{
+					int ch = b[i+j];
+					printf("%02X ",ch);
+				}
+				else
+				{
+					printf("   ");
+				}
+			}
+			printf("   ");
+			for(j = 0; j < 16 && (i+j) < l; j++)
+			{
+				int ch = b[i+j];
+				printf("%c", (ch >= ' ' && ch <= '~') ? ch : '.');
+			}
+			printf("\n");
+		}
 	}
 }
 
 
-/* call back function for message data */
-static void md_indication(
-    void                 *pRefCon,
-    const TRDP_MD_INFO_T *pMsg,
-    UINT8                *pData,
-    UINT32               dataSize)
-{
-	//printf("md_indication(r=%p m=%p d=%p l=%d)\n",pRefCon,pMsg,pData,dataSize);
-
-	trdp_apl_cbenv_t fwd;
-
-	fwd.pRefCon  = pRefCon;
-	fwd.Msg      = * pMsg;
-	fwd.pData    = pData;
-	fwd.dataSize = dataSize;
-
-	queue_sendmessage(&fwd);
-
-}
-
+/* QUEUE FUNCTIONS */
 
 static void queue_initialize()
 {
@@ -250,6 +244,19 @@ static void queue_initialize()
 	printf("mq_curmsgs = %ld\n",old_ma.mq_curmsgs);
 }
 
+/* send message trough queue */
+static void queue_sendmessage(trdp_apl_cbenv_t * msg)
+{
+	int rc;
+	char * p_bf = (char *)msg;
+	int    l_bf = sizeof(*msg) - sizeof(msg->dummy);
+	rc = mq_send(trdp_mq,p_bf,l_bf,0);
+	if (-1 == rc)
+	{
+		perror("mq_send()");
+		exit(EXIT_FAILURE);
+	}
+}
 
 /* receive message from queue */
 static int queue_receivemessage(trdp_apl_cbenv_t * msg)
@@ -288,27 +295,83 @@ static void queue_procricz()
 	if (rc != EOK) return;
 
 	{
-		myMDcallBack(msg.Msg.pUserRef, msg.Msg,	msg.pData,
-								msg.dataSize);
+		printf("md_indication(r=%p d=%p l=%d)\n",msg.pRefCon,msg.pData,msg.dataSize);
+
+		printf("srcIpAddr         = x%08X\n",msg.Msg.srcIpAddr);
+		printf("destIpAddr        = x%08X\n",msg.Msg.destIpAddr);
+		printf("seqCount          = %d\n"   ,msg.Msg.seqCount);
+		printf("protVersion       = %d\n"   ,msg.Msg.protVersion);
+		printf("msgType           = x%04X\n",msg.Msg.msgType);
+		printf("comId             = %d\n"   ,msg.Msg.comId);
+		printf("topoCount         = %d\n"   ,msg.Msg.topoCount);
+		printf("userStatus        = %d\n"   ,msg.Msg.userStatus);
+		printf("replyStatus       = %d\n"   ,msg.Msg.replyStatus);
+		//printf("sessionId         = ");      print_session(msg.Msg.sessionId);
+		printf("replyTimeout      = %d\n"   ,msg.Msg.replyTimeout);
+		//printf("destURI           = ");      print_uri(msg.Msg.destURI); printf("\n");
+		//printf("srcURI            = ");      print_uri(msg.Msg.srcURI); printf("\n");
+		printf("noOfReplies       = %d\n"   ,msg.Msg.numReplies);
+		printf("pUserRef          = %p\n"   ,msg.Msg.pUserRef);
+		printf("resultCode        = %d\n"   ,msg.Msg.resultCode);
+
+		print_memory(msg.pData,msg.dataSize);
 	}
+
+	myMDcallBack(msg.Msg.pUserRef, msg.Msg,	msg.pData,
+									msg.dataSize);
 }
 
 
+/* call back function for message data */
+static void md_indication(
+    void                 *pRefCon,
+    const TRDP_MD_INFO_T *pMsg,
+    UINT8                *pData,
+    UINT32               dataSize)
+{
+	printf("md_indication(r=%p m=%p d=%p l=%d)\n",pRefCon,pMsg,pData,dataSize);
+
+	#if 0
+
+	printf("srcIpAddr         = x%08X\n",pMsg->srcIpAddr);
+	printf("destIpAddr        = x%08X\n",pMsg->destIpAddr);
+	printf("seqCount          = %d\n"   ,pMsg->seqCount);
+	printf("protVersion       = %d\n"   ,pMsg->protVersion);
+	printf("msgType           = x%04X\n",pMsg->msgType);
+	printf("comId             = %d\n"   ,pMsg->comId);
+	printf("topoCount         = %d\n"   ,pMsg->topoCount);
+	printf("userStatus        = %d\n"   ,pMsg->userStatus);
+	printf("replyStatus       = %d\n"   ,pMsg->replyStatus);
+	printf("sessionId         = ");      print_session(pMsg->sessionId);
+	printf("replyTimeout      = %d\n"   ,pMsg->replyTimeout);
+	printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
+	printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
+	printf("noOfReplies       = %d\n"   ,pMsg->noOfReplies);
+	printf("pUserRef          = %p\n"   ,pMsg->pUserRef);
+	printf("resultCode        = %d\n"   ,pMsg->resultCode);
+
+	print_memory(pData,dataSize);
+
+	#endif
+
+	{
+		trdp_apl_cbenv_t fwd;
+
+		fwd.pRefCon  = pRefCon;
+		fwd.Msg      = * pMsg;
+		fwd.pData    = pData;
+		fwd.dataSize = dataSize;
+
+		queue_sendmessage(&fwd);
+	}
+
+}
+
 
 /* Delete MD session */
-void delete_session(const TRDP_MD_INFO_T *pMsg)
+void delete_session(INT32 found_index)
 {
 	INT32 index;
-	INT32 found_index;
-
-	for(index=0; index < count_session; index++)
-	{
-		if(memcmp(APP_SESSION_TEST[index].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T)) == 0)
-		{
-			found_index = index;
-			break;
-		}
-	}
 
 	memset(&APP_SESSION_TEST[found_index], 0, sizeof(APP_SESSION_TEST_T));
 
@@ -325,7 +388,6 @@ void tlm_digest_session(const TRDP_MD_INFO_T *pMsg)
 {
 	UINT32 index;
 	BOOL session_exist = FALSE;
-	TRDP_IP_ADDR_T tmp_ip;
 
 
 	/* Request message received */
@@ -336,68 +398,117 @@ void tlm_digest_session(const TRDP_MD_INFO_T *pMsg)
 		APP_SESSION_TEST[count_session].sessionState.msgType = pMsg->msgType;
 		APP_SESSION_TEST[count_session].comId = pMsg->comId;
 		memcpy(APP_SESSION_TEST[count_session].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T));
-		APP_SESSION_TEST[count_session].srcIp = pMsg->srcIpAddr;
+		APP_SESSION_TEST[count_session].cornerIp = pMsg->srcIpAddr;
 		count_session++;
-	}
 
-
-
-	for(index=0; index < count_session; index++)
+	}else
 	{
 
-		if(memcmp(APP_SESSION_TEST[index].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T)) == 0)
+		for(index=0; index < count_session; index++)
 		{
 
-			if(pMsg->msgType == TRDP_MSG_MP)
+			if((memcmp(APP_SESSION_TEST[index].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T)) == 0)
+				&& (APP_SESSION_TEST[index].cornerIp == pMsg->srcIpAddr)
+				&& (APP_SESSION_TEST[index].comId == pMsg->comId))
 			{
-				/* Reply message has been sent */
-				printf("Session-Handling - Reply without confirm message (comId=%d) sent\n", pMsg->comId);
-				APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
-				APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
-				delete_session(pMsg);
 
-			}else if(pMsg->msgType == TRDP_MSG_ME)
-			{
-				/* Reply Error message has been sent */
-				printf("Session-Handling - Reply Error message (comId=%d) sent\n", pMsg->comId);
-				APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
-				APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
-				delete_session(pMsg);
+				if((pMsg->msgType == TRDP_MSG_MP)
+					&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MR)
+					&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+				{
+					/* Reply message has been sent */
+					printf("Session-Handling - Reply without confirm message (comId=%d) sent\n", pMsg->comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
+					delete_session(index);
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
 
-			}else if(pMsg->msgType == TRDP_MSG_MQ)
-			{
-				/* Reply with confirm message has been sent */
-				printf("Session-Handling - Reply with confirm (comId=%d) sent\n", pMsg->comId);
-				APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
-				APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+				}else if((pMsg->msgType == TRDP_MSG_MP)
+						&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MR)
+						&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_SENT))
+				{
+					/* Reply message has been received */
+					printf("Session-Handling - Reply without confirm message (comId=%d) received\n", APP_SESSION_TEST[index].comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_RECEIVED;
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+					delete_session(index);
 
-			}else if(pMsg->msgType == TRDP_MSG_MC)
-			{
-				/* Confirm message has been sent */
-				printf("Session-Handling - Confirm message (comId=%d) sent\n", APP_SESSION_TEST[index].comId);
-				APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
-				APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
-				delete_session(pMsg);
+				}else if((pMsg->msgType == TRDP_MSG_ME)
+						&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MR)
+						&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+				{
+					/* Reply Error message has been sent */
+					printf("Session-Handling - Reply Error message (comId=%d) sent\n", pMsg->comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+					delete_session(index);
 
-			}else
-			{
-				/* Wrong message received */
-				printf("Session-Handling - Wrong message.\n");
-				printf("The session will be aborted.\n");
-				delete_session(pMsg);
+				}else if((pMsg->msgType == TRDP_MSG_ME)
+						&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MR)
+						&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_SENT))
+				{
+					/* Reply Error message has been received */
+					printf("Session-Handling - Reply Error message (comId=%d) received\n", pMsg->comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_RECEIVED;
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+					delete_session(index);
+
+				}else if((pMsg->msgType == TRDP_MSG_MQ)
+						&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MR)
+						&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+				{
+					/* Reply with confirm message has been sent */
+					printf("Session-Handling - Reply with confirm (comId=%d) sent\n", pMsg->comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+
+				}else if((pMsg->msgType == TRDP_MSG_MQ)
+						&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MR)
+						&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_SENT))
+				{
+					/* Reply with confirm message has been received */
+					printf("Session-Handling - Reply with confirm (comId=%d) received\n", pMsg->comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_RECEIVED;
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+
+				}else if((pMsg->msgType == TRDP_MSG_MC)
+						&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MQ)
+						&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+				{
+					/* Confirm message has been sent */
+					printf("Session-Handling - Confirm message (comId=%d) sent\n", APP_SESSION_TEST[index].comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_SENT;
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+					delete_session(index);
+
+				}else if((pMsg->msgType == TRDP_MSG_MC)
+						&& (APP_SESSION_TEST[index].sessionState.msgType == TRDP_MSG_MQ)
+						&& (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_SENT))
+				{
+					/* Confirm message has been received */
+					printf("Session-Handling - Confirm message (comId=%d) received\n", APP_SESSION_TEST[index].comId);
+					APP_SESSION_TEST[index].sessionState.sent_recv_prep = TRDP_RECEIVED;
+					APP_SESSION_TEST[index].sessionState.msgType = pMsg->msgType;
+					delete_session(index);
+
+				}else
+				{
+					/* Wrong message received */
+					printf("Session-Handling - Wrong message.\n");
+					printf("The session will be aborted.\n");
+					delete_session(index);
+				}
+
+				break;
+
 			}
 
-			break;
-
 		}
-
 	}
-
 }
 
 /* Check if there is any received message that is waiting the response */
 BOOL prep_toSend(TRDP_MSG_T type)
-{
+{	TRDP_IP_ADDR_T tmp_ip;
 	INT32 index;
 
 	for(index = 0; index < count_session;index++)
@@ -521,13 +632,7 @@ void myMDcallBack (
 
         		case TRDP_MSG_ME:
 					printf("ComID %d Reply Error\n", pMsg->comId);
-					if (pData)
-					{
-						memcpy(gBuffer, pData,
-							   ((sizeof(gBuffer) <
-								 dataSize) ? sizeof(gBuffer) : dataSize));
-
-					}
+					memset(gBuffer, 0, sizeof(gBuffer));
 					tlm_digest_session(pMsg);
 					break;
 
@@ -545,12 +650,7 @@ void myMDcallBack (
 
         		case TRDP_MSG_MC:
 					printf("ComID %d Confirm\n", pMsg->comId);
-					if (pData)
-					{
-						memcpy(gBuffer, pData,
-							   ((sizeof(gBuffer) <
-								 dataSize) ? sizeof(gBuffer) : dataSize));
-					}
+					memset(gBuffer, 0, sizeof(gBuffer));
 					tlm_digest_session(pMsg);
 					break;
 
@@ -561,6 +661,43 @@ void myMDcallBack (
 					break;
     		}
         	break;
+
+        	case TRDP_TIMEOUT_ERR:
+
+				memset(gBuffer, 0, sizeof(gBuffer));
+
+				if(memcmp(pMsg->sessionId, not_ini, sizeof(TRDP_UUID_T)) != 0)
+				{
+					for(index=0; index < count_session; index++)
+					{
+						if((memcmp(APP_SESSION_TEST[index].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T)) == 0)
+							&& (APP_SESSION_TEST[index].cornerIp == pMsg->destIpAddr)
+							&& (APP_SESSION_TEST[index].comId == pMsg->comId))
+						{
+							printf("Session timed out (DstIP: %u) - (ComId: %u) \n", pMsg->destIpAddr, pMsg->comId);
+							delete_session(index);
+							break;
+						}
+					}
+				}else
+				{
+					printf("Socket timed out (Destination IP: %u)\n", pMsg->destIpAddr);
+				}
+				break;
+
+        	case TRDP_APPTIMEOUT_ERR:
+
+        		for(index=0; index < count_session; index++)
+				{
+					if((memcmp(APP_SESSION_TEST[index].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T)) == 0)
+						&& (APP_SESSION_TEST[index].comId == pMsg->comId))
+					{
+						printf("Session App timed out (ComId: %u) \n", pMsg->comId);
+						delete_session(index);
+						break;
+					}
+				}
+        		break;
 
 			default:
 				printf("Error on packet (ComID %d), err = %d\n",
@@ -591,8 +728,8 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 		mem_config.size = HEAP_MEMORY_SIZE;
 
 		md_config.pRefCon      = (void *)0x12345678;
-		md_config.sendParam.qos = MD_DEFAULT_QOS;
-		md_config.sendParam.ttl = MD_DEFAULT_TTL;
+		md_config.sendParam.qos = TRDP_MD_DEFAULT_QOS;
+		md_config.sendParam.ttl = TRDP_MD_DEFAULT_TTL;
 		md_config.flags = 0
 			| TRDP_FLAGS_NONE      * 0
 			| TRDP_FLAGS_REDUNDANT * 0
@@ -600,14 +737,17 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 			| TRDP_FLAGS_CALLBACK  * 1
 			| TRDP_FLAGS_TCP       * 1 /* 1=TCP, 0=UDP */
 			;
-		md_config.replyTimeout   = MD_DEFAULT_REPLY_TIMEOUT;
-		md_config.confirmTimeout = MD_DEFAULT_CONFIRM_TIMEOUT;
-		md_config.udpPort        = IP_MD_UDP_PORT;
-		md_config.tcpPort        = IP_MD_TCP_PORT;
+		md_config.replyTimeout   = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+		md_config.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+		md_config.connectTimeout = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+		md_config.udpPort        = TRDP_MD_UDP_PORT;
+		md_config.tcpPort        = TRDP_MD_TCP_PORT;
 
 
-		printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");
-		scanf("%d", &read_data);
+		//printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");
+		//scanf("%d", &read_data);
+
+		read_data = 0;
 
 		/* MD config */
 		if(read_data == 1)
@@ -713,8 +853,11 @@ TRDP_ERR_T notifies_requests()
 		printf("Enter: 1 for notify, 2 for request\n");
 		scanf("%d", &read_data);
 
-		printf("Enter the message data to send (Maximum 32 characters):\n");
+		printf("Enter the message data to send (Maximum 32 chars - Without whitespaces):\n");
 		scanf("%s", gBuffer);
+		//fgets(gBuffer, 30, stdin);
+		//gets(gBuffer);
+		//scanf("%s", gBuffer);
 
 		err = vos_getUuid(pSessionId);
 
@@ -749,7 +892,7 @@ TRDP_ERR_T notifies_requests()
 								MD_COMID1_DST_IP,
 								TRDP_FLAGS_TCP,
 								noOfRepliers,
-								MD_DEFAULT_REPLY_TIMEOUT,
+								TRDP_MD_DEFAULT_REPLY_TIMEOUT,
 								NULL,
 								(UINT8 *)gBuffer,
 								sizeof(gBuffer),
@@ -770,7 +913,7 @@ TRDP_ERR_T notifies_requests()
 			APP_SESSION_TEST[count_session].sessionState.msgType = TRDP_MSG_MR;
 			APP_SESSION_TEST[count_session].comId = MD_COMID;
 			memcpy(APP_SESSION_TEST[count_session].pSessionId, pSessionId, sizeof(TRDP_UUID_T));
-			APP_SESSION_TEST[count_session].srcIp = MD_COMID1_DST_IP;
+			APP_SESSION_TEST[count_session].cornerIp = MD_COMID1_DST_IP;
 			count_session++;
 			printf("The request saved in the - App Session Handling -\n");
 		}
@@ -818,7 +961,7 @@ TRDP_ERR_T reply_msgs()
 
 	while(read_data)
 	{
-		printf("Which one? Enter the number (1,2...): \n");
+		printf("\nWhich one? Enter the number (0,1,2...): \n");
 		scanf("%d", &session_num);
 
 		printf("Which kind of reply? 0-REPLY | 1-REPLY QUERY | 2-REPLY ERR\n");
@@ -826,7 +969,7 @@ TRDP_ERR_T reply_msgs()
 
 		if((answer_kind == 0) || (answer_kind == 1))
 		{
-			printf("Enter the message data to send (Maximum 32 characters):\n");
+			printf("Enter the message data to send (Maximum 32 characters - Without whitespaces):\n");
 			scanf("%s", gBuffer);
 		}
 
@@ -860,7 +1003,7 @@ TRDP_ERR_T reply_msgs()
 							MD_COMID1_DST_IP,
 							TRDP_FLAGS_TCP,
 							NULL, //UINT16                  userStatus,
-							MD_DEFAULT_CONFIRM_TIMEOUT,
+							TRDP_MD_DEFAULT_CONFIRM_TIMEOUT,
 							NULL,
 							(UINT8 *)gBuffer,
 							sizeof(gBuffer),
@@ -892,6 +1035,19 @@ TRDP_ERR_T reply_msgs()
 		{
 			printf("MD reply error\n");
 			return err;
+
+		}else
+		{
+			if(answer_kind == 1)
+			{
+				APP_SESSION_TEST[(session_num)].sessionState.sent_recv_prep = TRDP_SENT;
+				APP_SESSION_TEST[(session_num)].sessionState.msgType = TRDP_MSG_MQ;
+
+			}else
+			{
+				delete_session(session_num);
+			}
+
 		}
 
 		replies_count--;
@@ -900,6 +1056,22 @@ TRDP_ERR_T reply_msgs()
 		{
 			printf("Do you want to reply another one? Yes[1] / No[0]\n");
 			scanf("%d", &read_data);
+
+			if(read_data)
+			{
+				session_num =0;
+				printf("You have those connections (comId's) to reply.\n");
+				for(found_index = 0; found_index < count_session;found_index++)
+				{
+					if((APP_SESSION_TEST[found_index].sessionState.msgType == (TRDP_MSG_MR))
+						&& (APP_SESSION_TEST[found_index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+					{
+						printf("%d.ComId=%d  |  ", (session_num), APP_SESSION_TEST[found_index].comId);
+					}
+					session_num ++;
+				}
+			}
+
 		}else
 		{
 			read_data = 0;
@@ -944,7 +1116,7 @@ TRDP_ERR_T confirm_msgs()
 
 	while(read_data)
 	{
-		printf("Which one? Enter the number (1,2...): \n");
+		printf("\nWhich one? Enter the number (0,1,2...): \n");
 		scanf("%d", &session_num);
 
 		if(err != TRDP_NO_ERR)
@@ -970,6 +1142,9 @@ TRDP_ERR_T confirm_msgs()
 		{
 			printf("MD confirm error\n");
 			return err;
+		}else
+		{
+			delete_session(session_num);
 		}
 
 		confirms_count--;
@@ -978,6 +1153,22 @@ TRDP_ERR_T confirm_msgs()
 		{
 			printf("Do you want to send another confirm message? Yes[1] / No[0]\n");
 			scanf("%d", &read_data);
+
+			if(read_data)
+			{
+				session_num=0;
+				printf("You have those connections (comId's) to send the confirm.\n");
+				for(found_index = 0; found_index < count_session;found_index++)
+				{
+					if((APP_SESSION_TEST[found_index].sessionState.msgType == (TRDP_MSG_MQ))
+						&& (APP_SESSION_TEST[found_index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+					{
+						printf("%d.ComId=%d  |  ", (session_num), APP_SESSION_TEST[found_index].comId);
+					}
+					session_num++;
+				}
+			}
+
 		}else
 		{
 			read_data = 0;

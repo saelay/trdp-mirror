@@ -78,6 +78,10 @@ void    trdp_MDqueueDelElement (
     MD_ELE_T    * *ppHead,
     MD_ELE_T    *pDelete);
 
+void    trdp_MDqueueAppLast (
+    MD_ELE_T    * *pHead,
+    MD_ELE_T    *pNew);
+
 void    trdp_MDqueueInsFirst (
     MD_ELE_T    * *ppHead,
     MD_ELE_T    *pNew);
@@ -100,7 +104,8 @@ TRDP_ERR_T  trdp_requestSocket(
     TRDP_SOCK_TYPE_T usage,
     TRDP_OPTION_T options,
 	BOOL					rcvOnly,
-    INT32                   * pIndex);
+    INT32                   * pIndex,
+    TRDP_IP_ADDR_T			cornerIp);
 
 TRDP_ERR_T trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
