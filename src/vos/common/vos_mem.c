@@ -421,6 +421,9 @@ EXT_DECL UINT8 *vos_memAlloc (
         }
         gMem.memCnt.allocCnt++;
 
+        /* Clear returned memory area to be compliant with malloc'ed version */
+        memset((UINT8 *) pBlock + sizeof(MEM_BLOCK_T), 0, blockSize);
+
         /* Return pointer to data area, not the memory block itself */
         return (UINT8 *) pBlock + sizeof(MEM_BLOCK_T);
     }
