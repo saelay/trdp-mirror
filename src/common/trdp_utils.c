@@ -290,6 +290,10 @@ void    trdp_queueAppLast (
     {
         return;
     }
+
+    /* Ensure this element is last! */    
+    pNew->pNext = NULL;
+
     if (*ppHead == NULL)
     {
         *ppHead = pNew;
@@ -320,6 +324,10 @@ void    trdp_MDqueueAppLast (
     {
         return;
     }
+
+    /* Ensure this element is last! */    
+    pNew->pNext = NULL;
+    
     if (*ppHead == NULL)
     {
         *ppHead = pNew;
