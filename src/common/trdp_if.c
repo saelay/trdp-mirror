@@ -839,8 +839,9 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         pNewElement->addr       = pubHandle;
         pNewElement->pktFlags   = pktFlags;
         pNewElement->privFlags  = TRDP_PRIV_NONE;
+        pNewElement->pullIpAddress = 0;
 
-        /*    Find a possible redundant entry in one of the other sessions and sync the sequence counter!
+        /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
             curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
             it will be incremented when sending...    */
 
