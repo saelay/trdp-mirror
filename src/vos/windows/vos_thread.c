@@ -421,7 +421,7 @@ EXT_DECL VOS_ERR_T vos_getTime (
     _ftime32_s( &curTime );
 
     pTime->tv_sec   = curTime.time;
-    pTime->tv_usec  = curTime.millitm * 10;
+    pTime->tv_usec  = curTime.millitm * 1000;
 
     return VOS_NO_ERR;
 }
