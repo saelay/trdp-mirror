@@ -494,21 +494,19 @@ EXT_DECL VOS_ERR_T vos_addTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pAdd)
 {
-    VOS_TIME_T lTime;
-
     if (pTime == NULL || pAdd == NULL)
     {
         return VOS_PARAM_ERR;
     }
 
-    lTime.tv_usec   = pTime->tv_usec + pAdd->tv_usec;
-    lTime.tv_sec    = pTime->tv_sec + pAdd->tv_sec;
-    if (!((lTime.tv_usec >= pTime->tv_usec) && (lTime.tv_usec >= pAdd->tv_usec)))
+    pTime->tv_sec += pAdd->tv_sec;
+    pTime->tv_usec += pAdd->tv_usec;
+    while (pTime->tv_usec >= 1000000)
     {
-        lTime.tv_sec++;
+        pTime->tv_sec++;
+        pTime->tv_usec -= 1000000;
     }
 
-    *pTime = lTime;
     return VOS_NO_ERR;
 }
 
