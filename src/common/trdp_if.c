@@ -1021,7 +1021,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     {
         if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
             (!timerisset(&appHandle->interval) ||
-             timercmp(&iterPD->timeToGo, &appHandle->interval, <=)))
+             !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
         {
             appHandle->interval = iterPD->timeToGo;
 
@@ -1045,7 +1045,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     {
         if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
             (!timerisset(&appHandle->interval) ||
-             timercmp(&iterPD->timeToGo, &appHandle->interval, <=)))
+             !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
         {
             appHandle->interval = iterPD->timeToGo;
         }
@@ -1068,7 +1068,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 			if(FD_ISSET(appHandle->iface[index].sock, &sMaster_set))
 			{
 				FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-			}else
+			}
+			else
 			{
 				FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
 			}
@@ -1081,7 +1082,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 
     /*    if lowest time is not zero   */
     if (timerisset(&appHandle->interval) &&
-        timercmp(&now, &appHandle->interval, <=))
+        !timercmp(&now, &appHandle->interval, >))
     {
         vos_subTime(&appHandle->interval, &now);
         *pInterval = appHandle->interval;
@@ -1164,7 +1165,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
     {
         if (timerisset(&iterPD->interval) &&
             timerisset(&iterPD->timeToGo) &&                    /*  Prevent timing out of PULLed data too early */
-            timercmp(&iterPD->timeToGo, &now, <=) &&            /*  late?   */
+            !timercmp(&iterPD->timeToGo, &now, >) &&            /*  late?   */
             !(iterPD->privFlags & TRDP_TIMED_OUT))              /*  and not already flagged ?   */
         {
             /*  Update some statistics  */
