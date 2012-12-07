@@ -201,8 +201,8 @@ TRDP_ERR_T  trdp_pdSendQueued (
          due to sent?
          or is it a PD Request or a requested packet (PULL) ?
          */
-        if ((timerisset(&iterPD->interval) &&
-             timercmp(&iterPD->timeToGo, &now, <=)) ||
+		if ((timerisset(&iterPD->interval) &&
+             !timercmp(&iterPD->timeToGo, &now, >)) ||
             iterPD->privFlags & TRDP_REQ_2B_SENT)       /*  Request for immediate sending   */
         {
             /*  Update the sequence counter and re-compute CRC    */
