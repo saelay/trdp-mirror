@@ -45,12 +45,13 @@
 #define APP_VERSION     "1.0"
 
 #define DATA_MAX        1000
-
 #define PD_COMID        999
 #define PD_COMID_CYCLE  5000000             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory	*/
 #define RESERVED_MEMORY  900000
+
+#define TRDP_NET_SELECT
 
 /* define the logging, and what we want to see */
 void win32_print_debug(
@@ -61,7 +62,7 @@ void win32_print_debug(
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-	return;
+	return; /* NO debugging messages at all */
 	switch(category) {
 	case VOS_LOG_WARNING:
 		printf("WARN\t %s %s", vos_getTimeStamp(), pMsgStr);
@@ -145,6 +146,7 @@ int main (int argc, char *argv[])
     TRDP_PD_CONFIG_T    pdConfiguration =
 	{ myPDcallBack, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+	TRDP_PROCESS_CONFIG_T   processConfig   = {"windowsclient", "", 0, 0, TRDP_OPTION_BLOCK};
 
 	/* needed for polling */
 	TRDP_PD_INFO_T  pdMsg;
@@ -192,7 +194,7 @@ int main (int argc, char *argv[])
 						0, 0,					/* use default IP address */
 						NULL,					/* no Marshalling */
 						&pdConfiguration, NULL, /* system defaults for PD and MD */
-						NULL					/* Pointer to process configuration */
+						&processConfig			/* Pointer to process configuration */
 						) != TRDP_NO_ERR)
 	{
 			printf("Initialization error\n");
@@ -254,7 +256,7 @@ int main (int argc, char *argv[])
         fd_set  rfds;
         INT32   noDesc;
         struct timeval  tv;
-        struct timeval  max_tv = {0, 100000};
+        struct timeval  max_tv = {8, 0};
 		int textLength;
 
         /*
@@ -262,7 +264,6 @@ int main (int argc, char *argv[])
            Additional descriptors can be added here.
          */
         FD_ZERO(&rfds);
-        /* FD_SET(pd_fd, &rfds); */
 
         /*
            Compute the min. timeout value for select.
@@ -289,7 +290,7 @@ int main (int argc, char *argv[])
            Select() will wait for ready descriptors or time out,
            what ever comes first.
          */
-        rv = select((int)noDesc, &rfds, NULL, NULL, &tv);
+        rv = select((int) noDesc, &rfds, NULL, NULL, &tv);
 
         /*
            Check for overdue PDs (sending and receiving)
@@ -300,16 +301,17 @@ int main (int argc, char *argv[])
            The callback function will be called from within the trdp_work
            function (in it's context and thread)!
          */
-        //tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+#ifdef TRDP_NET_SELECT
+        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+#else
 		tlc_process(appHandle, NULL, NULL);
-		tlp_get(appHandle, subHandle, pdConfiguration.flags, &pdMsg, buffer, &buffer_size );
-
-
+		tlp_get(appHandle, subHandle, pdConfiguration.flags, &pdMsg, buffer, &buffer_size );		
 #ifdef WIN32
 		/* convert the time to sleep into milliseconds */
 		Sleep((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 #else
 #error "This application was developped on windows for windows only"
+#endif
 #endif
 
         /* Handle other ready descriptors... */

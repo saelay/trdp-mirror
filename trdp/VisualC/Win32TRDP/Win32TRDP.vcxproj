@@ -75,7 +75,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\..\src\vos\api;..\..\src\api;..\..\src\vos\windows\pthread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\vos\api;..\..\src\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>$(ProjectDir)pthread/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -127,9 +127,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32TRDP.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
