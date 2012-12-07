@@ -74,6 +74,50 @@ int testTimeCompare()
 		return 1;
 
 
+	/* macro timercmp() */
+	/* there is a problem with >= and <= in windows */
+	time1.tv_sec = 1; time1.tv_usec = 1;
+	time2.tv_sec = 2; time2.tv_usec = 2;
+	if (timercmp(&time1, &time2, <=) != 1)
+		return 1;
+
+	time1.tv_sec = 1; time1.tv_usec = 1;
+	time2.tv_sec = 1; time2.tv_usec = 2;
+	if (timercmp(&time1, &time2, <=) != 1)
+		return 1;
+
+	time1.tv_sec = 2; time1.tv_usec = 999999;
+	time2.tv_sec = 3; time2.tv_usec = 0;
+	if (timercmp(&time1, &time2, <=) != 1)
+		return 1;
+
+	/* test for equal */
+	time1.tv_sec = 1; time1.tv_usec = 1;
+	time2.tv_sec = 1; time2.tv_usec = 1;
+	if (timercmp(&time1, &time2, <=) != 1)
+		return 1; 
+
+	time1.tv_sec = 2; time1.tv_usec = 2;
+	time2.tv_sec = 1; time2.tv_usec = 1;
+	if (timercmp(&time1, &time2, >=) != 1)
+		return 1;
+
+	time1.tv_sec = 1; time1.tv_usec = 2;
+	time2.tv_sec = 1; time2.tv_usec = 1;
+	if (timercmp(&time1, &time2, >=) != 1)
+		return 1;
+
+	time1.tv_sec = 2; time1.tv_usec = 0;
+	time2.tv_sec = 1; time2.tv_usec = 999999;
+	if (timercmp(&time1, &time2, >=) != 1)
+		return 1;
+
+	/* test for equal */
+	time1.tv_sec = 3; time1.tv_usec = 4;
+	time2.tv_sec = 3; time2.tv_usec = 4;
+	if (timercmp(&time1, &time2, >=) != 1)
+		return 1; 
+
 	return 0; /* all time tests succeeded */
 }
 
@@ -101,6 +145,14 @@ int testTimeAdd()
 	if (vos_addTime(&time, &add) != VOS_NO_ERR)
 		return 1;
 	if (time.tv_sec != 3 || time.tv_usec != 0)
+		return 1;
+
+	time.tv_sec =  2 /*sec */;	time.tv_usec = 999999 /* usec */;
+	add.tv_sec = 1 /*sec */;	add.tv_usec = 999999 /* usec */;
+
+	if (vos_addTime(&time, &add) != VOS_NO_ERR)
+		return 1;
+	if (time.tv_sec != 4 || time.tv_usec != 999998)
 		return 1;
 
 	return 0; /* all time tests succeeded */
