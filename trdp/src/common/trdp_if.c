@@ -1950,7 +1950,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
 								iterMD->stateEle = TRDP_MD_ELE_ST_TX_REQUEST_ARM;
 								iterMD->disableReplyRx = 0;
 								
-								//vos_printf(VOS_LOG_INFO, "DEBUG tlc_process(): MD send check, handle retrie.\n");
+								// Increment counter with each telegram
+								iterMD->frameHead.sequenceCounter = vos_htonl(vos_ntohl(iterMD->frameHead.sequenceCounter) + 1);
 							}
 							else
 							{
@@ -1958,8 +1959,6 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
 								// Reply timeout raised, stop Reply/ReplyQuery reception
 								iterMD->disableReplyRx = 1;
-								
-								//vos_printf(VOS_LOG_INFO, "DEBUG tlc_process(): MD send check, disable reply reception.\n");
 							}
 							
 							// Callback execution require to indicate this event
@@ -3231,7 +3230,11 @@ static TRDP_ERR_T tlm_common_send (
 
 
             /* Prepare header */
-            pNewElement->frameHead.sequenceCounter  = vos_htonl(0);
+			pNewElement->frameHead.sequenceCounter  = vos_htonl(0);
+			if(pendingMD_reply)
+				pNewElement->frameHead.sequenceCounter  = pendingMD_reply->frameHead.sequenceCounter;
+			if(pendingMD_confirm)
+				pNewElement->frameHead.sequenceCounter  = pendingMD_confirm->frameHead.sequenceCounter;
             pNewElement->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
             pNewElement->frameHead.msgType          = vos_htons(msgType);
             pNewElement->frameHead.comId            = vos_htonl(comId);

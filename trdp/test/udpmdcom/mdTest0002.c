@@ -722,7 +722,7 @@ static void queue_procricz()
 		{
 			case 2001:
 			{
-				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{
 					if(rx_test_fsm_state == 0)
 					{
@@ -739,7 +739,7 @@ static void queue_procricz()
 				}
 				else
 				{
-					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_PROT_REPLYTO_ERR, msg.Msg.resultCode);
 				}
 			}
 			break;
@@ -772,7 +772,7 @@ static void queue_procricz()
 
 			case 2003:
 			{
-				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{    
 					if(rx_test_fsm_state == 0)
 					{
@@ -846,7 +846,12 @@ static void queue_procricz()
 						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
+				{
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					fprintf(stderr, "%s: Listener timeout on not sent confirm.\n", strTstName);
+				}
+				else if(msg.Msg.resultCode == TRDP_REQ_CONFIRMTO_ERR)
 				{
 					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
 					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
@@ -854,13 +859,13 @@ static void queue_procricz()
 				else
 				{
 					// Error
-					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 5001:
-				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{
 					if(msg.Msg.numReplies == 0)
 					{
@@ -873,7 +878,7 @@ static void queue_procricz()
 				}
 				else
 				{
-					fprintf(stderr,"%s ERROR: resultCode expected %d, found %d.\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+					fprintf(stderr,"%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
 				}
 			break;
 			
@@ -907,7 +912,7 @@ static void queue_procricz()
 						}
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{
 					// 2) Timeout
 					if(rx_test_fsm_state != 1)
@@ -928,8 +933,8 @@ static void queue_procricz()
 				}
 				else
 				{
-					// Unexpected  result code
-					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d.\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+					// Unexpected result code
+					fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
@@ -978,13 +983,13 @@ static void queue_procricz()
 				else
 				{
 					// Unexpected  result code
-					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 6001:
-				if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{
 					if(rx_test_fsm_state != 0)
 					{
@@ -1037,7 +1042,7 @@ static void queue_procricz()
 						}
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{
 					// 2) Timeout
 					if(rx_test_fsm_state != 1)
@@ -1059,7 +1064,7 @@ static void queue_procricz()
 				else
 				{
 					// Unexpected  result code
-					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
@@ -1105,7 +1110,7 @@ static void queue_procricz()
 						}
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{
 					if(rx_test_fsm_state != 2)
 					{
@@ -1126,12 +1131,66 @@ static void queue_procricz()
 				else
 				{
 					// Unexpected  result code
-					fprintf(stderr, "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
 
 			case 7001:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					if(msg.Msg.msgType == TRDP_MSG_MQ)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						// No send confirm to check Confirm timeout in Dev2
+						fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+					}
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
+				{
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					if((rx_test_fsm_state == 2) && (msg.Msg.numConfirmTimeout == 1))
+					{
+						fprintf(stderr, "%s: Listener timeout on not sent confirm 1.\n", strTstName);
+					}
+					else if((rx_test_fsm_state == 3) && (msg.Msg.numConfirmTimeout == 2))
+					{
+						fprintf(stderr, "%s: Listener timeout on not sent confirm 2.\n", strTstName);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_REQ_CONFIRMTO_ERR)
+				{
+					if(rx_test_fsm_state != 4)
+					{
+						fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+						break;
+					}
+					
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+				}
+				else
+				{
+					// Error
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
 			case 8001:
 			{
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
@@ -1152,10 +1211,100 @@ static void queue_procricz()
 						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
 				{
 					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					if((rx_test_fsm_state == 2) && (msg.Msg.numConfirmTimeout == 1))
+					{
+						fprintf(stderr, "%s: Listener timeout on not sent confirm 1.\n", strTstName);
+					}
+					else if((rx_test_fsm_state == 3) && (msg.Msg.numConfirmTimeout == 2))
+					{
+						fprintf(stderr, "%s: Listener timeout on not sent confirm 2.\n", strTstName);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
+				{
+					if(rx_test_fsm_state != 4)
+					{
+						fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+						break;
+					}
+					
+					fprintf(stderr, "%s: Application timeout (due to unknown repliers).\n", strTstName);
+				}
+				else if(msg.Msg.resultCode == TRDP_REQ_CONFIRMTO_ERR)
+				{
+					if(rx_test_fsm_state != 5)
+					{
+						fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
+						break;
+					}
+					
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
 					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+				}
+				else
+				{
+					// Error
+					fprintf(stderr, "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
+				}
+			}
+			break;
+
+			case 7002:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					if(msg.Msg.msgType == TRDP_MSG_MQ)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+
+						// Send only one confirm
+						if(rx_test_fsm_state == 0)
+						{
+							// Send Confirm
+							testConfirmSend(msg);
+
+							// Send confirm to check Confirm timeout in Dev2
+							fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+						}
+					}
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
+				{
+					if(rx_test_fsm_state != 2)
+					{
+						fprintf(stderr, "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+						break;
+					}
+					
+					fprintf(stderr, "%s: Listener timeout on not sent confirm.\n", strTstName);
+				}
+				else if(msg.Msg.resultCode == TRDP_REQ_CONFIRMTO_ERR)
+				{
+					if(rx_test_fsm_state != 3)
+					{
+						fprintf(stderr, "%s ERROR: Application request confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+						break;
+					}
+					
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					fprintf(stderr, "%s: Application request timeout on not sent confirm.\n", strTstName);
 				}
 				else
 				{
@@ -1164,8 +1313,7 @@ static void queue_procricz()
 				}
 			}
 			break;
-
-			case 7002:
+			
 			case 8002:
 			{
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
@@ -1195,8 +1343,35 @@ static void queue_procricz()
 						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
 				{
+					if(rx_test_fsm_state != 2)
+					{
+						fprintf(stderr, "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+						break;
+					}
+					
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					fprintf(stderr, "%s: Listener timeout on not sent confirm.\n", strTstName);
+				}
+				else if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
+				{
+					if(rx_test_fsm_state != 3)
+					{
+						fprintf(stderr, "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+						break;
+					}
+					
+					fprintf(stderr, "%s: Application timeout (due to unknown repliers).\n", strTstName);
+				}
+				else if(msg.Msg.resultCode == TRDP_REQ_CONFIRMTO_ERR)
+				{
+					if(rx_test_fsm_state != 4)
+					{
+						fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
+						break;
+					}
+					
 					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
 					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
 				}
@@ -1209,6 +1384,38 @@ static void queue_procricz()
 			break;
 
 			case 7003:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					if(msg.Msg.msgType == TRDP_MSG_MQ)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+
+						// Send confirm
+						testConfirmSend(msg);
+
+						// Send confirm
+						fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+					}
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+					}
+				}
+				else
+				{
+					// Error
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+			
 			case 8003:
 			{
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
@@ -1234,10 +1441,15 @@ static void queue_procricz()
 						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_PROT_REPLYTO_ERR)
 				{
-					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+					if(rx_test_fsm_state != 2)
+					{
+						fprintf(stderr, "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
+						break;
+					}
+					
+					fprintf(stderr, "%s: Application timeout (due to unknown repliers).\n", strTstName);
 				}
 				else
 				{
@@ -1373,9 +1585,14 @@ static void queue_procricz()
 						fprintf(stderr, "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
 					}
 				}
+				else if(msg.Msg.resultCode == TRDP_PROT_CONFIRMTO_ERR)
+				{
+					// 
+					fprintf(stderr, "%s: MD Confirm reception timeout.\n", strTstName);
+				}
 				else
 				{
-					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
@@ -1408,7 +1625,7 @@ static void queue_procricz()
 						fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_PROT_CONFIRMTO_ERR)
 				{
 					if(msg.Msg.msgType == TRDP_MSG_MQ)
 					{
@@ -1424,7 +1641,7 @@ static void queue_procricz()
 				else
 				{
 					// Error
-					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
@@ -1603,7 +1820,7 @@ static void queue_procricz()
 						fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
 					}
 				}
-				else if(msg.Msg.resultCode == TRDP_TIMEOUT_ERR)
+				else if(msg.Msg.resultCode == TRDP_PROT_CONFIRMTO_ERR)
 				{
 					if(msg.Msg.msgType == TRDP_MSG_MQ)
 					{
@@ -1619,7 +1836,7 @@ static void queue_procricz()
 				else
 				{
 					// Error
-					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_TIMEOUT_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
@@ -1657,14 +1874,20 @@ static void queue_procricz()
 						//
 						fprintf(stderr, "%s: MD Confirm received\n", strTstName);
 					}
+					
 					else
 					{
 						fprintf(stderr, "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
 					}
 				}
+				else if(msg.Msg.resultCode == TRDP_PROT_CONFIRMTO_ERR)
+				{
+					// 
+					fprintf(stderr, "%s: MD Confirm reception timeout.\n", strTstName);
+				}
 				else
 				{
-					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+					fprintf(stderr, "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
 				}
 			}
 			break;
