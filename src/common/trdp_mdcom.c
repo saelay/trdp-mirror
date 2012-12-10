@@ -237,10 +237,6 @@ void    trdp_mdUpdate (
     UINT32  *hFCS   = &pPacket->frameHead.frameCheckSum;
     UINT32  *pFCS   = (UINT32 *)((UINT8 *)&pPacket->frameHead + pPacket->grossSize - 4);
 
-    /* increment counter with each telegram */
-    pPacket->frameHead.sequenceCounter =
-        vos_htonl(vos_ntohl(pPacket->frameHead.sequenceCounter) + 1);
-
     /* Calculate CRC for message head */
     myCRC = vos_crc32(myCRC,
                       (UINT8 *)&pPacket->frameHead,
