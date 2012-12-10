@@ -18,6 +18,8 @@
  *		to third parties without express authority is forbidden,
  *		FAR Systems spa, Italy, 2013.
  *
+ * $Id: mdTest0002.c 178 2012-11-28 09:56:41Z spachera $
+ *
  */
 
  /* check if the needed functionality is present */
@@ -55,7 +57,7 @@
 	((UINT32)((a) & 0xFF) << 24) | ((UINT32)((b) & 0xFF) << 16) | ((UINT32)((c) & 0xFF) << 8) | ((UINT32)((d) & 0xFF)) : \
 	((UINT32)((d) & 0xFF) << 24) | ((UINT32)((c) & 0xFF) << 16) | ((UINT32)((b) & 0xFF) << 8) | ((UINT32)((a) & 0xFF)))
 
-#define HEAP_MEMORY_SIZE (2*1024*1024)
+#define HEAP_MEMORY_SIZE (4*1024*1024)
 
 #ifndef EOK
 	#define EOK 0
@@ -151,9 +153,12 @@ cli_test cliTests[] =
 	{'d', "TEST-0013", "Multicast Request-Reply, unknown expected repliers, 0 reply.", 1, 6001, 151, 2, 0},
 	{'e', "TEST-0014", "Multicast Request-Reply, unknown expected repliers, 1 reply.", 1, 6002, 151, 2, 0},
 	{'f', "TEST-0015", "Multicast Request-Reply, unknown expected repliers, 2 reply.", 1, 6003, 151, 2, 0},
-	{'g', "TEST-0013", "Multicast Request-Reply-Confirm, 2 expected repliers, 0 confirm sent.", 1, 7001, 151, 2, 2},
-	{'i', "TEST-0014", "Multicast Request-Reply-Confirm, 2 expected repliers, 1 confirm sent.", 1, 7002, 151, 2, 2},
-	{'l', "TEST-0015", "Multicast Request-Reply-Confirm, 2 expected repliers, 2 confirm sent.", 1, 7003, 151, 2, 2}
+	{'g', "TEST-0016", "Multicast Request-Reply-Confirm, 2 expected repliers, 0 confirm sent.", 1, 7001, 151, 2, 2},
+	{'i', "TEST-0017", "Multicast Request-Reply-Confirm, 2 expected repliers, 1 confirm sent.", 1, 7002, 151, 2, 2},
+	{'l', "TEST-0018", "Multicast Request-Reply-Confirm, 2 expected repliers, 2 confirm sent.", 1, 7003, 151, 2, 2},
+	{'m', "TEST-0019", "Multicast Request-Reply-Confirm, 0 expected repliers, 0 confirm sent.", 1, 8001, 151, 2, 0},
+	{'n', "TEST-0020", "Multicast Request-Reply-Confirm, 0 expected repliers, 1 confirm sent.", 1, 8002, 151, 2, 0},
+	{'o', "TEST-0021", "Multicast Request-Reply-Confirm, 0 expected repliers, 2 confirm sent.", 1, 8003, 151, 2, 0}
 };
 
 
@@ -683,10 +688,14 @@ static void queue_procricz()
 		fprintf(stderr,"replyTimeout      = %d\n"   ,msg.Msg.replyTimeout);
 		fprintf(stderr,"destURI           = ");      print_uri(msg.Msg.destURI); fprintf(stderr,"\n");
 		fprintf(stderr,"srcURI            = ");      print_uri(msg.Msg.srcURI); fprintf(stderr,"\n");
-		fprintf(stderr,"noOfRepliers      = %d\n"   ,msg.Msg.noOfRepliers);
-		fprintf(stderr,"numReplies        = %d\n"   ,msg.Msg.numReplies);
 		fprintf(stderr,"numRetriesMax     = %d\n"   ,msg.Msg.numRetriesMax);
 		fprintf(stderr,"numRetries        = %d\n"   ,msg.Msg.numRetries);
+		fprintf(stderr,"noOfRepliers      = %d\n"   ,msg.Msg.noOfRepliers);
+		fprintf(stderr,"numReplies        = %d\n"   ,msg.Msg.numReplies);
+		fprintf(stderr,"disableReplyRx    = %d\n"   ,msg.Msg.disableReplyRx);
+		fprintf(stderr,"numRepliesQuery   = %d\n"   ,msg.Msg.numRepliesQuery);
+		fprintf(stderr,"numConfirmSent    = %d\n"   ,msg.Msg.numConfirmSent);
+		fprintf(stderr,"numConfirmTimeout = %d\n"   ,msg.Msg.numConfirmTimeout);
 		fprintf(stderr,"pUserRef          = %p\n"   ,msg.Msg.pUserRef);
 		fprintf(stderr,"resultCode        = %d\n"   ,msg.Msg.resultCode);
 		
@@ -840,7 +849,7 @@ static void queue_procricz()
 				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
 				{
 					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-					fprintf(stderr, "%s: Application timeout on not sended confirm.\n", strTstName);
+					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
 				}
 				else
 				{
@@ -1123,6 +1132,7 @@ static void queue_procricz()
 			break;
 
 			case 7001:
+			case 8001:
 			{
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
@@ -1145,7 +1155,89 @@ static void queue_procricz()
 				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
 				{
 					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-					fprintf(stderr, "%s: Application timeout on not sended confirm.\n", strTstName);
+					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+				}
+				else
+				{
+					// Error
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
+			case 7002:
+			case 8002:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					if(msg.Msg.msgType == TRDP_MSG_MQ)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+
+						// Send only one confirm
+						if(rx_test_fsm_state == 0)
+						{
+							// Send Confirm
+							testConfirmSend(msg);
+
+							// Send confirm to check Confirm timeout in Dev2
+							fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+						}
+					}
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
+				{
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+				}
+				else
+				{
+					// Error
+					fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APPTIMEOUT_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
+			case 7003:
+			case 8003:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					if(msg.Msg.msgType == TRDP_MSG_MQ)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+
+						// Send confirm
+						testConfirmSend(msg);
+
+						// Send confirm
+						fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+					}
+					else
+					{
+						// Error
+						fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+					}
+				}
+				else if(msg.Msg.resultCode == TRDP_APPTIMEOUT_ERR)
+				{
+					// Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
+					fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
 				}
 				else
 				{
@@ -1245,6 +1337,8 @@ static void queue_procricz()
 			case 3001:
 			case 7002:
 			case 7003:
+			case 8002:
+			case 8003:
 			{
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
@@ -1288,6 +1382,7 @@ static void queue_procricz()
 			
 			case 3002:
 			case 7001:
+			case 8001:
 			{
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
@@ -1482,7 +1577,7 @@ static void queue_procricz()
 			break;
 
 			case 7001:
-			case 7002:
+			case 8001:
 			{
 				if(msg.Msg.resultCode == TRDP_NO_ERR)
 				{
@@ -1529,6 +1624,51 @@ static void queue_procricz()
 			}
 			break;
 
+			case 7002:
+			case 7003:
+			case 8002:
+			case 8003:
+			{
+				if(msg.Msg.resultCode == TRDP_NO_ERR)
+				{
+					// Check type
+					if(msg.Msg.msgType == TRDP_MSG_MR)
+					{
+						// Get data
+						UINT8 *pPayload = &msg.pData[sizeof(MD_HEADER_T)];
+						TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
+						mdTestData->cnt = vos_ntohl(mdTestData->cnt);
+						
+						//
+						fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+						
+						// Send MD Reply
+						TRDP_MD_TEST_DS_T mdTestData1;    
+						testReplyQSendID++;
+						mdTestData1.cnt = vos_htonl(testReplyQSendID);
+						sprintf(mdTestData1.testId,"MD ReplyQ test");
+						
+						testReplyQuerySend(msg, mdTestData1);
+					
+						fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
+					}
+					else if(msg.Msg.msgType == TRDP_MSG_MC)
+					{
+						//
+						fprintf(stderr, "%s: MD Confirm received\n", strTstName);
+					}
+					else
+					{
+						fprintf(stderr, "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
+					}
+				}
+				else
+				{
+					fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+				}
+			}
+			break;
+
 			default:
 			{
 				fprintf(stderr, "%s ERROR: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
@@ -1568,9 +1708,16 @@ static void md_indication(
     printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
     printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
     printf("noOfReplies       = %d\n"   ,pMsg->noOfReplies);
+	printf("numReplies        = %d\n"   ,pMsg->numReplies);
+	printf("numRetriesMax     = %d\n"   ,pMsg->numRetriesMax);
+	printf("numRetries        = %d\n"   ,pMsg->numRetries);
+	printf("disableReplyRx    = %d\n"   ,pMsg->disableReplyRx);
+	printf("numRepliesQuery   = %d\n"   ,pMsg->numRepliesQuery);
+	printf("numConfirmSent    = %d\n"   ,pMsg->numConfirmSent);
+	printf("numConfirmTimeout = %d\n"   ,pMsg->numConfirmTimeout);
     printf("pUserRef          = %p\n"   ,pMsg->pUserRef);
     printf("resultCode        = %d\n"   ,pMsg->resultCode);
-    
+
     print_memory(pData,dataSize);
     
     #endif
@@ -1601,7 +1748,7 @@ static int test_initialize()
 	// Memory allocator config
 	mem_config.p    = NULL;
 	mem_config.size = HEAP_MEMORY_SIZE;
-		
+	
 	//	MD config
 	memset(&md_config,0,sizeof(md_config));
 	md_config.pfCbFunction = md_indication;
@@ -1906,16 +2053,30 @@ static const int test0014_lenv2 = 20006002; // Dev2 Listener, comID 6002 Multica
 static const int test0015_lenv1 = 10006003; // Dev1 Listener, comID 6003 Reply, unknown expected 2 received
 static const int test0015_lenv2 = 20006003; // Dev2 Listener, comID 6003 Multicast Request
 static const int test0015_lenv3 = 30006003; // Dev3 Listener, comID 6003 Multicast Request
-static const int test0016_lenv1 = 10007001; // Dev1 Listener, comID 7001 Reply, 2 expected 2 received, 0 confirm sent
+static const int test0016_lenv1a = 10007001; // Dev1 Listener, comID 7001 Reply, 2 expected 2 received, 0 confirm sent (listener 1)
+static const int test0016_lenv1b = 10017001; // Dev1 Listener, comID 7001 Reply, 2 expected 2 received, 0 confirm sent (listener 2)
 static const int test0016_lenv2 = 20007001; // Dev2 Listener, comID 7001 Multicast Request, Singlecast Confirm
 static const int test0016_lenv3 = 30007001; // Dev3 Listener, comID 7001 Multicast Request, Singlecast Confirm
-static const int test0017_lenv1 = 10007002; // Dev1 Listener, comID 7002 Reply, 2 expected 2 received
+static const int test0017_lenv1a = 10007002; // Dev1 Listener, comID 7002 Reply, 2 expected 2 received
+static const int test0017_lenv1b = 10017002; // Dev1 Listener, comID 7002 Reply, 2 expected 2 received
 static const int test0017_lenv2 = 20007002; // Dev2 Listener, comID 7002 Multicast Request, Singlecast Confirm
 static const int test0017_lenv3 = 30007002; // Dev3 Listener, comID 7002 Multicast Request, Singlecast Confirm
-static const int test0018_lenv1 = 10007003; // Dev1 Listener, comID 7003 Reply, 2 expected 2 received
+static const int test0018_lenv1a = 10007003; // Dev1 Listener, comID 7003 Reply, 2 expected 2 received
+static const int test0018_lenv1b = 10017003; // Dev1 Listener, comID 7003 Reply, 2 expected 2 received
 static const int test0018_lenv2 = 20007003; // Dev2 Listener, comID 7003 Multicast Request, Singlecast Confirm
 static const int test0018_lenv3 = 30007003; // Dev3 Listener, comID 7003 Multicast Request, Singlecast Confirm
-
+static const int test0019_lenv1a = 10008001; // Dev1 Listener, comID 8001 Reply, unknown expected 2 received, 0 confirm sent (listener 1)
+static const int test0019_lenv1b = 10018001; // Dev1 Listener, comID 8001 Reply, unknown expected 2 received, 0 confirm sent (listener 2)
+static const int test0019_lenv2 = 20008001; // Dev2 Listener, comID 8001 Multicast Request, Singlecast Confirm
+static const int test0019_lenv3 = 30008001; // Dev3 Listener, comID 8001 Multicast Request, Singlecast Confirm
+static const int test0020_lenv1a = 10008002; // Dev1 Listener, comID 8002 Reply, unknown expected 2 received
+static const int test0020_lenv1b = 10018002; // Dev1 Listener, comID 8002 Reply, unknownexpected 2 received
+static const int test0020_lenv2 = 20008002; // Dev2 Listener, comID 8002 Multicast Request, Singlecast Confirm
+static const int test0020_lenv3 = 30008002; // Dev3 Listener, comID 8002 Multicast Request, Singlecast Confirm
+static const int test0021_lenv1a = 10008003; // Dev1 Listener, comID 8003 Reply, unknown expected 2 received
+static const int test0021_lenv1b = 10018003; // Dev1 Listener, comID 8003 Reply, unknown expected 2 received
+static const int test0021_lenv2 = 20008003; // Dev2 Listener, comID 8003 Multicast Request, Singlecast Confirm
+static const int test0021_lenv3 = 30008003; // Dev3 Listener, comID 8003 Multicast Request, Singlecast Confirm
 
 // Init listeners
 static int testInitListeners()
@@ -1956,16 +2117,37 @@ static int testInitListeners()
 		// TEST-0015: listener for comID 6003 Reply 
 		testAddListener(&test0015_lenv1, 6003, 0, "");
 		
-		// TEST-0016: listener for comID 7001 Reply 
-		testAddListener(&test0016_lenv1, 7001, 0, "");
-		
-		// TEST-0017: listener for comID 7002 Reply 
-		testAddListener(&test0017_lenv1, 7002, 0, "");
-		
-		// TEST-0018: listener for comID 7003 Reply 
-		testAddListener(&test0018_lenv1, 7003, 0, "");
+		// TEST-0016: listener for comID 7001 Reply
+		// Application create 2 listener, because we like to handle a maximum o 2 ReplyQuery
+		testAddListener(&test0016_lenv1a, 7001, 0, "");
+		testAddListener(&test0016_lenv1b, 7001, 0, "");
+
+		// TEST-0017: listener for comID 7002 Reply
+		// Application create 2 listener, because we like to handle a maximum o 2 ReplyQuery
+		testAddListener(&test0017_lenv1a, 7002, 0, "");
+		testAddListener(&test0017_lenv1b, 7002, 0, "");
+
+		// TEST-0018: listener for comID 7003 Reply
+		// Application create 2 listener, because we like to handle a maximum o 2 ReplyQuery
+		testAddListener(&test0018_lenv1a, 7003, 0, "");
+		testAddListener(&test0018_lenv1b, 7003, 0, "");
+
+		// TEST-0019: listener for comID 8001 Reply
+		// Application create 2 listener, because we like to handle a maximum o 2 ReplyQuery
+		testAddListener(&test0019_lenv1a, 8001, 0, "");
+		testAddListener(&test0019_lenv1b, 8001, 0, "");
+
+		// TEST-0020: listener for comID 8002 Reply
+		// Application create 2 listener, because we like to handle a maximum o 2 ReplyQuery
+		testAddListener(&test0020_lenv1a, 8002, 0, "");
+		testAddListener(&test0020_lenv1b, 8002, 0, "");
+
+		// TEST-0021: listener for comID 8003 Reply
+		// Application create 2 listener, because we like to handle a maximum o 2 ReplyQuery
+		testAddListener(&test0021_lenv1a, 8003, 0, "");
+		testAddListener(&test0021_lenv1b, 8003, 0, ""); 
     }
-    
+
     // Dev2 mode listeners
     if(x_testmode == 2)
     {
@@ -2010,6 +2192,15 @@ static int testInitListeners()
 		
 		// TEST-0018: comID 7003 Multicast Request, Singlecast Confirm
 		testAddListener(&test0018_lenv2, 7003, x_ip4_mc_02, "");
+		
+		// TEST-0019: comID 8001 Multicast Request, Singlecast Confirm
+		testAddListener(&test0019_lenv2, 8001, x_ip4_mc_02, "");
+
+		// TEST-0020: comID 8002 Multicast Request, Singlecast Confirm
+		testAddListener(&test0020_lenv2, 8002, x_ip4_mc_02, "");
+		
+		// TEST-0021: comID 8003 Multicast Request, Singlecast Confirm
+		testAddListener(&test0021_lenv2, 8003, x_ip4_mc_02, "");
     }
 
     // Dev3 mode listeners
@@ -2032,6 +2223,15 @@ static int testInitListeners()
 		
 		// TEST-0018: comID 7003 Multicast Request, Singlecast Confirm
 		testAddListener(&test0018_lenv3, 7003, x_ip4_mc_02, "");
+		
+		// TEST-0019: comID 8001 Multicast Request, Singlecast Confirm
+		testAddListener(&test0019_lenv3, 8001, x_ip4_mc_02, "");
+
+		// TEST-0020: comID 8002 Multicast Request, Singlecast Confirm
+		testAddListener(&test0020_lenv3, 8002, x_ip4_mc_02, "");
+		
+		// TEST-0011: comID 8003 Multicast Request, Singlecast Confirm
+		testAddListener(&test0021_lenv3, 8003, x_ip4_mc_02, "");
     }
 
     // LOG

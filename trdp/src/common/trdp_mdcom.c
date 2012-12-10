@@ -595,6 +595,10 @@ TRDP_ERR_T  trdp_mdReceive (
 							theMessage.numReplies   = 0;
                             theMessage.numRetriesMax = 0;
 							theMessage.numRetries   = 0;
+							theMessage.disableReplyRx = 0;
+							theMessage.numRepliesQuery = 0;
+							theMessage.numConfirmSent = 0;
+							theMessage.numConfirmTimeout = 0;
                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                             theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -671,6 +675,14 @@ TRDP_ERR_T  trdp_mdReceive (
                                 continue;
                             }
 
+							// Found
+							break;
+						}
+
+						// Found
+						if(sender_ele != NULL)
+						{
+
                             /**--**/
 
                             /* the sender sent request and is waiting for reply */
@@ -679,6 +691,12 @@ TRDP_ERR_T  trdp_mdReceive (
                                 /* reply ok or reply error */
                                 if (l_msgType == TRDP_MSG_MP || l_msgType == TRDP_MSG_MQ || l_msgType == TRDP_MSG_ME)
                                 {
+									// Discard all MD Reply/ReplyQuery received after ReplyTimeout or expected replies received
+									if(sender_ele->disableReplyRx != 0)
+									{
+										break;
+									}
+
 									UINT32 removeMdSendElement = 0;
 								
 									// Info
@@ -690,49 +708,48 @@ TRDP_ERR_T  trdp_mdReceive (
 									// Increment number of received replies
 									sender_ele->numReplies++;
 
+									// If received reply with confirm request
+									if (l_msgType == TRDP_MSG_MQ)
+									{
+										// Increment number of ReplyQuery received, used to count nuomber of expected Confirm sent
+										sender_ele->numRepliesQuery++;
+										
+										/* ... move the listener waiting for sending confirm telegram */
+										iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
+
+										/* copy session id to listener */
+										memcpy(&iterMD->sessionID, &sender_ele->sessionID, 16);
+
+										/* forward timeout */
+										iterMD->timeToGo    = sender_ele->timeToGo;
+										iterMD->interval    = sender_ele->interval;
+
+										/* Copy other identification arams */
+										iterMD->u.listener.comId        = l_comId;
+										iterMD->u.listener.topoCount    = l_topoCount;
+										iterMD->u.listener.destIpAddr   = appHandle->pMDRcvEle->addr.srcIpAddr;
+										memcpy(iterMD->u.listener.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
+									}
+
 									// Handle multiple replies
 									if(sender_ele->noOfRepliers == 1)
 									{
-										// Handle single expected replies
-										
-										// If received reply with confirm request
-										// Handle only for single expected reply
-										if (l_msgType == TRDP_MSG_MQ)
-										{
-											/* ... move the listener waiting for sending confirm telegram */
-											iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
-
-											/* copy session id to listener */
-											memcpy(&iterMD->sessionID, &sender_ele->sessionID, 16);
-
-											/* forward timeout */
-											iterMD->timeToGo    = sender_ele->timeToGo;
-											iterMD->interval    = sender_ele->interval;
-
-											/* Copy other identification arams */
-											iterMD->u.listener.comId        = l_comId;
-											iterMD->u.listener.topoCount    = l_topoCount;
-											iterMD->u.listener.destIpAddr   = appHandle->pMDRcvEle->addr.srcIpAddr;
-											memcpy(iterMD->u.listener.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
-										}
-										
-										// Reply reception done, remove send element
-										removeMdSendElement = 1;
+										// Disable Reply/ReplyQuery reception, only one expected
+										sender_ele->disableReplyRx = 1;
 									}
 									else if(sender_ele->noOfRepliers > 1)
 									{
 										// Handle multiple known expected replies
-										
 										if(sender_ele->noOfRepliers == sender_ele->numReplies)
 										{
-											// Reply reception done, remove send element
-											removeMdSendElement = 1;
+											// Disable Reply/ReplyQuery reception because all expected are received
+											sender_ele->disableReplyRx = 1;
 										}
 									}
 									else
 									{
 										// Handle multiple unknown replies
-										// Send element removed by timeout because nomber of repliers is unknow
+										// Send element removed by timeout because number of repliers is unknow
 									}
 
                                     /* copy message to proper listener */
@@ -759,6 +776,10 @@ TRDP_ERR_T  trdp_mdReceive (
                                         theMessage.numReplies   = sender_ele->numReplies;
 										theMessage.numRetriesMax = sender_ele->numRetriesMax;
 										theMessage.numRetries   = sender_ele->numRetries;
+										theMessage.disableReplyRx = sender_ele->disableReplyRx;
+										theMessage.numRepliesQuery = sender_ele->numRepliesQuery;
+										theMessage.numConfirmSent = sender_ele->numConfirmSent;
+										theMessage.numConfirmTimeout = sender_ele->numConfirmTimeout;
                                         theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                         theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -840,17 +861,7 @@ TRDP_ERR_T  trdp_mdReceive (
 
 									}
 
-
-                                    // Handle send element
-									if(removeMdSendElement == 1)
-									{
-										/* Remove element from queue */
-										trdp_MDqueueDelElement(&appHandle->pMDSndQueue, sender_ele);
-
-										/* free element */
-										vos_memFree(sender_ele);
-									}
-
+									
                                     /* stop loop */
                                     break;
                                 }
@@ -887,6 +898,10 @@ TRDP_ERR_T  trdp_mdReceive (
                                         theMessage.numReplies   = 0;
 										theMessage.numRetriesMax = 0;
 										theMessage.numRetries   = 0;
+										theMessage.disableReplyRx = 0;
+										theMessage.numRepliesQuery = 0;
+										theMessage.numConfirmSent = 0;
+										theMessage.numConfirmTimeout = 0;
                                         theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                         theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -933,7 +948,6 @@ TRDP_ERR_T  trdp_mdReceive (
 									}
 
 
-
                                     /* Remove element from queue */
                                     trdp_MDqueueDelElement(&appHandle->pMDSndQueue, sender_ele);
 
@@ -948,11 +962,8 @@ TRDP_ERR_T  trdp_mdReceive (
                     }
                     break;
 
-                    default:
-                    {}
-                     break;
                 }
-
+				break;
             }
         }
     }

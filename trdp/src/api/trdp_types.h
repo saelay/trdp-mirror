@@ -190,8 +190,13 @@ typedef enum
     TRDP_WIRE_ERR           = -19,  /**<                                    */
     TRDP_TOPO_ERR           = -20,  /**< Invalid topo count                 */
     TRDP_COMID_ERR          = -21,  /**< Unknown ComId                      */
-    TRDP_STATE_ERR          = -22,  /**< Call in wrong state        */
-    TRDP_APPTIMEOUT_ERR     = -23,  /**< Application Timeout            */
+    TRDP_STATE_ERR          = -22,  /**< Call in wrong state        		*/
+    TRDP_APPTIMEOUT_ERR     = -23,  /**< Application Timeout            	*/
+	TRDP_APP_REPLYTO_ERR	= -24,  /**< Application Reply Sent Timeout     */
+	TRDP_APP_CONFIRMTO_ERR	= -25,  /**< Application Confirm Sent Timeout   */
+	TRDP_PROT_REPLYTO_ERR	= -26,  /**< Protocol Reply Timeout 			*/
+	TRDP_PROT_CONFIRMTO_ERR	= -27,  /**< Protocol Confirm Timeout			*/
+	TRDP_REQ_CONFIRMTO_ERR	= -28,  /**< Protocol Confirm Timeout (Request sender)  */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                  */
 } TRDP_ERR_T;
 
@@ -315,6 +320,10 @@ typedef struct
     UINT32              topoCount;    /**< received topocount                         */
     UINT32              numRetries;   /**< actual number of retries                    */
 	UINT32              numRetriesMax;/**< maximun number of retries for request to a know dev*/
+	UINT8				disableReplyRx;	/**< disable reply reception, for multicast use			*/
+	UINT32              numRepliesQuery;/**< number of ReplyQuery received, used to count nuomber of expected Confirm sent */
+	UINT32              numConfirmSent;	/**< number of Confirm sent								*/
+	UINT32				numConfirmTimeout; /**< number of Confirm Timeouts (incremented by listeners */
     UINT16              userStatus;   /**< error code, user stat                      */
     TRDP_REPLY_STATUS_T replyStatus;  /**< reply status                               */
     TRDP_UUID_T         sessionId;    /**< for response                               */
