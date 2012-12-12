@@ -4,7 +4,7 @@
  *
  * @brief           Socket functions
  *
- * @details	        OS abstraction of IP socket functions for UDP and TCP
+ * @details         OS abstraction of IP socket functions for UDP and TCP
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -459,16 +459,18 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             err = VOS_NO_ERR;
         }
 		
-        // Disable multicast loop back
-        UINT32 enMcLb = 0;
-        if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1)
+        /* Disable multicast loop back */
         {
-            vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_TTL failed\n");
-            err = VOS_SOCK_ERR;
-        }
-        else
-        {
-            err = (err == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
+            UINT32 enMcLb = 0;
+            if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1)
+            {
+                vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_TTL failed\n");
+                err = VOS_SOCK_ERR;
+            }
+            else
+            {
+                err = (err == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
+            }
         }
     }
     else
@@ -904,6 +906,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  *  @param[in]      sock            socket descriptor
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
+ *  @param[in]      blocking        blocking mode
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
@@ -914,7 +917,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
     INT32   *pSize,
-    BOOL blocking)
+    BOOL     blocking)
 {
     ssize_t rcvSize     = 0;
     size_t  bufferSize  = (size_t) *pSize;
@@ -933,7 +936,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             bufferSize  -= rcvSize;
             pBuffer     += rcvSize;
-            *pSize		+= rcvSize;
+            *pSize      += rcvSize;
         }
         
         if((rcvSize == -1) && (errno == EWOULDBLOCK) && (blocking == FALSE))

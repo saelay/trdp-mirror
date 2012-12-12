@@ -470,8 +470,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         vos_printf(VOS_LOG_INFO, "joining MC: %s\n",
                    inet_ntoa(mreq.imr_multiaddr));
 
-        if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq,
-                       sizeof(mreq)) == SOCKET_ERROR)
+        if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR)
         {
             vos_print(VOS_LOG_WARNING, "setsockopt IP_ADD_MEMBERSHIP failed\n");
             err = VOS_SOCK_ERR;
@@ -479,6 +478,22 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         else
         {
             err = VOS_NO_ERR;
+        }
+
+        /* Disable multicast loop back */
+        {
+            mreq.imr_multiaddr.s_addr   = 0;
+            mreq.imr_interface.s_addr   = 0;
+
+            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR)
+            {
+                vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_TTL failed\n");
+                err = VOS_SOCK_ERR;
+            }
+            else
+            {
+                err = (err == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
+            }
         }
     }
     else
@@ -909,22 +924,25 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  *	been received or the socket was closed or an error occured.
  *	If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
  *
- *  @param[in]      sock			socket descriptor
- *  @param[out]     pBuffer			pointer to applications data buffer
- *  @param[in,out]  pSize			pointer to the received data size
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_PARAM_ERR	sock descriptor unknown, parameter error
- *  @retval         VOS_IO_ERR		data could not be read
- *  @retval         VOS_NODATA_ERR	no data in non-blocking
+ *  @param[in]      sock            socket descriptor
+ *  @param[out]     pBuffer         pointer to applications data buffer
+ *  @param[in,out]  pSize           pointer to the received data size
+ *  @param[in]      blocking        blocking mode
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
+ *  @retval         VOS_IO_ERR      data could not be read
+ *  @retval         VOS_NODATA_ERR  no data in non-blocking
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize)
+    INT32   *pSize,
+    BOOL     blocking)
 {
     int rcvSize     = 0;
     int bufferSize  = (size_t) *pSize;
+    *pSize = 0;
 
     if (sock == INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
@@ -939,7 +957,14 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             bufferSize  -= rcvSize;
             pBuffer     += rcvSize;
+            *pSize      += rcvSize;
         }
+        
+        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (blocking == FALSE))
+        {
+        	return VOS_NO_ERR;
+        }
+
         if (rcvSize == 0)
         {
             return VOS_NODATA_ERR;
