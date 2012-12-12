@@ -98,9 +98,10 @@ typedef enum
 {
     TRDP_PRIV_NONE      = 0,
     TRDP_MC_JOINT       = 0x1,
-    TRDP_TIMED_OUT      = 0x2,              /**< if set, informed the user                              */
-    TRDP_REQ_2B_SENT    = 0x4,              /**< if set, the request needs to be sent                   */
-    TRDP_PULL_SUB       = 0x8               /**< if set, its a PULL subscription                        */
+    TRDP_TIMED_OUT      = 0x2,              /**< if set, inform the user                                */
+    TRDP_INVALID_DATA   = 0x4,              /**< if set, inform the user                                */
+    TRDP_REQ_2B_SENT    = 0x8,              /**< if set, the request needs to be sent                   */
+    TRDP_PULL_SUB       = 0x10              /**< if set, its a PULL subscription                        */
 } TRDP_PRIV_FLAGS_T;
 
 /** Socket usage    */
@@ -174,8 +175,8 @@ typedef struct
     INT32   replyStatus;                    /**< 0 = OK                                         */
     UINT8   sessionID[16];                  /**< UUID as a byte stream                          */
     UINT32  replyTimeout;                   /**< in us                                          */
-    UINT8   sourceURI[32];                  /**<    User part of URI                            */
-    UINT8   destinationURI[32];             /**<    User part of URI                            */
+    UINT8   sourceURI[32];                  /**< User part of URI                               */
+    UINT8   destinationURI[32];             /**< User part of URI                               */
     UINT32  frameCheckSum;                  /**< CRC32 of header                                */
 } GNU_PACKED MD_HEADER_T;
 
@@ -194,11 +195,12 @@ typedef struct
 typedef struct PD_ELE
 {
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                    */
-    TRDP_ADDRESSES_T     addr;                   /**< handle of publisher/subscriber                    */
+    TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                     */
     TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip   */
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter         */
     UINT32              numRxTx;                /**< Counter for received packets (statistics)          */
     UINT32              updPkts;                /**< Counter for updated packets (statistics)           */
+    UINT32              getPkts;                /**< Counter for read packets (statistics)              */
     TRDP_ERR_T          lastErr;                /**< Last error (timeout)                               */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                      */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                              */
