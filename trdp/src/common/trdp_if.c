@@ -1595,7 +1595,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
 					    	if(errv != TRDP_NO_ERR)
 						    {
-							    /* where is the error handling */
+							    /* where is the error handling ??? */
                             }
 						}
 					}
@@ -2630,8 +2630,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       = toBehavior;
                     newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef      = pUserRef;
-                    newPD->socketIdx    = index;
+                    newPD->userRef          = pUserRef;
+                    newPD->socketIdx        = index;
+                    newPD->privFlags       |= TRDP_INVALID_DATA;
 
                     if (timeout == 0)
                     {
@@ -2768,12 +2769,6 @@ EXT_DECL TRDP_ERR_T tlp_get (
     }
     else
     {
-        /*    Check the supplied buffer size    */
-        if (pElement->dataSize > *pDataSize)
-        {
-            return TRDP_PARAM_ERR;
-        }
-
         /*    Call the receive function if we are in non blocking mode    */
         if (!(appHandle->option & TRDP_OPTION_BLOCK))
         {
@@ -2784,7 +2779,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         vos_getTime(&now);
 
         /*    Check time out    */
-        if (timercmp(&pElement->timeToGo, &now, >))
+        if (timercmp(&pElement->timeToGo, &now, <))
         {
             /*    Packet is late    */
             if (appHandle->pdDefault.toBehavior == TRDP_TO_SET_TO_ZERO)
@@ -2803,11 +2798,11 @@ EXT_DECL TRDP_ERR_T tlp_get (
                              appHandle->marshall.pfCbUnmarshall,
                              appHandle->marshall.pRefCon,
                              pData,
-                             *pDataSize);
+                             pDataSize);
         }
         else
         {
-            ret = trdp_pdGet(pElement, NULL, NULL, pData, *pDataSize);
+            ret = trdp_pdGet(pElement, NULL, NULL, pData, pDataSize);
         }
     }
 

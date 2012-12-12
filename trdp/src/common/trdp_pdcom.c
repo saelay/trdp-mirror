@@ -115,9 +115,9 @@ TRDP_ERR_T trdp_pdPut (
     if (TRDP_NO_ERR == ret)
     {
         trdp_pdDataUpdate(pPacket);
+
         /*  Update some statistics  */
         pPacket->updPkts++;
-
     }
     return ret;
 }
@@ -156,22 +156,43 @@ TRDP_ERR_T trdp_pdGet (
     TRDP_UNMARSHALL_T   unmarshall,
     void                *refCon,
     const UINT8         *pData,
-    UINT32              dataSize)
+    UINT32              *pDataSize)
 {
-    if (pPacket == NULL || pData == NULL || dataSize == 0)
+    if (pPacket == NULL || pData == NULL )
     {
         return TRDP_PARAM_ERR;
     }
 
     /*  Update some statistics  */
-    pPacket->updPkts++;
+    pPacket->getPkts++;
+
+    if (pPacket->privFlags == TRDP_TIMED_OUT)
+    {
+        return TRDP_TIMEOUT_ERR;
+    }
+
+    if (pPacket->privFlags == TRDP_INVALID_DATA)
+    {
+        return TRDP_NODATA_ERR;
+    }
 
     if (unmarshall == NULL)
     {
-        memcpy(pPacket->pFrame->data, pData, dataSize);
-        return TRDP_NO_ERR;
+        if (*pDataSize >=  pPacket->dataSize)
+        {
+            *pDataSize =  pPacket->dataSize;
+            memcpy((void *)pData, pPacket->pFrame->data, *pDataSize);
+            return TRDP_NO_ERR;
+        }
+        else
+        {
+            return TRDP_PARAM_ERR;
+        }
     }
-    return unmarshall(refCon, pPacket->addr.comId, (UINT8 *)pData, pPacket->pFrame->data, &dataSize);
+    else
+    {
+        return unmarshall(refCon, pPacket->addr.comId, (UINT8 *)pData, pPacket->pFrame->data, pDataSize);
+    }
 }
 
 /******************************************************************************/
@@ -423,14 +444,14 @@ TRDP_ERR_T  trdp_pdReceive (
         informUser = memcmp(pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
 
         /*  Get the current time and compute the next time this packet should be received.  */
-
         vos_getTime(&pExistingElement->timeToGo);
         vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
 
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
-        pExistingElement->lastErr   = TRDP_NO_ERR;
+        pExistingElement->lastErr    = TRDP_NO_ERR;
         pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
+        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
 
         if (informUser)
         {

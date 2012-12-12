@@ -69,7 +69,7 @@ TRDP_ERR_T  trdp_pdGet (
     TRDP_UNMARSHALL_T   unmarshall,
     void                *refCon,
     const UINT8         *pData,
-    UINT32              dataSize);
+    UINT32              *pDataSize);
 
 TRDP_ERR_T trdp_pdSendQueued (
     TRDP_SESSION_PT appHandle);
