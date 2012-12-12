@@ -235,7 +235,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
                  (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
             {
                 /* We pass the error to the application, but we keep on going    */
-                err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD);
+                err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);
                 if (err == TRDP_NO_ERR)
                 {
                     appHandle->stats.pd.numSend++;
@@ -609,7 +609,8 @@ TRDP_ERR_T trdp_pdCheck (
  */
 TRDP_ERR_T  trdp_pdSend (
     INT32       pdSock,
-    PD_ELE_T    *pPacket)
+    PD_ELE_T    *pPacket,
+    UINT16      port)
 {
     VOS_ERR_T   err     = VOS_NO_ERR;
     UINT32      destIp  = pPacket->addr.destIpAddr;
@@ -628,7 +629,7 @@ TRDP_ERR_T  trdp_pdSend (
                           (UINT8 *)&pPacket->pFrame->frameHead,
                           pPacket->grossSize,
                           destIp,
-                          TRDP_PD_UDP_PORT);
+                          port);
 
     if (err != VOS_NO_ERR)
     {
