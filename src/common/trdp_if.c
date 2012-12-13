@@ -781,8 +781,10 @@ EXT_DECL TRDP_ERR_T tlp_publish (
              */
             if (dataSize == 0)
             {
-                /* dataSize = MAX_PD_DATA_SIZE; */
+                /* mark data as invalid, data will be set valid with tlp_put */
+                pNewElement->privFlags |= TRDP_INVALID_DATA;
             }
+
             pNewElement->dataSize   = dataSize;
             pNewElement->grossSize  = trdp_packetSizePD(dataSize);
 

@@ -114,6 +114,10 @@ TRDP_ERR_T trdp_pdPut (
 
     if (TRDP_NO_ERR == ret)
     {
+        /* set data valid */
+        pPacket->privFlags &= ~TRDP_INVALID_DATA;
+
+        /* Update PD buffer */
         trdp_pdDataUpdate(pPacket);
 
         /*  Update some statistics  */
@@ -171,7 +175,7 @@ TRDP_ERR_T trdp_pdGet (
         return TRDP_TIMEOUT_ERR;
     }
 
-    if (pPacket->privFlags == TRDP_INVALID_DATA)
+    if (pPacket->privFlags & TRDP_INVALID_DATA)
     {
         return TRDP_NODATA_ERR;
     }
@@ -226,19 +230,23 @@ TRDP_ERR_T  trdp_pdSendQueued (
              !timercmp(&iterPD->timeToGo, &now, >)) ||
             iterPD->privFlags & TRDP_REQ_2B_SENT)       /*  Request for immediate sending   */
         {
-            /*  Update the sequence counter and re-compute CRC    */
-            trdp_pdUpdate(iterPD);
-
-            /*    Send the packet if it is not redundant    */
-            if (iterPD->socketIdx != -1 &&
-                (!appHandle->beQuiet ||
-                 (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
+            /* send only if there are valid data */
+            if (!(iterPD->privFlags & TRDP_INVALID_DATA))
             {
-                /* We pass the error to the application, but we keep on going    */
-                err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);
-                if (err == TRDP_NO_ERR)
+                /*  Update the sequence counter and re-compute CRC    */
+                trdp_pdUpdate(iterPD);
+
+                /*    Send the packet if it is not redundant    */
+                if (iterPD->socketIdx != -1 &&
+                    (!appHandle->beQuiet ||
+                    (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
                 {
-                    appHandle->stats.pd.numSend++;
+                    /* We pass the error to the application, but we keep on going    */
+                    err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);
+                    if (err == TRDP_NO_ERR)
+                    {
+                        appHandle->stats.pd.numSend++;
+                    }
                 }
             }
 
@@ -451,6 +459,8 @@ TRDP_ERR_T  trdp_pdReceive (
         pExistingElement->numRxTx++;
         pExistingElement->lastErr    = TRDP_NO_ERR;
         pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
+
+        /* set the data valid */
         pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
 
         if (informUser)
