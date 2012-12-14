@@ -32,7 +32,6 @@
 #include "vos_thread.h"
 #include "vos_utils.h"
 #include "vos_sock.h"
-#include "test_server.h"
 
 // include also stuff, needed for windows:
 #ifdef WIN32
@@ -47,6 +46,8 @@
 #define DATA_MAX        1000
 #define PD_COMID        902
 #define PD_COMID_CYCLE  500000             /* in us (1000000 = 1 sec) */
+UINT8 gMyDataSet998[1400];
+
 
 /* We use dynamic memory	*/
 #define RESERVED_MEMORY  900000
@@ -102,7 +103,7 @@ void myPDcallBack (
     {
         case TRDP_NO_ERR:
             printf("> ComID %d received\n", pMsg->comId);
-			if (pData && pMsg->comId == PD_TEST_ECHO_UNI_COMID)
+			if (pData && pMsg->comId == 901)
             {
                 memcpy(&gMyDataSet998, pData,
                        ((sizeof(gMyDataSet998) <
