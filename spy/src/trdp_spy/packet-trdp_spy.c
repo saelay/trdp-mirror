@@ -76,7 +76,7 @@
  * Needed to set default values
  * @param dataset_level is set to 0 for the beginning
  */
-static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint8 flag_dataset, guint8 dataset_level);
+static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint32 length,guint8 flag_dataset, guint8 dataset_level);
 
 /* Forward declaration we need below */
 void proto_reg_handoff_trdp(void);
@@ -94,9 +94,11 @@ static int hf_trdp_spy_datasetlength = -1;    			/*uint16*/
 
 /*For All (user data)*/
 static int hf_trdp_spy_fcs_head = -1;							/*uint32*/
+static int hf_trdp_spy_fcs_head_calc = -1;							/*uint32*/
 static int hf_trdp_spy_data = -1;						/*dyanmic*/
 static int hf_trdp_spy_padding = -1;						/*uint16*/
 static int hf_trdp_spy_fcs_head_data = -1;					/*uint32*/
+static int hf_trdp_spy_userdata = -1;					/* userdata */
 
 /*needed only for PD messages*/
 static int hf_trdp_spy_subs = -1;						/*uint16*/
@@ -106,9 +108,11 @@ static int hf_trdp_spy_reply_comid = -1;					/*uint16*/   /*for MD-family only*/
 static int hf_trdp_spy_reply_ipaddress = -1; 				/*uint16*/
 
 static int hf_trdp_spy_fcs_body = -1;					/*uint8*/
+static int hf_trdp_spy_fcs_body_calc = -1;				/*uint8*/
 static int hf_trdp_spy_desturilen = -1;					/*uint8*/
 static int hf_trdp_spy_index = -1;						/*int16*/
 static int hf_trdp_spy_sequencenumber = -1;				/*uint16*/
+static int hf_trdp_spy_isPD = -1;				/* flag */
 
 /* needed only for MD messages*/
 static int hf_trdp_spy_replystatus = -1;	/*uint32*/
@@ -119,6 +123,7 @@ static int hf_trdp_spy_sessionid3 = -1;		/*uint32*/
 static int hf_trdp_spy_replytimeout = -1;	/*uint32*/
 static int hf_trdp_spy_sourceURI = -1;		/*string*/
 static int hf_trdp_spy_destinationURI = -1; /*string*/
+static int hf_trdp_spy_isMD 	= -1;				/* flag*/
 
 static gboolean preference_changed = FALSE;
 
@@ -240,6 +245,7 @@ static guint32 fcs32(const guint8 buf[], guint32 len, guint32 fcs)
  * @param tvb			dissected package
  * @param trdp_spy_tree	tree, where the information will be added as child
  * @param ref_fcs		name of the global dissect variable
+ * @param ref_fcs_calc		name of the global dissect variable, when the calculation failed
  * @param offset		the offset in the package where the (32bit) CRC is stored
  * @param data_start	start where the data begins, the CRC should be calculated from
  * @param data_end		end where the data stops, the CRC should be calculated from
@@ -247,9 +253,9 @@ static guint32 fcs32(const guint8 buf[], guint32 len, guint32 fcs)
  *
  * @return proto_item, that was appended
  */
-static proto_item* add_crc2tree(tvbuff_t *tvb, proto_tree *trdp_spy_tree, int ref_fcs, guint32 offset, guint32 data_start, guint32 data_end, const char* descr_text)
+static proto_item* add_crc2tree(tvbuff_t *tvb, proto_tree *trdp_spy_tree, int ref_fcs, int ref_fcs_calc, guint32 offset, guint32 data_start, guint32 data_end, const char* descr_text)
 {
-	guint32 calced_crc, package_crc;
+	guint32 calced_crc, package_crc, length;
 	guint8* pBuff;
 	proto_item *ti;
 
@@ -257,12 +263,14 @@ static proto_item* add_crc2tree(tvbuff_t *tvb, proto_tree *trdp_spy_tree, int re
 	if (data_start > data_end)
 		return NULL;
 
-	pBuff = g_malloc(data_end - data_start);
+	length = data_end - data_start;
+
+	pBuff = g_malloc(length);
 	if (pBuff == NULL) // big problem, could not allocate the needed memory
 		return NULL;
 
-	tvb_memcpy(tvb, pBuff, data_start, data_end - data_start);
-	calced_crc = g_ntohl(fcs32(pBuff, data_end - data_start,0xffffffff));
+	tvb_memcpy(tvb, pBuff, data_start, length);
+	calced_crc = g_ntohl(fcs32(pBuff, length,0xffffffff));
 
 	package_crc = tvb_get_ntohl(tvb, offset);
 
@@ -272,7 +280,7 @@ static proto_item* add_crc2tree(tvbuff_t *tvb, proto_tree *trdp_spy_tree, int re
 	}
 	else
 	{
-		ti = proto_tree_add_uint_format(trdp_spy_tree, ref_fcs, tvb, offset, 4, calced_crc, "%s CRC: 0x%04x [incorrect, should be 0x%04x]",
+		ti = proto_tree_add_uint_format(trdp_spy_tree, ref_fcs_calc, tvb, offset, 4, calced_crc, "%s CRC: 0x%04x [incorrect, should be 0x%04x]",
 			descr_text, package_crc, calced_crc);
 	}
 	g_free(pBuff);
@@ -330,9 +338,9 @@ static guint8 dissect_trdp_width(guint32 type)
  *
  * @return nothing
  */
-static void dissect_trdp_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset)
+static void dissect_trdp_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint32 length)
 {
-    dissect_trdp_generic_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, offset, 0, 0/* level of cascaded datasets*/);
+    dissect_trdp_generic_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, offset, length, 0, 0/* level of cascaded datasets*/);
 }
 
 
@@ -349,7 +357,7 @@ static void dissect_trdp_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trd
  *
  * @return the actual offset in the package
  */
-static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint8 flag_dataset, guint8 dataset_level)
+static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
 {
 	guint32 start_offset;
 	struct Dataset* pFound;
@@ -361,7 +369,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	guint32 array_id;
 	guint32 element_amount;
 	gdouble formated_value;
-    GSList *gActualNode;
+	GSList *gActualNode;
 
 	gint8 value8;
 	gint16 value16;
@@ -375,26 +383,28 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	gdouble real64;
 	gchar  *text;
 	GTimeVal time;
-
-	start_offset = offset;
+	
+	start_offset = offset; /* mark the beginning of the userdata in the package */
 
 	API_TRACE;
 
 	// set the local environment to a "minimum version", so the separator in numbers is always a dot.
 	setlocale(LC_ALL,"C");
 
-
+	// make the userdata accessable for wireshark
+	ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_userdata, tvb, offset, length, FALSE);
 
 	if (strcmp(gbl_trdpDictionary_1,"") == 0  )
 	{
-		proto_tree_add_text(trdp_spy_tree, tvb, offset, -1, "No Configuration available");
+		proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "No Configuration available");
 		/* Jump to the last 4 byte and check the crc */
 		value32u = tvb_length_remaining(tvb, offset);
-		PRNT(printf("The remaining is %d (startoffset=%d)\n", value32u, start_offset));
-		if (value32u > 4)
+		PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", value32u, start_offset, 
+				(value32u % 4)));
+		if (value32u > FCS_LENGTH && value32u >= length) /* check if there is space for the header */
 		{
-			offset += value32u - 4;
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, offset, start_offset, offset, "Body");
+			offset += length;
+			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u - FCS_LENGTH, start_offset, offset, "Body");
 		}
 		return;
 	}
@@ -408,7 +418,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 		if (ret != TRDP_PARSEBODY_OK)
 		{
-			proto_tree_add_text(trdp_spy_tree, tvb, offset, -1, "Configuration could not be parsed, code: %d", ret);
+			proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "Configuration could not be parsed, code: %d", ret);
 			PRNT(printf("Configuration could not be parsed, code: %d", ret));
 			return;
 		}
@@ -429,20 +439,20 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 		/* Jump to the last 4 byte and check the crc */
 		value32u = tvb_length_remaining(tvb, offset);
 		PRNT(printf("The remaining is %d (startoffset=%d)\n", value32u, start_offset));
-		if (value32u > 4)
+		if (value32u > FCS_LENGTH && value32u >= length)
 		{
-			offset += value32u - 4;
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, offset, start_offset, offset, "Body");
+			offset += length;
+			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u, start_offset, offset, "Body");
 		}
 		return;
 	}
 
-	ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, -1, "%s (dataset %d)", pFound->name, pFound->datasetId);
+	ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "%s (dataset %d)", pFound->name, pFound->datasetId);
 	trdp_spy_userdata = proto_item_add_subtree(ti, ett_trdp_spy_userdata);
 
 	if (pFound->listOfElements <= 0)
 	{
-		ti = proto_tree_add_text(trdp_spy_userdata, tvb, offset, -1, "Userdata should be empty.");
+		ti = proto_tree_add_text(trdp_spy_userdata, tvb, offset, length, "Userdata should be empty.");
 		return;
 	}
 
@@ -684,7 +694,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 			//FIXME check the dataset_level (maximum is 5!)
 
-			offset = dissect_trdp_generic_body(tvb, pinfo, userdata_actual, el->type, offset, 1, dataset_level + 1);
+			offset = dissect_trdp_generic_body(tvb, pinfo, userdata_actual, el->type, offset, length, 1, dataset_level + 1);
 			element_amount = 0;
 			array_id = 0;
 			break;
@@ -717,7 +727,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
                 gActualNode = g_slist_next(gActualNode);
                 array_id = 0;
             }
-		}
+	}
     }
 
     // When there is an dataset displayed, the FCS calculation is not necessary
@@ -750,7 +760,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	}
 	else
 	{
-		ti = add_crc2tree(tvb,trdp_spy_userdata, hf_trdp_spy_fcs_body, offset, start_offset, offset, "Body");
+	ti = add_crc2tree(tvb,trdp_spy_userdata, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, offset, start_offset, offset - value32u /* do NOT calculate the CRC over the padding */, "Body");
 	}
 
     PRNT(printf("##### Display ComId END found (level %d) #######\n", dataset_level));
@@ -775,6 +785,7 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 {
 	proto_item *ti;
 	proto_tree *trdp_spy_tree;
+	guint32 datasetlength;
 
 	ti = NULL;
 
@@ -792,6 +803,7 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_comid, tvb, 8, 4, FALSE);
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_topocount, tvb, 12, 4, FALSE);
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_datasetlength, tvb, 16, 4, FALSE);
+		datasetlength = tvb_get_ntohl(tvb, 16);
 	}
 
 	if (trdp_spy_string > 0)
@@ -803,8 +815,9 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_offset_address, tvb, 22, 2, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_comid, tvb, 24, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_ipaddress, tvb, 28, 4, FALSE);
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, 32, 0, 32, "Header");
-			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, 36);
+			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, 32, 0, 32, "Header");
+			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, 36, datasetlength);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isPD, tvb, 6, 2, FALSE);
 			break;
 		case 'M':
 			//MD specific stuff
@@ -816,8 +829,9 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_replytimeout, tvb, 40, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sourceURI, tvb, 44, 32, ENC_ASCII);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_destinationURI, tvb, 76, 32, ENC_ASCII);
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, 108, 0, 108, "Header");
-			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, 108 + FCS_LENGTH);
+			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, 108, 0, 108, "Header");
+			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, 108 + FCS_LENGTH, datasetlength);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isMD, tvb, 6, 2, FALSE);
 			break;
 		default:
 			ti = proto_tree_add_text(trdp_spy_tree, tvb, 20, -1, "Unkown package format");
@@ -993,7 +1007,7 @@ void proto_register_trdp(void)
     /* Setup list of header fields  See Section 1.6.1 for details*/
     static hf_register_info hf[] =
     {
-		// All the general fields for the header
+	// All the general fields for the header
         { &hf_trdp_spy_sequencecounter,      { "Sequence Counter",			"trdp.sequencecounter",		FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
         { &hf_trdp_spy_protocolversion,      { "Protocol Version",           "trdp.protocolversion",    FT_UINT16, BASE_HEX, NULL,   0x0, "", HFILL } },
         { &hf_trdp_spy_type,                 { "Type",                       "trdp.type",               FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
@@ -1001,28 +1015,34 @@ void proto_register_trdp(void)
         { &hf_trdp_spy_topocount,            { "Topo Count",                 "trdp.topocount",          FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
         { &hf_trdp_spy_datasetlength,        { "Dataset Length",             "trdp.datasetlength",      FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
 
-		// PD specific stuff
-		{ &hf_trdp_spy_subs,      { "Substitution Transmission",  "trdp.subs",    FT_UINT16, BASE_DEC, VALS(trdp_spy_subs_code_vals), 0x8000,     "", HFILL } },
+	// PD specific stuff
+	{ &hf_trdp_spy_subs,      { "Substitution Transmission",  "trdp.subs",    FT_UINT16, BASE_DEC, VALS(trdp_spy_subs_code_vals), 0x8000,     "", HFILL } },
         { &hf_trdp_spy_offset_address,      { "Offset address",              "trdp.offsetaddress",      FT_UINT16, BASE_DEC, NULL, 0x0,     "", HFILL } },
         { &hf_trdp_spy_reply_comid,         { "Requested ComId",             "trdp.replycomid",         FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } }, /* only used in a PD request */
         { &hf_trdp_spy_reply_ipaddress,     { "Reply IP address",            "trdp.replyip",			FT_IPv4, BASE_NONE, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_isPD,      	    { "Process data",  "trdp.pd",    FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
 
         //MD specific stuff
-		{ &hf_trdp_spy_replystatus,     { "Reply Status",  "trdp.replystatus",			FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
-		{ &hf_trdp_spy_sessionid0,		{ "Session Id UINT0",  "trdp.sessionid0",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-		{ &hf_trdp_spy_sessionid1,		{ "Session Id UINT1",  "trdp.sessionid1",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-		{ &hf_trdp_spy_sessionid2,		{ "Session Id UINT2",  "trdp.sessionid2",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-		{ &hf_trdp_spy_sessionid3,		{ "Session Id UINT3",  "trdp.sessionid3",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-		{ &hf_trdp_spy_replytimeout,    { "Reply timeout",  "trdp.replytimeout",		FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
-		{ &hf_trdp_spy_sourceURI,		{ "Source URI",  "trdp.sourceURI",				FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
-		{ &hf_trdp_spy_destinationURI,  { "Destination URI",  "trdp.destinationURI",    FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_replystatus,     { "Reply Status",  "trdp.replystatus",			FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_sessionid0,		{ "Session Id UINT0",  "trdp.sessionid0",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_sessionid1,		{ "Session Id UINT1",  "trdp.sessionid1",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_sessionid2,		{ "Session Id UINT2",  "trdp.sessionid2",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_sessionid3,		{ "Session Id UINT3",  "trdp.sessionid3",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_replytimeout,    { "Reply timeout",  "trdp.replytimeout",		FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_sourceURI,		{ "Source URI",  "trdp.sourceURI",				FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_destinationURI,  { "Destination URI",  "trdp.destinationURI",    FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_isMD,      	    { "Message data",  "trdp.md",    FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
+	
+	{ &hf_trdp_spy_userdata,             { "Dataset",                 "trdp.rawdata",		FT_BYTES, BASE_NONE, NULL, 0x0,     "", HFILL } },
 
-		// The checksum for the header
-		{ &hf_trdp_spy_fcs_head,             { "header FCS",                 "trdp.fcshead",		FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-        { &hf_trdp_spy_fcs_head_data,             { "FCS (DATA)",                 "trdp.fcsheaddata",            FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	// The checksum for the header (the trdp.fcsheadcalc is ony set, if the calculated FCS differs)
+	{ &hf_trdp_spy_fcs_head,             { "header FCS",                 "trdp.fcshead",		FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_fcs_head_calc,        { "calculated header FCS",      "trdp.fcsheadcalc",	FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_fcs_head_data,             { "FCS (DATA)",        "trdp.fcsheaddata",            FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
 
-		// The checksum for the body
-        { &hf_trdp_spy_fcs_body,            { "body FCS",          "trdp.fcsbody",					FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	// The checksum for the body (the trdp.fcsbodycalc is only set, if calcuated FCS differs)
+	{ &hf_trdp_spy_fcs_body,            { "body FCS",          "trdp.fcsbody",					FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+	{ &hf_trdp_spy_fcs_body_calc,       { "body FCS",          "trdp.fcsbodycalc",					FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
     };
     /* Setup protocol subtree array */
     static gint *ett[] = {
