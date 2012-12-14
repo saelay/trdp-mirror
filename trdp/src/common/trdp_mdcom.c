@@ -404,6 +404,8 @@ TRDP_ERR_T  trdp_mdReceive (
     INT32           sock)
 {
     VOS_ERR_T err = VOS_NO_ERR;
+	INT8 find_sock;
+    INT8 sock_position;
 
     /* get buffer at 1st call */
     if (appHandle->pMDRcvEle == NULL)
@@ -454,8 +456,6 @@ TRDP_ERR_T  trdp_mdReceive (
 		/* TCP cornerIp */
 		if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 		{
-			int find_sock;
-
 			for(find_sock=0;find_sock<VOS_MAX_SOCKET_CNT;find_sock++)
 			{
 				if((appHandle->iface[find_sock].sock > -1) && (appHandle->iface[find_sock].sock == sock))
@@ -622,9 +622,6 @@ TRDP_ERR_T  trdp_mdReceive (
 
 							    if(TRDP_MSG_MR == l_msgType)
 							    {
-
-								    int find_sock;
-								    int sock_position;
 
 								    for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
 								    {
@@ -804,9 +801,6 @@ TRDP_ERR_T  trdp_mdReceive (
 									    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 									    {
 
-										    UINT16 find_sock;
-										    UINT16 sock_position;
-
 										    for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
 										    {
 											    if((appHandle->iface[find_sock].sock == sock)
@@ -923,9 +917,6 @@ TRDP_ERR_T  trdp_mdReceive (
                                         /* TCP and Confirm message */
 									    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 									    {
-										    UINT16 find_sock;
-										    UINT16 sock_position;
-
 										    for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
 										    {
 											    if((appHandle->iface[find_sock].sock == sock)

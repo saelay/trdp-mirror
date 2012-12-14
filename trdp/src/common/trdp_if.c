@@ -1279,7 +1279,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
 						if (vos_sockSetOptions(appHandle->iface[iterMD->socketIdx].sock, &trdp_sock_opt) != VOS_NO_ERR)
 						{
-								//close(new_sd);
+							vos_printf(VOS_LOG_ERROR, "Error setting the socket options after msg has been sent\n");
+							continue;
 						}
 
 
@@ -1490,7 +1491,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
 					    if (vos_sockSetOptions(new_sd, &trdp_sock_opt) != VOS_NO_ERR)
 					    {
-							/* where is the error handling ??? */
+					    	vos_printf(VOS_LOG_ERROR, "Error setting the socket options to the accepted socket\n");
+					    	continue;
 					    }
                     }
 
