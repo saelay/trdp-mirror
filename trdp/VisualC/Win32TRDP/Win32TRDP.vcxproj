@@ -89,6 +89,7 @@
     <ClCompile Include="..\..\src\common\trdp_if.c">
       <DeploymentContent>false</DeploymentContent>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\trdp_mdcom.c" />
     <ClCompile Include="..\..\src\common\trdp_pdcom.c">
       <DeploymentContent>false</DeploymentContent>
     </ClCompile>
@@ -103,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\common\trdp_if.h" />
+    <ClInclude Include="..\..\src\common\trdp_mdcom.h" />
     <ClInclude Include="..\..\src\common\trdp_pdcom.h" />
     <ClInclude Include="..\..\src\common\trdp_private.h" />
     <ClInclude Include="..\..\src\common\trdp_stats.h" />
