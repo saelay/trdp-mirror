@@ -45,8 +45,8 @@
 #define APP_VERSION     "1.0"
 
 #define DATA_MAX        1000
-#define PD_COMID        999
-#define PD_COMID_CYCLE  5000000             /* in us (1000000 = 1 sec) */
+#define PD_COMID        902
+#define PD_COMID_CYCLE  500000             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory	*/
 #define RESERVED_MEMORY  900000
@@ -62,7 +62,6 @@ void win32_print_debug(
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-	return; /* NO debugging messages at all */
 	switch(category) {
 	case VOS_LOG_WARNING:
 		printf("WARN\t %s %s", vos_getTimeStamp(), pMsgStr);
@@ -103,7 +102,7 @@ void myPDcallBack (
     {
         case TRDP_NO_ERR:
             printf("> ComID %d received\n", pMsg->comId);
-            if (pData && pMsg->comId == PD_TEST_ECHO_UNI_COMID)
+			if (pData && pMsg->comId == PD_TEST_ECHO_UNI_COMID)
             {
                 memcpy(&gMyDataSet998, pData,
                        ((sizeof(gMyDataSet998) <
@@ -144,13 +143,13 @@ int main (int argc, char *argv[])
     UINT32              comId = PD_COMID;
     TRDP_ERR_T          err;
     TRDP_PD_CONFIG_T    pdConfiguration =
-	{ myPDcallBack, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
+	{ myPDcallBack, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
 	TRDP_PROCESS_CONFIG_T   processConfig   = {"windowsclient", "", 0, 0, TRDP_OPTION_BLOCK};
 
 	/* needed for polling */
 	TRDP_PD_INFO_T  pdMsg;
-	UINT8			buffer[2048];
+	UINT8			buffer[50];
 	UINT32			buffer_size = sizeof(buffer);
 
     int                 rv = 0;
@@ -160,15 +159,15 @@ int main (int argc, char *argv[])
 
     /*	Generate some data, that we want to send, when nothing was specified. */
     UINT8               *outputBuffer;
-    UINT8               exampleData[1000]   = "";
-    int                 outputBufferSize    = 100;
+    UINT8               exampleData[50]   = "";
+    int                 outputBufferSize    = 50;
     outputBuffer = exampleData;
 
     printf("%s: Version %s\t(%s - %s)\n",
             argv[0], APP_VERSION, __DATE__, __TIME__);
 
 	// set it to the IP address of the virtual machine
-	destIP = 0x0A0000C9; // 10.0.0.201
+    destIP = vos_dottedIP("10.0.0.201");
     
 	if (destIP == 0)
     {
@@ -206,9 +205,9 @@ int main (int argc, char *argv[])
     err = tlp_subscribe( appHandle,                 /*   our application identifier          */
                          &subHandle,                /*   our subscription identifier         */
                          NULL,
-                         998,						/*   ComID                               */
+                         901,						/*   ComID                               */
                          0,                         /*   topocount: local consist only       */
-                         destIP,					/*   Source IP filter                   */
+                         0,					        /*   Source IP filter                   */
                          0,
                          0,                         /*   Default destination	(or MC Group)   */
                          (PD_COMID_CYCLE) * 2,  	/*   Time out in us                      */
@@ -285,7 +284,8 @@ int main (int argc, char *argv[])
         {
             tv = max_tv;
         }
-
+        
+#ifdef TRDP_NET_SELECT
         /*
            Select() will wait for ready descriptors or time out,
            what ever comes first.
@@ -301,14 +301,19 @@ int main (int argc, char *argv[])
            The callback function will be called from within the trdp_work
            function (in it's context and thread)!
          */
-#ifdef TRDP_NET_SELECT
         tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 #else
 		tlc_process(appHandle, NULL, NULL);
-		tlp_get(appHandle, subHandle, pdConfiguration.flags, &pdMsg, buffer, &buffer_size );		
+        /* Fetch package and directly call the callback function */
+		err = tlp_get(appHandle, subHandle, pdConfiguration.flags, &pdMsg, buffer, &buffer_size );
+        if (err == TRDP_NO_ERR)
+        {
+            myPDcallBack(NULL, &pdMsg, buffer, buffer_size);
+        }
 #ifdef WIN32
 		/* convert the time to sleep into milliseconds */
-		Sleep((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+        UINT32 sleeptime = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+        Sleep(sleeptime);
 #else
 #error "This application was developped on windows for windows only"
 #endif

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP", "Win32TRDP.vcxproj", "{4E059552-03FF-4EE4-A868-C2253289E9F6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibraryTests", "LibraryTests\LibraryTests.vcxproj", "{8238C177-25D0-42E3-AD8E-3A4E61CFA079}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDPrun", "..\Win32TRDPrun\Win32TRDPrun.vcxproj", "{5621DA34-F2D0-43E1-9C8C-C1F270CBDACB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP", "Win32TRDP\Win32TRDP.vcxproj", "{4E059552-03FF-4EE4-A868-C2253289E9F6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibraryTests", "..\LibraryTests\LibraryTests.vcxproj", "{8238C177-25D0-42E3-AD8E-3A4E61CFA079}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDPrun", "Win32TRDPrun\Win32TRDPrun.vcxproj", "{5621DA34-F2D0-43E1-9C8C-C1F270CBDACB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
