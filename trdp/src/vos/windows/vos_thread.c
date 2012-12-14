@@ -56,7 +56,6 @@ pthread_t       threadHandle[VOS_MAX_THREAD_CNT];
 /***********************************************************************************************************************
  *  LOCALS
  */
-/* extern struct ifreq gIfr; */
 
 /**********************************************************************************************************************/
 /** Cyclic thread functions.
@@ -88,7 +87,8 @@ void cyclicThread (
 
 
 /**********************************************************************************************************************/
-/* Threads                                                                                                            */
+/* Threads 
+                                                                                                           */
 /**********************************************************************************************************************/
 
 
@@ -100,7 +100,8 @@ void cyclicThread (
  *  @retval         VOS_INIT_ERR           threading not supported
  */
 
-EXT_DECL VOS_ERR_T vos_threadInit (void)
+EXT_DECL VOS_ERR_T vos_threadInit (
+	void)
 {
     memset(threadHandle, 0, sizeof(threadHandle));
     vosTreadInitialised = TRUE;
@@ -960,5 +961,87 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
         return VOS_MUTEX_ERR;
     }
 
+    return VOS_NO_ERR;
+}
+
+
+
+/**********************************************************************************************************************/
+/** Create a semaphore.
+ *  Return a semaphore handle. Depending on the initial state the semaphore will be available on creation or not.
+ *
+ *  @param[out]     pSema           Pointer to semaphore handle
+ *  @param[in]      initialState    The initial state of the sempahore
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR    no semaphore available
+ */
+
+EXT_DECL VOS_ERR_T vos_semaCreate (
+    VOS_SEMA_T          *pSema,
+    VOS_SEMA_STATE_T    initialState)
+{
+	/*TODO generated method stub */
+    return VOS_NO_ERR;
+}
+
+
+/**********************************************************************************************************************/
+/** Delete a semaphore.
+ *  This will eventually release any processes waiting for the semaphore.
+ *
+ *  @param[in]      sema            semaphore handle
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_NOINIT_ERR  invalid handle
+ */
+
+EXT_DECL VOS_ERR_T vos_semaDelete (
+    VOS_SEMA_T sema)
+{
+	/*TODO generated method stub */
+    return VOS_NO_ERR;
+}
+
+
+/**********************************************************************************************************************/
+/** Take a semaphore.
+ *  Try to get (decrease) a semaphore.
+ *
+ *  @param[in]      sema            semaphore handle
+ *  @param[in]      timeout         Max. time in us to wait, 0 means forever
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_NOINIT_ERR  invalid handle
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR    could not get semaphore in time
+ */
+
+EXT_DECL VOS_ERR_T vos_semaTake (
+    VOS_SEMA_T  sema,
+    UINT32      timeout)
+{
+	/*TODO generated method stub */
+    return VOS_NO_ERR;
+}
+
+
+
+/**********************************************************************************************************************/
+/** Give a semaphore.
+ *  Release (increase) a semaphore.
+ *
+ *  @param[in]      sema            semaphore handle
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_NOINIT_ERR  invalid handle
+ *  @retval         VOS_SEM_ERR        could not release semaphore
+ */
+
+EXT_DECL VOS_ERR_T vos_semaGive (
+    VOS_SEMA_T sema)
+{
+	/*TODO generated method stub */
     return VOS_NO_ERR;
 }
