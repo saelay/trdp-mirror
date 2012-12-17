@@ -14,7 +14,7 @@
 #include <time.h>
 #endif
 
-#include "trdp_if_light.h"
+#include <trdp_if_light.h>
 
 // --- globals -----------------------------------------------------------------
 
