@@ -11,6 +11,8 @@
  *			First issues, derived from mdTest0001.c example application.
  *			Add basic multicast test for Notify, Request and Reply without confirmation
  *			Removed log 2 file support, no more needed
+ *		Version 0.1: s.pachera (FAR).
+ *			Add statistics counters support, use and example listener statistics print
  *
  * @author	Simone Pachera  (FAR Systems)
  *
@@ -2139,6 +2141,12 @@ static int test_main_proc()
     int run = 1;
     int cliCmd = 0;
 	int n = 0;
+	
+	// For statistics
+	int i = 0;
+	MD_ELE_T *iterMD;
+	char strIp[16];
+	char strIp1[16];
    
     while(run)
     {
@@ -2176,6 +2184,43 @@ static int test_main_proc()
 						break;
 					}
 				}
+			}
+			
+			// Statistics command handled here because appHandle is not in cli task memory window
+			if(cliCmd == 's')
+			{
+				printf("UDPMDcom statistics:\n");
+				printf("    defQos: %d\n", appHandle->stats.udpMd.defQos);
+				printf("    defTtl: %d\n", appHandle->stats.udpMd.defTtl);
+				printf("    defReplyTimeout: %d\n", appHandle->stats.udpMd.defReplyTimeout);
+				printf("    defConfirmTimeout: %d\n", appHandle->stats.udpMd.defConfirmTimeout);
+				
+				printf("    numList: %d\n", appHandle->stats.udpMd.numList);
+				printf("        [%3s] %6s %16s %16s %11s %11s\n", "n.", "comID", "dstIP", "mcastIP", "pktFlags", "privFlags");
+				i = 0;
+				for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+				{
+					// Listener
+					// [n] ComID
+					printf("        [%3d] %6d %16s %16s %11x %11x\n",
+						i,
+						iterMD->u.listener.comId,
+						miscIpToString(iterMD->u.listener.destIpAddr, strIp),
+						miscIpToString(iterMD->addr.mcGroup, strIp1),
+						iterMD->u.listener.pktFlags,
+						iterMD->privFlags);
+					i++;
+				}
+				
+				printf("    numRcv: %d\n", appHandle->stats.udpMd.numRcv);
+				printf("    numCrcErr: %d\n", appHandle->stats.udpMd.numCrcErr);
+				printf("    numProtErr: %d\n", appHandle->stats.udpMd.numProtErr);
+				printf("    numTopoErr: %d\n", appHandle->stats.udpMd.numTopoErr);
+				printf("    numNoListener: %d\n", appHandle->stats.udpMd.numNoListener);
+				printf("    numReplyTimeout: %d\n", appHandle->stats.udpMd.numReplyTimeout);
+				printf("    numConfirmTimeout: %d\n", appHandle->stats.udpMd.numConfirmTimeout);
+				printf("    numSend: %d\n", appHandle->stats.udpMd.numSend);
+				printf("\n");
 			}
 		}
 		else
@@ -2500,10 +2545,21 @@ void cliInteractiveCli()
 				// Help
 				printf("Commands:\n");
 				printf("h) Print menu comands\n");
+				printf("s) Print UDMPDcom statistics\n");
+				printf("   ---------------   \n");
 				for(n = 0; n < sizeof(cliTests)/sizeof(cli_test); n++)
 				{
 					printf("%c) %s [ComID %u] : %s\n", cliTests[n].cliChar, cliTests[n].tstName, cliTests[n].comID, cliTests[n].tstDescr);
 				}
+			}
+			else if(ch == 's')
+			{
+				// Statistics.
+				// Handled in communication task because TRDP appHandle variable is not shared between that and cli task
+
+				// Send command to trdp test task
+				int cliCmd = 's';
+				write(cliPipeFd[1], &cliCmd, sizeof(cliCmd));
 			}
 			else
 			{
@@ -2524,6 +2580,26 @@ void cliInteractiveCli()
 						break;
 					}
 				}
+			}
+		}
+		else
+		{
+			// Execute command
+			if(ch == 'h')
+			{
+				// Help
+				printf("Commands:\n");
+				printf("h) Print menu comands\n");
+				printf("s) Print UDMPDcom statistics\n");
+			}
+			else if(ch == 's')
+			{
+				// Statistics.
+				// Handled in communication task because TRDP appHandle variable is not shared between that and cli task
+
+				// Send command to trdp test task
+				int cliCmd = 's';
+				write(cliPipeFd[1], &cliCmd, sizeof(cliCmd));
 			}
 		}
     }

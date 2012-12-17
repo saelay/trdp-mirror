@@ -128,7 +128,7 @@ TRDP_ERR_T trdp_mdCheck (
         {
             appHandle->stats.udpMd.numCrcErr++;
             vos_printf(VOS_LOG_ERROR, "MDframe header crc error.\n");
-            err = TRDP_WIRE_ERR;
+            err = TRDP_CRC_ERR;
         }
 
         /* Data CRC */
@@ -145,7 +145,7 @@ TRDP_ERR_T trdp_mdCheck (
             {
                 appHandle->stats.udpMd.numCrcErr++;
                 vos_printf(VOS_LOG_ERROR, "MDframe data crc error.\n");
-                err = TRDP_WIRE_ERR;
+                err = TRDP_CRC_ERR;
             }
         }
     }
@@ -288,12 +288,7 @@ TRDP_ERR_T  trdp_mdSend (
         vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (Err: %d)\n", err);
         return TRDP_IO_ERR;
     }
-    /*
-     else
-    {
-        sMDComStats.headerOutPackets++;
-    }
-     */
+
     return TRDP_NO_ERR;
 }
 
@@ -372,14 +367,28 @@ TRDP_ERR_T  trdp_mdRecv (
     /* received data */
 
     err = trdp_mdCheck(appHandle, &pPacket->frameHead, size);
+	
+    /*  Update statistics   */
+    switch (err)
+    {
+        case TRDP_NO_ERR:
+            appHandle->stats.udpMd.numRcv++;;
+            break;
+        case TRDP_CRC_ERR:
+            appHandle->stats.udpMd.numCrcErr++;
+            return err;
+        case TRDP_WIRE_ERR:
+            appHandle->stats.udpMd.numProtErr++;
+            return err;
+        default:
+            return err;
+    }
+	
     if (err != VOS_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
         return TRDP_IO_ERR;
     }
-
-    /* packet is ok */
-    appHandle->stats.udpMd.numRcv++;
 
     return TRDP_NO_ERR;
 }
@@ -527,6 +536,9 @@ TRDP_ERR_T  trdp_mdReceive (
                            "MD data with wrong topocount ignored (comId %u, topo %u)\n",
                            l_comId,
                         l_topoCount);
+
+				appHandle->stats.udpMd.numTopoErr++;
+
                 return TRDP_TOPO_ERR;
             }
        
@@ -954,7 +966,13 @@ TRDP_ERR_T  trdp_mdReceive (
                     }
 				    break;
                 }
-           }
+			}
+		   
+			// Statistics
+			if(iterMD == NULL)
+			{
+				appHandle->stats.udpMd.numNoListener++;
+			}
         }
     }
 
