@@ -415,6 +415,46 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
     return VOS_NO_ERR;
 }
 
+
+/**********************************************************************************************************************/
+/** Get socket options.
+ *
+ *  @param[in]      sock            socket descriptor
+ *  @param[out]     blocking_mode   return value; TRUE blocking mode, FALSE non-blocking mode
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown
+ */
+
+EXT_DECL VOS_ERR_T vos_sockGetOptions (
+    INT32                   sock,
+    BOOL *blocking_mode)
+{
+
+	INT32 flags;
+
+	flags = fcntl(sock, F_GETFL);
+
+	if(flags < 0)
+	{
+		return VOS_SOCK_ERR;
+	}
+
+   if((flags & O_NONBLOCK) == O_NONBLOCK)
+   {
+	   //The socket is non-blocking
+	   *blocking_mode = FALSE;
+   }else
+   {
+	   //The socket is Blocking
+	   *blocking_mode = TRUE;
+   }
+
+   return VOS_NO_ERR;
+
+}
+
+
+
 /**********************************************************************************************************************/
 /** Join a multicast group.
  *  Note: Some targeted systems might not support this option.
@@ -916,16 +956,23 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize,
-    BOOL     blocking)
+    INT32   *pSize)
 {
+	BOOL blocking_mode = FALSE;
     ssize_t rcvSize     = 0;
     size_t  bufferSize  = (size_t) *pSize;
     *pSize = 0;
 
+
     if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
+    }
+
+
+    if(vos_sockGetOptions(sock, &blocking_mode) != VOS_NO_ERR)
+    {
+    	return VOS_SOCK_ERR;
     }
 
     /* Keep on sending until we got rid of all data or we received an unrecoverable error */
@@ -939,7 +986,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             *pSize      += rcvSize;
         }
         
-        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (blocking == FALSE))
+        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (blocking_mode == FALSE))
         {
         	return VOS_NO_ERR;
         }
