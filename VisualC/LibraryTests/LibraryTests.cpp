@@ -32,7 +32,6 @@
 #include "vos_thread.h"
 #include "vos_utils.h"
 #include "vos_sock.h"
-#include "test_server.h"
 
 // include also stuff, needed for windows:
 #ifdef WIN32
@@ -158,6 +157,44 @@ int testTimeAdd()
 	return 0; /* all time tests succeeded */
 }
 
+
+int testTimeSubs()
+{
+	VOS_TIME_T time = { 1 /*sec */, 4 /* usec */ };
+	VOS_TIME_T subs =  { 0 /*sec */, 2 /* usec */ };
+
+    if (vos_subTime(&time, &subs) != VOS_NO_ERR)
+		return 1;
+	if (time.tv_sec != 1 || time.tv_usec != 2)
+		return 1;
+
+	time.tv_sec =  1 /*sec */;	time.tv_usec = 3 /* usec */;
+	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 2 /* usec */;
+
+	if (vos_subTime(&time, &subs) != VOS_NO_ERR)
+		return 1;
+	if (time.tv_sec != 0 || time.tv_usec != 1)
+		return 1;
+
+	time.tv_sec =  3 /*sec */;	time.tv_usec = 1 /* usec */;
+	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 999998 /* usec */;
+
+	if (vos_subTime(&time, &subs) != VOS_NO_ERR)
+		return 1;
+	if (time.tv_sec != 1 || time.tv_usec != 3)
+		return 1;
+
+	time.tv_sec =  3 /*sec */;	time.tv_usec = 0 /* usec */;
+	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 999999 /* usec */;
+
+	if (vos_subTime(&time, &subs) != VOS_NO_ERR)
+		return 1;
+	if (time.tv_sec != 1 || time.tv_usec != 1)
+		return 1;
+
+	return 0; /* all time tests succeeded */
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	printf("Starting tests\n");
@@ -172,6 +209,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		printf("Time ADD test failed\n");
 		return 1;
 	}
+
+    if (testTimeSubs())
+	{
+		printf("Time SUBSCRACT test failed\n");
+		return 1;
+	}
+
 
 	printf("All tests successfully finished.\n");
 	return 0;
