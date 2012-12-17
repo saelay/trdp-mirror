@@ -317,7 +317,7 @@ TRDP_ERR_T  trdp_mdRecv (
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
 	{
 		/* Read Header */
-		err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &size, FALSE);
+		err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &size);
 		vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
 
 		if(err == VOS_NODATA_ERR)
@@ -338,7 +338,7 @@ TRDP_ERR_T  trdp_mdRecv (
 		    data_size = vos_ntohl(pPacket->frameHead.datasetLength) + sizeof(pPacket->frameHead.frameCheckSum);
 
 		    /*Read Data + CRC */
-		    err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->data[0], &data_size, FALSE);
+		    err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->data[0], &data_size);
 		    vos_printf(VOS_LOG_INFO, "Read Data + CRC Size = %d\n", data_size);
 
 		    size = size + data_size;

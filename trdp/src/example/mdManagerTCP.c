@@ -686,6 +686,8 @@ void myMDcallBack (
 				break;
 
         	case TRDP_APPTIMEOUT_ERR:
+        	case TRDP_APP_REPLYTO_ERR:
+        	case TRDP_APP_CONFIRMTO_ERR:
 
         		for(index=0; index < count_session; index++)
 				{

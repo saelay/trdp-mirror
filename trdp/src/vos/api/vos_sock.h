@@ -227,6 +227,20 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
     INT32                   sock,
     const VOS_SOCK_OPT_T    *pOptions);
 
+
+/**********************************************************************************************************************/
+/** Get socket options.
+ *
+ *  @param[in]      sock            socket descriptor
+ *  @param[out]     blocking_mode   return value; TRUE blocking mode, FALSE non-blocking mode
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown
+ */
+
+EXT_DECL VOS_ERR_T vos_sockGetOptions (
+    INT32                   sock,
+    BOOL *blocking_mode);
+
 /**********************************************************************************************************************/
 /** Join a multicast group.
  *  Note: Some target systems might not support this option.
@@ -438,8 +452,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize,
-    BOOL blocking
+    INT32   *pSize
     );
 
 #ifdef __cplusplus
