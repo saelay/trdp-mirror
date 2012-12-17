@@ -285,7 +285,7 @@ TRDP_ERR_T  trdp_mdSend (
 
     if (err != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "trdp_mdSend failed\n");
+        vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (Err: %d)\n", err);
         return TRDP_IO_ERR;
     }
     /*
