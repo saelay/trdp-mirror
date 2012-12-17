@@ -420,37 +420,42 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
 /** Get socket options.
  *
  *  @param[in]      sock            socket descriptor
- *  @param[out]     blocking_mode   return value; TRUE blocking mode, FALSE non-blocking mode
+ *  @param[out]     pOptions        return value
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown
  */
 
 EXT_DECL VOS_ERR_T vos_sockGetOptions (
-    INT32                   sock,
-    BOOL *blocking_mode)
+    INT32           sock,
+    VOS_SOCK_OPT_T *pOptions)
 {
+    INT32 flags;
 
-	INT32 flags;
+    if ((sock > 0) && (pOptions != NULL))
+    {
+        return VOS_PARAM_ERR;
+    }
+    else
+    {
+        flags = fcntl(sock, F_GETFL);
 
-	flags = fcntl(sock, F_GETFL);
+        if(flags < 0)
+        {
+            return VOS_SOCK_ERR;
+        }
 
-	if(flags < 0)
-	{
-		return VOS_SOCK_ERR;
-	}
+        if((flags & O_NONBLOCK) == O_NONBLOCK)
+        {
+            pOptions->nonBlocking = TRUE;
+        }
 
-   if((flags & O_NONBLOCK) == O_NONBLOCK)
-   {
-	   //The socket is non-blocking
-	   *blocking_mode = FALSE;
-   }else
-   {
-	   //The socket is Blocking
-	   *blocking_mode = TRUE;
-   }
+        pOptions->qos = 0;
+        pOptions->reuseAddrPort = FALSE;
+        pOptions->ttl = 0;
+        pOptions->ttl_multicast = 0;
+    }
 
-   return VOS_NO_ERR;
-
+    return VOS_NO_ERR;
 }
 
 
@@ -958,19 +963,18 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     UINT8   *pBuffer,
     INT32   *pSize)
 {
-	BOOL blocking_mode = FALSE;
-    ssize_t rcvSize     = 0;
-    size_t  bufferSize  = (size_t) *pSize;
-    *pSize = 0;
+    ssize_t         rcvSize     = 0;
+    size_t          bufferSize  = (size_t) *pSize;
+    VOS_SOCK_OPT_T  options     = {0};
 
+    *pSize = 0;
 
     if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
-
-
-    if(vos_sockGetOptions(sock, &blocking_mode) != VOS_NO_ERR)
+    
+    if(vos_sockGetOptions(sock, &options) != VOS_NO_ERR)
     {
     	return VOS_SOCK_ERR;
     }
@@ -986,7 +990,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             *pSize      += rcvSize;
         }
         
-        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (blocking_mode == FALSE))
+        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (options.nonBlocking == TRUE))
         {
         	return VOS_NO_ERR;
         }
@@ -995,7 +999,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             return VOS_NODATA_ERR;
         }
-
     }
     while (bufferSize || (rcvSize == -1 && errno == EAGAIN));
 
