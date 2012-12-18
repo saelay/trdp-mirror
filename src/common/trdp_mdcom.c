@@ -102,7 +102,6 @@ TRDP_ERR_T trdp_mdCheck (
     UINT32          packetSize)
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
-
     UINT32      l_datasetLength = vos_ntohl(pPacket->datasetLength);
 
     /* size shall be in MIN..MAX */
@@ -122,16 +121,19 @@ TRDP_ERR_T trdp_mdCheck (
     /*	crc check */
     if (TRDP_NO_ERR == err)
     {
-        /* Header CRC */
-        UINT32 crc32 = vos_crc32(0xffffffff, (UINT8 *)pPacket, sizeof(MD_HEADER_T));
-        if (crc32 != 0)
+        /* Check Header CRC */
         {
-            appHandle->stats.udpMd.numCrcErr++;
-            vos_printf(VOS_LOG_ERROR, "MDframe header crc error.\n");
-            err = TRDP_CRC_ERR;
+            UINT32 crc32 = vos_crc32(0xffffffff, (UINT8 *)pPacket, sizeof(MD_HEADER_T));
+
+            if (crc32 != 0)
+            {
+                appHandle->stats.udpMd.numCrcErr++;
+                vos_printf(VOS_LOG_ERROR, "MDframe header crc error.\n");
+                err = TRDP_CRC_ERR;
+           }
         }
 
-        /* Data CRC */
+        /* Check Data CRC */
         if(l_datasetLength > 0)
         {
             /* Check only if we have some data */
@@ -196,8 +198,8 @@ TRDP_ERR_T trdp_mdCheck (
     /* check telegram length */
     if (TRDP_NO_ERR == err)
     {
-        UINT32  l_datasetLength = vos_ntohl(pPacket->datasetLength);
         UINT32  expectedLength  = 0;
+
         if(l_datasetLength > 0)
         {
             expectedLength = sizeof(MD_HEADER_T) + l_datasetLength + 4;
@@ -305,45 +307,44 @@ TRDP_ERR_T  trdp_mdRecv (
     INT32           mdSock,
     MD_ELE_T        *pPacket)
 {
-    VOS_ERR_T   err = VOS_NO_ERR;
+    TRDP_ERR_T   err = TRDP_NO_ERR;
 
     UINT32 size = pPacket->grossSize;
 
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
-	{
-		/* Read Header */
-		err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &size);
-		vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
+    {
+        /* Read Header */
+        err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &size);
+        vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
 
-		if(err == VOS_NODATA_ERR)
-		{
-			vos_printf(VOS_LOG_INFO, "trdp_mdRecv - The socket = %u has been closed \n",mdSock);
-			return TRDP_NODATA_ERR;
-		}
-
-		if(err != VOS_NO_ERR)
-		{
-			vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed (Reading the msg Header) = %d\n",err);
-			return TRDP_IO_ERR;
-		}
-
-		/* Get the rest of the message length */
-		{
-            UINT32 data_size;
-		    data_size = vos_ntohl(pPacket->frameHead.datasetLength) + sizeof(pPacket->frameHead.frameCheckSum);
-
-		    /*Read Data + CRC */
-		    err = vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->data[0], &data_size);
-		    vos_printf(VOS_LOG_INFO, "Read Data + CRC Size = %d\n", data_size);
-
-		    size = size + data_size;
-		    //pPacket->grossSize = Size;
+        if(err == VOS_NODATA_ERR)
+        {
+            vos_printf(VOS_LOG_INFO, "trdp_mdRecv - The socket = %u has been closed \n",mdSock);
+            return TRDP_NODATA_ERR;
         }
 
-	}else
-    {
+        if(err != VOS_NO_ERR)
+        {
+            vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed (Reading the msg Header) = %d\n",err);
+            return TRDP_IO_ERR;
+        }
 
-        err = vos_sockReceiveUDP(
+        /* Get the rest of the message length */
+        {
+            UINT32 data_size;
+            data_size = vos_ntohl(pPacket->frameHead.datasetLength) + sizeof(pPacket->frameHead.frameCheckSum);
+
+            /*Read Data + CRC */
+            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->data[0], &data_size);
+            vos_printf(VOS_LOG_INFO, "Read Data + CRC Size = %d\n", data_size);
+
+            size = size + data_size;
+            //pPacket->grossSize = Size;
+        }
+    }
+    else
+    {
+        err = (TRDP_ERR_T) vos_sockReceiveUDP(
                 mdSock,
                 (UINT8 *)&pPacket->frameHead,
                 &size,
@@ -352,21 +353,20 @@ TRDP_ERR_T  trdp_mdRecv (
 
     pPacket->dataSize = size;
 
-    if (err == VOS_NODATA_ERR)
+    if (err == TRDP_NODATA_ERR)
     {
         /* no data -> rx timeout */
         return TRDP_TIMEOUT_ERR;
     }
 
-    if (err != VOS_NO_ERR)
+    if (err != TRDP_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
         return TRDP_IO_ERR;
     }
 
     /* received data */
-
-    err = trdp_mdCheck(appHandle, &pPacket->frameHead, size);
+        err = trdp_mdCheck(appHandle, &pPacket->frameHead, size);
 	
     /*  Update statistics   */
     switch (err)
@@ -384,13 +384,13 @@ TRDP_ERR_T  trdp_mdRecv (
             return err;
     }
 	
-    if (err != VOS_NO_ERR)
+    if (err != TRDP_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
         return TRDP_IO_ERR;
     }
 
-    return TRDP_NO_ERR;
+    return err;
 }
 
 /******************************************************************************/
