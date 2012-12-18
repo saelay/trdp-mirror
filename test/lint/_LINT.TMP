@@ -44,24 +44,10 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(318) : Error 131: syntax error in
         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(364) : Error 131: syntax error in
     call of macro 'vos_printf' at location line 364
-        _
-        err = trdp_mdCheck(appHandle, &pPacket->frameHead, size);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(369) : Warning 539: Did not
-    expect positive indentation from line 362
                                                              _
         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(389) : Error 131: syntax error in
     call of macro 'vos_printf' at location line 389
-             _
-	INT8 find_sock;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(416) : Warning 522: Expected void
-    type, assignment, increment or decrement
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(416) : Error 10: Expecting ';'
-         _
-    INT8 sock_position;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(417) : Warning 522: Expected void
-    type, assignment, increment or decrement
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(417) : Error 10: Expecting ';'
                                                         _
         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(431) : Warning 655: bit-wise
