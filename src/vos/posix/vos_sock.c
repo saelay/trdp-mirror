@@ -657,7 +657,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize,
+    UINT32  *pSize,
     UINT32  *pIPAddr)
 {
     struct sockaddr_in  srcAddr;
@@ -961,7 +961,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize)
+    UINT32  *pSize)
 {
     ssize_t         rcvSize     = 0;
     size_t          bufferSize  = (size_t) *pSize;

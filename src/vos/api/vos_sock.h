@@ -313,7 +313,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize,
+    UINT32  *pSize,
     UINT32  *pIPAddr);
 
 /**********************************************************************************************************************/
@@ -425,7 +425,6 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  *  @param[in]      sock               socket descriptor
  *  @param[out]     pBuffer            pointer to applications data buffer
  *  @param[in,out]  pSize              pointer to the received data size
- *  @param[in]      blocking           The recv is (blocking - non-blocking)
  *  @retval         VOS_NO_ERR         no error
  *  @retval         VOS_INIT_ERR       module not initialised
  *  @retval         VOS_NOINIT_ERR     invalid handle
@@ -438,7 +437,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize
+    UINT32  *pSize
     );
 
 #ifdef __cplusplus
