@@ -412,7 +412,7 @@ TRDP_ERR_T  trdp_mdReceive (
     TRDP_SESSION_PT appHandle,
     INT32           sock)
 {
-    VOS_ERR_T err = VOS_NO_ERR;
+    TRDP_ERR_T err = TRDP_NO_ERR;
 	INT8 find_sock;
     INT8 sock_position;
 
@@ -428,16 +428,17 @@ TRDP_ERR_T  trdp_mdReceive (
 
         memset(appHandle->pMDRcvEle, 0, sizeof(MD_ELE_T));
 
-		if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-		{
-			/* Received telegram size = telegram header + data(fixed to 32) + CRC
-			 * TODO The data size should be got from the header->datasetLength (to be dinamic),
-			 * and then call to read() function until all the data is read. */
-			appHandle->pMDRcvEle->grossSize = sizeof(appHandle->pMDRcvEle->frameHead);
-		}else
-		{
-			appHandle->pMDRcvEle->grossSize = TRDP_MAX_MD_PACKET_SIZE;
-		}
+        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+        {
+            /* Received telegram size = telegram header + data(fixed to 32) + CRC
+            * TODO The data size should be got from the header->datasetLength (to be dinamic),
+            * and then call to read() function until all the data is read. */
+            appHandle->pMDRcvEle->grossSize = sizeof(appHandle->pMDRcvEle->frameHead);
+        }
+        else
+        {
+            appHandle->pMDRcvEle->grossSize = TRDP_MAX_MD_PACKET_SIZE;
+        }
      
         appHandle->pMDRcvEle->pktFlags  = appHandle->mdDefault.flags;
     }
@@ -460,27 +461,21 @@ TRDP_ERR_T  trdp_mdReceive (
                    appHandle->pMDRcvEle->dataSize);
 
         /* Display incoming header */
-
-
-		/* TCP cornerIp */
-		if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-		{
-			for(find_sock=0;find_sock<VOS_MAX_SOCKET_CNT;find_sock++)
-			{
-				if((appHandle->iface[find_sock].sock > -1) && (appHandle->iface[find_sock].sock == sock))
-				{
-					break;
-				}
-			}
-			
-
-			appHandle->pMDRcvEle->addr.srcIpAddr = appHandle->iface[find_sock].tcpParams.cornerIp;
-
-		}
-
-
+        /* TCP cornerIp */
+        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
         {
             int i;
+
+            for(find_sock=0;find_sock<VOS_MAX_SOCKET_CNT;find_sock++)
+            {
+                if((appHandle->iface[find_sock].sock > -1) && (appHandle->iface[find_sock].sock == sock))
+                {
+                    break;
+                }
+            }
+
+            appHandle->pMDRcvEle->addr.srcIpAddr = appHandle->iface[find_sock].tcpParams.cornerIp;
+
             printf("***** from **** : %08X\n", appHandle->pMDRcvEle->addr.srcIpAddr);
             printf("sequenceCounter = %d\n", vos_ntohl(pH->sequenceCounter));
             printf("protocolVersion = %d\n", vos_ntohs(pH->protocolVersion));
@@ -535,9 +530,9 @@ TRDP_ERR_T  trdp_mdReceive (
                 vos_printf(VOS_LOG_INFO,
                            "MD data with wrong topocount ignored (comId %u, topo %u)\n",
                            l_comId,
-                        l_topoCount);
+                           l_topoCount);
 
-				appHandle->stats.udpMd.numTopoErr++;
+                appHandle->stats.udpMd.numTopoErr++;
 
                 return TRDP_TOPO_ERR;
             }
@@ -612,51 +607,48 @@ TRDP_ERR_T  trdp_mdReceive (
                                 theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                 theMessage.resultCode   = TRDP_NO_ERR;
 
-
-							    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                                {
+                                    appHandle->mdDefault.pfCbFunction(
+                                        appHandle->mdDefault.pRefCon,
+                                        &theMessage,
+                                        (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
+                                }
+                                else
 							    {
-								    appHandle->mdDefault.pfCbFunction(
-									    appHandle->mdDefault.pRefCon,
-									    &theMessage,
-									    (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
-							    }else
-							    {
-								    appHandle->mdDefault.pfCbFunction(
-									    appHandle->mdDefault.pRefCon,
-									    &theMessage,
-									    (UINT8 *)pH, lF);
-							    }
+                                    appHandle->mdDefault.pfCbFunction(
+                                        appHandle->mdDefault.pRefCon,
+                                        &theMessage,
+                                        (UINT8 *)pH, lF);
+                                }
                             }
 
                             /* TCP and Notify message */
-						    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-						    {
+                            if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                            {
+                                if(TRDP_MSG_MR == l_msgType)
+                                {
+                                    for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+                                    {
+                                        if((appHandle->iface[find_sock].sock == sock)
+                                            && (appHandle->iface[find_sock].sock != -1)
+                                            && (appHandle->iface[find_sock].rcvOnly == 1))
+                                        {
+                                            sock_position = find_sock;
+                                            break;
+                                        }
+                                    }
 
-							    if(TRDP_MSG_MR == l_msgType)
-							    {
+                                    appHandle->iface[sock_position].usage++;
+                                    vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage incremented to (Num = %d)\n",
+                                        appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
 
-								    for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
-								    {
-									    if((appHandle->iface[find_sock].sock == sock)
-											    && (appHandle->iface[find_sock].sock != -1)
-											    && (appHandle->iface[find_sock].rcvOnly == 1))
-									    {
-										    sock_position = find_sock;
-										    break;
-									    }
-								    }
-
-								    appHandle->iface[sock_position].usage++;
-								    vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage incremented to (Num = %d)\n",
-										    appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
-
-								    /* Save the socket position in the listener */
-								    iterMD->socketIdx = sock_position;
-								    vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
-									    iterMD->socketIdx);
-							    }
-
-						    }
+                                    /* Save the socket position in the listener */
+                                    iterMD->socketIdx = sock_position;
+                                    vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
+                                        iterMD->socketIdx);
+                                }
+                            }
                         }
                         break;
 
@@ -682,83 +674,80 @@ TRDP_ERR_T  trdp_mdReceive (
                                     continue;
                                 }
 
-							    // Found
-							    break;
-						    }
+							    /* Found */
+                                break;
+                            }
 
-						    // Found
-						    if(sender_ele != NULL)
-						    {
-
+                            /* Found */
+                            if(sender_ele != NULL)
+                            {
                                 /**--**/
-
                                 /* the sender sent request and is waiting for reply */
                                 if (sender_ele->stateEle == TRDP_MD_ELE_ST_TX_REQUEST_W4Y)
                                 {
                                     /* reply ok or reply error */
                                     if (l_msgType == TRDP_MSG_MP || l_msgType == TRDP_MSG_MQ || l_msgType == TRDP_MSG_ME)
                                     {
-									    UINT32 removeMdSendElement = 0;
+                                        UINT32 removeMdSendElement = 0;
 
-									    // Discard all MD Reply/ReplyQuery received after ReplyTimeout or expected replies received
-									    if(sender_ele->disableReplyRx != 0)
-									    {
-										    break;
-									    }
+									    /* Discard all MD Reply/ReplyQuery received after ReplyTimeout or expected replies received */
+                                        if(sender_ele->disableReplyRx != 0)
+                                        {
+                                            break;
+                                        }
 
-								
-									    // Info
+                                        /* Info */
                                         vos_printf(VOS_LOG_INFO,
-                                                   "MD RX/TX match (comId %u, topo %u)\n",
-                                                   l_comId,
-                                                   l_topoCount);
+                                                    "MD RX/TX match (comId %u, topo %u)\n",
+                                                    l_comId,
+                                                    l_topoCount);
 
-									    // Increment number of received replies
-									    sender_ele->numReplies++;
+                                        /* Increment number of received replies */
+                                        sender_ele->numReplies++;
 
-									    // If received reply with confirm request
-									    if (l_msgType == TRDP_MSG_MQ)
-									    {
-										    // Increment number of ReplyQuery received, used to count nuomber of expected Confirm sent
-										    sender_ele->numRepliesQuery++;
+                                        /* If received reply with confirm request */
+                                        if (l_msgType == TRDP_MSG_MQ)
+                                        {
+                                            /* Increment number of ReplyQuery received, used to count nuomber of expected Confirm sent */
+                                            sender_ele->numRepliesQuery++;
 										
-										    /* ... move the listener waiting for sending confirm telegram */
-										    iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
+                                            /* ... move the listener waiting for sending confirm telegram */
+                                            iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
 
-										    /* copy session id to listener */
-										    memcpy(&iterMD->sessionID, &sender_ele->sessionID, 16);
+                                            /* copy session id to listener */
+                                            memcpy(&iterMD->sessionID, &sender_ele->sessionID, 16);
 
-										    /* forward timeout */
-										    iterMD->timeToGo    = sender_ele->timeToGo;
-										    iterMD->interval    = sender_ele->interval;
+                                            /* forward timeout */
+                                            iterMD->timeToGo    = sender_ele->timeToGo;
+                                            iterMD->interval    = sender_ele->interval;
 
-										    /* Copy other identification arams */
-										    iterMD->u.listener.comId        = l_comId;
-										    iterMD->u.listener.topoCount    = l_topoCount;
-										    iterMD->u.listener.destIpAddr   = appHandle->pMDRcvEle->addr.srcIpAddr;
-										    memcpy(iterMD->u.listener.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
-									    }
+                                            /* Copy other identification arams */
+                                            iterMD->u.listener.comId        = l_comId;
+                                            iterMD->u.listener.topoCount    = l_topoCount;
+                                            iterMD->u.listener.destIpAddr   = appHandle->pMDRcvEle->addr.srcIpAddr;
+                                            memcpy(iterMD->u.listener.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
+                                        }
 
-									    // Handle multiple replies
-									    if(sender_ele->noOfRepliers == 1)
-									    {
-										    // Disable Reply/ReplyQuery reception, only one expected
-										    sender_ele->disableReplyRx = 1;
-									    }
-									    else if(sender_ele->noOfRepliers > 1)
-									    {
-										    // Handle multiple known expected replies
-										    if(sender_ele->noOfRepliers == sender_ele->numReplies)
-										    {
-											    // Disable Reply/ReplyQuery reception because all expected are received
-											    sender_ele->disableReplyRx = 1;
-										    }
-									    }
-									    else
-									    {
-										    // Handle multiple unknown replies
-										    // Send element removed by timeout because number of repliers is unknow
-									    }
+                                        /* Handle multiple replies */
+                                        if(sender_ele->noOfRepliers == 1)
+                                        {
+                                            /* Disable Reply/ReplyQuery reception, only one expected */
+                                            sender_ele->disableReplyRx = 1;
+                                        }
+                                        else if(sender_ele->noOfRepliers > 1)
+                                        {
+                                            /* Handle multiple known expected replies */
+                                            if(sender_ele->noOfRepliers == sender_ele->numReplies)
+                                            {
+                                                /* Disable Reply/ReplyQuery reception because all expected are received */
+                                                sender_ele->disableReplyRx = 1;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            /* Handle multiple unknown replies */
+                                            /* Send element removed by timeout because number of repliers is unknown */
+                                        }
 
                                         /* copy message to proper listener */
                                         memcpy(&iterMD->frameHead, pH, lF);
@@ -791,80 +780,71 @@ TRDP_ERR_T  trdp_mdReceive (
                                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                             theMessage.resultCode   = TRDP_NO_ERR;
 
-
-										    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-										    {
-											    appHandle->mdDefault.pfCbFunction(
-												    appHandle->mdDefault.pRefCon,
-												    &theMessage,
-												    (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
-										    }else
-										    {
-											    appHandle->mdDefault.pfCbFunction(
-												    appHandle->mdDefault.pRefCon,
-												    &theMessage,
-												    (UINT8 *)pH, lF);
+                                            if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                                            {
+                                                appHandle->mdDefault.pfCbFunction(
+                                                    appHandle->mdDefault.pRefCon,
+                                                    &theMessage,
+                                                    (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
 										    }
-
+                                            else
+                                            {
+                                                appHandle->mdDefault.pfCbFunction(
+                                                    appHandle->mdDefault.pRefCon,
+                                                    &theMessage,
+                                                    (UINT8 *)pH, lF);
+                                            }
                                         }
 
-
                                         /* TCP and Reply/ReplyError message */
-									    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-									    {
+                                        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                                        {
+                                            for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+                                            {
+                                                if((appHandle->iface[find_sock].sock == sock)
+                                                    && (appHandle->iface[find_sock].sock != -1)
+                                                    && (appHandle->iface[find_sock].rcvOnly == FALSE))
+                                                {
+                                                    sock_position = find_sock;
+                                                    break;
+                                                }
+                                            }
 
-										    for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
-										    {
-											    if((appHandle->iface[find_sock].sock == sock)
-												    && (appHandle->iface[find_sock].sock != -1)
-												    && (appHandle->iface[find_sock].rcvOnly == FALSE))
-											    {
-												    sock_position = find_sock;
-												    break;
-											    }
-										    }
+                                            iterMD->socketIdx = sock_position;
 
-										    iterMD->socketIdx = sock_position;
+                                            if((TRDP_MSG_MP == l_msgType) || (TRDP_MSG_ME == l_msgType))
+                                            {
+                                                appHandle->iface[sock_position].usage--;
+                                                vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
+                                                    appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
 
-										    if((TRDP_MSG_MP == l_msgType) || (TRDP_MSG_ME == l_msgType))
-										    {
+                                                /* If there is no at least one session using the socket, start the socket connectionTimeout */
+                                                if((appHandle->iface[sock_position].usage == 0) && (appHandle->iface[sock_position].rcvOnly == FALSE))
+                                                {
+                                                    TRDP_TIME_T tmpt_interval, tmpt_now;
 
-											    appHandle->iface[sock_position].usage--;
-											    vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
-													    appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
-
-
-											    /* If there is no at least one session using the socket, start the socket connectionTimeout */
-											    if((appHandle->iface[sock_position].usage == 0) && (appHandle->iface[sock_position].rcvOnly == FALSE))
-											    {
-												    TRDP_TIME_T tmpt_interval, tmpt_now;
-
-												    vos_printf(VOS_LOG_INFO, "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-														    appHandle->iface[sock_position].sock);
+                                                    vos_printf(VOS_LOG_INFO, "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
+                                                        appHandle->iface[sock_position].sock);
                                                     
-												    // Start the socket connectionTimeout
-												    tmpt_interval.tv_sec = appHandle->mdDefault.connectTimeout / 1000000;
-												    tmpt_interval.tv_usec = appHandle->mdDefault.connectTimeout % 1000000;
+                                                    /* Start the socket connectionTimeout */
+                                                    tmpt_interval.tv_sec = appHandle->mdDefault.connectTimeout / 1000000;
+                                                    tmpt_interval.tv_usec = appHandle->mdDefault.connectTimeout % 1000000;
 
-												    vos_getTime(&tmpt_now);
-												    vos_addTime(&tmpt_now, &tmpt_interval);
+                                                    vos_getTime(&tmpt_now);
+                                                    vos_addTime(&tmpt_now, &tmpt_interval);
 
-												    memcpy(&appHandle->iface[sock_position].tcpParams.connectionTimeout, &tmpt_now, sizeof(TRDP_TIME_T));
+                                                    memcpy(&appHandle->iface[sock_position].tcpParams.connectionTimeout, &tmpt_now, sizeof(TRDP_TIME_T));
+                                                }
+                                            }
 
-											    }
-
-										    }
-
-
-										    if (TRDP_MSG_MQ == l_msgType)
-										    {
-											    /* Save the socket position in the listener */
-											    iterMD->socketIdx = sock_position;
-											    vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
-													    iterMD->socketIdx);
-										    }
-
-									    }
+                                            if (TRDP_MSG_MQ == l_msgType)
+                                            {
+                                                /* Save the socket position in the listener */
+                                                iterMD->socketIdx = sock_position;
+                                                vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
+                                                    iterMD->socketIdx);
+                                            }
+                                        }
 
                                         /* stop loop */
                                         break;
@@ -898,56 +878,53 @@ TRDP_ERR_T  trdp_mdReceive (
                                             theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
                                             memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                             memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-										    theMessage.noOfRepliers = 0;
+                                            theMessage.noOfRepliers = 0;
                                             theMessage.numReplies   = 0;
-										    theMessage.numRetriesMax = 0;
-										    theMessage.numRetries   = 0;
-										    theMessage.disableReplyRx = 0;
-										    theMessage.numRepliesQuery = 0;
-										    theMessage.numConfirmSent = 0;
-										    theMessage.numConfirmTimeout = 0;
+                                            theMessage.numRetriesMax = 0;
+                                            theMessage.numRetries   = 0;
+                                            theMessage.disableReplyRx = 0;
+                                            theMessage.numRepliesQuery = 0;
+                                            theMessage.numConfirmSent = 0;
+                                            theMessage.numConfirmTimeout = 0;
                                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                             theMessage.resultCode   = TRDP_NO_ERR;
 
-
-										    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-										    {
-											    appHandle->mdDefault.pfCbFunction(
-												    appHandle->mdDefault.pRefCon,
-												    &theMessage,
-												    (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
-										    }else
-										    {
-											    appHandle->mdDefault.pfCbFunction(
-												    appHandle->mdDefault.pRefCon,
-												    &theMessage,
-												    (UINT8 *)pH, lF);
-										    }
+                                            if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                                            {
+                                                appHandle->mdDefault.pfCbFunction(
+                                                    appHandle->mdDefault.pRefCon,
+                                                    &theMessage,
+                                                    (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
+                                            }
+                                            else
+                                            {
+                                                appHandle->mdDefault.pfCbFunction(
+                                                    appHandle->mdDefault.pRefCon,
+                                                    &theMessage,
+                                                    (UINT8 *)pH, lF);
+                                            }
                                         }
 
-
                                         /* TCP and Confirm message */
-									    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-									    {
-										    for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
-										    {
-											    if((appHandle->iface[find_sock].sock == sock)
-													    && (appHandle->iface[find_sock].sock != -1)
-													    && (appHandle->iface[find_sock].rcvOnly == 1))
-											    {
-												    sock_position = find_sock;
-												    break;
-											    }
-										    }
+                                        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                                        {
+                                            for(find_sock = 0; find_sock < VOS_MAX_SOCKET_CNT; find_sock++)
+                                            {
+                                                if((appHandle->iface[find_sock].sock == sock)
+                                                    && (appHandle->iface[find_sock].sock != -1)
+                                                    && (appHandle->iface[find_sock].rcvOnly == 1))
+                                                {
+                                                    sock_position = find_sock;
+                                                    break;
+                                                }
+                                            }
 
-										    iterMD->socketIdx = sock_position;
+                                            iterMD->socketIdx = sock_position;
 
-										    appHandle->iface[sock_position].usage--;
-										    vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
-												    appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
-
-									    }
-
+                                            appHandle->iface[sock_position].usage--;
+                                            vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
+                                                appHandle->iface[sock_position].sock, appHandle->iface[sock_position].usage);
+                                        }
 
                                         /* Remove element from queue */
                                         trdp_MDqueueDelElement(&appHandle->pMDSndQueue, sender_ele);
@@ -962,19 +939,19 @@ TRDP_ERR_T  trdp_mdReceive (
                             }
                         }
                         break;
-
                     }
-				    break;
+                    break;
                 }
-			}
+            }
 		   
-			// Statistics
-			if(iterMD == NULL)
-			{
-				appHandle->stats.udpMd.numNoListener++;
-			}
+            /* Statistics */
+            if(iterMD == NULL)
+            {
+                appHandle->stats.udpMd.numNoListener++;
+            }
         }
     }
 
     return TRDP_NO_ERR;
 }
+
