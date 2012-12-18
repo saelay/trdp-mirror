@@ -201,14 +201,14 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         WKSTA_TRANSPORT_INFO_0  *pwkti;
 
         /* Get MAC address via NetBIOS's enumerate function */
-        NET_API_STATUS          dwStatus = NetWkstaTransportEnum(
+        NET_API_STATUS  dwStatus = NetWkstaTransportEnum(
                 NULL,                     /* [in] server name */
-                0,                     /* [in] data structure to return */
-                &pbBuffer,                     /* [out] pointer to buffer */
-                MAX_PREFERRED_LENGTH,                     /* [in] maximum length */
-                &dwEntriesRead,                     /* [out] counter of elements actually enumerated */
-                &dwTotalEntries,                     /* [out] total number of elements that could be enumerated */
-                NULL);                     /* [in/out] resume handle */
+                0,                        /* [in] data structure to return */
+                &pbBuffer,                /* [out] pointer to buffer */
+                MAX_PREFERRED_LENGTH,     /* [in] maximum length */
+                &dwEntriesRead,           /* [out] counter of elements actually enumerated */
+                &dwTotalEntries,          /* [out] total number of elements that could be enumerated */
+                NULL);                    /* [in/out] resume handle */
 
 
         pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
@@ -394,15 +394,18 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             }
 #endif
         }
-        if (1 == pOptions->nonBlocking)
+        
+        if (pOptions->nonBlocking == TRUE)
         {
             value = TRUE;
+            
             if (ioctlsocket(sock, FIONBIO, &value) == SOCKET_ERROR)
             {
                 vos_printf(VOS_LOG_ERROR, "non blocking failed\n");
                 return VOS_SOCK_ERR;
             }
         }
+
         if (pOptions->qos > 0 && pOptions->qos < 8)
         {
             /* The QoS value (0-7) is mapped to MSB bits 7-5, bit 2 is set for local use */
@@ -937,19 +940,20 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    INT32   *pSize,
-    BOOL     blocking)
+    INT32   *pSize)
 {
-    int rcvSize     = 0;
-    int bufferSize  = (size_t) *pSize;
-    *pSize = 0;
+    int             rcvSize    = 0;
+    int             bufferSize = (size_t) *pSize;
+    VOS_SOCK_OPT_T  options    = {0};
 
+    *pSize = 0;
+    
     if (sock == INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
-
-    /*	Keep on sending until we got rid of all data or we received an unrecoverable error	*/
+    
+       /*	Keep on sending until we got rid of all data or we received an unrecoverable error	*/
     do
     {
         rcvSize = recv((SOCKET)sock, pBuffer, bufferSize, 0);
@@ -960,18 +964,17 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             *pSize      += rcvSize;
         }
         
-        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (blocking == FALSE))
+        if((rcvSize == -1) && (errno == EWOULDBLOCK))
         {
         	return VOS_NO_ERR;
         }
-
+        
         if (rcvSize == 0)
         {
             return VOS_NODATA_ERR;
         }
-
     }
-    while (bufferSize || (rcvSize == SOCKET_ERROR && errno == EAGAIN));
+    while (bufferSize && (rcvSize == -1 && errno == EAGAIN));
 
     if (rcvSize == SOCKET_ERROR)
     {
