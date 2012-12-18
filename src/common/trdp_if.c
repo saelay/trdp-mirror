@@ -70,53 +70,53 @@ static fd_set sMaster_set;
  */
 TRDP_ERR_T trdp_initMD(TRDP_SESSION_PT pSession)
 {
-	TRDP_ERR_T result = TRDP_NO_ERR;
-	VOS_SOCK_OPT_T	trdp_sock_opt;
-	UINT32 backlog = 10; /* Backlog = maximum connection atempts if system is busy. */
+    TRDP_ERR_T result = TRDP_NO_ERR;
+    VOS_SOCK_OPT_T	trdp_sock_opt;
+    UINT32 backlog = 10; /* Backlog = maximum connection atempts if system is busy. */
 	
-	if((pSession->mdDefault.flags & TRDP_FLAGS_TCP) != 0) /* TCP is used */
-	{
-		/* Define the common TCP socket options */
-		trdp_sock_opt.qos    = pSession->mdDefault.sendParam.qos; /* (default should be 5 for PD and 3 for MD) */
-		trdp_sock_opt.ttl    = pSession->mdDefault.sendParam.ttl; /* Time to live (default should be 64) */
-		trdp_sock_opt.ttl_multicast  = 0;
-		trdp_sock_opt.reuseAddrPort  = TRUE;
+    if((pSession->mdDefault.flags & TRDP_FLAGS_TCP) != 0) /* TCP is used */
+    {
+        /* Define the common TCP socket options */
+        trdp_sock_opt.qos    = pSession->mdDefault.sendParam.qos; /* (default should be 5 for PD and 3 for MD) */
+        trdp_sock_opt.ttl    = pSession->mdDefault.sendParam.ttl; /* Time to live (default should be 64) */
+        trdp_sock_opt.ttl_multicast  = 0;
+        trdp_sock_opt.reuseAddrPort  = TRUE;
 
-		/* The socket is defined non-blocking */
-		trdp_sock_opt.nonBlocking    =	TRUE;
+        /* The socket is defined non-blocking */
+        trdp_sock_opt.nonBlocking    =	TRUE;
 
-		result = (TRDP_ERR_T)vos_sockOpenTCP(&sListen_sd, &trdp_sock_opt);
+        result = (TRDP_ERR_T)vos_sockOpenTCP(&sListen_sd, &trdp_sock_opt);
 
-		 if (result != VOS_NO_ERR)
-		 {
-			 vos_printf(VOS_LOG_ERROR, "vos_sockOpenTCP failed (Err: %d)\n", result);
-			 return result;
-		 }
+        if (result != VOS_NO_ERR)
+        {
+            vos_printf(VOS_LOG_ERROR, "vos_sockOpenTCP failed (Err: %d)\n", result);
+            return result;
+        }
 
-		result = (TRDP_ERR_T)vos_sockBind(sListen_sd, pSession->realIP, pSession->mdDefault.tcpPort);
+        result = (TRDP_ERR_T)vos_sockBind(sListen_sd, pSession->realIP, pSession->mdDefault.tcpPort);
 
-		if (result != VOS_NO_ERR)
-		{
-			vos_printf(VOS_LOG_ERROR,"vos_sockBind failed (Err: %d)\n", result);
-			return result;
-		}
+        if (result != VOS_NO_ERR)
+        {
+            vos_printf(VOS_LOG_ERROR,"vos_sockBind failed (Err: %d)\n", result);
+            return result;
+        }
 
-		result = (TRDP_ERR_T)vos_sockListen(sListen_sd,backlog);
+        result = (TRDP_ERR_T)vos_sockListen(sListen_sd,backlog);
 
-		if (result != VOS_NO_ERR)
-		{
-			vos_printf(VOS_LOG_ERROR, "TRDP vos_sockListen failed (Err: %d)\n", result);
-			return result;
-		}
+        if (result != VOS_NO_ERR)
+        {
+            vos_printf(VOS_LOG_ERROR, "TRDP vos_sockListen failed (Err: %d)\n", result);
+            return result;
+        }
 
-		vos_printf(VOS_LOG_INFO, "Socket information (sListen_sd=%d)\n", sListen_sd);
-		FD_SET(sListen_sd, (fd_set*)&sMaster_set);
-		sMax_sd = sListen_sd + 1;
+        vos_printf(VOS_LOG_INFO, "Socket information (sListen_sd=%d)\n", sListen_sd);
+        FD_SET(sListen_sd, (fd_set*)&sMaster_set);
+        sMax_sd = sListen_sd + 1;
 
-		return  TRDP_NO_ERR;
-	}
+        return  TRDP_NO_ERR;
+    }
 
-	return  result;
+    return  result;
 }
 #endif
 /***********************************************************************************************************************
@@ -2199,66 +2199,63 @@ EXT_DECL TRDP_ERR_T tlc_process (
     }
 
     /* Check for sockets Connection Timeouts */
-
     if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
     {
-		INT32 index;
+        INT32 index;
 
-		for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
-		{
-			if((appHandle->iface[index].sock != -1) && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
-					&& (appHandle->iface[index].usage == 0)
-					&& (appHandle->iface[index].rcvOnly == FALSE)
-					&& ((appHandle->iface[index].tcpParams.connectionTimeout.tv_sec > 0)
-					|| (appHandle->iface[index].tcpParams.connectionTimeout.tv_usec > 0)))
-			{
+        for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+        {
+            if((appHandle->iface[index].sock != -1)
+                && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
+                && (appHandle->iface[index].usage == 0)
+                && (appHandle->iface[index].rcvOnly == FALSE)
+                && ((appHandle->iface[index].tcpParams.connectionTimeout.tv_sec > 0)
+                || (appHandle->iface[index].tcpParams.connectionTimeout.tv_usec > 0)))
+            {
+                if (0 > vos_cmpTime (&appHandle->iface[index].tcpParams.connectionTimeout,&now))
+                {
+                    vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[index].sock);
 
-				if (0 > vos_cmpTime (&appHandle->iface[index].tcpParams.connectionTimeout,&now))
-				{
-					vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[index].sock);
+                    /* Execute callback */
+                    if(appHandle->mdDefault.pfCbFunction != NULL)
+                    {
+                        TRDP_MD_INFO_T theMessage;
 
+                        theMessage.destIpAddr   = appHandle->iface[index].tcpParams.cornerIp;
+                        theMessage.resultCode   = TRDP_TIMEOUT_ERR;
+                        memset(theMessage.sessionId, 0, sizeof(TRDP_UUID_T));
 
-					/* Execute callback */
-					if(appHandle->mdDefault.pfCbFunction != NULL)
-					{
-						TRDP_MD_INFO_T theMessage;
-
-						theMessage.destIpAddr   = appHandle->iface[index].tcpParams.cornerIp;
-						theMessage.resultCode   = TRDP_TIMEOUT_ERR;
-						memset(theMessage.sessionId, 0, sizeof(TRDP_UUID_T));
-
-						appHandle->mdDefault.pfCbFunction(
+                        appHandle->mdDefault.pfCbFunction(
                             appHandle->mdDefault.pRefCon,
                             &theMessage, NULL, 0);
-					}
+                    }
 
-					/* Close the socket */
-					FD_CLR(appHandle->iface[index].sock, &sMaster_set);
+                    /* Close the socket */
+                    FD_CLR(appHandle->iface[index].sock, &sMaster_set);
 
-					if(appHandle->iface[index].sock == (sMax_sd - 1))
-					{
-						for(; FD_ISSET((sMax_sd - 1), &sMaster_set) == FALSE; sMax_sd -=1);
-					}
+                    if(appHandle->iface[index].sock == (sMax_sd - 1))
+                    {
+                        for(; FD_ISSET((sMax_sd - 1), &sMaster_set) == FALSE; sMax_sd -=1);
+                    }
 
-					vos_sockClose(appHandle->iface[index].sock);
+                    vos_sockClose(appHandle->iface[index].sock);
 
-					/* Delete the socket from the iface */
-					vos_printf(VOS_LOG_INFO, "Deleting socket (Num = %d) from the iface\n", appHandle->iface[index].sock);
-					vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
-					appHandle->iface[index].sock=-1;
-					appHandle->iface[index].sendParam.qos = 0;
-					appHandle->iface[index].sendParam.ttl = 0;
-					appHandle->iface[index].usage = 0;
-					appHandle->iface [index].bindAddr = 0;
-					appHandle->iface[index].type = 0;
-					appHandle->iface[index].rcvOnly = FALSE;
-					appHandle->iface[index].tcpParams.cornerIp = 0;
-					appHandle->iface[index].tcpParams.connectionTimeout.tv_sec = 0;
-					appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
-
-				}
-			}
-		}
+                    /* Delete the socket from the iface */
+                    vos_printf(VOS_LOG_INFO, "Deleting socket (Num = %d) from the iface\n", appHandle->iface[index].sock);
+                    vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
+                    appHandle->iface[index].sock=-1;
+                    appHandle->iface[index].sendParam.qos = 0;
+                    appHandle->iface[index].sendParam.ttl = 0;
+                    appHandle->iface[index].usage = 0;
+                    appHandle->iface [index].bindAddr = 0;
+                    appHandle->iface[index].type = 0;
+                    appHandle->iface[index].rcvOnly = FALSE;
+                    appHandle->iface[index].tcpParams.cornerIp = 0;
+                    appHandle->iface[index].tcpParams.connectionTimeout.tv_sec = 0;
+                    appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
+                }
+            }
+        }
     }
 
 #endif
