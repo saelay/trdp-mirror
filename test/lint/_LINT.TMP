@@ -1,0 +1,1282 @@
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
+                                                                 _
+            vos_printf(VOS_LOG_ERROR, "MDframe size error (%u)\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(115) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 115
+                                                                                _
+            vos_printf(VOS_LOG_ERROR, "MDframe protocol error (%04x != %04x))\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(164) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 164
+                                                                               _
+                vos_printf(VOS_LOG_ERROR, "MDframe type error, received %04x\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(190) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 190
+                                                                                          _
+            vos_printf(VOS_LOG_ERROR, "MDframe invalid length, received %d, expected %d\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(215) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 215
+                                           _
+    if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(274) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(274) : Warning 641: Converting
+    enum to int
+                                                                      _
+        vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (Err: %d)\n", err);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(290) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 290
+                                           _
+    if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(314) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(314) : Warning 641: Converting
+    enum to int
+                                                          _
+        vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(318) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 318
+                                                             _
+        vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(364) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 364
+        _
+        err = trdp_mdCheck(appHandle, &pPacket->frameHead, size);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(369) : Warning 539: Did not
+    expect positive indentation from line 362
+                                                             _
+        vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(389) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 389
+             _
+	INT8 find_sock;
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(416) : Warning 522: Expected void
+    type, assignment, increment or decrement
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(416) : Error 10: Expecting ';'
+         _
+    INT8 sock_position;
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(417) : Warning 522: Expected void
+    type, assignment, increment or decrement
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(417) : Error 10: Expecting ';'
+                                                        _
+        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(431) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(431) : Warning 641: Converting
+    enum to int
+                                                             _
+                   "Received MD packet (space: %d len: %d)\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(459) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 458
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
+                                                  _
+    if((pSession->mdDefault.flags & TRDP_FLAGS_TCP) != 0) /* TCP is used */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(77) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(77) : Warning 641: Converting enum
+    to int
+                                _
+        if (result != VOS_NO_ERR)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(90) : Error 58: Bad type
+                                                                          _
+            vos_printf(VOS_LOG_ERROR, "vos_sockOpenTCP failed (Err: %d)\n", result);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(92) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 92
+                                _
+        if (result != VOS_NO_ERR)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(98) : Error 58: Bad type
+                                                                      _
+            vos_printf(VOS_LOG_ERROR,"vos_sockBind failed (Err: %d)\n", result);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(100) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 100
+                                _
+        if (result != VOS_NO_ERR)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(106) : Error 58: Bad type
+                                                                              _
+            vos_printf(VOS_LOG_ERROR, "TRDP vos_sockListen failed (Err: %d)\n", result);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(108) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 108
+                                                                       _
+        vos_printf(VOS_LOG_INFO, "Socket information (sListen_sd=%d)\n", sListen_sd);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(112) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 112
+                                  _
+    vos_mutexUnlock(sSessionMutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(161) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                         _
+        vos_init(NULL, pPrintDebugString);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(198) : Warning 534: Ignoring return
+    value of function 'vos_init(void *, void (*)(void *, enum {...}, const char
+    *, const char *, unsigned short, const char *))' (compare with line 209,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                      _
+            vos_printf(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", LIB_VERSION);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(231) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 231
+                         _
+    if (ret != VOS_NO_ERR)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(343) : Error 58: Bad type
+                             _
+        vos_memFree(pSession);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(345) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                        _
+        vos_printf(VOS_LOG_ERROR, "vos_mutexCreate() failed (Err: /d)\n", ret);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(346) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 346
+                                      _
+    vos_clearTime(&pSession->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(350) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_clearTime(&pSession->nextJob);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(351) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                  _
+        vos_printf(VOS_LOG_ERROR, "TRDP initMD failed (Err: %d)\n", ret);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(364) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 364
+                                _
+    vos_mutexLock(sSessionMutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(372) : Warning 534: Ignoring return
+    value of function 'vos_mutexLock(struct VOS_MUTEX *)' (compare with line
+    383, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                  _
+    vos_mutexUnlock(sSessionMutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(393) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                _
+    vos_mutexLock(sSessionMutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(422) : Warning 534: Ignoring return
+    value of function 'vos_mutexLock(struct VOS_MUTEX *)' (compare with line
+    383, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                      _
+        vos_mutexLock(pSession->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(452) : Warning 534: Ignoring return
+    value of function 'vos_mutexLock(struct VOS_MUTEX *)' (compare with line
+    383, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                               _
+            trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(460) : Warning 534: Ignoring return
+    value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)' (compare
+    with line 112, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                            _
+            vos_memFree(pSession->pSndQueue);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(461) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                        _
+        vos_mutexUnlock(pSession->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(465) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                        _
+        vos_mutexDelete(pSession->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(466) : Warning 534: Ignoring return
+    value of function 'vos_mutexDelete(struct VOS_MUTEX *)' (compare with line
+    370, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                             _
+        vos_memFree(pSession);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(467) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                  _
+    vos_mutexUnlock(sSessionMutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(472) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                      _
+            tlc_closeSession(pSession);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(495) : Warning 534: Ignoring return
+    value of function 'tlc_closeSession(struct TRDP_SESSION *)' (compare with
+    line 408)
+                           _
+        vos_memDelete(NULL);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(499) : Warning 534: Ignoring return
+    value of function 'vos_memDelete(unsigned char *)' (compare with line 122,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                              _
+        if (iterPD->privFlags & TRDP_MC_JOINT &&
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(535) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                             _
+                           0);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(541) : Warning 534: Ignoring return
+    value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
+    (compare with line 247, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(545) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(586) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(623) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(658) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                            _
+    TRDP_ADDRESSES_T    pubHandle   = {comId, srcIpAddr, destIpAddr, 0};
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(721) : Warning 614: auto aggregate
+    initializer not constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(721) : Warning 614: auto aggregate
+    initializer not constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(721) : Warning 614: auto aggregate
+    initializer not constant
+                                                           _
+                pNewElement->privFlags |= TRDP_INVALID_DATA;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(778) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                        _
+                vos_memFree(pNewElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(797) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                            _
+                    vos_memFree(pNewElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(806) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                 _
+            vos_clearTime(&pNewElement->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(820) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                 _
+            vos_clearTime(&pNewElement->timeToGo);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(821) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                  _
+            vos_getTime(&nextTime);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(825) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                _
+            vos_addTime(&nextTime, &tv_interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(828) : Warning 534: Ignoring return
+    value of function 'vos_addTime(struct {...} *, const struct {...} *)'
+    (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                           _
+        if (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(858) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                   _
+            trdp_pdDistribute(appHandle->pSndQueue);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(860) : Warning 534: Ignoring return
+    value of function 'trdp_pdDistribute(struct PD_ELE *)' (compare with line
+    83, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.h)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(864) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+        vos_memFree(pElement->pFrame);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(909) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                             _
+        vos_memFree(pElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(910) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(914) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(970) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                     _
+    vos_getTime(&now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1008) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                       _
+    vos_clearTime(&appHandle->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1010) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                     _
+                appHandle->option & TRDP_OPTION_BLOCK)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1028) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                          _
+#... AR *)((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_se
+    FD_SET(sListen_sd, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                          _
+#... AR *)((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_se
+    FD_SET(sListen_sd, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                          _
+#... ay[__i] == (sListen_sd)) { break; }}if (__i == ((fd_set FAR *)((fd_set *)p
+    FD_SET(sListen_sd, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                          _
+#... AR *)((fd_set *)pFileDesc))->fd_count) { if (((fd_set FAR *)((fd_set *)pFi
+    FD_SET(sListen_sd, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                          _
+#...  *)pFileDesc))->fd_count < FD_SETSIZE) { ((fd_set FAR *)((fd_set *)pFileDe
+    FD_SET(sListen_sd, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                          _
+#...  *)((fd_set *)pFileDesc))->fd_count++; }}}while(0)
+    FD_SET(sListen_sd, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                        _
+    			{
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 525: Negative
+    indentation from line 1063
+                                                                                        _
+#... ((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_set *)p
+	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                        _
+#... ((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_set *)p
+	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                        _
+#... iface[index].sock)) { break; }}if (__i == ((fd_set FAR *)((fd_set *)pFileD
+	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                        _
+#... ((fd_set *)pFileDesc))->fd_count) { if (((fd_set FAR *)((fd_set *)pFileDes
+	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                        _
+#... ileDesc))->fd_count < FD_SETSIZE) { ((fd_set FAR *)((fd_set *)pFileDesc))-
+	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                        _
+#... fd_set *)pFileDesc))->fd_count++; }}}while(0)
+	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                        _
+		    	}
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1066) : Warning 525: Negative
+    indentation from line 1063
+                                                                                            _
+#... (fd_set *)pFileDesc))->fd_count ; __i++) { if (((fd_set FAR *)((fd_set *)p
+				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                            _
+#... (fd_set *)pFileDesc))->fd_count ; __i++) { if (((fd_set FAR *)((fd_set *)p
+				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                            _
+#... fd_set *)pFileDesc))->fd_count-1) { ((fd_set FAR *)((fd_set *)pFileDesc))-
+				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                            _
+#... fd_set *)pFileDesc))->fd_count-1) { ((fd_set FAR *)((fd_set *)pFileDesc))-
+				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                            _
+#... esc))->fd_array[__i+1]; __i++; }((fd_set FAR *)((fd_set *)pFileDesc))->fd_
+				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                            _
+#... fd_set *)pFileDesc))->fd_count--; break; }}}while(0)
+				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                                                                                            _
+#... ileDesc))->fd_count--; break; }}}while(0)
+				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+    null pointer 'unknown-name' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
+                _
+                }
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1070) : Warning 525: Negative
+    indentation from line 1067
+                                               _
+        vos_subTime(&appHandle->interval, &now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1083) : Warning 534: Ignoring return
+    value of function 'vos_subTime(struct {...} *, const struct {...} *)'
+    (compare with line 281, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1096) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                       _
+    vos_clearTime(&appHandle->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1141) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                    _
+        vos_printf(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1152) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 1152
+                     _
+    vos_getTime(&now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1156) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                _
+            !(iterPD->privFlags & TRDP_TIMED_OUT))              /*  and not already flagged ?   */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1164) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                                                      _
+                theMessage.msgType      = vos_ntohs(iterPD->pFrame->frameHead.msgType);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1178) : Error 64: Type mismatch
+    (assignment) (enum {...} = unsigned short)
+                                               _
+            iterPD->privFlags |= TRDP_TIMED_OUT;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1192) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                         _
+        vos_getTime(&now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1196) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                                           _
+            if (iterMD->socketIdx != -1 && (!appHandle->beQuiet || (iterMD->pktFlags & TRDP_FLAGS_REDUNDANT)))
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1228) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                                _
+                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1232) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1232) : Warning 641: Converting enum
+    to int
+                        _
+                        }
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1245) : Warning 525: Negative
+    indentation from line 1242
+                                _
+				if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1256) : Warning 539: Did not expect
+    positive indentation from line 1251
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1256) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1256) : Warning 641: Converting enum
+    to int
+                _
+                {
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1257) : Warning 525: Negative
+    indentation from line 1256
+                        _
+                	if(nextstate == TRDP_MD_ELE_ST_TX_REQUEST_W4Y)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1258) : Warning 525: Negative
+    indentation from line 1256
+                    _
+                    {
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1259) : Warning 525: Negative
+    indentation from line 1258
+                    _
+                    }
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1281) : Warning 525: Negative
+    indentation from line 1258
+                _
+                }
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1282) : Warning 525: Negative
+    indentation from line 1256
+                                                                    _
+                    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1288) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1288) : Warning 641: Converting enum
+    to int
+                                                                                                      _
+                        vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1292) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 1292
+                                       _
+                    vos_memFree(iterMD);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1323) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                     _
+                    vos_printf(VOS_LOG_ERROR, "Error receiving PD packet (Err: %d)\n", err);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1361) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 1361
+                                                    _
+    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1372) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1372) : Warning 641: Converting enum
+    to int
+                            _
+        MD_ELE_T    *iterMD = NULL;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1375) : Warning 578: Declaration of
+    symbol 'iterMD' hides symbol 'iterMD' (line 1128)
+                        _
+        TRDP_ERR_T  err = TRDP_NO_ERR;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1377) : Warning 578: Declaration of
+    symbol 'err' hides symbol 'err' (line 1126)
+                                _
+                MD_ELE_T *iterMD;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1683) : Warning 578: Declaration of
+    symbol 'iterMD' hides symbol 'iterMD' (line 1128)
+                        _
+        MD_ELE_T *iterMD;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1712) : Warning 578: Declaration of
+    symbol 'iterMD' hides symbol 'iterMD' (line 1128)
+                         _
+        vos_getTime(&now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1715) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                         _
+                    vos_addTime(&tmpt, &iterMD->interval); /* interval is timeout velue */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1729) : Warning 534: Ignoring return
+    value of function 'vos_addTime(struct {...} *, const struct {...} *)'
+    (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                             _
+                        vos_printf(VOS_LOG_INFO, "MD listener timeout: fall back ARM st=%d\n", iterMD->stateEle);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1735) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 1735
+                                                             _
+                        vos_addTime(&tmpt, &iterMD->interval); /* interval is timeout velue */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1903) : Warning 534: Ignoring return
+    value of function 'vos_addTime(struct {...} *, const struct {...} *)'
+    (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                          _
+                            theMessage.msgType      = vos_ntohs(iterMD->frameHead.msgType);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1990) : Error 64: Type mismatch
+    (assignment) (enum {...} = unsigned short)
+                                                                                              _
+                            theMessage.replyStatus  = vos_ntohs(iterMD->frameHead.replyStatus);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1994) : Error 64: Type mismatch
+    (assignment) (enum {...} = unsigned short)
+                                                                        _
+                        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2036) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2036) : Warning 641: Converting enum
+    to int
+                                                                                                          _
+                            vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2052) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 2052
+                                        _
+					if(sndDone == 1)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2077) : Warning 539: Did not expect
+    positive indentation from line 2034
+                    _
+                    {
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2078) : Warning 525: Negative
+    indentation from line 2077
+                                              _
+                        trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2080) : Warning 525: Negative
+    indentation from line 2077
+                                   _
+                        vos_memFree(iterMD);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2083) : Warning 525: Negative
+    indentation from line 2077
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2083) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                       _
+                        vos_printf(VOS_LOG_INFO, "MD send session done: remove st=%d\n", iterMD->stateEle);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2085) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 2085
+                                                         _
+                    vos_addTime(&tmpt, &iterMD->interval);  /* interval is timeout velue */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2097) : Warning 534: Ignoring return
+    value of function 'vos_addTime(struct {...} *, const struct {...} *)'
+    (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                          _
+                        vos_printf(VOS_LOG_INFO, "MD send session timeout: remove st=%d\n", iterMD->stateEle);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2100) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 2100
+                                                    _
+    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2202) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2202) : Warning 641: Converting enum
+    to int
+                                                                              _
+                    vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[index].sock);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2217) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 2217
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2263) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                            _
+                    vos_memFree(pReqElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2375) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                        _
+                        vos_memFree(pReqElement->pFrame);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2393) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                _
+                        vos_memFree(pReqElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2394) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                             _
+                        vos_clearTime(&pReqElement->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2402) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                             _
+                        vos_clearTime(&pReqElement->timeToGo);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2403) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                  _
+        pReqElement->privFlags |= TRDP_REQ_2B_SENT;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2439) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                        _
+        if (timerisset(&pSubPD->interval))
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2442) : Warning 613: Possible use of
+    null pointer 'pSubPD' in left argument to operator '->' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 2344]
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2442) : Warning 613: Possible use of
+    null pointer 'pSubPD' in left argument to operator '->' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 2344]
+                                          _
+            vos_getTime(&pSubPD->timeToGo);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2444) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2444) : Warning 613: Possible use of
+    null pointer 'pSubPD' in left argument to operator '->' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 2344]
+                                                             _
+            vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2445) : Warning 534: Ignoring return
+    value of function 'vos_addTime(struct {...} *, const struct {...} *)'
+    (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2445) : Warning 613: Possible use of
+    null pointer 'pSubPD' in left argument to operator '->' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 2344]
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2445) : Warning 613: Possible use of
+    null pointer 'pSubPD' in left argument to operator '->' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 2344]
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2449) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                     _
+    vos_getTime(&now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2536) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                      _
+                    vos_memFree(newPD);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2574) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                               _
+                    newPD->privFlags       |= TRDP_INVALID_DATA;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2601) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                       _
+                        vos_clearTime(&newPD->timeToGo);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2605) : Warning 534: Ignoring return
+    value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                     _
+                        vos_getTime(&newPD->timeToGo);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2609) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                       _
+                        vos_addTime(&newPD->timeToGo, &newPD->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2610) : Warning 534: Ignoring return
+    value of function 'vos_addTime(struct {...} *, const struct {...} *)'
+    (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                            _
+                        vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, 0);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2618) : Warning 534: Ignoring return
+    value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
+    (compare with line 247, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                         _
+                        newPD->privFlags |= TRDP_MC_JOINT;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2620) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2629) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+        vos_memFree(pElement->pFrame);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2673) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                             _
+        vos_memFree(pElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2674) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2678) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                   _
+        if (!(appHandle->option & TRDP_OPTION_BLOCK))
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2739) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                                                 _
+            trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2741) : Warning 534: Ignoring return
+    value of function 'trdp_pdReceive(struct TRDP_SESSION *, int)' (compare
+    with line 80, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.h)
+                         _
+        vos_getTime(&now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2745) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                                _
+        pPdInfo->msgType        = vos_ntohs(pElement->pFrame->frameHead.msgType);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2781) : Error 64: Type mismatch
+    (assignment) (enum {...} = unsigned short)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2792) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                  _
+                                if (0 == memcmp(&iterMD->sessionID, pSessionId, 16))
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2870) : Warning 545: Suspicious use
+    of &
+                                  _
+            vos_getTime(&nextTime);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2991) : Warning 534: Ignoring return
+    value of function 'vos_getTime(struct {...} *)' (compare with line 228,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                _
+            vos_addTime(&nextTime, &tv_interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3036) : Warning 534: Ignoring return
+    value of function 'vos_addTime(struct {...} *, const struct {...} *)'
+    (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                           _
+            if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3054) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3054) : Warning 641: Converting enum
+    to int
+                                                            _
+            if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3076) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3076) : Warning 641: Converting enum
+    to int
+                _
+                {
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3079) : Warning 525: Negative
+    indentation from line 3078
+                    _
+                    if (pendingMD_reply)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3080) : Warning 525: Negative
+    indentation from line 3078
+                    _
+                    if (pendingMD_confirm)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3085) : Warning 525: Negative
+    indentation from line 3078
+                _
+                }
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3090) : Warning 525: Negative
+    indentation from line 3078
+                _
+                else
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3091) : Warning 525: Negative
+    indentation from line 3078
+                        _
+			}
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3129) : Warning 539: Did not expect
+    positive indentation from line 3091
+                                                  _
+                    memcpy(&pNewElement->sessionID, &pendingMD_reply->sessionID, sizeof(TRDP_UUID_T));
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3174) : Warning 545: Suspicious use
+    of &
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3174) : Warning 545: Suspicious use
+    of &
+                                                  _
+                    memcpy(&pNewElement->sessionID, &pendingMD_confirm->sessionID, sizeof(TRDP_UUID_T));
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3178) : Warning 545: Suspicious use
+    of &
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3178) : Warning 545: Suspicious use
+    of &
+                                 _
+                vos_getUuid(uuid);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3185) : Warning 534: Ignoring return
+    value of function 'vos_getUuid(unsigned char *)' (compare with line 336,
+    file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                              _
+                memcpy(&pNewElement->sessionID, uuid, sizeof(TRDP_UUID_T));
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3194) : Warning 545: Suspicious use
+    of &
+                        _
+			if(pendingMD_confirm)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3206) : Warning 539: Did not expect
+    positive indentation from line 3202
+            _
+            {
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3207) : Warning 525: Negative
+    indentation from line 3206
+                           _
+                pNewElement->frameHead.sequenceCounter  = pendingMD_confirm->frameHead.sequenceCounter;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3208) : Warning 525: Negative
+    indentation from line 3206
+            _
+            }
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3209) : Warning 525: Negative
+    indentation from line 3206
+                                                                       _
+            pNewElement->frameHead.msgType          = vos_htons(msgType);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3211) : Warning 641: Converting enum
+    to int
+                                                                           _
+            pNewElement->frameHead.replyStatus      = vos_htonl(replyStatus);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3215) : Warning 641: Converting enum
+    to int
+                                                                            _
+            memcpy(pNewElement->frameHead.sessionID, &pNewElement->sessionID, sizeof(TRDP_UUID_T));
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3216) : Warning 545: Suspicious use
+    of &
+                                            _
+                    v = v ? sourceURI[i] : 0;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3223) : Warning 613: Possible use of
+    null pointer 'sourceURI' in left argument to operator '[' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 3220]
+                                          _
+                    v = v ? destURI[i] : 0;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3232) : Warning 613: Possible use of
+    null pointer 'destURI' in left argument to operator '[' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 3229]
+                                                           _
+            if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3253) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3253) : Warning 641: Converting enum
+    to int
+                                                                                                        _
+            vos_printf(VOS_LOG_INFO, "MD sender new element st = %d msgType=x%04X, disableReplyRx=%d.\n", pNewElement->stateEle, msgType, pNewElement->disableReplyRx);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3281) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 3281
+                                _
+        vos_memFree(pNewElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3291) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3297) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                _
+               0,              /* reply state */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3354) : Error 64: Type mismatch
+    (arg. no. 14) (int/enum)
+                _
+               0,              /* reply state */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3419) : Error 64: Type mismatch
+    (arg. no. 14) (int/enum)
+                                                                _
+                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) == 0)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3541) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3541) : Warning 641: Converting enum
+    to int
+                                                                                                    _
+                        vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, 0);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3574) : Warning 534: Ignoring return
+    value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
+    (compare with line 247, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                               _
+                        pNewElement->privFlags |= TRDP_MC_JOINT;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3577) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                _
+        vos_memFree(pNewElement);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3609) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3614) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                     _
+                    iterMD_pre->pNext = iterMD->pNext;
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3707) : Warning 613: Possible use of
+    null pointer 'iterMD_pre' in left argument to operator '->' [Reference:
+    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 3659]
+                                   _
+                vos_memFree(iterMD);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3713) : Warning 534: Ignoring return
+    value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                     _
+    vos_mutexUnlock(appHandle->mutex);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3724) : Warning 534: Ignoring return
+    value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
+    411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                _
+               0,              /* reply state */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3785) : Error 64: Type mismatch
+    (arg. no. 14) (int/enum)
+                _
+               0,              /* reply state */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3851) : Error 64: Type mismatch
+    (arg. no. 14) (int/enum)
+                _
+               0,              /* pktflags */
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3902) : Error 64: Type mismatch
+    (arg. no. 9) (int/enum)
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
+                          _
+UINT32 trdp_getTopoCount (void);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.h(55) : Error 18: Symbol
+    'trdp_getTopoCount(struct TRDP_SESSION *)' redeclared (arg. count)
+    conflicts with line 670, file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c
+                                                                _
+    pPacket->pFrame->frameHead.msgType          = vos_htons(type);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(80) : Warning 641: Converting
+    enum to int
+                                                _
+        pPacket->privFlags &= ~TRDP_INVALID_DATA;
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(118) : Warning 641: Converting
+    enum to int
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(118) : Warning 641: Converting
+    enum to int
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(118) : Error 64: Type mismatch
+    (assignment) (int/enum)
+                                                            _
+    myCRC = vos_crc32(myCRC, (UINT8 *)&pPacket->pFrame->data, pPacket->dataSize);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(150) : Warning 545: Suspicious
+    use of &
+                                              _
+    if (pPacket->privFlags & TRDP_INVALID_DATA)
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(178) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                       _
+    vos_clearTime(&appHandle->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(217) : Warning 534: Ignoring
+    return value of function 'vos_clearTime(struct {...} *)' (compare with line
+    253, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                         _
+        vos_getTime(&now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(223) : Warning 534: Ignoring
+    return value of function 'vos_getTime(struct {...} *)' (compare with line
+    228, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                _
+            iterPD->privFlags & TRDP_REQ_2B_SENT)       /*  Request for immediate sending   */
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(231) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+        _
+        {
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(232) : Warning 525: Negative
+    indentation from line 229
+            _
+            if (!(iterPD->privFlags & TRDP_INVALID_DATA))
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(234) : Warning 525: Negative
+    indentation from line 229
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(234) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                            _
+                    (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(242) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+            _
+            if (iterPD->privFlags & TRDP_REQ_2B_SENT)
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(254) : Warning 525: Negative
+    indentation from line 229
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(254) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                     _
+                iterPD->privFlags ^= TRDP_REQ_2B_SENT;
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(256) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+            _
+            if (timerisset(&iterPD->interval))
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(262) : Warning 525: Negative
+    indentation from line 229
+                                                    _
+                vos_addTime(&iterPD->timeToGo, &now);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(266) : Warning 534: Ignoring
+    return value of function 'vos_addTime(struct {...} *, const struct {...}
+    *)' (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+        _
+        }
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(268) : Warning 525: Negative
+    indentation from line 229
+                                                                          _
+    if (vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr) != VOS_NO_ERR)
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(322) : Error 64: Type mismatch
+    (arg. no. 3) (ptrs to signed/unsigned)
+                                                                                             _
+        vos_printf(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(351) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 351
+                                                              _
+    if (vos_ntohs(pNewFrame->frameHead.msgType) == TRDP_MSG_PR)
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(372) : Warning 641: Converting
+    enum to int
+                                                         _
+            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(413) : Warning 655: bit-wise
+    operation uses (compatible) enum's
+                                                                                            _
+                vos_printf(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(418) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 418
+                                                                           _
+                vos_printf(VOS_LOG_INFO, "Old PD data ignored (comId %u)\n", vos_ntohl(pNewFrame->frameHead.comId));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(439) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 439
+                                                _
+        vos_getTime(&pExistingElement->timeToGo);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(455) : Warning 534: Ignoring
+    return value of function 'vos_getTime(struct {...} *)' (compare with line
+    228, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                             _
+        vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(456) : Warning 534: Ignoring
+    return value of function 'vos_addTime(struct {...} *, const struct {...}
+    *)' (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                      _
+        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(461) : Warning 641: Converting
+    enum to int
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(461) : Warning 641: Converting
+    enum to int
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(461) : Error 64: Type mismatch
+    (assignment) (int/enum)
+                                                         _
+        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(464) : Warning 641: Converting
+    enum to int
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(464) : Warning 641: Converting
+    enum to int
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(464) : Error 64: Type mismatch
+    (assignment) (int/enum)
+                                                                                            _
+            theMessage.msgType      = vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(505) : Error 64: Type mismatch
+    (assignment) (enum {...} = unsigned short)
+                                             _
+    if (packetSize < TRDP_MIN_PD_HEADER_SIZE ||
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(560) : Warning 574:
+    Signed-unsigned mix with relational
+                     _
+        packetSize > TRDP_MAX_PD_PACKET_SIZE)
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(561) : Warning 574:
+    Signed-unsigned mix with relational
+                                                             _
+        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", (UINT32) packetSize);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(563) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 563
+                                                                      _
+        vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(573) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 573
+                                                                           _
+        vos_printf(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(579) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 579
+                                                        _
+    else if (vos_ntohs(pPacket->msgType) != TRDP_MSG_PD &&
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(585) : Warning 641: Converting
+    enum to int
+                                                        _
+             vos_ntohs(pPacket->msgType) != TRDP_MSG_PR &&
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(586) : Warning 641: Converting
+    enum to int
+                                                       _
+             vos_ntohs(pPacket->msgType) != TRDP_MSG_PE)
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(587) : Warning 641: Converting
+    enum to int
+                                                                      _
+        vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(589) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 589
+                                                                               _
+            vos_printf(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(600) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 600
+                                                                                                 _
+        vos_printf(VOS_LOG_ERROR, "trdp_pdDistribute: no minimal interval in %d packets found!\n", noOfPackets);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(717) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 717
+                                        _
+    vos_divTime(&deltaTmax, noOfPackets);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(722) : Warning 534: Ignoring
+    return value of function 'vos_divTime(struct {...} *, unsigned int)'
+    (compare with line 310, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                         _
+    vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %u.%06u\n", deltaTmax.tv_sec, deltaTmax.tv_usec);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(724) : Error 131: syntax error in
+    call of macro 'vos_printf' at location line 724
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
+              _
+static inline UINT8 *alignePtr (
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(70) : Error 10: Expecting ';'
+    _
+    alignment--;
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(74) : Error 52: Expected an
+    lvalue
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(74) : Error 34: Non-constant
+    Initializer
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(74) : Error 35: Initializer
+    has side-effects
+_
+static inline void unpackedCopy64 (
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(89) : Error 10: Expecting ';'
+    _
+#if __BIG_ENDIAN__
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(94) : Warning 553: Undefined
+    preprocessor variable '__BIG_ENDIAN__', assumed 0
+      _
+#elif __LITTLE_ENDIAN__
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(102) : Warning 553: Undefined
+    preprocessor variable '__LITTLE_ENDIAN__', assumed 0
+         _
+	#error "Endianess not defined"
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(122) : Error 309:      #error
+    "Endianess not defined"
+

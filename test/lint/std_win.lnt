@@ -1,0 +1,25 @@
+//  Gnu C/C++, -si4 -sp4, lib-stl.lnt
+//  Standard lint options
+
+co-msc90.lnt
+lib-stl.lnt
+options.lnt  -si4 -sp4
+
+-i"D:\TCNOpen\trunk\trdp\src\api"
+-i"D:\TCNOpen\trunk\trdp\src\common"
+-i"D:\TCNOpen\trunk\trdp\src\vos\api"
+-i"D:\TCNOpen\trunk\trdp\src\vos\common"
+-i"D:\TCNOpen\trunk\trdp\src\vos\windows"
+-i"D:\TCNOpen\trunk\trdp\src\vos\windows\pthread"
+-i"C:\Program Files\Microsoft Visual Studio\VC98\Include"
+-i"C:\Program Files\Microsoft Visual Studio 8\VC\include"
+-i"C:\Program Files\Microsoft Visual Studio 10.0\VC\include"
+
+-w2
++macros
++ppw(warning)
+
+-e537   // "Repeated include file 'FileName'"
+-e755   // "global macro 'Symbol' (Location) not referenced"
+-e40
+--emacro( {*}, vos_printf)
