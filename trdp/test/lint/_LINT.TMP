@@ -4,60 +4,24 @@
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-                                                                 _
-            vos_printf(VOS_LOG_ERROR, "MDframe size error (%u)\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(115) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 115
-                                                                                _
-            vos_printf(VOS_LOG_ERROR, "MDframe protocol error (%04x != %04x))\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(164) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 164
-                                                                               _
-                vos_printf(VOS_LOG_ERROR, "MDframe type error, received %04x\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(190) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 190
-                                                                                          _
-            vos_printf(VOS_LOG_ERROR, "MDframe invalid length, received %d, expected %d\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(215) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 215
                                            _
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(274) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(274) : Warning 641: Converting
     enum to int
-                                                                      _
-        vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (Err: %d)\n", err);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(290) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 290
                                            _
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(314) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(314) : Warning 641: Converting
     enum to int
-                                                          _
-        vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(318) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 318
-                                                             _
-        vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(364) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 364
-                                                             _
-        vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(389) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 389
                                                         _
         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(431) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(431) : Warning 641: Converting
     enum to int
-                                                             _
-                   "Received MD packet (space: %d len: %d)\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(459) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 458
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
                                _
@@ -70,31 +34,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(77) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(77) : Warning 641: Converting enum
     to int
-                                _
-        if (result != VOS_NO_ERR)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(90) : Error 58: Bad type
-                                                                          _
-            vos_printf(VOS_LOG_ERROR, "vos_sockOpenTCP failed (Err: %d)\n", result);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(92) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 92
-                                _
-        if (result != VOS_NO_ERR)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(98) : Error 58: Bad type
-                                                                      _
-            vos_printf(VOS_LOG_ERROR,"vos_sockBind failed (Err: %d)\n", result);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(100) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 100
-                                _
-        if (result != VOS_NO_ERR)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(106) : Error 58: Bad type
-                                                                              _
-            vos_printf(VOS_LOG_ERROR, "TRDP vos_sockListen failed (Err: %d)\n", result);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(108) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 108
-                                                                       _
-        vos_printf(VOS_LOG_INFO, "Socket information (sListen_sd=%d)\n", sListen_sd);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(112) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 112
                                   _
     vos_mutexUnlock(sSessionMutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(161) : Warning 534: Ignoring return
@@ -108,22 +47,11 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(198) : Warning 534: Ignoring return
     *, const char *, unsigned short, const char *))' (compare with line 209,
     file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                                      _
-            vos_printf(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", LIB_VERSION);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(231) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 231
-                         _
-    if (ret != VOS_NO_ERR)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(343) : Error 58: Bad type
                              _
         vos_memFree(pSession);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(345) : Warning 534: Ignoring return
     value of function 'vos_memFree(void *)' (compare with line 146, file
     D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                        _
-        vos_printf(VOS_LOG_ERROR, "vos_mutexCreate() failed (Err: /d)\n", ret);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(346) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 346
                                       _
     vos_clearTime(&pSession->interval);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(350) : Warning 534: Ignoring return
@@ -136,10 +64,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(351) : Warning 534: Ignoring return
     value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
     file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                  _
-        vos_printf(VOS_LOG_ERROR, "TRDP initMD failed (Err: %d)\n", ret);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(364) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 364
                                 _
     vos_mutexLock(sSessionMutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(372) : Warning 534: Ignoring return
@@ -345,236 +269,182 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1028) : Warning 655: bit-wise
                                           _
 #... AR *)((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_se
     FD_SET(sListen_sd, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1052) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
                                           _
 #... AR *)((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_se
     FD_SET(sListen_sd, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1052) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
                                           _
 #... ay[__i] == (sListen_sd)) { break; }}if (__i == ((fd_set FAR *)((fd_set *)p
     FD_SET(sListen_sd, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1052) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
                                           _
 #... AR *)((fd_set *)pFileDesc))->fd_count) { if (((fd_set FAR *)((fd_set *)pFi
     FD_SET(sListen_sd, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1052) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
                                           _
 #...  *)pFileDesc))->fd_count < FD_SETSIZE) { ((fd_set FAR *)((fd_set *)pFileDe
     FD_SET(sListen_sd, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1052) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
                                           _
 #...  *)((fd_set *)pFileDesc))->fd_count++; }}}while(0)
     FD_SET(sListen_sd, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1053) : Warning 613: Possible use of
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1052) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                        _
-    			{
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 525: Negative
-    indentation from line 1063
-                                                                                        _
-#... ((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_set *)p
-	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+                                                                            _
+#... _i; for (__i = 0; __i < ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count; _
+                    FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                        _
-#... ((fd_set *)pFileDesc))->fd_count; __i++) { if (((fd_set FAR *)((fd_set *)p
-	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+                                                                            _
+#... _i; for (__i = 0; __i < ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count; _
+                    FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                        _
-#... iface[index].sock)) { break; }}if (__i == ((fd_set FAR *)((fd_set *)pFileD
-	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+                                                                            _
+#... leDesc))->fd_array[__i] == (appHandle->iface[index].sock)) { break; }}if (
+                    FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                        _
-#... ((fd_set *)pFileDesc))->fd_count) { if (((fd_set FAR *)((fd_set *)pFileDes
-	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+                                                                            _
+#... ) { break; }}if (__i == ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count) {
+                    FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                        _
-#... ileDesc))->fd_count < FD_SETSIZE) { ((fd_set FAR *)((fd_set *)pFileDesc))-
-	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+                                                                            _
+#... unt) { if (((fd_set FAR *)((fd_set *)pFileDesc))->fd_count < FD_SETSIZE) {
+                    FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                        _
-#... fd_set *)pFileDesc))->fd_count++; }}}while(0)
-	    			FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1065) : Warning 613: Possible use of
+                                                                            _
+#... ->iface[index].sock); ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count++; }
+                    FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1064) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                        _
-		    	}
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1066) : Warning 525: Negative
-    indentation from line 1063
-                                                                                            _
-#... (fd_set *)pFileDesc))->fd_count ; __i++) { if (((fd_set FAR *)((fd_set *)p
-				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+                                                                            _
+#... i; for (__i = 0; __i < ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count ; _
+                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1068) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                            _
-#... (fd_set *)pFileDesc))->fd_count ; __i++) { if (((fd_set FAR *)((fd_set *)p
-				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+                                                                            _
+#... i; for (__i = 0; __i < ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count ; _
+                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1068) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                            _
-#... fd_set *)pFileDesc))->fd_count-1) { ((fd_set FAR *)((fd_set *)pFileDesc))-
-				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+                                                                            _
+#... .sock) { while (__i < ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count-1) {
+                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1068) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                            _
-#... fd_set *)pFileDesc))->fd_count-1) { ((fd_set FAR *)((fd_set *)pFileDesc))-
-				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+                                                                            _
+#... .sock) { while (__i < ((fd_set FAR *)((fd_set *)pFileDesc))->fd_count-1) {
+                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1068) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                            _
-#... esc))->fd_array[__i+1]; __i++; }((fd_set FAR *)((fd_set *)pFileDesc))->fd_
-				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+                                                                            _
+#... __i] = ((fd_set FAR *)((fd_set *)pFileDesc))->fd_array[__i+1]; __i++; }((f
+                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1068) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                            _
-#... fd_set *)pFileDesc))->fd_count--; break; }}}while(0)
-				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+                                                                            _
+#... array[__i+1]; __i++; }((fd_set FAR *)((fd_set *)pFileDesc))->fd_count--; b
+                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1068) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                                                                                            _
-#... ileDesc))->fd_count--; break; }}}while(0)
-				    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1069) : Warning 613: Possible use of
+                                                                            _
+#... ]; __i++; }((fd_set FAR *)((fd_set *)pFileDesc))->fd_count--; break; }}}wh
+                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1068) : Warning 613: Possible use of
     null pointer 'unknown-name' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 1025]
-                _
-                }
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1070) : Warning 525: Negative
-    indentation from line 1067
                                                _
         vos_subTime(&appHandle->interval, &now);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1083) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1082) : Warning 534: Ignoring return
     value of function 'vos_subTime(struct {...} *, const struct {...} *)'
     (compare with line 281, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                      _
     vos_mutexUnlock(appHandle->mutex);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1096) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1095) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                        _
     vos_clearTime(&appHandle->interval);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1141) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1140) : Warning 534: Ignoring return
     value of function 'vos_clearTime(struct {...} *)' (compare with line 253,
     file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                                    _
-        vos_printf(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1152) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 1152
                      _
     vos_getTime(&now);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1156) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1155) : Warning 534: Ignoring return
     value of function 'vos_getTime(struct {...} *)' (compare with line 228,
     file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                                 _
             !(iterPD->privFlags & TRDP_TIMED_OUT))              /*  and not already flagged ?   */
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1164) : Warning 655: bit-wise
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1163) : Warning 655: bit-wise
     operation uses (compatible) enum's
-                                                                                      _
-                theMessage.msgType      = vos_ntohs(iterPD->pFrame->frameHead.msgType);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1178) : Error 64: Type mismatch
-    (assignment) (enum {...} = unsigned short)
                                                _
             iterPD->privFlags |= TRDP_TIMED_OUT;
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1192) : Warning 655: bit-wise
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1191) : Warning 655: bit-wise
     operation uses (compatible) enum's
                          _
         vos_getTime(&now);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1196) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1195) : Warning 534: Ignoring return
     value of function 'vos_getTime(struct {...} *)' (compare with line 228,
     file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                                                                                            _
             if (iterMD->socketIdx != -1 && (!appHandle->beQuiet || (iterMD->pktFlags & TRDP_FLAGS_REDUNDANT)))
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1228) : Warning 655: bit-wise
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1227) : Warning 655: bit-wise
     operation uses (compatible) enum's
                                                                 _
                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1232) : Warning 655: bit-wise
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1231) : Warning 655: bit-wise
     operation uses (compatible) enum's
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1232) : Warning 641: Converting enum
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1231) : Warning 641: Converting enum
     to int
-                        _
-                        }
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1245) : Warning 525: Negative
-    indentation from line 1242
-                                _
-				if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1256) : Warning 539: Did not expect
-    positive indentation from line 1251
+                                                               _
+                if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1256) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1256) : Warning 641: Converting enum
     to int
-                _
-                {
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1257) : Warning 525: Negative
-    indentation from line 1256
-                        _
-                	if(nextstate == TRDP_MD_ELE_ST_TX_REQUEST_W4Y)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1258) : Warning 525: Negative
-    indentation from line 1256
-                    _
-                    {
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1259) : Warning 525: Negative
-    indentation from line 1258
-                    _
-                    }
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1281) : Warning 525: Negative
-    indentation from line 1258
-                _
-                }
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1282) : Warning 525: Negative
-    indentation from line 1256
                                                                     _
                     if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1288) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1288) : Warning 641: Converting enum
     to int
-                                                                                                      _
-                        vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1292) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 1292
                                        _
                     vos_memFree(iterMD);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1323) : Warning 534: Ignoring return
     value of function 'vos_memFree(void *)' (compare with line 146, file
     D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                                     _
-                    vos_printf(VOS_LOG_ERROR, "Error receiving PD packet (Err: %d)\n", err);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1361) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 1361
                                                     _
     if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1372) : Warning 655: bit-wise
@@ -584,19 +454,19 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1372) : Warning 641: Converting enum
                             _
         MD_ELE_T    *iterMD = NULL;
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1375) : Warning 578: Declaration of
-    symbol 'iterMD' hides symbol 'iterMD' (line 1128)
+    symbol 'iterMD' hides symbol 'iterMD' (line 1127)
                         _
         TRDP_ERR_T  err = TRDP_NO_ERR;
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1377) : Warning 578: Declaration of
-    symbol 'err' hides symbol 'err' (line 1126)
+    symbol 'err' hides symbol 'err' (line 1125)
                                 _
                 MD_ELE_T *iterMD;
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1683) : Warning 578: Declaration of
-    symbol 'iterMD' hides symbol 'iterMD' (line 1128)
+    symbol 'iterMD' hides symbol 'iterMD' (line 1127)
                         _
         MD_ELE_T *iterMD;
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1712) : Warning 578: Declaration of
-    symbol 'iterMD' hides symbol 'iterMD' (line 1128)
+    symbol 'iterMD' hides symbol 'iterMD' (line 1127)
                          _
         vos_getTime(&now);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1715) : Warning 534: Ignoring return
@@ -609,10 +479,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1729) : Warning 534: Ignoring return
     value of function 'vos_addTime(struct {...} *, const struct {...} *)'
     (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                                             _
-                        vos_printf(VOS_LOG_INFO, "MD listener timeout: fall back ARM st=%d\n", iterMD->stateEle);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1735) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 1735
                                                              _
                         vos_addTime(&tmpt, &iterMD->interval); /* interval is timeout velue */
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1903) : Warning 534: Ignoring return
@@ -633,10 +499,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2036) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2036) : Warning 641: Converting enum
     to int
-                                                                                                          _
-                            vos_printf(VOS_LOG_INFO, "Socket (Num = %d) usage decremented to (Num = %d)\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2052) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 2052
                                         _
 					if(sndDone == 1)
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2077) : Warning 539: Did not expect
@@ -656,30 +518,18 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2083) : Warning 525: Negative
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2083) : Warning 534: Ignoring return
     value of function 'vos_memFree(void *)' (compare with line 146, file
     D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                                       _
-                        vos_printf(VOS_LOG_INFO, "MD send session done: remove st=%d\n", iterMD->stateEle);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2085) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 2085
                                                          _
                     vos_addTime(&tmpt, &iterMD->interval);  /* interval is timeout velue */
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2097) : Warning 534: Ignoring return
     value of function 'vos_addTime(struct {...} *, const struct {...} *)'
     (compare with line 267, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                                          _
-                        vos_printf(VOS_LOG_INFO, "MD send session timeout: remove st=%d\n", iterMD->stateEle);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2100) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 2100
                                                     _
     if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2202) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2202) : Warning 641: Converting enum
     to int
-                                                                              _
-                    vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2217) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 2217
                                      _
     vos_mutexUnlock(appHandle->mutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2263) : Warning 534: Ignoring return
@@ -870,30 +720,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3076) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3076) : Warning 641: Converting enum
     to int
-                _
-                {
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3079) : Warning 525: Negative
-    indentation from line 3078
-                    _
-                    if (pendingMD_reply)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3080) : Warning 525: Negative
-    indentation from line 3078
-                    _
-                    if (pendingMD_confirm)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3085) : Warning 525: Negative
-    indentation from line 3078
-                _
-                }
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3090) : Warning 525: Negative
-    indentation from line 3078
-                _
-                else
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3091) : Warning 525: Negative
-    indentation from line 3078
-                        _
-			}
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3129) : Warning 539: Did not expect
-    positive indentation from line 3091
                                                   _
                     memcpy(&pNewElement->sessionID, &pendingMD_reply->sessionID, sizeof(TRDP_UUID_T));
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3174) : Warning 545: Suspicious use
@@ -916,22 +742,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3185) : Warning 534: Ignoring return
                 memcpy(&pNewElement->sessionID, uuid, sizeof(TRDP_UUID_T));
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3194) : Warning 545: Suspicious use
     of &
-                        _
-			if(pendingMD_confirm)
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3206) : Warning 539: Did not expect
-    positive indentation from line 3202
-            _
-            {
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3207) : Warning 525: Negative
-    indentation from line 3206
-                           _
-                pNewElement->frameHead.sequenceCounter  = pendingMD_confirm->frameHead.sequenceCounter;
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3208) : Warning 525: Negative
-    indentation from line 3206
-            _
-            }
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3209) : Warning 525: Negative
-    indentation from line 3206
                                                                        _
             pNewElement->frameHead.msgType          = vos_htons(msgType);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3211) : Warning 641: Converting enum
@@ -960,10 +770,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3253) : Warning 655: bit-wise
     operation uses (compatible) enum's
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3253) : Warning 641: Converting enum
     to int
-                                                                                                        _
-            vos_printf(VOS_LOG_INFO, "MD sender new element st = %d msgType=x%04X, disableReplyRx=%d.\n", pNewElement->stateEle, msgType, pNewElement->disableReplyRx);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3281) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 3281
                                 _
         vos_memFree(pNewElement);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3291) : Warning 534: Ignoring return
@@ -975,14 +781,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3297) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                _
-               0,              /* reply state */
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3354) : Error 64: Type mismatch
-    (arg. no. 14) (int/enum)
-                _
-               0,              /* reply state */
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3419) : Error 64: Type mismatch
-    (arg. no. 14) (int/enum)
                                                                 _
                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) == 0)
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3541) : Warning 655: bit-wise
@@ -1026,18 +824,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3724) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     411, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                _
-               0,              /* reply state */
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3785) : Error 64: Type mismatch
-    (arg. no. 14) (int/enum)
-                _
-               0,              /* reply state */
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3851) : Error 64: Type mismatch
-    (arg. no. 14) (int/enum)
-                _
-               0,              /* pktflags */
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3902) : Error 64: Type mismatch
-    (arg. no. 9) (int/enum)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                                _
@@ -1127,10 +913,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(268) : Warning 525: Negative
     if (vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr) != VOS_NO_ERR)
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(322) : Error 64: Type mismatch
     (arg. no. 3) (ptrs to signed/unsigned)
-                                                                                             _
-        vos_printf(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(351) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 351
                                                               _
     if (vos_ntohs(pNewFrame->frameHead.msgType) == TRDP_MSG_PR)
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(372) : Warning 641: Converting
@@ -1139,14 +921,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(372) : Warning 641: Converting
             pPulledElement->privFlags |= TRDP_REQ_2B_SENT;
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(413) : Warning 655: bit-wise
     operation uses (compatible) enum's
-                                                                                            _
-                vos_printf(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(418) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 418
-                                                                           _
-                vos_printf(VOS_LOG_INFO, "Old PD data ignored (comId %u)\n", vos_ntohl(pNewFrame->frameHead.comId));
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(439) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 439
                                                 _
         vos_getTime(&pExistingElement->timeToGo);
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(455) : Warning 534: Ignoring
@@ -1187,18 +961,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(560) : Warning 574:
         packetSize > TRDP_MAX_PD_PACKET_SIZE)
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(561) : Warning 574:
     Signed-unsigned mix with relational
-                                                             _
-        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", (UINT32) packetSize);
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(563) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 563
-                                                                      _
-        vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(573) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 573
-                                                                           _
-        vos_printf(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(579) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 579
                                                         _
     else if (vos_ntohs(pPacket->msgType) != TRDP_MSG_PD &&
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(585) : Warning 641: Converting
@@ -1211,28 +973,12 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(586) : Warning 641: Converting
              vos_ntohs(pPacket->msgType) != TRDP_MSG_PE)
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(587) : Warning 641: Converting
     enum to int
-                                                                      _
-        vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(589) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 589
-                                                                               _
-            vos_printf(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(600) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 600
-                                                                                                 _
-        vos_printf(VOS_LOG_ERROR, "trdp_pdDistribute: no minimal interval in %d packets found!\n", noOfPackets);
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(717) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 717
                                         _
     vos_divTime(&deltaTmax, noOfPackets);
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(722) : Warning 534: Ignoring
     return value of function 'vos_divTime(struct {...} *, unsigned int)'
     (compare with line 310, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                                         _
-    vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %u.%06u\n", deltaTmax.tv_sec, deltaTmax.tv_usec);
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(724) : Error 131: syntax error in
-    call of macro 'vos_printf' at location line 724
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c 
                                _
@@ -1257,12 +1003,535 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(89) : Error 10: Expecting ';'
 #if __BIG_ENDIAN__
 D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(94) : Warning 553: Undefined
     preprocessor variable '__BIG_ENDIAN__', assumed 0
-      _
-#elif __LITTLE_ENDIAN__
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(102) : Warning 553: Undefined
-    preprocessor variable '__LITTLE_ENDIAN__', assumed 0
-         _
-	#error "Endianess not defined"
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(122) : Error 309:      #error
-    "Endianess not defined"
+              _
+static inline void packedCopy64 (
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(135) : Error 129: declaration
+    expected, identifier 'inline' ignored
+                                                                _
+    UINT64 *pSrc64 = (UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(141) : Error 78: Symbol
+    'UINT64' typedef'ed at line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(141) : Warning 530: Symbol
+    'UINT64' (line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
+    initialized
+                                             _
+    TRDP_COMID_DSID_MAP_T	key1 = {comID, 0};
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(260) : Warning 614: auto
+    aggregate initializer not constant
+                                                _
+    	TRDP_DATASET_T	key22 = {key2->datasetId, 0, 0};
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(266) : Warning 614: auto
+    aggregate initializer not constant
+                                         _
+	TRDP_DATASET_T  key2 = {datasetID, 0, 0};
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(289) : Warning 614: auto
+    aggregate initializer not constant
+        _
+	pSrc = alignePtr(pInfo->pSrc, ALIGNOF(struct {UINT8 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(333) : Warning 539: Did not
+    expect positive indentation from line 326
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(333) : Error 26: Expected an
+    expression, found 'struct'
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(333) : Error 10: Expecting ','
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(333) : Error 155: Ignoring {
+    }'ed sequence within an expression, 0 assumed
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(333) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(333) : Warning 515: Symbol
+    __alignof() has arg. count conflict (2 vs. 1) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(333) : Error 64: Type mismatch
+    (assignment) (unsigned char * = int)
+                                                          _
+        if (pDataset->pElement[index].type > TRDP_TYPE_MAX)
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(347) : Warning 641: Converting
+    enum to int
+                                                                              _
+                    UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(389) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(389) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(389) : Warning 530: Symbol
+    'UINT16' (line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
+    initialized
+                                                                              _
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(408) : Error 78: Symbol
+    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(408) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
+    unsigned long long) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(408) : Warning 530: Symbol
+    'UINT32' (line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
+    initialized
+                                                                                              _
+#...                  __alignof(struct {VOS_TIME_T a;})
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(426) : Error 26: Expected an
+    expression, found 'struct'
+                                                                                              _
+#...                  __alignof(struct {VOS_TIME_T a;})
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(426) : Error 10: Expecting ','
+                                                                                              _
+#...                __alignof(struct {VOS_TIME_T a;})
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(426) : Error 155: Ignoring {
+    }'ed sequence within an expression, 0 assumed
+                                                                                              _
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(426) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(426) : Warning 515: Symbol
+    __alignof() has arg. count conflict (2 vs. 1) with line 141
+                                                                                          _
+#...                  __alignof(struct {TIMEDATE48 a;})
+                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Error 26: Expected an
+    expression, found 'struct'
+                                                                                          _
+#...                  __alignof(struct {TIMEDATE48 a;})
+                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Error 10: Expecting ','
+                                                                                          _
+#...                __alignof(struct {TIMEDATE48 a;})
+                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Error 155: Ignoring {
+    }'ed sequence within an expression, 0 assumed
+                                                                                          _
+                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Warning 515: Symbol
+    __alignof() has arg. count conflict (2 vs. 1) with line 141
+                                                                                     _
+                        pSrc16 = (UINT16 *) alignePtr((UINT8*) pSrc32, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(456) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(456) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+                                                          _
+        if (pDataset->pElement[index].type > TRDP_TYPE_MAX)
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(522) : Warning 641: Converting
+    enum to int
+                                                                              _
+                    UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(565) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(565) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+                                                                              _
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(582) : Error 78: Symbol
+    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(582) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
+    unsigned long long) with line 141
+                                                                                                                  _
+#...                  __alignof(struct {TIMEDATE48 a;})
+						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(602) : Error 26: Expected an
+    expression, found 'struct'
+                                                                                                                  _
+#...                  __alignof(struct {TIMEDATE48 a;})
+						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(602) : Error 10: Expecting ','
+                                                                                                                  _
+#...                __alignof(struct {TIMEDATE48 a;})
+						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(602) : Error 155: Ignoring {
+    }'ed sequence within an expression, 0 assumed
+                                                                                                                  _
+						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE48 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(602) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(602) : Warning 515: Symbol
+    __alignof() has arg. count conflict (2 vs. 1) with line 141
+                                                                                    _
+                        pDst16 = (UINT16 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(608) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(608) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+                                                                                              _
+#...                  __alignof(struct {VOS_TIME_T a;})
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(619) : Error 26: Expected an
+    expression, found 'struct'
+                                                                                              _
+#...                  __alignof(struct {VOS_TIME_T a;})
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(619) : Error 10: Expecting ','
+                                                                                              _
+#...                __alignof(struct {VOS_TIME_T a;})
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(619) : Error 155: Ignoring {
+    }'ed sequence within an expression, 0 assumed
+                                                                                              _
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE64 a;}));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(619) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 141
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(619) : Warning 515: Symbol
+    __alignof() has arg. count conflict (2 vs. 1) with line 141
+                                                                                    _
+                        pDst32 = (UINT32 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT32));
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(627) : Error 78: Symbol
+    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(627) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
+    unsigned long long) with line 141
 
+    --- Wrap-up for Module: D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c
+
+Warning 528: Symbol 'inline' (line 70, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
+    not referenced
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
+                          _
+UINT32 trdp_getTopoCount (void);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.h(55) : Error 18: Symbol
+    'trdp_getTopoCount(struct TRDP_SESSION *)' redeclared (arg. count)
+    conflicts with line 55, file D:\TCNOpen\trunk\trdp\src\common\trdp_if.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c
+                                                                                    _
+                        vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
+D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c(523) : Warning 534: Ignoring
+    return value of function 'vos_sockBind(int, unsigned int, unsigned short)'
+    (compare with line 337, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                            _
+            vos_sockClose(iface[index].sock);
+D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c(579) : Warning 534: Ignoring
+    return value of function 'vos_sockClose(int)' (compare with line 211, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
+                          _
+UINT32 trdp_getTopoCount (void);
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.h(55) : Error 18: Symbol
+    'trdp_getTopoCount(struct TRDP_SESSION *)' redeclared (arg. count)
+    conflicts with line 55, file D:\TCNOpen\trunk\trdp\src\common\trdp_if.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c
+                                            _
+    vos_getTime(&appHandle->stats.timeStamp);
+D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c(346) : Warning 534: Ignoring
+    return value of function 'vos_getTime(struct {...} *)' (compare with line
+    228, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                    _
+                 appHandle->stats.mem.usedBlockSize);
+D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c(356) : Warning 534: Ignoring
+    return value of function 'vos_memCount(unsigned int *, unsigned int *,
+    unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned
+    int *, unsigned int *)' (compare with line 172, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                       _
+    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c(412) : Warning 641: Converting
+    enum to int
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
+                  _
+    vos_sockInit();
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(135) : Warning 534: Ignoring
+    return value of function 'vos_sockInit(void)' (compare with line 152, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 328:
+    trdp_pdCheck([1], ?)
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 596: vos_crc32(-1,
+    [0], ?)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(158) : Warning 661: Possible
+    access of out-of-bounds pointer (1 beyond end of data) by operator '['
+    [Reference: file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c: lines 328,
+    596; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 156, 158]
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
+                                           _
+        for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(176) : Warning 641: Converting
+    enum to int
+                               _
+    if (i < VOS_MEM_NBLOCKSIZES)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(185) : Warning 641: Converting
+    enum to int
+                                           _
+        for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(188) : Warning 641: Converting
+    enum to int
+                                                _
+            gMem.memCnt.preAlloc[i] = fragMem[i];
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(190) : Warning 613: Possible use
+    of null pointer 'fragMem' in left argument to operator '[' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c: line 174]
+                                           _
+        for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(216) : Warning 641: Converting
+    enum to int
+                                         _
+    gMem.noOfBlocks = VOS_MEM_NBLOCKSIZES;
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(226) : Warning 641: Converting
+    enum to int
+                                       _
+    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(230) : Warning 641: Converting
+    enum to int
+                                 _
+                vos_memFree(p[j]);
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(257) : Warning 534: Ignoring
+    return value of function 'vos_memFree(void *)' (compare with line 146, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_if.c line 202: vos_memInit(0, 0,
+    0)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(190) : Warning 413: Likely use
+    of null pointer 'fragMem' in left argument to operator '[' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 202]
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_if.c line 206: vos_memInit(?, ?,
+    ?)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(190) : Warning 613: Possible use
+    of null pointer 'fragMem' in left argument to operator '[' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c: line 174]
+                                         _
+        vos_mutexLocalDelete(&gMem.mutex);
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(281) : Warning 534: Ignoring
+    return value of function 'vos_mutexLocalDelete(struct VOS_MUTEX *)'
+    (compare with line 49, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_private.h)
+                                _
+    int         ret = VOS_NO_ERR;
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(450) : Warning 641: Converting
+    enum to int
+              _
+    return ret;
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(528) : Error 64: Type mismatch
+    (return) (int/enum)
+                                       _
+    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(568) : Warning 641: Converting
+    enum to int
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
+                                 _
+        vos_threadDelay(interval);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(77) : Warning 534: Ignoring
+    return value of function 'vos_threadDelay(unsigned int)' (compare with line
+    216, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                               _
+    retCode = pthread_attr_setschedpolicy(&threadAttrib, policy);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(239) : Warning 641:
+    Converting enum to int
+                          _
+    _ftime32_s( &curTime );
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(422) : Warning 534: Ignoring
+    return value of function '_ftime32_s(struct __timeb32 *)' (compare with
+    line 123, file C:\Program Files\Microsoft Visual Studio
+    10.0\VC\include\sys\timeb.h)
+                          _
+    _ftime32_s( &curTime );
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(445) : Warning 534: Ignoring
+    return value of function '_ftime32_s(struct __timeb32 *)' (compare with
+    line 123, file C:\Program Files\Microsoft Visual Studio
+    10.0\VC\include\sys\timeb.h)
+                                  _
+                  curTime.millitm);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(458) : Warning 534: Ignoring
+    return value of function 'sprintf_s(char *, unsigned int, const char *,
+    ...)' (compare with line 321, file C:\Program Files\Microsoft Visual Studio
+    10.0\VC\include\stdio.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                        _
+#...                    (pTime)->tv_sec = (pTime)->tv_usec = 0
+	timerclear(pTime);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(482) : Warning 539: Did not
+    expect positive indentation from line 477
+_
+{
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(565) : Warning 578:
+    Declaration of symbol 'div' hides symbol 'div(int, int)' (line 432, file
+    C:\Program Files\Microsoft Visual Studio 10.0\VC\include\stdlib.h)
+                         _
+    vos_getTime(&current);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(661) : Warning 534: Ignoring
+    return value of function 'vos_getTime(struct {...} *)' (compare with line
+    412)
+                                        _
+        pthread_mutexattr_destroy(&attr);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(730) : Warning 534: Ignoring
+    return value of function 'pthread_mutexattr_destroy(struct
+    pthread_mutexattr_t_ **)' (compare with line 997, file D:\TCNOpen\trunk\trdp\src\vos\windows\pthread\pthread.h,
+    module D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c)
+                                        _
+        pthread_mutexattr_destroy(&attr);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(778) : Warning 534: Ignoring
+    return value of function 'pthread_mutexattr_destroy(struct
+    pthread_mutexattr_t_ **)' (compare with line 997, file D:\TCNOpen\trunk\trdp\src\vos\windows\pthread\pthread.h,
+    module D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c)
+                           _
+        vos_memFree(pMutex);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(819) : Warning 534: Ignoring
+    return value of function 'vos_memFree(void *)' (compare with line 447, file
+    D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c)
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
+                                                      _
+            (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(142) : Warning 534: Ignoring
+    return value of function 'sprintf_s(char *, unsigned int, const char *,
+    ...)' (compare with line 321, file C:\Program Files\Microsoft Visual Studio
+    10.0\VC\include\stdio.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                    _
+            &mac[5]);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(225) : Warning 534: Ignoring
+    return value of function 'swscanf_s(const unsigned short *, const unsigned
+    short *, ...)' (compare with line 585, file C:\Program Files\Microsoft
+    Visual Studio 10.0\VC\include\stdio.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+    _
+    }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(229) : Warning 550: Symbol
+    'dwStatus' (line 204) not accessed
+                         _
+        closesocket(sock);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(285) : Warning 534: Ignoring
+    return value of function 'closesocket(unsigned int)' (compare with line
+    1467, file C:\Program Files\Microsoft Visual Studio\VC98\Include\winsock2.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                         _
+        closesocket(sock);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(331) : Warning 534: Ignoring
+    return value of function 'closesocket(unsigned int)' (compare with line
+    1467, file C:\Program Files\Microsoft Visual Studio\VC98\Include\winsock2.h,
+    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                  _
+            if (ioctlsocket(sock, FIONBIO, &value) == SOCKET_ERROR)
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(402) : Warning 569: Loss of
+    information (arg. no. 2) (32 bits to 31 bits)
+                                                                   _
+                           sizeof(sockOptValue)) == INVALID_SOCKET )
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(423) : Warning 650: Constant
+    out of range for operator '=='
+                               _
+    if (sock == INVALID_SOCKET )
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(462) : Warning 650: Constant
+    out of range for operator '=='
+                               _
+    if (sock == INVALID_SOCKET )
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(530) : Warning 650: Constant
+    out of range for operator '=='
+                                                     _
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(667) : Warning 534: Ignoring
+    return value of function 'strerror_s(char *, unsigned int, int)' (compare
+    with line 159, file D:\TCNOpen\trunk\trdp\src\common\string.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                               _
+    if (sock == INVALID_SOCKET )
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(698) : Warning 650: Constant
+    out of range for operator '=='
+                               _
+    if (sock == INVALID_SOCKET )
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(741) : Warning 650: Constant
+    out of range for operator '=='
+                                                     _
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(748) : Warning 534: Ignoring
+    return value of function 'strerror_s(char *, unsigned int, int)' (compare
+    with line 159, file D:\TCNOpen\trunk\trdp\src\common\string.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                                                                 _
+                    strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(813) : Warning 534: Ignoring
+    return value of function 'strerror_s(char *, unsigned int, int)' (compare
+    with line 159, file D:\TCNOpen\trunk\trdp\src\common\string.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                               _
+    if (sock == INVALID_SOCKET )
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(853) : Warning 650: Constant
+    out of range for operator '=='
+                                                     _
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(867) : Warning 534: Ignoring
+    return value of function 'strerror_s(char *, unsigned int, int)' (compare
+    with line 159, file D:\TCNOpen\trunk\trdp\src\common\string.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                               _
+    if (sock == INVALID_SOCKET )
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(894) : Warning 650: Constant
+    out of range for operator '=='
+                                             _
+        sendSize = send((SOCKET)sock, pBuffer, bufferSize, 0);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(902) : Error 64: Type mismatch
+    (arg. no. 2) (ptrs to signed/unsigned)
+                                                     _
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(915) : Warning 534: Ignoring
+    return value of function 'strerror_s(char *, unsigned int, int)' (compare
+    with line 159, file D:\TCNOpen\trunk\trdp\src\common\string.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+                               _
+    if (sock == INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(951) : Warning 650: Constant
+    out of range for operator '=='
+                                            _
+        rcvSize = recv((SOCKET)sock, pBuffer, bufferSize, 0);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(959) : Error 64: Type mismatch
+    (arg. no. 2) (ptrs to signed/unsigned)
+                                                     _
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(982) : Warning 534: Ignoring
+    return value of function 'strerror_s(char *, unsigned int, int)' (compare
+    with line 159, file D:\TCNOpen\trunk\trdp\src\common\string.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+_
+}
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(987) : Warning 529: Symbol
+    'options' (line 947) not subsequently referenced
+
+--- Global Wrap-up
+
+Warning 526: 'ig_endian()' (line 573, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+    not defined
+Warning 628: no argument information provided for function 'ig_endian()' (line
+    573, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'unpackedCopy64()' (line 640, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
+    not defined
+Warning 628: no argument information provided for function 'unpackedCopy64()'
+    (line 640, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
+Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
+    not accessed
+Warning 526: '__alignof()' (line 141, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
+    not defined
+Warning 628: no argument information provided for function '__alignof()' (line
+    141, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
+Warning 526: 'alignePtr()' (line 141, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
+    not defined
+Warning 628: no argument information provided for function 'alignePtr()' (line
+    141, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)

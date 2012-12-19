@@ -57,7 +57,6 @@ extern void *gRefCon;
 
 /** Debug output macro with formatting options */
 #ifdef WIN32
-/*lint --emacro({*}, vos_printf) */
 #define vos_printf(level, format, ...)                                  \
     {if (gPDebugFunction != NULL)                                       \
      {   char str[VOS_MAX_PRNT_STR_SIZE];                               \
