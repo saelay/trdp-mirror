@@ -45,6 +45,23 @@ typedef struct
     UINT8       *pDstEnd;   /**< last destination		*/
 } TAU_MARSHALL_INFO_T;
 
+/* structure type definitions for alignment calculation */ 
+typedef struct 
+{
+    UINT8 a;
+} STRUCT_T;
+
+typedef struct 
+{
+    TIMEDATE48 a;
+} TIMEDATE48_STRUCT_T;
+
+typedef struct 
+{
+    TIMEDATE64 a;
+} TIMEDATE64_STRUCT_T;
+
+
 /***********************************************************************************************************************
  * LOCALS
  */
@@ -67,7 +84,7 @@ static UINT32                  sNumEntries = 0;
  *
  *  @retval         aligned pointer
  */
-static inline UINT8 *alignePtr (
+static INLINE UINT8 *alignePtr(
     const UINT8 *pSrc,
     UINT32      alignment)
 {
@@ -86,7 +103,7 @@ static inline UINT8 *alignePtr (
  *
  *  @retval         none
  */
-static inline void unpackedCopy64 (
+static INLINE void unpackedCopy64 (
     UINT8   * *ppSrc,
     UINT8   * *ppDst,
     UINT32  noOfItems)
@@ -132,7 +149,8 @@ static inline void unpackedCopy64 (
  *
  *  @retval         none
  */
-static inline void packedCopy64 (
+
+static INLINE void packedCopy64 (
     UINT8   * *ppSrc,
     UINT8   * *ppDst,
     UINT32  noOfItems)
@@ -255,16 +273,20 @@ static int comId_compare (
  *  @retval         pointer to dataset
  */
 static TRDP_DATASET_T *find_DS_from_ComId (
-    UINT32 comID)
+    UINT32 comId)
 {
-    TRDP_COMID_DSID_MAP_T	key1 = {comID, 0};
+    TRDP_COMID_DSID_MAP_T	key1 = {0};
     TRDP_DATASET_T 			**key3;	
+    TRDP_COMID_DSID_MAP_T   *key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
     
-	TRDP_COMID_DSID_MAP_T *key2 = vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+    key1.comId = comId;
+    
     if (key2 != NULL)
     {
-    	TRDP_DATASET_T	key22 = {key2->datasetId, 0, 0};
-    	key3 = vos_bsearch(&key22, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+    	TRDP_DATASET_T	key22 = {0};
+
+        key22.id = key2->datasetId; 
+        key3 = (TRDP_DATASET_T **) vos_bsearch(&key22, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
         if (key3 != NULL)
         {
             return *key3;
@@ -284,10 +306,12 @@ static TRDP_DATASET_T *find_DS_from_ComId (
  *  @retval         pointer to dataset
  */
 static TRDP_DATASET_T *find_DS (
-    UINT32 datasetID)
+    UINT32 datasetId)
 {
-	TRDP_DATASET_T  key2 = {datasetID, 0, 0};
+	TRDP_DATASET_T  key2 = {0};
     TRDP_DATASET_T  **key3;
+
+    key2.id = datasetId;
   	key3 = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
     if (key3 != NULL)
     {
@@ -328,12 +352,10 @@ EXT_DECL TRDP_ERR_T marshall (
         return TRDP_STATE_ERR;
     }
 
-	/*	Align on struct boundary first	*/
-    
-	pSrc = alignePtr(pInfo->pSrc, ALIGNOF(struct {UINT8 a;}));
+    /*	Align on struct boundary first	*/
+    pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
 
     /*	Loop over all datasets in the array	*/
-
     for (index = 0; index < pDataset->numElement; ++index)
     {
         UINT32 noOfItems = pDataset->pElement[index].size;
@@ -344,7 +366,7 @@ EXT_DECL TRDP_ERR_T marshall (
         }
 
         /*	Is this a composite type?	*/
-        if (pDataset->pElement[index].type > TRDP_TYPE_MAX)
+        if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
             {
@@ -405,7 +427,7 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_REAL32:
                 case TRDP_TIMEDATE32:
                 {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+                     UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
 
                     /*	possible variable source size	*/
                     var_size = *pSrc32;
@@ -423,7 +445,8 @@ EXT_DECL TRDP_ERR_T marshall (
                 }
                 case TRDP_TIMEDATE64:
                 {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE64 a;}));
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
+
                     while (noOfItems-- > 0)
                     {
                         *pDst++ = (UINT8) (*pSrc32 >> 24);
@@ -445,9 +468,10 @@ EXT_DECL TRDP_ERR_T marshall (
                 	/*	This is not a base type but a structure	*/
                     UINT32 *pSrc32;
                     UINT16 *pSrc16;
+
                     while (noOfItems-- > 0)
                     {
-                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(struct {TIMEDATE48 a;}));
+                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
                         *pDst++ = (UINT8) (*pSrc32 >> 24);
                         *pDst++ = (UINT8) (*pSrc32 >> 16);
                         *pDst++ = (UINT8) (*pSrc32 >> 8);
@@ -519,7 +543,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
             noOfItems = var_size;
         }
         /*	Is this a composite type?	*/
-        if (pDataset->pElement[index].type > TRDP_TYPE_MAX)
+        if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
             {
@@ -599,7 +623,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
                     UINT16 *pDst16;
                     while (noOfItems-- > 0)
                     {
-						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE48 a;}));
+						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
                         *pDst32 = *pSrc++ << 24;
                         *pDst32 += *pSrc++ << 16;
                         *pDst32 += *pSrc++ << 8;
@@ -616,7 +640,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 case TRDP_TIMEDATE64:
                 {
                 	/*	This is not a base type but a structure	*/
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(struct {TIMEDATE64 a;}));
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
                     while (noOfItems-- > 0)
                     {
                         *pDst32 = *pSrc++ << 24;

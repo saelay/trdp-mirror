@@ -138,8 +138,10 @@ EXT_DECL const CHAR8 *vos_ipDotted (
     UINT32 ipAddress)
 {
     static CHAR8 dotted[16];
-    sprintf_s (dotted, sizeof(dotted),"%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
-            (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
+
+    /*lint -e(534) ignore return value */
+    sprintf_s (dotted, sizeof(dotted),"%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF, 
+            (ipAddress >> 8) & 0xFF, ipAddress & 0xFF); 
     return dotted;
 }
 
@@ -174,7 +176,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
     UINT8 pMAC[6])
 {
     UINT32 i;
-
+    
     if (!vosSockInitialised)
     {
         return VOS_INIT_ERR;
@@ -210,10 +212,15 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
                 &dwTotalEntries,          /* [out] total number of elements that could be enumerated */
                 NULL);                    /* [in/out] resume handle */
 
+        if (dwStatus!=0)
+        {
+            return VOS_UNKNOWN_ERR;
+        }
 
         pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
 
         /* first address is 00000000, skip it */
+        /*lint -e(534) ignore return value */
         swscanf_s(
             (wchar_t *)pwkti[1].wkti0_transport_address,
             L"%2hx%2hx%2hx%2hx%2hx%2hx",
@@ -225,7 +232,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
             &mac[5]);
 
         /* Release pbBuffer allocated by NetWkstaTransportEnum */
-        dwStatus = NetApiBufferFree(pbBuffer);
+        dwStatus = NetApiBufferFree(pbBuffer); /*lint !e550 return value not used*/
     }
 
     for( i = 0; i < sizeof(mac); i++ )
@@ -282,7 +289,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     if (vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
     {
-        closesocket(sock);
+        closesocket(sock); /*lint !e534 ignore return value */
         return VOS_SOCK_ERR;
     }
 
@@ -328,7 +335,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if (vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
     {
-        closesocket(sock);
+        closesocket(sock);   /*lint !e534 ignore return value */
         return VOS_SOCK_ERR;
     }
     *pSock = (INT32) sock;
@@ -420,7 +427,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         {
             sockOptValue = pOptions->ttl;
             if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_TTL, (const char *)&sockOptValue,
-                           sizeof(sockOptValue)) == INVALID_SOCKET )
+                           sizeof(sockOptValue)) == SOCKET_ERROR)
             {
                 vos_printf(VOS_LOG_WARNING, "setsockopt IP_TTL failed\n");
             }
@@ -459,7 +466,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
     struct ip_mreq  mreq;
     VOS_ERR_T       err = VOS_NO_ERR;
 
-    if (sock == INVALID_SOCKET )
+    if (sock == (INT32)INVALID_SOCKET )
     {
         err = VOS_PARAM_ERR;
     }
@@ -527,7 +534,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
     struct ip_mreq  mreq;
     VOS_ERR_T       err = VOS_NO_ERR;
 
-    if (sock == INVALID_SOCKET )
+    if (sock == (INT32)INVALID_SOCKET )
     {
         err = VOS_PARAM_ERR;
     }
@@ -598,7 +605,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     {
         errno   = 0;
         err     = sendto(sock,
-                         pBuffer,
+                         (const char *)pBuffer,
                          size,
                          0,
                          (struct sockaddr *) &destAddr,
@@ -608,8 +615,8 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     if (err == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (%s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -663,8 +670,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     else if (rcvSize == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_ERROR, "recvfrom failed (%s)\n", buff);
         *pSize = 0; 
         return VOS_IO_ERR;
@@ -695,7 +702,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
 {
     struct sockaddr_in srcAddress;
 
-    if (sock == INVALID_SOCKET )
+    if (sock == (INT32)INVALID_SOCKET )
     {
         return VOS_PARAM_ERR;
     }
@@ -714,8 +721,8 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     /*  Try to bind the socket to the PD port.	*/
     if (bind(sock, (struct sockaddr *)&srcAddress, sizeof(srcAddress)) == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_ERROR, "bind failed(%s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -738,14 +745,14 @@ EXT_DECL VOS_ERR_T vos_sockListen (
     INT32   sock,
     UINT32  backlog)
 {
-    if (sock == INVALID_SOCKET )
+    if (sock == (INT32)INVALID_SOCKET )
     {
         return VOS_PARAM_ERR;
     }
     if (listen(sock, (int) backlog) == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_ERROR, "listen failed (%s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -809,8 +816,8 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
 #endif
                 default:
                 {
-                    char buff[VOS_MAX_ERR_STR_SIZE];
-                    strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+                    char buff[VOS_MAX_ERR_STR_SIZE]={0};
+                    strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
                     vos_printf(VOS_LOG_ERROR,
                                "Error calling accept listenFd(%d): %s",
                                *pSock,
@@ -850,7 +857,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
 {
     struct sockaddr_in dstAddress;
 
-    if (sock == INVALID_SOCKET )
+    if (sock == (INT32)INVALID_SOCKET )
     {
         return VOS_PARAM_ERR;
     }
@@ -863,8 +870,8 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     if (connect((SOCKET)sock, (const struct sockaddr *) &dstAddress,
                 sizeof(dstAddress)) == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_WARNING, "connect failed (%s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -891,7 +898,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     int sendSize    = 0;
     int bufferSize  = (int) size;
 
-    if (sock == INVALID_SOCKET )
+    if (sock == (INT32)INVALID_SOCKET )
     {
         return VOS_PARAM_ERR;
     }
@@ -899,7 +906,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     /*	Keep on sending until we got rid of all data or we received an unrecoverable error	*/
     do
     {
-        sendSize = send((SOCKET)sock, pBuffer, bufferSize, 0);
+        sendSize = send((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
         if (sendSize >= 0)
         {
             bufferSize  -= sendSize;
@@ -911,8 +918,8 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 
     if (sendSize == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_WARNING, "send failed (%s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -944,11 +951,10 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 {
     int             rcvSize    = 0;
     int             bufferSize = (size_t) *pSize;
-    VOS_SOCK_OPT_T  options    = {0};
 
     *pSize = 0;
     
-    if (sock == INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
+    if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
@@ -956,7 +962,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
        /*	Keep on sending until we got rid of all data or we received an unrecoverable error	*/
     do
     {
-        rcvSize = recv((SOCKET)sock, pBuffer, bufferSize, 0);
+        rcvSize = recv((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
         if (rcvSize > 0)
         {
             bufferSize  -= rcvSize;
@@ -977,9 +983,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     while (bufferSize && (rcvSize == -1 && errno == EAGAIN));
 
     if (rcvSize == SOCKET_ERROR)
-    {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno);
+    {        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_WARNING, "receive failed (%s)\n", buff);
         return VOS_IO_ERR;
     }

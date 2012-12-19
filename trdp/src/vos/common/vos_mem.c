@@ -142,7 +142,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
     UINT32          size,
     const UINT32    fragMem[VOS_MEM_NBLOCKSIZES])
 {
-    int     i, j, max;
+    UINT32  i, j, max;
     UINT32  minSize = 0;
     UINT32  blockSize[VOS_MEM_NBLOCKSIZES] = VOS_MEM_BLOCKSIZES;        /* Different block sizes */
     UINT8   *p[VOS_MEM_MAX_PREALLOCATE];
@@ -173,23 +173,22 @@ EXT_DECL VOS_ERR_T vos_memInit (
     /*  Check if we should prealloc some memory */
     if (fragMem != NULL)
     {
-        for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+        for (i = 0; i < (UINT32) VOS_MEM_NBLOCKSIZES; i++)
         {
             if (fragMem[i] != 0)
             {
                 break;
             }
         }
-    }
-
-    if (i < VOS_MEM_NBLOCKSIZES)
-    {
-
-        for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+        
+        if (i < (UINT32) VOS_MEM_NBLOCKSIZES)
         {
-            gMem.memCnt.preAlloc[i] = fragMem[i];
-            minSize += gMem.memCnt.preAlloc[i] * blockSize[i];
-        }
+            for (i = 0; i < (UINT32) VOS_MEM_NBLOCKSIZES; i++)
+            {
+                gMem.memCnt.preAlloc[i] = fragMem[i];
+                minSize += gMem.memCnt.preAlloc[i] * blockSize[i];
+            }
+        }   
     }
 
     if (pMemoryArea == NULL && size == 0)       /* This means we will use standard malloc calls    */
@@ -213,7 +212,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
     /*  Can we pre-allocate the memory? If more than half of the memory would be occupied, we don't even try...  */
     if (minSize > size / 2)
     {
-        for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+        for (i = 0; i < (UINT32) VOS_MEM_NBLOCKSIZES; i++)
         {
             gMem.memCnt.preAlloc[i] = 0;
         }
@@ -223,11 +222,11 @@ EXT_DECL VOS_ERR_T vos_memInit (
     minSize = 0;
 
     gMem.pFreeArea  = gMem.pArea;
-    gMem.noOfBlocks = VOS_MEM_NBLOCKSIZES;
+    gMem.noOfBlocks = (UINT32) VOS_MEM_NBLOCKSIZES;
     gMem.memSize    = size;
 
     /* Initialize free block headers */
-    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    for (i = 0; i < (UINT32) VOS_MEM_NBLOCKSIZES; i++)
     {
         gMem.freeBlock[i].pFirst    = (MEM_BLOCK_T *)NULL;
         gMem.freeBlock[i].size      = blockSize[i];
@@ -447,7 +446,7 @@ EXT_DECL UINT8 *vos_memAlloc (
 EXT_DECL VOS_ERR_T vos_memFree (
     void *pMemBlock)
 {
-    int         ret = VOS_NO_ERR;
+    VOS_ERR_T   ret = VOS_NO_ERR;
     UINT32      i;
     UINT32      blockSize;
     MEM_BLOCK_T *pBlock;
@@ -556,7 +555,7 @@ EXT_DECL VOS_ERR_T vos_memCount (
     UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES],
     UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES])
 {
-    int i;
+    UINT32 i;
 
     *pAllocatedMemory   = gMem.memSize;
     *pFreeMemory        = gMem.memCnt.freeSize;
@@ -565,7 +564,7 @@ EXT_DECL VOS_ERR_T vos_memCount (
     *pNumAllocErr       = gMem.memCnt.allocErrCnt;
     *pNumFreeErr        = gMem.memCnt.freeErrCnt;
 
-    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    for (i = 0; i < (UINT32) VOS_MEM_NBLOCKSIZES; i++)
     {
         usedBlockSize[i]    = gMem.memCnt.blockCnt[i];
         allocBlockSize[i]   = gMem.memCnt.preAlloc[i];

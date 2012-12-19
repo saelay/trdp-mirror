@@ -77,7 +77,7 @@ void    trdp_pdInit (
     pPacket->pFrame->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
     pPacket->pFrame->frameHead.topoCount        = vos_htonl(topoCount);
     pPacket->pFrame->frameHead.comId            = vos_htonl(pPacket->addr.comId);
-    pPacket->pFrame->frameHead.msgType          = vos_htons(type);
+    pPacket->pFrame->frameHead.msgType          = vos_htons((UINT16)type);
     pPacket->pFrame->frameHead.datasetLength    = vos_htonl(pPacket->dataSize);
     pPacket->pFrame->frameHead.subsAndReserved  = vos_htons(subs);
     pPacket->pFrame->frameHead.offsetAddress    = vos_htons(offsetAddress);
@@ -115,7 +115,7 @@ TRDP_ERR_T trdp_pdPut (
     if (TRDP_NO_ERR == ret)
     {
         /* set data valid */
-        pPacket->privFlags &= ~TRDP_INVALID_DATA;
+        pPacket->privFlags &= ~TRDP_INVALID_DATA;    /*lint !e641 !e64 bitwise operation of compatible enums */
 
         /* Update PD buffer */
         trdp_pdDataUpdate(pPacket);
@@ -147,7 +147,7 @@ void trdp_pdDataUpdate (
     }
 
     /*  Compute data checksum   */
-    myCRC = vos_crc32(myCRC, (UINT8 *)&pPacket->pFrame->data, pPacket->dataSize);
+    myCRC = vos_crc32(myCRC, pPacket->pFrame->data, pPacket->dataSize);
     *(UINT32 *)pDest = MAKE_LE(myCRC);
 }
 
@@ -170,12 +170,12 @@ TRDP_ERR_T trdp_pdGet (
     /*  Update some statistics  */
     pPacket->getPkts++;
 
-    if (pPacket->privFlags == TRDP_TIMED_OUT)
+    if (pPacket->privFlags & TRDP_TIMED_OUT)    /*lint !e655 bitwise operation of compatible enums */
     {
         return TRDP_TIMEOUT_ERR;
     }
 
-    if (pPacket->privFlags & TRDP_INVALID_DATA)
+    if (pPacket->privFlags & TRDP_INVALID_DATA) /*lint !e655 bitwise operation of compatible enums */
     {
         return TRDP_NODATA_ERR;
     }
@@ -214,32 +214,37 @@ TRDP_ERR_T  trdp_pdSendQueued (
     TRDP_TIME_T now;
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
-    vos_clearTime(&appHandle->interval);
-
+    vos_clearTime(&appHandle->interval);                        /*lint !e534 ignore return value */
+ 
     /*    Find the packet which has to be sent next:    */
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
         /*    Get the current time    */
-        vos_getTime(&now);
+        err = (TRDP_ERR_T) vos_getTime(&now);
+
+        if( err != TRDP_NO_ERR)
+        {
+            continue;
+        }
 
         /*  Is this a cyclic packet and
          due to sent?
          or is it a PD Request or a requested packet (PULL) ?
          */
-		if ((timerisset(&iterPD->interval) &&
+        if ((timerisset(&iterPD->interval) &&                   /*  Request for immediate sending   */
              !timercmp(&iterPD->timeToGo, &now, >)) ||
-            iterPD->privFlags & TRDP_REQ_2B_SENT)       /*  Request for immediate sending   */
+            iterPD->privFlags & TRDP_REQ_2B_SENT)               /*lint !e655 bitwise operation of compatible enums */
         {
             /* send only if there are valid data */
-            if (!(iterPD->privFlags & TRDP_INVALID_DATA))
+            if (!(iterPD->privFlags & TRDP_INVALID_DATA))       /*lint !e655 bitwise operation of compatible enums */
             {
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
 
                 /*    Send the packet if it is not redundant    */
-                if (iterPD->socketIdx != -1 &&
+                if (iterPD->socketIdx != -1 && 
                     (!appHandle->beQuiet ||
-                    (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
+                    (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT))) /*lint !e655 bitwise operation of compatible enums */
                 {
                     /* We pass the error to the application, but we keep on going    */
                     err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);
@@ -251,9 +256,9 @@ TRDP_ERR_T  trdp_pdSendQueued (
             }
 
             /* Reset "immediate" flag for request or requested packet */
-            if (iterPD->privFlags & TRDP_REQ_2B_SENT)
+            if (iterPD->privFlags & TRDP_REQ_2B_SENT)           /*lint !e655 bitwise operation of compatible enums */  
             {
-                iterPD->privFlags ^= TRDP_REQ_2B_SENT;
+                iterPD->privFlags ^= TRDP_REQ_2B_SENT;          /*lint !e655 bitwise operation of compatible enums */
             }
 
             /*  Set timer if interval was set.
@@ -263,7 +268,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
             {
                 /*    set new time    */
                 iterPD->timeToGo = iterPD->interval;
-                vos_addTime(&iterPD->timeToGo, &now);
+                vos_addTime(&iterPD->timeToGo, &now);           /*lint !e534 ignore return value */
             }
         }
     }
@@ -298,9 +303,9 @@ TRDP_ERR_T  trdp_pdReceive (
     PD_ELE_T            *pPulledElement;
     TRDP_ERR_T          err         = TRDP_NO_ERR;
     TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
-    INT32 recSize;
-    BOOL informUser = FALSE;
-    TRDP_ADDRESSES_T    subHandle = { 0, 0, 0, 0};
+    UINT32              recSize;
+    BOOL                informUser  = FALSE;
+    TRDP_ADDRESSES_T    subHandle   = { 0, 0, 0, 0};
 
 
     /*  Get a buffer    */
@@ -319,9 +324,10 @@ TRDP_ERR_T  trdp_pdReceive (
     recSize = TRDP_MAX_PD_PACKET_SIZE;
 
     /*  Get the packet from the wire:  */
-    if (vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr) != VOS_NO_ERR)
+    err = (TRDP_ERR_T) vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr);
+    if ( err!=TRDP_NO_ERR)
     {
-        return TRDP_WIRE_ERR;
+        return err;
     }
 
     /*  Is packet sane?	*/
@@ -369,7 +375,7 @@ TRDP_ERR_T  trdp_pdReceive (
 #endif
 
     /*  It might be a PULL request      */
-    if (vos_ntohs(pNewFrame->frameHead.msgType) == TRDP_MSG_PR)
+    if (vos_ntohs(pNewFrame->frameHead.msgType) == (UINT16) TRDP_MSG_PR)
     {
         /*  Handle statistics request  */
         if (vos_ntohl(pNewFrame->frameHead.comId) == TRDP_STATISTICS_REQUEST_COMID)
@@ -410,7 +416,7 @@ TRDP_ERR_T  trdp_pdReceive (
             }
 
             /* trigger immediate sending of PD  */
-            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;
+            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;  /*lint !e655 bitwise operation of compatible enums */
 
             if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
             {
@@ -452,16 +458,16 @@ TRDP_ERR_T  trdp_pdReceive (
         informUser = memcmp(pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
 
         /*  Get the current time and compute the next time this packet should be received.  */
-        vos_getTime(&pExistingElement->timeToGo);
-        vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
+        vos_getTime(&pExistingElement->timeToGo);                                /*lint !e534 ignore return value */
+        vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);   /*lint !e534 ignore return value */
 
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
         pExistingElement->lastErr    = TRDP_NO_ERR;
-        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
+        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;     /*lint !e641 !e64 converting enum to int */
 
         /* set the data valid */
-        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
+        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;  /*lint !e641 !e64 converting enum to int */
 
         if (informUser)
         {
@@ -502,7 +508,7 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.srcIpAddr    = pExistingElement->addr.srcIpAddr;
             theMessage.destIpAddr   = pExistingElement->addr.destIpAddr;
             theMessage.topoCount    = vos_ntohl(pExistingElement->pFrame->frameHead.topoCount);
-            theMessage.msgType      = vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
+            theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
             theMessage.seqCount     = vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter);
             theMessage.protVersion  = vos_ntohs(pExistingElement->pFrame->frameHead.protocolVersion);
             theMessage.subs         = vos_ntohs(pExistingElement->pFrame->frameHead.subsAndReserved);
@@ -550,7 +556,7 @@ void    trdp_pdUpdate (
  */
 TRDP_ERR_T trdp_pdCheck (
     PD_HEADER_T *pPacket,
-    INT32       packetSize)
+    UINT32       packetSize)
 {
     UINT32      myCRC       = vos_crc32(0xFFFFFFFF, NULL, 0);
     UINT32      *pDataFCS   = (UINT32 *)((UINT8 *)pPacket + packetSize - 4);
@@ -565,7 +571,6 @@ TRDP_ERR_T trdp_pdCheck (
     }
 
     /*	Check Header CRC (FCS)  */
-
     myCRC = vos_crc32(myCRC, (UINT8 *) pPacket, sizeof(PD_HEADER_T) - 4);
 
     if (pPacket->frameCheckSum != MAKE_LE(myCRC))
@@ -573,6 +578,7 @@ TRDP_ERR_T trdp_pdCheck (
         vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
         err = TRDP_CRC_ERR;
     }
+
     /*  Check protocol version  */
     else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (TRDP_PROTO_VER & 0xFF000000))
     {
@@ -581,14 +587,16 @@ TRDP_ERR_T trdp_pdCheck (
                    TRDP_PROTO_VER);
         err = TRDP_WIRE_ERR;
     }
+
     /*  Check type  */
-    else if (vos_ntohs(pPacket->msgType) != TRDP_MSG_PD &&
-             vos_ntohs(pPacket->msgType) != TRDP_MSG_PR &&
-             vos_ntohs(pPacket->msgType) != TRDP_MSG_PE)
+    else if (vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PD &&
+             vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PR &&
+             vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PE)
     {
         vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
         err = TRDP_WIRE_ERR;
     }
+
     /*  Check Data CRC (FCS)   */
     else if (pPacket->datasetLength > 0)
     {
@@ -719,7 +727,7 @@ TRDP_ERR_T  trdp_pdDistribute (
     }
 
     /*  This is the delta time we can jitter...   */
-    vos_divTime(&deltaTmax, noOfPackets);
+    vos_divTime(&deltaTmax, noOfPackets); /*lint !e534 ignore return value */
 
     vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %u.%06u\n", deltaTmax.tv_sec, deltaTmax.tv_usec);
     vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %u.%06u\n", tNull.tv_sec, tNull.tv_usec);

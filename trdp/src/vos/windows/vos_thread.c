@@ -74,7 +74,7 @@ void cyclicThread (
 {
     for(;; )
     {
-        vos_threadDelay(interval);
+        vos_threadDelay(interval); /*lint !e534 ignore return value */
         pFunction(pArguments);
         pthread_testcancel();
     }
@@ -236,7 +236,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     }
 
     /* Set the policy of the thread */
-    retCode = pthread_attr_setschedpolicy(&threadAttrib, policy);
+    retCode = pthread_attr_setschedpolicy(&threadAttrib, (int) policy);
     if (retCode != 0)
     {
         vos_printf(
@@ -407,6 +407,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
  *  @param[out]     pTime           Pointer to time value
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_UNKNOWN_ERR can't retrieve time
  */
 
 EXT_DECL VOS_ERR_T vos_getTime (
@@ -419,10 +420,18 @@ EXT_DECL VOS_ERR_T vos_getTime (
         return VOS_PARAM_ERR;
     }
 
-    _ftime32_s( &curTime );
+    if (_ftime32_s( &curTime )==0)
+    {
+        pTime->tv_sec   = curTime.time;
+        pTime->tv_usec  = curTime.millitm * 1000;
+    }
+    else
+    {
+        pTime->tv_sec   = 0;
+        pTime->tv_usec  = 0;
 
-    pTime->tv_sec   = curTime.time;
-    pTime->tv_usec  = curTime.millitm * 1000;
+        return VOS_UNKNOWN_ERR;
+    }
 
     return VOS_NO_ERR;
 }
@@ -442,20 +451,23 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
     struct tm           curTimeTM;
 
     memset(timeString, 0, sizeof(timeString));
-    _ftime32_s( &curTime );
 
-    if (_localtime32_s(&curTimeTM, &curTime.time) == 0)
+    if (_ftime32_s( &curTime )==0)
     {
-        sprintf_s(timeString,
-                  sizeof(timeString),
-                  "%04d%02d%02d-%02d:%02d:%02d.%03hd ",
-                  1900 + curTimeTM.tm_year /* offset in years from 1900 */,
-                  1 + curTimeTM.tm_mon /* january is zero */,
-                  curTimeTM.tm_mday,
-                  curTimeTM.tm_hour,
-                  curTimeTM.tm_min,
-                  curTimeTM.tm_sec,
-                  curTime.millitm);
+        if (_localtime32_s(&curTimeTM, &curTime.time) == 0)
+        {
+            /*lint -e(534) ignore return value */
+            sprintf_s(timeString, 
+                sizeof(timeString),
+                "%04d%02d%02d-%02d:%02d:%02d.%03hd ",
+                1900 + curTimeTM.tm_year /* offset in years from 1900 */,
+                1 + curTimeTM.tm_mon     /* january is zero */,
+                curTimeTM.tm_mday,
+                curTimeTM.tm_hour,
+                curTimeTM.tm_min,
+                curTimeTM.tm_sec,
+                curTime.millitm);
+        }
     }
 
     return timeString;
@@ -479,7 +491,7 @@ EXT_DECL VOS_ERR_T vos_clearTime (
         return VOS_PARAM_ERR;
     }
 
-	timerclear(pTime);
+    timerclear(pTime);
 
     return VOS_NO_ERR;
 }
@@ -554,28 +566,29 @@ EXT_DECL VOS_ERR_T vos_subTime (
  *
  *
  *  @param[in, out]     pTime           Pointer to time value
- *  @param[in]          div             Divisor
+ *  @param[in]          divisor         Divisor
  *  @retval             VOS_NO_ERR      no error
  *  @retval             VOS_PARAM_ERR   parameter must not be NULL
  */
 
 EXT_DECL VOS_ERR_T vos_divTime (
     VOS_TIME_T  *pTime,
-    UINT32      div)
+    UINT32      divisor)
 {
     UINT32 temp;
-    if (pTime == NULL || div == 0)
+
+    if (pTime == NULL || divisor == 0)
     {
         return VOS_PARAM_ERR;
     }
 
-    temp = pTime->tv_sec % div;
-    pTime->tv_sec /= div;
+    temp = pTime->tv_sec % divisor;
+    pTime->tv_sec /= divisor;
     if (temp > 0)
     {
         pTime->tv_usec += temp * 1000000;
     }
-    pTime->tv_usec /= div;
+    pTime->tv_usec /= divisor;
     return VOS_NO_ERR;
 }
 
@@ -657,8 +670,13 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1;
     VOS_TIME_T      current;
+    VOS_ERR_T       err = VOS_NO_ERR;
 
-    vos_getTime(&current);
+    err = vos_getTime(&current);
+    if ( err != VOS_NO_ERR)
+    {
+        return err;
+    }
 
     pUuID[0]    = current.tv_usec & 0xFF;
     pUuID[1]    = (current.tv_usec & 0xFF00) >> 8;
@@ -675,13 +693,14 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     count++;
 
     /*  Copy the mac address into the rest of the array */
-    if (vos_sockGetMAC(&pUuID[10]) != VOS_NO_ERR)
+    err = vos_sockGetMAC(&pUuID[10]) ;
+    if ( err != VOS_NO_ERR)
     {
-        return VOS_UNKNOWN_ERR;
+        return err;
     }
 
 #endif
-    return VOS_NO_ERR;
+    return err;
 }
 
 
@@ -727,7 +746,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
         {
             err = pthread_mutex_init(&(*pMutex)->mutexId, &attr);
         }
-        pthread_mutexattr_destroy(&attr);
+        pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
     }
 
     if (err == 0)
@@ -775,7 +794,7 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
         {
             err = pthread_mutex_init(&pMutex->mutexId, &attr);
         }
-        pthread_mutexattr_destroy(&attr);
+        pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
     }
 
     if (err == 0)
