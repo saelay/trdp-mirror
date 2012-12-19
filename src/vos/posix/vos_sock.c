@@ -417,50 +417,6 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
 
 
 /**********************************************************************************************************************/
-/** Get socket options.
- *
- *  @param[in]      sock            socket descriptor
- *  @param[out]     pOptions        return value
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   sock descriptor unknown
- */
-
-EXT_DECL VOS_ERR_T vos_sockGetOptions (
-    INT32           sock,
-    VOS_SOCK_OPT_T *pOptions)
-{
-    INT32 flags;
-
-    if ((sock > 0) && (pOptions != NULL))
-    {
-        return VOS_PARAM_ERR;
-    }
-    else
-    {
-        flags = fcntl(sock, F_GETFL);
-
-        if(flags < 0)
-        {
-            return VOS_SOCK_ERR;
-        }
-
-        if((flags & O_NONBLOCK) == O_NONBLOCK)
-        {
-            pOptions->nonBlocking = TRUE;
-        }
-
-        pOptions->qos = 0;
-        pOptions->reuseAddrPort = FALSE;
-        pOptions->ttl = 0;
-        pOptions->ttl_multicast = 0;
-    }
-
-    return VOS_NO_ERR;
-}
-
-
-
-/**********************************************************************************************************************/
 /** Join a multicast group.
  *  Note: Some targeted systems might not support this option.
  *
@@ -979,27 +935,24 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     	return VOS_SOCK_ERR;
     }
 
-    /* Keep on sending until we got rid of all data or we received an unrecoverable error */
-    do
+    rcvSize = read(sock, pBuffer, bufferSize);
+    if (rcvSize > 0)
     {
-        rcvSize = read(sock, pBuffer, bufferSize);
-        if (rcvSize > 0)
-        {
-            bufferSize  -= rcvSize;
-            pBuffer     += rcvSize;
-            *pSize      += rcvSize;
-        }
-        
-        if((rcvSize == -1) && (errno == EWOULDBLOCK) && (options.nonBlocking == TRUE))
-        {
-        	return VOS_NO_ERR;
-        }
-        
-        if (rcvSize == 0)
-        {
-            return VOS_NODATA_ERR;
-        }
+        bufferSize  -= rcvSize;
+        pBuffer     += rcvSize;
+        *pSize      += rcvSize;
     }
+        
+    if((rcvSize == -1) && (errno == EWOULDBLOCK))
+    {
+      	return VOS_NO_ERR;
+    }
+        
+    if (rcvSize == 0)
+    {
+        return VOS_NODATA_ERR;
+    }
+
     while (bufferSize || (rcvSize == -1 && errno == EAGAIN));
 
     if (rcvSize == -1)
