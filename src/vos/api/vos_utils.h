@@ -83,6 +83,15 @@ extern void *gRefCon;
 #define ALIGNOF(type)   offsetof(struct { char c; type member; }, member)
 #endif
 
+/** inline macros  */
+#ifdef WIN32
+#define INLINE   _inline
+#elif defined(__GNUC__)
+#define INLINE   inline
+#else
+#define INLINE   inline
+#endif
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */

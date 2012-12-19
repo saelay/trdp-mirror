@@ -132,9 +132,7 @@ VOS_ERR_T vos_init (
     gPDebugFunction = pDebugOutput;
     gRefCon         = pRefCon;
 
-    vos_sockInit();
-
-    return VOS_NO_ERR;
+    return vos_sockInit();
 }
 
 /**********************************************************************************************************************/

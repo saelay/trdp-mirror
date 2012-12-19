@@ -58,7 +58,7 @@ void trdp_pdDataUpdate (
 
 TRDP_ERR_T  trdp_pdCheck (
     PD_HEADER_T *pPacket,
-    INT32       packetSize);
+    UINT32       packetSize);
 
 TRDP_ERR_T  trdp_pdSend (
     INT32    pdSock,

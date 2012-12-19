@@ -508,11 +508,11 @@ TRDP_ERR_T  trdp_requestSocket (
                     port = TRDP_MD_UDP_PORT; /* FIXME configuration file! */
                 }
                 sock_options.nonBlocking = TRUE; /* MD UDP sockets are always non blocking because they are polled */
-                if (vos_sockOpenUDP(&iface[index].sock, &sock_options) != VOS_NO_ERR)
+                err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[index].sock, &sock_options);
+                if (err != TRDP_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "Socket create for UDP failed!\n");
                     *pIndex = -1;
-                    err     = TRDP_SOCK_ERR;
                 }
                 else
                 {
@@ -520,17 +520,21 @@ TRDP_ERR_T  trdp_requestSocket (
                     *pIndex = index;
                     if (rcvOnly)
                     {
-                        vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
+                        err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
+                        if (err != TRDP_NO_ERR)
+                        {
+                            vos_printf(VOS_LOG_ERROR, "Socket create for UDP rcv failed!\n");
+                            *pIndex = -1;
+                        }
                     }
                 }
                 break;
             case TRDP_SOCK_MD_TCP:
-                if (vos_sockOpenTCP(&iface[index].sock,
-                                    &sock_options) != VOS_NO_ERR)
+                err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[index].sock, &sock_options);
+                if (err != TRDP_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "Socket create for TCP failed!\n");
                     *pIndex = -1;
-                    err     = TRDP_SOCK_ERR;
                 }
                 else
                 {
@@ -566,20 +570,17 @@ TRDP_ERR_T  trdp_releaseSocket (
 {
     TRDP_ERR_T err = TRDP_PARAM_ERR;
 
-    if (iface == NULL)
+    if (iface != NULL)
     {
-        return err;
-    }
-
-    if (iface[index].sock > -1)
-    {
-        if (--iface[index].usage == 0)
+        if (iface[index].sock > -1)
         {
-            /* Close that socket, nobody uses it anymore */
-            vos_sockClose(iface[index].sock);
-            iface[index].sock = -1;
+            if (--iface[index].usage == 0)
+            {
+                /* Close that socket, nobody uses it anymore */
+                err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
+                iface[index].sock = -1;
+            }
         }
-        err = TRDP_NO_ERR;
     }
 
     return err;

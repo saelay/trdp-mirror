@@ -219,9 +219,10 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
 /** Return the current time in sec and us
  *
  *
- *  @param[out]     pTime             Pointer to time value
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
+ *  @param[out]     pTime            Pointer to time value
+ *  @retval         VOS_NO_ERR       no error
+ *  @retval         VOS_PARAM_ERR    parameter out of range/invalid
+ *  @retval         VOS_UNKNOWN_ERR  can't retrieve time
  */
 
 EXT_DECL VOS_ERR_T vos_getTime (

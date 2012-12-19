@@ -428,8 +428,11 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
     struct timeval  curTime;
     struct tm       *curTimeTM;
 
+    memset(timeString, 0, sizeof(timeString));
+
     gettimeofday(&curTime, NULL);
     curTimeTM = localtime(&curTime.tv_sec);
+    /*lint -e(534) ignore return value */
     sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
             curTimeTM->tm_year,
             curTimeTM->tm_mon,
@@ -520,28 +523,28 @@ EXT_DECL VOS_ERR_T vos_subTime (
  *
  *
  *  @param[in, out]     pTime           Pointer to time value
- *  @param[in]          div             Divisor
+ *  @param[in]          divisor         Divisor
  *  @retval             VOS_NO_ERR      no error
  *  @retval             VOS_PARAM_ERR   parameter must not be NULL
  */
 
 EXT_DECL VOS_ERR_T vos_divTime (
     VOS_TIME_T  *pTime,
-    UINT32      div)
+    UINT32      divisor)
 {
     UINT32 temp;
-    if (pTime == NULL || div == 0)
+    if (pTime == NULL || divisor == 0)
     {
         return VOS_PARAM_ERR;
     }
 
-    temp = pTime->tv_sec % div;
-    pTime->tv_sec /= div;
+    temp = pTime->tv_sec % divisor;
+    pTime->tv_sec /= divisor;
     if (temp > 0)
     {
         pTime->tv_usec += temp * 1000000;
     }
-    pTime->tv_usec /= div;
+    pTime->tv_usec /= divisor;
     return VOS_NO_ERR;
 }
 
@@ -620,11 +623,16 @@ EXT_DECL VOS_ERR_T vos_getUuid (
 #ifdef __APPLE__
     uuid_generate_time(pUuID);
 #else
-    /*    Manually creating a UUID from time stamp and MAC address    */
+    /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1;
     VOS_TIME_T      current;
+    VOS_ERR_T       err = VOS_NO_ERR;
 
-    vos_getTime(&current);
+    err = vos_getTime(&current);
+    if ( err != VOS_NO_ERR)
+    {
+        return err;
+    }
 
     pUuID[0]    = current.tv_usec & 0xFF;
     pUuID[1]    = (current.tv_usec & 0xFF00) >> 8;
@@ -633,23 +641,23 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     pUuID[4]    = current.tv_sec & 0xFF;
     pUuID[5]    = (current.tv_sec & 0xFF00) >> 8;
     pUuID[6]    = (current.tv_sec & 0xFF0000) >> 16;
-    pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*    pseudo-random version    */
+    pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*  pseudo-random version   */
 
     /* we always increment these values, this definitely makes the UUID unique */
     pUuID[8]    = (UINT8) (count & 0xFF);
     pUuID[9]    = (UINT8) (count >> 8);
     count++;
 
-    /*    Copy the mac address into the rest of the array    */
-    if (vos_sockGetMAC(&pUuID[10]) != VOS_NO_ERR)
+    /*  Copy the mac address into the rest of the array */
+    err = vos_sockGetMAC(&pUuID[10]) ;
+    if ( err != VOS_NO_ERR)
     {
-        return VOS_UNKNOWN_ERR;
+        return err;
     }
+
 #endif
-
-    return VOS_NO_ERR;
+    return err;
 }
-
 
 
 /**********************************************************************************************************************/
@@ -693,7 +701,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
         {
             err = pthread_mutex_init(&(*pMutex)->mutexId, &attr);
         }
-        pthread_mutexattr_destroy(&attr);
+        pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
     }
 
     if (err == 0)
@@ -741,7 +749,7 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
         {
             err = pthread_mutex_init(&pMutex->mutexId, &attr);
         }
-        pthread_mutexattr_destroy(&attr);
+        pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
     }
 
     if (err == 0)

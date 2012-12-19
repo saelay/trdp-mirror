@@ -52,7 +52,8 @@ extern "C" {
  *
  *  @retval      topoCount            Current topoCount value
  */
-UINT32 trdp_getTopoCount (void);
+UINT32 trdp_getTopoCount (
+    TRDP_APP_SESSION_T pSessionHandle);
     
 /**********************************************************************************************************************/
 /** Check if the session handle is valid
