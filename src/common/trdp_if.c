@@ -1006,119 +1006,114 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 {
     TRDP_TIME_T now;
     PD_ELE_T    *iterPD;
+    TRDP_ERR_T  ret = TRDP_NOINIT_ERR;
 
-    if (!trdp_isValidSession(appHandle))
+    if (trdp_isValidSession(appHandle))
     {
-        return TRDP_NOINIT_ERR;
-    }
-
-    if ((pInterval == NULL)
-        ||(pFileDesc == NULL)
-        ||(pNoDesc == NULL))
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
-    {
-        return TRDP_NOINIT_ERR;
-    }
-
-    /*    Get the current time    */
-    vos_getTime(&now);
-
-    vos_clearTime(&appHandle->interval);
-
-    /*    Walk over the registered PDs, find pending packets */
-
-    /*    Find the packet which has to be received next:    */
-    for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
-    {
-        if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
-            (!timerisset(&appHandle->interval) ||
-             !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
+        if ((pInterval == NULL)
+            ||(pFileDesc == NULL)
+            ||(pNoDesc == NULL))
         {
-            appHandle->interval = iterPD->timeToGo;
-
-            /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-
-            if (pFileDesc != NULL &&
-                iterPD->socketIdx != -1 &&
-                appHandle->iface[iterPD->socketIdx].sock != -1 &&
-                appHandle->option & TRDP_OPTION_BLOCK)
+            ret = TRDP_PARAM_ERR;
+        }
+        else
+        {
+            ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
+            
+            if (ret == TRDP_NO_ERR)
             {
-                if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))
-                {
-                    FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
-                }
-            }
-        }
-    }
+                /*    Get the current time    */
+                vos_getTime(&now);
+                vos_clearTime(&appHandle->interval);
 
-    /*    Find the packet which has to be sent even earlier:    */
-    for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
-    {
-        if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
-            (!timerisset(&appHandle->interval) ||
-             !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
-        {
-            appHandle->interval = iterPD->timeToGo;
-        }
-    }
+                /*    Walk over the registered PDs, find pending packets */
+                /*    Find the packet which has to be received next:    */
+                for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
+                {
+                    if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
+                        (!timerisset(&appHandle->interval) ||
+                         !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
+                    {
+                        appHandle->interval = iterPD->timeToGo;
+
+                        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
+                        if (iterPD->socketIdx != -1 &&
+                            appHandle->iface[iterPD->socketIdx].sock != -1 &&
+                            appHandle->option & TRDP_OPTION_BLOCK)
+                        {
+                            if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))
+                            {
+                                FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
+                            }
+                        }
+                    }
+                }
+
+                /*    Find the packet which has to be sent even earlier:    */
+                for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
+                {
+                    if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
+                        (!timerisset(&appHandle->interval) ||
+                         !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
+                    {
+                        appHandle->interval = iterPD->timeToGo;
+                    }
+                }
 
 #if MD_SUPPORT
-
-    /*	Copy the sMaster_set socket states to the pFileDesc	*/
-    FD_SET(sListen_sd, (fd_set *)pFileDesc);
-    {
-       int index;
-
-        for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
-        {
-            if((appHandle->iface[index].sock != -1)
-                && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP))
-            {
-                /* Copy the sMaster_set to the pFileDesc */
-                if(FD_ISSET(appHandle->iface[index].sock, &sMaster_set))
+                /*	Copy the sMaster_set socket states to the pFileDesc	*/
                 {
-                    FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+                    int index;
+
+                    FD_SET(sListen_sd, (fd_set *)pFileDesc);
+
+                    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+                    {
+                        if((appHandle->iface[index].sock != -1)
+                            && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP))
+                        {
+                            /* Copy the sMaster_set to the pFileDesc */
+                            if(FD_ISSET(appHandle->iface[index].sock, &sMaster_set))
+                            {
+                                FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+                            }
+                            else
+                            {
+                                FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+                            }
+                        }
+                    }
                 }
-                else
+
+                *pNoDesc = sMax_sd;
+#endif
+                /*    if lowest time is not zero   */
+                if (timerisset(&appHandle->interval) &&
+                    !timercmp(&now, &appHandle->interval, >))
                 {
-                    FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+                    vos_subTime(&appHandle->interval, &now);
+                    *pInterval = appHandle->interval;
+        
+                   /*    vos_printf(VOS_LOG_INFO, "interval sec = %lu, usec = %u\n",
+                                    appHandle->interval.tv_sec,
+                                    appHandle->interval.tv_usec); */
+                }
+                else    /*    Default minimum time is 10ms    */
+                {
+                    pInterval->tv_sec   = 0;
+                    pInterval->tv_usec  = 10000; /* Minimum poll time 10ms    */
+                    /* vos_printf(VOS_LOG_INFO, "no interval\n"); */
+                }
+                ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
+
+
+                /* FIXME set a maximumount of sockets to check */
+                if (pNoDesc != NULL)
+                {
+                    *pNoDesc = VOS_MAX_SOCKET_CNT;
                 }
             }
         }
-    }
-
-    *pNoDesc = sMax_sd;
-
-#endif
-
-    /*    if lowest time is not zero   */
-    if (timerisset(&appHandle->interval) &&
-        !timercmp(&now, &appHandle->interval, >))
-    {
-        vos_subTime(&appHandle->interval, &now);
-        *pInterval = appHandle->interval;
-        
-       /*    vos_printf(VOS_LOG_INFO, "interval sec = %lu, usec = %u\n",
-                           appHandle->interval.tv_sec,
-                                 appHandle->interval.tv_usec); */
-    }
-    else    /*    Default minimum time is 10ms    */
-    {
-        pInterval->tv_sec   = 0;
-        pInterval->tv_usec  = 10000; /* Minimum poll time 10ms    */
-        /* vos_printf(VOS_LOG_INFO, "no interval\n"); */
-    }
-    vos_mutexUnlock(appHandle->mutex);
-
-
-    /* FIXME set a maximumount of sockets to check */
-    if (pNoDesc != NULL)
-    {
-        *pNoDesc = VOS_MAX_SOCKET_CNT;
     }
     return TRDP_NO_ERR;
 }
@@ -2333,7 +2328,11 @@ EXT_DECL TRDP_ERR_T tlp_request (
     PD_ELE_T    *pReqElement    = NULL;
 
     /*    Check params    */
-    if (appHandle == 0 || subHandle == 0)
+    if (   appHandle == 0 
+        || subHandle == 0
+        ||  comId == 0 
+        || dataSize > TRDP_MAX_PD_PACKET_SIZE
+        || destIpAddr == 0)
     {
         return TRDP_PARAM_ERR;
     }
@@ -2343,130 +2342,115 @@ EXT_DECL TRDP_ERR_T tlp_request (
         return TRDP_NOINIT_ERR;
     }
 
-    /*    Check params    */
-    if (comId == 0 ||
-        dataSize > TRDP_MAX_PD_PACKET_SIZE ||
-        destIpAddr == 0)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
     /*    Reserve mutual access    */
-    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
+    
+    if ( ret == TRDP_NO_ERR)
     {
-        return TRDP_NOINIT_ERR;
-    }
+        /*    Look for existing subscription element    */
+        pSubPD = trdp_queueFindSubAddr(appHandle->pRcvQueue, (TRDP_ADDRESSES_T *) subHandle);
 
-    /*    Look for existing subscription element    */
-
-    pSubPD = trdp_queueFindSubAddr(appHandle->pRcvQueue, (TRDP_ADDRESSES_T *) subHandle);
-
-    if (pSubPD == NULL)
-    {
-        ret = TRDP_NOSUB_ERR;
-    }
-    else
-    {
-        /*    Look for former request element    */
-
-        pReqElement = trdp_queueFindComId(appHandle->pSndQueue, comId);
-
-        if ( pReqElement == NULL)
+        if (pSubPD == NULL)
         {
-            /*  This is the first time, get a new element   */
-            pReqElement = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
+            ret = TRDP_NOSUB_ERR;
+        }
+        else
+        {
+            /*    Look for former request element    */
+            pReqElement = trdp_queueFindComId(appHandle->pSndQueue, comId);
 
-            if (pReqElement == NULL)
+            if ( pReqElement == NULL)
             {
-                ret = TRDP_MEM_ERR;
-            }
-            else
-            {
-                /*
-                 Compute the overal packet size
-                 Add padding bytes to align to 32 bits
-                 */
-                pReqElement->dataSize   = dataSize;
-                pReqElement->grossSize  = trdp_packetSizePD(dataSize);
-                pReqElement->pFrame     = (PD_PACKET_T *) vos_memAlloc(pReqElement->grossSize);
+                /*  This is the first time, get a new element   */
+                pReqElement = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
 
-                if (pReqElement->pFrame == NULL)
+                if (pReqElement == NULL)
                 {
-                    vos_memFree(pReqElement);
-                    pReqElement = NULL;
+                    ret = TRDP_MEM_ERR;
                 }
                 else
                 {
+                    /*
+                     Compute the overal packet size
+                     Add padding bytes to align to 32 bits
+                     */
+                    pReqElement->dataSize   = dataSize;
+                    pReqElement->grossSize  = trdp_packetSizePD(dataSize);
+                    pReqElement->pFrame     = (PD_PACKET_T *) vos_memAlloc(pReqElement->grossSize);
 
-                    /*    Get a socket    */
-                    ret = trdp_requestSocket(appHandle->iface,
-                                             (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
-                                             srcIpAddr,
-                                             TRDP_SOCK_PD,
-                                             appHandle->option,
-                                             FALSE,
-                                             &pReqElement->socketIdx,
-                                             0);
-
-                    if (ret != TRDP_NO_ERR)
+                    if (pReqElement->pFrame == NULL)
                     {
-                        vos_memFree(pReqElement->pFrame);
                         vos_memFree(pReqElement);
                         pReqElement = NULL;
                     }
                     else
                     {
+                        /*    Get a socket    */
+                        ret = trdp_requestSocket(appHandle->iface,
+                                                 (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
+                                                 srcIpAddr,
+                                                 TRDP_SOCK_PD,
+                                                 appHandle->option,
+                                                 FALSE,
+                                                 &pReqElement->socketIdx,
+                                                 0);
 
-                        /*  Mark this element as a PD PULL.  Request will be sent on tlc_process time.    */
+                        if (ret != TRDP_NO_ERR)
+                        {
+                            vos_memFree(pReqElement->pFrame);
+                            vos_memFree(pReqElement);
+                            pReqElement = NULL;
+                        }
+                        else
+                        {
+                            /*  Mark this element as a PD PULL.  Request will be sent on tlc_process time.    */
+                            vos_clearTime(&pReqElement->interval);
+                            vos_clearTime(&pReqElement->timeToGo);
 
-                        vos_clearTime(&pReqElement->interval);
-                        vos_clearTime(&pReqElement->timeToGo);
+                            /*  Update the internal data */
+                            pReqElement->addr.comId         = comId;
+                            pReqElement->addr.destIpAddr    = destIpAddr;
+                            pReqElement->addr.srcIpAddr     = srcIpAddr;
+                            pReqElement->addr.mcGroup       = 0;
+                            pReqElement->pktFlags           = pktFlags;
 
-                        /*  Update the internal data */
-
-                        pReqElement->addr.comId         = comId;
-                        pReqElement->addr.destIpAddr    = destIpAddr;
-                        pReqElement->addr.srcIpAddr     = srcIpAddr;
-                        pReqElement->addr.mcGroup       = 0;
-                        pReqElement->pktFlags           = pktFlags;
-
-                        /*    Enter this request into the send queue.    */
-
-                        trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
+                            /*    Enter this request into the send queue.    */
+                            trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
+                        }
                     }
                 }
             }
+    
+            if (ret == TRDP_NO_ERR && pReqElement != NULL)
+            {
+                /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
+                    curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
+                    it will be incremented when sending...                                                          */
+                pReqElement->curSeqCnt = trdp_getSeqCnt(pReqElement->addr.comId, 
+                                                        TRDP_MSG_PD, pReqElement->addr.srcIpAddr) - 1;
+
+                /*    Compute the header fields */
+                trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, subs, offsetAddr, replyComId, replyIpAddr);
+
+                if (dataSize > 0)
+                {
+                    ret = tlp_put(appHandle, &pReqElement->addr, pData, dataSize);
+                }
+
+                /*  This flag triggers sending in tlc_process (one shot)  */
+                pReqElement->privFlags |= TRDP_REQ_2B_SENT;
+
+                /*    Set the current time and start time out of subscribed packet  */
+                if (timerisset(&pSubPD->interval))
+                {
+                    vos_getTime(&pSubPD->timeToGo);
+                    vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
+                }
+            }
         }
+
+        ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
     }
-
-    if (ret == TRDP_NO_ERR && pReqElement != NULL)
-    {
-        /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
-            curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
-            it will be incremented when sending...                                                          */
-
-        pReqElement->curSeqCnt = trdp_getSeqCnt(pReqElement->addr.comId, TRDP_MSG_PD, pReqElement->addr.srcIpAddr) - 1;
-
-        /*    Compute the header fields */
-        trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, subs, offsetAddr, replyComId, replyIpAddr);
-
-        if (dataSize > 0)
-        {
-            ret = tlp_put(appHandle, &pReqElement->addr, pData, dataSize);
-        }
-
-        /*  This flag triggers sending in tlc_process (one shot)  */
-        pReqElement->privFlags |= TRDP_REQ_2B_SENT;
-
-        /*    Set the current time and start time out of subscribed packet  */
-        if (timerisset(&pSubPD->interval))
-        {
-            vos_getTime(&pSubPD->timeToGo);
-            vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
-        }
-    }
-
-    vos_mutexUnlock(appHandle->mutex);
 
     return ret;
 }
@@ -3714,7 +3698,6 @@ TRDP_ERR_T tlm_delListener (
                 }
 
                 /* it's the listner i want to remove */
-
                 /* head or inside */
                 if (appHandle->pMDRcvQueue == iterMD)
                 {
@@ -3728,7 +3711,6 @@ TRDP_ERR_T tlm_delListener (
                 }
 
                 /* cleanup instance */
-
                 /* free memory space for element */
                 vos_memFree(iterMD);
 
