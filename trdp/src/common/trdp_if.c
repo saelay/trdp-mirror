@@ -309,7 +309,6 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     if (pProcessConfig != NULL)
     {
         pSession->option = pProcessConfig->options;
-
     }
 
     if (pMarshall != NULL)
@@ -403,7 +402,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           FALSE,                        /*    no ladder                     */
                           0);                           /*    no ladder                     */
 
-        vos_mutexUnlock(sSessionMutex);
+        vos_mutexUnlock(sSessionMutex);  /*lint !e534 ignore return value */
     }
 
     return ret;
@@ -486,14 +485,15 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     pSession->pSndQueue = pNext;
                 }
 
-                vos_mutexUnlock(pSession->mutex);
-                vos_mutexDelete(pSession->mutex);
+                vos_mutexUnlock(pSession->mutex);    /*lint !e534 ignore return value */
+                vos_mutexDelete(pSession->mutex);    /*lint !e534 ignore return value */
                 vos_memFree(pSession);
 
                 ret = TRDP_NO_ERR;
             }
         }
-        vos_mutexUnlock(sSessionMutex);
+        vos_mutexUnlock(sSessionMutex);  /*lint !e534 ignore return value */
+
     }
 
     return ret;
@@ -509,7 +509,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 EXT_DECL TRDP_ERR_T tlc_terminate (void)
 {
     TRDP_SESSION_PT pSession    = NULL;
-    TRDP_ERR_T      ret         = TRDP_INIT_ERR;
+    TRDP_ERR_T      ret;
 
     if (sInited == TRUE)
     {
@@ -523,6 +523,10 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
         vos_memDelete(NULL);
         sInited = FALSE;
         ret     = TRDP_NO_ERR;
+    }
+    else
+    {
+        ret = TRDP_NOINIT_ERR;
     }
     return ret;
 }
@@ -542,12 +546,12 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
     TRDP_APP_SESSION_T appHandle)
 {
     PD_ELE_T *iterPD;
-    TRDP_ERR_T ret = TRDP_NOINIT_ERR;
+    TRDP_ERR_T ret;
 
     if (trdp_isValidSession(appHandle))
     {
         ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
-        if (ret == VOS_NO_ERR)
+        if (ret == TRDP_NO_ERR)
         {
             /*    Walk over the registered PDs */
             for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
@@ -562,10 +566,13 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
                 }
             }
 
-            ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
+            vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
         }
     }
-
+    else
+    {
+        ret = TRDP_NOINIT_ERR;
+    }
     return ret;
 }
 
@@ -590,19 +597,23 @@ TRDP_ERR_T tlp_setRedundant (
     UINT32              redId,
     BOOL                leader)
 {
-    TRDP_ERR_T ret = TRDP_NOINIT_ERR;
+    TRDP_ERR_T ret;
 
     if (trdp_isValidSession(appHandle))
     {
         ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
-        if (ret == VOS_NO_ERR)
+        if (ret == TRDP_NO_ERR)
         {
             /*    TBD! Handle list of redundant comIds    */
             appHandle->beQuiet  = !leader;
             appHandle->redID    = redId;
 
-            ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
+            vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
         }
+    }
+    else
+    {
+        ret = TRDP_NOINIT_ERR;
     }
     return ret;
 }
@@ -623,12 +634,13 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
     UINT32              redId,
     BOOL                *pLeader)
 {
-    TRDP_ERR_T ret = TRDP_NOINIT_ERR;
+    TRDP_ERR_T ret;
 
     if (pLeader == NULL)
     {
         return TRDP_PARAM_ERR;
     }
+
     if (trdp_isValidSession(appHandle))
     {
         ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
@@ -637,9 +649,14 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
             /*    TBD! Search list of redundant comIds    */
             *pLeader = !appHandle->beQuiet;
 
-            ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
+            vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
         }
     }
+    else
+    {
+        ret = TRDP_NOINIT_ERR;
+    }
+
     return ret;
 }
 
@@ -655,7 +672,7 @@ EXT_DECL TRDP_ERR_T tlc_setTopoCount (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              topoCount)
 {
-    TRDP_ERR_T ret = TRDP_NOINIT_ERR;
+    TRDP_ERR_T ret;
     
     if (trdp_isValidSession(appHandle))
     {
@@ -667,9 +684,14 @@ EXT_DECL TRDP_ERR_T tlc_setTopoCount (
             /*  Set the topoCount for each session  */
             appHandle->topoCount = topoCount;
 
-            ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
+            vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
         }
     }
+    else
+    {
+        ret = TRDP_NOINIT_ERR;
+    }
+    
     return ret;
 }
 
@@ -734,24 +756,10 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_ADDRESSES_T    pubHandle   = {comId, srcIpAddr, destIpAddr, 0};
 
     /*    Check params    */
-    if (comId == 0)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    if (pData != NULL &&
-        dataSize == 0)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    if (interval != 0 &&
-        interval < TRDP_TIMER_GRANULARITY)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    if (pPubHandle == NULL)
+    if (    (comId == 0)
+         || (pData != NULL && dataSize == 0)
+         || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
+         || (pPubHandle == NULL))
     {
         return TRDP_PARAM_ERR;
     }
@@ -762,119 +770,117 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     }
 
     /*    Reserve mutual access    */
-
-    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
+    if (ret == TRDP_NO_ERR)
     {
-        return TRDP_NOINIT_ERR;
-    }
-
-    /*    Look for existing element    */
-    if (trdp_queueFindPubAddr(appHandle->pSndQueue, &pubHandle) != NULL)
-    {
-        ret = TRDP_NOPUB_ERR;
-    }
-    else
-    {
-        pNewElement = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
-        if (pNewElement == NULL)
+        /*    Look for existing element    */
+        if (trdp_queueFindPubAddr(appHandle->pSndQueue, &pubHandle) != NULL)
         {
-            ret = TRDP_MEM_ERR;
+            ret = TRDP_NOPUB_ERR;
         }
         else
         {
-            /*
-               Compute the overal packet size
-             */
-            if (dataSize == 0)
+            pNewElement = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
+            if (pNewElement == NULL)
             {
-                /* mark data as invalid, data will be set valid with tlp_put */
-                pNewElement->privFlags |= TRDP_INVALID_DATA;
-            }
-
-            pNewElement->dataSize   = dataSize;
-            pNewElement->grossSize  = trdp_packetSizePD(dataSize);
-
-            /*    Get a socket    */
-            ret = trdp_requestSocket(
-                    appHandle->iface,
-                    (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
-                    srcIpAddr,
-                    TRDP_SOCK_PD,
-                    appHandle->option,
-                    FALSE,
-                    &pNewElement->socketIdx,
-                    0);
-
-            if (ret != TRDP_NO_ERR)
-            {
-                vos_memFree(pNewElement);
-                pNewElement = NULL;
+                ret = TRDP_MEM_ERR;
             }
             else
             {
-                /*  Alloc the corresponding data buffer  */
-                pNewElement->pFrame = (PD_PACKET_T *) vos_memAlloc(pNewElement->grossSize);
-                if (pNewElement->pFrame == NULL)
+                /*
+                   Compute the overal packet size
+                 */
+                if (dataSize == 0)
+                {
+                    /* mark data as invalid, data will be set valid with tlp_put */
+                    pNewElement->privFlags |= TRDP_INVALID_DATA;
+                }
+
+                pNewElement->dataSize   = dataSize;
+                pNewElement->grossSize  = trdp_packetSizePD(dataSize);
+
+                /*    Get a socket    */
+                ret = trdp_requestSocket(
+                        appHandle->iface,
+                        (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
+                        srcIpAddr,
+                        TRDP_SOCK_PD,
+                        appHandle->option,
+                        FALSE,
+                        &pNewElement->socketIdx,
+                        0);
+
+                if (ret != TRDP_NO_ERR)
                 {
                     vos_memFree(pNewElement);
                     pNewElement = NULL;
                 }
+                else
+                {
+                    /*  Alloc the corresponding data buffer  */
+                    pNewElement->pFrame = (PD_PACKET_T *) vos_memAlloc(pNewElement->grossSize);
+                    if (pNewElement->pFrame == NULL)
+                    {
+                        vos_memFree(pNewElement);
+                        pNewElement = NULL;
+                    }
+                }
             }
         }
+
+        /*    Get the current time and compute the next time this packet should be sent.    */
+        if (ret == TRDP_NO_ERR && pNewElement != NULL)
+        {
+            /* PD PULL?    Packet will be sent on request only    */
+            if (0 == interval)
+            {
+                vos_clearTime(&pNewElement->interval);
+                vos_clearTime(&pNewElement->timeToGo);
+            }
+            else
+            {
+                vos_getTime(&nextTime);
+                tv_interval.tv_sec  = interval / 1000000;
+                tv_interval.tv_usec = interval % 1000000;
+                vos_addTime(&nextTime, &tv_interval);
+                pNewElement->interval   = tv_interval;
+                pNewElement->timeToGo   = nextTime;
+            }
+
+            /*    Update the internal data */
+            pNewElement->addr       = pubHandle;
+            pNewElement->pktFlags   = pktFlags;
+            pNewElement->privFlags  = TRDP_PRIV_NONE;
+            pNewElement->pullIpAddress = 0;
+
+            /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
+                curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
+                it will be incremented when sending...    */
+
+            pNewElement->curSeqCnt = trdp_getSeqCnt(pNewElement->addr.comId, TRDP_MSG_PD, 
+                                                    pNewElement->addr.srcIpAddr) - 1;
+
+            /*    Compute the header fields */
+            trdp_pdInit(pNewElement, TRDP_MSG_PD, topoCount, subs, offsetAddress, 0, 0);
+
+            /*    Insert at front    */
+            trdp_queueInsFirst(&appHandle->pSndQueue, pNewElement);
+
+            *pPubHandle = &pNewElement->addr;
+
+            if (pData != NULL && dataSize > 0)
+            {
+                ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
+            }
+
+            if (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING)
+            {
+                trdp_pdDistribute(appHandle->pSndQueue);
+            }
+        }
+
+        vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
     }
-
-    /*    Get the current time and compute the next time this packet should be sent.    */
-
-    if (ret == TRDP_NO_ERR && pNewElement != NULL)
-    {
-        /* PD PULL?    Packet will be sent on request only    */
-        if (0 == interval)
-        {
-            vos_clearTime(&pNewElement->interval);
-            vos_clearTime(&pNewElement->timeToGo);
-        }
-        else
-        {
-            vos_getTime(&nextTime);
-            tv_interval.tv_sec  = interval / 1000000;
-            tv_interval.tv_usec = interval % 1000000;
-            vos_addTime(&nextTime, &tv_interval);
-            pNewElement->interval   = tv_interval;
-            pNewElement->timeToGo   = nextTime;
-        }
-
-        /*    Update the internal data */
-        pNewElement->addr       = pubHandle;
-        pNewElement->pktFlags   = pktFlags;
-        pNewElement->privFlags  = TRDP_PRIV_NONE;
-        pNewElement->pullIpAddress = 0;
-
-        /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
-            curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
-            it will be incremented when sending...    */
-
-        pNewElement->curSeqCnt = trdp_getSeqCnt(pNewElement->addr.comId, TRDP_MSG_PD, pNewElement->addr.srcIpAddr) - 1;
-
-        /*    Compute the header fields */
-        trdp_pdInit(pNewElement, TRDP_MSG_PD, topoCount, subs, offsetAddress, 0, 0);
-
-        /*    Insert at front    */
-        trdp_queueInsFirst(&appHandle->pSndQueue, pNewElement);
-
-        *pPubHandle = &pNewElement->addr;
-
-        if (pData != NULL && dataSize > 0)
-        {
-            ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
-        }
-
-        if (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING)
-        {
-            trdp_pdDistribute(appHandle->pSndQueue);
-        }
-    }
-
-    vos_mutexUnlock(appHandle->mutex);
 
     return ret;
 }
@@ -896,7 +902,7 @@ TRDP_ERR_T  tlp_unpublish (
     TRDP_PUB_T          pubHandle)
 {
     PD_ELE_T    *pElement;
-    TRDP_ERR_T  ret = TRDP_NOPUB_ERR;
+    TRDP_ERR_T  ret;
 
     if (pubHandle == NULL)
     {
@@ -909,22 +915,25 @@ TRDP_ERR_T  tlp_unpublish (
     }
 
     /*    Reserve mutual access    */
-    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
+    if (ret == TRDP_NO_ERR)
     {
-        return TRDP_NOINIT_ERR;
-    }
+        /*    Remove from queue?    */
+        pElement = trdp_queueFindPubAddr(appHandle->pSndQueue, pubHandle);
+        if (pElement != NULL)
+        {
+            trdp_queueDelElement(&appHandle->pSndQueue, pElement);
+            vos_memFree(pElement->pFrame);
+            vos_memFree(pElement);
+            ret = TRDP_NO_ERR;
+        }
+        else
+        {
+            ret = TRDP_NOPUB_ERR;
+        }
 
-    /*    Remove from queue?    */
-    pElement = trdp_queueFindPubAddr(appHandle->pSndQueue, pubHandle);
-    if (pElement != NULL)
-    {
-        trdp_queueDelElement(&appHandle->pSndQueue, pElement);
-        vos_memFree(pElement->pFrame);
-        vos_memFree(pElement);
-        ret = TRDP_NO_ERR;
+        vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
     }
-
-    vos_mutexUnlock(appHandle->mutex);
 
     return ret;      /*    Not found    */
 }
@@ -953,7 +962,9 @@ TRDP_ERR_T tlp_put (
     PD_ELE_T    *pElement;
     TRDP_ERR_T  ret = TRDP_NOPUB_ERR;
 
-    if (pubHandle == NULL || pData == NULL || dataSize == 0)
+    if (   (pubHandle == NULL)
+        || (pData == NULL)
+        || (dataSize == 0))
     {
         return TRDP_PARAM_ERR;
     }
@@ -964,24 +975,23 @@ TRDP_ERR_T tlp_put (
     }
 
     /*    Reserve mutual access    */
-    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
+    if ( ret == TRDP_NO_ERR)
     {
-        return TRDP_NOINIT_ERR;
+        /*    Find the published queue entry    */
+        pElement = trdp_queueFindPubAddr(appHandle->pSndQueue, pubHandle);
+        if (pElement != NULL)
+        {
+            ret = trdp_pdPut(pElement,
+                             appHandle->marshall.pfCbMarshall,
+                             appHandle->marshall.pRefCon,
+                             pData,
+                             dataSize);
+        }
+
+        vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
     }
-
-    /*    Find the published queue entry    */
-    pElement = trdp_queueFindPubAddr(appHandle->pSndQueue, pubHandle);
-    if (pElement != NULL)
-    {
-        ret = trdp_pdPut(pElement,
-                         appHandle->marshall.pfCbMarshall,
-                         appHandle->marshall.pRefCon,
-                         pData,
-                         dataSize);
-    }
-
-    vos_mutexUnlock(appHandle->mutex);
-
+   
     return ret;      /*    Not found    */
 }
 
@@ -1010,7 +1020,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 
     if (trdp_isValidSession(appHandle))
     {
-        if ((pInterval == NULL)
+        if (  (pInterval == NULL)
             ||(pFileDesc == NULL)
             ||(pNoDesc == NULL))
         {
@@ -1104,9 +1114,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     pInterval->tv_usec  = 10000; /* Minimum poll time 10ms    */
                     /* vos_printf(VOS_LOG_INFO, "no interval\n"); */
                 }
-                ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
 
-
+                vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
+                
                 /* FIXME set a maximumount of sockets to check */
                 if (pNoDesc != NULL)
                 {
@@ -2275,7 +2285,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
 #endif
 
-    vos_mutexUnlock(appHandle->mutex);
+    vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
 
     return err;
 }
@@ -2328,11 +2338,11 @@ EXT_DECL TRDP_ERR_T tlp_request (
     PD_ELE_T    *pReqElement    = NULL;
 
     /*    Check params    */
-    if (   appHandle == 0 
-        || subHandle == 0
-        ||  comId == 0 
-        || dataSize > TRDP_MAX_PD_PACKET_SIZE
-        || destIpAddr == 0)
+    if (   (appHandle == 0) 
+        || (subHandle == 0)
+        || (comId == 0) 
+        || (dataSize > TRDP_MAX_PD_PACKET_SIZE)
+        || (destIpAddr == 0))
     {
         return TRDP_PARAM_ERR;
     }
@@ -2449,7 +2459,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
             }
         }
 
-        ret = (TRDP_ERR_T) vos_mutexUnlock(appHandle->mutex);
+        vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
     }
 
     return ret;
@@ -2498,7 +2508,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     INT32 index;
 
     /*    Check params    */
-    if (comId == 0 || pSubHandle == NULL)
+    if (   (comId == 0)
+        || (pSubHandle == NULL))
     {
         return TRDP_PARAM_ERR;
     }
@@ -2630,7 +2641,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         }
     }
 
-    vos_mutexUnlock(appHandle->mutex);
+    vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
 
     return ret;
 }
@@ -2651,7 +2662,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     TRDP_SUB_T          subHandle)
 {
     PD_ELE_T    *pElement;
-    TRDP_ERR_T  ret = TRDP_NOPUB_ERR;
+    TRDP_ERR_T  ret;
 
     if (subHandle == NULL)
     {
@@ -2664,22 +2675,25 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     }
 
     /*    Reserve mutual access    */
-    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
+    if ( ret == TRDP_NO_ERR)
     {
-        return TRDP_NOINIT_ERR;
-    }
+        /*    Remove from queue?    */
+        pElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, subHandle);
+        if (pElement != NULL)
+        {
+            trdp_queueDelElement(&appHandle->pRcvQueue, pElement);
+            vos_memFree(pElement->pFrame);
+            vos_memFree(pElement);
+            ret = TRDP_NO_ERR;
+        }
+        else
+        {
+            ret = TRDP_NOPUB_ERR;
+        }
 
-    /*    Remove from queue?    */
-    pElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, subHandle);
-    if (pElement != NULL)
-    {
-        trdp_queueDelElement(&appHandle->pRcvQueue, pElement);
-        vos_memFree(pElement->pFrame);
-        vos_memFree(pElement);
-        ret = TRDP_NO_ERR;
+        vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
     }
-
-    vos_mutexUnlock(appHandle->mutex);
 
     return ret;      /*    Not found    */
 }
@@ -2714,7 +2728,9 @@ EXT_DECL TRDP_ERR_T tlp_get (
     TRDP_ERR_T  ret = TRDP_NOSUB_ERR;
     TRDP_TIME_T now;
 
-    if (subHandle == NULL || pData == NULL || pDataSize == NULL)
+    if (   (subHandle == NULL)
+        || (pData == NULL)
+        || (pDataSize == NULL))
     {
         return TRDP_PARAM_ERR;
     }
@@ -2725,75 +2741,74 @@ EXT_DECL TRDP_ERR_T tlp_get (
     }
 
     /*    Reserve mutual access    */
-    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
+    if ( ret == TRDP_NO_ERR)
     {
-        return TRDP_NOINIT_ERR;
-    }
+        /*    Find the published queue entry    */
+        pElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, subHandle);
 
-    /*    Find the published queue entry    */
-    pElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, subHandle);
-
-    if (pElement == NULL)
-    {
-        ret = TRDP_NOSUB_ERR;
-    }
-    else
-    {
-        /*    Call the receive function if we are in non blocking mode    */
-        if (!(appHandle->option & TRDP_OPTION_BLOCK))
+        if (pElement == NULL)
         {
-            trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
-        }
-
-        /*    Get the current time    */
-        vos_getTime(&now);
-
-        /*    Check time out    */
-        if (timercmp(&pElement->timeToGo, &now, <))
-        {
-            /*    Packet is late    */
-            if (appHandle->pdDefault.toBehavior == TRDP_TO_SET_TO_ZERO)
-            {
-                memset(pData, 0, *pDataSize);
-            }
-            else /* TRDP_TO_KEEP_LAST_VALUE */
-            {
-                ;
-            }
-            ret = TRDP_TIMEOUT_ERR;
-        }
-        else if (pktFlags == TRDP_FLAGS_MARSHALL)
-        {
-            ret = trdp_pdGet(pElement,
-                             appHandle->marshall.pfCbUnmarshall,
-                             appHandle->marshall.pRefCon,
-                             pData,
-                             pDataSize);
+            ret = TRDP_NOSUB_ERR;
         }
         else
         {
-            ret = trdp_pdGet(pElement, NULL, NULL, pData, pDataSize);
+            /*    Call the receive function if we are in non blocking mode    */
+            if (!(appHandle->option & TRDP_OPTION_BLOCK))
+            {
+                trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
+            }
+
+            /*    Get the current time    */
+            vos_getTime(&now);
+
+            /*    Check time out    */
+            if (timercmp(&pElement->timeToGo, &now, <))
+            {
+                /*    Packet is late    */
+                if (appHandle->pdDefault.toBehavior == TRDP_TO_SET_TO_ZERO)
+                {
+                    memset(pData, 0, *pDataSize);
+                }
+                else /* TRDP_TO_KEEP_LAST_VALUE */
+                {
+                    ;
+                }
+                ret = TRDP_TIMEOUT_ERR;
+            }
+            else if (pktFlags == TRDP_FLAGS_MARSHALL)
+            {
+                ret = trdp_pdGet(pElement,
+                                 appHandle->marshall.pfCbUnmarshall,
+                                 appHandle->marshall.pRefCon,
+                                 pData,
+                                 pDataSize);
+            }
+            else
+            {
+                ret = trdp_pdGet(pElement, NULL, NULL, pData, pDataSize);
+            }
         }
-    }
 
-    if (pPdInfo != NULL && pElement != NULL)
-    {
-        pPdInfo->comId          = pElement->addr.comId;
-        pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
-        pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
-        pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
-        pPdInfo->msgType        = (TRDP_MSG_T) vos_ntohs(pElement->pFrame->frameHead.msgType);
-        pPdInfo->seqCount       = vos_ntohl(pElement->pFrame->frameHead.sequenceCounter);
-        pPdInfo->protVersion    = vos_ntohs(pElement->pFrame->frameHead.protocolVersion);
-        pPdInfo->subs           = vos_ntohs(pElement->pFrame->frameHead.subsAndReserved);
-        pPdInfo->offsetAddr     = vos_ntohs(pElement->pFrame->frameHead.offsetAddress);
-        pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
-        pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
-        pPdInfo->pUserRef       = pElement->userRef;        /* TBD: User reference given with the local subscribe?   */
-        pPdInfo->resultCode     = TRDP_NO_ERR;
-    }
+        if (pPdInfo != NULL && pElement != NULL)
+        {
+            pPdInfo->comId          = pElement->addr.comId;
+            pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
+            pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
+            pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
+            pPdInfo->msgType        = (TRDP_MSG_T) vos_ntohs(pElement->pFrame->frameHead.msgType);
+            pPdInfo->seqCount       = vos_ntohl(pElement->pFrame->frameHead.sequenceCounter);
+            pPdInfo->protVersion    = vos_ntohs(pElement->pFrame->frameHead.protocolVersion);
+            pPdInfo->subs           = vos_ntohs(pElement->pFrame->frameHead.subsAndReserved);
+            pPdInfo->offsetAddr     = vos_ntohs(pElement->pFrame->frameHead.offsetAddress);
+            pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
+            pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
+            pPdInfo->pUserRef       = pElement->userRef;        /* TBD: User reference given with the local subscribe?   */
+            pPdInfo->resultCode     = TRDP_NO_ERR;
+        }
 
-    vos_mutexUnlock(appHandle->mutex);
+        vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
+    }
 
     return ret;
 }
@@ -2831,12 +2846,8 @@ static TRDP_ERR_T tlm_common_send (
         return TRDP_NOINIT_ERR;
     }
 
-    if (0 == comId)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    if (pData == NULL && dataSize != 0)
+    if (   (0 == comId)
+        || ((pData == NULL) && (dataSize != 0)))
     {
         return TRDP_PARAM_ERR;
     }
@@ -3288,18 +3299,15 @@ static TRDP_ERR_T tlm_common_send (
     }
     while(0);
 
-
     /* Error and allocated element ! */
     if (TRDP_NO_ERR != errv && NULL != pNewElement)
     {
         vos_memFree(pNewElement);
         pNewElement = NULL;
     }
-    ;
 
     /* Release mutex */
-    vos_mutexUnlock(appHandle->mutex);
-
+    vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
 
     return errv;
 }
@@ -3615,7 +3623,7 @@ TRDP_ERR_T tlm_addListener (
     }
 
     /* Release mutex */
-    vos_mutexUnlock(appHandle->mutex);
+    vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
 
     /* return listener reference to caller */
     if (pListenHandle != NULL)
@@ -3723,7 +3731,7 @@ TRDP_ERR_T tlm_delListener (
 	appHandle->stats.udpMd.numList++;
 
     /* Release mutex */
-    vos_mutexUnlock(appHandle->mutex);
+    vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
 
     return errv;
 }

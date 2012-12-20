@@ -165,7 +165,7 @@ typedef CHAR8 TRDP_FILE_NAME_T[TRDP_MAX_FILE_NAME_LEN];
 
 
 
-/** Return codes for all API functions  */
+/** Return codes for all API functions, -1..-29 taken over from vos */
 typedef enum
 {
     TRDP_NO_ERR             = 0,    /**< No error  */
@@ -175,30 +175,30 @@ typedef enum
     TRDP_TIMEOUT_ERR        = -4,   /**< Timout                                         */
     TRDP_NODATA_ERR         = -5,   /**< Non blocking mode: no data received            */
     TRDP_SOCK_ERR           = -6,   /**< Socket error / option not supported            */
-    TRDP_IO_ERR             = -7,   /**< Socket IO error, data can't be received/sent    */
-    TRDP_MEM_ERR            = -8,   /**< No more memory available           */
-    TRDP_SEMA_ERR           = -9,   /**< Semaphore not available            */
-    TRDP_QUEUE_ERR          = -10,  /**< Queue empty                        */
-    TRDP_QUEUE_FULL_ERR     = -11,  /**< Queue full                         */
-    TRDP_MUTEX_ERR          = -12,  /**< Mutex not available                */
-    TRDP_THREAD_ERR         = -13,  /**< Thread error                       */
-    TRDP_NOSESSION_ERR      = -14,  /**< No such session                    */
-    TRDP_SESSION_ABORT_ERR  = -15,  /**< Session aborted                    */
-    TRDP_NOSUB_ERR          = -16,  /**< No subscriber                      */
-    TRDP_NOPUB_ERR          = -17,  /**< No publisher                       */
-    TRDP_NOLIST_ERR         = -18,  /**< No listener                        */
-    TRDP_CRC_ERR            = -19,  /**< Wrong CRC                          */
-    TRDP_WIRE_ERR           = -20,  /**<                                    */
-    TRDP_TOPO_ERR           = -21,  /**< Invalid topo count                 */
-    TRDP_COMID_ERR          = -22,  /**< Unknown ComId                      */
-    TRDP_STATE_ERR          = -23,  /**< Call in wrong state        		*/
-    TRDP_APPTIMEOUT_ERR     = -24,  /**< Application Timeout            	*/
-	TRDP_APP_REPLYTO_ERR	= -25,  /**< Application Reply Sent Timeout     */
-	TRDP_APP_CONFIRMTO_ERR	= -26,  /**< Application Confirm Sent Timeout   */
-	TRDP_PROT_REPLYTO_ERR	= -27,  /**< Protocol Reply Timeout 			*/
-	TRDP_PROT_CONFIRMTO_ERR	= -28,  /**< Protocol Confirm Timeout			*/
-	TRDP_REQ_CONFIRMTO_ERR	= -29,  /**< Protocol Confirm Timeout (Request sender)  */
-    TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                  */
+    TRDP_IO_ERR             = -7,   /**< Socket IO error, data can't be received/sent   */
+    TRDP_MEM_ERR            = -8,   /**< No more memory available                       */
+    TRDP_SEMA_ERR           = -9,   /**< Semaphore not available                        */
+    TRDP_QUEUE_ERR          = -10,  /**< Queue empty                                    */
+    TRDP_QUEUE_FULL_ERR     = -11,  /**< Queue full                                     */
+    TRDP_MUTEX_ERR          = -12,  /**< Mutex not available                            */
+    TRDP_THREAD_ERR         = -13,  /**< Thread error                                   */
+    TRDP_NOSESSION_ERR      = -30,  /**< No such session                                */
+    TRDP_SESSION_ABORT_ERR  = -31,  /**< Session aborted                                */
+    TRDP_NOSUB_ERR          = -32,  /**< No subscriber                                  */
+    TRDP_NOPUB_ERR          = -33,  /**< No publisher                                   */
+    TRDP_NOLIST_ERR         = -34,  /**< No listener                                    */
+    TRDP_CRC_ERR            = -35,  /**< Wrong CRC                                      */
+    TRDP_WIRE_ERR           = -36,  /**< Wire                                           */
+    TRDP_TOPO_ERR           = -37,  /**< Invalid topo count                             */
+    TRDP_COMID_ERR          = -38,  /**< Unknown ComId                                  */
+    TRDP_STATE_ERR          = -39,  /**< Call in wrong state        		            */
+    TRDP_APPTIMEOUT_ERR     = -40,  /**< Application Timeout            	            */
+    TRDP_APP_REPLYTO_ERR	= -41,  /**< Application Reply Sent Timeout                 */
+    TRDP_APP_CONFIRMTO_ERR	= -42,  /**< Application Confirm Sent Timeout               */
+    TRDP_PROT_REPLYTO_ERR	= -43,  /**< Protocol Reply Timeout 			            */
+    TRDP_PROT_CONFIRMTO_ERR	= -44,  /**< Protocol Confirm Timeout			            */
+    TRDP_REQ_CONFIRMTO_ERR	= -45,  /**< Protocol Confirm Timeout (Request sender)      */
+    TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 
 
