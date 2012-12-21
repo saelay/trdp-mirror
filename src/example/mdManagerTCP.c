@@ -118,6 +118,20 @@ BOOL app_queue_used;
 CHAR8 gBuffer[32];
 
 
+// Convert an IP address to string
+char * miscIpToString(int ipAdd, char *strTmp)
+{
+    int ipVal1 = (ipAdd >> 24) & 0xff;
+    int ipVal2 = (ipAdd >> 16) & 0xff;
+    int ipVal3 = (ipAdd >>  8) & 0xff;
+    int ipVal4 = (ipAdd >>  0) & 0xff;
+
+    int strSize = sprintf(strTmp,"%u.%u.%u.%u", ipVal1, ipVal2, ipVal3, ipVal4);
+    strTmp[strSize] = 0;
+
+    return strTmp;
+}
+
 
 void get_IPs()
 {
@@ -716,7 +730,7 @@ void myMDcallBack (
 }
 
 
-TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set*  rfds)
+TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set*  rfds, BOOL *tcpStatistics)
 {
 	UINT32 read_data = 1;
 	UINT32 MD_listen_COMID[TRDP_QUEUE_MAX_MESG];
@@ -804,7 +818,7 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 			scanf("%d", &MD_listen_COMID[*listeners_count]);
 
 			err = tlm_addListener( appHandle,                 				/*	our application identifier			*/
-			                         &(listenHandle[*listeners_count]), 	/*	our subscription identifier			*/
+									&(listenHandle[*listeners_count]),	 	/*	our subscription identifier			*/
 			                         NULL,
 			                         MD_listen_COMID[*listeners_count],     /*	ComID								*/
 			                         0,                         			/*	topocount: local consist only		*/
@@ -828,6 +842,15 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 
 			(*listeners_count) ++;
 
+	    }
+
+	    /* TCP Statistics Support */
+	    printf("Do you want to print TCP Statiscs?\n Yes[1] / No[0]\n");
+	    scanf("%d", &read_data);
+
+	    if(read_data == TRUE)
+	    {
+	    	*tcpStatistics = TRUE;
 	    }
 
 		FD_ZERO(rfds);
@@ -1181,6 +1204,47 @@ TRDP_ERR_T confirm_msgs()
 }
 
 
+void statistics()
+{
+	MD_ELE_T *iterMD;
+	INT32 i;
+	char strIp[16];
+	char strIp1[16];
+
+	printf("TCPMDcom statistics:\n");
+	printf("    defQos: %d\n", appHandle->stats.tcpMd.defQos);
+	printf("    defTtl: %d\n", appHandle->stats.tcpMd.defTtl);
+	printf("    defReplyTimeout: %d\n", appHandle->stats.tcpMd.defReplyTimeout);
+	printf("    defConfirmTimeout: %d\n", appHandle->stats.tcpMd.defConfirmTimeout);
+
+	printf("    numList: %d\n", appHandle->stats.tcpMd.numList);
+	printf("        [%3s] %6s %16s %16s %11s %11s\n", "n.", "comID", "dstIP", "mcastIP", "pktFlags", "privFlags");
+	i = 0;
+	for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+	{
+		// Listener
+		// [n] ComID
+		printf("        [%3d] %6d %16s %16s %11x %11x\n",
+			i,
+			iterMD->u.listener.comId,
+			miscIpToString(iterMD->u.listener.destIpAddr, strIp),
+			miscIpToString(iterMD->addr.mcGroup, strIp1),
+			iterMD->u.listener.pktFlags,
+			iterMD->privFlags);
+		i++;
+	}
+
+	printf("    numRcv: %d\n", appHandle->stats.tcpMd.numRcv);
+	printf("    numCrcErr: %d\n", appHandle->stats.tcpMd.numCrcErr);
+	printf("    numProtErr: %d\n", appHandle->stats.tcpMd.numProtErr);
+	printf("    numTopoErr: %d\n", appHandle->stats.tcpMd.numTopoErr);
+	printf("    numNoListener: %d\n", appHandle->stats.tcpMd.numNoListener);
+	printf("    numReplyTimeout: %d\n", appHandle->stats.tcpMd.numReplyTimeout);
+	printf("    numConfirmTimeout: %d\n", appHandle->stats.tcpMd.numConfirmTimeout);
+	printf("    numSend: %d\n", appHandle->stats.tcpMd.numSend);
+	printf("\n");
+}
+
 /**********************************************************************************************************************/
 /** main entry
  *
@@ -1198,6 +1262,14 @@ int main (int argc, char * *argv)
     UINT32 continue_looping = 1;
     struct timeval  tv;
     struct timeval  max_tv = {0, 100000};
+    BOOL tcpStatistics = FALSE;
+
+
+    INT32 count;
+    for(count=0;count<TRDP_QUEUE_MAX_MESG;count++)
+    {
+    	listenHandle[count] = malloc(sizeof(TRDP_LIS_T));
+    }
 
     UINT32 listeners_count = 0;
 
@@ -1205,7 +1277,7 @@ int main (int argc, char * *argv)
     get_IPs();
 
     /*	Init the TRDP and addListeners	*/
-    err = init_trdp(listenHandle, &listeners_count, &rfds);
+    err = init_trdp(listenHandle, &listeners_count, &rfds, &tcpStatistics);
 
     if(err != TRDP_NO_ERR)
     {
@@ -1261,6 +1333,10 @@ int main (int argc, char * *argv)
 
 		tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 
+		if(tcpStatistics == TRUE)
+		{
+			statistics();
+		}
 
 		if(app_queue_used == TRUE)
 		{
@@ -1290,7 +1366,7 @@ int main (int argc, char * *argv)
     int i = 0;
     for(i=0;i<listeners_count;i++)
     {
-    	err = tlm_delListener(appHandle, &(listenHandle[i]));
+    	err = tlm_delListener(appHandle, listenHandle[i]);
 
     	if(err != TRDP_NO_ERR)
     	{

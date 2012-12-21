@@ -930,10 +930,10 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         return VOS_PARAM_ERR;
     }
     
-    if(vos_sockGetOptions(sock, &options) != VOS_NO_ERR)
+    /*if(vos_sockGetOptions(sock, &options) != VOS_NO_ERR)
     {
     	return VOS_SOCK_ERR;
-    }
+    }*/
 
     rcvSize = read(sock, pBuffer, bufferSize);
     if (rcvSize > 0)
@@ -953,7 +953,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         return VOS_NODATA_ERR;
     }
 
-    while (bufferSize || (rcvSize == -1 && errno == EAGAIN));
+    //while (bufferSize || (rcvSize == -1 && errno == EAGAIN));
 
     if (rcvSize == -1)
     {
