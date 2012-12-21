@@ -405,7 +405,7 @@ const char * get_result_string(int ret)
         return "TRDP_COMID_ERR (unknown comid)";
     case TRDP_STATE_ERR:
         return "TRDP_STATE_ERR (call in wrong state)";
-    case TRDP_APPTIMEOUT_ERR:
+    case TRDP_APP_TIMEOUT_ERR:
         return "TRDP_APPTIMEOUT_ERR (application timeout)";
     case TRDP_UNKNOWN_ERR:
         return "TRDP_UNKNOWN_ERR (unspecified error)";
