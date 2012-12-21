@@ -795,7 +795,6 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_TIME_T         nextTime;
     TRDP_TIME_T         tv_interval;
     TRDP_ERR_T          ret         = TRDP_NO_ERR;
-    TRDP_ADDRESSES_T    pubHandle   = {comId, srcIpAddr, destIpAddr, 0};
 
 #ifdef TRDP_OPTION_LADDER
     extern BOOL pdComLadderThreadStartFlag;					/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
@@ -819,6 +818,14 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
     if (ret == TRDP_NO_ERR)
     {
+         TRDP_ADDRESSES_T    pubHandle;
+         
+         /* initialize pubHandle */
+         pubHandle.comId        = comId;
+         pubHandle.destIpAddr   = destIpAddr;
+         pubHandle.mcGroup      = 0;
+         pubHandle.srcIpAddr    = srcIpAddr;
+      
         /*    Look for existing element    */
         if (trdp_queueFindPubAddr(appHandle->pSndQueue, &pubHandle) != NULL)
         {
