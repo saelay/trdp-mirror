@@ -2863,7 +2863,8 @@ EXT_DECL TRDP_ERR_T tlp_get (
             vos_getTime(&now);
 
             /*    Check time out    */
-            if (timercmp(&pElement->timeToGo, &now, <))
+            if (timerisset(&pElement->interval) &&
+                timercmp(&pElement->timeToGo, &now, <))
             {
                 /*    Packet is late    */
                 if (appHandle->pdDefault.toBehavior == TRDP_TO_SET_TO_ZERO)
