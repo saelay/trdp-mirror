@@ -2030,7 +2030,14 @@ EXT_DECL TRDP_ERR_T tlc_process (
 							sndReplyTimeout = 1;
 							
 							/* Statistics */
-							appHandle->stats.udpMd.numReplyTimeout++;
+
+							if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+							{
+								appHandle->stats.udpMd.numReplyTimeout++;
+							}else
+							{
+								appHandle->stats.tcpMd.numReplyTimeout++;
+							}
                         }
                     }
 					
@@ -2259,8 +2266,15 @@ EXT_DECL TRDP_ERR_T tlc_process (
                         /* Remove element from queue */
                         trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
 
+
 						/* Statistics */
-						appHandle->stats.udpMd.numConfirmTimeout++;
+                        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                        {
+                        	appHandle->stats.tcpMd.numConfirmTimeout++;
+                        }else
+                        {
+                        	appHandle->stats.udpMd.numConfirmTimeout++;
+                        }
 
                         /* free element */
                         vos_memFree(iterMD);
@@ -3708,9 +3722,15 @@ TRDP_ERR_T tlm_addListener (
                     /* Insert into list */
                     pNewElement->pNext      = appHandle->pMDRcvQueue;
                     appHandle->pMDRcvQueue  = pNewElement;
-					
+
 					/* Statistics */
-					appHandle->stats.udpMd.numList++;
+                    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                    {
+                    	appHandle->stats.tcpMd.numList++;
+                    }else
+                    {
+                    	appHandle->stats.udpMd.numList++;
+                    }
                 }
             }
         }
@@ -3827,9 +3847,18 @@ TRDP_ERR_T tlm_delListener (
             }
         }
     }
-	
+
 	/* Statistics */
-	appHandle->stats.udpMd.numList++;
+    if(errv == TRDP_NO_ERR)
+    {
+		if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+		{
+			appHandle->stats.tcpMd.numList--;
+		}else
+		{
+			appHandle->stats.udpMd.numList--;
+		}
+    }
 
     /* Release mutex */
     vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */

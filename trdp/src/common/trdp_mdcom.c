@@ -372,13 +372,31 @@ TRDP_ERR_T  trdp_mdRecv (
     switch (err)
     {
         case TRDP_NO_ERR:
-            appHandle->stats.udpMd.numRcv++;;
+        	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+        	{
+        		appHandle->stats.tcpMd.numRcv++;;
+        	}else
+        	{
+        		appHandle->stats.udpMd.numRcv++;;
+        	}
             break;
         case TRDP_CRC_ERR:
-            appHandle->stats.udpMd.numCrcErr++;
+        	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+        	{
+        		appHandle->stats.tcpMd.numCrcErr++;
+        	}else
+        	{
+        		appHandle->stats.udpMd.numCrcErr++;
+        	}
             return err;
         case TRDP_WIRE_ERR:
-            appHandle->stats.udpMd.numProtErr++;
+        	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+        	{
+        		appHandle->stats.tcpMd.numProtErr++;
+        	}else
+        	{
+        		appHandle->stats.udpMd.numProtErr++;
+        	}
             return err;
         default:
             return err;
@@ -532,7 +550,13 @@ TRDP_ERR_T  trdp_mdReceive (
                            l_comId,
                            l_topoCount);
 
-                appHandle->stats.udpMd.numTopoErr++;
+                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                {
+                	appHandle->stats.tcpMd.numTopoErr++;
+                }else
+                {
+                	appHandle->stats.udpMd.numTopoErr++;
+                }
 
                 return TRDP_TOPO_ERR;
             }
@@ -945,7 +969,13 @@ TRDP_ERR_T  trdp_mdReceive (
             /* Statistics */
             if(iterMD == NULL)
             {
-                appHandle->stats.udpMd.numNoListener++;
+            	if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+            	{
+            		appHandle->stats.tcpMd.numNoListener++;
+            	}else
+            	{
+            		appHandle->stats.udpMd.numNoListener++;
+            	}
             }
         }
     }
