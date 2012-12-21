@@ -32,6 +32,18 @@
 extern "C" {
 #endif
 
+#ifdef TRDP_OPTION_LADDER
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <semaphore.h>
+#include <sys/times.h>
+
+
+#endif /* TRDP_OPTION_LADDER */
+
 /***********************************************************************************************************************
  * DEFINES
  */
@@ -108,8 +120,18 @@ typedef enum
     VOS_SEMA_FULL   = 1
 } VOS_SEMA_STATE_T;
 
-/** Hidden mutex handle definition    */
-typedef struct VOS_MUTEX *VOS_MUTEX_T;
+#ifdef TRDP_OPTION_LADDER
+struct VOS_SEMA
+{
+	CHAR8 *semaphoreName;		/* semaphore Name */
+	INT32 oflag;				/* semaphore access mode */
+	mode_t permission;		    /* semaphore permission */
+	sem_t *pSemaphore;		    /* semaphore object address */
+};
+#endif /* TRDP_OPTION_LADDER */
+
+/** Hidden mutex handle definition	*/
+typedef struct VOS_MUTEX  *VOS_MUTEX_T;
 
 /** Hidden semaphore handle definition    */
 typedef struct VOS_SEMA *VOS_SEMA_T;
@@ -411,7 +433,69 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
 EXT_DECL VOS_ERR_T vos_mutexUnlock (
     VOS_MUTEX_T pMutex);
 
+#ifdef TRDP_OPTION_LADDER
+/**********************************************************************************************************************/
+/** Create a semaphore.
+ *  Return a semaphore handle. Depending on the initial state the semaphore will be available on creation or not.
+ *
+ *  @param[out]     pSema           Pointer to semaphore handle
+ *  @param[in]      initialState	The initial state of the sempahore
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR	no semaphore available
+ */
 
+EXT_DECL VOS_ERR_T vos_semaCreate (
+    VOS_SEMA_T          *pSema,
+    VOS_SEMA_STATE_T    initialState);
+
+/**********************************************************************************************************************/
+/** Delete a semaphore.
+ *  This will eventually release any processes waiting for the semaphore.
+ *
+ *  @param[in]      sema            semaphore handle
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ */
+
+EXT_DECL VOS_ERR_T vos_semaDelete (
+    VOS_SEMA_T sema);
+
+/**********************************************************************************************************************/
+/** Take a semaphore.
+ *  Try to get (decrease) a semaphore.
+ *
+ *  @param[in]      sema            semaphore handle
+ *  @param[in]      timeout         Max. time in us to wait, 0 means forever
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR	could not get semaphore in time
+ */
+
+EXT_DECL VOS_ERR_T vos_semaTake (
+    VOS_SEMA_T  sema,
+    UINT32      timeout);
+
+
+/**********************************************************************************************************************/
+/** Give a semaphore.
+ *  Release (increase) a semaphore.
+ *
+ *  @param[in]      sema            semaphore handle
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_INIT_ERR	module not initialised
+ *  @retval         VOS_NOINIT_ERR	invalid handle
+ *  @retval         VOS_SEM_ERR		could not release semaphore
+ */
+
+EXT_DECL VOS_ERR_T vos_semaGive (
+    VOS_SEMA_T sema);
+
+#endif /* TRDP_OPTION_LADDER */
 
 #ifdef __cplusplus
 }

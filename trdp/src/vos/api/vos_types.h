@@ -67,7 +67,29 @@ typedef char CHAR8;
 #error "Standard types must be defined for each target!"
 #endif
 
-/*    Special handling for Windows DLLs    */
+#ifdef TRDP_OPTION_LADDER
+#include <wchar.h>
+#include <float.h>
+#include <time.h>
+
+typedef wchar_t UTF16;
+typedef float REAL32;
+typedef double REAL64;
+//typedef CHAR8 STRING[16];
+//typedef time_t TIMEDATE32;	/**< 32 bit UNIX time  */
+//typedef struct
+//{
+//	TIMEDATE32  time;			/* 32bit UNIX time */
+//    UINT16  ticks;			/* 16bit ticks */
+//} TIMEDATE48;				/**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
+//typedef  struct
+//{
+//	TIMEDATE32  time;			/* 32bit UNIX time */
+//   UINT32  mili_sec;		/* 32bit miliSeconds */
+//} TIMEDATE64;		/**< 32 bit UNIX time + 32 bit miliseconds  */
+#endif /* TRDP_OPTION_LADDER */
+
+/*	Special handling for Windows DLLs	*/
 #ifdef WIN32
     #ifdef DLL_EXPORT
         #define EXT_DECL    __declspec(dllexport)

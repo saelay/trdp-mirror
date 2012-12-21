@@ -32,6 +32,12 @@
 #include "vos_sock.h"
 #include "vos_mem.h"
 
+#ifdef TRDP_OPTION_LADDER
+#include "vos_thread.h"
+#include "trdp_ladder.h"
+#include "trdp_ladder_app.h"
+#endif /* TRDP_OPTION_LADDER */
+
 #if MD_SUPPORT
 #include "trdp_mdcom.h"
 #endif
@@ -402,6 +408,20 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           FALSE,                        /*    no ladder                     */
                           0);                           /*    no ladder                     */
 
+#ifdef TRDP_OPTION_LADDER
+    /* TRDP Ladder support initialize */
+    ret = trdp_ladder_init();
+    if (ret != TRDP_NO_ERR)
+    {
+		vos_printf(VOS_LOG_ERROR, "TRDP Ladder Support Initialize failed\n");
+		return ret;
+    }
+#endif /* TRDP_OPTION_LADDER */
+
+    vos_printf(VOS_LOG_INFO,
+               "TRDP Stack Version %s: successfully initiated\n",
+               LIB_VERSION);
+
         vos_mutexUnlock(sSessionMutex);  /*lint !e534 ignore return value */
     }
 
@@ -503,8 +523,10 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 /** Un-Initialize.
  *  Clean up and close all sessions. Mainly used for debugging/test runs. No further calls to library allowed
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_INIT_ERR          no error
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_INIT_ERR		no error
+ *  @retval         TRDP_MEM_ERR		TrafficStore nothing
+ *  @retval         TRDP_SEMA_ERR		TrafficStore semaphore err
  */
 EXT_DECL TRDP_ERR_T tlc_terminate (void)
 {
@@ -518,6 +540,26 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
         {
             tlc_closeSession(pSession);
         }
+
+#ifdef TRDP_OPTION_LADDER
+		/* TRDP Ladder support finalize */
+		extern struct VOS_SHRD  trafficStoreHandle;		/* Traffic Store Handle */
+		extern UINT8 *pTrafficStoreAddr;					/* pointer to pointer to Traffic Store Address */
+		extern struct VOS_SEMA trafficStoreSemaphore;		/* Semaphore for Traffic Store */
+
+		tlp_lockTrafficStore();
+		if (vos_sharedClose(&trafficStoreHandle, pTrafficStoreAddr) != VOS_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "Release Traffic Store shared memory failed\n");
+			return TRDP_MEM_ERR;
+		}
+		tlp_unlockTrafficStore();
+		if (vos_semaDelete(&trafficStoreSemaphore) != VOS_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "Release Traffic Store Semaphore failed\n");
+			return TRDP_SEMA_ERR;
+		}
+#endif /* TRDP_OPTION_LADDER */
 
         /* Release memory?  */
         vos_memDelete(NULL);
@@ -755,7 +797,11 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_ERR_T          ret         = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    pubHandle   = {comId, srcIpAddr, destIpAddr, 0};
 
-    /*    Check params    */
+#ifdef TRDP_OPTION_LADDER
+    extern BOOL pdComLadderThreadStartFlag;					/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
+#endif /* TRDP_OPTION_LADDER */
+
+    /*	Check params	*/
     if (    (comId == 0)
          || (pData != NULL && dataSize == 0)
          || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
@@ -881,6 +927,13 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
         vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
     }
+
+#ifdef TRDP_OPTION_LADDER
+    /* PDComLadder Thread instruction start up */
+    pdComLadderThreadStartFlag = TRUE;
+#endif /* TRDP_OPTION_LADDER */
+
+    vos_mutexUnlock(appHandle->mutex);
 
     return ret;
 }
@@ -2507,7 +2560,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_ADDRESSES_T    subHandle;
     INT32 index;
 
-    /*    Check params    */
+#ifdef TRDP_OPTION_LADDER
+    extern BOOL pdComLadderThreadStartFlag;					/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
+#endif /* TRDP_OPTION_LADDER */
+
+    /*	Check params	*/
     if (   (comId == 0)
         || (pSubHandle == NULL))
     {
@@ -2559,15 +2616,42 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     else
     {
         /*    Find a (new) socket    */
+#ifdef TRDP_OPTION_LADDER
+        /* Multicast : use I/F destIp */
+    	if (vos_isMulticast(destIpAddr))
+        {
+	    	ret = trdp_requestSocket(appHandle->iface,
+					 &appHandle->pdDefault.sendParam,
+					 destIpAddr,
+					 TRDP_SOCK_PD,
+					 appHandle->option,
+					 TRUE,
+					 &index,
+					 0);
+        }
+	    else
+        {
 
-        ret = trdp_requestSocket(appHandle->iface,
-                                 &appHandle->pdDefault.sendParam,
-                                 appHandle->realIP,
-                                 TRDP_SOCK_PD,
-                                 appHandle->option,
-                                 TRUE,
-                                 &index,
-                                 0);
+		    ret = trdp_requestSocket(appHandle->iface,
+					 &appHandle->pdDefault.sendParam,
+					 appHandle->realIP,
+					 TRDP_SOCK_PD,
+					 appHandle->option,
+					 TRUE,
+					 &index,
+					 0);
+        }
+#else
+	    ret = trdp_requestSocket(appHandle->iface,
+				 &appHandle->pdDefault.sendParam,
+				 appHandle->realIP,
+				 TRDP_SOCK_PD,
+				 appHandle->option,
+				 TRUE,
+				 &index,
+				 0);
+#endif /* TRDP_OPTION_LADDER */
+
         if (ret == TRDP_NO_ERR)
         {
             /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
@@ -2630,8 +2714,12 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     /*    Join a multicast group */
                     if (newPD->addr.mcGroup != 0)
                     {
-                        vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, 0);
-                        /*    Remember we did this    */
+#ifdef TRDP_OPTION_LADDER
+                    		vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, appHandle->realIP);
+#else
+                    	    vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, 0);
+#endif /* TRDP_OPTION_LADDER */
+                    		/*    Remember we did this    */
                         newPD->privFlags |= TRDP_MC_JOINT;
                     }
                     *pSubHandle = &newPD->addr;
@@ -2640,6 +2728,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             }
         }
     }
+
+#ifdef TRDP_OPTION_LADDER
+    /* PDComLadder Thread instruction start up */
+    pdComLadderThreadStartFlag = TRUE;
+#endif /* TRDP_OPTION_LADDER */
 
     vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
 
@@ -3985,3 +4078,105 @@ TRDP_ERR_T tlm_confirm (
                destURI
                );
 }
+
+#ifdef TRDP_OPTION_LADDER
+/**********************************************************************************************************************/
+/** Set SubNetwork Context.
+ *
+ *  @param[in]      SubnetId           Sub-network Id: SUBNET1 or SUBNET2
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+TRDP_ERR_T  tlp_setNetworkContext (
+    UINT32          subnetId)
+{
+    /* Check Sub-network Id */
+    if ((subnetId == SUBNET1) || (subnetId == SUBNET2))
+    {
+    	vos_mutexLock(sSessionMutex);
+    	/* Set usingSubnetId */
+    	usingSubnetId = subnetId;
+       vos_mutexUnlock(sSessionMutex);
+    	return TRDP_NO_ERR;
+    }
+    else
+    {
+    	return TRDP_PARAM_ERR;
+    }
+}
+
+/**********************************************************************************************************************/
+/** Get SubNetwork Context.
+ *
+ *  @param[in,out]  pSubnetId			pointer to Sub-network Id
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+TRDP_ERR_T  tlp_getNetworkContext (
+    UINT32          *pSubnetId)
+{
+    if (pSubnetId == NULL)
+    {
+    	return TRDP_PARAM_ERR;
+    }
+    else
+    {
+    	vos_mutexLock(sSessionMutex);
+    	/* Get usingSubnetId */
+    	*pSubnetId = usingSubnetId;
+    	vos_mutexUnlock(sSessionMutex);
+    	return TRDP_NO_ERR;
+    }
+}
+
+/**********************************************************************************************************************/
+/** Get Traffic Store accessibility.
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+TRDP_ERR_T  tlp_lockTrafficStore (
+    void)
+{
+	extern struct VOS_SEMA trafficStoreSemaphore;					/* Semaphore for Traffic Store */
+	extern UINT32 semaphoreTimeout;									/* semaphore take timeout : Max. time in us to wait, 0 means forever */
+
+	/* Lock Traffic Store by semaphore */
+	if ((vos_semaTake(&trafficStoreSemaphore, semaphoreTimeout)) != VOS_NO_ERR)
+	{
+		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store semaphore Lock failed\n");
+		return TRDP_SEMA_ERR;
+	}
+    return TRDP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Release Traffic Store accessibility.
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+TRDP_ERR_T  tlp_unlockTrafficStore (
+    void)
+{
+	extern struct VOS_SEMA trafficStoreSemaphore;							/* Semaphore for Traffic Store */
+
+	/* Lock Traffic Store by semaphore */
+	if (vos_semaGive(&trafficStoreSemaphore) != VOS_NO_ERR)
+	{
+		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store semaphore Unlock failed\n");
+		return TRDP_SEMA_ERR;
+	}
+		return TRDP_NO_ERR;
+}
+#endif /* TRDP_OPTION_LADDER */

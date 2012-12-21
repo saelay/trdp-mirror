@@ -424,7 +424,12 @@ EXT_DECL VOS_ERR_T vos_getTime (
 
 EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 {
-    static char     pTimeString[32];
+	/* mod_start TOSHIBA */
+    /*
+	static char     pTimeString[32];
+     */
+    static char    pTimeString[32] = {0};
+    /* mod_end */
     struct timeval  curTime;
     struct tm       *curTimeTM;
 
@@ -432,16 +437,27 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 
     gettimeofday(&curTime, NULL);
     curTimeTM = localtime(&curTime.tv_sec);
-    /*lint -e(534) ignore return value */
-    sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
-            curTimeTM->tm_year,
+    /* add_start TOSHIBA */
+    if (curTimeTM != NULL)
+    {
+    /* add_end */
+        /*lint -e(534) ignore return value */
+    	sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
+    	/* mod_start TOSIHBA */
+    		/* curTimeTM->tm_year,
             curTimeTM->tm_mon,
-            curTimeTM->tm_mday,
-            curTimeTM->tm_hour,
-            curTimeTM->tm_min,
-            curTimeTM->tm_sec,
-            (long) curTime.tv_usec / 1000L);
-
+            */
+    			curTimeTM->tm_year + 1900,
+    			curTimeTM->tm_mon + 1,
+    	/* mod_end TOSHIBA */
+    			curTimeTM->tm_mday,
+    			curTimeTM->tm_hour,
+    			curTimeTM->tm_min,
+    			curTimeTM->tm_sec,
+    			(long) curTime.tv_usec / 1000L);
+    /* add_start TOSHIBA */
+    }
+    /* add_end TOSHIBA */
     return pTimeString;
 }
 
@@ -959,6 +975,34 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_T          *pSema,
     VOS_SEMA_STATE_T    initialState)
 {
+#ifdef TRDP_OPTION_LADDER
+	sem_t *pSemaphore;					/* pointer to semaphore */
+
+	pSemaphore = sem_open((*pSema)->semaphoreName, (*pSema)->oflag, (*pSema)->permission, initialState);
+
+	if ((pSemaphore == SEM_FAILED)&&(errno != EEXIST))
+	{
+		vos_printf(VOS_LOG_ERROR, "Semaphore Create failed\n");
+		(*pSema)->pSemaphore = NULL;
+		return VOS_SEMA_ERR;
+	}
+	if (errno == EEXIST)
+	{
+		/* Retry sem_open. Because get semaphore pointer */
+		pSemaphore = sem_open((*pSema)->semaphoreName, O_CREAT, (*pSema)->permission, initialState);
+		(*pSema)->pSemaphore = pSemaphore;
+		return VOS_NO_ERR;
+	}
+
+	/* debug_start */
+	int sval;
+	sem_getvalue(pSemaphore, &sval);
+	printf("semaphore value%d\n", sval);
+	/* debug_end */
+
+	(*pSema)->pSemaphore = pSemaphore;
+#endif /* TRDP_OPTION_LADDER */
+
     return VOS_NO_ERR;
 }
 
@@ -976,6 +1020,19 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 EXT_DECL VOS_ERR_T vos_semaDelete (
     VOS_SEMA_T sema)
 {
+#ifdef TRDP_OPTION_LADDER
+	if (sem_close(sema->pSemaphore) == -1)
+	{
+		vos_printf(VOS_LOG_ERROR, "Semaphore Close failed\n");
+		return VOS_SEMA_ERR;
+	}
+	if (sem_unlink(sema->semaphoreName) == -1)
+	{
+		vos_printf(VOS_LOG_ERROR, "Semaphore unLink failed\n");
+		return VOS_SEMA_ERR;
+	}
+#endif /* TRDP_OPTION_LADDER */
+
     return VOS_NO_ERR;
 }
 
@@ -997,6 +1054,52 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     VOS_SEMA_T  sema,
     UINT32      timeout)
 {
+#ifdef TRDP_OPTION_LADDER
+	/* debug_start */
+	int sval;
+	sem_getvalue(sema->pSemaphore, &sval);
+	printf("Before vos_semaTake() :semaphore value%d\n", sval);
+	/* debug_end */
+
+	VOS_ERR_T ret = VOS_SEMA_ERR;
+
+	if (timeout == 0)
+	{
+		if (sem_wait(sema->pSemaphore) == -1)
+		{
+			vos_printf(VOS_LOG_ERROR, "Semaphore Lock failed\n");
+			return ret;
+		}
+	}
+	else
+	{
+		VOS_TIME_T now;
+		VOS_TIME_T waitTime;
+		struct timespec semaWaitTime;
+
+		vos_getTime(&now);
+		waitTime.tv_sec = timeout / 1000000;
+		waitTime.tv_usec = timeout % 1000000;
+		vos_addTime(&now, &waitTime);
+		TIMEVAL_TO_TIMESPEC(&now, &semaWaitTime);
+
+		if (sem_timedwait(sema->pSemaphore, &semaWaitTime) == -1)
+		{
+			vos_printf(VOS_LOG_ERROR, "Semaphore Lock failed\n");
+			/* debug_start */
+			int sval;
+			sem_getvalue(sema->pSemaphore, &sval);
+			printf("ERROR! After vos_semaTake() :semaphore value%d\n", sval);
+			/* debug_end */
+			return ret;
+		}
+	}
+	/* debug_start */
+	sem_getvalue(sema->pSemaphore, &sval);
+	printf("After vos_semaTake() :semaphore value%d\n", sval);
+	/* debug_end */
+#endif /* TRDP_OPTION_LADDER */
+
     return VOS_NO_ERR;
 }
 
@@ -1016,5 +1119,28 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 EXT_DECL VOS_ERR_T vos_semaGive (
     VOS_SEMA_T sema)
 {
+#ifdef TRDP_OPTION_LADDER
+	/* debug_start */
+	int sval;
+	sem_getvalue(sema->pSemaphore, &sval);
+	printf("Before vos_semaGive() :semaphore value%d\n", sval);
+	/* debug_end */
+
+	if (sem_post(sema->pSemaphore) == -1)
+	{
+		vos_printf(VOS_LOG_ERROR, "Semaphore Unlock failed\n");
+		/* debug_start */
+		int sval;
+		sem_getvalue(sema->pSemaphore, &sval);
+		printf("ERROR! After vos_semaGive() :semaphore value%d\n", sval);
+		/* debug_end */
+		return VOS_SEMA_ERR;
+	}
+	/* debug_start */
+	sem_getvalue(sema->pSemaphore, &sval);
+	printf("After vos_semaGive() :semaphore value%d\n", sval);
+	/* debug_end */
+#endif /* TRDP_OPTION_LADDER */
+
     return VOS_NO_ERR;
 }

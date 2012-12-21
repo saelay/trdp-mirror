@@ -32,6 +32,20 @@
 extern "C" {
 #endif
 
+#ifdef TRDP_OPTION_LADDER
+
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <errno.h>
+#include <semaphore.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#endif /* TRDP_OPTION_LADDER */
+
 /***********************************************************************************************************************
  * DEFINES
  */
@@ -41,6 +55,13 @@ extern "C" {
 #ifndef MD_SUPPORT
 #define MD_SUPPORT  1
 #endif
+
+#ifdef TRDP_OPTION_LADDER
+#define TRAFFIC_STORE_SIZE 65536			/* Traffic Store Size : 64KB */
+#define SUBNET1	0x00000000					/* Sub-network Id1 */
+#define SUBNET2	0x00002000					/* Sub-network Id2 */
+
+#endif /* TRDP_OPTION_LADDER */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -450,6 +471,60 @@ EXT_DECL TRDP_ERR_T tlp_get (
     UINT8               *pData,
     UINT32              *pDataSize);
 
+#ifdef TRDP_OPTION_LADDER
+/**********************************************************************************************************************/
+/** Set SubNetwork Context.
+ *
+ *  @param[in]      SubnetId			Sub-network Id: SUBNET1 or SUBNET2
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+
+TRDP_ERR_T  tlp_setNetworkContext (
+    UINT32          subnetId);
+
+/**********************************************************************************************************************/
+/** Get SubNetwork Context.
+ *
+ *  @param[in,out]  pSubnetId			pointer to Sub-network Id
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+
+TRDP_ERR_T  tlp_getNetworkContext (
+    UINT32          *pSubnetId);
+
+/**********************************************************************************************************************/
+/** Get Traffic Store accessibility.
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+
+TRDP_ERR_T  tlp_lockTrafficStore (
+    void);
+
+/**********************************************************************************************************************/
+/** Release Traffic Store accessibility.
+ *
+ *  @retval         TRDP_NO_ERR			no error
+ *  @retval         TRDP_PARAM_ERR		parameter error
+ *  @retval         TRDP_NOPUB_ERR		not published
+ *  @retval         TRDP_NOINIT_ERR	handle invalid
+ */
+
+TRDP_ERR_T  tlp_unlockTrafficStore (
+    void);
+
+#endif /* TRDP_OPTION_LADDER */
 
 #if MD_SUPPORT
 

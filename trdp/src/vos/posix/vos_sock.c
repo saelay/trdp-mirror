@@ -40,7 +40,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 
-#ifdef __linux
+#ifndef __linux
 #include <linux/if.h>
 #include <linux/in.h>
 #else
@@ -964,3 +964,94 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     }
     return VOS_NO_ERR;
 }
+
+#ifdef TRDP_OPTION_LADDER
+/**********************************************************************************************************************/
+/** Get interface address
+ *
+ *  @param[in,out]  pIfa_list		pointer to pointer to the I/F all list
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_PARAM_ERR	sock descriptor unknown, parameter error
+ *  @retval         VOS_IO_ERR		data could not be read
+  */
+
+EXT_DECL VOS_ERR_T vos_getIfAddrs (
+		struct ifaddrs * *ppIfa_list)
+{
+
+	if (ppIfa_list == NULL)
+	{
+		return VOS_PARAM_ERR;
+	}
+	if (getifaddrs(ppIfa_list) != 0)
+	{
+		vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
+       return VOS_SOCK_ERR;
+	}
+	return VOS_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Clear interface address memory area
+ *
+ *  @param[in,out]  pIfa_list		pointer to the I/F all list
+ *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOS_PARAM_ERR	sock descriptor unknown, parameter error
+  */
+
+EXT_DECL VOS_ERR_T vos_freeIfAddrs (
+		struct ifaddrs *pIfa_list)
+{
+	if (pIfa_list == NULL)
+	{
+		return VOS_PARAM_ERR;
+	}
+
+	freeifaddrs(pIfa_list);
+	return VOS_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Set Using Multicast I/F
+ *
+ *  @param[in]      sock							socket descriptor
+ *  @param[in]      usingMulticastIfAddress	using Multicast I/F Address
+ *  @retval         VOS_NO_ERR					no error
+ *  @retval         VOS_PARAM_ERR				sock descriptor unknown, parameter error
+ *  @retval         VOS_SOCK_ERR				option not supported
+ */
+EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
+		INT32   sock,
+		UINT32  usingMulticastIfAddress)
+{
+	struct sockaddr_in multicastIFAddress;
+	VOS_ERR_T       err = VOS_NO_ERR;
+
+    if (sock == -1)
+    {
+        err = VOS_PARAM_ERR;
+    }
+    else
+    {
+    	/* Multicast I/F setting */
+		memset((char *)&multicastIFAddress, 0, sizeof(multicastIFAddress));
+		multicastIFAddress.sin_addr.s_addr  = vos_htonl(usingMulticastIfAddress);
+
+		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &multicastIFAddress.sin_addr, sizeof(struct in_addr)) == -1)
+		{
+			vos_print(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed\n");
+			err = VOS_SOCK_ERR;
+		}
+		else
+		{
+		/*	DEBUG
+			struct sockaddr_in myAddress = {0};
+			socklen_t optionSize ;
+			getsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &myAddress.sin_addr, &optionSize);
+		*/
+			err = VOS_NO_ERR;
+		}
+	}
+    return err;
+}
+#endif /* TRDP_OPTION_LADDER */

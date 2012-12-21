@@ -127,4 +127,10 @@ BOOL trdp_isRcvSeqCnt (
     TRDP_MSG_T      msgType,
     TRDP_IP_ADDR_T  srcIP);
 
+#ifdef TRDP_OPTION_LADDER
+/* Initial TRDP Ladder Setting (Create Traffic Store semaphore, Traffic Store, PDComLadderThread) */
+TRDP_ERR_T trdp_ladder_init (
+	void);
+#endif /* TRDP_OPTION_LADDER */
+
 #endif
