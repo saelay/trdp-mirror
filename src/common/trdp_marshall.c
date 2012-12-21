@@ -136,7 +136,9 @@ static INLINE void unpackedCopy64 (
     *ppDst = (UINT8 *) pDst8;
 }
 #else
-	#error "Endianess not defined"
+{
+/*	#error "Endianess not defined" */
+}
 #endif
 
 /**********************************************************************************************************************/

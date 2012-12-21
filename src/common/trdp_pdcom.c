@@ -476,6 +476,35 @@ TRDP_ERR_T  trdp_pdReceive (
             pTemp = pExistingElement->pFrame;
             pExistingElement->pFrame = pNewFrame;
             pNewFrame = pTemp;
+
+#ifdef TRDP_OPTION_LADDER           
+             /* add_start TOSHIBA */
+            /*  If a callback (recvPdDs) was provided, call it now */
+            if (appHandle->pdDefault.pfCbFunction != NULL)
+            {
+                TRDP_PD_INFO_T theMessage;
+                theMessage.comId        = pExistingElement->addr.comId;
+                theMessage.srcIpAddr    = pExistingElement->addr.srcIpAddr;
+                theMessage.destIpAddr   = pExistingElement->addr.destIpAddr;
+                theMessage.topoCount    = vos_ntohl(pExistingElement->pFrame->frameHead.topoCount);
+                theMessage.msgType      = vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
+                theMessage.seqCount     = vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter);
+                theMessage.protVersion  = vos_ntohs(pExistingElement->pFrame->frameHead.protocolVersion);
+                theMessage.subs         = vos_ntohs(pExistingElement->pFrame->frameHead.subsAndReserved);
+                theMessage.offsetAddr   = vos_ntohs(pExistingElement->pFrame->frameHead.offsetAddress);
+                theMessage.replyComId   = vos_ntohl(pExistingElement->pFrame->frameHead.replyComId);
+                theMessage.replyIpAddr  = vos_ntohl(pExistingElement->pFrame->frameHead.replyIpAddress);
+                theMessage.pUserRef     = pExistingElement->userRef;  /* TBD: User reference given with the local subscribe? */
+                theMessage.resultCode   = resultCode;
+
+				appHandle->pdDefault.pfCbFunction(
+						(void *)pExistingElement->userRef,
+						&theMessage,
+						pExistingElement->pFrame->data,
+						pExistingElement->dataSize);
+            }
+            /* add_end TOSHIBA */
+#endif /* TRDP_OPTION_LADDER */
         }
     }
 #if 0
