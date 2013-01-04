@@ -38,8 +38,8 @@
 #endif
 
 
-#define MD_DEFAULT_IP_1        0xC0A867B3 /* Sender's IP: 192.168.102.179	Decimal: 3232261811	/ 10.0.0.203 - 0xA0000CB*/
-#define MD_DEFAULT_IP_2        0xC0A867B4 /* Caller's IP: 192.168.102.180	Decimal: 3232261811	/ 10.0.0.204 - 0xA0000CC*/
+#define MD_DEFAULT_IP_1        0xC0A866B3 /* Sender's IP: 192.168.102.179	Decimal: 3232261811	/ 10.0.0.203 - 0xA0000CB*/
+#define MD_DEFAULT_IP_2        0xC0A866AA /* Caller's IP: 192.168.102.180	Decimal: 3232261811	/ 10.0.0.204 - 0xA0000CC*/
 
 #define SOURCE_URI "user@host"
 #define DEST_URI "user@host"
@@ -328,10 +328,21 @@ static void queue_procricz()
 		printf("pUserRef          = %p\n"   ,msg.Msg.pUserRef);
 		printf("resultCode        = %d\n"   ,msg.Msg.resultCode);
 
-		print_memory(msg.pData,msg.dataSize);
+//		print_memory(msg.pData,msg.dataSize);
 	}
 
-	myMDcallBack(msg.Msg.pUserRef, msg.Msg,	msg.pData,
+	/* Prepare for the CallBack function */
+
+	/* Will be like this if we pass the lF = &frameHead like in UDP */
+	//UINT8 *pDataCall = &msg.pData[sizeof(MD_HEADER_T)];
+
+	UINT8 *pDataCall = &msg.pData[0];
+
+	const TRDP_MD_INFO_T    *pMsg = &msg.Msg;
+
+	/****************************************/
+
+	myMDcallBack(msg.Msg.pUserRef, pMsg,	pDataCall,
 									msg.dataSize);
 }
 
@@ -760,10 +771,10 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 		md_config.tcpPort        = TRDP_MD_TCP_PORT;
 
 
-		//printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");
-		//scanf("%d", &read_data);
+		printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");
+		scanf("%d", &read_data);
 
-		read_data = 0;
+		//read_data = 0;
 
 		/* MD config */
 		if(read_data == 1)
