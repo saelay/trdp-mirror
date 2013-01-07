@@ -309,11 +309,12 @@ TRDP_ERR_T  trdp_mdRecv (
 {
     TRDP_ERR_T   err = TRDP_NO_ERR;
 
-    UINT32 size = pPacket->grossSize;
+    UINT32 size;
 
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
         /* Read Header */
+    	size = sizeof(MD_HEADER_T);
         err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &size);
         vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
 
@@ -339,11 +340,12 @@ TRDP_ERR_T  trdp_mdRecv (
             vos_printf(VOS_LOG_INFO, "Read Data + CRC Size = %d\n", data_size);
 
             size = size + data_size;
-            //pPacket->grossSize = Size;
         }
     }
     else
     {
+    	size = TRDP_MAX_MD_PACKET_SIZE;
+    	
         err = (TRDP_ERR_T) vos_sockReceiveUDP(
                 mdSock,
                 (UINT8 *)&pPacket->frameHead,
@@ -351,7 +353,9 @@ TRDP_ERR_T  trdp_mdRecv (
                 &pPacket->addr.srcIpAddr);
     }
 
-    pPacket->dataSize = size;
+    //pPacket->dataSize = size;
+    pPacket->grossSize = size;
+    pPacket->dataSize = size - sizeof(MD_HEADER_T);
 
     if (err == TRDP_NODATA_ERR)
     {
@@ -366,7 +370,7 @@ TRDP_ERR_T  trdp_mdRecv (
     }
 
     /* received data */
-    err = trdp_mdCheck(appHandle, &pPacket->frameHead, size);
+    err = trdp_mdCheck(appHandle, &pPacket->frameHead, pPacket->grossSize);
 	
     /*  Update statistics   */
     switch (err)
@@ -445,18 +449,6 @@ TRDP_ERR_T  trdp_mdReceive (
         }
 
         memset(appHandle->pMDRcvEle, 0, sizeof(MD_ELE_T));
-
-        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-        {
-            /* Received telegram size = telegram header + data(fixed to 32) + CRC
-            * TODO The data size should be got from the header->datasetLength (to be dinamic),
-            * and then call to read() function until all the data is read. */
-            appHandle->pMDRcvEle->grossSize = sizeof(appHandle->pMDRcvEle->frameHead);
-        }
-        else
-        {
-            appHandle->pMDRcvEle->grossSize = TRDP_MAX_MD_PACKET_SIZE;
-        }
      
         appHandle->pMDRcvEle->pktFlags  = appHandle->mdDefault.flags;
     }
@@ -471,7 +463,12 @@ TRDP_ERR_T  trdp_mdReceive (
     /* process message */
     {
         MD_HEADER_T *pH = &appHandle->pMDRcvEle->frameHead;
-        int         lF  = appHandle->pMDRcvEle->dataSize;
+        int         lF  = appHandle->pMDRcvEle->grossSize;
+
+        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+        {
+        	lF  = appHandle->pMDRcvEle->dataSize;
+        }
 
         vos_printf(VOS_LOG_ERROR,
                    "Received MD packet (space: %d len: %d)\n",
