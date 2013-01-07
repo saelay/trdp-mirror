@@ -422,40 +422,25 @@ EXT_DECL void vos_getTime (
 
 EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 {
-	/* mod_start TOSHIBA */
-    /*
-	static char     pTimeString[32];
-     */
     static char    pTimeString[32] = {0};
-    /* mod_end */
     struct timeval  curTime;
     struct tm       *curTimeTM;
 
-    memset(timeString, 0, sizeof(timeString));
-
     gettimeofday(&curTime, NULL);
     curTimeTM = localtime(&curTime.tv_sec);
-    /* add_start TOSHIBA */
+
     if (curTimeTM != NULL)
     {
-    /* add_end */
         /*lint -e(534) ignore return value */
     	sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
-    	/* mod_start TOSIHBA */
-    		/* curTimeTM->tm_year,
-            curTimeTM->tm_mon,
-            */
-    			curTimeTM->tm_year + 1900,
+     			curTimeTM->tm_year + 1900,
     			curTimeTM->tm_mon + 1,
-    	/* mod_end TOSHIBA */
     			curTimeTM->tm_mday,
     			curTimeTM->tm_hour,
     			curTimeTM->tm_min,
     			curTimeTM->tm_sec,
     			(long) curTime.tv_usec / 1000L);
-    /* add_start TOSHIBA */
     }
-    /* add_end TOSHIBA */
     return pTimeString;
 }
 

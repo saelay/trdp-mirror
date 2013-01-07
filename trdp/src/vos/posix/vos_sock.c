@@ -40,7 +40,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 
-#ifndef __linux
+#ifdef __linux
 #include <linux/if.h>
 #include <linux/in.h>
 #else
@@ -882,9 +882,8 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
         }
-
-    }
-    while (bufferSize || (sendSize == -1 && errno == EAGAIN));
+	}
+    while (bufferSize && !(sendSize == -1 && errno != EINTR));
 
     if (sendSize == -1)
     {
@@ -907,7 +906,6 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  *  @param[in]      sock            socket descriptor
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
- *  @param[in]      blocking        blocking mode
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
@@ -934,26 +932,31 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     {
     	return VOS_SOCK_ERR;
     }*/
-
-    rcvSize = read(sock, pBuffer, bufferSize);
-    if (rcvSize > 0)
+    
+    do
     {
-        bufferSize  -= rcvSize;
-        pBuffer     += rcvSize;
-        *pSize      += rcvSize;
-    }
         
-    if((rcvSize == -1) && (errno == EWOULDBLOCK))
-    {
-      	return VOS_NO_ERR;
-    }
-        
-    if (rcvSize == 0)
-    {
-        return VOS_NODATA_ERR;
-    }
-
-    //while (bufferSize || (rcvSize == -1 && errno == EAGAIN));
+    	rcvSize = read(sock, pBuffer, bufferSize);
+        if (rcvSize > 0)
+        {
+            bufferSize  -= rcvSize;
+            pBuffer     += rcvSize;
+            *pSize      += rcvSize;
+        }
+            
+        if(rcvSize == -1 && errno == EWOULDBLOCK)
+        {
+            if (*pSize == 0)
+            {
+                return VOS_NODATA_ERR;
+            }
+            else
+            {
+            	return VOS_NO_ERR;
+            }
+        }
+	}
+	while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));
 
     if (rcvSize == -1)
     {
@@ -962,7 +965,14 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         vos_printf(VOS_LOG_WARNING, "receive failed (%s)\n", buff);
         return VOS_IO_ERR;
     }
-    return VOS_NO_ERR;
+    else if (*pSize == 0)
+    {
+        return VOS_NODATA_ERR;
+    }
+    else
+    {
+    	return VOS_NO_ERR;
+    }
 }
 
 #ifdef TRDP_OPTION_LADDER
