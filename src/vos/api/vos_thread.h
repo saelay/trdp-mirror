@@ -242,12 +242,9 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
  *
  *
  *  @param[out]     pTime            Pointer to time value
- *  @retval         VOS_NO_ERR       no error
- *  @retval         VOS_PARAM_ERR    parameter out of range/invalid
- *  @retval         VOS_UNKNOWN_ERR  can't retrieve time
  */
 
-EXT_DECL VOS_ERR_T vos_getTime (
+EXT_DECL void vos_getTime (
     VOS_TIME_T *pTime);
 
 
@@ -268,11 +265,9 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (
  *
  *
  *  @param[out]     pTime             Pointer to time value
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_PARAM_ERR     parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_clearTime (
+EXT_DECL void vos_clearTime (
     VOS_TIME_T *pTime);
 
 /**********************************************************************************************************************/
@@ -281,11 +276,9 @@ EXT_DECL VOS_ERR_T vos_clearTime (
  *
  *  @param[in, out]     pTime            Pointer to time value
  *  @param[in]          pAdd             Pointer to time value
- *  @retval             VOS_NO_ERR       no error
- *  @retval             VOS_PARAM_ERR    parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_addTime (
+EXT_DECL void vos_addTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pAdd);
 
@@ -295,11 +288,9 @@ EXT_DECL VOS_ERR_T vos_addTime (
  *
  *  @param[in, out]     pTime            Pointer to time value
  *  @param[in]          pSub             Pointer to time value
- *  @retval             VOS_NO_ERR       no error
- *  @retval             VOS_PARAM_ERR    parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_subTime (
+EXT_DECL void vos_subTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pSub);
 
@@ -324,11 +315,9 @@ EXT_DECL INT32 vos_cmpTime (
  *
  *  @param[in, out]     pTime           Pointer to time value
  *  @param[in]          div             Divisor
- *  @retval             VOS_NO_ERR      no error
- *  @retval             VOS_PARAM_ERR   parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_divTime (
+EXT_DECL void vos_divTime (
     VOS_TIME_T  *pTime,
     UINT32      div);
 
@@ -338,11 +327,9 @@ EXT_DECL VOS_ERR_T vos_divTime (
 *
 *  @param[in, out]     pTime           Pointer to time value
 *  @param[in]          mul             Factor
-*  @retval             VOS_NO_ERR      no error
-*  @retval             VOS_PARAM_ERR   parameter must not be NULL
 */
 
-EXT_DECL VOS_ERR_T vos_mulTime (
+EXT_DECL void vos_mulTime (
     VOS_TIME_T  *pTime,
     UINT32      mul);
 
@@ -351,11 +338,9 @@ EXT_DECL VOS_ERR_T vos_mulTime (
  *
  *
  *  @param[out]     pUuID             Pointer to a universal unique identifier
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_UNKNOWN_ERR   Could not create UUID
  */
 
-EXT_DECL VOS_ERR_T vos_getUuid (
+EXT_DECL void vos_getUuid (
     VOS_UUID_T pUuID);
 
 
@@ -384,12 +369,9 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
  *
  *  @param[in]      pMutex            mutex handle
  *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
- *  @retval         VOS_MUTEX_ERR     no such mutex
  */
 
-EXT_DECL VOS_ERR_T vos_mutexDelete (
+EXT_DECL void vos_mutexDelete (
     VOS_MUTEX_T pMutex);
 
 /**********************************************************************************************************************/
@@ -425,15 +407,11 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
  *  Unlock the mutex.
  *
  *  @param[in]      pMutex            mutex handle
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
  */
 
-EXT_DECL VOS_ERR_T vos_mutexUnlock (
+EXT_DECL void vos_mutexUnlock (
     VOS_MUTEX_T pMutex);
 
-#ifdef TRDP_OPTION_LADDER
 /**********************************************************************************************************************/
 /** Create a semaphore.
  *  Return a semaphore handle. Depending on the initial state the semaphore will be available on creation or not.
@@ -455,12 +433,9 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
  *  This will eventually release any processes waiting for the semaphore.
  *
  *  @param[in]      sema            semaphore handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
  */
 
-EXT_DECL VOS_ERR_T vos_semaDelete (
+EXT_DECL void vos_semaDelete (
     VOS_SEMA_T sema);
 
 /**********************************************************************************************************************/
@@ -486,16 +461,11 @@ EXT_DECL VOS_ERR_T vos_semaTake (
  *  Release (increase) a semaphore.
  *
  *  @param[in]      sema            semaphore handle
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_SEM_ERR		could not release semaphore
  */
 
-EXT_DECL VOS_ERR_T vos_semaGive (
+EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema);
 
-#endif /* TRDP_OPTION_LADDER */
 
 #ifdef __cplusplus
 }
