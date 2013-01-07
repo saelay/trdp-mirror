@@ -271,15 +271,16 @@ EXT_DECL VOS_ERR_T vos_memInit (
  *  application quits. No further access to the memory blocks is allowed after this call.
  *
  *  @param[in]      pMemoryArea        Pointer to memory area to use
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  */
 
-EXT_DECL VOS_ERR_T vos_memDelete (
+EXT_DECL void vos_memDelete (
     UINT8 *pMemoryArea)
 {
-    if (pMemoryArea == gMem.pArea)
+    if ((pMemoryArea == NULL) || (pMemoryArea != gMem.pArea))
+    {
+        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/üarameter\n");
+    }
+    else
     {
         vos_mutexLocalDelete(&gMem.mutex);
         if (gMem.wasMalloced)
@@ -287,9 +288,7 @@ EXT_DECL VOS_ERR_T vos_memDelete (
             free(pMemoryArea);
         }
         memset(&gMem, 0, sizeof(gMem));
-        return VOS_NO_ERR;
     }
-    return VOS_PARAM_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -356,84 +355,83 @@ EXT_DECL UINT8 *vos_memAlloc (
 
         return NULL;
     }
-
-    blockSize   = gMem.freeBlock[i].size;
-    pBlock      = gMem.freeBlock[i].pFirst;
-
-    /* Check if there is a free block ready */
-    if (pBlock != NULL)
-    {
-        /* There is, get it. */
-        /* Set start pointer to next free block in the linked list */
-        gMem.freeBlock[i].pFirst = pBlock->pNext;
-    }
     else
     {
-        /* There was no suitable free block, create one from the free area */
+        blockSize   = gMem.freeBlock[i].size;
+        pBlock      = gMem.freeBlock[i].pFirst;
 
-        /* Enough free memory left ? */
-        if ((gMem.allocSize + blockSize + sizeof(MEM_BLOCK_T)) < gMem.memSize)
+        /* Check if there is a free block ready */
+        if (pBlock != NULL)
         {
-            pBlock = (MEM_BLOCK_T *) gMem.pFreeArea; /*lint !e826 Allocation of MEM_BLOCK from free area*/
-
-            gMem.pFreeArea  = (UINT8 *) gMem.pFreeArea + (sizeof(MEM_BLOCK_T) + blockSize);
-            gMem.allocSize  += blockSize + sizeof(MEM_BLOCK_T);
-            gMem.memCnt.blockCnt[i]++;
+            /* There is, get it. */
+            /* Set start pointer to next free block in the linked list */
+            gMem.freeBlock[i].pFirst = pBlock->pNext;
         }
         else
         {
-            while ((++i < gMem.noOfBlocks) && (pBlock == NULL))
-            {
-                pBlock = gMem.freeBlock[i].pFirst;
-                if (pBlock != NULL)
-                {
-                    vos_printf(
-                        VOS_LOG_ERROR,
-                        "IPTVosMalloc Used a bigger buffer size=%d asked size=%d\n",
-                        gMem.freeBlock[i].size,
-                        size);
-                    /* There is, get it. */
-                    /* Set start pointer to next free block in the linked list */
-                    gMem.freeBlock[i].pFirst = pBlock->pNext;
+            /* There was no suitable free block, create one from the free area */
 
-                    blockSize = gMem.freeBlock[i].size;
+            /* Enough free memory left ? */
+            if ((gMem.allocSize + blockSize + sizeof(MEM_BLOCK_T)) < gMem.memSize)
+            {
+                pBlock = (MEM_BLOCK_T *) gMem.pFreeArea; /*lint !e826 Allocation of MEM_BLOCK from free area*/
+
+                gMem.pFreeArea  = (UINT8 *) gMem.pFreeArea + (sizeof(MEM_BLOCK_T) + blockSize);
+                gMem.allocSize  += blockSize + sizeof(MEM_BLOCK_T);
+                gMem.memCnt.blockCnt[i]++;
+            }
+            else
+            {
+                while ((++i < gMem.noOfBlocks) && (pBlock == NULL))
+                {
+                    pBlock = gMem.freeBlock[i].pFirst;
+                    if (pBlock != NULL)
+                    {
+                        vos_printf(
+                            VOS_LOG_ERROR,
+                            "IPTVosMalloc Used a bigger buffer size=%d asked size=%d\n",
+                            gMem.freeBlock[i].size,
+                            size);
+                        /* There is, get it. */
+                        /* Set start pointer to next free block in the linked list */
+                        gMem.freeBlock[i].pFirst = pBlock->pNext;
+
+                        blockSize = gMem.freeBlock[i].size;
+                    }
+                }
+                if (pBlock == NULL)
+                {
+                    /* Not enough memory */
+                    vos_printf(VOS_LOG_ERROR, "IPTVosMalloc Not enough memory\n");
                 }
             }
-            if (pBlock == NULL)
-            {
-                /* Not enough memory */
-                vos_printf(VOS_LOG_ERROR, "IPTVosMalloc Not enough memory\n");
-            }
         }
-    }
 
-    /* Release semaphore */
-    if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
-    {
-        vos_printf(VOS_LOG_ERROR, "IPTVosPutSemR ERROR\n");
-    }
+        /* Release semaphore */
+        vos_mutexUnlock(&gMem.mutex);
 
-    if (pBlock != NULL)
-    {
-        /* Fill in size in memory header of the block. To be used when it is returned.*/
-        pBlock->size            = blockSize;
-        gMem.memCnt.freeSize    -= blockSize + sizeof(MEM_BLOCK_T);
-        if (gMem.memCnt.freeSize < gMem.memCnt.minFreeSize)
+        if (pBlock != NULL)
         {
-            gMem.memCnt.minFreeSize = gMem.memCnt.freeSize;
+            /* Fill in size in memory header of the block. To be used when it is returned.*/
+            pBlock->size            = blockSize;
+            gMem.memCnt.freeSize    -= blockSize + sizeof(MEM_BLOCK_T);
+            if (gMem.memCnt.freeSize < gMem.memCnt.minFreeSize)
+            {
+                gMem.memCnt.minFreeSize = gMem.memCnt.freeSize;
+            }
+            gMem.memCnt.allocCnt++;
+
+            /* Clear returned memory area to be compliant with malloc'ed version */
+            memset((UINT8 *) pBlock + sizeof(MEM_BLOCK_T), 0, blockSize);
+
+            /* Return pointer to data area, not the memory block itself */
+            return (UINT8 *) pBlock + sizeof(MEM_BLOCK_T);
         }
-        gMem.memCnt.allocCnt++;
-
-        /* Clear returned memory area to be compliant with malloc'ed version */
-        memset((UINT8 *) pBlock + sizeof(MEM_BLOCK_T), 0, blockSize);
-
-        /* Return pointer to data area, not the memory block itself */
-        return (UINT8 *) pBlock + sizeof(MEM_BLOCK_T);
-    }
-    else
-    {
-        gMem.memCnt.allocErrCnt++;
-        return NULL;
+        else
+        {
+            gMem.memCnt.allocErrCnt++;
+            return NULL;
+        }    
     }
 }
 
@@ -455,14 +453,14 @@ EXT_DECL void vos_memFree (void *pMemBlock)
     if (pMemBlock == NULL)
     {
         gMem.memCnt.freeErrCnt++;
-        vos_printf(VOS_LOG_ERROR, "vos_memFree ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "vos_memFree() ERROR NULL pointer\n");
         return;
     }
 
     /*    Use standard heap memory    */
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
-        vos_printf(VOS_LOG_DBG, "vos_memFree %p\n", pMemBlock);
+        vos_printf(VOS_LOG_DBG, "vos_memFree() %p\n", pMemBlock);
         free(pMemBlock);
         return;
     }

@@ -131,12 +131,9 @@ EXT_DECL VOS_ERR_T vos_memInit (
  *  application quits. No further access to the memory blocks is allowed after this call.
  *
  *  @param[in]      pMemoryArea     Pointer to memory area to use
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_INIT_ERR    module not initialised
- *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
  */
 
-EXT_DECL VOS_ERR_T vos_memDelete (
+EXT_DECL void vos_memDelete (
     UINT8 *pMemoryArea);
 
 /**********************************************************************************************************************/

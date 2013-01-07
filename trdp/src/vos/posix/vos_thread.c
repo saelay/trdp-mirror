@@ -376,42 +376,40 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
  *
  *
  *  @param[out]     pTime           Pointer to time value
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
  */
 
-EXT_DECL VOS_ERR_T vos_getTime (
+EXT_DECL void vos_getTime (
     VOS_TIME_T *pTime)
 {
     struct timeval myTime;
 
     if (pTime == NULL)
     {
-        return VOS_PARAM_ERR;
+         vos_printf(VOS_LOG_ERROR, "vos_getTime() ERROR NULL pointer\n");
     }
-
+    else
+    {
 #ifndef _POSIX_TIMERS
 
-    /*    On systems without monotonic clock support,
-        changing the system clock during operation
-        might interrupt process data packet transmissions!    */
+        /*    On systems without monotonic clock support,
+            changing the system clock during operation
+            might interrupt process data packet transmissions!    */
 
-    gettimeofday(&myTime, NULL);
+        gettimeofday(&myTime, NULL);
 
 #else
 
-    struct timespec currentTime;
+        struct timespec currentTime;
 
-    clock_gettime(CLOCK_MONOTONIC, &currentTime);
+        clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-    TIMESPEC_TO_TIMEVAL(&myTime, &currentTime);
+        TIMESPEC_TO_TIMEVAL(&myTime, &currentTime);
 
 #endif
 
-    pTime->tv_sec   = myTime.tv_sec;
-    pTime->tv_usec  = myTime.tv_usec;
-
-    return VOS_NO_ERR;
+        pTime->tv_sec   = myTime.tv_sec;
+        pTime->tv_usec  = myTime.tv_usec;
+    }
 }
 
 /**********************************************************************************************************************/
@@ -467,21 +465,19 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
  *
  *
  *  @param[out]     pTime           Pointer to time value
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_clearTime (
+EXT_DECL void vos_clearTime (
     VOS_TIME_T *pTime)
 {
     if (pTime == NULL)
     {
-        return VOS_PARAM_ERR;
+         vos_printf(VOS_LOG_ERROR, "vos_clearTime() ERROR NULL pointer\n");
     }
-
-    timerclear(pTime);
-
-    return VOS_NO_ERR;
+    else
+    {
+         timerclear(pTime);
+    }
 }
 
 /**********************************************************************************************************************/
@@ -490,23 +486,23 @@ EXT_DECL VOS_ERR_T vos_clearTime (
  *
  *  @param[in, out]     pTime           Pointer to time value
  *  @param[in]          pAdd            Pointer to time value
- *  @retval             VOS_NO_ERR      no error
- *  @retval             VOS_PARAM_ERR   parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_addTime (
+EXT_DECL void vos_addTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pAdd)
 {
-    VOS_TIME_T ltime;
-
     if (pTime == NULL || pAdd == NULL)
     {
-        return VOS_PARAM_ERR;
+        vos_printf(VOS_LOG_ERROR, "vos_addTime() ERROR NULL pointer\n");
     }
-    timeradd(pTime, pAdd, &ltime);
-    *pTime = ltime;
-    return VOS_NO_ERR;
+    else
+    {
+        VOS_TIME_T ltime;
+
+        timeradd(pTime, pAdd, &ltime);
+        *pTime = ltime;
+    }
 }
 
 /**********************************************************************************************************************/
@@ -515,23 +511,23 @@ EXT_DECL VOS_ERR_T vos_addTime (
  *
  *  @param[in, out]     pTime           Pointer to time value
  *  @param[in]          pSub            Pointer to time value
- *  @retval             VOS_NO_ERR      no error
- *  @retval             VOS_PARAM_ERR   parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_subTime (
+EXT_DECL void vos_subTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pSub)
 {
-    VOS_TIME_T ltime;
-
     if (pTime == NULL || pSub == NULL)
     {
-        return VOS_PARAM_ERR;
+        vos_printf(VOS_LOG_ERROR, "vos_subTime() ERROR NULL pointer\n");
     }
-    timersub(pTime, pSub, &ltime);
-    *pTime = ltime;
-    return VOS_NO_ERR;
+    else
+    {
+        VOS_TIME_T ltime;
+
+        timersub(pTime, pSub, &ltime);
+        *pTime = ltime;
+    }
 }
 
 /**********************************************************************************************************************/
@@ -540,28 +536,28 @@ EXT_DECL VOS_ERR_T vos_subTime (
  *
  *  @param[in, out]     pTime           Pointer to time value
  *  @param[in]          divisor         Divisor
- *  @retval             VOS_NO_ERR      no error
- *  @retval             VOS_PARAM_ERR   parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_divTime (
+EXT_DECL void vos_divTime (
     VOS_TIME_T  *pTime,
     UINT32      divisor)
 {
-    UINT32 temp;
     if (pTime == NULL || divisor == 0)
     {
-        return VOS_PARAM_ERR;
+        vos_printf(VOS_LOG_ERROR, "vos_divTime() ERROR NULL pointer/parameter\n");
     }
-
-    temp = pTime->tv_sec % divisor;
-    pTime->tv_sec /= divisor;
-    if (temp > 0)
+    else
     {
-        pTime->tv_usec += temp * 1000000;
+        UINT32 temp;
+
+        temp = pTime->tv_sec % divisor;
+        pTime->tv_sec /= divisor;
+        if (temp > 0)
+        {
+            pTime->tv_usec += temp * 1000000;
+        }
+        pTime->tv_usec /= divisor;
     }
-    pTime->tv_usec /= divisor;
-    return VOS_NO_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -570,28 +566,26 @@ EXT_DECL VOS_ERR_T vos_divTime (
  *
  *  @param[in, out]     pTime           Pointer to time value
  *  @param[in]          mul             Factor
- *  @retval             VOS_NO_ERR      no error
- *  @retval             VOS_PARAM_ERR   parameter must not be NULL
  */
 
-EXT_DECL VOS_ERR_T vos_mulTime (
+EXT_DECL void vos_mulTime (
     VOS_TIME_T  *pTime,
     UINT32      mul)
 {
     if (pTime == NULL)
     {
-        return VOS_PARAM_ERR;
+        vos_printf(VOS_LOG_ERROR, "vos_mulTime() ERROR NULL pointer/parameter\n");
     }
-    pTime->tv_sec   *= mul;
-    pTime->tv_usec  *= mul;
-    while (pTime->tv_usec >= 1000000)
+    else
     {
-        pTime->tv_sec++;
-        pTime->tv_usec -= 1000000;
+        pTime->tv_sec   *= mul;
+        pTime->tv_usec  *= mul;
+        while (pTime->tv_usec >= 1000000)
+        {
+            pTime->tv_sec++;
+            pTime->tv_usec -= 1000000;
+        }
     }
-    ;
-
-    return VOS_NO_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -629,11 +623,9 @@ EXT_DECL INT32 vos_cmpTime (
  *
  *
  *  @param[out]     pUuID           Pointer to a universal unique identifier
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_UNKNOWN_ERR Could not create UUID
  */
 
-EXT_DECL VOS_ERR_T vos_getUuid (
+EXT_DECL void vos_getUuid (
     VOS_UUID_T pUuID)
 {
 #ifdef __APPLE__
@@ -642,14 +634,9 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1;
     VOS_TIME_T      current;
-    VOS_ERR_T       err = VOS_NO_ERR;
 
-    err = vos_getTime(&current);
-    if ( err != VOS_NO_ERR)
-    {
-        return err;
-    }
-
+    vos_getTime(&current);
+    
     pUuID[0]    = current.tv_usec & 0xFF;
     pUuID[1]    = (current.tv_usec & 0xFF00) >> 8;
     pUuID[2]    = (current.tv_usec & 0xFF0000) >> 16;
@@ -665,14 +652,9 @@ EXT_DECL VOS_ERR_T vos_getUuid (
     count++;
 
     /*  Copy the mac address into the rest of the array */
-    err = vos_sockGetMAC(&pUuID[10]) ;
-    if ( err != VOS_NO_ERR)
-    {
-        return err;
-    }
+    vos_sockGetMAC(&pUuID[10]) ;
 
 #endif
-    return err;
 }
 
 
@@ -787,36 +769,32 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
  *  Release the resources taken by the mutex.
  *
  *  @param[in]      pMutex          mutex handle
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   pMutex == NULL or wrong type
- *  @retval         VOS_MUTEX_ERR   no such mutex
  */
 
-EXT_DECL VOS_ERR_T vos_mutexDelete (
+EXT_DECL void vos_mutexDelete (
     VOS_MUTEX_T pMutex)
 {
-    int err;
-
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        return VOS_PARAM_ERR;
-    }
-
-    err = pthread_mutex_destroy(&pMutex->mutexId);
-    if (err == 0)
-    {
-        pMutex->magicNo = 0;
-        vos_memFree(pMutex);
+        vos_printf(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
     }
     else
     {
-        vos_printf(VOS_LOG_ERROR,
-                   "Can not destroy Mutex (pthread err=%d)\n",
-                   err);
-        return VOS_MUTEX_ERR;
+        int err;
+        
+        err = pthread_mutex_destroy(&pMutex->mutexId);
+        if (err == 0)
+        {
+            pMutex->magicNo = 0;
+            vos_memFree(pMutex);
+        }
+        else
+        {
+            vos_printf(VOS_LOG_ERROR,
+                       "Can not destroy Mutex (pthread err=%d)\n",
+                       err);
+        }
     }
-
-    return VOS_NO_ERR;
 }
 
 
@@ -825,33 +803,30 @@ EXT_DECL VOS_ERR_T vos_mutexDelete (
  *  Release the resources taken by the mutex.
  *
  *  @param[in]      pMutex          Pointer to mutex struct
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   pMutex == NULL or wrong type
- *  @retval         VOS_MUTEX_ERR   no such mutex
  */
 
-EXT_DECL VOS_ERR_T vos_mutexLocalDelete (
+EXT_DECL void vos_mutexLocalDelete (
     struct VOS_MUTEX *pMutex)
 {
-    int err;
-
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        return VOS_PARAM_ERR;
-    }
-
-    err = pthread_mutex_destroy(&pMutex->mutexId);
-    if (err == 0)
-    {
-        pMutex->magicNo = 0;
+        vos_printf(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
     }
     else
     {
-        vos_printf(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
-        return VOS_MUTEX_ERR;
-    }
+        int err;
 
-    return VOS_NO_ERR;
+        err = pthread_mutex_destroy(&pMutex->mutexId);
+        if (err == 0)
+        {
+            pMutex->magicNo = 0;
+        }
+        else
+        {
+            vos_printf(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
+            return VOS_MUTEX_ERR;
+        }
+    }
 }
 
 
@@ -930,31 +905,29 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
  *  Unlock the mutex.
  *
  *  @param[in]      pMutex          mutex handle
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   pMutex == NULL or wrong type
- *  @retval         VOS_MUTEX_ERR   no such mutex
  */
 
-EXT_DECL VOS_ERR_T vos_mutexUnlock (
+EXT_DECL void vos_mutexUnlock (
     VOS_MUTEX_T pMutex)
 {
-    int err;
 
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        return VOS_PARAM_ERR;
+        vos_printf(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
     }
-
-    err = pthread_mutex_unlock(&pMutex->mutexId);
-    if (err != 0)
+    else
     {
-        vos_printf(VOS_LOG_ERROR,
-                   "Unable to unlock Mutex (pthread err=%d)\n",
-                   err);
-        return VOS_MUTEX_ERR;
-    }
+        int err;
 
-    return VOS_NO_ERR;
+        err = pthread_mutex_unlock(&pMutex->mutexId);
+        if (err != 0)
+        {
+            vos_printf(VOS_LOG_ERROR,
+                       "Unable to unlock Mutex (pthread err=%d)\n",
+                       err);
+            return VOS_MUTEX_ERR;
+        }
+    }
 }
 
 
@@ -1012,28 +985,21 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
  *  This will eventually release any processes waiting for the semaphore.
  *
  *  @param[in]      sema            semaphore handle
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_INIT_ERR    module not initialised
- *  @retval         VOS_NOINIT_ERR  invalid handle
  */
 
-EXT_DECL VOS_ERR_T vos_semaDelete (
+EXT_DECL void vos_semaDelete (
     VOS_SEMA_T sema)
 {
 #ifdef TRDP_OPTION_LADDER
 	if (sem_close(sema->pSemaphore) == -1)
 	{
 		vos_printf(VOS_LOG_ERROR, "Semaphore Close failed\n");
-		return VOS_SEMA_ERR;
 	}
 	if (sem_unlink(sema->semaphoreName) == -1)
 	{
 		vos_printf(VOS_LOG_ERROR, "Semaphore unLink failed\n");
-		return VOS_SEMA_ERR;
 	}
 #endif /* TRDP_OPTION_LADDER */
-
-    return VOS_NO_ERR;
 }
 
 
@@ -1110,13 +1076,9 @@ EXT_DECL VOS_ERR_T vos_semaTake (
  *  Release (increase) a semaphore.
  *
  *  @param[in]      sema            semaphore handle
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_INIT_ERR    module not initialised
- *  @retval         VOS_NOINIT_ERR  invalid handle
- *  @retval         VOS_SEM_ERR        could not release semaphore
  */
 
-EXT_DECL VOS_ERR_T vos_semaGive (
+EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema)
 {
 #ifdef TRDP_OPTION_LADDER
@@ -1134,13 +1096,11 @@ EXT_DECL VOS_ERR_T vos_semaGive (
 		sem_getvalue(sema->pSemaphore, &sval);
 		printf("ERROR! After vos_semaGive() :semaphore value%d\n", sval);
 		/* debug_end */
-		return VOS_SEMA_ERR;
+		return;
 	}
 	/* debug_start */
 	sem_getvalue(sema->pSemaphore, &sval);
 	printf("After vos_semaGive() :semaphore value%d\n", sval);
 	/* debug_end */
 #endif /* TRDP_OPTION_LADDER */
-
-    return VOS_NO_ERR;
 }

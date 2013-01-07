@@ -220,7 +220,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
         /*    Get the current time    */
-        err = (TRDP_ERR_T) vos_getTime(&now);
+        vos_getTime(&now);
 
         if( err != TRDP_NO_ERR)
         {
