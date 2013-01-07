@@ -67,18 +67,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3839) : Warning 613: Possible use of
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-                                                _
-        pPacket->privFlags &= ~TRDP_INVALID_DATA;
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(118) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                                      _
-        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(467) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                                         _
-        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(470) : Error 64: Type mismatch
-    (assignment) (int/enum)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c 
                                _
@@ -234,10 +222,6 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
     633; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
-_
-}
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(521) : Warning 529: Symbol 'ret'
-    (line 447) not subsequently referenced
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
                                _
