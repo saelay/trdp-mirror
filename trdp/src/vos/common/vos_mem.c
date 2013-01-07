@@ -18,6 +18,11 @@
  *
  * $Id$
  *
+ * Changes:
+ *                  BL 2012-12-03: ID 1: "using uninitialized PD_ELE_T.pullIpAddress variable"
+ *                                 ID 2: "uninitialized PD_ELE_T newPD->pNext in tlp_subscribe()"
+ *                  
+ *					
  */
 
 /***********************************************************************************************************************
