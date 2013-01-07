@@ -115,7 +115,7 @@ TRDP_ERR_T trdp_pdPut (
     if (TRDP_NO_ERR == ret)
     {
         /* set data valid */
-        pPacket->privFlags &= ~TRDP_INVALID_DATA;    /*lint !e641 !e64 bitwise operation of compatible enums */
+        pPacket->privFlags &= ~TRDP_INVALID_DATA;
 
         /* Update PD buffer */
         trdp_pdDataUpdate(pPacket);
@@ -170,12 +170,12 @@ TRDP_ERR_T trdp_pdGet (
     /*  Update some statistics  */
     pPacket->getPkts++;
 
-    if (pPacket->privFlags & TRDP_TIMED_OUT)    /*lint !e655 bitwise operation of compatible enums */
+    if (pPacket->privFlags & TRDP_TIMED_OUT)    
     {
         return TRDP_TIMEOUT_ERR;
     }
 
-    if (pPacket->privFlags & TRDP_INVALID_DATA) /*lint !e655 bitwise operation of compatible enums */
+    if (pPacket->privFlags & TRDP_INVALID_DATA) 
     {
         return TRDP_NODATA_ERR;
     }
@@ -214,7 +214,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
     TRDP_TIME_T now;
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
-    vos_clearTime(&appHandle->interval);                        /*lint !e534 ignore return value */
+    vos_clearTime(&appHandle->interval);
  
     /*    Find the packet which has to be sent next:    */
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
@@ -233,10 +233,10 @@ TRDP_ERR_T  trdp_pdSendQueued (
          */
         if ((timerisset(&iterPD->interval) &&                   /*  Request for immediate sending   */
              !timercmp(&iterPD->timeToGo, &now, >)) ||
-            iterPD->privFlags & TRDP_REQ_2B_SENT)               /*lint !e655 bitwise operation of compatible enums */
+            iterPD->privFlags & TRDP_REQ_2B_SENT)               
         {
             /* send only if there are valid data */
-            if (!(iterPD->privFlags & TRDP_INVALID_DATA))       /*lint !e655 bitwise operation of compatible enums */
+            if (!(iterPD->privFlags & TRDP_INVALID_DATA))       
             {
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
@@ -244,7 +244,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 /*    Send the packet if it is not redundant    */
                 if (iterPD->socketIdx != -1 && 
                     (!appHandle->beQuiet ||
-                    (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT))) /*lint !e655 bitwise operation of compatible enums */
+                    (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT))) 
                 {
                     /* We pass the error to the application, but we keep on going    */
                     err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);
@@ -256,9 +256,9 @@ TRDP_ERR_T  trdp_pdSendQueued (
             }
 
             /* Reset "immediate" flag for request or requested packet */
-            if (iterPD->privFlags & TRDP_REQ_2B_SENT)           /*lint !e655 bitwise operation of compatible enums */  
+            if (iterPD->privFlags & TRDP_REQ_2B_SENT)            
             {
-                iterPD->privFlags ^= TRDP_REQ_2B_SENT;          /*lint !e655 bitwise operation of compatible enums */
+                iterPD->privFlags ^= TRDP_REQ_2B_SENT;          
             }
 
             /*  Set timer if interval was set.
@@ -268,7 +268,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
             {
                 /*    set new time    */
                 iterPD->timeToGo = iterPD->interval;
-                vos_addTime(&iterPD->timeToGo, &now);           /*lint !e534 ignore return value */
+                vos_addTime(&iterPD->timeToGo, &now);
             }
         }
     }
@@ -416,7 +416,7 @@ TRDP_ERR_T  trdp_pdReceive (
             }
 
             /* trigger immediate sending of PD  */
-            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;  /*lint !e655 bitwise operation of compatible enums */
+            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;  
 
             if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
             {
@@ -458,16 +458,16 @@ TRDP_ERR_T  trdp_pdReceive (
         informUser = memcmp(pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
 
         /*  Get the current time and compute the next time this packet should be received.  */
-        vos_getTime(&pExistingElement->timeToGo);                                /*lint !e534 ignore return value */
-        vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);   /*lint !e534 ignore return value */
+        vos_getTime(&pExistingElement->timeToGo);
+        vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
 
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
         pExistingElement->lastErr    = TRDP_NO_ERR;
-        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;     /*lint !e641 !e64 converting enum to int */
+        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
 
         /* set the data valid */
-        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;  /*lint !e641 !e64 converting enum to int */
+        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
 
         if (informUser)
         {
@@ -756,7 +756,7 @@ TRDP_ERR_T  trdp_pdDistribute (
     }
 
     /*  This is the delta time we can jitter...   */
-    vos_divTime(&deltaTmax, noOfPackets); /*lint !e534 ignore return value */
+    vos_divTime(&deltaTmax, noOfPackets);
 
     vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %u.%06u\n", deltaTmax.tv_sec, deltaTmax.tv_usec);
     vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %u.%06u\n", tNull.tv_sec, tNull.tv_usec);

@@ -165,7 +165,7 @@ BOOL    trdp_isValidSession (
         pSession = pSession->pNext;
     }
 
-    vos_mutexUnlock(sSessionMutex);  /*lint !e534 ignore return value */
+    vos_mutexUnlock(sSessionMutex);
     return found;
 }
 
@@ -422,7 +422,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                "TRDP Stack Version %s: successfully initiated\n",
                LIB_VERSION);
 
-        vos_mutexUnlock(sSessionMutex);  /*lint !e534 ignore return value */
+        vos_mutexUnlock(sSessionMutex);
     }
 
     return ret;
@@ -505,14 +505,14 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     pSession->pSndQueue = pNext;
                 }
 
-                vos_mutexUnlock(pSession->mutex);    /*lint !e534 ignore return value */
-                vos_mutexDelete(pSession->mutex);    /*lint !e534 ignore return value */
+                vos_mutexUnlock(pSession->mutex);
+                vos_mutexDelete(pSession->mutex);
                 vos_memFree(pSession);
 
                 ret = TRDP_NO_ERR;
             }
         }
-        vos_mutexUnlock(sSessionMutex);  /*lint !e534 ignore return value */
+        vos_mutexUnlock(sSessionMutex);
 
     }
 
@@ -608,7 +608,7 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
                 }
             }
 
-            vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
+            vos_mutexUnlock(appHandle->mutex);
         }
     }
     else
@@ -650,7 +650,7 @@ TRDP_ERR_T tlp_setRedundant (
             appHandle->beQuiet  = !leader;
             appHandle->redID    = redId;
 
-            vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
+            vos_mutexUnlock(appHandle->mutex);
         }
     }
     else
@@ -691,7 +691,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
             /*    TBD! Search list of redundant comIds    */
             *pLeader = !appHandle->beQuiet;
 
-            vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
+            vos_mutexUnlock(appHandle->mutex);
         }
     }
     else
@@ -726,7 +726,7 @@ EXT_DECL TRDP_ERR_T tlc_setTopoCount (
             /*  Set the topoCount for each session  */
             appHandle->topoCount = topoCount;
 
-            vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
+            vos_mutexUnlock(appHandle->mutex);
         }
     }
     else
@@ -932,7 +932,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             }
         }
 
-        vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
+        vos_mutexUnlock(appHandle->mutex);
     }
 
 #ifdef TRDP_OPTION_LADDER
@@ -992,7 +992,7 @@ TRDP_ERR_T  tlp_unpublish (
             ret = TRDP_NOPUB_ERR;
         }
 
-        vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
+        vos_mutexUnlock(appHandle->mutex); 
     }
 
     return ret;      /*    Not found    */
@@ -1049,7 +1049,7 @@ TRDP_ERR_T tlp_put (
                              dataSize);
         }
 
-        vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
+        vos_mutexUnlock(appHandle->mutex);
     }
    
     return ret;      /*    Not found    */
@@ -1175,7 +1175,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     /* vos_printf(VOS_LOG_INFO, "no interval\n"); */
                 }
 
-                vos_mutexUnlock(appHandle->mutex);  /*lint !e534 ignore return value */
+                vos_mutexUnlock(appHandle->mutex);
                 
                 /* FIXME set a maximumount of sockets to check */
                 if (pNoDesc != NULL)
@@ -2359,7 +2359,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
 #endif
 
-    vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
+    vos_mutexUnlock(appHandle->mutex);
 
     return err;
 }
@@ -2533,7 +2533,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
             }
         }
 
-        vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
+        vos_mutexUnlock(appHandle->mutex);
     }
 
     return ret;
@@ -2755,7 +2755,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     pdComLadderThreadStartFlag = TRUE;
 #endif /* TRDP_OPTION_LADDER */
 
-    vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
+    vos_mutexUnlock(appHandle->mutex);
 
     return ret;
 }
@@ -2806,7 +2806,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
             ret = TRDP_NOPUB_ERR;
         }
 
-        vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
+        vos_mutexUnlock(appHandle->mutex);
     }
 
     return ret;      /*    Not found    */
@@ -2922,7 +2922,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
             pPdInfo->resultCode     = TRDP_NO_ERR;
         }
 
-        vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
+        vos_mutexUnlock(appHandle->mutex);
     }
 
     return ret;
@@ -3422,7 +3422,7 @@ static TRDP_ERR_T tlm_common_send (
     }
 
     /* Release mutex */
-    vos_mutexUnlock(appHandle->mutex);   /*lint !e534 ignore return value */
+    vos_mutexUnlock(appHandle->mutex);
 
     return errv;
 }
@@ -3744,7 +3744,7 @@ TRDP_ERR_T tlm_addListener (
     }
 
     /* Release mutex */
-    vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
+    vos_mutexUnlock(appHandle->mutex);
 
     /* return listener reference to caller */
     if (pListenHandle != NULL)
@@ -3861,7 +3861,7 @@ TRDP_ERR_T tlm_delListener (
     }
 
     /* Release mutex */
-    vos_mutexUnlock(appHandle->mutex);    /*lint !e534 ignore return value */
+    vos_mutexUnlock(appHandle->mutex);
 
     return errv;
 }

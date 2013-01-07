@@ -26,3 +26,5 @@ options.lnt  -si4 -sp4
 --emacro({*},vos_printf)
 --emacro((131),vos_printf)
 -e131
+-e655   // bit-wise operation uses (compatible) enum's
+-e641   // Converting enum to int
