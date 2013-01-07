@@ -16,11 +16,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(168) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     434, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                             _
-        vos_memFree(pSession);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(356) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                       _
     vos_clearTime(&pSession->interval);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(361) : Warning 534: Ignoring return
@@ -39,11 +34,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(503) : Warning 534: Ignoring return
     value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)' (compare
     with line 112, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                    _
-                    vos_memFree(pSession->pSndQueue);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(504) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                                 _
                 vos_mutexUnlock(pSession->mutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(508) : Warning 534: Ignoring return
@@ -56,11 +46,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(509) : Warning 534: Ignoring return
     value of function 'vos_mutexDelete(struct VOS_MUTEX *)' (compare with line
     393, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                     _
-                vos_memFree(pSession);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(510) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                       _
         vos_mutexUnlock(sSessionMutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(515) : Warning 534: Ignoring return
@@ -108,16 +93,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(729) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     434, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                            _
-                    vos_memFree(pNewElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(868) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                _
-                        vos_memFree(pNewElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(877) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                                      _
                 vos_clearTime(&pNewElement->interval);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(890) : Warning 534: Ignoring return
@@ -159,16 +134,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(943) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     434, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                         _
-            vos_memFree(pElement->pFrame);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(986) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                 _
-            vos_memFree(pElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(987) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                          _
         vos_mutexUnlock(appHandle->mutex); 
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(995) : Warning 534: Ignoring return
@@ -223,11 +188,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1277) : Warning 534: Ignoring return
     value of function 'vos_getTime(struct {...} *)' (compare with line 251,
     file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                           _
-                        vos_memFree(iterMD);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1407) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                         _
         TRDP_ERR_T  err = TRDP_NO_ERR;
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1462) : Warning 578: Declaration of
@@ -250,11 +210,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1988) : Warning 534: Ignoring return
     value of function 'vos_addTime(struct {...} *, const struct {...} *)'
     (compare with line 290, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                           _
-                        vos_memFree(iterMD);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2175) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                                          _
                     vos_addTime(&tmpt, &iterMD->interval);  /* interval is timeout velue */
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2189) : Warning 534: Ignoring return
@@ -267,21 +222,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2362) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     434, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                _
-                        vos_memFree(pReqElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2467) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                            _
-                            vos_memFree(pReqElement->pFrame);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2484) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                    _
-                            vos_memFree(pReqElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2485) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                                                  _
                             vos_clearTime(&pReqElement->interval);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2491) : Warning 534: Ignoring return
@@ -318,11 +258,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2629) : Warning 534: Ignoring return
     value of function 'vos_getTime(struct {...} *)' (compare with line 251,
     file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                      _
-                    vos_memFree(newPD);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2694) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                                        _
                         vos_clearTime(&newPD->timeToGo);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2725) : Warning 534: Ignoring return
@@ -353,16 +288,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2758) : Warning 534: Ignoring return
     value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare with line
     434, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
     D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                         _
-            vos_memFree(pElement->pFrame);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2800) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                 _
-            vos_memFree(pElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2801) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                          _
         vos_mutexUnlock(appHandle->mutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2809) : Warning 534: Ignoring return
@@ -407,11 +332,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3315) : Warning 534: Ignoring return
                                                                                     _
             pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3345) : Warning 571: Suspicious cast
-                                _
-        vos_memFree(pNewElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3420) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                      _
     vos_mutexUnlock(appHandle->mutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3425) : Warning 534: Ignoring return
@@ -424,11 +344,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3701) : Warning 534: Ignoring return
     value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
     (compare with line 251, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                _
-        vos_memFree(pNewElement);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3742) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                      _
     vos_mutexUnlock(appHandle->mutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3747) : Warning 534: Ignoring return
@@ -440,11 +355,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3747) : Warning 534: Ignoring return
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3839) : Warning 613: Possible use of
     null pointer 'iterMD_pre' in left argument to operator '->' [Reference:
     file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 3792]
-                                   _
-                vos_memFree(iterMD);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3844) : Warning 534: Ignoring return
-    value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                      _
     vos_mutexUnlock(appHandle->mutex);
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3864) : Warning 534: Ignoring return
@@ -644,7 +554,7 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c(346) : Warning 534: Ignoring
 D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c(356) : Warning 534: Ignoring
     return value of function 'vos_memCount(unsigned int *, unsigned int *,
     unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned
-    int *, unsigned int *)' (compare with line 190, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h,
+    int *, unsigned int *)' (compare with line 187, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
@@ -660,23 +570,23 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
     633; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
-                                 _
-                vos_memFree(p[j]);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(260) : Warning 534: Ignoring
-    return value of function 'vos_memFree(void *)' (compare with line 164, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
                                          _
         vos_mutexLocalDelete(&gMem.mutex);
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(284) : Warning 534: Ignoring
     return value of function 'vos_mutexLocalDelete(struct VOS_MUTEX *)'
     (compare with line 49, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_private.h)
+                                    _
+        vos_mutexUnlock(&gMem.mutex);
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(521) : Warning 534: Ignoring
+    return value of function 'vos_mutexUnlock(struct VOS_MUTEX *)' (compare
+    with line 434, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_thread.h, module
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+_
+}
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(523) : Warning 529: Symbol 'ret'
+    (line 449) not subsequently referenced
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
-                           _
-        vos_memFree(pMutex);
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(838) : Warning 534: Ignoring
-    return value of function 'vos_memFree(void *)' (compare with line 450, file
-    D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
                                   _

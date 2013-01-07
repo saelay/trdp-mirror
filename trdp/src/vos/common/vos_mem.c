@@ -442,13 +442,9 @@ EXT_DECL UINT8 *vos_memAlloc (
 /** Deallocate a block of memory (from memory area above).
  *
  *  @param[in]      pMemBlock         Pointer to memory block to be freed
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
  */
 
-EXT_DECL VOS_ERR_T vos_memFree (
-    void *pMemBlock)
+EXT_DECL void vos_memFree (void *pMemBlock)
 {
     VOS_ERR_T   ret = VOS_NO_ERR;
     UINT32      i;
@@ -460,7 +456,7 @@ EXT_DECL VOS_ERR_T vos_memFree (
     {
         gMem.memCnt.freeErrCnt++;
         vos_printf(VOS_LOG_ERROR, "vos_memFree ERROR NULL pointer\n");
-        return VOS_PARAM_ERR;
+        return;
     }
 
     /*    Use standard heap memory    */
@@ -468,7 +464,7 @@ EXT_DECL VOS_ERR_T vos_memFree (
     {
         vos_printf(VOS_LOG_DBG, "vos_memFree %p\n", pMemBlock);
         free(pMemBlock);
-        return VOS_NO_ERR;
+        return;
     }
 
     /* Check that the returned memory is within the allocated area */
@@ -477,7 +473,7 @@ EXT_DECL VOS_ERR_T vos_memFree (
     {
         gMem.memCnt.freeErrCnt++;
         vos_printf(VOS_LOG_ERROR, "vos_memFree ERROR returned memory not within allocated memory\n");
-        return VOS_PARAM_ERR;
+        return;
     }
 
     /* Get memory sempahore */
@@ -486,49 +482,44 @@ EXT_DECL VOS_ERR_T vos_memFree (
         gMem.memCnt.freeErrCnt++;
 
         vos_printf(VOS_LOG_ERROR, "vos_memFree can't get semaphore\n");
-        return VOS_MEM_ERR;
-    }
-
-    /* Set block pointer to start of block, before the returned pointer */
-    pBlock      = (MEM_BLOCK_T *) ((UINT8 *) pMemBlock - sizeof(MEM_BLOCK_T));
-    blockSize   = pBlock->size;
-
-    /* Find appropriate free block item */
-    for (i = 0; i < gMem.noOfBlocks; i++)
-    {
-        if (blockSize == gMem.freeBlock[i].size)
-        {
-            break;
-        }
-    }
-
-    if (i >= gMem.noOfBlocks)
-    {
-        gMem.memCnt.freeErrCnt++;
-
-        vos_printf(VOS_LOG_ERROR, "vos_memFree illegal sized memory\n");
-        ret = VOS_MEM_ERR;   /* Try to return a illegal sized memory */
-    }
+     }
     else
     {
-        gMem.memCnt.freeSize += blockSize + sizeof(MEM_BLOCK_T);
-        gMem.memCnt.allocCnt--;
+        /* Set block pointer to start of block, before the returned pointer */
+        pBlock      = (MEM_BLOCK_T *) ((UINT8 *) pMemBlock - sizeof(MEM_BLOCK_T));
+        blockSize   = pBlock->size;
 
-        /* Put the returned block first in the linked list */
-        pBlock->pNext = gMem.freeBlock[i].pFirst;
-        gMem.freeBlock[i].pFirst = pBlock;
+        /* Find appropriate free block item */
+        for (i = 0; i < gMem.noOfBlocks; i++)
+        {
+            if (blockSize == gMem.freeBlock[i].size)
+            {
+                break;
+            }
+        }
 
-        /* Destroy the size first in the block. If user tries to return same memory this will then fail. */
-        pBlock->size = 0;
+        if (i >= gMem.noOfBlocks)
+        {
+            gMem.memCnt.freeErrCnt++;
+
+            vos_printf(VOS_LOG_ERROR, "vos_memFree illegal sized memory\n");
+        }
+        else
+        {
+            gMem.memCnt.freeSize += blockSize + sizeof(MEM_BLOCK_T);
+            gMem.memCnt.allocCnt--;
+
+            /* Put the returned block first in the linked list */
+            pBlock->pNext = gMem.freeBlock[i].pFirst;
+            gMem.freeBlock[i].pFirst = pBlock;
+
+            /* Destroy the size first in the block. If user tries to return same memory this will then fail. */
+            pBlock->size = 0;
+        }
+
+        /* Release semaphore */
+        vos_mutexUnlock(&gMem.mutex);
     }
-
-    /* Release semaphore */
-    if(vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
-    {
-        vos_printf(VOS_LOG_ERROR, "vos_memFree can't release semaphore\n");
-    }
-
-    return ret;
 }
 
 
