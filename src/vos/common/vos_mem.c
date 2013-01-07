@@ -444,7 +444,6 @@ EXT_DECL UINT8 *vos_memAlloc (
 
 EXT_DECL void vos_memFree (void *pMemBlock)
 {
-    VOS_ERR_T   ret = VOS_NO_ERR;
     UINT32      i;
     UINT32      blockSize;
     MEM_BLOCK_T *pBlock;
