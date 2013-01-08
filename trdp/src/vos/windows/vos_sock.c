@@ -1011,8 +1011,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  *  @retval         VOS_SOCK_ERR        option not supported
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-		INT32   sock,
-		UINT32  mcIfAddress)
+        INT32   sock,
+        UINT32  mcIfAddress)
 {
     DWORD       optValue = (DWORD) mcIfAddress;
     VOS_ERR_T   err = VOS_NO_ERR;
@@ -1028,7 +1028,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
             vos_print(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed\n");
             err = VOS_SOCK_ERR;
         }
-		else
+        else
         {
             err = VOS_NO_ERR;
         }

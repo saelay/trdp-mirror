@@ -541,7 +541,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[index].sock, &sock_options);
                 if (err != TRDP_NO_ERR)
                 {
-                    vos_printf(VOS_LOG_ERROR, "Socket create for UDP failed!\n");
+                    vos_printf(VOS_LOG_ERROR, "vos_sockOpenUDP failed! (Err: %d)\n", err);
                     *pIndex = -1;
                 }
                 else
@@ -553,18 +553,23 @@ TRDP_ERR_T  trdp_requestSocket (
                         err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
                         if (err != TRDP_NO_ERR)
                         {
-                            vos_printf(VOS_LOG_ERROR, "Socket create for UDP rcv failed!\n");
+                            vos_printf(VOS_LOG_ERROR, "vos_sockBind() for UDP rcv failed! (Err: %d)\n", err);
                             *pIndex = -1;
+                            break;
                         }
                     }
-                    vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
+                    err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
+                    if (err != TRDP_NO_ERR)
+                    {
+                        vos_printf(VOS_LOG_ERROR, "vos_sockSetMulticastIf() failed! (Err: %d)\n", err);
+                    }
                 }
                 break;
             case TRDP_SOCK_MD_TCP:
                 err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[index].sock, &sock_options);
                 if (err != TRDP_NO_ERR)
                 {
-                    vos_printf(VOS_LOG_ERROR, "Socket create for TCP failed!\n");
+                    vos_printf(VOS_LOG_ERROR, "vos_sockOpenTCP() failed! (Err: %d)\n", err);
                     *pIndex = -1;
                 }
                 else
