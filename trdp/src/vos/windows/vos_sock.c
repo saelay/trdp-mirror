@@ -912,9 +912,8 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
         }
-
     }
-    while (bufferSize || (sendSize == SOCKET_ERROR && errno == EAGAIN));
+    while (bufferSize && !(sendSize == -1 && errno != EINTR));
 
     if (sendSize == SOCKET_ERROR)
     {
@@ -959,7 +958,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         return VOS_PARAM_ERR;
     }
     
-       /*	Keep on sending until we got rid of all data or we received an unrecoverable error	*/
+    /* Keep on sending until we got rid of all data or we received an unrecoverable error	*/
     do
     {
         rcvSize = recv((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
@@ -970,23 +969,33 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             *pSize      += rcvSize;
         }
         
-        if((rcvSize == -1) && (errno == EWOULDBLOCK))
+        if(rcvSize == -1 && errno == EWOULDBLOCK)
         {
-        	return VOS_NO_ERR;
+            if (*pSize == 0)
+            {
+                return VOS_NODATA_ERR;
+            }
+            else
+            {
+            	return VOS_NO_ERR;
+            }
         }
-        
-        if (rcvSize == 0)
-        {
-            return VOS_NODATA_ERR;
-        }
-    }
-    while (bufferSize && (rcvSize == -1 && errno == EAGAIN));
-
+	}
+	while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));
     if (rcvSize == SOCKET_ERROR)
-    {        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+    {
+        char buff[VOS_MAX_ERR_STR_SIZE]={0};
+
         strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
         vos_printf(VOS_LOG_WARNING, "receive failed (%s)\n", buff);
         return VOS_IO_ERR;
     }
-    return VOS_NO_ERR;
+    else if (*pSize == 0)
+    {
+        return VOS_NODATA_ERR;
+    }
+    else
+    {
+        return VOS_NO_ERR;
+    }
 }
