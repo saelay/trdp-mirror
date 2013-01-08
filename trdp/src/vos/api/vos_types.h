@@ -46,11 +46,15 @@ typedef signed int INT32;
 typedef signed long long INT64;
 typedef int BOOL;
 typedef char CHAR8;
-
+typedef wchar_t UTF16;
+typedef float REAL32;
+typedef double REAL64;
 
 #elif defined(POSIX)
 
 #include <stdint.h>
+#include <wchar.h>
+#include <float.h>
 
 typedef uint8_t UINT8;
 typedef uint16_t UINT16;
@@ -62,32 +66,13 @@ typedef int32_t INT32;
 typedef int64_t INT64;
 typedef signed char BOOL;
 typedef char CHAR8;
+typedef wchar_t UTF16;
+typedef float REAL32;
+typedef double REAL64;
 
 #else
 #error "Standard types must be defined for each target!"
 #endif
-
-#ifdef TRDP_OPTION_LADDER
-#include <wchar.h>
-#include <float.h>
-#include <time.h>
-
-typedef wchar_t UTF16;
-typedef float REAL32;
-typedef double REAL64;
-//typedef CHAR8 STRING[16];
-//typedef time_t TIMEDATE32;	/**< 32 bit UNIX time  */
-//typedef struct
-//{
-//	TIMEDATE32  time;			/* 32bit UNIX time */
-//    UINT16  ticks;			/* 16bit ticks */
-//} TIMEDATE48;				/**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
-//typedef  struct
-//{
-//	TIMEDATE32  time;			/* 32bit UNIX time */
-//   UINT32  mili_sec;		/* 32bit miliSeconds */
-//} TIMEDATE64;		/**< 32 bit UNIX time + 32 bit miliseconds  */
-#endif /* TRDP_OPTION_LADDER */
 
 /*	Special handling for Windows DLLs	*/
 #ifdef WIN32
