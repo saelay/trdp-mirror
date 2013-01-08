@@ -44,50 +44,6 @@
  *   Locals
  */
 
-/******************************************************************************/
-/** Send MD packet
- *
- *  @param[in]      mdSock          socket descriptor
- *  @param[in]      pPacket         pointer to packet to be sent
- *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_UNKNOWN_ERR    error
- */
-TRDP_ERR_T  trdp_sendMD (
-    INT32            mdSock,
-    const MD_ELE_T  *pPacket)
-{
-    TRDP_ERR_T err = TRDP_UNKNOWN_ERR;
-
-
-    if (err != TRDP_NO_ERR)
-    {
-        vos_printf(VOS_LOG_ERROR, "trdp_sendMD failed\n");
-        return TRDP_IO_ERR;
-    }
-    return TRDP_NO_ERR;
-}
-
-/******************************************************************************/
-/** Receive MD packet
- *
- *  @param[in]      mdSock          socket descriptor
- *  @param[out]     ppPacket        pointer to pointer to received packet
- *  @param[out]     pSize           pointer to size of received packet
- *  @param[out]     pIPAddr         pointer to source IP address of packet
- *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_UNKNOWN_ERR    error
- */
-TRDP_ERR_T  trdp_rcvMD (
-    INT32         mdSock,
-    MD_HEADER_T   **ppPacket,
-    INT32         *pSize,
-    UINT32        *pIPAddr)
-{
-    TRDP_ERR_T err = TRDP_UNKNOWN_ERR;
-
-
-    return err;
-}
 
 /******************************************************************************/
 /** Check for incoming md packet
