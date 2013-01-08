@@ -1021,6 +1021,8 @@ EXT_DECL VOS_ERR_T vos_freeIfAddrs (
 	return VOS_NO_ERR;
 }
 
+#endif /* TRDP_OPTION_LADDER */
+
 /**********************************************************************************************************************/
 /** Set Using Multicast I/F
  *
@@ -1064,4 +1066,3 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
 	}
     return err;
 }
-#endif /* TRDP_OPTION_LADDER */

@@ -468,6 +468,8 @@ EXT_DECL VOS_ERR_T vos_getIfAddrs (
 EXT_DECL VOS_ERR_T vos_freeIfAddrs (
 		struct ifaddrs *pIfa_list);
 
+#endif /* TRDP_OPTION_LADDER */
+
 /**********************************************************************************************************************/
 /** Set Using Multicast I/F
  *
@@ -481,7 +483,6 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
 		INT32   sock,
 		UINT32  usingMulticastIfAddress);
 
-#endif /* TRDP_OPTION_LADDER */
 
 #ifdef __cplusplus
 }

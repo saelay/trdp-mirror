@@ -557,9 +557,7 @@ TRDP_ERR_T  trdp_requestSocket (
                             *pIndex = -1;
                         }
                     }
-#ifdef TRDP_OPTION_LADDER
                     vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
-#endif /* TRDP_OPTION_LADDER */
                 }
                 break;
             case TRDP_SOCK_MD_TCP:
