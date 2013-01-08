@@ -1529,7 +1529,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
                         }
                         else
                         {
-                            vos_printf(result, "TRDP vos_sockListen failed\n");
+                            vos_printf(VOS_LOG_ERROR, "TRDP vos_sockAccept() failed (Err: %d)\n", result);
 
                             /* Callback the error to the application  */
                             if (appHandle->mdDefault.pfCbFunction != NULL)
