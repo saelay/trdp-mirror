@@ -230,7 +230,6 @@ TRDP_ERR_T  trdp_mdSend (
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
         err = vos_sockSendTCP(pdSock, (UINT8 *)&pPacket->frameHead, pPacket->grossSize);
-
     }
     else
     {
@@ -663,8 +662,6 @@ TRDP_ERR_T  trdp_mdReceive (
                                     /* reply ok or reply error */
                                     if (l_msgType == TRDP_MSG_MP || l_msgType == TRDP_MSG_MQ || l_msgType == TRDP_MSG_ME)
                                     {
-                                        UINT32 removeMdSendElement = 0;
-
 									    /* Discard all MD Reply/ReplyQuery received after ReplyTimeout or expected replies received */
                                         if(sender_ele->disableReplyRx != 0)
                                         {
