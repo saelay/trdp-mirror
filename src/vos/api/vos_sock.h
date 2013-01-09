@@ -400,17 +400,15 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
 
 /**********************************************************************************************************************/
 /** Send TCP data.
- *  Send data to the given socket.
+ *  Send data to the supplied address and port.
  *
- *  @param[in]      sock               socket descriptor
- *  @param[in]      pBuffer            pointer to data to send
- *  @param[in]      size               size of the data to send
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- *  @retval         VOS_IO_ERR         data could not be sent
- *  @retval         VOS_MEM_ERR        resource error
+ *  @param[in]      sock            socket descriptor
+ *  @param[in]      pBuffer         pointer to data to send
+ *  @param[in]      size            size of the data to send
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
+ *  @retval         VOS_IO_ERR      data could not be sent
+ *  @retval         VOS_NODATA_ERR  no data was sent in non-blocking
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
@@ -421,21 +419,18 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 /**********************************************************************************************************************/
 /** Receive TCP data.
  *  The caller must provide a sufficient sized buffer. If the supplied buffer is smaller than the bytes received, *pSize
- *    will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
- *    If the socket was created in blocking-mode (default), then this call will block and will only return if data has
- *    been received or the socket was closed or an error occured.
- *    If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *  will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
+ *  If the socket was created in blocking-mode (default), then this call will block and will only return if data has
+ *  been received or the socket was closed or an error occured.
+ *  If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
  *
- *  @param[in]      sock               socket descriptor
- *  @param[out]     pBuffer            pointer to applications data buffer
- *  @param[in,out]  pSize              pointer to the received data size
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- *  @retval         VOS_IO_ERR         data could not be read
- *  @retval         VOS_MEM_ERR        resource error
- *  @retval         VOS_NODATA_ERR     no data in non-blocking
+ *  @param[in]      sock            socket descriptor
+ *  @param[out]     pBuffer         pointer to applications data buffer
+ *  @param[in,out]  pSize           pointer to the received data size
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
+ *  @retval         VOS_IO_ERR      data could not be read
+ *  @retval         VOS_NODATA_ERR  no data in non-blocking
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
@@ -455,7 +450,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
   */
 
 EXT_DECL VOS_ERR_T vos_getIfAddrs (
-		struct ifaddrs * *ppIfa_list);
+    struct ifaddrs * *ppIfa_list);
 
 /**********************************************************************************************************************/
 /** Clear interface address memory area
@@ -466,7 +461,7 @@ EXT_DECL VOS_ERR_T vos_getIfAddrs (
   */
 
 EXT_DECL VOS_ERR_T vos_freeIfAddrs (
-		struct ifaddrs *pIfa_list);
+    struct ifaddrs *pIfa_list);
 
 #endif /* TRDP_OPTION_LADDER */
 
@@ -480,8 +475,8 @@ EXT_DECL VOS_ERR_T vos_freeIfAddrs (
  *  @retval         VOS_SOCK_ERR				option not supported
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-		INT32   sock,
-		UINT32  usingMulticastIfAddress);
+    INT32   sock,
+    UINT32  usingMulticastIfAddress);
 
 
 #ifdef __cplusplus
