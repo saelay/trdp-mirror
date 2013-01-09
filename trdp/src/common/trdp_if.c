@@ -446,8 +446,8 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
     TRDP_APP_SESSION_T appHandle)
 {
     TRDP_SESSION_PT pSession = NULL;
-    BOOL found = FALSE;
-    TRDP_ERR_T      ret = TRDP_NOINIT_ERR;
+    BOOL        found = FALSE;
+    TRDP_ERR_T  ret   = TRDP_NOINIT_ERR;
 
     /*    Find the session    */
     if (appHandle == NULL)
@@ -501,10 +501,17 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pSndQueue != NULL)
                 {
-                    PD_ELE_T *pNext = pSession->pSndQueue->pNext;
+                    TRDP_ERR_T  err;
+                    PD_ELE_T    *pNext = pSession->pSndQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx);
+                    err = trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx);
+                    if (err != TRDP_NO_ERR)
+                    {
+                        /* save the error code in case of an error */
+                        ret = err;
+                        vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err: %d)\n", ret);
+                    }
                     vos_memFree(pSession->pSndQueue);
                     pSession->pSndQueue = pNext;
                 }
@@ -512,8 +519,6 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 vos_mutexUnlock(pSession->mutex);
                 vos_mutexDelete(pSession->mutex);
                 vos_memFree(pSession);
-
-                ret = TRDP_NO_ERR;
             }
         }
         vos_mutexUnlock(sSessionMutex);
@@ -534,15 +539,22 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
  */
 EXT_DECL TRDP_ERR_T tlc_terminate (void)
 {
-    TRDP_SESSION_PT pSession = NULL;
-    TRDP_ERR_T      ret;
+    TRDP_ERR_T   ret = TRDP_NO_ERR;
 
     if (sInited == TRUE)
     {
         /*    Close all sessions    */
-        while ((pSession = sSession))
+        while (sSession != NULL)
         {
-            tlc_closeSession(pSession);
+            TRDP_ERR_T err;
+
+            err = tlc_closeSession(sSession);
+            if (err != TRDP_NO_ERR)
+            {
+                /* save the error code in case of an error */
+                ret = err;
+                vos_printf(VOS_LOG_ERROR, "tlc_closeSession() failed (Err: %d)\n", ret);
+            }
         }
 
 #ifdef TRDP_OPTION_LADDER
@@ -568,7 +580,6 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
         /* Release memory?  */
         vos_memDelete(NULL);
         sInited = FALSE;
-        ret     = TRDP_NO_ERR;
     }
     else
     {
@@ -2910,7 +2921,8 @@ EXT_DECL TRDP_ERR_T tlp_get (
             /*    Call the receive function if we are in non blocking mode    */
             if (!(appHandle->option & TRDP_OPTION_BLOCK))
             {
-                trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
+                /* return value is not interesting, will be overwritten later anyway */
+                ret = trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
             }
 
             /*    Get the current time    */
