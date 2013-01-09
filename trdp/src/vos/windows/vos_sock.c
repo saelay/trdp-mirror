@@ -870,10 +870,13 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     if (connect((SOCKET)sock, (const struct sockaddr *) &dstAddress,
                 sizeof(dstAddress)) == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE]={0};
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_WARNING, "connect failed (%s)\n", buff);
-        return VOS_IO_ERR;
+        if (errno != EINPROGRESS)
+        {
+            char buff[VOS_MAX_ERR_STR_SIZE]={0};
+            strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
+            vos_printf(VOS_LOG_WARNING, "connect failed (%s)\n", buff);
+            return VOS_IO_ERR;
+        }
     }
     return VOS_NO_ERR;
 }
@@ -888,6 +891,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *  @retval         VOS_NO_ERR		no error
  *  @retval         VOS_PARAM_ERR	sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR		data could not be sent
+ *  @retval         VOS_NO_DATA_ERR	no data sent in non blocking 
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
@@ -912,10 +916,15 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
         }
+
+        if(sendSize == -1 && errno == EWOULDBLOCK)
+        {
+            return VOS_NODATA_ERR;
+        }
     }
     while (bufferSize && !(sendSize == -1 && errno != EINTR));
 
-    if (sendSize == SOCKET_ERROR)
+    if (sendSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE]={0};
         strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
@@ -936,7 +945,6 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  *  @param[in]      sock            socket descriptor
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
- *  @param[in]      blocking        blocking mode
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
