@@ -922,9 +922,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     UINT8   *pBuffer,
     UINT32  *pSize)
 {
-    ssize_t         rcvSize     = 0;
-    size_t          bufferSize  = (size_t) *pSize;
-    VOS_SOCK_OPT_T  options     = {0};
+    ssize_t rcvSize     = 0;
+    size_t  bufferSize  = (size_t) *pSize;
 
     *pSize = 0;
 
@@ -932,11 +931,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     {
         return VOS_PARAM_ERR;
     }
-
-    /*if(vos_sockGetOptions(sock, &options) != VOS_NO_ERR)
-    {
-        return VOS_SOCK_ERR;
-    }*/
 
     do
     {
