@@ -10,29 +10,13 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-                                                                                       _
-                    trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(507) : Warning 534: Ignoring return
-    value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)' (compare
-    with line 112, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h, module
-    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                      _
-            tlc_closeSession(pSession);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(545) : Warning 534: Ignoring return
-    value of function 'tlc_closeSession(struct TRDP_SESSION *)' (compare with
-    line 445)
                         _
         TRDP_ERR_T  err = TRDP_NO_ERR;
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1476) : Warning 578: Declaration of
-    symbol 'err' hides symbol 'err' (line 1217)
-                                                                                     _
-                trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2913) : Warning 534: Ignoring return
-    value of function 'trdp_pdReceive(struct TRDP_SESSION *, int)' (compare
-    with line 80, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.h)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1487) : Warning 578: Declaration of
+    symbol 'err' hides symbol 'err' (line 1228)
                                                                                     _
             pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3388) : Warning 571: Suspicious cast
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3400) : Warning 571: Suspicious cast
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                                _
@@ -173,13 +157,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-                                                    _
-                 appHandle->stats.mem.usedBlockSize);
-D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c(356) : Warning 534: Ignoring
-    return value of function 'vos_memCount(unsigned int *, unsigned int *,
-    unsigned int *, unsigned int *, unsigned int *, unsigned int *, unsigned
-    int *, unsigned int *)' (compare with line 184, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_mem.h,
-    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
 
@@ -196,12 +173,6 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
-                               _
-    vos_sockGetMAC(&pUuID[10]) ;
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(674) : Warning 534: Ignoring
-    return value of function 'vos_sockGetMAC(unsigned char *)' (compare with
-    line 168, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module
-    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
                                   _

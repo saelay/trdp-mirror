@@ -341,12 +341,13 @@ void    trdp_UpdateStats (
 {
     PD_ELE_T    *iter;
     UINT16      index;
+    VOS_ERR_T  ret;
 
     /*  Get a new time stamp    */
     vos_getTime(&appHandle->stats.timeStamp);
 
     /*  Update memory statsp    */
-    vos_memCount(&appHandle->stats.mem.total,
+    ret = vos_memCount(&appHandle->stats.mem.total,
                  &appHandle->stats.mem.free,
                  &appHandle->stats.mem.minFree,
                  &appHandle->stats.mem.numAllocBlocks,
@@ -354,6 +355,10 @@ void    trdp_UpdateStats (
                  &appHandle->stats.mem.numFreeErr,
                  appHandle->stats.mem.preAllocBlockSize,
                  appHandle->stats.mem.usedBlockSize);
+    if (ret != VOS_NO_ERR)
+    {
+        vos_printf(VOS_LOG_ERROR, "vos_memCount() failed (Err: %d)\n", ret);
+    }
 
     /*  Count our subscriptions */
     for (index = 0, iter = appHandle->pRcvQueue; iter != NULL; index++, iter = iter->pNext) {;}

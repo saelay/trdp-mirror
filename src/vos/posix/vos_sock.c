@@ -202,7 +202,8 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
         if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) == -1)
         {
-            vos_printf(VOS_LOG_ERROR, "socket call failed\n");
+            memset(pMAC, 0, sizeof(mac));
+            vos_printf(VOS_LOG_ERROR, "socket() failed\n");
             return VOS_SOCK_ERR;
         }
 
