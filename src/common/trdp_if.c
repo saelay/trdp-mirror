@@ -606,9 +606,9 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
                     iterPD->socketIdx != -1)
                 {
                     /*    Join the MC group again    */
-                    vos_sockJoinMC(appHandle->iface[iterPD->socketIdx].sock,
-                                   iterPD->addr.mcGroup,
-                                   0);
+                    ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[iterPD->socketIdx].sock,
+                                                      iterPD->addr.mcGroup,
+                                                      0);
                 }
             }
 
@@ -887,7 +887,8 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         }
 
         /*    Get the current time and compute the next time this packet should be sent.    */
-        if (ret == TRDP_NO_ERR && pNewElement != NULL)
+        if (   (ret == TRDP_NO_ERR) 
+            && (pNewElement != NULL))
         {
             /* PD PULL?    Packet will be sent on request only    */
             if (0 == interval)
@@ -931,9 +932,10 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
             }
 
-            if (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING)
+            if (   (ret == TRDP_NO_ERR)
+                && (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING))
             {
-                trdp_pdDistribute(appHandle->pSndQueue);
+                ret = trdp_pdDistribute(appHandle->pSndQueue);
             }
         }
 
@@ -2568,7 +2570,9 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 }
             }
 
-            if (ret == TRDP_NO_ERR && pReqElement != NULL)
+            if (
+                     (ret == TRDP_NO_ERR) 
+                  && (pReqElement != NULL))
             {
                 /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
                     curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
@@ -2735,7 +2739,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                 else
                 {
                     /*    Initialize some fields    */
-
                     if (vos_isMulticast(destIpAddr))
                     {
                         newPD->addr.mcGroup = destIpAddr;
@@ -2772,12 +2775,16 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     /*    Join a multicast group */
                     if (newPD->addr.mcGroup != 0)
                     {
-                        vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, appHandle->realIP);
+                        ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, appHandle->realIP);
+                        
                         /*    Remember we did this    */
-                        newPD->privFlags |= TRDP_MC_JOINT;
+                        if (ret ==TRDP_NO_ERR)
+                        {
+                            newPD->privFlags |= TRDP_MC_JOINT;
+                        }
                     }
+
                     *pSubHandle = &newPD->addr;
-                    ret         = TRDP_NO_ERR;
                 }
             }
         }
@@ -3380,7 +3387,7 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->frameHead.datasetLength    = vos_htonl(dataSize);
             pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
             memcpy(pNewElement->frameHead.sessionID, pNewElement->sessionID, sizeof(TRDP_UUID_T));
-            pNewElement->frameHead.replyTimeout = vos_htonl(replyTimeout);
+            pNewElement->frameHead.replyTimeout     = vos_htonl(replyTimeout);
             {
                 int     i;
                 UINT8   *pNewSourceURI = pNewElement->frameHead.sourceURI;
@@ -3731,7 +3738,8 @@ TRDP_ERR_T tlm_addListener (
 
                     /* Check if destination address is multicast, if yes join into this group */
                     /* TODO: check if this is ok or need to be done in other way */
-                    if (vos_isMulticast(destIpAddr))
+                    if ((errv == TRDP_NO_ERR)
+                        && vos_isMulticast(destIpAddr))
                     {
                         /* Set multicast group address */
                         pNewElement->addr.mcGroup = destIpAddr;
@@ -3740,7 +3748,7 @@ TRDP_ERR_T tlm_addListener (
                            Join group
                            Note: disable multicast loop back
                          */
-                        vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, 0);
+                        errv = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, 0);
 
                         /* Set multicast flag */
                         pNewElement->privFlags |= TRDP_MC_JOINT;
@@ -3878,8 +3886,11 @@ TRDP_ERR_T tlm_delListener (
                 }
                 else
                 {
-                    /* inside: n+1 -> n */
-                    iterMD_pre->pNext = iterMD->pNext;
+                    if (iterMD_pre != NULL)
+                    {
+                        /* inside: n+1 -> n */
+                        iterMD_pre->pNext = iterMD->pNext;
+                    }
                 }
 
                 /* cleanup instance */

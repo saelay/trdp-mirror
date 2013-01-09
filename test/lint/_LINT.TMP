@@ -21,46 +21,18 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(507) : Warning 534: Ignoring return
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(545) : Warning 534: Ignoring return
     value of function 'tlc_closeSession(struct TRDP_SESSION *)' (compare with
     line 445)
-                                     _
-                                   0);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(611) : Warning 534: Ignoring return
-    value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
-    (compare with line 251, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
-    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                       _
-                trdp_pdDistribute(appHandle->pSndQueue);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(936) : Warning 534: Ignoring return
-    value of function 'trdp_pdDistribute(struct PD_ELE *)' (compare with line
-    83, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.h)
                         _
         TRDP_ERR_T  err = TRDP_NO_ERR;
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1474) : Warning 578: Declaration of
-    symbol 'err' hides symbol 'err' (line 1215)
-                                                                                                            _
-                        vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, appHandle->realIP);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2775) : Warning 534: Ignoring return
-    value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
-    (compare with line 251, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
-    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1476) : Warning 578: Declaration of
+    symbol 'err' hides symbol 'err' (line 1217)
                                                                                      _
                 trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2906) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2913) : Warning 534: Ignoring return
     value of function 'trdp_pdReceive(struct TRDP_SESSION *, int)' (compare
     with line 80, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.h)
                                                                                     _
             pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3381) : Warning 571: Suspicious cast
-                                                                                                    _
-                        vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, 0);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3743) : Warning 534: Ignoring return
-    value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
-    (compare with line 251, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
-    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
-                                                     _
-                    iterMD_pre->pNext = iterMD->pNext;
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3882) : Warning 613: Possible use of
-    null pointer 'iterMD_pre' in left argument to operator '->' [Reference:
-    file D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: line 3835]
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3388) : Warning 571: Suspicious cast
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                                _
