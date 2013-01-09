@@ -22,7 +22,7 @@
 
 #ifndef WIN32
 #error \
-    "You are trying to compile the POSIX implementation of vos_sock.c - either define POSIX or exclude this file!"
+    "You are trying to compile the WIN32 implementation of vos_sock.c - either define POSIX or exclude this file!"
 #endif
 
 /***********************************************************************************************************************
@@ -214,31 +214,31 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
         if (dwStatus!=0)
         {
+            memset(pMAC, 0, sizeof(mac));
             return VOS_UNKNOWN_ERR;
         }
+        else
+        {
+            pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
 
-        pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
-
-        /* first address is 00000000, skip it */
-        /*lint -e(534) ignore return value */
-        swscanf_s(
-            (wchar_t *)pwkti[1].wkti0_transport_address,
-            L"%2hx%2hx%2hx%2hx%2hx%2hx",
-            &mac[0],
-            &mac[1],
-            &mac[2],
-            &mac[3],
-            &mac[4],
-            &mac[5]);
+            /* first address is 00000000, skip it */
+            /*lint -e(534) ignore return value */
+            swscanf_s(
+                (wchar_t *)pwkti[1].wkti0_transport_address,
+                L"%2hx%2hx%2hx%2hx%2hx%2hx",
+                &mac[0],
+                &mac[1],
+                &mac[2],
+                &mac[3],
+                &mac[4],
+                &mac[5]);
+        }
 
         /* Release pbBuffer allocated by NetWkstaTransportEnum */
         dwStatus = NetApiBufferFree(pbBuffer); /*lint !e550 return value not used*/
     }
 
-    for( i = 0; i < sizeof(mac); i++ )
-    {
-        pMAC[i] = (UINT8) mac[i];
-    }
+    memcpy(pMAC, mac, sizeof(mac));
     return VOS_NO_ERR;
 }
 

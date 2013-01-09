@@ -157,7 +157,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (interval > 0)
     {
         vos_printf(VOS_LOG_ERROR,
-                   "%s vos_threadCreate cyclic threads not implemented yet\n",
+                   "%s cyclic threads not implemented yet\n",
                    pName);
         return VOS_INIT_ERR;
     }
@@ -167,7 +167,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (retCode != 0)
     {
         vos_printf(VOS_LOG_ERROR,
-                   "%s vos_threadCreate pthread_attr_init failed return=%d\n",
+                   "%s pthread_attr_init() failed (Err:%d)\n",
                    pName,
                    retCode );
         return VOS_THREAD_ERR;
@@ -187,7 +187,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printf(
             VOS_LOG_ERROR,
-            "%s vos_threadCreate pthread_attr_setstacksize failed return=%d\n",
+            "%s pthread_attr_setstacksize() failed (Err:%d)\n",
             pName,
             retCode );
         return VOS_THREAD_ERR;
@@ -200,7 +200,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printf(
             VOS_LOG_ERROR,
-            "%s vos_threadCreate pthread_attr_setdetachstate failed return=%d\n",
+            "%s pthread_attr_setdetachstate() failed (Err:%d)\n",
             pName,
             retCode );
         return VOS_THREAD_ERR;
@@ -212,7 +212,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printf(
             VOS_LOG_ERROR,
-            "%s vos_threadCreate pthread_attr_setschedpolicy failed return=%d\n",
+            "%s pthread_attr_setschedpolicy() failed (Err:%d)\n",
             pName,
             retCode );
         return VOS_THREAD_ERR;
@@ -225,7 +225,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printf(
             VOS_LOG_ERROR,
-            "%s vos_threadCreate pthread_attr_setschedparam failed return=%d\n",
+            "%s pthread_attr_setschedparam() failed (Err:%d)\n",
             pName,
             retCode );
         return VOS_THREAD_ERR;
@@ -238,7 +238,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printf(
             VOS_LOG_ERROR,
-            "%s vos_threadCreate pthread_attr_setinheritsched failed return=%d\n",
+            "%s pthread_attr_setinheritsched() failed (Err:%d)\n",
             pName,
             retCode );
         return VOS_THREAD_ERR;
@@ -251,7 +251,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (retCode != 0)
     {
         vos_printf(VOS_LOG_ERROR,
-                   "%s vos_threadCreate pthread_create failed return=%d\n",
+                   "%s pthread_create() failed (Err:%d)\n",
                    pName,
                    retCode );
         return VOS_THREAD_ERR;
@@ -265,7 +265,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printf(
             VOS_LOG_ERROR,
-            "%s vos_threadCreate pthread_attr_destroy failed return=%d\n",
+            "%s pthread_attr_destroy() failed (Err:%d)\n",
             pName,
             retCode );
         return VOS_THREAD_ERR;
@@ -294,7 +294,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
     if (retCode != 0)
     {
         vos_printf(VOS_LOG_ERROR,
-                   "vos_threadTerminate pthread_cancel failed return=%d\n",
+                   "pthread_cancel() failed (Err:%d)\n",
                    retCode );
         return VOS_THREAD_ERR;
     }
@@ -385,7 +385,7 @@ EXT_DECL void vos_getTime (
 
     if (pTime == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_getTime() ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -457,7 +457,7 @@ EXT_DECL void vos_clearTime (
 {
     if (pTime == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_clearTime() ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -479,7 +479,7 @@ EXT_DECL void vos_addTime (
 {
     if (pTime == NULL || pAdd == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_addTime() ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -504,7 +504,7 @@ EXT_DECL void vos_subTime (
 {
     if (pTime == NULL || pSub == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_subTime() ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -529,7 +529,7 @@ EXT_DECL void vos_divTime (
 {
     if (pTime == NULL || divisor == 0)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_divTime() ERROR NULL pointer/parameter\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -559,7 +559,7 @@ EXT_DECL void vos_mulTime (
 {
     if (pTime == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_mulTime() ERROR NULL pointer/parameter\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -619,6 +619,7 @@ EXT_DECL void vos_getUuid (
     /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1;
     VOS_TIME_T      current;
+    VOS_ERR_T       ret;
 
     vos_getTime(&current);
 
@@ -637,8 +638,11 @@ EXT_DECL void vos_getUuid (
     count++;
 
     /*  Copy the mac address into the rest of the array */
-    vos_sockGetMAC(&pUuID[10]);
-
+    ret = vos_sockGetMAC(&pUuID[10]);
+    if (ret != VOS_NO_ERR)
+    {
+        vos_printf(VOS_LOG_ERROR, "vos_sockGetMAC() failed (Err:%d)\n", ret);
+    }
 #endif
 }
 
