@@ -440,7 +440,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
     {
         err = VOS_PARAM_ERR;
     }
-    /*	Is this a multicast address?	*/
+    /* Is this a multicast address? */
     else if (IN_MULTICAST(mcAddress))
     {
 
@@ -459,7 +459,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         {
             err = VOS_NO_ERR;
         }
-		
+
         /* Disable multicast loop back */
         {
             UINT32 enMcLb = 0;
@@ -618,7 +618,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 {
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen = sizeof(srcAddr);
-    ssize_t             rcvSize = 0;
+    ssize_t rcvSize = 0;
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
@@ -749,38 +749,38 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
     UINT32  *pIPAddress,
     UINT16  *pPort)
 {
-   struct sockaddr_in srcAddress;
-	int connFd = -1;
+    struct sockaddr_in srcAddress;
+    int connFd = -1;
 
-	if (pSock == NULL || pIPAddress == NULL || pPort == NULL)
-	{
-		return VOS_PARAM_ERR;
-	}
+    if (pSock == NULL || pIPAddress == NULL || pPort == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
 
-	memset((char *)&srcAddress, 0, sizeof(srcAddress));
+    memset((char *)&srcAddress, 0, sizeof(srcAddress));
 
-	srcAddress.sin_family       = AF_INET;
-	srcAddress.sin_addr.s_addr  = vos_htonl(*pIPAddress);
-	srcAddress.sin_port         = vos_htons(*pPort);
+    srcAddress.sin_family       = AF_INET;
+    srcAddress.sin_addr.s_addr  = vos_htonl(*pIPAddress);
+    srcAddress.sin_port         = vos_htons(*pPort);
 
-	for (;; )
-	{
-		socklen_t sockLen = sizeof(srcAddress);
-        
-		connFd = accept(sock, (struct sockaddr *) &srcAddress, &sockLen);
-		if (connFd < 0)
-		{
-			switch (errno)
-			{
-				/*Accept return -1 and errno = EWOULDBLOCK,
-				when there is no more connection requests.*/
-				case EWOULDBLOCK:
-				{
-					*pSock      = connFd;
-					return VOS_NO_ERR;
-				}
-				case EINTR:         break;
-				case ECONNABORTED:  break;
+    for (;; )
+    {
+        socklen_t sockLen = sizeof(srcAddress);
+
+        connFd = accept(sock, (struct sockaddr *) &srcAddress, &sockLen);
+        if (connFd < 0)
+        {
+            switch (errno)
+            {
+                /*Accept return -1 and errno = EWOULDBLOCK,
+                when there is no more connection requests.*/
+                case EWOULDBLOCK:
+                {
+                    *pSock = connFd;
+                    return VOS_NO_ERR;
+                }
+                case EINTR:         break;
+                case ECONNABORTED:  break;
 #if defined (EPROTO)
                 case EPROTO:        break;
 #endif
@@ -858,6 +858,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
+ *  @retval         VOS_NODATA_ERR  no data was sent in non-blocking
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
@@ -882,7 +883,11 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
         }
-	}
+        if(sendSize == -1 && errno == EWOULDBLOCK)
+        {
+            return VOS_NODATA_ERR;
+        }
+    }
     while (bufferSize && !(sendSize == -1 && errno != EINTR));
 
     if (sendSize == -1)
@@ -927,23 +932,23 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     {
         return VOS_PARAM_ERR;
     }
-    
+
     /*if(vos_sockGetOptions(sock, &options) != VOS_NO_ERR)
     {
-    	return VOS_SOCK_ERR;
+        return VOS_SOCK_ERR;
     }*/
-    
+
     do
     {
-        
-    	rcvSize = read(sock, pBuffer, bufferSize);
+
+        rcvSize = read(sock, pBuffer, bufferSize);
         if (rcvSize > 0)
         {
             bufferSize  -= rcvSize;
             pBuffer     += rcvSize;
             *pSize      += rcvSize;
         }
-            
+
         if(rcvSize == -1 && errno == EWOULDBLOCK)
         {
             if (*pSize == 0)
@@ -952,11 +957,11 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             }
             else
             {
-            	return VOS_NO_ERR;
+                return VOS_NO_ERR;
             }
         }
-	}
-	while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));
+    }
+    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));
 
     if (rcvSize == -1)
     {
@@ -971,7 +976,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     }
     else
     {
-    	return VOS_NO_ERR;
+        return VOS_NO_ERR;
     }
 }
 
@@ -979,46 +984,46 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 /**********************************************************************************************************************/
 /** Get interface address
  *
- *  @param[in,out]  pIfa_list		pointer to pointer to the I/F all list
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_PARAM_ERR	sock descriptor unknown, parameter error
- *  @retval         VOS_IO_ERR		data could not be read
+ *  @param[in,out]  pIfa_list       pointer to pointer to the I/F all list
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
+ *  @retval         VOS_IO_ERR      data could not be read
   */
 
 EXT_DECL VOS_ERR_T vos_getIfAddrs (
-		struct ifaddrs * *ppIfa_list)
+    struct ifaddrs * *ppIfa_list)
 {
 
-	if (ppIfa_list == NULL)
-	{
-		return VOS_PARAM_ERR;
-	}
-	if (getifaddrs(ppIfa_list) != 0)
-	{
-		vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
-       return VOS_SOCK_ERR;
-	}
-	return VOS_NO_ERR;
+    if (ppIfa_list == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
+    if (getifaddrs(ppIfa_list) != 0)
+    {
+        vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
+        return VOS_SOCK_ERR;
+    }
+    return VOS_NO_ERR;
 }
 
 /**********************************************************************************************************************/
 /** Clear interface address memory area
  *
- *  @param[in,out]  pIfa_list		pointer to the I/F all list
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_PARAM_ERR	sock descriptor unknown, parameter error
+ *  @param[in,out]  pIfa_list       pointer to the I/F all list
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
   */
 
 EXT_DECL VOS_ERR_T vos_freeIfAddrs (
-		struct ifaddrs *pIfa_list)
+    struct ifaddrs *pIfa_list)
 {
-	if (pIfa_list == NULL)
-	{
-		return VOS_PARAM_ERR;
-	}
+    if (pIfa_list == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
 
-	freeifaddrs(pIfa_list);
-	return VOS_NO_ERR;
+    freeifaddrs(pIfa_list);
+    return VOS_NO_ERR;
 }
 
 #endif /* TRDP_OPTION_LADDER */
@@ -1026,18 +1031,18 @@ EXT_DECL VOS_ERR_T vos_freeIfAddrs (
 /**********************************************************************************************************************/
 /** Set Using Multicast I/F
  *
- *  @param[in]      sock							socket descriptor
- *  @param[in]      usingMulticastIfAddress	using Multicast I/F Address
- *  @retval         VOS_NO_ERR					no error
- *  @retval         VOS_PARAM_ERR				sock descriptor unknown, parameter error
- *  @retval         VOS_SOCK_ERR				option not supported
+ *  @param[in]      sock                        socket descriptor
+ *  @param[in]      usingMulticastIfAddress     using Multicast I/F Address
+ *  @retval         VOS_NO_ERR                  no error
+ *  @retval         VOS_PARAM_ERR               sock descriptor unknown, parameter error
+ *  @retval         VOS_SOCK_ERR                option not supported
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-		INT32   sock,
-		UINT32  usingMulticastIfAddress)
+    INT32   sock,
+    UINT32  usingMulticastIfAddress)
 {
-	struct sockaddr_in multicastIFAddress;
-	VOS_ERR_T       err = VOS_NO_ERR;
+    struct sockaddr_in  multicastIFAddress;
+    VOS_ERR_T           err = VOS_NO_ERR;
 
     if (sock == -1)
     {
@@ -1045,24 +1050,24 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
     }
     else
     {
-    	/* Multicast I/F setting */
-		memset((char *)&multicastIFAddress, 0, sizeof(multicastIFAddress));
-		multicastIFAddress.sin_addr.s_addr  = vos_htonl(usingMulticastIfAddress);
+        /* Multicast I/F setting */
+        memset((char *)&multicastIFAddress, 0, sizeof(multicastIFAddress));
+        multicastIFAddress.sin_addr.s_addr = vos_htonl(usingMulticastIfAddress);
 
-		if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &multicastIFAddress.sin_addr, sizeof(struct in_addr)) == -1)
-		{
-			vos_print(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed\n");
-			err = VOS_SOCK_ERR;
-		}
-		else
-		{
-		/*	DEBUG
-			struct sockaddr_in myAddress = {0};
-			socklen_t optionSize ;
-			getsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &myAddress.sin_addr, &optionSize);
-		*/
-			err = VOS_NO_ERR;
-		}
-	}
+        if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &multicastIFAddress.sin_addr, sizeof(struct in_addr)) == -1)
+        {
+            vos_print(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed\n");
+            err = VOS_SOCK_ERR;
+        }
+        else
+        {
+            /*	DEBUG
+                struct sockaddr_in myAddress = {0};
+                socklen_t optionSize ;
+                getsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &myAddress.sin_addr, &optionSize);
+            */
+            err = VOS_NO_ERR;
+        }
+    }
     return err;
 }

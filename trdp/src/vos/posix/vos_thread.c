@@ -37,7 +37,7 @@
 #include <sched.h>
 
 #ifdef __APPLE__
-/* #include <uuid/uuid.h> */
+#include <uuid/uuid.h>
 #else
 #include "vos_sock.h"
 #endif
@@ -385,7 +385,7 @@ EXT_DECL void vos_getTime (
 
     if (pTime == NULL)
     {
-         vos_printf(VOS_LOG_ERROR, "vos_getTime() ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "vos_getTime() ERROR NULL pointer\n");
     }
     else
     {
@@ -422,7 +422,7 @@ EXT_DECL void vos_getTime (
 
 EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 {
-    static char    pTimeString[32] = {0};
+    static char     pTimeString[32] = {0};
     struct timeval  curTime;
     struct tm       *curTimeTM;
 
@@ -432,14 +432,14 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
     if (curTimeTM != NULL)
     {
         /*lint -e(534) ignore return value */
-    	sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
-     			curTimeTM->tm_year + 1900,
-    			curTimeTM->tm_mon + 1,
-    			curTimeTM->tm_mday,
-    			curTimeTM->tm_hour,
-    			curTimeTM->tm_min,
-    			curTimeTM->tm_sec,
-    			(long) curTime.tv_usec / 1000L);
+        sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
+                curTimeTM->tm_year + 1900,
+                curTimeTM->tm_mon + 1,
+                curTimeTM->tm_mday,
+                curTimeTM->tm_hour,
+                curTimeTM->tm_min,
+                curTimeTM->tm_sec,
+                (long) curTime.tv_usec / 1000L);
     }
     return pTimeString;
 }
@@ -457,11 +457,11 @@ EXT_DECL void vos_clearTime (
 {
     if (pTime == NULL)
     {
-         vos_printf(VOS_LOG_ERROR, "vos_clearTime() ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "vos_clearTime() ERROR NULL pointer\n");
     }
     else
     {
-         timerclear(pTime);
+        timerclear(pTime);
     }
 }
 
@@ -621,7 +621,7 @@ EXT_DECL void vos_getUuid (
     VOS_TIME_T      current;
 
     vos_getTime(&current);
-    
+
     pUuID[0]    = current.tv_usec & 0xFF;
     pUuID[1]    = (current.tv_usec & 0xFF00) >> 8;
     pUuID[2]    = (current.tv_usec & 0xFF0000) >> 16;
@@ -637,7 +637,7 @@ EXT_DECL void vos_getUuid (
     count++;
 
     /*  Copy the mac address into the rest of the array */
-    vos_sockGetMAC(&pUuID[10]) ;
+    vos_sockGetMAC(&pUuID[10]);
 
 #endif
 }
@@ -766,7 +766,7 @@ EXT_DECL void vos_mutexDelete (
     else
     {
         int err;
-        
+
         err = pthread_mutex_destroy(&pMutex->mutexId);
         if (err == 0)
         {
@@ -775,9 +775,7 @@ EXT_DECL void vos_mutexDelete (
         }
         else
         {
-            vos_printf(VOS_LOG_ERROR,
-                       "Can not destroy Mutex (pthread err=%d)\n",
-                       err);
+            vos_printf(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
         }
     }
 }
@@ -809,7 +807,6 @@ EXT_DECL void vos_mutexLocalDelete (
         else
         {
             vos_printf(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
-            return VOS_MUTEX_ERR;
         }
     }
 }
@@ -838,9 +835,7 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     err = pthread_mutex_lock(&pMutex->mutexId);
     if (err != 0)
     {
-        vos_printf(VOS_LOG_ERROR,
-                   "Unable to lock Mutex (pthread err=%d)\n",
-                   err);
+        vos_printf(VOS_LOG_ERROR, "Unable to lock Mutex (pthread err=%d)\n", err);
         return VOS_MUTEX_ERR;
     }
 
@@ -875,9 +870,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     }
     if (err == EINVAL)
     {
-        vos_printf(VOS_LOG_ERROR,
-                   "Unable to trylock Mutex (pthread err=%d)\n",
-                   err);
+        vos_printf(VOS_LOG_ERROR, "Unable to trylock Mutex (pthread err=%d)\n", err);
         return VOS_MUTEX_ERR;
     }
 
@@ -907,10 +900,7 @@ EXT_DECL void vos_mutexUnlock (
         err = pthread_mutex_unlock(&pMutex->mutexId);
         if (err != 0)
         {
-            vos_printf(VOS_LOG_ERROR,
-                       "Unable to unlock Mutex (pthread err=%d)\n",
-                       err);
-            return VOS_MUTEX_ERR;
+            vos_printf(VOS_LOG_ERROR, "Unable to unlock Mutex (pthread err=%d)\n", err);
         }
     }
 }
@@ -934,31 +924,31 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_STATE_T    initialState)
 {
 #ifdef TRDP_OPTION_LADDER
-	sem_t *pSemaphore;					/* pointer to semaphore */
+    sem_t *pSemaphore;                  /* pointer to semaphore */
 
-	pSemaphore = sem_open((*pSema)->semaphoreName, (*pSema)->oflag, (*pSema)->permission, initialState);
+    pSemaphore = sem_open((*pSema)->semaphoreName, (*pSema)->oflag, (*pSema)->permission, initialState);
 
-	if ((pSemaphore == SEM_FAILED)&&(errno != EEXIST))
-	{
-		vos_printf(VOS_LOG_ERROR, "Semaphore Create failed\n");
-		(*pSema)->pSemaphore = NULL;
-		return VOS_SEMA_ERR;
-	}
-	if (errno == EEXIST)
-	{
-		/* Retry sem_open. Because get semaphore pointer */
-		pSemaphore = sem_open((*pSema)->semaphoreName, O_CREAT, (*pSema)->permission, initialState);
-		(*pSema)->pSemaphore = pSemaphore;
-		return VOS_NO_ERR;
-	}
+    if ((pSemaphore == SEM_FAILED) && (errno != EEXIST))
+    {
+        vos_printf(VOS_LOG_ERROR, "Semaphore Create failed\n");
+        (*pSema)->pSemaphore = NULL;
+        return VOS_SEMA_ERR;
+    }
+    if (errno == EEXIST)
+    {
+        /* Retry sem_open. Because get semaphore pointer */
+        pSemaphore = sem_open((*pSema)->semaphoreName, O_CREAT, (*pSema)->permission, initialState);
+        (*pSema)->pSemaphore = pSemaphore;
+        return VOS_NO_ERR;
+    }
 
-	/* debug_start */
-	int sval;
-	sem_getvalue(pSemaphore, &sval);
-	printf("semaphore value%d\n", sval);
-	/* debug_end */
+    /* debug_start */
+    int sval;
+    sem_getvalue(pSemaphore, &sval);
+    printf("semaphore value%d\n", sval);
+    /* debug_end */
 
-	(*pSema)->pSemaphore = pSemaphore;
+    (*pSema)->pSemaphore = pSemaphore;
 #endif /* TRDP_OPTION_LADDER */
 
     return VOS_NO_ERR;
@@ -976,14 +966,14 @@ EXT_DECL void vos_semaDelete (
     VOS_SEMA_T sema)
 {
 #ifdef TRDP_OPTION_LADDER
-	if (sem_close(sema->pSemaphore) == -1)
-	{
-		vos_printf(VOS_LOG_ERROR, "Semaphore Close failed\n");
-	}
-	if (sem_unlink(sema->semaphoreName) == -1)
-	{
-		vos_printf(VOS_LOG_ERROR, "Semaphore unLink failed\n");
-	}
+    if (sem_close(sema->pSemaphore) == -1)
+    {
+        vos_printf(VOS_LOG_ERROR, "Semaphore Close failed\n");
+    }
+    if (sem_unlink(sema->semaphoreName) == -1)
+    {
+        vos_printf(VOS_LOG_ERROR, "Semaphore unLink failed\n");
+    }
 #endif /* TRDP_OPTION_LADDER */
 }
 
@@ -1006,49 +996,49 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     UINT32      timeout)
 {
 #ifdef TRDP_OPTION_LADDER
-	/* debug_start */
-	int sval;
-	sem_getvalue(sema->pSemaphore, &sval);
-	printf("Before vos_semaTake() :semaphore value%d\n", sval);
-	/* debug_end */
+    /* debug_start */
+    int sval;
+    sem_getvalue(sema->pSemaphore, &sval);
+    printf("Before vos_semaTake() :semaphore value%d\n", sval);
+    /* debug_end */
 
-	VOS_ERR_T ret = VOS_SEMA_ERR;
+    VOS_ERR_T ret = VOS_SEMA_ERR;
 
-	if (timeout == 0)
-	{
-		if (sem_wait(sema->pSemaphore) == -1)
-		{
-			vos_printf(VOS_LOG_ERROR, "Semaphore Lock failed\n");
-			return ret;
-		}
-	}
-	else
-	{
-		VOS_TIME_T now;
-		VOS_TIME_T waitTime;
-		struct timespec semaWaitTime;
+    if (timeout == 0)
+    {
+        if (sem_wait(sema->pSemaphore) == -1)
+        {
+            vos_printf(VOS_LOG_ERROR, "Semaphore Lock failed\n");
+            return ret;
+        }
+    }
+    else
+    {
+        VOS_TIME_T      now;
+        VOS_TIME_T      waitTime;
+        struct timespec semaWaitTime;
 
-		vos_getTime(&now);
-		waitTime.tv_sec = timeout / 1000000;
-		waitTime.tv_usec = timeout % 1000000;
-		vos_addTime(&now, &waitTime);
-		TIMEVAL_TO_TIMESPEC(&now, &semaWaitTime);
+        vos_getTime(&now);
+        waitTime.tv_sec     = timeout / 1000000;
+        waitTime.tv_usec    = timeout % 1000000;
+        vos_addTime(&now, &waitTime);
+        TIMEVAL_TO_TIMESPEC(&now, &semaWaitTime);
 
-		if (sem_timedwait(sema->pSemaphore, &semaWaitTime) == -1)
-		{
-			vos_printf(VOS_LOG_ERROR, "Semaphore Lock failed\n");
-			/* debug_start */
-			int sval;
-			sem_getvalue(sema->pSemaphore, &sval);
-			printf("ERROR! After vos_semaTake() :semaphore value%d\n", sval);
-			/* debug_end */
-			return ret;
-		}
-	}
-	/* debug_start */
-	sem_getvalue(sema->pSemaphore, &sval);
-	printf("After vos_semaTake() :semaphore value%d\n", sval);
-	/* debug_end */
+        if (sem_timedwait(sema->pSemaphore, &semaWaitTime) == -1)
+        {
+            vos_printf(VOS_LOG_ERROR, "Semaphore Lock failed\n");
+            /* debug_start */
+            int sval;
+            sem_getvalue(sema->pSemaphore, &sval);
+            printf("ERROR! After vos_semaTake() :semaphore value%d\n", sval);
+            /* debug_end */
+            return ret;
+        }
+    }
+    /* debug_start */
+    sem_getvalue(sema->pSemaphore, &sval);
+    printf("After vos_semaTake() :semaphore value%d\n", sval);
+    /* debug_end */
 #endif /* TRDP_OPTION_LADDER */
 
     return VOS_NO_ERR;
@@ -1067,25 +1057,25 @@ EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema)
 {
 #ifdef TRDP_OPTION_LADDER
-	/* debug_start */
-	int sval;
-	sem_getvalue(sema->pSemaphore, &sval);
-	printf("Before vos_semaGive() :semaphore value%d\n", sval);
-	/* debug_end */
+    /* debug_start */
+    int sval;
+    sem_getvalue(sema->pSemaphore, &sval);
+    printf("Before vos_semaGive() :semaphore value%d\n", sval);
+    /* debug_end */
 
-	if (sem_post(sema->pSemaphore) == -1)
-	{
-		vos_printf(VOS_LOG_ERROR, "Semaphore Unlock failed\n");
-		/* debug_start */
-		int sval;
-		sem_getvalue(sema->pSemaphore, &sval);
-		printf("ERROR! After vos_semaGive() :semaphore value%d\n", sval);
-		/* debug_end */
-		return;
-	}
-	/* debug_start */
-	sem_getvalue(sema->pSemaphore, &sval);
-	printf("After vos_semaGive() :semaphore value%d\n", sval);
-	/* debug_end */
+    if (sem_post(sema->pSemaphore) == -1)
+    {
+        vos_printf(VOS_LOG_ERROR, "Semaphore Unlock failed\n");
+        /* debug_start */
+        int sval;
+        sem_getvalue(sema->pSemaphore, &sval);
+        printf("ERROR! After vos_semaGive() :semaphore value%d\n", sval);
+        /* debug_end */
+        return;
+    }
+    /* debug_start */
+    sem_getvalue(sema->pSemaphore, &sval);
+    printf("After vos_semaGive() :semaphore value%d\n", sval);
+    /* debug_end */
 #endif /* TRDP_OPTION_LADDER */
 }
