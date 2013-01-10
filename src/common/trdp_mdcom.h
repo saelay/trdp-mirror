@@ -46,7 +46,7 @@ TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
     const MD_ELE_T  *pPacket);
 
-void    trdp_mdUpdatePacket (
+void trdp_mdUpdatePacket (
     MD_ELE_T *pPacket);
 
 TRDP_ERR_T  trdp_mdRecv (
@@ -56,12 +56,12 @@ TRDP_ERR_T  trdp_mdRecv (
 TRDP_ERR_T  trdp_mdSend (
     TRDP_SESSION_PT appHandle);
 
-TRDP_ERR_T  trdp_mdCheckListenSocks (
+void trdp_mdCheckListenSocks (
     TRDP_SESSION_PT appHandle,
     TRDP_FDS_T          *pRfds,
     INT32               *pCount);
 
-TRDP_ERR_T  trdp_mdCheckTimeouts (
+void trdp_mdCheckTimeouts (
     TRDP_SESSION_PT appHandle);
 
 #endif

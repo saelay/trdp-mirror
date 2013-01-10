@@ -70,8 +70,9 @@ static BOOL     sInited     = FALSE;
  *
  *
  *  @param[in]      pSessionHandle        session parameters
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         initialization error
+ *
+ *  @retval         TRDP_NO_ERR           no error
+ *  @retval         TRDP_PARAM_ERR        initialization error
  */
 TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
 {
@@ -132,9 +133,10 @@ TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
 /** Check if the session handle is valid
  *
  *
- *  @param[in]      pSessionHandle        pointer to packet data (dataset)
- *    @retval       TRUE                  is valid
- *    @retval       FALSE                 is invalid
+ *  @param[in]    pSessionHandle        pointer to packet data (dataset)
+ *
+ *  @retval       TRUE                  is valid
+ *  @retval       FALSE                 is invalid
  */
 BOOL    trdp_isValidSession (
     TRDP_APP_SESSION_T pSessionHandle)
@@ -181,7 +183,7 @@ TRDP_APP_SESSION_T *trdp_sessionQueue (void)
 /**********************************************************************************************************************/
 /** Initialize the TRDP stack.
  *
- *    tlc_init returns in pAppHandle a unique handle to be used in further calls to the stack.
+ *  tlc_init returns in pAppHandle a unique handle to be used in further calls to the stack.
  *
  *  @param[in]      pPrintDebugString   Pointer to debug print function
  *  @param[in]      pMemConfig          Pointer to memory configuration
@@ -254,7 +256,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
 /**********************************************************************************************************************/
 /** Open a session with the TRDP stack.
  *
- *    tlc_openSession returns in pAppHandle a unique handle to be used in further calls to the stack.
+ *  tlc_openSession returns in pAppHandle a unique handle to be used in further calls to the stack.
  *
  *  @param[out]     pAppHandle          A handle for further calls to the trdp stack
  *  @param[in]      ownIpAddr           Own IP address, can be different for each process in multihoming systems,
@@ -267,10 +269,10 @@ EXT_DECL TRDP_ERR_T tlc_init (
  *                                      only option parameter is used here to define session behavior
  *                                      all other parameters are only used to feed statistics
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_INIT_ERR          not yet inited
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_SOCK_ERR          socket error
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_INIT_ERR       not yet inited
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_SOCK_ERR       socket error
  */
 EXT_DECL TRDP_ERR_T tlc_openSession (
     TRDP_APP_SESSION_T              *pAppHandle,
@@ -432,6 +434,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
  *  Clean up and release all resources of that session
  *
  *  @param[in]      appHandle             The handle returned by tlc_openSession
+ *
  *  @retval         TRDP_NO_ERR           no error
  *  @retval         TRDP_NOINIT_ERR       handle invalid
  *  @retval         TRDP_PARAM_ERR        handle NULL
@@ -527,10 +530,10 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 /** Un-Initialize.
  *  Clean up and close all sessions. Mainly used for debugging/test runs. No further calls to library allowed
  *
- *  @retval         TRDP_NO_ERR			no error
- *  @retval         TRDP_INIT_ERR		no error
- *  @retval         TRDP_MEM_ERR		TrafficStore nothing
- *  @retval         TRDP_SEMA_ERR		TrafficStore semaphore err
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_INIT_ERR       no error
+ *  @retval         TRDP_MEM_ERR        TrafficStore nothing
+ *  @retval         TRDP_SEMA_ERR       TrafficStore semaphore err
  */
 EXT_DECL TRDP_ERR_T tlc_terminate (void)
 {
@@ -585,14 +588,14 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
 
 /**********************************************************************************************************************/
 /** Re-Initialize.
- *  Should be called by the application when a link-down/link-up event
- *    has occured during normal operation.
- *    We need to re-join the multicast groups...
+ *  Should be called by the application when a link-down/link-up event has occured during normal operation.
+ *  We need to re-join the multicast groups...
  *
  *  @param[in]      appHandle           The handle returned by tlc_openSession
- *  @retval         TRDP_NO_ERR           no error
- *  @retval         TRDP_NOINIT_ERR       handle invalid
- *  @retval         TRDP_PARAM_ERR        handle NULL
+ *
+ *  @retval         TRDP_NO_ERR          no error
+ *  @retval         TRDP_NOINIT_ERR      handle invalid
+ *  @retval         TRDP_PARAM_ERR       handle NULL
  */
 EXT_DECL TRDP_ERR_T tlc_reinitSession (
     TRDP_APP_SESSION_T appHandle)
@@ -640,9 +643,9 @@ const char *tlc_getVersion (void)
  *  @param[in]      redId               will be set for all ComID's with the given redId, 0 to change for all redId
  *  @param[in]      leader              TRUE if we send
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error / redId not existing
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error / redId not existing
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 TRDP_ERR_T tlp_setRedundant (
     TRDP_APP_SESSION_T  appHandle,
@@ -677,9 +680,9 @@ TRDP_ERR_T tlp_setRedundant (
  *  @param[in]      redId               will be returned for all ComID's with the given redId, 0 for all redId
  *  @param[in,out]  pLeader             TRUE if we send (leader)
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error / redId not existing
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error / redId not existing
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlp_getRedundant (
     TRDP_APP_SESSION_T  appHandle,
@@ -717,8 +720,8 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *
  *    This value is used for validating outgoing and incoming packets only!
  *
- *  @param[in]      appHandle           the handle returned by tlc_openSession
- *  @param[in]      topoCount           New topoCount value
+ *  @param[in]      appHandle        the handle returned by tlc_openSession
+ *  @param[in]      topoCount        New topoCount value
  */
 EXT_DECL TRDP_ERR_T tlc_setTopoCount (
     TRDP_APP_SESSION_T  appHandle,
@@ -752,7 +755,7 @@ EXT_DECL TRDP_ERR_T tlc_setTopoCount (
  *
  *    This value is used for validating outgoing and incoming packets only!
  *
- *  @retval      topoCount            Current topoCount value
+ *  @retval      topoCount           Current topoCount value
  */
 UINT32 trdp_getTopoCount (
     TRDP_APP_SESSION_T appHandle)
@@ -779,11 +782,11 @@ UINT32 trdp_getTopoCount (
  *  @param[in]      subs                 substitution (Ladder)
  *  @param[in]      offsetAddress        offset (Ladder)
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_MEM_ERR           could not insert (out of memory)
- *  @retval         TRDP_NOINIT_ERR        handle invalid
- *  @retval         TRDP_NOPUB_ERR         Already published
+ *  @retval         TRDP_NO_ERR          no error
+ *  @retval         TRDP_PARAM_ERR       parameter error
+ *  @retval         TRDP_MEM_ERR         could not insert (out of memory)
+ *  @retval         TRDP_NOINIT_ERR      handle invalid
+ *  @retval         TRDP_NOPUB_ERR       Already published
  */
 EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_APP_SESSION_T      appHandle,
@@ -811,7 +814,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                                                               stop=FALSE */
 #endif /* TRDP_OPTION_LADDER */
 
-    /*	Check params	*/
+    /*    Check params    */
     if ((comId == 0)
         || (pData != NULL && dataSize == 0)
         || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
@@ -961,13 +964,13 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 /**********************************************************************************************************************/
 /** Stop sending PD messages.
  *
- *  @param[in]      appHandle            the handle returned by tlc_openSession
- *  @param[in]      pubHandle            the handle returned by prepare
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in]      pubHandle           the handle returned by prepare
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_NOPUB_ERR         not published
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_NOPUB_ERR      not published
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 
 TRDP_ERR_T  tlp_unpublish (
@@ -1015,16 +1018,16 @@ TRDP_ERR_T  tlp_unpublish (
 /** Update the process data to send.
  *  Update previously published data. The new telegram will be sent earliest when tlc_process is called.
  *
- *  @param[in]      appHandle           the handle returned by tlc_openSession
- *  @param[in]      pubHandle           the handle returned by publish
- *  @param[in,out]  pData               pointer to application's data buffer
- *  @param[in,out]  dataSize            size of data
+ *  @param[in]      appHandle          the handle returned by tlc_openSession
+ *  @param[in]      pubHandle          the handle returned by publish
+ *  @param[in,out]  pData              pointer to application's data buffer
+ *  @param[in,out]  dataSize           size of data
  *
- *  @retval         TRDP_NO_ERR           no error
- *  @retval         TRDP_PARAM_ERR        parameter error
- *  @retval         TRDP_NOPUB_ERR        not published
- *  @retval         TRDP_NOINIT_ERR       handle invalid
- *  @retval         TRDP_COMID_ERR        ComID not found when marshalling
+ *  @retval         TRDP_NO_ERR        no error
+ *  @retval         TRDP_PARAM_ERR     parameter error
+ *  @retval         TRDP_NOPUB_ERR     not published
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
+ *  @retval         TRDP_COMID_ERR     ComID not found when marshalling
  */
 TRDP_ERR_T tlp_put (
     TRDP_APP_SESSION_T  appHandle,
@@ -1074,12 +1077,13 @@ TRDP_ERR_T tlp_put (
  *    can send due PD packets in time.
  *    If the PD send queue is empty, return zero time
  *
- *  @param[in]      appHandle            The handle returned by tlc_openSession
- *  @param[out]     pInterval            pointer to needed interval
- *  @param[in,out]  pFileDesc            pointer to file descriptor set
- *  @param[out]     pNoDesc              pointer to put no of used descriptors (for select())
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @param[in]      appHandle          The handle returned by tlc_openSession
+ *  @param[out]     pInterval          pointer to needed interval
+ *  @param[in,out]  pFileDesc          pointer to file descriptor set
+ *  @param[out]     pNoDesc            pointer to put no of used descriptors (for select())
+ *
+ *  @retval         TRDP_NO_ERR        no error
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
  */
 EXT_DECL TRDP_ERR_T tlc_getInterval (
     TRDP_APP_SESSION_T  appHandle,
@@ -1207,11 +1211,12 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
  *    Search the receive queue for pending PDs (time out)
  *
  *
- *  @param[in]      appHandle            The handle returned by tlc_openSession
- *  @param[in]      pRfds                pointer to set of ready descriptors
- *  @param[in,out]  pCount               pointer to number of ready descriptors
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @param[in]      appHandle          The handle returned by tlc_openSession
+ *  @param[in]      pRfds              pointer to set of ready descriptors
+ *  @param[in,out]  pCount             pointer to number of ready descriptors
+ *
+ *  @retval         TRDP_NO_ERR        no error
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
  */
 EXT_DECL TRDP_ERR_T tlc_process (
     TRDP_APP_SESSION_T  appHandle,
@@ -1220,7 +1225,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
 {
     PD_ELE_T    *iterPD = NULL;
     TRDP_TIME_T now;
-    TRDP_ERR_T  err = TRDP_NO_ERR;
+    TRDP_ERR_T  result = TRDP_NO_ERR;
+    TRDP_ERR_T  err;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -1231,114 +1237,122 @@ EXT_DECL TRDP_ERR_T tlc_process (
     {
         return TRDP_NOINIT_ERR;
     }
-
-    vos_clearTime(&appHandle->interval);
-
-    /******************************************************
-        Find and send the packets which has to be sent next:
-     ******************************************************/
-
-    err = trdp_pdSendQueued(appHandle);
-
-    if (err != TRDP_NO_ERR)
+    else
     {
-        /*  We do not break here, only report error */
-        vos_printf(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
-    }
+        vos_clearTime(&appHandle->interval);
 
-    /*    Update the current time    */
-    vos_getTime(&now);
+        /******************************************************
+            Find and send the packets which has to be sent next:
+         ******************************************************/
 
-    /*    Examine receive queue for late packets    */
-    for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
-    {
-        if (timerisset(&iterPD->interval) &&
-            timerisset(&iterPD->timeToGo) &&                    /*  Prevent timing out of PULLed data too early */
-            !timercmp(&iterPD->timeToGo, &now, >) &&            /*  late?   */
-            !(iterPD->privFlags & TRDP_TIMED_OUT))              /*  and not already flagged ?   */
+        err = trdp_pdSendQueued(appHandle);
+
+        if (err != TRDP_NO_ERR)
         {
-            /*  Update some statistics  */
-            appHandle->stats.pd.numTimeout++;
-            iterPD->lastErr = TRDP_TIMEOUT_ERR;
-
-            /* Packet is late! We inform the user about this:    */
-            if (appHandle->pdDefault.pfCbFunction != NULL)
-            {
-                TRDP_PD_INFO_T theMessage;
-                theMessage.comId        = iterPD->addr.comId;
-                theMessage.srcIpAddr    = iterPD->addr.srcIpAddr;
-                theMessage.destIpAddr   = iterPD->addr.destIpAddr;
-                theMessage.topoCount    = vos_ntohl(iterPD->pFrame->frameHead.topoCount);
-                theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
-                theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
-                theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
-                theMessage.subs         = vos_ntohs(iterPD->pFrame->frameHead.subsAndReserved);
-                theMessage.offsetAddr   = vos_ntohs(iterPD->pFrame->frameHead.offsetAddress);
-                theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
-                theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
-                theMessage.pUserRef     = iterPD->userRef;
-                theMessage.resultCode   = TRDP_TIMEOUT_ERR;
-
-                appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, &theMessage, NULL, 0);
-            }
-
-            /*    Prevent repeated time out events    */
-            iterPD->privFlags |= TRDP_TIMED_OUT;
+            /*  We do not break here, only report error */
+            result = err;
+            vos_printf(VOS_LOG_ERROR, "trdp_pdSendQueued failed (Err: %d)\n", err);
         }
 
         /*    Update the current time    */
         vos_getTime(&now);
-    }
 
-#if MD_SUPPORT
-
-    trdp_mdSend(appHandle);
-
-#endif
-
-    /*    Check the input params, in case we are in polling mode, the application
-        is responsible to get any process data by calling tlp_get()    */
-
-    if (pRfds == NULL || pCount == NULL)
-    {
-        err = TRDP_NO_ERR;
-    }
-    else if (pCount != NULL && *pCount > 0)
-    {
-        /*    Check the sockets for received PD packets    */
+        /*    Examine receive queue for late packets    */
         for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
         {
-            if (iterPD->socketIdx != -1 &&
-                FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))     /*    PD frame received?    */
+            if (timerisset(&iterPD->interval) &&
+                timerisset(&iterPD->timeToGo) &&                    /*  Prevent timing out of PULLed data too early */
+                !timercmp(&iterPD->timeToGo, &now, >) &&            /*  late?   */
+                !(iterPD->privFlags & TRDP_TIMED_OUT))              /*  and not already flagged ?   */
             {
-                /*    Compare the received data to the data in our receive queue
-                    Call user's callback if data changed    */
+                /*  Update some statistics  */
+                appHandle->stats.pd.numTimeout++;
+                iterPD->lastErr = TRDP_TIMEOUT_ERR;
 
-                err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
-
-                if (err != TRDP_NO_ERR &&
-                    err != TRDP_TIMEOUT_ERR)
+                /* Packet is late! We inform the user about this:    */
+                if (appHandle->pdDefault.pfCbFunction != NULL)
                 {
-                    vos_printf(VOS_LOG_ERROR, "Error receiving PD packet (Err: %d)\n", err);
+                    TRDP_PD_INFO_T theMessage;
+                    theMessage.comId        = iterPD->addr.comId;
+                    theMessage.srcIpAddr    = iterPD->addr.srcIpAddr;
+                    theMessage.destIpAddr   = iterPD->addr.destIpAddr;
+                    theMessage.topoCount    = vos_ntohl(iterPD->pFrame->frameHead.topoCount);
+                    theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
+                    theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
+                    theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
+                    theMessage.subs         = vos_ntohs(iterPD->pFrame->frameHead.subsAndReserved);
+                    theMessage.offsetAddr   = vos_ntohs(iterPD->pFrame->frameHead.offsetAddress);
+                    theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
+                    theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
+                    theMessage.pUserRef     = iterPD->userRef;
+                    theMessage.resultCode   = TRDP_TIMEOUT_ERR;
+
+                    appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, &theMessage, NULL, 0);
                 }
 
-                (*pCount)--;
-                FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds);
+                /*    Prevent repeated time out events    */
+                iterPD->privFlags |= TRDP_TIMED_OUT;
+            }
+
+            /*    Update the current time    */
+            vos_getTime(&now);
+        }
+
+    #if MD_SUPPORT
+
+        err = trdp_mdSend(appHandle);
+        if (err != TRDP_NO_ERR)
+        {
+            result = err;
+            vos_printf(VOS_LOG_ERROR, "trdp_mdSend() failed (Err: %d)\n", err);
+        }
+
+    #endif
+
+        /*  Check the input params, in case we are in polling mode, the application
+            is responsible to get any process data by calling tlp_get()    */
+        if (pRfds == NULL || pCount == NULL)
+        {
+            /* polling mode */
+        }
+        else if (pCount != NULL && *pCount > 0)
+        {
+            /*    Check the sockets for received PD packets    */
+            for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
+            {
+                if (iterPD->socketIdx != -1 &&
+                    FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))     /*    PD frame received?    */
+                {
+                    /*  Compare the received data to the data in our receive queue
+                        Call user's callback if data changed    */
+
+                    err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
+
+                    if (err != TRDP_NO_ERR &&
+                        err != TRDP_TIMEOUT_ERR)
+                    {
+                        result = err;
+                        vos_printf(VOS_LOG_ERROR, "trdp_pdReceive() failed (Err: %d)\n", err);
+                    }
+
+                    (*pCount)--;
+                    FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds);
+                }
             }
         }
+
+    #if MD_SUPPORT
+
+        trdp_mdCheckListenSocks(appHandle, pRfds, pCount);
+
+        trdp_mdCheckTimeouts(appHandle);
+
+    #endif
+
+        vos_mutexUnlock(appHandle->mutex);
     }
 
-#if MD_SUPPORT
-
-    trdp_mdCheckListenSocks(appHandle, pRfds, pCount);
-
-    trdp_mdCheckTimeouts(appHandle);
-
-#endif
-
-    vos_mutexUnlock(appHandle->mutex);
-
-    return err;
+    return result;
 }
 
 /**********************************************************************************************************************/
@@ -1361,11 +1375,11 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      subs                substitution (Ladder)
  *  @param[in]      offsetAddr          offset (Ladder)
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_MEM_ERR           could not insert (out of memory)
- *  @retval         TRDP_NOINIT_ERR        handle invalid
- *  @retval         TRDP_NOSUB_ERR         no matching subscription found
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not insert (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_NOSUB_ERR      no matching subscription found
  */
 EXT_DECL TRDP_ERR_T tlp_request (
     TRDP_APP_SESSION_T      appHandle,
@@ -1520,8 +1534,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages.
- *  Subscribe to a specific PD ComID and source IP
- *    To unsubscribe, set maxDataSize to zero!
+ *  Subscribe to a specific PD ComID and source IP. To unsubscribe, set maxDataSize to zero!
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pSubHandle          return a handle for these messages
@@ -1536,10 +1549,10 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      toBehavior          timeout behavior
  *  @param[in]      maxDataSize         expected max. size of packet data
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_MEM_ERR           could not reserve memory (out of memory)
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not reserve memory (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_APP_SESSION_T  appHandle,
@@ -1565,7 +1578,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                                               stop=FALSE */
 #endif /* TRDP_OPTION_LADDER */
 
-    /*	Check params	*/
+    /*    Check params    */
     if ((comId == 0)
         || (pSubHandle == NULL))
     {
@@ -1718,10 +1731,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
  *
  *  @param[in]      appHandle            the handle returned by tlc_openSession
  *  @param[in]      subHandle            the handle returned by subscription
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_SUB_ERR           not subscribed
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *
+ *  @retval         TRDP_NO_ERR          no error
+ *  @retval         TRDP_PARAM_ERR       parameter error
+ *  @retval         TRDP_SUB_ERR         not subscribed
+ *  @retval         TRDP_NOINIT_ERR      handle invalid
  */
 EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     TRDP_APP_SESSION_T  appHandle,
@@ -1768,19 +1782,19 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
 /** Get the last valid PD message.
  *  This allows polling of PDs instead of event driven handling by callbacks
  *
- *  @param[in]        appHandle           the handle returned by tlc_openSession
- *  @param[in]        subHandle           the handle returned by subscription
- *  @param[in]        pktFlags            OPTION: TRDP_FLAGS_MARSHALL
- *  @param[in,out]    pPdInfo             pointer to application's info buffer
- *  @param[in,out]    pData               pointer to application's data buffer
- *  @param[in,out]    pDataSize           in: size of buffer, out: size of data
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in]      subHandle           the handle returned by subscription
+ *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_MARSHALL
+ *  @param[in,out]  pPdInfo             pointer to application's info buffer
+ *  @param[in,out]  pData               pointer to application's data buffer
+ *  @param[in,out]  pDataSize           in: size of buffer, out: size of data
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_SUB_ERR           not subscribed
- *  @retval         TRDP_TIMEOUT_ERR       packet timed out
- *  @retval         TRDP_NOINIT_ERR        handle invalid
- *  @retval         TRDP_COMID_ERR         ComID not found when marshalling
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_SUB_ERR        not subscribed
+ *  @retval         TRDP_TIMEOUT_ERR    packet timed out
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_COMID_ERR      ComID not found when marshalling
  */
 EXT_DECL TRDP_ERR_T tlp_get (
     TRDP_APP_SESSION_T  appHandle,
@@ -2369,7 +2383,6 @@ static TRDP_ERR_T tlm_common_send (
                        pNewElement->stateEle,
                        msgType,
                        pNewElement->disableReplyRx);
-
         }
     }
     while(0);
@@ -2919,11 +2932,11 @@ TRDP_ERR_T tlm_reply (
  *  @param[in]      sourceURI           only user part of source URI
  *  @param[in]      destURI             only user part of destination URI
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_MEM_ERR           out of memory
- *  @retval         TRDP_NO_SESSION_ERR    no such session
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NO_SESSION_ERR no such session
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 TRDP_ERR_T tlm_replyQuery (
     TRDP_APP_SESSION_T      appHandle,
@@ -2980,11 +2993,11 @@ TRDP_ERR_T tlm_replyQuery (
  *  @param[in]      sourceURI           only user part of source URI
  *  @param[in]      destURI             only user part of destination URI
  *
- *  @retval         TRDP_NO_ERR          no error
- *  @retval         TRDP_PARAM_ERR       parameter error
- *  @retval         TRDP_MEM_ERR         out of memory
- *  @retval         TRDP_NO_SESSION_ERR  no such session
- *  @retval         TRDP_NOINIT_ERR      handle invalid
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NO_SESSION_ERR no such session
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 TRDP_ERR_T tlm_replyErr (
     TRDP_APP_SESSION_T      appHandle,
@@ -3040,11 +3053,11 @@ TRDP_ERR_T tlm_replyErr (
  *  @param[in]      sourceURI           only functional group of source URI
  *  @param[in]      destURI             only functional group of destination URI
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR         parameter error
- *  @retval         TRDP_MEM_ERR           out of memory
- *  @retval         TRDP_NO_SESSION_ERR    no such session
- *  @retval         TRDP_NOINIT_ERR        handle invalid
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NO_SESSION_ERR no such session
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 TRDP_ERR_T tlm_confirm (
     TRDP_APP_SESSION_T      appHandle,
@@ -3090,10 +3103,10 @@ TRDP_ERR_T tlm_confirm (
  *
  *  @param[in]      SubnetId           Sub-network Id: SUBNET1 or SUBNET2
  *
- *  @retval         TRDP_NO_ERR			no error
- *  @retval         TRDP_PARAM_ERR		parameter error
- *  @retval         TRDP_NOPUB_ERR		not published
- *  @retval         TRDP_NOINIT_ERR	handle invalid
+ *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_PARAM_ERR        parameter error
+ *  @retval         TRDP_NOPUB_ERR        not published
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
  */
 TRDP_ERR_T  tlp_setNetworkContext (
     UINT32 subnetId)
@@ -3116,12 +3129,12 @@ TRDP_ERR_T  tlp_setNetworkContext (
 /**********************************************************************************************************************/
 /** Get SubNetwork Context.
  *
- *  @param[in,out]  pSubnetId			pointer to Sub-network Id
+ *  @param[in,out]  pSubnetId            pointer to Sub-network Id
  *
- *  @retval         TRDP_NO_ERR			no error
- *  @retval         TRDP_PARAM_ERR		parameter error
- *  @retval         TRDP_NOPUB_ERR		not published
- *  @retval         TRDP_NOINIT_ERR	handle invalid
+ *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_PARAM_ERR        parameter error
+ *  @retval         TRDP_NOPUB_ERR        not published
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
  */
 TRDP_ERR_T  tlp_getNetworkContext (
     UINT32 *pSubnetId)
@@ -3143,10 +3156,10 @@ TRDP_ERR_T  tlp_getNetworkContext (
 /**********************************************************************************************************************/
 /** Get Traffic Store accessibility.
  *
- *  @retval         TRDP_NO_ERR			no error
- *  @retval         TRDP_PARAM_ERR		parameter error
- *  @retval         TRDP_NOPUB_ERR		not published
- *  @retval         TRDP_NOINIT_ERR	handle invalid
+ *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_PARAM_ERR        parameter error
+ *  @retval         TRDP_NOPUB_ERR        not published
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
  */
 TRDP_ERR_T  tlp_lockTrafficStore (
     void)
@@ -3167,10 +3180,10 @@ TRDP_ERR_T  tlp_lockTrafficStore (
 /**********************************************************************************************************************/
 /** Release Traffic Store accessibility.
  *
- *  @retval         TRDP_NO_ERR			no error
- *  @retval         TRDP_PARAM_ERR		parameter error
- *  @retval         TRDP_NOPUB_ERR		not published
- *  @retval         TRDP_NOINIT_ERR	handle invalid
+ *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_PARAM_ERR        parameter error
+ *  @retval         TRDP_NOPUB_ERR        not published
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
  */
 TRDP_ERR_T  tlp_unlockTrafficStore (
     void)
