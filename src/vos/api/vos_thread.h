@@ -4,7 +4,7 @@
  *
  * @brief           Threading functions for OS abstraction
  *
- * @details            Thread-, semaphore- and time-handling functions
+ * @details         Thread-, semaphore- and time-handling functions
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -123,14 +123,14 @@ typedef enum
 #ifdef TRDP_OPTION_LADDER
 struct VOS_SEMA
 {
-	CHAR8 *semaphoreName;		/* semaphore Name */
-	INT32 oflag;				/* semaphore access mode */
-	mode_t permission;		    /* semaphore permission */
-	sem_t *pSemaphore;		    /* semaphore object address */
+    CHAR8 *semaphoreName;        /* semaphore Name */
+    INT32 oflag;                /* semaphore access mode */
+    mode_t permission;            /* semaphore permission */
+    sem_t *pSemaphore;            /* semaphore object address */
 };
 #endif /* TRDP_OPTION_LADDER */
 
-/** Hidden mutex handle definition	*/
+/** Hidden mutex handle definition    */
 typedef struct VOS_MUTEX  *VOS_MUTEX_T;
 
 /** Hidden semaphore handle definition    */
@@ -174,6 +174,7 @@ EXT_DECL VOS_ERR_T vos_threadInit (
  *  @param[in]      stackSize         Minimum stacksize, default 0: 16kB
  *  @param[in]      pFunction         Pointer to the thread function
  *  @param[in]      pArguments        Pointer to the thread function parameters
+ *
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
@@ -210,6 +211,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
  *  This call will return VOS_NO_ERR if the thread is still active, VOS_PARAM_ERR in case it ran out.
  *
  *  @param[in]      thread            Thread handle
+ *
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
@@ -354,6 +356,7 @@ EXT_DECL void vos_getUuid (
  *  Return a mutex handle. The mutex will be available at creation.
  *
  *  @param[out]     pMutex           Pointer to mutex handle
+ *
  *  @retval         VOS_NO_ERR       no error
  *  @retval         VOS_INIT_ERR     module not initialised
  *  @retval         VOS_PARAM_ERR    pMutex == NULL
@@ -368,6 +371,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
  *  Release the resources taken by the mutex.
  *
  *  @param[in]      pMutex            mutex handle
+ *
  *  @retval         VOS_NO_ERR        no error
  */
 
@@ -379,6 +383,7 @@ EXT_DECL void vos_mutexDelete (
  *  Wait for the mutex to become available (lock).
  *
  *  @param[in]      pMutex            mutex handle
+ *
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
@@ -392,6 +397,7 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
  *  If mutex is can't be taken VOS_MUTEX_ERR is returned.
  *
  *  @param[in]      pMutex            mutex handle
+ *
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
@@ -417,11 +423,12 @@ EXT_DECL void vos_mutexUnlock (
  *  Return a semaphore handle. Depending on the initial state the semaphore will be available on creation or not.
  *
  *  @param[out]     pSema           Pointer to semaphore handle
- *  @param[in]      initialState	The initial state of the sempahore
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_SEMA_ERR	no semaphore available
+ *  @param[in]      initialState    The initial state of the sempahore
+ *
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR    no semaphore available
  */
 
 EXT_DECL VOS_ERR_T vos_semaCreate (
@@ -444,11 +451,12 @@ EXT_DECL void vos_semaDelete (
  *
  *  @param[in]      sema            semaphore handle
  *  @param[in]      timeout         Max. time in us to wait, 0 means forever
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_SEMA_ERR	could not get semaphore in time
+ *
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_NOINIT_ERR  invalid handle
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_SEMA_ERR    could not get semaphore in time
  */
 
 EXT_DECL VOS_ERR_T vos_semaTake (

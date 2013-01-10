@@ -182,19 +182,19 @@ typedef struct
 
 
 /**********************************************************************************************************************/
-/*	Train configuration information access                                                                            */
+/*    Train configuration information access                                                                            */
 /**********************************************************************************************************************/
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the inauguration state and the topography counter.
+/**    Function to retrieve the inauguration state and the topography counter.
  * 
  *
- *  @param[out]	    pInaugState      Pointer to an inauguration state variable to be returned.
- *  @param[in,out]	pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[out]     pInaugState     Pointer to an inauguration state variable to be returned.
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getEtbState (
@@ -203,14 +203,14 @@ EXT_DECL TRDP_ERR_T tau_getEtbState (
  
  
 /**********************************************************************************************************************/
-/**	Function to retrieve the total number of consists in the train.
+/**    Function to retrieve the total number of consists in the train.
  *  
  *
- *  @param[out]	    pTrnCstCnt       Pointer to the number of consists to be returned 
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[out]     pTrnCstCnt      Pointer to the number of consists to be returned 
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTrnCstCnt (
@@ -219,14 +219,14 @@ EXT_DECL TRDP_ERR_T tau_getTrnCstCnt (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the total number of consists in the train.
+/**    Function to retrieve the total number of consists in the train.
  *  
  *
- *  @param[out]	    pTrnCarCnt       Pointer to the number of cars to be returned 
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[out]     pTrnCarCnt      Pointer to the number of cars to be returned 
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTrnCarCnt (
@@ -235,15 +235,15 @@ EXT_DECL TRDP_ERR_T tau_getTrnCarCnt (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the total number of cars in a consist.
+/**    Function to retrieve the total number of cars in a consist.
  *  
  *
- *  @param[out]	    pCstCarCnt       Pointer to the number of cars to be returned
- *  @param[in,out]	pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
+ *  @param[out]     pCstCarCnt      Pointer to the number of cars to be returned
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstCarCnt (
@@ -253,15 +253,15 @@ EXT_DECL TRDP_ERR_T tau_getCstCarCnt (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the total number of functions in a consist.
+/**    Function to retrieve the total number of functions in a consist.
  *  
  *
- *  @param[out]	    pCstFctCnt       Pointer to the number of functions to be returned
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
+ *  @param[out]     pCstFctCnt      Pointer to the number of functions to be returned
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
@@ -271,16 +271,16 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
 
                                          
 /**********************************************************************************************************************/
-/**	Function to retrieve the total number of devices in a car.
+/**    Function to retrieve the total number of devices in a car.
  *  
  *
- *  @param[out]	    pDevCnt          Pointer to the device count to be returned
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    carLabel         Pointer to a car label. NULL means own car if cstLabel == NULL.
- *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
+ *  @param[out]     pDevCnt         Pointer to the device count to be returned
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      carLabel        Pointer to a car label. NULL means own car if cstLabel == NULL.
+ *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCarDevCnt (
@@ -293,17 +293,17 @@ EXT_DECL TRDP_ERR_T tau_getCarDevCnt (
 /* ---------------------------------------------------------------------------- */
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the function information of the consist. 
+/**    Function to retrieve the function information of the consist. 
  *  
  *
- *  @param[out]	    pFctInfo         Pointer to function info list to be returned. Memory needs to be provided by application. 
- *                                   Memory needs to be provided by application. Set NULL if not used.
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
- *  @param[in]	    maxFctCnt        Maximal number of functions to be returned in provided buffer.
+ *  @param[out]     pFctInfo        Pointer to function info list to be returned. Memory needs to be provided by application. 
+ *                                  Memory needs to be provided by application. Set NULL if not used.
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      maxFctCnt       Maximal number of functions to be returned in provided buffer.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
@@ -314,24 +314,24 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the device information of a car's device. 
+/**    Function to retrieve the device information of a car's device. 
  *  
  *
- *  @param[out]	    pDevInfo         Pointer to device infos to be returned. Memory needs to be provided by application. 
- *  @param[out]	    pDevProp         Pointer to application specific device properties to be returned.
- *                                   Memory needs to be provided by application. Set NULL if not used.
- *  @param[out]	    pDevFctNo        Pointer to device function number list to be returned. 
- *                                   Memory needs to be provided by application. Set NULL if not used.
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    devLabel         Pointer to a device label. NULL means own device if carLabel ist referring to own car.
- *                                   "devxxx" possible, with xxx = 001...999
- *  @param[in]	    carLabel         Pointer to a car label. NULL means own car if cstLabel refers to the own consist.
- *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
- *  @param[in]	    devPropLen       Length of provided buffer for device properties.
- *  @param[in]	    devFctCnt        Maximal number of functions to be returned in provided buffer pDevFctNo.
+ *  @param[out]     pDevInfo        Pointer to device infos to be returned. Memory needs to be provided by application. 
+ *  @param[out]     pDevProp        Pointer to application specific device properties to be returned.
+ *                                  Memory needs to be provided by application. Set NULL if not used.
+ *  @param[out]     pDevFctNo       Pointer to device function number list to be returned. 
+ *                                  Memory needs to be provided by application. Set NULL if not used.
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      devLabel        Pointer to a device label. NULL means own device if carLabel ist referring to own car.
+ *                                  "devxxx" possible, with xxx = 001...999
+ *  @param[in]      carLabel        Pointer to a car label. NULL means own car if cstLabel refers to the own consist.
+ *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      devPropLen      Length of provided buffer for device properties.
+ *  @param[in]      devFctCnt       Maximal number of functions to be returned in provided buffer pDevFctNo.
  *  
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getDevInfo (
@@ -347,19 +347,19 @@ EXT_DECL TRDP_ERR_T tau_getDevInfo (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the car information of a consist's car. 
+/**    Function to retrieve the car information of a consist's car. 
  *  
  *
- *  @param[out]	    pCarInfo         Pointer to the car info to be returned. Memory needs to be provided by application. 
- *  @param[out]	    pCarProp         Pointer to application specific car properties to be returned.
- *                                   Memory needs to be provided by application. Set NULL if not used.
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    carLabel         Pointer to a car label. NULL means own car  if cstLabel refers to own consist.
- *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
- *  @param[in]	    carPropLen       Length of provided buffer for car properties.
+ *  @param[out]     pCarInfo        Pointer to the car info to be returned. Memory needs to be provided by application. 
+ *  @param[out]     pCarProp        Pointer to application specific car properties to be returned.
+ *                                  Memory needs to be provided by application. Set NULL if not used.
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      carLabel        Pointer to a car label. NULL means own car  if cstLabel refers to own consist.
+ *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      carPropLen      Length of provided buffer for car properties.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCarInfo (
@@ -372,18 +372,18 @@ EXT_DECL TRDP_ERR_T tau_getCarInfo (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the consist information of a train's consist. 
+/**    Function to retrieve the consist information of a train's consist. 
  *  
  *
- *  @param[out]	    pCstInfo         Pointer to the consist info to be returned. Memory needs to be provided by application. 
- *  @param[out]	    pCstProp         Pointer to application specific consist properties to be returned.
- *                                   Memory needs to be provided by application. Set NULL if not used.
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    cstLabel         Pointer to a consist label. NULL means own consist.
- *  @param[in]	    cstPropLen       Length of provided buffer for consist properties.
+ *  @param[out]     pCstInfo        Pointer to the consist info to be returned. Memory needs to be provided by application. 
+ *  @param[out]     pCstProp        Pointer to application specific consist properties to be returned.
+ *                                  Memory needs to be provided by application. Set NULL if not used.
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      cstPropLen      Length of provided buffer for consist properties.
  *
- *  @retval         TRDP_NO_ERR	     no error
- *  @retval         TRDP_PARAM_ERR   Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstInfo (
@@ -395,14 +395,14 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the train information. 
+/**    Function to retrieve the train information. 
  *  
  *
- *  @param[out]	    pTrnInfo         Pointer to the train info to be returned. Memory needs to be provided by application. 
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[out]     pTrnInfo        Pointer to the train info to be returned. Memory needs to be provided by application. 
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *
- *  @retval         TRDP_NO_ERR	      no error
- *  @retval         TRDP_PARAM_ERR    Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTrnInfo (
@@ -414,16 +414,16 @@ EXT_DECL TRDP_ERR_T tau_getTrnInfo (
 
 
 **********************************************************************************************************************/
-/**	Function to retrieve the orientation of the given car. 
+/**    Function to retrieve the orientation of the given car. 
  *  
- *  @param[out]	    pCarOrient       Pointer to the car orientation to be returned
- *  @param[out]	    pCstOrient       Pointer to the consist orientation to be returned
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    carLabel         carLabel = NULL means own car if cstLabel == NULL
- *  @param[in]	    cstLabel         cstLabel = NULL means own consist
+ *  @param[out]     pCarOrient      Pointer to the car orientation to be returned
+ *  @param[out]     pCstOrient      Pointer to the consist orientation to be returned
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      carLabel        carLabel = NULL means own car if cstLabel == NULL
+ *  @param[in]      cstLabel        cstLabel = NULL means own consist
  *
- *  @retval         TRDP_NO_ERR	      no error
- *  @retval         TRDP_PARAM_ERR    Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCarOrient (
@@ -435,16 +435,16 @@ EXT_DECL TRDP_ERR_T tau_getCarOrient (
 
 
 /**********************************************************************************************************************/
-/**	Function to retrieve the leading car depending IEC orientation of the given consist. 
+/**    Function to retrieve the leading car depending IEC orientation of the given consist. 
  *  
- *  @param[out]	    pIecCarOrient    Pointer to the IEC car orientation to be returned
- *  @param[out]	    pIecCstOrient    Pointer to the IEC consist orientation to be returned
- *  @param[in,out]  pTopoCnt         Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
- *  @param[in]	    carLabel         carLabel = NULL means own car if cstLabel == NULL
- *  @param[in]	    cstLabel         cstLabel = NULL means own consist
+ *  @param[out]     pIecCarOrient   Pointer to the IEC car orientation to be returned
+ *  @param[out]     pIecCstOrient   Pointer to the IEC consist orientation to be returned
+ *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
+ *  @param[in]      carLabel        carLabel = NULL means own car if cstLabel == NULL
+ *  @param[in]      cstLabel        cstLabel = NULL means own consist
  *
- *  @retval         TRDP_NO_ERR	      no error
- *  @retval         TRDP_PARAM_ERR    Parameter error
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 EXT_DECL TRDP_ERR_T tau_getIecCarOrient (

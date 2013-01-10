@@ -4,10 +4,10 @@
  *
  * @brief           TRDP utility interface definitions
  *
- * @details			This module provides the interface to the following utilities
- *					- marshalling/unmarshalling
- *					- xml configuration interpreter
- *					- IP - URI address translation
+ * @details            This module provides the interface to the following utilities
+ *                    - marshalling/unmarshalling
+ *                    - xml configuration interpreter
+ *                    - IP - URI address translation
  *
  *
  * @note            Project: TCNOpen TRDP prototype stack

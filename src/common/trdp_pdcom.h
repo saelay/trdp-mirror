@@ -57,13 +57,13 @@ void trdp_pdDataUpdate (
     PD_ELE_T        *pPacket);
 
 TRDP_ERR_T  trdp_pdCheck (
-    PD_HEADER_T *pPacket,
-    UINT32       packetSize);
+    PD_HEADER_T     *pPacket,
+    UINT32          packetSize);
 
 TRDP_ERR_T  trdp_pdSend (
-    INT32    pdSock,
-    PD_ELE_T *pPacket,
-    UINT16   port);
+    INT32           pdSock,
+    PD_ELE_T        *pPacket,
+    UINT16          port);
 
 TRDP_ERR_T  trdp_pdGet (
     PD_ELE_T            *pPacket,
@@ -80,6 +80,6 @@ TRDP_ERR_T trdp_pdReceive (
     INT32           sock);
 
 TRDP_ERR_T trdp_pdDistribute (
-	PD_ELE_T    *pSndQueue);
+    PD_ELE_T        *pSndQueue);
 
 #endif

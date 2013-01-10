@@ -77,7 +77,7 @@ void trdp_initStats (
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pStatistics         Pointer to statistics for this application session
- *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
@@ -109,7 +109,7 @@ EXT_DECL TRDP_ERR_T tlc_getStatistics (
  *  @param[in,out]  pNumSubs            In: The number of subscriptions requested
  *                                      Out: Number of subscriptions returned
  *  @param[in,out]  pStatistics         Pointer to an array with the subscription statistics information
- *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
@@ -163,7 +163,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumPub             Pointer to the number of publishers
  *  @param[out]     pStatistics         Pointer to a list with the publish statistics information
- *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR     there are more subscriptions than requested
@@ -218,7 +218,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumList            Pointer to the number of listeners
  *  @param[out]     pStatistics         Pointer to a list with the listener statistics information
- *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
@@ -233,7 +233,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
         return TRDP_NOINIT_ERR;
     }
 
-    /*	TBD	*/
+    /*    TBD    */
     return TRDP_NO_ERR;
 }
 
@@ -244,7 +244,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumRed             Pointer to the number of redundancy groups
  *  @param[out]     pStatistics         Pointer to a list with the redundancy group information
- *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR     there are more subscriptions than requested
@@ -259,7 +259,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
         return TRDP_NOINIT_ERR;
     }
 
-    /*	TBD	*/
+    /*    TBD    */
     return TRDP_NO_ERR;
 }
 
@@ -270,7 +270,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumJoin            Pointer to the number of joined IP Adresses
  *  @param[out]     pIpAddr             Pointer to a list with the joined IP adresses
- *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        there are more items than requested
@@ -314,7 +314,7 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 /** Reset statistics.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
- *  @retval         TRDP_NO_ERR	        no error
+ *  @retval         TRDP_NO_ERR            no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  */
