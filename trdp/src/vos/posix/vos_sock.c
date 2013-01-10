@@ -841,10 +841,13 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     if (connect(sock, (const struct sockaddr *) &dstAddress,
                 sizeof(dstAddress)) == -1)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
-        vos_printf(VOS_LOG_WARNING, "connect failed (%s)\n", buff);
-        return VOS_IO_ERR;
+        if (errno != EINPROGRESS)
+        {
+            char buff[VOS_MAX_ERR_STR_SIZE];
+            strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            vos_printf(VOS_LOG_WARNING, "connect failed (%s)\n", buff);
+            return VOS_IO_ERR;
+        }
     }
     return VOS_NO_ERR;
 }
