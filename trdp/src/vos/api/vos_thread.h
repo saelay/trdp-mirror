@@ -84,12 +84,14 @@ extern "C" {
 #ifndef timersub
 # define timersub(a, b, result)                            \
     do {                                                   \
+    	INT32 usec;                                        \
         (result)->tv_sec    = (a)->tv_sec - (b)->tv_sec;   \
-        (result)->tv_usec   = (a)->tv_usec - (b)->tv_usec; \
-        if ((result)->tv_usec < 0) {                       \
+        usec   = (a)->tv_usec - (b)->tv_usec;              \
+        if (usec < 0) {                                    \
             --(result)->tv_sec;                            \
-            (result)->tv_usec += 1000000;                  \
+            usec += 1000000;                               \
         }                                                  \
+        (result)->tv_usec = usec;                          \
     } while (0)
 #endif
 #endif
