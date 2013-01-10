@@ -144,7 +144,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
     return dotted;
 }
 
-/*	Sockets	*/
+/*    Sockets    */
 
 /**********************************************************************************************************************/
 /** Initialize the socket library.
@@ -704,7 +704,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
  *
  *
  *  @param[in]      sock            socket descriptor
- *  @param[in]      backlog	        maximum connection attempts if system is busy
+ *  @param[in]      backlog            maximum connection attempts if system is busy
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      Input/Output error
@@ -1056,7 +1056,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         }
         else
         {
-            /*	DEBUG
+            /*    DEBUG
                 struct sockaddr_in myAddress = {0};
                 socklen_t optionSize ;
                 getsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &myAddress.sin_addr, &optionSize);

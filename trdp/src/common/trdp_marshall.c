@@ -40,9 +40,9 @@
 typedef struct
 {
     INT32       level;
-    UINT8 		*pSrc;      /**< source pointer			*/
-    UINT8       *pDst;      /**< destination pointer	*/
-    UINT8       *pDstEnd;   /**< last destination		*/
+    UINT8       *pSrc;      /**< source pointer          */
+    UINT8       *pDst;      /**< destination pointer     */
+    UINT8       *pDstEnd;   /**< last destination        */
 } TAU_MARSHALL_INFO_T;
 
 /* structure type definitions for alignment calculation */ 
@@ -77,7 +77,7 @@ static UINT32                  sNumEntries = 0;
  */
 
 /**********************************************************************************************************************/
-/**	Align a pointer to the next natural address.
+/**    Align a pointer to the next natural address.
  *
  *
  *  @param[in]      pSrc            Pointer to align
@@ -94,7 +94,7 @@ static INLINE UINT8 *alignePtr(
 }
 
 /**********************************************************************************************************************/
-/**	Copy a variable to its natural address.
+/**    Copy a variable to its natural address.
  *
  *
  *  @param[in,out]      ppSrc           Pointer to pointer to source variable
@@ -137,12 +137,12 @@ static INLINE void unpackedCopy64 (
 }
 #else
 {
-/*	#error "Endianess not defined" */
+/*    #error "Endianess not defined" */
 }
 #endif
 
 /**********************************************************************************************************************/
-/**	Copy a variable from its natural address.
+/**    Copy a variable from its natural address.
  *
  *
  *  @param[in,out]      ppSrc           Pointer to pointer to source variable
@@ -175,10 +175,10 @@ static INLINE void packedCopy64 (
 }
 
 /**********************************************************************************************************************/
-/**	Dataset compare function
+/**    Dataset compare function
  *
- *  @param[in]      pArg1		Pointer to first element
- *  @param[in]      pArg2		Pointer to second element
+ *  @param[in]      pArg1        Pointer to first element
+ *  @param[in]      pArg2        Pointer to second element
  *
  *  @retval         -1 if arg1 < arg2
  *  @retval          0 if arg1 == arg2
@@ -188,8 +188,8 @@ static int dataset_compare (
     const void  *pArg1,
     const void  *pArg2)
 {
-	TRDP_DATASET_T	*p1 = *(TRDP_DATASET_T **)pArg1;
-	TRDP_DATASET_T	*p2 = *(TRDP_DATASET_T **)pArg2;
+    TRDP_DATASET_T    *p1 = *(TRDP_DATASET_T **)pArg1;
+    TRDP_DATASET_T    *p2 = *(TRDP_DATASET_T **)pArg2;
 
     if (p1->id < p2->id)
     {
@@ -206,10 +206,10 @@ static int dataset_compare (
 }
 
 /**********************************************************************************************************************/
-/**	Dataset compare function
+/**    Dataset compare function
  *
- *  @param[in]      pArg1		Pointer to key
- *  @param[in]      pArg2		Pointer to array element
+ *  @param[in]      pArg1        Pointer to key
+ *  @param[in]      pArg2        Pointer to array element
  *
  *  @retval         -1 if arg1 < arg2
  *  @retval          0 if arg1 == arg2
@@ -219,8 +219,8 @@ static int dataset_compare_deref (
     const void  *pArg1,
     const void  *pArg2)
 {
-	TRDP_DATASET_T	*p1 = (TRDP_DATASET_T *)pArg1;
-	TRDP_DATASET_T	*p2 = *(TRDP_DATASET_T **)pArg2;
+    TRDP_DATASET_T    *p1 = (TRDP_DATASET_T *)pArg1;
+    TRDP_DATASET_T    *p2 = *(TRDP_DATASET_T **)pArg2;
 
     if (p1->id < p2->id)
     {
@@ -237,10 +237,10 @@ static int dataset_compare_deref (
 }
 
 /**********************************************************************************************************************/
-/**	ComId/dataset mapping compare function
+/**    ComId/dataset mapping compare function
  *
- *  @param[in]      pArg1		Pointer to first element
- *  @param[in]      pArg2		Pointer to second element
+ *  @param[in]      pArg1        Pointer to first element
+ *  @param[in]      pArg2        Pointer to second element
  *
  *  @retval         -1 if arg1 < arg2
  *  @retval          0 if arg1 == arg2
@@ -266,7 +266,7 @@ static int comId_compare (
 
 
 /**********************************************************************************************************************/
-/**	Return the dataset for the comID
+/**    Return the dataset for the comID
  *
  *
  *  @param[in]      comID           
@@ -277,15 +277,15 @@ static int comId_compare (
 static TRDP_DATASET_T *find_DS_from_ComId (
     UINT32 comId)
 {
-    TRDP_COMID_DSID_MAP_T	key1 = {0};
-    TRDP_DATASET_T 			**key3;	
+    TRDP_COMID_DSID_MAP_T    key1 = {0};
+    TRDP_DATASET_T             **key3;    
     TRDP_COMID_DSID_MAP_T   *key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
     
     key1.comId = comId;
     
     if (key2 != NULL)
     {
-    	TRDP_DATASET_T	key22 = {0};
+        TRDP_DATASET_T    key22 = {0};
 
         key22.id = key2->datasetId; 
         key3 = (TRDP_DATASET_T **) vos_bsearch(&key22, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
@@ -299,7 +299,7 @@ static TRDP_DATASET_T *find_DS_from_ComId (
 }
 
 /**********************************************************************************************************************/
-/**	Return the dataset for the datasetID
+/**    Return the dataset for the datasetID
  *
  *
  *  @param[in]      datasetID           dataset ID to find
@@ -310,11 +310,11 @@ static TRDP_DATASET_T *find_DS_from_ComId (
 static TRDP_DATASET_T *find_DS (
     UINT32 datasetId)
 {
-	TRDP_DATASET_T  key2 = {0};
+    TRDP_DATASET_T  key2 = {0};
     TRDP_DATASET_T  **key3;
 
     key2.id = datasetId;
-  	key3 = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+      key3 = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
     if (key3 != NULL)
     {
         return *key3;
@@ -325,15 +325,15 @@ static TRDP_DATASET_T *find_DS (
 
 
 /**********************************************************************************************************************/
-/**	Marshall one dataset.
+/**    Marshall one dataset.
  *
  *  @param[in,out]  pInfo           Pointer with src & dest info
- *  @param[in]	    pDataset        Pointer to one dataset
+ *  @param[in]      pDataset        Pointer to one dataset
  *
- *  @retval         TRDP_NO_ERR		no error
- *  @retval         TRDP_MEM_ERR	provided buffer to small
- *  @retval         TRDP_PARAM_ERR	Parameter error
- *  @retval         TRDP_STATE_ERR	Too deep recursion
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_MEM_ERR    provided buffer to small
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_STATE_ERR  Too deep recursion
  *
  */
 
@@ -354,20 +354,20 @@ EXT_DECL TRDP_ERR_T marshall (
         return TRDP_STATE_ERR;
     }
 
-    /*	Align on struct boundary first	*/
+    /*    Align on struct boundary first    */
     pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
 
-    /*	Loop over all datasets in the array	*/
+    /*    Loop over all datasets in the array    */
     for (index = 0; index < pDataset->numElement; ++index)
     {
         UINT32 noOfItems = pDataset->pElement[index].size;
 
-        if (TDRP_VAR_SIZE == noOfItems) /* variable size	*/
+        if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
         {
             noOfItems = var_size;
         }
 
-        /*	Is this a composite type?	*/
+        /*    Is this a composite type?    */
         if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
@@ -375,7 +375,7 @@ EXT_DECL TRDP_ERR_T marshall (
                 /* Dataset, call ourself recursively */
                 TRDP_DATASET_T *pLocalDataset = find_DS(pDataset->pElement[index].type);
 
-                if (NULL == pLocalDataset)      /* Not in our DB	*/
+                if (NULL == pLocalDataset)      /* Not in our DB    */
                 {
                     vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
                     return TRDP_COMID_ERR;
@@ -397,7 +397,7 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_INT8:
                 case TRDP_UINT8:
                 {
-                    /*	possible variable source size	*/
+                    /*    possible variable source size    */
                     var_size = *pSrc;
 
                     while (noOfItems-- > 0)
@@ -412,7 +412,7 @@ EXT_DECL TRDP_ERR_T marshall (
                 {
                     UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
 
-                    /*	possible variable source size	*/
+                    /*    possible variable source size    */
                     var_size = *pSrc16;
 
                     while (noOfItems-- > 0)
@@ -431,7 +431,7 @@ EXT_DECL TRDP_ERR_T marshall (
                 {
                      UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
 
-                    /*	possible variable source size	*/
+                    /*    possible variable source size    */
                     var_size = *pSrc32;
 
                     while (noOfItems-- > 0)
@@ -467,13 +467,13 @@ EXT_DECL TRDP_ERR_T marshall (
                 }
                 case TRDP_TIMEDATE48:
                 {
-                	/*	This is not a base type but a structure	*/
+                    /*    This is not a base type but a structure    */
                     UINT32 *pSrc32;
                     UINT16 *pSrc16;
 
                     while (noOfItems-- > 0)
                     {
-                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
                         *pDst++ = (UINT8) (*pSrc32 >> 24);
                         *pDst++ = (UINT8) (*pSrc32 >> 16);
                         *pDst++ = (UINT8) (*pSrc32 >> 8);
@@ -483,7 +483,7 @@ EXT_DECL TRDP_ERR_T marshall (
                         *pDst++ = (UINT8) (*pSrc16 >> 8);
                         *pDst++ = (UINT8) (*pSrc16 & 0xFF);
                         pSrc32++;
-                    	pSrc = (UINT8 *) pSrc32;
+                        pSrc = (UINT8 *) pSrc32;
                     }
                     break;
                 }
@@ -496,8 +496,8 @@ EXT_DECL TRDP_ERR_T marshall (
                     break;
             }
         }
-    	pInfo->pDst = pDst;
-    	pInfo->pSrc = pSrc;
+        pInfo->pDst = pDst;
+        pInfo->pSrc = pSrc;
     }
     
     
@@ -505,15 +505,15 @@ EXT_DECL TRDP_ERR_T marshall (
 }
 
 /**********************************************************************************************************************/
-/**	Unmarshall one dataset.
+/**    Unmarshall one dataset.
  *
  *  @param[in,out]  pInfo           Pointer with src & dest info
- *  @param[in]	    pDataset        Pointer to one dataset
+ *  @param[in]      pDataset        Pointer to one dataset
  *
- *  @retval         TRDP_NO_ERR		no error
- *  @retval         TRDP_MEM_ERR	provided buffer to small
- *  @retval         TRDP_PARAM_ERR	Parameter error
- *  @retval         TRDP_STATE_ERR	Too deep recursion
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_MEM_ERR    provided buffer to small
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_STATE_ERR  Too deep recursion
  *
  */
 
@@ -534,17 +534,17 @@ EXT_DECL TRDP_ERR_T unmarshall (
         return TRDP_STATE_ERR;
     }
 
-    /*	Loop over all datasets in the array	*/
+    /*    Loop over all datasets in the array    */
 
     for (index = 0; index < pDataset->numElement; ++index)
     {
         UINT32 noOfItems = pDataset->pElement[index].size;
 
-        if (TDRP_VAR_SIZE == noOfItems) /* variable size	*/
+        if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
         {
             noOfItems = var_size;
         }
-        /*	Is this a composite type?	*/
+        /*    Is this a composite type?    */
         if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
@@ -552,7 +552,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 /* Dataset, call ourself recursively */
                 TRDP_DATASET_T *pLocalDataset = find_DS(pDataset->pElement[index].type);
 
-                if (NULL == pLocalDataset)      /* Not in our DB	*/
+                if (NULL == pLocalDataset)      /* Not in our DB    */
                 {
                     vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
                     return TRDP_COMID_ERR;
@@ -593,7 +593,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
                     {
                         *pDst16 = *pSrc++ << 8;
                         *pDst16 += *pSrc++;
-                        /*	possible variable source size	*/
+                        /*    possible variable source size    */
                         var_size = *pDst16;
                         pDst16++;
                     }
@@ -620,12 +620,12 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 }
                 case TRDP_TIMEDATE48:
                 {
-                	/*	This is not a base type but a structure	*/
+                    /*    This is not a base type but a structure    */
                     UINT32 *pDst32;
                     UINT16 *pDst16;
                     while (noOfItems-- > 0)
                     {
-						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
                         *pDst32 = *pSrc++ << 24;
                         *pDst32 += *pSrc++ << 16;
                         *pDst32 += *pSrc++ << 8;
@@ -635,13 +635,13 @@ EXT_DECL TRDP_ERR_T unmarshall (
                         *pDst16 = *pSrc++ << 8;
                         *pDst16 += *pSrc++;
                         pDst32++;
-                    	pDst = (UINT8 *) pDst32;
+                        pDst = (UINT8 *) pDst32;
                     }
                     break;
                 }
                 case TRDP_TIMEDATE64:
                 {
-                	/*	This is not a base type but a structure	*/
+                    /*    This is not a base type but a structure    */
                     UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
                     while (noOfItems-- > 0)
                     {
@@ -669,8 +669,8 @@ EXT_DECL TRDP_ERR_T unmarshall (
                     break;
             }
         }
-    	pInfo->pDst = pDst;
-    	pInfo->pSrc = pSrc;
+        pInfo->pDst = pDst;
+        pInfo->pSrc = pSrc;
     }
 
     return TRDP_NO_ERR;
@@ -681,19 +681,19 @@ EXT_DECL TRDP_ERR_T unmarshall (
  */
 
 /**********************************************************************************************************************/
-/**	Function to initialise the marshalling/unmarshalling.
- *	The supplied array must be sorted by ComIds. The array must exist during the use of the marshalling
- *	functions (until tlc_terminate()).
+/**    Function to initialise the marshalling/unmarshalling.
+ *    The supplied array must be sorted by ComIds. The array must exist during the use of the marshalling
+ *    functions (until tlc_terminate()).
  *
  *  @param[in,out]  ppRefCon         Returns a pointer to be used for the reference context of marshalling/unmarshalling
- *  @param[in]	    numComId         Number of datasets found in the configuration
- *  @param[in]	    pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
- *  @param[in]	    numDataSet       Number of datasets found in the configuration
- *  @param[in]	    pDataset         Pointer to an array of pointers to structures of type TRDP_DATASET_T
+ *  @param[in]      numComId         Number of datasets found in the configuration
+ *  @param[in]      pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
+ *  @param[in]      numDataSet       Number of datasets found in the configuration
+ *  @param[in]      pDataset         Pointer to an array of pointers to structures of type TRDP_DATASET_T
  *
- *  @retval         TRDP_NO_ERR		no error
- *  @retval         TRDP_MEM_ERR	provided buffer to small
- *  @retval         TRDP_PARAM_ERR	Parameter error
+ *  @retval         TRDP_NO_ERR      no error
+ *  @retval         TRDP_MEM_ERR     provided buffer to small
+ *  @retval         TRDP_PARAM_ERR   Parameter error
  *
  */
 
@@ -709,44 +709,44 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
         return TRDP_PARAM_ERR;
     }
 
-    /*	Save the pointer to the comId mapping table	*/
+    /*    Save the pointer to the comId mapping table    */
     sComIdDsIdMap   = pComIdDsIdMap;
     sNumComId = numComId;
     
-    /* sort the table	*/
+    /* sort the table    */
     vos_qsort(pComIdDsIdMap, numComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
 
-    /*	Save the pointer to the table	*/
+    /*    Save the pointer to the table    */
     sDataSets   = pDataset;
     sNumEntries = numDataSet;
 
-    /* sort the table	*/
+    /* sort the table    */
     vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T*), dataset_compare);
 
     return TRDP_NO_ERR;
 }
 
 /**********************************************************************************************************************/
-/**	marshall function.
+/**    marshall function.
  *
- *  @param[in]	    pRefCon    pointer to user context
- *  @param[in]      comId      ComId to identify the structure out of a configuration
- *  @param[in]      pSrc       pointer to received original message
- *  @param[in]	    pDest      pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize  size of the provide buffer / size of the treated message
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      comId           ComId to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *
- *  @retval         TRDP_NO_ERR	    no error
+ *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR	comid not existing
- *  @retval         TRDP_PARAM_ERR	Parameter error
+ *  @retval         TRDP_COMID_ERR  comid not existing
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 
 EXT_DECL TRDP_ERR_T tau_marshall (
     void        *pRefCon,
     UINT32      comId,
-    UINT8 		*pSrc,
+    UINT8         *pSrc,
     UINT8       *pDest,
     UINT32      *pDestSize)
 {
@@ -760,7 +760,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 
     pDataset = find_DS_from_ComId(comId);
 
-    if (NULL == pDataset)   /* Not in our DB	*/
+    if (NULL == pDataset)   /* Not in our DB    */
     {
         vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
         return TRDP_COMID_ERR;
@@ -775,15 +775,15 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 }
 
 /**********************************************************************************************************************/
-/**	unmarshall function.
+/**    unmarshall function.
  *
- *  @param[in]	    pRefCon    pointer to user context
- *  @param[in]      comId      ComId to identify the structure out of a configuration
- *  @param[in]      pSrc       pointer to received original message
- *  @param[in]	    pDest      pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize  size of the provide buffer / size of the treated message
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      comId           ComId to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *
- *  @retval         TRDP_NO_ERR	    no error
+ *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
  *  @retval         TRDP_COMID_ERR  comid not existing
@@ -808,7 +808,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 
     pDataset = find_DS_from_ComId(comId);
 
-    if (NULL == pDataset)   /* Not in our DB	*/
+    if (NULL == pDataset)   /* Not in our DB    */
     {
         return TRDP_COMID_ERR;
     }

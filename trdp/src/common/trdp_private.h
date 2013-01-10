@@ -53,7 +53,7 @@
 
 #define TRDP_MD_DEFAULT_REPLY_TIMEOUT   10000000    /**< default reply time out 10s     */
 #define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT 10000000    /**< default reply time out 10s     */
-#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  	300000000   /**< Socket connection time out 5 minutes    */
+#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT      300000000   /**< Socket connection time out 5 minutes    */
 
 #define TRDP_PD_DEFAULT_QOS              0
 #define TRDP_PD_DEFAULT_TTL              64
@@ -83,14 +83,14 @@ typedef enum
     TRDP_MD_ELE_ST_TX_REPLYQUERY_ARM   =  4,  /**< ready to send reply with confirm request MD                 */
     TRDP_MD_ELE_ST_TX_CONFIRM_ARM      =  5,  /**< ready to send confirm MD                                    */
     TRDP_MD_ELE_ST_TX_ERROR_ARM        =  6,  /**< ready to send error MD                                      */
-	                                      
+                                          
     TRDP_MD_ELE_ST_TX_REQUEST_W4Y      =  7,  /**< request sent, wait for reply                                */
     TRDP_MD_ELE_ST_TX_REPLYQUERY_W4C   =  8,  /**< reply send, with confirm request MD                         */
-	
+    
     TRDP_MD_ELE_ST_RX_ARM              =  9,  /**< armed listener                                              */
     TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY   = 10,  /**< request received, wait for application reply send           */
     TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF  = 11   /**< reply conf. rq. rx, wait for application conf send          */
-	
+    
 } TRDP_MD_ELE_ST_T;
 
 /** Internal flags for packets    */
@@ -125,8 +125,8 @@ typedef struct TRDP_HANDLE
 /** TCP parameters    */
 typedef struct TRDP_SOCKET_TCP
 {
-    TRDP_IP_ADDR_T  cornerIp;				/**< The other TCP corner Ip		                      */
-    TRDP_TIME_T  connectionTimeout;			/**< TCP socket connection Timeout	                      */
+    TRDP_IP_ADDR_T  cornerIp;                /**< The other TCP corner Ip                              */
+    TRDP_TIME_T  connectionTimeout;            /**< TCP socket connection Timeout                          */
 }TRDP_SOCKET_TCP_T;
 
 
@@ -137,9 +137,9 @@ typedef struct TRDP_SOCKETS
     TRDP_IP_ADDR_T      bindAddr;           /**< Defines the interface to use                           */
     TRDP_SEND_PARAM_T   sendParam;          /**< Send parameters                                        */
     TRDP_SOCK_TYPE_T    type;               /**< Usage of this socket                                   */
-    BOOL				rcvOnly;			/**< Used for receiving										*/
+    BOOL                rcvOnly;            /**< Used for receiving                                        */
     UINT16              usage;              /**< No. of current users of this socket                    */
-    TRDP_SOCKET_TCP_T	tcpParams;			/**< Params used for TCP				                    */
+    TRDP_SOCKET_TCP_T    tcpParams;            /**< Params used for TCP                                    */
 } TRDP_SOCKETS_T;
 
 #ifdef WIN32
@@ -226,18 +226,18 @@ typedef struct MD_ELE
                                                     interval for packets to send (set from ms)          */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv             */
     INT32               dataSize;               /**< net data size                                      */
-    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)	*/
-    INT32               socketIdx;              /**< index into the socket list							*/
+    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)    */
+    INT32               socketIdx;              /**< index into the socket list                            */
     TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                    */
     UINT8               sessionID[16];          /**< UUID as a byte stream                              */
-	UINT32				noOfRepliers;        	/**< number of expected repliers, 0 if unknown			*/
-    UINT32              numReplies;   			/**< actual number of replies for the request   		*/
-	UINT32              numRetriesMax; 			/**< maximun number of retries for request to a know dev*/
-	UINT32              numRetries;   			/**< actual number of retries for request to a know dev */
-	UINT8				disableReplyRx;			/**< disable reply reception, for multicast use			*/
-	UINT32              numRepliesQuery;		/**< number of ReplyQuery received, used to count nuomber of expected Confirm sent */
-	UINT32              numConfirmSent;			/**< number of Confirm sent								*/
-	UINT32				numConfirmTimeout; 		/**< number of Confirm Timeouts (incremented by listeners */
+    UINT32                noOfRepliers;            /**< number of expected repliers, 0 if unknown            */
+    UINT32              numReplies;               /**< actual number of replies for the request           */
+    UINT32              numRetriesMax;             /**< maximun number of retries for request to a know dev*/
+    UINT32              numRetries;               /**< actual number of retries for request to a know dev */
+    UINT8                disableReplyRx;            /**< disable reply reception, for multicast use            */
+    UINT32              numRepliesQuery;        /**< number of ReplyQuery received, used to count nuomber of expected Confirm sent */
+    UINT32              numConfirmSent;            /**< number of Confirm sent                                */
+    UINT32                numConfirmTimeout;         /**< number of Confirm Timeouts (incremented by listeners */
     union
     {
         struct
@@ -255,7 +255,7 @@ typedef struct MD_ELE
         } listener; /**< Listener arguments */
     } u;
     BOOL                connectDone;
-    MD_HEADER_T         frameHead;              /**< Packet	header in network byte order                */
+    MD_HEADER_T         frameHead;              /**< Packet    header in network byte order                */
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
     /*    ... data + FCS ... */
 } MD_ELE_T;
@@ -283,7 +283,7 @@ typedef struct TRDP_SESSION
     PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue      */
     MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue  */
     MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue  */
-	MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element             */
+    MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element             */
     TRDP_STATISTICS_T       stats;              /**< statistics of this session                 */
 } TRDP_SESSION_T, *TRDP_SESSION_PT;
 

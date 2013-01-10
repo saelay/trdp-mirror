@@ -203,7 +203,7 @@ TRDP_ERR_T trdp_pdGet (
 /** Send all due PD messages
  *
  *
- *	@param[in]      appHandle           session pointer
+ *    @param[in]      appHandle           session pointer
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_IO_ERR         socket I/O error
  */
@@ -284,7 +284,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
  *  If it is an update, exchange the existing entry with the new one
  *  Call user's callback if needed
  *
- *	@param[in]      appHandle           session pointer
+ *    @param[in]      appHandle           session pointer
  *  @param[in]      sock                the socket to read from
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -330,7 +330,7 @@ TRDP_ERR_T  trdp_pdReceive (
         return err;
     }
 
-    /*  Is packet sane?	*/
+    /*  Is packet sane?    */
     err = trdp_pdCheck(&pNewFrame->frameHead, recSize);
 
     /*  Update statistics   */
@@ -433,7 +433,7 @@ TRDP_ERR_T  trdp_pdReceive (
 
     if (pExistingElement != NULL)
     {
-        /*		Is this packet a duplicate?	*/
+        /*        Is this packet a duplicate?    */
         if (vos_ntohl(pNewFrame->frameHead.sequenceCounter) <
             vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter))
         {
@@ -451,7 +451,7 @@ TRDP_ERR_T  trdp_pdReceive (
         pExistingElement->dataSize  = vos_ntohl(pNewFrame->frameHead.datasetLength);
         pExistingElement->grossSize = trdp_packetSizePD(pExistingElement->dataSize);
 
-        /*  Remember this sequence count value	*/
+        /*  Remember this sequence count value    */
         pExistingElement->curSeqCnt = vos_ntohl(pNewFrame->frameHead.sequenceCounter);
 
         /*  Has the data changed?   */
@@ -497,11 +497,11 @@ TRDP_ERR_T  trdp_pdReceive (
                 theMessage.pUserRef     = pExistingElement->userRef;  /* TBD: User reference given with the local subscribe? */
                 theMessage.resultCode   = resultCode;
 
-				appHandle->pdDefault.pfCbFunction(
-						(void *)pExistingElement->userRef,
-						&theMessage,
-						pExistingElement->pFrame->data,
-						pExistingElement->dataSize);
+                appHandle->pdDefault.pfCbFunction(
+                        (void *)pExistingElement->userRef,
+                        &theMessage,
+                        pExistingElement->pFrame->data,
+                        pExistingElement->dataSize);
             }
             /* add_end TOSHIBA */
 #endif /* TRDP_OPTION_LADDER */
@@ -591,7 +591,7 @@ TRDP_ERR_T trdp_pdCheck (
     UINT32      *pDataFCS   = (UINT32 *)((UINT8 *)pPacket + packetSize - 4);
     TRDP_ERR_T  err         = TRDP_NO_ERR;
 
-    /*  Check size	*/
+    /*  Check size    */
     if (packetSize < TRDP_MIN_PD_HEADER_SIZE ||
         packetSize > TRDP_MAX_PD_PACKET_SIZE)
     {
@@ -599,7 +599,7 @@ TRDP_ERR_T trdp_pdCheck (
         err = TRDP_WIRE_ERR;
     }
 
-    /*	Check Header CRC (FCS)  */
+    /*    Check Header CRC (FCS)  */
     myCRC = vos_crc32(myCRC, (UINT8 *) pPacket, sizeof(PD_HEADER_T) - 4);
 
     if (pPacket->frameCheckSum != MAKE_LE(myCRC))
@@ -704,7 +704,7 @@ TRDP_ERR_T  trdp_pdDistribute (
     PD_ELE_T *pSndQueue)
 {
     PD_ELE_T    *pPacket    = pSndQueue;
-    TRDP_TIME_T deltaTmax   = {1000, 0}; /*	Preset to highest value	*/
+    TRDP_TIME_T deltaTmax   = {1000, 0}; /*    Preset to highest value    */
     TRDP_TIME_T tNull       = {0, 0};
     TRDP_TIME_T temp        = {0, 0};
     TRDP_TIME_T nextTime2Go;

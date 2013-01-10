@@ -50,29 +50,29 @@ extern "C" {
  * TYPEDEFS
  */
 
-/** Types for marshalling / unmarshalling	*/
+/** Types for marshalling / unmarshalling    */
 
 /***********************************************************************************************************************
  * PROTOTYPES
  */
 
 /**********************************************************************************************************************/
-/*	Marshalling/Unmarshalling                                                                                         */
+/*    Marshalling/Unmarshalling                                                                                         */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
-/**	Function to initialise the marshalling/unmarshalling.
+/**    Function to initialise the marshalling/unmarshalling.
  *
  *
  *  @param[in,out]  ppRefCon         Returns a pointer to be used for the reference context of marshalling/unmarshalling
- *  @param[in]	    numComId         Number of datasets found in the configuration
- *  @param[in]	    pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
- *  @param[in]	    numDataSet       Number of datasets found in the configuration
- *  @param[in]	    pDataset         Pointer to an array of pointers to structures of type TRDP_DATASET_T
+ *  @param[in]      numComId         Number of datasets found in the configuration
+ *  @param[in]      pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
+ *  @param[in]      numDataSet       Number of datasets found in the configuration
+ *  @param[in]      pDataset         Pointer to an array of pointers to structures of type TRDP_DATASET_T
  *
- *  @retval         TRDP_NO_ERR	      no error
- *  @retval         TRDP_MEM_ERR      provided buffer to small
- *  @retval         TRDP_PARAM_ERR    Parameter error
+ *  @retval         TRDP_NO_ERR      no error
+ *  @retval         TRDP_MEM_ERR     provided buffer to small
+ *  @retval         TRDP_PARAM_ERR   Parameter error
  *
  */
 
@@ -84,15 +84,15 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
     TRDP_DATASET_T          *pDataset[]);
 
 /**********************************************************************************************************************/
-/**	marshall function.
+/**    marshall function.
  *
- *  @param[in]	    pRefCon    pointer to user context
- *  @param[in]      comId      ComId to identify the structure out of a configuration
- *  @param[in]      pSrc       pointer to received original message
- *  @param[in]	    pDest      pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize  size of the provide buffer / size of the treated message
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      comId           ComId to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *
- *  @retval         TRDP_NO_ERR	    no error
+ *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
  *  @retval         TRDP_COMID_ERR  comid not existing
@@ -102,21 +102,21 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
 EXT_DECL TRDP_ERR_T tau_marshall (
     void        *pRefCon,
     UINT32      comId,
-    UINT8 		*pSrc,
+    UINT8         *pSrc,
     UINT8       *pDest,
     UINT32      *pDestSize);
 
 
 /**********************************************************************************************************************/
-/**	Marshall data set function.
+/**    Marshall data set function.
  *
- *  @param[in]	    pRefCon    pointer to user context
- *  @param[in]      datasetId  Dataset Id to identify the structure out of a configuration
- *  @param[in]      pSrc       pointer to received original message
- *  @param[in]	    pDest      pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize  size of the provide buffer / size of the treated message
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      datasetId       Dataset Id to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *
- *  @retval         TRDP_NO_ERR	    no error
+ *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
  *  @retval         TRDP_PARAM_ERR  data set id not existing
@@ -132,15 +132,15 @@ typedef TRDP_ERR_T tau_marshallDs (
 
 
 /**********************************************************************************************************************/
-/**	unmarshall function.
+/**    unmarshall function.
  *
- *  @param[in]	    pRefCon    pointer to user context
- *  @param[in]      comId      ComId to identify the structure out of a configuration
- *  @param[in]      pSrc       pointer to received original message
- *  @param[in]	    pDest      pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize  size of the provide buffer / size of the treated message
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      comId           ComId to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *
- *  @retval         TRDP_NO_ERR	    no error
+ *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
  *  @retval         TRDP_COMID_ERR  comid not existing
@@ -156,15 +156,15 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 
 
 /**********************************************************************************************************************/
-/**	unmarshall data set function.
+/**    unmarshall data set function.
  *
- *  @param[in]	    pRefCon    pointer to user context
- *  @param[in]      datasetId  Dataset id to identify the structure out of a configuration
- *  @param[in]      pSrc       pointer to received original message
- *  @param[in]	    pDest      pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize  size of the provide buffer / size of the treated message
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      datasetId       Dataset id to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *
- *  @retval         TRDP_NO_ERR	    no error
+ *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
  *  @retval         TRDP_PARAM_ERR  data set id not existing
@@ -180,14 +180,14 @@ typedef TRDP_ERR_T tau_unmarshallDs (
 
 
 /**********************************************************************************************************************/
-/**	Calculate data set size.
+/**    Calculate data set size.
  *
- *  @param[in]	    pRefCon    Pointer to user context
- *  @param[in]      datasetId  Dataset id to identify the structure out of a configuration
- *  @param[in]      pSrc       Pointer to received original message
- *  @param[out]	    pSize      Pointer to the size of the data set
+ *  @param[in]      pRefCon         Pointer to user context
+ *  @param[in]      datasetId       Dataset id to identify the structure out of a configuration
+ *  @param[in]      pSrc            Pointer to received original message
+ *  @param[out]     pSize           Pointer to the size of the data set
  *
- *  @retval         TRDP_NO_ERR	    no error
+ *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
  *  @retval         TRDP_PARAM_ERR  data set id not existing
  *

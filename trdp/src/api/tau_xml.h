@@ -4,8 +4,8 @@
  *
  * @brief           TRDP utility interface definitions
  *
- * @details			This module provides the interface to the following utilities
- *					- read xml configuration interpreter
+ * @details            This module provides the interface to the following utilities
+ *                    - read xml configuration interpreter
  *
  *
  * @note            Project: TCNOpen TRDP prototype stack
@@ -49,7 +49,7 @@ extern "C" {
  * TYPEDEFS
  */
 
-/** Types to read out the XML configuration	*/
+/** Types to read out the XML configuration    */
 /** Configuration of TRDP main process.
  */
 typedef struct
@@ -157,25 +157,25 @@ typedef struct
 
 
 /**********************************************************************************************************************/
-/*	XML Configuration	                                                                                              */
+/*    XML Configuration                                                                                                  */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
-/**	Function to read the TRDP configuration parameters out of the XML configuration file.
+/**    Function to read the TRDP configuration parameters out of the XML configuration file.
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
- *  @param[out]	    pProcessConfig    TRDP main process configuration
- *  @param[out]	    pMemConfig        Memory configuration
- *  @param[out]	    pPdConfig         PD default configuration
- *  @param[out]	    pMdConfig         MD default configuration
- *  @param[out]	    pNumExchgPar      Number of configured telegrams
+ *  @param[in]      pFileName         Path and filename of the xml configuration file
+ *  @param[out]     pProcessConfig    TRDP main process configuration
+ *  @param[out]     pMemConfig        Memory configuration
+ *  @param[out]     pPdConfig         PD default configuration
+ *  @param[out]     pMdConfig         MD default configuration
+ *  @param[out]     pNumExchgPar      Number of configured telegrams
  *  @param[out]     ppExchgPar        Pointer to array of telegram configurations
  *  @param[out]     pNumComPar        Number of configured com parameters
  *  @param[out]     ppComPar          Pointer to array of com parameters
  *  @param[out]     pDbgPar           Debug printout options for application use
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -195,14 +195,14 @@ EXT_DECL TRDP_ERR_T tau_readXmlConfig (
 
 
 /**********************************************************************************************************************/
-/**	Function to read the DataSet configuration out of the XML configuration file.
+/**    Function to read the DataSet configuration out of the XML configuration file.
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
- *  @param[out]	    pNumDataset       Pointer to the number of datasets found in the configuration
- *  @param[out]	    ppDataset         Pointer to an array of a structures of type TRDP_DATASET_T
+ *  @param[in]      pFileName         Path and filename of the xml configuration file
+ *  @param[out]     pNumDataset       Pointer to the number of datasets found in the configuration
+ *  @param[out]     ppDataset         Pointer to an array of a structures of type TRDP_DATASET_T
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *

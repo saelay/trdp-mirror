@@ -69,7 +69,7 @@ BOOL trdp_isValidSession (
 /**********************************************************************************************************************/
 /** Get the session queue head pointer
  *
- *  @retval	        &sSession
+ *  @retval            &sSession
  */
 TRDP_APP_SESSION_T *trdp_sessionQueue (
     void);
@@ -78,4 +78,4 @@ TRDP_APP_SESSION_T *trdp_sessionQueue (
 }
 #endif
 
-#endif  /* TRDP_IF_LIGHT_H	*/
+#endif  /* TRDP_IF_LIGHT_H    */

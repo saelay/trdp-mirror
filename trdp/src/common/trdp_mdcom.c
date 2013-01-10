@@ -74,7 +74,7 @@ TRDP_ERR_T trdp_mdCheck (
         }
     }
 
-    /*	crc check */
+    /*    crc check */
     if (TRDP_NO_ERR == err)
     {
         /* Check Header CRC */
@@ -108,7 +108,7 @@ TRDP_ERR_T trdp_mdCheck (
         }
     }
 
-    /*	Check protocol version	*/
+    /*    Check protocol version    */
     if (TRDP_NO_ERR == err)
     {
         UINT16 l_protocolVersion = vos_ntohs(pPacket->protocolVersion);
@@ -124,7 +124,7 @@ TRDP_ERR_T trdp_mdCheck (
         }
     }
 
-    /*	Check protocol type	*/
+    /*    Check protocol type    */
     if (TRDP_NO_ERR == err)
     {
         UINT16 l_msgType = vos_ntohs(pPacket->msgType);
@@ -269,7 +269,7 @@ TRDP_ERR_T  trdp_mdRecv (
     if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
         /* Read Header */
-    	size = sizeof(MD_HEADER_T);
+        size = sizeof(MD_HEADER_T);
         err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &size);
         vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
 
@@ -299,8 +299,8 @@ TRDP_ERR_T  trdp_mdRecv (
     }
     else
     {
-    	size = TRDP_MAX_MD_PACKET_SIZE;
-    	
+        size = TRDP_MAX_MD_PACKET_SIZE;
+        
         err = (TRDP_ERR_T) vos_sockReceiveUDP(
                 mdSock,
                 (UINT8 *)&pPacket->frameHead,
@@ -326,41 +326,41 @@ TRDP_ERR_T  trdp_mdRecv (
 
     /* received data */
     err = trdp_mdCheck(appHandle, &pPacket->frameHead, pPacket->grossSize);
-	
+    
     /*  Update statistics   */
     switch (err)
     {
         case TRDP_NO_ERR:
-        	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
-        	{
-        		appHandle->stats.tcpMd.numRcv++;;
-        	}else
-        	{
-        		appHandle->stats.udpMd.numRcv++;;
-        	}
+            if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+            {
+                appHandle->stats.tcpMd.numRcv++;;
+            }else
+            {
+                appHandle->stats.udpMd.numRcv++;;
+            }
             break;
         case TRDP_CRC_ERR:
-        	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
-        	{
-        		appHandle->stats.tcpMd.numCrcErr++;
-        	}else
-        	{
-        		appHandle->stats.udpMd.numCrcErr++;
-        	}
+            if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+            {
+                appHandle->stats.tcpMd.numCrcErr++;
+            }else
+            {
+                appHandle->stats.udpMd.numCrcErr++;
+            }
             return err;
         case TRDP_WIRE_ERR:
-        	if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
-        	{
-        		appHandle->stats.tcpMd.numProtErr++;
-        	}else
-        	{
-        		appHandle->stats.udpMd.numProtErr++;
-        	}
+            if ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)
+            {
+                appHandle->stats.tcpMd.numProtErr++;
+            }else
+            {
+                appHandle->stats.udpMd.numProtErr++;
+            }
             return err;
         default:
             return err;
     }
-	
+    
     if (err != TRDP_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv failed = %d\n", err);
@@ -422,7 +422,7 @@ TRDP_ERR_T  trdp_mdReceive (
 
         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
         {
-        	lF  = appHandle->pMDRcvEle->dataSize;
+            lF  = appHandle->pMDRcvEle->dataSize;
         }
 
         vos_printf(VOS_LOG_ERROR,
@@ -504,10 +504,10 @@ TRDP_ERR_T  trdp_mdReceive (
 
                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                 {
-                	appHandle->stats.tcpMd.numTopoErr++;
+                    appHandle->stats.tcpMd.numTopoErr++;
                 }else
                 {
-                	appHandle->stats.udpMd.numTopoErr++;
+                    appHandle->stats.udpMd.numTopoErr++;
                 }
 
                 return TRDP_TOPO_ERR;
@@ -570,14 +570,14 @@ TRDP_ERR_T  trdp_mdReceive (
                                 theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
                                 memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                 memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-							    theMessage.noOfRepliers = 0;
-							    theMessage.numReplies   = 0;
+                                theMessage.noOfRepliers = 0;
+                                theMessage.numReplies   = 0;
                                 theMessage.numRetriesMax = 0;
-							    theMessage.numRetries   = 0;
-							    theMessage.disableReplyRx = 0;
-							    theMessage.numRepliesQuery = 0;
-							    theMessage.numConfirmSent = 0;
-							    theMessage.numConfirmTimeout = 0;
+                                theMessage.numRetries   = 0;
+                                theMessage.disableReplyRx = 0;
+                                theMessage.numRepliesQuery = 0;
+                                theMessage.numConfirmSent = 0;
+                                theMessage.numConfirmTimeout = 0;
                                 theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                 theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -589,7 +589,7 @@ TRDP_ERR_T  trdp_mdReceive (
                                         (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
                                 }
                                 else
-							    {
+                                {
                                     appHandle->mdDefault.pfCbFunction(
                                         appHandle->mdDefault.pRefCon,
                                         &theMessage,
@@ -648,7 +648,7 @@ TRDP_ERR_T  trdp_mdReceive (
                                     continue;
                                 }
 
-							    /* Found */
+                                /* Found */
                                 break;
                             }
 
@@ -662,7 +662,7 @@ TRDP_ERR_T  trdp_mdReceive (
                                     /* reply ok or reply error */
                                     if (l_msgType == TRDP_MSG_MP || l_msgType == TRDP_MSG_MQ || l_msgType == TRDP_MSG_ME)
                                     {
-									    /* Discard all MD Reply/ReplyQuery received after ReplyTimeout or expected replies received */
+                                        /* Discard all MD Reply/ReplyQuery received after ReplyTimeout or expected replies received */
                                         if(sender_ele->disableReplyRx != 0)
                                         {
                                             break;
@@ -682,7 +682,7 @@ TRDP_ERR_T  trdp_mdReceive (
                                         {
                                             /* Increment number of ReplyQuery received, used to count nuomber of expected Confirm sent */
                                             sender_ele->numRepliesQuery++;
-										
+                                        
                                             /* ... move the listener waiting for sending confirm telegram */
                                             iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
 
@@ -741,14 +741,14 @@ TRDP_ERR_T  trdp_mdReceive (
                                             theMessage.replyTimeout = vos_ntohl(pH->replyTimeout);
                                             memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                             memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-										    theMessage.noOfRepliers = sender_ele->noOfRepliers;
+                                            theMessage.noOfRepliers = sender_ele->noOfRepliers;
                                             theMessage.numReplies   = sender_ele->numReplies;
-										    theMessage.numRetriesMax = sender_ele->numRetriesMax;
-										    theMessage.numRetries   = sender_ele->numRetries;
-										    theMessage.disableReplyRx = sender_ele->disableReplyRx;
-										    theMessage.numRepliesQuery = sender_ele->numRepliesQuery;
-										    theMessage.numConfirmSent = sender_ele->numConfirmSent;
-										    theMessage.numConfirmTimeout = sender_ele->numConfirmTimeout;
+                                            theMessage.numRetriesMax = sender_ele->numRetriesMax;
+                                            theMessage.numRetries   = sender_ele->numRetries;
+                                            theMessage.disableReplyRx = sender_ele->disableReplyRx;
+                                            theMessage.numRepliesQuery = sender_ele->numRepliesQuery;
+                                            theMessage.numConfirmSent = sender_ele->numConfirmSent;
+                                            theMessage.numConfirmTimeout = sender_ele->numConfirmTimeout;
                                             theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                                             theMessage.resultCode   = TRDP_NO_ERR;
 
@@ -758,7 +758,7 @@ TRDP_ERR_T  trdp_mdReceive (
                                                     appHandle->mdDefault.pRefCon,
                                                     &theMessage,
                                                     (UINT8 *)&(appHandle->pMDRcvEle->data[0]),lF);
-										    }
+                                            }
                                             else
                                             {
                                                 appHandle->mdDefault.pfCbFunction(
@@ -915,17 +915,17 @@ TRDP_ERR_T  trdp_mdReceive (
                     break;
                 }
             }
-		   
+           
             /* Statistics */
             if(iterMD == NULL)
             {
-            	if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-            	{
-            		appHandle->stats.tcpMd.numNoListener++;
-            	}else
-            	{
-            		appHandle->stats.udpMd.numNoListener++;
-            	}
+                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                {
+                    appHandle->stats.tcpMd.numNoListener++;
+                }else
+                {
+                    appHandle->stats.udpMd.numNoListener++;
+                }
             }
         }
     }

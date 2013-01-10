@@ -52,25 +52,25 @@ static INT32 sCurrentMaxSocketCnt = 0;
 
 #ifdef TRDP_OPTION_LADDER
 /* Traffic Store Semaphore */
-CHAR8 SEMAPHORE_TRAFFIC_STORE[] = "/semaphore_ts";		/* Traffic Store semaphore name */
-mode_t PERMISSION_SEMAPHORE = 0777;						/* Traffic Store semaphore permission is rwxrwxrwx */
-struct VOS_SEMA trafficStoreSemaphore;					/* Semaphore for Traffic Store */
-UINT32 semaphoreTimeout = 1000;							/* semaphore take timeout : Max. time in us to wait, 0 means forever */
-sem_t *pSemaphore;										/* pointer to Traffic Store semaphore */
+CHAR8 SEMAPHORE_TRAFFIC_STORE[] = "/semaphore_ts";        /* Traffic Store semaphore name */
+mode_t PERMISSION_SEMAPHORE = 0777;                        /* Traffic Store semaphore permission is rwxrwxrwx */
+struct VOS_SEMA trafficStoreSemaphore;                    /* Semaphore for Traffic Store */
+UINT32 semaphoreTimeout = 1000;                            /* semaphore take timeout : Max. time in us to wait, 0 means forever */
+sem_t *pSemaphore;                                        /* pointer to Traffic Store semaphore */
 
 /* Traffic Store */
-CHAR8 TRAFFIC_STORE[] = "/ladder_ts";					/* Traffic Store shared memory name */
-mode_t PERMISSION	 = 0666;							/* Traffic Store permission is rw-rw-rw- */
-UINT8 *pTrafficStoreAddr;								/* pointer to pointer to Traffic Store Address */
-struct VOS_SHRD  trafficStoreHandle;					/* Traffic Store Handle */
+CHAR8 TRAFFIC_STORE[] = "/ladder_ts";                    /* Traffic Store shared memory name */
+mode_t PERMISSION     = 0666;                            /* Traffic Store permission is rw-rw-rw- */
+UINT8 *pTrafficStoreAddr;                                /* pointer to pointer to Traffic Store Address */
+struct VOS_SHRD  trafficStoreHandle;                    /* Traffic Store Handle */
 
 /* PDComLadderThread */
-CHAR8 pdComLadderThreadName[] ="PDComLadderThread";		/* Thread name is PDComLadder Thread. */
-BOOL pdComLadderThreadActiveFlag = FALSE;				/* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
-BOOL pdComLadderThreadStartFlag = FALSE;				/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
+CHAR8 pdComLadderThreadName[] ="PDComLadderThread";        /* Thread name is PDComLadder Thread. */
+BOOL pdComLadderThreadActiveFlag = FALSE;                /* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
+BOOL pdComLadderThreadStartFlag = FALSE;                /* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
 
 /* Sub-net */
-UINT32 usingSubnetId;									/* Using SubnetId */
+UINT32 usingSubnetId;                                    /* Using SubnetId */
 
 #endif /* TRDP_OPTION_LADDER */
 /******************************************************************************/
@@ -287,7 +287,7 @@ void    trdp_MDqueueDelElement (
         return;
     }
 
-    /*	handle removal of first element	*/
+    /*    handle removal of first element    */
     if (pDelete == *ppHead)
     {
         *ppHead = pDelete->pNext;
@@ -436,8 +436,8 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  *  @param[in]      options         blocking/nonblocking
  *  @param[in]      rcvOnly         only used for receiving
  *  @param[out]     pIndex          returned index of socket pool
- *  @retval	        TRDP_NO_ERR
- *  @retval	        TRDP_PARAM_ERR
+ *  @retval            TRDP_NO_ERR
+ *  @retval            TRDP_PARAM_ERR
  */
 TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCKETS_T          iface[],
@@ -447,7 +447,7 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_OPTION_T           options,
     BOOL                    rcvOnly,
     INT32                   *pIndex,
-	TRDP_IP_ADDR_T			cornerIp)
+    TRDP_IP_ADDR_T            cornerIp)
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           index, emptySock = -1;
@@ -479,7 +479,7 @@ TRDP_ERR_T  trdp_requestSocket (
 
             if(((usage != TRDP_SOCK_MD_TCP)) || ((usage == TRDP_SOCK_MD_TCP) && (iface[index].usage > 0)))
             {
-            	iface[index].usage++;
+                iface[index].usage++;
             }
 
             return err;
@@ -510,7 +510,7 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
         iface[index].rcvOnly        = rcvOnly;
-		iface[index].tcpParams.connectionTimeout.tv_sec = 0;
+        iface[index].tcpParams.connectionTimeout.tv_sec = 0;
         iface[index].tcpParams.connectionTimeout.tv_usec = 0;
         iface[index].tcpParams.cornerIp = cornerIp;
 
@@ -522,10 +522,10 @@ TRDP_ERR_T  trdp_requestSocket (
 
         if((usage == TRDP_SOCK_MD_TCP) && (rcvOnly == TRUE))
         {
-        	iface[index].sock       = *pIndex;
-        	*pIndex					= index;
-        	iface[index].usage 		= 0;
-        	return err;
+            iface[index].sock       = *pIndex;
+            *pIndex                    = index;
+            iface[index].usage         = 0;
+            return err;
         }
 
         switch (usage)
@@ -597,8 +597,8 @@ TRDP_ERR_T  trdp_requestSocket (
  *
  *  @param[in,out]  iface           socket pool
  *  @param[in]      index           index of socket to release
- *  @retval	        TRDP_NO_ERR
- *  @retval	        TRDP_PARAM_ERR
+ *  @retval            TRDP_NO_ERR
+ *  @retval            TRDP_PARAM_ERR
  */
 TRDP_ERR_T  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
@@ -631,10 +631,10 @@ TRDP_ERR_T  trdp_releaseSocket (
  *        but shall be the same for redundant telegrams (subnet/srcIP).
  *
  *  @param[in]      comId           comID to look for
- *  @param[in]      msgType	        PD/MD type
+ *  @param[in]      msgType            PD/MD type
  *  @param[in]      srcIpAddr       Source IP address
  *
- *  @retval	        return the sequence number
+ *  @retval            return the sequence number
  */
 
 UINT32  trdp_getSeqCnt (
@@ -650,12 +650,12 @@ UINT32  trdp_getSeqCnt (
         return 0;
     }
 
-    /*	For process data look at the PD send queue only	*/
+    /*    For process data look at the PD send queue only    */
     if (TRDP_MSG_PD == msgType ||
         TRDP_MSG_PR == msgType ||
         TRDP_MSG_PE == msgType)
     {
-        /*	Loop thru all sessions	*/
+        /*    Loop thru all sessions    */
         while (pSession)
         {
             pSendElement = pSession->pSndQueue;
@@ -677,7 +677,7 @@ UINT32  trdp_getSeqCnt (
         /* #error */
     }
 #endif
-    return 0;   /*	Not found, initial value is zero	*/
+    return 0;   /*    Not found, initial value is zero    */
 }
 
 /**********************************************************************************************************************/
@@ -692,7 +692,7 @@ UINT32  trdp_getSeqCnt (
  *  @param[in]      msgType         PD/MD type
  *  @param[in]      srcIP           Source IP address
  *
- *  @retval	        return the sequence number
+ *  @retval            return the sequence number
  */
 
 BOOL  trdp_isRcvSeqCnt (
@@ -709,12 +709,12 @@ BOOL  trdp_isRcvSeqCnt (
         return FALSE;
     }
 
-    /*	For process data look at the PD recv queue only	*/
+    /*    For process data look at the PD recv queue only    */
     if (TRDP_MSG_PD == msgType ||
         TRDP_MSG_PR == msgType ||
         TRDP_MSG_PE == msgType)
     {
-        /*	Loop thru all sessions	*/
+        /*    Loop thru all sessions    */
         while (pSession)
         {
             pRcvElement = pSession->pRcvQueue;
@@ -753,128 +753,128 @@ BOOL  trdp_isRcvSeqCnt (
 /** Initialize TRDP Ladder Support
  *  Create Traffic Store semaphore, Traffic Store, PDComLadderThread.
  *
- *	Note:
+ *    Note:
  *
- *	@retval			TRDP_NO_ERR
- *	@retval			TRDP_SEMA_ERR
+ *    @retval            TRDP_NO_ERR
+ *    @retval            TRDP_SEMA_ERR
  */
 TRDP_ERR_T trdp_ladder_init (void)
 {
-	/* Traffic Store */
-	extern CHAR8 SEMAPHORE_TRAFFIC_STORE[];		    /* Traffic Store semaphore name */
-	extern CHAR8 TRAFFIC_STORE[];					/* Traffic Store shared memory name */
-	extern mode_t PERMISSION_SEMAPHORE;		    	/* Traffic Store semaphore permission is rwxrwxrwx */
-	extern struct VOS_SHRD  trafficStoreHandle;	/* Traffic Store Handle */
-	VOS_SHRD_T  pTrafficStoreHandle;				/* Pointer to Traffic Store Handle */
-	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
-	UINT32 trafficStoreSize = TRAFFIC_STORE_SIZE;	/* Traffic Store Size : 64KB */
+    /* Traffic Store */
+    extern CHAR8 SEMAPHORE_TRAFFIC_STORE[];            /* Traffic Store semaphore name */
+    extern CHAR8 TRAFFIC_STORE[];                    /* Traffic Store shared memory name */
+    extern mode_t PERMISSION_SEMAPHORE;                /* Traffic Store semaphore permission is rwxrwxrwx */
+    extern struct VOS_SHRD  trafficStoreHandle;    /* Traffic Store Handle */
+    VOS_SHRD_T  pTrafficStoreHandle;                /* Pointer to Traffic Store Handle */
+    extern UINT8 *pTrafficStoreAddr;                /* pointer to pointer to Traffic Store Address */
+    UINT32 trafficStoreSize = TRAFFIC_STORE_SIZE;    /* Traffic Store Size : 64KB */
 
-	/* PDComLadderThread */
-	extern CHAR8 pdComLadderThreadName[];			/* Thread name is PDComLadder Thread. */
-	extern BOOL pdComLadderThreadActiveFlag;		/* PDComLaader Thread active/non-active Flag :active=TRUE, nonActive=FALSE */
-	VOS_THREAD_T pdComLadderThread = NULL;			/* Thread handle */
+    /* PDComLadderThread */
+    extern CHAR8 pdComLadderThreadName[];            /* Thread name is PDComLadder Thread. */
+    extern BOOL pdComLadderThreadActiveFlag;        /* PDComLaader Thread active/non-active Flag :active=TRUE, nonActive=FALSE */
+    VOS_THREAD_T pdComLadderThread = NULL;            /* Thread handle */
 
-	/* Traffic Store Semaphore */
-	extern struct VOS_SEMA trafficStoreSemaphore;	/* Semaphore for Traffic Store */
-	extern UINT32 semaphoreTimeout;					/* semaphore take timeout : Max. time in us to wait, 0 means forever */
-	VOS_SEMA_T pTrafficStoreSemaphore;				/* Pointer to Semaphore for Traffic Store */
+    /* Traffic Store Semaphore */
+    extern struct VOS_SEMA trafficStoreSemaphore;    /* Semaphore for Traffic Store */
+    extern UINT32 semaphoreTimeout;                    /* semaphore take timeout : Max. time in us to wait, 0 means forever */
+    VOS_SEMA_T pTrafficStoreSemaphore;                /* Pointer to Semaphore for Traffic Store */
 
 
-	/* Traffic Store Create */
-	/* Traffic Store Semaphore Create */
-	TRDP_ERR_T ret = TRDP_SEMA_ERR;
+    /* Traffic Store Create */
+    /* Traffic Store Semaphore Create */
+    TRDP_ERR_T ret = TRDP_SEMA_ERR;
 
-	/*	PDComLadder Thread Active ? */
-	if (pdComLadderThreadActiveFlag == TRUE)
-	{
-		return TRDP_NO_ERR;
-	}
-
-	/* Set Traffic Store Semaphore parameter */
-	trafficStoreSemaphore.semaphoreName = SEMAPHORE_TRAFFIC_STORE;
-	trafficStoreSemaphore.oflag = (O_CREAT | O_EXCL);
-	trafficStoreSemaphore.permission = PERMISSION_SEMAPHORE;
-	trafficStoreSemaphore.pSemaphore = NULL;
-
-	pTrafficStoreSemaphore = &trafficStoreSemaphore;
-
-	if (vos_semaCreate(&pTrafficStoreSemaphore, VOS_SEMA_FULL) != VOS_NO_ERR)
-	{
-		if (pdComLadderThreadActiveFlag == FALSE)
-		{
-			vos_threadInit();
-			if (vos_threadCreate(&pdComLadderThread,
-									pdComLadderThreadName,
-									VOS_THREAD_POLICY_OTHER,
-									0,
-									0,
-									0,
-									(void *)PDComLadder,
-									NULL) == VOS_NO_ERR)
-			{
-				pdComLadderThreadActiveFlag = TRUE;
-				return TRDP_NO_ERR;
-			}
-			else
-			{
-				vos_printf(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
-				return ret;
-			}
-		}
-	}
-
-	/* Lock Traffic Store Semaphore */
-	if ((vos_semaTake(&trafficStoreSemaphore, semaphoreTimeout)) != VOS_NO_ERR)
-	{
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store semaphore Lock failed\n");
-		return ret;
-	}
-
-	/* Create the Traffic Store */
-	trafficStoreHandle.semaphoreName = TRAFFIC_STORE;
-	pTrafficStoreHandle = &trafficStoreHandle;
-    if ((vos_sharedOpen(TRAFFIC_STORE, &pTrafficStoreHandle, &pTrafficStoreAddr, &trafficStoreSize)) != VOS_NO_ERR)
+    /*    PDComLadder Thread Active ? */
+    if (pdComLadderThreadActiveFlag == TRUE)
     {
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Creat failed\n");
-		ret = TRDP_MEM_ERR;
-		return ret;
+        return TRDP_NO_ERR;
     }
 
-	/* Traffic Store semaphore unlock */
-	if ((vos_semaGive(&trafficStoreSemaphore)) != VOS_NO_ERR)
-	{
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store semaphore Unlock failed\n");
-		return ret;
-	}
+    /* Set Traffic Store Semaphore parameter */
+    trafficStoreSemaphore.semaphoreName = SEMAPHORE_TRAFFIC_STORE;
+    trafficStoreSemaphore.oflag = (O_CREAT | O_EXCL);
+    trafficStoreSemaphore.permission = PERMISSION_SEMAPHORE;
+    trafficStoreSemaphore.pSemaphore = NULL;
 
-	/*	PDComLadder Thread Create */
-	if (pdComLadderThreadActiveFlag == FALSE)
-	{
-		vos_threadInit();
-		if (vos_threadCreate(&pdComLadderThread,
-								pdComLadderThreadName,
-								VOS_THREAD_POLICY_OTHER,
-								0,
-								0,
-								0,
-								(void *)PDComLadder,
-								NULL) == TRDP_NO_ERR)
-		{
-			pdComLadderThreadActiveFlag = TRUE;
-			ret = TRDP_NO_ERR;
-		}
-		else
-		{
-			vos_printf(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
-			return ret;
-		}
-	}
-	else
-	{
-		ret = TRDP_NO_ERR;
-	}
+    pTrafficStoreSemaphore = &trafficStoreSemaphore;
 
-	return ret;	/* TRDP_NO_ERR */
+    if (vos_semaCreate(&pTrafficStoreSemaphore, VOS_SEMA_FULL) != VOS_NO_ERR)
+    {
+        if (pdComLadderThreadActiveFlag == FALSE)
+        {
+            vos_threadInit();
+            if (vos_threadCreate(&pdComLadderThread,
+                                    pdComLadderThreadName,
+                                    VOS_THREAD_POLICY_OTHER,
+                                    0,
+                                    0,
+                                    0,
+                                    (void *)PDComLadder,
+                                    NULL) == VOS_NO_ERR)
+            {
+                pdComLadderThreadActiveFlag = TRUE;
+                return TRDP_NO_ERR;
+            }
+            else
+            {
+                vos_printf(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
+                return ret;
+            }
+        }
+    }
+
+    /* Lock Traffic Store Semaphore */
+    if ((vos_semaTake(&trafficStoreSemaphore, semaphoreTimeout)) != VOS_NO_ERR)
+    {
+        vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store semaphore Lock failed\n");
+        return ret;
+    }
+
+    /* Create the Traffic Store */
+    trafficStoreHandle.semaphoreName = TRAFFIC_STORE;
+    pTrafficStoreHandle = &trafficStoreHandle;
+    if ((vos_sharedOpen(TRAFFIC_STORE, &pTrafficStoreHandle, &pTrafficStoreAddr, &trafficStoreSize)) != VOS_NO_ERR)
+    {
+        vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Creat failed\n");
+        ret = TRDP_MEM_ERR;
+        return ret;
+    }
+
+    /* Traffic Store semaphore unlock */
+    if ((vos_semaGive(&trafficStoreSemaphore)) != VOS_NO_ERR)
+    {
+        vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store semaphore Unlock failed\n");
+        return ret;
+    }
+
+    /*    PDComLadder Thread Create */
+    if (pdComLadderThreadActiveFlag == FALSE)
+    {
+        vos_threadInit();
+        if (vos_threadCreate(&pdComLadderThread,
+                                pdComLadderThreadName,
+                                VOS_THREAD_POLICY_OTHER,
+                                0,
+                                0,
+                                0,
+                                (void *)PDComLadder,
+                                NULL) == TRDP_NO_ERR)
+        {
+            pdComLadderThreadActiveFlag = TRUE;
+            ret = TRDP_NO_ERR;
+        }
+        else
+        {
+            vos_printf(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
+            return ret;
+        }
+    }
+    else
+    {
+        ret = TRDP_NO_ERR;
+    }
+
+    return ret;    /* TRDP_NO_ERR */
 }
 
 #endif /* TRDP_OPTION_LADDER */

@@ -74,7 +74,7 @@ typedef double REAL64;
 #error "Standard types must be defined for each target!"
 #endif
 
-/*	Special handling for Windows DLLs	*/
+/*    Special handling for Windows DLLs    */
 #ifdef WIN32
     #ifdef DLL_EXPORT
         #define EXT_DECL    __declspec(dllexport)

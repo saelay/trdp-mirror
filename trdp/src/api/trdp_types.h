@@ -28,7 +28,7 @@
 
 #include "vos_types.h"
 #include "vos_mem.h"
-/* #include "vos_sock.h" */
+#include "vos_sock.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -191,12 +191,12 @@ typedef enum
     TRDP_WIRE_ERR           = -36,  /**< Wire                                           */
     TRDP_TOPO_ERR           = -37,  /**< Invalid topo count                             */
     TRDP_COMID_ERR          = -38,  /**< Unknown ComId                                  */
-    TRDP_STATE_ERR          = -39,  /**< Call in wrong state        		            */
-    TRDP_APP_TIMEOUT_ERR    = -40,  /**< Application Timeout            	            */
+    TRDP_STATE_ERR          = -39,  /**< Call in wrong state                            */
+    TRDP_APP_TIMEOUT_ERR    = -40,  /**< Application Timeout                            */
     TRDP_APP_REPLYTO_ERR    = -41,  /**< Application Reply Sent Timeout                 */
     TRDP_APP_CONFIRMTO_ERR  = -42,  /**< Application Confirm Sent Timeout               */
-    TRDP_REPLYTO_ERR        = -43,  /**< Protocol Reply Timeout 			            */
-    TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout			            */
+    TRDP_REPLYTO_ERR        = -43,  /**< Protocol Reply Timeout                         */
+    TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout                        */
     TRDP_REQCONFIRMTO_ERR   = -45,  /**< Protocol Confirm Timeout (Request sender)      */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
@@ -320,18 +320,18 @@ typedef struct
     UINT32              comId;              /**< ComID                                      */
     UINT32              topoCount;          /**< received topocount                         */
     UINT8               numRetries;         /**< actual number of retries                   */
-	UINT8               numRetriesMax;      /**< maximun number of retries for request to a know dev*/
-	BOOL                disableReplyRx;	    /**< disable reply reception, for multicast use	*/
-	UINT32              numRepliesQuery;    /**< number of ReplyQuery received              */
-	UINT32              numConfirmSent;	    /**< number of Confirm sent                     */
-	UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners */
+    UINT8               numRetriesMax;      /**< maximun number of retries for request to a know dev*/
+    BOOL                disableReplyRx;        /**< disable reply reception, for multicast use    */
+    UINT32              numRepliesQuery;    /**< number of ReplyQuery received              */
+    UINT32              numConfirmSent;        /**< number of Confirm sent                     */
+    UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners */
     UINT16              userStatus;         /**< error code, user stat                      */
     TRDP_REPLY_STATUS_T replyStatus;        /**< reply status                               */
     TRDP_UUID_T         sessionId;          /**< for response                               */
     UINT32              replyTimeout;       /**< reply timeout in us given with the request */
     TRDP_URI_USER_T     destURI;            /**< destination URI user part from MD header   */
     TRDP_URI_USER_T     srcURI;             /**< source URI user part from MD header        */
-	UINT32				noOfRepliers;       /**< number of expected repliers, 0 if unknown  */
+    UINT32                noOfRepliers;       /**< number of expected repliers, 0 if unknown  */
     UINT32              numReplies;         /**< actual number of replies for the request   */
     const void          *pUserRef;          /**< User reference given with the local call   */
     TRDP_ERR_T          resultCode;         /**< error code                                 */
