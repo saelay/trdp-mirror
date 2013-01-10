@@ -129,6 +129,7 @@ typedef enum
     VOS_QUEUE_FULL_ERR  = -11,  /**< Queue full                                      */
     VOS_MUTEX_ERR       = -12,  /**< Mutex not available                             */
     VOS_THREAD_ERR      = -13,  /**< Thread creation error                           */
+    VOS_BLOCK_ERR       = -14,  /**< System call would have blocked in blocking mode */
     VOS_UNKNOWN_ERR     = -99   /**< Unknown error                                   */
 } VOS_ERR_T;
 
