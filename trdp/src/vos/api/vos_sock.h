@@ -29,7 +29,7 @@
 #include "vos_types.h"
 
 #ifdef WIN32
-/* #include <winsock2.h> */
+#include <winsock2.h>
 #else
 #include <sys/select.h>
 #endif

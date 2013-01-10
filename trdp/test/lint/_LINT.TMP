@@ -10,13 +10,9 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(259) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-                        _
-        TRDP_ERR_T  err = TRDP_NO_ERR;
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1487) : Warning 578: Declaration of
-    symbol 'err' hides symbol 'err' (line 1228)
                                                                                     _
             pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(3400) : Warning 571: Suspicious cast
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2315) : Warning 571: Suspicious cast
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                                _
@@ -86,7 +82,7 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Warning 516: 'Symbol
 D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Warning 530: Symbol
     'TIMEDATE64_STRUCT_T' (line 62) not initialized
                                                                                        _
-                    	pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
 D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(476) : Error 78: Symbol
     'TIMEDATE48_STRUCT_T' typedef'ed at line 57 used in expression
 D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(476) : Warning 516: 'Symbol
@@ -117,8 +113,8 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(608) : Error 78: Symbol
 D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(608) : Warning 516: 'Symbol
     __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
     unsigned long long) with line 121
-                                                                                                               _
-						pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+                                                                                       _
+                        pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
 D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(628) : Error 78: Symbol
     'TIMEDATE48_STRUCT_T' typedef'ed at line 57 used in expression
 D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(628) : Warning 516: 'Symbol
