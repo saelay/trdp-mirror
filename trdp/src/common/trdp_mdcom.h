@@ -42,15 +42,26 @@
  * GLOBAL FUNCTIONS
  */
 
-TRDP_ERR_T  trdp_mdSend (
+TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
     const MD_ELE_T  *pPacket);
 
-void    trdp_mdUpdate (
+void    trdp_mdUpdatePacket (
     MD_ELE_T *pPacket);
 
-TRDP_ERR_T  trdp_mdReceive (
+TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
-                            INT32           sock);
+    INT32           sock);
+
+TRDP_ERR_T  trdp_mdSend (
+    TRDP_SESSION_PT appHandle);
+
+TRDP_ERR_T  trdp_mdCheckListenSocks (
+    TRDP_SESSION_PT appHandle,
+    TRDP_FDS_T          *pRfds,
+    INT32               *pCount);
+
+TRDP_ERR_T  trdp_mdCheckTimeouts (
+    TRDP_SESSION_PT appHandle);
 
 #endif
