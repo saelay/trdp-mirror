@@ -75,6 +75,7 @@ struct ifreq    gIfr;
 /** Byte swapping.
  *
  *  @param[in]          val             Initial value.
+ *
  *  @retval             swapped value
  */
 
@@ -105,7 +106,8 @@ EXT_DECL UINT32 vos_ntohl (
 /**********************************************************************************************************************/
 /** Check if the supplied address is a multicast group address.
  *
- *  @param[in]          ipAddress        IP address to check.
+ *  @param[in]          ipAddress   IP address to check.
+ *
  *  @retval             TRUE        address is multicast
  *  @retval             FALSE       address is not a multicast address
  */
@@ -120,6 +122,7 @@ EXT_DECL BOOL vos_isMulticast (
 /** Convert IP address.
  *
  *  @param[in]          pDottedIP   IP address as dotted decimal.
+ *
  *  @retval             address in UINT32 in host endianess
  */
 EXT_DECL UINT32 vos_dottedIP (
@@ -132,6 +135,7 @@ EXT_DECL UINT32 vos_dottedIP (
 /** Convert IP address to dotted dec.
  *
  *  @param[in]          ipAddress   IP address as dotted decimal.
+ *
  *  @retval             address in UINT32 in host endianess
  */
 
@@ -166,6 +170,7 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 /** Return the MAC address of the default adapter.
  *
  *  @param[out]     pMAC            return MAC address.
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pMAC == NULL
  *  @retval         VOS_SOCK_ERR    socket not available or option not supported
@@ -234,6 +239,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
  *
  *  @param[out]     pSock           pointer to socket descriptor returned
  *  @param[in]      pOptions        pointer to socket options (optional)
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pSock == NULL
  *  @retval         VOS_SOCK_ERR    socket not available or option not supported
@@ -280,6 +286,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
  *
  *  @param[out]     pSock           pointer to socket descriptor returned
  *  @param[in]      pOptions        pointer to socket options (optional)
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pSock == NULL
  *  @retval         VOS_SOCK_ERR    socket not available or option not supported
@@ -346,6 +353,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
  *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pOptions        pointer to socket options (optional)
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown
  */
@@ -424,6 +432,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
  *  @param[in]      sock            socket descriptor
  *  @param[in]      mcAddress       multicast group to join
  *  @param[in]      ipAddress       depicts interface on which to join, default 0 for any
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_SOCK_ERR    option not supported
@@ -490,6 +499,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
  *  @param[in]      sock            socket descriptor
  *  @param[in]      mcAddress       multicast group to join
  *  @param[in]      ipAddress       depicts interface on which to leave, default 0 for any
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_SOCK_ERR    option not supported
@@ -545,10 +555,11 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *  @param[in]      size            size of the data to send
  *  @param[in]      ipAddress       destination IP
  *  @param[in]      port            destination port
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
- *  @retval         VOS_MEM_ERR     resource error
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
@@ -559,7 +570,12 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     UINT16      port)
 {
     struct sockaddr_in destAddr;
-    int err = 0;
+    ssize_t sendSize    = 0; 
+
+    if (sock == -1 || pBuffer == NULL)
+    {
+        return VOS_PARAM_ERR;
+    } 
 
     /*      We send UDP packets to the address  */
     memset(&destAddr, 0, sizeof(destAddr));
@@ -572,22 +588,25 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     do
     {
-        errno   = 0;
-        err     = sendto(sock,
+        sendSize = sendto(sock,
                          pBuffer,
                          size,
                          0,
                          (struct sockaddr *) &destAddr,
                          sizeof(destAddr));
+
+        if(sendSize == -1 && errno == EWOULDBLOCK)
+        {
+            return VOS_BLOCK_ERR;
+        } 
     }
-    while (err == -1 && errno == EAGAIN);
+    while (bufferSize && !(sendSize == -1 && errno != EINTR));
 
     if (err == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
-        vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (%s)\n",
-                   buff);
+        vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (%s)\n", buff);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -605,10 +624,12 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
  *  @param[out]     pIPAddr         source IP
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
- *  @retval         VOS_NODATA_ERR  no data in non-blocking
+ *  @retval         VOS_NODATA_ERR  no data
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
@@ -620,36 +641,66 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen = sizeof(srcAddr);
     ssize_t rcvSize = 0;
+    size_t  bufferSize = (size_t) *pSize;
+ 
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
-    rcvSize = recvfrom(sock,
-                       pBuffer,
-                       *pSize,
-                       0,
-                       (struct sockaddr *) &srcAddr,
-                       &sockLen);
-
-    *pIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
-    /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
-
-    if (rcvSize == -1 && errno == EAGAIN)
+    if (sock == -1 || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
     {
-        *pSize = 0;
-        return VOS_NODATA_ERR;
+        return VOS_PARAM_ERR;
+    } 
+
+    *pSize = 0;
+
+    do
+    {
+        rcvSize = recvfrom(sock,
+                           pBuffer,
+                           bufferSize,
+                           0,
+                           (struct sockaddr *) &srcAddr,
+                           &sockLen);
+
+        *pIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
+        /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
+
+        if (rcvSize > 0)
+        {
+            bufferSize  -= rcvSize;
+            pBuffer     += rcvSize;
+            *pSize      += rcvSize;
+        }
+
+        if(rcvSize == -1 && errno == EWOULDBLOCK)
+        {
+            if (*pSize == 0)
+            {
+                return VOS_BLOCK_ERR;
+            }
+            else
+            {
+                return VOS_NO_ERR;
+            }
+        }
     }
-    else if (rcvSize == -1)
+    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR)); 
+
+    if (rcvSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "recvfrom failed (%s)\n", buff);
-        *pSize = 0;
         return VOS_IO_ERR;
+    } 
+    else if (*pSize == 0)
+    {
+        return VOS_NODATA_ERR;
     }
-
-    *pSize = rcvSize;
-
-    return VOS_NO_ERR;
+    else
+    {
+        return VOS_NO_ERR;
+    }
 }
 
 /**********************************************************************************************************************/
@@ -659,6 +710,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
  *  @param[in]      sock            socket descriptor
  *  @param[in]      ipAddress       source IP to receive on, 0 for any
  *  @param[in]      port            port to receive on, 20548 for PD
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      Input/Output error
@@ -705,6 +757,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
  *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      backlog            maximum connection attempts if system is busy
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      Input/Output error
@@ -739,6 +792,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
  *  @param[out]     pSock           Pointer to socket descriptor, on exit new socket
  *  @param[out]     pIPAddress      source IP to receive on, 0 for any
  *  @param[out]     pPort           port to receive on, 20548 for PD
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   NULL parameter, parameter error
  *  @retval         VOS_UNKNOWN_ERR sock descriptor unknown error
@@ -815,10 +869,10 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
  *  @param[in]      sock            socket descriptor
  *  @param[in]      ipAddress       destination IP
  *  @param[in]      port            destination port
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      Input/Output error
- *  @retval         VOS_MEM_ERR     resource error
  */
 
 EXT_DECL VOS_ERR_T vos_sockConnect (
@@ -859,10 +913,11 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pBuffer         pointer to data to send
  *  @param[in]      size            size of the data to send
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
- *  @retval         VOS_NODATA_ERR  no data was sent in non-blocking
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
@@ -889,7 +944,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
         }
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
-            return VOS_NODATA_ERR;
+            return VOS_BLOCK_ERR;
         }
     }
     while (bufferSize && !(sendSize == -1 && errno != EINTR));
@@ -915,10 +970,12 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  *  @param[in]      sock            socket descriptor
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
- *  @retval         VOS_NODATA_ERR  no data in non-blocking
+ *  @retval         VOS_NODATA_ERR  no data
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
@@ -951,7 +1008,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             if (*pSize == 0)
             {
-                return VOS_NODATA_ERR;
+                return VOS_BLOCK_ERR;
             }
             else
             {
@@ -983,6 +1040,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 /** Get interface address
  *
  *  @param[in,out]  pIfa_list       pointer to pointer to the I/F all list
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
@@ -1031,6 +1089,7 @@ EXT_DECL VOS_ERR_T vos_freeIfAddrs (
  *
  *  @param[in]      sock                        socket descriptor
  *  @param[in]      usingMulticastIfAddress     using Multicast I/F Address
+ *
  *  @retval         VOS_NO_ERR                  no error
  *  @retval         VOS_PARAM_ERR               sock descriptor unknown, parameter error
  *  @retval         VOS_SOCK_ERR                option not supported
