@@ -20,25 +20,33 @@
 /*******************************************************************************
  * INCLUDES
  */
-#include "stdafx.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-//#include <unistd.h>
-//#include <sys/time.h>
-//#include <sys/select.h>
 
-#include <trdp_if_light.h>
-#include "vos_thread.h"
-#include "vos_utils.h"
-#include "vos_sock.h"
 
-// include also stuff, needed for windows:
 #ifdef WIN32
+// include also stuff, needed for window
+#include "stdafx.h"
 #include <winsock2.h>
 #endif
 
-#include "stdafx.h"
+#ifdef POSIX
+// stuff needed for posix
+#include <unistd.h>
+#include <sys/time.h>
+#include <sys/select.h>
+
+#ifndef _TCHAR
+#define _TCHAR char
+#endif
+#endif
+
+// gernal needed imports
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "vos_thread.h"
+#include "vos_sock.h"
+
 
 int testTimeCompare()
 {
@@ -125,32 +133,28 @@ int testTimeAdd()
 	VOS_TIME_T time = { 1 /*sec */, 0 /* usec */ };
 	VOS_TIME_T add =  { 0 /*sec */, 2 /* usec */ };
 
-	if (vos_addTime(&time, &add) != VOS_NO_ERR)
-		return 1;
+	vos_addTime(&time, &add);
 	if (time.tv_sec != 1 || time.tv_usec != 2)
 		return 1;
 
 	time.tv_sec =  1 /*sec */;	time.tv_usec = 1 /* usec */;
 	add.tv_sec = 1 /*sec */;	add.tv_usec = 2 /* usec */;
 
-	if (vos_addTime(&time, &add) != VOS_NO_ERR)
-		return 1;
+	vos_addTime(&time, &add);
 	if (time.tv_sec != 2 || time.tv_usec != 3)
 		return 1;
 
 	time.tv_sec =  1 /*sec */;	time.tv_usec = 1 /* usec */;
 	add.tv_sec = 1 /*sec */;	add.tv_usec = 999999 /* usec */;
 
-	if (vos_addTime(&time, &add) != VOS_NO_ERR)
-		return 1;
+	vos_addTime(&time, &add);
 	if (time.tv_sec != 3 || time.tv_usec != 0)
 		return 1;
 
 	time.tv_sec =  2 /*sec */;	time.tv_usec = 999999 /* usec */;
 	add.tv_sec = 1 /*sec */;	add.tv_usec = 999999 /* usec */;
 
-	if (vos_addTime(&time, &add) != VOS_NO_ERR)
-		return 1;
+	vos_addTime(&time, &add);
 	if (time.tv_sec != 4 || time.tv_usec != 999998)
 		return 1;
 
@@ -163,37 +167,34 @@ int testTimeSubs()
 	VOS_TIME_T time = { 1 /*sec */, 4 /* usec */ };
 	VOS_TIME_T subs =  { 0 /*sec */, 2 /* usec */ };
 
-    if (vos_subTime(&time, &subs) != VOS_NO_ERR)
-		return 1;
+    vos_subTime(&time, &subs);
 	if (time.tv_sec != 1 || time.tv_usec != 2)
 		return 1;
 
 	time.tv_sec =  1 /*sec */;	time.tv_usec = 3 /* usec */;
 	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 2 /* usec */;
 
-	if (vos_subTime(&time, &subs) != VOS_NO_ERR)
-		return 1;
+	vos_subTime(&time, &subs);
 	if (time.tv_sec != 0 || time.tv_usec != 1)
 		return 1;
 
 	time.tv_sec =  3 /*sec */;	time.tv_usec = 1 /* usec */;
 	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 999998 /* usec */;
 
-	if (vos_subTime(&time, &subs) != VOS_NO_ERR)
-		return 1;
+	vos_subTime(&time, &subs);
 	if (time.tv_sec != 1 || time.tv_usec != 3)
 		return 1;
 
 	time.tv_sec =  3 /*sec */;	time.tv_usec = 0 /* usec */;
 	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 999999 /* usec */;
 
-	if (vos_subTime(&time, &subs) != VOS_NO_ERR)
-		return 1;
+	vos_subTime(&time, &subs);
 	if (time.tv_sec != 1 || time.tv_usec != 1)
 		return 1;
 
 	return 0; /* all time tests succeeded */
 }
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -221,3 +222,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	return 0;
 }
 
+/* startpoint for linux */
+#ifndef WIN32
+int main(int argc, char** argv)
+{
+	return _tmain(argc, argv);
+}
+#endif
