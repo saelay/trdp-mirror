@@ -397,6 +397,11 @@ typedef struct
     UINT32  datasetId;          /**< corresponding dataset Id */
 } TRDP_COMID_DSID_MAP_T;
 
+/**     Array of pointers to dataset  */
+typedef TRDP_DATASET_T    * pTRDP_DATASET_T;
+typedef pTRDP_DATASET_T     apTRDP_DATASET_T[];
+typedef apTRDP_DATASET_T  * papTRDP_DATASET_T;
+typedef papTRDP_DATASET_T * ppapTRDP_DATASET_T;
 
 
 /**********************************************************************************************************************/
@@ -695,7 +700,7 @@ typedef struct
 {
     UINT8   *p;                                     /**< pointer to static or allocated memory  */
     UINT32  size;                                   /**< size of static or allocated memory     */
-    UINT32  prealloc[TRDP_MEM_BLK_524288 + 1];      /**< memory block structure                 */
+    UINT32  prealloc[VOS_MEM_NBLOCKSIZES];          /**< memory block structure                 */
 } TRDP_MEM_CONFIG_T;
 
 

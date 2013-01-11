@@ -51,21 +51,39 @@
 
 #define TRDP_TIMER_GRANULARITY          10000       /**< granularity in us              */
 
-#define TRDP_MD_DEFAULT_REPLY_TIMEOUT   10000000    /**< default reply time out 10s     */
-#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT 10000000    /**< default reply time out 10s     */
-#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT      300000000   /**< Socket connection time out 5 minutes    */
-
-#define TRDP_PD_DEFAULT_QOS              0
-#define TRDP_PD_DEFAULT_TTL              64
-
-#define TRDP_MD_DEFAULT_QOS              0
+/*  Default MD communication parameters   */
+#define TRDP_MD_DEFAULT_REPLY_TIMEOUT   5000000    /**< default reply time out 5s     */
+#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT 1000000    /**< default confirm time out 1s     */
+#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  	60000000   /**< Socket connection time out 1 minute    */
+#define TRDP_MD_DEFAULT_QOS              3
 #define TRDP_MD_DEFAULT_TTL              64
 #define TRDP_MD_DEFAULT_RETRIES          2
+#define TRDP_MD_DEFAULT_SEND_PARAM       {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
 
+/*  Default PD communication parameters   */
+#define TRDP_PD_DEFAULT_QOS              5
+#define TRDP_PD_DEFAULT_TTL              64
+#define TRDP_PD_DEFAULT_TIMEOUT          100000
+#define TRDP_PD_DEFAULT_SEND_PARAM       {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
+
+/*  PD packet properties    */
 #define TRDP_MIN_PD_HEADER_SIZE          sizeof(PD_HEADER_T)     /**< PD header size with FCS */
 #define TRDP_MAX_PD_DATA_SIZE            1436
 #define TRDP_MAX_PD_PACKET_SIZE          (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
 #define TRDP_MAX_MD_PACKET_SIZE          (1024 * 64)
+
+/*  Default TRDP process options    */
+#define TRDP_PROCESS_DEFAULT_CYCLE_TIME 10000       /**< Default cycle time for TRDP process    */
+#define TRDP_PROCESS_DEFAULT_PRIORITY   64          /**< Default priority of TRDP process   */
+#define TRDP_PROCESS_DEFAULT_OPTIONS    TRDP_OPTION_TRAFFIC_SHAPING /**< Default options for TRDP process   */
+
+#define TRDP_DEBUG_DEFAULT_FILE_SIZE    65536       /**< Default maximum size of log file    */
+
+/*  Default SDT values  */
+#define TRDP_SDT_DEFAULT_SMI2           0           /**< Default SDT safe message identifier for a redundant device */
+#define TRDP_SDT_DEFAULT_NRXSAFE        3           /**< Default SDT timeout cycles*/
+#define TRDP_SDT_DEFAULT_NGUARD         100         /**< Default SDT initial timeout cycles*/
+#define TRDP_SDT_DEFAULT_CMTHR          10          /**< Default SDT channel monitoring threshold*/
 
 
 /***********************************************************************************************************************
