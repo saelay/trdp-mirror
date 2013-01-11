@@ -14,8 +14,16 @@
  * @remarks         All rights reserved. Reproduction, modification, use or disclosure
  *                  to third parties without express authority is forbidden,
  *                  Copyright TOSHIBA, Japan, 2013.
- *					
+ *
+ *
+ * $Id: vos_mem.h 282 2013-01-11 07:08:44Z 97029 $
+ *                    
  */
+
+#ifndef POSIX
+#error \
+    "You are trying to compile the POSIX implementation of vos_sock.c - either define POSIX or exclude this file!"
+#endif
 
 /***********************************************************************************************************************
  * INCLUDES
@@ -31,6 +39,10 @@
 #include <fcntl.h>
 
 #include <unistd.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "vos_types.h"
 #include "vos_utils.h"
@@ -77,55 +89,55 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     UINT8       * *ppMemoryArea,
     UINT32      *pSize)
 {
-	VOS_ERR_T ret = VOS_MEM_ERR;
-	mode_t PERMISSION = 0666;				/* Shared Memory permission is rw-rw-rw- */
-	static INT32 fd;						/* Shared Memory file descriptor */
-	struct	stat sharedMemoryStat;			/* Shared Memory Stat */
+    VOS_ERR_T ret = VOS_MEM_ERR;
+    mode_t PERMISSION = 0666;                /* Shared Memory permission is rw-rw-rw- */
+    static INT32 fd;                         /* Shared Memory file descriptor */
+    struct    stat sharedMemoryStat;         /* Shared Memory Stat */
 
-	/* Shared Memory Open */
-	fd = shm_open(pKey, O_CREAT | O_RDWR, PERMISSION);
-	if (fd == -1)
-	{
-		vos_printf(VOS_LOG_ERROR, "Shared Memory Create failed\n");
-		return ret;
-	}
-	/* Shared Memory acquire */
-	if (ftruncate(fd, (__off_t )*pSize) == -1)
-	{
-		vos_printf(VOS_LOG_ERROR, "Shared Memory Acquire failed\n");
-		return ret;
-	}
-	/* Get Shared Memory Stats */
-	fstat(fd, &sharedMemoryStat);
-	if (sharedMemoryStat.st_size != (__off_t )*pSize)
-	{
-		vos_printf(VOS_LOG_ERROR, "Shared Memory Size failed\n");
-		return ret;
-	}
+    /* Shared Memory Open */
+    fd = shm_open(pKey, O_CREAT | O_RDWR, PERMISSION);
+    if (fd == -1)
+    {
+        vos_printf(VOS_LOG_ERROR, "Shared Memory Create failed\n");
+        return ret;
+    }
+    /* Shared Memory acquire */
+    if (ftruncate(fd, (__off_t )*pSize) == -1)
+    {
+        vos_printf(VOS_LOG_ERROR, "Shared Memory Acquire failed\n");
+        return ret;
+    }
+    /* Get Shared Memory Stats */
+    fstat(fd, &sharedMemoryStat);
+    if (sharedMemoryStat.st_size != (__off_t )*pSize)
+    {
+        vos_printf(VOS_LOG_ERROR, "Shared Memory Size failed\n");
+        return ret;
+    }
 
-	/* Mapping Shared Memory */
-	*ppMemoryArea = mmap(NULL, sharedMemoryStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (*ppMemoryArea == MAP_FAILED)
-	{
-		vos_printf(VOS_LOG_ERROR, "Shared Memory memory-mapping failed\n");
-		return ret;
-	}
-	/* Initialize Shared Memory */
-	memset(*ppMemoryArea, 0, sharedMemoryStat.st_size);
-	/* Handle */
-	*pHandle = (VOS_SHRD_T) vos_memAlloc(sizeof (struct VOS_SHRD));
-	if(*pHandle == NULL)
-	{
-		vos_printf(VOS_LOG_ERROR, "Shared Memory Handle create failed\n");
-		return ret;
-	}
-	else
-	{
-		(*pHandle)->fd = fd;
-	}
+    /* Mapping Shared Memory */
+    *ppMemoryArea = mmap(NULL, sharedMemoryStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (*ppMemoryArea == MAP_FAILED)
+    {
+        vos_printf(VOS_LOG_ERROR, "Shared Memory memory-mapping failed\n");
+        return ret;
+    }
+    /* Initialize Shared Memory */
+    memset(*ppMemoryArea, 0, sharedMemoryStat.st_size);
+    /* Handle */
+    *pHandle = (VOS_SHRD_T) vos_memAlloc(sizeof (struct VOS_SHRD));
+    if(*pHandle == NULL)
+    {
+        vos_printf(VOS_LOG_ERROR, "Shared Memory Handle create failed\n");
+        return ret;
+    }
+    else
+    {
+        (*pHandle)->fd = fd;
+    }
 
-	ret = VOS_NO_ERR;
-	return ret;
+    ret = VOS_NO_ERR;
+    return ret;
 }
 
 /**********************************************************************************************************************/
@@ -144,15 +156,15 @@ EXT_DECL VOS_ERR_T vos_sharedClose (
     VOS_SHRD_T  handle,
     const UINT8 *pMemoryArea)
 {
-	if (close(handle->fd) == -1)
-	{
-		vos_printf(VOS_LOG_ERROR, "Shared Memory file close failed\n");
-		return VOS_MEM_ERR;
-	}
-	if (shm_unlink(handle->sharedMemoryName) == -1)
-	{
-		vos_printf(VOS_LOG_ERROR, "Shared Memory unLink failed\n");
-		return VOS_MEM_ERR;
-	}
+    if (close(handle->fd) == -1)
+    {
+        vos_printf(VOS_LOG_ERROR, "Shared Memory file close failed\n");
+        return VOS_MEM_ERR;
+    }
+    if (shm_unlink(handle->sharedMemoryName) == -1)
+    {
+        vos_printf(VOS_LOG_ERROR, "Shared Memory unLink failed\n");
+        return VOS_MEM_ERR;
+    }
     return VOS_NO_ERR;
 }

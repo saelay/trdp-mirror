@@ -413,7 +413,10 @@ EXT_DECL UINT8 *vos_memAlloc (
         }
 
         /* Release semaphore */
-        vos_mutexUnlock(&gMem.mutex);
+        if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
+        {
+            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        }
 
         if (pBlock != NULL)
         {
@@ -520,7 +523,10 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         }
 
         /* Release semaphore */
-        vos_mutexUnlock(&gMem.mutex);
+        if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
+        {
+            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        }
     }
 }
 
