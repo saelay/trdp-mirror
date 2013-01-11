@@ -40,7 +40,7 @@
 #define PD_COMID_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory	*/
-#define RESERVED_MEMORY  10000
+#define RESERVED_MEMORY  100000
 
 /* Print a sensible usage message */
 void usage (const char *appName)
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
     TRDP_PUB_T          pubHandle;  /*	Our identifier to the publication	*/
     UINT32              comId = PD_COMID;
     TRDP_ERR_T          err;
-    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
+    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
