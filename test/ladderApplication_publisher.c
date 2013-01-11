@@ -12,7 +12,7 @@
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2012.
+ *          Copyright TOSHIBA, Japan, 2013.
  *
  */
 #ifdef TRDP_OPTION_LADDER
@@ -24,8 +24,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/types.h>
+#include <errno.h>
 #include <ifaddrs.h>
+
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -35,6 +37,7 @@
 #include "trdp_pdcom.h"
 #include "trdp_utils.h"
 #include "trdp_if_light.h"
+#include "trdp_ladder.h"
 #include "trdp_ladder_app.h"
 #include "tau_marshall.h"
 
@@ -82,10 +85,34 @@ TRDP_IP_ADDR_T PD_COMID1_SRC_IP = 0x0A040111;		/* Source IP: 10.4.1.17 */
 TRDP_IP_ADDR_T PD_COMID2_SRC_IP = 0x0A040111;		/* Source IP: 10.4.1.17 */
 TRDP_IP_ADDR_T PD_COMID1_DST_IP = 0xe60000C0;		/* multicast Destination IP: 230.0.0.192 */
 TRDP_IP_ADDR_T PD_COMID2_DST_IP = 0xe60000C0;		/* multicast Destination IP: 230.0.0.192 */
-//TRDP_IP_ADDR_T PD_COMID1_DST_IP = 0x0A040111;		/* unicast Destination IP: 10.4.1.17 */
-//TRDP_IP_ADDR_T PD_COMID2_DST_IP = 0x0A040111;		/* unicast Destination IP: 10.4.1.17 */
+//TRDP_IP_ADDR_T PD_COMID1_DST_IP = 0x0A040110;		/* unicast Destination IP: 10.4.1.17 */
+//TRDP_IP_ADDR_T PD_COMID2_DST_IP = 0x0A040110;		/* unicast Destination IP: 10.4.1.17 */
 //TRDP_IP_ADDR_T PD_COMID1_DST_IP2 = 0;				/* unicast Destination IP: 10.4.1.17 */
 //TRDP_IP_ADDR_T PD_COMID2_DST_IP2 = 0;				/* unicast Destination IP: 10.4.1.17 */
+
+TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP = 0x0A040111;				/* Subscribe Source IP: 10.4.1.17 */
+TRDP_IP_ADDR_T PD_COMID2_SUB_SRC_IP = 0x0A040111;		/* Subscribe Source IP: 10.4.1.17 */
+TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP2 = 0x0A042111;		/* Subscribe Source IP: 10.4.33.17 */
+TRDP_IP_ADDR_T PD_COMID2_SUB_SRC_IP2 = 0x0A042111;		/* Subscribe Source IP: 10.4.33.17 */
+
+//TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP = 0x0A040110;		/* Subscribe Destination IP: 10.4.1.16 */
+//TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP = 0x0A040110;		/* Subscribe Destination IP: 10.4.1.16 */
+TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
+//TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP2 = 0x0A042110;		/* Subscribe Destination IP: 10.4.33.16 */
+//TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP2 = 0x0A042110;		/* Subscribe Destination IP: 10.4.33.16 */
+TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP2 = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP2 = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
+
+//TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP = 0x0A040111;		/* Publish Destination IP: 10.4.1.17 */
+//TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP = 0x0A040111;		/* Publish Destination IP: 10.4.1.17 */
+TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP = 0xe60000C0;		/* Publish multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP = 0xe60000C0;		/* Publish multicastDestination IP: 230.0.0.192 */
+//TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP2 = 0x0A042111;		/* Publish Destination IP: 10.4.33.17 */
+//TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP2 = 0x0A042111;		/* Publish Destination IP: 10.4.33.17 */
+TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP2 = 0xe60000C0;		/* Publish multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP2 = 0xe60000C0;		/* Publish multicast Destination IP: 230.0.0.192 */
+
 /* Subscribe for Sub-network Id2 */
 TRDP_IP_ADDR_T PD_COMID1_SRC_IP2 = 0;
 TRDP_IP_ADDR_T PD_COMID2_SRC_IP2 = 0;
@@ -332,7 +359,6 @@ INT8 dumpMemory (
  */
 int main (int argc, char *argv[])
 {
-//	BOOL ladderTopologyFlag = TRUE;								/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
 	TRDP_ERR_T err;
 	CHAR8 stringMaxData[16] = "STRING MAX SIZE";
 	PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;	    /* Sender's IP: 10.4.33.17 (default) */
@@ -732,7 +758,7 @@ int main (int argc, char *argv[])
 	CHAR8 addrStr[256] = {0};
 
 	/* Get I/F address */
-	if (vos_getIfAddrs(&ifa_list) != VOS_NO_ERR)
+	if (getifaddrs(&ifa_list) != VOS_NO_ERR)
 	{
     	printf("getifaddrs error. errno=%d\n", errno);
        return 1;
@@ -757,7 +783,7 @@ int main (int argc, char *argv[])
 		}
 	}
 	/* Release memory */
-	vos_freeIfAddrs(ifa_list);
+	freeifaddrs(ifa_list);
 
 	/* Sub-network Id1 Init the library for callback operation	(PD only) */
 	if (tlc_init(dbgOut,							/* actually printf	*/
@@ -781,6 +807,13 @@ int main (int argc, char *argv[])
 							&processConfig) != TRDP_NO_ERR)
 	{
 		printf("Sub-network Id1 Initialization error (tlc_openSession)\n");
+		return 1;
+	}
+
+	/* TRDP Ladder support initialize */
+	if (trdp_ladder_init() != TRDP_NO_ERR)
+	{
+		printf("TRDP Ladder Support Initialize failed\n");
 		return 1;
 	}
 
@@ -808,9 +841,9 @@ int main (int argc, char *argv[])
                          &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
                          PD_COMID1,                	/* ComID */
                          0,                        	/* topocount: local consist only */
-                         PD_COMID1_SRC_IP,         	/* Source IP filter */
+                         PD_COMID1_SUB_SRC_IP,     	/* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
-                         PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+                         PD_COMID1_SUB_DST_IP,     	/* Default destination	(or MC Group) */
                          PD_COMID1_TIMEOUT,         /* Time out in us	*/
                          TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
                          dataSet1Size);         	/* net data size */
@@ -821,15 +854,18 @@ int main (int argc, char *argv[])
         return 1;
     }
 
+    /* Start PdComLadderThread */
+    trdp_setPdComLadderThreadStartFlag(TRUE);
+
     /*	Sub-network Id1 ComID2 Subscribe */
     err = tlp_subscribe( appHandle,					/* our application identifier */
                          &subHandleNet1ComId2,		/* our subscription identifier */
                          &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
                          PD_COMID2,                	/* ComID */
                          0,                        	/* topocount: local consist only */
-                         PD_COMID2_SRC_IP,         	/* Source IP filter */
+                         PD_COMID2_SUB_SRC_IP,         	/* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
-                         PD_COMID2_DST_IP,        	/* Default destination	(or MC Group) */
+                         PD_COMID2_SUB_DST_IP,        	/* Default destination	(or MC Group) */
                          PD_COMID2_TIMEOUT,         /* Time out in us	*/
                          TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
                          dataSet2Size);       	  	/* net data size */
@@ -837,6 +873,7 @@ int main (int argc, char *argv[])
     {
         printf("prep  Sub-network Id1 pd receive error\n");
         tlc_terminate();
+        trdp_ladder_terminate();
         return 1;
     }
 
@@ -849,9 +886,9 @@ int main (int argc, char *argv[])
 							 &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
 							 PD_COMID1,                	/* ComID */
 							 0,                        	/* topocount: local consist only */
-							 PD_COMID1_SRC_IP2,        	/* Source IP filter */
+							 PD_COMID1_SUB_SRC_IP2,        	/* Source IP filter */
 							 0,                        	/* Source IP filter2 : no used */
-							 PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+							 PD_COMID1_SUB_DST_IP,        	/* Default destination	(or MC Group) */
 							 PD_COMID1_TIMEOUT,        	/* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
 							 dataSet1Size);        		/* net data size */
@@ -859,6 +896,7 @@ int main (int argc, char *argv[])
 		{
 			printf("prep  Sub-network Id2 pd receive error\n");
 			tlc_terminate();
+			trdp_ladder_terminate();
 			return 1;
 		}
 
@@ -868,9 +906,9 @@ int main (int argc, char *argv[])
 							 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
 							 PD_COMID2,                	/* ComID */
 							 0,                        	/* topocount: local consist only */
-							 PD_COMID2_SRC_IP2,        	/* Source IP filter */
+							 PD_COMID2_SUB_SRC_IP2,        	/* Source IP filter */
 							 0,                        	/* Source IP filter2 : no used */
-							 PD_COMID2_DST_IP,        	/* Default destination	(or MC Group) */
+							 PD_COMID2_SUB_DST_IP2,        	/* Default destination	(or MC Group) */
 							 PD_COMID2_TIMEOUT,        	/* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
 							 dataSet2Size);     		/* net data size */
@@ -878,6 +916,7 @@ int main (int argc, char *argv[])
 		{
 			printf("prep  Sub-network Id2 pd receive error\n");
 			tlc_terminate();
+			trdp_ladder_terminate();
 			return 1;
 		}
 	}
@@ -888,7 +927,7 @@ int main (int argc, char *argv[])
                         PD_COMID1,						/* ComID to send */
                         0,								/* local consist only */
                         subnetId1Address,				/* default source IP */
-                        PD_COMID1_DST_IP,				/* where to send to */
+                        PD_COMID1_PUB_DST_IP,				/* where to send to */
                         PD_COMID1_CYCLE,				/* Cycle time in ms */
                         0,								/* not redundant */
                         TRDP_FLAGS_NONE,				/* Don't use callback for errors */
@@ -901,6 +940,7 @@ int main (int argc, char *argv[])
     {
         printf("prep Sub-network Id1 pd publish error\n");
         tlc_terminate();
+        trdp_ladder_terminate();
         return 1;
     }
 
@@ -910,7 +950,7 @@ int main (int argc, char *argv[])
                         PD_COMID2,						/* ComID to send */
                         0,								/* local consist only */
                         subnetId1Address,				/* default source IP */
-                        PD_COMID2_DST_IP,				/* where to send to */
+                        PD_COMID2_PUB_DST_IP,				/* where to send to */
                         PD_COMID2_CYCLE,				/* Cycle time in ms */
                         0,								/* not redundant */
                         TRDP_FLAGS_NONE,				/* Don't use callback for errors */
@@ -923,6 +963,7 @@ int main (int argc, char *argv[])
     {
         printf("prep Sub-network Id1 pd publish error\n");
         tlc_terminate();
+        trdp_ladder_terminate();
         return 1;
     }
 
@@ -935,7 +976,7 @@ int main (int argc, char *argv[])
 							PD_COMID1,					/* ComID to send */
 							0,							/* local consist only */
 							subnetId2Address,			/* default source IP */
-							PD_COMID1_DST_IP,			/* where to send to */
+							PD_COMID1_PUB_DST_IP2,			/* where to send to */
 							PD_COMID1_CYCLE,			/* Cycle time in ms */
 							0,							/* not redundant */
 							TRDP_FLAGS_NONE,			/* Don't use callback for errors */
@@ -949,6 +990,7 @@ int main (int argc, char *argv[])
 		{
 			printf("prep Sub-network Id2 pd publish error\n");
 			tlc_terminate();
+			trdp_ladder_terminate();
 			return 1;
 		}
 
@@ -958,7 +1000,7 @@ int main (int argc, char *argv[])
 							PD_COMID2,					/* ComID to send */
 							0,							/* local consist only */
 							subnetId2Address,			/* default source IP */
-							PD_COMID2_DST_IP,			/* where to send to */
+							PD_COMID2_PUB_DST_IP2,			/* where to send to */
 							PD_COMID2_CYCLE,			/* Cycle time in ms */
 							0,							/* not redundant */
 							TRDP_FLAGS_NONE,			/* Don't use callback for errors */
@@ -971,6 +1013,7 @@ int main (int argc, char *argv[])
 		{
 			printf("prep Sub-network Id2 pd publish error\n");
 			tlc_terminate();
+			trdp_ladder_terminate();
 			return 1;
 		}
 	}
@@ -1003,7 +1046,7 @@ vos_threadDelay(publisherAppCycle);
         Enter the main processing loop.
      */
     while (1)
-//DEBUG    for(i=0; i>=1; i++)
+/*DEBUG    for(i=0; i>=1; i++) */
     {
       	/* Get access right to Traffic Store*/
     	err = tlp_lockTrafficStore();
@@ -1279,6 +1322,7 @@ vos_threadDelay(publisherAppCycle);
 		tlp_unsubscribe(appHandle2, subHandleNet2ComId1);
 	}
     tlc_terminate();
+    trdp_ladder_terminate();
 
     tlp_unpublish(appHandle, pubHandleNet1ComId2);
     tlp_unsubscribe(appHandle, subHandleNet1ComId2);

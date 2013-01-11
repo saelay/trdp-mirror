@@ -207,9 +207,11 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
         if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) == -1)
         {
-            memset(pMAC, 0, sizeof(mac));
+/*
+          	memset(pMAC, 0, sizeof(mac));
             vos_printf(VOS_LOG_ERROR, "socket() failed\n");
             return VOS_SOCK_ERR;
+*/
         }
 
         /* get the MAC address; we will construct our UUID from this (if UUID generation is not supported) */
@@ -1034,55 +1036,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         return VOS_NO_ERR;
     }
 }
-
-#ifdef TRDP_OPTION_LADDER
-/**********************************************************************************************************************/
-/** Get interface address
- *
- *  @param[in,out]  pIfa_list       pointer to pointer to the I/F all list
- *
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
- *  @retval         VOS_IO_ERR      data could not be read
-  */
-
-EXT_DECL VOS_ERR_T vos_getIfAddrs (
-    struct ifaddrs * *ppIfa_list)
-{
-
-    if (ppIfa_list == NULL)
-    {
-        return VOS_PARAM_ERR;
-    }
-    if (getifaddrs(ppIfa_list) != 0)
-    {
-        vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
-        return VOS_SOCK_ERR;
-    }
-    return VOS_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/** Clear interface address memory area
- *
- *  @param[in,out]  pIfa_list       pointer to the I/F all list
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
-  */
-
-EXT_DECL VOS_ERR_T vos_freeIfAddrs (
-    struct ifaddrs *pIfa_list)
-{
-    if (pIfa_list == NULL)
-    {
-        return VOS_PARAM_ERR;
-    }
-
-    freeifaddrs(pIfa_list);
-    return VOS_NO_ERR;
-}
-
-#endif /* TRDP_OPTION_LADDER */
 
 /**********************************************************************************************************************/
 /** Set Using Multicast I/F

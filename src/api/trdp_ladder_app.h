@@ -48,7 +48,7 @@ extern "C" {
 #define PD_COMID1_DATA_SIZE		32
 
 /* We use static memory	*/
-#define RESERVED_MEMORY  10000
+#define RESERVED_MEMORY  1024 * 1024
 
 /* Convert into IP address from number */
 #define TRDP_IP4_ADDR(a,b,c,d) ( (am_big_endian()) ? \

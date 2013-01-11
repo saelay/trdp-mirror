@@ -283,7 +283,7 @@ EXT_DECL void vos_memDelete (
 {
     if ((pMemoryArea == NULL) || (pMemoryArea != gMem.pArea))
     {
-        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/üarameter\n");
+        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/’[arameter\n");
     }
     else
     {
@@ -597,102 +597,6 @@ EXT_DECL void vos_qsort (
     qsort(pBuf, num, size, compare);
 }
 
-#ifdef TRDP_OPTION_LADDER
-/**********************************************************************************************************************/
-/*    Shared memory
-                                                                                                               */
-/**********************************************************************************************************************/
-
-/**********************************************************************************************************************/
-/** Create a shared memory area or attach to existing one.
- *  The first call with the a specified key will create a shared memory area with the supplied size and will return
- *  a handle and a pointer to that area. If the area already exists, the area will be attached.
- *    This function is not available in each target implementation.
- *
- *  @param[in]      pKey               Unique identifier (file name)
- *  @param[out]     pHandle            Pointer to returned handle
- *  @param[out]     ppMemoryArea       Pointer to pointer to memory area
- *  @param[in,out]  pSize              Pointer to size of area to allocate, on return actual size after attach
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_MEM_ERR        no memory available
- */
-EXT_DECL VOS_ERR_T vos_sharedOpen (
-    const CHAR8 *pKey,
-    VOS_SHRD_T  *pHandle,
-    UINT8       * *ppMemoryArea,
-    UINT32      *pSize)
-{
-    VOS_ERR_T ret = VOS_MEM_ERR;
-    mode_t PERMISSION = 0666;                /* Shared Memory permission is rw-rw-rw- */
-    static INT32 fd;                        /* Shared Memory file descriptor */
-    struct    stat sharedMemoryStat;            /* Shared Memory Stat */
-
-    /* Shared Memory Open */
-    fd = shm_open(pKey, O_CREAT | O_RDWR, PERMISSION);
-    if (fd == -1)
-    {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory Create failed\n");
-        return ret;
-    }
-    /* Shared Memory acquire */
-    if (ftruncate(fd, (__off_t )*pSize) == -1)
-    {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory Acquire failed\n");
-        return ret;
-    }
-    /* Get Shared Memory Stats */
-    fstat(fd, &sharedMemoryStat);
-    if (sharedMemoryStat.st_size != (__off_t )*pSize)
-    {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory Size failed\n");
-        return ret;
-    }
-
-    /* Mapping Shared Memory */
-    *ppMemoryArea = mmap(NULL, sharedMemoryStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (*ppMemoryArea == MAP_FAILED)
-    {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory memory-mapping failed\n");
-        return ret;
-    }
-    /* Initialize Shared Memory */
-    memset(*ppMemoryArea, 0, sharedMemoryStat.st_size);
-    /* Handle */
-    (*pHandle)->fd = fd;
-
-    ret = VOS_NO_ERR;
-    return ret;
-}
-
-/**********************************************************************************************************************/
-/** Close connection to the shared memory area.
- *  If the area was created by the calling process, the area will be closed (freed). If the area was attached,
- *  it will be detached.
- *    This function is not available in each target implementation.
- *
- *  @param[in]      handle             Returned handle
- *  @param[in]      pMemoryArea        Pointer to memory area
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_MEM_ERR        no memory available
- */
-
-EXT_DECL VOS_ERR_T vos_sharedClose (
-    VOS_SHRD_T  handle,
-    const UINT8 *pMemoryArea)
-{
-    if (close(handle->fd) == -1)
-    {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory file close failed\n");
-        return VOS_MEM_ERR;
-    }
-    if (shm_unlink(handle->semaphoreName) == -1)
-    {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory unLink failed\n");
-        return VOS_MEM_ERR;
-    }
-    return VOS_NO_ERR;
-}
-#endif /* TRDP_OPTION_LADDER */
 
 /**********************************************************************************************************************/
 /** Binary search in a sorted array.

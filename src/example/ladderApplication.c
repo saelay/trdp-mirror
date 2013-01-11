@@ -12,7 +12,7 @@
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2012.
+ *          Copyright TOSHIBA, Japan, 2013.
  *
  */
 #ifdef TRDP_OPTION_LADDER
@@ -25,12 +25,14 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
+#include <errno.h>
 
 #include "vos_utils.h"
 #include "vos_thread.h"
 #include "vos_sock.h"
 #include "trdp_pdcom.h"
 #include "trdp_if_light.h"
+#include "trdp_ladder.h"
 #include "trdp_ladder_app.h"
 
 /***********************************************************************************************************************
@@ -96,8 +98,6 @@ UINT8   firstPutData[PD_DATA_SIZE_MAX] = "First Put";
 #define PD_COMID1_CYCLE         30000000			/* ComID1 Publish Cycle TIme */
 #define PD_COMID2_CYCLE         30000000			/* ComID2 Publish Cycle TIme */
 
-/* We use static memory	*/
-#define RESERVED_MEMORY  10000
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -149,7 +149,7 @@ int main (void)
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
 
 	/* Get I/F address */
-	if (vos_getIfAddrs(&ifa_list) != VOS_NO_ERR)
+	if (getifaddrs(&ifa_list) != 0)
 	{
     	printf("getifaddrs error. errno=%d\n", errno);
        return 1;
@@ -168,9 +168,8 @@ int main (void)
 			}
 		}
 	}
-
 	/* Release memory */
-	vos_freeIfAddrs(ifa_list);
+	freeifaddrs(ifa_list);
 
 	/* Sub-net Id2 Address */
 	subnetId2Address = subnetId1Address | SUBNET2_NETMASK;
@@ -196,7 +195,14 @@ int main (void)
 		return 1;
 	}
 
-	/*	Sub-network Id2 Open a session for callback operation	(PD only) */
+	/* TRDP Ladder support initialize */
+	if (trdp_ladder_init() != TRDP_NO_ERR)
+	{
+		printf("TRDP Ladder Support Initialize failed\n");
+		return 1;
+	}
+
+        /*	Sub-network Id2 Open a session for callback operation	(PD only) */
 	if (tlc_openSession(&appHandle2,
 							subnetId2Address, subnetId2Address,	    /* Sub-net Id2 IP address/interface	*/
 							NULL,				                   	/* no Marshalling		*/
@@ -226,8 +232,12 @@ int main (void)
     {
         printf("prep  Sub-network Id1 pd receive error\n");
         tlc_terminate();
+        trdp_ladder_terminate();
         return 1;
     }
+
+    /* Start PdComLadderThread */
+    trdp_setPdComLadderThreadStartFlag(TRUE);
 
     /*	Sub-network Id2 Subscribe */
     err = tlp_subscribe( appHandle2,				/* our application identifier */
@@ -246,6 +256,7 @@ int main (void)
     {
         printf("prep  Sub-network Id2 pd receive error\n");
         tlc_terminate();
+        trdp_ladder_terminate();
         return 1;
     }
 
@@ -269,6 +280,7 @@ int main (void)
     {
         printf("prep Sub-network Id1 pd publish error\n");
         tlc_terminate();
+        trdp_ladder_terminate();
         return 1;
     }
 
@@ -292,6 +304,7 @@ int main (void)
     {
         printf("prep Sub-network Id2 pd publish error\n");
         tlc_terminate();
+        trdp_ladder_terminate();
         return 1;
     }
 
@@ -354,6 +367,7 @@ int main (void)
     tlp_unsubscribe(appHandle, subHandleNet1ComId1);
 
     tlc_terminate();
+    trdp_ladder_terminate();
 
     tlp_unpublish(appHandle2, pubHandleNet2ComId1);
     tlp_unsubscribe(appHandle2, subHandleNet2ComId1);
