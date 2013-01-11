@@ -34,10 +34,6 @@
 #include <sys/select.h>
 #endif
 
-#ifdef TRDP_OPTION_LADDER
-#include <ifaddrs.h>
-#endif /* TRDP_OPTION_LADDER */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -438,32 +434,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     UINT8   *pBuffer,
     UINT32  *pSize
     );
-
-#ifdef TRDP_OPTION_LADDER
-/**********************************************************************************************************************/
-/** Get interface addrress
- *
- *  @param[in,out]  pIfa_list        pointer to the I/F all list
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_PARAM_ERR    sock descriptor unknown, parameter error
- *  @retval         VOS_IO_ERR        data could not be read
-  */
-
-EXT_DECL VOS_ERR_T vos_getIfAddrs (
-    struct ifaddrs * *ppIfa_list);
-
-/**********************************************************************************************************************/
-/** Clear interface address memory area
- *
- *  @param[in,out]  pIfa_list        pointer to the I/F all list
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_PARAM_ERR    sock descriptor unknown, parameter error
-  */
-
-EXT_DECL VOS_ERR_T vos_freeIfAddrs (
-    struct ifaddrs *pIfa_list);
-
-#endif /* TRDP_OPTION_LADDER */
 
 /**********************************************************************************************************************/
 /** Set Using Multicast I/F

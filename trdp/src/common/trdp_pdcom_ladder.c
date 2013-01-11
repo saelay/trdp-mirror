@@ -12,7 +12,7 @@
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2012.
+ *          Copyright TOSHIBA, Japan, 2013.
  *
  *
  */
@@ -37,7 +37,7 @@
 /**********************************************************************************************************************/
 /** callback function PD receive
  *
- *  @param[in]		pRefCon			user supplied context pointer (offsetAddress)
+ *  @param[in]		pRefCon			user supplied context pointer
  *  @param[in]		pPDInfo			pointer to PDInformation
  *  @param[in]		pData			pointer to receive PD Data
  *  @param[in]		dataSize        receive PD Data Size
@@ -54,7 +54,8 @@ void tlp_recvPdDs (
 	extern UINT8 *pTrafficStoreAddr;			/* pointer to pointer to Traffic Store Address */
 
 	/* check parameter */
-	if ((pRefCon == NULL) || (pData == NULL) || (dataSize == 0))
+/*	if ((pRefCon == NULL) || (pData == NULL) || (dataSize == 0)) */
+	if ((pData == NULL) || (dataSize == 0))
 	{
        vos_printf(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
 		return;
@@ -67,7 +68,8 @@ void tlp_recvPdDs (
 	if ((pPDInfo->srcIpAddr & SUBNET2_NETMASK) == subnetId)
 	{
 		/* Set received PD Data in Traffic Store */
-		memcpy(&offset, pRefCon, sizeof(offset));
+/*		memcpy(&offset, pRefCon, sizeof(offset)); */
+		memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
 		memcpy((void *)((int)pTrafficStoreAddr + (int)offset), pData, dataSize);
 	}
 	tlp_unlockTrafficStore();
