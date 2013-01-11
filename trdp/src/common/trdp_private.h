@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.1.0"
+#define LIB_VERSION  "0.0.1.1"
 
 #ifndef TRDP_PD_UDP_PORT
 #define TRDP_PD_UDP_PORT                20548       /**< process data UDP port          */
@@ -215,6 +215,7 @@ typedef struct PD_ELE
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                    */
     TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                     */
     TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip   */
+    UINT32              redId;                  /**< Redundancy group ID or zero                        */
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter         */
     UINT32              numRxTx;                /**< Counter for received packets (statistics)          */
     UINT32              updPkts;                /**< Counter for updated packets (statistics)           */
