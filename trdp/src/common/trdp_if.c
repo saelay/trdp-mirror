@@ -324,6 +324,10 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     if (pPdDefault != NULL)
     {
         pSession->pdDefault = *pPdDefault;
+        if (pSession->pdDefault.port == 0)
+    	{
+        	pSession->pdDefault.port = TRDP_PD_UDP_PORT;
+        }
     }
     else
     {
@@ -595,7 +599,7 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
                     /*    Join the MC group again    */
                     ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[iterPD->socketIdx].sock,
                                                       iterPD->addr.mcGroup,
-                                                      0);
+                                                      appHandle->realIP);
                 }
             }
 
@@ -633,21 +637,31 @@ TRDP_ERR_T tlp_setRedundant (
     UINT32              redId,
     BOOL                leader)
 {
-    TRDP_ERR_T ret;
+    TRDP_ERR_T  ret;
+    PD_ELE_T    *iterPD;
 
     if (trdp_isValidSession(appHandle))
     {
         ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
         if (ret == TRDP_NO_ERR)
         {
-            /*    TBD! Handle list of redundant comIds    */
+            /*    Handle list of redundant comIds    */
             appHandle->beQuiet  = !leader;
             appHandle->redID    = redId;
 
-            if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+            /*    Set the redundancy flag for every PD with the specified ID */
+            for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
             {
-                vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
-            }
+                if (iterPD->redId == redId)
+                {
+                	if (leader == TRUE)
+                    {
+                        iterPD->pktFlags = TRDP_FLAGS_REDUNDANT;
+                    }
+                    iterPD->pktFlags |= TRDP_FLAGS_REDUNDANT;
+                }
+            }          
+            vos_mutexUnlock(appHandle->mutex);
         }
     }
     else
@@ -915,6 +929,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             pNewElement->pktFlags       = pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
+            pNewElement->redId			= redId;
 
             /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
                 curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
@@ -936,7 +951,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
             }
 
-            if (   (ret == TRDP_NO_ERR)
+            if ((ret == TRDP_NO_ERR)
                 && (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING))
             {
                 ret = trdp_pdDistribute(appHandle->pSndQueue);
@@ -2708,7 +2723,7 @@ TRDP_ERR_T tlm_addListener (
                            Join group
                            Note: disable multicast loop back
                          */
-                        errv = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, 0);
+                        errv = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, appHandle->realIP);
 
                         /* Set multicast flag */
                         pNewElement->privFlags |= TRDP_MC_JOINT;
