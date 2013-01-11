@@ -929,12 +929,14 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
  *  @param[in]      pMutex           mutex handle
  */
 
-EXT_DECL void vos_mutexUnlock (
+EXT_DECL VOS_ERR_T vos_mutexUnlock (
     VOS_MUTEX_T pMutex)
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
+
         vos_printf(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
+        return VOS_PARAM_ERR;
     }
     else
     {
@@ -946,8 +948,10 @@ EXT_DECL void vos_mutexUnlock (
             vos_printf(VOS_LOG_ERROR,
                        "Unable to unlock Mutex (pthread err=%d)\n",
                        err);
+            return VOS_MUTEX_ERR;
         }
     }
+    return VOS_NO_ERR;
 }
 
 
@@ -969,7 +973,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_STATE_T    initialState)
 {
     /*TODO generated method stub */
-    return VOS_NO_ERR;
+    return VOS_SEMA_ERR;
 }
 
 
@@ -1006,7 +1010,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     UINT32      timeout)
 {
     /*TODO generated method stub */
-    return VOS_NO_ERR;
+    return VOS_SEMA_ERR;
 }
 
 
@@ -1018,9 +1022,10 @@ EXT_DECL VOS_ERR_T vos_semaTake (
  *  @param[in]      sema            semaphore handle
  */
 
-EXT_DECL void vos_semaGive (
+EXT_DECL VOS_ERR_T vos_semaGive (
     VOS_SEMA_T sema)
 {
     /*TODO generated method stub */
     ;
+    return VOS_SEMA_ERR;
 }

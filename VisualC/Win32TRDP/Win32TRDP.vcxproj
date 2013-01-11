@@ -110,6 +110,7 @@
     <ClInclude Include="..\..\src\common\trdp_private.h" />
     <ClInclude Include="..\..\src\common\trdp_stats.h" />
     <ClInclude Include="..\..\src\common\trdp_utils.h" />
+    <ClInclude Include="..\..\src\vos\api\vos_shared_mem.h" />
     <ClInclude Include="..\..\src\vos\windows\pthread\pthread.h" />
     <ClInclude Include="..\..\src\vos\windows\vos_private.h" />
     <ClInclude Include="resource.h" />

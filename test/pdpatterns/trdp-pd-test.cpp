@@ -679,13 +679,26 @@ void poll_data()
 }
 
 // --- main --------------------------------------------------------------------
+static FILE *pLogFile;
+
+void printLog(
+    void        *pRefCon,
+    VOS_LOG_T   category,
+    const CHAR8 *pTime,
+    const CHAR8 *pFile,
+    UINT16      line,
+    const CHAR8 *pMsgStr)
+{
+    fprintf(pLogFile, "%s File: %s Line: %d %s\n", category==VOS_LOG_ERROR?"ERR ":(category==VOS_LOG_WARNING?"WARN":(category==VOS_LOG_INFO?"INFO":"DEBG")), pFile, (int) line, pMsgStr);
+}
+
 
 int main(int argc, char * argv[])
 {
     TRDP_ERR_T err;
     unsigned tick = 0;
 
-    printf("TRDP process data test program, version r178\n");
+        printf("TRDP process data test program, version r178\n");
 
     if (argc != 4)
     {
@@ -708,8 +721,10 @@ int main(int argc, char * argv[])
     memset(&memcfg, 0, sizeof(memcfg));
     memset(&proccfg, 0, sizeof(proccfg));
 
+    pLogFile = fopen("TRDPLogFile.txt", "w+");
+
     // initialize TRDP protocol library
-    err = tlc_init(NULL, &memcfg);
+    err = tlc_init(printLog, &memcfg);
     if (err != TRDP_NO_ERR)
     {
         printf("tlc_init() failed, err: %d\n", err);
