@@ -50,20 +50,6 @@ extern "C" {
  */
 
 /** Types to read out the XML configuration    */
-/** Configuration of TRDP main process.
- */
-typedef struct
-{
-    TRDP_LABEL_T    hostName;   /**< Host name */
-    TRDP_LABEL_T    leaderName; /**< Leader name dependant on redundanca concept */
-    TRDP_IP_ADDR    hostIp;     /**< Host IP address */
-    TRDP_IP_ADDR    leaderIp;   /**< Leader IP address dependant on redundancy concept */
-    UINT32          cycleTime;  /**< TRDP main process cycle time in usec */
-    UINT32          priority;   /**< TRDP main process priority */
-    TRDP_OPTION_T   options;    /**< TRDP default options */
-} TRDP_PROCESS_CONFIG_T;
-
-
 typedef struct
 {
     UINT32  smi1;        /**< Safe message identifier - unique for this message at consist level */
@@ -83,7 +69,7 @@ typedef struct
     UINT32              cycle;     /**< dataset identifier */
     UINT32              redundant; /**< N0 = not redundant, >0 redundancy group */
     UINT32              timeout;   /**< Timeout value in us, before considering received process data invalid */
-    TRDP_TO_BEHAVIOR    toBehav;   /**< Behaviour when received process data is invalid/timed out. */
+    TRDP_TO_BEHAVIOR_T  toBehav;   /**< Behaviour when received process data is invalid/timed out. */
     TRDP_FLAGS_T        flags;     /**< TRDP_FLAGS_MARSHALL, TRDP_FLAGS_REDUNDANT */
 } TRDP_PD_PAR_T;
 
@@ -97,6 +83,7 @@ typedef struct
 typedef struct
 {
     UINT32          id;            /**< destination identifier */
+    TRDP_SDT_PAR_T  *pSdtPar;      /**< Pointer to optional SDT Parameters for this connection */
     TRDP_URI_USER_T *pUriUser;     /**< Pointer to URI user part */
     TRDP_URI_HOST_T *pUriHost;     /**< Pointer to URI host parts or IP */
 } TRDP_DEST_T;
@@ -115,14 +102,27 @@ typedef struct
     UINT32          comId;        /**< source filter identifier */
     UINT32          datasetId;    /**< data set identifier */
     UINT32          comParId;     /**< communication parameter id */
-    TRDP_MD_PAR_T   *pMdPar;      /**< Pointer to optional SDT Parameters for this connection */
-    TRDP_PD_PAR_T   *pPdPar;      /**< Pointer to optional SDT Parameters for this connection */
+    TRDP_MD_PAR_T   *pMdPar;      /**< Pointer to MD Parameters for this connection */
+    TRDP_PD_PAR_T   *pPdPar;      /**< Pointer to PD Parameters for this connection */
     UINT32          destCnt;      /**< number of destinations */
-    TRDP_DEST_T     *pDest;       /**< Pointer to a destination handled as list */
+    TRDP_DEST_T     *pDest;       /**< Pointer to array of destination descriptors */
     UINT32          srcCnt;       /**< number of sources */
-    TRDP_SRC_T      *pSrc;        /**< Pointer to a source handled as list */
+    TRDP_SRC_T      *pSrc;        /**< Pointer to array of source descriptors */
 } TRDP_EXCHG_PAR_T;
 
+typedef struct
+{
+    TRDP_LABEL_T    ifName;       /**< interface name   */
+    UINT8           networkId;    /**< used network on the device (1…4)   */
+    TRDP_IP_ADDR_T  hostIp;       /**< host IP address   */
+    TRDP_IP_ADDR_T  leaderIp;     /**< Leader IP address dependant on redundancy concept   */
+} TRDP_IF_CONFIG_T;
+
+typedef struct
+{
+    UINT32            id;         /**< communication parameter identifier */
+    TRDP_SEND_PARAM_T sendParam;  /**< Send parameter (TTL, QoS, retries) */
+} TRDP_COM_PAR_T;
 
 /** Control for debug output format on application level.
  */
@@ -144,10 +144,10 @@ typedef enum
  */
 typedef struct
 {
-    TRDP_DEBUG_OPTION_T option;        /**< Debug printout options for application use  */
+    TRDP_DBG_OPTION_T   option;        /**< Debug printout options for application use  */
     UINT32              maxFileSize;   /**< Maximal file size  */
     TRDP_FILE_NAME_T    fileName;      /**< Debug file name and path */
-}TRDP_DBG_CONFIG_T;
+} TRDP_DBG_CONFIG_T;
 
 
 
@@ -161,21 +161,21 @@ typedef struct
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
-/**    Function to read the TRDP configuration parameters out of the XML configuration file.
+/**	Function to read the TRDP configuration parameters out of the XML configuration file.
  *
  *
- *  @param[in]      pFileName         Path and filename of the xml configuration file
- *  @param[out]     pProcessConfig    TRDP main process configuration
- *  @param[out]     pMemConfig        Memory configuration
- *  @param[out]     pPdConfig         PD default configuration
- *  @param[out]     pMdConfig         MD default configuration
- *  @param[out]     pNumExchgPar      Number of configured telegrams
- *  @param[out]     ppExchgPar        Pointer to array of telegram configurations
+ *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[out]	    pProcessConfig    TRDP main process configuration
+ *  @param[out]	    pMemConfig        Memory configuration
+ *  @param[out]     pDbgConfig        Debug printout configuration for application use
+ *  @param[out]	    pPdConfig         PD default configuration
+ *  @param[out]	    pMdConfig         MD default configuration
  *  @param[out]     pNumComPar        Number of configured com parameters
  *  @param[out]     ppComPar          Pointer to array of com parameters
- *  @param[out]     pDbgPar           Debug printout options for application use
+ *  @param[out]     pNumIfConfig      Number of configured interfaces
+ *  @param[out]     ppIfConfig        Pointer to an array of interface parameter sets
  *
- *  @retval         TRDP_NO_ERR       no error
+ *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -184,36 +184,73 @@ EXT_DECL TRDP_ERR_T tau_readXmlConfig (
     const CHAR8             *pFileName,
     TRDP_PROCESS_CONFIG_T   *pProcessConfig,
     TRDP_MEM_CONFIG_T       *pMemConfig,
+    TRDP_DBG_CONFIG_T       *pDbgConfig,
     TRDP_PD_CONFIG_T        *pPdConfig,
     TRDP_MD_CONFIG_T        *pMdConfig,
-    UINT32                  *pNumExchgPar,
-    TRDP_EXCHG_PAR_T        * *ppExchgPar,
     UINT32                  *pNumComPar,
     TRDP_COM_PAR_T          * *ppComPar,
-    TRDP_DBG_CONFIG_T       *pDbgPar
+    UINT32                  *pNumIfConfig,
+    TRDP_IF_CONFIG_T        * *ppIfConfig
     );
 
-
 /**********************************************************************************************************************/
-/**    Function to read the DataSet configuration out of the XML configuration file.
+/**	Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
  *
  *
- *  @param[in]      pFileName         Path and filename of the xml configuration file
- *  @param[out]     pNumDataset       Pointer to the number of datasets found in the configuration
- *  @param[out]     ppDataset         Pointer to an array of a structures of type TRDP_DATASET_T
+ *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[in]	    pIfName           Interface name
+ *  @param[in]      pPdConfig         PD default configuration
+ *  @param[in]      pMdConfig         MD default configuration
+ *  @param[out]	    pNumExchgPar      Number of configured telegrams
+ *  @param[out]     ppExchgPar        Pointer to array of telegram configurations
  *
- *  @retval         TRDP_NO_ERR       no error
+ *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_MEM_ERR      provided buffer to small
+ *  @retval         TRDP_PARAM_ERR    File not existing
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
+    const CHAR8             *pFileName,
+    const CHAR8             *pIfName,
+    const TRDP_PD_CONFIG_T  *pPdConfig,
+    const TRDP_MD_CONFIG_T  *pMdConfig,
+    UINT32                  *pNumExchgPar,
+    TRDP_EXCHG_PAR_T       **ppExchgPar
+    );
+/**********************************************************************************************************************/
+/**	Function to read the DataSet configuration out of the XML configuration file.
+ *
+ *
+ *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[out]	    pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
+ *  @param[out]	    ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
+ *  @param[out]	    pNumDataset       Pointer to the number of datasets found in the configuration
+ *  @param[out]	    ppapDataset       Pointer to an array of pointers to a structures of type TRDP_DATASET_T
+ *
+ *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
  */
 
 EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
-    const CHAR8     *pFileName,
-    UINT32          *pNumDataset,
-    TRDP_DATASET_T  * *ppDataset);
+    const CHAR8            *pFileName,
+    UINT32                 *pNumComId,
+    TRDP_COMID_DSID_MAP_T **ppComIdDsIdMap,        
+    UINT32                 *pNumDataset,
+    ppapTRDP_DATASET_T      ppapDataset);
 
 
+/**********************************************************************************************************************/
+/**	Free array of telegram configurations allocated by tau_readXmlInterfaceConfig
+ *
+ *  @param[in]      numExchgPar       Number of telegram configurations in the array
+ *  @param[in]      pExchgPar         Pointer to array of telegram configurations
+ *
+ */
+EXT_DECL void tau_freeTelegrams(
+    UINT32                  numExchgPar,
+    TRDP_EXCHG_PAR_T       *pExchgPar);
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,1464 @@
+/******************************************************************************/
+/**
+ * @file            trdp_xml.c
+ *
+ * @brief           Functions for XML file interpretation
+ *
+ * @details
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Tomas Svoboda, UniContorls a.s.
+ *
+ * @remarks All rights reserved. Reproduction, modification, use or disclosure
+ *          to third parties without express authority is forbidden,
+ *          Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *
+ *
+ * $Id: $
+ *
+ */
+
+/*******************************************************************************
+ * INCLUDES
+ */
+
+#include <string.h>
+#include <stdio.h>
+
+#include "trdp_types.h"
+#include "trdp_utils.h"
+#include "tau_xml.h"
+#include "libxml/parser.h"
+#include "libxml/xpath.h"
+
+/*******************************************************************************
+ * DEFINES
+ */
+/*  Define snprintf function for Microsoft Visual Studio compiler */
+#if _MSC_VER
+    #define snprintf _snprintf
+#endif
+
+/*******************************************************************************
+ * TYPEDEFS
+ */
+
+
+/******************************************************************************
+ *   Locals
+ */
+
+/*
+ *  Load and parse provided XML document into DOM tree
+ *  Return pointer to the parsed document and pointer to the root element
+ */
+static TRDP_ERR_T parseXmlDocument (
+    const CHAR8 *pFileName, 
+    xmlDoc     **ppXmlDoc,
+    xmlNodePtr  *ppRootElement
+)
+{
+    /*  Check file name */
+    if (!pFileName || strlen(pFileName) == 0)
+        return TRDP_PARAM_ERR;
+
+    /* Check parameters */
+    if (!ppXmlDoc || !ppRootElement)
+        return TRDP_PARAM_ERR;
+
+    /*  Initialize XML parser library (libxml2), test version   */
+    LIBXML_TEST_VERSION
+
+    /*  Parse XML file  */
+    *ppXmlDoc = xmlReadFile((const char *)pFileName, NULL, 0);
+    
+    /*  Check parsing result    */
+    if (!*ppXmlDoc)
+    { 
+        /*  Get parser error    */
+        xmlError * pError = xmlGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "Read XML config: failed to parsed XML file\n");
+        if (pError)
+            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
+
+        return TRDP_PARAM_ERR;
+    }
+
+    /*  Get root element - device   */
+    *ppRootElement = xmlDocGetRootElement(*ppXmlDoc);
+
+    if (!*ppRootElement)
+        return TRDP_PARAM_ERR;
+
+    return TRDP_NO_ERR;
+}
+
+/*
+ *  Free parsed DOM tree, free the XML parser
+ */
+static void freeXmlDocument (xmlDoc *pXmlDoc)
+{
+    /*  free parsed document    */
+    if (pXmlDoc)
+        xmlFreeDoc(pXmlDoc);
+
+    /* cleanup the parser   */
+    xmlCleanupParser();
+}
+
+/*
+*   Parse TRDP_LABEL from attribute of given XML elemnt.
+*   Parsed value is copied into provided lable.
+*   If XML attribute does not exist, label is not modified.
+*/
+static void parseLABEL(xmlNodePtr pXmlElem, const char * pAttrName, TRDP_LABEL_T label)
+{
+    xmlChar     *pAttr;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName || !label)
+        return;
+
+    /*  Get attribute   */
+    pAttr = xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+
+    /*  Copy the value of the attribute */
+    if (pAttr)
+    {
+        strncpy(label, (const char *)pAttr, sizeof(TRDP_LABEL_T));
+        xmlFree(pAttr);
+    }
+}
+
+/*
+* Parse UINT32 value from xml attribute into supplied variable.
+* When attribute does not exist, value variable is not modified.
+*/
+static void parseUINT32(xmlNodePtr pXmlElem, const char * pAttrName, UINT32 * pValue)
+{
+    xmlChar     *pAttr;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName || !pValue)
+        return;
+
+    /*  Get attribute   */
+    pAttr = xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+
+    /*  Parse the value */
+    if (pAttr)
+    {
+        *pValue = (UINT32)strtoul((const char *)pAttr, NULL, 10);
+        xmlFree(pAttr);
+    }
+}
+
+/*
+* Parse UINT16 value from xml attribute into supplied variable.
+* When attribute does not exist, value variable is not modified.
+*/
+static void parseUINT16(xmlNodePtr pXmlElem, const char * pAttrName, UINT16 * pValue)
+{
+    xmlChar     *pAttr;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName || !pValue)
+        return;
+
+    /*  Get attribute   */
+    pAttr = xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+
+    /*  Parse the value */
+    if (pAttr)
+    {
+        *pValue = (UINT16)strtoul((const char *)pAttr, NULL, 10);
+        xmlFree(pAttr);
+    }
+}
+
+/*
+* Parse UINT8 value from xml attribute into supplied variable.
+* When attribute does not exist, value variable is not modified.
+*/
+static void parseUINT8(xmlNodePtr pXmlElem, const char * pAttrName, UINT8 * pValue)
+{
+    xmlChar     *pAttr;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName || !pValue)
+        return;
+
+    /*  Get attribute   */
+    pAttr = xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+
+    /*  Parse the value */
+    if (pAttr)
+    {
+        *pValue = (UINT8)strtoul((const char *)pAttr, NULL, 10);
+        xmlFree(pAttr);
+    }
+}
+
+/*
+* Parse IP ADDRESS value from xml attribute into supplied variable.
+* When attribute does not exist, value variable is not modified.
+*/
+static void parseIPADDR(xmlNodePtr pXmlElem, const char * pAttrName, UINT32 * pValue)
+{
+    xmlChar     *pAttr;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName || !pValue)
+        return;
+
+    /*  Get attribute   */
+    pAttr = xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+
+    /*  Parse the value */
+    if (pAttr)
+    {
+        *pValue = vos_dottedIP((const CHAR8 *)pAttr);
+        xmlFree(pAttr);
+    }
+}
+
+/*
+* Checks if value of given attribute equals to supplied value, ignore case.
+* Returns true if values are equal, false otherwise.
+*/
+static BOOL checkAttrValue(xmlNodePtr pXmlElem, const char * pAttrName, const char * pValue)
+{
+    xmlChar     *pAttr;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName || !pValue)
+        return FALSE;
+
+    /*  Get attribute   */
+    pAttr = xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+
+    /*  Compare the value */
+    if (pAttr)
+    {
+        if (!xmlStrcasecmp(pAttr, BAD_CAST pValue))
+            return TRUE;
+        xmlFree(pAttr);
+    }
+
+    return FALSE;
+}
+
+/*
+ * Parse user and host part of the URI from given atribute in XML configuration. Syntax is [[user@]host].
+ * URI parts are allocated dynamically (only if present in XML). 
+ * Pointers to allocated URIs are returned.
+ */
+static void parseURI(xmlNodePtr pXmlElem, const char * pAttrName, TRDP_URI_USER_T **ppUriUser, TRDP_URI_HOST_T **ppUriHost)
+{
+    char        *pAttr;
+    char        *pDelimiter;
+
+    /*  Set empty */
+    if (ppUriUser)
+        *ppUriUser = NULL;
+    if (ppUriHost)
+        *ppUriHost = NULL;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName)
+        return;
+
+    /*  Get attribute   */
+    pAttr = (char *)xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+    if (!pAttr)
+        return;
+
+    /*  Get pointer to @ character    */
+    pDelimiter = strchr(pAttr, '@');
+    
+    /*  Create host part of the URI */
+    if (ppUriHost)
+    {
+        *ppUriHost = (TRDP_URI_HOST_T *) malloc(sizeof(TRDP_URI_HOST_T));
+        if (pDelimiter)
+            strncpy((char *)*ppUriHost, pDelimiter+1, sizeof(TRDP_URI_HOST_T));
+        else
+            strncpy((char *)*ppUriHost, pAttr, sizeof(TRDP_URI_HOST_T));
+    }
+    /*  Create user part of the URI */
+    if (ppUriUser && pDelimiter && (pDelimiter > pAttr))
+    {
+        UINT32 size = (UINT32)(pDelimiter - pAttr);
+        *ppUriUser = (TRDP_URI_USER_T *) malloc(sizeof(TRDP_URI_USER_T));
+        memset(*ppUriUser, 0, sizeof(TRDP_URI_USER_T));
+        memcpy(*ppUriUser, pAttr, size < sizeof(TRDP_URI_USER_T) ? size : sizeof(TRDP_URI_USER_T));
+    }
+    xmlFree(pAttr);
+}
+
+/*
+ * Parse type of dataset element.
+ * Type may be specified either as string or number.
+ */
+static void parseDSElemType(xmlNodePtr pXmlElem, const char * pAttrName, UINT32 * pElemType)
+{
+    xmlChar    *pAttr;
+    UINT32      tmpType;
+
+    /*  Check for valid parameters  */
+    if (!pXmlElem || !pAttrName || !pElemType)
+        return;
+
+    *pElemType = 0;
+
+    /*  Get attribute   */
+    pAttr = xmlGetProp(pXmlElem, BAD_CAST pAttrName);
+    if (!pAttr)
+        return;
+
+    /* Try to convert numerical value first */
+    tmpType = strtoul((const char *)pAttr, NULL, 10);
+    if (tmpType > 0)
+        *pElemType = tmpType;
+    /*  Try to convert string data type name    */
+    else if (!xmlStrcmp(pAttr, BAD_CAST "BOOLEAN"))
+        *pElemType = TRDP_BOOLEAN;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "CHAR8"))
+        *pElemType = TRDP_CHAR8;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "UTF16"))
+        *pElemType = TRDP_UTF16;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "INT8"))
+        *pElemType = TRDP_INT8;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "INT16"))
+        *pElemType = TRDP_INT16;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "INT32"))
+        *pElemType = TRDP_INT32;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "INT64"))
+        *pElemType = TRDP_INT64;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "UINT8"))
+        *pElemType = TRDP_UINT8;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "UINT16"))
+        *pElemType = TRDP_UINT16;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "UINT32"))
+        *pElemType = TRDP_UINT32;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "UINT64"))
+        *pElemType = TRDP_UINT64;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "REAL32"))
+        *pElemType = TRDP_REAL32;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "REAL64"))
+        *pElemType = TRDP_REAL64;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "TIMEDATE32"))
+        *pElemType = TRDP_TIMEDATE32;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "TIMEDATE48"))
+        *pElemType = TRDP_TIMEDATE48;
+    else if (!xmlStrcmp(pAttr, BAD_CAST "TIMEDATE64"))
+        *pElemType = TRDP_TIMEDATE64;
+
+    xmlFree(pAttr);
+}
+
+
+/*
+* Set default values to all supplied structures
+*/
+static void setDefaultValues(
+    TRDP_PROCESS_CONFIG_T   *pProcessConfig,
+    TRDP_MEM_CONFIG_T       *pMemConfig,
+    TRDP_DBG_CONFIG_T       *pDbgConfig,
+    TRDP_PD_CONFIG_T        *pPdConfig,
+    TRDP_MD_CONFIG_T        *pMdConfig,
+    UINT32                  *pNumComPar,
+    TRDP_COM_PAR_T          * *ppComPar,
+    UINT32                  *pNumIfConfig,
+    TRDP_IF_CONFIG_T        * *ppIfConfig
+    )
+{
+    /*  Process configuration   */
+    if (pProcessConfig)
+    {
+        memset(pProcessConfig->hostName, 0, sizeof(TRDP_LABEL_T));
+        memset(pProcessConfig->leaderName, 0, sizeof(TRDP_LABEL_T));
+        pProcessConfig->cycleTime   = TRDP_PROCESS_DEFAULT_CYCLE_TIME;
+        pProcessConfig->options     = TRDP_PROCESS_DEFAULT_OPTIONS;
+        pProcessConfig->priority    = TRDP_PROCESS_DEFAULT_PRIORITY;
+    }
+
+    /*  Memory configuration    */
+    if (pMemConfig)
+    {
+        UINT32  defaultPrealloc[VOS_MEM_NBLOCKSIZES] = VOS_MEM_PREALLOCATE;
+        pMemConfig->size    = 0;
+        pMemConfig->p       = NULL;
+        memcpy (pMemConfig->prealloc, defaultPrealloc, sizeof(defaultPrealloc));
+    }
+    /*  Default debug parameters*/
+    if (pDbgConfig)
+    {
+        memset(pDbgConfig->fileName, 0, sizeof(TRDP_FILE_NAME_T));
+        pDbgConfig->maxFileSize= TRDP_DEBUG_DEFAULT_FILE_SIZE;
+        pDbgConfig->option     = TRDP_DBG_ERR;
+    }
+
+    /*  Default Pd configuration    */
+    if (pPdConfig)
+    {
+        pPdConfig->pfCbFunction     = NULL;
+        pPdConfig->pRefCon          = NULL;
+        pPdConfig->flags            = TRDP_FLAGS_NONE;
+        pPdConfig->port             = TRDP_PD_UDP_PORT;
+        pPdConfig->sendParam.qos    = TRDP_PD_DEFAULT_QOS;
+        pPdConfig->sendParam.ttl    = TRDP_PD_DEFAULT_TTL;
+        pPdConfig->sendParam.retries= 0;
+        pPdConfig->timeout          = TRDP_PD_DEFAULT_TIMEOUT;
+        pPdConfig->toBehavior       = TRDP_TO_SET_TO_ZERO;
+    }
+
+    /*  Default Md configuration    */
+    if (pMdConfig)
+    {
+        pMdConfig->pfCbFunction     = NULL;
+        pMdConfig->pRefCon          = NULL;
+        pMdConfig->confirmTimeout   = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+        pMdConfig->connectTimeout   = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+        pMdConfig->flags            = TRDP_FLAGS_NONE; 
+        pMdConfig->replyTimeout     = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+        pMdConfig->sendParam.qos    = TRDP_MD_DEFAULT_QOS;
+        pMdConfig->sendParam.retries= TRDP_MD_DEFAULT_RETRIES;
+        pMdConfig->sendParam.ttl    = TRDP_MD_DEFAULT_TTL;
+        pMdConfig->tcpPort          = TRDP_MD_TCP_PORT;
+        pMdConfig->udpPort          = TRDP_MD_UDP_PORT;
+    }
+
+    /*  No Communication parameters*/
+    if (pNumComPar)
+        *pNumComPar = 0;
+    if (ppComPar)
+        *ppComPar = NULL;
+
+    /*  No Interface configurations*/
+    if (pNumIfConfig)
+        *pNumIfConfig = 0;
+    if (ppIfConfig)
+        *ppIfConfig = NULL;
+}
+
+/*
+*   Parse configuration of preallocated memory blocks
+*/
+static void parseMemBlockList(xmlNodePtr pMemBlockListElem, TRDP_MEM_CONFIG_T *pMemConfig)
+{
+    UINT32      blockSizes[VOS_MEM_NBLOCKSIZES] = VOS_MEM_BLOCKSIZES;
+    xmlNodePtr  pMemBlockElem;
+    UINT32      size;
+    UINT32      i;
+
+    if (!pMemConfig)
+        return;
+
+    /*  Clear the array of preallocated block sizes */
+    memset(pMemConfig->prealloc, 0, sizeof(UINT32) * VOS_MEM_NBLOCKSIZES);
+
+    /*  Iterate over all defined memory blocks  */
+	pMemBlockElem = xmlFirstElementChild(pMemBlockListElem);
+	while (pMemBlockElem != NULL) 
+    {
+        /*  Parse size of the block */
+        size = 0;
+        parseUINT32(pMemBlockElem, "size", &size);
+        if (size)
+        {
+            /*  Find memory block with corresponding size   */
+            for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+                if (blockSizes[i] == size)
+                {
+                    /*  Found the block, set number of preallocated blocks  */
+                    pMemConfig->prealloc[i] = 0;
+                    parseUINT32(pMemBlockElem, "preallocate", &pMemConfig->prealloc[i]);
+                }
+        }
+		 
+    	pMemBlockElem = xmlNextElementSibling(pMemBlockElem);
+	}
+}
+
+/*
+*   Parse TRDP process configuration
+*/
+static void parseProcessConfig(xmlNodePtr pProcCfgElem, TRDP_PROCESS_CONFIG_T *pProcessConfig)
+{
+    if (!pProcessConfig)
+        return;
+
+    /*  Parse attribute values  */
+    parseUINT32(pProcCfgElem, "cycle-time", &pProcessConfig->cycleTime);
+    parseUINT32(pProcCfgElem, "priority", &pProcessConfig->priority);
+    if (checkAttrValue(pProcCfgElem, "blocking", "yes"))
+        pProcessConfig->options |= TRDP_OPTION_BLOCK;
+    if (checkAttrValue(pProcCfgElem, "traffic-shaping", "off"))
+        pProcessConfig->options &= ~TRDP_OPTION_TRAFFIC_SHAPING;
+}
+
+/*
+*   Parse default PD communication parameters
+*/
+static void parsePDDefaultParams(xmlNodePtr pPDParElem, TRDP_PD_CONFIG_T *pPdConfig)
+{
+    if (!pPdConfig)
+        return;
+
+    /*  Parse attribute values  */
+    parseUINT32(pPDParElem, "timeout-value", &pPdConfig->timeout);
+    if (checkAttrValue(pPDParElem, "validity-behavior", "keep"))
+        pPdConfig->toBehavior = TRDP_TO_KEEP_LAST_VALUE;
+    parseUINT8(pPDParElem, "ttl", &pPdConfig->sendParam.ttl);
+    parseUINT8(pPDParElem, "qos", &pPdConfig->sendParam.qos);
+    if (checkAttrValue(pPDParElem, "marshall", "on"))
+        pPdConfig->flags |= TRDP_FLAGS_MARSHALL;
+    parseUINT16(pPDParElem, "port", &pPdConfig->port);
+}
+
+/*
+*   Parse default MD communication parameters
+*/
+static void parseMDDefaultParams(xmlNodePtr pMDParElem, TRDP_MD_CONFIG_T *pMdConfig)
+{
+    if (!pMdConfig)
+        return;
+
+    /*  Parse attribute values  */
+    parseUINT32(pMDParElem, "confirm-timeout", &pMdConfig->confirmTimeout);
+    parseUINT32(pMDParElem, "reply-timeout", &pMdConfig->replyTimeout);
+    parseUINT32(pMDParElem, "connect-timeout", &pMdConfig->connectTimeout);
+    parseUINT8(pMDParElem, "ttl", &pMdConfig->sendParam.ttl);
+    parseUINT8(pMDParElem, "qos", &pMdConfig->sendParam.qos);
+    parseUINT8(pMDParElem, "retries", &pMdConfig->sendParam.retries);
+    if (checkAttrValue(pMDParElem, "protocol", "TCP"))
+        pMdConfig->flags |= TRDP_FLAGS_TCP;
+    if (checkAttrValue(pMDParElem, "marshall", "on"))
+        pMdConfig->flags |= TRDP_FLAGS_MARSHALL;
+    parseUINT16(pMDParElem, "udp-port", &pMdConfig->udpPort);
+    parseUINT16(pMDParElem, "tcp-port", &pMdConfig->tcpPort);
+}
+
+/*
+*   Parse content of the device-configuration element and all its child elements
+*/
+static void parseDeviceConfiguration(
+    xmlNodePtr               pDevCfgElem, 
+    TRDP_PROCESS_CONFIG_T   *pProcessConfig, 
+    TRDP_MEM_CONFIG_T       *pMemConfig, 
+    TRDP_PD_CONFIG_T        *pPdConfig,
+    TRDP_MD_CONFIG_T        *pMdConfig
+    )
+{
+    xmlNodePtr   pChildElement;
+
+    /*  Get total TRDP memory size  */
+    if (pMemConfig)
+        parseUINT32(pDevCfgElem, "memory-size", &pMemConfig->size);
+    
+    /*  Iterate over all child elements, call parser functions  */
+	pChildElement = xmlFirstElementChild(pDevCfgElem);
+	while (pChildElement != NULL) 
+    {
+        /*  Memory blocks configuration  */
+        if ((!xmlStrcmp(pChildElement->name, BAD_CAST "mem-block-list")))
+			parseMemBlockList(pChildElement, pMemConfig);
+        /*  TRDP process configuration  */
+		else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "trdp-process")))
+			parseProcessConfig(pChildElement, pProcessConfig);
+        /*  PD default communication parameters  */
+		else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "pd-com-parameter")))
+			parsePDDefaultParams(pChildElement, pPdConfig);
+        /*  MD default communication parameters  */
+		else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "md-com-parameter")))
+            parseMDDefaultParams(pChildElement, pMdConfig);
+
+        pChildElement = xmlNextElementSibling(pChildElement);
+	}
+}
+
+/*
+*   Parse content of the debug element
+*/
+static void parseDebugConfiguration(
+    xmlNodePtr               pDbgCfgElem, 
+    TRDP_DBG_CONFIG_T       *pDbgConfig
+    )
+{
+    xmlChar     *pAttr;
+
+    if (!pDbgConfig)
+        return;
+
+    /*  Parse attribute values  */
+    parseUINT32(pDbgCfgElem, "file-size", &pDbgConfig->maxFileSize);
+    pAttr = xmlGetProp(pDbgCfgElem, BAD_CAST "file-name");
+    if (pAttr)
+    {
+        strncpy(pDbgConfig->fileName, (const char *)pAttr, sizeof(TRDP_FILE_NAME_T));
+        xmlFree(pAttr);
+    }
+    /*  Debug printout level    */
+    pAttr = xmlGetProp(pDbgCfgElem, BAD_CAST "level");
+    if (pAttr)
+    {
+        if (!xmlStrcasecmp(pAttr, BAD_CAST "") || !xmlStrcasecmp(pAttr, BAD_CAST " "))
+            pDbgConfig->option = TRDP_DBG_OFF;
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "e"))
+            pDbgConfig->option |= TRDP_DBG_ERR;
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "w"))
+            pDbgConfig->option |= TRDP_DBG_WARN;
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "i"))
+            pDbgConfig->option |= TRDP_DBG_INFO;
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "d"))
+            pDbgConfig->option |= TRDP_DBG_DBG;
+        xmlFree(pAttr);
+    }
+    /*  Debug info  */
+    pAttr = xmlGetProp(pDbgCfgElem, BAD_CAST "info");
+    if (pAttr)
+    {
+        if (!xmlStrcasecmp(pAttr, BAD_CAST "") || !xmlStrcasecmp(pAttr, BAD_CAST " "))
+            pDbgConfig->option &= ~(TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT);
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "a"))
+            pDbgConfig->option |= TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT;
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "d") || !xmlStrcasecmp(pAttr, BAD_CAST "t"))
+            pDbgConfig->option |= TRDP_DBG_TIME;
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "f"))
+            pDbgConfig->option |= TRDP_DBG_LOC;
+        else if (!xmlStrcasecmp(pAttr, BAD_CAST "c"))
+            pDbgConfig->option |= TRDP_DBG_CAT;
+        xmlFree(pAttr);
+    }
+}
+    
+/*
+*   Parse list of communication parameters (com-parameter-list)
+*/
+static void parseComParameters(
+    xmlNodePtr               pComParListElem, 
+    UINT32                  *pNumComPar,
+    TRDP_COM_PAR_T         **ppComPar
+    )
+{
+    xmlNodePtr      pChildElement;
+    UINT32          index;
+
+    /*  Check parameters    */
+    if (!pNumComPar || !ppComPar)
+        return;
+
+    /*  Get number of child elements    */
+    *ppComPar = NULL;
+    *pNumComPar = (UINT32) xmlChildElementCount(pComParListElem);
+    if (*pNumComPar == 0)
+        return;
+
+    /*  Allocate array of communication parameters  */
+    *ppComPar = (TRDP_COM_PAR_T *) malloc(sizeof(TRDP_COM_PAR_T) * *pNumComPar);
+
+    /*  Iterate over all child elements (com-parameter), parse their attributes  */
+	pChildElement = xmlFirstElementChild(pComParListElem);
+    index = 0;
+	while (pChildElement != NULL && index < *pNumComPar) 
+    {
+        parseUINT32(pChildElement, "id", &(*ppComPar)[index].id);
+        parseUINT8(pChildElement, "qos", &(*ppComPar)[index].sendParam.qos);
+        (*ppComPar)[index].sendParam.ttl = 64;
+        parseUINT8(pChildElement, "ttl", &(*ppComPar)[index].sendParam.ttl);
+        (*ppComPar)[index].sendParam.retries = 0;
+        parseUINT8(pChildElement, "retries", &(*ppComPar)[index].sendParam.retries);
+
+        pChildElement = xmlNextElementSibling(pChildElement);
+        index++;
+	}
+}
+
+/*
+*   Parse list of bus interfaces (bus-interface-list)
+*/
+static void parseBusInterfaces(
+    xmlNodePtr               pBusInterfaceListElem, 
+    UINT32                  *pNumIfConfig,
+    TRDP_IF_CONFIG_T       **ppIfConfig
+    )
+{
+    xmlNodePtr      pChildElement;
+    UINT32          index;
+
+    /*  Check parameters    */
+    if (!pNumIfConfig || !ppIfConfig)
+        return;
+
+    /*  Get number of child elements    */
+    *ppIfConfig = NULL;
+    *pNumIfConfig = (UINT32) xmlChildElementCount(pBusInterfaceListElem);
+    if (*pNumIfConfig == 0)
+        return;
+
+    /*  Allocate array of interface configurations  */
+    *ppIfConfig = (TRDP_IF_CONFIG_T *) malloc(sizeof(TRDP_IF_CONFIG_T) * (*pNumIfConfig));
+
+    /*  Iterate over all child elements (bus-interface), parse their attributes  */
+	pChildElement = xmlFirstElementChild(pBusInterfaceListElem);
+    index = 0;
+	while (pChildElement != NULL && index < *pNumIfConfig) 
+    {
+        parseUINT8(pChildElement, "network-id", &(*ppIfConfig)[index].networkId);
+        parseLABEL(pChildElement, "name", (*ppIfConfig)[index].ifName);
+        (*ppIfConfig)[index].hostIp = 0;
+        parseIPADDR(pChildElement, "host-ip", &(*ppIfConfig)[index].hostIp);
+        (*ppIfConfig)[index].leaderIp = 0;
+        parseIPADDR(pChildElement, "leader-ip", &(*ppIfConfig)[index].leaderIp);
+
+        pChildElement = xmlNextElementSibling(pChildElement);
+        index++;
+	}
+}
+
+/**********************************************************************************************************************/
+/**	Function to read the TRDP configuration parameters out of the XML configuration file.
+ *
+ *
+ *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[out]	    pProcessConfig    TRDP main process configuration
+ *  @param[out]	    pMemConfig        Memory configuration
+ *  @param[out]     pDbgConfig        Debug printout configuration for application use
+ *  @param[out]	    pPdConfig         PD default configuration
+ *  @param[out]	    pMdConfig         MD default configuration
+ *  @param[out]     pNumComPar        Number of configured com parameters
+ *  @param[out]     ppComPar          Pointer to array of com parameters
+ *  @param[out]     pNumIfConfig      Number of configured interfaces
+ *  @param[out]     ppIfConfig        Pointer to an array of interface parameter sets
+ *
+ *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_MEM_ERR      provided buffer to small
+ *  @retval         TRDP_PARAM_ERR    File not existing
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_readXmlConfig (
+    const CHAR8             *pFileName,
+    TRDP_PROCESS_CONFIG_T   *pProcessConfig,
+    TRDP_MEM_CONFIG_T       *pMemConfig,
+    TRDP_DBG_CONFIG_T       *pDbgConfig,
+    TRDP_PD_CONFIG_T        *pPdConfig,
+    TRDP_MD_CONFIG_T        *pMdConfig,
+    UINT32                  *pNumComPar,
+    TRDP_COM_PAR_T          * *ppComPar,
+    UINT32                  *pNumIfConfig,
+    TRDP_IF_CONFIG_T        * *ppIfConfig
+    )
+{
+    xmlDoc     *pXmlDoc;
+    xmlNodePtr  pRootElement;
+    xmlNodePtr  pChildElement;
+    TRDP_ERR_T  result;       
+
+    /*  Set default values to all parameters    */
+    setDefaultValues(
+        pProcessConfig, pMemConfig, pDbgConfig, pPdConfig, pMdConfig, 
+        pNumComPar, ppComPar, pNumIfConfig, ppIfConfig);
+
+    /* Load the document, parse it into DOM tree    */
+    result = parseXmlDocument(pFileName, &pXmlDoc, &pRootElement);
+    if (result != TRDP_NO_ERR)
+        return result;
+
+    /*  Read host names */
+    if (pProcessConfig)
+    {
+        /*  Read host name attribute    */
+        parseLABEL(pRootElement, "host-name", pProcessConfig->hostName);
+        /*  Read    leader name attribute   */
+        parseLABEL(pRootElement, "leader-name", pProcessConfig->leaderName);
+    }
+
+    /*  Iterate over all child elements, call appropriate parser functions*/
+	pChildElement = xmlFirstElementChild(pRootElement);
+	while (pChildElement != NULL) 
+    {
+		/*  Parse device-configuration element and all children  */
+        if ((!xmlStrcmp(pChildElement->name, BAD_CAST "device-configuration")))
+        {
+			parseDeviceConfiguration(
+                pChildElement, pProcessConfig, pMemConfig, pPdConfig, pMdConfig);
+	    }
+		/*  Parse debug configuration  */
+        else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "debug")))
+        {
+			parseDebugConfiguration(pChildElement, pDbgConfig);
+	    }
+		/*  Parse communication parameters  */
+        else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "com-parameter-list")))
+        {
+			parseComParameters(pChildElement, pNumComPar, ppComPar);
+	    }
+		/*  Parse bus interfaces  */
+        else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "bus-interface-list")))
+        {
+            parseBusInterfaces(pChildElement, pNumIfConfig, ppIfConfig);
+	    }
+
+        pChildElement = xmlNextElementSibling(pChildElement);
+	}
+
+    /*  Free parsed document    */
+    freeXmlDocument(pXmlDoc);
+    
+    return TRDP_NO_ERR;
+}
+
+/*
+ * Parse mapping between ComId and DatasetId from all telegram elements
+ * defined in all bus interfaces
+ */
+static void parseComIdDsIdMap(
+    xmlXPathContextPtr      pXPathCtx,
+    UINT32                 *pNumComId,
+    TRDP_COMID_DSID_MAP_T **ppComIdDsIdMap
+    )
+{
+    xmlXPathObjectPtr   pXPathObj;
+    xmlNodePtr          pTlgElem;
+    int                 index;
+
+    /*  Check parameters    */
+    if (!pNumComId || !ppComIdDsIdMap)
+        return;
+
+    /* Execute XPath expression   */
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST "//telegram", pXPathCtx);
+    if (!pXPathObj)
+        return;
+
+    /*  Check if any telegram elements were found   */
+    if (pXPathObj->nodesetval && pXPathObj->nodesetval->nodeNr)
+    {
+        /*  Allocate array of map structures    */
+        *pNumComId = pXPathObj->nodesetval->nodeNr;
+        *ppComIdDsIdMap = (TRDP_COMID_DSID_MAP_T *) malloc(
+            sizeof(TRDP_COMID_DSID_MAP_T) * (*pNumComId));
+
+        /* Iterate over all found telegram elements */
+        for (index = 0; index < pXPathObj->nodesetval->nodeNr; index++)
+        { 
+            pTlgElem = pXPathObj->nodesetval->nodeTab[index];
+            /*  Check for correct XML node type */
+            if (pTlgElem->type != XML_ELEMENT_NODE)
+                continue;
+            
+            /*  Parse telegram attributes   */
+            parseUINT32(pTlgElem, "com-id", &(*ppComIdDsIdMap)[index].comId);
+            parseUINT32(pTlgElem, "data-set-id", &(*ppComIdDsIdMap)[index].datasetId);
+        }
+    }
+
+    /*  Free XPath result   */
+    xmlXPathFreeObject(pXPathObj);
+}
+
+/*
+ * Parse list of dataset configurations
+ */
+static void parseDatasets(
+    xmlXPathContextPtr      pXPathCtx,
+    UINT32                 *pNumDataset,
+    ppapTRDP_DATASET_T      ppapDataset
+    )
+{
+    xmlXPathObjectPtr       pXPathObj;
+    xmlNodePtr              pDatasetElem;
+    xmlNodePtr              pElementElem;
+    int                     idxDataset;
+    UINT16                  idxElem;
+    UINT16                  numElement;
+    papTRDP_DATASET_T       papDataset;
+    pTRDP_DATASET_T         pDataset;
+
+    /*  Check parameters    */
+    if (!pNumDataset || !ppapDataset)
+        return;
+
+    /*  Set default values  */
+    *pNumDataset = 0;
+    papDataset = NULL;
+    *ppapDataset = NULL;
+
+    /* Execute XPath expression   */
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST "/device/data-set-list/data-set", pXPathCtx);
+
+    if (!pXPathObj)
+        return;
+
+    /*  Check if any data-set elements were found   */
+    if (pXPathObj->nodesetval && pXPathObj->nodesetval->nodeNr)
+    {
+        /*  Allocate array of pointers to dataset structures    */
+        *pNumDataset = pXPathObj->nodesetval->nodeNr;
+        papDataset = (papTRDP_DATASET_T) malloc(
+            sizeof(TRDP_DATASET_T *) * (*pNumDataset));
+        *ppapDataset = papDataset;
+
+        /* Iterate over all found data-set elements */
+        for (idxDataset = 0; idxDataset < pXPathObj->nodesetval->nodeNr; idxDataset++)
+        { 
+            pDatasetElem = pXPathObj->nodesetval->nodeTab[idxDataset];
+            /*  Check for correct XML node type */
+            if (pDatasetElem->type != XML_ELEMENT_NODE)
+                continue;
+
+            /*  Get number of elements in the dataset   */
+            numElement = (UINT16) xmlChildElementCount(pDatasetElem);
+
+            /*  Allocate dataset structure with elements    */
+            pDataset = (TRDP_DATASET_T *)malloc(
+                sizeof(TRDP_DATASET_T) + sizeof(TRDP_DATASET_ELEMENT_T) * numElement);
+            (*papDataset)[idxDataset] = pDataset;
+
+            /*  Parse dataset attributes   */
+            parseUINT32(pDatasetElem, "id", &pDataset->id);
+            pDataset->numElement = numElement;
+
+            /*  Iterate over all dataset elements   */
+            idxElem = 0;
+            pElementElem = xmlFirstElementChild(pDatasetElem);
+    	    while (pElementElem != NULL && idxElem < numElement) 
+            {
+                parseDSElemType(pElementElem, "type", &(pDataset->pElement[idxElem].type));
+                pDataset->pElement[idxElem].size = TDRP_VAR_SIZE;
+                parseUINT32(pElementElem, "array-size", &(pDataset->pElement[idxElem].size));
+
+                pElementElem = xmlNextElementSibling(pElementElem);
+                idxElem++;
+	        }
+        }
+    }
+
+    /*  Free XPath result   */
+    xmlXPathFreeObject(pXPathObj);
+}
+
+
+/**********************************************************************************************************************/
+/**	Function to read the DataSet configuration out of the XML configuration file.
+ *
+ *
+ *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[out]	    pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
+ *  @param[out]	    ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
+ *  @param[out]	    pNumDataset       Pointer to the number of datasets found in the configuration
+ *  @param[out]	    ppapDataset       Pointer to an array of pointers to a structures of type TRDP_DATASET_T
+ *
+ *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_MEM_ERR      provided buffer to small
+ *  @retval         TRDP_PARAM_ERR    File not existing
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
+    const CHAR8            *pFileName,
+    UINT32                 *pNumComId,
+    TRDP_COMID_DSID_MAP_T **ppComIdDsIdMap,        
+    UINT32                 *pNumDataset,
+    ppapTRDP_DATASET_T      ppapDataset
+    )
+{
+    xmlDoc             *pXmlDoc;
+    xmlNodePtr          pRootElement;
+    xmlXPathContextPtr  pXPathCtx;
+    TRDP_ERR_T          result;       
+
+    /*  Set empty values  */
+    if (pNumComId)
+        *pNumComId = 0;
+    if (ppComIdDsIdMap)
+        *ppComIdDsIdMap = NULL;
+    if (pNumDataset)
+        *pNumDataset = 0;
+    if (ppapDataset)
+        *ppapDataset = NULL;
+
+    /*  Load the document, parse it into DOM tree    */
+    result = parseXmlDocument(pFileName, &pXmlDoc, &pRootElement);
+    if (result != TRDP_NO_ERR)
+        return result;
+
+    /*  Prepare XPath context   */
+    pXPathCtx = xmlXPathNewContext(pXmlDoc);
+    if(!pXPathCtx) 
+    { 
+        /*  Get parser error    */
+        xmlError * pError = xmlGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "Read XML config: failed to initialize XPath\n");
+        if (pError)
+            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
+
+        return TRDP_PARAM_ERR;
+    }
+
+    /*  Parse mapping between ComId and DatasetId   */
+    parseComIdDsIdMap(pXPathCtx, pNumComId, ppComIdDsIdMap);
+
+    /*  Parse dataset definitions   */
+    parseDatasets(pXPathCtx, pNumDataset, ppapDataset);
+
+    /*  Free XPath context  */
+    xmlXPathFreeContext(pXPathCtx);
+
+    /*  Free parsed document    */
+    freeXmlDocument(pXmlDoc);
+    
+    return TRDP_NO_ERR;
+}
+
+/*
+ * Parse message data communication parameters configured for one telegram
+ * Default values are used for properties which are not configured
+ */
+static void parseMdParameter(
+    xmlXPathContextPtr      pXPathCtx, 
+    const TRDP_MD_CONFIG_T *pMdConfig, 
+    TRDP_EXCHG_PAR_T       *pExchgPar
+    )
+{
+    xmlXPathObjectPtr   pXPathObj;
+    xmlNodePtr          pMdParElem;
+
+    /*  Try to find the md-parameter element    */
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST "./md-parameter", pXPathCtx);
+    if (!pXPathObj)
+        return;
+
+    /*  Check if element was found  */
+    if (pXPathObj->nodesetval && pXPathObj->nodesetval->nodeNr)
+    {
+        /*  Get the element */
+        pMdParElem = pXPathObj->nodesetval->nodeTab[0];
+        /*  Allocate the structure  */
+        pExchgPar->pMdPar = (TRDP_MD_PAR_T *) malloc(sizeof(TRDP_MD_PAR_T));
+        
+        /*  Set default values  */
+        pExchgPar->pMdPar->confirmTimeout = pMdConfig->confirmTimeout;
+        pExchgPar->pMdPar->replyTimeout = pMdConfig->replyTimeout;
+        pExchgPar->pMdPar->flags = pMdConfig->flags;
+
+        /*  Parse attributes    */
+        parseUINT32(pMdParElem, "confirm-timeout", &pExchgPar->pMdPar->confirmTimeout);
+        parseUINT32(pMdParElem, "reply-timeout", &pExchgPar->pMdPar->replyTimeout);
+        if (checkAttrValue(pMdParElem, "protocol", "TCP"))
+            pExchgPar->pMdPar->flags |= TRDP_FLAGS_TCP;
+        if (checkAttrValue(pMdParElem, "protocol", "UDP"))
+            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_TCP;
+        if (checkAttrValue(pMdParElem, "marshall", "on"))
+            pExchgPar->pMdPar->flags |= TRDP_FLAGS_MARSHALL;
+        if (checkAttrValue(pMdParElem, "marshall", "off"))
+            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_MARSHALL;
+    }
+
+    /*  Free XPath result   */
+    xmlXPathFreeObject(pXPathObj);
+}
+
+/*
+ * Parse process data communication parameters configured for one telegram
+ * Default values are used for properties which are not configured
+ */
+static void parsePdParameter(
+    xmlXPathContextPtr      pXPathCtx, 
+    const TRDP_PD_CONFIG_T *pPdConfig, 
+    TRDP_EXCHG_PAR_T       *pExchgPar
+    )
+{
+    xmlXPathObjectPtr   pXPathObj;
+    xmlNodePtr          pPdParElem;
+
+    /*  Try to find the pd-parameter element    */
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST "./pd-parameter", pXPathCtx);
+    if (!pXPathObj)
+        return;
+
+    /*  Check if element was found  */
+    if (pXPathObj->nodesetval && pXPathObj->nodesetval->nodeNr)
+    {
+        /*  Get the element */
+        pPdParElem = pXPathObj->nodesetval->nodeTab[0];
+
+        /*  Allocate the structure  */
+        pExchgPar->pPdPar = (TRDP_PD_PAR_T *) malloc(sizeof(TRDP_PD_PAR_T));
+        
+        /*  Set default values  */
+        pExchgPar->pPdPar->flags = pPdConfig->flags;
+        pExchgPar->pPdPar->redundant = 0;
+        pExchgPar->pPdPar->timeout = pPdConfig->timeout;
+        pExchgPar->pPdPar->toBehav = pPdConfig->toBehavior;
+
+        /*  Parse attributes    */
+        parseUINT32(pPdParElem, "timeout", &pExchgPar->pPdPar->timeout);
+        parseUINT32(pPdParElem, "cycle", &pExchgPar->pPdPar->cycle);
+        parseUINT32(pPdParElem, "redundant", &pExchgPar->pPdPar->redundant);
+        if (checkAttrValue(pPdParElem, "validity-behaviour", "keep"))
+            pExchgPar->pPdPar->toBehav = TRDP_TO_KEEP_LAST_VALUE;
+        if (checkAttrValue(pPdParElem, "validity-behaviour", "zero"))
+            pExchgPar->pPdPar->toBehav = TRDP_TO_SET_TO_ZERO;
+        if (checkAttrValue(pPdParElem, "marshall", "on"))
+            pExchgPar->pPdPar->flags |= TRDP_FLAGS_MARSHALL;
+        if (checkAttrValue(pPdParElem, "marshall", "off"))
+            pExchgPar->pPdPar->flags &= ~TRDP_FLAGS_MARSHALL;
+    }
+
+    /*  Free XPath result   */
+    xmlXPathFreeObject(pXPathObj);
+}
+
+/*
+ *  Parse Safe Data Transmission parameters for given source or destination element.
+ *  Looks for sdt-parameter child element. If it exists, new SDT_PAR structure is 
+ *  allocated and pointer is returned.
+ */
+static void parseSDTParameters(xmlNodePtr pParentElem, TRDP_SDT_PAR_T  **ppSdtPar)
+{
+    xmlNodePtr          pSDTElem;
+    TRDP_SDT_PAR_T  *   pSdtPar;
+
+    /*  Set empty   */
+    *ppSdtPar = NULL;
+
+    /*  Look for sdt-parameter element  */
+    pSDTElem = xmlFirstElementChild(pParentElem);
+    if (!pSDTElem)
+        return;
+    if (xmlStrcmp(pSDTElem->name, BAD_CAST "sdt-parameter"))
+        return;
+
+    /*  Allocate new SDT_PAR structure, set default values  */
+    pSdtPar = (TRDP_SDT_PAR_T *) malloc(sizeof(TRDP_SDT_PAR_T));
+    *ppSdtPar = pSdtPar;
+    pSdtPar->smi2 = TRDP_SDT_DEFAULT_SMI2;
+    pSdtPar->nrxSafe = TRDP_SDT_DEFAULT_NRXSAFE;
+    pSdtPar->nGuard = TRDP_SDT_DEFAULT_NGUARD;
+    pSdtPar->cmThr = TRDP_SDT_DEFAULT_CMTHR;
+
+    /*  Parse SDT attributes    */
+    parseUINT32(pSDTElem, "smi1", &pSdtPar->smi1);
+    parseUINT32(pSDTElem, "smi2", &pSdtPar->smi2);
+    parseUINT16(pSDTElem, "udv", &pSdtPar->udv);
+    parseUINT16(pSDTElem, "rx-period", &pSdtPar->rxPeriod);
+    parseUINT16(pSDTElem, "tx-period", &pSdtPar->txPeriod);
+    parseUINT8(pSDTElem, "n-rxsafe", &pSdtPar->nrxSafe);
+    parseUINT16(pSDTElem, "n-guard", &pSdtPar->nGuard);
+    parseUINT32(pSDTElem, "cm-thr", &pSdtPar->cmThr);
+}
+
+/*
+ *  Parse configuration of all sources for one telegram
+ */
+static void parseSources(    
+    xmlXPathContextPtr      pXPathCtx, 
+    TRDP_EXCHG_PAR_T       *pExchgPar
+    )
+{
+    xmlXPathObjectPtr   pXPathObj;
+    xmlNodePtr          pSourceElem;
+    int                 index;
+
+    /*  Try to find all source elements    */
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST "./source", pXPathCtx);
+    if (!pXPathObj)
+        return;
+
+    /*  Check if any sources were found  */
+    if (!pXPathObj->nodesetval || !pXPathObj->nodesetval->nodeNr)
+    {
+        /*  Free XPath result   */
+        xmlXPathFreeObject(pXPathObj);
+        return;
+    }
+
+    /*  Allocate array of SRC structures    */
+    pExchgPar->srcCnt = pXPathObj->nodesetval->nodeNr;
+    pExchgPar->pSrc = (TRDP_SRC_T *) malloc(sizeof(TRDP_SRC_T) * pExchgPar->srcCnt);
+
+    /*  Iterate over all found source elements  */
+    for (index = 0; index < pXPathObj->nodesetval->nodeNr; index++)
+    { 
+        pSourceElem = pXPathObj->nodesetval->nodeTab[index];
+        /*  Check for correct XML node type */
+        if (pSourceElem->type != XML_ELEMENT_NODE)
+            continue;
+
+        /*  Parse the source element    */
+        parseUINT32(pSourceElem, "id", &(pExchgPar->pSrc[index].id));
+        parseURI(pSourceElem, "uri1", 
+            &(pExchgPar->pSrc[index].pUriUser), &(pExchgPar->pSrc[index].pUriHost1));
+        parseURI(pSourceElem, "uri2", 
+            NULL, &(pExchgPar->pSrc[index].pUriHost2));
+
+        /*  Parse SDT parameters   */
+        parseSDTParameters(pSourceElem, &(pExchgPar->pSrc[index].pSdtPar));
+    }
+
+    /*  Free XPath result   */
+    xmlXPathFreeObject(pXPathObj);
+}
+
+/*
+ *  Parse configuration of all destinations for one telegram
+ */
+static void parseDestinations(    
+    xmlXPathContextPtr      pXPathCtx, 
+    TRDP_EXCHG_PAR_T       *pExchgPar
+    )
+{
+    xmlXPathObjectPtr   pXPathObj;
+    xmlNodePtr          pDestElem;
+    int                 index;
+
+    /*  Try to find all destination elements    */
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST "./destination", pXPathCtx);
+    if (!pXPathObj)
+        return;
+
+    /*  Check if any destinations were found  */
+    if (!pXPathObj->nodesetval || !pXPathObj->nodesetval->nodeNr)
+    {
+        /*  Free XPath result   */
+        xmlXPathFreeObject(pXPathObj);
+        return;
+    }
+
+    /*  Allocate array of DEST structures    */
+    pExchgPar->destCnt = pXPathObj->nodesetval->nodeNr;
+    pExchgPar->pDest = (TRDP_DEST_T *) malloc(sizeof(TRDP_DEST_T) * pExchgPar->destCnt);
+
+    /*  Iterate over all found destination elements  */
+    for (index = 0; index < pXPathObj->nodesetval->nodeNr; index++)
+    { 
+        pDestElem = pXPathObj->nodesetval->nodeTab[index];
+        /*  Check for correct XML node type */
+        if (pDestElem->type != XML_ELEMENT_NODE)
+            continue;
+
+        /*  Parse the destination element    */
+        parseUINT32(pDestElem, "id", &(pExchgPar->pDest[index].id));
+        parseURI(pDestElem, "uri", 
+            &(pExchgPar->pDest[index].pUriUser), &(pExchgPar->pDest[index].pUriHost));
+
+        /*  Parse SDT parameters   */
+        parseSDTParameters(pDestElem, &(pExchgPar->pDest[index].pSdtPar));
+    }
+
+    /*  Free XPath result   */
+    xmlXPathFreeObject(pXPathObj);
+}
+
+/*
+ * Parse configuration of one telegram into provided structure
+ */
+static void parseTelegram(
+    xmlNodePtr              pTlgElem, 
+    xmlXPathContextPtr      pXPathCtx,
+    const TRDP_PD_CONFIG_T *pPdConfig,
+    const TRDP_MD_CONFIG_T *pMdConfig,
+    TRDP_EXCHG_PAR_T       *pExchgPar
+    )
+{
+
+    /*  Check parameters    */
+    if (!pTlgElem || !pExchgPar)
+        return;
+
+    /*  Set default values  */
+    memset(pExchgPar, 0, sizeof(TRDP_EXCHG_PAR_T));
+
+    /*  Parse telegram attributes   */
+    parseUINT32(pTlgElem, "com-id", &pExchgPar->comId);
+    parseUINT32(pTlgElem, "data-set-id", &pExchgPar->datasetId);
+    parseUINT32(pTlgElem, "com-parameter-id", &pExchgPar->comParId);
+
+    /*  Set current node to XPath context   */
+    pXPathCtx->node = pTlgElem;
+
+    /*  Call parser functions for nested elements   */
+    parseMdParameter(pXPathCtx, pMdConfig, pExchgPar);
+    parsePdParameter(pXPathCtx, pPdConfig, pExchgPar);
+    parseSources(pXPathCtx, pExchgPar);
+    parseDestinations(pXPathCtx, pExchgPar);
+}
+
+/**********************************************************************************************************************/
+/**	Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
+ *
+ *
+ *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[in]	    pIfName           Interface name
+ *  @param[in]      pPdConfig         PD default configuration
+ *  @param[in]      pMdConfig         MD default configuration
+ *  @param[out]	    pNumExchgPar      Number of configured telegrams
+ *  @param[out]     ppExchgPar        Pointer to array of telegram configurations
+ *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_MEM_ERR      provided buffer to small
+ *  @retval         TRDP_PARAM_ERR    File not existing
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
+    const CHAR8             *pFileName,
+    const CHAR8             *pIfName,
+    const TRDP_PD_CONFIG_T  *pPdConfig,
+    const TRDP_MD_CONFIG_T  *pMdConfig,
+    UINT32                  *pNumExchgPar,
+    TRDP_EXCHG_PAR_T       **ppExchgPar
+    )
+{
+    xmlDoc             *pXmlDoc;
+    xmlNodePtr          pRootElement;
+    xmlXPathContextPtr  pXPathCtx;
+    xmlXPathObjectPtr   pXPathObj;
+    TRDP_ERR_T          result;       
+    CHAR8               strXPath[256];
+    xmlNodePtr          pTlgElem;
+    int                 index;
+
+    /*  Check parameters    */
+    if (!pFileName || !pIfName || !pNumExchgPar)
+        return TRDP_PARAM_ERR;
+    if (!pPdConfig || !pMdConfig || !ppExchgPar)
+        return TRDP_PARAM_ERR;
+
+    /* Set empty values */
+    *pNumExchgPar = 0;
+    *ppExchgPar = NULL;
+
+    /*  Load the document, parse it into DOM tree    */
+    result = parseXmlDocument(pFileName, &pXmlDoc, &pRootElement);
+    if (result != TRDP_NO_ERR)
+        return result;
+
+    /*  Prepare XPath context   */
+    pXPathCtx = xmlXPathNewContext(pXmlDoc);
+    if(!pXPathCtx) 
+    { 
+        /*  Get parser error    */
+        xmlError * pError = xmlGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "Read XML config: failed to initialize XPath\n");
+        if (pError)
+            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
+
+        return TRDP_PARAM_ERR;
+    }
+
+    /* Execute XPath expression - find all telegram elemments for given interface  */
+    snprintf(strXPath, sizeof(strXPath),
+        "/device/bus-interface-list/bus-interface[@name='%s']/telegram", pIfName);
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
+    
+    /*  Check if any telegrams were found   */
+    if (pXPathObj)
+    {
+        if (pXPathObj->nodesetval && pXPathObj->nodesetval->nodeNr)
+        {
+            /*  Allocate array of exchange parameters   */
+            *pNumExchgPar = pXPathObj->nodesetval->nodeNr;
+            *ppExchgPar = (TRDP_EXCHG_PAR_T *) malloc(
+                sizeof(TRDP_EXCHG_PAR_T) * (*pNumExchgPar));
+
+            /*  Iterate over all found telegram definitions and parse them   */
+            for (index = 0; index < pXPathObj->nodesetval->nodeNr; index++)
+            { 
+                pTlgElem = pXPathObj->nodesetval->nodeTab[index];
+                /*  Check for correct XML node type */
+                if (pTlgElem->type != XML_ELEMENT_NODE)
+                    continue;
+
+                /*  Parse the telegram definition   */
+                parseTelegram(pTlgElem, pXPathCtx, pPdConfig, pMdConfig, &((*ppExchgPar)[index]));
+            }
+        }
+        /*  Free XPath result   */
+        xmlXPathFreeObject(pXPathObj);
+    }
+
+    /*  Free XPath context  */
+    xmlXPathFreeContext(pXPathCtx);
+
+    /*  Free parsed document    */
+    freeXmlDocument(pXmlDoc);
+    
+    return TRDP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/**	Free array of telegram configurations allocated by tau_readXmlInterfaceConfig
+ *
+ *  @param[in]      numExchgPar       Number of telegram configurations in the array
+ *  @param[in]      pExchgPar         Pointer to array of telegram configurations
+ *
+ */
+EXT_DECL void tau_freeTelegrams(
+    UINT32                  numExchgPar,
+    TRDP_EXCHG_PAR_T       *pExchgPar
+    )
+{
+    UINT32  idxEP, i;
+
+    /*  Check parameters    */
+    if (!numExchgPar || !pExchgPar)
+        return;
+
+    /*  Iterate over all exchange parameters    */
+    for (idxEP = 0; idxEP < numExchgPar; idxEP++)
+    {
+        /*  Free MD and PD parameters   */
+        if (pExchgPar[idxEP].pMdPar)
+            free(pExchgPar[idxEP].pMdPar);
+        if (pExchgPar[idxEP].pPdPar)
+            free(pExchgPar[idxEP].pPdPar);
+
+        /*  Free array of destinations  */
+        if (pExchgPar[idxEP].destCnt)
+        {
+            /*  Iterate ove all destinations    */
+            for (i = 0; i < pExchgPar[idxEP].destCnt; i++)
+            {
+                /*  Free URIs   */
+                if (pExchgPar[idxEP].pDest[i].pUriHost)
+                    free(pExchgPar[idxEP].pDest[i].pUriHost);
+                if (pExchgPar[idxEP].pDest[i].pUriUser)
+                    free(pExchgPar[idxEP].pDest[i].pUriUser);
+                /*  Free SDT parameters */
+                if (pExchgPar[idxEP].pDest[i].pSdtPar)
+                    free(pExchgPar[idxEP].pDest[i].pSdtPar);
+            }
+            /*  Free destinations array  */
+            free(pExchgPar[idxEP].pDest);
+        }
+        /*  Free array of sources  */
+        if (pExchgPar[idxEP].srcCnt)
+        {
+            /*  Iterate ove all sources    */
+            for (i = 0; i < pExchgPar[idxEP].srcCnt; i++)
+            {
+                /*  Free URIs   */
+                if (pExchgPar[idxEP].pSrc[i].pUriHost1)
+                    free(pExchgPar[idxEP].pSrc[i].pUriHost1);
+                if (pExchgPar[idxEP].pSrc[i].pUriHost2)
+                    free(pExchgPar[idxEP].pSrc[i].pUriHost2);
+                if (pExchgPar[idxEP].pSrc[i].pUriUser)
+                    free(pExchgPar[idxEP].pSrc[i].pUriUser);
+                /*  Free SDT parameters */
+                if (pExchgPar[idxEP].pSrc[i].pSdtPar)
+                    free(pExchgPar[idxEP].pSrc[i].pSdtPar);
+            }
+            /*  Free sources array  */
+            free(pExchgPar[idxEP].pSrc);
+        }
+
+    }
+
+    /*  Free array of TRDP_EXCHG_PAR_T structures   */
+    free(pExchgPar);
+}
+
