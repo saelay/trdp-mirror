@@ -601,7 +601,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     UINT16      port)
 {
     struct sockaddr_in destAddr;
-    int bufferSize  = (int) size;
+    ssize_t bufferSize  = size;
     ssize_t sendSize    = 0; 
 
     if (sock == -1 || pBuffer == NULL)
@@ -620,13 +620,20 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     do
     {
+        errno   = 0;
         sendSize = sendto(sock,
-                         pBuffer,
-                         size,
-                         0,
-                         (struct sockaddr *) &destAddr,
-                         sizeof(destAddr));
-
+                          (const char *)pBuffer,
+                          size,
+                          0,
+                          (struct sockaddr *) &destAddr,
+                          sizeof(destAddr));
+        
+        if (sendSize >= 0)
+        {
+            bufferSize  -= sendSize;
+            pBuffer     += sendSize;
+        } 
+        
         if (sendSize >= 0)
         {
             bufferSize  -= sendSize;
@@ -636,7 +643,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
-        } 
+        }
     }
     while (bufferSize && !(sendSize == -1 && errno != EINTR));
 
