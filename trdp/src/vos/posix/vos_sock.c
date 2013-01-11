@@ -372,54 +372,71 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         {
             sockOptValue = 1;
 #ifdef SO_REUSEPORT
+            errno = 0;
             if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
-                vos_printf(VOS_LOG_WARNING, "Reuse ADDR & Port failed\n");
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (%s)\n", buff);
             }
 #else
+            errno = 0;
             if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
-                vos_printf(VOS_LOG_WARNING, "Reuse ADDR failed\n");
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (%s)\n", buff);
             }
 #endif
         }
         if (1 == pOptions->nonBlocking)
         {
+            errno = 0;
             if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)
             {
-                vos_printf(VOS_LOG_ERROR, "non blocking failed\n");
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                vos_printf(VOS_LOG_ERROR, "setsockopt() O_NONBLOCK failed (%s)\n", buff);
                 return VOS_SOCK_ERR;
             }
         }
         if (pOptions->qos > 0 && pOptions->qos < 8)
         {
             /* The QoS value (0-7) is mapped to MSB bits 7-5, bit 2 is set for local use */
+            errno = 0;
             sockOptValue = (int) ((pOptions->qos << 5) | 4);
             if (setsockopt(sock, IPPROTO_IP, IP_TOS, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
-                vos_printf(VOS_LOG_WARNING, "setsockopt IP_TOS/QOS failed\n");
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (%s)\n", buff);
             }
         }
         if (pOptions->ttl > 0)
         {
+            errno = 0;
             sockOptValue = pOptions->ttl;
             if (setsockopt(sock, IPPROTO_IP, IP_TTL, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
-                vos_printf(VOS_LOG_WARNING, "setsockopt IP_TTL failed\n");
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (%s)\n", buff);
             }
         }
         if (pOptions->ttl_multicast > 0)
         {
+            errno = 0;
             sockOptValue = pOptions->ttl_multicast;
             if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
-                vos_printf(VOS_LOG_WARNING,
-                           "setsockopt IP_MULTICAST_TTL failed\n");
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (%s)\n", buff);
             }
         }
     }
@@ -462,9 +479,13 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n",
                    inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
 
-        if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
+        errno = 0;
+        if (    (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
+             && (errno != 0))
         {
-            vos_print(VOS_LOG_WARNING, "setsockopt IP_ADD_MEMBERSHIP failed\n");
+            char buff[VOS_MAX_ERR_STR_SIZE];
+            strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (%s)\n", buff);
             err = VOS_SOCK_ERR;
         }
         else
@@ -475,9 +496,14 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         /* Disable multicast loop back */
         {
             UINT32 enMcLb = 0;
-            if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1)
+
+            errno = 0;
+            if (    (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1)
+                 && (errno != 0))
             {
-                vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_TTL failed\n");
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (%s)\n", buff);
                 err = VOS_SOCK_ERR;
             }
             else
@@ -529,10 +555,13 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n",
                    inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
 
-
+        errno = 0;
         if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
-            vos_print(VOS_LOG_WARNING, "setsockopt IP_DROP_MEMBERSHIP failed\n");
+            char buff[VOS_MAX_ERR_STR_SIZE];
+            strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (%s)\n", buff);
+       
             err = VOS_SOCK_ERR;
         }
         else
@@ -608,7 +637,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
-        vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (%s)\n", buff);
+        vos_printf(VOS_LOG_ERROR, "sendto() failed (%s)\n", buff);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
