@@ -22,7 +22,7 @@
 
 #ifndef WIN32
 #error \
-    "You are trying to compile the WIN32 implementation of vos_sock.c - either define POSIX or exclude this file!"
+    "You are trying to compile the WIN32 implementation of vos_sock.c - either define WIN32 or exclude this file!"
 #endif
 
 /***********************************************************************************************************************
@@ -629,6 +629,12 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
                          (struct sockaddr *) &destAddr,
                          sizeof(destAddr));
     
+        if (sendSize >= 0)
+        {
+            bufferSize  -= sendSize;
+            pBuffer     += sendSize;
+        } 
+
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
@@ -640,7 +646,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     {
         char buff[VOS_MAX_ERR_STR_SIZE]={0};
         strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_ERROR, "vos_sockSendUDP failed (%s)\n", buff);
+        vos_printf(VOS_LOG_ERROR, "sendto() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -677,7 +683,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     int rcvSize = 0;
     int bufferSize = *pSize;
  
-    if (sock == -1 || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
+    if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
     {
         return VOS_PARAM_ERR;
     } 
@@ -723,7 +729,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     {
         char buff[VOS_MAX_ERR_STR_SIZE]={0};
         strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_ERROR, "recvfrom failed (%s)\n", buff);
+        vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %s)\n", buff);
         *pSize = 0; 
         return VOS_IO_ERR;
     }
