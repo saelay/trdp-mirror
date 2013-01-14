@@ -59,7 +59,7 @@ TRDP_APP_SESSION_T      aSessions[MAX_SESSIONS];
 TRDP_MARSHALL_CONFIG_T  marshallCfg;
 
 /*  Dataset buffers */
-typedef UINT8  DATASET_BUF_T[MAX_DATASET_LEN];
+typedef UINT64  DATASET_BUF_T[MAX_DATASET_LEN/8];
 typedef struct 
 {
     UINT32          size;
@@ -475,7 +475,7 @@ static TRDP_ERR_T fillDataset(pTRDP_DATASET_T pDatasetDesc, DATASET_T * pDataset
     for (elmIdx = 0; elmIdx < pDatasetDesc->numElement; elmIdx++)
     {
         result = fillDatasetElem(
-            pDataset->buffer, &offset, 
+            (UINT8 *)pDataset->buffer, &offset, 
             pDatasetDesc->pElement[elmIdx].type, pDatasetDesc->pElement[elmIdx].size);
         if (result != TRDP_NO_ERR)
         {
@@ -503,7 +503,7 @@ static TRDP_ERR_T printDataset(pTRDP_DATASET_T pDatasetDesc, DATASET_T * pDatase
     for (elmIdx = 0; elmIdx < pDatasetDesc->numElement; elmIdx++)
     {
         result = printDatasetElem(
-            pDataset->buffer, &offset, 
+            (UINT8 *)pDataset->buffer, &offset, 
             pDatasetDesc->pElement[elmIdx].type, pDatasetDesc->pElement[elmIdx].size);
         if (result != TRDP_NO_ERR)
         {
@@ -519,12 +519,12 @@ static TRDP_ERR_T printDataset(pTRDP_DATASET_T pDatasetDesc, DATASET_T * pDatase
 /** Parse dataset configuration
  *  Initialize marshalling
  */
-static TRDP_ERR_T initMarshalling(const char * pFileName)
+static TRDP_ERR_T initMarshalling(const TRDP_XML_DOC_HANDLE_T * pDocHnd)
 {
     TRDP_ERR_T result;
 
     /*  Read dataset configuration  */
-    result = tau_readXmlDatasetConfig(pFileName, 
+    result = tau_readXmlDatasetConfig(pDocHnd, 
         &numComId, &pComIdDsIdMap,
         &numDataset, &papDataset);
     if (result != TRDP_NO_ERR)
@@ -569,7 +569,7 @@ static TRDP_ERR_T initSessions()
     {
         result = tlc_openSession(
             &aSessions[i], pIfConfig[i].hostIp, pIfConfig[i].leaderIp, 
-            NULL/*&marshallCfg*/, &pdConfig, &mdConfig, &processConfig);
+            &marshallCfg, &pdConfig, &mdConfig, &processConfig);
         if (result != TRDP_NO_ERR)
         {
             printf("Failed to open session for interface %s: %s", 
@@ -681,7 +681,7 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
         result = tlp_publish(
             pPubTlg->sessionhandle, &pPubTlg->pubHandle, pExchgPar->comId, 
             0, 0, destIP, interval, redId, flags, pSendParam, 
-            pPubTlg->dataset.buffer, pPubTlg->dataset.size, FALSE, 0);
+            (UINT8 *)pPubTlg->dataset.buffer, pPubTlg->dataset.size, FALSE, 0);
         if (result != TRDP_NO_ERR)
         {
             printf("tlp_publish for comID %u, destID %u failed: %s\n", 
@@ -822,7 +822,7 @@ static TRDP_ERR_T subscribeTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
 /** Parse telegrams configured for each interface.
  *  Publish and subscribe configured telegrams.
  */
-static TRDP_ERR_T configureTelegrams(const char * pFileName)
+static TRDP_ERR_T configureTelegrams(TRDP_XML_DOC_HANDLE_T * pDocHnd)
 {
     UINT32 ifcIdx, tlgIdx;
     TRDP_ERR_T  result;
@@ -836,7 +836,7 @@ static TRDP_ERR_T configureTelegrams(const char * pFileName)
 
         /*  Read telegrams configured for the interface */
         result = tau_readXmlInterfaceConfig(
-            pFileName, pIfConfig[ifcIdx].ifName, &pdConfig, &mdConfig,
+            pDocHnd, pIfConfig[ifcIdx].ifName, &pdConfig, &mdConfig,
             &numExchgPar, &pExchgPar);
         if (result != TRDP_NO_ERR)
         {
@@ -936,7 +936,7 @@ void processData()
                 /*  Write data to TRDP stack    */
                 result = tlp_put(
                     aPubTelegrams[i].sessionhandle, aPubTelegrams[i].pubHandle, 
-                    aPubTelegrams[i].dataset.buffer, aPubTelegrams[i].dataset.size);
+                    (UINT8 *)aPubTelegrams[i].dataset.buffer, aPubTelegrams[i].dataset.size);
                 /*  Print result    */
                 if (result == TRDP_NO_ERR)
                     setColorGreen();
@@ -966,7 +966,7 @@ void processData()
             aSubTelegrams[i].result = tlp_get(
                 aSubTelegrams[i].sessionhandle, aSubTelegrams[i].subHandle, 
                 aSubTelegrams[i].pktFlags, &aSubTelegrams[i].pdInfo, 
-                aSubTelegrams[i].dataset.buffer, &dataSize);
+                (UINT8 *)aSubTelegrams[i].dataset.buffer, &dataSize);
         }
 
         /*  Print data and last results for all subscribed telegrams  */
@@ -1008,6 +1008,7 @@ int main(int argc, char * argv[])
 {
     const char *            pFileName;
     TRDP_ERR_T              result;
+    TRDP_XML_DOC_HANDLE_T   docHnd;
     UINT32                  i;
 
     /*  Get XML file name   */
@@ -1019,9 +1020,17 @@ int main(int argc, char * argv[])
     }
     pFileName = argv[1];
 
+    /*  Prepare XML document    */
+    result = tau_prepareXmlDoc(pFileName, &docHnd);
+    if (result != TRDP_NO_ERR)
+    {
+        printf("Failed to prepare XML document: %s\n", getResultString(result));
+        return 1;
+    }
+
     /*  Read general parameters from XML configuration*/
     result = tau_readXmlConfig(
-        pFileName, 
+        &docHnd, 
         &processConfig, &memConfig, &dbgConfig, 
         &pdConfig, &mdConfig, 
         &numComPar, &pComPar, 
@@ -1051,7 +1060,7 @@ int main(int argc, char * argv[])
     }
 
     /*  Read dataset configuration, initialize marshalling  */
-    if (initMarshalling(pFileName) != TRDP_NO_ERR)
+    if (initMarshalling(&docHnd) != TRDP_NO_ERR)
         return 1;
 
     /*  Initialize TRDP sessions    */
@@ -1059,7 +1068,7 @@ int main(int argc, char * argv[])
         return 1;
 
     /*  Configure telegrams  */
-    if (configureTelegrams(pFileName) != TRDP_NO_ERR)
+    if (configureTelegrams(&docHnd) != TRDP_NO_ERR)
     {
         printf("Failed to configure telegrams\n");
         return 1;
@@ -1074,6 +1083,8 @@ int main(int argc, char * argv[])
 
     /*  Free allocated memory   */
     freeParameters();
+    /*  Free parsed xml document    */
+    tau_freeXmlDoc(&docHnd);
     /*  Unpublish all telegrams */
     for (i = 0; i < numPubTelegrams; i++)
         tlp_unpublish(aPubTelegrams[i].sessionhandle, aPubTelegrams[i].pubHandle);
