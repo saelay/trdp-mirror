@@ -161,6 +161,17 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 
 EXT_DECL VOS_ERR_T vos_sockInit (void)
 {
+    WSADATA WsaDat;
+
+    /* The windows socket library has to be prepared, before it could be used */
+    if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
+    {
+        int err = WSAGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "WSAStartup() failed (Err: %d)\n", err);
+        return VOS_SOCK_ERR;
+    }
+
     memset(mac, 0, sizeof(mac));
     vosSockInitialised = TRUE;
 
@@ -267,7 +278,6 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     const VOS_SOCK_OPT_T    *pOptions)
 {
     SOCKET  sock;
-    WSADATA WsaDat;
 
     if (!vosSockInitialised)
     {
@@ -280,16 +290,11 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_PARAM_ERR;
     }
 
-    /* The windows socket library has to be prepared, before it could be used */
-    if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
-    {
-        vos_printf(VOS_LOG_ERROR, "Windows socket API failed\n");
-        return VOS_SOCK_ERR;
-    }
-
     if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET )
     {
-        vos_printf(VOS_LOG_ERROR, "socket call failed\n");
+        int err = WSAGetLastError();
+        
+        vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
 
@@ -336,7 +341,9 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
     {
-        vos_printf(VOS_LOG_ERROR, "socket call failed\n");
+        int err = WSAGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
 
@@ -365,8 +372,9 @@ EXT_DECL VOS_ERR_T vos_sockClose (
 {
     if (closesocket(sock) == SOCKET_ERROR)
     {
-        vos_printf(VOS_LOG_ERROR,
-                   "vos_sockClose called with unknown descriptor\n");
+        int err = WSAGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n");
         return VOS_PARAM_ERR;
     }
     gNumberOfOpenSockets--;
@@ -388,45 +396,39 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
     INT32                   sock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
-    int     sockOptValue = 0;
-    u_long  value;
-
     if (pOptions)
     {
         if (1 == pOptions->reuseAddrPort)
         {
-            sockOptValue = 1;
+            BOOL optValue = TRUE;
 #ifdef SO_REUSEPORT
-            errno = 0;
             if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &sockOptValue,
                            sizeof(sockOptValue)) == SOCKET_ERROR )
             {
-                char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (%s)\n", buff);
+                int err = WSAGetLastError();
+
+                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (Err: %d)\n", err);
             }
 #else
-            errno = 0;
-            if (setsockopt((SOCKET)sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&sockOptValue,
-                           sizeof(sockOptValue)) == SOCKET_ERROR )
+            if (setsockopt((SOCKET)sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&optValue,
+                           sizeof(optValue)) == SOCKET_ERROR )
             {
-                char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (%s)\n", buff);
+                int err = WSAGetLastError();
+
+                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (Err: %d)\n", err);
             }
 #endif
         }
         
         if (pOptions->nonBlocking == TRUE)
         {
-            value = TRUE;
+            u_long  optValue = TRUE;
             
-            errno = 0;
-            if (ioctlsocket(sock, FIONBIO, &value) == SOCKET_ERROR)
+            if (ioctlsocket(sock, FIONBIO, &optValue) == SOCKET_ERROR)
             {
-                char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() FIONBIO failed (%s)\n", buff);
+                int err = WSAGetLastError();
+
+                vos_printf(VOS_LOG_ERROR, "setsockopt() FIONBIO failed (Err: %d)\n", err);
                 return VOS_SOCK_ERR;
             }
         }
@@ -434,38 +436,35 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         if (pOptions->qos > 0 && pOptions->qos < 8)
         {
             /* The QoS value (0-7) is mapped to MSB bits 7-5, bit 2 is set for local use */
-            errno = 0;
-            sockOptValue = (int) ((pOptions->qos << 5) | 4);
-            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_TOS, (const char *)&sockOptValue,
-                           sizeof(sockOptValue)) == SOCKET_ERROR )
+            DWORD optValue = (int) ((pOptions->qos << 5) | 4);
+            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_TOS, (const char *)&optValue,
+                           sizeof(optValue)) == SOCKET_ERROR )
             {
-                char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (%s)\n", buff);
+                int err = WSAGetLastError();
+
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (Err: %d)\n", err);
             }
         }
         if (pOptions->ttl > 0)
         {
-            errno = 0;
-            sockOptValue = pOptions->ttl;
-            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_TTL, (const char *)&sockOptValue,
-                           sizeof(sockOptValue)) == SOCKET_ERROR)
+            DWORD optValue = pOptions->ttl;
+            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_TTL, (const char *)&optValue,
+                           sizeof(optValue)) == SOCKET_ERROR)
             {
-                char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (%s)\n", buff);
+                int err = WSAGetLastError();
+
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %d)\n", err);
             }
         }
         if (pOptions->ttl_multicast > 0)
         {
-            errno = 0;
-            sockOptValue = pOptions->ttl_multicast;
-            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_MULTICAST_TTL, (const char *)&sockOptValue,
-                           sizeof(sockOptValue)) == SOCKET_ERROR )
+            DWORD optValue = pOptions->ttl_multicast;
+            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_MULTICAST_TTL, (const char *)&optValue,
+                           sizeof(optValue)) == SOCKET_ERROR )
             {
-                char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (%s)\n", buff);
+                int err = WSAGetLastError();
+
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %d)\n", err);
             }
         }
     }
@@ -491,62 +490,65 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
     UINT32  ipAddress)
 {
     struct ip_mreq  mreq;
-    VOS_ERR_T       err = VOS_NO_ERR;
+    VOS_ERR_T       result = VOS_NO_ERR;
 
     if (sock == (INT32)INVALID_SOCKET )
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     /*    Is this a multicast address?    */
     else if (IN_MULTICAST(mcAddress))
     {
-
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "joining MC: %s\n",
-                   inet_ntoa(mreq.imr_multiaddr));
-        
-        errno = 0;
-        if (   (setsockopt((SOCKET)sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR) 
-            && (errno != 0))
         {
-            char buff[VOS_MAX_ERR_STR_SIZE]={0};
-            strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (%s)\n", buff);
-            err = VOS_SOCK_ERR;
+            char mcStr[16];
+            char ifStr[16];
+
+            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
+            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+            vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
+        }
+         
+        if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR) 
+        {
+            int err = WSAGetLastError();
+
+            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %d)\n", err);
+            result = VOS_SOCK_ERR;
         }
         else
         {
-            err = VOS_NO_ERR;
+            result = VOS_NO_ERR;
         }
 
         /* Disable multicast loop back */
+        /* only useful for streaming
         {
             mreq.imr_multiaddr.s_addr   = 0;
             mreq.imr_interface.s_addr   = 0;
 
-            errno = 0;
-            if (   (setsockopt((SOCKET)sock, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR)
-                && (errno != 0))
+            if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR)
             {
-                char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (%s)\n", buff);
-                err = VOS_SOCK_ERR;
+                int err = WSAGetLastError();
+
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", result);
+                result = VOS_SOCK_ERR;
             }
             else
             {
-                err = (err == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
+                result = (result == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
             }
         }
+        */
     }
     else
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
 
-    return err;
+    return result;
 }
 
 /**********************************************************************************************************************/
@@ -568,11 +570,11 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
     UINT32  ipAddress)
 {
     struct ip_mreq  mreq;
-    VOS_ERR_T       err = VOS_NO_ERR;
+    VOS_ERR_T       result = VOS_NO_ERR;
 
     if (sock == (INT32)INVALID_SOCKET )
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     /*    Is this a multicast address?    */
     else if (IN_MULTICAST(mcAddress))
@@ -581,29 +583,34 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n",
-                   inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
+        {
+            char mcStr[16];
+            char ifStr[16];
 
-        errno = 0;
+            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
+            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+            vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
+        }
+
         if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, (const char *)&mreq,
                        sizeof(mreq)) == SOCKET_ERROR)
         {
-            char buff[VOS_MAX_ERR_STR_SIZE]={0};
-            strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (%s)\n", buff);
-            err = VOS_SOCK_ERR;
+            int err = WSAGetLastError();
+
+            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %d)\n", err);
+            result = VOS_SOCK_ERR;
         }
         else
         {
-            err = VOS_NO_ERR;
+            result = VOS_NO_ERR;
         }
     }
     else
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
 
-    return err;
+    return result;
 }
 
 /**********************************************************************************************************************/
@@ -632,6 +639,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     struct sockaddr_in destAddr;
     int bufferSize  = (int) size;
     int sendSize    = 0; 
+    int err = 0;
 
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL )
     {
@@ -649,32 +657,30 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     do
     {
-        errno   = 0;
         sendSize = sendto(sock,
                          (const char *)pBuffer,
                          size,
                          0,
                          (struct sockaddr *) &destAddr,
                          sizeof(destAddr));
-    
+        err = WSAGetLastError();
+
         if (sendSize >= 0)
         {
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
         } 
 
-        if(sendSize == -1 && errno == EWOULDBLOCK)
+        if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
     }
-    while (bufferSize && !(sendSize == -1 && errno != EINTR));
+    while (bufferSize && !(sendSize == SOCKET_ERROR && err != WSAEINTR));
 
-    if (sendSize == -1)
+    if (sendSize == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE]={0};
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_ERROR, "sendto() failed (Err: %s)\n", buff);
+        vos_printf(VOS_LOG_ERROR, "sendto() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -710,6 +716,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     int sockLen = sizeof(srcAddr);
     int rcvSize = 0;
     int bufferSize = *pSize;
+    int err = 0;
  
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
     {
@@ -721,13 +728,13 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
     do
     {  
-        errno = 0;
         rcvSize = recvfrom(sock,
                            (char *) pBuffer,
                            bufferSize,
                            0,
                            (SOCKADDR *) &srcAddr,
                            &sockLen);
+        err = WSAGetLastError();
 
         *pIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
         /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
@@ -739,7 +746,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
             *pSize      += rcvSize;
         }
 
-        if(rcvSize == -1 && errno == EWOULDBLOCK)
+        if(rcvSize == -1 && err == WSAEWOULDBLOCK)
         {
             if (*pSize == 0)
             {
@@ -751,14 +758,11 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
             }
         }
     }
-    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));  
+    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && err == WSAEINTR));  
  
-    if (   (rcvSize == -1)
-        && (errno != 0))
+    if (rcvSize == -1)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE]={0};
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %s)\n", buff);
+        vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
         *pSize = 0; 
         return VOS_IO_ERR;
     }
@@ -812,9 +816,9 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     /*  Try to bind the socket to the PD port.    */
     if (bind(sock, (struct sockaddr *)&srcAddress, sizeof(srcAddress)) == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE]={0};
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_ERROR, "bind failed(%s)\n", buff);
+        int err = WSAGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "bind() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
     return VOS_NO_ERR;
@@ -843,9 +847,9 @@ EXT_DECL VOS_ERR_T vos_sockListen (
     }
     if (listen(sock, (int) backlog) == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE]={0};
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_ERROR, "listen failed (%s)\n", buff);
+        int err = WSAGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "listen() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
     return VOS_NO_ERR;
@@ -893,28 +897,25 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
         connFd = accept(*pSock, (struct sockaddr *) &srcAddress, &sockLen);
         if (connFd < 0)
         {
-            switch (errno)
+            int err = WSAGetLastError();
+
+            switch (err)
             {
-                /*Accept return -1 and errno = EWOULDBLOCK,
+                /*Accept return -1 and err = EWOULDBLOCK,
                 when there is no more connection requests.*/
-                case EWOULDBLOCK:
+                case WSAEWOULDBLOCK:
                 {
                     *pSock = connFd;
                     return VOS_NO_ERR;
                 }
-                case EINTR:         break;
-                case ECONNABORTED:  break;
-#if defined (EPROTO)
-                case EPROTO:        break;
+                case WSAEINTR:         break;
+                case WSAECONNABORTED:  break;
+#if defined (WSAEPROTO)
+                case WSAEPROTO:        break;
 #endif
                 default:
                 {
-                    char buff[VOS_MAX_ERR_STR_SIZE]={0};
-                    strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-                    vos_printf(VOS_LOG_ERROR,
-                               "Error calling accept listenFd(%d): %s",
-                               *pSock,
-                               buff);
+                    vos_printf(VOS_LOG_ERROR, "accept() failed (socket: %d, err: %d)", *pSock, err);
                     return VOS_UNKNOWN_ERR;
                 }
             }
@@ -964,11 +965,11 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     if (connect((SOCKET)sock, (const struct sockaddr *) &dstAddress,
                 sizeof(dstAddress)) == SOCKET_ERROR)
     {
-        if (errno != EINPROGRESS)
+        int err = WSAGetLastError();
+
+        if (err != WSAEINPROGRESS)
         {
-            char buff[VOS_MAX_ERR_STR_SIZE]={0};
-            strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-            vos_printf(VOS_LOG_WARNING, "connect failed (%s)\n", buff);
+            vos_printf(VOS_LOG_WARNING, "connect() failed (Err: %d)\n", err);
             return VOS_IO_ERR;
         }
     }
@@ -996,6 +997,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 {
     int sendSize    = 0;
     int bufferSize  = (int) size;
+    int err         = 0;
 
     if (sock == (INT32)INVALID_SOCKET )
     {
@@ -1006,24 +1008,24 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     do
     {
         sendSize = send((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
+        err = WSAGetLastError();
+
         if (sendSize >= 0)
         {
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
         }
 
-        if(sendSize == -1 && errno == EWOULDBLOCK)
+        if(sendSize == -1 && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
     }
-    while (bufferSize && !(sendSize == -1 && errno != EINTR));
+    while (bufferSize && !(sendSize == -1 && err != WSAEINTR));
 
     if (sendSize == -1)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE]={0};
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_WARNING, "send failed (%s)\n", buff);
+        vos_printf(VOS_LOG_WARNING, "send() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -1053,8 +1055,9 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     UINT8   *pBuffer,
     UINT32  *pSize)
 {
-    int             rcvSize    = 0;
-    int             bufferSize = (size_t) *pSize;
+    int rcvSize    = 0;
+    int bufferSize = (size_t) *pSize;
+    int err        = 0;
 
     *pSize = 0;
     
@@ -1067,6 +1070,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     do
     {
         rcvSize = recv((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
+        err = WSAGetLastError();
+
         if (rcvSize > 0)
         {
             bufferSize  -= rcvSize;
@@ -1074,7 +1079,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             *pSize      += rcvSize;
         }
         
-        if(rcvSize == -1 && errno == EWOULDBLOCK)
+        if(rcvSize == -1 && err == WSAEWOULDBLOCK)
         {
             if (*pSize == 0)
             {
@@ -1086,13 +1091,10 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             }
         }
     }
-    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));
+    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && err == WSAEINTR));
     if (rcvSize == SOCKET_ERROR)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE]={0};
-
-        strerror_s(buff, VOS_MAX_ERR_STR_SIZE, errno); /*lint !e534 ignore return value */
-        vos_printf(VOS_LOG_WARNING, "receive failed (%s)\n", buff);
+        vos_printf(VOS_LOG_WARNING, "receive() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     else if (*pSize == 0)
@@ -1131,7 +1133,8 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
     {
         if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, (const char *) &optValue, sizeof(optValue)) == SOCKET_ERROR)
         {
-            vos_print(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed\n");
+            int err = WSAGetLastError();
+            vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed (Err: %d)\n", err);
             err = VOS_SOCK_ERR;
         }
         else
