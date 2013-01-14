@@ -93,7 +93,9 @@ TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
             return result;
         }
 
-        result = (TRDP_ERR_T)vos_sockBind(pSession->mdDefault.tcpFd.listen_sd, pSession->realIP, pSession->mdDefault.tcpPort);
+        result = (TRDP_ERR_T)vos_sockBind(pSession->mdDefault.tcpFd.listen_sd,
+                                          pSession->realIP,
+                                          pSession->mdDefault.tcpPort);
 
         if (result != TRDP_NO_ERR)
         {
@@ -325,8 +327,8 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     {
         pSession->pdDefault = *pPdDefault;
         if (pSession->pdDefault.port == 0)
-    	{
-        	pSession->pdDefault.port = TRDP_PD_UDP_PORT;
+        {
+            pSession->pdDefault.port = TRDP_PD_UDP_PORT;
         }
     }
     else
@@ -439,8 +441,8 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
     TRDP_APP_SESSION_T appHandle)
 {
     TRDP_SESSION_PT pSession = NULL;
-    BOOL        found = FALSE;
-    TRDP_ERR_T  ret   = TRDP_NOINIT_ERR;
+    BOOL found = FALSE;
+    TRDP_ERR_T      ret = TRDP_NOINIT_ERR;
 
     /*    Find the session    */
     if (appHandle == NULL)
@@ -513,12 +515,12 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 {
                     vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
                 }
-                            
+
                 vos_mutexDelete(pSession->mutex);
                 vos_memFree(pSession);
             }
         }
-        
+
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
         {
             vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
@@ -539,7 +541,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
  */
 EXT_DECL TRDP_ERR_T tlc_terminate (void)
 {
-    TRDP_ERR_T   ret = TRDP_NO_ERR;
+    TRDP_ERR_T ret = TRDP_NO_ERR;
 
     if (sInited == TRUE)
     {
@@ -654,13 +656,13 @@ TRDP_ERR_T tlp_setRedundant (
             {
                 if (iterPD->redId == redId)
                 {
-                	if (leader == TRUE)
+                    if (leader == TRUE)
                     {
                         iterPD->pktFlags = TRDP_FLAGS_REDUNDANT;
                     }
                     iterPD->pktFlags |= TRDP_FLAGS_REDUNDANT;
                 }
-            }          
+            }
             vos_mutexUnlock(appHandle->mutex);
         }
     }
@@ -869,7 +871,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 ret = trdp_requestSocket(
                         appHandle->iface,
                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
-                        srcIpAddr,
+                        (srcIpAddr == 0) ? appHandle->realIP : srcIpAddr,
                         TRDP_SOCK_PD,
                         appHandle->option,
                         FALSE,
@@ -886,7 +888,8 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                     /* SetMulticast I/F */
                     if (vos_isMulticast(destIpAddr))
                     {
-                        ret = (TRDP_ERR_T) vos_sockSetMulticastIf(appHandle->iface[pNewElement->socketIdx].sock, srcIpAddr);
+                        ret = (TRDP_ERR_T) vos_sockSetMulticastIf(appHandle->iface[pNewElement->socketIdx].sock,
+                                                                  (srcIpAddr == 0) ? appHandle->realIP : srcIpAddr);
                         if (ret != TRDP_NO_ERR)
                         {
                             vos_printf(VOS_LOG_ERROR, "vos_sockSetMulticastIf() failed! (Err: %d)\n", ret);
@@ -905,7 +908,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         }
 
         /*    Get the current time and compute the next time this packet should be sent.    */
-        if (   (ret == TRDP_NO_ERR) 
+        if ((ret == TRDP_NO_ERR)
             && (pNewElement != NULL))
         {
             /* PD PULL?    Packet will be sent on request only    */
@@ -925,11 +928,11 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             }
 
             /*    Update the internal data */
-            pNewElement->addr           = pubHandle;
+            pNewElement->addr = pubHandle;
             pNewElement->pktFlags       = pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
-            pNewElement->redId			= redId;
+            pNewElement->redId          = redId;
 
             /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
                 curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
@@ -1336,7 +1339,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
             for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
             {
                 if (iterPD->socketIdx != -1 &&
-                    FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))     /*    PD frame received?    */
+                    FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))     /*    PD frame received?
+                                                                                                   */
                 {
                     /*  Compare the received data to the data in our receive queue
                         Call user's callback if data changed    */
@@ -1416,7 +1420,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     BOOL                    subs,
     UINT16                  offsetAddr)
 {
-    TRDP_ERR_T  ret             = TRDP_NO_ERR;
+    TRDP_ERR_T  ret = TRDP_NO_ERR;
     PD_ELE_T    *pSubPD         = NULL;
     PD_ELE_T    *pReqElement    = NULL;
 
@@ -1515,8 +1519,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
             }
 
             if (
-                     (ret == TRDP_NO_ERR) 
-                  && (pReqElement != NULL))
+                (ret == TRDP_NO_ERR)
+                && (pReqElement != NULL))
             {
                 /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
                     curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
@@ -1588,11 +1592,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T            *newPD = NULL;
+    PD_ELE_T    *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
-    INT32 index;
+    INT32       index;
 
     /*    Check params    */
     if ((comId == 0)
@@ -1651,35 +1655,35 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         if (vos_isMulticast(destIpAddr))
         {
             ret = trdp_requestSocket(appHandle->iface,
-                     &appHandle->pdDefault.sendParam,
-                     destIpAddr,
-                     TRDP_SOCK_PD,
-                     appHandle->option,
-                     TRUE,
-                     &index,
-                     0);
+                                     &appHandle->pdDefault.sendParam,
+                                     destIpAddr,
+                                     TRDP_SOCK_PD,
+                                     appHandle->option,
+                                     TRUE,
+                                     &index,
+                                     0);
         }
         else
         {
 
             ret = trdp_requestSocket(appHandle->iface,
-                     &appHandle->pdDefault.sendParam,
-                     appHandle->realIP,
-                     TRDP_SOCK_PD,
-                     appHandle->option,
-                     TRUE,
-                     &index,
-                     0);
+                                     &appHandle->pdDefault.sendParam,
+                                     appHandle->realIP,
+                                     TRDP_SOCK_PD,
+                                     appHandle->option,
+                                     TRUE,
+                                     &index,
+                                     0);
         }
 #else
         ret = trdp_requestSocket(appHandle->iface,
-                 &appHandle->pdDefault.sendParam,
-                 appHandle->realIP,
-                 TRDP_SOCK_PD,
-                 appHandle->option,
-                 TRUE,
-                 &index,
-                 0);
+                                 &appHandle->pdDefault.sendParam,
+                                 appHandle->realIP,
+                                 TRDP_SOCK_PD,
+                                 appHandle->option,
+                                 TRUE,
+                                 &index,
+                                 0);
 #endif /* TRDP_OPTION_LADDER */
         if (ret == TRDP_NO_ERR)
         {
@@ -1723,9 +1727,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       = toBehavior;
                     newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef          = pUserRef;
-                    newPD->socketIdx        = index;
-                    newPD->privFlags       |= TRDP_INVALID_DATA;
+                    newPD->userRef      = pUserRef;
+                    newPD->socketIdx    = index;
+                    newPD->privFlags    |= TRDP_INVALID_DATA;
 
                     if (timeout == 0)
                     {
@@ -1742,7 +1746,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     /*    Join a multicast group */
                     if (newPD->addr.mcGroup != 0)
                     {
-                        /*ret = (TRDP_ERR_T)*/ vos_sockJoinMC(appHandle->iface[index].sock, newPD->addr.mcGroup, appHandle->realIP);
+                        /*ret = (TRDP_ERR_T)*/ vos_sockJoinMC(appHandle->iface[index].sock,
+                                                              newPD->addr.mcGroup,
+                                                              appHandle->realIP);
 
                         /*    Remember we did this    */
                         if (ret == TRDP_NO_ERR)
@@ -1917,7 +1923,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL && pElement != NULL)
         {
-            pPdInfo->comId          = pElement->addr.comId;
+            pPdInfo->comId = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
@@ -1965,8 +1971,8 @@ static TRDP_ERR_T tlm_common_send (
     const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T  errv            = TRDP_NO_ERR;
-    MD_ELE_T    *pNewElement    = NULL;
+    TRDP_ERR_T  errv = TRDP_NO_ERR;
+    MD_ELE_T    *pNewElement = NULL;
 
     /*   TRDP_ADDRESSES  pubHandle = {comId, srcIpAddr, destIpAddr, 0}; */
 
@@ -2360,7 +2366,7 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->frameHead.datasetLength    = vos_htonl(dataSize);
             pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
             memcpy(pNewElement->frameHead.sessionID, pNewElement->sessionID, sizeof(TRDP_UUID_T));
-            pNewElement->frameHead.replyTimeout     = vos_htonl(replyTimeout);
+            pNewElement->frameHead.replyTimeout = vos_htonl(replyTimeout);
             {
                 int     i;
                 UINT8   *pNewSourceURI = pNewElement->frameHead.sourceURI;
@@ -2603,8 +2609,8 @@ TRDP_ERR_T tlm_addListener (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T  errv            = TRDP_NO_ERR;
-    MD_ELE_T    *pNewElement    = NULL;
+    TRDP_ERR_T  errv = TRDP_NO_ERR;
+    MD_ELE_T    *pNewElement = NULL;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -2723,7 +2729,9 @@ TRDP_ERR_T tlm_addListener (
                            Join group
                            Note: disable multicast loop back
                          */
-                        errv = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock, destIpAddr, appHandle->realIP);
+                        errv = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[pNewElement->socketIdx].sock,
+                                                           destIpAddr,
+                                                           appHandle->realIP);
 
                         /* Set multicast flag */
                         pNewElement->privFlags |= TRDP_MC_JOINT;
