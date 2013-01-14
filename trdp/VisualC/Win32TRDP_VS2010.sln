@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDPTest", "Win32TRDPT
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP", "Win32TRDP\Win32TRDP.vcxproj", "{4E059552-03FF-4EE4-A868-C2253289E9F6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_pdpattern", "test_pdpattern\test_pdpattern.vcxproj", "{A0135A95-BFCD-4E4C-BAB6-C513811B6C57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +33,10 @@ Global
 		{4E059552-03FF-4EE4-A868-C2253289E9F6}.Debug|Win32.Build.0 = Debug|Win32
 		{4E059552-03FF-4EE4-A868-C2253289E9F6}.Release|Win32.ActiveCfg = Release|Win32
 		{4E059552-03FF-4EE4-A868-C2253289E9F6}.Release|Win32.Build.0 = Release|Win32
+		{A0135A95-BFCD-4E4C-BAB6-C513811B6C57}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A0135A95-BFCD-4E4C-BAB6-C513811B6C57}.Debug|Win32.Build.0 = Debug|Win32
+		{A0135A95-BFCD-4E4C-BAB6-C513811B6C57}.Release|Win32.ActiveCfg = Release|Win32
+		{A0135A95-BFCD-4E4C-BAB6-C513811B6C57}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
