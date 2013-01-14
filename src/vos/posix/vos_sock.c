@@ -634,12 +634,6 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
             pBuffer     += sendSize;
         } 
         
-        if (sendSize >= 0)
-        {
-            bufferSize  -= sendSize;
-            pBuffer     += sendSize;
-        }
-
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
