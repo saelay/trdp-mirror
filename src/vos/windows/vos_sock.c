@@ -1122,7 +1122,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         INT32   sock,
         UINT32  mcIfAddress)
 {
-    DWORD       optValue = (DWORD) mcIfAddress;
+    DWORD       optValue =  vos_htonl(mcIfAddress);
     VOS_ERR_T   err = VOS_NO_ERR;
 
     if (sock == (INT32) INVALID_SOCKET)
