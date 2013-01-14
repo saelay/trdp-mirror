@@ -17,7 +17,7 @@
  *
  *
  * $Id: vos_mem.h 282 2013-01-11 07:08:44Z 97029 $
- *                    
+ *
  */
 
 #ifndef POSIX
@@ -89,10 +89,10 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     UINT8       * *ppMemoryArea,
     UINT32      *pSize)
 {
-    VOS_ERR_T ret = VOS_MEM_ERR;
-    mode_t PERMISSION = 0666;                /* Shared Memory permission is rw-rw-rw- */
-    static INT32 fd;                         /* Shared Memory file descriptor */
-    struct    stat sharedMemoryStat;         /* Shared Memory Stat */
+    VOS_ERR_T       ret         = VOS_MEM_ERR;
+    mode_t          PERMISSION  = 0666;      /* Shared Memory permission is rw-rw-rw- */
+    static INT32    fd;                      /* Shared Memory file descriptor */
+    struct    stat  sharedMemoryStat;        /* Shared Memory Stat */
 
     /* Shared Memory Open */
     fd = shm_open(pKey, O_CREAT | O_RDWR, PERMISSION);
@@ -102,14 +102,14 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
         return ret;
     }
     /* Shared Memory acquire */
-    if (ftruncate(fd, (__off_t )*pSize) == -1)
+    if (ftruncate(fd, (off_t )*pSize) == -1)
     {
         vos_printf(VOS_LOG_ERROR, "Shared Memory Acquire failed\n");
         return ret;
     }
     /* Get Shared Memory Stats */
     fstat(fd, &sharedMemoryStat);
-    if (sharedMemoryStat.st_size != (__off_t )*pSize)
+    if (sharedMemoryStat.st_size != (off_t )*pSize)
     {
         vos_printf(VOS_LOG_ERROR, "Shared Memory Size failed\n");
         return ret;

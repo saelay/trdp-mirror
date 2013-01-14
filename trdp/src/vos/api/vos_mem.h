@@ -59,7 +59,6 @@ extern "C" {
 
 /** Opaque queue define  */
 typedef struct VOS_QUEUE *VOS_QUEUE_T;
-typedef struct VOS_SHRD  *VOS_SHRD_T;
 
 /** enumeration for memory block sizes */
 typedef enum
