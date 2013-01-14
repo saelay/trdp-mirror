@@ -463,37 +463,43 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
     UINT32  ipAddress)
 {
     struct ip_mreq  mreq;
-    VOS_ERR_T       err = VOS_NO_ERR;
+    VOS_ERR_T       result = VOS_NO_ERR;
 
     if (sock == -1)
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     /* Is this a multicast address? */
     else if (IN_MULTICAST(mcAddress))
     {
-
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n",
-                   inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
+        {
+            char mcStr[16];
+            char ifStr[16];
+
+            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
+            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+
+            vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
+        }
 
         errno = 0;
-        if (    (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
-             && (errno != 0))
+        if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (%s)\n", buff);
-            err = VOS_SOCK_ERR;
+            result = VOS_SOCK_ERR;
         }
         else
         {
-            err = VOS_NO_ERR;
+            result = VOS_NO_ERR;
         }
 
         /* Disable multicast loop back */
+        /* only useful for streaming 
         {
             UINT32 enMcLb = 0;
 
@@ -504,20 +510,21 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
                 char buff[VOS_MAX_ERR_STR_SIZE];
                 strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (%s)\n", buff);
-                err = VOS_SOCK_ERR;
+                result = VOS_SOCK_ERR;
             }
             else
             {
-                err = (err == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
+                result = (result == VOS_SOCK_ERR) ? VOS_SOCK_ERR : VOS_NO_ERR;
             }
         }
+        */
     }
     else
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
 
-    return err;
+    return result;
 }
 
 /**********************************************************************************************************************/
@@ -539,21 +546,27 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
     UINT32  ipAddress)
 {
     struct ip_mreq  mreq;
-    VOS_ERR_T       err = VOS_NO_ERR;
+    VOS_ERR_T       result = VOS_NO_ERR;
 
     if (sock == -1)
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     /* Is this a multicast address? */
     else if (IN_MULTICAST(mcAddress))
     {
-
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-        vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n",
-                   inet_ntoa(mreq.imr_multiaddr), inet_ntoa(mreq.imr_interface));
+       {
+            char mcStr[16];
+            char ifStr[16];
+
+            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
+            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+
+            vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
+        }
 
         errno = 0;
         if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
@@ -562,19 +575,19 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (%s)\n", buff);
        
-            err = VOS_SOCK_ERR;
+            result = VOS_SOCK_ERR;
         }
         else
         {
-            err = VOS_NO_ERR;
+            result = VOS_NO_ERR;
         }
     }
     else
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
 
-    return err;
+    return result;
 }
 
 /**********************************************************************************************************************/
@@ -1090,11 +1103,11 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
     UINT32  usingMulticastIfAddress)
 {
     struct sockaddr_in  multicastIFAddress;
-    VOS_ERR_T           err = VOS_NO_ERR;
+    VOS_ERR_T           result = VOS_NO_ERR;
 
     if (sock == -1)
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     else
     {
@@ -1105,7 +1118,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &multicastIFAddress.sin_addr, sizeof(struct in_addr)) == -1)
         {
             vos_print(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed\n");
-            err = VOS_SOCK_ERR;
+            result = VOS_SOCK_ERR;
         }
         else
         {
@@ -1114,8 +1127,8 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
                 socklen_t optionSize ;
                 getsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &myAddress.sin_addr, &optionSize);
             */
-            err = VOS_NO_ERR;
+            result = VOS_NO_ERR;
         }
     }
-    return err;
+    return result;
 }
