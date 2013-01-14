@@ -45,13 +45,11 @@ struct VOS_MUTEX
     pthread_mutex_t mutexId;
 };
 
-#ifdef TRDP_OPTION_LADDER
 struct VOS_SHRD
 {
-	INT32 fd;			/* File descriptor */
-	CHAR8 *sharedMemoryName;	/* shared memory Name */
+    INT32   fd;                     /* File descriptor */
+    CHAR8   *sharedMemoryName;      /* shared memory Name */
 };
-#endif /* TRDP_OPTION_LADDER */
 
 VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
 void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
