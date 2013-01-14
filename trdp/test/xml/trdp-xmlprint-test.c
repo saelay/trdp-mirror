@@ -284,6 +284,7 @@ static void printTelegrams(
 int main(int argc, char * argv[])
 {
     const char * pFileName;
+    TRDP_XML_DOC_HANDLE_T   docHandle;
     TRDP_ERR_T              result;
     TRDP_PROCESS_CONFIG_T   processConfig;
     TRDP_MEM_CONFIG_T       memConfig;
@@ -311,9 +312,17 @@ int main(int argc, char * argv[])
     }
     pFileName = argv[1];
 
+    /*  Prepare XML document    */
+    result = tau_prepareXmlDoc(pFileName, &docHandle);
+    if (result != TRDP_NO_ERR)
+    {
+        printf("Failed to parse XML document\n");
+        return 1;
+    }
+
     /*  Read general parameters from XML configuration*/
     result = tau_readXmlConfig(
-        pFileName, 
+        &docHandle, 
         &processConfig, &memConfig, &dbgConfig, 
         &pdConfig, &mdConfig, 
         &numComPar, &pComPar, 
@@ -331,7 +340,7 @@ int main(int argc, char * argv[])
     }
 
     /*  Read dataset configuration  */
-    result = tau_readXmlDatasetConfig(pFileName, 
+    result = tau_readXmlDatasetConfig(&docHandle, 
         &numComId, &pComIdDsIdMap,
         &numDataset, &papDataset);
     if (result == TRDP_NO_ERR)
@@ -351,7 +360,7 @@ int main(int argc, char * argv[])
         TRDP_EXCHG_PAR_T    *pExchgPar = NULL;
         /*  Read telegrams configured for the interface */
         result = tau_readXmlInterfaceConfig(
-            pFileName, pIfConfig[ifIndex].ifName, &pdConfig, &mdConfig,
+            &docHandle, pIfConfig[ifIndex].ifName, &pdConfig, &mdConfig,
             &numExchgPar, &pExchgPar);
         if (result == TRDP_NO_ERR)
         {
@@ -362,6 +371,9 @@ int main(int argc, char * argv[])
             tau_freeTelegrams(numExchgPar, pExchgPar);
         }
     }
+
+    /*  Free parsed document    */
+    tau_freeXmlDoc(&docHandle);
 
     /*  Free allocated memory   */
     if (pComPar)

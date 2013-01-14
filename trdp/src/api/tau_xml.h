@@ -149,6 +149,14 @@ typedef struct
     TRDP_FILE_NAME_T    fileName;      /**< Debug file name and path */
 } TRDP_DBG_CONFIG_T;
 
+/** Parsed XML document handle
+ */
+typedef struct
+{
+    void               *pXmlDocument;   /**< Pointer to parsed XML document */
+    void               *pRootElement;   /**< Pointer to the document root element   */
+    void               *pXPathContext;  /**< Pointer to prepared XPath context  */
+} TRDP_XML_DOC_HANDLE_T;
 
 
 /***********************************************************************************************************************
@@ -161,10 +169,37 @@ typedef struct
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
-/**	Function to read the TRDP configuration parameters out of the XML configuration file.
+/**	Load XML file into DOM tree, prepare XPath context.
  *
  *
  *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[out]	    pDocHnd           Handle of the parsed XML file
+ *
+ *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_PARAM_ERR    File does not exist
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
+    const CHAR8             *pFileName,
+    TRDP_XML_DOC_HANDLE_T   *pDocHnd
+    );
+
+/**********************************************************************************************************************/
+/**	Free all the memory allocated by tau_prepareXmlDoc
+ *
+ *
+ *  @param[in]	    pDocHnd           Handle of the parsed XML file
+ *
+ */
+EXT_DECL void tau_freeXmlDoc (
+    TRDP_XML_DOC_HANDLE_T   *pDocHnd
+    );
+
+/**********************************************************************************************************************/
+/**	Function to read the TRDP configuration parameters out of the XML configuration file.
+ *
+ *
+ *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
  *  @param[out]	    pProcessConfig    TRDP main process configuration
  *  @param[out]	    pMemConfig        Memory configuration
  *  @param[out]     pDbgConfig        Debug printout configuration for application use
@@ -181,23 +216,23 @@ typedef struct
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlConfig (
-    const CHAR8             *pFileName,
-    TRDP_PROCESS_CONFIG_T   *pProcessConfig,
-    TRDP_MEM_CONFIG_T       *pMemConfig,
-    TRDP_DBG_CONFIG_T       *pDbgConfig,
-    TRDP_PD_CONFIG_T        *pPdConfig,
-    TRDP_MD_CONFIG_T        *pMdConfig,
-    UINT32                  *pNumComPar,
-    TRDP_COM_PAR_T          * *ppComPar,
-    UINT32                  *pNumIfConfig,
-    TRDP_IF_CONFIG_T        * *ppIfConfig
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    TRDP_PROCESS_CONFIG_T       *pProcessConfig,
+    TRDP_MEM_CONFIG_T           *pMemConfig,
+    TRDP_DBG_CONFIG_T           *pDbgConfig,
+    TRDP_PD_CONFIG_T            *pPdConfig,
+    TRDP_MD_CONFIG_T            *pMdConfig,
+    UINT32                      *pNumComPar,
+    TRDP_COM_PAR_T             **ppComPar,
+    UINT32                      *pNumIfConfig,
+    TRDP_IF_CONFIG_T           **ppIfConfig
     );
 
 /**********************************************************************************************************************/
 /**	Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
  *  @param[in]	    pIfName           Interface name
  *  @param[in]      pPdConfig         PD default configuration
  *  @param[in]      pMdConfig         MD default configuration
@@ -210,18 +245,18 @@ EXT_DECL TRDP_ERR_T tau_readXmlConfig (
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
-    const CHAR8             *pFileName,
-    const CHAR8             *pIfName,
-    const TRDP_PD_CONFIG_T  *pPdConfig,
-    const TRDP_MD_CONFIG_T  *pMdConfig,
-    UINT32                  *pNumExchgPar,
-    TRDP_EXCHG_PAR_T       **ppExchgPar
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    const CHAR8                 *pIfName,
+    const TRDP_PD_CONFIG_T      *pPdConfig,
+    const TRDP_MD_CONFIG_T      *pMdConfig,
+    UINT32                      *pNumExchgPar,
+    TRDP_EXCHG_PAR_T           **ppExchgPar
     );
 /**********************************************************************************************************************/
 /**	Function to read the DataSet configuration out of the XML configuration file.
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
  *  @param[out]	    pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
  *  @param[out]	    ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
  *  @param[out]	    pNumDataset       Pointer to the number of datasets found in the configuration
@@ -234,11 +269,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
  */
 
 EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
-    const CHAR8            *pFileName,
-    UINT32                 *pNumComId,
-    TRDP_COMID_DSID_MAP_T **ppComIdDsIdMap,        
-    UINT32                 *pNumDataset,
-    ppapTRDP_DATASET_T      ppapDataset);
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    UINT32                      *pNumComId,
+    TRDP_COMID_DSID_MAP_T      **ppComIdDsIdMap,        
+    UINT32                      *pNumDataset,
+    ppapTRDP_DATASET_T           ppapDataset);
 
 
 /**********************************************************************************************************************/

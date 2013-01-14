@@ -49,60 +49,118 @@
  *   Locals
  */
 
-/*
- *  Load and parse provided XML document into DOM tree
- *  Return pointer to the parsed document and pointer to the root element
+/**********************************************************************************************************************/
+/**	Load XML file into DOM tree, prepare XPath context.
+ *
+ *
+ *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[out]	    pDocHnd           Handle of the parsed XML file
+ *
+ *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_PARAM_ERR    File does not exist
+ *
  */
-static TRDP_ERR_T parseXmlDocument (
-    const CHAR8 *pFileName, 
-    xmlDoc     **ppXmlDoc,
-    xmlNodePtr  *ppRootElement
-)
+EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
+    const CHAR8             *pFileName,
+    TRDP_XML_DOC_HANDLE_T   *pDocHnd
+    )
 {
+    xmlDoc             *pXmlDoc;
+    xmlNodePtr          pRootElement;
+    xmlXPathContextPtr  pXPathCtx;
+
     /*  Check file name */
     if (!pFileName || strlen(pFileName) == 0)
         return TRDP_PARAM_ERR;
 
     /* Check parameters */
-    if (!ppXmlDoc || !ppRootElement)
+    if (!pDocHnd)
         return TRDP_PARAM_ERR;
+
+    /*  Set handle pointers to NULL */
+    memset(pDocHnd, 0, sizeof(TRDP_XML_DOC_HANDLE_T));
 
     /*  Initialize XML parser library (libxml2), test version   */
     LIBXML_TEST_VERSION
 
     /*  Parse XML file  */
-    *ppXmlDoc = xmlReadFile((const char *)pFileName, NULL, 0);
-    
+    pXmlDoc = xmlReadFile((const char *)pFileName, NULL, 0);
+    pDocHnd->pXmlDocument = (void *)pXmlDoc;
+
     /*  Check parsing result    */
-    if (!*ppXmlDoc)
+    if (!pXmlDoc)
     { 
         /*  Get parser error    */
         xmlError * pError = xmlGetLastError();
 
-        vos_printf(VOS_LOG_ERROR, "Read XML config: failed to parsed XML file\n");
+        vos_printf(VOS_LOG_ERROR, "Prepare XML doc: failed to parsed XML file\n");
         if (pError)
             vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
 
         return TRDP_PARAM_ERR;
     }
 
-    /*  Get root element - device   */
-    *ppRootElement = xmlDocGetRootElement(*ppXmlDoc);
-
-    if (!*ppRootElement)
+    /*  Get root element    */
+    pRootElement = xmlDocGetRootElement(pXmlDoc);
+    pDocHnd->pRootElement = (void *)pRootElement;
+    /*  Check result    */
+    if (!pRootElement)
+    {
+        vos_printf(VOS_LOG_ERROR, "Prepare XML doc: failed to get document root element\n");
         return TRDP_PARAM_ERR;
+    }
+
+    if (!pRootElement)
+        return TRDP_PARAM_ERR;
+
+    /*  Prepare XPath context   */
+    pXPathCtx = xmlXPathNewContext(pXmlDoc);
+    pDocHnd->pXPathContext = (void *)pXPathCtx;
+    /*  Check result    */
+    if (!pXPathCtx)
+    { 
+        /*  Get parser error    */
+        xmlError * pError = xmlGetLastError();
+
+        vos_printf(VOS_LOG_ERROR, "Prepare XML doc: failed to prepare XPath context\n");
+        if (pError)
+            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
+
+        return TRDP_PARAM_ERR;
+    }
 
     return TRDP_NO_ERR;
 }
 
-/*
- *  Free parsed DOM tree, free the XML parser
+/**********************************************************************************************************************/
+/**	Free all the memory allocated by tau_prepareXmlDoc
+ *
+ *
+ *  @param[in]	    pDocHnd           Handle of the parsed XML file
+ *
  */
-static void freeXmlDocument (xmlDoc *pXmlDoc)
+EXT_DECL void tau_freeXmlDoc (
+    TRDP_XML_DOC_HANDLE_T   *pDocHnd
+    )
 {
-    /*  free parsed document    */
-    if (pXmlDoc)
-        xmlFreeDoc(pXmlDoc);
+    /*  Check parameter */
+    if (!pDocHnd)
+        return;
+
+    /*  Free XPath context  */
+    if (pDocHnd->pXPathContext)
+    {
+        xmlXPathFreeContext((xmlXPathContextPtr)pDocHnd->pXPathContext);
+        pDocHnd->pXPathContext = NULL;
+    }
+
+    /*  Free the document   */
+    if (pDocHnd->pXmlDocument)
+    {
+        xmlFreeDoc((xmlDoc *)pDocHnd->pXmlDocument);
+        pDocHnd->pXmlDocument = NULL;
+    }
+    pDocHnd->pRootElement = NULL;
 
     /* cleanup the parser   */
     xmlCleanupParser();
@@ -723,7 +781,7 @@ static void parseBusInterfaces(
 /**	Function to read the TRDP configuration parameters out of the XML configuration file.
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
  *  @param[out]	    pProcessConfig    TRDP main process configuration
  *  @param[out]	    pMemConfig        Memory configuration
  *  @param[out]     pDbgConfig        Debug printout configuration for application use
@@ -736,36 +794,34 @@ static void parseBusInterfaces(
  *
  *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
- *  @retval         TRDP_PARAM_ERR    File not existing
+ *  @retval         TRDP_PARAM_ERR    Invalid dcument handle
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlConfig (
-    const CHAR8             *pFileName,
-    TRDP_PROCESS_CONFIG_T   *pProcessConfig,
-    TRDP_MEM_CONFIG_T       *pMemConfig,
-    TRDP_DBG_CONFIG_T       *pDbgConfig,
-    TRDP_PD_CONFIG_T        *pPdConfig,
-    TRDP_MD_CONFIG_T        *pMdConfig,
-    UINT32                  *pNumComPar,
-    TRDP_COM_PAR_T          * *ppComPar,
-    UINT32                  *pNumIfConfig,
-    TRDP_IF_CONFIG_T        * *ppIfConfig
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    TRDP_PROCESS_CONFIG_T       *pProcessConfig,
+    TRDP_MEM_CONFIG_T           *pMemConfig,
+    TRDP_DBG_CONFIG_T           *pDbgConfig,
+    TRDP_PD_CONFIG_T            *pPdConfig,
+    TRDP_MD_CONFIG_T            *pMdConfig,
+    UINT32                      *pNumComPar,
+    TRDP_COM_PAR_T             **ppComPar,
+    UINT32                      *pNumIfConfig,
+    TRDP_IF_CONFIG_T           **ppIfConfig
     )
 {
-    xmlDoc     *pXmlDoc;
     xmlNodePtr  pRootElement;
     xmlNodePtr  pChildElement;
-    TRDP_ERR_T  result;       
 
     /*  Set default values to all parameters    */
     setDefaultValues(
         pProcessConfig, pMemConfig, pDbgConfig, pPdConfig, pMdConfig, 
         pNumComPar, ppComPar, pNumIfConfig, ppIfConfig);
 
-    /* Load the document, parse it into DOM tree    */
-    result = parseXmlDocument(pFileName, &pXmlDoc, &pRootElement);
-    if (result != TRDP_NO_ERR)
-        return result;
+    /* Check document handle    */
+    if (!pDocHnd)
+        return TRDP_PARAM_ERR;
+    pRootElement = (xmlNodePtr)pDocHnd->pRootElement;
 
     /*  Read host names */
     if (pProcessConfig)
@@ -805,9 +861,6 @@ EXT_DECL TRDP_ERR_T tau_readXmlConfig (
         pChildElement = xmlNextElementSibling(pChildElement);
 	}
 
-    /*  Free parsed document    */
-    freeXmlDocument(pXmlDoc);
-    
     return TRDP_NO_ERR;
 }
 
@@ -928,7 +981,7 @@ static void parseDatasets(
     	    while (pElementElem != NULL && idxElem < numElement) 
             {
                 parseDSElemType(pElementElem, "type", &(pDataset->pElement[idxElem].type));
-                pDataset->pElement[idxElem].size = TDRP_VAR_SIZE;
+                pDataset->pElement[idxElem].size = 1;
                 parseUINT32(pElementElem, "array-size", &(pDataset->pElement[idxElem].size));
 
                 pElementElem = xmlNextElementSibling(pElementElem);
@@ -946,7 +999,7 @@ static void parseDatasets(
 /**	Function to read the DataSet configuration out of the XML configuration file.
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
  *  @param[out]	    pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
  *  @param[out]	    ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
  *  @param[out]	    pNumDataset       Pointer to the number of datasets found in the configuration
@@ -958,17 +1011,15 @@ static void parseDatasets(
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
-    const CHAR8            *pFileName,
-    UINT32                 *pNumComId,
-    TRDP_COMID_DSID_MAP_T **ppComIdDsIdMap,        
-    UINT32                 *pNumDataset,
-    ppapTRDP_DATASET_T      ppapDataset
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    UINT32                      *pNumComId,
+    TRDP_COMID_DSID_MAP_T      **ppComIdDsIdMap,        
+    UINT32                      *pNumDataset,
+    ppapTRDP_DATASET_T           ppapDataset
     )
 {
-    xmlDoc             *pXmlDoc;
     xmlNodePtr          pRootElement;
     xmlXPathContextPtr  pXPathCtx;
-    TRDP_ERR_T          result;       
 
     /*  Set empty values  */
     if (pNumComId)
@@ -980,24 +1031,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     if (ppapDataset)
         *ppapDataset = NULL;
 
-    /*  Load the document, parse it into DOM tree    */
-    result = parseXmlDocument(pFileName, &pXmlDoc, &pRootElement);
-    if (result != TRDP_NO_ERR)
-        return result;
-
-    /*  Prepare XPath context   */
-    pXPathCtx = xmlXPathNewContext(pXmlDoc);
-    if(!pXPathCtx) 
-    { 
-        /*  Get parser error    */
-        xmlError * pError = xmlGetLastError();
-
-        vos_printf(VOS_LOG_ERROR, "Read XML config: failed to initialize XPath\n");
-        if (pError)
-            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
-
+    /* Check document handle    */
+    if (!pDocHnd)
         return TRDP_PARAM_ERR;
-    }
+    pRootElement = (xmlNodePtr)pDocHnd->pRootElement;
+    pXPathCtx = (xmlXPathContextPtr)pDocHnd->pXPathContext;
 
     /*  Parse mapping between ComId and DatasetId   */
     parseComIdDsIdMap(pXPathCtx, pNumComId, ppComIdDsIdMap);
@@ -1005,12 +1043,6 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     /*  Parse dataset definitions   */
     parseDatasets(pXPathCtx, pNumDataset, ppapDataset);
 
-    /*  Free XPath context  */
-    xmlXPathFreeContext(pXPathCtx);
-
-    /*  Free parsed document    */
-    freeXmlDocument(pXmlDoc);
-    
     return TRDP_NO_ERR;
 }
 
@@ -1292,7 +1324,7 @@ static void parseTelegram(
 /**	Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
+ *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
  *  @param[in]	    pIfName           Interface name
  *  @param[in]      pPdConfig         PD default configuration
  *  @param[in]      pMdConfig         MD default configuration
@@ -1304,51 +1336,32 @@ static void parseTelegram(
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
-    const CHAR8             *pFileName,
-    const CHAR8             *pIfName,
-    const TRDP_PD_CONFIG_T  *pPdConfig,
-    const TRDP_MD_CONFIG_T  *pMdConfig,
-    UINT32                  *pNumExchgPar,
-    TRDP_EXCHG_PAR_T       **ppExchgPar
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    const CHAR8                 *pIfName,
+    const TRDP_PD_CONFIG_T      *pPdConfig,
+    const TRDP_MD_CONFIG_T      *pMdConfig,
+    UINT32                      *pNumExchgPar,
+    TRDP_EXCHG_PAR_T           **ppExchgPar
     )
 {
-    xmlDoc             *pXmlDoc;
     xmlNodePtr          pRootElement;
     xmlXPathContextPtr  pXPathCtx;
     xmlXPathObjectPtr   pXPathObj;
-    TRDP_ERR_T          result;       
     CHAR8               strXPath[256];
     xmlNodePtr          pTlgElem;
     int                 index;
 
     /*  Check parameters    */
-    if (!pFileName || !pIfName || !pNumExchgPar)
+    if (!pDocHnd || !pIfName || !pNumExchgPar)
         return TRDP_PARAM_ERR;
     if (!pPdConfig || !pMdConfig || !ppExchgPar)
         return TRDP_PARAM_ERR;
+    pRootElement = (xmlNodePtr)pDocHnd->pRootElement;
+    pXPathCtx = (xmlXPathContextPtr)pDocHnd->pXPathContext;
 
     /* Set empty values */
     *pNumExchgPar = 0;
     *ppExchgPar = NULL;
-
-    /*  Load the document, parse it into DOM tree    */
-    result = parseXmlDocument(pFileName, &pXmlDoc, &pRootElement);
-    if (result != TRDP_NO_ERR)
-        return result;
-
-    /*  Prepare XPath context   */
-    pXPathCtx = xmlXPathNewContext(pXmlDoc);
-    if(!pXPathCtx) 
-    { 
-        /*  Get parser error    */
-        xmlError * pError = xmlGetLastError();
-
-        vos_printf(VOS_LOG_ERROR, "Read XML config: failed to initialize XPath\n");
-        if (pError)
-            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
-
-        return TRDP_PARAM_ERR;
-    }
 
     /* Execute XPath expression - find all telegram elemments for given interface  */
     snprintf(strXPath, sizeof(strXPath),
@@ -1381,12 +1394,6 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
         xmlXPathFreeObject(pXPathObj);
     }
 
-    /*  Free XPath context  */
-    xmlXPathFreeContext(pXPathCtx);
-
-    /*  Free parsed document    */
-    freeXmlDocument(pXmlDoc);
-    
     return TRDP_NO_ERR;
 }
 
