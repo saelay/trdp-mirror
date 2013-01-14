@@ -689,7 +689,10 @@ void printLog(
     UINT16      line,
     const CHAR8 *pMsgStr)
 {
-    fprintf(pLogFile, "%s File: %s Line: %d %s\n", category==VOS_LOG_ERROR?"ERR ":(category==VOS_LOG_WARNING?"WARN":(category==VOS_LOG_INFO?"INFO":"DEBG")), pFile, (int) line, pMsgStr);
+    if (pLogFile != NULL)
+    {
+        fprintf(pLogFile, "%s File: %s Line: %d %s\n", category==VOS_LOG_ERROR?"ERR ":(category==VOS_LOG_WARNING?"WARN":(category==VOS_LOG_INFO?"INFO":"DEBG")), pFile, (int) line, pMsgStr);
+    }
 }
 
 
@@ -698,20 +701,23 @@ int main(int argc, char * argv[])
     TRDP_ERR_T err;
     unsigned tick = 0;
 
-        printf("TRDP process data test program, version r178\n");
+    printf("TRDP process data test program, version r178\n");
 
-    if (argc != 4)
+    if (argc < 4)
     {
-        printf("usage: trdp-pd-test <localip> <remoteip> <mcast>\n", argv[0]);
+        printf("usage: trdp-pd-test <localip> <remoteip> <mcast> <logfile>\n", argv[0]);
         printf("  <localip>  .. own IP address (ie. 10.2.24.1)\n");
         printf("  <remoteip> .. remote peer IP address (ie. 10.2.24.2)\n");
         printf("  <mcast>    .. multicast group address (ie. 239.2.24.1)\n");
+        printf("  <logfile>  .. file name for logging (ie. test.txt)\n");
+
         return 1;
     }
 
     srcip = ntohl(inet_addr(argv[1]));
     dstip = ntohl(inet_addr(argv[2]));
     mcast = ntohl(inet_addr(argv[3]));
+
     if (!srcip || !dstip || (mcast >> 28) != 0xE)
     {
         printf("invalid input arguments\n");
@@ -721,7 +727,14 @@ int main(int argc, char * argv[])
     memset(&memcfg, 0, sizeof(memcfg));
     memset(&proccfg, 0, sizeof(proccfg));
 
-    pLogFile = fopen("TRDPLogFile.txt", "w+");
+    if (argc >= 5)
+    {
+        pLogFile = fopen(argv[4], "w+");
+    }
+    else
+    {
+        pLogFile = NULL;
+    }
 
     // initialize TRDP protocol library
     err = tlc_init(printLog, &memcfg);
