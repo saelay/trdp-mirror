@@ -34,12 +34,7 @@ extern "C" {
 
 #ifdef TRDP_OPTION_LADDER
 #include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <semaphore.h>
-#include <sys/times.h>
 
 
 #endif /* TRDP_OPTION_LADDER */
