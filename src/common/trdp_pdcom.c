@@ -258,7 +258,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
             /* Reset "immediate" flag for request or requested packet */
             if (iterPD->privFlags & TRDP_REQ_2B_SENT)            
             {
-                iterPD->privFlags ^= TRDP_REQ_2B_SENT;          
+                iterPD->privFlags &= ~ TRDP_REQ_2B_SENT;          
             }
 
             /*  Set timer if interval was set.
