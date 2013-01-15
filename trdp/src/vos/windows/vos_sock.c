@@ -637,7 +637,6 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     UINT16      port)
 {
     struct sockaddr_in destAddr;
-    int bufferSize  = (int) size;
     int sendSize    = 0; 
     int err = 0;
 
@@ -662,18 +661,12 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
                          sizeof(destAddr));
         err = WSAGetLastError();
 
-        if (sendSize >= 0)
-        {
-            bufferSize  -= sendSize;
-            pBuffer     += sendSize;
-        } 
-
         if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)   
         {
             return VOS_BLOCK_ERR;
         }
     }
-    while (bufferSize && !(sendSize == SOCKET_ERROR && err != WSAEINTR));
+    while (sendSize == SOCKET_ERROR && err != WSAEINTR);
 
     if (sendSize == SOCKET_ERROR)
     {
@@ -713,7 +706,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     struct sockaddr_in srcAddr;
     int sockLen = sizeof(srcAddr);
     int rcvSize = 0;
-    int bufferSize = *pSize;
     int err = 0;
  
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
@@ -721,14 +713,13 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         return VOS_PARAM_ERR;
     } 
 
-    *pSize = 0;
     memset(&srcAddr, 0, sizeof(srcAddr));
 
     do
     {  
         rcvSize = recvfrom(sock,
                            (char *) pBuffer,
-                           bufferSize,
+                           *pSize,
                            0,
                            (SOCKADDR *) &srcAddr,
                            &sockLen);
@@ -736,27 +727,13 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
         *pIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
         /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
-        
-        if (rcvSize > 0)
-        {
-            bufferSize  -= rcvSize;
-            pBuffer     += rcvSize;
-            *pSize      += rcvSize;
-        }
-
+     
         if(rcvSize == -1 && err == WSAEWOULDBLOCK)
         {
-            if (*pSize == 0)
-            {
-                return VOS_BLOCK_ERR;
-            }
-            else
-            {
-                return VOS_NO_ERR;
-            }
+            return VOS_BLOCK_ERR;
         }
     }
-    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && err == WSAEINTR));  
+    while (rcvSize == -1 && err == WSAEINTR);  
  
     if ((rcvSize == -1) && !(err == WSAEMSGSIZE))
     {
@@ -764,8 +741,9 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         *pSize = 0; 
         return VOS_IO_ERR;
     }
-    else if (*pSize == 0)
+    else if (rcvSize == 0)
     {
+        *pSize = 0; 
         if (err == WSAEMSGSIZE)
         {
             return VOS_MEM_ERR;
@@ -777,6 +755,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     else
     {
+        *pSize = rcvSize; 
         return VOS_NO_ERR;
     } 
 }
