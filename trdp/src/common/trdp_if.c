@@ -1885,8 +1885,8 @@ EXT_DECL TRDP_ERR_T tlp_get (
             /*    Call the receive function if we are in non blocking mode    */
             if (!(appHandle->option & TRDP_OPTION_BLOCK))
             {
-                /* return value is not interesting, will be overwritten later anyway */
-                ret = trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock);
+                 /* read all you can get, return value is not interesting */
+                do {} while (trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock) != TRDP_BLOCK_ERR);
             }
 
             /*    Get the current time    */

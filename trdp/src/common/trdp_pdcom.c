@@ -115,7 +115,7 @@ TRDP_ERR_T trdp_pdPut (
     if (TRDP_NO_ERR == ret)
     {
         /* set data valid */
-        pPacket->privFlags ^= TRDP_INVALID_DATA;
+        pPacket->privFlags &= ~TRDP_INVALID_DATA;
 
         /* Update PD buffer */
         trdp_pdDataUpdate(pPacket);
@@ -431,7 +431,13 @@ TRDP_ERR_T  trdp_pdReceive (
     /*  Examine subscription queue, are we interested in this PD?   */
     pExistingElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, &subHandle);
 
-    if (pExistingElement != NULL)
+    if (pExistingElement == NULL)
+    {
+         /*
+         vos_printf(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+         */
+    }
+    else
     {
         /*        Is this packet a duplicate?    */
         if (vos_ntohl(pNewFrame->frameHead.sequenceCounter) <
@@ -442,10 +448,14 @@ TRDP_ERR_T  trdp_pdReceive (
                 vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter) <
                 vos_ntohl(pNewFrame->frameHead.sequenceCounter))
             {
-                vos_printf(VOS_LOG_INFO, "Old PD data ignored (comId %u)\n", vos_ntohl(pNewFrame->frameHead.comId));
+                vos_printf(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
                 return TRDP_NO_ERR;
             }
         }
+        
+        /*
+        vos_printf(VOS_LOG_INFO, "Received (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+        */
 
         /*  This might have not been set!   */
         pExistingElement->dataSize  = vos_ntohl(pNewFrame->frameHead.datasetLength);
@@ -464,10 +474,10 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
         pExistingElement->lastErr    = TRDP_NO_ERR;
-        pExistingElement->privFlags ^= TRDP_TIMED_OUT;
+        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
 
         /* set the data valid */
-        pExistingElement->privFlags ^= TRDP_INVALID_DATA;
+        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
 
         if (informUser)
         {
