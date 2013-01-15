@@ -652,9 +652,6 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     destAddr.sin_addr.s_addr    = vos_htonl(ipAddress);
     destAddr.sin_port           = vos_htons(port);
 
-    vos_printf(VOS_LOG_DBG, "sending packet to %s:%u\n",
-               inet_ntoa(destAddr.sin_addr), port);
-
     do
     {
         sendSize = sendto(sock,
@@ -671,7 +668,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
             pBuffer     += sendSize;
         } 
 
-        if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
+        if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)   
         {
             return VOS_BLOCK_ERR;
         }
@@ -680,7 +677,8 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     if (sendSize == SOCKET_ERROR)
     {
-        vos_printf(VOS_LOG_ERROR, "sendto() failed (Err: %d)\n", err);
+        vos_printf(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %d)\n", 
+                   inet_ntoa(destAddr.sin_addr), port, err);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -760,7 +758,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && err == WSAEINTR));  
  
-    if (rcvSize == -1)
+    if ((rcvSize == -1) && !(err == WSAEMSGSIZE))
     {
         vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
         *pSize = 0; 
@@ -768,7 +766,14 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     else if (*pSize == 0)
     {
-        return VOS_NODATA_ERR;
+        if (err == WSAEMSGSIZE)
+        {
+            return VOS_MEM_ERR;
+        }
+        else 
+        {
+            return VOS_NODATA_ERR;
+        }
     }
     else
     {
@@ -1097,9 +1102,16 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         vos_printf(VOS_LOG_WARNING, "receive() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
-    else if (*pSize == 0)
+    else if ((*pSize == 0) && !(err == WSAEMSGSIZE))
     {
-        return VOS_NODATA_ERR;
+        if (err == WSAEMSGSIZE)
+        {
+            return VOS_MEM_ERR;
+        }
+        else 
+        {
+            return VOS_NODATA_ERR;
+        }
     }
     else
     {
