@@ -617,7 +617,6 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     UINT16      port)
 {
     struct sockaddr_in destAddr;
-    ssize_t bufferSize  = size;
     ssize_t sendSize    = 0; 
 
     if (sock == -1 || pBuffer == NULL)
@@ -641,18 +640,12 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
                           (struct sockaddr *) &destAddr,
                           sizeof(destAddr));
         
-        if (sendSize >= 0)
-        {
-            bufferSize  -= sendSize;
-            pBuffer     += sendSize;
-        } 
-        
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
     }
-    while (bufferSize && !(sendSize == -1 && errno != EINTR));
+    while (sendSize == -1 && errno != EINTR);
 
     if (sendSize == -1)
     {
@@ -694,7 +687,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen     = sizeof(srcAddr);
     ssize_t             rcvSize     = 0;
-    size_t              bufferSize  = (size_t) *pSize;
  
 
     memset(&srcAddr, 0, sizeof(srcAddr));
@@ -704,40 +696,30 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         return VOS_PARAM_ERR;
     } 
 
-    *pSize = 0;
-
     do
     {
         rcvSize = recvfrom(sock,
                            pBuffer,
-                           bufferSize,
+                           *pSize,
                            0,
                            (struct sockaddr *) &srcAddr,
                            &sockLen);
 
         *pIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
-        /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
-
+        
         if (rcvSize > 0)
         {
-            bufferSize  -= rcvSize;
-            pBuffer     += rcvSize;
-            *pSize      += rcvSize;
-        }
+            vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %08x\n", rcvSize, *pIPAddr);
+		}
 
         if(rcvSize == -1 && errno == EWOULDBLOCK)
         {
-            if (*pSize == 0)
-            {
-                return VOS_BLOCK_ERR;
-            }
-            else
-            {
-                return VOS_NO_ERR;
-            }
+            return VOS_BLOCK_ERR;
         }
     }
-    while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR)); 
+    while (rcvSize == -1 && errno == EINTR); 
+
+    *pSize = 0; 
 
     if (rcvSize == -1)
     {
@@ -746,7 +728,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         vos_printf(VOS_LOG_ERROR, "recvfrom() from failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     } 
-    else if (*pSize == 0)
+    else if (rcvSize == 0)
     {
         if (errno == EMSGSIZE)
         {
@@ -759,6 +741,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     else
     {
+        *pSize = rcvSize; 
         return VOS_NO_ERR;
     }
 }
