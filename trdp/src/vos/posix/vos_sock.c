@@ -468,6 +468,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
 {
     struct ip_mreq  mreq;
     VOS_ERR_T       result = VOS_NO_ERR;
+    char buff[VOS_MAX_ERR_STR_SIZE];
 
     if (sock == -1)
     {
@@ -483,8 +484,8 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             char mcStr[16];
             char ifStr[16];
 
-            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
-            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+            strncpy (mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
+            strncpy (ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
 
             vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
@@ -492,7 +493,6 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         errno = 0;
         if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
-            char buff[VOS_MAX_ERR_STR_SIZE];
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %s)\n", buff);
             result = VOS_SOCK_ERR;
@@ -508,10 +508,9 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             UINT32 enMcLb = 0;
 
             errno = 0;
-            if (    (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1)
-                 && (errno != 0))
+            if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1
+                 && errno != 0)
             {
-                char buff[VOS_MAX_ERR_STR_SIZE];
                 strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (%s)\n", buff);
                 result = VOS_SOCK_ERR;
@@ -566,8 +565,8 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             char mcStr[16];
             char ifStr[16];
 
-            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
-            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+            strncpy (mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
+            strncpy (ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
 
             vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
         }
@@ -749,7 +748,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     } 
     else if (*pSize == 0)
     {
-        if (err == EMSGSIZE)
+        if (errno == EMSGSIZE)
         {
             return VOS_MEM_ERR;
         }
@@ -1088,7 +1087,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     }
     else if (*pSize == 0)
     {
-        if (err == EMSGSIZE)
+        if (errno == EMSGSIZE)
         {
             return VOS_MEM_ERR;
         }
@@ -1134,7 +1133,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
-            vos_print(VOS_LOG_WARNING, "setsockopt() IP_MULTICAST_IF failed (Err: %s)\n", buff);
+            vos_printf(VOS_LOG_WARNING, "setsockopt() IP_MULTICAST_IF failed (Err: %s)\n", buff);
             result = VOS_SOCK_ERR;
         }
         else
