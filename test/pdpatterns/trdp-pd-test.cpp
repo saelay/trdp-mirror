@@ -144,8 +144,8 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
                 // addresses
                 if (!a)
                 {   // unicast address
-                    src.dst = snk.src = dstip;
-                    src.src = snk.dst = srcip;
+                    src.dst = snk.src =  dstip;
+                    src.src = snk.dst =  srcip;
                 }
                 else
                 {   // multicast address
@@ -755,7 +755,7 @@ int main(int argc, char * argv[])
     pdcfg.port = 20548;
 
     // open session
-    err = tlc_openSession(&apph, /*srcip*/ 0, 0, NULL, &pdcfg, NULL, &proccfg);
+    err = tlc_openSession(&apph, srcip, 0, NULL, &pdcfg, NULL, &proccfg);
     if (err != TRDP_NO_ERR)
     {
         printf("tlc_openSession() failed, err: %d\n", err);

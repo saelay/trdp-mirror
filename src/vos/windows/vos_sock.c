@@ -728,22 +728,22 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         *pIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
         /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
      
-        if(rcvSize == -1 && err == WSAEWOULDBLOCK)
+        if(rcvSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
     }
-    while (rcvSize == -1 && err == WSAEINTR);  
+    while (rcvSize == SOCKET_ERROR && err == WSAEINTR);  
  
-    if ((rcvSize == -1) && !(err == WSAEMSGSIZE))
+    *pSize = 0; 
+
+    if ((rcvSize == SOCKET_ERROR) && !(err == WSAEMSGSIZE))
     {
         vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
-        *pSize = 0; 
         return VOS_IO_ERR;
     }
     else if (rcvSize == 0)
     {
-        *pSize = 0; 
         if (err == WSAEMSGSIZE)
         {
             return VOS_MEM_ERR;
