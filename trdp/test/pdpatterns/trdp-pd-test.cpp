@@ -678,7 +678,7 @@ void poll_data()
     }
 }
 
-// --- main --------------------------------------------------------------------
+
 static FILE *pLogFile;
 
 void printLog(
@@ -692,10 +692,11 @@ void printLog(
     if (pLogFile != NULL)
     {
         fprintf(pLogFile, "%s File: %s Line: %d %s\n", category==VOS_LOG_ERROR?"ERR ":(category==VOS_LOG_WARNING?"WARN":(category==VOS_LOG_INFO?"INFO":"DEBG")), pFile, (int) line, pMsgStr);
+        fflush(pLogFile);
     }
 }
 
-
+// --- main --------------------------------------------------------------------
 int main(int argc, char * argv[])
 {
     TRDP_ERR_T err;
