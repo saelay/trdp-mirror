@@ -1530,7 +1530,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                     curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
                     it will be incremented when sending...                                                          */
                 pReqElement->curSeqCnt = trdp_getSeqCnt(pReqElement->addr.comId,
-                                                        TRDP_MSG_PD, pReqElement->addr.srcIpAddr) - 1;
+                                                        TRDP_MSG_PR, pReqElement->addr.srcIpAddr) - 1;
 
                 /*    Compute the header fields */
                 trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, subs, offsetAddr, replyComId, replyIpAddr);
