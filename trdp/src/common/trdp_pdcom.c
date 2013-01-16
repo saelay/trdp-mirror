@@ -103,7 +103,7 @@ TRDP_ERR_T trdp_pdPut (
         return TRDP_PARAM_ERR;
     }
 
-    if (   (pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
+    if (  !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
         || (marshall == NULL))
     {
         memcpy(pPacket->pFrame->data, pData, dataSize);
