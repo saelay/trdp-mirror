@@ -663,7 +663,11 @@ TRDP_ERR_T tlp_setRedundant (
                     iterPD->pktFlags |= TRDP_FLAGS_REDUNDANT;
                 }
             }
-            vos_mutexUnlock(appHandle->mutex);
+          
+            if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+            {
+                vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            }
         }
     }
     else
@@ -1746,6 +1750,10 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     /*    Join a multicast group */
                     if (newPD->addr.mcGroup != 0)
                     {
+                        /* 
+                           return value ignored since joining of an already joined address leads to an error 
+                           TODO: call join only when address is not joined yet               
+                        */
                         /*ret = (TRDP_ERR_T)*/ vos_sockJoinMC(appHandle->iface[index].sock,
                                                               newPD->addr.mcGroup,
                                                               appHandle->realIP);
