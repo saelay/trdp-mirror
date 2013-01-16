@@ -103,7 +103,8 @@ TRDP_ERR_T trdp_pdPut (
         return TRDP_PARAM_ERR;
     }
 
-    if (marshall == NULL)
+    if (   (pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
+        || (marshall == NULL))
     {
         memcpy(pPacket->pFrame->data, pData, dataSize);
     }
@@ -202,8 +203,8 @@ TRDP_ERR_T trdp_pdGet (
 /******************************************************************************/
 /** Send all due PD messages
  *
+ *  @param[in]      appHandle           session pointer
  *
- *    @param[in]      appHandle           session pointer
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_IO_ERR         socket I/O error
  */
@@ -284,8 +285,9 @@ TRDP_ERR_T  trdp_pdSendQueued (
  *  If it is an update, exchange the existing entry with the new one
  *  Call user's callback if needed
  *
- *    @param[in]      appHandle           session pointer
+ *  @param[in]      appHandle           session pointer
  *  @param[in]      sock                the socket to read from
+ *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_WIRE_ERR       protocol error (late packet, version mismatch)
@@ -561,6 +563,7 @@ void    trdp_pdUpdate (
  *
  *  @param[in]      pPacket         pointer to the packet to check
  *  @param[in]      packetSize      max size to check
+ *
  *  @retval         TRDP_NO_ERR
  *  @retval         TRDP_CRC_ERR
  */
@@ -632,6 +635,7 @@ TRDP_ERR_T trdp_pdCheck (
  *
  *  @param[in]      pdSock          socket descriptor
  *  @param[in]      pPacket         pointer to packet to be sent
+ *
  *  @retval         TRDP_NO_ERR
  *  @retval         TRDP_IO_ERR
  */
@@ -679,6 +683,7 @@ TRDP_ERR_T  trdp_pdSend (
  *  Scheduling will be computed based on the smallest interval time.
  *
  *  @param[in]      pSndQueue       pointer to send queue
+ *
  *  @retval         TRDP_NO_ERR
  */
 TRDP_ERR_T  trdp_pdDistribute (
