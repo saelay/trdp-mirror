@@ -32,12 +32,6 @@
 extern "C" {
 #endif
 
-#ifdef TRDP_OPTION_LADDER
-#include <fcntl.h>
-#include <semaphore.h>
-
-
-#endif /* TRDP_OPTION_LADDER */
 
 /***********************************************************************************************************************
  * DEFINES
@@ -117,15 +111,6 @@ typedef enum
     VOS_SEMA_FULL   = 1
 } VOS_SEMA_STATE_T;
 
-#ifdef TRDP_OPTION_LADDER
-struct VOS_SEMA
-{
-    CHAR8 *semaphoreName;        /* semaphore Name */
-    INT32 oflag;                /* semaphore access mode */
-    mode_t permission;            /* semaphore permission */
-    sem_t *pSemaphore;            /* semaphore object address */
-};
-#endif /* TRDP_OPTION_LADDER */
 
 /** Hidden mutex handle definition    */
 typedef struct VOS_MUTEX  *VOS_MUTEX_T;
