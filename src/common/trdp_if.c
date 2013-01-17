@@ -785,7 +785,8 @@ UINT32 trdp_getTopoCount (
  *  @param[in]      destIpAddr           where to send the packet to
  *  @param[in]      interval             frequency of PD packet (>= 10ms) in usec, 0 if PD PULL
  *  @param[in]      redId                0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags             OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pktFlags             OPTION: 
+ *                                       TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam           optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData                pointer to packet data / dataset
  *  @param[in]      dataSize             size of packet data <= 1436 without FCS
@@ -924,16 +925,16 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             else
             {
                 vos_getTime(&nextTime);
-                tv_interval.tv_sec  = interval / 1000000;
-                tv_interval.tv_usec = interval % 1000000;
+                tv_interval.tv_sec      = interval / 1000000;
+                tv_interval.tv_usec     = interval % 1000000;
                 vos_addTime(&nextTime, &tv_interval);
                 pNewElement->interval   = tv_interval;
                 pNewElement->timeToGo   = nextTime;
             }
 
             /*    Update the internal data */
-            pNewElement->addr = pubHandle;
-            pNewElement->pktFlags       = pktFlags;
+            pNewElement->addr           = pubHandle;
+            pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
             pNewElement->redId          = redId;
@@ -1392,7 +1393,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pktFlags            OPTION: 
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -1513,7 +1515,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                             pReqElement->addr.destIpAddr    = destIpAddr;
                             pReqElement->addr.srcIpAddr     = srcIpAddr;
                             pReqElement->addr.mcGroup       = 0;
-                            pReqElement->pktFlags           = pktFlags;
+                            pReqElement->pktFlags           = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
 
                             /*    Enter this request into the send queue.    */
                             trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
@@ -1573,6 +1575,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      srcIpAddr1          IP for source filtering, set 0 if not used
  *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
  *                                      Used e.g. for source filtering of redundant devices.
+ *  @param[in]      pktFlags            OPTION: 
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      destIpAddr          IP address to join
  *  @param[in]      timeout             timeout (>= 10ms) in usec
  *  @param[in]      toBehavior          timeout behavior
@@ -1592,6 +1596,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_IP_ADDR_T      srcIpAddr1,
     TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      destIpAddr,
+    TRDP_FLAGS_T        pktFlags,
     UINT32              timeout,
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
@@ -1731,9 +1736,10 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       = toBehavior;
                     newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef      = pUserRef;
-                    newPD->socketIdx    = index;
-                    newPD->privFlags    |= TRDP_INVALID_DATA;
+                    newPD->userRef          = pUserRef;
+                    newPD->socketIdx        = index;
+                    newPD->privFlags       |= TRDP_INVALID_DATA;
+                    newPD->pktFlags         = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
 
                     if (timeout == 0)
                     {
@@ -1841,7 +1847,6 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      subHandle           the handle returned by subscription
- *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_MARSHALL
  *  @param[in,out]  pPdInfo             pointer to application's info buffer
  *  @param[in,out]  pData               pointer to application's data buffer
  *  @param[in,out]  pDataSize           in: size of buffer, out: size of data
@@ -1856,7 +1861,6 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
 EXT_DECL TRDP_ERR_T tlp_get (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_SUB_T          subHandle,
-    TRDP_FLAGS_T        pktFlags,
     TRDP_PD_INFO_T      *pPdInfo,
     UINT8               *pData,
     UINT32              *pDataSize)
@@ -1915,17 +1919,13 @@ EXT_DECL TRDP_ERR_T tlp_get (
                 }
                 ret = TRDP_TIMEOUT_ERR;
             }
-            else if (pktFlags == TRDP_FLAGS_MARSHALL)
+            else
             {
                 ret = trdp_pdGet(pElement,
                                  appHandle->marshall.pfCbUnmarshall,
                                  appHandle->marshall.pRefCon,
                                  pData,
                                  pDataSize);
-            }
-            else
-            {
-                ret = trdp_pdGet(pElement, NULL, NULL, pData, pDataSize);
             }
         }
 
@@ -2199,7 +2199,7 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->addr.destIpAddr    = destIpAddr;
             pNewElement->addr.mcGroup       = 0;
             pNewElement->privFlags          = TRDP_PRIV_NONE;
-            pNewElement->pktFlags           = pktFlags;
+            pNewElement->pktFlags           = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->mdDefault.flags:pktFlags;
             pNewElement->interval           = tv_interval;
             pNewElement->timeToGo           = nextTime;
             pNewElement->dataSize           = dataSize;
@@ -2474,7 +2474,8 @@ static TRDP_ERR_T tlm_common_send (
  *  @param[in]      topoCount           topocount to use
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pktFlags            OPTION: 
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -2534,7 +2535,8 @@ TRDP_ERR_T tlm_notify (
  *  @param[in]      topoCount           topocount to use
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pktFlags            OPTION: 
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL
  *  @param[in]      noOfRepliers        number of expected repliers, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
@@ -2599,7 +2601,8 @@ TRDP_ERR_T tlm_request (
  *  @param[in]      comId               comId to be observed
  *  @param[in]      topoCount           topocount to use
  *  @param[in]      destIpAddr          destination IP address
- *  @param[in]      pktFlags            optional marshalling
+ *  @param[in]      pktFlags            OPTION: 
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL
  *  @param[in]      destURI             only functional group of destination URI
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -3083,23 +3086,23 @@ TRDP_ERR_T tlm_replyErr (
     const TRDP_URI_USER_T   destURI)
 {
     return tlm_common_send(
-               TRDP_MSG_ME,              /* reply with error */
+               TRDP_MSG_ME,     /* reply with error */
                appHandle,
-               NULL,              /* user ref */
+               NULL,            /* user ref */
                pSessionId,
                comId,
                topoCount,
                srcIpAddr,
                destIpAddr,
                TRDP_FLAGS_NONE, /* pktflags */
-               0,              /* user status */
-               0,              /* confirm timeout */
-               0,              /* num of repliers */
-               0,              /* reply timeout */
+               0,               /* user status */
+               0,               /* confirm timeout */
+               0,               /* num of repliers */
+               0,               /* reply timeout */
                replyState,
                pSendParam,
-               NULL,           /* pData */
-               0,              /* dataSize */
+               NULL,            /* pData */
+               0,               /* dataSize */
                sourceURI,
                destURI
                );

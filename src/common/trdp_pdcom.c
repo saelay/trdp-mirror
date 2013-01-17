@@ -181,7 +181,8 @@ TRDP_ERR_T trdp_pdGet (
         return TRDP_NODATA_ERR;
     }
 
-    if (unmarshall == NULL)
+    if ( !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
+        ||(unmarshall == NULL))
     {
         if (*pDataSize >=  pPacket->dataSize)
         {
@@ -513,7 +514,8 @@ TRDP_ERR_T  trdp_pdReceive (
         informUser)
     {
         /*  If a callback was provided, call it now */
-        if (appHandle->pdDefault.pfCbFunction != NULL)
+        if (   (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
+             &&(appHandle->pdDefault.pfCbFunction != NULL))
         {
             TRDP_PD_INFO_T theMessage;
             theMessage.comId        = pExistingElement->addr.comId;
@@ -529,7 +531,7 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.replyIpAddr  = vos_ntohl(pExistingElement->pFrame->frameHead.replyIpAddress);
             theMessage.pUserRef     = pExistingElement->userRef; /* User reference given with the local subscribe? */
             theMessage.resultCode   = resultCode;
-
+             
             appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
                                               &theMessage,
                                               pExistingElement->pFrame->data,
