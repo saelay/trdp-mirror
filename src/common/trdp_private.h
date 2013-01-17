@@ -38,52 +38,52 @@
 #define LIB_VERSION  "0.0.1.1"
 
 #ifndef TRDP_PD_UDP_PORT
-#define TRDP_PD_UDP_PORT                20548       /**< process data UDP port          */
+#define TRDP_PD_UDP_PORT                    20548       /**< process data UDP port                      */
 #endif
 #ifndef TRDP_MD_UDP_PORT
-#define TRDP_MD_UDP_PORT                20550       /**< message data UDP port          */
+#define TRDP_MD_UDP_PORT                    20550       /**< message data UDP port                      */
 #endif
 #ifndef TRDP_MD_TCP_PORT
-#define TRDP_MD_TCP_PORT                20550       /**< message data TCP port          */
+#define TRDP_MD_TCP_PORT                    20550       /**< message data TCP port                      */
 #endif
 
-#define TRDP_PROTO_VER                  0x0100      /**< Protocol version               */
+#define TRDP_PROTO_VER                      0x0100      /**< Protocol version                           */
 
-#define TRDP_TIMER_GRANULARITY          10000       /**< granularity in us              */
+#define TRDP_TIMER_GRANULARITY              10000       /**< granularity in us                          */
 
 /*  Default MD communication parameters   */
-#define TRDP_MD_DEFAULT_REPLY_TIMEOUT   5000000    /**< default reply time out 5s     */
-#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT 1000000    /**< default confirm time out 1s     */
-#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  	60000000   /**< Socket connection time out 1 minute    */
-#define TRDP_MD_DEFAULT_QOS              3
-#define TRDP_MD_DEFAULT_TTL              64
-#define TRDP_MD_DEFAULT_RETRIES          2
-#define TRDP_MD_DEFAULT_SEND_PARAM       {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
+#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000     /**< default reply time out 5s                  */
+#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000     /**< default confirm time out 1s                */
+#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000    /**< Socket connection time out 1 minute        */
+#define TRDP_MD_DEFAULT_QOS                 3
+#define TRDP_MD_DEFAULT_TTL                 64
+#define TRDP_MD_DEFAULT_RETRIES             2
+#define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
 
 /*  Default PD communication parameters   */
-#define TRDP_PD_DEFAULT_QOS              5
-#define TRDP_PD_DEFAULT_TTL              64
-#define TRDP_PD_DEFAULT_TIMEOUT          100000
-#define TRDP_PD_DEFAULT_SEND_PARAM       {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
+#define TRDP_PD_DEFAULT_QOS                 5
+#define TRDP_PD_DEFAULT_TTL                 64
+#define TRDP_PD_DEFAULT_TIMEOUT             100000
+#define TRDP_PD_DEFAULT_SEND_PARAM          {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
 
 /*  PD packet properties    */
-#define TRDP_MIN_PD_HEADER_SIZE          sizeof(PD_HEADER_T)     /**< PD header size with FCS */
-#define TRDP_MAX_PD_DATA_SIZE            1436
-#define TRDP_MAX_PD_PACKET_SIZE          (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
-#define TRDP_MAX_MD_PACKET_SIZE          (1024 * 64)
+#define TRDP_MIN_PD_HEADER_SIZE             sizeof(PD_HEADER_T)     /**< PD header size with FCS        */
+#define TRDP_MAX_PD_DATA_SIZE               1436
+#define TRDP_MAX_PD_PACKET_SIZE             (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
+#define TRDP_MAX_MD_PACKET_SIZE             (1024 * 64)
 
 /*  Default TRDP process options    */
-#define TRDP_PROCESS_DEFAULT_CYCLE_TIME 10000       /**< Default cycle time for TRDP process    */
-#define TRDP_PROCESS_DEFAULT_PRIORITY   64          /**< Default priority of TRDP process   */
-#define TRDP_PROCESS_DEFAULT_OPTIONS    TRDP_OPTION_TRAFFIC_SHAPING /**< Default options for TRDP process   */
+#define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000       /**< Default cycle time for TRDP process        */
+#define TRDP_PROCESS_DEFAULT_PRIORITY       64          /**< Default priority of TRDP process           */
+#define TRDP_PROCESS_DEFAULT_OPTIONS        TRDP_OPTION_TRAFFIC_SHAPING /**< Default options for TRDP process   */
 
-#define TRDP_DEBUG_DEFAULT_FILE_SIZE    65536       /**< Default maximum size of log file    */
+#define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536       /**< Default maximum size of log file           */
 
 /*  Default SDT values  */
-#define TRDP_SDT_DEFAULT_SMI2           0           /**< Default SDT safe message identifier for a redundant device */
-#define TRDP_SDT_DEFAULT_NRXSAFE        3           /**< Default SDT timeout cycles*/
-#define TRDP_SDT_DEFAULT_NGUARD         100         /**< Default SDT initial timeout cycles*/
-#define TRDP_SDT_DEFAULT_CMTHR          10          /**< Default SDT channel monitoring threshold*/
+#define TRDP_SDT_DEFAULT_SMI2               0           /**< Default SDT safe message identifier for a redundant dev */
+#define TRDP_SDT_DEFAULT_NRXSAFE            3           /**< Default SDT timeout cycles                 */
+#define TRDP_SDT_DEFAULT_NGUARD             100         /**< Default SDT initial timeout cycles         */
+#define TRDP_SDT_DEFAULT_CMTHR              10          /**< Default SDT channel monitoring threshold   */
 
 
 /***********************************************************************************************************************
@@ -93,21 +93,21 @@
 /** Internal MD state */
 typedef enum
 {
-    TRDP_MD_ELE_ST_NONE                =  0,  /**< neutral value                                               */
+    TRDP_MD_ELE_ST_NONE                =  0,  /**< neutral value                                        */
                                           
-    TRDP_MD_ELE_ST_TX_NOTIFY_ARM       =  1,  /**< ready to send notify MD                                     */
-    TRDP_MD_ELE_ST_TX_REQUEST_ARM      =  2,  /**< ready to send request MD                                    */
-    TRDP_MD_ELE_ST_TX_REPLY_ARM        =  3,  /**< ready to send reply MD                                      */
-    TRDP_MD_ELE_ST_TX_REPLYQUERY_ARM   =  4,  /**< ready to send reply with confirm request MD                 */
-    TRDP_MD_ELE_ST_TX_CONFIRM_ARM      =  5,  /**< ready to send confirm MD                                    */
-    TRDP_MD_ELE_ST_TX_ERROR_ARM        =  6,  /**< ready to send error MD                                      */
+    TRDP_MD_ELE_ST_TX_NOTIFY_ARM       =  1,  /**< ready to send notify MD                              */
+    TRDP_MD_ELE_ST_TX_REQUEST_ARM      =  2,  /**< ready to send request MD                             */
+    TRDP_MD_ELE_ST_TX_REPLY_ARM        =  3,  /**< ready to send reply MD                               */
+    TRDP_MD_ELE_ST_TX_REPLYQUERY_ARM   =  4,  /**< ready to send reply with confirm request MD          */
+    TRDP_MD_ELE_ST_TX_CONFIRM_ARM      =  5,  /**< ready to send confirm MD                             */
+    TRDP_MD_ELE_ST_TX_ERROR_ARM        =  6,  /**< ready to send error MD                               */
                                           
-    TRDP_MD_ELE_ST_TX_REQUEST_W4Y      =  7,  /**< request sent, wait for reply                                */
-    TRDP_MD_ELE_ST_TX_REPLYQUERY_W4C   =  8,  /**< reply send, with confirm request MD                         */
+    TRDP_MD_ELE_ST_TX_REQUEST_W4Y      =  7,  /**< request sent, wait for reply                         */
+    TRDP_MD_ELE_ST_TX_REPLYQUERY_W4C   =  8,  /**< reply send, with confirm request MD                  */
     
-    TRDP_MD_ELE_ST_RX_ARM              =  9,  /**< armed listener                                              */
-    TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY   = 10,  /**< request received, wait for application reply send           */
-    TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF  = 11   /**< reply conf. rq. rx, wait for application conf send          */
+    TRDP_MD_ELE_ST_RX_ARM              =  9,  /**< armed listener                                       */
+    TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY   = 10,  /**< request received, wait for application reply send    */
+    TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF  = 11   /**< reply conf. rq. rx, wait for application conf send   */
     
 } TRDP_MD_ELE_ST_T;
 
@@ -143,8 +143,8 @@ typedef struct TRDP_HANDLE
 /** TCP parameters    */
 typedef struct TRDP_SOCKET_TCP
 {
-    TRDP_IP_ADDR_T  cornerIp;                /**< The other TCP corner Ip                              */
-    TRDP_TIME_T  connectionTimeout;            /**< TCP socket connection Timeout                          */
+    TRDP_IP_ADDR_T  cornerIp;               /**< The other TCP corner Ip                                */
+    TRDP_TIME_T  connectionTimeout;         /**< TCP socket connection Timeout                          */
 }TRDP_SOCKET_TCP_T;
 
 
@@ -155,9 +155,9 @@ typedef struct TRDP_SOCKETS
     TRDP_IP_ADDR_T      bindAddr;           /**< Defines the interface to use                           */
     TRDP_SEND_PARAM_T   sendParam;          /**< Send parameters                                        */
     TRDP_SOCK_TYPE_T    type;               /**< Usage of this socket                                   */
-    BOOL                rcvOnly;            /**< Used for receiving                                        */
+    BOOL                rcvOnly;            /**< Used for receiving                                     */
     UINT16              usage;              /**< No. of current users of this socket                    */
-    TRDP_SOCKET_TCP_T    tcpParams;            /**< Params used for TCP                                    */
+    TRDP_SOCKET_TCP_T    tcpParams;         /**< Params used for TCP                                    */
 } TRDP_SOCKETS_T;
 
 #ifdef WIN32
@@ -212,98 +212,99 @@ typedef struct
 /** Queue element for PD packets to send or receive    */
 typedef struct PD_ELE
 {
-    struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                    */
-    TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                     */
-    TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip   */
-    UINT32              redId;                  /**< Redundancy group ID or zero                        */
-    UINT32              curSeqCnt;              /**< the last sent or received sequence counter         */
-    UINT32              numRxTx;                /**< Counter for received packets (statistics)          */
-    UINT32              updPkts;                /**< Counter for updated packets (statistics)           */
-    UINT32              getPkts;                /**< Counter for read packets (statistics)              */
-    TRDP_ERR_T          lastErr;                /**< Last error (timeout)                               */
-    TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                      */
-    TRDP_FLAGS_T        pktFlags;               /**< flags                                              */
+    struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                        */
+    TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
+    TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip       */
+    UINT32              redId;                  /**< Redundancy group ID or zero                            */
+    UINT32              curSeqCnt;              /**< the last sent or received sequence counter             */
+    UINT32              numRxTx;                /**< Counter for received packets (statistics)              */
+    UINT32              updPkts;                /**< Counter for updated packets (statistics)               */
+    UINT32              getPkts;                /**< Counter for read packets (statistics)                  */
+    TRDP_ERR_T          lastErr;                /**< Last error (timeout)                                   */
+    TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
+    TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
-                                                     interval for packets to send (set from ms)         */
-    TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv             */
-    TRDP_TO_BEHAVIOR_T  toBehavior;             /**< timeout behavior for packets                       */
-    UINT32              dataSize;               /**< net data size                                      */
-    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)  */
-    INT32               socketIdx;              /**< index into the socket list                         */
-    const void          *userRef;               /**< from subscribe()                                   */
-    PD_PACKET_T         *pFrame;                /*    header ... data + FCS...                          */
+                                                     interval for packets to send (set from ms)             */
+    TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
+    TRDP_TO_BEHAVIOR_T  toBehavior;             /**< timeout behavior for packets                           */
+    UINT32              dataSize;               /**< net data size                                          */
+    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    INT32               socketIdx;              /**< index into the socket list                             */
+    const void          *userRef;               /**< from subscribe()                                       */
+    PD_PACKET_T         *pFrame;                /*    header ... data + FCS...                              */
 } PD_ELE_T;
 
 /** Queue element for MD packets to send or receive or acknowledge    */
 typedef struct MD_ELE
 {
-    struct MD_ELE       *pNext;                 /**< pointer to next element or NULL                    */
-    TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                     */
-    TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                      */
-    TRDP_FLAGS_T        pktFlags;               /**< flags                                              */
+    struct MD_ELE       *pNext;                 /**< pointer to next element or NULL                        */
+    TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
+    TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
+    TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
-                                                    interval for packets to send (set from ms)          */
-    TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv             */
-    INT32               dataSize;               /**< net data size                                      */
-    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)    */
-    INT32               socketIdx;              /**< index into the socket list                            */
-    TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                    */
-    UINT8               sessionID[16];          /**< UUID as a byte stream                              */
-    UINT32                noOfRepliers;            /**< number of expected repliers, 0 if unknown            */
-    UINT32              numReplies;               /**< actual number of replies for the request           */
-    UINT32              numRetriesMax;             /**< maximun number of retries for request to a know dev*/
-    UINT32              numRetries;               /**< actual number of retries for request to a know dev */
-    UINT8                disableReplyRx;            /**< disable reply reception, for multicast use            */
-    UINT32              numRepliesQuery;        /**< number of ReplyQuery received, used to count nuomber of expected Confirm sent */
-    UINT32              numConfirmSent;            /**< number of Confirm sent                                */
-    UINT32                numConfirmTimeout;         /**< number of Confirm Timeouts (incremented by listeners */
+                                                    interval for packets to send (set from ms)              */
+    TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
+    INT32               dataSize;               /**< net data size                                          */
+    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    INT32               socketIdx;              /**< index into the socket list                             */
+    TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                        */
+    UINT8               sessionID[16];          /**< UUID as a byte stream                                  */
+    UINT32              noOfRepliers;           /**< number of expected repliers, 0 if unknown              */
+    UINT32              numReplies;             /**< actual number of replies for the request               */
+    UINT32              numRetriesMax;          /**< maximun number of retries for request to a know dev    */
+    UINT32              numRetries;             /**< actual number of retries for request to a know dev     */
+    UINT8               disableReplyRx;         /**< disable reply reception, for multicast use             */
+    UINT32              numRepliesQuery;        /**< number of ReplyQuery received, used to count nuomber
+                                                     of expected Confirm sent                               */
+    UINT32              numConfirmSent;         /**< number of Confirm sent                                 */
+    UINT32                numConfirmTimeout;    /**< number of Confirm Timeouts (incremented by listeners   */
     union
     {
         struct
         {
-            UINT32                comId;        /**< filter on incoming MD by comId                     */
+            UINT32                comId;        /**< filter on incoming MD by comId                         */
         } caller;
         struct
         {
-            const void            *pUserRef;    /**< user reference for call_back from addListener()    */
-            UINT32                comId;        /**< filter on incoming MD by comId                     */
-            UINT32                topoCount;    /**< set by user: ETB to use, '0' to deacticate         */
-            TRDP_IP_ADDR_T        destIpAddr;   /**< filter on incoming MD by destination IP address    */
-            TRDP_FLAGS_T          pktFlags;     /**< marshalling option                                 */
-            TRDP_URI_USER_T       destURI;      /**< filter on incoming MD by destination URI           */
+            const void            *pUserRef;    /**< user reference for call_back from addListener()        */
+            UINT32                comId;        /**< filter on incoming MD by comId                         */
+            UINT32                topoCount;    /**< set by user: ETB to use, '0' to deacticate             */
+            TRDP_IP_ADDR_T        destIpAddr;   /**< filter on incoming MD by destination IP address        */
+            TRDP_FLAGS_T          pktFlags;     /**< marshalling option                                     */
+            TRDP_URI_USER_T       destURI;      /**< filter on incoming MD by destination URI               */
         } listener; /**< Listener arguments */
     } u;
     BOOL                connectDone;
-    MD_HEADER_T         frameHead;              /**< Packet    header in network byte order                */
-    UINT8               data[0];                /**< data ready to be sent (with CRCs)                  */
+    MD_HEADER_T         frameHead;              /**< Packet    header in network byte order                 */
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
     /*    ... data + FCS ... */
 } MD_ELE_T;
 
 /** Session/application variables store */
 typedef struct TRDP_SESSION
 {
-    struct TRDP_SESSION     *pNext;             /**< Pointer to next session                    */
-    VOS_MUTEX_T             mutex;              /**< protect this session                       */
-    TRDP_IP_ADDR_T          realIP;             /**< Real IP address                            */
-    TRDP_IP_ADDR_T          virtualIP;          /**< Virtual IP address                         */
-    BOOL                    beQuiet;            /**< if set, only react on ownIP requests       */
-    UINT32                  redID;              /**< redundant comId                            */
-    UINT32                  topoCount;          /**< current valid topocount or zero            */
-    TRDP_TIME_T             interval;           /**< Store for next select interval             */
+    struct TRDP_SESSION     *pNext;             /**< Pointer to next session                                */
+    VOS_MUTEX_T             mutex;              /**< protect this session                                   */
+    TRDP_IP_ADDR_T          realIP;             /**< Real IP address                                        */
+    TRDP_IP_ADDR_T          virtualIP;          /**< Virtual IP address                                     */
+    BOOL                    beQuiet;            /**< if set, only react on ownIP requests                   */
+    UINT32                  redID;              /**< redundant comId                                        */
+    UINT32                  topoCount;          /**< current valid topocount or zero                        */
+    TRDP_TIME_T             interval;           /**< Store for next select interval                         */
     TRDP_TIME_T             nextJob;
     TRDP_PRINT_DBG_T        pPrintDebugString;
     TRDP_MARSHALL_CONFIG_T  marshall;
-    TRDP_PD_CONFIG_T        pdDefault;          /**< Default configuration for process data     */
+    TRDP_PD_CONFIG_T        pdDefault;          /**< Default configuration for process data                 */
     TRDP_MD_CONFIG_T        mdDefault;
     TRDP_MEM_CONFIG_T       memConfig;
     TRDP_OPTION_T           option;
-    TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use       */
-    PD_ELE_T                *pSndQueue;         /**< pointer to first element of send queue     */
-    PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue      */
-    MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue  */
-    MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue  */
-    MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element             */
-    TRDP_STATISTICS_T       stats;              /**< statistics of this session                 */
+    TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use                   */
+    PD_ELE_T                *pSndQueue;         /**< pointer to first element of send queue                 */
+    PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue                  */
+    MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue              */
+    MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue              */
+    MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element                         */
+    TRDP_STATISTICS_T       stats;              /**< statistics of this session                             */
 } TRDP_SESSION_T, *TRDP_SESSION_PT;
 
 
