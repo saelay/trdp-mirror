@@ -337,6 +337,7 @@ void setup_ports()
                 p.src,              // source address
                 0,                  // second source address
                 p.dst,              // destination address
+                TRDP_FLAGS_NONE,    // No flags set
                 p.timeout,          // timeout [usec]
                 TRDP_TO_SET_TO_ZERO,// timeout behavior
                 p.size);            // maximum size
@@ -674,7 +675,7 @@ void poll_data()
             continue;
 
         UINT32 size = p.size;
-        p.err = tlp_get(apph, p.sh, TRDP_FLAGS_NONE, &pdi, p.data, &size);
+        p.err = tlp_get(apph, p.sh, &pdi, p.data, &size);
     }
 }
 
@@ -691,7 +692,7 @@ void printLog(
 {
     if (pLogFile != NULL)
     {
-        fprintf(pLogFile, "%s File: %s Line: %d %s\n", category==VOS_LOG_ERROR?"ERR ":(category==VOS_LOG_WARNING?"WARN":(category==VOS_LOG_INFO?"INFO":"DEBG")), pFile, (int) line, pMsgStr);
+        fprintf(pLogFile, "%s File: %s Line: %d %s\n", category==VOS_LOG_ERROR?"ERR ":(category==VOS_LOG_WARNING?"WAR ":(category==VOS_LOG_INFO?"INFO":"DBG ")), pFile, (int) line, pMsgStr);
         fflush(pLogFile);
     }
 }

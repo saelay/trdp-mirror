@@ -199,8 +199,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
  *
  *
  *  @param[in]      appHandle           The handle returned by tlc_init
- *  @param[in]        pRfds               pointer to set of ready descriptors
- *  @param[in,out]    pCount              pointer to number of ready descriptors
+ *  @param[in]      pRfds               pointer to set of ready descriptors
+ *  @param[in,out]  pCount              pointer to number of ready descriptors
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
@@ -226,14 +226,15 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      interval            frequency of PD packet (>= 10ms) in usec
  *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pktFlags            OPTION: 
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
  *  @param[in]      subs                substitution (Ladder)
  *  @param[in]      offsetAddress       offset (Ladder)
  *
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        could not insert (out of memory)
  *  @retval         TRDP_NOINIT_ERR     handle invalid
@@ -339,7 +340,8 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pktFlags            OPTIONS: 
+ *                                      TTRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -348,7 +350,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *  @param[in]      subs                substitution (Ladder)
  *  @param[in]      offsetAddr          offset (Ladder)
  *
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        could not insert (out of memory)
  *  @retval         TRDP_NOINIT_ERR     handle invalid
@@ -385,11 +387,13 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
  *                                      Used e.g. for source filtering of redundant devices.
  *  @param[in]      destIpAddr          IP address to join
+ *  @param[in]      pktFlags            OPTION: 
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      timeout             timeout (>= 10ms) in usec
- *  @param[in]      toBehavior          timeout behavior
+ *  @param[in]      toBehavior          OPTION: TRDP_TO_DEFAULT, TRDP_TO_SET_TO_ZERO, TRDP_TO_KEEP_LAST_VALUE
  *  @param[in]      maxDataSize         expected max. size of packet data
  *
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        could not reserve memory (out of memory)
  *  @retval         TRDP_NOINIT_ERR     handle invalid
@@ -403,6 +407,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_IP_ADDR_T      srcIpAddr1,
     TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      destIpAddr,
+    TRDP_FLAGS_T        pktFlags,
     UINT32              timeout,
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize);
@@ -430,7 +435,6 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      subHandle           the handle returned by subscription
- *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_MARSHALL
  *  @param[in,out]  pPdInfo             pointer to application's info buffer
  *  @param[in,out]  pData               pointer to application's data buffer
  *  @param[in,out]  pDataSize           in: size of buffer, out: size of data
@@ -445,7 +449,6 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
 EXT_DECL TRDP_ERR_T tlp_get (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_SUB_T          subHandle,
-    TRDP_FLAGS_T        pktFlags,
     TRDP_PD_INFO_T      *pPdInfo,
     UINT8               *pData,
     UINT32              *pDataSize);
