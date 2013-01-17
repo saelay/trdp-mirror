@@ -4,8 +4,10 @@
   <xs:annotation>
     <xs:documentation>
 #===========================================================================
-#  COPYRIGHT     : (c) 2012 Bombardier Inc. or its subsidiaries
+==========================================
+#  COPYRIGHT     : (c) 2013 Bombardier Inc. or its subsidiaries
 #===========================================================================
+==========================================
 #
 #  PRODUCT       : TRDP
 #
@@ -13,9 +15,12 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.1.0.2
+#  VERSION       : 1.2.0.0
 #
+#   HISTORY      :
+#                            1.2.0.0   Support of optional attribute "callback" for md/pd-com-parameter, md/pd-parameter
 #===========================================================================
+==========================================
 </xs:documentation>
   </xs:annotation>
   
@@ -421,6 +426,14 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
+      <xs:attribute name="callback" default="off" use="optional">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
       <xs:attribute name="udp-port" default="20550" type="uint32" use="optional"/>
       <xs:attribute name="tcp-port" default="20550" type="uint32" use="optional"/>
     </xs:complexType>
@@ -439,6 +452,14 @@
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="marshall" default="off" use="optional">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="callback" default="off" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
             <xs:enumeration value="on"/>
@@ -572,6 +593,14 @@ keep = keep the last value</xs:documentation>
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
+      <xs:attribute name="callback" default="off" use="optional">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
       <xs:attribute name="port" default="20548" type="uint32" use="optional"/>
     </xs:complexType>
   </xs:element>
@@ -607,6 +636,14 @@ keep = keep the last value</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="marshall" default="off" use="optional">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="callback" default="off" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
             <xs:enumeration value="on"/>
