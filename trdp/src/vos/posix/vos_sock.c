@@ -706,10 +706,12 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
         *pIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
         
+#if 0
         if (rcvSize > 0)
         {
-            vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %08x\n", rcvSize, *pIPAddr);
+            vos_printf(VOS_LOG_INFO, "recvfrom found %ld bytes for IP address %08x\n", rcvSize, *pIPAddr);
         }
+#endif
 
         if(rcvSize == -1 && errno == EWOULDBLOCK)
         {
@@ -1053,7 +1055,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     }
     while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));
 
-    if ((rcvSize == -1) && !(err == EMSGSIZE))
+    if ((rcvSize == -1) && !(errno == EMSGSIZE))
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
