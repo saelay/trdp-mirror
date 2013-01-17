@@ -278,8 +278,8 @@ static TRDP_DATASET_T *find_DS_from_ComId (
     UINT32 comId)
 {
     TRDP_COMID_DSID_MAP_T    key1 = {0};
-    TRDP_DATASET_T             **key3;    
-    TRDP_COMID_DSID_MAP_T   *key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+    TRDP_DATASET_T           **key3;    
+    TRDP_COMID_DSID_MAP_T    *key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
     
     key1.comId = comId;
     
@@ -314,7 +314,7 @@ static TRDP_DATASET_T *find_DS (
     TRDP_DATASET_T  **key3;
 
     key2.id = datasetId;
-      key3 = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+    key3 = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
     if (key3 != NULL)
     {
         return *key3;
@@ -373,15 +373,21 @@ EXT_DECL TRDP_ERR_T marshall (
             while (noOfItems-- > 0)
             {
                 /* Dataset, call ourself recursively */
-                TRDP_DATASET_T *pLocalDataset = find_DS(pDataset->pElement[index].type);
 
-                if (NULL == pLocalDataset)      /* Not in our DB    */
+				/* Never used before?  */                
+                if (NULL == pDataset->pElement[index].pCachedDS)
+                {
+                	/* Look for it   */
+                    pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
+                }
+
+                if (NULL == pDataset->pElement[index].pCachedDS)      /* Not in our DB    */
                 {
                     vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
                     return TRDP_COMID_ERR;
                 }
 
-                err = marshall(pInfo, pLocalDataset);
+                err = marshall(pInfo, pDataset->pElement[index].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -550,15 +556,20 @@ EXT_DECL TRDP_ERR_T unmarshall (
             while (noOfItems-- > 0)
             {
                 /* Dataset, call ourself recursively */
-                TRDP_DATASET_T *pLocalDataset = find_DS(pDataset->pElement[index].type);
-
-                if (NULL == pLocalDataset)      /* Not in our DB    */
+				/* Never used before?  */                
+                if (NULL == pDataset->pElement[index].pCachedDS)
+                {
+                	/* Look for it   */
+                    pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
+                }
+                
+                if (NULL == pDataset->pElement[index].pCachedDS)      /* Not in our DB    */
                 {
                     vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
                     return TRDP_COMID_ERR;
                 }
 
-                err = unmarshall(pInfo, pLocalDataset);
+                err = unmarshall(pInfo, pDataset->pElement[index].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -704,6 +715,8 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
     UINT32                  numDataSet,
     TRDP_DATASET_T          *pDataset[])
 {
+	UINT32	i,j;
+    
     if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
     {
         return TRDP_PARAM_ERR;
@@ -720,6 +733,14 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
     sDataSets   = pDataset;
     sNumEntries = numDataSet;
 
+    /* invalidate the cache */
+    for (i = 0; i < numDataSet; i++)
+    {
+    	for (j = 0; j < pDataset[i]->numElement; j++)
+        {
+            pDataset[i]->pElement[j].pCachedDS = NULL;
+        }
+    }
     /* sort the table    */
     vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T*), dataset_compare);
 
@@ -734,6 +755,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached datasett
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -744,11 +766,12 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
  */
 
 EXT_DECL TRDP_ERR_T tau_marshall (
-    void        *pRefCon,
-    UINT32      comId,
-    UINT8         *pSrc,
-    UINT8       *pDest,
-    UINT32      *pDestSize)
+    void        	*pRefCon,
+    UINT32      	comId,
+    UINT8       	*pSrc,
+    UINT8       	*pDest,
+    UINT32      	*pDestSize,
+    TRDP_DATASET_T	**ppDSPointer)
 {
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
@@ -758,7 +781,19 @@ EXT_DECL TRDP_ERR_T tau_marshall (
         return TRDP_PARAM_ERR;
     }
 
-    pDataset = find_DS_from_ComId(comId);
+	/* Can we use the formerly cached value? */
+	if (NULL != ppDSPointer)
+    {
+        if (NULL == *ppDSPointer)
+        {
+        	*ppDSPointer = find_DS_from_ComId(comId);
+        }
+        pDataset = *ppDSPointer;
+    }
+    else
+    {
+        pDataset = find_DS_from_ComId(comId);
+    }
 
     if (NULL == pDataset)   /* Not in our DB    */
     {
@@ -782,6 +817,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -791,11 +827,12 @@ EXT_DECL TRDP_ERR_T tau_marshall (
  */
 
 EXT_DECL TRDP_ERR_T tau_unmarshall (
-    void        *pRefCon,
-    UINT32      comId,
-    UINT8       *pSrc,
-    UINT8       *pDest,
-    UINT32      *pDestSize)
+    void        	*pRefCon,
+    UINT32      	comId,
+    UINT8       	*pSrc,
+    UINT8      		*pDest,
+    UINT32      	*pDestSize,
+    TRDP_DATASET_T	**ppDSPointer)
 {
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
@@ -806,8 +843,20 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
         return TRDP_PARAM_ERR;
     }
 
-    pDataset = find_DS_from_ComId(comId);
-
+	/* Can we use the formerly cached value? */
+	if (NULL != ppDSPointer)
+    {
+        if (NULL == *ppDSPointer)
+        {
+        	*ppDSPointer = find_DS_from_ComId(comId);
+        }
+        pDataset = *ppDSPointer;
+    }
+    else
+    {
+        pDataset = find_DS_from_ComId(comId);
+    }
+    
     if (NULL == pDataset)   /* Not in our DB    */
     {
         return TRDP_COMID_ERR;

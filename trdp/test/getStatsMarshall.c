@@ -82,15 +82,18 @@ TRDP_DATASET_T gMemStatisticsDS =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT32,
-            6
+            6,
+            NULL
         },
         {
             TRDP_UINT32,
-            15
+            15,
+            NULL
         },
         {
             TRDP_UINT32,
-            15
+            15,
+            NULL
         }
 	}
 };
@@ -103,7 +106,8 @@ TRDP_DATASET_T gPDStatisticsDS =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT32,
-            13
+            13,
+            NULL
         }
 	}
 };
@@ -116,7 +120,8 @@ TRDP_DATASET_T gMDStatisticsDS =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT32,
-            13
+            13,
+            NULL
         }
 	}
 };
@@ -129,35 +134,43 @@ TRDP_DATASET_T gStatisticsDS =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT32,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE64,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE32,
-            2
+            2,
+            NULL
         },
         {
             TRDP_CHAR8,
-            16
+            16,
+            NULL
         },
         {
             TRDP_CHAR8,
-            16
+            16,
+            NULL
         },
         {
             TRDP_MEM_STATS_DS_ID,
-            1
+            1,
+            NULL
         },
         {
             TRDP_PD_STATS_DS_ID,
-            1
+            1,
+            NULL
         },
         {
             TRDP_MD_STATS_DS_ID,
-            1
+            1,
+            NULL
         },
     }
 };
@@ -204,7 +217,7 @@ void print_stats(
     printf("mem.allocBlockSizes: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, pData->mem.allocBlockSize[i]);
+        printf("%u, ", i, pData->mem.preAllocBlockSize[i]);
     }
     
     printf("\nmem.usedBlockSize:   ");
@@ -295,7 +308,7 @@ void myPDcallBack (
             {
                 if (pMsg->comId == 12)
                 {
-            		tau_unmarshall(NULL, pMsg->comId, pData, (UINT8*) &gBuffer, &dataSize);
+            		tau_unmarshall(NULL, pMsg->comId, pData, (UINT8*) &gBuffer, &dataSize, NULL);
                     print_stats(&gBuffer);
                     gKeepOnRunning = FALSE;
                 }
@@ -403,11 +416,12 @@ int main (int argc, char * *argv)
                          0,                         /*	topocount: local consist only		*/
                          0,                         /*	Source IP filter					*/
                          0,
-                         0xEF000000,/*PD_OWN_IP, */                /*	Default destination	(or MC Group)   */
+                         0xEF000000,/*PD_OWN_IP, */  /*	Default destination	(or MC Group)   */
+                         TRDP_FLAGS_DEFAULT,
                          PD_COMID1_TIMEOUT,         /*	Time out in us						*/
                          TRDP_TO_SET_TO_ZERO,       /*  delete invalid data	on timeout      */
                          sizeof(gBuffer));          /*	net data size						*/
-
+    
     if (err != TRDP_NO_ERR)
     {
         printf("prep pd receive error\n");

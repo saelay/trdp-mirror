@@ -21,11 +21,13 @@ TRDP_DATASET_T gDataSet990 =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
-            1
+            1,
+            NULL
         },
         {
             TRDP_CHAR8,
-            16
+            16,
+            NULL
         }
     }
 };
@@ -38,11 +40,13 @@ TRDP_DATASET_T gDataSet991 =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
-            1
+            1,
+            NULL
         },
         {
             990,
-            1
+            1,
+            NULL
         }
     }
 };
@@ -55,11 +59,13 @@ TRDP_DATASET_T gDataSet992 =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
-            1
+            1,
+            NULL
         },
         {
             991,
-            1
+            1,
+            NULL
         }
     }
 };
@@ -72,11 +78,13 @@ TRDP_DATASET_T gDataSet993 =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_UINT8,
-            1
+            1,
+            NULL
         },
         {
             992,
-            1
+            1,
+            NULL
         }
     }
 };
@@ -89,263 +97,328 @@ TRDP_DATASET_T gDataSet1000 =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_BOOLEAN,  /*	data type		*/
-            1               /*	no of elements	*/
+            1,               /*	no of elements	*/
+            NULL
         },
         {
             TRDP_CHAR8,
-            1
+            1,
+            NULL
         },
        {
             TRDP_UTF16,
-            1
+           1,
+           NULL
         },
         {
             TRDP_INT8,
-            1           
+            1,
+            NULL           
         },
         {
             TRDP_INT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_INT32,
-            1
+            1,
+            NULL
         },
         {
             TRDP_INT64,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT8,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT32,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT64,
-            1
+            1,
+            NULL
         },
         {
             TRDP_REAL32,
-            1
+            1,
+            NULL
         },
         {
             TRDP_REAL64,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE32,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE48,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE64,
-            1
+            1,
+            NULL
         },
         {	/* 16	*/
             TRDP_BOOLEAN,  /*	data type		*/
-            4               /*	no of elements	*/
+            4,
+            NULL               /*	no of elements	*/
         },
         {
             TRDP_CHAR8,
-            16
+            16,
+            NULL
         },
        {
             TRDP_UTF16,
-            16
+           16,
+           NULL
         },
         {
             TRDP_INT8,
-            4           
+            4,
+            NULL           
         },
         {
             TRDP_INT16,
-            4
+            4,
+            NULL
         },
         {
             TRDP_INT32,
-            4
+            4,
+            NULL
         },
         {
             TRDP_INT64,
-            4
+            4,
+            NULL
         },
         {
             TRDP_UINT8,
-            4
+            4,
+            NULL
         },
         {
             TRDP_UINT16,
-            4
+            4,
+            NULL
         },
         {
             TRDP_UINT32,
-            4
+            4,
+            NULL
         },
         {
             TRDP_UINT64,
-            4
+            4,
+            NULL
         },
         {
             TRDP_REAL32,
-            4
+            4,
+            NULL
         },
         {
             TRDP_REAL64,
-            4
+            4,
+            NULL
         },
         {
             TRDP_TIMEDATE32,
-            4
+            4,
+            NULL
         },
         {
             TRDP_TIMEDATE48,
-            4
+            4,
+            NULL
         },
         {
             TRDP_TIMEDATE64,
-            4
+            4,
+            NULL
         },
         {
             TRDP_UINT16,	/* 32	*/
-            1
+            1,
+            NULL
         },
         {
             TRDP_BOOLEAN,  /*	data type		*/
-            0               /*	no of elements	*/
+            0,               /*	no of elements	*/
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_CHAR8,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UTF16,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_INT8,
-            0           
+            0,
+            NULL           
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_INT16,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_INT32,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_INT64,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT8,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT16,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT32,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT64,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_REAL32,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_REAL64,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE32,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE48,
-            0
+            0,
+            NULL
         },
         {
             TRDP_UINT16,
-            1
+            1,
+            NULL
         },
         {
             TRDP_TIMEDATE64,
-            0
+            0,
+            NULL
         },
         {
             993,
-            1
+            1,
+            NULL
         }
     }
 };
@@ -358,15 +431,18 @@ TRDP_DATASET_T	gDataSet1001 =
     {           /*	TRDP_DATASET_ELEMENT_T[]	*/
         {
             TRDP_TIMEDATE64,	/*	Array	*/
-            4
+            4,
+            NULL
         },
         {
             TRDP_UINT16,		/*	Size of variable dataset	*/
-            1
+            1,
+            NULL
         },
         {
             TRDP_UINT8,
-            0
+            0,
+            NULL
         }
     }
 };
@@ -585,7 +661,7 @@ int main ()
     bufSize = sizeof(gDstDataBuffer);
     memset(gDstDataBuffer, 0, bufSize);
 
-    err = tau_marshall (refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize);
+    err = tau_marshall (refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize, NULL);
 
 	if (err != TRDP_NO_ERR)
     {
@@ -596,7 +672,7 @@ int main ()
 	bufSize = sizeof(gMyDataSet1000Copy);
     memset(&gMyDataSet1000Copy, 0, bufSize);
 
-    err = tau_unmarshall (refCon, 1000, gDstDataBuffer, (UINT8 *) &gMyDataSet1000Copy, &bufSize);
+    err = tau_unmarshall (refCon, 1000, gDstDataBuffer, (UINT8 *) &gMyDataSet1000Copy, &bufSize, NULL);
 
 	if (err != TRDP_NO_ERR)
     {
