@@ -687,7 +687,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen     = sizeof(srcAddr);
     ssize_t             rcvSize     = 0;
- 
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
@@ -710,7 +709,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         if (rcvSize > 0)
         {
             vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %08x\n", rcvSize, *pIPAddr);
-		}
+        }
 
         if(rcvSize == -1 && errno == EWOULDBLOCK)
         {
@@ -730,14 +729,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     } 
     else if (rcvSize == 0)
     {
-        if (errno == EMSGSIZE)
-        {
-            return VOS_MEM_ERR;
-        }
-        else 
-        {
-            return VOS_NODATA_ERR;
-        }
+        return VOS_NODATA_ERR;
     }
     else
     {
@@ -971,7 +963,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     ssize_t sendSize    = 0;
     size_t  bufferSize  = (size_t) size;
 
-    if (sock == -1)
+    if (sock == -1 || pBuffer == NULL)
     {
         return VOS_PARAM_ERR;
     }
@@ -1061,7 +1053,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     }
     while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && errno == EINTR));
 
-    if (rcvSize == -1)
+    if ((rcvSize == -1) && !(err == EMSGSIZE))
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);

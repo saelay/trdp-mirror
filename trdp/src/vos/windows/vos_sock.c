@@ -506,8 +506,8 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             char mcStr[16];
             char ifStr[16];
 
-            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
-            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr)); /*lint !e534 ignore return value */
+            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface)); /*lint !e534 ignore return value */
             vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
          
@@ -587,8 +587,8 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             char mcStr[16];
             char ifStr[16];
 
-            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
-            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
+            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr)); /*lint !e534 ignore return value */
+            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface)); /*lint !e534 ignore return value */
             vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
         }
 
@@ -737,21 +737,14 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
  
     *pSize = 0; 
 
-    if ((rcvSize == SOCKET_ERROR) && !(err == WSAEMSGSIZE))
+    if (rcvSize == SOCKET_ERROR)
     {
         vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     else if (rcvSize == 0)
     {
-        if (err == WSAEMSGSIZE)
-        {
-            return VOS_MEM_ERR;
-        }
-        else 
-        {
-            return VOS_NODATA_ERR;
-        }
+        return VOS_NODATA_ERR;
     }
     else
     {
@@ -1076,12 +1069,13 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         }
     }
     while ((bufferSize > 0 && rcvSize > 0) || (rcvSize == -1 && err == WSAEINTR));
-    if (rcvSize == SOCKET_ERROR)
+
+    if ((rcvSize == SOCKET_ERROR) && !(err == WSAEMSGSIZE))
     {
         vos_printf(VOS_LOG_WARNING, "receive() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
-    else if ((*pSize == 0) && !(err == WSAEMSGSIZE))
+    else if (*pSize == 0)
     {
         if (err == WSAEMSGSIZE)
         {
@@ -1114,11 +1108,11 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         UINT32  mcIfAddress)
 {
     DWORD       optValue =  vos_htonl(mcIfAddress);
-    VOS_ERR_T   err = VOS_NO_ERR;
+    VOS_ERR_T   result = VOS_NO_ERR;
 
     if (sock == (INT32) INVALID_SOCKET)
     {
-        err = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     else
     {
@@ -1126,12 +1120,12 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         {
             int err = WSAGetLastError();
             vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed (Err: %d)\n", err);
-            err = VOS_SOCK_ERR;
+            result = VOS_SOCK_ERR;
         }
         else
         {
-            err = VOS_NO_ERR;
+            result = VOS_NO_ERR;
         }
     }
-    return err;
+    return result;
 }
