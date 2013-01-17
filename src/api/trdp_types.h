@@ -259,26 +259,28 @@ typedef enum
 /** Various flags for PD and MD packets    */
 typedef enum
 {
-    TRDP_FLAGS_NONE         = 0,
-    TRDP_FLAGS_REDUNDANT    = 0x1,      /**< Redundant                                          */
-    TRDP_FLAGS_MARSHALL     = 0x2,      /**< Optional marshalling/unmarshalling in TRDP stack   */
-    TRDP_FLAGS_CALLBACK     = 0x4,      /**< Use of callback function                           */
-    TRDP_FLAGS_TCP          = 0x8       /**< Use TCP for message data                           */
+    TRDP_FLAGS_DEFAULT      = 0,    /**< Default value defined in tlc_openDession will be taken     */
+    TRDP_FLAGS_NONE         = 0x1,  /**< No flags set                                               */
+    TRDP_FLAGS_REDUNDANT    = 0x2,  /**< Redundant                                                  */
+    TRDP_FLAGS_MARSHALL     = 0x3,  /**< Optional marshalling/unmarshalling in TRDP stack           */
+    TRDP_FLAGS_CALLBACK     = 0x4,  /**< Use of callback function                                   */
+    TRDP_FLAGS_TCP          = 0x5   /**< Use TCP for message data                                   */
 } TRDP_FLAGS_T;
 
 
 /** Redundancy states */
 typedef enum
 {
-    TRDP_RED_FOLLOWER   = 0,     /**< Redundancy follower - redundant PD will be not sent out  */
-    TRDP_RED_LEADER     = 1      /**< Redundancy leader - redundant PD will be sent out    */
+    TRDP_RED_FOLLOWER       = 0,    /**< Redundancy follower - redundant PD will be not sent out    */
+    TRDP_RED_LEADER         = 1     /**< Redundancy leader - redundant PD will be sent out          */
 } TRDP_RED_STATE_T;
 
 /** How invalid PD shall be handled    */
 typedef enum
 {
-    TRDP_TO_SET_TO_ZERO     = 1,      /**< If set, data will be reset to zero on time out         */
-    TRDP_TO_KEEP_LAST_VALUE = 2       /**< If not set, last received values will be returned      */
+    TRDP_TO_DEFAULT         = 0,    /**< Default value defined in tlc_openDession will be taken     */
+    TRDP_TO_SET_TO_ZERO     = 1,    /**< If set, data will be reset to zero on time out             */
+    TRDP_TO_KEEP_LAST_VALUE = 2     /**< If set, last received values will be returned              */
 } TRDP_TO_BEHAVIOR_T;
 
 /**    Process data info from received telegram; allows the application to generate responses.
@@ -287,19 +289,19 @@ typedef enum
  */
 typedef struct
 {
-    TRDP_IP_ADDR_T  srcIpAddr;      /**< source IP address for filtering                */
-    TRDP_IP_ADDR_T  destIpAddr;     /**< destination IP address for filtering           */
-    UINT32          seqCount;       /**< sequence counter                               */
-    UINT16          protVersion;    /**< Protocol version                               */
-    TRDP_MSG_T      msgType;        /**< Protocol ('PD', 'MD', ...)                     */
-    UINT32          comId;          /**< ComID                                          */
-    UINT32          topoCount;      /**< received topocount                             */
-    BOOL            subs;           /**< substitution                                   */
-    UINT16          offsetAddr;     /**< offset address for ladder architecture         */
-    UINT32          replyComId;     /**< ComID for reply (request only)                 */
-    TRDP_IP_ADDR_T  replyIpAddr;    /**< IP address for reply (request only)            */
-    const void      *pUserRef;      /**< User reference given with the local subscribe  */
-    TRDP_ERR_T      resultCode;     /**< error code                                     */
+    TRDP_IP_ADDR_T  srcIpAddr;      /**< source IP address for filtering                            */
+    TRDP_IP_ADDR_T  destIpAddr;     /**< destination IP address for filtering                       */
+    UINT32          seqCount;       /**< sequence counter                                           */
+    UINT16          protVersion;    /**< Protocol version                                           */
+    TRDP_MSG_T      msgType;        /**< Protocol ('PD', 'MD', ...)                                 */
+    UINT32          comId;          /**< ComID                                                      */
+    UINT32          topoCount;      /**< received topocount                                         */
+    BOOL            subs;           /**< substitution                                               */
+    UINT16          offsetAddr;     /**< offset address for ladder architecture                     */
+    UINT32          replyComId;     /**< ComID for reply (request only)                             */
+    TRDP_IP_ADDR_T  replyIpAddr;    /**< IP address for reply (request only)                        */
+    const void      *pUserRef;      /**< User reference given with the local subscribe              */
+    TRDP_ERR_T      resultCode;     /**< error code                                                 */
 } TRDP_PD_INFO_T;
 
 
@@ -323,9 +325,9 @@ typedef struct
     UINT32              topoCount;          /**< received topocount                         */
     UINT8               numRetries;         /**< actual number of retries                   */
     UINT8               numRetriesMax;      /**< maximun number of retries for request to a know dev*/
-    BOOL                disableReplyRx;        /**< disable reply reception, for multicast use    */
+    BOOL                disableReplyRx;     /**< disable reply reception, for multicast use    */
     UINT32              numRepliesQuery;    /**< number of ReplyQuery received              */
-    UINT32              numConfirmSent;        /**< number of Confirm sent                     */
+    UINT32              numConfirmSent;     /**< number of Confirm sent                     */
     UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners */
     UINT16              userStatus;         /**< error code, user stat                      */
     TRDP_REPLY_STATUS_T replyStatus;        /**< reply status                               */
@@ -333,7 +335,7 @@ typedef struct
     UINT32              replyTimeout;       /**< reply timeout in us given with the request */
     TRDP_URI_USER_T     destURI;            /**< destination URI user part from MD header   */
     TRDP_URI_USER_T     srcURI;             /**< source URI user part from MD header        */
-    UINT32                noOfRepliers;       /**< number of expected repliers, 0 if unknown  */
+    UINT32                noOfRepliers;     /**< number of expected repliers, 0 if unknown  */
     UINT32              numReplies;         /**< actual number of replies for the request   */
     const void          *pUserRef;          /**< User reference given with the local call   */
     TRDP_ERR_T          resultCode;         /**< error code                                 */
