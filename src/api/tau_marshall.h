@@ -83,6 +83,8 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
     UINT32                  numDataSet,
     TRDP_DATASET_T          *pDataset[]);
 
+
+
 /**********************************************************************************************************************/
 /**    marshall function.
  *
@@ -91,20 +93,23 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached datasett
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
  *  @retval         TRDP_COMID_ERR  comid not existing
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 
 EXT_DECL TRDP_ERR_T tau_marshall (
-    void        *pRefCon,
-    UINT32      comId,
-    UINT8         *pSrc,
-    UINT8       *pDest,
-    UINT32      *pDestSize);
+    void        	*pRefCon,
+    UINT32      	comId,
+    UINT8       	*pSrc,
+    UINT8       	*pDest,
+    UINT32      	*pDestSize,
+    TRDP_DATASET_T	**ppDSPointer);
 
 
 /**********************************************************************************************************************/
@@ -139,6 +144,7 @@ typedef TRDP_ERR_T tau_marshallDs (
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -148,13 +154,13 @@ typedef TRDP_ERR_T tau_marshallDs (
  */
 
 EXT_DECL TRDP_ERR_T tau_unmarshall (
-    void        *pRefCon,
-    UINT32      comId,
-    UINT8       *pSrc,
-    UINT8       *pDest,
-    UINT32      *pDestSize);
-
-
+    void        	*pRefCon,
+    UINT32      	comId,
+    UINT8       	*pSrc,
+    UINT8      		*pDest,
+    UINT32      	*pDestSize,
+	TRDP_DATASET_T	**ppDSPointer);
+    
 /**********************************************************************************************************************/
 /**    unmarshall data set function.
  *

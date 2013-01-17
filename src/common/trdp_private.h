@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.1.1"
+#define LIB_VERSION  "0.0.1.2"
 
 #ifndef TRDP_PD_UDP_PORT
 #define TRDP_PD_UDP_PORT                    20548       /**< process data UDP port                      */
@@ -229,6 +229,7 @@ typedef struct PD_ELE
     TRDP_TO_BEHAVIOR_T  toBehavior;             /**< timeout behavior for packets                           */
     UINT32              dataSize;               /**< net data size                                          */
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    TRDP_DATASET_T		*pCachedDS;				/**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
     const void          *userRef;               /**< from subscribe()                                       */
     PD_PACKET_T         *pFrame;                /*    header ... data + FCS...                              */
@@ -246,6 +247,7 @@ typedef struct MD_ELE
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
     INT32               dataSize;               /**< net data size                                          */
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    TRDP_DATASET_T		*pCachedDS;				/**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
     TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                        */
     UINT8               sessionID[16];          /**< UUID as a byte stream                                  */

@@ -110,7 +110,7 @@ TRDP_ERR_T trdp_pdPut (
     }
     else
     {
-        ret = marshall(refCon, pPacket->addr.comId, (UINT8 *) pData, pPacket->pFrame->data, &dataSize);
+        ret = marshall(refCon, pPacket->addr.comId, (UINT8 *) pData, pPacket->pFrame->data, &dataSize, &pPacket->pCachedDS);
     }
 
     if (TRDP_NO_ERR == ret)
@@ -197,7 +197,7 @@ TRDP_ERR_T trdp_pdGet (
     }
     else
     {
-        return unmarshall(refCon, pPacket->addr.comId, (UINT8 *)pData, pPacket->pFrame->data, pDataSize);
+        return unmarshall(refCon, pPacket->addr.comId, (UINT8 *)pData, pPacket->pFrame->data, pDataSize, &pPacket->pCachedDS);
     }
 }
 
