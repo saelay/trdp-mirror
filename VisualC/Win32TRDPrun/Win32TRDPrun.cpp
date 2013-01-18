@@ -211,10 +211,11 @@ int main (int argc, char *argv[])
                          0,					        /*   Source IP filter                   */
                          0,
                          0,                         /*   Default destination	(or MC Group)   */
+                         TRDP_FLAGS_CALLBACK,       /*   On received information, trigger a callback function */
                          (PD_COMID_CYCLE) * 2,  	/*   Time out in us                      */
                          TRDP_TO_SET_TO_ZERO,       /*   delete invalid data	on timeout      */
                          sizeof(gMyDataSet998));    /*   net data size                       */
-	
+    
 	if (err != TRDP_NO_ERR)
     {
         printf("subscribe pd error (%d)\n", err);
