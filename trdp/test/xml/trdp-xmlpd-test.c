@@ -1,5 +1,5 @@
 /*
- *  trdp-xmlprint-test.c
+ *  trdp-xmlpd-test.c
  *  Test of PD comunication based on XML configuration file
  *
  *  Created by Tomas Svoboda on 17.12.12.
