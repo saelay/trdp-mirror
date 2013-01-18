@@ -626,7 +626,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
- *  @retval         VOS_MEM_ERR     resource error
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
@@ -804,7 +804,6 @@ EXT_DECL VOS_ERR_T vos_sockBind (
 /**********************************************************************************************************************/
 /** Listen for incoming connections.
  *
- *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      backlog         maximum connection attempts if system is busy
  *
@@ -827,7 +826,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
         int err = WSAGetLastError();
 
         vos_printf(VOS_LOG_ERROR, "listen() failed (Err: %d)\n", err);
-        return VOS_SOCK_ERR;
+        return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
 }
@@ -1101,7 +1100,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  *
  *  @retval         VOS_NO_ERR          no error
  *  @retval         VOS_PARAM_ERR       sock descriptor unknown, parameter error
- *  @retval         VOS_SOCK_ERR        option not supported
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         INT32   sock,

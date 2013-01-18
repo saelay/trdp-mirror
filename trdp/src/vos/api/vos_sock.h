@@ -71,6 +71,7 @@ typedef struct
 /** Byte swapping 2 Bytes.
  *
  *  @param[in]          val             Initial value.
+ *
  *  @retval             swapped value
  */
 
@@ -81,6 +82,7 @@ EXT_DECL UINT16 vos_htons (
 /** Byte swapping 2 Bytes.
  *
  *  @param[in]          val             Initial value.
+ *
  *  @retval             swapped value
  */
 
@@ -91,6 +93,7 @@ EXT_DECL UINT16 vos_ntohs (
 /** Byte swapping 4 Bytes.
  *
  *  @param[in]          val             Initial value.
+ *
  *  @retval             swapped value
  */
 
@@ -101,6 +104,7 @@ EXT_DECL UINT32 vos_htonl (
 /** Byte swapping 4 Bytes.
  *
  *  @param[in]          val             Initial value.
+ *
  *  @retval             swapped value
  */
 
@@ -111,6 +115,7 @@ EXT_DECL UINT32 vos_ntohl (
 /** Check if the supplied address is a multicast group address.
  *
  *  @param[in]          ipAddress      IP address to check.
+ *
  *  @retval             TRUE           address is multicast
  *  @retval             FALSE          address is not a multicast address
  */
@@ -122,6 +127,7 @@ EXT_DECL BOOL vos_isMulticast (
 /** Convert IP address from dotted dec. to !host! endianess
  *
  *  @param[in]          pDottedIP     IP address as dotted decimal.
+ *
  *  @retval             address in UINT32 in host endianess
  */
 
@@ -132,6 +138,7 @@ EXT_DECL UINT32 vos_dottedIP (
 /** Convert IP address to dotted dec. from !host! endianess
  *
  *  @param[in]          ipAddress    IP address as dotted decimal.
+ *
  *  @retval             address in UINT32 in host endianess
  */
 
@@ -155,6 +162,7 @@ EXT_DECL VOS_ERR_T vos_sockInit (
 /** Return the MAC address of the default adapter.
  *
  *  @param[out]     pMAC              return MAC address.
+ *
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_PARAM_ERR     pMAC == NULL
  *  @retval         VOS_SOCK_ERR      socket not available or option not supported
@@ -171,6 +179,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC(
  *
  *  @param[out]     pSock             pointer to socket descriptor returned
  *  @param[in]      pOptions          pointer to socket options (optional)
+ *
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_PARAM_ERR     pSock == NULL
  *  @retval         VOS_SOCK_ERR      socket not available or option not supported
@@ -187,8 +196,8 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
  *
  *  @param[out]     pSock             pointer to socket descriptor returned
  *  @param[in]      pOptions          pointer to socket options (optional)
+ *
  *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_PARAM_ERR     pSock == NULL
  *  @retval         VOS_SOCK_ERR      socket not available or option not supported
  */
@@ -202,9 +211,9 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
  *  Release any resources aquired by this socket
  *
  *  @param[in]      sock              socket descriptor
+ *
  *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_PARAM_ERR     pSock == NULL
  */
 
 EXT_DECL VOS_ERR_T vos_sockClose (
@@ -216,11 +225,9 @@ EXT_DECL VOS_ERR_T vos_sockClose (
  *
  *  @param[in]      sock              socket descriptor
  *  @param[in]      pOptions          pointer to socket options (optional)
+ *
  *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
  *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
- *  @retval         VOS_SOCK_ERR      socket not available or option not supported
  */
 
 EXT_DECL VOS_ERR_T vos_sockSetOptions (
@@ -234,9 +241,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
  *  @param[in]      sock              socket descriptor
  *  @param[in]      mcAddress         multicast group to join
  *  @param[in]      ipAddress         depicts interface on which to join, default 0 for any
+ *
  *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
  *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
  *  @retval         VOS_SOCK_ERR      option not supported
  */
@@ -253,6 +259,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
  *  @param[in]      sock              socket descriptor
  *  @param[in]      mcAddress         multicast group to join
  *  @param[in]      ipAddress         depicts interface on which to leave, default 0 for any
+ *
  *  @retval         VOS_NO_ERR        no error
  *  @retval         VOS_INIT_ERR      module not initialised
  *  @retval         VOS_NOINIT_ERR    invalid handle
@@ -274,12 +281,11 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *  @param[in]      size               size of the data to send
  *  @param[in]      ipAddress          destination IP
  *  @param[in]      port               destination port
+ *
  *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
  *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  *  @retval         VOS_IO_ERR         data could not be sent
- *  @retval         VOS_MEM_ERR        resource error
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
@@ -301,13 +307,13 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @param[out]     pBuffer            pointer to applications data buffer
  *  @param[in,out]  pSize              pointer to the received data size
  *  @param[out]     pIPAddr            source IP
+ *
  *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
  *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  *  @retval         VOS_IO_ERR         data could not be read
  *  @retval         VOS_MEM_ERR        resource error
  *  @retval         VOS_NODATA_ERR     no data in non-blocking
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
@@ -323,9 +329,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
  *  @param[in]      sock              socket descriptor
  *  @param[in]      ipAddress         source IP to receive from, 0 for any
  *  @param[in]      port              port to receive from
+ *
  *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_INIT_ERR      module not initialised
- *  @retval         VOS_NOINIT_ERR    invalid handle
  *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
  *  @retval         VOS_IO_ERR        Input/Output error
  *  @retval         VOS_MEM_ERR       resource error
@@ -342,9 +347,8 @@ EXT_DECL VOS_ERR_T vos_sockBind (
  *
  *  @param[in]      sock               socket descriptor
  *  @param[in]      backlog            maximum connection attempts if system is busy
+ *
  *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
  *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  *  @retval         VOS_IO_ERR         Input/Output error
  *  @retval         VOS_MEM_ERR        resource error
@@ -363,6 +367,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
  *  @param[out]     pSock              Pointer to socket descriptor, on exit new socket
  *  @param[out]     pIPAddress         source IP to receive on, 0 for any
  *  @param[out]     pPort              port to receive on, 20548 for PD
+ *
  *  @retval         VOS_NO_ERR         no error
  *  @retval         VOS_PARAM_ERR      NULL parameter, parameter error
  *  @retval         VOS_UNKNOWN_ERR    sock descriptor unknown error
@@ -381,12 +386,10 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
  *  @param[in]      sock               socket descriptor
  *  @param[in]      ipAddress          destination IP
  *  @param[in]      port               destination port
+ *
  *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_INIT_ERR       module not initialised
- *  @retval         VOS_NOINIT_ERR     invalid handle
  *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  *  @retval         VOS_IO_ERR         Input/Output error
- *  @retval         VOS_MEM_ERR        resource error
  */
 
 EXT_DECL VOS_ERR_T vos_sockConnect (
@@ -401,10 +404,12 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pBuffer         pointer to data to send
  *  @param[in]      size            size of the data to send
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
  *  @retval         VOS_NODATA_ERR  no data was sent in non-blocking
+ *  @retval         VOS_BLOCK_ERR   call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
@@ -423,10 +428,12 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  *  @param[in]      sock            socket descriptor
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
+ *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
  *  @retval         VOS_NODATA_ERR  no data in non-blocking
+ *  @retval         VOS_BLOCK_ERR   call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
@@ -438,11 +445,11 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 /**********************************************************************************************************************/
 /** Set Using Multicast I/F
  *
- *  @param[in]      sock                            socket descriptor
+ *  @param[in]      sock                       socket descriptor
  *  @param[in]      usingMulticastIfAddress    using Multicast I/F Address
- *  @retval         VOS_NO_ERR                    no error
- *  @retval         VOS_PARAM_ERR                sock descriptor unknown, parameter error
- *  @retval         VOS_SOCK_ERR                option not supported
+ *
+ *  @retval         VOS_NO_ERR                 no error
+ *  @retval         VOS_PARAM_ERR              sock descriptor unknown, parameter error
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
     INT32   sock,
