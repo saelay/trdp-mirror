@@ -754,7 +754,8 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached datasett
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -817,6 +818,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -838,7 +840,6 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 
     if (0 == comId || NULL == pSrc || NULL == pDest || NULL == pDestSize || 0 == *pDestSize)
     {
-        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
         return TRDP_PARAM_ERR;
     }
 
@@ -858,6 +859,133 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     
     if (NULL == pDataset)   /* Not in our DB    */
     {
+        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
+        return TRDP_COMID_ERR;
+    }
+
+    info.level      = 0;
+    info.pSrc       = pSrc;
+    info.pDst       = pDest;
+    info.pDstEnd    = pDest + *pDestSize;
+
+    return unmarshall(&info, pDataset);
+}
+
+
+/**********************************************************************************************************************/
+/**    marshall data set function.
+ *
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      dsId            Data set id to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_MEM_ERR    provided buffer to small
+ *  @retval         TRDP_INIT_ERR   marshalling not initialised
+ *  @retval         TRDP_COMID_ERR  comid not existing
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *
+ */
+
+EXT_DECL TRDP_ERR_T tau_marshallDs (
+    void            *pRefCon,
+    UINT32           dsId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer)
+{
+    TRDP_DATASET_T      *pDataset;
+    TAU_MARSHALL_INFO_T info;
+
+    if (0 == dsId || NULL == pSrc || NULL == pDest || NULL == pDestSize || 0 == *pDestSize)
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    /* Can we use the formerly cached value? */
+    if (NULL != ppDSPointer)
+    {
+        if (NULL == *ppDSPointer)
+        {
+            *ppDSPointer = find_DS(dsId);
+        }
+        pDataset = *ppDSPointer;
+    }
+    else
+    {
+        pDataset = find_DS(dsId);
+    }
+
+    if (NULL == pDataset)   /* Not in our DB    */
+    {
+        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
+        return TRDP_COMID_ERR;
+    }
+
+    info.level      = 0;
+    info.pSrc       = pSrc;
+    info.pDst       = pDest;
+    info.pDstEnd    = pDest + *pDestSize;
+
+    return marshall(&info, pDataset);
+}
+
+/**********************************************************************************************************************/
+/**    unmarshall data set function.
+ *
+ *  @param[in]      pRefCon         pointer to user context
+ *  @param[in]      dsId            Data set id to identify the structure out of a configuration
+ *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      pDest           pointer to a buffer for the treated message
+ *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_MEM_ERR    provided buffer to small
+ *  @retval         TRDP_INIT_ERR   marshalling not initialised
+ *  @retval         TRDP_COMID_ERR  comid not existing
+ *
+ */
+
+EXT_DECL TRDP_ERR_T tau_unmarshallDs (
+    void            *pRefCon,
+    UINT32           dsId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer)
+{
+    TRDP_DATASET_T      *pDataset;
+    TAU_MARSHALL_INFO_T info;
+
+    if (0 == dsId || NULL == pSrc || NULL == pDest || NULL == pDestSize || 0 == *pDestSize)
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    /* Can we use the formerly cached value? */
+    if (NULL != ppDSPointer)
+    {
+        if (NULL == *ppDSPointer)
+        {
+            *ppDSPointer = find_DS(dsId);
+        }
+        pDataset = *ppDSPointer;
+    }
+    else
+    {
+        pDataset = find_DS(dsId);
+    }
+    
+    if (NULL == pDataset)   /* Not in our DB    */
+    {
+        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
         return TRDP_COMID_ERR;
     }
 
