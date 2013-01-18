@@ -27,11 +27,11 @@ static void printProcessConfig(TRDP_PROCESS_CONFIG_T  * pProcessConfig)
     UINT32  procOptions[2] = {TRDP_OPTION_BLOCK, TRDP_OPTION_TRAFFIC_SHAPING};
     const char * strProcOptions[2] = {"TRDP_OPTION_BLOCK", "TRDP_OPTION_TRAFFIC_SHAPING"};
     UINT32  i;
-    printf("Process configuration\n");
-    printf("  Host: %s, Leader: %s\n", pProcessConfig->hostName, pProcessConfig->leaderName);
-    printf("  Priority: %u, CycleTime: %u\n",
+    printf("  Process (session) configuration\n");
+    printf("    Host: %s, Leader: %s\n", pProcessConfig->hostName, pProcessConfig->leaderName);
+    printf("    Priority: %u, CycleTime: %u\n",
         pProcessConfig->priority, pProcessConfig->cycleTime);
-    printf("  Options:");
+    printf("    Options:");
     for (i=0; i < 2; i++)
         if (pProcessConfig->options & procOptions[i])
             printf(" %s", strProcOptions[i]);
@@ -58,26 +58,26 @@ static void printDefaultPDandMD(
     UINT32  trdpFlags[4] = {TRDP_FLAGS_REDUNDANT, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
     const char * strtrdpFlags[4] = {"TRDP_FLAGS_REDUNDANT", "TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
     UINT32  i;
-    printf("Default PD configuration\n");
-    printf("  QoS: %u, TTL: %u, Retries: %u\n", 
+    printf("  Default PD configuration\n");
+    printf("    QoS: %u, TTL: %u, Retries: %u\n", 
         pPdConfig->sendParam.qos, pPdConfig->sendParam.ttl, pPdConfig->sendParam.retries);
-    printf("  Port: %u, Timeout: %u, Behavior: %s\n", 
+    printf("    Port: %u, Timeout: %u, Behavior: %s\n", 
         pPdConfig->port, pPdConfig->timeout, 
         pPdConfig->toBehavior==1 ? "TRDP_TO_SET_TO_ZERO" : "TRDP_TO_KEEP_LAST_VALUE");
-    printf("  Flags:");
+    printf("    Flags:");
     for (i=0; i < 4; i++)
         if (pPdConfig->flags & trdpFlags[i])
             printf(" %s", strtrdpFlags[i]);
     printf("\n");
 
-    printf("Default MD configuration\n");
-    printf("  QoS: %u, TTL: %u, Retries: %u\n", 
+    printf("  Default MD configuration\n");
+    printf("    QoS: %u, TTL: %u, Retries: %u\n", 
         pMdConfig->sendParam.qos, pMdConfig->sendParam.ttl, pMdConfig->sendParam.retries);
-    printf("  Reply tmo: %u, Confirm tmo: %u, Connect tmo: %u\n", 
+    printf("    Reply tmo: %u, Confirm tmo: %u, Connect tmo: %u\n", 
         pMdConfig->replyTimeout, pMdConfig->confirmTimeout, pMdConfig->connectTimeout);
-    printf("  UDP port: %u, TCP port: %u\n", 
+    printf("    UDP port: %u, TCP port: %u\n", 
         pMdConfig->udpPort, pMdConfig->tcpPort);
-    printf("  Flags:");
+    printf("    Flags:");
     for (i=0; i < 4; i++)
         if (pMdConfig->flags & trdpFlags[i])
             printf(" %s", strtrdpFlags[i]);
@@ -185,7 +185,6 @@ static void printTelegrams(
     const char * strtrdpFlags[4] = {"TRDP_FLAGS_REDUNDANT", "TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
     UINT32  idxExPar, i;
 
-    printf("%s telegram configuration\n", pIfName);
     /*  Iterate over all telegrams  */
     for (idxExPar=0; idxExPar < numExchgPar; idxExPar++)
     {
@@ -286,11 +285,8 @@ int main(int argc, char * argv[])
     const char * pFileName;
     TRDP_XML_DOC_HANDLE_T   docHandle;
     TRDP_ERR_T              result;
-    TRDP_PROCESS_CONFIG_T   processConfig;
     TRDP_MEM_CONFIG_T       memConfig;
     TRDP_DBG_CONFIG_T       dbgConfig;
-    TRDP_PD_CONFIG_T        pdConfig;
-    TRDP_MD_CONFIG_T        mdConfig;
     UINT32                  numComPar = 0;
     TRDP_COM_PAR_T         *pComPar = NULL;
     UINT32                  numIfConfig = 0;
@@ -321,19 +317,16 @@ int main(int argc, char * argv[])
     }
 
     /*  Read general parameters from XML configuration*/
-    result = tau_readXmlConfig(
+    result = tau_readXmlDeviceConfig(
         &docHandle, 
-        &processConfig, &memConfig, &dbgConfig, 
-        &pdConfig, &mdConfig, 
+        &memConfig, &dbgConfig, 
         &numComPar, &pComPar, 
         &numIfConfig, &pIfConfig);
     if (result == TRDP_NO_ERR)
     {
         /*  Print general parameters    */
-        printf("\n***  tau_readXmlConfig results ************************************************\n\n");
-        printProcessConfig(&processConfig);
+        printf("\n***  tau_readXmlDeviceConfig results ************************************************\n\n");
         printMemConfig(&memConfig);
-        printDefaultPDandMD(&pdConfig, &mdConfig);
         printCommParams(numComPar, pComPar);
         printIfCfg(numIfConfig, pIfConfig);
         printDbgCfg(&dbgConfig);
@@ -356,14 +349,24 @@ int main(int argc, char * argv[])
         printf("\n***  tau_readXmlInterfaceConfig results ***************************************\n\n");
     for (ifIndex = 0; ifIndex < numIfConfig; ifIndex++)
     {
+        TRDP_PD_CONFIG_T        pdConfig;
+        TRDP_MD_CONFIG_T        mdConfig;
+        TRDP_PROCESS_CONFIG_T   processConfig;
+
         UINT32              numExchgPar = 0;
         TRDP_EXCHG_PAR_T    *pExchgPar = NULL;
         /*  Read telegrams configured for the interface */
         result = tau_readXmlInterfaceConfig(
-            &docHandle, pIfConfig[ifIndex].ifName, &pdConfig, &mdConfig,
+            &docHandle, pIfConfig[ifIndex].ifName, 
+            &processConfig, &pdConfig, &mdConfig,
             &numExchgPar, &pExchgPar);
         if (result == TRDP_NO_ERR)
         {
+            printf("%s interface configuration\n", 
+                (const char *)pIfConfig[ifIndex].ifName);
+            /*  Print default parameters for the interface (session)    */
+            printProcessConfig(&processConfig);
+            printDefaultPDandMD(&pdConfig, &mdConfig);
             /*  Print telegrams configured for the interface */
             printTelegrams(pIfConfig[ifIndex].ifName, numExchgPar, pExchgPar);
             printf("\n");

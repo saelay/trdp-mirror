@@ -88,10 +88,10 @@ $(OUTDIR)/trdp_if.o:	trdp_if.c
 $(OUTDIR)/%.o: %.c %.h trdp_if_light.h trdp_types.h vos_types.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(OUTDIR)/trdp_xml.o:	trdp_xml.c
+$(OUTDIR)/trdp_xml.o:	tau_xml.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(OUTDIR)/trdp_marshall.o:	trdp_marshall.c
+$(OUTDIR)/trdp_marshall.o:	tau_marshall.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 			

@@ -1,8 +1,8 @@
 /******************************************************************************/
 /**
- * @file            trdp_xml.c
+ * @file            tau_xml.c
  *
- * @brief           Functions for XML file interpretation
+ * @brief           Functions for XML file parsing
  *
  * @details
  *
@@ -417,32 +417,18 @@ static void parseDSElemType(xmlNodePtr pXmlElem, const char * pAttrName, UINT32 
     xmlFree(pAttr);
 }
 
-
 /*
-* Set default values to all supplied structures
+* Set default values to device parameters
 */
-static void setDefaultValues(
-    TRDP_PROCESS_CONFIG_T   *pProcessConfig,
+static void setDefaultDeviceValues(
     TRDP_MEM_CONFIG_T       *pMemConfig,
     TRDP_DBG_CONFIG_T       *pDbgConfig,
-    TRDP_PD_CONFIG_T        *pPdConfig,
-    TRDP_MD_CONFIG_T        *pMdConfig,
     UINT32                  *pNumComPar,
     TRDP_COM_PAR_T          * *ppComPar,
     UINT32                  *pNumIfConfig,
     TRDP_IF_CONFIG_T        * *ppIfConfig
     )
 {
-    /*  Process configuration   */
-    if (pProcessConfig)
-    {
-        memset(pProcessConfig->hostName, 0, sizeof(TRDP_LABEL_T));
-        memset(pProcessConfig->leaderName, 0, sizeof(TRDP_LABEL_T));
-        pProcessConfig->cycleTime   = TRDP_PROCESS_DEFAULT_CYCLE_TIME;
-        pProcessConfig->options     = TRDP_PROCESS_DEFAULT_OPTIONS;
-        pProcessConfig->priority    = TRDP_PROCESS_DEFAULT_PRIORITY;
-    }
-
     /*  Memory configuration    */
     if (pMemConfig)
     {
@@ -457,6 +443,38 @@ static void setDefaultValues(
         memset(pDbgConfig->fileName, 0, sizeof(TRDP_FILE_NAME_T));
         pDbgConfig->maxFileSize= TRDP_DEBUG_DEFAULT_FILE_SIZE;
         pDbgConfig->option     = TRDP_DBG_ERR;
+    }
+
+    /*  No Communication parameters*/
+    if (pNumComPar)
+        *pNumComPar = 0;
+    if (ppComPar)
+        *ppComPar = NULL;
+
+    /*  No Interface configurations*/
+    if (pNumIfConfig)
+        *pNumIfConfig = 0;
+    if (ppIfConfig)
+        *ppIfConfig = NULL;
+}
+
+/*
+* Set default values to interface (session) parameters
+*/
+static void setDefaultInterfaceValues(
+    TRDP_PROCESS_CONFIG_T   *pProcessConfig,
+    TRDP_PD_CONFIG_T        *pPdConfig,
+    TRDP_MD_CONFIG_T        *pMdConfig
+    )
+{
+    /*  Process configuration   */
+    if (pProcessConfig)
+    {
+        memset(pProcessConfig->hostName, 0, sizeof(TRDP_LABEL_T));
+        memset(pProcessConfig->leaderName, 0, sizeof(TRDP_LABEL_T));
+        pProcessConfig->cycleTime   = TRDP_PROCESS_DEFAULT_CYCLE_TIME;
+        pProcessConfig->options     = TRDP_PROCESS_DEFAULT_OPTIONS;
+        pProcessConfig->priority    = TRDP_PROCESS_DEFAULT_PRIORITY;
     }
 
     /*  Default Pd configuration    */
@@ -488,19 +506,8 @@ static void setDefaultValues(
         pMdConfig->tcpPort          = TRDP_MD_TCP_PORT;
         pMdConfig->udpPort          = TRDP_MD_UDP_PORT;
     }
-
-    /*  No Communication parameters*/
-    if (pNumComPar)
-        *pNumComPar = 0;
-    if (ppComPar)
-        *ppComPar = NULL;
-
-    /*  No Interface configurations*/
-    if (pNumIfConfig)
-        *pNumIfConfig = 0;
-    if (ppIfConfig)
-        *ppIfConfig = NULL;
 }
+
 
 /*
 *   Parse configuration of preallocated memory blocks
@@ -605,14 +612,11 @@ static void parseMDDefaultParams(xmlNodePtr pMDParElem, TRDP_MD_CONFIG_T *pMdCon
 }
 
 /*
-*   Parse content of the device-configuration element and all its child elements
+*   Parse memory configuration from the the device-configuration element
 */
-static void parseDeviceConfiguration(
+static void parseMemoryConfiguration(
     xmlNodePtr               pDevCfgElem, 
-    TRDP_PROCESS_CONFIG_T   *pProcessConfig, 
-    TRDP_MEM_CONFIG_T       *pMemConfig, 
-    TRDP_PD_CONFIG_T        *pPdConfig,
-    TRDP_MD_CONFIG_T        *pMdConfig
+    TRDP_MEM_CONFIG_T       *pMemConfig
     )
 {
     xmlNodePtr   pChildElement;
@@ -621,22 +625,13 @@ static void parseDeviceConfiguration(
     if (pMemConfig)
         parseUINT32(pDevCfgElem, "memory-size", &pMemConfig->size);
     
-    /*  Iterate over all child elements, call parser functions  */
+    /*  Iterate over all child elements, look for memory block list  */
 	pChildElement = xmlFirstElementChild(pDevCfgElem);
 	while (pChildElement != NULL) 
     {
         /*  Memory blocks configuration  */
         if ((!xmlStrcmp(pChildElement->name, BAD_CAST "mem-block-list")))
 			parseMemBlockList(pChildElement, pMemConfig);
-        /*  TRDP process configuration  */
-		else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "trdp-process")))
-			parseProcessConfig(pChildElement, pProcessConfig);
-        /*  PD default communication parameters  */
-		else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "pd-com-parameter")))
-			parsePDDefaultParams(pChildElement, pPdConfig);
-        /*  MD default communication parameters  */
-		else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "md-com-parameter")))
-            parseMDDefaultParams(pChildElement, pMdConfig);
 
         pChildElement = xmlNextElementSibling(pChildElement);
 	}
@@ -781,16 +776,14 @@ static void parseBusInterfaces(
 	}
 }
 
+
 /**********************************************************************************************************************/
-/**	Function to read the TRDP configuration parameters out of the XML configuration file.
+/**	Function to read the TRDP device configuration parameters out of the XML configuration file.
  *
  *
  *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
- *  @param[out]	    pProcessConfig    TRDP main process configuration
  *  @param[out]	    pMemConfig        Memory configuration
  *  @param[out]     pDbgConfig        Debug printout configuration for application use
- *  @param[out]	    pPdConfig         PD default configuration
- *  @param[out]	    pMdConfig         MD default configuration
  *  @param[out]     pNumComPar        Number of configured com parameters
  *  @param[out]     ppComPar          Pointer to array of com parameters
  *  @param[out]     pNumIfConfig      Number of configured interfaces
@@ -798,16 +791,13 @@ static void parseBusInterfaces(
  *
  *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
- *  @retval         TRDP_PARAM_ERR    Invalid dcument handle
+ *  @retval         TRDP_PARAM_ERR    File not existing
  *
  */
-EXT_DECL TRDP_ERR_T tau_readXmlConfig (
+EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
     const TRDP_XML_DOC_HANDLE_T *pDocHnd,
-    TRDP_PROCESS_CONFIG_T       *pProcessConfig,
     TRDP_MEM_CONFIG_T           *pMemConfig,
     TRDP_DBG_CONFIG_T           *pDbgConfig,
-    TRDP_PD_CONFIG_T            *pPdConfig,
-    TRDP_MD_CONFIG_T            *pMdConfig,
     UINT32                      *pNumComPar,
     TRDP_COM_PAR_T             **ppComPar,
     UINT32                      *pNumIfConfig,
@@ -818,8 +808,8 @@ EXT_DECL TRDP_ERR_T tau_readXmlConfig (
     xmlNodePtr  pChildElement;
 
     /*  Set default values to all parameters    */
-    setDefaultValues(
-        pProcessConfig, pMemConfig, pDbgConfig, pPdConfig, pMdConfig, 
+    setDefaultDeviceValues(
+        pMemConfig, pDbgConfig, 
         pNumComPar, ppComPar, pNumIfConfig, ppIfConfig);
 
     /* Check document handle    */
@@ -827,14 +817,6 @@ EXT_DECL TRDP_ERR_T tau_readXmlConfig (
         return TRDP_PARAM_ERR;
     pRootElement = (xmlNodePtr)pDocHnd->pRootElement;
 
-    /*  Read host names */
-    if (pProcessConfig)
-    {
-        /*  Read host name attribute    */
-        parseLABEL(pRootElement, "host-name", pProcessConfig->hostName);
-        /*  Read    leader name attribute   */
-        parseLABEL(pRootElement, "leader-name", pProcessConfig->leaderName);
-    }
 
     /*  Iterate over all child elements, call appropriate parser functions*/
 	pChildElement = xmlFirstElementChild(pRootElement);
@@ -843,8 +825,8 @@ EXT_DECL TRDP_ERR_T tau_readXmlConfig (
 		/*  Parse device-configuration element and all children  */
         if ((!xmlStrcmp(pChildElement->name, BAD_CAST "device-configuration")))
         {
-			parseDeviceConfiguration(
-                pChildElement, pProcessConfig, pMemConfig, pPdConfig, pMdConfig);
+            parseMemoryConfiguration(
+                pChildElement, pMemConfig);
 	    }
 		/*  Parse debug configuration  */
         else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "debug")))
@@ -1332,16 +1314,20 @@ static void parseTelegram(
     parseDestinations(pXPathCtx, pExchgPar);
 }
 
+
+
 /**********************************************************************************************************************/
 /**	Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
  *
  *
  *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
  *  @param[in]	    pIfName           Interface name
- *  @param[in]      pPdConfig         PD default configuration
- *  @param[in]      pMdConfig         MD default configuration
+ *  @param[out]	    pProcessConfig    TRDP process (session) configuration for the interface
+ *  @param[out]     pPdConfig         PD default configuration for the interface
+ *  @param[out]     pMdConfig         MD default configuration for the interface
  *  @param[out]	    pNumExchgPar      Number of configured telegrams
  *  @param[out]     ppExchgPar        Pointer to array of telegram configurations
+ *
  *  @retval         TRDP_NO_ERR	      no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
@@ -1350,8 +1336,9 @@ static void parseTelegram(
 EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     const TRDP_XML_DOC_HANDLE_T *pDocHnd,
     const CHAR8                 *pIfName,
-    const TRDP_PD_CONFIG_T      *pPdConfig,
-    const TRDP_MD_CONFIG_T      *pMdConfig,
+    TRDP_PROCESS_CONFIG_T       *pProcessConfig,
+    TRDP_PD_CONFIG_T            *pPdConfig,
+    TRDP_MD_CONFIG_T            *pMdConfig,
     UINT32                      *pNumExchgPar,
     TRDP_EXCHG_PAR_T           **ppExchgPar
     )
@@ -1360,20 +1347,67 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     xmlXPathContextPtr  pXPathCtx;
     xmlXPathObjectPtr   pXPathObj;
     CHAR8               strXPath[256];
+    xmlNodePtr          pIfElem;
+    xmlNodePtr          pChildElement;
     xmlNodePtr          pTlgElem;
     int                 index;
 
     /*  Check parameters    */
-    if (!pDocHnd || !pIfName || !pNumExchgPar)
+    if (!pDocHnd || !pIfName || !pNumExchgPar || !ppExchgPar)
         return TRDP_PARAM_ERR;
-    if (!pPdConfig || !pMdConfig || !ppExchgPar)
+    if (!pPdConfig || !pMdConfig)
         return TRDP_PARAM_ERR;
+
     pRootElement = (xmlNodePtr)pDocHnd->pRootElement;
     pXPathCtx = (xmlXPathContextPtr)pDocHnd->pXPathContext;
 
-    /* Set empty values */
+    /* Set default values */
     *pNumExchgPar = 0;
     *ppExchgPar = NULL;
+    setDefaultInterfaceValues(pProcessConfig, pPdConfig, pMdConfig);
+
+    /*  Read host names */
+    if (pProcessConfig)
+    {
+        /*  Read host name attribute    */
+        parseLABEL(pRootElement, "host-name", pProcessConfig->hostName);
+        /*  Read    leader name attribute   */
+        parseLABEL(pRootElement, "leader-name", pProcessConfig->leaderName);
+    }
+
+    /* Execute XPath expression - find given interface element  */
+    snprintf(strXPath, sizeof(strXPath),
+        "/device/bus-interface-list/bus-interface[@name='%s']", pIfName);
+    pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
+    /*  Check if bus-interface element was found    */
+    if (pXPathObj)
+    {
+        if (pXPathObj->nodesetval && pXPathObj->nodesetval->nodeNr)
+        {
+            /*  Get the first found interface with given name - there should be only one!   */
+            pIfElem = pXPathObj->nodesetval->nodeTab[0];
+            
+            /*  Iterate over all child elements, call parser functions for PROCESS, PD and MD config  */
+	        pChildElement = xmlFirstElementChild(pIfElem);
+	        while (pChildElement != NULL) 
+            {
+                /*  TRDP process (session) configuration  */
+                if ((!xmlStrcmp(pChildElement->name, BAD_CAST "trdp-process")))
+			        parseProcessConfig(pChildElement, pProcessConfig);
+                /*  PD default parameters  */
+                else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "pd-com-parameter")))
+                    parsePDDefaultParams(pChildElement, pPdConfig);
+                /*  MD default parameters  */
+                else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "md-com-parameter")))
+                    parseMDDefaultParams(pChildElement, pMdConfig);
+
+                pChildElement = xmlNextElementSibling(pChildElement);
+	        }
+        }
+        /*  Free XPath result   */
+        xmlXPathFreeObject(pXPathObj);
+    }
+
 
     /* Execute XPath expression - find all telegram elemments for given interface  */
     snprintf(strXPath, sizeof(strXPath),
