@@ -4,10 +4,10 @@
   <xs:annotation>
     <xs:documentation>
 #===========================================================================
-==========================================
+==========================
 #  COPYRIGHT     : (c) 2013 Bombardier Inc. or its subsidiaries
 #===========================================================================
-==========================================
+==========================
 #
 #  PRODUCT       : TRDP
 #
@@ -18,9 +18,10 @@
 #  VERSION       : 1.2.0.0
 #
 #   HISTORY      :
+#                            1.3.0.0   trdp-process, md-com-parameter, pd-com-parameter moved from device-configuration to bus-interface
 #                            1.2.0.0   Support of optional attribute "callback" for md/pd-com-parameter, md/pd-parameter
 #===========================================================================
-==========================================
+==========================
 </xs:documentation>
   </xs:annotation>
   
@@ -133,6 +134,9 @@
   
   <xs:element name="bus-interface">
     <xs:complexType>
+      <xs:element ref="trdp-process" minOccurs="0" maxOccurs="1"/>
+      <xs:element ref="pd-com-parameter" minOccurs="0" maxOccurs="1"/>
+      <xs:element ref="md-com-parameter" minOccurs="0" maxOccurs="1"/>
       <xs:sequence>
         <xs:element  ref="telegram" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
@@ -339,9 +343,6 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="mem-block-list" minOccurs="0" maxOccurs="1"/>
-        <xs:element ref="trdp-process" minOccurs="0" maxOccurs="1"/>
-        <xs:element ref="pd-com-parameter" minOccurs="0" maxOccurs="1"/>
-        <xs:element ref="md-com-parameter" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:attribute  name="memory-size" default="4194304" type="uint32" use="optional">
         <xs:annotation>
