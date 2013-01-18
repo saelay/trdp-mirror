@@ -77,11 +77,11 @@ extern "C" {
  */
 
 EXT_DECL TRDP_ERR_T tau_initMarshall(
-    void                    **ppRefCon,
+    void                  **ppRefCon,
     UINT32                  numComId,
-    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,        
+    TRDP_COMID_DSID_MAP_T  *pComIdDsIdMap,        
     UINT32                  numDataSet,
-    TRDP_DATASET_T          *pDataset[]);
+    TRDP_DATASET_T         *pDataset[]);
 
 
 
@@ -104,12 +104,12 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
  */
 
 EXT_DECL TRDP_ERR_T tau_marshall (
-    void        	*pRefCon,
-    UINT32      	comId,
-    UINT8       	*pSrc,
-    UINT8       	*pDest,
-    UINT32      	*pDestSize,
-    TRDP_DATASET_T	**ppDSPointer);
+    void            *pRefCon,
+    UINT32           comId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer);
 
 
 /**********************************************************************************************************************/
@@ -131,9 +131,9 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 typedef TRDP_ERR_T tau_marshallDs (
     void *pRefCon,
     UINT32 datasetId,
-    const UINT8 * pSrc,
-    UINT8       * pDest,
-    UINT32      * pDestSize);
+    const UINT8 *pSrc,
+    UINT8       *pDest,
+    UINT32      *pDestSize);
 
 
 /**********************************************************************************************************************/
@@ -154,12 +154,12 @@ typedef TRDP_ERR_T tau_marshallDs (
  */
 
 EXT_DECL TRDP_ERR_T tau_unmarshall (
-    void        	*pRefCon,
-    UINT32      	comId,
-    UINT8       	*pSrc,
-    UINT8      		*pDest,
-    UINT32      	*pDestSize,
-	TRDP_DATASET_T	**ppDSPointer);
+    void            *pRefCon,
+    UINT32           comId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer);
     
 /**********************************************************************************************************************/
 /**    unmarshall data set function.
@@ -180,9 +180,9 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 typedef TRDP_ERR_T tau_unmarshallDs (
     void *pRefCon,
     UINT32 datasetId,
-    const UINT8 * pSrc,
-    UINT8       * pDest,
-    UINT32      * pDestSize);
+    const UINT8 *pSrc,
+    UINT8       *pDest,
+    UINT32      *pDestSize);
 
 
 /**********************************************************************************************************************/
@@ -200,10 +200,10 @@ typedef TRDP_ERR_T tau_unmarshallDs (
  */
 
 typedef TRDP_ERR_T tau_calcDatasetSize (
-    void *pRefCon,
-    UINT32 datasetId,
-    UINT8       * pSrc,
-    UINT32      * pSize);
+    void        *pRefCon,
+    UINT32       datasetId,
+    UINT8       *pSrc,
+    UINT32      *pSize);
 
 
 #ifdef __cplusplus

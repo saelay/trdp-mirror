@@ -382,25 +382,25 @@ struct TRDP_DATASET;
 /**    Dataset element definition    */
 typedef struct
 {
-    UINT32  				type;		/**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000 */
-    UINT32  				size;		/**< Number of items or TDRP_VAR_SIZE (0)                     */
-    struct TRDP_DATASET		*pCachedDS;	/**< Used internally for marshalling speed-up                 */
+    UINT32                  type;        /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000 */
+    UINT32                  size;        /**< Number of items or TDRP_VAR_SIZE (0)                     */
+    struct TRDP_DATASET    *pCachedDS;   /**< Used internally for marshalling speed-up                 */
 } TRDP_DATASET_ELEMENT_T;
 
 /**    Dataset definition    */
 typedef struct TRDP_DATASET
 {
-    UINT32                  id;       	/**< dataset identifier > 1000                                */
-    UINT16                  reserved1; 	/**< Reserved for future use, must be zero                    */
-    UINT16                  numElement;	/**< Number of elements                                       */
-    TRDP_DATASET_ELEMENT_T  pElement[];	/**< Pointer to a dataset element, used as array              */
+    UINT32                  id;           /**< dataset identifier > 1000                                */
+    UINT16                  reserved1;    /**< Reserved for future use, must be zero                    */
+    UINT16                  numElement;   /**< Number of elements                                       */
+    TRDP_DATASET_ELEMENT_T  pElement[];   /**< Pointer to a dataset element, used as array              */
 } TRDP_DATASET_T;
 
 /**    Dataset element definition    */
 typedef struct
 {
-    UINT32  		comId;              /**< comId                                                    */
-    UINT32  		datasetId;          /**< corresponding dataset Id                                 */
+    UINT32          comId;              /**< comId                                                    */
+    UINT32          datasetId;          /**< corresponding dataset Id                                 */
 } TRDP_COMID_DSID_MAP_T;
 
 /**     Array of pointers to dataset  */
@@ -574,7 +574,7 @@ typedef VOS_LOG_T TRDP_LOG_T;
  *  @param[in]        comId         ComId to identify the structure out of a configuration
  *  @param[in]        *pSrc         pointer to received original message
  *  @param[in]        *pDst         pointer to a buffer for the treated message
- *  @param[in,out]    *pDstSize  	size of the provide buffer / size of the treated message
+ *  @param[in,out]    *pDstSize      size of the provide buffer / size of the treated message
  *  @param[in,out]    *ppCachedDS   pointer to pointer of cached dataset
  *
  *  @retval         TRDP_NO_ERR        no error
@@ -589,7 +589,7 @@ typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
     UINT8   *pSrc,
     UINT8   *pDst,
     UINT32  *pDstSize,
-    TRDP_DATASET_T	**ppCachedDS);
+    TRDP_DATASET_T    **ppCachedDS);
 
 
 /**********************************************************************************************************************/
@@ -614,8 +614,8 @@ typedef TRDP_ERR_T (*TRDP_UNMARSHALL_T)(
     UINT32  comId,
     UINT8   *pSrc,
     UINT8   *pDst,
-	UINT32  *pDstSize,
-	TRDP_DATASET_T	**ppCachedDS);
+    UINT32  *pDstSize,
+    TRDP_DATASET_T    **ppCachedDS);
 
 
 /**********************************************************************************************************************/

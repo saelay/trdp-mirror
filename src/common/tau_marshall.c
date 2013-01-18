@@ -149,7 +149,7 @@ static INLINE void unpackedCopy64 (
  *  @param[in,out]      ppDst           Pointer to pointer to destination variable
  *  @param[in]          noOfItems       Items to copy
  *
- *  @retval         none
+ *  @retval             none
  */
 
 static INLINE void packedCopy64 (
@@ -374,10 +374,10 @@ EXT_DECL TRDP_ERR_T marshall (
             {
                 /* Dataset, call ourself recursively */
 
-				/* Never used before?  */                
+                /* Never used before?  */                
                 if (NULL == pDataset->pElement[index].pCachedDS)
                 {
-                	/* Look for it   */
+                    /* Look for it   */
                     pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
                 }
 
@@ -541,7 +541,6 @@ EXT_DECL TRDP_ERR_T unmarshall (
     }
 
     /*    Loop over all datasets in the array    */
-
     for (index = 0; index < pDataset->numElement; ++index)
     {
         UINT32 noOfItems = pDataset->pElement[index].size;
@@ -556,10 +555,10 @@ EXT_DECL TRDP_ERR_T unmarshall (
             while (noOfItems-- > 0)
             {
                 /* Dataset, call ourself recursively */
-				/* Never used before?  */                
+                /* Never used before?  */                
                 if (NULL == pDataset->pElement[index].pCachedDS)
                 {
-                	/* Look for it   */
+                    /* Look for it   */
                     pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
                 }
                 
@@ -715,7 +714,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
     UINT32                  numDataSet,
     TRDP_DATASET_T          *pDataset[])
 {
-	UINT32	i,j;
+    UINT32    i,j;
     
     if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
     {
@@ -736,7 +735,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
     /* invalidate the cache */
     for (i = 0; i < numDataSet; i++)
     {
-    	for (j = 0; j < pDataset[i]->numElement; j++)
+        for (j = 0; j < pDataset[i]->numElement; j++)
         {
             pDataset[i]->pElement[j].pCachedDS = NULL;
         }
@@ -766,12 +765,12 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
  */
 
 EXT_DECL TRDP_ERR_T tau_marshall (
-    void        	*pRefCon,
-    UINT32      	comId,
-    UINT8       	*pSrc,
-    UINT8       	*pDest,
-    UINT32      	*pDestSize,
-    TRDP_DATASET_T	**ppDSPointer)
+    void            *pRefCon,
+    UINT32           comId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer)
 {
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
@@ -781,12 +780,12 @@ EXT_DECL TRDP_ERR_T tau_marshall (
         return TRDP_PARAM_ERR;
     }
 
-	/* Can we use the formerly cached value? */
-	if (NULL != ppDSPointer)
+    /* Can we use the formerly cached value? */
+    if (NULL != ppDSPointer)
     {
         if (NULL == *ppDSPointer)
         {
-        	*ppDSPointer = find_DS_from_ComId(comId);
+            *ppDSPointer = find_DS_from_ComId(comId);
         }
         pDataset = *ppDSPointer;
     }
@@ -827,12 +826,12 @@ EXT_DECL TRDP_ERR_T tau_marshall (
  */
 
 EXT_DECL TRDP_ERR_T tau_unmarshall (
-    void        	*pRefCon,
-    UINT32      	comId,
-    UINT8       	*pSrc,
-    UINT8      		*pDest,
-    UINT32      	*pDestSize,
-    TRDP_DATASET_T	**ppDSPointer)
+    void            *pRefCon,
+    UINT32           comId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer)
 {
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
@@ -843,12 +842,12 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
         return TRDP_PARAM_ERR;
     }
 
-	/* Can we use the formerly cached value? */
-	if (NULL != ppDSPointer)
+    /* Can we use the formerly cached value? */
+    if (NULL != ppDSPointer)
     {
         if (NULL == *ppDSPointer)
         {
-        	*ppDSPointer = find_DS_from_ComId(comId);
+            *ppDSPointer = find_DS_from_ComId(comId);
         }
         pDataset = *ppDSPointer;
     }

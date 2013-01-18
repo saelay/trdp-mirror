@@ -1,29 +1,28 @@
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
-                               _
-    UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(279) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
                                _
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(279) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(281) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
                                                                                 _
                                                               appHandle->realIP);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1765) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1769) : Warning 534: Ignoring return
     value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
-    (compare with line 247, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h,
-    module D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c)
+    (compare with line 247, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h)
                                                                                     _
             pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2375) : Warning 571: Suspicious cast
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2380) : Warning 571: Suspicious cast
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(281) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                                _
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(279) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(281) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
                                                 _
         pPacket->privFlags &= ~TRDP_INVALID_DATA;
@@ -42,138 +41,16 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(480) : Error 64: Type mismatch
 D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(483) : Error 64: Type mismatch
     (assignment) (int/enum)
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c 
-                               _
-    UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(279) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-    _
-#if __BIG_ENDIAN__
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(111) : Warning 553: Undefined
-    preprocessor variable '__BIG_ENDIAN__', assumed 0
-                                                               _
-    UINT8   *pDst8 = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(121) : Error 78: Symbol
-    'UINT64' typedef'ed at line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(121) : Warning 530: Symbol
-    'UINT64' (line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
-    initialized
-                                                                _
-    UINT64 *pSrc64 = (UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(161) : Error 78: Symbol
-    'UINT64' typedef'ed at line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-                                                  _
-    pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(358) : Error 78: Symbol
-    'STRUCT_T' typedef'ed at line 52 used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(358) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- struct vs. unsigned long
-    long) with line 121
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(358) : Warning 530: Symbol
-    'STRUCT_T' (line 52) not initialized
-                                                                              _
-                    UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(413) : Error 78: Symbol
-    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(413) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
-    long) with line 121
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(413) : Warning 530: Symbol
-    'UINT16' (line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
-    initialized
-                                                                               _
-                     UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(432) : Error 78: Symbol
-    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(432) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
-    unsigned long long) with line 121
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(432) : Warning 530: Symbol
-    'UINT32' (line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
-    initialized
-                                                                                           _
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Error 78: Symbol
-    'TIMEDATE64_STRUCT_T' typedef'ed at line 62 used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(450) : Warning 530: Symbol
-    'TIMEDATE64_STRUCT_T' (line 62) not initialized
-                                                                                       _
-                        pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(476) : Error 78: Symbol
-    'TIMEDATE48_STRUCT_T' typedef'ed at line 57 used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(476) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(476) : Warning 530: Symbol
-    'TIMEDATE48_STRUCT_T' (line 57) not initialized
-                                                                                     _
-                        pSrc16 = (UINT16 *) alignePtr((UINT8*) pSrc32, ALIGNOF(UINT16));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(482) : Error 78: Symbol
-    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(482) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
-    long) with line 121
-                                                                              _
-                    UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(591) : Error 78: Symbol
-    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(591) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
-    long) with line 121
-                                                                              _
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(608) : Error 78: Symbol
-    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(608) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
-    unsigned long long) with line 121
-                                                                                       _
-                        pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(628) : Error 78: Symbol
-    'TIMEDATE48_STRUCT_T' typedef'ed at line 57 used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(628) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
-                                                                                    _
-                        pDst16 = (UINT16 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT16));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(634) : Error 78: Symbol
-    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(634) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
-    long) with line 121
-                                                                                           _
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(645) : Error 78: Symbol
-    'TIMEDATE64_STRUCT_T' typedef'ed at line 62 used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(645) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
-                                                                                    _
-                        pDst32 = (UINT32 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT32));
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(653) : Error 78: Symbol
-    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
-    used in expression
-D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c(653) : Warning 516: 'Symbol
-    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
-    unsigned long long) with line 121
-
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
                                _
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(279) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(281) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
                                _
     UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(279) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(281) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
@@ -198,15 +75,125 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
 D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(427) : Warning 569: Loss of
     information (arg. no. 2) (32 bits to 31 bits)
 
---- Global Wrap-up
-
-Warning 526: 'ig_endian()' (line 593, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
-    not defined
-Warning 628: no argument information provided for function 'ig_endian()' (line
-    593, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
-Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
-    not accessed
-Warning 526: '__alignof()' (line 121, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
-    not defined
-Warning 628: no argument information provided for function '__alignof()' (line
-    121, file D:\TCNOpen\trunk\trdp\src\common\trdp_marshall.c)
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
+                               _
+    UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(281) : Error 43: Vacuous type
+    for variable 'MD_ELE::data'
+    _
+#if __BIG_ENDIAN__
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
+    preprocessor variable '__BIG_ENDIAN__', assumed 0
+                                                               _
+    UINT8   *pDst8 = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(121) : Error 78: Symbol
+    'UINT64' typedef'ed at line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(121) : Warning 530: Symbol
+    'UINT64' (line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
+    initialized
+                                                                _
+    UINT64 *pSrc64 = (UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(161) : Error 78: Symbol
+    'UINT64' typedef'ed at line 42, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+                                                  _
+    pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(358) : Error 78: Symbol
+    'STRUCT_T' typedef'ed at line 52 used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(358) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- struct vs. unsigned long
+    long) with line 121
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(358) : Warning 530: Symbol
+    'STRUCT_T' (line 52) not initialized
+                                                                              _
+                    UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(419) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(419) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 121
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(419) : Warning 530: Symbol
+    'UINT16' (line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
+    initialized
+                                                                               _
+                     UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(438) : Error 78: Symbol
+    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(438) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
+    unsigned long long) with line 121
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(438) : Warning 530: Symbol
+    'UINT32' (line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h) not
+    initialized
+                                                                                           _
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(456) : Error 78: Symbol
+    'TIMEDATE64_STRUCT_T' typedef'ed at line 62 used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(456) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(456) : Warning 530: Symbol
+    'TIMEDATE64_STRUCT_T' (line 62) not initialized
+                                                                                       _
+                        pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(482) : Error 78: Symbol
+    'TIMEDATE48_STRUCT_T' typedef'ed at line 57 used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(482) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(482) : Warning 530: Symbol
+    'TIMEDATE48_STRUCT_T' (line 57) not initialized
+                                                                                     _
+                        pSrc16 = (UINT16 *) alignePtr((UINT8*) pSrc32, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(488) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(488) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 121
+                                                                              _
+                    UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(601) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(601) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 121
+                                                                              _
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(618) : Error 78: Symbol
+    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(618) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
+    unsigned long long) with line 121
+                                                                                       _
+                        pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(638) : Error 78: Symbol
+    'TIMEDATE48_STRUCT_T' typedef'ed at line 57 used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(638) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
+                                                                                    _
+                        pDst16 = (UINT16 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT16));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(644) : Error 78: Symbol
+    'UINT16' typedef'ed at line 40, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(644) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- int vs. unsigned long
+    long) with line 121
+                                                                                           _
+                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(655) : Error 78: Symbol
+    'TIMEDATE64_STRUCT_T' typedef'ed at line 62 used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(655) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- basic) with line 121
+                                                                                    _
+                        pDst32 = (UINT32 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT32));
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(663) : Error 78: Symbol
+    'UINT32' typedef'ed at line 41, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_types.h
+    used in expression
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(663) : Warning 516: 'Symbol
+    __alignof()' has arg. type conflict (arg. no. 1 -- unsigned int vs.
+    unsigned long long) with line 121
+Error 305: Unable to open module 'tau_xml.c'
