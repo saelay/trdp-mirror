@@ -574,6 +574,8 @@ static void parsePDDefaultParams(xmlNodePtr pPDParElem, TRDP_PD_CONFIG_T *pPdCon
     parseUINT8(pPDParElem, "qos", &pPdConfig->sendParam.qos);
     if (checkAttrValue(pPDParElem, "marshall", "on"))
         pPdConfig->flags |= TRDP_FLAGS_MARSHALL;
+    if (checkAttrValue(pPDParElem, "callback", "on"))
+        pPdConfig->flags |= TRDP_FLAGS_CALLBACK;
     parseUINT16(pPDParElem, "port", &pPdConfig->port);
 }
 
@@ -596,6 +598,8 @@ static void parseMDDefaultParams(xmlNodePtr pMDParElem, TRDP_MD_CONFIG_T *pMdCon
         pMdConfig->flags |= TRDP_FLAGS_TCP;
     if (checkAttrValue(pMDParElem, "marshall", "on"))
         pMdConfig->flags |= TRDP_FLAGS_MARSHALL;
+    if (checkAttrValue(pMDParElem, "callback", "on"))
+        pMdConfig->flags |= TRDP_FLAGS_CALLBACK;
     parseUINT16(pMDParElem, "udp-port", &pMdConfig->udpPort);
     parseUINT16(pMDParElem, "tcp-port", &pMdConfig->tcpPort);
 }
@@ -1088,6 +1092,10 @@ static void parseMdParameter(
             pExchgPar->pMdPar->flags |= TRDP_FLAGS_MARSHALL;
         if (checkAttrValue(pMdParElem, "marshall", "off"))
             pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_MARSHALL;
+        if (checkAttrValue(pMdParElem, "callback", "on"))
+            pExchgPar->pMdPar->flags |= TRDP_FLAGS_CALLBACK;
+        if (checkAttrValue(pMdParElem, "callback", "off"))
+            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_CALLBACK;
     }
 
     /*  Free XPath result   */
@@ -1139,6 +1147,10 @@ static void parsePdParameter(
             pExchgPar->pPdPar->flags |= TRDP_FLAGS_MARSHALL;
         if (checkAttrValue(pPdParElem, "marshall", "off"))
             pExchgPar->pPdPar->flags &= ~TRDP_FLAGS_MARSHALL;
+        if (checkAttrValue(pPdParElem, "callback", "on"))
+            pExchgPar->pPdPar->flags |= TRDP_FLAGS_CALLBACK;
+        if (checkAttrValue(pPdParElem, "callback", "off"))
+            pExchgPar->pPdPar->flags &= ~TRDP_FLAGS_CALLBACK;
     }
 
     /*  Free XPath result   */

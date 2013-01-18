@@ -152,6 +152,10 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			>
 			<File
+				RelativePath="..\..\src\common\tau_xml.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\common\trdp_if.c"
 				>
 			</File>
@@ -173,10 +177,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\common\trdp_utils.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\common\trdp_xml.c"
 				>
 			</File>
 			<File
