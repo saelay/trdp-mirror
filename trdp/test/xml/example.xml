@@ -6,15 +6,15 @@
             <mem-block size="64" preallocate="256"/>
             <mem-block size="128" preallocate="256"/>
         </mem-block-list>
-        <trdp-process blocking="no" cycle-time="10000" priority="80" traffic-shaping="on" />
-        <pd-com-parameter marshall="on" port="20548" qos="5" ttl="64" timeout-value="100000" validity-behavior="zero" />
-        <md-com-parameter udp-port="20550" tcp-port="20550"
-                          confirm-timeout="1000000" connect-timeout="60000000" reply-timeout="5000000"
-                          marshall="off" protocol="UDP" qos="3" retries="2" ttl="64" />
     </device-configuration>
     
     <bus-interface-list>
         <bus-interface network-id="1" name="eth0" >
+            <trdp-process blocking="no" cycle-time="10000" priority="80" traffic-shaping="on" />
+            <pd-com-parameter marshall="on" port="20548" qos="5" ttl="64" timeout-value="100000" validity-behavior="zero" />
+            <md-com-parameter udp-port="20550" tcp-port="20550"
+                              confirm-timeout="1000000" connect-timeout="60000000" reply-timeout="5000000"
+                              marshall="off" protocol="UDP" qos="3" retries="2" ttl="64" />
             <telegram name="tlg1001" com-id="1001" data-set-id="1001" com-parameter-id="1">
                 <pd-parameter cycle="10000" marshall="on" timeout ="30000" validity-behavior="keep"/>
                 <source id="1" uri1="10.2.13.50">
@@ -32,6 +32,11 @@
             </telegram>
         </bus-interface>
         <bus-interface network-id="2" name="eth1" >
+            <trdp-process blocking="no" cycle-time="50000" priority="20" traffic-shaping="on" />
+            <pd-com-parameter marshall="off" port="21548" qos="4" ttl="64" timeout-value="500000" validity-behavior="keep" callback="on" />
+            <md-com-parameter udp-port="21550" tcp-port="21550"
+                              confirm-timeout="1500000" connect-timeout="65000000" reply-timeout="5500000"
+                              marshall="off" protocol="TCP" qos="1" retries="4" ttl="64" callback="on" />
             <telegram name="tlg1004" com-id="1004" data-set-id="1004" com-parameter-id="1">
                 <source id="5" uri1="192.168.13.50" />
                 <destination id="5" uri="192.168.13.50" />

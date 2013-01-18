@@ -134,10 +134,10 @@
   
   <xs:element name="bus-interface">
     <xs:complexType>
-      <xs:element ref="trdp-process" minOccurs="0" maxOccurs="1"/>
-      <xs:element ref="pd-com-parameter" minOccurs="0" maxOccurs="1"/>
-      <xs:element ref="md-com-parameter" minOccurs="0" maxOccurs="1"/>
       <xs:sequence>
+        <xs:element ref="trdp-process" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="pd-com-parameter" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="md-com-parameter" minOccurs="0" maxOccurs="1"/>
         <xs:element  ref="telegram" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
       <xs:attribute name="network-id" type="uint8" use="required">

@@ -34,15 +34,13 @@
 #define DATA_PERIOD         1000000 /* Period [us] in which tlg data are updated and printed    */
 
 /*  General parameters from xml configuration file */
-TRDP_PROCESS_CONFIG_T   processConfig;
 TRDP_MEM_CONFIG_T       memConfig;
 TRDP_DBG_CONFIG_T       dbgConfig;
-TRDP_PD_CONFIG_T        pdConfig;
-TRDP_MD_CONFIG_T        mdConfig;
 UINT32                  numComPar = 0;
 TRDP_COM_PAR_T         *pComPar = NULL;
 UINT32                  numIfConfig = 0;
 TRDP_IF_CONFIG_T       *pIfConfig = NULL;
+UINT32                  minCycleTime = 0xFFFFFFFF;
 
 /*  Log configuration   */
 INT32                   maxLogCategory = -1;
@@ -53,8 +51,17 @@ TRDP_COMID_DSID_MAP_T  *pComIdDsIdMap = NULL;
 UINT32                  numDataset = 0;
 papTRDP_DATASET_T       papDataset = NULL;
 
-/*  Array of sessions - one for each interface, only numIfConfig elements actually used  */
-TRDP_APP_SESSION_T      aSessions[MAX_SESSIONS];
+/*  Session configurations  */
+typedef struct
+{
+    TRDP_APP_SESSION_T      sessionhandle;
+    TRDP_PD_CONFIG_T        pdConfig;
+    TRDP_MD_CONFIG_T        mdConfig;
+    TRDP_PROCESS_CONFIG_T   processConfig;
+} sSESSION_CFG_T;
+/*  Array of session configurations - one for each interface, only numIfConfig elements actually used  */
+sSESSION_CFG_T          aSessionCfg[MAX_SESSIONS];
+
 /*  Marshalling configuration initialized from datasets defined in xml  */
 TRDP_MARSHALL_CONFIG_T  marshallCfg;
 
@@ -550,39 +557,6 @@ static TRDP_ERR_T initMarshalling(const TRDP_XML_DOC_HANDLE_T * pDocHnd)
 }
 
 /*********************************************************************************************************************/
-/** Initialize TRDP sessions - one for each configured interface
- *  Store session identifiers in global array
- */
-static TRDP_ERR_T initSessions()
-{
-    UINT32 i;
-    TRDP_ERR_T result;
-
-    if (numIfConfig > MAX_SESSIONS)
-    {
-        printf("Maximum number of sessions %u exceeded\n", MAX_SESSIONS);
-        return TRDP_PARAM_ERR;
-    }
-
-    /*  Iterate over all configured interfaces, open session for each one   */
-    for (i = 0; i < numIfConfig; i++)
-    {
-        result = tlc_openSession(
-            &aSessions[i], pIfConfig[i].hostIp, pIfConfig[i].leaderIp, 
-            &marshallCfg, &pdConfig, &mdConfig, &processConfig);
-        if (result != TRDP_NO_ERR)
-        {
-            printf("Failed to open session for interface %s: %s", 
-                pIfConfig[i].ifName, getResultString(result));
-            return result;
-        }
-        printf("Initialized session for interface %s\n", pIfConfig[i].ifName);
-    }
-
-    return TRDP_NO_ERR;
-}
-
-/*********************************************************************************************************************/
 /** Publish telegram for each configured destination.
  *  Reference to each published telegram is stored in array of published telegrams
  */
@@ -610,9 +584,9 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
 
     /*  Get communication parameters  */
     if (pExchgPar->comParId == 1)
-        pSendParam = &pdConfig.sendParam;
+        pSendParam = &aSessionCfg[ifcIdx].pdConfig.sendParam;
     else if (pExchgPar->comParId == 2)
-        pSendParam = &mdConfig.sendParam;
+        pSendParam = &aSessionCfg[ifcIdx].mdConfig.sendParam;
     else
         for (i = 0; i < numComPar; i++)
             if (pComPar[i].id == pExchgPar->comParId)
@@ -632,8 +606,8 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
     }
     else
     {
-        interval = processConfig.cycleTime;
-        flags = pdConfig.flags;
+        interval = aSessionCfg[ifcIdx].processConfig.cycleTime;
+        flags = aSessionCfg[ifcIdx].pdConfig.flags;
         redId = 0;
     }
 
@@ -653,7 +627,7 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
         }
         /*  Initialize telegram descriptor  */
         pPubTlg->pDatasetDesc = pDatasetDesc;
-        pPubTlg->sessionhandle = aSessions[ifcIdx];
+        pPubTlg->sessionhandle = aSessionCfg[ifcIdx].sessionhandle;
         pPubTlg->pIfConfig = &pIfConfig[ifcIdx];
         pPubTlg->comID = pExchgPar->comId;
         pPubTlg->dstID = pExchgPar->pDest[i].id;
@@ -732,9 +706,9 @@ static TRDP_ERR_T subscribeTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
     }
     else
     {
-        timeout = pdConfig.timeout;
-        toBehav = pdConfig.toBehavior;
-        flags = pdConfig.flags;
+        timeout = aSessionCfg[ifcIdx].pdConfig.timeout;
+        toBehav = aSessionCfg[ifcIdx].pdConfig.toBehavior;
+        flags = aSessionCfg[ifcIdx].pdConfig.flags;
     }
 
     /*  Try to find MC destination address  */
@@ -764,7 +738,7 @@ static TRDP_ERR_T subscribeTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
         }
         /*  Initialize telegram descriptor  */
         pSubTlg->pDatasetDesc = pDatasetDesc;
-        pSubTlg->sessionhandle = aSessions[ifcIdx];
+        pSubTlg->sessionhandle = aSessionCfg[ifcIdx].sessionhandle;
         pSubTlg->pktFlags = flags;
         pSubTlg->pIfConfig = &pIfConfig[ifcIdx];
         pSubTlg->comID = pExchgPar->comId;
@@ -819,60 +793,103 @@ static TRDP_ERR_T subscribeTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
 }
 
 /*********************************************************************************************************************/
-/** Parse telegrams configured for each interface.
- *  Publish and subscribe configured telegrams.
+/** Publish and subscribe telegrams configured for one interface.
  */
-static TRDP_ERR_T configureTelegrams(TRDP_XML_DOC_HANDLE_T * pDocHnd)
+static TRDP_ERR_T configureTelegrams(UINT32 ifcIdx, UINT32 numExchgPar, TRDP_EXCHG_PAR_T *pExchgPar)
 {
-    UINT32 ifcIdx, tlgIdx;
+    UINT32 tlgIdx;
     TRDP_ERR_T  result;
 
-    /*  Over all interfaces */
-    for (ifcIdx = 0; ifcIdx < numIfConfig; ifcIdx++)
+    printf("Configuring telegrams for interface %s...\n", pIfConfig[ifcIdx].ifName);
+
+    /*  Over all configured telegrams   */
+    for (tlgIdx = 0; tlgIdx < numExchgPar; tlgIdx++)
+    {
+        if (pExchgPar[tlgIdx].destCnt)
+        {
+            /*  Destinations defined - publish the telegram */
+            result = publishTelegram(ifcIdx, &pExchgPar[tlgIdx]);
+            if (result != TRDP_NO_ERR)
+            {
+                printf("Failed to publish telegram for interface %s", pIfConfig[ifcIdx].ifName);
+                return result;
+            }
+        }
+        if (pExchgPar[tlgIdx].srcCnt)
+        {
+            /*  Sources defined - subscribe the telegram */
+            result = subscribeTelegram(ifcIdx, &pExchgPar[tlgIdx]);
+            if (result != TRDP_NO_ERR)
+            {
+                printf("Failed to subscribe telegram for interface %s", pIfConfig[ifcIdx].ifName);
+                return result;
+            }
+        }
+    }
+
+    printf("Telegrams for interface %s configured\n", pIfConfig[ifcIdx].ifName);
+
+    return TRDP_NO_ERR;
+}
+
+/*********************************************************************************************************************/
+/** Initialize and configure TRDP sessions - one for each configured interface
+ */
+static TRDP_ERR_T configureSessions(TRDP_XML_DOC_HANDLE_T *pDocHnd)
+{
+    UINT32 i;
+    TRDP_ERR_T result;
+
+    if (numIfConfig > MAX_SESSIONS)
+    {
+        printf("Maximum number of sessions %u exceeded\n", MAX_SESSIONS);
+        return TRDP_PARAM_ERR;
+    }
+
+    /*  Iterate over all configured interfaces, configure session for each one   */
+    for (i = 0; i < numIfConfig; i++)
     {
         UINT32              numExchgPar = 0;
         TRDP_EXCHG_PAR_T    *pExchgPar = NULL;
-        printf("Configuring telegrams for interface %s...\n", pIfConfig[ifcIdx].ifName);
 
+        printf("Configuring session for interface %s\n", pIfConfig[i].ifName);
         /*  Read telegrams configured for the interface */
         result = tau_readXmlInterfaceConfig(
-            pDocHnd, pIfConfig[ifcIdx].ifName, &pdConfig, &mdConfig,
+            pDocHnd, pIfConfig[i].ifName, 
+            &aSessionCfg[i].processConfig,
+            &aSessionCfg[i].pdConfig, &aSessionCfg[i].mdConfig,
             &numExchgPar, &pExchgPar);
         if (result != TRDP_NO_ERR)
         {
-            printf("Failed to parse telegram configuration for interface %s: %s", 
-                pIfConfig[ifcIdx].ifName, getResultString(result));
+            printf("Failed to parse configuration for interface %s: %s", 
+                pIfConfig[i].ifName, getResultString(result));
             return result;
         }
-        
-        /*  Over all configured telegrams   */
-        for (tlgIdx = 0; tlgIdx < numExchgPar; tlgIdx++)
+        printf("Read configuration for interface %s\n", pIfConfig[i].ifName);
+
+        /*  Check for minimum cycle time    */
+        if (aSessionCfg[i].processConfig.cycleTime < minCycleTime)
+            minCycleTime = aSessionCfg[i].processConfig.cycleTime;
+
+        /*  Open session for the interface  */
+        result = tlc_openSession(
+            &aSessionCfg[i].sessionhandle, pIfConfig[i].hostIp, pIfConfig[i].leaderIp, 
+            &marshallCfg, &aSessionCfg[i].pdConfig, &aSessionCfg[i].mdConfig, &aSessionCfg[i].processConfig);
+        if (result != TRDP_NO_ERR)
         {
-            if (pExchgPar[tlgIdx].destCnt)
-            {
-                /*  Destinations defined - publish the telegram */
-                result = publishTelegram(ifcIdx, &pExchgPar[tlgIdx]);
-                if (result != TRDP_NO_ERR)
-                {
-                    printf("Failed to publish telegram for interface %s", pIfConfig[ifcIdx].ifName);
-                    return result;
-                }
-            }
-            if (pExchgPar[tlgIdx].srcCnt)
-            {
-                /*  Sources defined - subscribe the telegram */
-                result = subscribeTelegram(ifcIdx, &pExchgPar[tlgIdx]);
-                if (result != TRDP_NO_ERR)
-                {
-                    printf("Failed to subscribe telegram for interface %s", pIfConfig[ifcIdx].ifName);
-                    return result;
-                }
-            }
+            printf("Failed to open session for interface %s: %s", 
+                pIfConfig[i].ifName, getResultString(result));
+            return result;
         }
-    
+        printf("Initialized session for interface %s\n", pIfConfig[i].ifName);
+
+        /*  Configure telegrams */
+        result = configureTelegrams(i, numExchgPar, pExchgPar);
+        if (result != TRDP_NO_ERR)
+            return result;
+
         /*  Free allocated memory - parsed telegram configuration */
         tau_freeTelegrams(numExchgPar, pExchgPar);
-        printf("Telegrams configured\n");
     }
 
     return TRDP_NO_ERR;
@@ -894,8 +911,8 @@ void processData()
     UINT32 dataSize;
 
     /*  Cycle period  */
-    cyclePeriod.tv_usec = processConfig.cycleTime % 1000000;
-    cyclePeriod.tv_sec = processConfig.cycleTime / 1000000;
+    cyclePeriod.tv_usec = minCycleTime % 1000000;
+    cyclePeriod.tv_sec = minCycleTime / 1000000;
     /*  Data update period  */
     dataPeriod.tv_usec = DATA_PERIOD % 1000000;
     dataPeriod.tv_sec = DATA_PERIOD / 1000000;
@@ -952,7 +969,7 @@ void processData()
         /*  call process function for all sessions  */
         for (i = 0; i < numIfConfig; i++)
         {
-            result = tlc_process(aSessions[i], NULL, NULL);
+            result = tlc_process(aSessionCfg[i].sessionhandle, NULL, NULL);
             if (result != TRDP_NO_ERR)
                 printf("tlc_process for interface %s failed: %s\n", 
                     pIfConfig[i].ifName, getResultString(result));
@@ -1029,10 +1046,9 @@ int main(int argc, char * argv[])
     }
 
     /*  Read general parameters from XML configuration*/
-    result = tau_readXmlConfig(
+    result = tau_readXmlDeviceConfig(
         &docHnd, 
-        &processConfig, &memConfig, &dbgConfig, 
-        &pdConfig, &mdConfig, 
+        &memConfig, &dbgConfig, 
         &numComPar, &pComPar, 
         &numIfConfig, &pIfConfig);
     if (result != TRDP_NO_ERR)
@@ -1064,15 +1080,8 @@ int main(int argc, char * argv[])
         return 1;
 
     /*  Initialize TRDP sessions    */
-    if (initSessions() != TRDP_NO_ERR)
+    if (configureSessions(&docHnd) != TRDP_NO_ERR)
         return 1;
-
-    /*  Configure telegrams  */
-    if (configureTelegrams(&docHnd) != TRDP_NO_ERR)
-    {
-        printf("Failed to configure telegrams\n");
-        return 1;
-    }
 
     /*  Wait for user to press enter    */
     printf("Press Enter to start data processing...\n");
@@ -1093,7 +1102,7 @@ int main(int argc, char * argv[])
         tlp_unsubscribe(aSubTelegrams[i].sessionhandle, aSubTelegrams[i].subHandle);
     /* Close all sessions   */
     for (i = 0; i < numIfConfig; i++)
-        tlc_closeSession(aSessions[i]);
+        tlc_closeSession(aSessionCfg[i].sessionhandle);
     /* Close TRDP   */
     tlc_terminate();
 
