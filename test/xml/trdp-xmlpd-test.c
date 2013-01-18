@@ -804,7 +804,7 @@ static TRDP_ERR_T subscribeTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
         /*  Subscribe the telegram    */
         result = tlp_subscribe(
             pSubTlg->sessionhandle, &pSubTlg->subHandle, pSubTlg, pExchgPar->comId, 
-            0, srcIP1, srcIP2, destMCIP, timeout, toBehav, pSubTlg->dataset.size);
+            0, srcIP1, srcIP2, destMCIP, flags, timeout, toBehav, pSubTlg->dataset.size);
         if (result != TRDP_NO_ERR)
         {
             printf("tlp_subscribe for comID %u, srcID %u failed: %s\n", 
@@ -965,7 +965,7 @@ void processData()
             dataSize = aPubTelegrams[i].dataset.size;
             aSubTelegrams[i].result = tlp_get(
                 aSubTelegrams[i].sessionhandle, aSubTelegrams[i].subHandle, 
-                aSubTelegrams[i].pktFlags, &aSubTelegrams[i].pdInfo, 
+                &aSubTelegrams[i].pdInfo, 
                 (UINT8 *)aSubTelegrams[i].dataset.buffer, &dataSize);
         }
 
