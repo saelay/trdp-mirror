@@ -1735,12 +1735,14 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->interval.tv_sec  = timeout / 1000000;
                     newPD->interval.tv_usec = timeout % 1000000;
                     newPD->timeToGo         = newPD->interval;
-                    newPD->toBehavior       = toBehavior;
+                    newPD->toBehavior       = 
+                        (toBehavior == TRDP_TO_DEFAULT)?appHandle->pdDefault.toBehavior:toBehavior;
                     newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
                     newPD->userRef          = pUserRef;
                     newPD->socketIdx        = index;
                     newPD->privFlags       |= TRDP_INVALID_DATA;
-                    newPD->pktFlags         = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
+                    newPD->pktFlags         = 
+                        (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
                     newPD->pCachedDS		= NULL;
 
                     if (timeout == 0)
