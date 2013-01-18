@@ -938,7 +938,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
             pNewElement->redId          = redId;
-            pNewElement->pCachedDS		= NULL;
+            pNewElement->pCachedDS        = NULL;
 
             /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
                 curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
@@ -1743,7 +1743,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->privFlags       |= TRDP_INVALID_DATA;
                     newPD->pktFlags         = 
                         (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
-                    newPD->pCachedDS		= NULL;
+                    newPD->pCachedDS        = NULL;
 
                     if (timeout == 0)
                     {
@@ -2210,7 +2210,7 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->grossSize          = grossSize;
             pNewElement->numReplies         = 0;
             pNewElement->numRetries         = 0;
-            pNewElement->pCachedDS			= NULL;
+            pNewElement->pCachedDS            = NULL;
             pNewElement->numRetriesMax      =
                 (pSendParam != NULL) ? pSendParam->retries : (appHandle->mdDefault.sendParam.retries);
             /* vos_printf(VOS_LOG_ERROR, "numRetriesMax: %u, %u, %u, \n", pNewElement->numRetriesMax, (pSendParam !=
@@ -2707,7 +2707,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->u.listener.topoCount   = topoCount;
                 pNewElement->u.listener.destIpAddr  = destIpAddr;
                 pNewElement->u.listener.pktFlags    = pktFlags;
-                pNewElement->pCachedDS				= NULL;
+                pNewElement->pCachedDS                = NULL;
                 memcpy(pNewElement->u.listener.destURI, destURI, TRDP_MAX_URI_USER_LEN);
 
                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) == 0)
