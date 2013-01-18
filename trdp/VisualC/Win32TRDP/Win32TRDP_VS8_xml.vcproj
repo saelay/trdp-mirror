@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;libxml\include"
+				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\resources\pthread\inc;..\..\resources\libxml\inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;__LITTLE_ENDIAN__;MD_SUPPORT;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libxml2.lib"
-				AdditionalLibraryDirectories="libxml\lib"
+				AdditionalLibraryDirectories="..\..\resources\libxml\lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -105,7 +105,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;libxml\include"
+				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\resources\pthread\inc;..\..\resources\libxml\inc"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;__LITTLE_ENDIAN__;MD_SUPPORT;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -125,7 +125,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="libxml2.lib"
-				AdditionalLibraryDirectories="libxml\lib"
+				AdditionalLibraryDirectories="..\..\resources\libxml\lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -152,15 +152,15 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			>
 			<File
+				RelativePath="..\..\src\common\tau_marshall.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\common\tau_xml.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\common\trdp_if.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\common\trdp_marshall.c"
 				>
 			</File>
 			<File
