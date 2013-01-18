@@ -93,7 +93,8 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached datasett
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -113,27 +114,31 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 
 
 /**********************************************************************************************************************/
-/**    Marshall data set function.
+/**    marshall data set function.
  *
  *  @param[in]      pRefCon         pointer to user context
- *  @param[in]      datasetId       Dataset Id to identify the structure out of a configuration
+ *  @param[in]      dsId            Data set id to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_PARAM_ERR  data set id not existing
+ *  @retval         TRDP_COMID_ERR  comid not existing
+ *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
 
-typedef TRDP_ERR_T tau_marshallDs (
-    void *pRefCon,
-    UINT32 datasetId,
-    const UINT8 *pSrc,
-    UINT8       *pDest,
-    UINT32      *pDestSize);
+EXT_DECL TRDP_ERR_T tau_marshallDs (
+    void            *pRefCon,
+    UINT32           dsId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer);
 
 
 /**********************************************************************************************************************/
@@ -145,6 +150,7 @@ typedef TRDP_ERR_T tau_marshallDs (
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -160,29 +166,33 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T **ppDSPointer);
+
     
 /**********************************************************************************************************************/
 /**    unmarshall data set function.
  *
  *  @param[in]      pRefCon         pointer to user context
- *  @param[in]      datasetId       Dataset id to identify the structure out of a configuration
+ *  @param[in]      dsId            Data set id to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
+ *                                  set NULL if not used, set content NULL if unknown
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_PARAM_ERR  data set id not existing
+ *  @retval         TRDP_COMID_ERR  comid not existing
  *
  */
 
-typedef TRDP_ERR_T tau_unmarshallDs (
-    void *pRefCon,
-    UINT32 datasetId,
-    const UINT8 *pSrc,
-    UINT8       *pDest,
-    UINT32      *pDestSize);
+EXT_DECL TRDP_ERR_T tau_unmarshallDs (
+    void            *pRefCon,
+    UINT32           dsId,
+    UINT8           *pSrc,
+    UINT8           *pDest,
+    UINT32          *pDestSize,
+    TRDP_DATASET_T **ppDSPointer);
 
 
 /**********************************************************************************************************************/
@@ -192,6 +202,8 @@ typedef TRDP_ERR_T tau_unmarshallDs (
  *  @param[in]      datasetId       Dataset id to identify the structure out of a configuration
  *  @param[in]      pSrc            Pointer to received original message
  *  @param[out]     pSize           Pointer to the size of the data set
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
+ *                                  set NULL if not used, set content NULL if unknown
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   marshalling not initialised
@@ -200,10 +212,11 @@ typedef TRDP_ERR_T tau_unmarshallDs (
  */
 
 typedef TRDP_ERR_T tau_calcDatasetSize (
-    void        *pRefCon,
-    UINT32       datasetId,
-    UINT8       *pSrc,
-    UINT32      *pSize);
+    void            *pRefCon,
+    UINT32           datasetId,
+    UINT8           *pSrc,
+    UINT32          *pSize,
+    TRDP_DATASET_T **ppDSPointer);
 
 
 #ifdef __cplusplus
