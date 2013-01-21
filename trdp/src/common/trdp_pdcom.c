@@ -197,7 +197,7 @@ TRDP_ERR_T trdp_pdGet (
     }
     else
     {
-        return unmarshall(refCon, pPacket->addr.comId, (UINT8 *)pData, pPacket->pFrame->data, pDataSize, &pPacket->pCachedDS);
+        return unmarshall(refCon, pPacket->addr.comId, pPacket->pFrame->data, (UINT8 *)pData, pDataSize, &pPacket->pCachedDS);
     }
 }
 
