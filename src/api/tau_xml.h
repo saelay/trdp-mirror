@@ -4,8 +4,8 @@
  *
  * @brief           TRDP utility interface definitions
  *
- * @details            This module provides the interface to the following utilities
- *                    - read xml configuration interpreter
+ * @details         This module provides the interface to the following utilities
+ *                  - read xml configuration interpreter
  *
  *
  * @note            Project: TCNOpen TRDP prototype stack
@@ -169,13 +169,13 @@ typedef struct
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
-/**	Load XML file into DOM tree, prepare XPath context.
+/**    Load XML file into DOM tree, prepare XPath context.
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
- *  @param[out]	    pDocHnd           Handle of the parsed XML file
+ *  @param[in]      pFileName         Path and filename of the xml configuration file
+ *  @param[out]     pDocHnd           Handle of the parsed XML file
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_PARAM_ERR    File does not exist
  *
  */
@@ -185,10 +185,10 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
     );
 
 /**********************************************************************************************************************/
-/**	Free all the memory allocated by tau_prepareXmlDoc
+/**    Free all the memory allocated by tau_prepareXmlDoc
  *
  *
- *  @param[in]	    pDocHnd           Handle of the parsed XML file
+ *  @param[in]        pDocHnd           Handle of the parsed XML file
  *
  */
 EXT_DECL void tau_freeXmlDoc (
@@ -196,18 +196,18 @@ EXT_DECL void tau_freeXmlDoc (
     );
 
 /**********************************************************************************************************************/
-/**	Function to read the TRDP device configuration parameters out of the XML configuration file.
+/**    Function to read the TRDP device configuration parameters out of the XML configuration file.
  *
  *
- *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
- *  @param[out]	    pMemConfig        Memory configuration
+ *  @param[in]      pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
+ *  @param[out]     pMemConfig        Memory configuration
  *  @param[out]     pDbgConfig        Debug printout configuration for application use
  *  @param[out]     pNumComPar        Number of configured com parameters
  *  @param[out]     ppComPar          Pointer to array of com parameters
  *  @param[out]     pNumIfConfig      Number of configured interfaces
  *  @param[out]     ppIfConfig        Pointer to an array of interface parameter sets
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -223,18 +223,18 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
     );
 
 /**********************************************************************************************************************/
-/**	Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
+/**    Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
  *
  *
- *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
- *  @param[in]	    pIfName           Interface name
- *  @param[out]	    pProcessConfig    TRDP process (session) configuration for the interface
+ *  @param[in]      pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
+ *  @param[in]      pIfName           Interface name
+ *  @param[out]     pProcessConfig    TRDP process (session) configuration for the interface
  *  @param[out]     pPdConfig         PD default configuration for the interface
  *  @param[out]     pMdConfig         MD default configuration for the interface
- *  @param[out]	    pNumExchgPar      Number of configured telegrams
+ *  @param[out]     pNumExchgPar      Number of configured telegrams
  *  @param[out]     ppExchgPar        Pointer to array of telegram configurations
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -249,16 +249,16 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     TRDP_EXCHG_PAR_T           **ppExchgPar
     );
 /**********************************************************************************************************************/
-/**	Function to read the DataSet configuration out of the XML configuration file.
+/**    Function to read the DataSet configuration out of the XML configuration file.
  *
  *
- *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
- *  @param[out]	    pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
- *  @param[out]	    ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
- *  @param[out]	    pNumDataset       Pointer to the number of datasets found in the configuration
- *  @param[out]	    ppapDataset       Pointer to an array of pointers to a structures of type TRDP_DATASET_T
+ *  @param[in]      pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
+ *  @param[out]     pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
+ *  @param[out]     ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
+ *  @param[out]     pNumDataset       Pointer to the number of datasets found in the configuration
+ *  @param[out]     ppapDataset       Pointer to an array of pointers to a structures of type TRDP_DATASET_T
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -273,7 +273,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
 
 
 /**********************************************************************************************************************/
-/**	Free array of telegram configurations allocated by tau_readXmlInterfaceConfig
+/**    Free array of telegram configurations allocated by tau_readXmlInterfaceConfig
  *
  *  @param[in]      numExchgPar       Number of telegram configurations in the array
  *  @param[in]      pExchgPar         Pointer to array of telegram configurations
