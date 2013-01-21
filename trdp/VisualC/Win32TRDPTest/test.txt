@@ -1,0 +1,256 @@
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00363A40 Requested size = 0x8
+
+INFO File: d:\tcnopen\trunk\trdp\src\common\trdp_if.c Line: 244 TRDP Stack Version 0.0.1.2: successfully initiated
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00367D88 Requested size = 0xe98
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00363A88 Requested size = 0x8
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00363AD0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00368C60 Requested size = 0x1a0
+
+INFO File: d:\tcnopen\trunk\trdp\src\common\trdp_if.c Line: 418 TRDP Stack Version 0.0.1.2: successfully initiated
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00368E40 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00368EE0 Requested size = 0x128
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 791 binding to: 10.0.0.221:20548
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00369048 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 003690E8 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 003696E8 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00369788 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 003698F0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00369990 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00369F90 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036A030 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036A630 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036A6D0 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036ACD0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036AD70 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036B370 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036B410 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036BA10 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036BAB0 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036BC18 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036BCB8 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036C2B8 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036C358 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036C4C0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036C560 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036CB60 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036CC00 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036D200 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036D2A0 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036D8A0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036D940 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036DF40 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036DFE0 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036E5E0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036E680 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036EC80 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036ED20 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036EE88 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036EF28 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036F528 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036F5C8 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036F730 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036F7D0 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036FDD0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00960068 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036FE70 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00960668 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 0036FF10 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00960C68 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00961268 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00961308 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00961908 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009619A8 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00961B10 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00961BB0 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009621B0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00962250 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009623B8 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00962458 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00962A58 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00962AF8 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009630F8 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00963198 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00963798 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00963838 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00963E38 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00963ED8 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009644D8 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00964578 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009646E0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00964780 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00964D80 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00964E20 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00965420 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009654C0 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00965AC0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00965B60 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00965CC8 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00965D68 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00966368 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00966408 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00966A08 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00966AA8 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009670A8 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00967148 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009672B0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00967350 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00967950 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009679F0 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00967FF0 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00968090 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00968690 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00968730 Requested size = 0x128
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00968898 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00968938 Requested size = 0x5c0
+
+INFO File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 511 joining MC: 239.2.24.1 on iface 10.0.0.221
+
+ERR  File: d:\tcnopen\trunk\trdp\src\vos\windows\vos_sock.c Line: 518 setsockopt() IP_ADD_MEMBERSHIP failed (Err: 10049)
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00968F38 Requested size = 0x64
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 00968FD8 Requested size = 0x5c0
+
+DBG  File: d:\tcnopen\trunk\trdp\src\vos\common\vos_mem.c Line: 328 vos_memAlloc 009695D8 Requested size = 0x5c0
+
