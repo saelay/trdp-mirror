@@ -146,7 +146,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_UINT64,
+            TRDP_UINT64,	/* 10	*/
             1,
             NULL
         },
@@ -171,7 +171,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_TIMEDATE64,
+            TRDP_TIMEDATE64,		/* 15	*/
             1,
             NULL
         },
@@ -196,7 +196,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL           
         },
         {
-            TRDP_INT16,
+            TRDP_INT16,	/* 20	*/
             4,
             NULL
         },
@@ -221,7 +221,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_UINT32,
+            TRDP_UINT32,		/* 25	*/
             4,
             NULL
         },
@@ -246,7 +246,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_TIMEDATE48,
+            TRDP_TIMEDATE48,	/* 30	*/
             4,
             NULL
         },
