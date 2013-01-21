@@ -277,12 +277,15 @@ static int comId_compare (
 static TRDP_DATASET_T *find_DS_from_ComId (
     UINT32 comId)
 {
-    TRDP_COMID_DSID_MAP_T    key1 = {0};
+    TRDP_COMID_DSID_MAP_T    key1;
     TRDP_DATASET_T           **key3;    
-    TRDP_COMID_DSID_MAP_T    *key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+    TRDP_COMID_DSID_MAP_T    *key2;
     
     key1.comId = comId;
-    
+    key1.datasetId = 0;
+
+    key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+
     if (key2 != NULL)
     {
         TRDP_DATASET_T    key22 = {0};
