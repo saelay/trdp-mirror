@@ -49,7 +49,7 @@ INT32                   maxLogCategory = -1;
 UINT32                  numComId = 0;
 TRDP_COMID_DSID_MAP_T  *pComIdDsIdMap = NULL;
 UINT32                  numDataset = 0;
-papTRDP_DATASET_T       papDataset = NULL;
+apTRDP_DATASET_T        apDataset = NULL;
 
 /*  Session configurations  */
 typedef struct
@@ -301,19 +301,19 @@ static void freeParameters()
         free(pComIdDsIdMap);
         pComIdDsIdMap = NULL; numComId = 0;
     }
-    if (papDataset)
+    if (apDataset)
     {
         /*  Free dataset structures */
         pTRDP_DATASET_T pDataset;
         UINT32 i;
         for (i=0; i < numDataset; i++)
         {
-            pDataset = (*papDataset)[i];
+            pDataset = apDataset[i];
             free(pDataset);
         }
         /*  Free array of pointers to dataset structures    */
-        free(papDataset);
-        papDataset = NULL; numDataset = 0;
+        free(apDataset);
+        apDataset = NULL; numDataset = 0;
     }
 }
 
@@ -533,7 +533,7 @@ static TRDP_ERR_T initMarshalling(const TRDP_XML_DOC_HANDLE_T * pDocHnd)
     /*  Read dataset configuration  */
     result = tau_readXmlDatasetConfig(pDocHnd, 
         &numComId, &pComIdDsIdMap,
-        &numDataset, &papDataset);
+        &numDataset, &apDataset);
     if (result != TRDP_NO_ERR)
     {
         printf("Failed to read dataset configuration: %s\n", getResultString(result));
@@ -541,7 +541,7 @@ static TRDP_ERR_T initMarshalling(const TRDP_XML_DOC_HANDLE_T * pDocHnd)
     }
 
     /*  Initialize marshalling  */
-    result = tau_initMarshall(&marshallCfg.pRefCon, numComId, pComIdDsIdMap, numDataset, *papDataset);
+    result = tau_initMarshall(&marshallCfg.pRefCon, numComId, pComIdDsIdMap, numDataset, apDataset);
     if (result != TRDP_NO_ERR)
     {
         printf("Failed to initialize marshalling: %s\n", getResultString(result));
@@ -574,8 +574,8 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
 
     /*  Find dataset for the telegram   */
     for (i = 0; i < numDataset; i++)
-        if ((*papDataset)[i]->id == pExchgPar->datasetId)
-            pDatasetDesc = (*papDataset)[i];
+        if (apDataset[i]->id == pExchgPar->datasetId)
+            pDatasetDesc = apDataset[i];
     if (!pDatasetDesc)
     {
         printf("Unknown datasetId %u for comID %u\n", pExchgPar->datasetId, pExchgPar->comId);
@@ -689,8 +689,8 @@ static TRDP_ERR_T subscribeTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
 
     /*  Find dataset for the telegram   */
     for (i = 0; i < numDataset; i++)
-        if ((*papDataset)[i]->id == pExchgPar->datasetId)
-            pDatasetDesc = (*papDataset)[i];
+        if (apDataset[i]->id == pExchgPar->datasetId)
+            pDatasetDesc = apDataset[i];
     if (!pDatasetDesc)
     {
         printf("Unknown datasetId %u for comID %u\n", pExchgPar->datasetId, pExchgPar->comId);

@@ -144,7 +144,7 @@ static void printComIdDsIdMap(
 
 static void printDatasets(
     UINT32                  numDataset,
-    papTRDP_DATASET_T       papDataset
+    apTRDP_DATASET_T        apDataset
     )
 {
     const char * strtrdpTypes[17] = {
@@ -158,7 +158,7 @@ static void printDatasets(
     printf("Dataset definitions\n");
     for (idxDs=0; idxDs < numDataset; idxDs++)
     {
-        pDataset = (*papDataset)[idxDs];
+        pDataset = apDataset[idxDs];
         printf("  Dataset Id: %u, Elements: %u\n", 
             pDataset->id, pDataset->numElement);
         for (idxElem = 0; idxElem < pDataset->numElement; idxElem++)
@@ -295,7 +295,7 @@ int main(int argc, char * argv[])
     UINT32                  numComId = 0;
     TRDP_COMID_DSID_MAP_T  *pComIdDsIdMap = NULL;
     UINT32                  numDataset = 0;
-    papTRDP_DATASET_T       papDataset = NULL;
+    apTRDP_DATASET_T        apDataset = NULL;
     
     UINT32                  ifIndex;
 
@@ -335,13 +335,13 @@ int main(int argc, char * argv[])
     /*  Read dataset configuration  */
     result = tau_readXmlDatasetConfig(&docHandle, 
         &numComId, &pComIdDsIdMap,
-        &numDataset, &papDataset);
+        &numDataset, &apDataset);
     if (result == TRDP_NO_ERR)
     {
         /*  Print dataset configuration */
         printf("\n***  tau_readXmlDatasetConfig results *****************************************\n\n");
         printComIdDsIdMap(numComId, pComIdDsIdMap);
-        printDatasets(numDataset, papDataset);
+        printDatasets(numDataset, apDataset);
     }
 
     /*  Read and print telegram configurations for each interface */
@@ -394,19 +394,19 @@ int main(int argc, char * argv[])
         free(pComIdDsIdMap);
         pComIdDsIdMap = NULL; numComId = 0;
     }
-    if (papDataset)
+    if (apDataset)
     {
         /*  Free dataset structures */
         pTRDP_DATASET_T pDataset;
         UINT32 i;
         for (i=0; i < numDataset; i++)
         {
-            pDataset = (*papDataset)[i];
+            pDataset = apDataset[i];
             free(pDataset);
         }
         /*  Free array of pointers to dataset structures    */
-        free(papDataset);
-        papDataset = NULL; numDataset = 0;
+        free(apDataset);
+        apDataset = NULL; numDataset = 0;
     }
 
     return 0;

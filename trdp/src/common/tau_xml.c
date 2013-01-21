@@ -905,7 +905,7 @@ static void parseComIdDsIdMap(
 static void parseDatasets(
     xmlXPathContextPtr      pXPathCtx,
     UINT32                 *pNumDataset,
-    ppapTRDP_DATASET_T      ppapDataset
+    papTRDP_DATASET_T      papDataset
     )
 {
     xmlXPathObjectPtr       pXPathObj;
@@ -914,17 +914,17 @@ static void parseDatasets(
     int                     idxDataset;
     UINT16                  idxElem;
     UINT16                  numElement;
-    papTRDP_DATASET_T       papDataset;
+    apTRDP_DATASET_T        apDataset;
     pTRDP_DATASET_T         pDataset;
 
     /*  Check parameters    */
-    if (!pNumDataset || !ppapDataset)
+    if (!pNumDataset || !papDataset)
         return;
 
     /*  Set default values  */
     *pNumDataset = 0;
-    papDataset = NULL;
-    *ppapDataset = NULL;
+    apDataset = NULL;
+    *papDataset = NULL;
 
     /* Execute XPath expression   */
     pXPathObj = xmlXPathEvalExpression(BAD_CAST "/device/data-set-list/data-set", pXPathCtx);
@@ -937,9 +937,9 @@ static void parseDatasets(
     {
         /*  Allocate array of pointers to dataset structures    */
         *pNumDataset = pXPathObj->nodesetval->nodeNr;
-        papDataset = (papTRDP_DATASET_T) malloc(
+        apDataset = (apTRDP_DATASET_T) malloc(
             sizeof(TRDP_DATASET_T *) * (*pNumDataset));
-        *ppapDataset = papDataset;
+        *papDataset = apDataset;
 
         /* Iterate over all found data-set elements */
         for (idxDataset = 0; idxDataset < pXPathObj->nodesetval->nodeNr; idxDataset++)
@@ -955,7 +955,7 @@ static void parseDatasets(
             /*  Allocate dataset structure with elements    */
             pDataset = (TRDP_DATASET_T *)malloc(
                 sizeof(TRDP_DATASET_T) + sizeof(TRDP_DATASET_ELEMENT_T) * numElement);
-            (*papDataset)[idxDataset] = pDataset;
+            apDataset[idxDataset] = pDataset;
 
             /*  Parse dataset attributes   */
             parseUINT32(pDatasetElem, "id", &pDataset->id);
@@ -1001,7 +1001,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     UINT32                      *pNumComId,
     TRDP_COMID_DSID_MAP_T      **ppComIdDsIdMap,        
     UINT32                      *pNumDataset,
-    ppapTRDP_DATASET_T           ppapDataset
+    papTRDP_DATASET_T            papDataset
     )
 {
     xmlNodePtr          pRootElement;
@@ -1014,8 +1014,8 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
         *ppComIdDsIdMap = NULL;
     if (pNumDataset)
         *pNumDataset = 0;
-    if (ppapDataset)
-        *ppapDataset = NULL;
+    if (papDataset)
+        *papDataset = NULL;
 
     /* Check document handle    */
     if (!pDocHnd)
@@ -1027,7 +1027,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     parseComIdDsIdMap(pXPathCtx, pNumComId, ppComIdDsIdMap);
 
     /*  Parse dataset definitions   */
-    parseDatasets(pXPathCtx, pNumDataset, ppapDataset);
+    parseDatasets(pXPathCtx, pNumDataset, papDataset);
 
     return TRDP_NO_ERR;
 }

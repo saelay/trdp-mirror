@@ -269,7 +269,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     UINT32                      *pNumComId,
     TRDP_COMID_DSID_MAP_T      **ppComIdDsIdMap,        
     UINT32                      *pNumDataset,
-    ppapTRDP_DATASET_T           ppapDataset);
+    papTRDP_DATASET_T            papDataset);
 
 
 /**********************************************************************************************************************/
