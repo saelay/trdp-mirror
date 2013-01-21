@@ -77,8 +77,10 @@ extern void *gRefCon;
 /** Alignment macros  */
 #ifdef WIN32
 #define ALIGNOF(type)   __alignof(type)
+/* __alignof__() is broken in GCC since 3.3! It returns 8 for the alignement of long long instaed of 4!
 #elif defined(__GNUC__)
 #define ALIGNOF(type)   __alignof__(type)
+*/
 #else
 #define ALIGNOF(type)   offsetof(struct { char c; type member; }, member)
 #endif
