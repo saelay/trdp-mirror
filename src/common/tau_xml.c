@@ -50,13 +50,13 @@
  */
 
 /**********************************************************************************************************************/
-/**	Load XML file into DOM tree, prepare XPath context.
+/**    Load XML file into DOM tree, prepare XPath context.
  *
  *
- *  @param[in]	    pFileName         Path and filename of the xml configuration file
- *  @param[out]	    pDocHnd           Handle of the parsed XML file
+ *  @param[in]      pFileName         Path and filename of the xml configuration file
+ *  @param[out]     pDocHnd           Handle of the parsed XML file
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_PARAM_ERR    File does not exist
  *
  */
@@ -133,10 +133,10 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
 }
 
 /**********************************************************************************************************************/
-/**	Free all the memory allocated by tau_prepareXmlDoc
+/**    Free all the memory allocated by tau_prepareXmlDoc
  *
  *
- *  @param[in]	    pDocHnd           Handle of the parsed XML file
+ *  @param[in]     pDocHnd           Handle of the parsed XML file
  *
  */
 EXT_DECL void tau_freeXmlDoc (
@@ -526,8 +526,8 @@ static void parseMemBlockList(xmlNodePtr pMemBlockListElem, TRDP_MEM_CONFIG_T *p
     memset(pMemConfig->prealloc, 0, sizeof(UINT32) * VOS_MEM_NBLOCKSIZES);
 
     /*  Iterate over all defined memory blocks  */
-	pMemBlockElem = xmlFirstElementChild(pMemBlockListElem);
-	while (pMemBlockElem != NULL) 
+    pMemBlockElem = xmlFirstElementChild(pMemBlockListElem);
+    while (pMemBlockElem != NULL) 
     {
         /*  Parse size of the block */
         size = 0;
@@ -543,9 +543,9 @@ static void parseMemBlockList(xmlNodePtr pMemBlockListElem, TRDP_MEM_CONFIG_T *p
                     parseUINT32(pMemBlockElem, "preallocate", &pMemConfig->prealloc[i]);
                 }
         }
-		 
-    	pMemBlockElem = xmlNextElementSibling(pMemBlockElem);
-	}
+         
+        pMemBlockElem = xmlNextElementSibling(pMemBlockElem);
+    }
 }
 
 /*
@@ -626,15 +626,15 @@ static void parseMemoryConfiguration(
         parseUINT32(pDevCfgElem, "memory-size", &pMemConfig->size);
     
     /*  Iterate over all child elements, look for memory block list  */
-	pChildElement = xmlFirstElementChild(pDevCfgElem);
-	while (pChildElement != NULL) 
+    pChildElement = xmlFirstElementChild(pDevCfgElem);
+    while (pChildElement != NULL) 
     {
         /*  Memory blocks configuration  */
         if ((!xmlStrcmp(pChildElement->name, BAD_CAST "mem-block-list")))
-			parseMemBlockList(pChildElement, pMemConfig);
+            parseMemBlockList(pChildElement, pMemConfig);
 
         pChildElement = xmlNextElementSibling(pChildElement);
-	}
+    }
 }
 
 /*
@@ -718,9 +718,9 @@ static void parseComParameters(
     *ppComPar = (TRDP_COM_PAR_T *) malloc(sizeof(TRDP_COM_PAR_T) * *pNumComPar);
 
     /*  Iterate over all child elements (com-parameter), parse their attributes  */
-	pChildElement = xmlFirstElementChild(pComParListElem);
+    pChildElement = xmlFirstElementChild(pComParListElem);
     index = 0;
-	while (pChildElement != NULL && index < *pNumComPar) 
+    while (pChildElement != NULL && index < *pNumComPar) 
     {
         parseUINT32(pChildElement, "id", &(*ppComPar)[index].id);
         parseUINT8(pChildElement, "qos", &(*ppComPar)[index].sendParam.qos);
@@ -731,7 +731,7 @@ static void parseComParameters(
 
         pChildElement = xmlNextElementSibling(pChildElement);
         index++;
-	}
+    }
 }
 
 /*
@@ -760,9 +760,9 @@ static void parseBusInterfaces(
     *ppIfConfig = (TRDP_IF_CONFIG_T *) malloc(sizeof(TRDP_IF_CONFIG_T) * (*pNumIfConfig));
 
     /*  Iterate over all child elements (bus-interface), parse their attributes  */
-	pChildElement = xmlFirstElementChild(pBusInterfaceListElem);
+    pChildElement = xmlFirstElementChild(pBusInterfaceListElem);
     index = 0;
-	while (pChildElement != NULL && index < *pNumIfConfig) 
+    while (pChildElement != NULL && index < *pNumIfConfig) 
     {
         parseUINT8(pChildElement, "network-id", &(*ppIfConfig)[index].networkId);
         parseLABEL(pChildElement, "name", (*ppIfConfig)[index].ifName);
@@ -773,23 +773,23 @@ static void parseBusInterfaces(
 
         pChildElement = xmlNextElementSibling(pChildElement);
         index++;
-	}
+    }
 }
 
 
 /**********************************************************************************************************************/
-/**	Function to read the TRDP device configuration parameters out of the XML configuration file.
+/**    Function to read the TRDP device configuration parameters out of the XML configuration file.
  *
  *
- *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
- *  @param[out]	    pMemConfig        Memory configuration
+ *  @param[in]      pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
+ *  @param[out]     pMemConfig        Memory configuration
  *  @param[out]     pDbgConfig        Debug printout configuration for application use
  *  @param[out]     pNumComPar        Number of configured com parameters
  *  @param[out]     ppComPar          Pointer to array of com parameters
  *  @param[out]     pNumIfConfig      Number of configured interfaces
  *  @param[out]     ppIfConfig        Pointer to an array of interface parameter sets
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -819,33 +819,33 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
 
 
     /*  Iterate over all child elements, call appropriate parser functions*/
-	pChildElement = xmlFirstElementChild(pRootElement);
-	while (pChildElement != NULL) 
+    pChildElement = xmlFirstElementChild(pRootElement);
+    while (pChildElement != NULL) 
     {
-		/*  Parse device-configuration element and all children  */
+        /*  Parse device-configuration element and all children  */
         if ((!xmlStrcmp(pChildElement->name, BAD_CAST "device-configuration")))
         {
             parseMemoryConfiguration(
                 pChildElement, pMemConfig);
-	    }
-		/*  Parse debug configuration  */
+        }
+        /*  Parse debug configuration  */
         else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "debug")))
         {
-			parseDebugConfiguration(pChildElement, pDbgConfig);
-	    }
-		/*  Parse communication parameters  */
+            parseDebugConfiguration(pChildElement, pDbgConfig);
+        }
+        /*  Parse communication parameters  */
         else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "com-parameter-list")))
         {
-			parseComParameters(pChildElement, pNumComPar, ppComPar);
-	    }
-		/*  Parse bus interfaces  */
+            parseComParameters(pChildElement, pNumComPar, ppComPar);
+        }
+        /*  Parse bus interfaces  */
         else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "bus-interface-list")))
         {
             parseBusInterfaces(pChildElement, pNumIfConfig, ppIfConfig);
-	    }
+        }
 
         pChildElement = xmlNextElementSibling(pChildElement);
-	}
+    }
 
     return TRDP_NO_ERR;
 }
@@ -964,7 +964,7 @@ static void parseDatasets(
             /*  Iterate over all dataset elements   */
             idxElem = 0;
             pElementElem = xmlFirstElementChild(pDatasetElem);
-    	    while (pElementElem != NULL && idxElem < numElement) 
+            while (pElementElem != NULL && idxElem < numElement) 
             {
                 parseDSElemType(pElementElem, "type", &(pDataset->pElement[idxElem].type));
                 pDataset->pElement[idxElem].size = 1;
@@ -972,7 +972,7 @@ static void parseDatasets(
 
                 pElementElem = xmlNextElementSibling(pElementElem);
                 idxElem++;
-	        }
+            }
         }
     }
 
@@ -982,16 +982,16 @@ static void parseDatasets(
 
 
 /**********************************************************************************************************************/
-/**	Function to read the DataSet configuration out of the XML configuration file.
+/**    Function to read the DataSet configuration out of the XML configuration file.
  *
  *
- *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
- *  @param[out]	    pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
- *  @param[out]	    ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
- *  @param[out]	    pNumDataset       Pointer to the number of datasets found in the configuration
- *  @param[out]	    ppapDataset       Pointer to an array of pointers to a structures of type TRDP_DATASET_T
+ *  @param[in]      pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
+ *  @param[out]     pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
+ *  @param[out]     ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
+ *  @param[out]     pNumDataset       Pointer to the number of datasets found in the configuration
+ *  @param[out]     ppapDataset       Pointer to an array of pointers to a structures of type TRDP_DATASET_T
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -1317,18 +1317,18 @@ static void parseTelegram(
 
 
 /**********************************************************************************************************************/
-/**	Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
+/**    Read the interface relevant telegram parameters (except data set configuration) out of the configuration file .
  *
  *
- *  @param[in]	    pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
- *  @param[in]	    pIfName           Interface name
- *  @param[out]	    pProcessConfig    TRDP process (session) configuration for the interface
+ *  @param[in]      pDocHnd           Handle of the XML document prepared by tau_prepareXmlDoc
+ *  @param[in]      pIfName           Interface name
+ *  @param[out]     pProcessConfig    TRDP process (session) configuration for the interface
  *  @param[out]     pPdConfig         PD default configuration for the interface
  *  @param[out]     pMdConfig         MD default configuration for the interface
- *  @param[out]	    pNumExchgPar      Number of configured telegrams
+ *  @param[out]     pNumExchgPar      Number of configured telegrams
  *  @param[out]     ppExchgPar        Pointer to array of telegram configurations
  *
- *  @retval         TRDP_NO_ERR	      no error
+ *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
  *  @retval         TRDP_PARAM_ERR    File not existing
  *
@@ -1388,12 +1388,12 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
             pIfElem = pXPathObj->nodesetval->nodeTab[0];
             
             /*  Iterate over all child elements, call parser functions for PROCESS, PD and MD config  */
-	        pChildElement = xmlFirstElementChild(pIfElem);
-	        while (pChildElement != NULL) 
+            pChildElement = xmlFirstElementChild(pIfElem);
+            while (pChildElement != NULL) 
             {
                 /*  TRDP process (session) configuration  */
                 if ((!xmlStrcmp(pChildElement->name, BAD_CAST "trdp-process")))
-			        parseProcessConfig(pChildElement, pProcessConfig);
+                    parseProcessConfig(pChildElement, pProcessConfig);
                 /*  PD default parameters  */
                 else if ((!xmlStrcmp(pChildElement->name, BAD_CAST "pd-com-parameter")))
                     parsePDDefaultParams(pChildElement, pPdConfig);
@@ -1402,7 +1402,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                     parseMDDefaultParams(pChildElement, pMdConfig);
 
                 pChildElement = xmlNextElementSibling(pChildElement);
-	        }
+            }
         }
         /*  Free XPath result   */
         xmlXPathFreeObject(pXPathObj);
@@ -1444,7 +1444,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
 }
 
 /**********************************************************************************************************************/
-/**	Free array of telegram configurations allocated by tau_readXmlInterfaceConfig
+/**    Free array of telegram configurations allocated by tau_readXmlInterfaceConfig
  *
  *  @param[in]      numExchgPar       Number of telegram configurations in the array
  *  @param[in]      pExchgPar         Pointer to array of telegram configurations
