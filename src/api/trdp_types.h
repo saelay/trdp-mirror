@@ -405,10 +405,8 @@ typedef struct
 
 /**     Array of pointers to dataset  */
 typedef TRDP_DATASET_T    * pTRDP_DATASET_T;
-typedef pTRDP_DATASET_T     apTRDP_DATASET_T[];
+typedef pTRDP_DATASET_T   * apTRDP_DATASET_T;
 typedef apTRDP_DATASET_T  * papTRDP_DATASET_T;
-typedef papTRDP_DATASET_T * ppapTRDP_DATASET_T;
-
 
 /**********************************************************************************************************************/
 /**                          TRDP statistics type definitions.                                                        */

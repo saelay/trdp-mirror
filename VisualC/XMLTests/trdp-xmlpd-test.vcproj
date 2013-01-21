@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;..\..\src\common"
+				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\resources\pthread\inc;..\..\src\common"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -120,7 +120,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;..\..\src\common"
+				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\resources\pthread\inc;..\..\src\common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
