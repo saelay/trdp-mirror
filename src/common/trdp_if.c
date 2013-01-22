@@ -663,7 +663,7 @@ TRDP_ERR_T tlp_setRedundant (
                     iterPD->pktFlags |= TRDP_FLAGS_REDUNDANT;
                 }
             }
-          
+
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
                 vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
@@ -785,7 +785,7 @@ UINT32 trdp_getTopoCount (
  *  @param[in]      destIpAddr           where to send the packet to
  *  @param[in]      interval             frequency of PD packet (>= 10ms) in usec, 0 if PD PULL
  *  @param[in]      redId                0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags             OPTION: 
+ *  @param[in]      pktFlags             OPTION:
  *                                       TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam           optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData                pointer to packet data / dataset
@@ -867,6 +867,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 {
                     /* mark data as invalid, data will be set valid with tlp_put */
                     pNewElement->privFlags |= TRDP_INVALID_DATA;
+                    dataSize = TRDP_MAX_PD_DATA_SIZE;
                 }
 
                 pNewElement->dataSize   = dataSize;
@@ -925,20 +926,20 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             else
             {
                 vos_getTime(&nextTime);
-                tv_interval.tv_sec      = interval / 1000000;
-                tv_interval.tv_usec     = interval % 1000000;
+                tv_interval.tv_sec  = interval / 1000000;
+                tv_interval.tv_usec = interval % 1000000;
                 vos_addTime(&nextTime, &tv_interval);
                 pNewElement->interval   = tv_interval;
                 pNewElement->timeToGo   = nextTime;
             }
 
             /*    Update the internal data */
-            pNewElement->addr           = pubHandle;
-            pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
+            pNewElement->addr = pubHandle;
+            pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
             pNewElement->redId          = redId;
-            pNewElement->pCachedDS        = NULL;
+            pNewElement->pCachedDS      = NULL;
 
             /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
                 curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
@@ -1394,7 +1395,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags            OPTION: 
+ *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
@@ -1516,7 +1517,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
                             pReqElement->addr.destIpAddr    = destIpAddr;
                             pReqElement->addr.srcIpAddr     = srcIpAddr;
                             pReqElement->addr.mcGroup       = 0;
-                            pReqElement->pktFlags           = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
+                            pReqElement->pktFlags           =
+                                (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
 
                             /*    Enter this request into the send queue.    */
                             trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
@@ -1576,7 +1578,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      srcIpAddr1          IP for source filtering, set 0 if not used
  *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
  *                                      Used e.g. for source filtering of redundant devices.
- *  @param[in]      pktFlags            OPTION: 
+ *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      destIpAddr          IP address to join
  *  @param[in]      timeout             timeout (>= 10ms) in usec
@@ -1735,15 +1737,14 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->interval.tv_sec  = timeout / 1000000;
                     newPD->interval.tv_usec = timeout % 1000000;
                     newPD->timeToGo         = newPD->interval;
-                    newPD->toBehavior       = 
-                        (toBehavior == TRDP_TO_DEFAULT)?appHandle->pdDefault.toBehavior:toBehavior;
-                    newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef          = pUserRef;
-                    newPD->socketIdx        = index;
-                    newPD->privFlags       |= TRDP_INVALID_DATA;
-                    newPD->pktFlags         = 
-                        (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->pdDefault.flags:pktFlags;
-                    newPD->pCachedDS        = NULL;
+                    newPD->toBehavior       =
+                        (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
+                    newPD->grossSize    = TRDP_MAX_PD_PACKET_SIZE;
+                    newPD->userRef      = pUserRef;
+                    newPD->socketIdx    = index;
+                    newPD->privFlags    |= TRDP_INVALID_DATA;
+                    newPD->pktFlags     = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    newPD->pCachedDS    = NULL;
 
                     if (timeout == 0)
                     {
@@ -1760,9 +1761,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     /*    Join a multicast group */
                     if (newPD->addr.mcGroup != 0)
                     {
-                        /* 
-                           return value ignored since joining of an already joined address leads to an error 
-                           TODO: call join only when address is not joined yet               
+                        /*
+                           return value ignored since joining of an already joined address leads to an error
+                           TODO: call join only when address is not joined yet
                         */
                         /*ret = (TRDP_ERR_T)*/ vos_sockJoinMC(appHandle->iface[index].sock,
                                                               newPD->addr.mcGroup,
@@ -1901,8 +1902,10 @@ EXT_DECL TRDP_ERR_T tlp_get (
             /*    Call the receive function if we are in non blocking mode    */
             if (!(appHandle->option & TRDP_OPTION_BLOCK))
             {
-                 /* read all you can get, return value is not interesting */
-                do {} while (trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock) == TRDP_NO_ERR);
+                /* read all you can get, return value is not interesting */
+                do
+                {}
+                while (trdp_pdReceive(appHandle, appHandle->iface[pElement->socketIdx].sock) == TRDP_NO_ERR);
             }
 
             /*    Get the current time    */
@@ -2203,14 +2206,14 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->addr.destIpAddr    = destIpAddr;
             pNewElement->addr.mcGroup       = 0;
             pNewElement->privFlags          = TRDP_PRIV_NONE;
-            pNewElement->pktFlags           = (pktFlags == TRDP_FLAGS_DEFAULT)?appHandle->mdDefault.flags:pktFlags;
+            pNewElement->pktFlags           = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
             pNewElement->interval           = tv_interval;
             pNewElement->timeToGo           = nextTime;
             pNewElement->dataSize           = dataSize;
             pNewElement->grossSize          = grossSize;
             pNewElement->numReplies         = 0;
             pNewElement->numRetries         = 0;
-            pNewElement->pCachedDS            = NULL;
+            pNewElement->pCachedDS          = NULL;
             pNewElement->numRetriesMax      =
                 (pSendParam != NULL) ? pSendParam->retries : (appHandle->mdDefault.sendParam.retries);
             /* vos_printf(VOS_LOG_ERROR, "numRetriesMax: %u, %u, %u, \n", pNewElement->numRetriesMax, (pSendParam !=
@@ -2479,7 +2482,7 @@ static TRDP_ERR_T tlm_common_send (
  *  @param[in]      topoCount           topocount to use
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTION: 
+ *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
@@ -2540,7 +2543,7 @@ TRDP_ERR_T tlm_notify (
  *  @param[in]      topoCount           topocount to use
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTION: 
+ *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL
  *  @param[in]      noOfRepliers        number of expected repliers, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
@@ -2606,7 +2609,7 @@ TRDP_ERR_T tlm_request (
  *  @param[in]      comId               comId to be observed
  *  @param[in]      topoCount           topocount to use
  *  @param[in]      destIpAddr          destination IP address
- *  @param[in]      pktFlags            OPTION: 
+ *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL
  *  @param[in]      destURI             only functional group of destination URI
  *
@@ -2707,7 +2710,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->u.listener.topoCount   = topoCount;
                 pNewElement->u.listener.destIpAddr  = destIpAddr;
                 pNewElement->u.listener.pktFlags    = pktFlags;
-                pNewElement->pCachedDS                = NULL;
+                pNewElement->pCachedDS = NULL;
                 memcpy(pNewElement->u.listener.destURI, destURI, TRDP_MAX_URI_USER_LEN);
 
                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) == 0)
