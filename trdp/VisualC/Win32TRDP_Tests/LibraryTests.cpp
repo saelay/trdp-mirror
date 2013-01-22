@@ -24,7 +24,7 @@
 
 #ifdef WIN32
 // include also stuff, needed for window
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <winsock2.h>
 #endif
 
@@ -196,7 +196,8 @@ int testTimeSubs()
 }
 
 
-int _tmain(int argc, _TCHAR* argv[])
+
+int main(int argc, char *argv[])
 {
 	printf("Starting tests\n");
 	if (testTimeCompare())
@@ -221,11 +222,3 @@ int _tmain(int argc, _TCHAR* argv[])
 	printf("All tests successfully finished.\n");
 	return 0;
 }
-
-/* startpoint for linux */
-#ifndef WIN32
-int main(int argc, char** argv)
-{
-	return _tmain(argc, argv);
-}
-#endif

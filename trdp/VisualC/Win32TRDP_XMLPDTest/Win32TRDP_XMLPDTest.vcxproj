@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EF516E67-31DF-402D-8910-813FDF55965C}</ProjectGuid>
+    <ProjectGuid>{DDBD7C18-B718-472C-8D18-BE40D887DD7C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Win32TRDP_PDTest</RootNamespace>
-    <ProjectName>Win32TRDP_PDTest</ProjectName>
+    <RootNamespace>Win32TRDP_XMLPDTest</RootNamespace>
+    <ProjectName>Win32TRDP_XMLPDTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -49,13 +49,16 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>MD_SUPPORT=1;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\src\vos\api;..\..\src\api;..\..\src\vos\windows;..\..\src\vos\windows\pthreadi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..test\xml;..\..\src\api;..\..\src\vos\api;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(ProjectDir)..\..\resources\libxml\bin\*.* $(TargetDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -74,15 +77,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Library Include="..\..\resources\libxml\lib\libxml2.lib" />
     <Library Include="..\Debug\Win32TRDP.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\pdpatterns\trdp-pd-test.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Win32TRDP\Win32TRDP.vcxproj">
-      <Project>{4e059552-03ff-4ee4-a868-c2253289e9f6}</Project>
-    </ProjectReference>
+    <ClCompile Include="..\..\test\xml\trdp-xmlpd-test.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
