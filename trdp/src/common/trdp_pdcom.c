@@ -104,17 +104,24 @@ TRDP_ERR_T trdp_pdPut (
     }
 
     if (  !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
-        || (marshall == NULL))
+          || (marshall == NULL))
     {
         memcpy(pPacket->pFrame->data, pData, dataSize);
     }
     else
     {
-        ret = marshall(refCon, pPacket->addr.comId, (UINT8 *) pData, pPacket->pFrame->data, &dataSize, &pPacket->pCachedDS);
+        ret = marshall(refCon,
+                       pPacket->addr.comId,
+                       (UINT8 *) pData,
+                       pPacket->pFrame->data,
+                       &dataSize,
+                       &pPacket->pCachedDS);
     }
 
     if (TRDP_NO_ERR == ret)
     {
+        pPacket->dataSize = dataSize;
+
         /* set data valid */
         pPacket->privFlags &= ~TRDP_INVALID_DATA;
 
@@ -171,22 +178,22 @@ TRDP_ERR_T trdp_pdGet (
     /*  Update some statistics  */
     pPacket->getPkts++;
 
-    if (pPacket->privFlags & TRDP_TIMED_OUT)    
+    if (pPacket->privFlags & TRDP_TIMED_OUT)
     {
         return TRDP_TIMEOUT_ERR;
     }
 
-    if (pPacket->privFlags & TRDP_INVALID_DATA) 
+    if (pPacket->privFlags & TRDP_INVALID_DATA)
     {
         return TRDP_NODATA_ERR;
     }
 
     if ( !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
-        ||(unmarshall == NULL))
+         || (unmarshall == NULL))
     {
-        if (*pDataSize >=  pPacket->dataSize)
+        if (*pDataSize >= pPacket->dataSize)
         {
-            *pDataSize =  pPacket->dataSize;
+            *pDataSize = pPacket->dataSize;
             memcpy((void *)pData, pPacket->pFrame->data, *pDataSize);
             return TRDP_NO_ERR;
         }
@@ -197,7 +204,12 @@ TRDP_ERR_T trdp_pdGet (
     }
     else
     {
-        return unmarshall(refCon, pPacket->addr.comId, pPacket->pFrame->data, (UINT8 *)pData, pDataSize, &pPacket->pCachedDS);
+        return unmarshall(refCon,
+                          pPacket->addr.comId,
+                          pPacket->pFrame->data,
+                          (UINT8 *)pData,
+                          pDataSize,
+                          &pPacket->pCachedDS);
     }
 }
 
@@ -217,7 +229,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
     vos_clearTime(&appHandle->interval);
- 
+
     /*    Find the packet which has to be sent next:    */
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
@@ -235,18 +247,18 @@ TRDP_ERR_T  trdp_pdSendQueued (
          */
         if ((timerisset(&iterPD->interval) &&                   /*  Request for immediate sending   */
              !timercmp(&iterPD->timeToGo, &now, >)) ||
-            iterPD->privFlags & TRDP_REQ_2B_SENT)               
+            iterPD->privFlags & TRDP_REQ_2B_SENT)
         {
             /* send only if there are valid data */
-            if (!(iterPD->privFlags & TRDP_INVALID_DATA))       
+            if (!(iterPD->privFlags & TRDP_INVALID_DATA))
             {
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
 
                 /*    Send the packet if it is not redundant    */
-                if (iterPD->socketIdx != -1 && 
+                if (iterPD->socketIdx != -1 &&
                     (!appHandle->beQuiet ||
-                    (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT))) 
+                     (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
                 {
                     /* We pass the error to the application, but we keep on going    */
                     err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);
@@ -258,9 +270,9 @@ TRDP_ERR_T  trdp_pdSendQueued (
             }
 
             /* Reset "immediate" flag for request or requested packet */
-            if (iterPD->privFlags & TRDP_REQ_2B_SENT)            
+            if (iterPD->privFlags & TRDP_REQ_2B_SENT)
             {
-                iterPD->privFlags &= ~ TRDP_REQ_2B_SENT;          
+                iterPD->privFlags &= ~TRDP_REQ_2B_SENT;
             }
 
             /*  Set timer if interval was set.
@@ -306,9 +318,9 @@ TRDP_ERR_T  trdp_pdReceive (
     PD_ELE_T            *pPulledElement;
     TRDP_ERR_T          err         = TRDP_NO_ERR;
     TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
-    UINT32              recSize;
-    BOOL                informUser  = FALSE;
-    TRDP_ADDRESSES_T    subHandle   = { 0, 0, 0, 0};
+    UINT32 recSize;
+    BOOL informUser = FALSE;
+    TRDP_ADDRESSES_T    subHandle = { 0, 0, 0, 0};
 
 
     /*  Get a buffer    */
@@ -328,7 +340,7 @@ TRDP_ERR_T  trdp_pdReceive (
 
     /*  Get the packet from the wire:  */
     err = (TRDP_ERR_T) vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr);
-    if ( err!=TRDP_NO_ERR)
+    if ( err != TRDP_NO_ERR)
     {
         return err;
     }
@@ -419,7 +431,7 @@ TRDP_ERR_T  trdp_pdReceive (
             }
 
             /* trigger immediate sending of PD  */
-            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;  
+            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;
 
             if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
             {
@@ -436,9 +448,9 @@ TRDP_ERR_T  trdp_pdReceive (
 
     if (pExistingElement == NULL)
     {
-         /*
-         vos_printf(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
-         */
+        /*
+        vos_printf(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+        */
     }
     else
     {
@@ -451,11 +463,12 @@ TRDP_ERR_T  trdp_pdReceive (
                 vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter) <
                 vos_ntohl(pNewFrame->frameHead.sequenceCounter))
             {
-                vos_printf(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+                vos_printf(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
+                               subHandle.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
                 return TRDP_NO_ERR;
             }
         }
-        
+
         /*
         vos_printf(VOS_LOG_INFO, "Received (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
         */
@@ -476,7 +489,7 @@ TRDP_ERR_T  trdp_pdReceive (
 
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
-        pExistingElement->lastErr    = TRDP_NO_ERR;
+        pExistingElement->lastErr   = TRDP_NO_ERR;
         pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
 
         /* set the data valid */
@@ -514,8 +527,8 @@ TRDP_ERR_T  trdp_pdReceive (
         informUser)
     {
         /*  If a callback was provided, call it now */
-        if (   (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
-             &&(appHandle->pdDefault.pfCbFunction != NULL))
+        if ((pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
+            && (appHandle->pdDefault.pfCbFunction != NULL))
         {
             TRDP_PD_INFO_T theMessage;
             theMessage.comId        = pExistingElement->addr.comId;
@@ -531,7 +544,7 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.replyIpAddr  = vos_ntohl(pExistingElement->pFrame->frameHead.replyIpAddress);
             theMessage.pUserRef     = pExistingElement->userRef; /* User reference given with the local subscribe? */
             theMessage.resultCode   = resultCode;
-             
+
             appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
                                               &theMessage,
                                               pExistingElement->pFrame->data,
@@ -571,7 +584,7 @@ void    trdp_pdUpdate (
  */
 TRDP_ERR_T trdp_pdCheck (
     PD_HEADER_T *pPacket,
-    UINT32       packetSize)
+    UINT32      packetSize)
 {
     UINT32      myCRC       = vos_crc32(0xFFFFFFFF, NULL, 0);
     UINT32      *pDataFCS   = (UINT32 *)((UINT8 *)pPacket + packetSize - 4);
@@ -593,7 +606,6 @@ TRDP_ERR_T trdp_pdCheck (
         vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
         err = TRDP_CRC_ERR;
     }
-
     /*  Check protocol version  */
     else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (TRDP_PROTO_VER & 0xFF000000))
     {
@@ -602,7 +614,6 @@ TRDP_ERR_T trdp_pdCheck (
                    TRDP_PROTO_VER);
         err = TRDP_WIRE_ERR;
     }
-
     /*  Check type  */
     else if (vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PD &&
              vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PR &&
@@ -611,7 +622,6 @@ TRDP_ERR_T trdp_pdCheck (
         vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
         err = TRDP_WIRE_ERR;
     }
-
     /*  Check Data CRC (FCS)   */
     else if (pPacket->datasetLength > 0)
     {

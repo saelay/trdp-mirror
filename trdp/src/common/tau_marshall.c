@@ -39,24 +39,24 @@
 /** Marshalling info, used to and from wire */
 typedef struct
 {
-    INT32       level;
-    UINT8       *pSrc;      /**< source pointer          */
-    UINT8       *pDst;      /**< destination pointer     */
-    UINT8       *pDstEnd;   /**< last destination        */
+    INT32   level;
+    UINT8   *pSrc;          /**< source pointer          */
+    UINT8   *pDst;          /**< destination pointer     */
+    UINT8   *pDstEnd;       /**< last destination        */
 } TAU_MARSHALL_INFO_T;
 
-/* structure type definitions for alignment calculation */ 
-typedef struct 
+/* structure type definitions for alignment calculation */
+typedef struct
 {
     UINT8 a;
 } STRUCT_T;
 
-typedef struct 
+typedef struct
 {
     TIMEDATE48 a;
 } TIMEDATE48_STRUCT_T;
 
-typedef struct 
+typedef struct
 {
     TIMEDATE64 a;
 } TIMEDATE64_STRUCT_T;
@@ -66,11 +66,11 @@ typedef struct
  * LOCALS
  */
 
-static TRDP_COMID_DSID_MAP_T   *sComIdDsIdMap  = NULL;
-static UINT32                  sNumComId = 0;
+static TRDP_COMID_DSID_MAP_T    *sComIdDsIdMap = NULL;
+static UINT32 sNumComId = 0;
 
-static TRDP_DATASET_T          **sDataSets  = NULL;
-static UINT32                  sNumEntries = 0;
+static TRDP_DATASET_T           * *sDataSets = NULL;
+static UINT32 sNumEntries = 0;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -84,7 +84,7 @@ static UINT32                  sNumEntries = 0;
  *
  *  @retval         aligned pointer
  */
-static INLINE UINT8 *alignePtr(
+static INLINE UINT8 *alignePtr (
     const UINT8 *pSrc,
     UINT32      alignment)
 {
@@ -118,22 +118,22 @@ static INLINE void unpackedCopy64 (
 }
 #elif __LITTLE_ENDIAN__
 {
-    UINT8   *pDst8 = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
-    UINT8   *pSrc8 = *ppSrc;
+    UINT8   *pDst8  = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
+    UINT8   *pSrc8  = *ppSrc;
     while (noOfItems--)
     {
-        *pDst8++ = *(pSrc8 + 7);
-        *pDst8++ = *(pSrc8 + 6);
-        *pDst8++ = *(pSrc8 + 5);
-        *pDst8++ = *(pSrc8 + 4);
-        *pDst8++ = *(pSrc8 + 3);
-        *pDst8++ = *(pSrc8 + 2);
-        *pDst8++ = *(pSrc8 + 1);
-        *pDst8++ = *pSrc8;
-        pSrc8 += 8;
+        *pDst8++    = *(pSrc8 + 7);
+        *pDst8++    = *(pSrc8 + 6);
+        *pDst8++    = *(pSrc8 + 5);
+        *pDst8++    = *(pSrc8 + 4);
+        *pDst8++    = *(pSrc8 + 3);
+        *pDst8++    = *(pSrc8 + 2);
+        *pDst8++    = *(pSrc8 + 1);
+        *pDst8++    = *pSrc8;
+        pSrc8       += 8;
     }
-    *ppSrc = (UINT8 *) pSrc8;
-    *ppDst = (UINT8 *) pDst8;
+    *ppSrc  = (UINT8 *) pSrc8;
+    *ppDst  = (UINT8 *) pDst8;
 }
 #else
 {
@@ -156,7 +156,6 @@ static INLINE void packedCopy64 (
     UINT8   * *ppSrc,
     UINT8   * *ppDst,
     UINT32  noOfItems)
-
 {
     UINT64 *pSrc64 = (UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64));
     while (noOfItems--)
@@ -188,8 +187,8 @@ static int dataset_compare (
     const void  *pArg1,
     const void  *pArg2)
 {
-    TRDP_DATASET_T    *p1 = *(TRDP_DATASET_T **)pArg1;
-    TRDP_DATASET_T    *p2 = *(TRDP_DATASET_T **)pArg2;
+    TRDP_DATASET_T  *p1 = *(TRDP_DATASET_T * *)pArg1;
+    TRDP_DATASET_T  *p2 = *(TRDP_DATASET_T * *)pArg2;
 
     if (p1->id < p2->id)
     {
@@ -219,8 +218,8 @@ static int dataset_compare_deref (
     const void  *pArg1,
     const void  *pArg2)
 {
-    TRDP_DATASET_T    *p1 = (TRDP_DATASET_T *)pArg1;
-    TRDP_DATASET_T    *p2 = *(TRDP_DATASET_T **)pArg2;
+    TRDP_DATASET_T  *p1 = (TRDP_DATASET_T *)pArg1;
+    TRDP_DATASET_T  *p2 = *(TRDP_DATASET_T * *)pArg2;
 
     if (p1->id < p2->id)
     {
@@ -269,7 +268,7 @@ static int comId_compare (
 /**    Return the dataset for the comID
  *
  *
- *  @param[in]      comID           
+ *  @param[in]      comID
  *
  *  @retval         NULL if not found
  *  @retval         pointer to dataset
@@ -277,21 +276,29 @@ static int comId_compare (
 static TRDP_DATASET_T *find_DS_from_ComId (
     UINT32 comId)
 {
-    TRDP_COMID_DSID_MAP_T    key1;
-    TRDP_DATASET_T           **key3;    
-    TRDP_COMID_DSID_MAP_T    *key2;
-    
-    key1.comId = comId;
-    key1.datasetId = 0;
+    TRDP_COMID_DSID_MAP_T   key1;
+    TRDP_DATASET_T          * *key3;
+    TRDP_COMID_DSID_MAP_T   *key2;
 
-    key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1, sComIdDsIdMap, sNumComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+    key1.comId      = comId;
+    key1.datasetId  = 0;
+
+    key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1,
+                                                 sComIdDsIdMap,
+                                                 sNumComId,
+                                                 sizeof(TRDP_COMID_DSID_MAP_T),
+                                                 comId_compare);
 
     if (key2 != NULL)
     {
-        TRDP_DATASET_T    key22 = {0};
+        TRDP_DATASET_T key22 = {0};
 
-        key22.id = key2->datasetId; 
-        key3 = (TRDP_DATASET_T **) vos_bsearch(&key22, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+        key22.id    = key2->datasetId;
+        key3        = (TRDP_DATASET_T * *) vos_bsearch(&key22,
+                                                       sDataSets,
+                                                       sNumEntries,
+                                                       sizeof(TRDP_DATASET_T *),
+                                                       dataset_compare_deref);
         if (key3 != NULL)
         {
             return *key3;
@@ -314,10 +321,10 @@ static TRDP_DATASET_T *find_DS (
     UINT32 datasetId)
 {
     TRDP_DATASET_T  key2 = {0};
-    TRDP_DATASET_T  **key3;
+    TRDP_DATASET_T  * *key3;
 
     key2.id = datasetId;
-    key3 = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T*), dataset_compare_deref);
+    key3    = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T *), dataset_compare_deref);
     if (key3 != NULL)
     {
         return *key3;
@@ -340,15 +347,15 @@ static TRDP_DATASET_T *find_DS (
  *
  */
 
-EXT_DECL TRDP_ERR_T marshall (
+static TRDP_ERR_T marshall (
     TAU_MARSHALL_INFO_T *pInfo,
     TRDP_DATASET_T      *pDataset)
 {
     TRDP_ERR_T  err;
     UINT16      index;
-    UINT32      var_size    = 0;
+    UINT32      var_size = 0;
     UINT8       *pSrc;
-    UINT8       *pDst       = pInfo->pDst;
+    UINT8       *pDst = pInfo->pDst;
 
     /* Restrict recursion */
     pInfo->level++;
@@ -377,7 +384,7 @@ EXT_DECL TRDP_ERR_T marshall (
             {
                 /* Dataset, call ourself recursively */
 
-                /* Never used before?  */                
+                /* Never used before?  */
                 if (NULL == pDataset->pElement[index].pCachedDS)
                 {
                     /* Look for it   */
@@ -409,6 +416,11 @@ EXT_DECL TRDP_ERR_T marshall (
                     /*    possible variable source size    */
                     var_size = *pSrc;
 
+                    if (pDst + noOfItems > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     while (noOfItems-- > 0)
                     {
                         *pDst++ = *pSrc++;
@@ -424,6 +436,11 @@ EXT_DECL TRDP_ERR_T marshall (
                     /*    possible variable source size    */
                     var_size = *pSrc16;
 
+                    if (pDst + noOfItems * 2 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     while (noOfItems-- > 0)
                     {
                         *pDst++ = (UINT8) (*pSrc16 >> 8);
@@ -438,10 +455,15 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_REAL32:
                 case TRDP_TIMEDATE32:
                 {
-                     UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
 
                     /*    possible variable source size    */
                     var_size = *pSrc32;
+
+                    if (pDst + noOfItems * 4 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
 
                     while (noOfItems-- > 0)
                     {
@@ -457,6 +479,11 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_TIMEDATE64:
                 {
                     UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
+
+                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
 
                     while (noOfItems-- > 0)
                     {
@@ -477,18 +504,24 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_TIMEDATE48:
                 {
                     /*    This is not a base type but a structure    */
-                    UINT32 *pSrc32;
-                    UINT16 *pSrc16;
+                    UINT32  *pSrc32;
+                    UINT16  *pSrc16;
+
+                    if (pDst + noOfItems * 6 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
 
                     while (noOfItems-- > 0)
                     {
-                        pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        pSrc32 =
+                            (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
                         *pDst++ = (UINT8) (*pSrc32 >> 24);
                         *pDst++ = (UINT8) (*pSrc32 >> 16);
                         *pDst++ = (UINT8) (*pSrc32 >> 8);
                         *pDst++ = (UINT8) (*pSrc32 & 0xFF);
                         pSrc32++;
-                        pSrc16 = (UINT16 *) alignePtr((UINT8*) pSrc32, ALIGNOF(UINT16));
+                        pSrc16  = (UINT16 *) alignePtr((UINT8 *) pSrc32, ALIGNOF(UINT16));
                         *pDst++ = (UINT8) (*pSrc16 >> 8);
                         *pDst++ = (UINT8) (*pSrc16 & 0xFF);
                         pSrc32++;
@@ -499,6 +532,11 @@ EXT_DECL TRDP_ERR_T marshall (
                 case TRDP_INT64:
                 case TRDP_UINT64:
                 case TRDP_REAL64:
+                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     packedCopy64( &pSrc, &pDst, noOfItems);
                     break;
                 default:
@@ -508,8 +546,8 @@ EXT_DECL TRDP_ERR_T marshall (
         pInfo->pDst = pDst;
         pInfo->pSrc = pSrc;
     }
-    
-    
+
+
     return TRDP_NO_ERR;
 }
 
@@ -526,7 +564,7 @@ EXT_DECL TRDP_ERR_T marshall (
  *
  */
 
-EXT_DECL TRDP_ERR_T unmarshall (
+static TRDP_ERR_T unmarshall (
     TAU_MARSHALL_INFO_T *pInfo,
     TRDP_DATASET_T      *pDataset)
 {
@@ -558,13 +596,13 @@ EXT_DECL TRDP_ERR_T unmarshall (
             while (noOfItems-- > 0)
             {
                 /* Dataset, call ourself recursively */
-                /* Never used before?  */                
+                /* Never used before?  */
                 if (NULL == pDataset->pElement[index].pCachedDS)
                 {
                     /* Look for it   */
                     pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
                 }
-                
+
                 if (NULL == pDataset->pElement[index].pCachedDS)      /* Not in our DB    */
                 {
                     vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
@@ -576,8 +614,8 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 {
                     return err;
                 }
-                pDst = pInfo->pDst;
-                pSrc = pInfo->pSrc;
+                pDst    = pInfo->pDst;
+                pSrc    = pInfo->pSrc;
 
             }
         }
@@ -590,10 +628,15 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 case TRDP_INT8:
                 case TRDP_UINT8:
                 {
+                    if (pDst + noOfItems > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     while (noOfItems-- > 0)
                     {
-                        var_size = *pSrc++;
-                        *pDst++ = var_size;
+                        var_size    = *pSrc++;
+                        *pDst++     = var_size;
                     }
                     break;
                 }
@@ -602,6 +645,12 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 case TRDP_UINT16:
                 {
                     UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
+
+                    if (pDst + noOfItems * 2 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     while (noOfItems-- > 0)
                     {
                         *pDst16 = *pSrc++ << 8;
@@ -619,13 +668,19 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 case TRDP_TIMEDATE32:
                 {
                     UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
+
+                    if (pDst + noOfItems * 4 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     while (noOfItems-- > 0)
                     {
-                        *pDst32 = *pSrc++ << 24;
-                        *pDst32 += *pSrc++ << 16;
-                        *pDst32 += *pSrc++ << 8;
-                        *pDst32 += *pSrc++;
-                        var_size = *pDst32;
+                        *pDst32     = *pSrc++ << 24;
+                        *pDst32     += *pSrc++ << 16;
+                        *pDst32     += *pSrc++ << 8;
+                        *pDst32     += *pSrc++;
+                        var_size    = *pDst32;
                         pDst32++;
                     }
                     pDst = (UINT8 *) pDst32;
@@ -634,17 +689,23 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 case TRDP_TIMEDATE48:
                 {
                     /*    This is not a base type but a structure    */
-                    UINT32 *pDst32;
-                    UINT16 *pDst16;
+                    UINT32  *pDst32;
+                    UINT16  *pDst16;
+
+                    if (pDst + noOfItems * 6 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     while (noOfItems-- > 0)
                     {
-                        pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
                         *pDst32 = *pSrc++ << 24;
                         *pDst32 += *pSrc++ << 16;
                         *pDst32 += *pSrc++ << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
-                        pDst16 = (UINT16 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT16));
+                        pDst16  = (UINT16 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT16));
                         *pDst16 = *pSrc++ << 8;
                         *pDst16 += *pSrc++;
                         pDst32++;
@@ -656,6 +717,12 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 {
                     /*    This is not a base type but a structure    */
                     UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
+
+                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     while (noOfItems-- > 0)
                     {
                         *pDst32 = *pSrc++ << 24;
@@ -663,7 +730,7 @@ EXT_DECL TRDP_ERR_T unmarshall (
                         *pDst32 += *pSrc++ << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
-                        pDst32 = (UINT32 *) alignePtr((UINT8*)pDst32, ALIGNOF(UINT32));
+                        pDst32  = (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
                         *pDst32 = *pSrc++ << 24;
                         *pDst32 += *pSrc++ << 16;
                         *pDst32 += *pSrc++ << 8;
@@ -676,6 +743,12 @@ EXT_DECL TRDP_ERR_T unmarshall (
                 case TRDP_INT64:
                 case TRDP_UINT64:
                 case TRDP_REAL64:
+
+                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
+                    {
+                        return TRDP_PARAM_ERR;
+                    }
+
                     unpackedCopy64((UINT8 * *) &pSrc, &pDst, noOfItems);
                     break;
                 default:
@@ -711,14 +784,14 @@ EXT_DECL TRDP_ERR_T unmarshall (
  */
 
 EXT_DECL TRDP_ERR_T tau_initMarshall (
-    void                    **ppRefCon,
+    void                    * *ppRefCon,
     UINT32                  numComId,
-    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,        
+    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,
     UINT32                  numDataSet,
     TRDP_DATASET_T          *pDataset[])
 {
-    UINT32    i,j;
-    
+    UINT32 i, j;
+
     if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
     {
         return TRDP_PARAM_ERR;
@@ -726,8 +799,8 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
 
     /*    Save the pointer to the comId mapping table    */
     sComIdDsIdMap   = pComIdDsIdMap;
-    sNumComId = numComId;
-    
+    sNumComId       = numComId;
+
     /* sort the table    */
     vos_qsort(pComIdDsIdMap, numComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
 
@@ -744,7 +817,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
         }
     }
     /* sort the table    */
-    vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T*), dataset_compare);
+    vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T *), dataset_compare);
 
     return TRDP_NO_ERR;
 }
@@ -770,12 +843,13 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
 
 EXT_DECL TRDP_ERR_T tau_marshall (
     void            *pRefCon,
-    UINT32           comId,
+    UINT32          comId,
     UINT8           *pSrc,
     UINT8           *pDest,
     UINT32          *pDestSize,
-    TRDP_DATASET_T **ppDSPointer)
+    TRDP_DATASET_T  * *ppDSPointer)
 {
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -809,7 +883,11 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    return marshall(&info, pDataset);
+    err = marshall(&info, pDataset);
+
+    *pDestSize = info.pDst - pDest;
+
+    return err;
 }
 
 /**********************************************************************************************************************/
@@ -832,12 +910,13 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 
 EXT_DECL TRDP_ERR_T tau_unmarshall (
     void            *pRefCon,
-    UINT32           comId,
+    UINT32          comId,
     UINT8           *pSrc,
     UINT8           *pDest,
     UINT32          *pDestSize,
-    TRDP_DATASET_T **ppDSPointer)
+    TRDP_DATASET_T  * *ppDSPointer)
 {
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -859,7 +938,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     {
         pDataset = find_DS_from_ComId(comId);
     }
-    
+
     if (NULL == pDataset)   /* Not in our DB    */
     {
         vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
@@ -871,7 +950,11 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    return unmarshall(&info, pDataset);
+    err = unmarshall(&info, pDataset);
+
+    *pDestSize = info.pDst - pDest;
+
+    return err;
 }
 
 
@@ -896,12 +979,13 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 
 EXT_DECL TRDP_ERR_T tau_marshallDs (
     void            *pRefCon,
-    UINT32           dsId,
+    UINT32          dsId,
     UINT8           *pSrc,
     UINT8           *pDest,
     UINT32          *pDestSize,
-    TRDP_DATASET_T **ppDSPointer)
+    TRDP_DATASET_T  * *ppDSPointer)
 {
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -935,7 +1019,11 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    return marshall(&info, pDataset);
+    err = marshall(&info, pDataset);
+
+    *pDestSize = info.pDst - pDest;
+
+    return err;
 }
 
 /**********************************************************************************************************************/
@@ -958,12 +1046,13 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
 
 EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     void            *pRefCon,
-    UINT32           dsId,
+    UINT32          dsId,
     UINT8           *pSrc,
     UINT8           *pDest,
     UINT32          *pDestSize,
-    TRDP_DATASET_T **ppDSPointer)
+    TRDP_DATASET_T  * *ppDSPointer)
 {
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -985,7 +1074,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     {
         pDataset = find_DS(dsId);
     }
-    
+
     if (NULL == pDataset)   /* Not in our DB    */
     {
         vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
@@ -997,5 +1086,9 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    return unmarshall(&info, pDataset);
+    err = unmarshall(&info, pDataset);
+
+    *pDestSize = info.pDst - pDest;
+
+    return err;
 }
