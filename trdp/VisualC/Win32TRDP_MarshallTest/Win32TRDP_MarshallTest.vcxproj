@@ -11,10 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{DDBD7C18-B718-472C-8D18-BE40D887DD7C}</ProjectGuid>
+    <ProjectGuid>{56100B24-1CD7-4767-8972-83CB14931DB6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Win32TRDP_XMLPDTest</RootNamespace>
-    <ProjectName>Win32TRDP_XMLPDTest</ProjectName>
+    <RootNamespace>Win32TRDP_MarshallTest</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -46,24 +45,23 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\test\xml;..\..\src\api;..\..\src\vos\api;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\test;..\..\src\vos\api;..\..\src\api</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>copy $(ProjectDir)..\..\resources\libxml\bin\*.* $(TargetDir)</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -77,11 +75,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Library Include="..\..\resources\libxml\lib\libxml2.lib" />
-    <Library Include="..\Debug\Win32TRDP.lib" />
+    <ClCompile Include="..\..\test\test_marshalling.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\xml\trdp-xmlpd-test.c" />
+    <Library Include="..\Debug\Win32TRDP.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
