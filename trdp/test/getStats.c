@@ -46,8 +46,6 @@
 #define PD_COMID1_CYCLE         0
 #define PD_COMID1_TIMEOUT       5000000
 #define PD_COMID1_DATA_SIZE     sizeof(TRDP_STATISTICS_T)
-//#define PD_COMID1_SRC_IP        vos_dottedIP("192.168.2.4")     /*    Sender's IP        */
-#define PD_COMID1_SRC_IP        vos_dottedIP("10.64.8.203")     /*    Sender's IP        */
 
 /* Send as request:    */
 #define PD_COMID2_DATA_SIZE     0
@@ -117,11 +115,11 @@ void print_stats(
 void usage (const char *appName)
 {
     printf("%s: Version %s\t(%s - %s)\n", appName, APP_VERSION, __DATE__, __TIME__);
-
     printf("Usage of %s\n", appName);
     printf("This tool requests the general statistics from an ED.\n"
            "Arguments are:\n"
            "-o own IP address in dotted decimal\n"
+           "-r reply IP address in dotted decimal\n"
            "-t target IP address in dotted decimal\n"
            "-v print version and quit\n"
            );
@@ -224,6 +222,7 @@ int main (int argc, char * *argv)
     int                 rv = 0;
     int                 ip[4];
     UINT32              destIP = 0;
+    UINT32              replyIP = 0;
     UINT32              ownIP = 0;
     int                 count = 0, i;
     int                 ch;
@@ -234,7 +233,7 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:h?v")) != -1)
+    while ((ch = getopt(argc, argv, "o:r:t:h?v")) != -1)
     {
         switch (ch)
         {
@@ -247,6 +246,17 @@ int main (int argc, char * *argv)
                     exit(1);
                 }
                 ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
+            case 'r':
+            {   /*  read ip    */
+                if (sscanf(optarg, "%u.%u.%u.%u",
+                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                replyIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
                 break;
             }
             case 't':
@@ -300,18 +310,18 @@ int main (int argc, char * *argv)
 
     memset(&gBuffer, 0, sizeof(gBuffer));
 
-    err = tlp_subscribe( appHandle,                 /*    our application identifier            */
-                         &subHandle,                /*    our subscription identifier            */
+    err = tlp_subscribe( appHandle,                     /*    our application identifier            */
+                         &subHandle,                    /*    our subscription identifier            */
                          NULL,
-                         TRDP_GLOBAL_STATISTICS_COMID,                 /*    ComID                                */
-                         0,                         /*    topocount: local consist only        */
-                         0,                         /*    Source IP filter                    */
+                         TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                */
+                         0,                             /*    topocount: local consist only        */
+                         0,                             /*    Source IP filter                    */
                          0,
-                         0,                         /*    Default destination    (or MC Group)   */
-                         TRDP_FLAGS_DEFAULT,        /* packet flags */
-                         PD_COMID1_TIMEOUT,         /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
-                         sizeof(gBuffer));          /*    net data size                        */
+                         replyIP,                       /*    Default destination    (or MC Group)   */
+                         TRDP_FLAGS_DEFAULT,            /* packet flags */
+                         PD_COMID1_TIMEOUT,             /*    Time out in us                        */
+                         TRDP_TO_SET_TO_ZERO,           /*  delete invalid data    on timeout      */
+                         sizeof(gBuffer));              /*    net data size                        */
 
     if (err != TRDP_NO_ERR)
     {
@@ -321,8 +331,7 @@ int main (int argc, char * *argv)
     }
 
     /*    Request statistics PD        */
-
-    err = tlp_request(appHandle, subHandle, TRDP_STATISTICS_REQUEST_COMID, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0, 0, 0);
+    err = tlp_request(appHandle, subHandle, TRDP_STATISTICS_REQUEST_COMID, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, TRDP_GLOBAL_STATISTICS_COMID, replyIP, 0, 0);
 
     if (err != TRDP_NO_ERR)
     {
