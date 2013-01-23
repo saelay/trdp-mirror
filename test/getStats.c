@@ -4,7 +4,7 @@
  *
  * @brief           Test application for TRDP statistics
  *
- * @details			Send PD Pull request for statistics and display them
+ * @details            Send PD Pull request for statistics and display them
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -26,9 +26,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef POSIX
+#if defined (POSIX)
 #include <unistd.h>
 #include <sys/select.h>
+#elif defined (WIN32)
+#include "getopt.h"
 #endif
 
 #include "trdp_if_light.h"
@@ -38,22 +40,22 @@
 #include "vos_utils.h"
 #include "vos_mem.h"
 
-/* Some sample comId definitions	*/
+/* Some sample comId definitions    */
 
-/* Expect receiving:	*/
+/* Expect receiving:    */
 #define PD_COMID1_CYCLE         0
 #define PD_COMID1_TIMEOUT       5000000
 #define PD_COMID1_DATA_SIZE     sizeof(TRDP_STATISTICS_T)
-//#define PD_COMID1_SRC_IP        vos_dottedIP("192.168.2.4")     /*	Sender's IP		*/
-#define PD_COMID1_SRC_IP        vos_dottedIP("10.64.8.203")     /*	Sender's IP		*/
+//#define PD_COMID1_SRC_IP        vos_dottedIP("192.168.2.4")     /*    Sender's IP        */
+#define PD_COMID1_SRC_IP        vos_dottedIP("10.64.8.203")     /*    Sender's IP        */
 
-/* Send as request:	*/
+/* Send as request:    */
 #define PD_COMID2_DATA_SIZE     0
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
-/* We use dynamic memory	*/
+/* We use dynamic memory    */
 #define RESERVED_MEMORY  64000
-#define PREALLOCATE		{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+#define PREALLOCATE        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
 #define APP_VERSION  "0.0.0.3"
 
@@ -119,20 +121,21 @@ void usage (const char *appName)
     printf("Usage of %s\n", appName);
     printf("This tool requests the general statistics from an ED.\n"
            "Arguments are:\n"
-           "  own IP address in dotted decimal\n"
-           "  target IP address in dotted decimal\n"
+           "-o own IP address in dotted decimal\n"
+           "-t target IP address in dotted decimal\n"
+           "-v print version and quit\n"
            );
 }
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]		category		Log category (Error, Warning, Info etc.)
- *  @param[in]		pTime			pointer to NULL-terminated string of time stamp
- *  @param[in]		pFile			pointer to NULL-terminated string of source module
- *  @param[in]		LineNumber		line
- *  @param[in]		pMsgStr         pointer to NULL-terminated string
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]        category        Log category (Error, Warning, Info etc.)
+ *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
+ *  @param[in]        pFile            pointer to NULL-terminated string of source module
+ *  @param[in]        LineNumber        line
+ *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
 void dbgOut (
@@ -156,10 +159,10 @@ void dbgOut (
 /**********************************************************************************************************************/
 /** callback routine for receiving TRDP traffic
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]      pMsg			pointer to header/packet infos
- *  @param[in]      pData			pointer to data block
- *  @param[in]      dataSize		pointer to data size
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]      pMsg            pointer to header/packet infos
+ *  @param[in]      pData            pointer to data block
+ *  @param[in]      dataSize        pointer to data size
  *  @retval         none
  */
 void myPDcallBack (
@@ -169,7 +172,7 @@ void myPDcallBack (
     UINT32                  dataSize)
 {
 
-    /*	Check why we have been called	*/
+    /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
@@ -188,7 +191,7 @@ void myPDcallBack (
             break;
 
         case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept	*/
+            /* The application can decide here if old data shall be invalidated or kept    */
             printf("Packet timed out (ComID %d, SrcIP: %s)\n",
                    pMsg->comId,
                    vos_ipDotted(pMsg->srcIpAddr));
@@ -205,90 +208,110 @@ void myPDcallBack (
 /**********************************************************************************************************************/
 /** main entry
  *
- *  @retval         0		no error
- *  @retval         1		some error
+ *  @retval         0        no error
+ *  @retval         1        some error
  */
 int main (int argc, char * *argv)
 {
-    TRDP_APP_SESSION_T  	appHandle;  /*	Our identifier to the library instance	*/
-    TRDP_SUB_T          	subHandle;  /*	Our identifier to the subscription	*/
-    TRDP_ERR_T          	err;
-    TRDP_PD_CONFIG_T    	pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                        	(TRDP_FLAGS_CALLBACK|TRDP_FLAGS_MARSHALL), 10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, PREALLOCATE};
-    TRDP_PROCESS_CONFIG_T	processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
+    TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
+    TRDP_ERR_T              err;
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
+                                            (TRDP_FLAGS_CALLBACK|TRDP_FLAGS_MARSHALL), 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, RESERVED_MEMORY, PREALLOCATE};
+    TRDP_PROCESS_CONFIG_T    processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
     int                 rv = 0;
     int                 ip[4];
-    UINT32              destIP;
-    UINT32              ownIP;
-    int					count = 0, i;
+    UINT32              destIP = 0;
+    UINT32              ownIP = 0;
+    int                 count = 0, i;
+    int                 ch;
 
-    if (argc <= 2)
+    if (argc <= 1)
     {
         usage(argv[0]);
         return 1;
     }
 
-    if (sscanf(argv[1], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+    while ((ch = getopt(argc, argv, "t:o:h?v")) != -1)
     {
-        usage(argv[0]);
-        exit(1);
-    }
-    else
-    {
-        ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-    }
-
-    if (sscanf(argv[2], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-    {
-        usage(argv[0]);
-        exit(1);
-    }
-    else
-    {
-        destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+        switch (ch)
+        {
+            case 'o':
+            {   /*  read ip    */
+                if (sscanf(optarg, "%u.%u.%u.%u",
+                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
+            case 't':
+            {   /*  read ip    */
+                if (sscanf(optarg, "%u.%u.%u.%u",
+                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
+            case 'v':   /*  version */
+                printf("%s: Version %s\t(%s - %s)\n",
+                       argv[0], APP_VERSION, __DATE__, __TIME__);
+                exit(0);
+                break;
+            case 'h':
+            case '?':
+            default:
+                usage(argv[0]);
+                return 1;
+        }
     }
 
     printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
 
-    /*	Init the library for callback operation	(PD only) */
-    if (tlc_init(dbgOut,                            /* actually printf	*/
-                 &dynamicConfig                    /* Use application supplied memory	*/
+    /*    Init the library for callback operation    (PD only) */
+    if (tlc_init(dbgOut,                            /* actually printf    */
+                 &dynamicConfig                    /* Use application supplied memory    */
                 ) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
     
-    /*	Open a session for callback operation	(PD only) */
+    /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&appHandle,
                  ownIP,
                  0,                                 /* use default IP addresses */
-                 NULL,                              /* no Marshalling	*/
-                 &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
+                 NULL,                              /* no Marshalling    */
+                 &pdConfiguration, NULL,            /* system defaults for PD and MD    */
                  &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
 
-    /*	Subscribe to control PD		*/
+    /*    Subscribe to control PD        */
 
     memset(&gBuffer, 0, sizeof(gBuffer));
 
-    err = tlp_subscribe( appHandle,                 /*	our application identifier			*/
-                         &subHandle,                /*	our subscription identifier			*/
+    err = tlp_subscribe( appHandle,                 /*    our application identifier            */
+                         &subHandle,                /*    our subscription identifier            */
                          NULL,
-                         TRDP_GLOBAL_STATISTICS_COMID,                 /*	ComID								*/
-                         0,                         /*	topocount: local consist only		*/
-                         0,                         /*	Source IP filter					*/
+                         TRDP_GLOBAL_STATISTICS_COMID,                 /*    ComID                                */
+                         0,                         /*    topocount: local consist only        */
+                         0,                         /*    Source IP filter                    */
                          0,
-                         0,                         /*	Default destination	(or MC Group)   */
+                         0,                         /*    Default destination    (or MC Group)   */
                          TRDP_FLAGS_DEFAULT,        /* packet flags */
-                         PD_COMID1_TIMEOUT,         /*	Time out in us						*/
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data	on timeout      */
-                         sizeof(gBuffer));          /*	net data size						*/
+                         PD_COMID1_TIMEOUT,         /*    Time out in us                        */
+                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
+                         sizeof(gBuffer));          /*    net data size                        */
 
     if (err != TRDP_NO_ERR)
     {
@@ -297,7 +320,7 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-    /*	Request statistics PD		*/
+    /*    Request statistics PD        */
 
     err = tlp_request(appHandle, subHandle, TRDP_STATISTICS_REQUEST_COMID, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0, 0, 0);
 
@@ -379,7 +402,7 @@ int main (int argc, char * *argv)
         
         if (count++ > 10)
         {
-        	UINT32  allocatedMemory;
+            UINT32  allocatedMemory;
             UINT32  freeMemory;
             UINT32  minFree;
             UINT32  numAllocBlocks;
@@ -388,15 +411,15 @@ int main (int argc, char * *argv)
             UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES];
             UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];
             vos_memCount(&allocatedMemory, &freeMemory, &minFree, &numAllocBlocks, &numAllocErr, &numFreeErr,
-            				allocBlockSize, usedBlockSize);
+                            allocBlockSize, usedBlockSize);
             printf("Memory usage:\n");
-            printf(" allocatedMemory:	%u\n", allocatedMemory);
-            printf(" freeMemory:		%u\n", freeMemory);
-            printf(" minFree:			%u\n", minFree);
-            printf(" numAllocBlocks:	%u\n", numAllocBlocks);
-            printf(" numAllocErr:		%u\n", numAllocErr);
-            printf(" numFreeErr:		%u\n", numFreeErr);
-            printf(" allocBlockSize:	");
+            printf(" allocatedMemory:    %u\n", allocatedMemory);
+            printf(" freeMemory:        %u\n", freeMemory);
+            printf(" minFree:            %u\n", minFree);
+            printf(" numAllocBlocks:    %u\n", numAllocBlocks);
+            printf(" numAllocErr:        %u\n", numAllocErr);
+            printf(" numFreeErr:        %u\n", numFreeErr);
+            printf(" allocBlockSize:    ");
             for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
             {
                 printf("%08u ", allocBlockSize[i]);
@@ -405,10 +428,10 @@ int main (int argc, char * *argv)
             count = 0;
          }
 
-    }   /*	Bottom of while-loop	*/
+    }   /*    Bottom of while-loop    */
 
     /*
-     *	We always clean up behind us!
+     *    We always clean up behind us!
      */
     tlp_unsubscribe(appHandle, subHandle);
 

@@ -50,7 +50,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\test\xml;..\..\src\api;..\..\src\vos\api;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\test\xml;..\..\src\api;..\..\src\vos\api;;..\..\resources\getopt</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,6 +81,7 @@
     <Library Include="..\Debug\Win32TRDP.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\resources\getopt\getopt.c" />
     <ClCompile Include="..\..\test\xml\trdp-xmlpd-test.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

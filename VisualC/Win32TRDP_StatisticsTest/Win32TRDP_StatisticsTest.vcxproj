@@ -50,7 +50,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\src\vos\api;..\..\src\api;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\vos\api;..\..\src\api;;..\..\resources\getopt</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -75,6 +75,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\resources\getopt\getopt.c" />
     <ClCompile Include="..\..\test\getStats.c" />
   </ItemGroup>
   <ItemGroup>
