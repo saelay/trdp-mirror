@@ -26,8 +26,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef POSIX
 #include <unistd.h>
 #include <sys/select.h>
+#endif
 
 #include "trdp_if_light.h"
 #include "trdp_types.h"
@@ -37,8 +39,6 @@
 #include "vos_mem.h"
 
 /* Some sample comId definitions	*/
-
-#define PD_OWN_IP               0 //vos_dottedIP("192.168.2.2")
 
 /* Expect receiving:	*/
 #define PD_COMID1_CYCLE         0
@@ -114,11 +114,13 @@ void print_stats(
 /* Print a sensible usage message */
 void usage (const char *appName)
 {
+    printf("%s: Version %s\t(%s - %s)\n", appName, APP_VERSION, __DATE__, __TIME__);
+
     printf("Usage of %s\n", appName);
     printf("This tool requests the general statistics from an ED.\n"
            "Arguments are:\n"
-           "-t target IP address in dotted decimal\n"
-           "-v print version and quit\n"
+           "  own IP address in dotted decimal\n"
+           "  target IP address in dotted decimal\n"
            );
 }
 
@@ -212,41 +214,43 @@ int main (int argc, char * *argv)
     TRDP_SUB_T          	subHandle;  /*	Our identifier to the subscription	*/
     TRDP_ERR_T          	err;
     TRDP_PD_CONFIG_T    	pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                        	TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+                                        	(TRDP_FLAGS_CALLBACK|TRDP_FLAGS_MARSHALL), 10000000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, PREALLOCATE};
     TRDP_PROCESS_CONFIG_T	processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
     int                 rv = 0;
-    int                 ch;
     int                 ip[4];
-    UINT32              destIP = PD_COMID2_DST_IP;
+    UINT32              destIP;
+    UINT32              ownIP;
     int					count = 0, i;
 
-    while ((ch = getopt(argc, argv, "t:h?v")) != -1)
+    if (argc <= 2)
     {
-        switch (ch)
-        {
-            case 't':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
-                exit(0);
-                break;
-            case 'h':
-            case '?':
-            default:
-                usage(argv[0]);
-                return 1;
-        }
+        usage(argv[0]);
+        return 1;
     }
+
+    if (sscanf(argv[1], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+    {
+        usage(argv[0]);
+        exit(1);
+    }
+    else
+    {
+        ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+    }
+
+    if (sscanf(argv[2], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+    {
+        usage(argv[0]);
+        exit(1);
+    }
+    else
+    {
+        destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+    }
+
+    printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
 
     /*	Init the library for callback operation	(PD only) */
     if (tlc_init(dbgOut,                            /* actually printf	*/
@@ -259,7 +263,8 @@ int main (int argc, char * *argv)
     
     /*	Open a session for callback operation	(PD only) */
     if (tlc_openSession(&appHandle,
-                 PD_OWN_IP, 0,                      /* use default IP addresses */
+                 ownIP,
+                 0,                                 /* use default IP addresses */
                  NULL,                              /* no Marshalling	*/
                  &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
                  &processConfig) != TRDP_NO_ERR)
@@ -279,7 +284,8 @@ int main (int argc, char * *argv)
                          0,                         /*	topocount: local consist only		*/
                          0,                         /*	Source IP filter					*/
                          0,
-                         PD_OWN_IP,                 /*	Default destination	(or MC Group)   */
+                         0,                         /*	Default destination	(or MC Group)   */
+                         TRDP_FLAGS_DEFAULT,        /* packet flags */
                          PD_COMID1_TIMEOUT,         /*	Time out in us						*/
                          TRDP_TO_SET_TO_ZERO,       /*  delete invalid data	on timeout      */
                          sizeof(gBuffer));          /*	net data size						*/
