@@ -5,20 +5,20 @@
  *  Created by Bernd Löhr on 13.08.12.
  *  Copyright 2012 NewTec GmbH. All rights reserved.
  *
- *	$ID:$
+ *    $ID:$
  */
 
 #include <stdio.h>
 #include <string.h>
 #include "tau_marshall.h"
 
-/*	Test data sets	*/
+/*    Test data sets    */
 TRDP_DATASET_T gDataSet990 =
 {
-    990,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    990,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
             1,
@@ -34,10 +34,10 @@ TRDP_DATASET_T gDataSet990 =
 
 TRDP_DATASET_T gDataSet991 =
 {
-    991,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    991,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
             1,
@@ -53,10 +53,10 @@ TRDP_DATASET_T gDataSet991 =
 
 TRDP_DATASET_T gDataSet992 =
 {
-    992,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    992,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
             1,
@@ -72,10 +72,10 @@ TRDP_DATASET_T gDataSet992 =
 
 TRDP_DATASET_T gDataSet993 =
 {
-    993,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    993,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
             1,
@@ -91,13 +91,13 @@ TRDP_DATASET_T gDataSet993 =
 
 TRDP_DATASET_T gDataSet1000 =
 {
-    1000,        /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    65,         /*	No of elements	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    1000,        /*    dataset/com ID  */
+    0,          /*    reserved        */
+    65,         /*    No of elements    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_BOOLEAN,  /*	data type		*/
-            1,               /*	no of elements	*/
+            TRDP_BOOLEAN,  /*    data type        */
+            1,               /*    no of elements    */
             NULL
         },
         {
@@ -146,7 +146,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_UINT64,	/* 10	*/
+            TRDP_UINT64,    /* 10    */
             1,
             NULL
         },
@@ -171,14 +171,14 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_TIMEDATE64,		/* 15	*/
+            TRDP_TIMEDATE64,        /* 15    */
             1,
             NULL
         },
-        {	/* 16	*/
-            TRDP_BOOLEAN,  /*	data type		*/
+        {    /* 16    */
+            TRDP_BOOLEAN,  /*    data type        */
             4,
-            NULL               /*	no of elements	*/
+            NULL               /*    no of elements    */
         },
         {
             TRDP_CHAR8,
@@ -196,7 +196,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL           
         },
         {
-            TRDP_INT16,	/* 20	*/
+            TRDP_INT16,    /* 20    */
             4,
             NULL
         },
@@ -221,7 +221,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_UINT32,		/* 25	*/
+            TRDP_UINT32,        /* 25    */
             4,
             NULL
         },
@@ -246,7 +246,7 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_TIMEDATE48,	/* 30	*/
+            TRDP_TIMEDATE48,    /* 30    */
             4,
             NULL
         },
@@ -256,13 +256,13 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            TRDP_UINT16,	/* 32	*/
+            TRDP_UINT16,    /* 32    */
             1,
             NULL
         },
         {
-            TRDP_BOOLEAN,  /*	data type		*/
-            0,               /*	no of elements	*/
+            TRDP_BOOLEAN,  /*    data type        */
+            0,               /*    no of elements    */
             NULL
         },
         {
@@ -423,19 +423,19 @@ TRDP_DATASET_T gDataSet1000 =
     }
 };
 
-TRDP_DATASET_T	gDataSet1001 = 
+TRDP_DATASET_T    gDataSet1001 = 
 {
-    1001,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    3,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    1001,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    3,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_TIMEDATE64,	/*	Array	*/
+            TRDP_TIMEDATE64,    /*    Array    */
             4,
             NULL
         },
         {
-            TRDP_UINT16,		/*	Size of variable dataset	*/
+            TRDP_UINT16,        /*    Size of variable dataset    */
             1,
             NULL
         },
@@ -447,8 +447,8 @@ TRDP_DATASET_T	gDataSet1001 =
     }
 };
 
-/*	Will be sorted by tau_initMarshall	*/
-TRDP_DATASET_T*	gDataSets[] =
+/*    Will be sorted by tau_initMarshall    */
+TRDP_DATASET_T*    gDataSets[] =
 {
     &gDataSet1001,
     &gDataSet1000,
@@ -565,13 +565,13 @@ struct myDataSet1000
     0.12345,
     0.12345678,
     0x12345678,
-    {0x12345678, 0x9ABC},			/* 14	*/
+    {0x12345678, 0x9ABC},            /* 14    */
     {0x12345678, 0x9ABCDEF0},
     {1,0,1,0},                      /* BOOL8 array fixed size */
     "Hello old World",
     {0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x0040, 0x0041, 0x0042, 0x0043, 0x0044, 0},
     {0x12, 0x34, 0x55, 0x78},
-    {0x1234, 0x5678, 0x9ABC, 0xDEF0},	/* index == 20	*/
+    {0x1234, 0x5678, 0x9ABC, 0xDEF0},    /* index == 20    */
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     {0x123456789ABCDEF1, 0x123456789ABCDEF2, 0x123456789ABCDEF3, 0x123456789ABCDEF4},
     {0x01, 0x23, 0x45, 0x67},
@@ -583,7 +583,7 @@ struct myDataSet1000
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     {{0x12345671, 0x89A1},{0x12345672, 0x89A2},{0x12345673, 0x89A3},{0x12345674, 0x89A4}},
     {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
-    4,								/* 32	*/
+    4,                                /* 32    */
     {1,0,1,0},                       /* BOOL8 array var size */
     16,
     "Hello old World",
@@ -594,7 +594,7 @@ struct myDataSet1000
     4,
     {0x1234, 0x5678, 0x9ABC, 0xDEF0},
     4,
-    {0x12345671, 0x12345672, 0x12345673, 0x12345674},	/* 43	*/
+    {0x12345671, 0x12345672, 0x12345673, 0x12345674},    /* 43    */
     4,
     {0x123456789ABCDEF1, 0x123456789ABCDEF2, 0x123456789ABCDEF3, 0x123456789ABCDEF4},
     4,
@@ -621,27 +621,27 @@ struct myDataSet1000
 struct myDataSet1001
 {
     TIMEDATE64  timedate64_4[4];
-	UINT16		size;
-	UINT8		array[4];
+    UINT16        size;
+    UINT8        array[4];
 } gMyDataSet1001 =
 {
-	{{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
+    {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
     4,
     {1,0,1,0}                       /* UINT8 array var size */
 };
 
 
-TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
+TRDP_COMID_DSID_MAP_T    gComIdMap[] = {
     {1000, 1000},
     {1001, 1001}
 };
 
-UINT8 					gDstDataBuffer[1500];
-struct myDataSet1000	gMyDataSet1000Copy;
-struct myDataSet1001	gMyDataSet1001Copy;
+UINT8                     gDstDataBuffer[1500];
+struct myDataSet1000    gMyDataSet1000Copy;
+struct myDataSet1001    gMyDataSet1001Copy;
 
 /***********************************************************************************************************************
-	Test marshalling and unmarshalling of test dataset
+    Test marshalling and unmarshalling of test dataset
 ***********************************************************************************************************************/
 int main ()
 {
@@ -652,7 +652,7 @@ int main ()
 
     err = tau_initMarshall((void *)&refCon, 2, gComIdMap, 6, gDataSets);
 
-	if (err != TRDP_NO_ERR)
+    if (err != TRDP_NO_ERR)
     {
         printf("tau_initMarshall returns error %d\n", err);
         return 1;
@@ -663,25 +663,25 @@ int main ()
 
     err = tau_marshall (refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize, NULL);
 
-	if (err != TRDP_NO_ERR)
+    if (err != TRDP_NO_ERR)
     {
         printf("tau_marshall returns error %d\n", err);
         return 1;
     }
 
-	bufSize = sizeof(gMyDataSet1000Copy);
+    bufSize = sizeof(gMyDataSet1000Copy);
     memset(&gMyDataSet1000Copy, 0, bufSize);
 
     err = tau_unmarshall (refCon, 1000, gDstDataBuffer, (UINT8 *) &gMyDataSet1000Copy, &bufSize, NULL);
 
-	if (err != TRDP_NO_ERR)
+    if (err != TRDP_NO_ERR)
     {
         printf("tau_unmarshall returns error %d\n", err);
         return 1;
     }
     
-	if (memcmp(&gMyDataSet1000, &gMyDataSet1000Copy, sizeof(gMyDataSet1000)) != 0)
-	{
+    if (memcmp(&gMyDataSet1000, &gMyDataSet1000Copy, sizeof(gMyDataSet1000)) != 0)
+    {
         printf("Something's wrong in the state of Marshalling!\n");
         return 1;
         
@@ -691,7 +691,7 @@ int main ()
         printf("Marshalling and Unmarshalling data matched!\n");
     }
 
-	/*
+    /*
     printf("ComID: 0x%0X\n", gDataSet1000.id);
     printf("  INT8 0x%02hhx,  INT16 0x%04hx,  INT32 0x%04x,  INT64 0x%08llx\n",
            gMyDataSet1000.int8_1,
@@ -720,7 +720,7 @@ int main ()
                gDstDataBuffer[index * 8 + 7]
                );
     }
-	*/
+    */
 
     return 0;
 }

@@ -4,7 +4,7 @@
  *
  * @brief           Test application for TRDP statistics
  *
- * @details			Send PD Pull request for statistics and display them by unmarshalling them
+ * @details            Send PD Pull request for statistics and display them by unmarshalling them
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -36,26 +36,26 @@
 #include "vos_sock.h"
 #include "vos_utils.h"
 
-/* Some sample comId definitions	*/
+/* Some sample comId definitions    */
 
 #define PD_OWN_IP               0 //vos_dottedIP("192.168.2.2")
 
-/* Expect receiving:	*/
+/* Expect receiving:    */
 #define PD_COMID1               12
 #define PD_COMID1_CYCLE         0
 #define PD_COMID1_TIMEOUT       5000000
 #define PD_COMID1_DATA_SIZE     sizeof(TRDP_STATISTICS_T)
-//#define PD_COMID1_SRC_IP        vos_dottedIP("192.168.2.4")     /*	Sender's IP		*/
-#define PD_COMID1_SRC_IP        vos_dottedIP("10.64.8.203")     /*	Sender's IP		*/
+//#define PD_COMID1_SRC_IP        vos_dottedIP("192.168.2.4")     /*    Sender's IP        */
+#define PD_COMID1_SRC_IP        vos_dottedIP("10.64.8.203")     /*    Sender's IP        */
 
-/* Send as request:	*/
+/* Send as request:    */
 #define PD_COMID2               11
 #define PD_COMID2_DATA_SIZE     0
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
-/* We use dynamic memory	*/
+/* We use dynamic memory    */
 #define RESERVED_MEMORY  64000
-#define PREALLOCATE		{0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+#define PREALLOCATE        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
 #define APP_VERSION  "0.0.0.3"
 
@@ -67,19 +67,19 @@ BOOL                gKeepOnRunning = TRUE;
  *  Dataset definitions
  */
 #if 0
-#define	TRDP_STATS_DS_ID		111
-#define	TRDP_MEM_STATS_DS_ID	TRDP_STATS_DS_ID + 1
-#define	TRDP_PD_STATS_DS_ID		TRDP_MEM_STATS_DS_ID + 1
-#define	TRDP_MD_STATS_DS_ID		TRDP_PD_STATS_DS_ID + 1
+#define    TRDP_STATS_DS_ID        111
+#define    TRDP_MEM_STATS_DS_ID    TRDP_STATS_DS_ID + 1
+#define    TRDP_PD_STATS_DS_ID        TRDP_MEM_STATS_DS_ID + 1
+#define    TRDP_MD_STATS_DS_ID        TRDP_PD_STATS_DS_ID + 1
 
-/*	Statistics data set	*/
+/*    Statistics data set    */
 
 TRDP_DATASET_T gMemStatisticsDS =
 {
-    TRDP_MEM_STATS_DS_ID,		/*	dataset/com ID  */
-    0,          				/*	reserved		*/
-    3,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_MEM_STATS_DS_ID,        /*    dataset/com ID  */
+    0,                          /*    reserved        */
+    3,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT32,
             6,
@@ -95,43 +95,43 @@ TRDP_DATASET_T gMemStatisticsDS =
             15,
             NULL
         }
-	}
+    }
 };
 
 TRDP_DATASET_T gPDStatisticsDS =
 {
-    TRDP_PD_STATS_DS_ID,		/*	dataset/com ID  */
-    0,          				/*	reserved		*/
-    1,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_PD_STATS_DS_ID,        /*    dataset/com ID  */
+    0,                          /*    reserved        */
+    1,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT32,
             13,
             NULL
         }
-	}
+    }
 };
 
 TRDP_DATASET_T gMDStatisticsDS =
 {
-    TRDP_MD_STATS_DS_ID,		/*	dataset/com ID  */
-    0,          				/*	reserved		*/
-    1,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_MD_STATS_DS_ID,        /*    dataset/com ID  */
+    0,                          /*    reserved        */
+    1,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT32,
             13,
             NULL
         }
-	}
+    }
 };
 
 TRDP_DATASET_T gStatisticsDS =
 {
-    TRDP_STATS_DS_ID,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    8,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_STATS_DS_ID,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    8,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT32,
             1,
@@ -175,8 +175,8 @@ TRDP_DATASET_T gStatisticsDS =
     }
 };
 
-/*	Will be sorted by tau_initMarshall	*/
-TRDP_DATASET_T*	gDataSets[] =
+/*    Will be sorted by tau_initMarshall    */
+TRDP_DATASET_T*    gDataSets[] =
 {
     &gStatisticsDS,
     &gMemStatisticsDS,
@@ -188,7 +188,7 @@ TRDP_DATASET_T*	gDataSets[] =
 
 #include "trdp_reserved.h"
 
-extern TRDP_COMID_DSID_MAP_T	gComIdMap[];
+extern TRDP_COMID_DSID_MAP_T    gComIdMap[];
 extern TRDP_DATASET_T           *gDataSets[];
 extern const UINT32             cNoOfDatasets;
 
@@ -257,12 +257,12 @@ void usage (const char *appName)
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]		category		Log category (Error, Warning, Info etc.)
- *  @param[in]		pTime			pointer to NULL-terminated string of time stamp
- *  @param[in]		pFile			pointer to NULL-terminated string of source module
- *  @param[in]		LineNumber		line
- *  @param[in]		pMsgStr         pointer to NULL-terminated string
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]        category        Log category (Error, Warning, Info etc.)
+ *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
+ *  @param[in]        pFile            pointer to NULL-terminated string of source module
+ *  @param[in]        LineNumber        line
+ *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
 void dbgOut (
@@ -286,10 +286,10 @@ void dbgOut (
 /**********************************************************************************************************************/
 /** callback routine for receiving TRDP traffic
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]      pMsg			pointer to header/packet infos
- *  @param[in]      pData			pointer to data block
- *  @param[in]      dataSize		pointer to data size
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]      pMsg            pointer to header/packet infos
+ *  @param[in]      pData            pointer to data block
+ *  @param[in]      dataSize        pointer to data size
  *  @retval         none
  */
 void myPDcallBack (
@@ -299,7 +299,7 @@ void myPDcallBack (
     UINT32                  dataSize)
 {
 
-    /*	Check why we have been called	*/
+    /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
@@ -308,7 +308,7 @@ void myPDcallBack (
             {
                 if (pMsg->comId == 12)
                 {
-            		tau_unmarshall(NULL, pMsg->comId, pData, (UINT8*) &gBuffer, &dataSize, NULL);
+                    tau_unmarshall(NULL, pMsg->comId, pData, (UINT8*) &gBuffer, &dataSize, NULL);
                     print_stats(&gBuffer);
                     gKeepOnRunning = FALSE;
                 }
@@ -316,7 +316,7 @@ void myPDcallBack (
             break;
 
         case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept	*/
+            /* The application can decide here if old data shall be invalidated or kept    */
             printf("Packet timed out (ComID %d, SrcIP: %s)\n",
                    pMsg->comId,
                    vos_ipDotted(pMsg->srcIpAddr));
@@ -333,25 +333,25 @@ void myPDcallBack (
 /**********************************************************************************************************************/
 /** main entry
  *
- *  @retval         0		no error
- *  @retval         1		some error
+ *  @retval         0        no error
+ *  @retval         1        some error
  */
 int main (int argc, char * *argv)
 {
-    TRDP_APP_SESSION_T  	appHandle;  /*	Our identifier to the library instance	*/
-    TRDP_SUB_T          	subHandle;  /*	Our identifier to the subscription	*/
-    TRDP_ERR_T          	err;
-    TRDP_PD_CONFIG_T    	pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                        	TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, {}};
-    TRDP_PROCESS_CONFIG_T	processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-    TRDP_MARSHALL_CONFIG_T	marshall = {NULL, tau_unmarshall, 0};
+    TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
+    TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
+    TRDP_ERR_T              err;
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
+                                            TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_PROCESS_CONFIG_T    processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_MARSHALL_CONFIG_T    marshall = {NULL, tau_unmarshall, 0};
 
     int                 rv = 0;
     int                 ch;
     int                 ip[4];
     UINT32              destIP = PD_COMID2_DST_IP;
-    UINT32      		*refCon;
+    UINT32              *refCon;
 
     if (argc <= 1)
     {
@@ -385,48 +385,48 @@ int main (int argc, char * *argv)
         }
     }
 
-    /*	Init the library for callback operation	(PD only) */
-    if (tlc_init(dbgOut,                            /* actually printf	*/
-                 &dynamicConfig                    /* Use application supplied memory	*/
+    /*    Init the library for callback operation    (PD only) */
+    if (tlc_init(dbgOut,                            /* actually printf    */
+                 &dynamicConfig                    /* Use application supplied memory    */
                 ) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
 
-	if (tau_initMarshall((void *)&refCon, 1, gComIdMap, cNoOfDatasets, gDataSets) != TRDP_NO_ERR)
+    if (tau_initMarshall((void *)&refCon, 1, gComIdMap, cNoOfDatasets, gDataSets) != TRDP_NO_ERR)
     {
         printf("Marshalling initialization error\n");
         return 1;
     }
     
-    /*	Open a session for callback operation	(PD only) */
+    /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&appHandle,
                  PD_OWN_IP, 0,                      /* use default IP addresses */
-                 &marshall,                         /* marshalling	*/
-                 &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
+                 &marshall,                         /* marshalling    */
+                 &pdConfiguration, NULL,            /* system defaults for PD and MD    */
                  &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
 
-    /*	Subscribe to control PD		*/
+    /*    Subscribe to control PD        */
 
     memset(&gBuffer, 0, sizeof(gBuffer));
 
-    err = tlp_subscribe( appHandle,                 /*	our application identifier			*/
-                         &subHandle,                /*	our subscription identifier			*/
+    err = tlp_subscribe( appHandle,                 /*    our application identifier            */
+                         &subHandle,                /*    our subscription identifier            */
                          NULL,
-                         PD_COMID1,                 /*	ComID								*/
-                         0,                         /*	topocount: local consist only		*/
-                         0,                         /*	Source IP filter					*/
+                         PD_COMID1,                 /*    ComID                                */
+                         0,                         /*    topocount: local consist only        */
+                         0,                         /*    Source IP filter                    */
                          0,
-                         0xEF000000,/*PD_OWN_IP, */  /*	Default destination	(or MC Group)   */
+                         0xEF000000,/*PD_OWN_IP, */  /*    Default destination    (or MC Group)   */
                          TRDP_FLAGS_DEFAULT,
-                         PD_COMID1_TIMEOUT,         /*	Time out in us						*/
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data	on timeout      */
-                         sizeof(gBuffer));          /*	net data size						*/
+                         PD_COMID1_TIMEOUT,         /*    Time out in us                        */
+                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
+                         sizeof(gBuffer));          /*    net data size                        */
     
     if (err != TRDP_NO_ERR)
     {
@@ -435,7 +435,7 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-    /*	Request statistics PD		*/
+    /*    Request statistics PD        */
 
     err = tlp_request(appHandle, subHandle, PD_COMID2, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, 12, 0xEF000000, 0, 0);
 
@@ -515,10 +515,10 @@ int main (int argc, char * *argv)
             fflush(stdout);
         }
 
-    }   /*	Bottom of while-loop	*/
+    }   /*    Bottom of while-loop    */
 
     /*
-     *	We always clean up behind us!
+     *    We always clean up behind us!
      */
     tlp_unsubscribe(appHandle, subHandle);
 

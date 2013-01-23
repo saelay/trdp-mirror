@@ -23,9 +23,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef POSIX
+#if defined (POSIX)
 #include <unistd.h>
 #include <sys/select.h>
+#elif defined (WIN32)
+#include "getopt.h"
 #endif
 #include "trdp_if_light.h"
 #include "vos_thread.h"
@@ -37,43 +39,43 @@
 
 #define DATA_MAX        1000
 
-#define PD_COMID1      	1001
-#define PD_COMID_CYCLE1	1000000             /* in us (1000000 = 1 sec) */
-#define PD_SIZE1		1000
-#define PD_COMID2      	1002
-#define PD_COMID_CYCLE2	100000              /* in us (100000 = 0.1 sec) */
-#define PD_SIZE2		1000
-#define PD_COMID3      	1003
-#define PD_COMID_CYCLE3	20000               /* in us (20000 = 0.02 sec) */
-#define PD_SIZE3		1000
-#define PD_COMID4      	1004
-#define PD_COMID_CYCLE4	50000                /* in us (50000 = 0.05 sec) */
-#define PD_SIZE4		1000
-#define PD_COMID5      	1005
-#define PD_COMID_CYCLE5	20000               /* in us (20000 = 0.02 sec) */
-#define PD_SIZE5		1000
-#define PD_COMID6      	1006
-#define PD_COMID_CYCLE6	10000000             /* in us (10000000 = 10 sec) */
-#define PD_SIZE6		1000
-#define PD_COMID7      	1007
-#define PD_COMID_CYCLE7	5000000             /* in us (5000000 = 5 sec) */
-#define PD_SIZE7		1000
-#define PD_COMID8      	1008
-#define PD_COMID_CYCLE8	1000000             /* in us (1000000 = 1 sec) */
-#define PD_SIZE8		1000
+#define PD_COMID1          1001
+#define PD_COMID_CYCLE1    1000000             /* in us (1000000 = 1 sec) */
+#define PD_SIZE1        1000
+#define PD_COMID2          1002
+#define PD_COMID_CYCLE2    100000              /* in us (100000 = 0.1 sec) */
+#define PD_SIZE2        1000
+#define PD_COMID3          1003
+#define PD_COMID_CYCLE3    20000               /* in us (20000 = 0.02 sec) */
+#define PD_SIZE3        1000
+#define PD_COMID4          1004
+#define PD_COMID_CYCLE4    50000                /* in us (50000 = 0.05 sec) */
+#define PD_SIZE4        1000
+#define PD_COMID5          1005
+#define PD_COMID_CYCLE5    20000               /* in us (20000 = 0.02 sec) */
+#define PD_SIZE5        1000
+#define PD_COMID6          1006
+#define PD_COMID_CYCLE6    10000000             /* in us (10000000 = 10 sec) */
+#define PD_SIZE6        1000
+#define PD_COMID7          1007
+#define PD_COMID_CYCLE7    5000000             /* in us (5000000 = 5 sec) */
+#define PD_SIZE7        1000
+#define PD_COMID8          1008
+#define PD_COMID_CYCLE8    1000000             /* in us (1000000 = 1 sec) */
+#define PD_SIZE8        1000
 
-/* We use dynamic memory	*/
-#define RESERVED_MEMORY  100000
+/* We use dynamic memory    */
+#define RESERVED_MEMORY  200000
 
 
 typedef struct testData {
-    UINT32	comID;
+    UINT32    comID;
     UINT32  cycle;
-    UINT32	size;
+    UINT32    size;
 } TESTDATA_T;
 
-#define NoOfPackets		8
-TESTDATA_T	gPD[NoOfPackets] = 
+#define NoOfPackets        8
+TESTDATA_T    gPD[NoOfPackets] = 
 {
     1001, 1000000, 1000,
     1002, 100000, 1000,
@@ -92,20 +94,22 @@ void usage (const char *appName)
     printf("Usage of %s\n", appName);
     printf("This tool sends PD messages to an ED.\n"
            "Arguments are:\n"
-           "  own IP address in dotted decimal\n"
-           "  target IP address in dotted decimal\n"
+           "-o own IP address in dotted decimal\n"
+           "-t target IP address in dotted decimal\n"
+           "-v print version and quit\n"
            );
 }
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]		category		Log category (Error, Warning, Info etc.)
- *  @param[in]		pTime			pointer to NULL-terminated string of time stamp
- *  @param[in]		pFile			pointer to NULL-terminated string of source module
- *  @param[in]		LineNumber		line
- *  @param[in]		pMsgStr         pointer to NULL-terminated string
+ *  @param[in]      pRefCon         user supplied context pointer
+ *  @param[in]      category        Log category (Error, Warning, Info etc.)
+ *  @param[in]      pTime           pointer to NULL-terminated string of time stamp
+ *  @param[in]      pFile           pointer to NULL-terminated string of source module
+ *  @param[in]      LineNumber      line
+ *  @param[in]      pMsgStr         pointer to NULL-terminated string
+ *
  *  @retval         none
  */
 void dbgOut (
@@ -134,14 +138,14 @@ void dbgOut (
 /**********************************************************************************************************************/
 /** main entry
  *
- *  @retval         0		no error
- *  @retval         1		some error
+ *  @retval         0        no error
+ *  @retval         1        some error
  */
 int main (int argc, char *argv[])
 {
     int                 ip[4];
-    TRDP_APP_SESSION_T  appHandle;  /*	Our identifier to the library instance	*/
-    TRDP_PUB_T          pubHandle;  /*	Our identifier to the publication	*/
+    TRDP_APP_SESSION_T  appHandle;  /*    Our identifier to the library instance    */
+    TRDP_PUB_T          pubHandle;  /*    Our identifier to the publication    */
     TRDP_ERR_T          err;
     TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {0}};
@@ -151,38 +155,57 @@ int main (int argc, char *argv[])
     UINT32              destIP = 0;
     UINT32              ownIP = 0;
 
-    /*	Generate some data, that we want to send, when nothing was specified. */
+    /*    Generate some data, that we want to send, when nothing was specified. */
     UINT8               *outputBuffer;
     UINT8               exampleData[DATA_MAX]   = "Hello World";
     int                 i;
+    int                 ch;
     
     outputBuffer = exampleData;
     
-    if (argc <= 2)
+    if (argc <= 1)
     {
         usage(argv[0]);
         return 1;
     }
 
-
-    if (sscanf(argv[1], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+    while ((ch = getopt(argc, argv, "t:o:h?v")) != -1)
     {
-        usage(argv[0]);
-        exit(1);
-    }
-    else
-    {
-        ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-    }
-
-    if (sscanf(argv[2], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-    {
-        usage(argv[0]);
-        exit(1);
-    }
-    else
-    {
-        destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+        switch (ch)
+        {
+            case 'o':
+            {   /*  read ip    */
+                if (sscanf(optarg, "%u.%u.%u.%u",
+                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
+            case 't':
+            {   /*  read ip    */
+                if (sscanf(optarg, "%u.%u.%u.%u",
+                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
+            case 'v':   /*  version */
+                printf("%s: Version %s\t(%s - %s)\n",
+                       argv[0], APP_VERSION, __DATE__, __TIME__);
+                exit(0);
+                break;
+            case 'h':
+            case '?':
+            default:
+                usage(argv[0]);
+                return 1;
+        }
     }
 
     if (destIP == 0)
@@ -194,46 +217,46 @@ int main (int argc, char *argv[])
     
     printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
 
-    /*	Init the library  */
-    if (tlc_init(dbgOut,                              /* no logging	*/
-                 &dynamicConfig) != TRDP_NO_ERR)    /* Use application supplied memory	*/
+    /*    Init the library  */
+    if (tlc_init(dbgOut,                          /* no logging    */
+                 &dynamicConfig) != TRDP_NO_ERR)  /* Use application supplied memory    */
         
     {
         printf("Initialization error\n");
         return 1;
     }
     
-    /*	Open a session  */
+    /*    Open a session  */
     if (tlc_openSession(&appHandle,
                         ownIP,
                         0,                         /* use default IP address */
-                        NULL,                      /* no Marshalling	*/
-                        &pdConfiguration, NULL,    /* system defaults for PD and MD	*/
+                        NULL,                      /* no Marshalling    */
+                        &pdConfiguration, NULL,    /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
 
-	for (i = 0; i < NoOfPackets; i++)
+    for (i = 0; i < NoOfPackets; i++)
     {    
         
-        /*	Copy the packet into the internal send queue, prepare for sending.	*/
-        /*	If we change the data, just re-publish it	*/
-        err = tlp_publish(  appHandle,                  /*	our application identifier	*/
-                          &pubHandle,                 /*	our pulication identifier	*/
+        /*    Copy the packet into the internal send queue, prepare for sending.    */
+        /*    If we change the data, just re-publish it    */
+        err = tlp_publish(  appHandle,                /*    our application identifier    */
+                          &pubHandle,                 /*    our pulication identifier    */
                           gPD[i].comID,
-                          0,                          /*	local consist only			*/
-                          0,                          /*	default source IP			*/
-                          destIP,                     /*	where to send to			*/
-                          gPD[i].cycle,             /*	Cycle time in us			*/
-                          0,                          /*	not redundant				*/
-                          TRDP_FLAGS_NONE,            /*	Use callback for errors		*/
-                          NULL,                       /*	default qos and ttl			*/
-                          (UINT8 *)outputBuffer,      /*	initial data                */
-                          gPD[i].size,           			/*	data size					*/
-                          FALSE,                      /*	no ladder					*/
-                          0);                         /*	no ladder					*/
+                          0,                          /*    local consist only            */
+                          0,                          /*    default source IP            */
+                          destIP,                     /*    where to send to            */
+                          gPD[i].cycle,               /*    Cycle time in us            */
+                          0,                          /*    not redundant                */
+                          TRDP_FLAGS_NONE,            /*    Use callback for errors        */
+                          NULL,                       /*    default qos and ttl            */
+                          (UINT8 *)outputBuffer,      /*    initial data                */
+                          gPD[i].size,                /*    data size                    */
+                          FALSE,                      /*    no ladder                    */
+                          0);                         /*    no ladder                    */
         
         
         if (err != TRDP_NO_ERR)
@@ -304,7 +327,7 @@ int main (int argc, char *argv[])
         else
         {
             //printf(".");
-			//fflush(stdout);
+            //fflush(stdout);
         }
         
         /* sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
@@ -315,11 +338,11 @@ int main (int argc, char *argv[])
             printf("put pd error\n");
             rv = 1;
             break;
-        }	*/
+        }    */
     }
     
     /*
-     *	We always clean up behind us!
+     *    We always clean up behind us!
      */
     tlp_unpublish(appHandle, pubHandle);
     
