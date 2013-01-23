@@ -23,8 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/select.h>
+
+//#include <unistd.h>
+//#include <sys/select.h>
 
 #include "trdp_if_light.h"
 #include "vos_thread.h"
@@ -87,11 +88,17 @@ TESTDATA_T	gPD[NoOfPackets] =
 /* Print a sensible usage message */
 void usage (const char *appName)
 {
+    printf("%s: Version %s\t(%s - %s)\n", appName[0], APP_VERSION, __DATE__, __TIME__);
+
     printf("Usage of %s\n", appName);
     printf("This tool sends PD messages to an ED.\n"
            "Arguments are:\n"
+#ifdef POSIX
            "-t target IP address\n"
            "-v print version and quit\n"
+#else
+           "target IP address\n"
+#endif
            );
 }
 
@@ -142,7 +149,7 @@ int main (int argc, char *argv[])
     TRDP_PUB_T          pubHandle;  /*	Our identifier to the publication	*/
     TRDP_ERR_T          err;
     TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
-    TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+    TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK | TRDP_OPTION_TRAFFIC_SHAPING};
     
     int                 rv = 0;
@@ -153,6 +160,7 @@ int main (int argc, char *argv[])
     UINT8               exampleData[DATA_MAX]   = "Hello World";
     
     int                 ch;
+    int                 i;
     
     outputBuffer = exampleData;
     
@@ -161,7 +169,8 @@ int main (int argc, char *argv[])
         usage(argv[0]);
         return 1;
     }
-    
+
+#ifdef POSIX
     while ((ch = getopt(argc, argv, "t:h?v")) != -1)
     {
         switch (ch)
@@ -189,7 +198,18 @@ int main (int argc, char *argv[])
                 return 1;
         }
     }
-    
+#else
+    if (sscanf(argv[1], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+    {
+        usage(argv[0]);
+        exit(1);
+    }
+    else
+    {
+        destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+    }
+#endif
+
     if (destIP == 0)
     {
         fprintf(stderr, "No destination address given!\n");
@@ -197,6 +217,8 @@ int main (int argc, char *argv[])
         return 1;
     }
     
+    printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
+
     /*	Init the library  */
     if (tlc_init(dbgOut,                              /* no logging	*/
                  &dynamicConfig) != TRDP_NO_ERR)    /* Use application supplied memory	*/
@@ -217,7 +239,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-	for (int i = 0; i < NoOfPackets; i++)
+	for (i = 0; i < NoOfPackets; i++)
     {    
         
         /*	Copy the packet into the internal send queue, prepare for sending.	*/
