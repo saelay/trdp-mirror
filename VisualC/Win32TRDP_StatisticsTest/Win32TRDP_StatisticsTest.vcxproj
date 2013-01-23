@@ -76,7 +76,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\resources\getopt\getopt.c" />
-    <ClCompile Include="..\..\test\getStats.c" />
+    <ClCompile Include="..\..\test\getStatsMarshall.c" />
+    <ClCompile Include="..\..\test\trdp_reserved.c" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\Debug\Win32TRDP.lib" />
