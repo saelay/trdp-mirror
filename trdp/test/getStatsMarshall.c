@@ -353,6 +353,12 @@ int main (int argc, char * *argv)
     UINT32              destIP = PD_COMID2_DST_IP;
     UINT32      		*refCon;
 
+    if (argc <= 1)
+    {
+        usage(argv[0]);
+        return 1;
+    }
+
     while ((ch = getopt(argc, argv, "t:h?v")) != -1)
     {
         switch (ch)

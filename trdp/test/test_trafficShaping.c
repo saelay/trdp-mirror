@@ -23,10 +23,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-//#include <unistd.h>
-//#include <sys/select.h>
-
+#ifdef POSIX
+#include <unistd.h>
+#include <sys/select.h>
+#endif
 #include "trdp_if_light.h"
 #include "vos_thread.h"
 
@@ -88,17 +88,12 @@ TESTDATA_T	gPD[NoOfPackets] =
 /* Print a sensible usage message */
 void usage (const char *appName)
 {
-    printf("%s: Version %s\t(%s - %s)\n", appName[0], APP_VERSION, __DATE__, __TIME__);
-
+    printf("%s: Version %s\t(%s - %s)\n", appName, APP_VERSION, __DATE__, __TIME__);
     printf("Usage of %s\n", appName);
     printf("This tool sends PD messages to an ED.\n"
            "Arguments are:\n"
-#ifdef POSIX
-           "-t target IP address\n"
-           "-v print version and quit\n"
-#else
-           "target IP address\n"
-#endif
+           "  own IP address in dotted decimal\n"
+           "  target IP address in dotted decimal\n"
            );
 }
 
@@ -154,52 +149,33 @@ int main (int argc, char *argv[])
     
     int                 rv = 0;
     UINT32              destIP = 0;
-    
+    UINT32              ownIP = 0;
+
     /*	Generate some data, that we want to send, when nothing was specified. */
     UINT8               *outputBuffer;
     UINT8               exampleData[DATA_MAX]   = "Hello World";
-    
-    int                 ch;
     int                 i;
     
     outputBuffer = exampleData;
     
-    if (argc <= 1)
+    if (argc <= 2)
     {
         usage(argv[0]);
         return 1;
     }
 
-#ifdef POSIX
-    while ((ch = getopt(argc, argv, "t:h?v")) != -1)
-    {
-        switch (ch)
-        {
-            case 't':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n",
-                       argv[0], APP_VERSION, __DATE__, __TIME__);
-                exit(0);
-                break;
-            case 'h':
-            case '?':
-            default:
-                usage(argv[0]);
-                return 1;
-        }
-    }
-#else
+
     if (sscanf(argv[1], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+    {
+        usage(argv[0]);
+        exit(1);
+    }
+    else
+    {
+        ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+    }
+
+    if (sscanf(argv[2], "%u.%u.%u.%u",  &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
     {
         usage(argv[0]);
         exit(1);
@@ -208,7 +184,6 @@ int main (int argc, char *argv[])
     {
         destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
     }
-#endif
 
     if (destIP == 0)
     {
@@ -230,7 +205,8 @@ int main (int argc, char *argv[])
     
     /*	Open a session  */
     if (tlc_openSession(&appHandle,
-                        0, 0,                      /* use default IP address */
+                        ownIP,
+                        0,                         /* use default IP address */
                         NULL,                      /* no Marshalling	*/
                         &pdConfiguration, NULL,    /* system defaults for PD and MD	*/
                         &processConfig) != TRDP_NO_ERR)
