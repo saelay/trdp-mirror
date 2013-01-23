@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_XMLPrintTest", "W
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_MarshallTest", "Win32TRDP_MarshallTest\Win32TRDP_MarshallTest.vcxproj", "{56100B24-1CD7-4767-8972-83CB14931DB6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_TrafficShapingTest", "Win32TRDP_TrafficShapingTest\Win32TRDP_TrafficShapingTest.vcxproj", "{4023DD57-7FE6-4DE8-8A2A-030D2DEAAA55}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,6 +45,10 @@ Global
 		{56100B24-1CD7-4767-8972-83CB14931DB6}.Debug|Win32.Build.0 = Debug|Win32
 		{56100B24-1CD7-4767-8972-83CB14931DB6}.Release|Win32.ActiveCfg = Release|Win32
 		{56100B24-1CD7-4767-8972-83CB14931DB6}.Release|Win32.Build.0 = Release|Win32
+		{4023DD57-7FE6-4DE8-8A2A-030D2DEAAA55}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4023DD57-7FE6-4DE8-8A2A-030D2DEAAA55}.Debug|Win32.Build.0 = Debug|Win32
+		{4023DD57-7FE6-4DE8-8A2A-030D2DEAAA55}.Release|Win32.ActiveCfg = Release|Win32
+		{4023DD57-7FE6-4DE8-8A2A-030D2DEAAA55}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
