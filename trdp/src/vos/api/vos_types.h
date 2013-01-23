@@ -36,6 +36,8 @@ extern "C" {
 
 #if defined(WIN32)
 
+#include <wchar.h>
+
 typedef unsigned char UINT8;
 typedef unsigned short UINT16;
 typedef unsigned int UINT32;
