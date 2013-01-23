@@ -178,14 +178,14 @@ TRDP_ERR_T trdp_pdGet (
     /*  Update some statistics  */
     pPacket->getPkts++;
 
-    if (pPacket->privFlags & TRDP_TIMED_OUT)
-    {
-        return TRDP_TIMEOUT_ERR;
-    }
-
     if (pPacket->privFlags & TRDP_INVALID_DATA)
     {
         return TRDP_NODATA_ERR;
+    }
+
+    if (pPacket->privFlags & TRDP_TIMED_OUT)
+    {
+        return TRDP_TIMEOUT_ERR;
     }
 
     if ( !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
