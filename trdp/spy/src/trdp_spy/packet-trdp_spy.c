@@ -963,15 +963,15 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         {
             col_set_str(pinfo->cinfo, COL_INFO, "PD Data");
         }
-		else if ((!strcmp(trdp_spy_string,"Mn")))
+        else if ((!strcmp(trdp_spy_string,"Mn")))
         {
             col_set_str(pinfo->cinfo, COL_INFO, "MD Notificatoin");
         }
-		else if ((!strcmp(trdp_spy_string,"Mr")))
+        else if ((!strcmp(trdp_spy_string,"Mr")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply");
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Request with reply");
         }
-		else if ((!strcmp(trdp_spy_string,"Mp")))
+        else if ((!strcmp(trdp_spy_string,"Mp")))
         {
             col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (without notification)");
         }
