@@ -666,7 +666,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
             return VOS_BLOCK_ERR;
         }
     }
-    while (sendSize == SOCKET_ERROR && err != WSAEINTR);
+    while (sendSize == SOCKET_ERROR && err == WSAEINTR);
 
     if (sendSize == SOCKET_ERROR)
     {
