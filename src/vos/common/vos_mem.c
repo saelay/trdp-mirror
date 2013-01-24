@@ -631,3 +631,51 @@ EXT_DECL void *vos_bsearch (
 {
     return bsearch(pKey, pBuf, num, size, compare);
 }
+
+
+/**********************************************************************************************************************/
+/** Case insensitive string compare.
+ *
+ *  @param[in]      pStr1         Null terminated string to compare
+ *  @param[in]      pStr1         Null terminated string to compare
+ *  @param[in]      count         Maximum number of characters to compare 
+ *
+ *  @retval         0  - equal 
+ *  @retval         <0 - string1 less than string 2
+ *  @retval         >0 - string 1 greater than string 2
+ */
+
+EXT_DECL INT32 vos_strnicmp ( 
+    const CHAR8 *pStr1,
+    const CHAR8 *pStr2,
+    UINT32       count )
+{
+#ifdef WIN32
+    return (INT32) _strnicmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
+#else
+    return (INT32) strnicmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
+#endif
+}
+
+
+/**********************************************************************************************************************/
+/** String copy with length limitation.
+ *
+ *  @param[in]      pStrDst       Destination string
+ *  @param[in]      pStrSrc       Null terminated string to copy
+ *  @param[in]      count         Maximum number of characters to copy 
+ *
+ *  @retval         none
+ */
+
+EXT_DECL void vos_strncpy ( 
+    CHAR8       *pStrDst,
+    const CHAR8 *pStrSrc,
+    UINT32       count )
+{
+#ifdef WIN32
+    strncpy_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc, (size_t) count);
+#else
+    strncpy((char *)pStrDst, (size_t) count, (const char *)pStrSrc, (size_t) count);
+#endif
+}

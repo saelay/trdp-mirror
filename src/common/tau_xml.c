@@ -185,7 +185,7 @@ static void parseLABEL(xmlNodePtr pXmlElem, const char * pAttrName, TRDP_LABEL_T
     /*  Copy the value of the attribute */
     if (pAttr)
     {
-        strncpy(label, (const char *)pAttr, sizeof(TRDP_LABEL_T));
+        vos_strncpy(label, (const char *)pAttr, sizeof(TRDP_LABEL_T));
         xmlFree(pAttr);
     }
 }
@@ -341,9 +341,9 @@ static void parseURI(xmlNodePtr pXmlElem, const char * pAttrName, TRDP_URI_USER_
     {
         *ppUriHost = (TRDP_URI_HOST_T *) malloc(sizeof(TRDP_URI_HOST_T));
         if (pDelimiter)
-            strncpy((char *)*ppUriHost, pDelimiter+1, sizeof(TRDP_URI_HOST_T));
+            vos_strncpy((char *)*ppUriHost, pDelimiter+1, sizeof(TRDP_URI_HOST_T));
         else
-            strncpy((char *)*ppUriHost, pAttr, sizeof(TRDP_URI_HOST_T));
+            vos_strncpy((char *)*ppUriHost, pAttr, sizeof(TRDP_URI_HOST_T));
     }
     /*  Create user part of the URI */
     if (ppUriUser && pDelimiter && (pDelimiter > pAttr))
@@ -655,7 +655,7 @@ static void parseDebugConfiguration(
     pAttr = xmlGetProp(pDbgCfgElem, BAD_CAST "file-name");
     if (pAttr)
     {
-        strncpy(pDbgConfig->fileName, (const char *)pAttr, sizeof(TRDP_FILE_NAME_T));
+        vos_strncpy(pDbgConfig->fileName, (const char *)pAttr, sizeof(TRDP_FILE_NAME_T));
         xmlFree(pAttr);
     }
     /*  Debug printout level    */
