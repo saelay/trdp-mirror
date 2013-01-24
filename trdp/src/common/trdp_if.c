@@ -876,6 +876,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 /*    Get a socket    */
                 ret = trdp_requestSocket(
                         appHandle->iface,
+                        appHandle->pdDefault.port,
                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
                         (srcIpAddr == 0) ? appHandle->realIP : srcIpAddr,
                         TRDP_SOCK_PD,
@@ -1492,6 +1493,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                     {
                         /*    Get a socket    */
                         ret = trdp_requestSocket(appHandle->iface,
+                                                 appHandle->pdDefault.port,
                                                  (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
                                                  srcIpAddr,
                                                  TRDP_SOCK_PD,
@@ -1667,6 +1669,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         if (vos_isMulticast(destIpAddr))
         {
             ret = trdp_requestSocket(appHandle->iface,
+                                     appHandle->pdDefault.port,
                                      &appHandle->pdDefault.sendParam,
                                      destIpAddr,
                                      TRDP_SOCK_PD,
@@ -1679,6 +1682,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         {
 
             ret = trdp_requestSocket(appHandle->iface,
+                                     appHandle->pdDefault.port,
                                      &appHandle->pdDefault.sendParam,
                                      appHandle->realIP,
                                      TRDP_SOCK_PD,
@@ -1689,6 +1693,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         }
 #else
         ret = trdp_requestSocket(appHandle->iface,
+                                 appHandle->pdDefault.port,
                                  &appHandle->pdDefault.sendParam,
                                  appHandle->realIP,
                                  TRDP_SOCK_PD,
@@ -2263,6 +2268,7 @@ static TRDP_ERR_T tlm_common_send (
                         /* socket to send TCP MD */
                         errv = trdp_requestSocket(
                                 appHandle->iface,
+                                appHandle->mdDefault.tcpPort,
                                 (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
                                 srcIpAddr,
                                 TRDP_SOCK_MD_TCP,
@@ -2300,6 +2306,7 @@ static TRDP_ERR_T tlm_common_send (
                 /* socket to send UDP MD */
                 errv = trdp_requestSocket(
                         appHandle->iface,
+                        appHandle->mdDefault.udpPort,
                         (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
                         srcIpAddr,
                         TRDP_SOCK_MD_UDP,
@@ -2718,6 +2725,7 @@ TRDP_ERR_T tlm_addListener (
                     /* socket to receive UDP MD */
                     errv = trdp_requestSocket(
                             appHandle->iface,
+                            appHandle->mdDefault.udpPort,
                             &appHandle->mdDefault.sendParam,
                             0,
                             TRDP_SOCK_MD_UDP,

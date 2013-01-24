@@ -99,6 +99,7 @@ void    trdp_initSockets(
 
 TRDP_ERR_T  trdp_requestSocket(
     TRDP_SOCKETS_T          iface[],
+    UINT32                  port,
     const TRDP_SEND_PARAM_T *params,
     TRDP_IP_ADDR_T          srcIP,
     TRDP_SOCK_TYPE_T        usage,
