@@ -327,7 +327,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     {
         pSession->pdDefault = *pPdDefault;
 
-        /* check whether default values neded or not */
+        /* check whether default values needed or not */
         if (pSession->pdDefault.flags == TRDP_FLAGS_DEFAULT)
         {
             pSession->pdDefault.flags = TRDP_FLAGS_NONE;
@@ -375,7 +375,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     {
         pSession->mdDefault = *pMdDefault;
 
-        /* check whether default values neded or not */
+        /* check whether default values needed or not */
         if (pSession->mdDefault.tcpPort == 0)
         {
             pSession->mdDefault.tcpPort = TRDP_MD_TCP_PORT;
