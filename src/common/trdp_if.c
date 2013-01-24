@@ -188,9 +188,9 @@ TRDP_APP_SESSION_T *trdp_sessionQueue (void)
  *  @param[in]      pPrintDebugString   Pointer to debug print function
  *  @param[in]      pMemConfig          Pointer to memory configuration
  *
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_MEM_ERR           memory allocation failed
- *  @retval         TRDP_PARAM_ERR         initialization error
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_MEM_ERR        memory allocation failed
+ *  @retval         TRDP_PARAM_ERR      initialization error
   */
 EXT_DECL TRDP_ERR_T tlc_init (
     const TRDP_PRINT_DBG_T  pPrintDebugString,
@@ -347,7 +347,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         {
             pSession->pdDefault.toBehavior = TRDP_TO_SET_TO_ZERO;
         }
-
+        
         if (pSession->pdDefault.sendParam.ttl == 0)
         {
             pSession->pdDefault.sendParam.ttl = TRDP_PD_DEFAULT_TTL;
@@ -801,6 +801,9 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *
  *  @param[in]      appHandle        the handle returned by tlc_openSession
  *  @param[in]      topoCount        New topoCount value
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlc_setTopoCount (
     TRDP_APP_SESSION_T  appHandle,
@@ -999,8 +1002,8 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             else
             {
                 vos_getTime(&nextTime);
-                tv_interval.tv_sec  = interval / 1000000;
-                tv_interval.tv_usec = interval % 1000000;
+                tv_interval.tv_sec      = interval / 1000000;
+                tv_interval.tv_usec     = interval % 1000000;
                 vos_addTime(&nextTime, &tv_interval);
                 pNewElement->interval   = tv_interval;
                 pNewElement->timeToGo   = nextTime;
@@ -1695,15 +1698,22 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     {
         return TRDP_NOINIT_ERR;
     }
-
+        
     /*    Check params    */
-    if (comId == 0 ||
-        maxDataSize > TRDP_MAX_PD_PACKET_SIZE ||
-        (timeout != 0 && timeout < TRDP_TIMER_GRANULARITY))
+    if (comId == 0 ||  maxDataSize > TRDP_MAX_PD_PACKET_SIZE)
     {
         return TRDP_PARAM_ERR;
     }
 
+    if (timeout == 0)
+    {
+        timeout = appHandle->pdDefault.timeout;
+    }
+    else if (timeout < TRDP_TIMER_GRANULARITY)
+    {
+        timeout = TRDP_TIMER_GRANULARITY;
+    }
+    
     /*    Reserve mutual access    */
     if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
     {
@@ -1728,7 +1738,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     vos_getTime(&now);
 
     /*    Look for existing element    */
-
     if (trdp_queueFindSubAddr(appHandle->pRcvQueue, &subHandle) != NULL)
     {
         ret = TRDP_NOSUB_ERR;
@@ -1779,7 +1788,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
 
             /*    Allocate a buffer for this kind of packets    */
-
             newPD = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
 
             if (newPD == NULL)
@@ -1816,14 +1824,14 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       =
                         (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
-                    newPD->grossSize    = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef      = pUserRef;
-                    newPD->socketIdx    = index;
-                    newPD->privFlags    |= TRDP_INVALID_DATA;
-                    newPD->pktFlags     = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
-                    newPD->pCachedDS    = NULL;
+                    newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
+                    newPD->userRef          = pUserRef;
+                    newPD->socketIdx        = index;
+                    newPD->privFlags       |= TRDP_INVALID_DATA;
+                    newPD->pktFlags         = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    newPD->pCachedDS        = NULL;
 
-                    if (timeout == 0)
+                    if (timeout == TRDP_TIMER_FOREVER)
                     {
                         vos_clearTime(&newPD->timeToGo);
                     }
@@ -1832,6 +1840,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                         vos_getTime(&newPD->timeToGo);
                         vos_addTime(&newPD->timeToGo, &newPD->interval);
                     }
+
                     /*  append this subscription to our receive queue */
                     trdp_queueAppLast(&appHandle->pRcvQueue, newPD);
 
@@ -1993,7 +2002,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
                 timercmp(&pElement->timeToGo, &now, <))
             {
                 /*    Packet is late    */
-                if (appHandle->pdDefault.toBehavior == TRDP_TO_SET_TO_ZERO)
+                if (pElement->toBehavior == TRDP_TO_SET_TO_ZERO)
                 {
                     memset(pData, 0, *pDataSize);
                 }
