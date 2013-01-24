@@ -411,20 +411,19 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  */
 TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCKETS_T          iface[],
+    UINT32                  port,
     const TRDP_SEND_PARAM_T *params,
     TRDP_IP_ADDR_T          srcIP,
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
     BOOL                    rcvOnly,
     INT32                   *pIndex,
-    TRDP_IP_ADDR_T            cornerIp)
+    TRDP_IP_ADDR_T          cornerIp)
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           index, emptySock = -1;
     TRDP_ERR_T      err     = TRDP_NO_ERR;
-    UINT32          port    = TRDP_MD_TCP_PORT; /* port, where the server listens on FIXME (this could be found somewhere in the
-                                   configuration file)*/
-
+ 
     if (iface == NULL || params == NULL || pIndex == NULL)
     {
         return TRDP_PARAM_ERR;
@@ -473,7 +472,6 @@ TRDP_ERR_T  trdp_requestSocket (
             sCurrentMaxSocketCnt = index + 1;
         }
 
-
         iface[index].sock           = -1;
         iface[index].bindAddr       = srcIP;
         iface[index].type           = usage;
@@ -484,8 +482,8 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].tcpParams.connectionTimeout.tv_usec = 0;
         iface[index].tcpParams.cornerIp = cornerIp;
 
-        sock_options.qos    = params->qos;
-        sock_options.ttl    = params->ttl;
+        sock_options.qos            = params->qos;
+        sock_options.ttl            = params->ttl;
         sock_options.ttl_multicast  = VOS_TTL_MULTICAST;
         sock_options.reuseAddrPort  = TRUE;
         sock_options.nonBlocking    = (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
@@ -500,14 +498,9 @@ TRDP_ERR_T  trdp_requestSocket (
 
         switch (usage)
         {
-            case TRDP_SOCK_PD:
-                port = TRDP_PD_UDP_PORT; /* FIXME configuration file! */
             case TRDP_SOCK_MD_UDP:
-                if (port <= 0) /* only set the port, when this is a MD communication */
-                {
-                    port = TRDP_MD_UDP_PORT; /* FIXME configuration file! */
-                }
                 sock_options.nonBlocking = TRUE; /* MD UDP sockets are always non blocking because they are polled */
+            case TRDP_SOCK_PD:
                 err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[index].sock, &sock_options);
                 if (err != TRDP_NO_ERR)
                 {

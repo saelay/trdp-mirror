@@ -44,6 +44,7 @@
 
 TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
+    UINT32          port,
     const MD_ELE_T  *pPacket);
 
 void trdp_mdUpdatePacket (

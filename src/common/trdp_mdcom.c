@@ -223,6 +223,7 @@ void    trdp_mdUpdatePacket (
  */
 TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
+    UINT32          port,
     const MD_ELE_T  *pPacket)
 {
     VOS_ERR_T err = VOS_NO_ERR;
@@ -238,7 +239,7 @@ TRDP_ERR_T  trdp_mdSendPacket (
                               (UINT8 *)&pPacket->frameHead,
                               pPacket->grossSize,
                               pPacket->addr.destIpAddr,
-                              TRDP_MD_UDP_PORT);
+                              port);
     }
 
     if (err != VOS_NO_ERR)
@@ -1004,7 +1005,7 @@ TRDP_ERR_T  trdp_mdSend (
                     }
                 }
 
-                result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock, iterMD);
+                result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock, appHandle->mdDefault.udpPort, iterMD);
 
                 if (result == TRDP_NO_ERR)
                 {
@@ -1305,6 +1306,7 @@ void  trdp_mdCheckListenSocks (
                             /* Save the new socket in the iface */
                             err = trdp_requestSocket(
                                     appHandle->iface,
+                                    appHandle->mdDefault.tcpPort,
                                     &appHandle->mdDefault.sendParam,
                                     appHandle->realIP,
                                     TRDP_SOCK_MD_TCP,
