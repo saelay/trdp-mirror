@@ -50,6 +50,7 @@
 #define TRDP_PROTO_VER                      0x0100      /**< Protocol version                           */
 
 #define TRDP_TIMER_GRANULARITY              10000       /**< granularity in us                          */
+#define TRDP_TIMER_FOREVER                  0xffffffff  /**< granularity in us                          */
 
 /*  Default MD communication parameters   */
 #define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000     /**< default reply time out 5s                  */

@@ -60,6 +60,7 @@ int am_big_endian ()
 /** Get the packet size from the raw data size
  *
  *  @param[in]      dataSize            net data size (without padding or FCS)
+ *
  *  @retval         packet size         the size of the complete packet to
  *                                      be sent or received
  */
@@ -82,6 +83,7 @@ UINT32 trdp_packetSizePD (
  *
  *  @param[in]      pHead           pointer to head of queue
  *  @param[in]      comId           ComID to search for
+ *
  *  @retval         != NULL         pointer to PD element
  *  @retval         NULL            No PD element found
  */
@@ -111,6 +113,7 @@ PD_ELE_T *trdp_queueFindComId (
  *
  *  @param[in]      pHead           pointer to head of queue
  *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
  *  @retval         != NULL         pointer to PD element
  *  @retval         NULL            No PD element found
  */
@@ -145,6 +148,7 @@ PD_ELE_T *trdp_queueFindPubAddr (
  *
  *  @param[in]      pHead           pointer to head of queue
  *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
  *  @retval         != NULL         pointer to PD element
  *  @retval         NULL            No PD element found
  */
@@ -177,6 +181,7 @@ PD_ELE_T *trdp_queueFindSubAddr (
  *
  *  @param[in]      pHead           pointer to head of queue
  *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
  *  @retval         != NULL         pointer to PD element
  *  @retval         NULL            No PD element found
  */
@@ -400,14 +405,16 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
 /** Handle the socket pool: Request a socket from our socket pool
  *
  *  @param[in,out]  iface           socket pool
+ *  @param[in]      port            port to use
  *  @param[in]      params          parameters to use
  *  @param[in]      srcIP           IP to bind to (0 = any address)
  *  @param[in]      usage           type and port to bind to
  *  @param[in]      options         blocking/nonblocking
  *  @param[in]      rcvOnly         only used for receiving
  *  @param[out]     pIndex          returned index of socket pool
- *  @retval            TRDP_NO_ERR
- *  @retval            TRDP_PARAM_ERR
+ *
+ *  @retval         TRDP_NO_ERR
+ *  @retval         TRDP_PARAM_ERR
  */
 TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCKETS_T          iface[],
@@ -555,8 +562,9 @@ TRDP_ERR_T  trdp_requestSocket (
  *
  *  @param[in,out]  iface           socket pool
  *  @param[in]      index           index of socket to release
- *  @retval            TRDP_NO_ERR
- *  @retval            TRDP_PARAM_ERR
+ *
+ *  @retval         TRDP_NO_ERR
+ *  @retval         TRDP_PARAM_ERR
  */
 TRDP_ERR_T  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
@@ -589,7 +597,7 @@ TRDP_ERR_T  trdp_releaseSocket (
  *        but shall be the same for redundant telegrams (subnet/srcIP).
  *
  *  @param[in]      comId           comID to look for
- *  @param[in]      msgType            PD/MD type
+ *  @param[in]      msgType         PD/MD type
  *  @param[in]      srcIpAddr       Source IP address
  *
  *  @retval            return the sequence number
@@ -650,7 +658,7 @@ UINT32  trdp_getSeqCnt (
  *  @param[in]      msgType         PD/MD type
  *  @param[in]      srcIP           Source IP address
  *
- *  @retval            return the sequence number
+ *  @retval         return the sequence number
  */
 
 BOOL  trdp_isRcvSeqCnt (
