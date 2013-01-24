@@ -196,7 +196,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
 
 
 /**********************************************************************************************************************/
-/**    Calculate data set size.
+/**    Calculate data set size by given data set id.
  *
  *  @param[in]      pRefCon         Pointer to user context
  *  @param[in]      datasetId       Dataset id to identify the structure out of a configuration
@@ -211,9 +211,33 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
  *
  */
 
-typedef TRDP_ERR_T tau_calcDatasetSize (
+EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     void            *pRefCon,
     UINT32           datasetId,
+    UINT8           *pSrc,
+    UINT32          *pSize,
+    TRDP_DATASET_T **ppDSPointer);
+
+
+/**********************************************************************************************************************/
+/**    Calculate data set size by given ComId.
+ *
+ *  @param[in]      pRefCon         Pointer to user context
+ *  @param[in]      comId           ComId id to identify the structure out of a configuration
+ *  @param[in]      pSrc            Pointer to received original message
+ *  @param[out]     pSize           Pointer to the size of the data set
+ *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
+ *                                  set NULL if not used, set content NULL if unknown
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_INIT_ERR   marshalling not initialised
+ *  @retval         TRDP_PARAM_ERR  data set id not existing
+ *
+ */
+
+EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
+    void            *pRefCon,
+    UINT32           comId,
     UINT8           *pSrc,
     UINT32          *pSize,
     TRDP_DATASET_T **ppDSPointer);
