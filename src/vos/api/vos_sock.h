@@ -446,14 +446,14 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 /** Set Using Multicast I/F
  *
  *  @param[in]      sock                       socket descriptor
- *  @param[in]      usingMulticastIfAddress    using Multicast I/F Address
+ *  @param[in]      mcIfAddress                using Multicast I/F Address
  *
  *  @retval         VOS_NO_ERR                 no error
  *  @retval         VOS_PARAM_ERR              sock descriptor unknown, parameter error
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
     INT32   sock,
-    UINT32  usingMulticastIfAddress);
+    UINT32  mcIfAddress);
 
 
 #ifdef __cplusplus
