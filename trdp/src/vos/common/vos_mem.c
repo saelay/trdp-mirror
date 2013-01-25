@@ -36,6 +36,9 @@
 
 #include <errno.h>
 #include <string.h>
+#ifdef POSIX
+#include <strings.h>
+#endif
 #include <fcntl.h>
 
 #ifdef TRDP_OPTION_LADDER
@@ -653,7 +656,7 @@ EXT_DECL INT32 vos_strnicmp (
 #ifdef WIN32
     return (INT32) _strnicmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
 #else
-    return (INT32) strnicmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
+    return (INT32) strncasecmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
 #endif
 }
 
@@ -676,6 +679,6 @@ EXT_DECL void vos_strncpy (
 #ifdef WIN32
     strncpy_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc, (size_t) count);
 #else
-    strncpy((char *)pStrDst, (size_t) count, (const char *)pStrSrc, (size_t) count);
+    strncpy((char *)pStrDst, (const char *)pStrSrc, (size_t) count);
 #endif
 }
