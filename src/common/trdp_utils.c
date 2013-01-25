@@ -421,6 +421,7 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  *  @param[in]      options         blocking/nonblocking
  *  @param[in]      rcvOnly         only used for receiving
  *  @param[out]     pIndex          returned index of socket pool
+ *  @param[in]      cornerIp        only used for receiving
  *
  *  @retval         TRDP_NO_ERR
  *  @retval         TRDP_PARAM_ERR
