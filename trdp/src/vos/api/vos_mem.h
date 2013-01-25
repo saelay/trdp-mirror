@@ -215,7 +215,7 @@ EXT_DECL void *vos_bsearch (
 /** Case insensitive string compare.
  *
  *  @param[in]      pStr1         Null terminated string to compare
- *  @param[in]      pStr1         Null terminated string to compare
+ *  @param[in]      pStr2         Null terminated string to compare
  *  @param[in]      count         Maximum number of characters to compare 
  *
  *  @retval         0  - equal 
