@@ -35,22 +35,22 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.1.3"
+#define LIB_VERSION  "0.0.1.4"
 
 #ifndef TRDP_PD_UDP_PORT
-#define TRDP_PD_UDP_PORT                    20548       /**< process data UDP port                      */
+#define TRDP_PD_UDP_PORT  20548                         /**< process data UDP port                      */
 #endif
 #ifndef TRDP_MD_UDP_PORT
-#define TRDP_MD_UDP_PORT                    20550       /**< message data UDP port                      */
+#define TRDP_MD_UDP_PORT  20550                         /**< message data UDP port                      */
 #endif
 #ifndef TRDP_MD_TCP_PORT
-#define TRDP_MD_TCP_PORT                    20550       /**< message data TCP port                      */
+#define TRDP_MD_TCP_PORT  20550                         /**< message data TCP port                      */
 #endif
 
-#define TRDP_PROTO_VER                      0x0100      /**< Protocol version                           */
+#define TRDP_PROTO_VER          0x0100                  /**< Protocol version                           */
 
-#define TRDP_TIMER_GRANULARITY              10000       /**< granularity in us                          */
-#define TRDP_TIMER_FOREVER                  0xffffffff  /**< granularity in us                          */
+#define TRDP_TIMER_GRANULARITY  10000                   /**< granularity in us                          */
+#define TRDP_TIMER_FOREVER      0xffffffff              /**< granularity in us                          */
 
 /*  Default MD communication parameters   */
 #define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000     /**< default reply time out 5s                  */
@@ -62,16 +62,16 @@
 #define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
 
 /*  Default PD communication parameters   */
-#define TRDP_PD_DEFAULT_QOS                 5
-#define TRDP_PD_DEFAULT_TTL                 64
-#define TRDP_PD_DEFAULT_TIMEOUT             100000
-#define TRDP_PD_DEFAULT_SEND_PARAM          {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
+#define TRDP_PD_DEFAULT_QOS         5
+#define TRDP_PD_DEFAULT_TTL         64
+#define TRDP_PD_DEFAULT_TIMEOUT     100000
+#define TRDP_PD_DEFAULT_SEND_PARAM  {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
 
 /*  PD packet properties    */
-#define TRDP_MIN_PD_HEADER_SIZE             sizeof(PD_HEADER_T)     /**< PD header size with FCS        */
-#define TRDP_MAX_PD_DATA_SIZE               1436
-#define TRDP_MAX_PD_PACKET_SIZE             (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
-#define TRDP_MAX_MD_PACKET_SIZE             (1024 * 64)
+#define TRDP_MIN_PD_HEADER_SIZE     sizeof(PD_HEADER_T)             /**< PD header size with FCS        */
+#define TRDP_MAX_PD_DATA_SIZE       1436
+#define TRDP_MAX_PD_PACKET_SIZE     (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
+#define TRDP_MAX_MD_PACKET_SIZE     (1024 * 64)
 
 /*  Default TRDP process options    */
 #define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000       /**< Default cycle time for TRDP process        */
@@ -81,35 +81,35 @@
 #define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536       /**< Default maximum size of log file           */
 
 /*  Default SDT values  */
-#define TRDP_SDT_DEFAULT_SMI2               0           /**< Default SDT safe message identifier for a redundant dev */
-#define TRDP_SDT_DEFAULT_NRXSAFE            3           /**< Default SDT timeout cycles                 */
-#define TRDP_SDT_DEFAULT_NGUARD             100         /**< Default SDT initial timeout cycles         */
-#define TRDP_SDT_DEFAULT_CMTHR              10          /**< Default SDT channel monitoring threshold   */
+#define TRDP_SDT_DEFAULT_SMI2       0                   /**< Default SDT safe message identifier for a redundant dev */
+#define TRDP_SDT_DEFAULT_NRXSAFE    3                   /**< Default SDT timeout cycles                 */
+#define TRDP_SDT_DEFAULT_NGUARD     100                 /**< Default SDT initial timeout cycles         */
+#define TRDP_SDT_DEFAULT_CMTHR      10                  /**< Default SDT channel monitoring threshold   */
 
 
 /***********************************************************************************************************************
  * TYPEDEFS
  */
- 
+
 /** Internal MD state */
 typedef enum
 {
-    TRDP_MD_ELE_ST_NONE                =  0,  /**< neutral value                                        */
-                                          
-    TRDP_MD_ELE_ST_TX_NOTIFY_ARM       =  1,  /**< ready to send notify MD                              */
-    TRDP_MD_ELE_ST_TX_REQUEST_ARM      =  2,  /**< ready to send request MD                             */
-    TRDP_MD_ELE_ST_TX_REPLY_ARM        =  3,  /**< ready to send reply MD                               */
-    TRDP_MD_ELE_ST_TX_REPLYQUERY_ARM   =  4,  /**< ready to send reply with confirm request MD          */
-    TRDP_MD_ELE_ST_TX_CONFIRM_ARM      =  5,  /**< ready to send confirm MD                             */
-    TRDP_MD_ELE_ST_TX_ERROR_ARM        =  6,  /**< ready to send error MD                               */
-                                          
-    TRDP_MD_ELE_ST_TX_REQUEST_W4Y      =  7,  /**< request sent, wait for reply                         */
-    TRDP_MD_ELE_ST_TX_REPLYQUERY_W4C   =  8,  /**< reply send, with confirm request MD                  */
-    
-    TRDP_MD_ELE_ST_RX_ARM              =  9,  /**< armed listener                                       */
-    TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY   = 10,  /**< request received, wait for application reply send    */
-    TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF  = 11   /**< reply conf. rq. rx, wait for application conf send   */
-    
+    TRDP_MD_ELE_ST_NONE = 0,                  /**< neutral value                                        */
+
+    TRDP_MD_ELE_ST_TX_NOTIFY_ARM        = 1,  /**< ready to send notify MD                              */
+    TRDP_MD_ELE_ST_TX_REQUEST_ARM       = 2,  /**< ready to send request MD                             */
+    TRDP_MD_ELE_ST_TX_REPLY_ARM         = 3,  /**< ready to send reply MD                               */
+    TRDP_MD_ELE_ST_TX_REPLYQUERY_ARM    = 4,  /**< ready to send reply with confirm request MD          */
+    TRDP_MD_ELE_ST_TX_CONFIRM_ARM       = 5,  /**< ready to send confirm MD                             */
+    TRDP_MD_ELE_ST_TX_ERROR_ARM         = 6,  /**< ready to send error MD                               */
+
+    TRDP_MD_ELE_ST_TX_REQUEST_W4Y       = 7,  /**< request sent, wait for reply                         */
+    TRDP_MD_ELE_ST_TX_REPLYQUERY_W4C    = 8,  /**< reply send, with confirm request MD                  */
+
+    TRDP_MD_ELE_ST_RX_ARM = 9,                /**< armed listener                                       */
+    TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY    = 10, /**< request received, wait for application reply send    */
+    TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF   = 11  /**< reply conf. rq. rx, wait for application conf send   */
+
 } TRDP_MD_ELE_ST_T;
 
 /** Internal flags for packets    */
@@ -120,7 +120,8 @@ typedef enum
     TRDP_TIMED_OUT      = 0x2,              /**< if set, inform the user                                */
     TRDP_INVALID_DATA   = 0x4,              /**< if set, inform the user                                */
     TRDP_REQ_2B_SENT    = 0x8,              /**< if set, the request needs to be sent                   */
-    TRDP_PULL_SUB       = 0x10              /**< if set, its a PULL subscription                        */
+    TRDP_PULL_SUB       = 0x10,             /**< if set, its a PULL subscription                        */
+    TRDP_REDUNDANT      = 0x20              /**< if set, packet should not be sent (redundant           */
 } TRDP_PRIV_FLAGS_T;
 
 /** Socket usage    */
@@ -134,10 +135,10 @@ typedef enum
 /** Hidden handle definition, used as unique addressing item    */
 typedef struct TRDP_HANDLE
 {
-    UINT32              comId;              /**< comId for packets to send/receive                      */
-    TRDP_IP_ADDR_T      srcIpAddr;          /**< source IP for PD                                       */
-    TRDP_IP_ADDR_T      destIpAddr;         /**< destination IP for PD                                  */
-    TRDP_IP_ADDR_T      mcGroup;            /**< multicast group to join for PD                         */
+    UINT32          comId;                  /**< comId for packets to send/receive                      */
+    TRDP_IP_ADDR_T  srcIpAddr;              /**< source IP for PD                                       */
+    TRDP_IP_ADDR_T  destIpAddr;             /**< destination IP for PD                                  */
+    TRDP_IP_ADDR_T  mcGroup;                /**< multicast group to join for PD                         */
 } TRDP_ADDRESSES_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
 
@@ -145,7 +146,7 @@ typedef struct TRDP_HANDLE
 typedef struct TRDP_SOCKET_TCP
 {
     TRDP_IP_ADDR_T  cornerIp;               /**< The other TCP corner Ip                                */
-    TRDP_TIME_T  connectionTimeout;         /**< TCP socket connection Timeout                          */
+    TRDP_TIME_T     connectionTimeout;      /**< TCP socket connection Timeout                          */
 }TRDP_SOCKET_TCP_T;
 
 
@@ -158,7 +159,7 @@ typedef struct TRDP_SOCKETS
     TRDP_SOCK_TYPE_T    type;               /**< Usage of this socket                                   */
     BOOL                rcvOnly;            /**< Used for receiving                                     */
     UINT16              usage;              /**< No. of current users of this socket                    */
-    TRDP_SOCKET_TCP_T    tcpParams;         /**< Params used for TCP                                    */
+    TRDP_SOCKET_TCP_T   tcpParams;          /**< Params used for TCP                                    */
 } TRDP_SOCKETS_T;
 
 #ifdef WIN32
@@ -202,8 +203,8 @@ typedef struct
 /** TRDP PD packet    */
 typedef struct
 {
-    PD_HEADER_T         frameHead;                       /**< Packet    header in network byte order         */
-    UINT8               data[TRDP_MAX_PD_PACKET_SIZE];   /**< data ready to be sent or received (with CRCs)  */
+    PD_HEADER_T frameHead;                               /**< Packet    header in network byte order         */
+    UINT8       data[TRDP_MAX_PD_PACKET_SIZE];           /**< data ready to be sent or received (with CRCs)  */
 } GNU_PACKED PD_PACKET_T;
 
 #ifdef WIN32
@@ -260,26 +261,26 @@ typedef struct MD_ELE
     UINT32              numRepliesQuery;        /**< number of ReplyQuery received, used to count nuomber
                                                      of expected Confirm sent                               */
     UINT32              numConfirmSent;         /**< number of Confirm sent                                 */
-    UINT32                numConfirmTimeout;    /**< number of Confirm Timeouts (incremented by listeners   */
+    UINT32              numConfirmTimeout;      /**< number of Confirm Timeouts (incremented by listeners   */
     union
     {
         struct
         {
-            UINT32                comId;        /**< filter on incoming MD by comId                         */
+            UINT32 comId;                       /**< filter on incoming MD by comId                         */
         } caller;
         struct
         {
-            const void            *pUserRef;    /**< user reference for call_back from addListener()        */
-            UINT32                comId;        /**< filter on incoming MD by comId                         */
-            UINT32                topoCount;    /**< set by user: ETB to use, '0' to deacticate             */
-            TRDP_IP_ADDR_T        destIpAddr;   /**< filter on incoming MD by destination IP address        */
-            TRDP_FLAGS_T          pktFlags;     /**< marshalling option                                     */
-            TRDP_URI_USER_T       destURI;      /**< filter on incoming MD by destination URI               */
+            const void      *pUserRef;          /**< user reference for call_back from addListener()        */
+            UINT32          comId;              /**< filter on incoming MD by comId                         */
+            UINT32          topoCount;          /**< set by user: ETB to use, '0' to deacticate             */
+            TRDP_IP_ADDR_T  destIpAddr;         /**< filter on incoming MD by destination IP address        */
+            TRDP_FLAGS_T    pktFlags;           /**< marshalling option                                     */
+            TRDP_URI_USER_T destURI;            /**< filter on incoming MD by destination URI               */
         } listener; /**< Listener arguments */
     } u;
-    BOOL                connectDone;
-    MD_HEADER_T         frameHead;              /**< Packet    header in network byte order                 */
-    UINT8               data[0];                /**< data ready to be sent (with CRCs)                      */
+    BOOL        connectDone;
+    MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
+    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
     /*    ... data + FCS ... */
 } MD_ELE_T;
 

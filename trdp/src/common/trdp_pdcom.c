@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2013-01-25: ID 20: Redundancy handling fixed
  */
 
 /*******************************************************************************
@@ -258,7 +259,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 /*    Send the packet if it is not redundant    */
                 if (iterPD->socketIdx != -1 &&
                     (!appHandle->beQuiet ||
-                     (iterPD->pktFlags & TRDP_FLAGS_REDUNDANT)))
+                     (iterPD->privFlags & TRDP_REDUNDANT)))
                 {
                     /* We pass the error to the application, but we keep on going    */
                     err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);

@@ -17,6 +17,8 @@
  *
  * $Id$
  *
+ *      BL 2013-01-25: ID 20: Redundancy handling fixed
+ *
  *      BL 2013-01-08: LADDER: Removed/Changed some ladder specific code in tlp_subscribe()
  *
  *      BL 2012-12-03: ID 1: "using uninitialized PD_ELE_T.pullIpAddress variable"
@@ -347,7 +349,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         {
             pSession->pdDefault.toBehavior = TRDP_TO_SET_TO_ZERO;
         }
-        
+
         if (pSession->pdDefault.sendParam.ttl == 0)
         {
             pSession->pdDefault.sendParam.ttl = TRDP_PD_DEFAULT_TTL;
@@ -413,12 +415,12 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
-        pSession->mdDefault.pfCbFunction        = NULL;
-        pSession->mdDefault.pRefCon             = NULL;
-        pSession->mdDefault.confirmTimeout      = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
-        pSession->mdDefault.connectTimeout      = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
-        pSession->mdDefault.replyTimeout        = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
-        pSession->mdDefault.flags               = TRDP_FLAGS_NONE; 
+        pSession->mdDefault.pfCbFunction    = NULL;
+        pSession->mdDefault.pRefCon         = NULL;
+        pSession->mdDefault.confirmTimeout  = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+        pSession->mdDefault.connectTimeout  = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+        pSession->mdDefault.replyTimeout    = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+        pSession->mdDefault.flags               = TRDP_FLAGS_NONE;
         pSession->mdDefault.udpPort             = TRDP_MD_UDP_PORT;
         pSession->mdDefault.tcpPort             = TRDP_MD_TCP_PORT;
         pSession->mdDefault.sendParam.qos       = TRDP_MD_DEFAULT_QOS;
@@ -711,28 +713,28 @@ TRDP_ERR_T tlp_setRedundant (
     UINT32              redId,
     BOOL                leader)
 {
-    TRDP_ERR_T  ret;
+    TRDP_ERR_T  ret = TRDP_NOINIT_ERR;
     PD_ELE_T    *iterPD;
 
     if (trdp_isValidSession(appHandle))
     {
         ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
-        if (ret == TRDP_NO_ERR)
+        if (TRDP_NO_ERR == ret)
         {
-            /*    Handle list of redundant comIds    */
-            appHandle->beQuiet  = !leader;
-            appHandle->redID    = redId;
-
             /*    Set the redundancy flag for every PD with the specified ID */
-            for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
+            for (iterPD = appHandle->pSndQueue; NULL != iterPD; iterPD = iterPD->pNext)
             {
-                if (iterPD->redId == redId)
+                if (iterPD->redId == redId ||       /* packet redundant ID matches                      */
+                    (iterPD->redId && 0 == redId))  /* all set redundant ID are targeted if redID == 0  */
                 {
-                    if (leader == TRUE)
+                    if (TRUE == leader)
                     {
-                        iterPD->pktFlags = TRDP_FLAGS_REDUNDANT;
+                        iterPD->privFlags &= ~TRDP_REDUNDANT;
                     }
-                    iterPD->pktFlags |= TRDP_FLAGS_REDUNDANT;
+                    else
+                    {
+                        iterPD->privFlags |= TRDP_REDUNDANT;
+                    }
                 }
             }
 
@@ -742,19 +744,17 @@ TRDP_ERR_T tlp_setRedundant (
             }
         }
     }
-    else
-    {
-        ret = TRDP_NOINIT_ERR;
-    }
+
     return ret;
 }
 
 /**********************************************************************************************************************/
 /** Get status of redundant ComIds.
+ *  Only the status of the first redundancy group entry is returned will be returned!
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      redId               will be returned for all ComID's with the given redId, 0 for all redId
- *  @param[in,out]  pLeader             TRUE if we send (leader)
+ *  @param[in]      redId               will be returned for all ComID's with the given redId
+ *  @param[in,out]  pLeader             TRUE if we're sending this redundancy group (leader)
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error / redId not existing
@@ -765,7 +765,8 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
     UINT32              redId,
     BOOL                *pLeader)
 {
-    TRDP_ERR_T ret;
+    TRDP_ERR_T  ret = TRDP_NOINIT_ERR;
+    PD_ELE_T    *iterPD;
 
     if (pLeader == NULL)
     {
@@ -777,18 +778,28 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
         ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
         if (ret == TRDP_NO_ERR)
         {
-            /*    TBD! Search list of redundant comIds    */
-            *pLeader = !appHandle->beQuiet;
+            /*    Search the redundancy flag for every PD with the specified ID */
+            for (iterPD = appHandle->pSndQueue; NULL != iterPD; iterPD = iterPD->pNext)
+            {
+                if (iterPD->redId == redId)         /* packet redundant ID matches                      */
+                {
+                    if (iterPD->privFlags & TRDP_REDUNDANT)
+                    {
+                        *pLeader = FALSE;
+                    }
+                    else
+                    {
+                        *pLeader = TRUE;
+                    }
+                    break;
+                }
+            }
 
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
                 vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
             }
         }
-    }
-    else
-    {
-        ret = TRDP_NOINIT_ERR;
     }
 
     return ret;
@@ -1002,15 +1013,15 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             else
             {
                 vos_getTime(&nextTime);
-                tv_interval.tv_sec      = interval / 1000000;
-                tv_interval.tv_usec     = interval % 1000000;
+                tv_interval.tv_sec  = interval / 1000000;
+                tv_interval.tv_usec = interval % 1000000;
                 vos_addTime(&nextTime, &tv_interval);
                 pNewElement->interval   = tv_interval;
                 pNewElement->timeToGo   = nextTime;
             }
 
             /*    Update the internal data */
-            pNewElement->addr = pubHandle;
+            pNewElement->addr           = pubHandle;
             pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
@@ -1504,7 +1515,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     BOOL                    subs,
     UINT16                  offsetAddr)
 {
-    TRDP_ERR_T  ret = TRDP_NO_ERR;
+    TRDP_ERR_T  ret             = TRDP_NO_ERR;
     PD_ELE_T    *pSubPD         = NULL;
     PD_ELE_T    *pReqElement    = NULL;
 
@@ -1681,11 +1692,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T    *newPD = NULL;
+    PD_ELE_T            *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
-    INT32       index;
+    INT32 index;
 
     /*    Check params    */
     if ((comId == 0)
@@ -1698,9 +1709,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     {
         return TRDP_NOINIT_ERR;
     }
-        
+
     /*    Check params    */
-    if (comId == 0 ||  maxDataSize > TRDP_MAX_PD_PACKET_SIZE)
+    if (comId == 0 || maxDataSize > TRDP_MAX_PD_PACKET_SIZE)
     {
         return TRDP_PARAM_ERR;
     }
@@ -1713,7 +1724,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     {
         timeout = TRDP_TIMER_GRANULARITY;
     }
-    
+
     /*    Reserve mutual access    */
     if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
     {
@@ -1824,12 +1835,12 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       =
                         (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
-                    newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef          = pUserRef;
-                    newPD->socketIdx        = index;
-                    newPD->privFlags       |= TRDP_INVALID_DATA;
-                    newPD->pktFlags         = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
-                    newPD->pCachedDS        = NULL;
+                    newPD->grossSize    = TRDP_MAX_PD_PACKET_SIZE;
+                    newPD->userRef      = pUserRef;
+                    newPD->socketIdx    = index;
+                    newPD->privFlags    |= TRDP_INVALID_DATA;
+                    newPD->pktFlags     = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    newPD->pCachedDS    = NULL;
 
                     if (timeout == TRDP_TIMER_FOREVER)
                     {
@@ -2024,7 +2035,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL && pElement != NULL)
         {
-            pPdInfo->comId = pElement->addr.comId;
+            pPdInfo->comId          = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
@@ -2072,8 +2083,8 @@ static TRDP_ERR_T tlm_common_send (
     const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T  errv = TRDP_NO_ERR;
-    MD_ELE_T    *pNewElement = NULL;
+    TRDP_ERR_T  errv            = TRDP_NO_ERR;
+    MD_ELE_T    *pNewElement    = NULL;
 
     /*   TRDP_ADDRESSES  pubHandle = {comId, srcIpAddr, destIpAddr, 0}; */
 
@@ -2235,7 +2246,7 @@ static TRDP_ERR_T tlm_common_send (
             TRDP_TIME_T nextTime;
             TRDP_TIME_T tv_interval;
 
-            UINT32 grossSize = sizeof(MD_HEADER_T);
+            UINT32      grossSize = sizeof(MD_HEADER_T);
 
             if(dataSize > 0)
             {
@@ -2723,8 +2734,8 @@ TRDP_ERR_T tlm_addListener (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T  errv = TRDP_NO_ERR;
-    MD_ELE_T    *pNewElement = NULL;
+    TRDP_ERR_T  errv            = TRDP_NO_ERR;
+    MD_ELE_T    *pNewElement    = NULL;
 
     if (!trdp_isValidSession(appHandle))
     {
