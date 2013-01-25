@@ -1,10 +1,10 @@
 /**********************************************************************************************************************/
 /**
- * @file            echoMD.c
+ * @file            mdManagerTCP_Siemens.c
  *
  * @brief           Demo TRDP Message Data
  *
- * @details            Receive and send message data
+ * @details         Receive and send message data
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *

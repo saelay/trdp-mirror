@@ -989,7 +989,7 @@ static void parseDatasets(
  *  @param[out]     pNumComId         Pointer to the number of entries in the ComId DatasetId mapping list
  *  @param[out]     ppComIdDsIdMap    Pointer to an array of a structures of type TRDP_COMID_DSID_MAP_T
  *  @param[out]     pNumDataset       Pointer to the number of datasets found in the configuration
- *  @param[out]     ppapDataset       Pointer to an array of pointers to a structures of type TRDP_DATASET_T
+ *  @param[out]     papDataset        Pointer to an array of pointers to a structures of type TRDP_DATASET_T
  *
  *  @retval         TRDP_NO_ERR       no error
  *  @retval         TRDP_MEM_ERR      provided buffer to small
