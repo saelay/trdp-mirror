@@ -39,7 +39,7 @@
 
 
 #define MD_DEFAULT_IP_1        0xC0A866B3 /* Sender's IP: 192.168.102.179    Decimal: 3232261811    / 10.0.0.203 - 0xA0000CB*/
-#define MD_DEFAULT_IP_2        0xC0A866AA /* Caller's IP: 192.168.102.180    Decimal: 3232261811    / 10.0.0.204 - 0xA0000CC*/
+#define MD_DEFAULT_IP_2        0xC0A866B4 /* Caller's IP: 192.168.102.180    Decimal: 3232261811    / 10.0.0.204 - 0xA0000CC*/
 
 #define SOURCE_URI "user@host"
 #define DEST_URI "user@host"

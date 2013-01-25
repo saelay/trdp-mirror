@@ -2235,7 +2235,14 @@ static TRDP_ERR_T tlm_common_send (
             TRDP_TIME_T nextTime;
             TRDP_TIME_T tv_interval;
 
-            UINT32      grossSize = sizeof(MD_HEADER_T) + dataSize + 4; /* telegram header + payload + CRC */
+            UINT32 grossSize = sizeof(MD_HEADER_T);
+
+            if(dataSize > 0)
+            {
+                grossSize = grossSize + dataSize + 4; /* telegram header + payload + CRC */
+
+            }
+
             grossSize += (4 - (grossSize & 3)) & 3; /* round to 4 bytes size */
 
             /* evaluate start time and timeout. For notify I use replyTimeout as sendTimeout */
