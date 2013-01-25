@@ -259,20 +259,20 @@ typedef enum
 /** Various flags for PD and MD packets    */
 typedef enum
 {
-    TRDP_FLAGS_DEFAULT      = 0,    /**< Default value defined in tlc_openDession will be taken     */
-    TRDP_FLAGS_NONE         = 0x1,  /**< No flags set                                               */
-    TRDP_FLAGS_REDUNDANT    = 0x2,  /**< Redundant                                                  */
-    TRDP_FLAGS_MARSHALL     = 0x4,  /**< Optional marshalling/unmarshalling in TRDP stack           */
-    TRDP_FLAGS_CALLBACK     = 0x8,  /**< Use of callback function                                   */
-    TRDP_FLAGS_TCP          = 0x10   /**< Use TCP for message data                                   */
+    TRDP_FLAGS_DEFAULT  = 0,        /**< Default value defined in tlc_openDession will be taken     */
+    TRDP_FLAGS_NONE     = 0x1,      /**< No flags set                                               */
+    TRDP_FLAGS_RESERVED = 0x2,      /**< (was Redundant, moved to private flags)                    */
+    TRDP_FLAGS_MARSHALL = 0x4,      /**< Optional marshalling/unmarshalling in TRDP stack           */
+    TRDP_FLAGS_CALLBACK = 0x8,      /**< Use of callback function                                   */
+    TRDP_FLAGS_TCP      = 0x10      /**< Use TCP for message data                                   */
 } TRDP_FLAGS_T;
 
 
 /** Redundancy states */
 typedef enum
 {
-    TRDP_RED_FOLLOWER       = 0,    /**< Redundancy follower - redundant PD will be not sent out    */
-    TRDP_RED_LEADER         = 1     /**< Redundancy leader - redundant PD will be sent out          */
+    TRDP_RED_FOLLOWER   = 0,        /**< Redundancy follower - redundant PD will be not sent out    */
+    TRDP_RED_LEADER     = 1         /**< Redundancy leader - redundant PD will be sent out          */
 } TRDP_RED_STATE_T;
 
 /** How invalid PD shall be handled    */
@@ -335,7 +335,7 @@ typedef struct
     UINT32              replyTimeout;       /**< reply timeout in us given with the request */
     TRDP_URI_USER_T     destURI;            /**< destination URI user part from MD header   */
     TRDP_URI_USER_T     srcURI;             /**< source URI user part from MD header        */
-    UINT32                noOfRepliers;     /**< number of expected repliers, 0 if unknown  */
+    UINT32              noOfRepliers;       /**< number of expected repliers, 0 if unknown  */
     UINT32              numReplies;         /**< actual number of replies for the request   */
     const void          *pUserRef;          /**< User reference given with the local call   */
     TRDP_ERR_T          resultCode;         /**< error code                                 */
@@ -382,9 +382,9 @@ struct TRDP_DATASET;
 /**    Dataset element definition    */
 typedef struct
 {
-    UINT32                  type;        /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000 */
-    UINT32                  size;        /**< Number of items or TDRP_VAR_SIZE (0)                     */
-    struct TRDP_DATASET    *pCachedDS;   /**< Used internally for marshalling speed-up                 */
+    UINT32              type;            /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000 */
+    UINT32              size;            /**< Number of items or TDRP_VAR_SIZE (0)                     */
+    struct TRDP_DATASET *pCachedDS;      /**< Used internally for marshalling speed-up                 */
 } TRDP_DATASET_ELEMENT_T;
 
 /**    Dataset definition    */
@@ -399,14 +399,14 @@ typedef struct TRDP_DATASET
 /**    Dataset element definition    */
 typedef struct
 {
-    UINT32          comId;              /**< comId                                                    */
-    UINT32          datasetId;          /**< corresponding dataset Id                                 */
+    UINT32  comId;                      /**< comId                                                    */
+    UINT32  datasetId;                  /**< corresponding dataset Id                                 */
 } TRDP_COMID_DSID_MAP_T;
 
 /**     Array of pointers to dataset  */
-typedef TRDP_DATASET_T    * pTRDP_DATASET_T;
-typedef pTRDP_DATASET_T   * apTRDP_DATASET_T;
-typedef apTRDP_DATASET_T  * papTRDP_DATASET_T;
+typedef TRDP_DATASET_T *pTRDP_DATASET_T;
+typedef pTRDP_DATASET_T *apTRDP_DATASET_T;
+typedef apTRDP_DATASET_T *papTRDP_DATASET_T;
 
 /**********************************************************************************************************************/
 /**                          TRDP statistics type definitions.                                                        */
@@ -582,12 +582,12 @@ typedef VOS_LOG_T TRDP_LOG_T;
  */
 
 typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
-    void    *pRefCon,
-    UINT32  comId,
-    UINT8   *pSrc,
-    UINT8   *pDst,
-    UINT32  *pDstSize,
-    TRDP_DATASET_T    **ppCachedDS);
+    void            *pRefCon,
+    UINT32          comId,
+    UINT8           *pSrc,
+    UINT8           *pDst,
+    UINT32          *pDstSize,
+    TRDP_DATASET_T  * *ppCachedDS);
 
 
 /**********************************************************************************************************************/
@@ -608,12 +608,12 @@ typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
  */
 
 typedef TRDP_ERR_T (*TRDP_UNMARSHALL_T)(
-    void    *pRefCon,
-    UINT32  comId,
-    UINT8   *pSrc,
-    UINT8   *pDst,
-    UINT32  *pDstSize,
-    TRDP_DATASET_T    **ppCachedDS);
+    void            *pRefCon,
+    UINT32          comId,
+    UINT8           *pSrc,
+    UINT8           *pDst,
+    UINT32          *pDstSize,
+    TRDP_DATASET_T  * *ppCachedDS);
 
 
 /**********************************************************************************************************************/
@@ -673,9 +673,9 @@ typedef void (*TRDP_MD_CALLBACK_T)(
 /**    TCP file descriptor parameters   */
 typedef struct
 {
-    INT32    listen_sd;            /**< TCP general socket listening connection requests   */
-    INT32    max_sd;            /**< Maximum socket number in the file descriptor   */
-    fd_set   master_set;        /**< Local file descriptor   */
+    INT32   listen_sd;             /**< TCP general socket listening connection requests   */
+    INT32   max_sd;             /**< Maximum socket number in the file descriptor   */
+    fd_set  master_set;         /**< Local file descriptor   */
 } TRDP_TCP_FD_T;
 
 /**********************************************************************************************************************/

@@ -986,7 +986,7 @@ TRDP_ERR_T  trdp_mdSend (
         if (dotx)
         {
             /*    Send the packet if it is not redundant    */
-            if (iterMD->socketIdx != -1 && (!appHandle->beQuiet || (iterMD->pktFlags & TRDP_FLAGS_REDUNDANT)))
+            if (iterMD->socketIdx != -1 && (!appHandle->beQuiet || (iterMD->privFlags & TRDP_REDUNDANT)))
             {
                 trdp_mdUpdatePacket(iterMD);
 
