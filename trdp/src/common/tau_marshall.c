@@ -1,6 +1,6 @@
 /**********************************************************************************************************************/
 /**
- * @file            trdp_marshall.c
+ * @file            tau_marshall.c
  *
  * @brief           Marshalling functions for TRDP
  *

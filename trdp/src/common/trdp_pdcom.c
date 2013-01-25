@@ -648,6 +648,7 @@ TRDP_ERR_T trdp_pdCheck (
  *
  *  @param[in]      pdSock          socket descriptor
  *  @param[in]      pPacket         pointer to packet to be sent
+ *  @param[in]      port            port on which to send
  *
  *  @retval         TRDP_NO_ERR
  *  @retval         TRDP_IO_ERR

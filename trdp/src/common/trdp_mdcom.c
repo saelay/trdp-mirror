@@ -218,6 +218,7 @@ void    trdp_mdUpdatePacket (
 /** Send MD packet
  *
  *  @param[in]      pdSock          socket descriptor
+ *  @param[in]      port            port on which to send
  *  @param[in]      pPacket         pointer to packet to be sent
  *  @retval         != NULL         error
  */
