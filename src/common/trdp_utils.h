@@ -94,8 +94,32 @@ void    trdp_queueInsFirst (
     PD_ELE_T            **pHead,
     PD_ELE_T            *pNew);
 
+
+/*********************************************************************************************************************/
+/** Handle the socket pool: Initialize it
+ *
+ *  @param[in]      iface          pointer to the socket pool
+ */
+
 void    trdp_initSockets(
     TRDP_SOCKETS_T      iface[]);
+
+
+/*********************************************************************************************************************/
+/** Handle the socket pool: Request a socket from our socket pool
+ *
+ *  @param[in,out]  iface           socket pool
+ *  @param[in]      port            port to use
+ *  @param[in]      params          parameters to use
+ *  @param[in]      srcIP           IP to bind to (0 = any address)
+ *  @param[in]      usage           type and port to bind to
+ *  @param[in]      options         blocking/nonblocking
+ *  @param[in]      rcvOnly         only used for receiving
+ *  @param[out]     pIndex          returned index of socket pool
+ *
+ *  @retval         TRDP_NO_ERR
+ *  @retval         TRDP_PARAM_ERR
+ */
 
 TRDP_ERR_T  trdp_requestSocket(
     TRDP_SOCKETS_T          iface[],
@@ -108,24 +132,89 @@ TRDP_ERR_T  trdp_requestSocket(
     INT32                   *pIndex,
     TRDP_IP_ADDR_T          cornerIp);
 
+/*********************************************************************************************************************/
+/** Handle the socket pool: Release a socket from our socket pool
+ *
+ *  @param[in,out]  iface           socket pool
+ *  @param[in]      index           index of socket to release
+ *
+ *  @retval         TRDP_NO_ERR
+ *  @retval         TRDP_PARAM_ERR
+ */
+
 TRDP_ERR_T trdp_releaseSocket(
     TRDP_SOCKETS_T  iface[],
     INT32           index);
 
-/*  Compute actual packet size from datasize    */
+
+/*********************************************************************************************************************/
+/** Get the packet size from the raw data size
+ *
+ *  @param[in]      dataSize            net data size (without padding or FCS)
+ *
+ *  @retval         packet size         the size of the complete packet to
+ *                                      be sent or received
+ */
+
 UINT32  trdp_packetSizePD (
     UINT32 dataSize);
 
-/*  Get initial Sequence No    */
+
+/*********************************************************************************************************************/
+/** Get the initial sequence counter for the comID/message type and subnet (source IP).
+ *  If the comID/srcIP is not found elsewhere, return 0 -
+ *  else return its current sequence number (the redundant packet needs the same seqNo)
+ *
+ *  Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
+ *        but shall be the same for redundant telegrams (subnet/srcIP).
+ *
+ *  @param[in]      comId           comID to look for
+ *  @param[in]      msgType         PD/MD type
+ *  @param[in]      srcIpAddr       Source IP address
+ *
+ *  @retval            return the sequence number
+ */
+
 UINT32  trdp_getSeqCnt (
     UINT32          comID,
     TRDP_MSG_T      msgType,
     TRDP_IP_ADDR_T  srcIP);
+
+
+/**********************************************************************************************************************/
+/** Check if the sequence counter for the comID/message type and subnet (source IP)
+ *  has already been received.
+ *
+ *  Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
+ *         but shall be the same for redundant telegrams (subnet/srcIP).
+ *
+ *  @param[in]      seqCnt          sequence counter received
+ *  @param[in]      comId           comID to look for
+ *  @param[in]      msgType         PD/MD type
+ *  @param[in]      srcIP           Source IP address
+ *
+ *  @retval         return the sequence number
+ */
 
 BOOL trdp_isRcvSeqCnt (
     UINT32          seqCnt,
     UINT32          comId,
     TRDP_MSG_T      msgType,
     TRDP_IP_ADDR_T  srcIP);
+
+
+/**********************************************************************************************************************/
+/** Check if listener URI is in addressing range of destination URI.
+ *
+ *  @param[in]      listUri       Null terminated listener URI string to compare
+ *  @param[in]      destUri       Null terminated destination URI string to compare
+ *
+ *  @retval         FALSE - not in addressing range 
+ *  @retval         TRUE  - listener URI is in addressing range of destination URI
+ */
+
+BOOL trdp_isAddressed(
+    const TRDP_URI_USER_T listUri, 
+    const TRDP_URI_USER_T destUri);
 
 #endif

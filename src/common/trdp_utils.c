@@ -713,3 +713,19 @@ BOOL  trdp_isRcvSeqCnt (
 #endif
     return FALSE;   /* Not found, initial value is zero */
 }
+
+
+/**********************************************************************************************************************/
+/** Check if listener URI is in addressing range of destination URI.
+ *
+ *  @param[in]      listUri       Null terminated listener URI string to compare
+ *  @param[in]      destUri       Null terminated destination URI string to compare
+ *
+ *  @retval         FALSE - not in addressing range 
+ *  @retval         TRUE  - listener URI is in addressing range of destination URI
+ */
+
+BOOL trdp_isAddressed(const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T destUri)
+{
+    return (vos_strnicmp(listUri, destUri, sizeof(TRDP_URI_USER_T)) == 0);
+}
