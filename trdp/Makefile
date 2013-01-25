@@ -25,6 +25,7 @@ vpath %.h src/api src/vos/api src/common src/vos/common
 INCPATH = src/api
 VOS_INCPATH = src/vos/api -I src/common
 BUILD_PATH = bld/$(TARGET_VOS)
+DOXYPATH = /usr/local/bin/
 
 ifdef TARGET
 DIR_PATH=$(TARGET)/
@@ -200,7 +201,7 @@ outdir:
 
 doc/latex/refman.pdf: Doxyfile trdp_if_light.h trdp_types.h
 			@$(ECHO) ' ### Making the PDF document'
-			doxygen Doxyfile
+			$(DOXYPATH)/doxygen Doxyfile
 			make -C doc/latex
 			$(CP) doc/latex/refman.pdf doc
 
