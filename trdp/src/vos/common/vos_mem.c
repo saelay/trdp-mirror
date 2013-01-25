@@ -38,12 +38,9 @@
 #include <string.h>
 #ifdef POSIX
 #include <strings.h>
+#include <unistd.h>
 #endif
 #include <fcntl.h>
-
-#ifdef TRDP_OPTION_LADDER
-#include <unistd.h>
-#endif /* TRDP_OPTION_LADDER */
 
 #include "vos_types.h"
 #include "vos_utils.h"
