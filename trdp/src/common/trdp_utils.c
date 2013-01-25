@@ -78,6 +78,7 @@ UINT32 trdp_packetSizePD (
     return packetSize;
 }
 
+
 /******************************************************************************/
 /** Return the element with same comId
  *
@@ -107,6 +108,7 @@ PD_ELE_T *trdp_queueFindComId (
     }
     return NULL;
 }
+
 
 /******************************************************************************/
 /** Return the element with same comId and IP addresses
@@ -143,6 +145,7 @@ PD_ELE_T *trdp_queueFindPubAddr (
     return NULL;
 }
 
+
 /******************************************************************************/
 /** Return the element with same comId and IP addresses
  *
@@ -175,6 +178,7 @@ PD_ELE_T *trdp_queueFindSubAddr (
     }
     return NULL;
 }
+
 
 /******************************************************************************/
 /** Return the element with same comId from MD queue
@@ -211,6 +215,7 @@ MD_ELE_T *trdp_MDqueueFindAddr (
     return NULL;
 }
 
+
 /******************************************************************************/
 /** Delete an element
  *
@@ -245,6 +250,7 @@ void    trdp_queueDelElement (
     }
 }
 
+
 /******************************************************************************/
 /** Delete an element from MD queue
  *
@@ -278,6 +284,7 @@ void    trdp_MDqueueDelElement (
         }
     }
 }
+
 
 /******************************************************************************/
 /** Append an element at end of queue
@@ -366,6 +373,7 @@ void    trdp_queueInsFirst (
     *ppHead     = pNew;
 }
 
+
 /******************************************************************************/
 /** Insert an element at front of MD queue
  *
@@ -400,6 +408,7 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
         iface[index].sock = -1;
     }
 }
+
 
 /******************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
@@ -557,6 +566,7 @@ TRDP_ERR_T  trdp_requestSocket (
     return err;
 }
 
+
 /******************************************************************************/
 /** Handle the socket pool: Release a socket from our socket pool
  *
@@ -587,6 +597,7 @@ TRDP_ERR_T  trdp_releaseSocket (
 
     return err;
 }
+
 
 /******************************************************************************/
 /** Get the initial sequence counter for the comID/message type and subnet (source IP).
@@ -645,6 +656,7 @@ UINT32  trdp_getSeqCnt (
 #endif
     return 0;   /*    Not found, initial value is zero    */
 }
+
 
 /**********************************************************************************************************************/
 /** Check if the sequence counter for the comID/message type and subnet (source IP)
