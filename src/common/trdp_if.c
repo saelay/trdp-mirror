@@ -715,6 +715,7 @@ TRDP_ERR_T tlp_setRedundant (
 {
     TRDP_ERR_T  ret = TRDP_NOINIT_ERR;
     PD_ELE_T    *iterPD;
+    BOOL        found = FALSE;
 
     if (trdp_isValidSession(appHandle))
     {
@@ -735,7 +736,17 @@ TRDP_ERR_T tlp_setRedundant (
                     {
                         iterPD->privFlags |= TRDP_REDUNDANT;
                     }
+                    found = TRUE;
                 }
+            }
+
+            /*  It would lead to an error, if the user tries to change the redundancy on a non-existant group, because
+                the leadership state is recorded in the PD send queue! If there is no published comID with a certain
+                redID, it would never be set... */
+            if (FALSE == found)
+            {
+                vos_printf(VOS_LOG_ERROR, "Redundant ID not found\n");
+                ret = TRDP_PARAM_ERR;
             }
 
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
