@@ -80,7 +80,7 @@ endif
 all:		outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
-demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP
+demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
 example:	outdir $(OUTDIR)/mdManager
 test:		outdir $(OUTDIR)/getstats
 
@@ -172,6 +172,17 @@ $(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
+
+
+$(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building TCPMDCom Siemens test application $(@F)'
+			$(CC) $(SUBDIRS)/example/mdManagerTCP_Siemens.c \
+			    -ltrdp \
+			    -luuid -lrt \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
 
 $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building TCPMDCom test application $(@F)'
