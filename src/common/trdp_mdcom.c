@@ -310,7 +310,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 &pPacket->addr.srcIpAddr);
     }
 
-    //pPacket->dataSize = size;
     pPacket->grossSize = size;
     pPacket->dataSize = size - sizeof(MD_HEADER_T);
 
@@ -322,8 +321,12 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
     if (err != TRDP_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "trdp_mdRecvPacket failed = %d\n", err);
-        return TRDP_IO_ERR;
+        if(((pPacket->pktFlags & TRDP_FLAGS_TCP) == 0)//UDP
+                || ((err != TRDP_BLOCK_ERR) && ((pPacket->pktFlags & TRDP_FLAGS_TCP) != 0)))
+        {
+            vos_printf(VOS_LOG_ERROR, "trdp_mdRecvPacket failed = %d\n", err);
+            return TRDP_IO_ERR;
+        }
     }
 
     /* received data */
