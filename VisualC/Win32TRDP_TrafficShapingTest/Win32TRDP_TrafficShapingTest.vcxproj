@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\resources\getopt\getopt.c" />
+    <ClCompile Include="..\..\resources\windows\getopt\getopt.c" />
     <ClCompile Include="..\..\test\test_trafficShaping.c" />
   </ItemGroup>
   <ItemGroup>
@@ -57,7 +57,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\test;..\..\src\vos\api;..\..\src\api;;..\..\resources\getopt</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\test;..\..\src\vos\api;..\..\src\api;..\..\resources\windows\getopt</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
