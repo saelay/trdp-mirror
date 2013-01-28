@@ -2,7 +2,7 @@
  *  test_marshalling.c
  *  trdp
  *
- *  Created by Bernd Löhr on 13.08.12.
+ *  Created by Bernd Lhr on 13.08.12.
  *  Copyright 2012 NewTec GmbH. All rights reserved.
  *
  *    $ID:$
@@ -12,10 +12,13 @@
 #include <string.h>
 #include "tau_marshall.h"
 
+#define TEST_COMID  1000
+
+
 /*    Test data sets    */
-TRDP_DATASET_T gDataSet990 =
+TRDP_DATASET_T  gDataSet1990 =
 {
-    990,       /*    dataset/com ID  */
+    1990,       /*    dataset/com ID  */
     0,          /*    reserved        */
     2,         /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
@@ -32,9 +35,9 @@ TRDP_DATASET_T gDataSet990 =
     }
 };
 
-TRDP_DATASET_T gDataSet991 =
+TRDP_DATASET_T  gDataSet1991 =
 {
-    991,       /*    dataset/com ID  */
+    1991,       /*    dataset/com ID  */
     0,          /*    reserved        */
     2,         /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
@@ -44,16 +47,16 @@ TRDP_DATASET_T gDataSet991 =
             NULL
         },
         {
-            990,
+            1990,
             1,
             NULL
         }
     }
 };
 
-TRDP_DATASET_T gDataSet992 =
+TRDP_DATASET_T  gDataSet1992 =
 {
-    992,       /*    dataset/com ID  */
+    1992,       /*    dataset/com ID  */
     0,          /*    reserved        */
     2,         /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
@@ -63,16 +66,16 @@ TRDP_DATASET_T gDataSet992 =
             NULL
         },
         {
-            991,
+            1991,
             1,
             NULL
         }
     }
 };
 
-TRDP_DATASET_T gDataSet993 =
+TRDP_DATASET_T  gDataSet1993 =
 {
-    993,       /*    dataset/com ID  */
+    1993,       /*    dataset/com ID  */
     0,          /*    reserved        */
     2,         /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
@@ -82,14 +85,14 @@ TRDP_DATASET_T gDataSet993 =
             NULL
         },
         {
-            992,
+            1992,
             1,
             NULL
         }
     }
 };
 
-TRDP_DATASET_T gDataSet1000 =
+TRDP_DATASET_T  gDataSet1000 =
 {
     1000,        /*    dataset/com ID  */
     0,          /*    reserved        */
@@ -105,15 +108,15 @@ TRDP_DATASET_T gDataSet1000 =
             1,
             NULL
         },
-       {
+        {
             TRDP_UTF16,
-           1,
-           NULL
+            1,
+            NULL
         },
         {
             TRDP_INT8,
             1,
-            NULL           
+            NULL
         },
         {
             TRDP_INT16,
@@ -185,15 +188,15 @@ TRDP_DATASET_T gDataSet1000 =
             16,
             NULL
         },
-       {
+        {
             TRDP_UTF16,
-           16,
-           NULL
+            16,
+            NULL
         },
         {
             TRDP_INT8,
             4,
-            NULL           
+            NULL
         },
         {
             TRDP_INT16,    /* 20    */
@@ -293,7 +296,7 @@ TRDP_DATASET_T gDataSet1000 =
         {
             TRDP_INT8,
             0,
-            NULL           
+            NULL
         },
         {
             TRDP_UINT16,
@@ -416,14 +419,14 @@ TRDP_DATASET_T gDataSet1000 =
             NULL
         },
         {
-            993,
+            1993,
             1,
             NULL
         }
     }
 };
 
-TRDP_DATASET_T    gDataSet1001 = 
+TRDP_DATASET_T  gDataSet1001 =
 {
     1001,       /*    dataset/com ID  */
     0,          /*    reserved        */
@@ -448,107 +451,107 @@ TRDP_DATASET_T    gDataSet1001 =
 };
 
 /*    Will be sorted by tau_initMarshall    */
-TRDP_DATASET_T*    gDataSets[] =
+TRDP_DATASET_T  *gDataSets[] =
 {
     &gDataSet1001,
     &gDataSet1000,
-    &gDataSet990,
-    &gDataSet991,
-    &gDataSet992,
-    &gDataSet993
+    &gDataSet1990,
+    &gDataSet1991,
+    &gDataSet1992,
+    &gDataSet1993
 };
 
-struct myDataSet990
+struct myDataSet1990
 {
     UINT8   level;
     char    string[16];
 };
 
-struct myDataSet991
+struct myDataSet1991
 {
-    UINT8   level;
-    struct myDataSet990 ds;
+    UINT8                   level;
+    struct myDataSet1990    ds;
 };
 
-struct myDataSet992
+struct myDataSet1992
 {
-    UINT8   level;
-    struct myDataSet991 ds;
+    UINT8                   level;
+    struct myDataSet1991    ds;
 };
 
-struct myDataSet993
+struct myDataSet1993
 {
-    UINT8   level;
-    struct myDataSet992 ds;
+    UINT8                   level;
+    struct myDataSet1992    ds;
 };
 
 struct myDataSet1000
 {
-    UINT8   bool8_1;
-    char    char8_1;
-    INT16   utf16_1;
-    INT8    int8_1;
-    INT16   int16_1;
-    INT32   int32_1;
-    INT64   int64_1;
-    UINT8   uint8_1;
-    UINT16  uint16_1;
-    UINT32  uint32_1;
-    UINT64  uint64_1;
-    float   float32_1;
-    double  float64_1;
-    TIMEDATE32  timedate32_1;
-    TIMEDATE48  timedate48_1;
-    TIMEDATE64  timedate64_1;
-    UINT8   bool8_4[4];
-    char    char8_16[16];
-    INT16   utf16_4[16];
-    INT8    int8_4[4];
-    INT16   int16_4[4];
-    INT32   int32_4[4];
-    INT64   int64_4[4];
-    UINT8   uint8_4[4];
-    UINT16  uint16_4[4];
-    UINT32  uint32_4[4];
-    UINT64  uint64_4[4];
-    float   float32_4[4];
-    double  float64_4[4];
-    TIMEDATE32  timedate32_4[4];
-    TIMEDATE48  timedate48_4[4];
-    TIMEDATE64  timedate64_4[4];
-    UINT16  size_bool8;
-    UINT8   bool8_0[4];
-    UINT16  size_char8;
-    char    char8_0[16];
-    UINT16  size_utf16;
-    INT16   utf16_0[16];
-    UINT16  size_int8;
-    INT8    int8_0[4];
-    UINT16  size_int16;
-    INT16   int16_0[4];
-    UINT16  size_int32;
-    INT32   int32_0[4];
-    UINT16  size_int64;
-    INT64   int64_0[4];
-    UINT16  size_uint8;
-    UINT8   uint8_0[4];
-    UINT16  size_uint16;
-    UINT16  uint16_0[4];
-    UINT16  size_uint32;
-    UINT32  uint32_0[4];
-    UINT16  size_uint64;
-    UINT64  uint64_0[4];
-    UINT16  size_float32;
-    float   float32_0[4];
-    UINT16  size_float64;
-    double  float64_0[4];
-    UINT16  size_timedate32;
-    TIMEDATE32  timedate32_0[4];
-    UINT16  size_timedate48;
-    TIMEDATE48  timedate48_0[4];
-    UINT16  size_timedate64;
-    TIMEDATE64  timedate64_0[4];
-    struct myDataSet993 ds;
+    UINT8                   bool8_1;
+    char                    char8_1;
+    INT16                   utf16_1;
+    INT8                    int8_1;
+    INT16                   int16_1;
+    INT32                   int32_1;
+    INT64                   int64_1;
+    UINT8                   uint8_1;
+    UINT16                  uint16_1;
+    UINT32                  uint32_1;
+    UINT64                  uint64_1;
+    float                   float32_1;
+    double                  float64_1;
+    TIMEDATE32              timedate32_1;
+    TIMEDATE48              timedate48_1;
+    TIMEDATE64              timedate64_1;
+    UINT8                   bool8_4[4];
+    char                    char8_16[16];
+    INT16                   utf16_4[16];
+    INT8                    int8_4[4];
+    INT16                   int16_4[4];
+    INT32                   int32_4[4];
+    INT64                   int64_4[4];
+    UINT8                   uint8_4[4];
+    UINT16                  uint16_4[4];
+    UINT32                  uint32_4[4];
+    UINT64                  uint64_4[4];
+    float                   float32_4[4];
+    double                  float64_4[4];
+    TIMEDATE32              timedate32_4[4];
+    TIMEDATE48              timedate48_4[4];
+    TIMEDATE64              timedate64_4[4];
+    UINT16                  size_bool8;
+    UINT8                   bool8_0[4];
+    UINT16                  size_char8;
+    char                    char8_0[16];
+    UINT16                  size_utf16;
+    INT16                   utf16_0[16];
+    UINT16                  size_int8;
+    INT8                    int8_0[4];
+    UINT16                  size_int16;
+    INT16                   int16_0[4];
+    UINT16                  size_int32;
+    INT32                   int32_0[4];
+    UINT16                  size_int64;
+    INT64                   int64_0[4];
+    UINT16                  size_uint8;
+    UINT8                   uint8_0[4];
+    UINT16                  size_uint16;
+    UINT16                  uint16_0[4];
+    UINT16                  size_uint32;
+    UINT32                  uint32_0[4];
+    UINT16                  size_uint64;
+    UINT64                  uint64_0[4];
+    UINT16                  size_float32;
+    float                   float32_0[4];
+    UINT16                  size_float64;
+    double                  float64_0[4];
+    UINT16                  size_timedate32;
+    TIMEDATE32              timedate32_0[4];
+    UINT16                  size_timedate48;
+    TIMEDATE48              timedate48_0[4];
+    UINT16                  size_timedate64;
+    TIMEDATE64              timedate64_0[4];
+    struct myDataSet1993    ds;
 } gMyDataSet1000 =
 {
     1,                               /* BOOL8 */
@@ -567,9 +570,10 @@ struct myDataSet1000
     0x12345678,
     {0x12345678, 0x9ABC},            /* 14    */
     {0x12345678, 0x9ABCDEF0},
-    {1,0,1,0},                      /* BOOL8 array fixed size */
+    {1, 0, 1, 0},                   /* BOOL8 array fixed size */
     "Hello old World",
-    {0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x0040, 0x0041, 0x0042, 0x0043, 0x0044, 0},
+    {0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x0040, 0x0041, 0x0042, 0x0043,
+     0x0044, 0},
     {0x12, 0x34, 0x55, 0x78},
     {0x1234, 0x5678, 0x9ABC, 0xDEF0},    /* index == 20    */
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
@@ -581,14 +585,15 @@ struct myDataSet1000
     {0.12341, 0x12342, 0x12343, 0x12344},
     {0.12345671, 0.12345672, 0.12345673, 0.12345674},
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
-    {{0x12345671, 0x89A1},{0x12345672, 0x89A2},{0x12345673, 0x89A3},{0x12345674, 0x89A4}},
-    {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
+    {{0x12345671, 0x89A1}, {0x12345672, 0x89A2}, {0x12345673, 0x89A3}, {0x12345674, 0x89A4}},
+    {{0x12345671, 0x89ABCDE1}, {0x12345672, 0x89ABCDE2}, {0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
     4,                                /* 32    */
-    {1,0,1,0},                       /* BOOL8 array var size */
+    {1, 0, 1, 0},                    /* BOOL8 array var size */
     16,
     "Hello old World",
     16,
-    {0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x0040, 0x0041, 0x0042, 0x0043, 0x0044, 0},
+    {0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x0040, 0x0041, 0x0042, 0x0043,
+     0x0044, 0},
     4,
     {0x12, 0x34, 0x55, 0x78},
     4,
@@ -612,31 +617,32 @@ struct myDataSet1000
     4,
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     4,
-    {{0x12345671, 0x89A1},{0x12345672, 0x89A2},{0x12345673, 0x89A3},{0x12345674, 0x89A4}},
+    {{0x12345671, 0x89A1}, {0x12345672, 0x89A2}, {0x12345673, 0x89A3}, {0x12345674, 0x89A4}},
     4,
-    {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
+    {{0x12345671, 0x89ABCDE1}, {0x12345672, 0x89ABCDE2}, {0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
     {1, {2, {3, {4, "Nested Datasets"}}}}
 };
 
 struct myDataSet1001
 {
     TIMEDATE64  timedate64_4[4];
-    UINT16        size;
-    UINT8        array[4];
+    UINT16      size;
+    UINT8       array[4];
 } gMyDataSet1001 =
 {
-    {{0x12345671, 0x89ABCDE1},{0x12345672, 0x89ABCDE2},{0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
+    {{0x12345671, 0x89ABCDE1}, {0x12345672, 0x89ABCDE2}, {0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
     4,
-    {1,0,1,0}                       /* UINT8 array var size */
+    {1, 0, 1, 0}                       /* UINT8 array var size */
 };
 
 
-TRDP_COMID_DSID_MAP_T    gComIdMap[] = {
+TRDP_COMID_DSID_MAP_T   gComIdMap[] =
+{
     {1000, 1000},
     {1001, 1001}
 };
 
-UINT8                     gDstDataBuffer[1500];
+UINT8 gDstDataBuffer[1500];
 struct myDataSet1000    gMyDataSet1000Copy;
 struct myDataSet1001    gMyDataSet1001Copy;
 
@@ -648,7 +654,7 @@ int main ()
     /*INT32       index;*/
     UINT32      *refCon;
     TRDP_ERR_T  err;
-    UINT32      bufSize;
+    UINT32      bufSize = 0;
 
     err = tau_initMarshall((void *)&refCon, 2, gComIdMap, 6, gDataSets);
 
@@ -658,10 +664,30 @@ int main ()
         return 1;
     }
 
+    /*	Compute size of marshalled data */
+    err = tau_calcDatasetSizeByComId(refCon, 1000, (UINT8 *) &gMyDataSet1000, &bufSize, NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tau_calcDatasetSizeByComId returns error %d\n", err);
+        return 1;
+    }
+
+    printf("Precomputed size of marshalled dataset for ComId %d is %u...\n", 1000, bufSize);
+
+    if (bufSize == 680)
+    {
+        printf("...seems OK!\n");
+    }
+    else
+    {
+        printf("...### Precomputed size is different!\n");
+    }
+
     bufSize = sizeof(gDstDataBuffer);
     memset(gDstDataBuffer, 0, bufSize);
 
-    err = tau_marshall (refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize, NULL);
+    err = tau_marshall(refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -669,22 +695,33 @@ int main ()
         return 1;
     }
 
+    printf("Marshalled size of dataset for ComId %d is %u\n", 1000, bufSize);
+
+    if (bufSize == 680)
+    {
+        printf("...seems OK!\n");
+    }
+    else
+    {
+        printf("...### Marshalled size is different!\n");
+    }
+
     bufSize = sizeof(gMyDataSet1000Copy);
     memset(&gMyDataSet1000Copy, 0, bufSize);
 
-    err = tau_unmarshall (refCon, 1000, gDstDataBuffer, (UINT8 *) &gMyDataSet1000Copy, &bufSize, NULL);
+    err = tau_unmarshall(refCon, 1000, gDstDataBuffer, (UINT8 *) &gMyDataSet1000Copy, &bufSize, NULL);
 
     if (err != TRDP_NO_ERR)
     {
         printf("tau_unmarshall returns error %d\n", err);
         return 1;
     }
-    
+
     if (memcmp(&gMyDataSet1000, &gMyDataSet1000Copy, sizeof(gMyDataSet1000)) != 0)
     {
         printf("Something's wrong in the state of Marshalling!\n");
         return 1;
-        
+
     }
     else
     {
