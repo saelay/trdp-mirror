@@ -99,7 +99,7 @@ TRDP_ERR_T trdp_pdPut (
 {
     TRDP_ERR_T ret = TRDP_NO_ERR;
 
-    if (pPacket == NULL || pData == NULL || dataSize == 0)
+    if (pPacket == NULL || pData == NULL || dataSize == 0 || dataSize > pPacket->dataSize)
     {
         return TRDP_PARAM_ERR;
     }
@@ -108,6 +108,8 @@ TRDP_ERR_T trdp_pdPut (
           || (marshall == NULL))
     {
         memcpy(pPacket->pFrame->data, pData, dataSize);
+        // clean the rest of the package, when shorter data is sent (set data to zero)
+        memset(pPacket->pFrame->data+dataSize, 0, pPacket->dataSize - dataSize);
     }
     else
     {
@@ -121,7 +123,7 @@ TRDP_ERR_T trdp_pdPut (
 
     if (TRDP_NO_ERR == ret)
     {
-        pPacket->dataSize = dataSize;
+        //do NOT update the package size: pPacket->dataSize = dataSize; (keep the same value as in the PD header, otherwise the CRC calculation will fail)
 
         /* set data valid */
         pPacket->privFlags &= ~TRDP_INVALID_DATA;
