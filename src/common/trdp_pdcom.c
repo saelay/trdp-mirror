@@ -99,7 +99,7 @@ TRDP_ERR_T trdp_pdPut (
 {
     TRDP_ERR_T ret = TRDP_NO_ERR;
 
-    if (pPacket == NULL || pData == NULL || dataSize == 0 || dataSize > pPacket->dataSize)
+    if (pPacket == NULL || pData == NULL || dataSize == 0 || dataSize != pPacket->dataSize)
     {
         return TRDP_PARAM_ERR;
     }
@@ -123,8 +123,6 @@ TRDP_ERR_T trdp_pdPut (
 
     if (TRDP_NO_ERR == ret)
     {
-        //do NOT update the package size: pPacket->dataSize = dataSize; (keep the same value as in the PD header, otherwise the CRC calculation will fail)
-
         /* set data valid */
         pPacket->privFlags &= ~TRDP_INVALID_DATA;
 
@@ -764,7 +762,6 @@ TRDP_ERR_T  trdp_pdDistribute (
     vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %u.%06u\n", tNull.tv_sec, tNull.tv_usec);
     vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: noOfPackets = %d\n", noOfPackets);
 
-    /*  Compute the new send time for each packet by averaging deltaTmax */
     for (packetIndex = 0, pPacket = pSndQueue; packetIndex < noOfPackets && pPacket != NULL; )
     {
         /*  Ignore PULL-only packets!  */
