@@ -282,7 +282,7 @@ EXT_DECL TRDP_ERR_T tlp_unpublish (
  *  @param[in,out]  dataSize            size of data
  *
  *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_PARAM_ERR      parameter error on uninitialized parameter or changed dataSize compared to published one
  *  @retval         TRDP_PUB_ERR        not published
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_COMID_ERR      ComID not found when marshalling
