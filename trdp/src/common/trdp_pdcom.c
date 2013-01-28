@@ -248,16 +248,19 @@ TRDP_ERR_T  trdp_pdSendQueued (
              !timercmp(&iterPD->timeToGo, &now, >)) ||
             iterPD->privFlags & TRDP_REQ_2B_SENT)
         {
-            /* send only if there are valid data */
+            /* send only if there is valid data */
             if (!(iterPD->privFlags & TRDP_INVALID_DATA))
             {
+                if (iterPD->privFlags & TRDP_REQ_2B_SENT)       /*  PULL Request?  */
+                {
+                    iterPD->pFrame->frameHead.msgType = vos_htons(TRDP_MSG_PP);
+                }
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
 
                 /*    Send the packet if it is not redundant    */
                 if (iterPD->socketIdx != -1 &&
-                    (!appHandle->beQuiet ||
-                     (iterPD->privFlags & TRDP_REDUNDANT)))
+                    (!appHandle->beQuiet || (iterPD->privFlags & TRDP_REDUNDANT)))
                 {
                     /* We pass the error to the application, but we keep on going    */
                     err = trdp_pdSend(appHandle->iface[iterPD->socketIdx].sock, iterPD, appHandle->pdDefault.port);
@@ -400,7 +403,7 @@ TRDP_ERR_T  trdp_pdReceive (
                 pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
                 pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrame->frameHead.replyIpAddress);
 
-                trdp_pdInit(pPulledElement, TRDP_MSG_PD, appHandle->topoCount, 0, 0, 0, 0);
+                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->topoCount, 0, 0, 0, 0);
 
                 trdp_pdPrepareStats(appHandle, pPulledElement);
             }
@@ -564,8 +567,16 @@ void    trdp_pdUpdate (
     UINT32 myCRC = vos_crc32(0xFFFFFFFF, NULL, 0);
 
     /* increment counter with each telegram */
-    pPacket->curSeqCnt++;
-    pPacket->pFrame->frameHead.sequenceCounter = vos_htonl(pPacket->curSeqCnt);
+    if (pPacket->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PP))
+    {
+        pPacket->curSeqCnt4Pull++;
+        pPacket->pFrame->frameHead.sequenceCounter = vos_htonl(pPacket->curSeqCnt4Pull);
+    }
+    else
+    {
+        pPacket->curSeqCnt++;
+        pPacket->pFrame->frameHead.sequenceCounter = vos_htonl(pPacket->curSeqCnt);
+    }
 
     /* Compute CRC32   */
     myCRC = vos_crc32(myCRC, (UINT8 *)&pPacket->pFrame->frameHead, sizeof(PD_HEADER_T) - sizeof(UINT32));

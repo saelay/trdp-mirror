@@ -52,7 +52,7 @@
 
 static TRDP_APP_SESSION_T   sSession        = NULL;
 static VOS_MUTEX_T          sSessionMutex   = NULL;
-static BOOL                 sInited         = FALSE;
+static BOOL sInited = FALSE;
 
 
 /******************************************************************************
@@ -1029,6 +1029,11 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
             pNewElement->curSeqCnt = trdp_getSeqCnt(pNewElement->addr.comId, TRDP_MSG_PD,
                                                     pNewElement->addr.srcIpAddr) - 1;
+
+            /*  Get a second sequence counter in case this packet is requested as PULL. This way we will not
+                disturb the monotonic sequence for PDs  */
+            pNewElement->curSeqCnt4Pull = trdp_getSeqCnt(pNewElement->addr.comId, TRDP_MSG_PP,
+                                                         pNewElement->addr.srcIpAddr) - 1;
 
             /*    Check if the redundancy group is already set as follower; if set, we need to mark this one also!
                   This will only happen, if publish() is called while we are in redundant mode */
