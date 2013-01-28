@@ -46,16 +46,6 @@ extern "C" {
  */
 
 /**********************************************************************************************************************/
-/** Get current topocount
- *
- *    This value is used for validating outgoing and incoming packets only!
- *
- *  @retval      topoCount            Current topoCount value
- */
-UINT32 trdp_getTopoCount (
-    TRDP_APP_SESSION_T pSessionHandle);
-    
-/**********************************************************************************************************************/
 /** Check if the session handle is valid
  *
  *
@@ -63,16 +53,14 @@ UINT32 trdp_getTopoCount (
  *  @retval         TRUE              is valid
  *  @retval         FALSE             is invalid
  */
-BOOL trdp_isValidSession (
-    TRDP_APP_SESSION_T pSessionHandle);
+BOOL trdp_isValidSession (TRDP_APP_SESSION_T pSessionHandle);
 
 /**********************************************************************************************************************/
 /** Get the session queue head pointer
  *
  *  @retval            &sSession
  */
-TRDP_APP_SESSION_T *trdp_sessionQueue (
-    void);
+TRDP_APP_SESSION_T *trdp_sessionQueue (void);
 
 #ifdef __cplusplus
 }
