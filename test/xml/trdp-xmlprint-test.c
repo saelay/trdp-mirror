@@ -55,8 +55,8 @@ static void printDefaultPDandMD(
     TRDP_MD_CONFIG_T  * pMdConfig
     )
 {
-    UINT32  trdpFlags[4] = {TRDP_FLAGS_REDUNDANT, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
-    const char * strtrdpFlags[4] = {"TRDP_FLAGS_REDUNDANT", "TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
+    UINT32  trdpFlags[4] = {TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
+    const char * strtrdpFlags[4] = {"TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
     UINT32  i;
     printf("  Default PD configuration\n");
     printf("    QoS: %u, TTL: %u, Retries: %u\n", 
@@ -181,8 +181,8 @@ static void printTelegrams(
     TRDP_EXCHG_PAR_T    *pExchgPar
     )
 {
-    UINT32  trdpFlags[4] = {TRDP_FLAGS_REDUNDANT, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
-    const char * strtrdpFlags[4] = {"TRDP_FLAGS_REDUNDANT", "TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
+    UINT32  trdpFlags[4] = {TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
+    const char * strtrdpFlags[4] = {"TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
     UINT32  idxExPar, i;
 
     /*  Iterate over all telegrams  */
