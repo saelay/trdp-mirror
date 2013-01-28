@@ -260,11 +260,10 @@ typedef enum
 typedef enum
 {
     TRDP_FLAGS_DEFAULT   = 0,       /**< Default value defined in tlc_openDession will be taken     */
-    TRDP_FLAGS_NONE      = 0x1,     /**< No flags set                                               */
-    TRDP_FLAGS_REDUNDANT = 0x2,     /**< Redundant sources                                          */
-    TRDP_FLAGS_MARSHALL  = 0x4,     /**< Optional marshalling/unmarshalling in TRDP stack           */
-    TRDP_FLAGS_CALLBACK  = 0x8,     /**< Use of callback function                                   */
-    TRDP_FLAGS_TCP       = 0x10     /**< Use TCP for message data                                   */
+    TRDP_FLAGS_NONE      = 0x01,    /**< No flags set                                               */
+    TRDP_FLAGS_MARSHALL  = 0x02,    /**< Optional marshalling/unmarshalling in TRDP stack           */
+    TRDP_FLAGS_CALLBACK  = 0x04,    /**< Use of callback function                                   */
+    TRDP_FLAGS_TCP       = 0x08     /**< Use TCP for message data                                   */
 } TRDP_FLAGS_T;
 
 
