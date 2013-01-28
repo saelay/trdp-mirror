@@ -55,8 +55,8 @@ static void printDefaultPDandMD(
     TRDP_MD_CONFIG_T  * pMdConfig
     )
 {
-    UINT32  trdpFlags[4] = {TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
-    const char * strtrdpFlags[4] = {"TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
+    UINT32  trdpFlags[5] = {TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
+    const char * strtrdpFlags[5] = {"TRDP_FLAGS_DEFAULT", "TRDP_FLAGS_NONE", "TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
     UINT32  i;
     printf("  Default PD configuration\n");
     printf("    QoS: %u, TTL: %u, Retries: %u\n", 
@@ -65,7 +65,7 @@ static void printDefaultPDandMD(
         pPdConfig->port, pPdConfig->timeout, 
         pPdConfig->toBehavior==1 ? "TRDP_TO_SET_TO_ZERO" : "TRDP_TO_KEEP_LAST_VALUE");
     printf("    Flags:");
-    for (i=0; i < 4; i++)
+    for (i=0; i < 5; i++)
         if (pPdConfig->flags & trdpFlags[i])
             printf(" %s", strtrdpFlags[i]);
     printf("\n");
@@ -181,8 +181,8 @@ static void printTelegrams(
     TRDP_EXCHG_PAR_T    *pExchgPar
     )
 {
-    UINT32  trdpFlags[4] = {TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
-    const char * strtrdpFlags[4] = {"TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
+    UINT32  trdpFlags[5] = {TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK, TRDP_FLAGS_TCP};
+    const char * strtrdpFlags[5] = {"TRDP_FLAGS_DEFAULT", "TRDP_FLAGS_NONE", "TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
     UINT32  idxExPar, i;
 
     /*  Iterate over all telegrams  */
@@ -195,7 +195,7 @@ static void printTelegrams(
         {
             printf("    MD Conf tmo: %u, Repl tmo: %u, Flags:",
                 pExchgPar[idxExPar].pMdPar->confirmTimeout, pExchgPar[idxExPar].pMdPar->replyTimeout);
-            for (i=0; i < 4; i++)
+            for (i=0; i < 5; i++)
                 if (pExchgPar[idxExPar].pMdPar->flags & trdpFlags[i])
                     printf(" %s", strtrdpFlags[i]);
             printf("\n");
