@@ -50,7 +50,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\test;..\..\src\vos\api;..\..\src\api;..\..\src\example;;..\..\resources\getopt;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\test;..\..\src\vos\api;..\..\src\api;..\..\src\example;..\..\resources\windows\getopt;</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
     </ClCompile>
@@ -76,7 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\resources\getopt\getopt.c" />
+    <ClCompile Include="..\..\resources\windows\getopt\getopt.c" />
     <ClCompile Include="LibraryTests.cpp" />
   </ItemGroup>
   <ItemGroup>

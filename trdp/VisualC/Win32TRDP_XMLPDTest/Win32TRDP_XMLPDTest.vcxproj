@@ -50,14 +50,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\test\xml;..\..\src\api;..\..\src\vos\api;;..\..\resources\getopt</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\test\xml;..\..\src\api;..\..\src\vos\api;..\..\resources\windows\getopt</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(ProjectDir)..\..\resources\libxml\bin\*.* $(TargetDir)</Command>
+      <Command>copy $(ProjectDir)..\..\resources\windows\libxml\bin\*.* $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -77,11 +77,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Library Include="..\..\resources\libxml\lib\libxml2.lib" />
+    <Library Include="..\..\resources\windows\libxml\lib\libxml2.lib" />
     <Library Include="..\Debug\Win32TRDP.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\resources\getopt\getopt.c" />
+    <ClCompile Include="..\..\resources\windows\getopt\getopt.c" />
     <ClCompile Include="..\..\test\xml\trdp-xmlpd-test.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
