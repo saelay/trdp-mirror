@@ -39,7 +39,7 @@
 /** Marshalling info, used to and from wire */
 typedef struct
 {
-    INT32   level;
+    INT32   level;          /**< track recursive level   */
     UINT8   *pSrc;          /**< source pointer          */
     UINT8   *pDst;          /**< destination pointer     */
     UINT8   *pDstEnd;       /**< last destination        */
@@ -347,7 +347,7 @@ static TRDP_DATASET_T *find_DS (
  *
  */
 
-static TRDP_ERR_T marshall (
+static TRDP_ERR_T do_marshall (
     TAU_MARSHALL_INFO_T *pInfo,
     TRDP_DATASET_T      *pDataset)
 {
@@ -397,7 +397,7 @@ static TRDP_ERR_T marshall (
                     return TRDP_COMID_ERR;
                 }
 
-                err = marshall(pInfo, pDataset->pElement[index].pCachedDS);
+                err = do_marshall(pInfo, pDataset->pElement[index].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -564,7 +564,7 @@ static TRDP_ERR_T marshall (
  *
  */
 
-static TRDP_ERR_T unmarshall (
+static TRDP_ERR_T do_unmarshall (
     TAU_MARSHALL_INFO_T *pInfo,
     TRDP_DATASET_T      *pDataset)
 {
@@ -609,7 +609,7 @@ static TRDP_ERR_T unmarshall (
                     return TRDP_COMID_ERR;
                 }
 
-                err = unmarshall(pInfo, pDataset->pElement[index].pCachedDS);
+                err = do_unmarshall(pInfo, pDataset->pElement[index].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -762,6 +762,186 @@ static TRDP_ERR_T unmarshall (
     return TRDP_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/**    Compute marshalled size of one dataset.
+ *
+ *  @param[in,out]  pInfo           Pointer with src & dest info
+ *  @param[in]      pDataset        Pointer to one dataset
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_MEM_ERR    provided buffer to small
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_STATE_ERR  Too deep recursion
+ *
+ */
+
+static TRDP_ERR_T size_marshall (
+    TAU_MARSHALL_INFO_T *pInfo,
+    TRDP_DATASET_T      *pDataset)
+{
+    TRDP_ERR_T  err;
+    UINT16      index;
+    UINT32      var_size = 0;
+    UINT8       *pSrc;
+    UINT8       *pDst = pInfo->pDst;
+
+    /* Restrict recursion */
+    pInfo->level++;
+    if (pInfo->level > TAU_MAX_DS_LEVEL)
+    {
+        return TRDP_STATE_ERR;
+    }
+
+    /*    Align on struct boundary first    */
+    pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
+
+    /*    Loop over all datasets in the array    */
+    for (index = 0; index < pDataset->numElement; ++index)
+    {
+        UINT32 noOfItems = pDataset->pElement[index].size;
+
+        if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
+        {
+            noOfItems = var_size;
+        }
+
+        /*    Is this a composite type?    */
+        if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
+        {
+            while (noOfItems-- > 0)
+            {
+                /* Dataset, call ourself recursively */
+
+                /* Never used before?  */
+                if (NULL == pDataset->pElement[index].pCachedDS)
+                {
+                    /* Look for it   */
+                    pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
+                }
+
+                if (NULL == pDataset->pElement[index].pCachedDS)      /* Not in our DB    */
+                {
+                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
+                    return TRDP_COMID_ERR;
+                }
+
+                err = size_marshall(pInfo, pDataset->pElement[index].pCachedDS);
+                if (err != TRDP_NO_ERR)
+                {
+                    return err;
+                }
+            }
+        }
+        else
+        {
+            switch (pDataset->pElement[index].type)
+            {
+                case TRDP_BOOLEAN:
+                case TRDP_CHAR8:
+                case TRDP_INT8:
+                case TRDP_UINT8:
+                {
+                    /*    possible variable source size    */
+                    var_size = *pSrc;
+
+                    while (noOfItems-- > 0)
+                    {
+                        pDst++;
+                        pSrc++;
+                    }
+                    break;
+                }
+                case TRDP_UTF16:
+                case TRDP_INT16:
+                case TRDP_UINT16:
+                {
+                    UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
+
+                    /*    possible variable source size    */
+                    var_size = *pSrc16;
+
+                    while (noOfItems-- > 0)
+                    {
+                        pDst += 2;
+                        pSrc16++;
+                    }
+                    pSrc = (UINT8 *) pSrc16;
+                    break;
+                }
+                case TRDP_INT32:
+                case TRDP_UINT32:
+                case TRDP_REAL32:
+                case TRDP_TIMEDATE32:
+                {
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+
+                    /*    possible variable source size    */
+                    var_size = *pSrc32;
+
+                    while (noOfItems-- > 0)
+                    {
+                        pDst += 4;
+                        pSrc32++;
+                    }
+                    pSrc = (UINT8 *) pSrc32;
+                    break;
+                }
+                case TRDP_TIMEDATE64:
+                {
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
+
+                    while (noOfItems-- > 0)
+                    {
+                        pDst    += 8;
+                        pSrc32  += 2;
+                    }
+                    pSrc = (UINT8 *) pSrc32;
+                    break;
+                }
+                case TRDP_TIMEDATE48:
+                {
+                    /*    This is not a base type but a structure    */
+                    UINT32  *pSrc32;
+                    UINT16  *pSrc16;
+
+                    while (noOfItems-- > 0)
+                    {
+                        pSrc32  = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        pDst    += 4;
+                        pSrc32++;
+                        pSrc16  = (UINT16 *) alignePtr((UINT8 *) pSrc32, ALIGNOF(UINT16));
+                        pDst    += 2;
+                        pSrc32++;
+                        pSrc = (UINT8 *) pSrc32;
+                    }
+                    break;
+                }
+                case TRDP_INT64:
+                case TRDP_UINT64:
+                case TRDP_REAL64:
+                {
+                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT64));
+
+                    while (noOfItems-- > 0)
+                    {
+                        pDst    += 8;
+                        pSrc32  += 2;
+                    }
+                    pSrc = (UINT8 *) pSrc32;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        pInfo->pDst = pDst;
+        pInfo->pSrc = pSrc;
+    }
+
+
+    return TRDP_NO_ERR;
+}
+
 /**********************************************************************************************************************
  * GLOBAL FUNCTIONS
  */
@@ -849,7 +1029,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -883,7 +1063,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = marshall(&info, pDataset);
+    err = do_marshall(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -916,7 +1096,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -950,7 +1130,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = unmarshall(&info, pDataset);
+    err = do_unmarshall(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -985,7 +1165,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1019,7 +1199,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = marshall(&info, pDataset);
+    err = do_marshall(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -1052,7 +1232,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1086,7 +1266,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = unmarshall(&info, pDataset);
+    err = do_unmarshall(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -1098,9 +1278,9 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
 /**    Calculate data set size by given data set id.
  *
  *  @param[in]      pRefCon         Pointer to user context
- *  @param[in]      datasetId       Dataset id to identify the structure out of a configuration
+ *  @param[in]      dsId            Dataset id to identify the structure out of a configuration
  *  @param[in]      pSrc            Pointer to received original message
- *  @param[out]     pSize           Pointer to the size of the data set
+ *  @param[out]     pDestSize       Pointer to the size of the data set
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
  *                                  set NULL if not used, set content NULL if unknown
  *
@@ -1112,13 +1292,49 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
 
 EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     void            *pRefCon,
-    UINT32           datasetId,
+    UINT32          dsId,
     UINT8           *pSrc,
-    UINT32          *pSize,
-    TRDP_DATASET_T **ppDSPointer)
+    UINT32          *pDestSize,
+    TRDP_DATASET_T  * *ppDSPointer)
 {
-    /* to be implemented */
-    return TRDP_UNKNOWN_ERR;
+    TRDP_ERR_T          err;
+    TRDP_DATASET_T      *pDataset;
+    TAU_MARSHALL_INFO_T info;
+
+    if (0 == dsId || NULL == pSrc || NULL == pDestSize)
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    /* Can we use the formerly cached value? */
+    if (NULL != ppDSPointer)
+    {
+        if (NULL == *ppDSPointer)
+        {
+            *ppDSPointer = find_DS(dsId);
+        }
+        pDataset = *ppDSPointer;
+    }
+    else
+    {
+        pDataset = find_DS(dsId);
+    }
+
+    if (NULL == pDataset)   /* Not in our DB    */
+    {
+        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
+        return TRDP_COMID_ERR;
+    }
+
+    info.level  = 0;
+    info.pSrc   = pSrc;
+    info.pDst   = 0;
+
+    err = size_marshall(&info, pDataset);
+
+    *pDestSize = (UINT32) info.pDst;
+
+    return err;
 }
 
 /**********************************************************************************************************************/
@@ -1139,12 +1355,47 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
 
 EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
     void            *pRefCon,
-    UINT32           comId,
+    UINT32          comId,
     UINT8           *pSrc,
-    UINT32          *pSize,
-    TRDP_DATASET_T **ppDSPointer)
+    UINT32          *pDestSize,
+    TRDP_DATASET_T  * *ppDSPointer)
 {
-    /* to be implemented */
-    return TRDP_UNKNOWN_ERR;
-}
+    TRDP_ERR_T          err;
+    TRDP_DATASET_T      *pDataset;
+    TAU_MARSHALL_INFO_T info;
 
+    if (0 == comId || NULL == pSrc || NULL == pDestSize)
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    /* Can we use the formerly cached value? */
+    if (NULL != ppDSPointer)
+    {
+        if (NULL == *ppDSPointer)
+        {
+            *ppDSPointer = find_DS_from_ComId(comId);
+        }
+        pDataset = *ppDSPointer;
+    }
+    else
+    {
+        pDataset = find_DS_from_ComId(comId);
+    }
+
+    if (NULL == pDataset)   /* Not in our DB    */
+    {
+        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
+        return TRDP_COMID_ERR;
+    }
+
+    info.level  = 0;
+    info.pSrc   = pSrc;
+    info.pDst   = 0;
+
+    err = size_marshall(&info, pDataset);
+
+    *pDestSize = (UINT32) info.pDst;
+
+    return err;
+}
