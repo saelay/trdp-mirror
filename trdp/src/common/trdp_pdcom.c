@@ -108,8 +108,6 @@ TRDP_ERR_T trdp_pdPut (
           || (marshall == NULL))
     {
         memcpy(pPacket->pFrame->data, pData, dataSize);
-        // clean the rest of the package, when shorter data is sent (set data to zero)
-        memset(pPacket->pFrame->data+dataSize, 0, pPacket->dataSize - dataSize);
     }
     else
     {
