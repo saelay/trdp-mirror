@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.1.5"
+#define LIB_VERSION  "0.0.1.6"
 
 #ifndef TRDP_PD_UDP_PORT
 #define TRDP_PD_UDP_PORT  20548                         /**< process data UDP port                      */
