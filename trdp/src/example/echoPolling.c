@@ -4,7 +4,7 @@
  *
  * @brief           Demo echoing application for TRDP
  *
- * @details			Receive and send process data, single threaded polling, static memory
+ * @details            Receive and send process data, single threaded polling, static memory
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -31,23 +31,23 @@
 #include "trdp_if.h"
 #include "vos_thread.h"
 
-/* Some sample comId definitions	*/
+/* Some sample comId definitions    */
 
-/* Expect receiving:	*/
+/* Expect receiving:    */
 #define PD_COMID1               1000
 #define PD_COMID1_CYCLE         1000000
-#define PD_COMID1_TIMEOUT       3000000         /* 3 s	*/
+#define PD_COMID1_TIMEOUT       3000000         /* 3 s    */
 #define PD_COMID1_DATA_SIZE     32
-#define PD_COMID1_SRC_IP        0x0             /*	Sender's IP: 10.0.0.100		*/
+#define PD_COMID1_SRC_IP        0x0             /*    Sender's IP: 10.0.0.100        */
 
-/* Send as echo:	*/
+/* Send as echo:    */
 #define PD_COMID2               2001
 #define PD_COMID2_CYCLE         100000
 #define PD_COMID2_TIMEOUT       1200000
 #define PD_COMID2_DATA_SIZE     32
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
-/* We use static memory	*/
+/* We use static memory    */
 #define RESERVED_MEMORY  10000
 UINT8   gMemoryArea[RESERVED_MEMORY];
 
@@ -56,12 +56,12 @@ CHAR8   gBuffer[32] = "Hello World";
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]		category		Log category (Error, Warning, Info etc.)
- *  @param[in]		pTime			pointer to NULL-terminated string of time stamp
- *  @param[in]		pFile			pointer to NULL-terminated string of source module
- *  @param[in]		LineNumber		line
- *  @param[in]		pMsgStr         pointer to NULL-terminated string
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]        category        Log category (Error, Warning, Info etc.)
+ *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
+ *  @param[in]        pFile            pointer to NULL-terminated string of source module
+ *  @param[in]        LineNumber        line
+ *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
 void dbgOut (
@@ -86,59 +86,60 @@ void dbgOut (
 /**********************************************************************************************************************/
 /** main entry
  *
- *  @retval         0		no error
- *  @retval         1		some error
+ *  @retval         0        no error
+ *  @retval         1        some error
  */
 int main (int argc, char * *argv)
 {
-    TRDP_APP_SESSION_T      appHandle;  /*	Our identifier to the library instance	*/
-    TRDP_SUB_T              subHandle;  /*	Our identifier to the subscription	*/
-    TRDP_PUB_T              pubHandle;  /*	Our identifier to the publication	*/
+    TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
+    TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
+    TRDP_PUB_T              pubHandle;  /*    Our identifier to the publication    */
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 0}, TRDP_FLAGS_NONE,
-                                           10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, RESERVED_MEMORY, {}};
+                                               10000000, TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
 
-    TRDP_PD_INFO_T      myPDInfo;
+    TRDP_PD_INFO_T          myPDInfo;
     UINT32  receivedSize;
 
     int     rv = 0;
 
-    /*	Init the library for non-blocking operation	*/
-    if (tlc_init(&dbgOut,                            /* actually printf					*/
+    /*    Init the library for non-blocking operation    */
+    if (tlc_init(&dbgOut,                            /* actually printf                    */
                  &dynamicConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
-    
-    /*	Init the library for non-blocking operation	*/
+
+    /*    Init the library for non-blocking operation    */
     if (tlc_openSession(&appHandle,
-                 0, 0,                              /* use default IP address/interface */
-                 NULL,                              /* no Marshalling					*/
-                 &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
-                 &processConfig) != TRDP_NO_ERR)
+                        0, 0,                       /* use default IP address/interface */
+                        NULL,                       /* no Marshalling                    */
+                        &pdConfiguration, NULL,     /* system defaults for PD and MD    */
+                        &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
 
-    /*	Subscribe to control PD		*/
+    /*    Subscribe to control PD        */
 
     memset(gBuffer, 0, sizeof(gBuffer));
 
-    err = tlp_subscribe( appHandle,                 /*	our application identifier			*/
-                         &subHandle,                /*	our subscription identifier			*/
+    err = tlp_subscribe( appHandle,                 /*    our application identifier            */
+                         &subHandle,                /*    our subscription identifier            */
                          NULL,
-                         PD_COMID1,                 /*	ComID								*/
-                         0,                         /*	topocount: local consist only		*/
-                         PD_COMID1_SRC_IP,          /*	Source IP filter					*/
+                         PD_COMID1,                 /*    ComID                                */
+                         0,                         /*    topocount: local consist only        */
+                         PD_COMID1_SRC_IP,          /*    Source IP filter                    */
                          0,
-                         0,                         /*	Default destination	(or MC Group)   */
-                         PD_COMID1_TIMEOUT,         /*	Time out in us						*/
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data	on timeout      */
-                         sizeof(gBuffer));          /*	net data size						*/
+                         0,                         /*    Default destination    (or MC Group)   */
+                         0,
+                         PD_COMID1_TIMEOUT,         /*    Time out in us                        */
+                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
+                         sizeof(gBuffer));          /*    net data size                        */
 
 
     if (err != TRDP_NO_ERR)
@@ -148,22 +149,21 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-    /*	Publish another PD		*/
+    /*    Publish another PD        */
 
-    err = tlp_publish(  appHandle,                  /*	our application identifier		*/
-                        &pubHandle,                 /*	our pulication identifier		*/
-                        PD_COMID2,                  /*	ComID to send					*/
-                        0,                          /*	local consist only				*/
-                        0,                          /*	default source IP				*/
-                        PD_COMID2_DST_IP,           /*	where to send to				*/
-                        PD_COMID2_CYCLE,            /*	Cycle time in us				*/
-                        0,                          /*	not redundant					*/
-                        TRDP_FLAGS_NONE,            /*	Don't use callback for errors	*/
-                        NULL,                       /*	default qos and ttl				*/
-                        (UINT8 *)gBuffer,           /*	initial data                    */
-                        sizeof(gBuffer),            /*	data size						*/
-                        FALSE,                      /*	no ladder						*/
-                        0);                         /*	no ladder						*/
+    err = tlp_publish(  appHandle,                  /*    our application identifier        */
+                        &pubHandle,                 /*    our pulication identifier         */
+                        PD_COMID2,                  /*    ComID to send                     */
+                        0,                          /*    local consist only                */
+                        0,                          /*    default source IP                 */
+                        PD_COMID2_DST_IP,           /*    where to send to                  */
+                        PD_COMID2_CYCLE,            /*    Cycle time in us                  */
+                        0,                          /*    not redundant                     */
+                        TRDP_FLAGS_NONE,            /*    Don't use callback for errors     */
+                        NULL,                       /*    default qos and ttl               */
+                        (UINT8 *)gBuffer,           /*    initial data                      */
+                        sizeof(gBuffer)             /*    data size                         */
+                        ); 
 
 
     if (err != TRDP_NO_ERR)
@@ -216,13 +216,12 @@ int main (int argc, char * *argv)
 
         receivedSize = sizeof(gBuffer);
         err = tlp_get(appHandle,
-                    subHandle,
-                    TRDP_FLAGS_NONE,
-                    &myPDInfo,
-                    (UINT8 *) gBuffer,
-                    &receivedSize);
+                      subHandle,
+                      &myPDInfo,
+                      (UINT8 *) gBuffer,
+                      &receivedSize);
 
-        /* Check the returned code!	*/
+        /* Check the returned code!    */
 
         if (err == TRDP_TIMEOUT_ERR)
         {
@@ -257,10 +256,10 @@ int main (int argc, char * *argv)
 
         printf("looping...\n");
 
-    }   /*	Bottom of while-loop	*/
+    }   /*    Bottom of while-loop    */
 
     /*
-     *	We always clean up behind us!
+     *    We always clean up behind us!
      */
 
     tlp_unpublish(appHandle, pubHandle);
