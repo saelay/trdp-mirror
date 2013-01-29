@@ -727,7 +727,7 @@ TRDP_ERR_T tlp_setRedundant (
                 {
                     if (TRUE == leader)
                     {
-                        iterPD->privFlags &= ~TRDP_REDUNDANT;
+                        iterPD->privFlags = (TRDP_PRIV_FLAGS_T) (iterPD->privFlags & ~TRDP_REDUNDANT);
                     }
                     else
                     {

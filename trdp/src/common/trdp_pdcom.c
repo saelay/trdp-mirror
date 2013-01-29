@@ -117,7 +117,7 @@ TRDP_ERR_T trdp_pdPut (
     if (TRDP_NO_ERR == ret)
     {
         /* set data valid */
-        pPacket->privFlags &= ~TRDP_INVALID_DATA;
+        pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
 
         /* Update PD buffer */
         trdp_pdDataUpdate(pPacket);
@@ -268,10 +268,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
             }
 
             /* Reset "immediate" flag for request or requested packet */
-            if (iterPD->privFlags & TRDP_REQ_2B_SENT)
-            {
-                iterPD->privFlags &= ~TRDP_REQ_2B_SENT;
-            }
+            iterPD->privFlags = (TRDP_PRIV_FLAGS_T) (iterPD->privFlags & ~TRDP_REQ_2B_SENT);
 
             /*  Set timer if interval was set.
              In case of a requested cyclically PD packet, this will lead to one time jump (jitter) in the interval
@@ -488,10 +485,10 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
         pExistingElement->lastErr   = TRDP_NO_ERR;
-        pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
+        pExistingElement->privFlags = (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~TRDP_TIMED_OUT);
 
         /* set the data valid */
-        pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
+        pExistingElement->privFlags = (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~TRDP_INVALID_DATA);
 
         if (informUser)
         {
