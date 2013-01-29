@@ -491,7 +491,8 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         }
 
         errno = 0;
-        if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
+        if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1 &&
+        	errno != EADDRINUSE)
         {
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %s)\n", buff);
