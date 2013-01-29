@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;..\..\src\common"
+				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\common"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -63,7 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\Win32TRDP\pthread"
+				AdditionalLibraryDirectories="..\..\resources\windows\pthread\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -118,7 +118,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;..\..\src\common"
+				AdditionalIncludeDirectories="..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\common"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -139,7 +139,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC2.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\Win32TRDP\pthread"
+				AdditionalLibraryDirectories="..\..\resources\windows\pthread\lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

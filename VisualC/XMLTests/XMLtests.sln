@@ -13,6 +13,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "trdp-xmlpd-test", "trdp-xml
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "trdp-light-xml", "..\Win32TRDP\Win32TRDP_VS8_xml.vcproj", "{DA0967D7-832E-43E4-A5C6-38F1855BE0CD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "trdp-xmlmd-test", "trdp-xmlmd-test.vcproj", "{B1470EF8-67D8-47D3-98A5-D629D97209DB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DA0967D7-832E-43E4-A5C6-38F1855BE0CD} = {DA0967D7-832E-43E4-A5C6-38F1855BE0CD}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +36,10 @@ Global
 		{DA0967D7-832E-43E4-A5C6-38F1855BE0CD}.Debug|Win32.Build.0 = Debug|Win32
 		{DA0967D7-832E-43E4-A5C6-38F1855BE0CD}.Release|Win32.ActiveCfg = Release|Win32
 		{DA0967D7-832E-43E4-A5C6-38F1855BE0CD}.Release|Win32.Build.0 = Release|Win32
+		{B1470EF8-67D8-47D3-98A5-D629D97209DB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B1470EF8-67D8-47D3-98A5-D629D97209DB}.Debug|Win32.Build.0 = Debug|Win32
+		{B1470EF8-67D8-47D3-98A5-D629D97209DB}.Release|Win32.ActiveCfg = Release|Win32
+		{B1470EF8-67D8-47D3-98A5-D629D97209DB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

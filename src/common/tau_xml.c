@@ -562,7 +562,7 @@ static void parseProcessConfig(xmlNodePtr pProcCfgElem, TRDP_PROCESS_CONFIG_T *p
     if (checkAttrValue(pProcCfgElem, "blocking", "yes"))
         pProcessConfig->options |= TRDP_OPTION_BLOCK;
     if (checkAttrValue(pProcCfgElem, "traffic-shaping", "off"))
-        pProcessConfig->options &= ~TRDP_OPTION_TRAFFIC_SHAPING;
+        pProcessConfig->options &= (TRDP_OPTION_T)(~TRDP_OPTION_TRAFFIC_SHAPING);
 }
 
 /*
@@ -679,7 +679,7 @@ static void parseDebugConfiguration(
     if (pAttr)
     {
         if (!xmlStrcasecmp(pAttr, BAD_CAST "") || !xmlStrcasecmp(pAttr, BAD_CAST " "))
-            pDbgConfig->option &= ~(TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT);
+            pDbgConfig->option &= (TRDP_OPTION_T)~(TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT);
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "a"))
             pDbgConfig->option |= TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT;
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "d") || !xmlStrcasecmp(pAttr, BAD_CAST "t"))
@@ -902,7 +902,7 @@ static void parseComIdDsIdMap(
 /*
  * Parse list of dataset configurations
  */
-static void parseDatasets(
+static TRDP_ERR_T parseDatasets(
     xmlXPathContextPtr      pXPathCtx,
     UINT32                 *pNumDataset,
     papTRDP_DATASET_T      papDataset
@@ -919,7 +919,7 @@ static void parseDatasets(
 
     /*  Check parameters    */
     if (!pNumDataset || !papDataset)
-        return;
+        return TRDP_NO_ERR;
 
     /*  Set default values  */
     *pNumDataset = 0;
@@ -930,7 +930,7 @@ static void parseDatasets(
     pXPathObj = xmlXPathEvalExpression(BAD_CAST "/device/data-set-list/data-set", pXPathCtx);
 
     if (!pXPathObj)
-        return;
+        return TRDP_NO_ERR;
 
     /*  Check if any data-set elements were found   */
     if (pXPathObj->nodesetval && pXPathObj->nodesetval->nodeNr)
@@ -939,6 +939,8 @@ static void parseDatasets(
         *pNumDataset = pXPathObj->nodesetval->nodeNr;
         apDataset = (apTRDP_DATASET_T) malloc(
             sizeof(TRDP_DATASET_T *) * (*pNumDataset));
+        if (apDataset ==  NULL)
+            return TRDP_MEM_ERR;
         *papDataset = apDataset;
 
         /* Iterate over all found data-set elements */
@@ -955,6 +957,8 @@ static void parseDatasets(
             /*  Allocate dataset structure with elements    */
             pDataset = (TRDP_DATASET_T *)malloc(
                 sizeof(TRDP_DATASET_T) + sizeof(TRDP_DATASET_ELEMENT_T) * numElement);
+            if (pDataset == NULL)
+                return TRDP_MEM_ERR;
             apDataset[idxDataset] = pDataset;
 
             /*  Parse dataset attributes   */
@@ -978,6 +982,7 @@ static void parseDatasets(
 
     /*  Free XPath result   */
     xmlXPathFreeObject(pXPathObj);
+    return TRDP_NO_ERR;
 }
 
 
@@ -1004,8 +1009,8 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     papTRDP_DATASET_T            papDataset
     )
 {
-    xmlNodePtr          pRootElement;
     xmlXPathContextPtr  pXPathCtx;
+    TRDP_ERR_T result;
 
     /*  Set empty values  */
     if (pNumComId)
@@ -1020,16 +1025,15 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     /* Check document handle    */
     if (!pDocHnd)
         return TRDP_PARAM_ERR;
-    pRootElement = (xmlNodePtr)pDocHnd->pRootElement;
     pXPathCtx = (xmlXPathContextPtr)pDocHnd->pXPathContext;
 
     /*  Parse mapping between ComId and DatasetId   */
     parseComIdDsIdMap(pXPathCtx, pNumComId, ppComIdDsIdMap);
 
     /*  Parse dataset definitions   */
-    parseDatasets(pXPathCtx, pNumDataset, papDataset);
+    result = parseDatasets(pXPathCtx, pNumDataset, papDataset);
 
-    return TRDP_NO_ERR;
+    return result;
 }
 
 /*
@@ -1069,15 +1073,15 @@ static void parseMdParameter(
         if (checkAttrValue(pMdParElem, "protocol", "TCP"))
             pExchgPar->pMdPar->flags |= TRDP_FLAGS_TCP;
         if (checkAttrValue(pMdParElem, "protocol", "UDP"))
-            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_TCP;
+            pExchgPar->pMdPar->flags &= (TRDP_FLAGS_T)~TRDP_FLAGS_TCP;
         if (checkAttrValue(pMdParElem, "marshall", "on"))
             pExchgPar->pMdPar->flags |= TRDP_FLAGS_MARSHALL;
         if (checkAttrValue(pMdParElem, "marshall", "off"))
-            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_MARSHALL;
+            pExchgPar->pMdPar->flags &= (TRDP_FLAGS_T)~TRDP_FLAGS_MARSHALL;
         if (checkAttrValue(pMdParElem, "callback", "on"))
             pExchgPar->pMdPar->flags |= TRDP_FLAGS_CALLBACK;
         if (checkAttrValue(pMdParElem, "callback", "off"))
-            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_CALLBACK;
+            pExchgPar->pMdPar->flags &= (TRDP_FLAGS_T)~TRDP_FLAGS_CALLBACK;
     }
 
     /*  Free XPath result   */
@@ -1128,11 +1132,11 @@ static void parsePdParameter(
         if (checkAttrValue(pPdParElem, "marshall", "on"))
             pExchgPar->pPdPar->flags |= TRDP_FLAGS_MARSHALL;
         if (checkAttrValue(pPdParElem, "marshall", "off"))
-            pExchgPar->pPdPar->flags &= ~TRDP_FLAGS_MARSHALL;
+            pExchgPar->pPdPar->flags &= (TRDP_FLAGS_T)~TRDP_FLAGS_MARSHALL;
         if (checkAttrValue(pPdParElem, "callback", "on"))
             pExchgPar->pPdPar->flags |= TRDP_FLAGS_CALLBACK;
         if (checkAttrValue(pPdParElem, "callback", "off"))
-            pExchgPar->pPdPar->flags &= ~TRDP_FLAGS_CALLBACK;
+            pExchgPar->pPdPar->flags &= (TRDP_FLAGS_T)~TRDP_FLAGS_CALLBACK;
     }
 
     /*  Free XPath result   */
@@ -1144,7 +1148,7 @@ static void parsePdParameter(
  *  Looks for sdt-parameter child element. If it exists, new SDT_PAR structure is 
  *  allocated and pointer is returned.
  */
-static void parseSDTParameters(xmlNodePtr pParentElem, TRDP_SDT_PAR_T  **ppSdtPar)
+static TRDP_ERR_T parseSDTParameters(xmlNodePtr pParentElem, TRDP_SDT_PAR_T  **ppSdtPar)
 {
     xmlNodePtr          pSDTElem;
     TRDP_SDT_PAR_T  *   pSdtPar;
@@ -1155,12 +1159,14 @@ static void parseSDTParameters(xmlNodePtr pParentElem, TRDP_SDT_PAR_T  **ppSdtPa
     /*  Look for sdt-parameter element  */
     pSDTElem = xmlFirstElementChild(pParentElem);
     if (!pSDTElem)
-        return;
+        return TRDP_NO_ERR;
     if (xmlStrcmp(pSDTElem->name, BAD_CAST "sdt-parameter"))
-        return;
+        return TRDP_NO_ERR;
 
     /*  Allocate new SDT_PAR structure, set default values  */
     pSdtPar = (TRDP_SDT_PAR_T *) malloc(sizeof(TRDP_SDT_PAR_T));
+    if (pSdtPar == NULL)
+        return TRDP_MEM_ERR;
     *ppSdtPar = pSdtPar;
     pSdtPar->smi2 = TRDP_SDT_DEFAULT_SMI2;
     pSdtPar->nrxSafe = TRDP_SDT_DEFAULT_NRXSAFE;
@@ -1176,16 +1182,18 @@ static void parseSDTParameters(xmlNodePtr pParentElem, TRDP_SDT_PAR_T  **ppSdtPa
     parseUINT8(pSDTElem, "n-rxsafe", &pSdtPar->nrxSafe);
     parseUINT16(pSDTElem, "n-guard", &pSdtPar->nGuard);
     parseUINT32(pSDTElem, "cm-thr", &pSdtPar->cmThr);
+    return TRDP_NO_ERR;
 }
 
 /*
  *  Parse configuration of all sources for one telegram
  */
-static void parseSources(    
+static TRDP_ERR_T parseSources(    
     xmlXPathContextPtr      pXPathCtx, 
     TRDP_EXCHG_PAR_T       *pExchgPar
     )
 {
+    TRDP_ERR_T          result;
     xmlXPathObjectPtr   pXPathObj;
     xmlNodePtr          pSourceElem;
     int                 index;
@@ -1193,14 +1201,14 @@ static void parseSources(
     /*  Try to find all source elements    */
     pXPathObj = xmlXPathEvalExpression(BAD_CAST "./source", pXPathCtx);
     if (!pXPathObj)
-        return;
+        return TRDP_NO_ERR;
 
     /*  Check if any sources were found  */
     if (!pXPathObj->nodesetval || !pXPathObj->nodesetval->nodeNr)
     {
         /*  Free XPath result   */
         xmlXPathFreeObject(pXPathObj);
-        return;
+        return TRDP_NO_ERR;
     }
 
     /*  Allocate array of SRC structures    */
@@ -1223,21 +1231,25 @@ static void parseSources(
             NULL, &(pExchgPar->pSrc[index].pUriHost2));
 
         /*  Parse SDT parameters   */
-        parseSDTParameters(pSourceElem, &(pExchgPar->pSrc[index].pSdtPar));
+        result = parseSDTParameters(pSourceElem, &(pExchgPar->pSrc[index].pSdtPar));
+        if (result != TRDP_NO_ERR)
+            return result;
     }
 
     /*  Free XPath result   */
     xmlXPathFreeObject(pXPathObj);
+    return TRDP_NO_ERR;
 }
 
 /*
  *  Parse configuration of all destinations for one telegram
  */
-static void parseDestinations(    
+static TRDP_ERR_T parseDestinations(    
     xmlXPathContextPtr      pXPathCtx, 
     TRDP_EXCHG_PAR_T       *pExchgPar
     )
 {
+    TRDP_ERR_T          result;
     xmlXPathObjectPtr   pXPathObj;
     xmlNodePtr          pDestElem;
     int                 index;
@@ -1245,14 +1257,14 @@ static void parseDestinations(
     /*  Try to find all destination elements    */
     pXPathObj = xmlXPathEvalExpression(BAD_CAST "./destination", pXPathCtx);
     if (!pXPathObj)
-        return;
+        return TRDP_NO_ERR;
 
     /*  Check if any destinations were found  */
     if (!pXPathObj->nodesetval || !pXPathObj->nodesetval->nodeNr)
     {
         /*  Free XPath result   */
         xmlXPathFreeObject(pXPathObj);
-        return;
+        return TRDP_NO_ERR;
     }
 
     /*  Allocate array of DEST structures    */
@@ -1273,17 +1285,20 @@ static void parseDestinations(
             &(pExchgPar->pDest[index].pUriUser), &(pExchgPar->pDest[index].pUriHost));
 
         /*  Parse SDT parameters   */
-        parseSDTParameters(pDestElem, &(pExchgPar->pDest[index].pSdtPar));
+        result = parseSDTParameters(pDestElem, &(pExchgPar->pDest[index].pSdtPar));
+        if (result != TRDP_NO_ERR)
+            return result;
     }
 
     /*  Free XPath result   */
     xmlXPathFreeObject(pXPathObj);
+    return TRDP_NO_ERR;
 }
 
 /*
  * Parse configuration of one telegram into provided structure
  */
-static void parseTelegram(
+static TRDP_ERR_T parseTelegram(
     xmlNodePtr              pTlgElem, 
     xmlXPathContextPtr      pXPathCtx,
     const TRDP_PD_CONFIG_T *pPdConfig,
@@ -1291,10 +1306,11 @@ static void parseTelegram(
     TRDP_EXCHG_PAR_T       *pExchgPar
     )
 {
+    TRDP_ERR_T result;
 
     /*  Check parameters    */
     if (!pTlgElem || !pExchgPar)
-        return;
+        return TRDP_NO_ERR;
 
     /*  Set default values  */
     memset(pExchgPar, 0, sizeof(TRDP_EXCHG_PAR_T));
@@ -1310,8 +1326,13 @@ static void parseTelegram(
     /*  Call parser functions for nested elements   */
     parseMdParameter(pXPathCtx, pMdConfig, pExchgPar);
     parsePdParameter(pXPathCtx, pPdConfig, pExchgPar);
-    parseSources(pXPathCtx, pExchgPar);
-    parseDestinations(pXPathCtx, pExchgPar);
+    result = parseSources(pXPathCtx, pExchgPar);
+    if (result != TRDP_NO_ERR)
+        return result;
+    result = parseDestinations(pXPathCtx, pExchgPar);
+    if (result != TRDP_NO_ERR)
+        return result;
+    return TRDP_NO_ERR;
 }
 
 
@@ -1343,6 +1364,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     TRDP_EXCHG_PAR_T           **ppExchgPar
     )
 {
+    TRDP_ERR_T          result;
     xmlNodePtr          pRootElement;
     xmlXPathContextPtr  pXPathCtx;
     xmlXPathObjectPtr   pXPathObj;
@@ -1351,6 +1373,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     xmlNodePtr          pChildElement;
     xmlNodePtr          pTlgElem;
     int                 index;
+    int                 length;
 
     /*  Check parameters    */
     if (!pDocHnd || !pIfName || !pNumExchgPar || !ppExchgPar)
@@ -1376,8 +1399,10 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     }
 
     /* Execute XPath expression - find given interface element  */
-    snprintf(strXPath, sizeof(strXPath),
+    length = snprintf(strXPath, sizeof(strXPath),
         "/device/bus-interface-list/bus-interface[@name='%s']", pIfName);
+    if (length < 0 || length > sizeof(strXPath))
+        return TRDP_PARAM_ERR;
     pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
     /*  Check if bus-interface element was found    */
     if (pXPathObj)
@@ -1410,8 +1435,10 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
 
 
     /* Execute XPath expression - find all telegram elemments for given interface  */
-    snprintf(strXPath, sizeof(strXPath),
+    length = snprintf(strXPath, sizeof(strXPath),
         "/device/bus-interface-list/bus-interface[@name='%s']/telegram", pIfName);
+    if (length < 0 || length > sizeof(strXPath))
+        return TRDP_PARAM_ERR;
     pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
     
     /*  Check if any telegrams were found   */
@@ -1433,7 +1460,9 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                     continue;
 
                 /*  Parse the telegram definition   */
-                parseTelegram(pTlgElem, pXPathCtx, pPdConfig, pMdConfig, &((*ppExchgPar)[index]));
+                result = parseTelegram(pTlgElem, pXPathCtx, pPdConfig, pMdConfig, &((*ppExchgPar)[index]));
+                if (result != TRDP_NO_ERR)
+                    return result;
             }
         }
         /*  Free XPath result   */
