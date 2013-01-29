@@ -901,18 +901,14 @@ static TRDP_ERR_T size_marshall (
                 case TRDP_TIMEDATE48:
                 {
                     /*    This is not a base type but a structure    */
-                    UINT32  *pSrc32;
-                    UINT16  *pSrc16;
+                    UINT32 *pSrc32;
 
                     while (noOfItems-- > 0)
                     {
                         pSrc32  = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        pDst    += 4;
-                        pSrc32++;
-                        pSrc16  = (UINT16 *) alignePtr((UINT8 *) pSrc32, ALIGNOF(UINT16));
-                        pDst    += 2;
-                        pSrc32++;
-                        pSrc = (UINT8 *) pSrc32;
+                        pDst    += 6;
+                        pSrc32  += 2;
+                        pSrc    = (UINT8 *) pSrc32;
                     }
                     break;
                 }
