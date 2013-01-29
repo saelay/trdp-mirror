@@ -68,8 +68,7 @@ TRDP_ERR_T trdp_mdCheck (
             packetSize > TRDP_MAX_MD_PACKET_SIZE)
         {
             appHandle->stats.udpMd.numProtErr++;
-            vos_printf(VOS_LOG_ERROR, "MDframe size error (%u)\n",
-                       (UINT32) packetSize);
+            vos_printf(VOS_LOG_ERROR, "MDframe size error (%u)\n", packetSize);
             err = TRDP_WIRE_ERR;
         }
     }
@@ -86,7 +85,7 @@ TRDP_ERR_T trdp_mdCheck (
                 appHandle->stats.udpMd.numCrcErr++;
                 vos_printf(VOS_LOG_ERROR, "MDframe header crc error.\n");
                 err = TRDP_CRC_ERR;
-           }
+            }
         }
 
         /* Check Data CRC */
@@ -276,13 +275,13 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pPacket->frameHead, &size);
         vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
 
-        if(err == VOS_NODATA_ERR)
+        if(err == TRDP_NODATA_ERR)
         {
             vos_printf(VOS_LOG_INFO, "trdp_mdRecvPacket - The socket = %u has been closed \n",mdSock);
             return TRDP_NODATA_ERR;
         }
 
-        if(err != VOS_NO_ERR)
+        if(err != TRDP_NO_ERR)
         {
             vos_printf(VOS_LOG_ERROR, "trdp_mdRecvPacket failed (Reading the msg Header) = %d\n",err);
             return TRDP_IO_ERR;
@@ -572,11 +571,11 @@ TRDP_ERR_T  trdp_mdRecv (
                                 theMessage.destIpAddr       = 0;
                                 theMessage.seqCount         = vos_ntohl(pH->sequenceCounter);
                                 theMessage.protVersion      = vos_ntohs(pH->protocolVersion);
-                                theMessage.msgType          = vos_ntohs(pH->msgType);
+                                theMessage.msgType          = (TRDP_MSG_T) vos_ntohs(pH->msgType);
                                 theMessage.comId            = iterMD->u.listener.comId;
                                 theMessage.topoCount        = vos_ntohl(pH->topoCount);
                                 theMessage.userStatus       = 0;
-                                theMessage.replyStatus      = vos_ntohs(pH->replyStatus);
+                                theMessage.replyStatus      = (TRDP_REPLY_STATUS_T) vos_ntohs(pH->replyStatus);
                                 memcpy(theMessage.sessionId, pH->sessionID, 16);
                                 theMessage.replyTimeout     = vos_ntohl(pH->replyTimeout);
                                 memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
@@ -654,7 +653,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                 }
 
                                 /* check for session ... */
-                                if (0 != memcmp(&sender_ele->sessionID, pH->sessionID, 16))
+                                if (0 != memcmp(sender_ele->sessionID, pH->sessionID, 16))
                                 {
                                     continue;
                                 }
@@ -698,7 +697,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                             iterMD->stateEle = TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF;
 
                                             /* copy session id to listener */
-                                            memcpy(&iterMD->sessionID, &sender_ele->sessionID, 16);
+                                            memcpy(iterMD->sessionID, sender_ele->sessionID, 16);
 
                                             /* forward timeout */
                                             iterMD->timeToGo    = sender_ele->timeToGo;
@@ -743,11 +742,11 @@ TRDP_ERR_T  trdp_mdRecv (
                                             theMessage.destIpAddr       = 0;
                                             theMessage.seqCount         = vos_ntohl(pH->sequenceCounter);
                                             theMessage.protVersion      = vos_ntohs(pH->protocolVersion);
-                                            theMessage.msgType          = vos_ntohs(pH->msgType);
+                                            theMessage.msgType          = (TRDP_MSG_T) vos_ntohs(pH->msgType);
                                             theMessage.comId            = iterMD->u.listener.comId;
                                             theMessage.topoCount        = vos_ntohl(pH->topoCount);
                                             theMessage.userStatus       = 0;
-                                            theMessage.replyStatus      = vos_ntohs(pH->replyStatus);
+                                            theMessage.replyStatus      = (TRDP_REPLY_STATUS_T) vos_ntohs(pH->replyStatus);
                                             memcpy(theMessage.sessionId, pH->sessionID, 16);
                                             theMessage.replyTimeout     = vos_ntohl(pH->replyTimeout);
                                             memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
@@ -853,11 +852,11 @@ TRDP_ERR_T  trdp_mdRecv (
                                             theMessage.destIpAddr       = 0;
                                             theMessage.seqCount         = vos_ntohl(pH->sequenceCounter);
                                             theMessage.protVersion      = vos_ntohs(pH->protocolVersion);
-                                            theMessage.msgType          = vos_ntohs(pH->msgType);
+                                            theMessage.msgType          = (TRDP_MSG_T) vos_ntohs(pH->msgType);
                                             theMessage.comId            = iterMD->u.listener.comId;
                                             theMessage.topoCount        = vos_ntohl(pH->topoCount);
                                             theMessage.userStatus       = 0;
-                                            theMessage.replyStatus      = vos_ntohs(pH->replyStatus);
+                                            theMessage.replyStatus      = (TRDP_REPLY_STATUS_T) vos_ntohs(pH->replyStatus);
                                             memcpy(theMessage.sessionId, pH->sessionID, 16);
                                             theMessage.replyTimeout     = vos_ntohl(pH->replyTimeout);
                                             memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
@@ -1165,7 +1164,7 @@ void  trdp_mdCheckListenSocks (
                     
                     if (new_sd < 0)
                     {
-                        if(err == VOS_NO_ERR)
+                        if(err == TRDP_NO_ERR)
                         {
                             vos_printf(VOS_LOG_INFO, "TRDP no more connections to accept\n");
                             break;
@@ -1206,7 +1205,7 @@ void  trdp_mdCheckListenSocks (
                         trdp_sock_opt.nonBlocking   = TRUE;
 
                         err = (TRDP_ERR_T) vos_sockSetOptions(new_sd, &trdp_sock_opt);
-                        if (err != VOS_NO_ERR)
+                        if (err != TRDP_NO_ERR)
                         {
                             vos_printf(VOS_LOG_ERROR, "vos_sockSetOptions() failed (Err:%d)\n", err);
                             continue;
@@ -1262,7 +1261,7 @@ void  trdp_mdCheckListenSocks (
 
                                 /* Close the old socket */
                                 err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[socket_index].sock);
-                                if (err != VOS_NO_ERR)
+                                if (err != TRDP_NO_ERR)
                                 {
                                     vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
                                 }
@@ -1524,7 +1523,7 @@ void  trdp_mdCheckTimeouts (
                              sender_ele = sender_ele->pNext)
                         {
                             /* check for session ... */
-                            if (0 != memcmp(&sender_ele->sessionID, iterMD->sessionID, 16))
+                            if (0 != memcmp(sender_ele->sessionID, iterMD->sessionID, 16))
                             {
                                 continue;
                             }

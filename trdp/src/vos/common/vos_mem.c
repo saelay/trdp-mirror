@@ -674,8 +674,10 @@ EXT_DECL void vos_strncpy (
     UINT32       count )
 {
 #ifdef WIN32
+    /*lint -e(534) ignore return value */
     strncpy_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc, (size_t) count);
 #else
+    /*lint -e(534) ignore return value */
     strncpy((char *)pStrDst, (const char *)pStrSrc, (size_t) count);
 #endif
 }
