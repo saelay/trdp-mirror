@@ -1759,14 +1759,14 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     else
     {
         /*    Find a (new) socket    */
-#ifdef TRDP_OPTION_LADDER
+
         /* Multicast : use I/F destIp */
         if (vos_isMulticast(destIpAddr))
         {
             ret = trdp_requestSocket(appHandle->iface,
                                      appHandle->pdDefault.port,
                                      &appHandle->pdDefault.sendParam,
-                                     destIpAddr,
+                                     subHandle.mcGroup,
                                      TRDP_SOCK_PD,
                                      appHandle->option,
                                      TRUE,
@@ -1786,17 +1786,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                      &index,
                                      0);
         }
-#else
-        ret = trdp_requestSocket(appHandle->iface,
-                                 appHandle->pdDefault.port,
-                                 &appHandle->pdDefault.sendParam,
-                                 appHandle->realIP,
-                                 TRDP_SOCK_PD,
-                                 appHandle->option,
-                                 TRUE,
-                                 &index,
-                                 0);
-#endif /* TRDP_OPTION_LADDER */
+
         if (ret == TRDP_NO_ERR)
         {
             /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
@@ -1865,7 +1855,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                            return value ignored since joining of an already joined address leads to an error
                            TODO: call join only when address is not joined yet
                         */
-                        /*ret = (TRDP_ERR_T)*/ vos_sockJoinMC(appHandle->iface[index].sock,
+                        ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[index].sock,
                                                               newPD->addr.mcGroup,
                                                               appHandle->realIP);
 
