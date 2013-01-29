@@ -679,7 +679,7 @@ static void parseDebugConfiguration(
     if (pAttr)
     {
         if (!xmlStrcasecmp(pAttr, BAD_CAST "") || !xmlStrcasecmp(pAttr, BAD_CAST " "))
-            pDbgConfig->option &= (TRDP_OPTION_T)~(TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT);
+            pDbgConfig->option &= (TRDP_DBG_OPTION_T)~(TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT);
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "a"))
             pDbgConfig->option |= TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT;
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "d") || !xmlStrcasecmp(pAttr, BAD_CAST "t"))
@@ -1401,7 +1401,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     /* Execute XPath expression - find given interface element  */
     length = snprintf(strXPath, sizeof(strXPath),
         "/device/bus-interface-list/bus-interface[@name='%s']", pIfName);
-    if (length < 0 || length > sizeof(strXPath))
+    if (length < 0 || length > (int) sizeof(strXPath))
         return TRDP_PARAM_ERR;
     pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
     /*  Check if bus-interface element was found    */
@@ -1437,7 +1437,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     /* Execute XPath expression - find all telegram elemments for given interface  */
     length = snprintf(strXPath, sizeof(strXPath),
         "/device/bus-interface-list/bus-interface[@name='%s']/telegram", pIfName);
-    if (length < 0 || length > sizeof(strXPath))
+    if (length < 0 || length > (int) sizeof(strXPath))
         return TRDP_PARAM_ERR;
     pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
     
