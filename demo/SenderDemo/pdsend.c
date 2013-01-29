@@ -213,7 +213,7 @@ int pd_init (
     pd_sub(&gRec[4]);
 
     if (tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
-                    TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize, 0, 0) != TRDP_NO_ERR)
+                    TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize) != TRDP_NO_ERR)
     {
         printf("Publish error\n");
         return 1;
@@ -247,7 +247,7 @@ void pd_updatePublisher (BOOL stop)
     if (stop == FALSE)
     {
         err = tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
-                          TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize, 0, 0);
+                          TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize);
         if (err != TRDP_NO_ERR)
         {
             printf("tlp_publish error %d\n", err);
