@@ -485,7 +485,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           sizeof(TRDP_STATISTICS_T)); 
 
         vos_printf(VOS_LOG_INFO,
-                   "TRDP Stack Version %s: successfully initiated\n",
+                   "TRDP Stack Version %s: session opened successfully\n",
                    LIB_VERSION);
 
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
