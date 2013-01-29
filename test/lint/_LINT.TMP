@@ -62,12 +62,12 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
 During Specific Walk:
   File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 346:
     trdp_pdCheck([1], ?)
-  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 632: vos_crc32(-1,
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 633: vos_crc32(-1,
     [0], ?)
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
     access of out-of-bounds pointer (1 beyond end of data) by operator '['
     [Reference: file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c: lines 346,
-    632; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
+    633; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
                                                                                      _
@@ -291,125 +291,6 @@ C:\Program Files\Microsoft Visual Studio 10.0\VC\include\wchar.h(1137) : Error
     short *, const struct tm *, struct localeinfo_struct *)' redeclared (Arg.
     no. 4: origin) conflicts with line 231, file C:\Program Files\Microsoft
     Visual Studio 10.0\VC\include\time.h, module D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c
-                                                               _
-        pProcessConfig->options &= ~TRDP_OPTION_TRAFFIC_SHAPING;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(565) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                                                                _
-            pDbgConfig->option &= ~(TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(682) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                            _
-            apDataset[idxDataset] = pDataset;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(958) : Warning 613: Possible use of
-    null pointer 'apDataset' in left argument to operator '[' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 941]
-                                                          _
-            parseUINT32(pDatasetElem, "id", &pDataset->id);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(961) : Warning 613: Possible use of
-    null pointer 'pDataset' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 957]
-                                             _
-            pDataset->numElement = numElement;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(962) : Warning 613: Possible use of
-    null pointer 'pDataset' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 957]
-_
-}
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1033) : Warning 550: Symbol
-    'pRootElement' (line 1007) not accessed
-                                                       _
-            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_TCP;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1072) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                                            _
-            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_MARSHALL;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1076) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                                            _
-            pExchgPar->pMdPar->flags &= ~TRDP_FLAGS_CALLBACK;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1080) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                                            _
-            pExchgPar->pPdPar->flags &= ~TRDP_FLAGS_MARSHALL;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1131) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                                                            _
-            pExchgPar->pPdPar->flags &= ~TRDP_FLAGS_CALLBACK;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1135) : Error 64: Type mismatch
-    (assignment) (int/enum)
-                    _
-    pSdtPar->smi2 = TRDP_SDT_DEFAULT_SMI2;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1165) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                       _
-    pSdtPar->nrxSafe = TRDP_SDT_DEFAULT_NRXSAFE;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1166) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                      _
-    pSdtPar->nGuard = TRDP_SDT_DEFAULT_NGUARD;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1167) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                     _
-    pSdtPar->cmThr = TRDP_SDT_DEFAULT_CMTHR;
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1168) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                 _
-    parseUINT32(pSDTElem, "smi1", &pSdtPar->smi1);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1171) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                 _
-    parseUINT32(pSDTElem, "smi2", &pSdtPar->smi2);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1172) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                               _
-    parseUINT16(pSDTElem, "udv", &pSdtPar->udv);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1173) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                          _
-    parseUINT16(pSDTElem, "rx-period", &pSdtPar->rxPeriod);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1174) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                          _
-    parseUINT16(pSDTElem, "tx-period", &pSdtPar->txPeriod);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1175) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                       _
-    parseUINT8(pSDTElem, "n-rxsafe", &pSdtPar->nrxSafe);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1176) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                      _
-    parseUINT16(pSDTElem, "n-guard", &pSdtPar->nGuard);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1177) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                    _
-    parseUINT32(pSDTElem, "cm-thr", &pSdtPar->cmThr);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1178) : Warning 613: Possible use of
-    null pointer 'pSdtPar' in left argument to operator '->' [Reference: file
-    D:\TCNOpen\trunk\trdp\src\common\tau_xml.c: line 1163]
-                                                                        _
-        "/device/bus-interface-list/bus-interface[@name='%s']", pIfName);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1380) : Warning 534: Ignoring return
-    value of function '_snprintf(char *, unsigned int, const char *, ...)'
-    (compare with line 363, file C:\Program Files\Microsoft Visual Studio
-    10.0\VC\include\stdio.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
-                                                                                 _
-        "/device/bus-interface-list/bus-interface[@name='%s']/telegram", pIfName);
-D:\TCNOpen\trunk\trdp\src\common\tau_xml.c(1414) : Warning 534: Ignoring return
-    value of function '_snprintf(char *, unsigned int, const char *, ...)'
-    (compare with line 363, file C:\Program Files\Microsoft Visual Studio
-    10.0\VC\include\stdio.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
 
 --- Global Wrap-up
 
