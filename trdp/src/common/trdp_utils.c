@@ -630,6 +630,7 @@ UINT32  trdp_getSeqCnt (
 
     /*    For process data look at the PD send queue only    */
     if (TRDP_MSG_PD == msgType ||
+        TRDP_MSG_PP == msgType ||
         TRDP_MSG_PR == msgType ||
         TRDP_MSG_PE == msgType)
     {
@@ -690,6 +691,7 @@ BOOL  trdp_isRcvSeqCnt (
 
     /*    For process data look at the PD recv queue only    */
     if (TRDP_MSG_PD == msgType ||
+        TRDP_MSG_PP == msgType ||
         TRDP_MSG_PR == msgType ||
         TRDP_MSG_PE == msgType)
     {

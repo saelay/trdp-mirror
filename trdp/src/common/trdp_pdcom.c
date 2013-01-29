@@ -619,6 +619,7 @@ TRDP_ERR_T trdp_pdCheck (
     }
     /*  Check type  */
     else if (vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PD &&
+             vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PP &&
              vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PR &&
              vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PE)
     {
