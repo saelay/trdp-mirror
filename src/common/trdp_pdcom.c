@@ -598,7 +598,7 @@ TRDP_ERR_T trdp_pdCheck (
     if (packetSize < TRDP_MIN_PD_HEADER_SIZE ||
         packetSize > TRDP_MAX_PD_PACKET_SIZE)
     {
-        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", (UINT32) packetSize);
+        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", packetSize);
         err = TRDP_WIRE_ERR;
     }
 

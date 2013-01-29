@@ -13,15 +13,26 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(730) : Error 64: Type mismatch
 D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1870) : Warning 534: Ignoring return
     value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
     (compare with line 253, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h)
-                                                                                    _
-            pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2490) : Warning 571: Suspicious cast
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
+                                                                          _
+                                    appHandle->iface[sockPosition].usage++;
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(626) : Warning 644: Variable
+    'sockPosition' (line 399) may not have been initialized
+                                                                               _
+                                    vos_sockClose(appHandle->iface[index].sock);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1370) : Warning 534: Ignoring
+    return value of function 'vos_sockClose(int)' (compare with line 220, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
+                                                               _
+                    vos_sockClose(appHandle->iface[index].sock);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2068) : Warning 534: Ignoring
+    return value of function 'vos_sockClose(int)' (compare with line 220, file
+    D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                        _
@@ -34,16 +45,47 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(120) : Error 64: Type mismatch
     (assignment) (int/enum)
                                                       _
                 iterPD->privFlags &= ~TRDP_REQ_2B_SENT;
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(272) : Error 64: Type mismatch
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(273) : Error 64: Type mismatch
     (assignment) (int/enum)
+                                                       _
+                   vos_ntohl(pNewFrame->frameHead.comId),
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(371) : Error 42: Expected a
+    statement
+                                                  _
+                               subHandle.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(465) : Error 42: Expected a
+    statement
                                                       _
         pExistingElement->privFlags &= ~TRDP_TIMED_OUT;
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(490) : Error 64: Type mismatch
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(491) : Error 64: Type mismatch
     (assignment) (int/enum)
                                                          _
         pExistingElement->privFlags &= ~TRDP_INVALID_DATA;
-D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(493) : Error 64: Type mismatch
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(494) : Error 64: Type mismatch
     (assignment) (int/enum)
+                                                                                  _
+        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", (UINT32) packetSize);
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(601) : Warning 522: Expected void
+    type, assignment, increment or decrement
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(601) : Error 10: Expecting ';'
+                                                                                                             _
+#...                ((am_big_endian()) ? Swap32(myCRC) : (myCRC))
+        vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(610) : Error 42: Expected a
+    statement
+                                                     _
+                   vos_ntohs(pPacket->protocolVersion),
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(617) : Error 42: Expected a
+    statement
+                                                                                                  _
+        vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(627) : Error 42: Expected a
+    statement
+                                                                                                         _
+#...                ((am_big_endian()) ? Swap32(myCRC) : (myCRC))
+            vos_printf(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
+D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c(638) : Error 42: Expected a
+    statement
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
                        _
@@ -60,30 +102,88 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
 
 During Specific Walk:
-  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 346:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 347:
     trdp_pdCheck([1], ?)
-  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 633: vos_crc32(-1,
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 634: vos_crc32(-1,
     [0], ?)
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
     access of out-of-bounds pointer (1 beyond end of data) by operator '['
-    [Reference: file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c: lines 346,
-    633; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
+    [Reference: file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c: lines 347,
+    634; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
-                                                                                     _
-    strncpy_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc, (size_t) count);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(677) : Warning 534: Ignoring
-    return value of function 'strncpy_s(char *, unsigned int, const char *,
-    unsigned int)' (compare with line 185, file C:\Program Files\Microsoft
-    Visual Studio 10.0\VC\include\string.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
+    _
+    }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(173) : Warning 529: Symbol
+    'err' (line 169) not subsequently referenced
+    _
+    }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(299) : Warning 529: Symbol
+    'err' (line 295) not subsequently referenced
+    _
+    }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(348) : Warning 529: Symbol
+    'err' (line 344) not subsequently referenced
+    _
+    }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(379) : Warning 529: Symbol
+    'err' (line 375) not subsequently referenced
+            _
+            }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(419) : Warning 529: Symbol
+    'err' (line 416) not subsequently referenced
                                   _
             if (ioctlsocket(sock, FIONBIO, &optValue) == SOCKET_ERROR)
 D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(427) : Warning 569: Loss of
     information (arg. no. 2) (32 bits to 31 bits)
+            _
+            }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(433) : Warning 529: Symbol
+    'err' (line 429) not subsequently referenced
+            _
+            }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(446) : Warning 529: Symbol
+    'err' (line 443) not subsequently referenced
+            _
+            }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(457) : Warning 529: Symbol
+    'err' (line 454) not subsequently referenced
+            _
+            }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(468) : Warning 529: Symbol
+    'err' (line 465) not subsequently referenced
+        _
+        }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(520) : Warning 529: Symbol
+    'err' (line 516) not subsequently referenced
+        _
+        }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(602) : Warning 529: Symbol
+    'err' (line 598) not subsequently referenced
+                                              _
+                   inet_ntoa(destAddr.sin_addr), port, err);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(674) : Error 42: Expected a
+    statement
+                                            _
+               inet_ntoa(srcAddress.sin_addr), port);
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(791) : Error 42: Expected a
+    statement
+    _
+    }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(800) : Warning 529: Symbol
+    'err' (line 796) not subsequently referenced
+    _
+    }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(830) : Warning 529: Symbol
+    'err' (line 826) not subsequently referenced
+        _
+        }
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1122) : Warning 529: Symbol
+    'err' (line 1119) not subsequently referenced
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
                        _
@@ -94,10 +194,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
 #if __BIG_ENDIAN__
 D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
     preprocessor variable '__BIG_ENDIAN__', assumed 0
-                _
-                }
-D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(918) : Warning 550: Symbol
-    'pSrc16' (line 905) not accessed
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
                        _
@@ -134,10 +230,10 @@ C:\Program Files\Microsoft Visual Studio 10.0\VC\include\wchar.h(1137) : Error
 
 --- Global Wrap-up
 
-Warning 526: 'ig_endian()' (line 609, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'ig_endian()' (line 610, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
-    609, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+    610, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
 Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
     not accessed
 Warning 526: '__alignof()' (line 121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)

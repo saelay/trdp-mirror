@@ -2172,7 +2172,7 @@ static TRDP_ERR_T tlm_common_send (
                             case TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF:
                             {
                                 /* match session ID */
-                                if (0 == memcmp(&iterMD->sessionID, pSessionId, 16))
+                                if (0 == memcmp(iterMD->sessionID, pSessionId, 16))
                                 {
                                     pendingMD_confirm = iterMD;
                                     break;
@@ -2199,7 +2199,7 @@ static TRDP_ERR_T tlm_common_send (
                         {
 
                             /* check for session ... */
-                            if (0 == memcmp(&sender_ele->sessionID, iterMD->sessionID, 16))
+                            if (0 == memcmp(sender_ele->sessionID, iterMD->sessionID, 16))
                             {
                                 /* Match the sent Request waiting for replies */
                                 if (sender_ele->stateEle == TRDP_MD_ELE_ST_TX_REQUEST_W4Y)
@@ -2487,7 +2487,7 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->frameHead.comId            = vos_htonl(comId);
             pNewElement->frameHead.topoCount        = vos_htonl(topoCount);
             pNewElement->frameHead.datasetLength    = vos_htonl(dataSize);
-            pNewElement->frameHead.replyStatus      = vos_htonl((UINT32) replyStatus);
+            pNewElement->frameHead.replyStatus      = vos_htonl(replyStatus);
             memcpy(pNewElement->frameHead.sessionID, pNewElement->sessionID, sizeof(TRDP_UUID_T));
             pNewElement->frameHead.replyTimeout = vos_htonl(replyTimeout);
             {
