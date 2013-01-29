@@ -581,7 +581,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                 theMessage.replyTimeout     = vos_ntohl(pH->replyTimeout);
                                 memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                 memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-                                theMessage.noOfRepliers     = 0;
+                                theMessage.numExpReplies    = 0;
                                 theMessage.numReplies       = 0;
                                 theMessage.numRetriesMax    = 0;
                                 theMessage.numRetries       = 0;
@@ -752,7 +752,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                             theMessage.replyTimeout     = vos_ntohl(pH->replyTimeout);
                                             memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                             memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-                                            theMessage.noOfRepliers     = sender_ele->noOfRepliers;
+                                            theMessage.numExpReplies    = sender_ele->noOfRepliers;
                                             theMessage.numReplies       = sender_ele->numReplies;
                                             theMessage.numRetriesMax    = sender_ele->numRetriesMax;
                                             theMessage.numRetries       = sender_ele->numRetries;
@@ -862,7 +862,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                             theMessage.replyTimeout     = vos_ntohl(pH->replyTimeout);
                                             memcpy(theMessage.destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
                                             memcpy(theMessage.srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
-                                            theMessage.noOfRepliers     = 0;
+                                            theMessage.numExpReplies    = 0;
                                             theMessage.numReplies       = 0;
                                             theMessage.numRetriesMax    = 0;
                                             theMessage.numRetries       = 0;
@@ -1550,20 +1550,20 @@ void  trdp_mdCheckTimeouts (
                     {
                         TRDP_MD_INFO_T theMessage;
 
-                        theMessage.srcIpAddr    = 0;
-                        theMessage.destIpAddr   = iterMD->u.listener.destIpAddr;
-                        theMessage.seqCount     = vos_ntohs(iterMD->frameHead.sequenceCounter);
-                        theMessage.protVersion  = vos_ntohs(iterMD->frameHead.protocolVersion);
-                        theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterMD->frameHead.msgType);
-                        theMessage.comId        = iterMD->u.listener.comId;
-                        theMessage.topoCount    = iterMD->u.listener.topoCount;
-                        theMessage.userStatus   = 0;
-                        theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->frameHead.replyStatus);
+                        theMessage.srcIpAddr     = 0;
+                        theMessage.destIpAddr    = iterMD->u.listener.destIpAddr;
+                        theMessage.seqCount      = vos_ntohs(iterMD->frameHead.sequenceCounter);
+                        theMessage.protVersion   = vos_ntohs(iterMD->frameHead.protocolVersion);
+                        theMessage.msgType       = (TRDP_MSG_T) vos_ntohs(iterMD->frameHead.msgType);
+                        theMessage.comId         = iterMD->u.listener.comId;
+                        theMessage.topoCount     = iterMD->u.listener.topoCount;
+                        theMessage.userStatus    = 0;
+                        theMessage.replyStatus   = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->frameHead.replyStatus);
                         memcpy(theMessage.sessionId, iterMD->frameHead.sessionID, 16);
-                        theMessage.replyTimeout = vos_ntohl(iterMD->frameHead.replyTimeout);
+                        theMessage.replyTimeout  = vos_ntohl(iterMD->frameHead.replyTimeout);
                         memcpy(theMessage.destURI, iterMD->u.listener.destURI, 32);
                         memcpy(theMessage.srcURI, iterMD->frameHead.sourceURI, 32);
-                        theMessage.noOfRepliers = iterMD->noOfRepliers;
+                        theMessage.numExpReplies = iterMD->noOfRepliers;
 
                         theMessage.numReplies           = 0;
                         theMessage.numRetriesMax        = 0;
@@ -1798,7 +1798,7 @@ void  trdp_mdCheckTimeouts (
                         theMessage.replyTimeout = vos_ntohl(iterMD->frameHead.replyTimeout);
                         memcpy(theMessage.destURI, iterMD->frameHead.destinationURI, 32);
                         memcpy(theMessage.srcURI, iterMD->frameHead.sourceURI, 32);
-                        theMessage.noOfRepliers         = iterMD->noOfRepliers;
+                        theMessage.numExpReplies        = iterMD->noOfRepliers;
                         theMessage.numReplies           = iterMD->numReplies;
                         theMessage.numRetriesMax        = iterMD->numRetriesMax;
                         theMessage.numRetries           = iterMD->numRetries;
@@ -1928,7 +1928,7 @@ void  trdp_mdCheckTimeouts (
                         theMessage.replyTimeout     = vos_ntohl(iterMD->frameHead.replyTimeout);
                         memcpy(theMessage.destURI, iterMD->frameHead.destinationURI, 32);
                         memcpy(theMessage.srcURI, iterMD->frameHead.sourceURI, 32);
-                        theMessage.noOfRepliers     = iterMD->noOfRepliers;
+                        theMessage.numExpReplies    = iterMD->noOfRepliers;
                         theMessage.numReplies       = iterMD->numReplies;
                         theMessage.numRetriesMax    = iterMD->numRetriesMax;
                         theMessage.numRetries       = iterMD->numRetries;
