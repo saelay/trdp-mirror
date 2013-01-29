@@ -56,8 +56,6 @@
  *  @param[in]      pPacket         pointer to the packet element to init
  *  @param[in]      type            type the packet
  *  @param[in]      topoCount       topocount to use for PD frame
- *  @param[in]      subs            subsAndReserve
- *  @param[in]      offsetAddress   ladder offset
  *  @param[in]      replyComId      Pull request comId
  *  @param[in]      replyIpAddress  Pull request Ip
  */
@@ -65,8 +63,6 @@ void    trdp_pdInit (
     PD_ELE_T    *pPacket,
     TRDP_MSG_T  type,
     UINT32      topoCount,
-    UINT16      subs,
-    UINT16      offsetAddress,
     UINT32      replyComId,
     UINT32      replyIpAddress)
 {
@@ -80,8 +76,7 @@ void    trdp_pdInit (
     pPacket->pFrame->frameHead.comId            = vos_htonl(pPacket->addr.comId);
     pPacket->pFrame->frameHead.msgType          = vos_htons((UINT16)type);
     pPacket->pFrame->frameHead.datasetLength    = vos_htonl(pPacket->dataSize);
-    pPacket->pFrame->frameHead.subsAndReserved  = vos_htons(subs);
-    pPacket->pFrame->frameHead.offsetAddress    = vos_htons(offsetAddress);
+    pPacket->pFrame->frameHead.reserved         = 0;
     pPacket->pFrame->frameHead.replyComId       = vos_htonl(replyComId);
     pPacket->pFrame->frameHead.replyIpAddress   = vos_htonl(replyIpAddress);
 }
@@ -403,7 +398,7 @@ TRDP_ERR_T  trdp_pdReceive (
                 pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
                 pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrame->frameHead.replyIpAddress);
 
-                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->topoCount, 0, 0, 0, 0);
+                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->topoCount, 0, 0);
 
                 trdp_pdPrepareStats(appHandle, pPulledElement);
             }
@@ -540,8 +535,6 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
             theMessage.seqCount     = vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter);
             theMessage.protVersion  = vos_ntohs(pExistingElement->pFrame->frameHead.protocolVersion);
-            theMessage.subs         = vos_ntohs(pExistingElement->pFrame->frameHead.subsAndReserved);
-            theMessage.offsetAddr   = vos_ntohs(pExistingElement->pFrame->frameHead.offsetAddress);
             theMessage.replyComId   = vos_ntohl(pExistingElement->pFrame->frameHead.replyComId);
             theMessage.replyIpAddr  = vos_ntohl(pExistingElement->pFrame->frameHead.replyIpAddress);
             theMessage.pUserRef     = pExistingElement->userRef; /* User reference given with the local subscribe? */

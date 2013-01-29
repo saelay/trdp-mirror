@@ -655,7 +655,7 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
         result = tlp_publish(
             pPubTlg->sessionhandle, &pPubTlg->pubHandle, pExchgPar->comId, 
             0, 0, destIP, interval, redId, flags, pSendParam, 
-            (UINT8 *)pPubTlg->dataset.buffer, pPubTlg->dataset.size, FALSE, 0);
+            (UINT8 *)pPubTlg->dataset.buffer, pPubTlg->dataset.size);
         if (result != TRDP_NO_ERR)
         {
             printf("tlp_publish for comID %u, destID %u failed: %s\n", 

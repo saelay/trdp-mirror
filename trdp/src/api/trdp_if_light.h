@@ -231,8 +231,6 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      subs                substitution (Ladder)
- *  @param[in]      offsetAddress       offset (Ladder)
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -251,9 +249,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
-    UINT32                  dataSize,
-    BOOL                    subs,
-    UINT16                  offsetAddress);
+    UINT32                  dataSize);
 
 
 /**********************************************************************************************************************/
@@ -347,8 +343,6 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *  @param[in]      dataSize            size of packet data
  *  @param[in]      replyComId          comId of reply
  *  @param[in]      replyIpAddr         IP for reply
- *  @param[in]      subs                substitution (Ladder)
- *  @param[in]      offsetAddr          offset (Ladder)
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -368,9 +362,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     const UINT8             *pData,
     UINT32                  dataSize,
     UINT32                  replyComId,
-    TRDP_IP_ADDR_T          replyIpAddr,
-    BOOL                    subs,
-    UINT16                  offsetAddr);
+    TRDP_IP_ADDR_T          replyIpAddr);
 
 
 /**********************************************************************************************************************/

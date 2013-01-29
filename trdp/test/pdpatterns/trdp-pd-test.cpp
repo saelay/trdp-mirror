@@ -295,8 +295,7 @@ void setup_ports()
                 TRDP_FLAGS_NONE,    // flags
                 NULL,               // default send parameters
                 p.data,             // data
-                p.size,             // data size
-                FALSE, 0);          // ladder
+                p.size);            // data size
 
             if (p.err != TRDP_NO_ERR)
                 printf("tlp_publish() failed, err: %d\n", p.err);
@@ -318,8 +317,7 @@ void setup_ports()
                 p.data,             // data
                 p.size,             // data size
                 p.repid,            // reply comid
-                p.rep,              // reply ip address
-                FALSE, 0);          // ladder
+                p.rep);             // reply ip address
 
             if (p.err != TRDP_NO_ERR)
                 printf("tlp_request() failed, err: %d\n", p.err);
@@ -623,7 +621,7 @@ void process_data()
 
             p.err = tlp_request(apph, ports[p.link].sh, p.comid, 0,
                 p.src, p.dst, 0, TRDP_FLAGS_NONE, NULL, p.data, p.size,
-                p.repid, p.rep, FALSE, 0);
+                p.repid, p.rep);
         }
 
         // print port data

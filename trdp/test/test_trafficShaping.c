@@ -254,9 +254,7 @@ int main (int argc, char *argv[])
                           TRDP_FLAGS_NONE,            /*    Use callback for errors        */
                           NULL,                       /*    default qos and ttl            */
                           (UINT8 *)outputBuffer,      /*    initial data                */
-                          gPD[i].size,                /*    data size                    */
-                          FALSE,                      /*    no ladder                    */
-                          0);                         /*    no ladder                    */
+                          gPD[i].size);               /*    no ladder                    */
         
         
         if (err != TRDP_NO_ERR)

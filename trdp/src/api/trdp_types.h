@@ -295,8 +295,6 @@ typedef struct
     TRDP_MSG_T      msgType;        /**< Protocol ('PD', 'MD', ...)                                 */
     UINT32          comId;          /**< ComID                                                      */
     UINT32          topoCount;      /**< received topocount                                         */
-    BOOL            subs;           /**< substitution                                               */
-    UINT16          offsetAddr;     /**< offset address for ladder architecture                     */
     UINT32          replyComId;     /**< ComID for reply (request only)                             */
     TRDP_IP_ADDR_T  replyIpAddr;    /**< IP address for reply (request only)                        */
     const void      *pUserRef;      /**< User reference given with the local subscribe              */
