@@ -176,8 +176,7 @@ typedef struct
     UINT32  topoCount;                      /**< set by user: ETB to use, '0' to deacticate             */
     UINT32  datasetLength;                  /**< length of the data to transmit 0...1436
                                                  without padding and FCS                                */
-    UINT16  subsAndReserved;                /**< first bit (MSB): indicates substitution transmission   */
-    UINT16  offsetAddress;                  /**< for process data in traffic store                      */
+    UINT32  reserved;                       /**< before used for ladder support                         */
     UINT32  replyComId;                     /**< used in PD request                                     */
     UINT32  replyIpAddress;                 /**< used for PD request                                    */
     UINT32  frameCheckSum;                  /**< CRC32 of header                                        */

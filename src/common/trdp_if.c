@@ -482,9 +482,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           TRDP_FLAGS_NONE,              /*    No callbacks                  */
                           NULL,                         /*    default qos and ttl           */
                           NULL,                         /*    initial data                  */
-                          sizeof(TRDP_STATISTICS_T),    /*    max data size                 */
-                          FALSE,                        /*    no ladder                     */
-                          0);                           /*    no ladder                     */
+                          sizeof(TRDP_STATISTICS_T)); 
 
         vos_printf(VOS_LOG_INFO,
                    "TRDP Stack Version %s: successfully initiated\n",
@@ -892,9 +890,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
-    UINT32                  dataSize,
-    BOOL                    subs,
-    UINT16                  offsetAddress)
+    UINT32                  dataSize)
 {
     PD_ELE_T    *pNewElement = NULL;
     TRDP_TIME_T nextTime;
@@ -1048,7 +1044,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             }
 
             /*    Compute the header fields */
-            trdp_pdInit(pNewElement, TRDP_MSG_PD, topoCount, subs, offsetAddress, 0, 0);
+            trdp_pdInit(pNewElement, TRDP_MSG_PD, topoCount, 0, 0);
 
             /*    Insert at front    */
             trdp_queueInsFirst(&appHandle->pSndQueue, pNewElement);
@@ -1403,8 +1399,6 @@ EXT_DECL TRDP_ERR_T tlc_process (
                     theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
                     theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
                     theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
-                    theMessage.subs         = vos_ntohs(iterPD->pFrame->frameHead.subsAndReserved);
-                    theMessage.offsetAddr   = vos_ntohs(iterPD->pFrame->frameHead.offsetAddress);
                     theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
                     theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
                     theMessage.pUserRef     = iterPD->userRef;
@@ -1522,9 +1516,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     const UINT8             *pData,
     UINT32                  dataSize,
     UINT32                  replyComId,
-    TRDP_IP_ADDR_T          replyIpAddr,
-    BOOL                    subs,
-    UINT16                  offsetAddr)
+    TRDP_IP_ADDR_T          replyIpAddr)
 {
     TRDP_ERR_T  ret             = TRDP_NO_ERR;
     PD_ELE_T    *pSubPD         = NULL;
@@ -1637,7 +1629,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                                                         TRDP_MSG_PR, pReqElement->addr.srcIpAddr) - 1;
 
                 /*    Compute the header fields */
-                trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, subs, offsetAddr, replyComId, replyIpAddr);
+                trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, replyComId, replyIpAddr);
 
                 if (dataSize > 0)
                 {
@@ -2053,8 +2045,6 @@ EXT_DECL TRDP_ERR_T tlp_get (
             pPdInfo->msgType        = (TRDP_MSG_T) vos_ntohs(pElement->pFrame->frameHead.msgType);
             pPdInfo->seqCount       = vos_ntohl(pElement->pFrame->frameHead.sequenceCounter);
             pPdInfo->protVersion    = vos_ntohs(pElement->pFrame->frameHead.protocolVersion);
-            pPdInfo->subs           = vos_ntohs(pElement->pFrame->frameHead.subsAndReserved);
-            pPdInfo->offsetAddr     = vos_ntohs(pElement->pFrame->frameHead.offsetAddress);
             pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
             pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
             pPdInfo->pUserRef       = pElement->userRef;        /* TBD: User reference given with the local subscribe?
