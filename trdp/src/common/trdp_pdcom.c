@@ -246,7 +246,8 @@ TRDP_ERR_T  trdp_pdSendQueued (
             /* send only if there is valid data */
             if (!(iterPD->privFlags & TRDP_INVALID_DATA))
             {
-                if (iterPD->privFlags & TRDP_REQ_2B_SENT)       /*  PULL Request?  */
+                if (iterPD->privFlags & TRDP_REQ_2B_SENT &&
+                	iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PD))       /*  PULL packet?  */
                 {
                     iterPD->pFrame->frameHead.msgType = vos_htons(TRDP_MSG_PP);
                 }
