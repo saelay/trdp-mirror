@@ -1,10 +1,11 @@
 TRDP process data test program.
 
-usage: trdp-pd-test <localip> <remoteip> <mcast>
+usage: trdp-pd-test <localip> <remoteip> <mcast> <logfile>
 where:
   <localip>  .. own IP address (ie. 10.2.24.1)
   <remoteip> .. remote peer IP address (ie. 10.2.24.2)
   <mcast>    .. multicast group address (ie. 239.2.24.1)
+  <logfile>  .. optional name of the logfile (ie. log.txt)
 
 The purpose of this test program is to verify TRDP PD transmission between
 two hosts using all defined communication patterns.
@@ -17,11 +18,11 @@ hostB: 10.2.24.2
 
 On hostA, use this command to start the test:
 
-  ./trdp-pd-test 10.2.24.1 10.2.24.2 239.2.24.1
+  ./trdp-pd-test 10.2.24.1 10.2.24.2 239.2.24.1 log.txt
 
 On hostB, use this command to start the test:
 
-  ./trdp-pd-test 10.2.24.2 10.2.24.1 239.2.24.1
+  ./trdp-pd-test 10.2.24.2 10.2.24.1 239.2.24.1 log.txt
 
 
 Test creates these datasets with PUSH pattern
