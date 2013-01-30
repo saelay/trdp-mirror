@@ -1759,7 +1759,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     else
     {
         /*    Find a (new) socket    */
-
+#ifdef POSIX
         /* Multicast : use I/F destIp */
         if (vos_isMulticast(destIpAddr))
         {
@@ -1774,6 +1774,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                      0);
         }
         else
+#endif
         {
 
             ret = trdp_requestSocket(appHandle->iface,
