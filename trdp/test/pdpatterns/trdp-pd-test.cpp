@@ -463,6 +463,12 @@ void _set_color_green()
         FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
+void _set_color_blue()
+{
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+        FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+}
+
 void _set_color_default()
 {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
