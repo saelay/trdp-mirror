@@ -1,20 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
+#include "trdp_if_light.h"
+
+#ifdef WIN32
 #include <winsock2.h>
 #else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <sys/select.h>
 #include <sys/ioctl.h>
 #include <time.h>
 #endif
-
-#include "trdp_if_light.h"
 
 // --- globals -----------------------------------------------------------------
 
@@ -705,7 +703,7 @@ int main(int argc, char * argv[])
 
     if (argc < 4)
     {
-        printf("usage: trdp-pd-test <localip> <remoteip> <mcast> <logfile>\n", argv[0]);
+        printf("usage: %s <localip> <remoteip> <mcast> <logfile>\n", argv[0]);
         printf("  <localip>  .. own IP address (ie. 10.2.24.1)\n");
         printf("  <remoteip> .. remote peer IP address (ie. 10.2.24.2)\n");
         printf("  <mcast>    .. multicast group address (ie. 239.2.24.1)\n");
@@ -714,9 +712,9 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    srcip = ntohl(inet_addr(argv[1]));
-    dstip = ntohl(inet_addr(argv[2]));
-    mcast = ntohl(inet_addr(argv[3]));
+    srcip = vos_dottedIP(argv[1]);
+    dstip = vos_dottedIP(argv[2]);
+    mcast = vos_dottedIP(argv[3]);
 
     if (!srcip || !dstip || (mcast >> 28) != 0xE)
     {
