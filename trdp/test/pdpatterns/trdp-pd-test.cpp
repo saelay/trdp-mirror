@@ -4,15 +4,17 @@
 
 #include "trdp_if_light.h"
 
-#ifdef WIN32
+#if defined (WIN32)
 #include <winsock2.h>
-#else
+#elif defined (POSIX)
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/select.h>
 #include <sys/ioctl.h>
 #include <time.h>
-#endif
+#else
+#error "Target not defined!"
+#endif 
 
 // --- globals -----------------------------------------------------------------
 
@@ -413,7 +415,7 @@ const char * get_result_string(int ret)
 
 // --- platform helper functions -----------------------------------------------
 
-#ifdef _WIN32
+#if defined (WIN32)
 
 void cursor_home()
 {
@@ -495,7 +497,7 @@ int snprintf(char * str, size_t size, const char * format, ...)
     return n;
 }
 
-#else
+#elif defined (POSIX)
 
 void cursor_home()
 {
@@ -544,7 +546,9 @@ void sleep(int msec)
     nanosleep(&ts, NULL);
 }
 
-#endif
+#else
+#error "Target not defined!"
+#endif 
 
 // --- test data processing ----------------------------------------------------
 
