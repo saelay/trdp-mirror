@@ -216,7 +216,12 @@ typedef VOS_TIME_T TRDP_TIME_T;
     INT32   fds_bits[VOS_MAX_SOCKET_CNT];
    } TRDP_FDS_T;
  */
+#ifdef WIN32
 typedef struct fd_set TRDP_FDS_T;
+#else
+typedef fd_set TRDP_FDS_T;
+#endif
+
 /*#define TRDP_FDS_T    fd_set */
 
 /**********************************************************************************************************************/

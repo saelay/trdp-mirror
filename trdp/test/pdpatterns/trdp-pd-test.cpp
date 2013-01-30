@@ -24,9 +24,9 @@ TRDP_PD_CONFIG_T pdcfg;
 TRDP_PROCESS_CONFIG_T proccfg;
 
 // default addresses - overriden from command line
-TRDP_IP_ADDR_T srcip = ntohl(inet_addr("10.2.24.1"));
-TRDP_IP_ADDR_T dstip = ntohl(inet_addr("10.2.24.2"));
-TRDP_IP_ADDR_T mcast = ntohl(inet_addr("239.2.24.1"));
+TRDP_IP_ADDR_T srcip;
+TRDP_IP_ADDR_T dstip;
+TRDP_IP_ADDR_T mcast;
 
 enum Type
 {
