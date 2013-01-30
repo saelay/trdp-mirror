@@ -532,6 +532,11 @@ void _set_color_green()
     printf("\033" "[0;1;32m");
 }
 
+void _set_color_blue()
+{
+    printf("\033" "[0;1;34m");
+}
+
 void _set_color_default()
 {
     printf("\033" "[0m");
@@ -627,7 +632,15 @@ void process_data()
         }
 
         // print port data
-        printf("%5d %s [", p.comid, types[p.type]);
+        fflush(stdout);
+        if (vos_isMulticast(p.dst) || vos_isMulticast(p.src))
+            _set_color_blue();
+        else
+            _set_color_default();
+        printf("%5d ", p.comid);
+        _set_color_default();
+        printf("%s [", types[p.type]);
+
         if (p.err == TRDP_NO_ERR)
         {
             unsigned char * ptr = p.data;

@@ -132,3 +132,5 @@ function call for given dataset. It is printed in green color when the
 status is 0 (TRDP_NO_ERR) and in red color if not.
 
 You should see the zero status (green) if the communication works as expected.
+
+ComIDs in blue color show multicast addressed traffic - either receiving or sending.
