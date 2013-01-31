@@ -2,7 +2,7 @@
  * Routines for Train Real Time Data Protocol
  * Copyright 2012, Florian Weispfenning <florian.weispfenning@de.transport.bombardier.com>
  *
- * $Id: $
+ * $Id$
  *
  * Ethereal - Network traffic analyzer
  * By Gerald Combs <gerald@ethereal.com>
@@ -959,6 +959,10 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         {
             col_set_str(pinfo->cinfo, COL_INFO, "PD Request");
         }
+        else if ((!strcmp(trdp_spy_string,"Pp")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "PD Reply");
+        }
         else if ((!strcmp(trdp_spy_string,"Pd")))
         {
             col_set_str(pinfo->cinfo, COL_INFO, "PD Data");
@@ -991,7 +995,7 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         {
             col_set_str(pinfo->cinfo, COL_INFO, "Unknown TRDP Type");
         }
-        col_append_fstr(pinfo->cinfo, COL_INFO, " Comid: %d",trdp_spy_comid);
+        col_append_fstr(pinfo->cinfo, COL_INFO, "\tComid: %d",trdp_spy_comid);
     }
 }
 
