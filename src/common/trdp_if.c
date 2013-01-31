@@ -2073,8 +2073,7 @@ static TRDP_ERR_T tlm_common_send (
         return TRDP_NOINIT_ERR;
     }
 
-    if ((0 == comId)
-        || ((pData == NULL) && (dataSize != 0)))
+    if ((pData == NULL) && (dataSize != 0))
     {
         return TRDP_PARAM_ERR;
     }
