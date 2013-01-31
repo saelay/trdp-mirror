@@ -48,6 +48,8 @@ extern "C" {
 /**    The maximum hops a multicast packet can go    */
 #define VOS_TTL_MULTICAST  64
 
+/**    The maximum number of multicast groups a socket can join    */
+#define VOS_MAX_MULTICAST_CNT  20
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -285,7 +287,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *  @retval         VOS_NO_ERR         no error
  *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  *  @retval         VOS_IO_ERR         data could not be sent
- *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
@@ -313,7 +315,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @retval         VOS_IO_ERR         data could not be read
  *  @retval         VOS_MEM_ERR        resource error
  *  @retval         VOS_NODATA_ERR     no data in non-blocking
- *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (

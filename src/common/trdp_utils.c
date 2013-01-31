@@ -1,4 +1,4 @@
-/******************************************************************************/
+/**********************************************************************************************************************/
 /**
  * @file            trdp_utils.c
  *
@@ -12,38 +12,118 @@
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
- *          Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *          Copyright Bombardier Transportation GmbH, Germany, 2013.
  *
  *
  * $Id$
  *
  */
 
-/*******************************************************************************
+/***********************************************************************************************************************
  * INCLUDES
  */
+
+#include <string.h>
 
 #include "trdp_utils.h"
 #include "trdp_if.h"
 
-/*******************************************************************************
+/***********************************************************************************************************************
  * DEFINES
  */
 
-/*******************************************************************************
+/***********************************************************************************************************************
  * TYPEDEFS
  */
 
-/******************************************************************************
+/***********************************************************************************************************************
  *   Locals
  */
 static INT32 sCurrentMaxSocketCnt = 0;
 
-/******************************************************************************
+/**********************************************************************************************************************/
+/** Check if a mc group is in the list
+ *
+ *  @param[in]      mcList[]            List of multicast groups
+ *  @param[in]      mcGroup             multicast group
+ *
+ *  @retval         1           if found
+ *                  0           if not found
+ */
+BOOL trdp_SockIsJoined (
+    const TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
+    TRDP_IP_ADDR_T          mcGroup)
+{
+    int i = 0;
+
+    for (i = 0; i < VOS_MAX_MULTICAST_CNT && mcList[i] != mcGroup; i++)
+    {
+        ;
+    }
+
+    return i < VOS_MAX_MULTICAST_CNT;
+}
+
+/**********************************************************************************************************************/
+/** Add mc group to the list
+ *
+ *  @param[in]      mcList[]            List of multicast groups
+ *  @param[in]      mcGroup             multicast group
+ *
+ *  @retval         1           if added
+ *                  0           if list is full
+ */
+BOOL trdp_SockAddJoin (
+    TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
+    TRDP_IP_ADDR_T  mcGroup)
+{
+    int i = 0;
+
+    for (i = 0; i < VOS_MAX_MULTICAST_CNT; i++)
+    {
+        if (0 == mcList[i] || mcGroup == mcList[i])
+        {
+            mcList[i] = mcGroup;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+/**********************************************************************************************************************/
+/** remove mc group from the list
+ *
+ *  @param[in]      mcList[]            List of multicast groups
+ *  @param[in]      mcGroup             multicast group
+ *
+ *  @retval         1           if deleted
+ *                  0           was not in list
+ */
+BOOL trdp_SockDelJoin (
+    TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
+    TRDP_IP_ADDR_T  mcGroup)
+{
+    int i = 0;
+
+    for (i = 0; i < VOS_MAX_MULTICAST_CNT; i++)
+    {
+        if (mcGroup == mcList[i])
+        {
+            mcList[i] = 0;
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+
+/***********************************************************************************************************************
  *   Globals
  */
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Determine if we are Big or Little endian
  *
  *  @retval         != 0        we are big endian
@@ -56,7 +136,7 @@ int am_big_endian ()
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Get the packet size from the raw data size
  *
  *  @param[in]      dataSize            net data size (without padding or FCS)
@@ -79,7 +159,7 @@ UINT32 trdp_packetSizePD (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Return the element with same comId
  *
  *  @param[in]      pHead           pointer to head of queue
@@ -110,7 +190,7 @@ PD_ELE_T *trdp_queueFindComId (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Return the element with same comId and IP addresses
  *
  *  @param[in]      pHead           pointer to head of queue
@@ -146,7 +226,7 @@ PD_ELE_T *trdp_queueFindPubAddr (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Return the element with same comId and IP addresses
  *
  *  @param[in]      pHead           pointer to head of queue
@@ -180,7 +260,7 @@ PD_ELE_T *trdp_queueFindSubAddr (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Return the element with same comId from MD queue
  *
  *  @param[in]      pHead           pointer to head of queue
@@ -216,7 +296,7 @@ MD_ELE_T *trdp_MDqueueFindAddr (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Delete an element
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -251,7 +331,7 @@ void    trdp_queueDelElement (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Delete an element from MD queue
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -286,7 +366,7 @@ void    trdp_MDqueueDelElement (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Append an element at end of queue
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -303,7 +383,7 @@ void    trdp_queueAppLast (
         return;
     }
 
-    /* Ensure this element is last! */    
+    /* Ensure this element is last! */
     pNew->pNext = NULL;
 
     if (*ppHead == NULL)
@@ -320,7 +400,7 @@ void    trdp_queueAppLast (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Append an element at end of queue
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -337,9 +417,9 @@ void    trdp_MDqueueAppLast (
         return;
     }
 
-    /* Ensure this element is last! */    
+    /* Ensure this element is last! */
     pNew->pNext = NULL;
-    
+
     if (*ppHead == NULL)
     {
         *ppHead = pNew;
@@ -354,7 +434,7 @@ void    trdp_MDqueueAppLast (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Insert an element at front of queue
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -374,7 +454,7 @@ void    trdp_queueInsFirst (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Insert an element at front of MD queue
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -394,7 +474,7 @@ void    trdp_MDqueueInsFirst (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Handle the socket pool: Initialize it
  *
  *  @param[in]      iface          pointer to the socket pool
@@ -410,14 +490,20 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
+ *  First we loop through the socket pool and check if there is already a socket
+ *  which would suit us. If a multicast group should be joined, we do that on an otherwise suitable socket - up to 20
+ *  multicast goups can be joined per socket.
+ *  If a socket for multicast publishing is requested, we also use the source IP to determine the interface for outgoing
+ *  multicast traffic.
  *
  *  @param[in,out]  iface           socket pool
  *  @param[in]      port            port to use
  *  @param[in]      params          parameters to use
  *  @param[in]      srcIP           IP to bind to (0 = any address)
- *  @param[in]      usage           type and port to bind to
+ *  @param[in]      mcGroup         MC group to join (0 = do not join)
+ *  @param[in]      usage           type and port to bind to (PD, MD/UDP, MD/TCP)
  *  @param[in]      options         blocking/nonblocking
  *  @param[in]      rcvOnly         only used for receiving
  *  @param[out]     pIndex          returned index of socket pool
@@ -431,6 +517,7 @@ TRDP_ERR_T  trdp_requestSocket (
     UINT32                  port,
     const TRDP_SEND_PARAM_T *params,
     TRDP_IP_ADDR_T          srcIP,
+    TRDP_IP_ADDR_T          mcGroup,
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
     BOOL                    rcvOnly,
@@ -439,27 +526,55 @@ TRDP_ERR_T  trdp_requestSocket (
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           index, emptySock = -1;
-    TRDP_ERR_T      err     = TRDP_NO_ERR;
- 
+    TRDP_ERR_T      err         = TRDP_NO_ERR;
+    TRDP_IP_ADDR_T  bindAddr    = srcIP;
+
     if (iface == NULL || params == NULL || pIndex == NULL)
     {
         return TRDP_PARAM_ERR;
     }
 
     /*  We loop through the table of open/used sockets,
-        if we find a usable one (with the same socket options) we take it.
-        We remember already closed sockets on the way to be able to fill up gaps  */
+     if we find a usable one (with the same socket options) we take it.
+     if we search for a multicast group enabled socket, we also search the list of mc groups (max. 20)
+     and possibly add that group, if everything else fits.
+     We remember already closed sockets on the way to be able to fill up gaps  */
+
+    if (vos_isMulticast(mcGroup) && rcvOnly)
+    {
+        bindAddr = 0;
+    }
+
     for (index = 0; index < sCurrentMaxSocketCnt; index++)
     {
         if (iface[index].sock != -1 &&
-            iface[index].bindAddr == srcIP &&
+            iface[index].bindAddr == bindAddr &&
             iface[index].type == usage &&
             iface[index].sendParam.qos == params->qos &&
             iface[index].sendParam.ttl == params->ttl &&
             iface[index].rcvOnly == rcvOnly &&
             ((usage != TRDP_SOCK_MD_TCP) ||
-            ((usage == TRDP_SOCK_MD_TCP) && (iface[index].tcpParams.cornerIp == cornerIp))))
+             ((usage == TRDP_SOCK_MD_TCP) && (iface[index].tcpParams.cornerIp == cornerIp))))
         {
+            /*  Did this socket join the required multicast group?  */
+            if (mcGroup != 0 && trdp_SockIsJoined(iface[index].mcGroups, mcGroup) == FALSE)
+            {
+                /*  No, but can we add it? */
+                if (trdp_SockAddJoin(iface[index].mcGroups, mcGroup) == FALSE)
+                {
+                    continue;   /* No, socket cannot join more MC groups */
+                }
+                else
+                {
+                    if (vos_sockJoinMC(iface[index].sock, mcGroup, iface[index].bindAddr) != VOS_NO_ERR)
+                    {
+                        trdp_SockDelJoin(iface[index].mcGroups, mcGroup);
+                        continue;   /* No, socket cannot join more MC groups */
+                    }
+                }
+
+            }
+
             /* Use that socket */
             *pIndex = index;
 
@@ -495,21 +610,22 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
         iface[index].rcvOnly        = rcvOnly;
-        iface[index].tcpParams.connectionTimeout.tv_sec = 0;
-        iface[index].tcpParams.connectionTimeout.tv_usec = 0;
+        iface[index].tcpParams.connectionTimeout.tv_sec     = 0;
+        iface[index].tcpParams.connectionTimeout.tv_usec    = 0;
         iface[index].tcpParams.cornerIp = cornerIp;
+        memset(iface[index].mcGroups, 0, sizeof(iface[index].mcGroups));
 
-        sock_options.qos            = params->qos;
-        sock_options.ttl            = params->ttl;
+        sock_options.qos    = params->qos;
+        sock_options.ttl    = params->ttl;
         sock_options.ttl_multicast  = VOS_TTL_MULTICAST;
         sock_options.reuseAddrPort  = TRUE;
         sock_options.nonBlocking    = (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
 
         if((usage == TRDP_SOCK_MD_TCP) && (rcvOnly == TRUE))
         {
-            iface[index].sock       = *pIndex;
-            *pIndex                    = index;
-            iface[index].usage         = 0;
+            iface[index].sock = *pIndex;
+            *pIndex = index;
+            iface[index].usage = 0;
             return err;
         }
 
@@ -530,14 +646,47 @@ TRDP_ERR_T  trdp_requestSocket (
                     *pIndex = index;
                     if (rcvOnly)
                     {
-                        err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
+                        TRDP_IP_ADDR_T bindAddr = mcGroup;
+
+                        /*  Only bind to local IP if we are not a multicast listener  */
+                        if (0 == mcGroup)
+                        {
+                            bindAddr = iface[index].bindAddr;
+                        }
+                        err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, bindAddr, port);
                         if (err != TRDP_NO_ERR)
                         {
                             vos_printf(VOS_LOG_ERROR, "vos_sockBind() for UDP rcv failed! (Err: %d)\n", err);
                             *pIndex = -1;
                             break;
                         }
+                        if (0 != mcGroup)
+                        {
+
+                            err = (TRDP_ERR_T) vos_sockJoinMC(iface[index].sock, mcGroup, iface[index].bindAddr);
+                            if (err != TRDP_NO_ERR)
+                            {
+                                vos_printf(VOS_LOG_ERROR, "vos_sockJoinMC() for UDP rcv failed! (Err: %d)\n", err);
+                                *pIndex = -1;
+                                break;
+                            }
+                            else
+                            {
+                                trdp_SockAddJoin(iface[index].mcGroups, mcGroup);
+                            }
+                        }
                     }
+                    else if (0 != mcGroup)      /*	Multicast sender shall be bound to an interface	*/
+                    {
+                        err = vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
+                        if (err != TRDP_NO_ERR)
+                        {
+                            vos_printf(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err);
+                            *pIndex = -1;
+                            break;
+                        }
+                    }
+
                 }
                 break;
             case TRDP_SOCK_MD_TCP:
@@ -568,7 +717,7 @@ TRDP_ERR_T  trdp_requestSocket (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Handle the socket pool: Release a socket from our socket pool
  *
  *  @param[in,out]  iface           socket pool
@@ -600,7 +749,7 @@ TRDP_ERR_T  trdp_releaseSocket (
 }
 
 
-/******************************************************************************/
+/**********************************************************************************************************************/
 /** Get the initial sequence counter for the comID/message type and subnet (source IP).
  *  If the comID/srcIP is not found elsewhere, return 0 -
  *  else return its current sequence number (the redundant packet needs the same seqNo)
@@ -736,11 +885,11 @@ BOOL  trdp_isRcvSeqCnt (
  *  @param[in]      listUri       Null terminated listener URI string to compare
  *  @param[in]      destUri       Null terminated destination URI string to compare
  *
- *  @retval         FALSE - not in addressing range 
+ *  @retval         FALSE - not in addressing range
  *  @retval         TRUE  - listener URI is in addressing range of destination URI
  */
 
-BOOL trdp_isAddressed(const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T destUri)
+BOOL trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T destUri)
 {
     return (vos_strnicmp(listUri, destUri, sizeof(TRDP_URI_USER_T)) == 0);
 }

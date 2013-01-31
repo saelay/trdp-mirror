@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.1.6"
+#define LIB_VERSION  "0.0.1.7"
 
 #ifndef TRDP_PD_UDP_PORT
 #define TRDP_PD_UDP_PORT  20548                         /**< process data UDP port                      */
@@ -153,13 +153,14 @@ typedef struct TRDP_SOCKET_TCP
 /** Socket item    */
 typedef struct TRDP_SOCKETS
 {
-    INT32               sock;               /**< vos socket descriptor to use                           */
-    TRDP_IP_ADDR_T      bindAddr;           /**< Defines the interface to use                           */
-    TRDP_SEND_PARAM_T   sendParam;          /**< Send parameters                                        */
-    TRDP_SOCK_TYPE_T    type;               /**< Usage of this socket                                   */
-    BOOL                rcvOnly;            /**< Used for receiving                                     */
-    UINT16              usage;              /**< No. of current users of this socket                    */
-    TRDP_SOCKET_TCP_T   tcpParams;          /**< Params used for TCP                                    */
+    INT32               sock;                            /**< vos socket descriptor to use                */
+    TRDP_IP_ADDR_T      bindAddr;                        /**< Defines the interface to use                */
+    TRDP_SEND_PARAM_T   sendParam;                       /**< Send parameters                             */
+    TRDP_SOCK_TYPE_T    type;                            /**< Usage of this socket                        */
+    BOOL                rcvOnly;                         /**< Used for receiving                          */
+    UINT16              usage;                           /**< No. of current users of this socket         */
+    TRDP_SOCKET_TCP_T   tcpParams;                       /**< Params used for TCP                         */
+    TRDP_IP_ADDR_T      mcGroups[VOS_MAX_MULTICAST_CNT]; /**< List of multicast addresses for this socket */
 } TRDP_SOCKETS_T;
 
 #ifdef WIN32
@@ -266,8 +267,8 @@ typedef struct MD_ELE
     {
         struct
         {
-            UINT32          comId;              /**< filter on incoming MD by comId                         */
-            const void      *pUserRef;          /**< user reference for call_back from tlm_request()        */
+            UINT32      comId;                  /**< filter on incoming MD by comId                         */
+            const void  *pUserRef;              /**< user reference for call_back from tlm_request()        */
         } caller;
         struct
         {
