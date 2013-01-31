@@ -782,6 +782,10 @@ EXT_DECL VOS_ERR_T vos_sockBind (
         return VOS_PARAM_ERR;
     }
 
+	if (vos_isMulticast(ipAddress))
+    {
+        ipAddress = INADDR_ANY;
+    }
     /*    Allow the socket to be bound to an address and port
         that is already in use    */
 
