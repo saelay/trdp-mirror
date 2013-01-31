@@ -2463,6 +2463,17 @@ static TRDP_ERR_T tlm_common_send (
             /* save com ID */
             pNewElement->u.caller.comId = comId;
 
+            /* Add the pUserRef */
+            switch(msgType)
+            {
+                case TRDP_MSG_MR:
+                case TRDP_MSG_MC:
+                    pNewElement->u.caller.pUserRef = pUserRef;
+                    break;
+                default:
+                    break;
+            }
+
             /* Prepare header */
             pNewElement->frameHead.sequenceCounter = vos_htonl(0);
             if(pendingMD_reply)

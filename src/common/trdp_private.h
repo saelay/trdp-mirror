@@ -266,7 +266,8 @@ typedef struct MD_ELE
     {
         struct
         {
-            UINT32 comId;                       /**< filter on incoming MD by comId                         */
+            UINT32          comId;              /**< filter on incoming MD by comId                         */
+            const void      *pUserRef;          /**< user reference for call_back from tlm_request()        */
         } caller;
         struct
         {

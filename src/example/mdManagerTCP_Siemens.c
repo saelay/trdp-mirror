@@ -768,7 +768,6 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         md_config.sendParam.ttl = TRDP_MD_DEFAULT_TTL;
         md_config.flags = 0
             | TRDP_FLAGS_NONE      * 0
-            | TRDP_FLAGS_REDUNDANT * 0
             | TRDP_FLAGS_MARSHALL  * 0
             | TRDP_FLAGS_CALLBACK  * 1
             | TRDP_FLAGS_TCP       * 1 /* 1=TCP, 0=UDP */

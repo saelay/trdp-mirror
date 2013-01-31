@@ -588,7 +588,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                 theMessage.numRepliesQuery  = 0;
                                 theMessage.numConfirmSent   = 0;
                                 theMessage.numConfirmTimeout = 0;
-                                theMessage.pUserRef         = appHandle->mdDefault.pRefCon;
+                                theMessage.pUserRef         = iterMD->u.listener.pUserRef;
                                 theMessage.resultCode       = TRDP_NO_ERR;
 
                                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
@@ -759,8 +759,8 @@ TRDP_ERR_T  trdp_mdRecv (
                                             theMessage.numRepliesQuery  = sender_ele->numRepliesQuery;
                                             theMessage.numConfirmSent   = sender_ele->numConfirmSent;
                                             theMessage.numConfirmTimeout = sender_ele->numConfirmTimeout;
-                                            theMessage.pUserRef         = appHandle->mdDefault.pRefCon;
                                             theMessage.resultCode       = TRDP_NO_ERR;
+                                            theMessage.pUserRef         = sender_ele->u.caller.pUserRef;
 
                                             if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                                             {
@@ -869,7 +869,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                             theMessage.numRepliesQuery  = 0;
                                             theMessage.numConfirmSent   = 0;
                                             theMessage.numConfirmTimeout = 0;
-                                            theMessage.pUserRef         = appHandle->mdDefault.pRefCon;
+                                            theMessage.pUserRef         = iterMD->u.listener.pUserRef;
                                             theMessage.resultCode       = TRDP_NO_ERR;
 
                                             if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
@@ -1563,6 +1563,7 @@ void  trdp_mdCheckTimeouts (
                         memcpy(theMessage.destURI, iterMD->u.listener.destURI, 32);
                         memcpy(theMessage.srcURI, iterMD->frameHead.sourceURI, 32);
                         theMessage.numExpReplies = iterMD->noOfRepliers;
+                        theMessage.pUserRef = iterMD->u.listener.pUserRef;
 
                         theMessage.numReplies           = 0;
                         theMessage.numRetriesMax        = 0;
@@ -1805,7 +1806,7 @@ void  trdp_mdCheckTimeouts (
                         theMessage.numRepliesQuery      = iterMD->numRepliesQuery;
                         theMessage.numConfirmSent       = iterMD->numConfirmSent;
                         theMessage.numConfirmTimeout    = iterMD->numConfirmTimeout;
-                        theMessage.pUserRef = appHandle->mdDefault.pRefCon;
+                        theMessage.pUserRef = iterMD->u.listener.pUserRef;
 
                         /* Reply Timeout Callback */
                         if(sndReplyTimeout == 1)
@@ -1931,7 +1932,7 @@ void  trdp_mdCheckTimeouts (
                         theMessage.numReplies       = iterMD->numReplies;
                         theMessage.numRetriesMax    = iterMD->numRetriesMax;
                         theMessage.numRetries       = iterMD->numRetries;
-                        theMessage.pUserRef         = appHandle->mdDefault.pRefCon;
+                        theMessage.pUserRef         = iterMD->u.listener.pUserRef;
                         theMessage.resultCode       = TRDP_CONFIRMTO_ERR;
 
                         appHandle->mdDefault.pfCbFunction(
