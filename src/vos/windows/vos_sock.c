@@ -144,8 +144,8 @@ EXT_DECL const CHAR8 *vos_ipDotted (
     static CHAR8 dotted[16];
 
     /*lint -e(534) ignore return value */
-    sprintf_s (dotted, sizeof(dotted),"%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF, 
-            (ipAddress >> 8) & 0xFF, ipAddress & 0xFF); 
+    sprintf_s(dotted, sizeof(dotted), "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
+              (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
     return dotted;
 }
 
@@ -192,7 +192,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
     UINT8 pMAC[6])
 {
     UINT32 i;
-    
+
     if (!vosSockInitialised)
     {
         return VOS_INIT_ERR;
@@ -219,7 +219,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         WKSTA_TRANSPORT_INFO_0  *pwkti;
 
         /* Get MAC address via NetBIOS's enumerate function */
-        NET_API_STATUS  dwStatus = NetWkstaTransportEnum(
+        NET_API_STATUS          dwStatus = NetWkstaTransportEnum(
                 NULL,                     /* [in] server name */
                 0,                        /* [in] data structure to return */
                 &pbBuffer,                /* [out] pointer to buffer */
@@ -228,7 +228,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
                 &dwTotalEntries,          /* [out] total number of elements that could be enumerated */
                 NULL);                    /* [in/out] resume handle */
 
-        if (dwStatus!=0)
+        if (dwStatus != 0)
         {
             memset(pMAC, 0, sizeof(mac));
             return VOS_UNKNOWN_ERR;
@@ -277,7 +277,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     INT32                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
-    SOCKET  sock;
+    SOCKET sock;
 
     if (!vosSockInitialised)
     {
@@ -293,7 +293,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET )
     {
         int err = WSAGetLastError();
-        
+
         vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
@@ -419,11 +419,11 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             }
 #endif
         }
-        
+
         if (pOptions->nonBlocking == TRUE)
         {
-            u_long  optValue = TRUE;
-            
+            u_long optValue = TRUE;
+
             if (ioctlsocket(sock, FIONBIO, &optValue) == SOCKET_ERROR)
             {
                 int err = WSAGetLastError();
@@ -503,22 +503,22 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
         {
-            char mcStr[16];
-            char ifStr[16];
+            char    mcStr[16];
+            char    ifStr[16];
 
             strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr)); /*lint !e534 ignore return value */
             strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface)); /*lint !e534 ignore return value */
             vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
-         
-        if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR) 
+
+        if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR)
         {
             int err = WSAGetLastError();
 
-			if (WSAEADDRINUSE != err)
+            if (WSAEADDRINUSE != err)
             {
-             	vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %d)\n", err);
-            	result = VOS_SOCK_ERR;
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %d)\n", err);
+                result = VOS_SOCK_ERR;
             }
         }
         else
@@ -587,8 +587,8 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
         {
-            char mcStr[16];
-            char ifStr[16];
+            char    mcStr[16];
+            char    ifStr[16];
 
             strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr)); /*lint !e534 ignore return value */
             strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface)); /*lint !e534 ignore return value */
@@ -629,7 +629,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
- *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
@@ -640,8 +640,8 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     UINT16      port)
 {
     struct sockaddr_in destAddr;
-    int sendSize    = 0; 
-    int err = 0;
+    int sendSize    = 0;
+    int err         = 0;
 
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL )
     {
@@ -657,14 +657,14 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     do
     {
         sendSize = sendto(sock,
-                         (const char *)pBuffer,
-                         size,
-                         0,
-                         (struct sockaddr *) &destAddr,
-                         sizeof(destAddr));
+                          (const char *)pBuffer,
+                          size,
+                          0,
+                          (struct sockaddr *) &destAddr,
+                          sizeof(destAddr));
         err = WSAGetLastError();
 
-        if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)   
+        if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
@@ -673,7 +673,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     if (sendSize == SOCKET_ERROR)
     {
-        vos_printf(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %d)\n", 
+        vos_printf(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %d)\n",
                    inet_ntoa(destAddr.sin_addr), port, err);
         return VOS_IO_ERR;
     }
@@ -697,29 +697,29 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
  *  @retval         VOS_NODATA_ERR  no data
- *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
-    UINT32   *pSize,
+    UINT32  *pSize,
     UINT32  *pIPAddr)
 {
     struct sockaddr_in srcAddr;
     int sockLen = sizeof(srcAddr);
     int rcvSize = 0;
-    int err = 0;
- 
+    int err     = 0;
+
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
     {
         return VOS_PARAM_ERR;
-    } 
+    }
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
     do
-    {  
+    {
         rcvSize = recvfrom(sock,
                            (char *) pBuffer,
                            *pSize,
@@ -730,15 +730,15 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
         *pIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
         /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
-     
+
         if(rcvSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
     }
-    while (rcvSize == SOCKET_ERROR && err == WSAEINTR);  
- 
-    *pSize = 0; 
+    while (rcvSize == SOCKET_ERROR && err == WSAEINTR);
+
+    *pSize = 0;
 
     if (rcvSize == SOCKET_ERROR)
     {
@@ -751,9 +751,9 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     else
     {
-        *pSize = rcvSize; 
+        *pSize = rcvSize;
         return VOS_NO_ERR;
-    } 
+    }
 }
 
 /**********************************************************************************************************************/
@@ -782,11 +782,13 @@ EXT_DECL VOS_ERR_T vos_sockBind (
         return VOS_PARAM_ERR;
     }
 
-	if (vos_isMulticast(ipAddress))
+    /*  Never bind to multicast address  */
+    if (vos_isMulticast(ipAddress))
     {
         ipAddress = INADDR_ANY;
     }
-    /*    Allow the socket to be bound to an address and port
+
+    /*  Allow the socket to be bound to an address and port
         that is already in use    */
 
     memset((char *)&srcAddress, 0, sizeof(srcAddress));
@@ -990,8 +992,8 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     /*    Keep on sending until we got rid of all data or we received an unrecoverable error    */
     do
     {
-        sendSize = send((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
-        err = WSAGetLastError();
+        sendSize    = send((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
+        err         = WSAGetLastError();
 
         if (sendSize >= 0)
         {
@@ -1038,22 +1040,22 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     UINT8   *pBuffer,
     UINT32  *pSize)
 {
-    int rcvSize    = 0;
-    int bufferSize = (size_t) *pSize;
-    int err        = 0;
+    int rcvSize     = 0;
+    int bufferSize  = (size_t) *pSize;
+    int err         = 0;
 
     *pSize = 0;
-    
+
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
-    
+
     /* Keep on sending until we got rid of all data or we received an unrecoverable error    */
     do
     {
         rcvSize = recv((SOCKET)sock, (char *)pBuffer, bufferSize, 0);
-        err = WSAGetLastError();
+        err     = WSAGetLastError();
 
         if (rcvSize > 0)
         {
@@ -1061,7 +1063,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             pBuffer     += rcvSize;
             *pSize      += rcvSize;
         }
-        
+
         if(rcvSize == -1 && err == WSAEWOULDBLOCK)
         {
             if (*pSize == 0)
@@ -1087,7 +1089,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             return VOS_MEM_ERR;
         }
-        else 
+        else
         {
             return VOS_NODATA_ERR;
         }
@@ -1109,11 +1111,11 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  *  @retval         VOS_PARAM_ERR       sock descriptor unknown, parameter error
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-        INT32   sock,
-        UINT32  mcIfAddress)
+    INT32   sock,
+    UINT32  mcIfAddress)
 {
-    DWORD       optValue =  vos_htonl(mcIfAddress);
-    VOS_ERR_T   result = VOS_NO_ERR;
+    DWORD       optValue    = vos_htonl(mcIfAddress);
+    VOS_ERR_T   result      = VOS_NO_ERR;
 
     if (sock == (INT32) INVALID_SOCKET)
     {
