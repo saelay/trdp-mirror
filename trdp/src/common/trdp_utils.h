@@ -54,45 +54,45 @@
 extern int          am_big_endian ();
 extern TRDP_LOG_T   gDebugLevel;
 
-PD_ELE_T    *trdp_queueFindComId (
-    PD_ELE_T            *pHead,
-    UINT32              comId);
+PD_ELE_T            *trdp_queueFindComId (
+    PD_ELE_T    *pHead,
+    UINT32      comId);
 
-PD_ELE_T    *trdp_queueFindSubAddr (
+PD_ELE_T            *trdp_queueFindSubAddr (
     PD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *pAddr);
 
-MD_ELE_T *trdp_MDqueueFindAddr (
+MD_ELE_T            *trdp_MDqueueFindAddr (
     MD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *addr);
 
-PD_ELE_T    *trdp_queueFindPubAddr (
+PD_ELE_T            *trdp_queueFindPubAddr (
     PD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *addr);
 
 void    trdp_queueDelElement (
-    PD_ELE_T            **pHead,
-    PD_ELE_T            *pDelete);
+    PD_ELE_T    * *pHead,
+    PD_ELE_T    *pDelete);
 
 void    trdp_MDqueueDelElement (
-    MD_ELE_T            **ppHead,
-    MD_ELE_T            *pDelete);
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pDelete);
 
 void    trdp_MDqueueAppLast (
-    MD_ELE_T            **pHead,
-    MD_ELE_T            *pNew);
+    MD_ELE_T    * *pHead,
+    MD_ELE_T    *pNew);
 
 void    trdp_MDqueueInsFirst (
-    MD_ELE_T            **ppHead,
-    MD_ELE_T            *pNew);
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pNew);
 
 void    trdp_queueAppLast (
-    PD_ELE_T            **pHead,
-    PD_ELE_T            *pNew);
+    PD_ELE_T    * *pHead,
+    PD_ELE_T    *pNew);
 
 void    trdp_queueInsFirst (
-    PD_ELE_T            **pHead,
-    PD_ELE_T            *pNew);
+    PD_ELE_T    * *pHead,
+    PD_ELE_T    *pNew);
 
 
 /*********************************************************************************************************************/
@@ -101,8 +101,8 @@ void    trdp_queueInsFirst (
  *  @param[in]      iface          pointer to the socket pool
  */
 
-void    trdp_initSockets(
-    TRDP_SOCKETS_T      iface[]);
+void trdp_initSockets(
+    TRDP_SOCKETS_T iface[]);
 
 
 /*********************************************************************************************************************/
@@ -112,6 +112,7 @@ void    trdp_initSockets(
  *  @param[in]      port            port to use
  *  @param[in]      params          parameters to use
  *  @param[in]      srcIP           IP to bind to (0 = any address)
+ *  @param[in]      mcGroup         MC group to join (0 = do not join)
  *  @param[in]      usage           type and port to bind to
  *  @param[in]      options         blocking/nonblocking
  *  @param[in]      rcvOnly         only used for receiving
@@ -122,16 +123,17 @@ void    trdp_initSockets(
  *  @retval         TRDP_PARAM_ERR
  */
 
-TRDP_ERR_T  trdp_requestSocket(
-    TRDP_SOCKETS_T          iface[],
-    UINT32                  port,
-    const TRDP_SEND_PARAM_T *params,
-    TRDP_IP_ADDR_T          srcIP,
-    TRDP_SOCK_TYPE_T        usage,
-    TRDP_OPTION_T           options,
-    BOOL                    rcvOnly,
-    INT32                   *pIndex,
-    TRDP_IP_ADDR_T          cornerIp);
+TRDP_ERR_T trdp_requestSocket(
+    TRDP_SOCKETS_T iface[],
+    UINT32 port,
+    const TRDP_SEND_PARAM_T * params,
+    TRDP_IP_ADDR_T srcIP,
+    TRDP_IP_ADDR_T mcGroup,
+    TRDP_SOCK_TYPE_T usage,
+    TRDP_OPTION_T options,
+    BOOL rcvOnly,
+    INT32                   * pIndex,
+    TRDP_IP_ADDR_T cornerIp);
 
 /*********************************************************************************************************************/
 /** Handle the socket pool: Release a socket from our socket pool
@@ -144,8 +146,8 @@ TRDP_ERR_T  trdp_requestSocket(
  */
 
 TRDP_ERR_T trdp_releaseSocket(
-    TRDP_SOCKETS_T  iface[],
-    INT32           index);
+    TRDP_SOCKETS_T iface[],
+    INT32 index);
 
 
 /*********************************************************************************************************************/
@@ -157,7 +159,7 @@ TRDP_ERR_T trdp_releaseSocket(
  *                                      be sent or received
  */
 
-UINT32  trdp_packetSizePD (
+UINT32 trdp_packetSizePD (
     UINT32 dataSize);
 
 
@@ -176,7 +178,7 @@ UINT32  trdp_packetSizePD (
  *  @retval            return the sequence number
  */
 
-UINT32  trdp_getSeqCnt (
+UINT32 trdp_getSeqCnt (
     UINT32          comID,
     TRDP_MSG_T      msgType,
     TRDP_IP_ADDR_T  srcIP);
@@ -210,12 +212,12 @@ BOOL trdp_isRcvSeqCnt (
  *  @param[in]      listUri       Null terminated listener URI string to compare
  *  @param[in]      destUri       Null terminated destination URI string to compare
  *
- *  @retval         FALSE - not in addressing range 
+ *  @retval         FALSE - not in addressing range
  *  @retval         TRUE  - listener URI is in addressing range of destination URI
  */
 
-BOOL trdp_isAddressed(
-    const TRDP_URI_USER_T listUri, 
-    const TRDP_URI_USER_T destUri);
+BOOL trdp_isAddressed (
+    const TRDP_URI_USER_T   listUri,
+    const TRDP_URI_USER_T   destUri);
 
 #endif

@@ -482,7 +482,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           TRDP_FLAGS_NONE,              /*    No callbacks                  */
                           NULL,                         /*    default qos and ttl           */
                           NULL,                         /*    initial data                  */
-                          sizeof(TRDP_STATISTICS_T)); 
+                          sizeof(TRDP_STATISTICS_T));
 
         vos_printf(VOS_LOG_INFO,
                    "TRDP Stack Version %s: session opened successfully\n",
@@ -920,7 +920,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         /* initialize pubHandle */
         pubHandle.comId         = comId;
         pubHandle.destIpAddr    = destIpAddr;
-        pubHandle.mcGroup       = 0;
+        pubHandle.mcGroup       = vos_isMulticast(destIpAddr) ? destIpAddr : 0;
         pubHandle.srcIpAddr     = srcIpAddr;
 
         /*    Look for existing element    */
@@ -956,6 +956,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         appHandle->pdDefault.port,
                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
                         (srcIpAddr == 0) ? appHandle->realIP : srcIpAddr,
+                        pubHandle.mcGroup,
                         TRDP_SOCK_PD,
                         appHandle->option,
                         FALSE,
@@ -969,17 +970,6 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 }
                 else
                 {
-                    /* SetMulticast I/F */
-                    if (vos_isMulticast(destIpAddr))
-                    {
-                        ret = (TRDP_ERR_T) vos_sockSetMulticastIf(appHandle->iface[pNewElement->socketIdx].sock,
-                                                                  (srcIpAddr == 0) ? appHandle->realIP : srcIpAddr);
-                        if (ret != TRDP_NO_ERR)
-                        {
-                            vos_printf(VOS_LOG_ERROR, "vos_sockSetMulticastIf() failed! (Err: %d)\n", ret);
-                        }
-                    }
-
                     /*  Alloc the corresponding data buffer  */
                     pNewElement->pFrame = (PD_PACKET_T *) vos_memAlloc(pNewElement->grossSize);
                     if (pNewElement->pFrame == NULL)
@@ -1585,6 +1575,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                                                  appHandle->pdDefault.port,
                                                  (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
                                                  srcIpAddr,
+                                                 0,
                                                  TRDP_SOCK_PD,
                                                  appHandle->option,
                                                  FALSE,
@@ -1759,6 +1750,18 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     else
     {
         /*    Find a (new) socket    */
+#if 1
+        ret = trdp_requestSocket(appHandle->iface,
+                                 appHandle->pdDefault.port,
+                                 &appHandle->pdDefault.sendParam,
+                                 appHandle->realIP,
+                                 subHandle.mcGroup,
+                                 TRDP_SOCK_PD,
+                                 appHandle->option,
+                                 TRUE,
+                                 &index,
+                                 0);
+#else
 #ifdef POSIX
         /* Multicast : use I/F destIp */
         if (vos_isMulticast(destIpAddr))
@@ -1767,6 +1770,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                      appHandle->pdDefault.port,
                                      &appHandle->pdDefault.sendParam,
                                      subHandle.mcGroup,
+                                     0,
                                      TRDP_SOCK_PD,
                                      appHandle->option,
                                      TRUE,
@@ -1781,13 +1785,14 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                      appHandle->pdDefault.port,
                                      &appHandle->pdDefault.sendParam,
                                      appHandle->realIP,
+                                     0,
                                      TRDP_SOCK_PD,
                                      appHandle->option,
                                      TRUE,
                                      &index,
                                      0);
         }
-
+#endif
         if (ret == TRDP_NO_ERR)
         {
             /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
@@ -1815,6 +1820,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     if (vos_isMulticast(destIpAddr))
                     {
                         newPD->addr.mcGroup = destIpAddr;
+                        newPD->privFlags    |= TRDP_MC_JOINT;
                     }
                     else
                     {
@@ -1848,24 +1854,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
                     /*  append this subscription to our receive queue */
                     trdp_queueAppLast(&appHandle->pRcvQueue, newPD);
-
-                    /*    Join a multicast group */
-                    if (newPD->addr.mcGroup != 0)
-                    {
-                        /*
-                           return value ignored since joining of an already joined address leads to an error
-                           TODO: call join only when address is not joined yet
-                        */
-                        ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[index].sock,
-                                                              newPD->addr.mcGroup,
-                                                              appHandle->realIP);
-
-                        /*    Remember we did this    */
-                        if (ret == TRDP_NO_ERR)
-                        {
-                            newPD->privFlags |= TRDP_MC_JOINT;
-                        }
-                    }
 
                     *pSubHandle = &newPD->addr;
                 }
@@ -2362,6 +2350,7 @@ static TRDP_ERR_T tlm_common_send (
                                 appHandle->mdDefault.tcpPort,
                                 (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
                                 srcIpAddr,
+                                0,
                                 TRDP_SOCK_MD_TCP,
                                 TRDP_OPTION_NONE,
                                 FALSE,
@@ -2400,6 +2389,7 @@ static TRDP_ERR_T tlm_common_send (
                         appHandle->mdDefault.udpPort,
                         (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
                         srcIpAddr,
+                        0,
                         TRDP_SOCK_MD_UDP,
                         appHandle->option,
                         FALSE,                                          /*  Receive only    */
@@ -2821,6 +2811,15 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->u.listener.pktFlags    = pktFlags;
                 pNewElement->pCachedDS = NULL;
                 memcpy(pNewElement->u.listener.destURI, destURI, TRDP_MAX_URI_USER_LEN);
+                if (vos_isMulticast(destIpAddr))
+                {
+                    pNewElement->addr.mcGroup   = destIpAddr;   /* Set multicast group address */
+                    pNewElement->privFlags      |= TRDP_MC_JOINT; /* Set multicast flag */
+                }
+                else
+                {
+                    pNewElement->addr.mcGroup = 0;
+                }
 
                 if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) == 0)
                 {
@@ -2829,13 +2828,15 @@ TRDP_ERR_T tlm_addListener (
                             appHandle->iface,
                             appHandle->mdDefault.udpPort,
                             &appHandle->mdDefault.sendParam,
-                            0,
+                            appHandle->realIP,
+                            pNewElement->addr.mcGroup,
                             TRDP_SOCK_MD_UDP,
                             appHandle->option,
                             TRUE,
                             &pNewElement->socketIdx,
                             0);
 
+#if 0   /* Bind and join is nows done in requestSocket...  */
                     /* Bind shall be executed only once at socket creation */
                     if ((errv == TRDP_NO_ERR)
                         && (appHandle->iface[pNewElement->socketIdx].usage == 0))
@@ -2846,7 +2847,6 @@ TRDP_ERR_T tlm_addListener (
                                 0,
                                 appHandle->mdDefault.udpPort);
                     }
-
                     /* Check if destination address is multicast, if yes join into this group */
                     /* TODO: check if this is ok or need to be done in other way */
                     if ((errv == TRDP_NO_ERR)
@@ -2870,6 +2870,7 @@ TRDP_ERR_T tlm_addListener (
                     {
                         pNewElement->addr.mcGroup = 0;
                     }
+#endif
                 }
                 else
                 {

@@ -21,8 +21,8 @@
  * Changes:
  *                  BL 2012-12-03: ID 1: "using uninitialized PD_ELE_T.pullIpAddress variable"
  *                                 ID 2: "uninitialized PD_ELE_T newPD->pNext in tlp_subscribe()"
- *                  
- *                    
+ *
+ *
  */
 
 /***********************************************************************************************************************
@@ -189,7 +189,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
                 break;
             }
         }
-        
+
         if (i < (UINT32) VOS_MEM_NBLOCKSIZES)
         {
             for (i = 0; i < (UINT32) VOS_MEM_NBLOCKSIZES; i++)
@@ -197,7 +197,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
                 gMem.memCnt.preAlloc[i] = fragMem[i];
                 minSize += gMem.memCnt.preAlloc[i] * blockSize[i];
             }
-        }   
+        }
     }
 
     if (pMemoryArea == NULL && size == 0)       /* This means we will use standard malloc calls    */
@@ -283,7 +283,7 @@ EXT_DECL void vos_memDelete (
 {
     if ((pMemoryArea == NULL) || (pMemoryArea != gMem.pArea))
     {
-        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/’[arameter\n");
+        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/ï¿½[arameter\n");
     }
     else
     {
@@ -325,7 +325,7 @@ EXT_DECL UINT8 *vos_memAlloc (
         if (p != NULL)
         {
             memset(p, 0, size);
-            vos_printf(VOS_LOG_DBG, "vos_memAlloc %p Requested size = 0x%x\n", p, size);
+            /* vos_printf(VOS_LOG_DBG, "vos_memAlloc %p Requested size = 0x%x\n", p, size); */
         }
         return p;
     }
@@ -439,7 +439,7 @@ EXT_DECL UINT8 *vos_memAlloc (
         {
             gMem.memCnt.allocErrCnt++;
             return NULL;
-        }    
+        }
     }
 }
 
@@ -487,7 +487,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         gMem.memCnt.freeErrCnt++;
 
         vos_printf(VOS_LOG_ERROR, "vos_memFree can't get semaphore\n");
-     }
+    }
     else
     {
         /* Set block pointer to start of block, before the returned pointer */
@@ -638,17 +638,17 @@ EXT_DECL void *vos_bsearch (
  *
  *  @param[in]      pStr1         Null terminated string to compare
  *  @param[in]      pStr2         Null terminated string to compare
- *  @param[in]      count         Maximum number of characters to compare 
+ *  @param[in]      count         Maximum number of characters to compare
  *
- *  @retval         0  - equal 
+ *  @retval         0  - equal
  *  @retval         <0 - string1 less than string 2
  *  @retval         >0 - string 1 greater than string 2
  */
 
-EXT_DECL INT32 vos_strnicmp ( 
+EXT_DECL INT32 vos_strnicmp (
     const CHAR8 *pStr1,
     const CHAR8 *pStr2,
-    UINT32       count )
+    UINT32      count )
 {
 #ifdef WIN32
     return (INT32) _strnicmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
@@ -663,15 +663,15 @@ EXT_DECL INT32 vos_strnicmp (
  *
  *  @param[in]      pStrDst       Destination string
  *  @param[in]      pStrSrc       Null terminated string to copy
- *  @param[in]      count         Maximum number of characters to copy 
+ *  @param[in]      count         Maximum number of characters to copy
  *
  *  @retval         none
  */
 
-EXT_DECL void vos_strncpy ( 
+EXT_DECL void vos_strncpy (
     CHAR8       *pStrDst,
     const CHAR8 *pStrSrc,
-    UINT32       count )
+    UINT32      count )
 {
 #ifdef WIN32
     /*lint -e(534) ignore return value */
