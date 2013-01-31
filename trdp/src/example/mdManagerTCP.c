@@ -762,7 +762,6 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         md_config.sendParam.ttl = TRDP_MD_DEFAULT_TTL;
         md_config.flags = 0
             | TRDP_FLAGS_NONE      * 0
-            | TRDP_FLAGS_REDUNDANT * 0
             | TRDP_FLAGS_MARSHALL  * 0
             | TRDP_FLAGS_CALLBACK  * 1
             | TRDP_FLAGS_TCP       * 1 /* 1=TCP, 0=UDP */
@@ -836,7 +835,7 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 
             err = tlm_addListener( appHandle,                                 /*    our application identifier            */
                                     &(listenHandle[*listeners_count]),         /*    our subscription identifier            */
-                                     NULL,
+                                    (void *)0x12345678,
                                      MD_listen_COMID[*listeners_count],     /*    ComID                                */
                                      0,                                     /*    topocount: local consist only        */
                                      //MD_COMID1_SRC_IP,
@@ -906,7 +905,7 @@ TRDP_ERR_T notifies_requests()
         if(read_data == 1)
         {
             err = tlm_notify(appHandle,
-                                    NULL,
+                                    (void *)0x12345678,
                                     MD_COMID,
                                     0,
                                     MD_COMID1_SRC_IP,
@@ -921,7 +920,7 @@ TRDP_ERR_T notifies_requests()
         }else if(read_data == 2)
         {
             err = tlm_request(appHandle,
-                                NULL,
+                                (void *)0x12345678,
                                 pSessionId,
                                 MD_COMID,
                                 0,
@@ -1014,7 +1013,7 @@ TRDP_ERR_T reply_msgs()
         {
             case 0:
                 err = tlm_reply(appHandle,
-                            NULL,
+                            (void *)0x12345678,
                             &(APP_SESSION_TEST[(session_num)].pSessionId),
                             0,
                             APP_SESSION_TEST[(session_num)].comId,
@@ -1032,7 +1031,7 @@ TRDP_ERR_T reply_msgs()
 
             case 1:
                 err = tlm_replyQuery(appHandle,
-                            NULL,
+                            (void *)0x12345678,
                             &(APP_SESSION_TEST[(session_num)].pSessionId),
                             0,
                             APP_SESSION_TEST[(session_num)].comId,
@@ -1162,7 +1161,7 @@ TRDP_ERR_T confirm_msgs()
         }
 
         err = tlm_confirm(appHandle,
-                NULL,
+                (void *)0x12345678,
                 &(APP_SESSION_TEST[(session_num)].pSessionId),
                 APP_SESSION_TEST[(session_num)].comId,
                 0,
