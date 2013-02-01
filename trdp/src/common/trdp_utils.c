@@ -568,11 +568,13 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     if (vos_sockJoinMC(iface[index].sock, mcGroup, iface[index].bindAddr) != VOS_NO_ERR)
                     {
-                        trdp_SockDelJoin(iface[index].mcGroups, mcGroup);
+                        if (trdp_SockDelJoin(iface[index].mcGroups, mcGroup)==FALSE)
+                        {
+                            vos_printf(VOS_LOG_ERROR, "trdp_SockDelJoin() failed!\n");
+                        }
                         continue;   /* No, socket cannot join more MC groups */
                     }
                 }
-
             }
 
             /* Use that socket */
@@ -646,20 +648,23 @@ TRDP_ERR_T  trdp_requestSocket (
                     *pIndex = index;
                     if (rcvOnly)
                     {
-                        TRDP_IP_ADDR_T bindAddr = mcGroup;
-
                         /*  Only bind to local IP if we are not a multicast listener  */
                         if (0 == mcGroup)
                         {
-                            bindAddr = iface[index].bindAddr;
+                            err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
                         }
-                        err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, bindAddr, port);
+                        else
+                        {
+                            err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, mcGroup, port);
+                        }
+
                         if (err != TRDP_NO_ERR)
                         {
                             vos_printf(VOS_LOG_ERROR, "vos_sockBind() for UDP rcv failed! (Err: %d)\n", err);
                             *pIndex = -1;
                             break;
                         }
+
                         if (0 != mcGroup)
                         {
 
@@ -672,13 +677,16 @@ TRDP_ERR_T  trdp_requestSocket (
                             }
                             else
                             {
-                                trdp_SockAddJoin(iface[index].mcGroups, mcGroup);
+                                if (trdp_SockAddJoin(iface[index].mcGroups, mcGroup)==FALSE)
+                                {
+                                    vos_printf(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
+                                }
                             }
                         }
                     }
                     else if (0 != mcGroup)      /*	Multicast sender shall be bound to an interface	*/
                     {
-                        err = vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
+                        err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
                         if (err != TRDP_NO_ERR)
                         {
                             vos_printf(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err);
