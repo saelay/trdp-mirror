@@ -2,50 +2,45 @@
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-                                                                                _
-                                                              appHandle->realIP);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(1870) : Warning 534: Ignoring return
-    value of function 'vos_sockJoinMC(int, unsigned int, unsigned int)'
-    (compare with line 253, file D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
                                                                           _
                                     appHandle->iface[sockPosition].usage++;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(626) : Warning 644: Variable
-    'sockPosition' (line 399) may not have been initialized
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(633) : Warning 644: Variable
+    'sockPosition' (line 404) may not have been initialized
                                                                                _
                                     vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1370) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 220, file
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1411) : Warning 534: Ignoring
+    return value of function 'vos_sockClose(int)' (compare with line 222, file
     D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
                                                                _
                     vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2068) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 220, file
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2113) : Warning 534: Ignoring
+    return value of function 'vos_sockClose(int)' (compare with line 222, file
     D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
@@ -107,29 +102,25 @@ D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(468) : Warning 529: Symbol
     'err' (line 465) not subsequently referenced
         _
         }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(520) : Warning 529: Symbol
-    'err' (line 516) not subsequently referenced
-        _
-        }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(602) : Warning 529: Symbol
-    'err' (line 598) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(605) : Warning 529: Symbol
+    'err' (line 601) not subsequently referenced
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(800) : Warning 529: Symbol
-    'err' (line 796) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(809) : Warning 529: Symbol
+    'err' (line 805) not subsequently referenced
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(830) : Warning 529: Symbol
-    'err' (line 826) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(839) : Warning 529: Symbol
+    'err' (line 835) not subsequently referenced
         _
         }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1122) : Warning 529: Symbol
-    'err' (line 1119) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1131) : Warning 529: Symbol
+    'err' (line 1128) not subsequently referenced
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
     _
 #if __BIG_ENDIAN__
@@ -139,7 +130,7 @@ D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(283) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
                                                                                                 _
 _CRT_INSECURE_DEPRECATE(_wasctime_s) _CRTIMP wchar_t * __cdecl _wasctime(_In_ const struct tm * _Tm);
