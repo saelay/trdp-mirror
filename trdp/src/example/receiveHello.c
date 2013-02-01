@@ -1,16 +1,16 @@
 /**********************************************************************************************************************/
 /**
- * @file            sendHello.c
+ * @file            receiveHello.c
  *
  * @brief           Demo application for TRDP
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
- * @author          Bernd Loehr and Florian Weispfenning, NewTec GmbH
+ * @author          Bernd Loehr, NewTec GmbH
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
- *          Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *          Copyright Bombardier Transportation GmbH, Germany, 2013.
  *
  *
  * $Id$
@@ -42,15 +42,17 @@
 /* We use dynamic memory    */
 #define RESERVED_MEMORY  100000
 
+CHAR8 gBuffer[32] = "Hello World";
+
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
  *
- *  @param[in]      pRefCon            user supplied context pointer
- *  @param[in]        category        Log category (Error, Warning, Info etc.)
+ *  @param[in]        pRefCon          user supplied context pointer
+ *  @param[in]        category         Log category (Error, Warning, Info etc.)
  *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
  *  @param[in]        pFile            pointer to NULL-terminated string of source module
- *  @param[in]        LineNumber        line
- *  @param[in]        pMsgStr         pointer to NULL-terminated string
+ *  @param[in]        LineNumber       line
+ *  @param[in]        pMsgStr          pointer to NULL-terminated string
  *  @retval         none
  */
 void dbgOut (
@@ -74,13 +76,15 @@ void dbgOut (
 void usage (const char *appName)
 {
     printf("Usage of %s\n", appName);
-    printf("This tool sends PD messages to an ED.\n"
+    printf("This tool receives PD messages from an ED.\n"
            "Arguments are:\n"
            "-o <own IP address> (default INADDR_ANY)\n"
-           "-t <target IP address>\n"
+/*           "-t <target IP address>\n" */
            "-c <comId> (default 1000)\n"
-           "-e send empty request\n"
-           "-d <custom string to send> (default: 'Hello World')\n"
+/*
+             "-e send empty request\n"
+             "-d <custom string to send> (default: 'Hello World')\n"
+ */
            "-v print version and quit\n"
            );
 }
@@ -95,9 +99,8 @@ void usage (const char *appName)
 int main (int argc, char *argv[])
 {
     int                     ip[4];
-    INT32                   hugeCounter = 0;
     TRDP_APP_SESSION_T      appHandle; /*    Our identifier to the library instance    */
-    TRDP_PUB_T              pubHandle; /*    Our identifier to the publication         */
+    TRDP_SUB_T              subHandle; /*    Our identifier to the publication         */
     UINT32                  comId = PD_COMID;
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 20548};
@@ -112,21 +115,15 @@ int main (int argc, char *argv[])
 
     /*    Generate some data, that we want to send, when nothing was specified. */
     UINT8                   *outputBuffer;
-    UINT8                   exampleData[DATA_MAX]   = "Hello World";
-    int                     outputBufferSize        = 32;
+    UINT8                   exampleData[DATA_MAX] = "Hello World";
 
-    UINT8                   data[DATA_MAX];
     int                     ch;
+    TRDP_PD_INFO_T          myPDInfo;
+    UINT32                  receivedSize;
 
     outputBuffer = exampleData;
 
-    if (argc <= 1)
-    {
-        usage(argv[0]);
-        return 1;
-    }
-
-    while ((ch = getopt(argc, argv, "t:o:d:h?vec:")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:h?vec:")) != -1)
     {
         switch (ch)
         {
@@ -162,33 +159,7 @@ int main (int argc, char *argv[])
                 destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
                 break;
             }
-            case 'e':
-            {
-                outputBuffer        = NULL;
-                outputBufferSize    = 0;
-            }
             break;
-            case 'd':
-            {   /*  data    */
-                char    c;
-                int     dataSize = 0;
-                do
-                {
-                    c = optarg[dataSize];
-                    dataSize++;
-                }
-                while (c != '\0');
-
-                if (dataSize >= DATA_MAX)
-                {
-                    fprintf(stderr, "The data is too long\n");
-                    return 1;
-                }
-                memcpy(data, optarg, dataSize);
-                outputBuffer        = data; /* move the pointer to the new data */
-                outputBufferSize    = dataSize;
-                break;
-            }
             case 'v':   /*  version */
                 printf("%s: Version %s\t(%s - %s)\n",
                        argv[0], APP_VERSION, __DATE__, __TIME__);
@@ -201,13 +172,14 @@ int main (int argc, char *argv[])
                 return 1;
         }
     }
-
+/*
     if (destIP == 0)
     {
         fprintf(stderr, "No destination address given!\n");
         usage(argv[0]);
         return 1;
     }
+*/
 
     /*    Init the library  */
     if (tlc_init(&dbgOut,                              /* no logging    */
@@ -228,32 +200,32 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    /*    Copy the packet into the internal send queue, prepare for sending.    */
-    /*    If we change the data, just re-publish it    */
-    err = tlp_publish(  appHandle,                  /*    our application identifier    */
-                        &pubHandle,                 /*    our pulication identifier     */
-                        comId,                      /*    ComID to send                 */
-                        0,                          /*    local consist only            */
-                        ownIP,                      /*    default source IP             */
-                        destIP,                     /*    where to send to              */
-                        PD_COMID_CYCLE,             /*    Cycle time in us              */
-                        0,                          /*    not redundant                 */
-                        TRDP_FLAGS_NONE,            /*    Use callback for errors       */
-                        NULL,                       /*    default qos and ttl           */
-                        (UINT8 *)outputBuffer,      /*    initial data                  */
-                        outputBufferSize            /*    data size                     */
-                        );
+    /*    Subscribe to control PD        */
 
+    memset(gBuffer, 0, sizeof(gBuffer));
+
+    err = tlp_subscribe( appHandle,                 /*    our application identifier            */
+                         &subHandle,               /*    our subscription identifier            */
+                         NULL,
+                         comId,                     /*    ComID                                */
+                         0,                         /*    topocount: local consist only        */
+                         0,                         /*    Source IP filter                    */
+                         0,                         /*    2nd Source IP filter                    */
+                         0,                         /*    Default destination    (or MC Group)   */
+                         0,
+                         PD_COMID_CYCLE * 3,            /*    Time out in us                        */
+                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
+                         sizeof(gBuffer));          /*    net data size                        */
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd error\n");
+        printf("prep pd receive error\n");
         tlc_terminate();
         return 1;
     }
 
     /*
-       Enter the main processing loop.
+     Enter the main processing loop.
      */
     while (1)
     {
@@ -263,24 +235,23 @@ int main (int argc, char *argv[])
         struct timeval  max_tv = {0, 100000};
 
         /*
-           Prepare the file descriptor set for the select call.
-           Additional descriptors can be added here.
+         Prepare the file descriptor set for the select call.
+         Additional descriptors can be added here.
          */
         FD_ZERO(&rfds);
-        /* FD_SET(pd_fd, &rfds); */
 
         /*
-           Compute the min. timeout value for select.
-           This way we can guarantee that PDs are sent in time
-           with minimum CPU load and minimum jitter.
+         Compute the min. timeout value for select.
+         This way we can guarantee that PDs are sent in time
+         with minimum CPU load and minimum jitter.
          */
         tlc_getInterval(appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
 
         /*
-           The wait time for select must consider cycle times and timeouts of
-           the PD packets received or sent.
-           If we need to poll something faster than the lowest PD cycle,
-           we need to set the maximum time out our self.
+         The wait time for select must consider cycle times and timeouts of
+         the PD packets received or sent.
+         If we need to poll something faster than the lowest PD cycle,
+         we need to set the maximum time out our self.
          */
         if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
         {
@@ -288,19 +259,19 @@ int main (int argc, char *argv[])
         }
 
         /*
-           Select() will wait for ready descriptors or time out,
-           what ever comes first.
+         Select() will wait for ready descriptors or time out,
+         what ever comes first.
          */
         rv = select((int)noDesc, &rfds, NULL, NULL, &tv);
 
         /*
-           Check for overdue PDs (sending and receiving)
-           Send any pending PDs if it's time...
-           Detect missing PDs...
-           'rv' will be updated to show the handled events, if there are
-           more than one...
-           The callback function will be called from within the tlc_process
-           function (in it's context and thread)!
+         Check for overdue PDs (sending and receiving)
+         Send any pending PDs if it's time...
+         Detect missing PDs...
+         'rv' will be updated to show the handled events, if there are
+         more than one...
+         The callback function will be called from within the tlc_process
+         function (in it's context and thread)!
          */
         tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 
@@ -315,24 +286,49 @@ int main (int argc, char *argv[])
             fflush(stdout);
         }
 
-        if (outputBuffer != NULL)
-        {
-            sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
-        }
+        /*
+         Get the subscribed telegram.
+         The only supported packet flag is TRDP_FLAGS_MARSHALL, which would automatically de-marshall the telegram.
+         We do not use it here.
+         */
 
-        err = tlp_put(appHandle, pubHandle, outputBuffer, outputBufferSize);
-        if (err != TRDP_NO_ERR)
+        receivedSize = sizeof(gBuffer);
+        err = tlp_get(appHandle,
+                      subHandle,
+                      &myPDInfo,
+                      (UINT8 *) gBuffer,
+                      &receivedSize);
+        if (TRDP_NO_ERR == err && receivedSize > 0)
         {
-            printf("put pd error\n");
-            rv = 1;
-            break;
+
+            printf("\nMessage reveived:\n");
+            printf("Type = %c%c, ", myPDInfo.msgType >> 8, myPDInfo.msgType & 0xFF);
+            printf("Seq  = %u, ", myPDInfo.seqCount);
+            printf("with %d Bytes:\n", receivedSize);
+            printf("   %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx\n",
+                   gBuffer[0], gBuffer[1], gBuffer[2], gBuffer[3],
+                   gBuffer[4], gBuffer[5], gBuffer[6], gBuffer[7]);
+        }
+        else if (TRDP_NO_ERR == err)
+        {
+            printf("\nMessage reveived:\n");
+            printf("Type = %c%c - ", myPDInfo.msgType >> 8, myPDInfo.msgType & 0xFF);
+            printf("Seq  = %u\n", myPDInfo.seqCount);
+        }
+        else if (TRDP_TIMEOUT_ERR == err)
+        {
+            printf("Packet timed out\n");
+        }
+        else
+        {
+            printf("PD GET ERROR: %d\n", err);
         }
     }
 
     /*
      *    We always clean up behind us!
      */
-    tlp_unpublish(appHandle, pubHandle);
+    tlp_unpublish(appHandle, subHandle);
 
     tlc_terminate();
     return rv;
