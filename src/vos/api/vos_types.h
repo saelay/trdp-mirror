@@ -40,7 +40,7 @@ typedef unsigned char UINT8;
 typedef unsigned short UINT16;
 typedef unsigned int UINT32;
 typedef unsigned long long UINT64;
-//typedef char INT8; is already defined
+/* typedef char INT8; is already defined */
 typedef signed short INT16;
 typedef signed int INT32;
 typedef signed long long INT64;
@@ -159,19 +159,19 @@ typedef struct
 
 
 #ifndef TIMEDATE32
-#define TIMEDATE32 UINT32
+#define TIMEDATE32  UINT32
 #endif
 
 #ifndef TIMEDATE48
 typedef struct
 {
-    UINT32  sec;         /**< full seconds                                      */
-    UINT16  ticks;       /**< Micro seconds (max. value 999999)                 */
+    UINT32  sec;         /**< full seconds      */
+    UINT16  ticks;       /**< Ticks             */
 } TIMEDATE48;
 #endif
 
 #ifndef TIMEDATE64
-#define TIMEDATE64 VOS_TIME_T
+#define TIMEDATE64  VOS_TIME_T
 #endif
 
 /***********************************************************************************************************************
