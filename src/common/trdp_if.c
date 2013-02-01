@@ -17,6 +17,8 @@
  *
  * $Id$
  *
+ *      BL 2013-02-01: ID 53: Zero datset size fixed for PD
+ *
  *      BL 2013-01-25: ID 20: Redundancy handling fixed
  *
  *      BL 2013-01-08: LADDER: Removed/Changed some ladder specific code in tlp_subscribe()
@@ -900,6 +902,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     /*    Check params    */
     if ((comId == 0)
         || (pData != NULL && dataSize == 0)
+        || (dataSize > TRDP_MAX_PD_PACKET_SIZE)
         || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
         || (pPubHandle == NULL))
     {
@@ -944,7 +947,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 {
                     /* mark data as invalid, data will be set valid with tlp_put */
                     pNewElement->privFlags |= TRDP_INVALID_DATA;
-                    dataSize = TRDP_MAX_PD_DATA_SIZE;
+                    /* dataSize = TRDP_MAX_PD_DATA_SIZE; */
                 }
 
                 pNewElement->dataSize   = dataSize;
@@ -1041,10 +1044,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
             *pPubHandle = &pNewElement->addr;
 
-            if (pData != NULL && dataSize > 0)
-            {
-                ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
-            }
+            ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
 
             if ((ret == TRDP_NO_ERR) && (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING))
             {
@@ -1141,9 +1141,7 @@ TRDP_ERR_T tlp_put (
     PD_ELE_T    *pElement;
     TRDP_ERR_T  ret = TRDP_NOPUB_ERR;
 
-    if ((pubHandle == NULL)
-        || (pData == NULL)
-        || (dataSize == 0))
+    if (pubHandle == NULL)
     {
         return TRDP_PARAM_ERR;
     }
@@ -1622,10 +1620,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 /*    Compute the header fields */
                 trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, replyComId, replyIpAddr);
 
-                if (dataSize > 0)
-                {
-                    ret = tlp_put(appHandle, &pReqElement->addr, pData, dataSize);
-                }
+                ret = tlp_put(appHandle, &pReqElement->addr, pData, dataSize);
 
                 /*  This flag triggers sending in tlc_process (one shot)  */
                 pReqElement->privFlags |= TRDP_REQ_2B_SENT;
@@ -1650,7 +1645,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages.
- *  Subscribe to a specific PD ComID and source IP. To unsubscribe, set maxDataSize to zero!
+ *  Subscribe to a specific PD ComID and source IP.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pSubHandle          return a handle for these messages
@@ -1750,7 +1745,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     else
     {
         /*    Find a (new) socket    */
-#if 1
         ret = trdp_requestSocket(appHandle->iface,
                                  appHandle->pdDefault.port,
                                  &appHandle->pdDefault.sendParam,
@@ -1761,38 +1755,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                  TRUE,
                                  &index,
                                  0);
-#else
-#ifdef POSIX
-        /* Multicast : use I/F destIp */
-        if (vos_isMulticast(destIpAddr))
-        {
-            ret = trdp_requestSocket(appHandle->iface,
-                                     appHandle->pdDefault.port,
-                                     &appHandle->pdDefault.sendParam,
-                                     subHandle.mcGroup,
-                                     0,
-                                     TRDP_SOCK_PD,
-                                     appHandle->option,
-                                     TRUE,
-                                     &index,
-                                     0);
-        }
-        else
-#endif
-        {
 
-            ret = trdp_requestSocket(appHandle->iface,
-                                     appHandle->pdDefault.port,
-                                     &appHandle->pdDefault.sendParam,
-                                     appHandle->realIP,
-                                     0,
-                                     TRDP_SOCK_PD,
-                                     appHandle->option,
-                                     TRUE,
-                                     &index,
-                                     0);
-        }
-#endif
         if (ret == TRDP_NO_ERR)
         {
             /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
@@ -1953,9 +1916,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
     TRDP_ERR_T  ret = TRDP_NOSUB_ERR;
     TRDP_TIME_T now;
 
-    if ((subHandle == NULL)
-        || (pData == NULL)
-        || (pDataSize == NULL))
+    if (subHandle == NULL)
     {
         return TRDP_PARAM_ERR;
     }
@@ -2022,7 +1983,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
             pPdInfo->msgType        = (TRDP_MSG_T) vos_ntohs(pElement->pFrame->frameHead.msgType);
-            pPdInfo->seqCount       = vos_ntohl(pElement->pFrame->frameHead.sequenceCounter);
+            pPdInfo->seqCount       = pElement->curSeqCnt;
             pPdInfo->protVersion    = vos_ntohs(pElement->pFrame->frameHead.protocolVersion);
             pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
             pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
@@ -2227,7 +2188,7 @@ static TRDP_ERR_T tlm_common_send (
 
             UINT32      grossSize = sizeof(MD_HEADER_T);
 
-            if(dataSize > 0)
+            if (dataSize > 0)
             {
                 grossSize = grossSize + dataSize + 4; /* telegram header + payload + CRC */
 

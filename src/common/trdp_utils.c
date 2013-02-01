@@ -149,6 +149,11 @@ UINT32 trdp_packetSizePD (
 {
     UINT32 packetSize = sizeof(PD_HEADER_T) + dataSize + sizeof(UINT32);
 
+	if (0 == dataSize)
+    {
+    	/* Packet consists of header only  */
+        return sizeof(PD_HEADER_T);
+    }
     /*  padding to 4 */
     if ((dataSize & 0x3) > 0)
     {

@@ -94,24 +94,27 @@ TRDP_ERR_T trdp_pdPut (
 {
     TRDP_ERR_T ret = TRDP_NO_ERR;
 
-    if (pPacket == NULL || pData == NULL || dataSize == 0 || dataSize != pPacket->dataSize)
+    if (pPacket == NULL || dataSize != pPacket->dataSize)
     {
         return TRDP_PARAM_ERR;
     }
 
-    if (  !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
-          || (marshall == NULL))
+    if (pData != NULL && dataSize != 0)
     {
-        memcpy(pPacket->pFrame->data, pData, dataSize);
-    }
-    else
-    {
-        ret = marshall(refCon,
-                       pPacket->addr.comId,
-                       (UINT8 *) pData,
-                       pPacket->pFrame->data,
-                       &dataSize,
-                       &pPacket->pCachedDS);
+
+        if (!(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (marshall == NULL))
+        {
+            memcpy(pPacket->pFrame->data, pData, dataSize);
+        }
+        else
+        {
+            ret = marshall(refCon,
+                           pPacket->addr.comId,
+                           (UINT8 *) pData,
+                           pPacket->pFrame->data,
+                           &dataSize,
+                           &pPacket->pCachedDS);
+        }
     }
 
     if (TRDP_NO_ERR == ret)
@@ -138,8 +141,13 @@ void trdp_pdDataUpdate (
     UINT32  myCRC   = vos_crc32(0xFFFFFFFF, NULL, 0);
     UINT8   *pDest  = pPacket->pFrame->data + pPacket->dataSize;
 
+    if (pPacket->dataSize == 0)
+    {
+        return;     /*	Nothing to do	*/
+    }
+
     /*  Pad with zero bytes */
-    UINT32  padding = 4 - (pPacket->dataSize & 0x3);
+    UINT32 padding = 4 - (pPacket->dataSize & 0x3);
     if (padding < 4)
     {
         while (padding--)
@@ -164,7 +172,7 @@ TRDP_ERR_T trdp_pdGet (
     const UINT8         *pData,
     UINT32              *pDataSize)
 {
-    if (pPacket == NULL || pData == NULL )
+    if (pPacket == NULL)
     {
         return TRDP_PARAM_ERR;
     }
@@ -182,29 +190,32 @@ TRDP_ERR_T trdp_pdGet (
         return TRDP_TIMEOUT_ERR;
     }
 
-    if ( !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL)
-         || (unmarshall == NULL))
+    if (pData != NULL && pDataSize != NULL)
     {
-        if (*pDataSize >= pPacket->dataSize)
+        if ( !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (unmarshall == NULL))
         {
-            *pDataSize = pPacket->dataSize;
-            memcpy((void *)pData, pPacket->pFrame->data, *pDataSize);
-            return TRDP_NO_ERR;
+            if (*pDataSize >= pPacket->dataSize)
+            {
+                *pDataSize = pPacket->dataSize;
+                memcpy((void *)pData, pPacket->pFrame->data, *pDataSize);
+                return TRDP_NO_ERR;
+            }
+            else
+            {
+                return TRDP_PARAM_ERR;
+            }
         }
         else
         {
-            return TRDP_PARAM_ERR;
+            return unmarshall(refCon,
+                              pPacket->addr.comId,
+                              pPacket->pFrame->data,
+                              (UINT8 *)pData,
+                              pDataSize,
+                              &pPacket->pCachedDS);
         }
     }
-    else
-    {
-        return unmarshall(refCon,
-                          pPacket->addr.comId,
-                          pPacket->pFrame->data,
-                          (UINT8 *)pData,
-                          pDataSize,
-                          &pPacket->pCachedDS);
-    }
+    return TRDP_NO_ERR;
 }
 
 /******************************************************************************/
@@ -247,7 +258,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
             if (!(iterPD->privFlags & TRDP_INVALID_DATA))
             {
                 if (iterPD->privFlags & TRDP_REQ_2B_SENT &&
-                	iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PD))       /*  PULL packet?  */
+                    iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PD))       /*  PULL packet?  */
                 {
                     iterPD->pFrame->frameHead.msgType = vos_htons(TRDP_MSG_PP);
                 }
@@ -314,7 +325,7 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_ERR_T          err         = TRDP_NO_ERR;
     TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
     UINT32 recSize;
-    BOOL informUser = FALSE;
+    int informUser = 0;
     TRDP_ADDRESSES_T    subHandle = { 0, 0, 0, 0};
 
 
@@ -472,11 +483,16 @@ TRDP_ERR_T  trdp_pdReceive (
         pExistingElement->dataSize  = vos_ntohl(pNewFrame->frameHead.datasetLength);
         pExistingElement->grossSize = trdp_packetSizePD(pExistingElement->dataSize);
 
-        /*  Remember this sequence count value    */
-        pExistingElement->curSeqCnt = vos_ntohl(pNewFrame->frameHead.sequenceCounter);
-
         /*  Has the data changed?   */
         informUser = memcmp(pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
+
+        /*  Remember this sequence count value    */
+        if (pExistingElement->curSeqCnt != vos_ntohl(pNewFrame->frameHead.sequenceCounter))
+        {
+            informUser += 2;    /* informUser can be -1, 0 or 1!   */
+            pExistingElement->curSeqCnt = vos_ntohl(pNewFrame->frameHead.sequenceCounter);
+        }
+
 
         /*  Get the current time and compute the next time this packet should be received.  */
         vos_getTime(&pExistingElement->timeToGo);
@@ -499,25 +515,7 @@ TRDP_ERR_T  trdp_pdReceive (
             pNewFrame = pTemp;
         }
     }
-#if 0
-    else    /* there is no subscription, keep all values sane   */
-    {
-        pNewElement->addr.comId         = vos_ntohl(pNewElement->pFrame->frameHead.comId);
-        pNewElement->addr.srcIpAddr     = subHandle.srcIpAddr;
-        pNewElement->addr.destIpAddr    = subHandle.destIpAddr;
-        pNewElement->privFlags          = TRDP_PRIV_NONE;
-        pNewElement->pktFlags           = TRDP_FLAGS_NONE;
-        pNewElement->interval.tv_sec    = 0;
-        pNewElement->interval.tv_usec   = 0;
-        pNewElement->timeToGo.tv_sec    = 0;
-        pNewElement->timeToGo.tv_usec   = 0;
-        pNewElement->dataSize           = vos_ntohl(pNewElement->pFrame->frameHead.datasetLength);
-        pNewElement->grossSize          = trdp_packetSizePD(pNewElement->dataSize);
-        pNewElement->socketIdx          = 0;
-        pNewElement->userRef = 0;
-        resultCode = TRDP_NOSUB_ERR;
-    }
-#endif
+
     if (pExistingElement != NULL &&
         informUser)
     {
@@ -531,7 +529,7 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.destIpAddr   = pExistingElement->addr.destIpAddr;
             theMessage.topoCount    = vos_ntohl(pExistingElement->pFrame->frameHead.topoCount);
             theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
-            theMessage.seqCount     = vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter);
+            theMessage.seqCount     = pExistingElement->curSeqCnt;
             theMessage.protVersion  = vos_ntohs(pExistingElement->pFrame->frameHead.protocolVersion);
             theMessage.replyComId   = vos_ntohl(pExistingElement->pFrame->frameHead.replyComId);
             theMessage.replyIpAddr  = vos_ntohl(pExistingElement->pFrame->frameHead.replyIpAddress);
