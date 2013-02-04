@@ -141,24 +141,24 @@ void trdp_pdDataUpdate (
     UINT32  myCRC   = vos_crc32(0xFFFFFFFF, NULL, 0);
     UINT8   *pDest  = pPacket->pFrame->data + pPacket->dataSize;
 
-    if (pPacket->dataSize == 0)
+    /* CRC exists only if data transmitted */
+    if (pPacket->dataSize != 0)
     {
-        return;     /*	Nothing to do	*/
-    }
+        /*  Pad with zero bytes */
+        UINT32 padding = 4 - (pPacket->dataSize & 0x3);
 
-    /*  Pad with zero bytes */
-    UINT32 padding = 4 - (pPacket->dataSize & 0x3);
-    if (padding < 4)
-    {
-        while (padding--)
+        if (padding < 4)
         {
-            *pDest++ = 0;
+            while (padding--)
+            {
+                *pDest++ = 0;
+            }
         }
-    }
 
-    /*  Compute data checksum   */
-    myCRC = vos_crc32(myCRC, pPacket->pFrame->data, pPacket->dataSize);
-    *(UINT32 *)pDest = MAKE_LE(myCRC);
+        /*  Compute data checksum   */
+        myCRC = vos_crc32(myCRC, pPacket->pFrame->data, pPacket->dataSize);
+        *(UINT32 *)pDest = MAKE_LE(myCRC);
+    }
 }
 
 /******************************************************************************/
