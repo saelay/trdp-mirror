@@ -46,14 +46,14 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
 
 During Specific Walk:
-  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 344:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 355:
     trdp_pdCheck([1], ?)
-  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 631: vos_crc32(-1,
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 629: vos_crc32(-1,
     [0], ?)
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
     access of out-of-bounds pointer (1 beyond end of data) by operator '['
-    [Reference: file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c: lines 344,
-    631; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
+    [Reference: file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c: lines 355,
+    629; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
 
@@ -162,10 +162,10 @@ C:\Program Files\Microsoft Visual Studio 10.0\VC\include\wchar.h(1137) : Error
 
 --- Global Wrap-up
 
-Warning 526: 'ig_endian()' (line 607, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'ig_endian()' (line 605, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
-    607, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+    605, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
 Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
     not accessed
 Warning 526: '__alignof()' (line 121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)
