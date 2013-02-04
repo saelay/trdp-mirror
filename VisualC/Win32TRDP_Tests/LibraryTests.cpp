@@ -26,9 +26,7 @@
 // include also stuff, needed for window
 //#include "stdafx.h"
 #include <winsock2.h>
-#endif
-
-#ifdef POSIX
+#elif POSIX
 // stuff needed for posix
 #include <unistd.h>
 #include <sys/time.h>
