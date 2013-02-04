@@ -122,10 +122,6 @@ D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1131) : Warning 529: Symbol
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-    _
-#if __BIG_ENDIAN__
-D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
-    preprocessor variable '__BIG_ENDIAN__', assumed 0
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
                        _
