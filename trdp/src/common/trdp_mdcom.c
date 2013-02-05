@@ -401,7 +401,6 @@ TRDP_ERR_T  trdp_mdRecv (
 {
     TRDP_ERR_T  result = TRDP_NO_ERR;
     UINT8       findSock;
-    UINT8       sockPosition;
 
     if (appHandle == NULL)
     {
@@ -614,11 +613,13 @@ TRDP_ERR_T  trdp_mdRecv (
                                 }
                             }
 
-                            /* TCP and Notify message */
+                            /* TCP and Notify/Request message */
                             if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                             {
                                 if(TRDP_MSG_MR == l_msgType)
                                 {
+                                    UINT8 sockPosition;
+
                                     for(findSock = 0; findSock < VOS_MAX_SOCKET_CNT; findSock++)
                                     {
                                         if((appHandle->iface[findSock].sock == sock)
@@ -628,6 +629,13 @@ TRDP_ERR_T  trdp_mdRecv (
                                             sockPosition = findSock;
                                             break;
                                         }
+                                    }
+
+                                    /* Handle error*/
+                                    if(findSock == VOS_MAX_SOCKET_CNT)
+                                    {
+                                        vos_printf(VOS_LOG_ERROR, "Not found the receiving socket!\n");
+                                        return TRDP_SOCK_ERR;
                                     }
 
                                     appHandle->iface[sockPosition].usage++;
@@ -798,6 +806,8 @@ TRDP_ERR_T  trdp_mdRecv (
                                         /* TCP and Reply/ReplyError message */
                                         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                                         {
+                                            UINT8 sockPosition;
+
                                             for(findSock = 0; findSock < VOS_MAX_SOCKET_CNT; findSock++)
                                             {
                                                 if((appHandle->iface[findSock].sock == sock)
@@ -808,6 +818,14 @@ TRDP_ERR_T  trdp_mdRecv (
                                                     break;
                                                 }
                                             }
+
+                                            /* Handle error*/
+                                            if(findSock == VOS_MAX_SOCKET_CNT)
+                                            {
+                                                vos_printf(VOS_LOG_ERROR, "Not found the receiving socket!\n");
+                                                return TRDP_SOCK_ERR;
+                                            }
+
 
                                             iterMD->socketIdx = sockPosition;
 
@@ -919,6 +937,8 @@ TRDP_ERR_T  trdp_mdRecv (
                                         /* TCP and Confirm message */
                                         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                                         {
+                                            UINT8 sockPosition;
+
                                             for(findSock = 0; findSock < VOS_MAX_SOCKET_CNT; findSock++)
                                             {
                                                 if((appHandle->iface[findSock].sock == sock)
@@ -929,6 +949,14 @@ TRDP_ERR_T  trdp_mdRecv (
                                                     break;
                                                 }
                                             }
+
+                                            /* Handle error*/
+                                            if(findSock == VOS_MAX_SOCKET_CNT)
+                                            {
+                                                vos_printf(VOS_LOG_ERROR, "Not found the receiving socket!\n");
+                                                return TRDP_SOCK_ERR;
+                                            }
+
 
                                             iterMD->socketIdx = sockPosition;
 
