@@ -618,7 +618,7 @@ TRDP_ERR_T  trdp_mdRecv (
                             {
                                 if(TRDP_MSG_MR == l_msgType)
                                 {
-                                    UINT8 sockPosition;
+                                    UINT8 sockPosition = 0;
 
                                     for(findSock = 0; findSock < VOS_MAX_SOCKET_CNT; findSock++)
                                     {
@@ -637,17 +637,19 @@ TRDP_ERR_T  trdp_mdRecv (
                                         vos_printf(VOS_LOG_ERROR, "Not found the receiving socket!\n");
                                         return TRDP_SOCK_ERR;
                                     }
+                                    else
+                                    {
+                                        appHandle->iface[sockPosition].usage++;
+                                        vos_printf(VOS_LOG_INFO,
+                                                   "Socket (Num = %d) usage incremented to (Num = %d)\n",
+                                                   appHandle->iface[sockPosition].sock,
+                                                   appHandle->iface[sockPosition].usage);
 
-                                    appHandle->iface[sockPosition].usage++;
-                                    vos_printf(VOS_LOG_INFO,
-                                               "Socket (Num = %d) usage incremented to (Num = %d)\n",
-                                               appHandle->iface[sockPosition].sock,
-                                               appHandle->iface[sockPosition].usage);
-
-                                    /* Save the socket position in the listener */
-                                    iterMD->socketIdx = sockPosition;
-                                    vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
-                                               iterMD->socketIdx);
+                                        /* Save the socket position in the listener */
+                                        iterMD->socketIdx = sockPosition;
+                                        vos_printf(VOS_LOG_INFO, "SocketIndex (Num = %d) saved in the Listener\n",
+                                                   iterMD->socketIdx);
+                                    }
                                 }
                             }
                         }
@@ -806,7 +808,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                         /* TCP and Reply/ReplyError message */
                                         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                                         {
-                                            UINT8 sockPosition;
+                                            UINT8 sockPosition = 0;
 
                                             for(findSock = 0; findSock < VOS_MAX_SOCKET_CNT; findSock++)
                                             {
@@ -825,8 +827,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                                 vos_printf(VOS_LOG_ERROR, "Not found the receiving socket!\n");
                                                 return TRDP_SOCK_ERR;
                                             }
-
-
+                                            
                                             iterMD->socketIdx = sockPosition;
 
                                             if((TRDP_MSG_MP == l_msgType) || (TRDP_MSG_ME == l_msgType))
@@ -937,7 +938,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                         /* TCP and Confirm message */
                                         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
                                         {
-                                            UINT8 sockPosition;
+                                            UINT8 sockPosition = 0;
 
                                             for(findSock = 0; findSock < VOS_MAX_SOCKET_CNT; findSock++)
                                             {
@@ -956,15 +957,16 @@ TRDP_ERR_T  trdp_mdRecv (
                                                 vos_printf(VOS_LOG_ERROR, "Not found the receiving socket!\n");
                                                 return TRDP_SOCK_ERR;
                                             }
+                                            else
+                                            {
+                                                iterMD->socketIdx = sockPosition;
 
-
-                                            iterMD->socketIdx = sockPosition;
-
-                                            appHandle->iface[sockPosition].usage--;
-                                            vos_printf(VOS_LOG_INFO,
-                                                       "Socket (Num = %d) usage decremented to (Num = %d)\n",
-                                                       appHandle->iface[sockPosition].sock,
-                                                       appHandle->iface[sockPosition].usage);
+                                                appHandle->iface[sockPosition].usage--;
+                                                vos_printf(VOS_LOG_INFO,
+                                                           "Socket (Num = %d) usage decremented to (Num = %d)\n",
+                                                           appHandle->iface[sockPosition].sock,
+                                                           appHandle->iface[sockPosition].usage);
+                                            }
                                         }
 
                                         /* Remove element from queue */

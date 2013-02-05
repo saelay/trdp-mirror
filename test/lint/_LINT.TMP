@@ -10,18 +10,14 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
 D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
     for variable 'MD_ELE::data'
-                                                                          _
-                                    appHandle->iface[sockPosition].usage++;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(633) : Warning 644: Variable
-    'sockPosition' (line 404) may not have been initialized
                                                                                _
                                     vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1411) : Warning 534: Ignoring
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1441) : Warning 534: Ignoring
     return value of function 'vos_sockClose(int)' (compare with line 222, file
     D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
                                                                _
                     vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2113) : Warning 534: Ignoring
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2143) : Warning 534: Ignoring
     return value of function 'vos_sockClose(int)' (compare with line 222, file
     D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
 
