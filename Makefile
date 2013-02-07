@@ -174,6 +174,13 @@ $(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
+			
+$(OUTDIR)/test_mdSingle: $(OUTDIR)/libtrdp.a 
+			$(CC) test/test_mdSingle.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
 
 
 $(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a 
