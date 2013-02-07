@@ -2770,7 +2770,11 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->u.listener.destIpAddr  = destIpAddr;
                 pNewElement->u.listener.pktFlags    = pktFlags;
                 pNewElement->pCachedDS = NULL;
-                memcpy(pNewElement->u.listener.destURI, destURI, TRDP_MAX_URI_USER_LEN);
+                if ( destURI > 0 )
+                {
+                    memcpy(pNewElement->u.listener.destURI, destURI, TRDP_MAX_URI_USER_LEN);
+                } /* set the URI only, if it is given. Otherwise this attribute stays zero */
+
                 if (vos_isMulticast(destIpAddr))
                 {
                     pNewElement->addr.mcGroup   = destIpAddr;   /* Set multicast group address */
