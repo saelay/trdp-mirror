@@ -27,6 +27,7 @@
 
 #include "vos_utils.h"
 #include "vos_sock.h"
+#include "vos_thread.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -117,12 +118,141 @@ static const UINT32 crc_table[256] =
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
+static BOOL		sIsBigEndian 		= FALSE;
+static UINT32	sAlignINT8			= 1;
+static UINT32	sAlignINT16			= 2;
+static UINT32	sAlignINT32			= 4;
+static UINT32	sAlignREAL32		= 4;
+static UINT32	sAlignTIMEDATE48	= 6;
+static UINT32	sAlignINT64			= 8;
+static UINT32	sAlignREAL64		= 8;
+static UINT32	sAlignTIMEDATE48Array1 = 4;
+static UINT32	sAlignTIMEDATE48Array2 = 4;
+
+/***********************************************************************************************************************
+ * LOCAL FUNCTIONS
+ */
+
+/**********************************************************************************************************************/
+/** Pre-compute alignment and endianess.
+ *
+ *  @retval        VOS_INTEGRATION_ERR or VOS_NO_ERR
+ */
+
+VOS_ERR_T vos_initRuntimeConsts (void)
+{
+	VOS_ERR_T	err = VOS_INTEGRATION_ERR;
+
+    /*  Compute endianess  */
+    long one = 1;
+
+	/*  Define a nice struct to determine the natural alignement */
+    struct alignTest
+    {
+        INT8		byte1;
+        INT64		longLong1;
+        INT8		byte2;
+        INT32		dword1;
+        INT8		byte3;
+        INT16		word;
+        INT8		byte4;
+        REAL64		longLong2;
+        INT8		byte5;
+        REAL32		dword2;
+        INT8		byte6;
+        TIMEDATE48	dword3;
+        INT8		byte7;
+        struct {
+        	INT8		byte;
+        	TIMEDATE48	dword;
+        } a[2];
+    } vAlignTest;
+
+    sIsBigEndian = !(*((char *)(&one)));
+    
+#if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
+	if (sIsBigEndian == FALSE)
+#else
+    if (sIsBigEndian == TRUE)
+#endif
+    {
+    	vos_printf(VOS_LOG_ERROR, "Endianess is not set correctly!\n");
+    }
+    
+    sAlignINT16 = (INT8*) &vAlignTest.word - (INT8*) &vAlignTest.byte3; 
+    sAlignINT32 = (INT8*) &vAlignTest.dword1 - (INT8*) &vAlignTest.byte2; 
+    sAlignINT64 = (INT8*) &vAlignTest.longLong1 - (INT8*) &vAlignTest.byte1; 
+    sAlignREAL32 = (INT8*) &vAlignTest.dword2 - (INT8*) &vAlignTest.byte5; 
+    sAlignTIMEDATE48 = (INT8*) &vAlignTest.dword3 - (INT8*) &vAlignTest.byte6; 
+    sAlignREAL64 = (INT8*) &vAlignTest.longLong2 - (INT8*) &vAlignTest.byte4; 
+    sAlignTIMEDATE48Array1 = (INT8*) &vAlignTest.a[0].dword - (INT8*) &vAlignTest.a[0].byte; 
+    sAlignTIMEDATE48Array2 = (INT8*) &vAlignTest.a[1].dword - (INT8*) &vAlignTest.a[1].byte; 
+    
+	if (sAlignINT8 != ALIGNOF(INT8))
+    {
+    	vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != ALIGNOF(INT8)\n", sAlignINT8);
+    	sAlignINT8		= ALIGNOF(INT8);
+    }
+    else if (sAlignINT16 != ALIGNOF(INT16))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != ALIGNOF(INT16)\n", sAlignINT16);
+        sAlignINT16		= ALIGNOF(INT16);
+    }
+    else if (sAlignINT32 != ALIGNOF(INT32))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != ALIGNOF(INT32)\n", sAlignINT32);
+        sAlignINT32		= ALIGNOF(INT32);
+    }
+    else if (sAlignREAL32 != ALIGNOF(REAL32))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != %lu [ALIGNOF(REAL32)]\n", sAlignREAL32, ALIGNOF(REAL32));
+        sAlignREAL32	= ALIGNOF(REAL32);
+    }
+    else if (sAlignTIMEDATE48 != ALIGNOF(TIMEDATE48))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != %lu [ALIGNOF(TIMEDATE48)]\n", sAlignTIMEDATE48, ALIGNOF(TIMEDATE48));
+        sAlignTIMEDATE48		= ALIGNOF(TIMEDATE48);
+    }
+    else if (sAlignINT64 != ALIGNOF(INT64))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != %lu [ALIGNOF(INT64)]\n", sAlignINT64, ALIGNOF(INT64));
+        sAlignINT64		= ALIGNOF(INT64);
+    }
+    else if (sAlignREAL64 != ALIGNOF(REAL64))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != %lu [ALIGNOF(REAL64)]\n", sAlignREAL64, ALIGNOF(REAL64));
+        sAlignREAL64		= ALIGNOF(REAL64);
+    }
+    else if (sAlignTIMEDATE48Array1 != ALIGNOF(TIMEDATE48))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement 1: %u != %lu [ALIGNOF(TIMEDATE48)]\n", sAlignTIMEDATE48Array1, ALIGNOF(TIMEDATE48));
+        sAlignTIMEDATE48Array1		= ALIGNOF(TIMEDATE48);
+    }
+    else if (sAlignTIMEDATE48Array2 != ALIGNOF(TIMEDATE48))
+    {
+        vos_printf(VOS_LOG_ERROR, "Unexpected alignement 2: %u != %lu [ALIGNOF(TIMEDATE48)]\n", sAlignTIMEDATE48Array2, ALIGNOF(TIMEDATE48));
+        sAlignTIMEDATE48Array2		= ALIGNOF(TIMEDATE48);
+    }
+    else
+    {
+        err = VOS_NO_ERR;
+    }
+
+    return err;
+}
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
  */
 
-/*  Init  */
+/**********************************************************************************************************************/
+/** Initialize the virtual operating system.
+ *
+ *  @param[in]          pRefCon            context for debug output function
+ *  @param[in]          pDebugOutput       Pointer to debug output function.
+ *  @retval             VOS_NO_ERR             no error
+ *                      VOS_INTEGRATION_ERR    if endianess/alignment mismatch
+ */
 
 VOS_ERR_T vos_init (
     void            *pRefCon,
@@ -131,6 +261,11 @@ VOS_ERR_T vos_init (
 {
     gPDebugFunction = pDebugOutput;
     gRefCon         = pRefCon;
+    
+    if (vos_initRuntimeConsts() != VOS_NO_ERR)
+    {
+        return VOS_INTEGRATION_ERR;
+    }
 
     return vos_sockInit();
 }
@@ -157,3 +292,14 @@ UINT32 vos_crc32 (
     }
     return crc;
 }
+
+/**********************************************************************************************************************/
+/** Return endianess
+ *
+ *  @retval             TRUE if big endian
+ */
+inline BOOL vos_isBigEndian(void)
+{
+    return sIsBigEndian;
+}
+
