@@ -409,8 +409,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         if (pOptions->qos > 0 && pOptions->qos < 8)
         {
             /* The QoS value (0-7) is mapped to MSB bits 7-5, bit 2 is set for local use */
-            errno = 0;
-            sockOptValue = (int) ((pOptions->qos << 5) | 4);
+            errno           = 0;
+            sockOptValue    = (int) ((pOptions->qos << 5) | 4);
             if (setsockopt(sock, IPPROTO_IP, IP_TOS, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
@@ -421,8 +421,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (pOptions->ttl > 0)
         {
-            errno = 0;
-            sockOptValue = pOptions->ttl;
+            errno           = 0;
+            sockOptValue    = pOptions->ttl;
             if (setsockopt(sock, IPPROTO_IP, IP_TTL, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
@@ -433,8 +433,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (pOptions->ttl_multicast > 0)
         {
-            errno = 0;
-            sockOptValue = pOptions->ttl_multicast;
+            errno           = 0;
+            sockOptValue    = pOptions->ttl_multicast;
             if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
@@ -481,18 +481,18 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
         {
-            char mcStr[16];
-            char ifStr[16];
+            char    mcStr[16];
+            char    ifStr[16];
 
-            strncpy (mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
-            strncpy (ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
+            strncpy(mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
+            strncpy(ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
 
             vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
 
         errno = 0;
         if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1 &&
-        	errno != EADDRINUSE)
+            errno != EADDRINUSE)
         {
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %s)\n", buff);
@@ -504,7 +504,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         }
 
         /* Disable multicast loop back */
-        /* only useful for streaming 
+        /* only useful for streaming
         {
             UINT32 enMcLb = 0;
 
@@ -562,12 +562,12 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         mreq.imr_multiaddr.s_addr   = vos_htonl(mcAddress);
         mreq.imr_interface.s_addr   = vos_htonl(ipAddress);
 
-       {
-            char mcStr[16];
-            char ifStr[16];
+        {
+            char    mcStr[16];
+            char    ifStr[16];
 
-            strncpy (mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
-            strncpy (ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
+            strncpy(mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
+            strncpy(ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
 
             vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
         }
@@ -578,7 +578,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             char buff[VOS_MAX_ERR_STR_SIZE];
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %s)\n", buff);
-       
+
             result = VOS_SOCK_ERR;
         }
         else
@@ -607,7 +607,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
- *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
@@ -618,12 +618,12 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     UINT16      port)
 {
     struct sockaddr_in destAddr;
-    ssize_t sendSize    = 0; 
+    ssize_t sendSize = 0;
 
     if (sock == -1 || pBuffer == NULL)
     {
         return VOS_PARAM_ERR;
-    } 
+    }
 
     /*      We send UDP packets to the address  */
     memset(&destAddr, 0, sizeof(destAddr));
@@ -633,14 +633,14 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     do
     {
-        errno   = 0;
-        sendSize = sendto(sock,
-                          (const char *)pBuffer,
-                          size,
-                          0,
-                          (struct sockaddr *) &destAddr,
-                          sizeof(destAddr));
-        
+        errno       = 0;
+        sendSize    = sendto(sock,
+                             (const char *)pBuffer,
+                             size,
+                             0,
+                             (struct sockaddr *) &destAddr,
+                             sizeof(destAddr));
+
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
@@ -652,8 +652,8 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
-        vos_printf(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %s)\n", 
-                                  inet_ntoa(destAddr.sin_addr), port, buff);
+        vos_printf(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %s)\n",
+                   inet_ntoa(destAddr.sin_addr), port, buff);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -677,7 +677,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be read
  *  @retval         VOS_NODATA_ERR  no data
- *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode 
+ *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
@@ -685,18 +685,18 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT8   *pBuffer,
     UINT32  *pSize,
     UINT32  *pIPAddr,
-    UINT16	*pIPPort)
+    UINT16  *pIPPort)
 {
     struct sockaddr_in  srcAddr;
-    socklen_t           sockLen     = sizeof(srcAddr);
-    ssize_t             rcvSize     = 0;
+    socklen_t           sockLen = sizeof(srcAddr);
+    ssize_t rcvSize = 0;
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
     if (sock == -1 || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
     {
         return VOS_PARAM_ERR;
-    } 
+    }
 
     do
     {
@@ -710,7 +710,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         *pIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
         if (pIPPort)
         {
-        	*pIPPort = (UINT16) vos_ntohs(srcAddr.sin_port);
+            *pIPPort = (UINT16) vos_ntohs(srcAddr.sin_port);
         }
 
 #if 0
@@ -725,9 +725,9 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
             return VOS_BLOCK_ERR;
         }
     }
-    while (rcvSize == -1 && errno == EINTR); 
+    while (rcvSize == -1 && errno == EINTR);
 
-    *pSize = 0; 
+    *pSize = 0;
 
     if (rcvSize == -1)
     {
@@ -735,14 +735,14 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "recvfrom() from failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
-    } 
+    }
     else if (rcvSize == 0)
     {
         return VOS_NODATA_ERR;
     }
     else
     {
-        *pSize = rcvSize; 
+        *pSize = rcvSize;
         return VOS_NO_ERR;
     }
 }
@@ -1075,7 +1075,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             return VOS_MEM_ERR;
         }
-        else 
+        else
         {
             return VOS_NODATA_ERR;
         }

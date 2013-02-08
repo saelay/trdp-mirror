@@ -57,7 +57,7 @@ extern void *gRefCon;
 
 /** Debug output macro with formatting options */
 #ifdef WIN32
-	#define vos_printf(level, format, ...)                                  \
+    #define vos_printf(level, format, ...)                              \
     {if (gPDebugFunction != NULL)                                       \
      {   char str[VOS_MAX_PRNT_STR_SIZE];                               \
          _snprintf_s(str, sizeof(str), _TRUNCATE, format, __VA_ARGS__); \
@@ -65,7 +65,7 @@ extern void *gRefCon;
      }                                                                  \
     }
 #else
-	#define vos_printf(level, format, args ...)           \
+    #define vos_printf(level, format, args ...)       \
     {if (gPDebugFunction != NULL)                     \
      {   char str[VOS_MAX_PRNT_STR_SIZE];             \
          snprintf(str, sizeof(str), format, ## args); \
@@ -76,13 +76,13 @@ extern void *gRefCon;
 
 /** Alignment macros  */
 #ifdef WIN32
-	#define ALIGNOF(type)   __alignof(type)
+    #define ALIGNOF(type)  __alignof(type)
 /* __alignof__() is broken in GCC since 3.3! It returns 8 for the alignement of long long instaed of 4!
 #elif defined(__GNUC__)
-	#define ALIGNOF(type)   __alignof__(type)
+    #define ALIGNOF(type)   __alignof__(type)
 */
 #else
-	#define ALIGNOF(type)   offsetof(struct { char c; type member; }, member)
+    #define ALIGNOF(type)  offsetof(struct { char c; type member; }, member)
 #endif
 
 /***********************************************************************************************************************
