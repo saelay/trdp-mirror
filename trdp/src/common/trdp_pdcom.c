@@ -345,7 +345,7 @@ TRDP_ERR_T  trdp_pdReceive (
     recSize = TRDP_MAX_PD_PACKET_SIZE;
 
     /*  Get the packet from the wire:  */
-    err = (TRDP_ERR_T) vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr);
+    err = (TRDP_ERR_T) vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr, NULL);
     if ( err != TRDP_NO_ERR)
     {
         return err;
