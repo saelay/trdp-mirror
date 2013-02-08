@@ -298,7 +298,7 @@ UINT32 vos_crc32 (
  *
  *  @retval             TRUE if big endian
  */
-inline BOOL vos_isBigEndian(void)
+INLINE BOOL vos_isBigEndian(void)
 {
     return sIsBigEndian;
 }
