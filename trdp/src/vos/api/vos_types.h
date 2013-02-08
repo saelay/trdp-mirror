@@ -71,7 +71,7 @@ typedef float REAL32;
 typedef double REAL64;
 
 #else
-#error "Standard types must be defined for each target!"
+	#error "Standard types must be defined for each target!"
 #endif
 
 /*    Special handling for Windows DLLs    */
@@ -90,6 +90,16 @@ typedef double REAL64;
 
 #endif
 
+    /** inline macros  */
+#ifdef WIN32
+	#define INLINE   _inline
+#elif defined(__GNUC__)
+	#define INLINE   inline
+#else
+	#define INLINE   inline
+#endif
+    
+    
 #ifndef TRUE
     #define TRUE    (1)
     #define FALSE   (0)
