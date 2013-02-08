@@ -307,7 +307,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 mdSock,
                 (UINT8 *)&pPacket->frameHead,
                 &size,
-                &pPacket->addr.srcIpAddr);
+                &pPacket->addr.srcIpAddr,
+                &pPacket->replyPort);
     }
 
     pPacket->grossSize  = size;
@@ -440,7 +441,7 @@ TRDP_ERR_T  trdp_mdRecv (
             lF = appHandle->pMDRcvEle->dataSize;
         }
 
-        vos_printf(VOS_LOG_ERROR,
+        vos_printf(VOS_LOG_INFO,
                    "Received MD packet (space: %d len: %d)\n",
                    appHandle->pMDRcvEle->grossSize,
                    appHandle->pMDRcvEle->dataSize);
@@ -1068,9 +1069,21 @@ TRDP_ERR_T  trdp_mdSend (
                     }
                 }
 
-                result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock,
-                                           appHandle->mdDefault.udpPort,
-                                           iterMD);
+				if (0 != iterMD->replyPort &&
+                	(iterMD->frameHead.msgType == vos_ntohs(TRDP_MSG_MP) ||
+                    iterMD->frameHead.msgType == vos_ntohs(TRDP_MSG_MQ)))
+                {                                
+                	result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock,
+                                               iterMD->replyPort,
+                                               iterMD);
+                }
+				else
+                {
+                	result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock,
+                                           	appHandle->mdDefault.udpPort,
+                                           	iterMD);
+                }
+
 
                 if (result == TRDP_NO_ERR)
                 {
@@ -1166,6 +1179,8 @@ void  trdp_mdCheckListenSocks (
     TRDP_FDS_T      *pRfds,
     INT32           *pCount)
 {
+    TRDP_ERR_T      err;
+
     if (appHandle == NULL)
     {
         return;
@@ -1217,7 +1232,6 @@ void  trdp_mdCheckListenSocks (
                     /**********************************************/
                     TRDP_IP_ADDR_T  newIp;
                     UINT16          read_tcpPort;
-                    TRDP_ERR_T      err;
 
                     newIp           = appHandle->realIP;
                     read_tcpPort    = appHandle->mdDefault.tcpPort;
@@ -1541,6 +1555,47 @@ void  trdp_mdCheckListenSocks (
         else
         {
             /* select() mode */
+            MD_ELE_T *iterMD;
+            
+            for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+            {
+            	/*    Check the sockets for received MD packets    */
+                if (iterMD->socketIdx != -1 &&
+                    FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *) pRfds))     /* MD frame received?  */
+                {
+                    /*  Compare the received data to the data in our receive queue
+                     Call user's callback if data changed    */
+                    
+                    err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock);
+                    
+                    if (err != TRDP_NO_ERR)
+                    {
+                        vos_printf(VOS_LOG_ERROR, "trdp_mdRecv() failed (Err: %d)\n", err);
+                    }
+                    
+                    FD_CLR(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pRfds);
+                }
+            }
+            for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
+            {
+            	/*    Check the sockets for received MD packets    */
+                if (iterMD->socketIdx != -1 &&
+                    FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *) pRfds))     /* MD frame received?  */
+                {
+                    /*  Check the socket for received data -
+                        Call user's callback if data changed    */
+                    
+                    err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock);
+                    
+                    if (err != TRDP_NO_ERR)
+                    {
+                        vos_printf(VOS_LOG_ERROR, "trdp_mdRecv() failed (Err: %d)\n", err);
+                    }
+                    
+                    FD_CLR(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pRfds);
+                }
+            }
+            
         }
     }
 }
@@ -1584,7 +1639,7 @@ void  trdp_mdCheckTimeouts (
                 {
                     MD_ELE_T *sender_ele = NULL;
 
-                    vos_printf(VOS_LOG_INFO, "MD listener timeout: fall back ARM st=%d\n", iterMD->stateEle);
+                    vos_printf(VOS_LOG_ERROR, "MD listener timeout: fall back ARM st=%d\n", iterMD->stateEle);
 
                     if(iterMD->stateEle == TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF)
                     {
