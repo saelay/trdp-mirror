@@ -692,6 +692,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
  *  @param[out]     pIPAddr         source IP
+ *  @param[out]     pIPPort         source port
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error

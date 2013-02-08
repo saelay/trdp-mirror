@@ -389,6 +389,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
  *
  *  @param[in]      appHandle           session pointer
  *  @param[in]      sock                the socket to read from
+ *  @param[in]      pElement            pointer to proper element, if no listener found
+*  
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_WIRE_ERR       protocol error (late packet, version mismatch)
@@ -398,7 +400,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
  */
 TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
-    INT32           sock)
+    INT32           sock,
+    MD_ELE_T		*pElement)
 {
     TRDP_ERR_T  result = TRDP_NO_ERR;
     UINT8       findSock;
@@ -508,7 +511,7 @@ TRDP_ERR_T  trdp_mdRecv (
             UINT16      l_msgType = vos_ntohs(pH->msgType);
 
             /* find for subscriber */
-            MD_ELE_T    *iterMD;
+            MD_ELE_T    *iterMD = NULL;
 
             /* check for topo counter */
             if (l_topoCount != 0 && appHandle->topoCount != 0 && l_topoCount != appHandle->topoCount)
@@ -530,17 +533,50 @@ TRDP_ERR_T  trdp_mdRecv (
                 return TRDP_TOPO_ERR;
             }
 
-            /* seach for existing listener */
-            for(iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+			/* We must check, which MD_ELE should handle this message  */
+            /* Requests or Notifications should always address a listener, where Replies and Confirms must match
+               through the session ID */
+            switch (l_msgType)
             {
-                /* check for correct communication ID ... */
-                if (l_comId != iterMD->u.listener.comId)
-                {
-                    continue;
-                }
+                case TRDP_MSG_MR:
+                case TRDP_MSG_MN:
+                    /* search for existing listener */
+                    for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+                    {
+                        if (l_comId == iterMD->u.listener.comId ||
+                        	vos_strnicmp((CHAR8*)iterMD->u.listener.destURI, (CHAR8*)pH->destinationURI, 32) == 0)
+                        {
+                            break;
+                        }
+                    }
+                    break;
+                case TRDP_MSG_MP:
+                case TRDP_MSG_MC:
+                case TRDP_MSG_ME:
+                    if (NULL != pElement)
+                    {
+                        iterMD = pElement;
+                    }
+                    else
+                    {
+                    	/*  We have a look at the send queue, too  */
+                        for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
+                        {
+                            if (vos_strnicmp((CHAR8*)iterMD->sessionID, (CHAR8*)pH->sessionID, 16) == 0)
+                            {
+                                break;
+                            }
+                        }
+                    }
 
+                    break;
+            }
+
+            if (NULL != iterMD)
+            {
                 /* 1st receive */
-                if (iterMD->stateEle == TRDP_MD_ELE_ST_RX_ARM)
+                if (iterMD->stateEle == TRDP_MD_ELE_ST_RX_ARM ||
+                	iterMD->stateEle == TRDP_MD_ELE_ST_TX_REQUEST_W4Y)
                 {
                     /* message type depending */
                     switch(l_msgType)
@@ -555,6 +591,7 @@ TRDP_ERR_T  trdp_mdRecv (
                             {
                                 /* in case for request, the listener is busy waiting for application reply or error */
                                 iterMD->stateEle = TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY;
+                                iterMD->replyPort = appHandle->pMDRcvEle->replyPort;
                             }
 
                             /* receive time */
@@ -668,12 +705,6 @@ TRDP_ERR_T  trdp_mdRecv (
                                  sender_ele != NULL;
                                  sender_ele = sender_ele->pNext)
                             {
-                                /* check for comID .... */
-                                if (sender_ele->u.caller.comId != l_comId)
-                                {
-                                    continue;
-                                }
-
                                 /* check for session ... */
                                 if (0 != memcmp(sender_ele->sessionID, pH->sessionID, 16))
                                 {
@@ -735,6 +766,10 @@ TRDP_ERR_T  trdp_mdRecv (
                                             memcpy(iterMD->u.listener.destURI,
                                                    pH->destinationURI,
                                                    TRDP_MAX_URI_USER_LEN);
+                                        }
+                                        else if (l_msgType == TRDP_MSG_MP)
+                                        {
+                                            sender_ele->noOfRepliers = 1;
                                         }
 
                                         /* Handle multiple replies */
@@ -984,7 +1019,6 @@ TRDP_ERR_T  trdp_mdRecv (
                         }
                         break;
                     }
-                    break;
                 }
             }
 
@@ -1431,7 +1465,7 @@ void  trdp_mdCheckListenSocks (
                             (*pCount)--;
                             FD_CLR(appHandle->iface[index].sock, (fd_set *)pRfds);
 
-                            err = trdp_mdRecv(appHandle, appHandle->iface[index].sock);
+                            err = trdp_mdRecv(appHandle, appHandle->iface[index].sock, NULL);
 
                             if (err != TRDP_NO_ERR )
                             {
@@ -1544,7 +1578,7 @@ void  trdp_mdCheckListenSocks (
                 {
                     TRDP_ERR_T err;
 
-                    err = trdp_mdRecv(appHandle, appHandle->iface[i].sock);
+                    err = trdp_mdRecv(appHandle, appHandle->iface[i].sock, NULL);
                     if (err != TRDP_NO_ERR)
                     {
                         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv() failed (Err:%d)\n", err);
@@ -1566,7 +1600,7 @@ void  trdp_mdCheckListenSocks (
                     /*  Compare the received data to the data in our receive queue
                      Call user's callback if data changed    */
 
-                    err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock);
+                    err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock, iterMD);
 
                     if (err != TRDP_NO_ERR)
                     {
@@ -1585,7 +1619,7 @@ void  trdp_mdCheckListenSocks (
                     /*  Check the socket for received data -
                         Call user's callback if data changed    */
 
-                    err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock);
+                    err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock, iterMD);
 
                     if (err != TRDP_NO_ERR)
                     {
