@@ -180,8 +180,8 @@ int main (int argc, char *argv[])
     int                 ip[4];
     TRDP_APP_SESSION_T  appHandle;  	/*    Our identifier to the library instance    */
     TRDP_LIS_T          listenHandle;  	/*    Our identifier to the publication    */
-//    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
-    TRDP_MD_CONFIG_T    mdConfiguration = {mdCallback, &appHandle, {0, 64}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
+//    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {5, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
+    TRDP_MD_CONFIG_T    mdConfiguration = {mdCallback, &appHandle, {3, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     
@@ -279,7 +279,7 @@ int main (int argc, char *argv[])
     /*    Set up a listener  */
     //if (sResponder == TRUE)
     {
-    	if (tlm_addListener(appHandle, &listenHandle, NULL, sComID, 0, 0, TRDP_FLAGS_CALLBACK, NULL) != TRDP_NO_ERR)
+    	if (tlm_addListener(appHandle, &listenHandle, NULL, sComID, 0, destIP, TRDP_FLAGS_CALLBACK, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error\n");
             return 1;
@@ -295,6 +295,7 @@ int main (int argc, char *argv[])
         INT32   noDesc;
         struct timeval  tv;
         struct timeval  max_tv = {0, 100000};
+        char   requestMsg[16] = "Requesting Hello";
         
         /*
          Prepare the file descriptor set for the select call.
@@ -352,7 +353,7 @@ int main (int argc, char *argv[])
 		{
             TRDP_UUID_T sessionId;
             vos_threadDelay (1000000);
-            tlm_request(appHandle, NULL, &sessionId, sComID, 0, 0, destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (UINT8*)"Requesting Hello", 16, 0, 0);
+            tlm_request(appHandle, NULL, &sessionId, sComID, 0, ownIP, destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
         }
         /* sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
          
