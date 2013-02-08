@@ -155,7 +155,7 @@ VOS_ERR_T vos_initRuntimeConsts (void)
         INT32		dword1;
         INT8		byte3;
         INT16		word;
-        INT64       filler1;
+        INT64       filler1; /* move the 'byte4' to a position, that is dividable by eight */
         INT8		byte4;
         REAL64		longLong2;
         INT8		byte5;
@@ -169,9 +169,9 @@ VOS_ERR_T vos_initRuntimeConsts (void)
         	TIMEDATE48	dword;
         } a[2];
     } vAlignTest;
-
-    sIsBigEndian = !(*((char *)(&one)));
     
+    sIsBigEndian = !(*((char *)(&one)));
+        
 #if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
 	if (sIsBigEndian == FALSE)
 #else
