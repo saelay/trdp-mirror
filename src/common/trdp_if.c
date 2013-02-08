@@ -1264,7 +1264,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     FD_SET(appHandle->mdDefault.tcpFd.listen_sd, (fd_set *)pFileDesc);
                     if (appHandle->mdDefault.tcpFd.listen_sd > *pNoDesc)
                     {
-                        *pNoDesc = appHandle->iface[index].sock;
+                        *pNoDesc = appHandle->mdDefault.tcpFd.listen_sd;
                     }
 
                     for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
