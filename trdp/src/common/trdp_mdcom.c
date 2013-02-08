@@ -828,7 +828,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                                 vos_printf(VOS_LOG_ERROR, "Not found the receiving socket!\n");
                                                 return TRDP_SOCK_ERR;
                                             }
-                                            
+
                                             iterMD->socketIdx = sockPosition;
 
                                             if((TRDP_MSG_MP == l_msgType) || (TRDP_MSG_ME == l_msgType))
@@ -1069,19 +1069,19 @@ TRDP_ERR_T  trdp_mdSend (
                     }
                 }
 
-				if (0 != iterMD->replyPort &&
-                	(iterMD->frameHead.msgType == vos_ntohs(TRDP_MSG_MP) ||
-                    iterMD->frameHead.msgType == vos_ntohs(TRDP_MSG_MQ)))
-                {                                
-                	result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock,
+                if (0 != iterMD->replyPort &&
+                    (iterMD->frameHead.msgType == vos_ntohs(TRDP_MSG_MP) ||
+                     iterMD->frameHead.msgType == vos_ntohs(TRDP_MSG_MQ)))
+                {
+                    result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock,
                                                iterMD->replyPort,
                                                iterMD);
                 }
-				else
+                else
                 {
-                	result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock,
-                                           	appHandle->mdDefault.udpPort,
-                                           	iterMD);
+                    result = trdp_mdSendPacket(appHandle->iface[iterMD->socketIdx].sock,
+                                               appHandle->mdDefault.udpPort,
+                                               iterMD);
                 }
 
 
@@ -1179,7 +1179,7 @@ void  trdp_mdCheckListenSocks (
     TRDP_FDS_T      *pRfds,
     INT32           *pCount)
 {
-    TRDP_ERR_T      err;
+    TRDP_ERR_T err;
 
     if (appHandle == NULL)
     {
@@ -1460,13 +1460,13 @@ void  trdp_mdCheckListenSocks (
                                                appHandle->iface[index].sock);
                                     vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
                                     appHandle->iface[index].sock = -1;
-                                    appHandle->iface[index].sendParam.qos       = 0;
-                                    appHandle->iface[index].sendParam.ttl       = 0;
-                                    appHandle->iface[index].usage               = 0;
-                                    appHandle->iface [index].bindAddr           = 0;
-                                    appHandle->iface[index].type                = (TRDP_SOCK_TYPE_T) 0;
-                                    appHandle->iface[index].rcvOnly             = FALSE;
-                                    appHandle->iface[index].tcpParams.cornerIp  = 0;
+                                    appHandle->iface[index].sendParam.qos   = 0;
+                                    appHandle->iface[index].sendParam.ttl   = 0;
+                                    appHandle->iface[index].usage           = 0;
+                                    appHandle->iface [index].bindAddr       = 0;
+                                    appHandle->iface[index].type    = (TRDP_SOCK_TYPE_T) 0;
+                                    appHandle->iface[index].rcvOnly = FALSE;
+                                    appHandle->iface[index].tcpParams.cornerIp = 0;
                                     appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
                                     appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
 
@@ -1556,46 +1556,46 @@ void  trdp_mdCheckListenSocks (
         {
             /* select() mode */
             MD_ELE_T *iterMD;
-            
+
             for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
             {
-            	/*    Check the sockets for received MD packets    */
+                /*    Check the sockets for received MD packets    */
                 if (iterMD->socketIdx != -1 &&
                     FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *) pRfds))     /* MD frame received?  */
                 {
                     /*  Compare the received data to the data in our receive queue
                      Call user's callback if data changed    */
-                    
+
                     err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock);
-                    
+
                     if (err != TRDP_NO_ERR)
                     {
                         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv() failed (Err: %d)\n", err);
                     }
-                    
+
                     FD_CLR(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pRfds);
                 }
             }
             for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
             {
-            	/*    Check the sockets for received MD packets    */
+                /*    Check the sockets for received MD packets    */
                 if (iterMD->socketIdx != -1 &&
                     FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *) pRfds))     /* MD frame received?  */
                 {
                     /*  Check the socket for received data -
                         Call user's callback if data changed    */
-                    
+
                     err = trdp_mdRecv(appHandle, appHandle->iface[iterMD->socketIdx].sock);
-                    
+
                     if (err != TRDP_NO_ERR)
                     {
                         vos_printf(VOS_LOG_ERROR, "trdp_mdRecv() failed (Err: %d)\n", err);
                     }
-                    
+
                     FD_CLR(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pRfds);
                 }
             }
-            
+
         }
     }
 }
@@ -1691,7 +1691,7 @@ void  trdp_mdCheckTimeouts (
                         theMessage.numExpReplies    = iterMD->noOfRepliers;
                         theMessage.pUserRef         = iterMD->u.listener.pUserRef;
 
-                        theMessage.numReplies = 0;
+                        theMessage.numReplies           = 0;
                         theMessage.numRetriesMax        = 0;
                         theMessage.numRetries           = 0;
                         theMessage.disableReplyRx       = 0;
@@ -1702,7 +1702,7 @@ void  trdp_mdCheckTimeouts (
                         /* Fill information in case of sender found */
                         if(sender_ele != NULL)
                         {
-                            theMessage.numReplies = sender_ele->numReplies;
+                            theMessage.numReplies           = sender_ele->numReplies;
                             theMessage.numRetriesMax        = sender_ele->numRetriesMax;
                             theMessage.numRetries           = sender_ele->numRetries;
                             theMessage.disableReplyRx       = sender_ele->disableReplyRx;
@@ -1799,7 +1799,7 @@ void  trdp_mdCheckTimeouts (
     /* timeout on transmit queue */
     for(iterMD = appHandle->pMDSndQueue; iterMD != NULL; )
     {
-        int restart = 0;
+        int restart             = 0;
         int sndReplyTimeout     = 0;
         int sndConfirmTimeout   = 0;
         int sndDone             = 0;
@@ -2203,13 +2203,13 @@ void  trdp_mdCheckTimeouts (
                                appHandle->iface[index].sock);
                     vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
                     appHandle->iface[index].sock = -1;
-                    appHandle->iface[index].sendParam.qos       = 0;
-                    appHandle->iface[index].sendParam.ttl       = 0;
-                    appHandle->iface[index].usage               = 0;
-                    appHandle->iface [index].bindAddr           = 0;
-                    appHandle->iface[index].type                = (TRDP_SOCK_TYPE_T) 0;
-                    appHandle->iface[index].rcvOnly             = FALSE;
-                    appHandle->iface[index].tcpParams.cornerIp  = 0;
+                    appHandle->iface[index].sendParam.qos   = 0;
+                    appHandle->iface[index].sendParam.ttl   = 0;
+                    appHandle->iface[index].usage           = 0;
+                    appHandle->iface [index].bindAddr       = 0;
+                    appHandle->iface[index].type    = (TRDP_SOCK_TYPE_T) 0;
+                    appHandle->iface[index].rcvOnly = FALSE;
+                    appHandle->iface[index].tcpParams.cornerIp = 0;
                     appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
                     appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
                 }

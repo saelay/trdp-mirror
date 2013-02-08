@@ -324,7 +324,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT8   *pBuffer,
     UINT32  *pSize,
     UINT32  *pIPAddr,
-    UINT16	*pIPPort);
+    UINT16  *pIPPort);
 
 /**********************************************************************************************************************/
 /** Bind a socket to an address and port.
