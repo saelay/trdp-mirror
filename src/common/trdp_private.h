@@ -252,6 +252,7 @@ typedef struct MD_ELE
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
+    UINT16				replyPort;				/**< replies are sent to the requesters source port         */
     TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                        */
     UINT8               sessionID[16];          /**< UUID as a byte stream                                  */
     UINT32              noOfRepliers;           /**< number of expected repliers, 0 if unknown              */
