@@ -182,8 +182,8 @@ typedef enum
     TRDP_QUEUE_FULL_ERR     = -11,  /**< Queue full                                     */
     TRDP_MUTEX_ERR          = -12,  /**< Mutex not available                            */
     TRDP_THREAD_ERR         = -13,  /**< Thread error                                   */
-    TRDP_BLOCK_ERR          = -14,  /**< System call would have blocked in blocking mode */
-    TRDP_INTEGRATION_ERR    = -15,  /**< System call would have blocked in blocking mode */
+    TRDP_BLOCK_ERR          = -14,  /**< System call would have blocked in blocking mode  */
+    TRDP_INTEGRATION_ERR    = -15,  /**< Alignment or endianess for selected target wrong */
     TRDP_NOSESSION_ERR      = -30,  /**< No such session                                */
     TRDP_SESSION_ABORT_ERR  = -31,  /**< Session aborted                                */
     TRDP_NOSUB_ERR          = -32,  /**< No subscriber                                  */
@@ -628,12 +628,14 @@ typedef struct
 /**********************************************************************************************************************/
 /**    Callback for receiving indications, timeouts, releases, responses.
  *
+ *  @param[in]    appHandle  handle returned also by tlc_init
  *  @param[in]    *pRefCon   pointer to user context
  *  @param[in]    *pMsg      pointer to received message information
  *  @param[in]    *pData     pointer to received data
  *  @param[in]    dataSize   size of received data pointer to received data excl. padding and FCS !!!!
  */
 typedef void (*TRDP_PD_CALLBACK_T)(
+//    TRDP_APP_SESSION_T      appHandle,
     void                    *pRefCon,
     const TRDP_PD_INFO_T    *pMsg,
     UINT8                   *pData,
@@ -657,12 +659,14 @@ typedef struct
 /**********************************************************************************************************************/
 /**    Callback for receiving indications, timeouts, releases, responses.
  *
+ *  @param[in]    appHandle  handle returned also by tlc_init
  *  @param[in]    *pRefCon   pointer to user context
  *  @param[in]    *pMsg      pointer to received message information
  *  @param[in]    *pData     pointer to received data
  *  @param[in]    dataSize   size of received data pointer to received data excl. padding and FCS !!!!
  */
 typedef void (*TRDP_MD_CALLBACK_T)(
+//    TRDP_APP_SESSION_T      appHandle,
     void                    *pRefCon,
     const TRDP_MD_INFO_T    *pMsg,
     UINT8                   *pData,
