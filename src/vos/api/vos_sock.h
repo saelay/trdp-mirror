@@ -309,7 +309,8 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @param[out]     pBuffer            pointer to applications data buffer
  *  @param[in,out]  pSize              pointer to the received data size
  *  @param[out]     pIPAddr            source IP
- *
+ *  @param[out]     pIPPort            source port
+*
  *  @retval         VOS_NO_ERR         no error
  *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
  *  @retval         VOS_IO_ERR         data could not be read
@@ -322,7 +323,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
-    UINT32  *pIPAddr);
+    UINT32  *pIPAddr,
+    UINT16	*pIPPort);
 
 /**********************************************************************************************************************/
 /** Bind a socket to an address and port.
