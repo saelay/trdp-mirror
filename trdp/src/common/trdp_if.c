@@ -1353,7 +1353,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
             }
         }
     }
-    return TRDP_NO_ERR;
+    return ret;
 }
 
 /**********************************************************************************************************************/
@@ -2469,6 +2469,7 @@ static TRDP_ERR_T tlm_common_send (
             if(pendingMD_reply)
             {
                 pNewElement->frameHead.sequenceCounter = pendingMD_reply->frameHead.sequenceCounter;
+                pNewElement->replyPort = pendingMD_reply->replyPort;
             }
             if(pendingMD_confirm)
             {
