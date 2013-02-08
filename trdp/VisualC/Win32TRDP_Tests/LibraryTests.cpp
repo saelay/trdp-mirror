@@ -204,12 +204,6 @@ int testCRCcalculation()
     if (crc != 0)
         return 1;
 
-    if(testCRCcalculation())
-    {
-        printf("CRC calculation failed\n");
-        return 1;
-    }
-
     /* calculate for empty memory */
     memset(testdata, 0, length);
     crc = vos_crc32(0xffffffff, NULL, 0);
