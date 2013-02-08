@@ -51,8 +51,15 @@ typedef struct testData {
     UINT32    	size;
 } TESTDATA_T;
 
-static BOOL sResponder = FALSE;
-static UINT32 sComID = MD_COMID1;
+typedef struct sSessionData
+{
+	BOOL 				sResponder;
+	UINT32 				sComID;
+    TRDP_APP_SESSION_T  appHandle;  	/*    Our identifier to the library instance    */
+    TRDP_LIS_T          listenHandle;  	/*    Our identifier to the publication         */
+} SESSION_DATA_T;
+
+SESSION_DATA_T	sSessionData = {FALSE, MD_COMID1, NULL, NULL};
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -78,38 +85,41 @@ void usage (const char *appName)
  *  @param[in]      dataSize        pointer to data size
  *  @retval         none
  */
-void mdCallback (
-                   void                    *pRefCon,
-                   const TRDP_MD_INFO_T    *pMsg,
-                   UINT8                   *pData,
-                   UINT32                  dataSize)
+void mdCallback (void                    *pRefCon,
+                 const TRDP_MD_INFO_T    *pMsg,
+                 UINT8                   *pData,
+                 UINT32                  dataSize)
 {
     TRDP_ERR_T	err = TRDP_NO_ERR;
+    SESSION_DATA_T	*myGlobals = (SESSION_DATA_T*) pRefCon;
+    
     /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
-
+            
             switch (pMsg->msgType)
-            {
-                case  TRDP_MSG_MN:			/**< 'Mn' MD Notification (Request without reply)    */
-                	printf("<- MD Notification %u\n", pMsg->comId);
-                    break;
-                case  TRDP_MSG_MR:     		/**< 'Mr' MD Request with reply                      */
-                	printf("<- MR Request with reply %u\n", pMsg->comId);
-                	printf("-> sending reply\n");
-                    err = tlm_reply(pRefCon, NULL, (TRDP_UUID_T*) &pMsg->sessionId, pMsg->topoCount, pMsg->comId,
-                              pMsg->destIpAddr, pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL, (UINT8*) "This is a reply!", 16, NULL, NULL);
-                    break;
-                case  TRDP_MSG_MP:     		/**< 'Mp' MD Reply without confirmation              */
-                    break;
-                case  TRDP_MSG_MC: 		    /**< 'Mq' MD Reply with confirmation                 */
-                    break;
-                case  TRDP_MSG_MQ:  		/**< 'Mc' MD Confirm                                 */
-                    break;
-                case  TRDP_MSG_ME:     		/**< 'Me' MD Error                                   */
-                    break;
-            }
+        {
+            case  TRDP_MSG_MN:			/**< 'Mn' MD Notification (Request without reply)    */
+                printf("<- MD Notification %u\n", pMsg->comId);
+                break;
+            case  TRDP_MSG_MR:     		/**< 'Mr' MD Request with reply                      */
+                printf("<- MR Request with reply %u\n", pMsg->comId);
+                printf("-> sending reply\n");
+                err = tlm_reply(myGlobals->appHandle, pRefCon, (TRDP_UUID_T*) &pMsg->sessionId,
+                                pMsg->topoCount, pMsg->comId, pMsg->destIpAddr, 
+                                pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL,
+                                (UINT8*) "This is a reply!", 16, NULL, NULL);
+                break;
+            case  TRDP_MSG_MP:     		/**< 'Mp' MD Reply without confirmation              */
+                break;
+            case  TRDP_MSG_MC: 		    /**< 'Mq' MD Reply with confirmation                 */
+                break;
+            case  TRDP_MSG_MQ:  		/**< 'Mc' MD Confirm                                 */
+                break;
+            case  TRDP_MSG_ME:     		/**< 'Me' MD Error                                   */
+                break;
+        }
             if (pData)
             {
 				printf("%*s\n", dataSize, pData);
@@ -178,11 +188,9 @@ void dbgOut (
 int main (int argc, char *argv[])
 {
     int                 ip[4];
-    TRDP_APP_SESSION_T  appHandle;  	/*    Our identifier to the library instance    */
-    TRDP_LIS_T          listenHandle;  	/*    Our identifier to the publication    */
-//    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {5, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
-    TRDP_MD_CONFIG_T    mdConfiguration = {mdCallback, &appHandle, {3, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
-    TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {0}};
+    //    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
+    TRDP_MD_CONFIG_T    	mdConfiguration = {mdCallback, &sSessionData, {0, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
+    TRDP_MEM_CONFIG_T   	dynamicConfig = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     
     int                 rv = 0;
@@ -235,7 +243,7 @@ int main (int argc, char *argv[])
                 break;
             case 'r':
             {
-                sResponder = TRUE;
+                sSessionData.sResponder = TRUE;
             	break;
             }
             case 'h':
@@ -245,16 +253,16 @@ int main (int argc, char *argv[])
                 return 1;
         }
     }
-
-    if (destIP == 0 && sResponder == FALSE)
+    
+    if (destIP == 0 && sSessionData.sResponder == FALSE)
     {
         fprintf(stderr, "No destination address given!\n");
         usage(argv[0]);
         return 1;
     }
-
+    
     printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
-
+    
     /*    Init the library  */
     if (tlc_init(dbgOut,                          /* no logging    */
                  &dynamicConfig) != TRDP_NO_ERR)  /* Use application supplied memory    */
@@ -265,7 +273,7 @@ int main (int argc, char *argv[])
     }
     
     /*    Open a session  */
-    if (tlc_openSession(&appHandle,
+    if (tlc_openSession(&sSessionData.appHandle,
                         ownIP,
                         0,                         /* use default IP address    */
                         NULL,                      /* no Marshalling            */
@@ -277,9 +285,10 @@ int main (int argc, char *argv[])
     }
     
     /*    Set up a listener  */
-    //if (sResponder == TRUE)
+    if (sSessionData.sResponder == TRUE)
     {
-    	if (tlm_addListener(appHandle, &listenHandle, NULL, sComID, 0, destIP, TRDP_FLAGS_CALLBACK, NULL) != TRDP_NO_ERR)
+    	if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle, NULL, sSessionData.sComID, 0, destIP,
+        					TRDP_FLAGS_CALLBACK, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error\n");
             return 1;
@@ -292,7 +301,7 @@ int main (int argc, char *argv[])
     while (1)
     {
         fd_set  rfds;
-        INT32   noDesc;
+        INT32   noDesc = 0;
         struct timeval  tv;
         struct timeval  max_tv = {0, 100000};
         char   requestMsg[16] = "Requesting Hello";
@@ -308,7 +317,7 @@ int main (int argc, char *argv[])
          This way we can guarantee that PDs are sent in time
          with minimum CPU load and minimum jitter.
          */
-        tlc_getInterval(appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
+        tlc_getInterval(sSessionData.appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
         
         /*
          The wait time for select must consider cycle times and timeouts of
@@ -325,7 +334,7 @@ int main (int argc, char *argv[])
          Select() will wait for ready descriptors or time out,
          what ever comes first.
          */
-        rv = select((int)noDesc, &rfds, NULL, NULL, &tv);
+        rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
         
         /*
          Check for overdue PDs (sending and receiving)
@@ -336,12 +345,12 @@ int main (int argc, char *argv[])
          The callback function will be called from within the tlc_process
          function (in it's context and thread)!
          */
-        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
         
         /* Handle other ready descriptors... */
         if (rv > 0)
         {
-            printf("other descriptors were ready\n");
+            //printf("other descriptors were ready\n");
         }
         else
         {
@@ -349,11 +358,12 @@ int main (int argc, char *argv[])
             fflush(stdout);
         }
         
-        if (sResponder == FALSE)
+        if (sSessionData.sResponder == FALSE)
 		{
             TRDP_UUID_T sessionId;
             vos_threadDelay (1000000);
-            tlm_request(appHandle, NULL, &sessionId, sComID, 0, ownIP, destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
+            tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
+            			destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
         }
         /* sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
          
@@ -365,16 +375,16 @@ int main (int argc, char *argv[])
          break;
          }    */
     }
- 
+    
     /*
      *    We always clean up behind us!
      */
-	if (sResponder == TRUE)
+	if (sSessionData.sResponder == TRUE)
     {
-    	tlm_delListener (appHandle, listenHandle);
+    	tlm_delListener (sSessionData.appHandle, sSessionData.listenHandle);
     }
-
-    tlc_closeSession(appHandle);
+    
+    tlc_closeSession(sSessionData.appHandle);
     
     tlc_terminate();
     return rv;
