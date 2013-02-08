@@ -2245,25 +2245,25 @@ static TRDP_ERR_T tlm_common_send (
                 {
                     case TRDP_MSG_MN: /* notify (not reply)*/
                     {
-                        tmo = appHandle->mdDefault.replyTimeout; /* min time for deivery */
+                        tmo = replyTimeout?replyTimeout:appHandle->mdDefault.replyTimeout; /* min time for deivery */
                     }
                     break;
 
                     case TRDP_MSG_MR: /* request with reply */
                     {
-                        tmo = replyTimeout;
+                        tmo =replyTimeout?replyTimeout:appHandle->mdDefault.replyTimeout;
                     }
                     break;
 
                     case TRDP_MSG_MP: /* reply without confirm */
                     {
-                        tmo = appHandle->mdDefault.replyTimeout; /* min time for deivery */
+                        tmo = replyTimeout?replyTimeout:appHandle->mdDefault.replyTimeout; /* min time for deivery */
                     }
                     break;
 
                     case TRDP_MSG_MQ: /* reply with confirm */
                     {
-                        tmo = confirmTimeout;
+                        tmo = confirmTimeout?confirmTimeout:appHandle->mdDefault.confirmTimeout;
                     }
                     break;
 
@@ -2482,23 +2482,15 @@ static TRDP_ERR_T tlm_common_send (
             pNewElement->frameHead.replyStatus      = vos_htonl(replyStatus);
             memcpy(pNewElement->frameHead.sessionID, pNewElement->sessionID, sizeof(TRDP_UUID_T));
             pNewElement->frameHead.replyTimeout = vos_htonl(replyTimeout);
-            {
-                int     i;
-                UINT8   *pNewSourceURI = pNewElement->frameHead.sourceURI;
 
-                for(i = 0; i < TRDP_MAX_URI_USER_LEN; i++)
-                {
-                    pNewSourceURI[i] = sourceURI ? sourceURI[i] : 0;
-                }
+            if (sourceURI != NULL)
+            {
+                vos_strncpy((CHAR8 *) pNewElement->frameHead.sourceURI, sourceURI, TRDP_MAX_URI_USER_LEN);
             }
-            {
-                int     i;
-                UINT8   *pNewDestURI = pNewElement->frameHead.destinationURI;
 
-                for(i = 0; i < TRDP_MAX_URI_USER_LEN; i++)
-                {
-                    pNewDestURI[i] = destURI ? destURI[i] : 0;
-                }
+            if (destURI != NULL)
+            {
+                vos_strncpy((CHAR8 *) pNewElement->frameHead.destinationURI, destURI, TRDP_MAX_URI_USER_LEN);
             }
 
             /* payload */
