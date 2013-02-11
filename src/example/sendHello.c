@@ -291,7 +291,7 @@ int main (int argc, char *argv[])
            Select() will wait for ready descriptors or time out,
            what ever comes first.
          */
-        rv = select((int)noDesc, &rfds, NULL, NULL, &tv);
+        rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
 
         /*
            Check for overdue PDs (sending and receiving)
