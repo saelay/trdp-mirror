@@ -42,7 +42,7 @@
 #define PD_COMID1_DATA_SIZE     32
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY     10000
+#define RESERVED_MEMORY     1000000
 
 #define APP_VERSION         "0.08"
 
@@ -112,7 +112,7 @@ void myPDcallBack (
             /* The application can decide here if old data shall be invalidated or kept    */
             printf("> Packet timed out (ComID %d, SrcIP: %s)\n",
                    pMsg->comId,
-                   inet_ntoa(vos_htonl(pMsg->srcIpAddr)));
+                   vos_ipDotted(pMsg->srcIpAddr));
             memset(gBuffer, 0, GBUFFER_SIZE);
             break;
         default:
@@ -344,8 +344,9 @@ int main (int argc, char * *argv)
             what ever comes first.
          */
 
-        rv = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
+        rv = select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
 
+		printf("Pending events: %d\n", rv);
         /*
             Check for overdue PDs (sending and receiving)
             Send any PDs if it's time...

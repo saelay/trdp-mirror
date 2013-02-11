@@ -48,7 +48,7 @@
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
 /* We use static memory    */
-#define RESERVED_MEMORY  10000
+#define RESERVED_MEMORY  1000000
 UINT8   gMemoryArea[RESERVED_MEMORY];
 
 CHAR8   gBuffer[32] = "Hello World";
@@ -202,7 +202,7 @@ int main (int argc, char * *argv)
             Check for overdue PDs (sending and receiving)
             Send any PDs if it's time...
             Detect missing PDs...
-            The callback function will be called from within the trdp_work
+            The callback function will be called from within the tlc_process
             function (in it's context and thread)!
          */
 
