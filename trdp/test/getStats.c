@@ -85,13 +85,13 @@ void print_stats(
     printf("mem.preAllocBlockSize: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, vos_ntohl(pData->mem.preAllocBlockSize[i]));
+        printf("%u, ", vos_ntohl(pData->mem.preAllocBlockSize[i]));
     }
     
     printf("\nmem.usedBlockSize:   ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, vos_ntohl(pData->mem.usedBlockSize[i]));
+        printf("%u, ", vos_ntohl(pData->mem.usedBlockSize[i]));
     }
 
     /* Process data */
