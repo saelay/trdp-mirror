@@ -543,6 +543,13 @@ typedef struct
 
 
 
+typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
+typedef struct TRDP_HANDLE *TRDP_PUB_T;
+typedef struct TRDP_HANDLE *TRDP_SUB_T;
+typedef struct TRDP_HANDLE *TRDP_LIS_T;
+    
+    
+
 /**********************************************************************************************************************/
 /**                          TRDP configuration type definitions.                                                     */
 /**********************************************************************************************************************/
@@ -628,15 +635,15 @@ typedef struct
 /**********************************************************************************************************************/
 /**    Callback for receiving indications, timeouts, releases, responses.
  *
- *  @param[in]    appHandle  handle returned also by tlc_init
  *  @param[in]    *pRefCon   pointer to user context
+ *  @param[in]    appHandle  application handle returned by tlc_openSession
  *  @param[in]    *pMsg      pointer to received message information
  *  @param[in]    *pData     pointer to received data
  *  @param[in]    dataSize   size of received data pointer to received data excl. padding and FCS !!!!
  */
 typedef void (*TRDP_PD_CALLBACK_T)(
-//    TRDP_APP_SESSION_T      appHandle,
     void                    *pRefCon,
+	TRDP_APP_SESSION_T      appHandle,
     const TRDP_PD_INFO_T    *pMsg,
     UINT8                   *pData,
     UINT32                  dataSize);
@@ -666,8 +673,8 @@ typedef struct
  *  @param[in]    dataSize   size of received data pointer to received data excl. padding and FCS !!!!
  */
 typedef void (*TRDP_MD_CALLBACK_T)(
-//    TRDP_APP_SESSION_T      appHandle,
     void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
     const TRDP_MD_INFO_T    *pMsg,
     UINT8                   *pData,
     UINT32                  dataSize);

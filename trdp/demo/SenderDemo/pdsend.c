@@ -84,6 +84,7 @@ TRDP_PUB_T  gPubHandle;          /*	Our identifier to the publication	*/
  * LOCAL
  */
 static void callBack (void                  *pRefCon,
+                      TRDP_APP_SESSION_T    appHandle,
                       const TRDP_PD_INFO_T  *pMsg,
                       UINT8                 *pData,
                       UINT32                dataSize);
@@ -358,6 +359,7 @@ void pd_getData (int index, uint8_t *data, int invalid)
  */
 void callBack (
     void                    *pCallerRef,
+    TRDP_APP_SESSION_T      appHandle,
     const TRDP_PD_INFO_T    *pMsg,
     UINT8                   *pData,
     UINT32                  dataSize)

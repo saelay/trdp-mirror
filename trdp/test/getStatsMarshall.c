@@ -296,6 +296,7 @@ void dbgOut (
  */
 void myPDcallBack (
     void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
     const TRDP_PD_INFO_T    *pMsg,
     UINT8                   *pData,
     UINT32                  dataSize)
