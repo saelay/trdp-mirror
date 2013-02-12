@@ -1,156 +1,163 @@
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-                                                                               _
-                                    vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1441) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 222, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
-                                                               _
-                    vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2143) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 222, file
-    D:\TCNOpen\trunk\trdp\src\vos\api\vos_sock.h, module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
-
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
-
-During Specific Walk:
-  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 355:
-    trdp_pdCheck([1], ?)
-  File D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c line 629: vos_crc32(-1,
-    [0], ?)
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(156) : Warning 661: Possible
-    access of out-of-bounds pointer (1 beyond end of data) by operator '['
-    [Reference: file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c: lines 355,
-    629; file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c: lines 154, 156]
+                                                    _
+#if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
+    preprocessor variable '__ARMEB__', assumed 0 [MISRA Rule 97]
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
+    preprocessor variable '__AARCH64EB__', assumed 0 [MISRA Rule 97]
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
+    preprocessor variable '__MIPSEB__', assumed 0 [MISRA Rule 97]
+_
+}
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(244) : Warning 550: Symbol
+    'vAlignTest' (line 171) not accessed
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
+                                           _
+        gMem.pArea = (UINT8 *) malloc(size);
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(213) : Warning 421: Caution --
+    function 'malloc(unsigned int)' is considered dangerous [MISRA Rule 118]
+                             _
+            free(pMemoryArea);
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(293) : Warning 421: Caution --
+    function 'free(void *)' is considered dangerous [MISRA Rule 118]
+                                         _
+        UINT8 *p = (UINT8 *) malloc(size);
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(324) : Warning 421: Caution --
+    function 'malloc(unsigned int)' is considered dangerous [MISRA Rule 118]
+                       _
+        free(pMemBlock);
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(471) : Warning 421: Caution --
+    function 'free(void *)' is considered dangerous [MISRA Rule 118]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(173) : Warning 529: Symbol
-    'err' (line 169) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(172) : Warning 529: Symbol
+    'err' (line 168) not subsequently referenced
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(299) : Warning 529: Symbol
-    'err' (line 295) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(297) : Warning 529: Symbol
+    'err' (line 293) not subsequently referenced
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(348) : Warning 529: Symbol
-    'err' (line 344) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(346) : Warning 529: Symbol
+    'err' (line 342) not subsequently referenced
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(379) : Warning 529: Symbol
-    'err' (line 375) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(377) : Warning 529: Symbol
+    'err' (line 373) not subsequently referenced
             _
             }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(419) : Warning 529: Symbol
-    'err' (line 416) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(417) : Warning 529: Symbol
+    'err' (line 414) not subsequently referenced
                                   _
             if (ioctlsocket(sock, FIONBIO, &optValue) == SOCKET_ERROR)
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(427) : Warning 569: Loss of
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(425) : Warning 569: Loss of
     information (arg. no. 2) (32 bits to 31 bits)
             _
             }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(433) : Warning 529: Symbol
-    'err' (line 429) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(431) : Warning 529: Symbol
+    'err' (line 427) not subsequently referenced
             _
             }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(446) : Warning 529: Symbol
-    'err' (line 443) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(444) : Warning 529: Symbol
+    'err' (line 441) not subsequently referenced
             _
             }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(457) : Warning 529: Symbol
-    'err' (line 454) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(455) : Warning 529: Symbol
+    'err' (line 452) not subsequently referenced
             _
             }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(468) : Warning 529: Symbol
-    'err' (line 465) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(466) : Warning 529: Symbol
+    'err' (line 463) not subsequently referenced
         _
         }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(605) : Warning 529: Symbol
-    'err' (line 601) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(603) : Warning 529: Symbol
+    'err' (line 599) not subsequently referenced
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(809) : Warning 529: Symbol
-    'err' (line 805) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(813) : Warning 529: Symbol
+    'err' (line 809) not subsequently referenced
     _
     }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(839) : Warning 529: Symbol
-    'err' (line 835) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(843) : Warning 529: Symbol
+    'err' (line 839) not subsequently referenced
         _
         }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1131) : Warning 529: Symbol
-    'err' (line 1128) not subsequently referenced
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1135) : Warning 529: Symbol
+    'err' (line 1132) not subsequently referenced
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
+                       _
+    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(286) : Error 43: Vacuous type
+    for variable 'MD_ELE::data' [Misra Rule 108]
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
+                       _
+    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(286) : Error 43: Vacuous type
+    for variable 'MD_ELE::data' [Misra Rule 108]
+                                          _
+                            TRDP_ERR_T err;
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1463) : Warning 578: Declaration
+    of symbol 'err' hides symbol 'err' (line 1216) [Misra Rules 12, 21, and 27]
+                                                                               _
+                                    vos_sockClose(appHandle->iface[index].sock);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1489) : Warning 534: Ignoring
+    return value of function 'vos_sockClose(int)' (compare with line 368, file
+    D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
+                                  _
+                    TRDP_ERR_T err;
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1579) : Warning 578: Declaration
+    of symbol 'err' hides symbol 'err' (line 1216) [Misra Rules 12, 21, and 27]
+                                                               _
+                    vos_sockClose(appHandle->iface[index].sock);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2232) : Warning 534: Ignoring
+    return value of function 'vos_sockClose(int)' (compare with line 368, file
+    D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
+                       _
+    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(286) : Error 43: Vacuous type
+    for variable 'MD_ELE::data' [Misra Rule 108]
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
+                       _
+    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(286) : Error 43: Vacuous type
+    for variable 'MD_ELE::data' [Misra Rule 108]
+
+--- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
+                       _
+    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(286) : Error 43: Vacuous type
+    for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(286) : Error 43: Vacuous type
+    for variable 'MD_ELE::data' [Misra Rule 108]
+                                                    _
+#if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
+    preprocessor variable '__ARMEB__', assumed 0 [MISRA Rule 97]
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
+    preprocessor variable '__AARCH64EB__', assumed 0 [MISRA Rule 97]
+D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
+    preprocessor variable '__MIPSEB__', assumed 0 [MISRA Rule 97]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(285) : Error 43: Vacuous type
-    for variable 'MD_ELE::data'
-                                                                                                _
-_CRT_INSECURE_DEPRECATE(_wasctime_s) _CRTIMP wchar_t * __cdecl _wasctime(_In_ const struct tm * _Tm);
-C:\Program Files\Microsoft Visual Studio 10.0\VC\include\wchar.h(1128) : Error
-    18: Symbol '_wasctime(const struct tm *)' redeclared (Arg. no. 1: origin)
-    conflicts with line 222, file C:\Program Files\Microsoft Visual Studio
-    10.0\VC\include\time.h, module D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c
-                                                                                                                                               _
-_CRTIMP errno_t __cdecl _wasctime_s(_Out_cap_(_SizeInWords) _Post_count_c_(26) wchar_t *_Buf, _In_ size_t _SizeInWords, _In_ const struct tm * _Tm);
-C:\Program Files\Microsoft Visual Studio 10.0\VC\include\wchar.h(1129) : Error
-    18: Symbol '_wasctime_s(unsigned short *, unsigned int, const struct tm *)'
-    redeclared (Arg. no. 3: origin) conflicts with line 223, file C:\Program
-    Files\Microsoft Visual Studio 10.0\VC\include\time.h, module
-    D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c
-                                                                                                                                                                                   _
-_CRTIMP size_t __cdecl wcsftime(_Out_z_cap_(_SizeInWords) wchar_t * _Buf, _In_ size_t _SizeInWords, _In_z_ _Printf_format_string_ const wchar_t * _Format,  _In_ const struct tm * _Tm);
-C:\Program Files\Microsoft Visual Studio 10.0\VC\include\wchar.h(1136) : Error
-    18: Symbol 'wcsftime(unsigned short *, unsigned int, const unsigned short
-    *, const struct tm *)' redeclared (Arg. no. 4: origin) conflicts with line
-    230, file C:\Program Files\Microsoft Visual Studio 10.0\VC\include\time.h,
-    module D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c
-                                                                                                                                                                                                           _
-_CRTIMP size_t __cdecl _wcsftime_l(_Out_z_cap_(_SizeInWords) wchar_t * _Buf, _In_ size_t _SizeInWords, _In_z_ _Printf_format_string_ const wchar_t *_Format, _In_ const struct tm *_Tm, _In_opt_ _locale_t _Locale);
-C:\Program Files\Microsoft Visual Studio 10.0\VC\include\wchar.h(1137) : Error
-    18: Symbol '_wcsftime_l(unsigned short *, unsigned int, const unsigned
-    short *, const struct tm *, struct localeinfo_struct *)' redeclared (Arg.
-    no. 4: origin) conflicts with line 231, file C:\Program Files\Microsoft
-    Visual Studio 10.0\VC\include\time.h, module D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(286) : Error 43: Vacuous type
+    for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Global Wrap-up
 
@@ -158,6 +165,10 @@ Warning 526: 'ig_endian()' (line 605, file D:\TCNOpen\trunk\trdp\src\common\trdp
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
     605, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'e()' (line 210, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
+    not defined
+Warning 628: no argument information provided for function 'e()' (line 210,
+    file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
 Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
     not accessed
 Warning 526: '__alignof()' (line 121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)
