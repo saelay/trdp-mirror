@@ -3,6 +3,7 @@
 
 co-msc90.lnt
 lib-stl.lnt
+au-misra.lnt
 options.lnt  -si4 -sp4
 
 -i"D:\TCNOpen\trunk\trdp\src\api"
@@ -21,6 +22,12 @@ options.lnt  -si4 -sp4
 +macros
 +ppw(warning)
 
++libdir(D:\TCNOpen\trunk\trdp\resources\windows\libxml\inc)
++libdir(C:\Program Files\Microsoft Visual Studio 10.0\VC\include)
++libdir(C:\Program Files\Microsoft Visual Studio 9.0\VC\include)
++libdir(C:\Program Files\Microsoft Visual Studio 8\VC\include)
++libdir(C:\Program Files\Microsoft Visual Studio\VC98\Include)
+-elib(*)
 -e537   // "Repeated include file 'FileName'"
 -e755   // "global macro 'Symbol' (Location) not referenced"
 -e40
