@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.1.9"
+#define LIB_VERSION  "0.0.2.0"
 
 #ifndef TRDP_PD_UDP_PORT
 #define TRDP_PD_UDP_PORT  20548                         /**< process data UDP port                      */
@@ -139,6 +139,7 @@ typedef struct TRDP_HANDLE
     TRDP_IP_ADDR_T  srcIpAddr;              /**< source IP for PD                                       */
     TRDP_IP_ADDR_T  destIpAddr;             /**< destination IP for PD                                  */
     TRDP_IP_ADDR_T  mcGroup;                /**< multicast group to join for PD                         */
+    UINT32          topoCount;              /**< topocount belongs to addressing item                   */
 } TRDP_ADDRESSES_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
 
@@ -238,6 +239,19 @@ typedef struct PD_ELE
     PD_PACKET_T         *pFrame;                /*    header ... data + FCS...                              */
 } PD_ELE_T;
 
+/** Queue element for MD listeners    */
+typedef struct MD_LIS_ELE
+{
+    struct MD_LIS_ELE       *pNext;             /**< pointer to next element or NULL                        */
+    TRDP_ADDRESSES_T        addr;               /**< addressing values                                      */
+    TRDP_PRIV_FLAGS_T       privFlags;          /**< private flags                                          */
+    TRDP_FLAGS_T            pktFlags;           /**< flags                                                  */
+    const void              *pUserRef;          /**< user reference for call_back from tlm_request()        */
+    UINT32                  comId;
+    TRDP_URI_USER_T         destURI;
+    INT32                   socketIdx;          /**< index into the socket list                             */
+} MD_LIS_ELE_T;
+
 /** Queue element for MD packets to send or receive or acknowledge    */
 typedef struct MD_ELE
 {
@@ -245,6 +259,7 @@ typedef struct MD_ELE
     TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
+    BOOL				morituri;				/**< to flag to die                                         */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
                                                     interval for packets to send (set from ms)              */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
@@ -308,6 +323,7 @@ typedef struct TRDP_SESSION
     TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use                   */
     PD_ELE_T                *pSndQueue;         /**< pointer to first element of send queue                 */
     PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue                  */
+    MD_LIS_ELE_T            *pMDListenQueue;    /**< pointer to first element of listeners queue            */
     MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue              */
     MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue              */
     MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element                         */

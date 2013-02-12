@@ -87,6 +87,7 @@ void usage (const char *appName)
  *  @retval         none
  */
 void mdCallback (void                   *pRefCon,
+				 TRDP_APP_SESSION_T		appHandle,
                  const TRDP_MD_INFO_T   *pMsg,
                  UINT8                  *pData,
                  UINT32                 dataSize)
@@ -113,6 +114,7 @@ void mdCallback (void                   *pRefCon,
                                     (UINT8 *) "This is a reply!", 16, NULL, NULL);
                     break;
                 case  TRDP_MSG_MP:      /**< 'Mp' MD Reply without confirmation              */
+                    printf("<- MR Reply received %u\n", pMsg->comId);
                     break;
                 case  TRDP_MSG_MC:      /**< 'Mq' MD Reply with confirmation                 */
                     break;
