@@ -143,8 +143,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 {
     static CHAR8 dotted[16];
 
-    /*lint -e(534) ignore return value */
-    sprintf_s(dotted, sizeof(dotted), "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
+    (void) sprintf_s(dotted, sizeof(dotted), "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
               (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
     return dotted;
 }
@@ -238,8 +237,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
             pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
 
             /* first address is 00000000, skip it */
-            /*lint -e(534) ignore return value */
-            swscanf_s(
+            (void) swscanf_s(
                 (wchar_t *)pwkti[1].wkti0_transport_address,
                 L"%2hx%2hx%2hx%2hx%2hx%2hx",
                 &mac[0],
@@ -300,7 +298,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     if (vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
     {
-        closesocket(sock); /*lint !e534 ignore return value */
+        (void) closesocket(sock);
         return VOS_SOCK_ERR;
     }
 
@@ -349,7 +347,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if (vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
     {
-        closesocket(sock);   /*lint !e534 ignore return value */
+        (void) closesocket(sock);
         return VOS_SOCK_ERR;
     }
     *pSock = (INT32) sock;
@@ -506,8 +504,8 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             char    mcStr[16];
             char    ifStr[16];
 
-            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr)); /*lint !e534 ignore return value */
-            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface)); /*lint !e534 ignore return value */
+            (void) strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
+            (void) strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
             vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
 
@@ -590,8 +588,8 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             char    mcStr[16];
             char    ifStr[16];
 
-            strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr)); /*lint !e534 ignore return value */
-            strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface)); /*lint !e534 ignore return value */
+            (void) strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
+            (void) strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
             vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
         }
 

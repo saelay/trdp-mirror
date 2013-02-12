@@ -190,7 +190,7 @@ VOS_ERR_T vos_initRuntimeConsts (void)
     sAlignTIMEDATE48Array1 = (INT8*) &vAlignTest.a[0].dword - (INT8*) &vAlignTest.a[0].byte; 
     sAlignTIMEDATE48Array2 = (INT8*) &vAlignTest.a[1].dword - (INT8*) &vAlignTest.a[1].byte; 
     
-	if (sAlignINT8 != ALIGNOF(INT8))
+    if (sAlignINT8 != ALIGNOF(INT8))
     {
     	vos_printf(VOS_LOG_ERROR, "Unexpected alignement: %u != ALIGNOF(INT8)\n", sAlignINT8);
     	sAlignINT8		= ALIGNOF(INT8);
