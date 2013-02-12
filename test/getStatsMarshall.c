@@ -216,13 +216,13 @@ void print_stats(
     printf("mem.allocBlockSizes: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, pData->mem.preAllocBlockSize[i]);
+        printf("%u, ", pData->mem.preAllocBlockSize[i]);
     }
     
     printf("\nmem.usedBlockSize:   ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", i, pData->mem.usedBlockSize[i]);
+        printf("%u, ", pData->mem.usedBlockSize[i]);
     }
 
     /* Process data */
