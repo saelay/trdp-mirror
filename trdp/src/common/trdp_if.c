@@ -1259,7 +1259,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 /*    Copy the master_set socket states to the pFileDesc    */
                 {
                     int         index;
-                    MD_ELE_T    *iterPD;
+                    MD_ELE_T    *iterMD;
 
                     FD_SET(appHandle->mdDefault.tcpFd.listen_sd, (fd_set *)pFileDesc);
                     if (appHandle->mdDefault.tcpFd.listen_sd > *pNoDesc)
@@ -1291,36 +1291,37 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     /* *pNoDesc = appHandle->mdDefault.tcpFd.max_sd; */
 
                     /*  Include MD UDP listener sockets and send sockets  */
-                    for (iterPD = appHandle->pMDRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
+                    for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
                     {
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-                        if (iterPD->socketIdx != -1 &&
-                            appHandle->iface[iterPD->socketIdx].sock != -1 /*&&
+                        if (iterMD->socketIdx != -1 &&
+                            appHandle->iface[iterMD->socketIdx].sock != -1 /*&&
                                                                             appHandle->option & TRDP_OPTION_BLOCK*/)
                         {
-                            if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))
+                            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
-                                FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
+                                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
+                                if (appHandle->iface[iterMD->socketIdx].sock > *pNoDesc)
                                 {
-                                    *pNoDesc = appHandle->iface[iterPD->socketIdx].sock;
+                                    *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
                                 }
                             }
                         }
                     }
-                    for (iterPD = appHandle->pMDSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
+
+                    for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
                     {
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterPD->socketIdx != -1 &&
                             appHandle->iface[iterPD->socketIdx].sock != -1 /*&&
                                                                             appHandle->option & TRDP_OPTION_BLOCK*/)
                         {
-                            if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))
+                            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
-                                FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
+                                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
+                                if (appHandle->iface[iterMD->socketIdx].sock > *pNoDesc)
                                 {
-                                    *pNoDesc = appHandle->iface[iterPD->socketIdx].sock;
+                                    *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
                                 }
                             }
                         }
