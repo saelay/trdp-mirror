@@ -537,6 +537,7 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.resultCode   = resultCode;
 
             appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
+                                              appHandle,
                                               &theMessage,
                                               pExistingElement->pFrame->data,
                                               vos_ntohl(pExistingElement->pFrame->frameHead.datasetLength));

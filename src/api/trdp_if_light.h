@@ -46,11 +46,6 @@ extern "C" {
  * TYPEDEFS
  */
 
-typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
-typedef struct TRDP_HANDLE *TRDP_PUB_T;
-typedef struct TRDP_HANDLE *TRDP_SUB_T;
-typedef struct TRDP_HANDLE *TRDP_LIS_T;
-
 /***********************************************************************************************************************
  * PROTOTYPES
  */
@@ -258,7 +253,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pubHandle           the handle returned by prepare
  *
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_NOPUB_ERR      not published
  *  @retval         TRDP_NOINIT_ERR     handle invalid
@@ -273,8 +268,8 @@ EXT_DECL TRDP_ERR_T tlp_unpublish (
  *  Update previously published data. The new telegram will be sent earliest when tlc_process is called.
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pubHandle            the handle returned by publish
- *  @param[in,out]    pData                pointer to application's data buffer
+ *  @param[in]      pubHandle           the handle returned by publish
+ *  @param[in,out]  pData               pointer to application's data buffer
  *  @param[in,out]  dataSize            size of data
  *
  *  @retval         TRDP_NO_ERR            no error
@@ -297,7 +292,7 @@ EXT_DECL TRDP_ERR_T tlp_put (
  *  @param[in]      redId               will be set for all ComID's with the given redId, 0 to change for all redId
  *  @param[in]      leader              TRUE if we send
  *
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error / redId not existing
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
@@ -314,7 +309,7 @@ EXT_DECL TRDP_ERR_T tlp_setRedundant (
  *  @param[in]      redId               will be set for all ComID's with the given redId, 0 for all redId
  *  @param[in,out]  pLeader             TRUE if we send (leader)
  *
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error / redId not existing
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */

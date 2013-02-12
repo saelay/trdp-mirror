@@ -1437,7 +1437,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
                     theMessage.pUserRef     = iterPD->userRef;
                     theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
-                    appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, &theMessage, NULL, 0);
+                    appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0);
                 }
 
                 /*    Prevent repeated time out events    */
