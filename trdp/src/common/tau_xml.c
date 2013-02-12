@@ -339,7 +339,7 @@ static void parseURI(xmlNodePtr pXmlElem, const char * pAttrName, TRDP_URI_USER_
     /*  Create host part of the URI */
     if (ppUriHost)
     {
-        *ppUriHost = (TRDP_URI_HOST_T *) malloc(sizeof(TRDP_URI_HOST_T));
+        *ppUriHost = (TRDP_URI_HOST_T *) vos_memAlloc(sizeof(TRDP_URI_HOST_T));
         if (pDelimiter)
             vos_strncpy((char *)*ppUriHost, pDelimiter+1, sizeof(TRDP_URI_HOST_T));
         else
@@ -349,7 +349,7 @@ static void parseURI(xmlNodePtr pXmlElem, const char * pAttrName, TRDP_URI_USER_
     if (ppUriUser && pDelimiter && (pDelimiter > pAttr))
     {
         UINT32 size = (UINT32)(pDelimiter - pAttr);
-        *ppUriUser = (TRDP_URI_USER_T *) malloc(sizeof(TRDP_URI_USER_T));
+        *ppUriUser = (TRDP_URI_USER_T *) vos_memAlloc(sizeof(TRDP_URI_USER_T));
         memset(*ppUriUser, 0, sizeof(TRDP_URI_USER_T));
         memcpy(*ppUriUser, pAttr, size < sizeof(TRDP_URI_USER_T) ? size : sizeof(TRDP_URI_USER_T));
     }
@@ -715,7 +715,7 @@ static void parseComParameters(
         return;
 
     /*  Allocate array of communication parameters  */
-    *ppComPar = (TRDP_COM_PAR_T *) malloc(sizeof(TRDP_COM_PAR_T) * *pNumComPar);
+    *ppComPar = (TRDP_COM_PAR_T *) vos_memAlloc(sizeof(TRDP_COM_PAR_T) * *pNumComPar);
 
     /*  Iterate over all child elements (com-parameter), parse their attributes  */
     pChildElement = xmlFirstElementChild(pComParListElem);
@@ -757,7 +757,7 @@ static void parseBusInterfaces(
         return;
 
     /*  Allocate array of interface configurations  */
-    *ppIfConfig = (TRDP_IF_CONFIG_T *) malloc(sizeof(TRDP_IF_CONFIG_T) * (*pNumIfConfig));
+    *ppIfConfig = (TRDP_IF_CONFIG_T *) vos_memAlloc(sizeof(TRDP_IF_CONFIG_T) * (*pNumIfConfig));
 
     /*  Iterate over all child elements (bus-interface), parse their attributes  */
     pChildElement = xmlFirstElementChild(pBusInterfaceListElem);
@@ -878,7 +878,7 @@ static void parseComIdDsIdMap(
     {
         /*  Allocate array of map structures    */
         *pNumComId = pXPathObj->nodesetval->nodeNr;
-        *ppComIdDsIdMap = (TRDP_COMID_DSID_MAP_T *) malloc(
+        *ppComIdDsIdMap = (TRDP_COMID_DSID_MAP_T *) vos_memAlloc(
             sizeof(TRDP_COMID_DSID_MAP_T) * (*pNumComId));
 
         /* Iterate over all found telegram elements */
@@ -937,7 +937,7 @@ static TRDP_ERR_T parseDatasets(
     {
         /*  Allocate array of pointers to dataset structures    */
         *pNumDataset = pXPathObj->nodesetval->nodeNr;
-        apDataset = (apTRDP_DATASET_T) malloc(
+        apDataset = (apTRDP_DATASET_T) vos_memAlloc(
             sizeof(TRDP_DATASET_T *) * (*pNumDataset));
         if (apDataset ==  NULL)
             return TRDP_MEM_ERR;
@@ -955,7 +955,7 @@ static TRDP_ERR_T parseDatasets(
             numElement = (UINT16) xmlChildElementCount(pDatasetElem);
 
             /*  Allocate dataset structure with elements    */
-            pDataset = (TRDP_DATASET_T *)malloc(
+            pDataset = (TRDP_DATASET_T *)vos_memAlloc(
                 sizeof(TRDP_DATASET_T) + sizeof(TRDP_DATASET_ELEMENT_T) * numElement);
             if (pDataset == NULL)
                 return TRDP_MEM_ERR;
@@ -1060,7 +1060,7 @@ static void parseMdParameter(
         /*  Get the element */
         pMdParElem = pXPathObj->nodesetval->nodeTab[0];
         /*  Allocate the structure  */
-        pExchgPar->pMdPar = (TRDP_MD_PAR_T *) malloc(sizeof(TRDP_MD_PAR_T));
+        pExchgPar->pMdPar = (TRDP_MD_PAR_T *) vos_memAlloc(sizeof(TRDP_MD_PAR_T));
         
         /*  Set default values  */
         pExchgPar->pMdPar->confirmTimeout = pMdConfig->confirmTimeout;
@@ -1113,7 +1113,7 @@ static void parsePdParameter(
         pPdParElem = pXPathObj->nodesetval->nodeTab[0];
 
         /*  Allocate the structure  */
-        pExchgPar->pPdPar = (TRDP_PD_PAR_T *) malloc(sizeof(TRDP_PD_PAR_T));
+        pExchgPar->pPdPar = (TRDP_PD_PAR_T *) vos_memAlloc(sizeof(TRDP_PD_PAR_T));
         
         /*  Set default values  */
         pExchgPar->pPdPar->flags = pPdConfig->flags;
@@ -1164,7 +1164,7 @@ static TRDP_ERR_T parseSDTParameters(xmlNodePtr pParentElem, TRDP_SDT_PAR_T  **p
         return TRDP_NO_ERR;
 
     /*  Allocate new SDT_PAR structure, set default values  */
-    pSdtPar = (TRDP_SDT_PAR_T *) malloc(sizeof(TRDP_SDT_PAR_T));
+    pSdtPar = (TRDP_SDT_PAR_T *) vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
     if (pSdtPar == NULL)
         return TRDP_MEM_ERR;
     *ppSdtPar = pSdtPar;
@@ -1213,7 +1213,7 @@ static TRDP_ERR_T parseSources(
 
     /*  Allocate array of SRC structures    */
     pExchgPar->srcCnt = pXPathObj->nodesetval->nodeNr;
-    pExchgPar->pSrc = (TRDP_SRC_T *) malloc(sizeof(TRDP_SRC_T) * pExchgPar->srcCnt);
+    pExchgPar->pSrc = (TRDP_SRC_T *) vos_memAlloc(sizeof(TRDP_SRC_T) * pExchgPar->srcCnt);
 
     /*  Iterate over all found source elements  */
     for (index = 0; index < pXPathObj->nodesetval->nodeNr; index++)
@@ -1269,7 +1269,7 @@ static TRDP_ERR_T parseDestinations(
 
     /*  Allocate array of DEST structures    */
     pExchgPar->destCnt = pXPathObj->nodesetval->nodeNr;
-    pExchgPar->pDest = (TRDP_DEST_T *) malloc(sizeof(TRDP_DEST_T) * pExchgPar->destCnt);
+    pExchgPar->pDest = (TRDP_DEST_T *) vos_memAlloc(sizeof(TRDP_DEST_T) * pExchgPar->destCnt);
 
     /*  Iterate over all found destination elements  */
     for (index = 0; index < pXPathObj->nodesetval->nodeNr; index++)
@@ -1448,7 +1448,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
         {
             /*  Allocate array of exchange parameters   */
             *pNumExchgPar = pXPathObj->nodesetval->nodeNr;
-            *ppExchgPar = (TRDP_EXCHG_PAR_T *) malloc(
+            *ppExchgPar = (TRDP_EXCHG_PAR_T *) vos_memAlloc(
                 sizeof(TRDP_EXCHG_PAR_T) * (*pNumExchgPar));
 
             /*  Iterate over all found telegram definitions and parse them   */
@@ -1495,27 +1495,27 @@ EXT_DECL void tau_freeTelegrams(
     {
         /*  Free MD and PD parameters   */
         if (pExchgPar[idxEP].pMdPar)
-            free(pExchgPar[idxEP].pMdPar);
+            vos_memFree(pExchgPar[idxEP].pMdPar);
         if (pExchgPar[idxEP].pPdPar)
-            free(pExchgPar[idxEP].pPdPar);
+            vos_memFree(pExchgPar[idxEP].pPdPar);
 
-        /*  Free array of destinations  */
+        /*  vos_memFree array of destinations  */
         if (pExchgPar[idxEP].destCnt)
         {
             /*  Iterate ove all destinations    */
             for (i = 0; i < pExchgPar[idxEP].destCnt; i++)
             {
-                /*  Free URIs   */
+                /*  vos_free URIs   */
                 if (pExchgPar[idxEP].pDest[i].pUriHost)
-                    free(pExchgPar[idxEP].pDest[i].pUriHost);
+                    vos_memFree(pExchgPar[idxEP].pDest[i].pUriHost);
                 if (pExchgPar[idxEP].pDest[i].pUriUser)
-                    free(pExchgPar[idxEP].pDest[i].pUriUser);
+                    vos_memFree(pExchgPar[idxEP].pDest[i].pUriUser);
                 /*  Free SDT parameters */
                 if (pExchgPar[idxEP].pDest[i].pSdtPar)
-                    free(pExchgPar[idxEP].pDest[i].pSdtPar);
+                    vos_memFree(pExchgPar[idxEP].pDest[i].pSdtPar);
             }
             /*  Free destinations array  */
-            free(pExchgPar[idxEP].pDest);
+            vos_memFree(pExchgPar[idxEP].pDest);
         }
         /*  Free array of sources  */
         if (pExchgPar[idxEP].srcCnt)
@@ -1525,22 +1525,22 @@ EXT_DECL void tau_freeTelegrams(
             {
                 /*  Free URIs   */
                 if (pExchgPar[idxEP].pSrc[i].pUriHost1)
-                    free(pExchgPar[idxEP].pSrc[i].pUriHost1);
+                    vos_memFree(pExchgPar[idxEP].pSrc[i].pUriHost1);
                 if (pExchgPar[idxEP].pSrc[i].pUriHost2)
-                    free(pExchgPar[idxEP].pSrc[i].pUriHost2);
+                    vos_memFree(pExchgPar[idxEP].pSrc[i].pUriHost2);
                 if (pExchgPar[idxEP].pSrc[i].pUriUser)
-                    free(pExchgPar[idxEP].pSrc[i].pUriUser);
+                    vos_memFree(pExchgPar[idxEP].pSrc[i].pUriUser);
                 /*  Free SDT parameters */
                 if (pExchgPar[idxEP].pSrc[i].pSdtPar)
-                    free(pExchgPar[idxEP].pSrc[i].pSdtPar);
+                    vos_memFree(pExchgPar[idxEP].pSrc[i].pSdtPar);
             }
             /*  Free sources array  */
-            free(pExchgPar[idxEP].pSrc);
+            vos_memFree(pExchgPar[idxEP].pSrc);
         }
 
     }
 
     /*  Free array of TRDP_EXCHG_PAR_T structures   */
-    free(pExchgPar);
+    vos_memFree(pExchgPar);
 }
 
