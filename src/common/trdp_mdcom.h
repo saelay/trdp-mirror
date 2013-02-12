@@ -42,6 +42,9 @@
  * GLOBAL FUNCTIONS
  */
 
+void trdp_closeMDSessions(
+    TRDP_SESSION_PT appHandle);
+
 TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
     UINT32          port,

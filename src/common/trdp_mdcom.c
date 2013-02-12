@@ -43,7 +43,61 @@
 /******************************************************************************
  *   Locals
  */
+ 
+/******************************************************************************/
+/** Close and free any session marked as dead.
+ *
+ *  @param[in]      appHandle       session pointer
+ *  @param[in]      pPacket         pointer to the packet to check
+ *  @param[in]      packetSize      size of the packet
+ */
+void trdp_closeMDSessions(
+	TRDP_SESSION_PT 	appHandle)
+{
+	MD_ELE_T	*iterMD = appHandle->pMDSndQueue;
 
+	while (NULL != iterMD)
+    {
+    	if (TRUE == iterMD->morituri)
+        {
+            trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+            trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
+            vos_memFree(iterMD);
+            vos_printf(VOS_LOG_INFO, "Freeing sender session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                                iterMD->sessionID[0], iterMD->sessionID[1], iterMD->sessionID[2], iterMD->sessionID[3],
+                       			iterMD->sessionID[4], iterMD->sessionID[5], iterMD->sessionID[6], iterMD->sessionID[7])
+            iterMD = appHandle->pMDSndQueue;
+        }
+        else
+        {
+            iterMD = iterMD->pNext;
+        }
+
+    }
+
+    iterMD = appHandle->pMDRcvQueue;
+    
+	while (NULL != iterMD)
+    {
+    	if (TRUE == iterMD->morituri)
+        {
+            //trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+            trdp_MDqueueDelElement(&appHandle->pMDRcvQueue, iterMD);
+            vos_memFree(iterMD);
+            vos_printf(VOS_LOG_INFO, "Freeing receive session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                       iterMD->sessionID[0], iterMD->sessionID[1], iterMD->sessionID[2], iterMD->sessionID[3],
+                       iterMD->sessionID[4], iterMD->sessionID[5], iterMD->sessionID[6], iterMD->sessionID[7])
+            iterMD = appHandle->pMDRcvQueue;
+        }
+        else
+        {
+            iterMD = iterMD->pNext;
+        }
+        
+    }
+}
+
+	  
 
 /******************************************************************************/
 /** Check for incoming md packet
@@ -511,7 +565,8 @@ TRDP_ERR_T  trdp_mdRecv (
             UINT16      l_msgType = vos_ntohs(pH->msgType);
 
             /* find for subscriber */
-            MD_ELE_T    *iterMD = NULL;
+            MD_ELE_T     *iterMD = NULL;
+            MD_LIS_ELE_T *iterListener = NULL;
 
             /* check for topo counter */
             if (l_topoCount != 0 && appHandle->topoCount != 0 && l_topoCount != appHandle->topoCount)
@@ -541,11 +596,20 @@ TRDP_ERR_T  trdp_mdRecv (
                 case TRDP_MSG_MR:
                 case TRDP_MSG_MN:
                     /* search for existing listener */
-                    for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+                    for (iterListener = appHandle->pMDListenQueue; iterListener != NULL; iterListener = iterListener->pNext)
                     {
-                        if (l_comId == iterMD->u.listener.comId ||
-                        	vos_strnicmp((CHAR8*)iterMD->u.listener.destURI, (CHAR8*)pH->destinationURI, 32) == 0)
+                        if (l_comId == iterListener->addr.comId ||
+                        	vos_strnicmp((CHAR8*)iterListener->destURI, (CHAR8*)pH->destinationURI, 32) == 0)
                         {
+                        	/* We found a listener, set some values for this new session  */
+                        	iterMD = appHandle->pMDRcvEle;
+                            iterMD->stateEle = TRDP_MD_ELE_ST_RX_ARM;
+                            trdp_MDqueueInsFirst (&appHandle->pMDRcvQueue, iterMD);
+                            appHandle->pMDRcvEle = NULL;
+                            vos_printf(VOS_LOG_INFO, "Creating receive session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                                       pH->sessionID[0], pH->sessionID[1], pH->sessionID[2], pH->sessionID[3],
+                                       pH->sessionID[4], pH->sessionID[5], pH->sessionID[6], pH->sessionID[7])
+                            
                             break;
                         }
                     }
@@ -591,7 +655,6 @@ TRDP_ERR_T  trdp_mdRecv (
                             {
                                 /* in case for request, the listener is busy waiting for application reply or error */
                                 iterMD->stateEle = TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY;
-                                iterMD->replyPort = appHandle->pMDRcvEle->replyPort;
                             }
 
                             /* receive time */
@@ -611,7 +674,7 @@ TRDP_ERR_T  trdp_mdRecv (
                             {
                                 TRDP_MD_INFO_T theMessage;
 
-                                theMessage.srcIpAddr    = appHandle->pMDRcvEle->addr.srcIpAddr;
+                                theMessage.srcIpAddr    = iterMD->addr.srcIpAddr;
                                 theMessage.destIpAddr   = 0;
                                 theMessage.seqCount     = vos_ntohl(pH->sequenceCounter);
                                 theMessage.protVersion  = vos_ntohs(pH->protocolVersion);
@@ -916,6 +979,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                             }
                                         }
 
+										sender_ele->morituri = TRUE;
                                         /* stop loop */
                                         break;
                                     }
@@ -1061,9 +1125,8 @@ TRDP_ERR_T  trdp_mdSend (
     MD_ELE_T    *iterMD = NULL;
 
     /*    Find the packet which has to be sent next:    */
-    for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; )
+    for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
     {
-        int restart = 0;
         int dotx    = 0;
         TRDP_MD_ELE_ST_T nextstate = TRDP_MD_ELE_ST_NONE;
         switch(iterMD->stateEle)
@@ -1186,12 +1249,7 @@ TRDP_ERR_T  trdp_mdSend (
                     }
 
                     /* Remove element from queue */
-                    trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
-
-                    /* free element */
-                    vos_memFree(iterMD);
-
-                    restart = 1;
+                    iterMD->morituri = TRUE;
                 }
                 else
                 {
@@ -1199,9 +1257,10 @@ TRDP_ERR_T  trdp_mdSend (
                 }
             }
         }
-
-        iterMD = restart ? appHandle->pMDSndQueue : iterMD->pNext;
     }
+    
+    trdp_closeMDSessions(appHandle);
+
     return result;
 }
 
@@ -1596,7 +1655,28 @@ void  trdp_mdCheckListenSocks (
         {
             /* select() mode */
             MD_ELE_T *iterMD;
-
+            MD_LIS_ELE_T *iterListener;
+            
+            for (iterListener = appHandle->pMDListenQueue; iterListener != NULL; iterListener = iterListener->pNext)
+            {
+                /*    Check the sockets for received MD packets    */
+                if (iterListener->socketIdx != -1 &&
+                    FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *) pRfds))     /* MD listener?  */
+                {
+                    /*  Compare the received data to the data in our receive queue
+                     Call user's callback if data changed    */
+                    
+                    err = trdp_mdRecv(appHandle, appHandle->iface[iterListener->socketIdx].sock, NULL);
+                    
+                    if (err != TRDP_NO_ERR)
+                    {
+                        vos_printf(VOS_LOG_ERROR, "trdp_mdRecv() failed (Err: %d)\n", err);
+                    }
+                    
+                    FD_CLR(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pRfds);
+                }
+            }
+            
             for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
             {
                 /*    Check the sockets for received MD packets    */
@@ -1616,7 +1696,8 @@ void  trdp_mdCheckListenSocks (
                     FD_CLR(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pRfds);
                 }
             }
-            for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
+
+           for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
             {
                 /*    Check the sockets for received MD packets    */
                 if (iterMD->socketIdx != -1 &&
@@ -1635,7 +1716,6 @@ void  trdp_mdCheckListenSocks (
                     FD_CLR(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pRfds);
                 }
             }
-
         }
     }
 }
@@ -1773,8 +1853,8 @@ void  trdp_mdCheckTimeouts (
                             (UINT8 *)0, 0);
                     }
 
-                    /* Reset listener */
-                    iterMD->stateEle = TRDP_MD_ELE_ST_RX_ARM;
+                    /* Mark session to be deleted (we should not delete it while iterating through the list...) */
+                    iterMD->morituri = TRUE;
 
                     /* TCP handling */
                     if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
@@ -1838,9 +1918,8 @@ void  trdp_mdCheckTimeouts (
     }
 
     /* timeout on transmit queue */
-    for(iterMD = appHandle->pMDSndQueue; iterMD != NULL; )
+    for(iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
     {
-        int restart             = 0;
         int sndReplyTimeout     = 0;
         int sndConfirmTimeout   = 0;
         int sndDone             = 0;
@@ -2055,16 +2134,12 @@ void  trdp_mdCheckTimeouts (
                 /* Remove sender */
                 if(sndDone == 1)
                 {
-                    /* Remove element from queue */
-                    trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
-
-                    /* free element */
-                    vos_memFree(iterMD);
-
+                	iterMD->morituri = TRUE;
+ 
+                    /* Remove element from queue later */
+					
                     vos_printf(VOS_LOG_INFO, "MD send session done: remove st=%d\n", iterMD->stateEle);
 
-                    /* Recheck */
-                    restart = 1;
                 }
             }
             break;
@@ -2174,12 +2249,10 @@ void  trdp_mdCheckTimeouts (
                     }
 
                     /* free element */
-                    vos_memFree(iterMD);
+                    iterMD->morituri = TRUE;
 
                     vos_printf(VOS_LOG_INFO, "MD send session timeout: remove st=%d\n", iterMD->stateEle);
 
-                    /* Recheck */
-                    restart = 1;
                 }
             }
             break;
@@ -2189,8 +2262,6 @@ void  trdp_mdCheckTimeouts (
              break;
         }
 
-        /* Handle check restart */
-        iterMD = restart ? appHandle->pMDSndQueue : iterMD->pNext;
     }
 
     /* Check for sockets Connection Timeouts */
@@ -2251,7 +2322,7 @@ void  trdp_mdCheckTimeouts (
                     appHandle->iface[index].sendParam.qos   = 0;
                     appHandle->iface[index].sendParam.ttl   = 0;
                     appHandle->iface[index].usage           = 0;
-                    appHandle->iface [index].bindAddr       = 0;
+                    appHandle->iface[index].bindAddr       = 0;
                     appHandle->iface[index].type    = (TRDP_SOCK_TYPE_T) 0;
                     appHandle->iface[index].rcvOnly = FALSE;
                     appHandle->iface[index].tcpParams.cornerIp = 0;
@@ -2261,4 +2332,6 @@ void  trdp_mdCheckTimeouts (
             }
         }
     }
+
+	trdp_closeMDSessions(appHandle);    
 }
