@@ -683,7 +683,7 @@ typedef void (*TRDP_MD_CALLBACK_T)(
 /**    TCP file descriptor parameters   */
 typedef struct
 {
-    INT32   listen_sd;             /**< TCP general socket listening connection requests   */
+    INT32   listen_sd;          /**< TCP general socket listening connection requests   */
     INT32   max_sd;             /**< Maximum socket number in the file descriptor   */
     fd_set  master_set;         /**< Local file descriptor   */
 } TRDP_TCP_FD_T;
@@ -702,6 +702,7 @@ typedef struct
     UINT32              connectTimeout;         /**< Default connection timeout in us           */
     UINT16              udpPort;                /**< Port to be used for UDP MD communication   */
     UINT16              tcpPort;                /**< Port to be used for TCP MD communication   */
+    UINT32              maxNumSessions;         /**< Maximal number of replier sessions         */
     TRDP_TCP_FD_T       tcpFd;                  /**< TCP file descriptor parameters   */
 } TRDP_MD_CONFIG_T;
 
