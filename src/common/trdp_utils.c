@@ -151,7 +151,7 @@ UINT32 trdp_packetSizePD (
 
     if (0 == dataSize)
     {
-    	/* Packet consists of header only  */
+        /* Packet consists of header only  */
         return sizeof(PD_HEADER_T);
     }
     /*  padding to 4 */
@@ -689,7 +689,7 @@ TRDP_ERR_T  trdp_requestSocket (
                             }
                         }
                     }
-                    else if (0 != mcGroup)      /*	Multicast sender shall be bound to an interface	*/
+                    else if (0 != mcGroup)      /*    Multicast sender shall be bound to an interface    */
                     {
                         err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
                         if (err != TRDP_NO_ERR)

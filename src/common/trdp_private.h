@@ -38,53 +38,53 @@
 #define LIB_VERSION  "0.0.2.0"
 
 #ifndef TRDP_PD_UDP_PORT
-#define TRDP_PD_UDP_PORT  20548                         /**< process data UDP port                      */
+#define TRDP_PD_UDP_PORT                    20548                       /**< process data UDP port                  */
 #endif
 #ifndef TRDP_MD_UDP_PORT
-#define TRDP_MD_UDP_PORT  20550                         /**< message data UDP port                      */
+#define TRDP_MD_UDP_PORT                    20550                       /**< message data UDP port                  */
 #endif
 #ifndef TRDP_MD_TCP_PORT
-#define TRDP_MD_TCP_PORT  20550                         /**< message data TCP port                      */
+#define TRDP_MD_TCP_PORT                    20550                       /**< message data TCP port                  */
 #endif
 
-#define TRDP_PROTO_VER          0x0100                  /**< Protocol version                           */
+#define TRDP_PROTO_VER                      0x0100                      /**< Protocol version                       */
 
-#define TRDP_TIMER_GRANULARITY  10000                   /**< granularity in us                          */
-#define TRDP_TIMER_FOREVER      0xffffffff              /**< granularity in us                          */
+#define TRDP_TIMER_GRANULARITY              10000                       /**< granularity in us                      */
+#define TRDP_TIMER_FOREVER                  0xffffffff                  /**< granularity in us                      */
 
 /*  Default MD communication parameters   */
-#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000     /**< default reply time out 5s                  */
-#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000     /**< default confirm time out 1s                */
-#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000    /**< Socket connection time out 1 minute        */
+#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000                     /**< default reply time out 5s              */
+#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000                     /**< default confirm time out 1s            */
+#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000                    /**< Socket connection time out 1 minute    */
 #define TRDP_MD_DEFAULT_QOS                 3
 #define TRDP_MD_DEFAULT_TTL                 64
 #define TRDP_MD_DEFAULT_RETRIES             2
 #define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
 
 /*  Default PD communication parameters   */
-#define TRDP_PD_DEFAULT_QOS         5
-#define TRDP_PD_DEFAULT_TTL         64
-#define TRDP_PD_DEFAULT_TIMEOUT     100000
-#define TRDP_PD_DEFAULT_SEND_PARAM  {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
+#define TRDP_PD_DEFAULT_QOS                 5
+#define TRDP_PD_DEFAULT_TTL                 64
+#define TRDP_PD_DEFAULT_TIMEOUT             100000
+#define TRDP_PD_DEFAULT_SEND_PARAM          {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
 
 /*  PD packet properties    */
-#define TRDP_MIN_PD_HEADER_SIZE     sizeof(PD_HEADER_T)             /**< PD header size with FCS        */
-#define TRDP_MAX_PD_DATA_SIZE       1436
-#define TRDP_MAX_PD_PACKET_SIZE     (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
-#define TRDP_MAX_MD_PACKET_SIZE     (1024 * 64)
+#define TRDP_MIN_PD_HEADER_SIZE             sizeof(PD_HEADER_T)         /**< PD header size with FCS                */
+#define TRDP_MAX_PD_DATA_SIZE               1436
+#define TRDP_MAX_PD_PACKET_SIZE             (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
+#define TRDP_MAX_MD_PACKET_SIZE             (1024 * 64)
 
 /*  Default TRDP process options    */
-#define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000       /**< Default cycle time for TRDP process        */
-#define TRDP_PROCESS_DEFAULT_PRIORITY       64          /**< Default priority of TRDP process           */
-#define TRDP_PROCESS_DEFAULT_OPTIONS        TRDP_OPTION_TRAFFIC_SHAPING /**< Default options for TRDP process   */
+#define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000                       /**< Default cycle time for TRDP process    */
+#define TRDP_PROCESS_DEFAULT_PRIORITY       64                          /**< Default priority of TRDP process       */
+#define TRDP_PROCESS_DEFAULT_OPTIONS        TRDP_OPTION_TRAFFIC_SHAPING /**< Default options for TRDP process       */
 
-#define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536       /**< Default maximum size of log file           */
+#define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536                       /**< Default maximum size of log file       */
 
 /*  Default SDT values  */
-#define TRDP_SDT_DEFAULT_SMI2       0                   /**< Default SDT safe message identifier for a redundant dev */
-#define TRDP_SDT_DEFAULT_NRXSAFE    3                   /**< Default SDT timeout cycles                 */
-#define TRDP_SDT_DEFAULT_NGUARD     100                 /**< Default SDT initial timeout cycles         */
-#define TRDP_SDT_DEFAULT_CMTHR      10                  /**< Default SDT channel monitoring threshold   */
+#define TRDP_SDT_DEFAULT_SMI2               0                           /**< Default SDT safe message identifier    */
+#define TRDP_SDT_DEFAULT_NRXSAFE            3                           /**< Default SDT timeout cycles             */
+#define TRDP_SDT_DEFAULT_NGUARD             100                         /**< Default SDT initial timeout cycles     */
+#define TRDP_SDT_DEFAULT_CMTHR              10                          /**< Default SDT chan. monitoring threshold */
 
 
 /***********************************************************************************************************************
@@ -135,19 +135,19 @@ typedef enum
 /** Hidden handle definition, used as unique addressing item    */
 typedef struct TRDP_HANDLE
 {
-    UINT32          comId;                  /**< comId for packets to send/receive                      */
-    TRDP_IP_ADDR_T  srcIpAddr;              /**< source IP for PD                                       */
-    TRDP_IP_ADDR_T  destIpAddr;             /**< destination IP for PD                                  */
-    TRDP_IP_ADDR_T  mcGroup;                /**< multicast group to join for PD                         */
-    UINT32          topoCount;              /**< topocount belongs to addressing item                   */
+    UINT32              comId;                          /**< comId for packets to send/receive           */
+    TRDP_IP_ADDR_T      srcIpAddr;                      /**< source IP for PD                            */
+    TRDP_IP_ADDR_T      destIpAddr;                     /**< destination IP for PD                       */
+    TRDP_IP_ADDR_T      mcGroup;                        /**< multicast group to join for PD              */
+    UINT32              topoCount;                      /**< topocount belongs to addressing item        */
 } TRDP_ADDRESSES_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
 
 /** TCP parameters    */
 typedef struct TRDP_SOCKET_TCP
 {
-    TRDP_IP_ADDR_T  cornerIp;               /**< The other TCP corner Ip                                */
-    TRDP_TIME_T     connectionTimeout;      /**< TCP socket connection Timeout                          */
+    TRDP_IP_ADDR_T      cornerIp;                       /**< The other TCP corner Ip                      */
+    TRDP_TIME_T         connectionTimeout;              /**< TCP socket connection Timeout                */
 }TRDP_SOCKET_TCP_T;
 
 
@@ -171,41 +171,41 @@ typedef struct TRDP_SOCKETS
 /** TRDP process data header - network order and alignment    */
 typedef struct
 {
-    UINT32  sequenceCounter;                /**< Unique counter (autom incremented)                     */
-    UINT16  protocolVersion;                /**< fix value for compatibility (set by the API)           */
-    UINT16  msgType;                        /**< of datagram: PD Request (0x5072) or PD_MSG (0x5064)    */
-    UINT32  comId;                          /**< set by user: unique id                                 */
-    UINT32  topoCount;                      /**< set by user: ETB to use, '0' to deacticate             */
-    UINT32  datasetLength;                  /**< length of the data to transmit 0...1436
-                                                 without padding and FCS                                */
-    UINT32  reserved;                       /**< before used for ladder support                         */
-    UINT32  replyComId;                     /**< used in PD request                                     */
-    UINT32  replyIpAddress;                 /**< used for PD request                                    */
-    UINT32  frameCheckSum;                  /**< CRC32 of header                                        */
+    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
+    UINT16  protocolVersion;                    /**< fix value for compatibility (set by the API)           */
+    UINT16  msgType;                            /**< of datagram: PD Request (0x5072) or PD_MSG (0x5064)    */
+    UINT32  comId;                              /**< set by user: unique id                                 */
+    UINT32  topoCount;                          /**< set by user: ETB to use, '0' to deacticate             */
+    UINT32  datasetLength;                      /**< length of the data to transmit 0...1436
+                                                    without padding and FCS                                 */
+    UINT32  reserved;                           /**< before used for ladder support                         */
+    UINT32  replyComId;                         /**< used in PD request                                     */
+    UINT32  replyIpAddress;                     /**< used for PD request                                    */
+    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
 } GNU_PACKED PD_HEADER_T;
 
 /** TRDP message data header - network order and alignment    */
 typedef struct
 {
-    UINT32  sequenceCounter;                /**< Unique counter (autom incremented)             */
-    UINT16  protocolVersion;                /**< fix value for compatibility                    */
-    UINT16  msgType;                        /**< of datagram: Mn, Mr, Mp, Mq, Mc or Me          */
-    UINT32  comId;                          /**< set by user: unique id                         */
-    UINT32  topoCount;                      /**< set by user: ETB to use, '0' to deacticate     */
-    UINT32  datasetLength;                  /**< defined by user: length of data to transmit    */
-    INT32   replyStatus;                    /**< 0 = OK                                         */
-    UINT8   sessionID[16];                  /**< UUID as a byte stream                          */
-    UINT32  replyTimeout;                   /**< in us                                          */
-    UINT8   sourceURI[32];                  /**< User part of URI                               */
-    UINT8   destinationURI[32];             /**< User part of URI                               */
-    UINT32  frameCheckSum;                  /**< CRC32 of header                                */
+    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
+    UINT16  protocolVersion;                    /**< fix value for compatibility                            */
+    UINT16  msgType;                            /**< of datagram: Mn, Mr, Mp, Mq, Mc or Me                  */
+    UINT32  comId;                              /**< set by user: unique id                                 */
+    UINT32  topoCount;                          /**< set by user: ETB to use, '0' to deacticate             */
+    UINT32  datasetLength;                      /**< defined by user: length of data to transmit            */
+    INT32   replyStatus;                        /**< 0 = OK                                                 */
+    UINT8   sessionID[16];                      /**< UUID as a byte stream                                  */
+    UINT32  replyTimeout;                       /**< in us                                                  */
+    UINT8   sourceURI[32];                      /**< User part of URI                                       */
+    UINT8   destinationURI[32];                 /**< User part of URI                                       */
+    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
 } GNU_PACKED MD_HEADER_T;
 
 /** TRDP PD packet    */
 typedef struct
 {
-    PD_HEADER_T frameHead;                               /**< Packet    header in network byte order         */
-    UINT8       data[TRDP_MAX_PD_PACKET_SIZE];           /**< data ready to be sent or received (with CRCs)  */
+    PD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
+    UINT8       data[TRDP_MAX_PD_PACKET_SIZE];  /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED PD_PACKET_T;
 
 #ifdef WIN32
@@ -236,7 +236,7 @@ typedef struct PD_ELE
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
     const void          *userRef;               /**< from subscribe()                                       */
-    PD_PACKET_T         *pFrame;                /*    header ... data + FCS...                              */
+    PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                              */
 } PD_ELE_T;
 
 /** Queue element for MD listeners    */
@@ -259,7 +259,7 @@ typedef struct MD_ELE
     TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
-    BOOL				morituri;				/**< to flag to die                                         */
+    BOOL                morituri;               /**< to flag to die                                         */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
                                                     interval for packets to send (set from ms)              */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */

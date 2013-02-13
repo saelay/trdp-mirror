@@ -643,7 +643,7 @@ typedef struct
  */
 typedef void (*TRDP_PD_CALLBACK_T)(
     void                    *pRefCon,
-	TRDP_APP_SESSION_T      appHandle,
+    TRDP_APP_SESSION_T      appHandle,
     const TRDP_PD_INFO_T    *pMsg,
     UINT8                   *pData,
     UINT32                  dataSize);

@@ -2545,7 +2545,7 @@ static TRDP_ERR_T tlm_common_send (
             /* change state of receiver */
             if (pendingMD_reply != NULL)
             {
-		        /* pendingMD_reply->stateEle = TRDP_MD_ELE_ST_RX_ARM;*/
+                /* pendingMD_reply->stateEle = TRDP_MD_ELE_ST_RX_ARM;*/
                 pendingMD_reply->morituri = TRUE;
             }
             
@@ -2572,8 +2572,8 @@ static TRDP_ERR_T tlm_common_send (
     }
     while(0);
     
-	/* Clean up   */
-	trdp_closeMDSessions(appHandle);
+    /* Clean up   */
+    trdp_closeMDSessions(appHandle);
     
     /* Error and allocated element ! */
     if (TRDP_NO_ERR != errv && NULL != pNewElement)
@@ -2817,7 +2817,7 @@ TRDP_ERR_T tlm_addListener (
             }
             else
             {
-            	pNewElement->pNext = NULL;
+                pNewElement->pNext = NULL;
                 /* initial state for RX ready to receive */
                 // pNewElement->stateEle = TRDP_MD_ELE_ST_RX_ARM;
                 
@@ -2928,8 +2928,8 @@ TRDP_ERR_T tlm_delListener (
 {
     TRDP_ERR_T      errv = TRDP_NO_ERR;
     MD_LIS_ELE_T    *iterLis = NULL;
-	MD_LIS_ELE_T    *pDelete = (MD_LIS_ELE_T*) listenHandle;
-    BOOL			dequeued = FALSE;
+    MD_LIS_ELE_T    *pDelete = (MD_LIS_ELE_T*) listenHandle;
+    BOOL            dequeued = FALSE;
     
     if (!trdp_isValidSession(appHandle))
     {
@@ -2952,9 +2952,9 @@ TRDP_ERR_T tlm_delListener (
             appHandle->pMDListenQueue = pDelete->pNext;
             dequeued = TRUE;
         }
-		else
+        else
         {
-        	for (iterLis = appHandle->pMDListenQueue; iterLis != NULL; iterLis = iterLis->pNext)
+            for (iterLis = appHandle->pMDListenQueue; iterLis != NULL; iterLis = iterLis->pNext)
             {
                 if (iterLis->pNext == pDelete)
                 {
@@ -2963,15 +2963,15 @@ TRDP_ERR_T tlm_delListener (
                     break;
                 }
             }
-		}
+        }
         
-		if (TRUE == dequeued)
+        if (TRUE == dequeued)
         {
-       		/* cleanup instance */
+            /* cleanup instance */
             trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
             
-        	/* free memory space for element */
-        	vos_memFree(pDelete);
+            /* free memory space for element */
+            vos_memFree(pDelete);
         }
     }
     
