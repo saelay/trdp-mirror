@@ -17,13 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_TrafficShapingTes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_StatisticsTest", "Win32TRDP_StatisticsTest\Win32TRDP_StatisticsTest.vcxproj", "{70FE6320-198B-41BF-BD97-9A69E96332CD}"
 EndProject
-<<<<<<< .mine
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_UDPMDTest", "Win32TRDP_UDPMDTest\Win32TRDP_UDPMDTest.vcxproj", "{ECEF1965-D05C-41BD-8DAC-C86E74655491}"
-EndProject
-=======
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_MDTest_Basic", "Win32TRDP_MDTest_Basic\Win32TRDP_MDTest_Basic.vcxproj", "{43B964A9-9C58-4E78-BA2B-BC6CC7651E10}"
 EndProject
->>>>>>> .r482
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -62,17 +57,10 @@ Global
 		{70FE6320-198B-41BF-BD97-9A69E96332CD}.Debug|Win32.Build.0 = Debug|Win32
 		{70FE6320-198B-41BF-BD97-9A69E96332CD}.Release|Win32.ActiveCfg = Release|Win32
 		{70FE6320-198B-41BF-BD97-9A69E96332CD}.Release|Win32.Build.0 = Release|Win32
-<<<<<<< .mine
-		{ECEF1965-D05C-41BD-8DAC-C86E74655491}.Debug|Win32.ActiveCfg = Debug|Win32
-		{ECEF1965-D05C-41BD-8DAC-C86E74655491}.Debug|Win32.Build.0 = Debug|Win32
-		{ECEF1965-D05C-41BD-8DAC-C86E74655491}.Release|Win32.ActiveCfg = Release|Win32
-		{ECEF1965-D05C-41BD-8DAC-C86E74655491}.Release|Win32.Build.0 = Release|Win32
-=======
 		{43B964A9-9C58-4E78-BA2B-BC6CC7651E10}.Debug|Win32.ActiveCfg = Debug|Win32
 		{43B964A9-9C58-4E78-BA2B-BC6CC7651E10}.Debug|Win32.Build.0 = Debug|Win32
 		{43B964A9-9C58-4E78-BA2B-BC6CC7651E10}.Release|Win32.ActiveCfg = Release|Win32
 		{43B964A9-9C58-4E78-BA2B-BC6CC7651E10}.Release|Win32.Build.0 = Release|Win32
->>>>>>> .r482
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
