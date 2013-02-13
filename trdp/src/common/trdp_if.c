@@ -413,6 +413,11 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         {
             pSession->mdDefault.sendParam.qos = TRDP_MD_DEFAULT_QOS;
         }
+
+        if (pSession->mdDefault.maxNumSessions == 0)
+        {
+            pSession->mdDefault.maxNumSessions = TRDP_MD_MAX_NUM_SESSIONS;
+        }
     }
     else
     {

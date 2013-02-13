@@ -437,6 +437,7 @@
       </xs:attribute>
       <xs:attribute name="udp-port" default="20550" type="uint32" use="optional"/>
       <xs:attribute name="tcp-port" default="20550" type="uint32" use="optional"/>
+      <xs:attribute name="num-sessions" default="1000" type="uint32" use="optional"/>
     </xs:complexType>
   </xs:element>
   

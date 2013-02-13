@@ -8,12 +8,6 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
     preprocessor variable '__AARCH64EB__', assumed 0 [MISRA Rule 97]
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
     preprocessor variable '__MIPSEB__', assumed 0 [MISRA Rule 97]
-                                  _
-    if (sAlignINT8 != ALIGNOF(INT8))
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(193) : Error 10: Expecting '('
-                                        _
-        sAlignINT8        = ALIGNOF(INT8);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(196) : Error 10: Expecting '('
 _
 }
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(244) : Warning 550: Symbol

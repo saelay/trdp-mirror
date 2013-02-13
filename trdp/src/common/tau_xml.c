@@ -505,6 +505,7 @@ static void setDefaultInterfaceValues(
         pMdConfig->sendParam.ttl    = TRDP_MD_DEFAULT_TTL;
         pMdConfig->tcpPort          = TRDP_MD_TCP_PORT;
         pMdConfig->udpPort          = TRDP_MD_UDP_PORT;
+        pMdConfig->maxNumSessions   = TRDP_MD_MAX_NUM_SESSIONS;
     }
 }
 
@@ -609,6 +610,7 @@ static void parseMDDefaultParams(xmlNodePtr pMDParElem, TRDP_MD_CONFIG_T *pMdCon
         pMdConfig->flags |= TRDP_FLAGS_CALLBACK;
     parseUINT16(pMDParElem, "udp-port", &pMdConfig->udpPort);
     parseUINT16(pMDParElem, "tcp-port", &pMdConfig->tcpPort);
+    parseUINT32(pMDParElem, "num-sessions", &pMdConfig->maxNumSessions);
 }
 
 /*
