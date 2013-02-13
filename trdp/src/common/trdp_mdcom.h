@@ -56,7 +56,7 @@ void trdp_mdUpdatePacket (
 TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
     INT32           sock,
-    MD_ELE_T		*pElement);
+    MD_ELE_T        *pElement);
 
 TRDP_ERR_T  trdp_mdSend (
     TRDP_SESSION_PT appHandle);
