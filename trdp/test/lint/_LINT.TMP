@@ -94,18 +94,18 @@ D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1135) : Warning 529: Symbol
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(301) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
     for variable 'MD_ELE::data' [Misra Rule 108]
                                                                     _
             trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2971) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2976) : Warning 534: Ignoring return
     value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)' (compare
     with line 150, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(301) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
     for variable 'MD_ELE::data' [Misra Rule 108]
                                                                    _
             trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
@@ -135,25 +135,25 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2314) : Warning 534: Ignoring
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(301) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
     for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(301) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
     for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(301) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
     for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(301) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
     for variable 'MD_ELE::data' [Misra Rule 108]
                                                     _
 #if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
@@ -167,7 +167,7 @@ D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
                        _
     UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(301) : Error 43: Vacuous type
+D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
     for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Global Wrap-up
