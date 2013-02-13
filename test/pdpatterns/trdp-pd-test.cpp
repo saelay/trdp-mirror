@@ -1,19 +1,14 @@
 #include <stdio.h>
-//#include <stdlib.h>
 #include <string.h>
 
 #include "trdp_if_light.h"
 
-#if defined (WIN32)
-#include <winsock2.h>
-#elif defined (POSIX)
+#if defined (POSIX)
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/select.h>
 #include <sys/ioctl.h>
 #include <time.h>
-#else
-#error "Target not defined!"
 #endif 
 
 // --- globals -----------------------------------------------------------------
