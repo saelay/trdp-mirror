@@ -5,7 +5,7 @@
  * @brief           TRDP utility interface definitions
  *
  * @details         This module provides the interface to the following utilities
- *                  - train configuration information access
+ *                  - train topology information access
  *
  *
  * @note            Project: TCNOpen TRDP prototype stack
@@ -17,12 +17,12 @@
  *          Copyright Bombardier Transportation GmbH, Germany, 2012.
  *
  *
- * $Id$
+ * $Id: tau_tci.h 274 2013-01-10 11:00:43Z aweiss $
  *
  */
 
-#ifndef TAU_TCI_H
-#define TAU_TCI_H
+#ifndef TAU_TTI_H
+#define TAU_TTI_H
 
 /***********************************************************************************************************************
  * INCLUDES
