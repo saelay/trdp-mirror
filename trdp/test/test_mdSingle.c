@@ -55,12 +55,14 @@ typedef struct testData
 typedef struct sSessionData
 {
     BOOL                sResponder;
+    BOOL				sConfirmRequested;
+    BOOL				sNotifyOnly;
     UINT32              sComID;
     TRDP_APP_SESSION_T  appHandle;      /*    Our identifier to the library instance    */
     TRDP_LIS_T          listenHandle;   /*    Our identifier to the publication         */
 } SESSION_DATA_T;
 
-SESSION_DATA_T sSessionData = {FALSE, MD_COMID1, NULL, NULL};
+SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, MD_COMID1, NULL, NULL};
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -73,6 +75,8 @@ void usage (const char *appName)
            "-o <own IP address> in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
            "-r    be responder\n"
+           "-c    respond with confirmation\n"
+           "-n    notify only\n"
            "-v    print version and quit\n"
            );
 }
@@ -104,28 +108,59 @@ void mdCallback (void                   *pRefCon,
             {
                 case  TRDP_MSG_MN:      /**< 'Mn' MD Notification (Request without reply)    */
                     printf("<- MD Notification %u\n", pMsg->comId);
+                    if (NULL != pData && dataSize > 0)
+                    {
+                    	printf("   Data: %s\n", pData);
+                    }
                     break;
                 case  TRDP_MSG_MR:      /**< 'Mr' MD Request with reply                      */
                     printf("<- MR Request with reply %u\n", pMsg->comId);
-                    printf("-> sending reply\n");
-                    err = tlm_reply(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
-                                    pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
-                                    pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL,
-                                    (UINT8 *) "This is a reply!", 16, NULL, NULL);
+                    if (NULL != pData && dataSize > 0)
+                    {
+                    	printf("   Data: %s\n", pData);
+                    }
+                    if (sSessionData.sConfirmRequested)
+                    {
+                    	printf("-> sending reply with query\n");
+                        err = tlm_replyQuery(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
+                                        pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
+                                        pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 100000, NULL,
+                                        (UINT8 *) "This is a reply!", 16, NULL, NULL);
+                    }
+                    else
+                    {
+                        printf("-> sending reply\n");
+                        err = tlm_reply(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
+                                        pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
+                                        pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL,
+                                        (UINT8 *) "This is a reply!", 16, NULL, NULL);
+                    }
+                    
                     break;
                 case  TRDP_MSG_MP:      /**< 'Mp' MD Reply without confirmation              */
                     printf("<- MR Reply received %u\n", pMsg->comId);
+                    if (NULL != pData && dataSize > 0)
+                    {
+                    	printf("   Data: %s\n", pData);
+                    }
                     break;
-                case  TRDP_MSG_MC:      /**< 'Mq' MD Reply with confirmation                 */
+                case  TRDP_MSG_MQ:      /**< 'Mq' MD Reply with confirmation                 */
+                    printf("<- MR Reply with confirmation received %u\n", pMsg->comId);
+                    if (NULL != pData && dataSize > 0)
+                    {
+                    	printf("   Data: %s\n", pData);
+                    }
+                    printf("-> sending confirmation\n");
+                    err = tlm_confirm(myGlobals->appHandle, pRefCon, (const TRDP_UUID_T *) &pMsg->sessionId,
+                                    pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
+                                    pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 0,
+                                    NULL, NULL, NULL);
                     break;
-                case  TRDP_MSG_MQ:      /**< 'Mc' MD Confirm                                 */
+                case  TRDP_MSG_MC:      /**< 'Mc' MD Confirm                                 */
+                    printf("<- MR Confirmation received %u\n", pMsg->comId);
                     break;
                 case  TRDP_MSG_ME:      /**< 'Me' MD Error                                   */
                     break;
-            }
-            if (pData)
-            {
-                printf("%*s\n", dataSize, pData);
             }
             break;
 
@@ -136,7 +171,13 @@ void mdCallback (void                   *pRefCon,
                    vos_ipDotted(pMsg->srcIpAddr));
             break;
         case TRDP_REPLYTO_ERR:
-            printf("No Reply within timed out for ComID %d, destIP: %s\n",
+            printf("No Reply within time out for ComID %d, destIP: %s\n",
+                   pMsg->comId,
+                   vos_ipDotted(pMsg->destIpAddr));
+            break;
+        case TRDP_CONFIRMTO_ERR:
+        case TRDP_REQCONFIRMTO_ERR:
+            printf("No Confirmation within time out for ComID %d, destIP: %s\n",
                    pMsg->comId,
                    vos_ipDotted(pMsg->destIpAddr));
             break;
@@ -214,7 +255,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:h?vr")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:h?vrcn")) != -1)
     {
         switch (ch)
         {
@@ -248,6 +289,16 @@ int main (int argc, char *argv[])
             case 'r':
             {
                 sSessionData.sResponder = TRUE;
+                break;
+            }
+            case 'c':
+            {
+                sSessionData.sConfirmRequested = TRUE;
+                break;
+            }
+            case 'n':
+            {
+                sSessionData.sNotifyOnly = TRUE;
                 break;
             }
             case 'h':
@@ -365,8 +416,17 @@ int main (int argc, char *argv[])
         {
             TRDP_UUID_T sessionId;
             vos_threadDelay(1000000);
-            tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
+            if (sSessionData.sNotifyOnly)
+            {
+                tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
+                          	destIP, TRDP_FLAGS_CALLBACK, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
+            }
+            else
+            {
+            	tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
+                        	destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
+            }
+
         }
         /* sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
 
