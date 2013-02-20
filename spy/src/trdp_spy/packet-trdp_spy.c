@@ -61,7 +61,6 @@
 #define FCS_LENGTH 4
 
 //To Debug
-#define PRINT_DEBUG
 #ifdef PRINT_DEBUG
 #define PRNT(a) a
 #else
@@ -144,6 +143,7 @@ static guint g_md_port = TRDP_SPY_DEFAULT_UDPTCP_MD_PORT;
 static gint ett_trdp_spy = -1;
 static gint ett_trdp_spy_userdata = -1;
 static gint ett_trdp_spy_app_data_fcs = -1;
+static gint ett_trdp_proto_ver = -1;
 
 /*
 * The FCS-32 generator polynomial:
@@ -406,7 +406,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			offset += length;
 			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u - FCS_LENGTH, start_offset, offset, "Body");
 		}
-		return;
+		return offset;
 	}
 
 	if ( preference_changed || !trdp_parsebody_isinited())
@@ -420,7 +420,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 		{
 			proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "Configuration could not be parsed, code: %d", ret);
 			PRNT(printf("Configuration could not be parsed, code: %d", ret));
-			return;
+			return offset;
 		}
 		preference_changed = 0; // don't interpret this flag each time!
     }
@@ -444,7 +444,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			offset += length;
 			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u, start_offset, offset, "Body");
 		}
-		return;
+		return offset;
 	}
 
 	ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "%s (dataset %d)", pFound->name, pFound->datasetId);
@@ -453,7 +453,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	if (pFound->listOfElements <= 0)
 	{
 		ti = proto_tree_add_text(trdp_spy_userdata, tvb, offset, length, "Userdata should be empty.");
-		return;
+		return offset;
 	}
 
 	gActualNode = pFound->listOfElements;
@@ -785,6 +785,8 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 {
 	proto_item *ti;
 	proto_tree *trdp_spy_tree;
+	proto_tree *proto_ver_tree;
+	
 	guint32 datasetlength;
 
 	ti = NULL;
@@ -799,6 +801,8 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sequencecounter, tvb, 0, 4, FALSE);
 		ti = proto_tree_add_text(trdp_spy_tree, tvb, 4, 2, "Protocol Version %d.%d", tvb_get_guint8(tvb, 4), tvb_get_guint8(tvb, 5));
+		proto_ver_tree = proto_item_add_subtree(ti, ett_trdp_proto_ver);
+		ti = proto_tree_add_item(proto_ver_tree, hf_trdp_spy_protocolversion, tvb, 4, 2, FALSE); /* add the raw version of the protocol version in a subtree */
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_type, tvb, 6, 2, FALSE);
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_comid, tvb, 8, 4, FALSE);
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_topocount, tvb, 12, 4, FALSE);
@@ -811,8 +815,7 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 		{
 		case 'P':
 			//PD specific stuff
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_subs, tvb, 20, 2, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_offset_address, tvb, 22, 2, FALSE);
+			ti = proto_tree_add_text(trdp_spy_tree, tvb, 20, 4, "Reserved");
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_comid, tvb, 24, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_ipaddress, tvb, 28, 4, FALSE);
 			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, 32, 0, 32, "Header");
@@ -857,7 +860,7 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
 	trdp_spy_string = 0;
 	trdp_spy_comid = 0;
 
-	g_print("dissect_trdp_spy started\n");
+	PRNT(g_print("dissect_trdp_spy started\n"));
 	API_TRACE;
 
 	// when the package is big enough, then exract some data.
@@ -1020,8 +1023,6 @@ void proto_register_trdp(void)
         { &hf_trdp_spy_datasetlength,        { "Dataset Length",             "trdp.datasetlength",      FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
 
 	// PD specific stuff
-	{ &hf_trdp_spy_subs,      { "Substitution Transmission",  "trdp.subs",    FT_UINT16, BASE_DEC, VALS(trdp_spy_subs_code_vals), 0x8000,     "", HFILL } },
-        { &hf_trdp_spy_offset_address,      { "Offset address",              "trdp.offsetaddress",      FT_UINT16, BASE_DEC, NULL, 0x0,     "", HFILL } },
         { &hf_trdp_spy_reply_comid,         { "Requested ComId",             "trdp.replycomid",         FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } }, /* only used in a PD request */
         { &hf_trdp_spy_reply_ipaddress,     { "Reply IP address",            "trdp.replyip",			FT_IPv4, BASE_NONE, NULL, 0x0,     "", HFILL } },
 	{ &hf_trdp_spy_isPD,      	    { "Process data",  "trdp.pd",    FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
@@ -1053,6 +1054,7 @@ void proto_register_trdp(void)
         &ett_trdp_spy,
 		&ett_trdp_spy_userdata,
         &ett_trdp_spy_app_data_fcs,
+		&ett_trdp_proto_ver,
     };
 
     PRNT(printf("\n\n"));
