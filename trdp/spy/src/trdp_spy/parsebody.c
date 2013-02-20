@@ -90,14 +90,15 @@ processNodes(xmlNodeSetPtr nodes)
 {
     gint i, size;
     xmlNodePtr cur;
-    guint32 id = NULL;
+    guint32 id;
     struct ComId *myComIdMapping = NULL;
     static struct Dataset *pWorkingDataset = NULL;
     struct Element *el;
     const char* text;
 
     size = (nodes) ? nodes->nodeNr : 0;
-
+	id = 0;
+	
     /* handle each result separatly */
     for(i = 0; i < size; ++i)
     {
@@ -312,7 +313,7 @@ struct Dataset * trdp_parsebody_lookup(guint32 comId)
     gpointer mempos_found;
 
     if (gTableComId == NULL)
-        return pFound;
+        return NULL;
 
     // search in the first hashmap for the corresponding comId
     mempos_found = g_hash_table_lookup(gTableComId, GINT_TO_POINTER(comId));
