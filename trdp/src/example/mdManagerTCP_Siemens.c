@@ -777,9 +777,9 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         md_config.connectTimeout = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
         md_config.udpPort        = TRDP_MD_UDP_PORT;
         md_config.tcpPort        = TRDP_MD_TCP_PORT;
-        md_config.tcpFd.listen_sd= 0;
-        md_config.tcpFd.max_sd     = 0;
-        FD_ZERO(&md_config.tcpFd.master_set);
+        appHandle->tcpFd.listen_sd= 0;
+        appHandle->tcpFd.max_sd     = 0;
+        FD_ZERO(&appHandle->tcpFd.master_set);
 
 
         printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");

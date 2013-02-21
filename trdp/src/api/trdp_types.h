@@ -703,7 +703,7 @@ typedef struct
     UINT16              udpPort;                /**< Port to be used for UDP MD communication   */
     UINT16              tcpPort;                /**< Port to be used for TCP MD communication   */
     UINT32              maxNumSessions;         /**< Maximal number of replier sessions         */
-    TRDP_TCP_FD_T       tcpFd;                  /**< TCP file descriptor parameters   */
+    //TRDP_TCP_FD_T       tcpFd;                  /**< TCP file descriptor parameters   */
 } TRDP_MD_CONFIG_T;
 
 

@@ -1197,11 +1197,11 @@ TRDP_ERR_T  trdp_mdSend (
                         if(nextstate == TRDP_MD_ELE_ST_TX_REQUEST_W4Y)
                         {
                             /* Add the socket in the master_set to receive reply */
-                            FD_SET(appHandle->iface[iterMD->socketIdx].sock, &appHandle->mdDefault.tcpFd.master_set);
+                            FD_SET(appHandle->iface[iterMD->socketIdx].sock, &appHandle->tcpFd.master_set);
 
-                            if(appHandle->iface[iterMD->socketIdx].sock > (appHandle->mdDefault.tcpFd.max_sd - 1))
+                            if(appHandle->iface[iterMD->socketIdx].sock > (appHandle->tcpFd.max_sd - 1))
                             {
-                                appHandle->mdDefault.tcpFd.max_sd = appHandle->iface[iterMD->socketIdx].sock + 1;
+                                appHandle->tcpFd.max_sd = appHandle->iface[iterMD->socketIdx].sock + 1;
                             }
                         }
                     }
@@ -1312,7 +1312,7 @@ void  trdp_mdCheckListenSocks (
 
             vos_printf(VOS_LOG_INFO, "\n----- CHECKING READY DESCRIPTORS -----\n");
 
-            if (FD_ISSET(appHandle->mdDefault.tcpFd.listen_sd, (fd_set *)pRfds))
+            if (FD_ISSET(appHandle->tcpFd.listen_sd, (fd_set *)pRfds))
             {
                 /****************************************************/
                 /* A TCP connection request in the listen socket.   */
@@ -1336,7 +1336,7 @@ void  trdp_mdCheckListenSocks (
                     read_tcpPort    = appHandle->mdDefault.tcpPort;
 
                     err =
-                        (TRDP_ERR_T)vos_sockAccept(appHandle->mdDefault.tcpFd.listen_sd, &new_sd, &newIp,
+                        (TRDP_ERR_T)vos_sockAccept(appHandle->tcpFd.listen_sd, &new_sd, &newIp,
                                                    &(read_tcpPort));
 
                     if (new_sd < 0)
@@ -1392,11 +1392,11 @@ void  trdp_mdCheckListenSocks (
                     /* There is one more socket to manage */
 
                     /*Add the socket in the master_set */
-                    FD_SET(new_sd, &appHandle->mdDefault.tcpFd.master_set);
+                    FD_SET(new_sd, &appHandle->tcpFd.master_set);
 
-                    if(new_sd > (appHandle->mdDefault.tcpFd.max_sd - 1))
+                    if(new_sd > (appHandle->tcpFd.max_sd - 1))
                     {
-                        appHandle->mdDefault.tcpFd.max_sd = new_sd + 1;
+                        appHandle->tcpFd.max_sd = new_sd + 1;
                     }
 
                     /* Compare with the sockets stored in the socket list */
@@ -1457,14 +1457,14 @@ void  trdp_mdCheckListenSocks (
                                 }
 
                                 /* Clear from the master_set */
-                                FD_CLR(appHandle->iface[socket_index].sock, &appHandle->mdDefault.tcpFd.master_set);
+                                FD_CLR(appHandle->iface[socket_index].sock, &appHandle->tcpFd.master_set);
 
-                                if(appHandle->iface[socket_index].sock == (appHandle->mdDefault.tcpFd.max_sd - 1))
+                                if(appHandle->iface[socket_index].sock == (appHandle->tcpFd.max_sd - 1))
                                 {
                                     for(;
-                                        FD_ISSET((appHandle->mdDefault.tcpFd.max_sd - 1),
-                                                 &appHandle->mdDefault.tcpFd.master_set) == FALSE;
-                                        appHandle->mdDefault.tcpFd.max_sd -= 1)
+                                        FD_ISSET((appHandle->tcpFd.max_sd - 1),
+                                                 &appHandle->tcpFd.master_set) == FALSE;
+                                        appHandle->tcpFd.max_sd -= 1)
                                     {
                                         ;
                                     }
@@ -1538,14 +1538,14 @@ void  trdp_mdCheckListenSocks (
                                 if(err == TRDP_NODATA_ERR)
                                 {
                                     /* Close the socket */
-                                    FD_CLR(appHandle->iface[index].sock, &appHandle->mdDefault.tcpFd.master_set);
+                                    FD_CLR(appHandle->iface[index].sock, &appHandle->tcpFd.master_set);
 
-                                    if(appHandle->iface[index].sock == (appHandle->mdDefault.tcpFd.max_sd - 1))
+                                    if(appHandle->iface[index].sock == (appHandle->tcpFd.max_sd - 1))
                                     {
                                         for(;
-                                            FD_ISSET((appHandle->mdDefault.tcpFd.max_sd - 1),
-                                                     &appHandle->mdDefault.tcpFd.master_set) == FALSE;
-                                            appHandle->mdDefault.tcpFd.max_sd -= 1)
+                                            FD_ISSET((appHandle->tcpFd.max_sd - 1),
+                                                     &appHandle->tcpFd.master_set) == FALSE;
+                                            appHandle->tcpFd.max_sd -= 1)
                                         {
                                             ;
                                         }
@@ -2298,14 +2298,14 @@ void  trdp_mdCheckTimeouts (
                     }
 
                     /* Close the socket */
-                    FD_CLR(appHandle->iface[index].sock, &appHandle->mdDefault.tcpFd.master_set);
+                    FD_CLR(appHandle->iface[index].sock, &appHandle->tcpFd.master_set);
 
-                    if(appHandle->iface[index].sock == (appHandle->mdDefault.tcpFd.max_sd - 1))
+                    if(appHandle->iface[index].sock == (appHandle->tcpFd.max_sd - 1))
                     {
                         for(;
-                            FD_ISSET((appHandle->mdDefault.tcpFd.max_sd - 1),
-                                     &appHandle->mdDefault.tcpFd.master_set) == FALSE;
-                            appHandle->mdDefault.tcpFd.max_sd -= 1)
+                            FD_ISSET((appHandle->tcpFd.max_sd - 1),
+                                     &appHandle->tcpFd.master_set) == FALSE;
+                            appHandle->tcpFd.max_sd -= 1)
                         {
                             ;
                         }
