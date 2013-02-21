@@ -88,7 +88,7 @@ TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
         /* The socket is defined non-blocking */
         trdp_sock_opt.nonBlocking = TRUE;
         
-        result = (TRDP_ERR_T)vos_sockOpenTCP(&pSession->mdDefault.tcpFd.listen_sd, &trdp_sock_opt);
+        result = (TRDP_ERR_T)vos_sockOpenTCP(&pSession->tcpFd.listen_sd, &trdp_sock_opt);
         
         if (result != TRDP_NO_ERR)
         {
@@ -96,7 +96,7 @@ TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
             return result;
         }
         
-        result = (TRDP_ERR_T)vos_sockBind(pSession->mdDefault.tcpFd.listen_sd,
+        result = (TRDP_ERR_T)vos_sockBind(pSession->tcpFd.listen_sd,
                                           pSession->realIP,
                                           pSession->mdDefault.tcpPort);
         
@@ -106,7 +106,7 @@ TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
             return result;
         }
         
-        result = (TRDP_ERR_T)vos_sockListen(pSession->mdDefault.tcpFd.listen_sd, backlog);
+        result = (TRDP_ERR_T)vos_sockListen(pSession->tcpFd.listen_sd, backlog);
         
         if (result != TRDP_NO_ERR)
         {
@@ -114,9 +114,9 @@ TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
             return result;
         }
         
-        vos_printf(VOS_LOG_INFO, "Socket information (listen_sd=%d)\n", pSession->mdDefault.tcpFd.listen_sd);
-        FD_SET(pSession->mdDefault.tcpFd.listen_sd, (fd_set *)&pSession->mdDefault.tcpFd.master_set);
-        pSession->mdDefault.tcpFd.max_sd = pSession->mdDefault.tcpFd.listen_sd + 1;
+        vos_printf(VOS_LOG_INFO, "Socket information (listen_sd=%d)\n", pSession->tcpFd.listen_sd);
+        FD_SET(pSession->tcpFd.listen_sd, (fd_set *)&pSession->tcpFd.master_set);
+        pSession->tcpFd.max_sd = pSession->tcpFd.listen_sd + 1;
         
         return TRDP_NO_ERR;
     }
@@ -1267,10 +1267,10 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     MD_ELE_T     *iterMD;
                     MD_LIS_ELE_T *iterListener;
                     
-                    FD_SET(appHandle->mdDefault.tcpFd.listen_sd, (fd_set *)pFileDesc);
-                    if (appHandle->mdDefault.tcpFd.listen_sd > *pNoDesc)
+                    FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
+                    if (appHandle->tcpFd.listen_sd > *pNoDesc)
                     {
-                        *pNoDesc = appHandle->mdDefault.tcpFd.listen_sd;
+                        *pNoDesc = appHandle->tcpFd.listen_sd;
                     }
                     
                     for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
@@ -1279,7 +1279,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                            && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP))
                         {
                             /* Copy the master_set to the pFileDesc */
-                            if(FD_ISSET(appHandle->iface[index].sock, &appHandle->mdDefault.tcpFd.master_set))
+                            if(FD_ISSET(appHandle->iface[index].sock, &appHandle->tcpFd.master_set))
                             {
                                 FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
                                 if (appHandle->iface[index].sock > *pNoDesc)
@@ -1294,7 +1294,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                         }
                     }
                     
-                    /* *pNoDesc = appHandle->mdDefault.tcpFd.max_sd; */
+                    /* *pNoDesc = appHandle->tcpFd.max_sd; */
                     
                     /*  Include MD UDP listener sockets sockets  */
                     for (iterListener = appHandle->pMDListenQueue; iterListener != NULL; iterListener = iterListener->pNext)
