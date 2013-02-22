@@ -215,6 +215,28 @@ int testCRCcalculation()
     return 0; /* all time tests succeeded */
 }
 
+int testNetwork()
+{
+    UINT8 MAC[6];
+    VOS_ERR_T ret;
+    memset(MAC, 0, sizeof(MAC));
+    ret = vos_sockInit();
+
+    ret = vos_sockGetMAC(MAC);
+
+    printf("Got MAC %X:%X:%X:%X:%X:%X\n", MAC[0],
+                MAC[1],
+                MAC[2],
+                MAC[3],
+                MAC[4],
+                MAC[5]);
+
+    ret = vos_sockGetMAC(MAC);
+
+    return 0; /* all time tests succeeded */
+}
+
+
 int main(int argc, char *argv[])
 {
 	printf("Starting tests\n");
@@ -239,6 +261,12 @@ int main(int argc, char *argv[])
     if(testCRCcalculation())
     {
         printf("CRC calculation failed\n");
+        return 1;
+    }
+
+    if(testNetwork())
+    {
+        printf("Network testing failed\n");
         return 1;
     }
 

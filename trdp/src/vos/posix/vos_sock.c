@@ -202,7 +202,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         ;
     }
 
-    if (i >= 6) /* needs to be determined */
+    if (i < 6) /* needs to be determined */
     {
 
         if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) == -1)
@@ -218,7 +218,11 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         gIfr.ifr_addr.sa_family = AF_INET;
         strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ - 1);
 
-        ioctl(sock, SIOCGIFHWADDR, &gIfr);
+        if (ioctl(sock, SIOCGIFHWADDR, &gIfr) < 0)
+        {
+        	vos_printf(VOS_LOG_ERROR, "Could not fetch IFHW address on %s\n", gIfr.ifr_name);
+			return VOS_SOCK_ERR;
+        }
 
         close(sock);
     }

@@ -209,7 +209,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         ;
     }
 
-    if (i >= 6) /*    needs to be determined    */
+    if (i < 6) /*    needs to be determined    */
     {
         /* for NetBIOS */
         DWORD   dwEntriesRead;
