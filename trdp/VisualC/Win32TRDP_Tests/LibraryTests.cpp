@@ -203,7 +203,7 @@ int testCRCcalculation()
     /* the CRC is zero! */
     if (crc != 0)
         return 1;
-
+    
     /* calculate for empty memory */
     memset(testdata, 0, length);
     crc = vos_crc32(0xffffffff, NULL, 0);
@@ -218,13 +218,14 @@ int testCRCcalculation()
 int testNetwork()
 {
     UINT8 MAC[6];
+    int i;
     VOS_ERR_T ret;
-    memset(MAC, 0, sizeof(MAC));
+    memset(MAC, 0, sizeof(MAC)); // clean the memory
     ret = vos_sockInit();
 
     ret = vos_sockGetMAC(MAC);
 
-    printf("Got MAC %X:%X:%X:%X:%X:%X\n", MAC[0],
+    printf("Got MAC %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n", MAC[0],
                 MAC[1],
                 MAC[2],
                 MAC[3],
@@ -232,6 +233,22 @@ int testNetwork()
                 MAC[5]);
 
     ret = vos_sockGetMAC(MAC);
+
+    /* Check if a MAC address was received */
+    if (ret != VOS_NO_ERR)
+    {
+    	printf("Got %d when asking for own MAC address\n", ret);
+    	return 1;
+    }
+
+	for(i = 0; i < 6 && MAC[i] == 0; i++)
+	{
+	   ;
+	}
+	if (i >= 6) {
+		printf("The return MAC is \"empty\"\n");
+		return 1;
+	}
 
     return 0; /* all time tests succeeded */
 }
