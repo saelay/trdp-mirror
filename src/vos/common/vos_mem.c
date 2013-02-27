@@ -275,22 +275,22 @@ EXT_DECL VOS_ERR_T vos_memInit (
  *    This will eventually invalidate any previously allocated memory blocks! It should be called last before the
  *  application quits. No further access to the memory blocks is allowed after this call.
  *
- *  @param[in]      pMemoryArea        Pointer to memory area to use
+ *  @param[in]      pMemoryArea        Pointer to memory area used
  */
 
 EXT_DECL void vos_memDelete (
-    UINT8 *pMemoryArea)
+    UINT8 * pMemoryArea)
 {
-    if ((pMemoryArea == NULL) || (pMemoryArea != gMem.pArea))
+    if (NULL == gMem.pArea || (pMemoryArea != NULL && pMemoryArea != gMem.pArea))
     {
-        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/�[arameter\n");
+        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/Parameter\n");
     }
     else
     {
         vos_mutexLocalDelete(&gMem.mutex);
         if (gMem.wasMalloced)
         {
-            free(pMemoryArea);
+            free(gMem.pArea);
         }
         memset(&gMem, 0, sizeof(gMem));
     }
