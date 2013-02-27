@@ -859,6 +859,9 @@ TRDP_ERR_T  trdp_mdSend (
 
     do
     {
+        int dotx    = 0;
+        TRDP_MD_ELE_ST_T nextstate = TRDP_ST_NONE;
+
         /*  Switch to receive queue */
         if (NULL == iterMD && TRUE == firstLoop)
         {
@@ -870,9 +873,7 @@ TRDP_ERR_T  trdp_mdSend (
         {
             break;
         }
-
-        int dotx    = 0;
-        TRDP_MD_ELE_ST_T nextstate = TRDP_ST_NONE;
+        
         switch(iterMD->stateEle)
         {
             case TRDP_ST_TX_NOTIFY_ARM:
