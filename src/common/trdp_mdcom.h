@@ -69,4 +69,25 @@ void trdp_mdCheckListenSocks (
 void trdp_mdCheckTimeouts (
     TRDP_SESSION_PT appHandle);
 
+TRDP_ERR_T trdp_mdCommonSend (
+                              const TRDP_MSG_T        msgType,
+                              TRDP_APP_SESSION_T      appHandle,
+                              const void              *pUserRef,
+                              TRDP_UUID_T             *pSessionId,
+                              UINT32                  comId,
+                              UINT32                  topoCount,
+                              TRDP_IP_ADDR_T          srcIpAddr,
+                              TRDP_IP_ADDR_T          destIpAddr,
+                              TRDP_FLAGS_T            pktFlags,
+                              UINT16                  userStatus,
+                              UINT32                  confirmTimeout,
+                              UINT32                  noOfRepliers,
+                              UINT32                  replyTimeout,
+                              TRDP_REPLY_STATUS_T     replyStatus,
+                              const TRDP_SEND_PARAM_T *pSendParam,
+                              const UINT8             *pData,
+                              UINT32                  dataSize,
+                              const TRDP_URI_USER_T   sourceURI,
+                              const TRDP_URI_USER_T   destURI);
+
 #endif

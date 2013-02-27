@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.2.0"
+#define LIB_VERSION  "0.0.2.1"
 
 #ifndef TRDP_PD_UDP_PORT
 #define TRDP_PD_UDP_PORT                    20548                       /**< process data UDP port                  */
@@ -95,22 +95,25 @@
 /** Internal MD state */
 typedef enum
 {
-    TRDP_MD_ELE_ST_NONE = 0,                  /**< neutral value                                        */
+    TRDP_ST_NONE = 0,                  /**< neutral value                                        */
 
-    TRDP_MD_ELE_ST_TX_NOTIFY_ARM        = 1,  /**< ready to send notify MD                              */
-    TRDP_MD_ELE_ST_TX_REQUEST_ARM       = 2,  /**< ready to send request MD                             */
-    TRDP_MD_ELE_ST_TX_REPLY_ARM         = 3,  /**< ready to send reply MD                               */
-    TRDP_MD_ELE_ST_TX_REPLYQUERY_ARM    = 4,  /**< ready to send reply with confirm request MD          */
-    TRDP_MD_ELE_ST_TX_CONFIRM_ARM       = 5,  /**< ready to send confirm MD                             */
-    TRDP_MD_ELE_ST_TX_ERROR_ARM         = 6,  /**< ready to send error MD                               */
+    TRDP_ST_TX_NOTIFY_ARM           = 1,  /**< ready to send notify MD                              */
+    TRDP_ST_TX_REQUEST_ARM          = 2,  /**< ready to send request MD                             */
+    TRDP_ST_TX_REPLY_ARM            = 3,  /**< ready to send reply MD                               */
+    TRDP_ST_TX_REPLYQUERY_ARM       = 4,  /**< ready to send reply with confirm request MD          */
+    TRDP_ST_TX_CONFIRM_ARM          = 5,  /**< ready to send confirm MD                             */
+    TRDP_ST_RX_READY                = 6,  /**< armed listener                                       */
 
-    TRDP_MD_ELE_ST_TX_REQUEST_W4Y       = 7,  /**< request sent, wait for reply                         */
-    TRDP_MD_ELE_ST_TX_REPLYQUERY_W4C    = 8,  /**< reply send, with confirm request MD                  */
+    TRDP_ST_TX_REQUEST_W4REPLY      = 7,  /**< request sent, wait for reply                         */
+    TRDP_ST_RX_REPLYQUERY_W4C       = 8,  /**< reply send, with confirm request MD                  */
 
-    TRDP_MD_ELE_ST_RX_ARM = 9,                /**< armed listener                                       */
-    TRDP_MD_ELE_ST_RX_REQ_W4AP_REPLY    = 10, /**< request received, wait for application reply send    */
-    TRDP_MD_ELE_ST_RX_REPLY_W4AP_CONF   = 11  /**< reply conf. rq. rx, wait for application conf send   */
+    TRDP_ST_RX_REQ_W4AP_REPLY       = 9,  /**< request received, wait for application reply send    */
+    TRDP_ST_TX_REQ_W4AP_CONFIRM     = 10, /**< reply conf. rq. tx, wait for application conf send   */
+    TRDP_ST_RX_REPLY_SENT           = 11, /**< reply sent    */
 
+    TRDP_ST_RX_NOTIFY_RECEIVED      = 12, /**< notification received, wait for application to accept    */
+    TRDP_ST_TX_REPLY_RECEIVED       = 13, /**< reply received    */
+    TRDP_ST_RX_CONF_RECEIVED        = 14  /**< confirmation received  */
 } TRDP_MD_ELE_ST_T;
 
 /** Internal flags for packets    */
@@ -141,7 +144,7 @@ typedef struct TRDP_HANDLE
     TRDP_IP_ADDR_T      destIpAddr;                     /**< destination IP for PD                       */
     TRDP_IP_ADDR_T      mcGroup;                        /**< multicast group to join for PD              */
     UINT32              topoCount;                      /**< topocount belongs to addressing item        */
-} TRDP_ADDRESSES_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
+} TRDP_ADDRESSES_T/*, *TRDP_PUB_PT, *TRDP_SUB_PT*/;
 
 
 /** TCP parameters    */
@@ -209,6 +212,13 @@ typedef struct
     UINT8       data[TRDP_MAX_PD_PACKET_SIZE];  /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED PD_PACKET_T;
 
+/** TRDP MD packet    */
+typedef struct
+{
+    MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
+    UINT8       data[TRDP_MAX_MD_PACKET_SIZE];  /**< data ready to be sent or received (with CRCs)          */
+} GNU_PACKED MD_PACKET_T;
+
 #ifdef WIN32
 #pragma pack(pop)
 #endif
@@ -238,7 +248,7 @@ typedef struct PD_ELE
     INT32               socketIdx;              /**< index into the socket list                             */
     const void          *userRef;               /**< from subscribe()                                       */
     PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                              */
-} PD_ELE_T;
+} PD_ELE_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
 /** Queue element for MD listeners    */
 typedef struct MD_LIS_ELE
@@ -248,7 +258,6 @@ typedef struct MD_LIS_ELE
     TRDP_PRIV_FLAGS_T       privFlags;          /**< private flags                                          */
     TRDP_FLAGS_T            pktFlags;           /**< flags                                                  */
     const void              *pUserRef;          /**< user reference for call_back from tlm_request()        */
-    UINT32                  comId;
     TRDP_URI_USER_T         destURI;
     INT32                   socketIdx;          /**< index into the socket list                             */
 } MD_LIS_ELE_T;
@@ -258,11 +267,12 @@ typedef struct MD_ELE
 {
     struct MD_ELE       *pNext;                 /**< pointer to next element or NULL                        */
     TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
+    UINT32              curSeqCnt;              /**< the last sent or received sequence counter             */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
-    BOOL                morituri;               /**< to flag to die                                         */
+    BOOL                morituri;               /**< about to die                                           */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
-                                                    interval for packets to send (set from ms)              */
+                                                     interval for packets to send (set from ms)             */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
     INT32               dataSize;               /**< net data size                                          */
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
@@ -275,32 +285,15 @@ typedef struct MD_ELE
     UINT32              numReplies;             /**< actual number of replies for the request               */
     UINT32              numRetriesMax;          /**< maximun number of retries for request to a know dev    */
     UINT32              numRetries;             /**< actual number of retries for request to a know dev     */
-    UINT8               disableReplyRx;         /**< disable reply reception, for multicast use             */
     UINT32              numRepliesQuery;        /**< number of ReplyQuery received, used to count nuomber
                                                      of expected Confirm sent                               */
     UINT32              numConfirmSent;         /**< number of Confirm sent                                 */
     UINT32              numConfirmTimeout;      /**< number of Confirm Timeouts (incremented by listeners   */
-    union
-    {
-        struct
-        {
-            UINT32      comId;                  /**< filter on incoming MD by comId                         */
-            const void  *pUserRef;              /**< user reference for call_back from tlm_request()        */
-        } caller;
-        struct
-        {
-            const void      *pUserRef;          /**< user reference for call_back from addListener()        */
-            UINT32          comId;              /**< filter on incoming MD by comId                         */
-            UINT32          topoCount;          /**< set by user: ETB to use, '0' to deacticate             */
-            TRDP_IP_ADDR_T  destIpAddr;         /**< filter on incoming MD by destination IP address        */
-            TRDP_FLAGS_T    pktFlags;           /**< marshalling option                                     */
-            TRDP_URI_USER_T destURI;            /**< filter on incoming MD by destination URI               */
-        } listener; /**< Listener arguments */
-    } u;
-    BOOL        connectDone;
-    MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-    /*    ... data + FCS ... */
+    const void          *pUserRef;              /**< user reference for call_back from tlm_request()        */
+    TRDP_URI_USER_T     destURI;                /**< filter on incoming MD by destination URI               */
+    BOOL                connectDone;
+    MD_PACKET_T         *pPacket;               /**< Packet    header in network byte order                 */
+                                                /**< data ready to be sent (with CRCs)                      */
 } MD_ELE_T;
 
 /** Session/application variables store */
@@ -326,8 +319,8 @@ typedef struct TRDP_SESSION
     PD_ELE_T                *pSndQueue;         /**< pointer to first element of send queue                 */
     PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue                  */
     MD_LIS_ELE_T            *pMDListenQueue;    /**< pointer to first element of listeners queue            */
-    MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue              */
-    MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue              */
+    MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue (caller)     */
+    MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue (replier)     */
     MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element                         */
     TRDP_STATISTICS_T       stats;              /**< statistics of this session                             */
 } TRDP_SESSION_T, *TRDP_SESSION_PT;
