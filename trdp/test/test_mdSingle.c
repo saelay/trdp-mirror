@@ -35,7 +35,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION         "0.1"
+#define APP_VERSION         "0.2"
 
 #define DATA_MAX            1000
 
@@ -57,12 +57,15 @@ typedef struct sSessionData
     BOOL                sResponder;
     BOOL				sConfirmRequested;
     BOOL				sNotifyOnly;
+    BOOL				sOnlyOnce;
+    BOOL				sExitAfterReply;
+    BOOL				sLoop;
     UINT32              sComID;
     TRDP_APP_SESSION_T  appHandle;      /*    Our identifier to the library instance    */
     TRDP_LIS_T          listenHandle;   /*    Our identifier to the publication         */
 } SESSION_DATA_T;
 
-SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, MD_COMID1, NULL, NULL};
+SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, MD_COMID1, NULL, NULL};
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -77,6 +80,7 @@ void usage (const char *appName)
            "-r    be responder\n"
            "-c    respond with confirmation\n"
            "-n    notify only\n"
+           "-1    send only one request/notification\n"
            "-v    print version and quit\n"
            );
 }
@@ -124,8 +128,8 @@ void mdCallback (void                   *pRefCon,
                     	printf("-> sending reply with query\n");
                         err = tlm_replyQuery(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
                                         pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
-                                        pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 100000, NULL,
-                                        (UINT8 *) "This is a reply!", 16, NULL, NULL);
+                                        pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 10000000, NULL,
+                                        (UINT8 *) "I'm fine, how are you?", 23, NULL, NULL);
                     }
                     else
                     {
@@ -133,7 +137,7 @@ void mdCallback (void                   *pRefCon,
                         err = tlm_reply(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
                                         pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
                                         pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL,
-                                        (UINT8 *) "This is a reply!", 16, NULL, NULL);
+                                        (UINT8 *) "I'm fine, thanx!", 17, NULL, NULL);
                     }
                     
                     break;
@@ -143,6 +147,10 @@ void mdCallback (void                   *pRefCon,
                     {
                     	printf("   Data: %s\n", pData);
                     }
+                    if (sSessionData.sExitAfterReply == TRUE)
+                    { 
+                    	sSessionData.sLoop = FALSE;
+                	}
                     break;
                 case  TRDP_MSG_MQ:      /**< 'Mq' MD Reply with confirmation                 */
                     printf("<- MR Reply with confirmation received %u\n", pMsg->comId);
@@ -152,7 +160,7 @@ void mdCallback (void                   *pRefCon,
                     }
                     printf("-> sending confirmation\n");
                     err = tlm_confirm(myGlobals->appHandle, pRefCon, (const TRDP_UUID_T *) &pMsg->sessionId,
-                                    pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
+                                    pMsg->comId, pMsg->topoCount, pMsg->destIpAddr,
                                     pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 0,
                                     NULL, NULL, NULL);
                     break;
@@ -160,6 +168,7 @@ void mdCallback (void                   *pRefCon,
                     printf("<- MR Confirmation received %u\n", pMsg->comId);
                     break;
                 case  TRDP_MSG_ME:      /**< 'Me' MD Error                                   */
+                default:
                     break;
             }
             break;
@@ -210,10 +219,6 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    if (category == VOS_LOG_DBG)
-    {
-        return;
-    }
 
     printf("%s %s %s:%d %s",
            pTime,
@@ -241,13 +246,9 @@ int main (int argc, char *argv[])
     int     rv      = 0;
     UINT32  destIP  = 0;
     UINT32  ownIP   = 0;
+    UINT32  counter = 0;
 
-    /*    Generate some data, that we want to send, when nothing was specified. */
-    UINT8   *outputBuffer;
-    UINT8   exampleData[DATA_MAX] = "Hello World";
     int     ch;
-
-    outputBuffer = exampleData;
 
     if (argc <= 1)
     {
@@ -255,7 +256,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:h?vrcn")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:h?vrcn1")) != -1)
     {
         switch (ch)
         {
@@ -299,6 +300,11 @@ int main (int argc, char *argv[])
             case 'n':
             {
                 sSessionData.sNotifyOnly = TRUE;
+                break;
+            }
+            case '1':
+            {
+                sSessionData.sOnlyOnce = TRUE;
                 break;
             }
             case 'h':
@@ -352,13 +358,12 @@ int main (int argc, char *argv[])
     /*
      Enter the main processing loop.
      */
-    while (1)
+    while (sSessionData.sLoop)
     {
         fd_set  rfds;
         INT32   noDesc = 0;
         struct timeval tv;
         struct timeval max_tv   = {0, 100000};
-        char    requestMsg[16]  = "Requesting Hello";
 
         /*
          Prepare the file descriptor set for the select call.
@@ -408,35 +413,38 @@ int main (int argc, char *argv[])
         }
         else
         {
-            printf(".");
-            fflush(stdout);
+            if (counter++ == 100)
+            {
+                counter = 0;
+                printf("...\n");
+                fflush(stdout);
+            }
         }
 
-        if (sSessionData.sResponder == FALSE)
+        if (sSessionData.sResponder == FALSE && sSessionData.sExitAfterReply == FALSE)
         {
             TRDP_UUID_T sessionId;
-            vos_threadDelay(1000000);
-            if (sSessionData.sNotifyOnly)
+            printf("\n");
+           if (sSessionData.sNotifyOnly)
             {
+                printf("-> sending MR Notification %u\n", sSessionData.sComID);
+
                 tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
-                          	destIP, TRDP_FLAGS_CALLBACK, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
+                          	destIP, TRDP_FLAGS_CALLBACK, NULL, (const UINT8*) "Hello, World", 13, 0, 0);
             }
             else
             {
+                printf("-> sending MR Request with reply %u\n", sSessionData.sComID);
             	tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        	destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8 *) requestMsg, sizeof(requestMsg), 0, 0);
+                        	destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8*) "How are you?", 13, 0, 0);
             }
-
+            printf("\n");
+            if (sSessionData.sOnlyOnce == TRUE)
+            {
+                sSessionData.sExitAfterReply = TRUE;
+            }
         }
-        /* sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
 
-         err = tlp_put(appHandle, pubHandle, outputBuffer, outputBufferSize);
-         if (err != TRDP_NO_ERR)
-         {
-         printf("put pd error\n");
-         rv = 1;
-         break;
-         }    */
     }
 
     /*

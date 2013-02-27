@@ -165,6 +165,33 @@ UINT32 trdp_packetSizePD (
 
 
 /**********************************************************************************************************************/
+/** Get the packet size from the raw data size
+ *
+ *  @param[in]      dataSize            net data size (without padding or FCS)
+ *
+ *  @retval         packet size         the size of the complete packet to
+ *                                      be sent or received
+ */
+UINT32 trdp_packetSizeMD (
+    UINT32 dataSize)
+{
+    UINT32 packetSize = sizeof(MD_HEADER_T) + dataSize + sizeof(UINT32);
+    
+    if (0 == dataSize)
+    {
+        /* Packet consists of header only  */
+        return sizeof(MD_HEADER_T);
+    }
+    /*  padding to 4 */
+    if ((dataSize & 0x3) > 0)
+    {
+        packetSize += 4 - dataSize % 4;
+    }
+    
+    return packetSize;
+}
+
+/**********************************************************************************************************************/
 /** Return the element with same comId
  *
  *  @param[in]      pHead           pointer to head of queue
@@ -660,7 +687,7 @@ TRDP_ERR_T  trdp_requestSocket (
                         }
                         else
                         {
-                            err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, mcGroup, port);
+                            err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, 0 /*mcGroup*/, port);
                         }
 
                         if (err != TRDP_NO_ERR)
