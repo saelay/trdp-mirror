@@ -18,8 +18,8 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(244) : Warning 550: Symbol
         gMem.pArea = (UINT8 *) malloc(size);
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(213) : Warning 421: Caution --
     function 'malloc(unsigned int)' is considered dangerous [MISRA Rule 118]
-                             _
-            free(pMemoryArea);
+                            _
+            free(gMem.pArea);
 D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(293) : Warning 421: Caution --
     function 'free(void *)' is considered dangerous [MISRA Rule 118]
                                          _
@@ -92,69 +92,57 @@ D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1135) : Warning 529: Symbol
     'err' (line 1132) not subsequently referenced
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
-    for variable 'MD_ELE::data' [Misra Rule 108]
                                                                     _
             trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2976) : Warning 534: Ignoring return
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2519) : Warning 534: Ignoring return
     value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)' (compare
     with line 150, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
-    for variable 'MD_ELE::data' [Misra Rule 108]
                                                                    _
             trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(63) : Warning 534: Ignoring
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(64) : Warning 534: Ignoring
     return value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)'
     (compare with line 150, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h,
     module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
+ _
+ }
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(840) : Warning 550: Symbol
+    'datasize' (line 484) not accessed
+              _
+    } while (1);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1032) : Warning 506: Constant
+    value Boolean [MISRA Rule 52]
                                           _
                             TRDP_ERR_T err;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1528) : Warning 578: Declaration
-    of symbol 'err' hides symbol 'err' (line 1281) [Misra Rules 12, 21, and 27]
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1301) : Warning 578: Declaration
+    of symbol 'err' hides symbol 'err' (line 1054) [Misra Rules 12, 21, and 27]
                                                                                _
                                     vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1554) : Warning 534: Ignoring
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1327) : Warning 534: Ignoring
     return value of function 'vos_sockClose(int)' (compare with line 368, file
     D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
                                   _
                     TRDP_ERR_T err;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1644) : Warning 578: Declaration
-    of symbol 'err' hides symbol 'err' (line 1281) [Misra Rules 12, 21, and 27]
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1417) : Warning 578: Declaration
+    of symbol 'err' hides symbol 'err' (line 1054) [Misra Rules 12, 21, and 27]
+              _
+    } while (1);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1903) : Warning 506: Constant
+    value Boolean [MISRA Rule 52]
                                                                _
                     vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2314) : Warning 534: Ignoring
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1952) : Warning 534: Ignoring
     return value of function 'vos_sockClose(int)' (compare with line 368, file
     D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
-    for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
-    for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
-    for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
-    for variable 'MD_ELE::data' [Misra Rule 108]
                                                     _
 #if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
 D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
@@ -165,17 +153,13 @@ D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
     preprocessor variable '__MIPSEB__', assumed 0 [MISRA Rule 97]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
-                       _
-    UINT8       data[0];                        /**< data ready to be sent (with CRCs)                      */
-D:\TCNOpen\trunk\trdp\src\common\trdp_private.h(302) : Error 43: Vacuous type
-    for variable 'MD_ELE::data' [Misra Rule 108]
 
 --- Global Wrap-up
 
-Warning 526: 'ig_endian()' (line 606, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'ig_endian()' (line 618, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
-    606, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+    618, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
 Warning 526: 'e()' (line 210, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
     not defined
 Warning 628: no argument information provided for function 'e()' (line 210,

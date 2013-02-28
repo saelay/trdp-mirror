@@ -68,7 +68,7 @@ void trdp_closeMDSessions(
                                 iterMD->sessionID[4], iterMD->sessionID[5], iterMD->sessionID[6], iterMD->sessionID[7])
             if (NULL != iterMD->pPacket)
             {
-            	vos_memFree(iterMD->pPacket);
+                vos_memFree(iterMD->pPacket);
             }
             vos_memFree(iterMD);
             iterMD = appHandle->pMDSndQueue;
@@ -92,7 +92,7 @@ void trdp_closeMDSessions(
                        iterMD->sessionID[4], iterMD->sessionID[5], iterMD->sessionID[6], iterMD->sessionID[7])
             if (NULL != iterMD->pPacket)
             {
-            	vos_memFree(iterMD->pPacket);
+                vos_memFree(iterMD->pPacket);
             }
             vos_memFree(iterMD);
             iterMD = appHandle->pMDRcvQueue;
@@ -476,14 +476,14 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
     INT32           sock,
-	MD_ELE_T        *pElement)
+    MD_ELE_T        *pElement)
 {
-    TRDP_ERR_T      	result = TRDP_NO_ERR;
-    UINT8           	findSock;
-    MD_HEADER_T     	*pH = NULL;
-    UINT32          	datasize = 0;
-    MD_ELE_T        	*iterMD = NULL;
-    MD_LIS_ELE_T    	*iterListener = NULL;
+    TRDP_ERR_T          result = TRDP_NO_ERR;
+    UINT8               findSock;
+    MD_HEADER_T         *pH = NULL;
+    UINT32              datasize = 0;
+    MD_ELE_T            *iterMD = NULL;
+    MD_LIS_ELE_T        *iterListener = NULL;
     TRDP_MD_ELE_ST_T    state;
     
     if (appHandle == NULL)
@@ -514,7 +514,7 @@ TRDP_ERR_T  trdp_mdRecv (
         }
     }
 
-	if (appHandle->pMDRcvEle->pPacket == NULL)
+    if (appHandle->pMDRcvEle->pPacket == NULL)
     {    
         appHandle->pMDRcvEle->pPacket = (MD_PACKET_T*) vos_memAlloc(TRDP_MAX_MD_PACKET_SIZE);
         if (appHandle->pMDRcvEle->pPacket == NULL)
@@ -607,8 +607,8 @@ TRDP_ERR_T  trdp_mdRecv (
 
     state = TRDP_ST_RX_REQ_W4AP_REPLY;
 
-	/*  Depending on message type, we take appropriate measures */
-	switch (vos_ntohs(pH->msgType))
+    /*  Depending on message type, we take appropriate measures */
+    switch (vos_ntohs(pH->msgType))
     {
             /* Find a listener and create a new rcvQueue entry  */
         case TRDP_MSG_MN:
@@ -697,13 +697,13 @@ TRDP_ERR_T  trdp_mdRecv (
             {
                 if (0 == vos_strnicmp((CHAR8*)iterMD->pPacket->frameHead.sessionID, (CHAR8*)pH->sessionID, 16))
                 {
-                	/* throw away old packet data  */
+                    /* throw away old packet data  */
                     if (NULL != iterMD->pPacket)
                     {
-                		vos_memFree(iterMD->pPacket);
+                        vos_memFree(iterMD->pPacket);
                     }
                     /* and get the newly received data  */
-                	iterMD->pPacket = appHandle->pMDRcvEle->pPacket;
+                    iterMD->pPacket = appHandle->pMDRcvEle->pPacket;
                     iterMD->dataSize = vos_ntohl(pH->datasetLength);
                     iterMD->grossSize = appHandle->pMDRcvEle->grossSize;
                     
@@ -719,7 +719,7 @@ TRDP_ERR_T  trdp_mdRecv (
                     iterMD->morituri = TRUE;
                     vos_printf(VOS_LOG_INFO, "Received Confirmation, session will be closed!\n");
                     break;
-               }
+                }
             }
             break;
         case TRDP_MSG_MQ:
@@ -729,13 +729,13 @@ TRDP_ERR_T  trdp_mdRecv (
             {
                 if (0 == vos_strnicmp((CHAR8*)iterMD->pPacket->frameHead.sessionID, (CHAR8*)pH->sessionID, 16))
                 {
-                	/* throw away old data  */
+                    /* throw away old data  */
                     if (NULL != iterMD->pPacket)
                     {
-                		vos_memFree(iterMD->pPacket);
+                        vos_memFree(iterMD->pPacket);
                     }
                     /* and get the newly received data  */
-                	iterMD->pPacket = appHandle->pMDRcvEle->pPacket;
+                    iterMD->pPacket = appHandle->pMDRcvEle->pPacket;
                     iterMD->dataSize = vos_ntohl(pH->datasetLength);
                     iterMD->grossSize = appHandle->pMDRcvEle->grossSize;
                     
@@ -752,8 +752,8 @@ TRDP_ERR_T  trdp_mdRecv (
  
                     if (TRDP_MSG_MP == vos_ntohs(pH->msgType))
                     {
-                    	iterMD->stateEle = TRDP_ST_TX_REPLY_RECEIVED;
-                    	iterMD->numReplies++;
+                        iterMD->stateEle = TRDP_ST_TX_REPLY_RECEIVED;
+                        iterMD->numReplies++;
 
                         /* Handle multiple replies
                            Close session if number of expected replies reached */
@@ -771,7 +771,7 @@ TRDP_ERR_T  trdp_mdRecv (
                     }
                     else
                     {
-                    	/* Increment number of ReplyQuery received, used to count number of
+                        /* Increment number of ReplyQuery received, used to count number of
                            expected Confirms sent */
                         iterMD->numRepliesQuery++;
                         
@@ -942,7 +942,7 @@ TRDP_ERR_T  trdp_mdSend (
                 {
                     
                     if (nextstate == TRDP_ST_RX_REPLY_SENT ||
-                    	nextstate == TRDP_ST_RX_REPLYQUERY_W4C)
+                        nextstate == TRDP_ST_RX_REPLYQUERY_W4C)
                     {
                         /* Update timeout */
                         vos_getTime(&iterMD->timeToGo);
@@ -1531,19 +1531,19 @@ void  trdp_mdCheckTimeouts (
             firstLoop = FALSE;
         }
 
-		/*  Are we finished?   */
+        /*  Are we finished?   */
         if (NULL == iterMD)
         {
             break;
         }
         
-    	/* Update the current time always inside loop in case of application delays  */
-    	vos_getTime(&now);
+        /* Update the current time always inside loop in case of application delays  */
+        vos_getTime(&now);
 
         /* timeToGo is timeout value! */
         
-        if (0 > vos_cmpTime(&iterMD->timeToGo, &now)) 	/* timeout overflow */
-		{
+        if (0 > vos_cmpTime(&iterMD->timeToGo, &now))     /* timeout overflow */
+        {
             /* timeout on queue ? */
             switch (iterMD->stateEle)
             {
@@ -1836,19 +1836,19 @@ void  trdp_mdCheckTimeouts (
                 }
                     break;
                 case TRDP_ST_RX_REPLY_SENT:
-                	/* no complain within time out, kill session silently  */
-                	iterMD->morituri = TRUE;
-                	break;
+                    /* no complain within time out, kill session silently  */
+                    iterMD->morituri = TRUE;
+                    break;
                 case TRDP_ST_TX_REPLY_RECEIVED:
-                	/* kill session if number of repliers have been received  */
-                	if (iterMD->noOfRepliers == iterMD->numReplies)
-                	{
-                    	iterMD->morituri = TRUE;
+                    /* kill session if number of repliers have been received  */
+                    if (iterMD->noOfRepliers == iterMD->numReplies)
+                    {
+                        iterMD->morituri = TRUE;
                     }
                     break;
                default:
                     break;
-        	}
+            }
         }
         if (TRUE == timeOut)    /* Notify user  */
         {
@@ -1870,8 +1870,8 @@ void  trdp_mdCheckTimeouts (
                 theMessage.replyTimeout = vos_ntohl(iterMD->pPacket->frameHead.replyTimeout);
                 memcpy(theMessage.destURI, iterMD->destURI, 32);
                 memcpy(theMessage.srcURI, iterMD->pPacket->frameHead.sourceURI, 32);
-                theMessage.numExpReplies    	= iterMD->noOfRepliers;
-                theMessage.pUserRef         	= iterMD->pUserRef;
+                theMessage.numExpReplies        = iterMD->noOfRepliers;
+                theMessage.pUserRef             = iterMD->pUserRef;
                 
                 theMessage.numReplies           = iterMD->numReplies;
                 theMessage.numRetriesMax        = iterMD->numRetriesMax;
@@ -1881,8 +1881,8 @@ void  trdp_mdCheckTimeouts (
                 theMessage.numConfirmSent       = iterMD->numConfirmSent;
                 theMessage.numConfirmTimeout    = iterMD->numConfirmTimeout;
                 
-                theMessage.pUserRef 			= appHandle->mdDefault.pRefCon;
-                theMessage.resultCode 			= resultCode;
+                theMessage.pUserRef             = appHandle->mdDefault.pRefCon;
+                theMessage.resultCode             = resultCode;
                 
                 appHandle->mdDefault.pfCbFunction(
                                                   appHandle->mdDefault.pRefCon,
@@ -1898,7 +1898,7 @@ void  trdp_mdCheckTimeouts (
                        iterMD->sessionID[4], iterMD->sessionID[5], iterMD->sessionID[6], iterMD->sessionID[7])
         }
 
-		iterMD = iterMD->pNext;
+        iterMD = iterMD->pNext;
 
     } while (1);
 
@@ -2116,7 +2116,7 @@ TRDP_ERR_T trdp_mdCommonSend (
          If no data at all, free data pointer
          */
         
-		if (pSenderElement->grossSize <= trdp_packetSizeMD(dataSize) ||
+        if (pSenderElement->grossSize <= trdp_packetSizeMD(dataSize) ||
             NULL == pSenderElement->pPacket)
         {
             if (NULL != pSenderElement->pPacket)
