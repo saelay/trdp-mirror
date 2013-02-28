@@ -395,7 +395,7 @@ typedef struct TRDP_DATASET
     TRDP_DATASET_ELEMENT_T  pElement[];   /**< Pointer to a dataset element, used as array              */
 } TRDP_DATASET_T;
 
-/**    Dataset element definition    */
+/**    ComId - data set mapping element definition    */
 typedef struct
 {
     UINT32  comId;                      /**< comId                                                    */
@@ -542,7 +542,6 @@ typedef struct
 } TRDP_RED_STATISTICS_T;
 
 
-
 typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
 typedef struct TRDP_HANDLE *TRDP_PUB_T;
 typedef struct TRDP_HANDLE *TRDP_SUB_T;
@@ -680,14 +679,6 @@ typedef void (*TRDP_MD_CALLBACK_T)(
     UINT32                  dataSize);
 
 
-/**    TCP file descriptor parameters   */
-typedef struct
-{
-    INT32   listen_sd;          /**< TCP general socket listening connection requests   */
-    INT32   max_sd;             /**< Maximum socket number in the file descriptor   */
-    fd_set  master_set;         /**< Local file descriptor   */
-} TRDP_TCP_FD_T;
-
 /**********************************************************************************************************************/
 /** Default MD configuration
  */
@@ -703,8 +694,7 @@ typedef struct
     UINT16              udpPort;                /**< Port to be used for UDP MD communication   */
     UINT16              tcpPort;                /**< Port to be used for TCP MD communication   */
     UINT32              maxNumSessions;         /**< Maximal number of replier sessions         */
-    //TRDP_TCP_FD_T       tcpFd;                  /**< TCP file descriptor parameters   */
-} TRDP_MD_CONFIG_T;
+ } TRDP_MD_CONFIG_T;
 
 
 

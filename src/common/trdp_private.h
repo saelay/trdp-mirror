@@ -296,6 +296,14 @@ typedef struct MD_ELE
                                                 /**< data ready to be sent (with CRCs)                      */
 } MD_ELE_T;
 
+/**    TCP file descriptor parameters   */
+typedef struct
+{
+    INT32   listen_sd;          /**< TCP general socket listening connection requests   */
+    INT32   max_sd;             /**< Maximum socket number in the file descriptor   */
+    fd_set  master_set;         /**< Local file descriptor   */
+} TRDP_TCP_FD_T;
+
 /** Session/application variables store */
 typedef struct TRDP_SESSION
 {
