@@ -24,6 +24,7 @@
  * INCLUDES
  */
 
+#include <string.h>
 
 #include "vos_utils.h"
 #include "vos_sock.h"
