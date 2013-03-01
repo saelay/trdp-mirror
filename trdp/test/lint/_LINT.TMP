@@ -1,17 +1,5 @@
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
-                                                    _
-#if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
-    preprocessor variable '__ARMEB__', assumed 0 [MISRA Rule 97]
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
-    preprocessor variable '__AARCH64EB__', assumed 0 [MISRA Rule 97]
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(175) : Warning 553: Undefined
-    preprocessor variable '__MIPSEB__', assumed 0 [MISRA Rule 97]
-_
-}
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c(244) : Warning 550: Symbol
-    'vAlignTest' (line 171) not accessed
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
                                            _
@@ -34,62 +22,6 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(471) : Warning 421: Caution --
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
-    _
-    }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(172) : Warning 529: Symbol
-    'err' (line 168) not subsequently referenced
-    _
-    }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(297) : Warning 529: Symbol
-    'err' (line 293) not subsequently referenced
-    _
-    }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(346) : Warning 529: Symbol
-    'err' (line 342) not subsequently referenced
-    _
-    }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(377) : Warning 529: Symbol
-    'err' (line 373) not subsequently referenced
-            _
-            }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(417) : Warning 529: Symbol
-    'err' (line 414) not subsequently referenced
-                                  _
-            if (ioctlsocket(sock, FIONBIO, &optValue) == SOCKET_ERROR)
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(425) : Warning 569: Loss of
-    information (arg. no. 2) (32 bits to 31 bits)
-            _
-            }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(431) : Warning 529: Symbol
-    'err' (line 427) not subsequently referenced
-            _
-            }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(444) : Warning 529: Symbol
-    'err' (line 441) not subsequently referenced
-            _
-            }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(455) : Warning 529: Symbol
-    'err' (line 452) not subsequently referenced
-            _
-            }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(466) : Warning 529: Symbol
-    'err' (line 463) not subsequently referenced
-        _
-        }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(603) : Warning 529: Symbol
-    'err' (line 599) not subsequently referenced
-    _
-    }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(813) : Warning 529: Symbol
-    'err' (line 809) not subsequently referenced
-    _
-    }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(843) : Warning 529: Symbol
-    'err' (line 839) not subsequently referenced
-        _
-        }
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(1135) : Warning 529: Symbol
-    'err' (line 1132) not subsequently referenced
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
                                                                     _
@@ -120,7 +52,7 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1301) : Warning 578: Declaration
                                                                                _
                                     vos_sockClose(appHandle->iface[index].sock);
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1327) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 368, file
+    return value of function 'vos_sockClose(int)' (compare with line 371, file
     D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
                                   _
                     TRDP_ERR_T err;
@@ -133,7 +65,7 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1903) : Warning 506: Constant
                                                                _
                     vos_sockClose(appHandle->iface[index].sock);
 D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1952) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 368, file
+    return value of function 'vos_sockClose(int)' (compare with line 371, file
     D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
@@ -143,14 +75,6 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1952) : Warning 534: Ignoring
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
-                                                    _
-#if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
-D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
-    preprocessor variable '__ARMEB__', assumed 0 [MISRA Rule 97]
-D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
-    preprocessor variable '__AARCH64EB__', assumed 0 [MISRA Rule 97]
-D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c(111) : Warning 553: Undefined
-    preprocessor variable '__MIPSEB__', assumed 0 [MISRA Rule 97]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
 
@@ -160,9 +84,9 @@ Warning 526: 'ig_endian()' (line 618, file D:\TCNOpen\trunk\trdp\src\common\trdp
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
     618, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
-Warning 526: 'e()' (line 210, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
+Warning 526: 'e()' (line 211, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
     not defined
-Warning 628: no argument information provided for function 'e()' (line 210,
+Warning 628: no argument information provided for function 'e()' (line 211,
     file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
 Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
     not accessed
