@@ -2515,9 +2515,14 @@ TRDP_ERR_T tlm_delListener (
         
         if (TRUE == dequeued)
         {
+            TRDP_ERR_T err;
+
             /* cleanup instance */
-            trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
-            
+            err = trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
+            if (err != TRDP_NO_ERR)
+            {
+                vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err:%d)\n", err);
+            }            
             /* free memory space for element */
             vos_memFree(pDelete);
         }

@@ -61,7 +61,13 @@ void trdp_closeMDSessions(
     {
         if (TRUE == iterMD->morituri)
         {
-            trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+            TRDP_ERR_T err;
+
+            err = trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+            if (err != TRDP_NO_ERR)
+            {
+                vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err:%d)\n", err);
+            }
             trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
             vos_printf(VOS_LOG_INFO, "Freeing caller session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
                                 iterMD->sessionID[0], iterMD->sessionID[1], iterMD->sessionID[2], iterMD->sessionID[3],
@@ -1051,8 +1057,6 @@ void  trdp_mdCheckListenSocks (
     TRDP_FDS_T      *pRfds,
     INT32           *pCount)
 {
-    TRDP_ERR_T err;
-
     if (appHandle == NULL)
     {
         return;
@@ -1062,6 +1066,7 @@ void  trdp_mdCheckListenSocks (
     {
         INT32       new_sd;
         MD_ELE_T    *iterMD = NULL;
+        TRDP_ERR_T  err;
 
         /*    Check the socket for received MD packets    */
 
@@ -1108,9 +1113,9 @@ void  trdp_mdCheckListenSocks (
                     newIp           = appHandle->realIP;
                     read_tcpPort    = appHandle->mdDefault.tcpPort;
 
-                    err =
-                        (TRDP_ERR_T)vos_sockAccept(appHandle->tcpFd.listen_sd, &new_sd, &newIp,
-                                                   &(read_tcpPort));
+                    err = (TRDP_ERR_T) vos_sockAccept(appHandle->tcpFd.listen_sd, 
+                                                      &new_sd, &newIp,
+                                                      &(read_tcpPort));
 
                     if (new_sd < 0)
                     {
@@ -1298,8 +1303,6 @@ void  trdp_mdCheckListenSocks (
                     {
                         if(FD_ISSET(appHandle->iface[index].sock, (fd_set *) pRfds))
                         {
-                            TRDP_ERR_T err;
-
                             (*pCount)--;
                             FD_CLR(appHandle->iface[index].sock, (fd_set *)pRfds);
 
@@ -1324,7 +1327,11 @@ void  trdp_mdCheckListenSocks (
                                         }
                                     }
 
-                                    vos_sockClose(appHandle->iface[index].sock);
+                                    err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[index].sock);
+                                    if (err != TRDP_NO_ERR)
+                                    {
+                                        vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
+                                    }
 
                                     /* Delete the socket from the iface */
                                     vos_printf(VOS_LOG_INFO,
@@ -1379,6 +1386,8 @@ void  trdp_mdCheckListenSocks (
     }
     else
     {
+        TRDP_ERR_T err;
+
         /* UDP */
         if (pRfds == NULL || pCount == NULL)
         {
@@ -1414,8 +1423,6 @@ void  trdp_mdCheckListenSocks (
             {
                 if (skxp[i])
                 {
-                    TRDP_ERR_T err;
-
                     err = trdp_mdRecv(appHandle, appHandle->iface[i].sock, NULL);
                     if (err != TRDP_NO_ERR)
                     {
@@ -1918,6 +1925,8 @@ void  trdp_mdCheckTimeouts (
             {
                 if (0 > vos_cmpTime(&appHandle->iface[index].tcpParams.connectionTimeout, &now))
                 {
+                    TRDP_ERR_T err;
+
                     vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[index].sock);
                     
                     /* Execute callback */
@@ -1949,7 +1958,11 @@ void  trdp_mdCheckTimeouts (
                         }
                     }
                     
-                    vos_sockClose(appHandle->iface[index].sock);
+                    err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[index].sock);
+                    if (err != TRDP_NO_ERR)
+                    {
+                        vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
+                    }
                     
                     /* Delete the socket from the iface */
                     vos_printf(VOS_LOG_INFO,
