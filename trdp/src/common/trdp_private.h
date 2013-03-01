@@ -35,7 +35,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.2.1"
+#define LIB_VERSION  "0.0.2.2"
 
 #ifndef TRDP_PD_UDP_PORT
 #define TRDP_PD_UDP_PORT                    20548                       /**< process data UDP port                  */
@@ -87,6 +87,8 @@
 #define TRDP_SDT_DEFAULT_NGUARD             100                         /**< Default SDT initial timeout cycles     */
 #define TRDP_SDT_DEFAULT_CMTHR              10                          /**< Default SDT chan. monitoring threshold */
 
+#define TRDP_MAGIC_PUB_HNDL_VALUE			0xCAFEBABE
+#define TRDP_MAGIC_SUB_HNDL_VALUE			0xBABECAFE
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -227,6 +229,7 @@ typedef struct
 typedef struct PD_ELE
 {
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                        */
+    UINT32				magic;					/**< prevent acces through dangeling pointer                */
     TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
     TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip       */
     UINT32              redId;                  /**< Redundancy group ID or zero                            */
