@@ -118,14 +118,14 @@ static const UINT32 crc_table[256] =
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-static BOOL        sIsBigEndian         = FALSE;
-static UINT32    sAlignINT8            = 1;
+static BOOL      sIsBigEndian           = FALSE;
+static UINT32    sAlignINT8             = 1;
 static UINT32    sAlignINT16            = 2;
 static UINT32    sAlignINT32            = 4;
-static UINT32    sAlignREAL32        = 4;
-static UINT32    sAlignTIMEDATE48    = 6;
+static UINT32    sAlignREAL32           = 4;
+static UINT32    sAlignTIMEDATE48       = 6;
 static UINT32    sAlignINT64            = 8;
-static UINT32    sAlignREAL64        = 8;
+static UINT32    sAlignREAL64           = 8;
 static UINT32    sAlignTIMEDATE48Array1 = 4;
 static UINT32    sAlignTIMEDATE48Array2 = 4;
 
@@ -150,26 +150,27 @@ VOS_ERR_T vos_initRuntimeConsts (void)
     struct alignTest
     {
         INT8        byte1;
-        INT64        longLong1;
+        INT64       longLong1;
         INT8        byte2;
-        INT32        dword1;
+        INT32       dword1;
         INT8        byte3;
-        INT16        word;
+        INT16       word;
         INT64       filler1; /* move the 'byte4' to a position, that is dividable by eight */
         INT8        byte4;
-        REAL64        longLong2;
+        REAL64      longLong2;
         INT8        byte5;
-        REAL32        dword2;
+        REAL32      dword2;
         INT32       filler2;
         INT8        byte6;
-        TIMEDATE48    dword3;
+        TIMEDATE48  dword3;
         INT8        byte7;
         struct {
             INT8        byte;
-            TIMEDATE48    dword;
+            TIMEDATE48  dword;
         } a[2];
     } vAlignTest;
     
+    memset(&vAlignTest, 0, sizeof(vAlignTest)); /* for lint */
     sIsBigEndian = !(*((char *)(&one)));
         
 #if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
@@ -181,12 +182,12 @@ VOS_ERR_T vos_initRuntimeConsts (void)
         vos_printf(VOS_LOG_ERROR, "Endianess is not set correctly!\n");
     }
     
-    sAlignINT16 = (INT8*) &vAlignTest.word - (INT8*) &vAlignTest.byte3; 
-    sAlignINT32 = (INT8*) &vAlignTest.dword1 - (INT8*) &vAlignTest.byte2; 
-    sAlignINT64 = (INT8*) &vAlignTest.longLong1 - (INT8*) &vAlignTest.byte1; 
-    sAlignREAL32 = (INT8*) &vAlignTest.dword2 - (INT8*) &vAlignTest.byte5; 
-    sAlignTIMEDATE48 = (INT8*) &vAlignTest.dword3 - (INT8*) &vAlignTest.byte6; 
-    sAlignREAL64 = (INT8*) &vAlignTest.longLong2 - (INT8*) &vAlignTest.byte4; 
+    sAlignINT16         = (INT8*) &vAlignTest.word - (INT8*) &vAlignTest.byte3; 
+    sAlignINT32         = (INT8*) &vAlignTest.dword1 - (INT8*) &vAlignTest.byte2; 
+    sAlignINT64         = (INT8*) &vAlignTest.longLong1 - (INT8*) &vAlignTest.byte1; 
+    sAlignREAL32        = (INT8*) &vAlignTest.dword2 - (INT8*) &vAlignTest.byte5; 
+    sAlignTIMEDATE48    = (INT8*) &vAlignTest.dword3 - (INT8*) &vAlignTest.byte6; 
+    sAlignREAL64        = (INT8*) &vAlignTest.longLong2 - (INT8*) &vAlignTest.byte4; 
     sAlignTIMEDATE48Array1 = (INT8*) &vAlignTest.a[0].dword - (INT8*) &vAlignTest.a[0].byte; 
     sAlignTIMEDATE48Array2 = (INT8*) &vAlignTest.a[1].dword - (INT8*) &vAlignTest.a[1].byte; 
     

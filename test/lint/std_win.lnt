@@ -18,6 +18,10 @@ options.lnt  -si4 -sp4
 -i"C:\Program Files\Microsoft Visual Studio 8\VC\include"
 -i"C:\Program Files\Microsoft Visual Studio\VC98\Include"
 
+-D__ARMEB__=0
+-D__MIPSEB__=0
+-D__AARCH64EB__=0
+
 -w2
 +macros
 +ppw(warning)

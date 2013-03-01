@@ -167,6 +167,7 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
     {
         int err = WSAGetLastError();
 
+        err = err; /* for lint */
         vos_printf(VOS_LOG_ERROR, "WSAStartup() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
@@ -292,6 +293,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     {
         int err = WSAGetLastError();
 
+        err = err; /* for lint */
         vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
@@ -341,6 +343,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
     {
         int err = WSAGetLastError();
 
+        err = err; /* for lint */
         vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
@@ -372,6 +375,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     {
         int err = WSAGetLastError();
 
+        err = err; /* for lint */
         vos_printf(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n");
         return VOS_PARAM_ERR;
     }
@@ -413,6 +417,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
+                err = err; /* for lint */
                 vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (Err: %d)\n", err);
             }
 #endif
@@ -422,10 +427,11 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         {
             u_long optValue = TRUE;
 
-            if (ioctlsocket(sock, FIONBIO, &optValue) == SOCKET_ERROR)
+            if (ioctlsocket(sock, (long) FIONBIO, &optValue) == SOCKET_ERROR)
             {
                 int err = WSAGetLastError();
 
+                err = err; /* for lint */
                 vos_printf(VOS_LOG_ERROR, "setsockopt() FIONBIO failed (Err: %d)\n", err);
                 return VOS_SOCK_ERR;
             }
@@ -440,6 +446,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
+                err = err; /* for lint */
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (Err: %d)\n", err);
             }
         }
@@ -451,6 +458,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
+                err = err; /* for lint */
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %d)\n", err);
             }
         }
@@ -462,6 +470,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
+                err = err; /* for lint */
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %d)\n", err);
             }
         }
@@ -598,6 +607,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         {
             int err = WSAGetLastError();
 
+            err = err; /* for lint */
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %d)\n", err);
             result = VOS_SOCK_ERR;
         }
@@ -808,6 +818,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     {
         int err = WSAGetLastError();
 
+        err = err; /* for lint */
         vos_printf(VOS_LOG_ERROR, "bind() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
@@ -838,6 +849,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
     {
         int err = WSAGetLastError();
 
+        err = err; /* for lint */
         vos_printf(VOS_LOG_ERROR, "listen() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
@@ -1130,6 +1142,8 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, (const char *) &optValue, sizeof(optValue)) == SOCKET_ERROR)
         {
             int err = WSAGetLastError();
+
+            err = err; /* for lint */
             vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed (Err: %d)\n", err);
             result = VOS_SOCK_ERR;
         }
