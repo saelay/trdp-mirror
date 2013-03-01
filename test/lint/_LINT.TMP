@@ -24,49 +24,20 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(471) : Warning 421: Caution --
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
-                                                                    _
-            trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2519) : Warning 534: Ignoring return
-    value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)' (compare
-    with line 150, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
-                                                                   _
-            trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(64) : Warning 534: Ignoring
-    return value of function 'trdp_releaseSocket(struct TRDP_SOCKETS *, int)'
-    (compare with line 150, file D:\TCNOpen\trunk\trdp\src\common\trdp_utils.h,
-    module D:\TCNOpen\trunk\trdp\src\common\trdp_if.c)
  _
  }
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(840) : Warning 550: Symbol
-    'datasize' (line 484) not accessed
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(846) : Warning 550: Symbol
+    'datasize' (line 490) not accessed
               _
     } while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1032) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1038) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
-                                          _
-                            TRDP_ERR_T err;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1301) : Warning 578: Declaration
-    of symbol 'err' hides symbol 'err' (line 1054) [Misra Rules 12, 21, and 27]
-                                                                               _
-                                    vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1327) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 371, file
-    D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
-                                  _
-                    TRDP_ERR_T err;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1417) : Warning 578: Declaration
-    of symbol 'err' hides symbol 'err' (line 1054) [Misra Rules 12, 21, and 27]
               _
     } while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1903) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1910) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
-                                                               _
-                    vos_sockClose(appHandle->iface[index].sock);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1952) : Warning 534: Ignoring
-    return value of function 'vos_sockClose(int)' (compare with line 371, file
-    D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
 
