@@ -179,9 +179,10 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 EXT_DECL VOS_ERR_T vos_sockGetMAC (
     UINT8 pMAC[6])
 {
+#ifndef __APPLE__
     int sock;
     int i;
-
+#endif
     if (!vosSockInitialised)
     {
         return VOS_INIT_ERR;
