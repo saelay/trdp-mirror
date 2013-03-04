@@ -2136,7 +2136,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
     return ret;
 }
 
-
+#if MD_SUPPORT
 /**********************************************************************************************************************/
 /** Initiate sending MD notification message.
  *  Send a MD notification message
@@ -2794,3 +2794,4 @@ TRDP_ERR_T tlm_confirm (
                destURI
                );
 }
+#endif

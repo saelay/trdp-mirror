@@ -501,7 +501,7 @@ typedef struct
     TRDP_IP_ADDR_T      joinedAddr; /**< Joined IP address   */
     TRDP_IP_ADDR_T      filterAddr; /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0
                                       in case all senders. */
-    UINT32              callBack; /**< Reference for call back function if used */
+    void     			*callBack; /**< Reference for call back function if used */
     UINT32              timeout;  /**< Time-out value in us. 0 = No time-out supervision */
     TRDP_ERR_T          status;   /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
     TRDP_TO_BEHAVIOR_T  toBehav;  /**< Behaviour at time-out. Set data to zero / keep last value */
