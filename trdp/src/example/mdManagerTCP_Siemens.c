@@ -606,6 +606,7 @@ void dbgOut (
  */
 void myMDcallBack (
     void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
     const TRDP_MD_INFO_T    *pMsg,
     UINT8                   *pData,
     UINT32                  dataSize)
@@ -777,9 +778,6 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         md_config.connectTimeout = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
         md_config.udpPort        = TRDP_MD_UDP_PORT;
         md_config.tcpPort        = TRDP_MD_TCP_PORT;
-        appHandle->tcpFd.listen_sd= 0;
-        appHandle->tcpFd.max_sd     = 0;
-        FD_ZERO(&appHandle->tcpFd.master_set);
 
 
         printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");
@@ -825,6 +823,7 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         {
             printf("-------- Initialization OK ------\n");
         }
+
 
         /*    AddListener        */
 
@@ -1244,10 +1243,10 @@ void statistics()
         // [n] ComID
         printf("        [%3d] %6d %16s %16s %11x %11x\n",
             i,
-            iterMD->u.listener.comId,
-            miscIpToString(iterMD->u.listener.destIpAddr, strIp),
+            iterMD->pPacket->frameHead.comId,
+            miscIpToString(iterMD->addr.destIpAddr, strIp),
             miscIpToString(iterMD->addr.mcGroup, strIp1),
-            iterMD->u.listener.pktFlags,
+            iterMD->pktFlags,
             iterMD->privFlags);
         i++;
     }

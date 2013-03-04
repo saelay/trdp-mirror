@@ -1340,14 +1340,14 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 #if MD_SUPPORT
                 /*    Copy the master_set socket states to the pFileDesc    */
                 {
-                    int index;
-                    MD_ELE_T *iterMD;
+                    int          index;
+                    MD_ELE_T     *iterMD;
                     MD_LIS_ELE_T *iterListener;
 
                     FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
-                    if (appHandle->tcpFd.listen_sd > *pNoDesc)
+                    if (appHandle->tcpFd.listen_sd >= *pNoDesc)
                     {
-                        *pNoDesc = appHandle->tcpFd.listen_sd;
+                        *pNoDesc = appHandle->tcpFd.listen_sd + 1;
                     }
 
                     for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
@@ -1359,9 +1359,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                             if(FD_ISSET(appHandle->iface[index].sock, &appHandle->tcpFd.master_set))
                             {
                                 FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[index].sock > *pNoDesc)
+                                if (appHandle->iface[index].sock >= *pNoDesc)
                                 {
-                                    *pNoDesc = appHandle->iface[index].sock;
+                                    *pNoDesc = appHandle->iface[index].sock + 1;
                                 }
                             }
                             else
@@ -1374,13 +1374,12 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     /* *pNoDesc = appHandle->mdDefault.tcpFd.max_sd; */
 
                     /*  Include MD UDP listener sockets sockets  */
-                    for (iterListener = appHandle->pMDListenQueue;
-                         iterListener != NULL;
-                         iterListener = iterListener->pNext)
+                    for (iterListener = appHandle->pMDListenQueue; iterListener != NULL; iterListener = iterListener->pNext)
                     {
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterListener->socketIdx != -1 &&
-                            appHandle->iface[iterListener->socketIdx].sock != -1)
+                            (appHandle->iface[iterListener->socketIdx].sock != -1)
+                            && (appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP))
                         {
                             if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1397,8 +1396,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     {
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterMD->socketIdx != -1 &&
-                            appHandle->iface[iterMD->socketIdx].sock != -1 /*&&
+                            (appHandle->iface[iterMD->socketIdx].sock != -1 /*&&
                                                                             appHandle->option & TRDP_OPTION_BLOCK*/)
+                            && (appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP))
                         {
                             if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1415,13 +1415,14 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     {
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterMD->socketIdx != -1 &&
-                            appHandle->iface[iterMD->socketIdx].sock != -1 /*&&
+                            (appHandle->iface[iterMD->socketIdx].sock != -1 /*&&
                                                                             appHandle->option & TRDP_OPTION_BLOCK*/)
+                            && (appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP))
                         {
                             if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
                                 FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[iterMD->socketIdx].sock > *pNoDesc)
+                                if (appHandle->iface[iterMD->socketIdx].sock >= *pNoDesc)
                                 {
                                     *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
                                 }
