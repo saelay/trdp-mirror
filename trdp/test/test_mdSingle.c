@@ -60,12 +60,13 @@ typedef struct sSessionData
     BOOL				sOnlyOnce;
     BOOL				sExitAfterReply;
     BOOL				sLoop;
+    BOOL				sNoData;
     UINT32              sComID;
     TRDP_APP_SESSION_T  appHandle;      /*    Our identifier to the library instance    */
     TRDP_LIS_T          listenHandle;   /*    Our identifier to the publication         */
 } SESSION_DATA_T;
 
-SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, MD_COMID1, NULL, NULL};
+SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL};
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -80,6 +81,7 @@ void usage (const char *appName)
            "-r    be responder\n"
            "-c    respond with confirmation\n"
            "-n    notify only\n"
+           "-0    send no data\n"
            "-1    send only one request/notification\n"
            "-v    print version and quit\n"
            );
@@ -139,7 +141,10 @@ void mdCallback (void                   *pRefCon,
                                         pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL,
                                         (UINT8 *) "I'm fine, thanx!", 17, NULL, NULL);
                     }
-                    
+                    if (err != TRDP_NO_ERR)
+                    {
+                        printf("tlm_reply/Query returned error %d\n", err);
+                    }
                     break;
                 case  TRDP_MSG_MP:      /**< 'Mp' MD Reply without confirmation              */
                     printf("<- MR Reply received %u\n", pMsg->comId);
@@ -163,6 +168,10 @@ void mdCallback (void                   *pRefCon,
                                     pMsg->comId, pMsg->topoCount, pMsg->destIpAddr,
                                     pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 0,
                                     NULL, NULL, NULL);
+                    if (err != TRDP_NO_ERR)
+                    {
+                        printf("tlm_confirm returned error %d\n", err);
+                    }
                     break;
                 case  TRDP_MSG_MC:      /**< 'Mc' MD Confirm                                 */
                     printf("<- MR Confirmation received %u\n", pMsg->comId);
@@ -256,7 +265,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:h?vrcn1")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:h?vrcn01")) != -1)
     {
         switch (ch)
         {
@@ -300,6 +309,11 @@ int main (int argc, char *argv[])
             case 'n':
             {
                 sSessionData.sNotifyOnly = TRUE;
+                break;
+            }
+            case '0':
+            {
+                sSessionData.sNoData = TRUE;
                 break;
             }
             case '1':
@@ -429,14 +443,34 @@ int main (int argc, char *argv[])
             {
                 printf("-> sending MR Notification %u\n", sSessionData.sComID);
 
-                tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
-                          	destIP, TRDP_FLAGS_CALLBACK, NULL, (const UINT8*) "Hello, World", 13, 0, 0);
+				if (sSessionData.sNoData == TRUE)
+                {
+                	tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
+                          		destIP, TRDP_FLAGS_CALLBACK, NULL,  NULL, 0, 0, 0);
+                    
+                }
+                else
+                {
+                	tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
+                          	destIP, TRDP_FLAGS_CALLBACK, NULL,  (const UINT8*) "Hello, World", 13, 0, 0);
+                    
+                }
+
             }
             else
             {
                 printf("-> sending MR Request with reply %u\n", sSessionData.sComID);
-            	tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
+				if (sSessionData.sNoData == TRUE)
+                {
+                    
+            		tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
+                        		destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, NULL, 0, 0, 0);
+                }
+             	else
+                {
+                	tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
                         	destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8*) "How are you?", 13, 0, 0);
+                }
             }
             printf("\n");
             if (sSessionData.sOnlyOnce == TRUE)

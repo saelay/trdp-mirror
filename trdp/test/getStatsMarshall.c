@@ -513,7 +513,7 @@ int main (int argc, char * *argv)
             what ever comes first.
          */
 
-        rv = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
+        rv = select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
 
         /*
             Check for overdue PDs (sending and receiving)
