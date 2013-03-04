@@ -487,7 +487,7 @@ TRDP_ERR_T  trdp_mdRecv (
     TRDP_ERR_T          result = TRDP_NO_ERR;
     UINT8               findSock;
     MD_HEADER_T         *pH = NULL;
-    UINT32              datasize = 0;
+    /* UINT32              datasize = 0; */
     MD_ELE_T            *iterMD = NULL;
     MD_LIS_ELE_T        *iterListener = NULL;
     TRDP_MD_ELE_ST_T    state;
@@ -539,13 +539,14 @@ TRDP_ERR_T  trdp_mdRecv (
     
     /* process message */
     pH = &appHandle->pMDRcvEle->pPacket->frameHead;
+/*
     datasize = vos_ntohl(pH->datasetLength);
 
     if (appHandle->mdDefault.flags & TRDP_FLAGS_TCP)
     {
         datasize = appHandle->pMDRcvEle->dataSize;
     }
-
+*/
     vos_printf(VOS_LOG_INFO,
        "Received MD packet (type: '%c%c' UUID: %02x%02x%02x%02x%02x%02x%02x%02x Data len: %u)\n",
        appHandle->pMDRcvEle->pPacket->frameHead.msgType & 0xFF,
@@ -564,8 +565,6 @@ TRDP_ERR_T  trdp_mdRecv (
     /* TCP cornerIp */
     if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
     {
-        int i;
-        
         for(findSock = 0; findSock < VOS_MAX_SOCKET_CNT; findSock++)
         {
             if((appHandle->iface[findSock].sock > -1) && (appHandle->iface[findSock].sock == sock))
