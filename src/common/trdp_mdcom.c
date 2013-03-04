@@ -576,39 +576,6 @@ TRDP_ERR_T  trdp_mdRecv (
         
         appHandle->pMDRcvEle->addr.srcIpAddr = appHandle->iface[findSock].tcpParams.cornerIp;
         
-        printf("***** from **** : %08X\n", appHandle->pMDRcvEle->addr.srcIpAddr);
-        printf("sequenceCounter = %d\n", vos_ntohl(pH->sequenceCounter));
-        printf("protocolVersion = %d\n", vos_ntohs(pH->protocolVersion));
-        printf("msgType         = x%04X\n", vos_ntohs(pH->msgType        ));
-        printf("comId           = %d\n", vos_ntohl(pH->comId          ));
-        printf("topoCount       = %d\n", vos_ntohl(pH->topoCount      ));
-        printf("datasetLength   = %d\n", vos_ntohl(pH->datasetLength  ));
-        printf("replyStatus     = %d\n", vos_ntohl(pH->replyStatus    ));
-        printf("sessionID       = ");
-        for(i = 0; i < 16; i++)
-        {
-            printf("%02X ", pH->sessionID[i]);
-        }
-        printf("\n");
-        printf("replyTimeout    = %d\n", vos_ntohl(pH->replyTimeout   ));
-        printf("sourceURI       = ");
-        for(i = 0; i < 32; i++)
-        {
-            if (pH->sourceURI[i])
-            {
-                printf("%c", pH->sourceURI[i]);
-            }
-        }
-        printf("\n");
-        printf("destinationURI  = ");
-        for(i = 0; i < 32; i++)
-        {
-            if (pH->destinationURI[i])
-            {
-                printf("%c", pH->destinationURI[i]);
-            }
-        }
-        printf("\n");
     }
 
     state = TRDP_ST_RX_REQ_W4AP_REPLY;
@@ -964,9 +931,9 @@ TRDP_ERR_T  trdp_mdSend (
                             /* Add the socket in the master_set to receive reply */
                             FD_SET(appHandle->iface[iterMD->socketIdx].sock, &appHandle->tcpFd.master_set);
 
-                            if(appHandle->iface[iterMD->socketIdx].sock > (appHandle->tcpFd.max_sd - 1))
+                            if(appHandle->iface[iterMD->socketIdx].sock > (appHandle->tcpFd.max_sd))
                             {
-                                appHandle->tcpFd.max_sd = appHandle->iface[iterMD->socketIdx].sock + 1;
+                                appHandle->tcpFd.max_sd = appHandle->iface[iterMD->socketIdx].sock;
                             }
                         }
                     }
@@ -1172,9 +1139,9 @@ void  trdp_mdCheckListenSocks (
                     /*Add the socket in the master_set */
                     FD_SET(new_sd, &appHandle->tcpFd.master_set);
 
-                    if(new_sd > (appHandle->tcpFd.max_sd - 1))
+                    if(new_sd > (appHandle->tcpFd.max_sd))
                     {
-                        appHandle->tcpFd.max_sd = new_sd + 1;
+                        appHandle->tcpFd.max_sd = new_sd;
                     }
 
                     /* Compare with the sockets stored in the socket list */
@@ -1237,10 +1204,10 @@ void  trdp_mdCheckListenSocks (
                                 /* Clear from the master_set */
                                 FD_CLR(appHandle->iface[socket_index].sock, &appHandle->tcpFd.master_set);
 
-                                if(appHandle->iface[socket_index].sock == (appHandle->tcpFd.max_sd - 1))
+                                if(appHandle->iface[socket_index].sock == (appHandle->tcpFd.max_sd))
                                 {
                                     for(;
-                                        FD_ISSET((appHandle->tcpFd.max_sd - 1),
+                                        FD_ISSET((appHandle->tcpFd.max_sd),
                                                  &appHandle->tcpFd.master_set) == FALSE;
                                         appHandle->tcpFd.max_sd -= 1)
                                     {
@@ -1316,10 +1283,10 @@ void  trdp_mdCheckListenSocks (
                                     /* Close the socket */
                                     FD_CLR(appHandle->iface[index].sock, &appHandle->tcpFd.master_set);
 
-                                    if(appHandle->iface[index].sock == (appHandle->tcpFd.max_sd - 1))
+                                    if(appHandle->iface[index].sock == (appHandle->tcpFd.max_sd))
                                     {
                                         for(;
-                                            FD_ISSET((appHandle->tcpFd.max_sd - 1),
+                                            FD_ISSET((appHandle->tcpFd.max_sd),
                                                      &appHandle->tcpFd.master_set) == FALSE;
                                             appHandle->tcpFd.max_sd -= 1)
                                         {
@@ -1947,10 +1914,10 @@ void  trdp_mdCheckTimeouts (
                     /* Close the socket */
                     FD_CLR(appHandle->iface[index].sock, &appHandle->tcpFd.master_set);
                     
-                    if(appHandle->iface[index].sock == (appHandle->tcpFd.max_sd - 1))
+                    if(appHandle->iface[index].sock == (appHandle->tcpFd.max_sd))
                     {
                         for(;
-                            FD_ISSET((appHandle->tcpFd.max_sd - 1),
+                            FD_ISSET((appHandle->tcpFd.max_sd),
                                      &appHandle->tcpFd.master_set) == FALSE;
                             appHandle->tcpFd.max_sd -= 1)
                         {

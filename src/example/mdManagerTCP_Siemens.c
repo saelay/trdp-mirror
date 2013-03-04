@@ -1345,6 +1345,9 @@ int main (int argc, char * *argv)
            Select() will wait for ready descriptors or timeout,
            what ever comes first.
         */
+
+        noOfDesc++;
+
         rv = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
 
 
