@@ -287,7 +287,7 @@ void    trdp_mdUpdatePacket (
     if(pElement->pPacket->frameHead.datasetLength > 0)
     {
         myCRC1 = vos_crc32(myCRC1,
-                           &pElement->pPacket->data[0],
+                           &pElement->pPacket->data,
                            vos_ntohl(pElement->pPacket->frameHead.datasetLength));
         *pFCS = MAKE_LE(myCRC1);
     }
@@ -832,7 +832,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                           appHandle->mdDefault.pRefCon,
                                           appHandle,
                                           &theMessage,
-                                          (UINT8 *)&(iterMD->pPacket->data[0]),
+                                          (UINT8 *)&(iterMD->pPacket->data/*[0]*/),
                                           vos_ntohl(iterMD->pPacket->frameHead.datasetLength));
     }
     
@@ -2152,12 +2152,12 @@ TRDP_ERR_T trdp_mdCommonSend (
         {
             TRDP_TIME_T nextTime;
             TRDP_TIME_T tv_interval;
+            UINT32 tmo = 0;
             
             /* evaluate start time and timeout. For notify I use replyTimeout as sendTimeout */
             vos_getTime(&nextTime);
             
             {
-                UINT32 tmo = 0;
                 switch(msgType)
                 {
                     case TRDP_MSG_MP: /* reply without confirm */
@@ -2223,50 +2223,41 @@ TRDP_ERR_T trdp_mdCommonSend (
             
             if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
             {
-                if (TRUE != newSession)
+                /* socket to send TCP MD */
+                errv = trdp_requestSocket(
+                                          appHandle->iface,
+                                          appHandle->mdDefault.tcpPort,
+                                          (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
+                                          srcIpAddr,
+                                          0,
+                                          TRDP_SOCK_MD_TCP,
+                                          TRDP_OPTION_NONE,
+                                          FALSE,
+                                          &pSenderElement->socketIdx,
+                                          destIpAddr);
+
+                if (TRDP_NO_ERR != errv)
                 {
-                    pSenderElement->connectDone    = TRUE;
+                    /* Error getting socket */
+                    break;
                 }
                 else
                 {
-                    if (msgType == TRDP_MSG_MN || msgType == TRDP_MSG_MR)
+                    if(appHandle->iface[pSenderElement->socketIdx].usage > 1)
                     {
-                        /* socket to send TCP MD */
-                        errv = trdp_requestSocket(
-                                                  appHandle->iface,
-                                                  appHandle->mdDefault.tcpPort,
-                                                  (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
-                                                  srcIpAddr,
-                                                  0,
-                                                  TRDP_SOCK_MD_TCP,
-                                                  TRDP_OPTION_NONE,
-                                                  FALSE,
-                                                  &pSenderElement->socketIdx,
-                                                  destIpAddr);
-                        
-                        if (TRDP_NO_ERR != errv)
-                        {
-                            /* Error getting socket */
-                            break;
-                        }
-                        else
-                        {
-                            if(appHandle->iface[pSenderElement->socketIdx].usage > 1)
-                            {
-                                pSenderElement->connectDone = TRUE;
-                            }
-                            else if(appHandle->iface[pSenderElement->socketIdx].usage == 0)
-                            {
-                                appHandle->iface[pSenderElement->socketIdx].usage++;
-                                pSenderElement->connectDone = TRUE;
-                            }
-                            else
-                            {
-                                pSenderElement->connectDone = FALSE;
-                            }
-                        }
+                        pSenderElement->connectDone = TRUE;
+                    }
+                    else if(appHandle->iface[pSenderElement->socketIdx].usage == 0)
+                    {
+                        appHandle->iface[pSenderElement->socketIdx].usage++;
+                        pSenderElement->connectDone = TRUE;
+                    }
+                    else
+                    {
+                        pSenderElement->connectDone = FALSE;
                     }
                 }
+                        
             }
             else if (TRUE == newSession && -1 == pSenderElement->socketIdx)
             {
@@ -2364,7 +2355,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(dataSize);
             pSenderElement->pPacket->frameHead.replyStatus      = vos_htonl(replyStatus);
             memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, sizeof(TRDP_UUID_T));
-            pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(replyTimeout);
+            pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(tmo);
             
             if (sourceURI != NULL)
             {
@@ -2377,10 +2368,10 @@ TRDP_ERR_T trdp_mdCommonSend (
             }
             
             /* payload */
-            if (pData != NULL && dataSize > 0)
+            if ((pData != NULL) && (dataSize > 0) && (dataSize <= TRDP_MAX_MD_PACKET_SIZE))
             {
                 /* Copy payload */
-                memcpy(&pSenderElement->pPacket->data[0], pData, dataSize);
+                memcpy(&pSenderElement->pPacket->data, pData, dataSize);
                 {
                     /* zero padding (as required) */
                     int ix = dataSize;
@@ -2389,6 +2380,9 @@ TRDP_ERR_T trdp_mdCommonSend (
                         pSenderElement->pPacket->data[ix++] = 0;
                     }
                 }
+            }else
+            {
+                return TRDP_MEM_ERR;
             }
             
             /* Insert element in send queue */
