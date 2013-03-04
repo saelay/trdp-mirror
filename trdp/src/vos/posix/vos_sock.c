@@ -944,7 +944,13 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     if (connect(sock, (const struct sockaddr *) &dstAddress,
                 sizeof(dstAddress)) == -1)
     {
-        if (errno != EINPROGRESS)
+        if (    (err == EINPROGRESS)
+             || (err == EWOULDBLOCK)
+             || (err == EALREADY))
+        {
+            return VOS_BLOCK_ERR;
+        }
+        else if (err != EISCONN)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
             strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);

@@ -968,7 +968,13 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     {
         int err = WSAGetLastError();
 
-        if (err != WSAEINPROGRESS)
+        if (    (err == WSAEINPROGRESS)
+             || (err == WSAEWOULDBLOCK)
+             || (err == WSAEALREADY))
+        {
+            return VOS_BLOCK_ERR;
+        }
+        else if (err != WSAEISCONN)
         {
             vos_printf(VOS_LOG_WARNING, "connect() failed (Err: %d)\n", err);
             return VOS_IO_ERR;
