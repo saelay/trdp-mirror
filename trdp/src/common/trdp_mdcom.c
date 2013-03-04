@@ -287,7 +287,7 @@ void    trdp_mdUpdatePacket (
     if(pElement->pPacket->frameHead.datasetLength > 0)
     {
         myCRC1 = vos_crc32(myCRC1,
-                           &pElement->pPacket->data,
+                           pElement->pPacket->data,
                            vos_ntohl(pElement->pPacket->frameHead.datasetLength));
         *pFCS = MAKE_LE(myCRC1);
     }
@@ -832,7 +832,7 @@ TRDP_ERR_T  trdp_mdRecv (
                                           appHandle->mdDefault.pRefCon,
                                           appHandle,
                                           &theMessage,
-                                          (UINT8 *)&(iterMD->pPacket->data/*[0]*/),
+                                          (UINT8 *)(iterMD->pPacket->data),
                                           vos_ntohl(iterMD->pPacket->frameHead.datasetLength));
     }
     
@@ -2347,7 +2347,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             }
             
             /* Prepare header */
-            pSenderElement->pPacket->frameHead.sequenceCounter = sequenceCounter;
+            pSenderElement->pPacket->frameHead.sequenceCounter  = sequenceCounter;
             pSenderElement->pPacket->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
             pSenderElement->pPacket->frameHead.msgType          = vos_htons((UINT16) msgType);
             pSenderElement->pPacket->frameHead.comId            = vos_htonl(comId);
@@ -2355,7 +2355,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(dataSize);
             pSenderElement->pPacket->frameHead.replyStatus      = vos_htonl(replyStatus);
             memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, sizeof(TRDP_UUID_T));
-            pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(tmo);
+            pSenderElement->pPacket->frameHead.replyTimeout     = vos_htonl(tmo);
             
             if (sourceURI != NULL)
             {
@@ -2371,7 +2371,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             if ((pData != NULL) && (dataSize > 0) && (dataSize <= TRDP_MAX_MD_PACKET_SIZE))
             {
                 /* Copy payload */
-                memcpy(&pSenderElement->pPacket->data, pData, dataSize);
+                memcpy(pSenderElement->pPacket->data, pData, dataSize);
                 {
                     /* zero padding (as required) */
                     int ix = dataSize;
@@ -2380,7 +2380,8 @@ TRDP_ERR_T trdp_mdCommonSend (
                         pSenderElement->pPacket->data[ix++] = 0;
                     }
                 }
-            }else
+            }
+            else
             {
                 return TRDP_MEM_ERR;
             }

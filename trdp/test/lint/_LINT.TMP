@@ -55,9 +55,9 @@ Warning 526: 'ig_endian()' (line 618, file D:\TCNOpen\trunk\trdp\src\common\trdp
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
     618, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
-Warning 526: 'e()' (line 211, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
+Warning 526: 'e()' (line 212, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
     not defined
-Warning 628: no argument information provided for function 'e()' (line 211,
+Warning 628: no argument information provided for function 'e()' (line 212,
     file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
 Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
     not accessed
