@@ -116,7 +116,7 @@ TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
 
         vos_printf(VOS_LOG_INFO, "Socket information (listen_sd=%d)\n", pSession->tcpFd.listen_sd);
         FD_SET(pSession->tcpFd.listen_sd, (fd_set *)&pSession->tcpFd.master_set);
-        pSession->tcpFd.max_sd = pSession->tcpFd.listen_sd + 1;
+        pSession->tcpFd.max_sd = pSession->tcpFd.listen_sd;
 
         return TRDP_NO_ERR;
     }
@@ -1345,9 +1345,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     MD_LIS_ELE_T *iterListener;
 
                     FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
-                    if (appHandle->tcpFd.listen_sd >= *pNoDesc)
+                    if (appHandle->tcpFd.listen_sd > *pNoDesc)
                     {
-                        *pNoDesc = appHandle->tcpFd.listen_sd + 1;
+                        *pNoDesc = appHandle->tcpFd.listen_sd;
                     }
 
                     for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
@@ -1359,9 +1359,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                             if(FD_ISSET(appHandle->iface[index].sock, &appHandle->tcpFd.master_set))
                             {
                                 FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[index].sock >= *pNoDesc)
+                                if (appHandle->iface[index].sock > *pNoDesc)
                                 {
-                                    *pNoDesc = appHandle->iface[index].sock + 1;
+                                    *pNoDesc = appHandle->iface[index].sock;
                                 }
                             }
                             else
