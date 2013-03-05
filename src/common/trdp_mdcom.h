@@ -54,15 +54,15 @@ void trdp_mdUpdatePacket (
     MD_ELE_T *pPacket);
 
 TRDP_ERR_T  trdp_mdRecv (
-    TRDP_SESSION_PT appHandle,
-    INT32           sock,
-    MD_ELE_T        *pElement);
+    TRDP_SESSION_PT 	appHandle,
+    INT32           	sock,
+    TRDP_SOCK_TYPE_T	sockType);
 
 TRDP_ERR_T  trdp_mdSend (
     TRDP_SESSION_PT appHandle);
 
 void trdp_mdCheckListenSocks (
-    TRDP_SESSION_PT appHandle,
+    TRDP_SESSION_PT 	appHandle,
     TRDP_FDS_T          *pRfds,
     INT32               *pCount);
 
