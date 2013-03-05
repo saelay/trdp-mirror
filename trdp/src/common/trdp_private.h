@@ -229,7 +229,7 @@ typedef struct
 typedef struct PD_ELE
 {
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                        */
-    UINT32                magic;                    /**< prevent acces through dangeling pointer                */
+    UINT32              magic;                  /**< prevent acces through dangeling pointer                */
     TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
     TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip       */
     UINT32              redId;                  /**< Redundancy group ID or zero                            */
@@ -247,10 +247,11 @@ typedef struct PD_ELE
     TRDP_TO_BEHAVIOR_T  toBehavior;             /**< timeout behavior for packets                           */
     UINT32              dataSize;               /**< net data size                                          */
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    UINT32              sendSize;               /**< data size sent out                                     */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
     const void          *userRef;               /**< from subscribe()                                       */
-    PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                              */
+    PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                               */
 } PD_ELE_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
 /** Queue element for MD listeners    */
@@ -279,6 +280,7 @@ typedef struct MD_ELE
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
     INT32               dataSize;               /**< net data size                                          */
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    UINT32              sendSize;               /**< data size sent out                                     */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
     UINT16              replyPort;              /**< replies are sent to the requesters source port         */
