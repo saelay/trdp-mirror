@@ -1497,7 +1497,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
         vos_clearTime(&appHandle->interval);
 
         /******************************************************
-         Find and send the packets which has to be sent next:
+         Find and send the packets which have to be sent next:
          ******************************************************/
 
         err = trdp_pdSendQueued(appHandle);
@@ -2387,7 +2387,7 @@ TRDP_ERR_T tlm_addListener (
                     pNewElement->addr.mcGroup = 0;
                 }
 
-                if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) == 0)
+                if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) == 0)
                 {
                     /* socket to receive UDP MD */
                     errv = trdp_requestSocket(
@@ -2418,7 +2418,7 @@ TRDP_ERR_T tlm_addListener (
                     appHandle->pMDListenQueue = pNewElement;
 
                     /* Statistics */
-                    if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                    if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) != 0)
                     {
                         appHandle->stats.tcpMd.numList++;
                     }
@@ -2754,7 +2754,7 @@ TRDP_ERR_T tlm_replyErr (
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        out of memory
- *  @retval         TRDP_NO_SESSION_ERR no such session
+ *  @retval         TRDP_NOSESSION_ERR  no such session
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 TRDP_ERR_T tlm_confirm (
@@ -2794,4 +2794,73 @@ TRDP_ERR_T tlm_confirm (
                destURI
                );
 }
+
+/**********************************************************************************************************************/
+/** Cancel an open session.
+ *  Abort an open session; any pending messages will be dropped; session id set to zero
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in,out]  pSessionId          Session ID returned by request
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_NOSESSION_ERR no such session
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlm_abortSession (
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_UUID_T         *pSessionId)
+{
+    MD_ELE_T    *iterMD = appHandle->pMDSndQueue;
+    BOOL        firstLoop = TRUE;
+    TRDP_ERR_T	err = TRDP_NOSESSION_ERR;
+    
+    if (!trdp_isValidSession(appHandle))
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    
+    if (pSessionId == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    /* lock mutex */
+    
+    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        return TRDP_NOINIT_ERR;
+    }
+
+    /*  Find the session which needs to be killed. Actual release will be done in tlc_process().
+     	Note: We must also check the receive queue for pending replies! */
+    do
+    {        
+        /*  Switch to receive queue */
+        if (NULL == iterMD && TRUE == firstLoop)
+        {
+            iterMD = appHandle->pMDRcvQueue;
+            firstLoop = FALSE;
+        }
+        
+        if (NULL != iterMD)
+        {
+           	if (vos_strnicmp((CHAR8*)iterMD->sessionID, (CHAR8*) pSessionId, sizeof(TRDP_UUID_T)) == 0)
+            {
+            	iterMD->morituri = TRUE;
+                err = TRDP_NO_ERR;
+            }
+            iterMD = iterMD->pNext;
+        }
+    }
+    while (iterMD != NULL);
+
+    /* Release mutex */
+    if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+    }
+
+    return err;
+}
+
 #endif
