@@ -280,7 +280,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *
  *  @param[in]      sock               socket descriptor
  *  @param[in]      pBuffer            pointer to data to send
- *  @param[in]      size               size of the data to send
+ *  @param[in,out]  pSize              In: size of the data to send, Out: no of bytes sent
  *  @param[in]      ipAddress          destination IP
  *  @param[in]      port               destination port
  *
@@ -293,7 +293,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
     INT32       sock,
     const UINT8 *pBuffer,
-    UINT32      size,
+    UINT32      *pSize,
     UINT32      ipAddress,
     UINT16      port);
 
@@ -407,19 +407,18 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pBuffer         pointer to data to send
- *  @param[in]      size            size of the data to send
+ *  @param[in,out]  pSize           In: size of the data to send, Out: no of bytes sent
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
- *  @retval         VOS_NODATA_ERR  no data was sent in non-blocking
- *  @retval         VOS_BLOCK_ERR   call would have blocked in blocking mode
+ *  @retval         VOS_BLOCK_ERR   call would have blocked in blocking mode, data partially sent
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
     INT32       sock,
     const UINT8 *pBuffer,
-    UINT32      size);
+    UINT32      *pSize);
 
 /**********************************************************************************************************************/
 /** Receive TCP data.
@@ -443,8 +442,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     INT32   sock,
     UINT8   *pBuffer,
-    UINT32  *pSize
-    );
+    UINT32  *pSize);
 
 /**********************************************************************************************************************/
 /** Set Using Multicast I/F
