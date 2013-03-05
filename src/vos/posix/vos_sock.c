@@ -221,8 +221,8 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
         if (ioctl(sock, SIOCGIFHWADDR, &gIfr) < 0)
         {
-        	vos_printf(VOS_LOG_ERROR, "Could not fetch IFHW address on %s\n", gIfr.ifr_name);
-			return VOS_SOCK_ERR;
+            vos_printf(VOS_LOG_ERROR, "Could not fetch IFHW address on %s\n", gIfr.ifr_name);
+            return VOS_SOCK_ERR;
         }
 
         close(sock);
@@ -605,7 +605,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pBuffer         pointer to data to send
- *  @param[in]      size            size of the data to send
+ *  @param[in,out]  pSize           In: size of the data to send, Out: no of bytes sent
  *  @param[in]      ipAddress       destination IP
  *  @param[in]      port            destination port
  *
@@ -618,17 +618,21 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
     INT32       sock,
     const UINT8 *pBuffer,
-    UINT32      size,
+    UINT32      *pSize,
     UINT32      ipAddress,
     UINT16      port)
 {
     struct sockaddr_in destAddr;
-    ssize_t sendSize = 0;
+    ssize_t sendSize    = 0;
+    size_t  size        = 0;
 
-    if (sock == -1 || pBuffer == NULL)
+    if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
+
+    size    = *pSize;
+    *pSize  = 0;
 
     /*      We send UDP packets to the address  */
     memset(&destAddr, 0, sizeof(destAddr));
@@ -645,6 +649,11 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
                              0,
                              (struct sockaddr *) &destAddr,
                              sizeof(destAddr));
+
+        if (sendSize >= 0)
+        {
+            *pSize += sendSize;
+        }
 
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
@@ -944,9 +953,9 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     if (connect(sock, (const struct sockaddr *) &dstAddress,
                 sizeof(dstAddress)) == -1)
     {
-        if (    (errno == EINPROGRESS)
-             || (errno == EWOULDBLOCK)
-             || (errno == EALREADY))
+        if ((errno == EINPROGRESS)
+            || (errno == EWOULDBLOCK)
+            || (errno == EALREADY))
         {
             return VOS_BLOCK_ERR;
         }
@@ -967,7 +976,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pBuffer         pointer to data to send
- *  @param[in]      size            size of the data to send
+ *  @param[in,out]  pSize           In: size of the data to send, Out: no of bytes sent
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
@@ -978,15 +987,18 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
     INT32       sock,
     const UINT8 *pBuffer,
-    UINT32      size)
+    UINT32      *pSize)
 {
     ssize_t sendSize    = 0;
-    size_t  bufferSize  = (size_t) size;
+    size_t  bufferSize  = 0;
 
-    if (sock == -1 || pBuffer == NULL)
+    if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
+
+    bufferSize  = (size_t) *pSize;
+    *pSize      = 0;
 
     /* Keep on sending until we got rid of all data or we received an unrecoverable error */
     do
@@ -996,6 +1008,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
         {
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
+            *pSize      += sendSize;
         }
         if(sendSize == -1 && errno == EWOULDBLOCK)
         {
