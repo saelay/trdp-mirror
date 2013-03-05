@@ -561,7 +561,6 @@ TRDP_ERR_T  trdp_mdRecv (
        appHandle->pMDRcvEle->pPacket->frameHead.sessionID[7],
        vos_ntohl(appHandle->pMDRcvEle->pPacket->frameHead.datasetLength));
 
-    /* Display incoming header */
     /* TCP cornerIp */
     if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
     {
@@ -2165,7 +2164,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             /* vos_printf(VOS_LOG_ERROR, "numRetriesMax: %u, %u, %u, \n", pSenderElement->numRetriesMax, (pSendParam !=
              NULL) ? pSendParam->retries : 100000,  appHandle->mdDefault.sendParam.retries); */
             
-            if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+            if((pktFlags & TRDP_FLAGS_TCP) != 0)
             {
                 /* No multiple replies expected for TCP */
                 pSenderElement->noOfRepliers = 1;
@@ -2187,7 +2186,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                 pSenderElement->noOfRepliers = 1;
             }
             
-            if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+            if ((pktFlags & TRDP_FLAGS_TCP) != 0)
             {
                 /* socket to send TCP MD */
                 errv = trdp_requestSocket(
@@ -2355,7 +2354,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             /* Insert element in send queue */
             if (TRUE == newSession)
             {
-                if((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
+                if((pktFlags & TRDP_FLAGS_TCP) != 0)
                 {
                     trdp_MDqueueAppLast(&appHandle->pMDSndQueue, pSenderElement);
                 }
