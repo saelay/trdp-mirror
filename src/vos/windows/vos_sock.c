@@ -630,7 +630,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pBuffer         pointer to data to send
- *  @param[in]      size            size of the data to send
+ *  @param[in,out]  pSize           IN: bytes to send, OUT: bytes sent
  *  @param[in]      ipAddress       destination IP
  *  @param[in]      port            destination port
  *
@@ -643,18 +643,24 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
     INT32       sock,
     const UINT8 *pBuffer,
-    UINT32      size,
+    UINT32      *pSize,
     UINT32      ipAddress,
     UINT16      port)
 {
     struct sockaddr_in destAddr;
     int sendSize    = 0;
+    int size        = 0;
     int err         = 0;
 
-    if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL )
+    if (    (sock == (INT32)INVALID_SOCKET)
+         || (pBuffer == NULL)
+         || (pSize   == NULL) )
     {
         return VOS_PARAM_ERR;
     }
+
+    size = *pSize;
+    *pSize = 0;
 
     /*      We send UDP packets to the address  */
     memset(&destAddr, 0, sizeof(destAddr));
@@ -671,6 +677,11 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
                           (struct sockaddr *) &destAddr,
                           sizeof(destAddr));
         err = WSAGetLastError();
+
+        if (sendSize >= 0)
+        {
+            *pSize += sendSize;
+        }
 
         if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
@@ -989,7 +1000,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *
  *  @param[in]      sock            socket descriptor
  *  @param[in]      pBuffer         pointer to data to send
- *  @param[in]      size            size of the data to send
+ *  @param[in,out]  pSize           IN: bytes to send, OUT: bytes sent
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
@@ -1000,16 +1011,21 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
     INT32       sock,
     const UINT8 *pBuffer,
-    UINT32      size)
+    UINT32      *pSize)
 {
     int sendSize    = 0;
-    int bufferSize  = (int) size;
+    int bufferSize;
     int err         = 0;
 
-    if (sock == (INT32)INVALID_SOCKET )
+    if (    (sock == (INT32)INVALID_SOCKET )
+         || (pBuffer == NULL)
+         || (pSize == NULL) )
     {
         return VOS_PARAM_ERR;
     }
+
+    bufferSize  = (int) *pSize;
+    *pSize      = 0;
 
     /*    Keep on sending until we got rid of all data or we received an unrecoverable error    */
     do
@@ -1021,6 +1037,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
         {
             bufferSize  -= sendSize;
             pBuffer     += sendSize;
+            *pSize      += sendSize;
         }
 
         if(sendSize == -1 && err == WSAEWOULDBLOCK)

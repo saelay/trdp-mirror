@@ -684,17 +684,26 @@ TRDP_ERR_T  trdp_pdSend (
 #if 0
     pPacket->frameHead.frameCheckSum = 0x12345678;
 #endif
+    pPacket->sendSize = pPacket->grossSize;
+
     err = vos_sockSendUDP(pdSock,
                           (UINT8 *)&pPacket->pFrame->frameHead,
-                          pPacket->grossSize,
+                          &pPacket->sendSize,  
                           destIp,
                           port);
-
+    
     if (err != VOS_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "trdp_pdSend failed\n");
         return TRDP_IO_ERR;
     }
+
+    if (pPacket->sendSize != pPacket->grossSize)
+    {
+        vos_printf(VOS_LOG_ERROR, "trdp_pdSend incomplete\n");
+        return TRDP_IO_ERR;
+    }
+
     return TRDP_NO_ERR;
 }
 

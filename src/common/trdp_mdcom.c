@@ -304,20 +304,22 @@ void    trdp_mdUpdatePacket (
 TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
     UINT32          port,
-    const MD_ELE_T  *pElement)
+    MD_ELE_T       *pElement)
 {
     VOS_ERR_T err = VOS_NO_ERR;
 
+     pElement->sendSize =  pElement->grossSize;
+
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
-        err = vos_sockSendTCP(pdSock, (UINT8 *)&pElement->pPacket->frameHead, pElement->grossSize);
+        err = vos_sockSendTCP(pdSock, (UINT8 *)&pElement->pPacket->frameHead, &pElement->sendSize);
 
     }
     else
     {
         err = vos_sockSendUDP(pdSock,
                               (UINT8 *)&pElement->pPacket->frameHead,
-                              pElement->grossSize,
+                              &pElement->sendSize,
                               pElement->addr.destIpAddr,
                               port);
     }
@@ -327,6 +329,13 @@ TRDP_ERR_T  trdp_mdSendPacket (
         vos_printf(VOS_LOG_ERROR, "vos_sockSend failed (Err: %d)\n", err);
         return TRDP_IO_ERR;
     }
+
+    if (pElement->sendSize != pElement->grossSize)
+    {
+        vos_printf(VOS_LOG_ERROR, "vos_sockSend incomplete\n");
+        return TRDP_IO_ERR;
+    }
+
 
     return TRDP_NO_ERR;
 }
