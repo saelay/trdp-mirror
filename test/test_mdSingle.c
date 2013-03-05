@@ -78,6 +78,7 @@ void usage (const char *appName)
            "Arguments are:\n"
            "-o <own IP address> in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
+           "-p <TCP|UDP>\n"
            "-r    be responder\n"
            "-c    respond with confirmation\n"
            "-n    notify only\n"
@@ -252,12 +253,12 @@ int main (int argc, char *argv[])
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
-    int     rv      = 0;
-    UINT32  destIP  = 0;
-    UINT32  ownIP   = 0;
-    UINT32  counter = 0;
-
-    int     ch;
+    int          rv      = 0;
+    UINT32       destIP  = 0;
+    UINT32       ownIP   = 0;
+    UINT32       counter = 0;
+    TRDP_FLAGS_T flags = TRDP_FLAGS_CALLBACK; /* default settings: callback and UDP */
+    int          ch;
 
     if (argc <= 1)
     {
@@ -265,7 +266,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:h?vrcn01")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:p:h?vrcn01")) != -1)
     {
         switch (ch)
         {
@@ -289,6 +290,22 @@ int main (int argc, char *argv[])
                     exit(1);
                 }
                 destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
+            case 'p':
+            {   /*  determine protocol    */
+                if (strcmp(optarg,"TCP") == 0)
+                {
+                    flags |= TRDP_FLAGS_TCP;
+                }
+                else if (strcmp(optarg,"UDP") == 0)
+                {
+                }
+                else
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
                 break;
             }
             case 'v':   /*  version */
@@ -351,7 +368,8 @@ int main (int argc, char *argv[])
                         ownIP,
                         0,                         /* use default IP address    */
                         NULL,                      /* no Marshalling            */
-                        NULL, &mdConfiguration,    /* system defaults for PD    */
+                        NULL, 
+                        &mdConfiguration,    /* system defaults for PD    */
                         &processConfig) != TRDP_NO_ERR)
     {
         printf("tlc_openSession error\n");
@@ -362,7 +380,7 @@ int main (int argc, char *argv[])
     if (sSessionData.sResponder == TRUE)
     {
         if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle, NULL, sSessionData.sComID, 0, destIP,
-                            TRDP_FLAGS_CALLBACK, NULL) != TRDP_NO_ERR)
+                            flags, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error\n");
             return 1;
@@ -446,13 +464,13 @@ int main (int argc, char *argv[])
 				if (sSessionData.sNoData == TRUE)
                 {
                 	tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
-                          		destIP, TRDP_FLAGS_CALLBACK, NULL,  NULL, 0, 0, 0);
+                          		destIP, flags, NULL,  NULL, 0, 0, 0);
                     
                 }
                 else
                 {
                 	tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
-                          	destIP, TRDP_FLAGS_CALLBACK, NULL,  (const UINT8*) "Hello, World", 13, 0, 0);
+                          	destIP, flags, NULL,  (const UINT8*) "Hello, World", 13, 0, 0);
                     
                 }
 
@@ -464,12 +482,12 @@ int main (int argc, char *argv[])
                 {
                     
             		tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        		destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, NULL, 0, 0, 0);
+                        		destIP, flags, 1, 0, NULL, NULL, 0, 0, 0);
                 }
              	else
                 {
                 	tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        	destIP, TRDP_FLAGS_CALLBACK, 1, 0, NULL, (const UINT8*) "How are you?", 13, 0, 0);
+                        	destIP, flags, 1, 0, NULL, (const UINT8*) "How are you?", 13, 0, 0);
                 }
             }
             printf("\n");
