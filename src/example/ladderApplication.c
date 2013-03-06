@@ -189,7 +189,6 @@ int main (void)
 							NULL,                   				/* no Marshalling		*/
 							&pdConfiguration, NULL,					/* system defaults for PD and MD		*/
 							&processConfig) != TRDP_NO_ERR)
-
 	{
 		printf("Sub-network Id1 Initialization error (tlc_openSession)\n");
 		return 1;
@@ -208,7 +207,6 @@ int main (void)
 							NULL,				                   	/* no Marshalling		*/
 							&pdConfiguration2, NULL,				/* system defaults for PD and MD		*/
 							&processConfig2) != TRDP_NO_ERR)
-
 	{
 		printf("Sub-network Id2 Initialization error (tlc_openSession)\n");
 		return 1;
@@ -223,6 +221,7 @@ int main (void)
                          PD_COMID1_SRC_IP,         	/* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
                          PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+                         0,								/* Option */
                          PD_COMID1_TIMEOUT,         /* Time out in us	*/
                          TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
                          PD_DATA_SIZE_MAX);         /* net data size */
@@ -248,6 +247,7 @@ int main (void)
                          PD_COMID1_SRC_IP2,         /* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
                          PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+                         0,								/* Option */
                          PD_COMID1_TIMEOUT,         /* Time out in us	*/
                          TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
                          PD_DATA_SIZE_MAX);         /* net data size */
@@ -272,10 +272,7 @@ int main (void)
                         TRDP_FLAGS_NONE,				/* Don't use callback for errors */
                         NULL,							/* default qos and ttl */
                         firstPutData,					/* initial data */
-                        PD_DATA_SIZE_MAX,				/* data size */
-                        TRUE,							/* substitution : Ladder */
-                        OFFSET_ADDRESS1);				/* offsetAddress */
-
+                        PD_DATA_SIZE_MAX);			/* data size */
     if (err != TRDP_NO_ERR)
     {
         printf("prep Sub-network Id1 pd publish error\n");
@@ -296,10 +293,7 @@ int main (void)
                         TRDP_FLAGS_NONE,				/* Don't use callback for errors */
                         NULL,							/* default qos and ttl */
                         firstPutData,					/* initial data */
-                        PD_DATA_SIZE_MAX,				/* data size */
-                        TRUE,							/* substitution : Ladder */
-                        OFFSET_ADDRESS1);				/* offsetAddress */
-
+                        PD_DATA_SIZE_MAX);			/* data size */
     if (err != TRDP_NO_ERR)
     {
         printf("prep Sub-network Id2 pd publish error\n");

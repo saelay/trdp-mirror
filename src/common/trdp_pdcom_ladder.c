@@ -38,6 +38,7 @@
 /** callback function PD receive
  *
  *  @param[in]		pRefCon			user supplied context pointer
+ *  @param[in]		appHandle			application handle returned by tlc_opneSession
  *  @param[in]		pPDInfo			pointer to PDInformation
  *  @param[in]		pData			pointer to receive PD Data
  *  @param[in]		dataSize        receive PD Data Size
@@ -45,6 +46,7 @@
  */
 void tlp_recvPdDs (
     void *pRefCon,
+    TRDP_APP_SESSION_T appHandle,
     const TRDP_PD_INFO_T *pPDInfo,
     UINT8 *pData,
     UINT32 dataSize)
@@ -55,7 +57,8 @@ void tlp_recvPdDs (
 
 	/* check parameter */
 /*	if ((pRefCon == NULL) || (pData == NULL) || (dataSize == 0)) */
-	if ((pData == NULL) || (dataSize == 0))
+/*	if ((pData == NULL) || (dataSize == 0)) */
+	if ((pData == NULL) || (dataSize == 0) || (pPDInfo->pUserRef == 0))
 	{
        vos_printf(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
 		return;
@@ -201,29 +204,6 @@ VOS_THREAD_FUNC_T PDComLadder (void)
 		tlc_process(appHandle2, (TRDP_FDS_T *) &rfds, &rv);
 
 	}   /*	Bottom of while-loop	*/
-
-	/*
-	*	We always clean up behind us!
-	*/
-	tlp_unpublish(appHandle, pubHandleNet1ComId1);
-	tlp_unsubscribe(appHandle, subHandleNet1ComId1);
-	/* Is this Ladder Topology ? */
-	if (ladderTopologyFlag == TRUE)
-	{
-		tlp_unpublish(appHandle2, pubHandleNet2ComId1);
-		tlp_unsubscribe(appHandle2, subHandleNet2ComId1);
-	}
-	tlc_terminate();
-
-	tlp_unpublish(appHandle, pubHandleNet1ComId2);
-	tlp_unsubscribe(appHandle, subHandleNet1ComId2);
-	/* Is this Ladder Topology ? */
-	if (ladderTopologyFlag == TRUE)
-	{
-		tlp_unpublish(appHandle2, pubHandleNet2ComId2);
-		tlp_unsubscribe(appHandle2, subHandleNet2ComId2);
-	}
-	tlc_terminate();
 
 	return NULL;
 }

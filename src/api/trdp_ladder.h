@@ -26,6 +26,7 @@
  * INCLUDES
  */
 #include "trdp_types.h"
+#include "vos_shared_mem.h"
 
 #ifdef __cplusplus
 extern "C" {
