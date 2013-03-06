@@ -27,6 +27,7 @@
  */
 
 #include <pthread.h>
+#include <sys/types.h>
 
 #include "vos_types.h"
 #include "vos_thread.h"

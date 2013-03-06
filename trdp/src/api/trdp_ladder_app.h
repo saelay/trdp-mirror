@@ -30,10 +30,20 @@ extern "C" {
 #endif
 
 #include "vos_thread.h"
+#include "trdp_utils.h"
 
 /***********************************************************************************************************************
  * DEFINES
  */
+
+/* PD Application Version */
+#ifdef LITTLE_ENDIAN
+#define PD_APP_VERSION	"V0.01"
+#elif BIG_ENDIAN
+#define PD_APP_VERSION	"V0.01"
+#else
+#define PD_APP_VERSION	"V0.01"
+#endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
 #define PDCOM_LADDER_THREAD_DELAY_TIME				10000				/* PDComLadder Thread starting Judge Cycle in us */
@@ -42,7 +52,7 @@ extern "C" {
 
 /* Some sample comId definitions	*/
 #define PD_DATA_SIZE_MAX			300					/* PD DATA MAX SIZE */
-#define LADDER_APP_CYCLE			500000				/* Ladder Application data put cycle in us */
+//#define LADDER_APP_CYCLE			500000				/* Ladder Application data put cycle in us */
 
 /* Subscribe for Sub-network Id1 */
 #define PD_COMID1_DATA_SIZE		32
@@ -58,10 +68,61 @@ extern "C" {
 	((UINT32)((a) & 0xFF) << 24) | ((UINT32)((b) & 0xFF) << 16) | ((UINT32)((c) & 0xFF) << 8) | ((UINT32)((d) & 0xFF)) : \
 	((UINT32)((d) & 0xFF) << 24) | ((UINT32)((c) & 0xFF) << 16) | ((UINT32)((b) & 0xFF) << 8) | ((UINT32)((a) & 0xFF)))
 */
+/* Input Command */
+#define GET_COMMAND_MAX				1000			/* INPUT COMMAND MAX */
+#define SPACE							 ' '			/* SPACE Character */
 
 /***********************************************************************************************************************
  * TYPEDEFS
  */
+/* PD Application Error Type definition */
+typedef enum
+{
+    PD_APP_NO_ERR			= 0,			/**< PD Application No Error */
+    PD_APP_ERR			= -1,			/**< PD Application Error */
+    PD_APP_PARAM_ERR		= -2,			/**< PD Application Parameter Error */
+    PD_APP_MEM_ERR		= -3,			/**< PD Application Memory Error */
+    PD_APP_THREAD_ERR	= -4,			/**< PD Application Thread Error */
+    PD_APP_MUTEX_ERR		= -5			/**< PD Application Thread Mutex Error */
+} PD_APP_ERR_TYPE;
+
+/* Command Value */
+typedef struct
+{
+//	BOOL ladderTopologyFlag;						/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
+	UINT16 OFFSET_ADDRESS1;						/* offsetAddress comId1 publish */
+	UINT16 OFFSET_ADDRESS2;						/* offsetAddress comId2 publish */
+	UINT16 OFFSET_ADDRESS3;						/* offsetAddress comId1 subscribe */
+	UINT16 OFFSET_ADDRESS4;						/* offsetAddress comId2 subscribe */
+	UINT32	LADDER_APP_CYCLE;						/* Ladder Application cycle in us */
+	UINT32 PD_PUB_COMID1;						/* Publish ComId1 */
+//	UINT32 PD_PUB_COMID2;						/* Publish ComId2 */
+	UINT32 PD_SUB_COMID1;						/* Subscribe ComId1 */
+//	UINT32 PD_SUB_COMID2;						/* Subscribe ComId2 */
+	TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP1;		/* Subscribe ComId1 Source IP1 */
+	TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP2;		/* Subscribe ComId1 Source IP2 */
+	TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP1;		/* Subscribe ComId1 Destination IP1 */
+	TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP2;		/* Subscribe ComId1 Destination IP2 */
+//	TRDP_IP_ADDR_T PD_COMID2_SUB_SRC_IP1;		/* Subscribe ComId2 Source IP1 */
+//	TRDP_IP_ADDR_T PD_COMID2_SUB_SRC_IP2;		/* Subscribe Comid2 Source IP2 */
+//	TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP1;		/* Subscribe ComId2 Destination IP1 */
+//	TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP2;		/* Subscribe ComId2 Destination IP2 */
+	TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP1;		/* Publish ComID1 Destination IP1 */
+	TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP2;		/* Publish ComID1 Destination IP2 */
+//	TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP1;		/* Publish ComID2 Destination IP1 */
+//	TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP2;		/* Publish ComID2 Destination IP2 */
+	UINT32 PD_COMID1_TIMEOUT;				    /* Subscribe ComId1 Timeout : Macro second */
+//	UINT32 PD_COMID2_TIMEOUT;				    /* Subscribe ComId2 Timeout : Macro second */
+	UINT32 PD_COMID1_CYCLE;						/* Publish ComID1 Cycle TIme */
+//	UINT32 PD_COMID2_CYCLE;						/* Publish ComID2 Cycle TIme */
+	UINT32 TS_SUBNET;								/* Traffic Store Using Subnet */
+} PD_COMMAND_VALUE;
+
+/* PD Thread Parameter */
+typedef struct
+{
+	PD_COMMAND_VALUE *pPdCommandValue;
+} PD_THREAD_PARAMETER;
 
 /**	DataSet definition	*/
 typedef struct
@@ -167,6 +228,7 @@ extern UINT32	publisherAppCycle;			/* Publisher Application cycle in us */
 /** callback function PD receive
  *
  *  @param[in]		pRefCon			user supplied context pointer (offsetAddress)
+ *  @param[in]		appHandle			application handle returned by tlc_opneSession
  *  @param[in]		pPDInfo			pointer to PDInformation
  *  @param[in]		pData			pointer to receive PD Data
  *  @param[in]		dataSize        receive PD Data Size
@@ -174,6 +236,7 @@ extern UINT32	publisherAppCycle;			/* Publisher Application cycle in us */
  */
 void tlp_recvPdDs (
     void *pRefCon,
+    TRDP_APP_SESSION_T appHandle,
     const TRDP_PD_INFO_T *pPDInfo,
     UINT8 *pData,
     UINT32 dataSize);
@@ -203,6 +266,98 @@ INT8 dumpMemory (
  */
 VOS_THREAD_FUNC_T PDComLadder (
 		void);
+
+/**********************************************************************************************************************/
+/** Decide Create Thread
+ *
+ *  @param[in]		argc
+ *  @param[in]		argv
+ *  @param[in]		pPdCommandValue			pointer to Command Value
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ *  @retval         PD_APP_THREAD_ERR				error
+ *
+ */
+PD_APP_ERR_TYPE decideCreatePdThread (
+		int argc,
+		char *argv[],
+		PD_COMMAND_VALUE *pPdCommandValue);
+
+/**********************************************************************************************************************/
+/** Get PD Application Thread accessibility.
+ *
+ *  @retval         PD_APP_NO_ERR			no error
+ *  @retval         PD_APP_MUTEX_ERR		mutex error
+ */
+PD_APP_ERR_TYPE  lockPdApplicationThread (
+    void);
+
+/**********************************************************************************************************************/
+/** Release PD Application Thread accessibility.
+ *
+ *  @retval         PD_APP_NO_ERR			no error
+ *  @retval         PD_APP_MUTEX_ERR		mutex error
+ *
+  */
+PD_APP_ERR_TYPE  unlockPdApplicationThread (
+    void);
+
+/**********************************************************************************************************************/
+/** Create PD Thread
+ *
+ *  @param[in]		pPdThreadParameter			pointer to PDThread Parameter
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_THREAD_ERR				Thread error
+ *
+ */
+PD_APP_ERR_TYPE createPdThread (
+		PD_THREAD_PARAMETER *pPdThreadParameter);
+
+/**********************************************************************************************************************/
+/** main thread main loop process
+ *
+ *  @param[in]		void
+ *
+ *  @retval         0					no error
+ *  @retval         1					error
+ */
+PD_APP_ERR_TYPE pdCommand_main_proc(
+		void);
+
+/**********************************************************************************************************************/
+/** analyze command
+ *
+ *  @param[in]		void
+ *
+ *  @retval         PD_APP_NO_ERR			no error
+ *  @retval         PD_APP_ERR				error
+ */
+PD_APP_ERR_TYPE analyzePdCommand(
+		int argc,
+		char *argv[],
+		PD_COMMAND_VALUE *pPdCommandValue);
+
+/**********************************************************************************************************************/
+/** TRDP PD initialization
+ *
+ *  @retval         PD_APP_NO_ERR		no error
+ *  @retval         PD_APP_ERR			some error
+ */
+PD_APP_ERR_TYPE trdp_pdInitialize (
+		void);
+
+/**********************************************************************************************************************/
+/** PD Application main
+ *
+ *  @param[in]		pPDThreadParameter			pointer to PDThread Parameter
+ *
+ *  @retval         PD_APP_NO_ERR		no error
+ *  @retval         PD_APP_ERR			some error
+ */
+PD_APP_ERR_TYPE PDApplication (
+		PD_THREAD_PARAMETER *pPdThreadParameter);
 
 #endif	/* TRDP_OPTION_LADDER */
 

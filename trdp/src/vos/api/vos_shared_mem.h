@@ -28,6 +28,7 @@
 
 #include "vos_types.h"
 #include "vos_mem.h"
+#include "vos_private.h"
 
 #ifdef __cplusplus
 extern "C" {

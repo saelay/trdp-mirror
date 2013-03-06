@@ -83,42 +83,42 @@ UINT32 PD_COMID1_TIMEOUT = 1200000;				    /* Macro second */
 UINT32 PD_COMID2_TIMEOUT = 1200000;				    /* Macro second */
 TRDP_IP_ADDR_T PD_COMID1_SRC_IP = 0x0A040110;		/* Source IP: 10.4.1.16 */
 TRDP_IP_ADDR_T PD_COMID2_SRC_IP = 0x0A040110;		/* Source IP: 10.4.1.16 */
-TRDP_IP_ADDR_T PD_COMID1_DST_IP = 0xe60000C0;	    /* multicast Destination IP: 230.0.0.192 */
-TRDP_IP_ADDR_T PD_COMID2_DST_IP = 0xe60000C0;	    /* multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID1_DST_IP = 0xefff0101;	    /* multicast Destination IP: 239.255.1.1 */
+TRDP_IP_ADDR_T PD_COMID2_DST_IP = 0xefff0101;	    /* multicast Destination IP: 239.255.1.1 */
 //TRDP_IP_ADDR_T PD_COMID1_DST_IP = 0x0A040110;		/* unicast Destination IP: 10.4.1.16 */
 //TRDP_IP_ADDR_T PD_COMID2_DST_IP = 0x0A040110;		/* unicast Destination IP: 10.4.1.16 */
 //TRDP_IP_ADDR_T PD_COMID1_DST_IP2 = 0x0A040110;	/* unicast Destination IP: 10.4.1.16 */
 //TRDP_IP_ADDR_T PD_COMID2_DST_IP2 = 0x0A040110;	/* unicast Destination IP: 10.4.1.16 */
 
-TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP = 0x0A040110;		/* Subscribe Source IP: 10.4.1.16 */
-TRDP_IP_ADDR_T PD_COMID2_SUB_SRC_IP = 0x0A040110;		/* Subscribe Source IP: 10.4.1.16 */
+TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP1 = 0x0A040110;		/* Subscribe Source IP: 10.4.1.16 */
+TRDP_IP_ADDR_T PD_COMID2_SUB_SRC_IP1 = 0x0A040110;		/* Subscribe Source IP: 10.4.1.16 */
 TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP2 = 0x0A042110;		/* Subscribe Source IP: 10.4.33.16 */
 TRDP_IP_ADDR_T PD_COMID2_SUB_SRC_IP2 = 0x0A042110;		/* Subscribe Source IP: 10.4.33.16 */
 
 //TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP = 0x0A040111;		/* Subscribe Destination IP: 10.4.1.17 */
 //TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP = 0x0A040111;		/* Subscribe Destination IP: 10.4.1.17 */
-TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
-TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP1 = 0xefff0101;		/* Subscribe multicast Destination IP: 239.255.1.1 */
+TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP1 = 0xefff0101;		/* Subscribe multicast Destination IP: 239.255.1.1 */
 //TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP2 = 0x0A042111;		/* Subscribe Destination IP: 10.4.33.17 */
 //TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP2 = 0x0A042111;		/* Subscribe Destination IP: 10.4.33.17 */
-TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP2 = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
-TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP2 = 0xe60000C0;		/* Subscribe multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP2 = 0xefff0101;		/* Subscribe multicast Destination IP: 239.255.1.1 */
+TRDP_IP_ADDR_T PD_COMID2_SUB_DST_IP2 = 0xefff0101;		/* Subscribe multicast Destination IP: 239.255.1.1 */
 
 //TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP = 0x0A040110;		/* Publish Destination IP: 10.4.1.16 */
 //TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP = 0x0A040110;		/* Publish Destination IP: 10.4.1.16 */
-TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP = 0xe60000C0;		/* Publish multicast Destination IP: 230.0.0.192 */
-TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP = 0xe60000C0;		/* Publish multicastDestination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP1 = 0xefff0101;		/* Publish multicast Destination IP: 239.255.1.1 */
+TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP1 = 0xefff0101;		/* Publish multicastDestination IP: 239.255.1.1 */
 //TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP2 = 0x0A042110;		/* Publish Destination IP: 10.4.33.16 */
 //TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP2 = 0x0A042110;		/* Publish Destination IP: 10.4.33.16 */
-TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP2 = 0xe60000C0;		/* Publish multicast Destination IP: 230.0.0.192 */
-TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP2 = 0xe60000C0;		/* Publish multicast Destination IP: 230.0.0.192 */
+TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP2 = 0xefff0101;		/* Publish multicast Destination IP: 239.255.1.1 */
+TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP2 = 0xefff0101;		/* Publish multicast Destination IP: 239.255.1.1 */
 
 /* Subscribe for Sub-network Id2 */
 TRDP_IP_ADDR_T PD_COMID1_SRC_IP2 = 0;
 TRDP_IP_ADDR_T PD_COMID2_SRC_IP2 = 0;
 /* Publish for Sub-network Id1 */
-UINT32 PD_COMID1_CYCLE = 30000000;					/* ComID1 Publish Cycle TIme */
-UINT32 PD_COMID2_CYCLE = 30000000;					/* ComID2 Publish Cycle TIme */
+UINT32 PD_COMID1_CYCLE = 100000;					/* ComID1 Publish Cycle TIme */
+UINT32 PD_COMID2_CYCLE = 100000;					/* ComID2 Publish Cycle TIme */
 /* Ladder Topolpgy enable/disable */
 BOOL ladderTopologyFlag = TRUE;						/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
 /* OFFSET ADDRESS */
@@ -128,8 +128,8 @@ UINT16 OFFSET_ADDRESS3 = 0x1300;					/* offsetAddress comId1 subscribe */
 UINT16 OFFSET_ADDRESS4 = 0x1380;					/* offsetAddress comId2 subscribe */
 /* Marshalling enable/disable */
 BOOL marshallingFlag = FALSE;						/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
-UINT32	publisherAppCycle = 45000000;				/* Publisher Application cycle in us */
-UINT32	subscriberAppCycle = 45000000;				/* Subscriber Application cycle in us */
+UINT32	publisherAppCycle = 120000;				/* Publisher Application cycle in us */
+UINT32	subscriberAppCycle = 150000;				/* Subscriber Application cycle in us */
 /* Using Receive Subnet in order to Wirte PD in Traffic Store  */
 UINT32 TS_SUBNET =1;
 
@@ -352,10 +352,16 @@ int main (int argc, char *argv[])
 			{"marshall",				required_argument,	NULL, 'm'},
 			{"comid1",					required_argument,	NULL, 'c'},
 			{"comid2",					required_argument,	NULL, 'C'},
-			{"src-ip1",				    required_argument,	NULL, 'a'},
+/*			{"src-ip1",				    required_argument,	NULL, 'a'},
 			{"dst-ip1",				    required_argument,	NULL, 'b'},
 			{"src-ip2",				    required_argument,	NULL, 'A'},
-			{"dst-ip2",				    required_argument,	NULL, 'B'},
+			{"dst-ip2",				    required_argument,	NULL, 'B'},	*/
+			{"comid1-sub-src-ip1",	    required_argument,	NULL, 'a'},
+			{"comid1-sub-dst-ip1",	    required_argument,	NULL, 'b'},
+			{"comid2-sub-src-ip1",	    required_argument,	NULL, 'A'},
+			{"comid2-sub-dst-ip1",	    required_argument,	NULL, 'B'},
+			{"comid1-pub-dst-ip1",	    required_argument,	NULL, 'f'},
+			{"comid2-pub-dst-ip1",	    required_argument,	NULL, 'F'},
 			{"timeout-comid1",		    required_argument,	NULL, 'o'},
 			{"timeout-comid2",		    required_argument,	NULL, 'O'},
 			{"send-comid1-cycle",	    required_argument,	NULL, 'd'},
@@ -372,7 +378,7 @@ int main (int argc, char *argv[])
 	INT32 ip[4];					/* use variable number in order to get IP address value */
 
 	while((option = getopt_long(argc, argv,
-									"t:1:2:3:4:s:m:c:C:a:b:A:B:o:O:d:e:T:h",
+									"t:1:2:3:4:s:m:c:C:a:b:A:B:f:F:o:O:d:e:T:h",
 									long_options,
 									&option_index)) != -1)
 	{
@@ -480,48 +486,120 @@ int main (int argc, char *argv[])
 			case 'a':
 				if (strncmp(optarg, "-", 1) != 0)
 				{
-					/* Get source IP address comid1 subnet1 from an option argument */
+					/* Get ComId1 Subscribe source IP address comid1 subnet1 from an option argument */
 					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
 					{
 						/* Set source IP address comid1 subnet1 */
-						PD_COMID1_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+//						PD_COMID1_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						PD_COMID1_SUB_SRC_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
 						/* Set source IP address comid1 subnet2 */
-						PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;
+//						PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;
+						PD_COMID1_SUB_SRC_IP2 = PD_COMID1_SUB_SRC_IP1 | SUBNET2_NETMASK;
 					}
 				}
 			break;
 			case 'b':
 				if (strncmp(optarg, "-", 1) != 0)
 				{
-					/* Get destination IP address1 from an option argument */
+					/* Get ComId1 Subscribe destination IP address1 from an option argument */
 					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
 					{
 						/* Set destination IP address1 */
-						PD_COMID1_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+//						PD_COMID1_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						PD_COMID1_SUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						/* Set destination IP address2 */
+						if (vos_isMulticast(PD_COMID1_SUB_DST_IP1))
+						{
+							/* Multicast Group */
+							PD_COMID1_SUB_DST_IP2 = PD_COMID1_SUB_DST_IP1;
+						}
+						else
+						{
+							/* Unicast IP Address */
+							PD_COMID1_SUB_DST_IP2 = PD_COMID1_SUB_DST_IP1 | SUBNET2_NETMASK;
+						}
 					}
 				}
 			break;
 			case 'A':
 				if (strncmp(optarg, "-", 1) != 0)
 				{
-					/* Get source IP address comid2 subnet1 from an option argument */
+					/* Get ComId2 Subscribe source IP address comid2 subnet1 from an option argument */
 					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
 					{
 						/* Set source IP address comid2 subnet1 */
-						PD_COMID2_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+//						PD_COMID2_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						PD_COMID2_SUB_SRC_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
 						/* Set source IP address comid2 subnet2 */
-						PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;
+//						PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;
+						PD_COMID2_SUB_SRC_IP2 = PD_COMID2_SUB_SRC_IP1 | SUBNET2_NETMASK;
 					}
 				}
 			break;
 			case 'B':
 				if (strncmp(optarg, "-", 1) != 0)
 				{
-					/* Get destination IP address2 from an option argument */
+					/* Get ComId2 Subscribe destination IP address2 from an option argument */
 					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
 					{
+						/* Set destination IP address1 */
+//						PD_COMID2_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						PD_COMID2_SUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
 						/* Set destination IP address2 */
-						PD_COMID2_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						if (vos_isMulticast(PD_COMID2_SUB_DST_IP1))
+						{
+							/* Multicast Group */
+							PD_COMID2_SUB_DST_IP2 = PD_COMID2_SUB_DST_IP1;
+						}
+						else
+						{
+							/* Unicast IP Address */
+							PD_COMID2_SUB_DST_IP2 = PD_COMID2_SUB_DST_IP1 | SUBNET2_NETMASK;
+						}
+					}
+				}
+			break;
+			case 'f':
+				if (strncmp(optarg, "-", 1) != 0)
+				{
+					/* Get ComId1 Publish destination IP address1 from an option argument */
+					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
+					{
+						/* Set destination IP address1 */
+						PD_COMID1_PUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						/* Set destination IP address2 */
+						if (vos_isMulticast(PD_COMID1_PUB_DST_IP1))
+						{
+							/* Multicast Group */
+							PD_COMID1_PUB_DST_IP2 = PD_COMID1_PUB_DST_IP1;
+						}
+						else
+						{
+							/* Unicast IP Address */
+							PD_COMID1_PUB_DST_IP2 = PD_COMID1_PUB_DST_IP1 | SUBNET2_NETMASK;
+						}
+					}
+				}
+			break;
+			case 'F':
+				if (strncmp(optarg, "-", 1) != 0)
+				{
+					/* Get ComId1 Publish destination IP address1 from an option argument */
+					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
+					{
+						/* Set destination IP address1 */
+						PD_COMID2_PUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+						/* Set destination IP address2 */
+						if (vos_isMulticast(PD_COMID2_PUB_DST_IP1))
+						{
+							/* Multicast Group */
+							PD_COMID2_PUB_DST_IP2 = PD_COMID2_PUB_DST_IP1;
+						}
+						else
+						{
+							/* Unicast IP Address */
+							PD_COMID2_PUB_DST_IP2 = PD_COMID2_PUB_DST_IP1 | SUBNET2_NETMASK;
+						}
 					}
 				}
 			break;
@@ -573,7 +651,7 @@ int main (int argc, char *argv[])
 			case 'h':
 			case '?':
 				printf("Unknown or required argument option -%c\n", optopt);
-				printf("Usage: COMMAND [-t] [-1] [-2] [-3] [-4] [-s] [-m] [-c] [-C] [-a] [-b] [-A] [-B] [-o] [-O] [-d] [-e] [-T] [-h] \n");
+				printf("Usage: COMMAND [-t] [-1] [-2] [-3] [-4] [-s] [-m] [-c] [-C] [-a] [-b] [-A] [-B] [-f] [-F] [-o] [-O] [-d] [-e] [-T] [-h] \n");
 				printf("-t,	--topo			Ladder:1, not Lader:0\n");
 				printf("-1,	--offset1		OFFSET1 val hex\n");
 				printf("-2,	--offset2		OFFSET2 val hex\n");
@@ -583,10 +661,17 @@ int main (int argc, char *argv[])
 				printf("-m,	--marshall		Marshall:1, not Marshall:0\n");
 				printf("-c,	--comid1		ComId1 val\n");
 				printf("-C,	--comid2		ComId2 val\n");
-				printf("-a,	--src-ip1		IP Address xxx.xxx.xxx.xxx\n");
+/*				printf("-a,	--src-ip1		IP Address xxx.xxx.xxx.xxx\n");
 				printf("-b,	- dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
 				printf("-A,	--src-ip2		IP Address xxx.xxx.xxx.xxx\n");
 				printf("-B,	--dst-ip2		IP Address xxx.xxx.xxx.xxx\n");
+*/
+				printf("-a,	--comid1-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
+				printf("-b,	--comid1-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
+				printf("-A,	--comid2-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
+				printf("-B,	--comid2-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
+				printf("-f		--comid1-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
+				printf("-F,	--comid2-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
 				printf("-o,	--timeout-comid1	micro sec\n");
 				printf("-O,	--timeout-comid2	micro sec\n");
 				printf("-d,	--send-comid1-cycle	micro sec\n");
@@ -706,9 +791,12 @@ int main (int argc, char *argv[])
                          &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
                          PD_COMID1,                	/* ComID */
                          0,                        	/* topocount: local consist only */
-                         PD_COMID1_SRC_IP,         	/* Source IP filter */
+//                         PD_COMID1_SRC_IP,         	/* Source IP filter */
+                         PD_COMID1_SUB_SRC_IP1,     	/* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
-                         PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+//                         PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+                         PD_COMID1_SUB_DST_IP1,     	/* Default destination	(or MC Group) */
+                         0,								/* Option */
                          PD_COMID1_TIMEOUT,         	/* Time out in us	*/
                          TRDP_TO_SET_TO_ZERO,       	/* delete invalid data on timeout */
                          dataSet1Size);	         	/* net data size */
@@ -729,9 +817,12 @@ int main (int argc, char *argv[])
                          &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
                          PD_COMID2,                	/* ComID */
                          0,                        	/* topocount: local consist only */
-                         PD_COMID2_SRC_IP,         	/* Source IP filter */
+//                         PD_COMID2_SRC_IP,         	/* Source IP filter */
+                         PD_COMID2_SUB_SRC_IP1,      	/* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
-                         PD_COMID2_DST_IP,        	/* Default destination	(or MC Group) */
+//                         PD_COMID2_DST_IP,        	/* Default destination	(or MC Group) */
+                         PD_COMID2_SUB_DST_IP1,     	/* Default destination	(or MC Group) */
+                         0,								/* Option */
                          PD_COMID2_TIMEOUT,         	/* Time out in us	*/
                          TRDP_TO_SET_TO_ZERO,       	/* delete invalid data on timeout */
                          dataSet2Size);  	       	/* net data size */
@@ -752,9 +843,12 @@ int main (int argc, char *argv[])
 							 &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
 							 PD_COMID1,                	/* ComID */
 							 0,                        	/* topocount: local consist only */
-							 PD_COMID1_SRC_IP2,        	/* Source IP filter */
+//							 PD_COMID1_SRC_IP2,        	/* Source IP filter */
+							 PD_COMID1_SUB_SRC_IP2,        	/* Source IP filter */
 							 0,                        	/* Source IP filter2 : no used */
-							 PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+//							 PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
+							 PD_COMID1_SUB_DST_IP2,        	/* Default destination	(or MC Group) */
+							 0,								/* Option */
 							 PD_COMID1_TIMEOUT,        	/* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
 							 dataSet1Size);	        	/* net data size */
@@ -772,9 +866,12 @@ int main (int argc, char *argv[])
 							 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
 							 PD_COMID2,                	/* ComID */
 							 0,                        	/* topocount: local consist only */
-							 PD_COMID2_SRC_IP2,        	/* Source IP filter */
+//							 PD_COMID2_SRC_IP2,        	/* Source IP filter */
+							 PD_COMID2_SUB_SRC_IP2,        	/* Source IP filter */
 							 0,                        	/* Source IP filter2 : no used */
-							 PD_COMID2_DST_IP,        	/* Default destination	(or MC Group) */
+//							 PD_COMID2_DST_IP,        	/* Default destination	(or MC Group) */
+							 PD_COMID2_SUB_DST_IP2,        	/* Default destination	(or MC Group) */
+							 0,								/* Option */
 							 PD_COMID2_TIMEOUT,        	/* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
 							 dataSet2Size);        	/* net data size */
@@ -793,15 +890,14 @@ int main (int argc, char *argv[])
                         PD_COMID1,						/* ComID to send */
                         0,								/* local consist only */
                         subnetId1Address,				/* default source IP */
-                        PD_COMID1_DST_IP,				/* where to send to */
+//                        PD_COMID1_DST_IP,				/* where to send to */
+                        PD_COMID1_PUB_DST_IP1,		/* where to send to */
                         PD_COMID1_CYCLE,				/* Cycle time in ms */
                         0,								/* not redundant */
                         TRDP_FLAGS_NONE,				/* Don't use callback for errors */
                         NULL,							/* default qos and ttl */
                         (UINT8*)&dataSet1,			/* initial data */
-                        dataSet1Size,					/* data size */
-                        TRUE,							/* substitution : Ladder */
-                        OFFSET_ADDRESS1);				/* offsetAddress */
+                        dataSet1Size);					/* data size */
     if (err != TRDP_NO_ERR)
     {
         printf("prep Sub-network Id1 pd publish error\n");
@@ -816,15 +912,14 @@ int main (int argc, char *argv[])
                         PD_COMID2,						/* ComID to send */
                         0,								/* local consist only */
                         subnetId1Address,				/* default source IP */
-                        PD_COMID2_DST_IP,				/* where to send to */
+//                        PD_COMID2_DST_IP,				/* where to send to */
+                        PD_COMID2_PUB_DST_IP1,		/* where to send to */
                         PD_COMID2_CYCLE,				/* Cycle time in ms */
                         0,								/* not redundant */
                         TRDP_FLAGS_NONE,				/* Don't use callback for errors */
                         NULL,							/* default qos and ttl */
                         (UINT8*)&dataSet2,			/* initial data */
-                        dataSet2Size,					/* data size */
-                        TRUE,							/* substitution : Ladder */
-                        OFFSET_ADDRESS2);				/* offsetAddress */
+                        dataSet2Size);					/* data size */
     if (err != TRDP_NO_ERR)
     {
         printf("prep Sub-network Id1 pd publish error\n");
@@ -842,16 +937,14 @@ int main (int argc, char *argv[])
 							PD_COMID1,						/* ComID to send */
 							0,								/* local consist only */
 							subnetId2Address,				/* default source IP */
-							PD_COMID1_DST_IP,				/* where to send to */
+//							PD_COMID1_DST_IP,				/* where to send to */
+							PD_COMID1_PUB_DST_IP2,		/* where to send to */
 							PD_COMID1_CYCLE,				/* Cycle time in ms */
 							0,								/* not redundant */
 							TRDP_FLAGS_NONE,				/* Don't use callback for errors */
 							NULL,							/* default qos and ttl */
 							(UINT8*)&dataSet1,			/* initial data */
-							dataSet1Size,					/* data size */
-							TRUE,							/* substitution : Ladder */
-							OFFSET_ADDRESS1);				/* offsetAddress */
-
+							dataSet1Size);				/* data size */
 		if (err != TRDP_NO_ERR)
 		{
 			printf("prep Sub-network Id2 pd publish error\n");
@@ -866,15 +959,14 @@ int main (int argc, char *argv[])
 							PD_COMID2,						/* ComID to send */
 							0,								/* local consist only */
 							subnetId2Address,				/* default source IP */
-							PD_COMID2_DST_IP,				/* where to send to */
+//							PD_COMID2_DST_IP,				/* where to send to */
+							PD_COMID2_PUB_DST_IP2,		/* where to send to */
 							PD_COMID2_CYCLE,				/* Cycle time in ms */
 							0,								/* not redundant */
 							TRDP_FLAGS_NONE,				/* Don't use callback for errors */
 							NULL,							/* default qos and ttl */
 							(UINT8*)&dataSet2,			/* initial data */
-							dataSet2Size,					/* data size */
-							TRUE,							/* substitution : Ladder */
-							OFFSET_ADDRESS2);				/* offsetAddress */
+							dataSet2Size);				/* data size */
 		if (err != TRDP_NO_ERR)
 		{
 			printf("prep Sub-network Id2 pd publish error\n");
@@ -904,6 +996,11 @@ int main (int argc, char *argv[])
         printf("prep Sub-network tlp_setNetworkContext error\n");
         return 1;
     }
+
+	/* Display PD Application Version */
+	vos_printf(VOS_LOG_INFO,
+           "PD Application Version %s: TRDP Setting successfully\n",
+           PD_APP_VERSION);
 
     /*
         Enter the main processing loop.
