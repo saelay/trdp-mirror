@@ -78,7 +78,8 @@ void usage (const char *appName)
            "Arguments are:\n"
            "-o <own IP address> in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
-           "-p <TCP|UDP>\n"
+           "-p <TCP|UDP> protocol to communicate with\n"
+           "-e <n> expected replies\n"
            "-r    be responder\n"
            "-c    respond with confirmation\n"
            "-n    notify only\n"
@@ -257,6 +258,7 @@ int main (int argc, char *argv[])
     UINT32       destIP  = 0;
     UINT32       ownIP   = 0;
     UINT32       counter = 0;
+    UINT32       expReplies = 1;
     TRDP_FLAGS_T flags = TRDP_FLAGS_CALLBACK; /* default settings: callback and UDP */
     int          ch;
 
@@ -266,7 +268,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:p:h?vrcn01")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:p:e:h?vrcn01")) != -1)
     {
         switch (ch)
         {
@@ -327,6 +329,15 @@ int main (int argc, char *argv[])
             case 'n':
             {
                 sSessionData.sNotifyOnly = TRUE;
+                break;
+            }
+            case 'e':
+            {   /*  expected replies   */
+                if (sscanf(optarg, "%u", expReplies ) < 1)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
                 break;
             }
             case '0':
@@ -483,12 +494,12 @@ int main (int argc, char *argv[])
                 {
                     
             		tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        		destIP, flags, 1, 0, NULL, NULL, 0, 0, 0);
+                        		destIP, flags, expReplies, 0, NULL, NULL, 0, 0, 0);
                 }
              	else
                 {
                 	tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        	destIP, flags, 1, 0, NULL, (const UINT8*) "How are you?", 13, 0, 0);
+                        	destIP, flags, expReplies, 0, NULL, (const UINT8*) "How are you?", 13, 0, 0);
                 }
             }
             printf("\n");
