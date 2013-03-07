@@ -26,13 +26,13 @@ TRDP_IP_ADDR_T mcast;
 enum Type
 {
     PORT_PUSH,                      // outgoing port ('Pd'/push)
-    PORT_PULL,                      // outgoing port ('Pd'/pull)
+    PORT_PULL,                      // outgoing port ('Pp'/pull)
     PORT_REQUEST,                   // outgoing port ('Pr'/request)
-    PORT_SINK,                      // incoming port ('Pd' or 'Pr' sink)
+    PORT_SINK,                      // incoming port
 };
 
 static const char * types[] =
-    { "Pd ->", "Pd ->", "Pr ->", "   <-" };
+    { "Pd ->", "Pp ->", "Pr ->", "   <-" };
 
 struct Port
 {
@@ -176,13 +176,13 @@ void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
     // for unicast/multicast address
     for (int a = 0; a < 2; ++a)
     {   // for all dataset sizes
-        for (int sz = 1; sz < 3; ++sz)
+        for (int sz = 0; sz < 2; ++sz)
         {   // comid
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
             // dataset size
             req.size = size[sz];
-            rep.size = size[sz];
+            rep.size = size[sz + 1];
             // addresses
             if (!a)
             {   // unicast address
@@ -228,13 +228,13 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
     // for unicast/multicast address
     for (int a = 0; a < 2; ++a)
     {   // for all dataset sizes
-        for (int sz = 1; sz < 3; ++sz)
+        for (int sz = 0; sz < 2; ++sz)
         {   // comid
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
             // dataset size
             req.size = size[sz];
-            rep.size = size[sz];
+            rep.size = size[sz + 1];
             // addresses
             if (!a)
             {   // unicast address
@@ -594,7 +594,8 @@ void process_data()
                 if (o < p.size)
                 {
                     snprintf((char *) p.data + o, p.size - o,
-                        "<Pd/%d.%d.%d.%d->%d.%d.%d.%d/%dms/%db:%d>",
+                        "<%s/%d.%d.%d.%d->%d.%d.%d.%d/%dms/%db:%d>",
+                        p.type == PORT_PUSH ? "Pd" : "Pp",
                         (p.src >> 24) & 0xff, (p.src >> 16) & 0xff,
                         (p.src >> 8) & 0xff, p.src & 0xff,
                         (p.dst >> 24) & 0xff, (p.dst >> 16) & 0xff,
