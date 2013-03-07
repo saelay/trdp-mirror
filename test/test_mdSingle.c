@@ -35,7 +35,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION         "0.2"
+#define APP_VERSION         "0.3"
 
 #define DATA_MAX            1000
 
@@ -297,6 +297,7 @@ int main (int argc, char *argv[])
                 if (strcmp(optarg,"TCP") == 0)
                 {
                     flags |= TRDP_FLAGS_TCP;
+                    mdConfiguration.flags |= TRDP_FLAGS_TCP;
                 }
                 else if (strcmp(optarg,"UDP") == 0)
                 {
