@@ -366,26 +366,27 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         
         if(err == TRDP_NODATA_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "trdp_mdRecvPacket - The socket = %u has been closed \n", mdSock);
+            vos_printf(VOS_LOG_INFO, "vos_sockReceiveTCP - The socket = %u has been closed \n", mdSock);
             return TRDP_NODATA_ERR;
         }
         
         if(err != TRDP_NO_ERR)
         {
-            vos_printf(VOS_LOG_ERROR, "trdp_mdRecvPacket failed (Reading the msg Header) = %d\n", err);
-            return TRDP_IO_ERR;
+            vos_printf(VOS_LOG_ERROR, "vos_sockReceiveTCP failed (Reading the msg Header) (Err: %d)\n", err);
+            return err;
         }
         
         /* Get the rest of the message length */
         {
-            UINT32 data_size;
-            data_size = vos_ntohl(pElement->pPacket->frameHead.datasetLength) + sizeof(pElement->pPacket->frameHead.frameCheckSum);
+            UINT32 dataSize;
+            dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength) + sizeof(pElement->pPacket->frameHead.frameCheckSum);
+            dataSize += (4 - (dataSize % 4));    /* be aware that the check sum is on 4 byte aligned position */  
             
             /*Read Data + CRC */
-            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pElement->pPacket->data[0], &data_size);
-            vos_printf(VOS_LOG_INFO, "Read Data + CRC Size = %d\n", data_size);
+            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pElement->pPacket->data[0], &dataSize);
+            vos_printf(VOS_LOG_INFO, "Read Data + CRC Size = %d\n", dataSize);
             
-            size = size + data_size;
+            size = size + dataSize;
         }
     }
     else
@@ -414,8 +415,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         case TRDP_NO_ERR:
         	break;
         default:
-            vos_printf(VOS_LOG_ERROR, "trdp_mdRecvPacket failed = %d\n", err);
-            return TRDP_IO_ERR;
+            vos_printf(VOS_LOG_ERROR, "trdp_sockReceive failed (Err: %d)\n", err);
+            return err;
     }
     
     
@@ -463,7 +464,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     
     if (err != TRDP_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "trdp_mdRecvPacket failed = %d\n", err);
+        vos_printf(VOS_LOG_ERROR, "trdp_mdCheck failed (Err: %d)\n", err);
         return TRDP_IO_ERR;
     }
     
