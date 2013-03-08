@@ -68,6 +68,8 @@ typedef struct sSessionData
 
 SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL};
 
+UINT32       ownIP   = 0;
+
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
 void usage (const char *appName)
@@ -79,6 +81,7 @@ void usage (const char *appName)
            "-o <own IP address> in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
            "-p <TCP|UDP> protocol to communicate with\n"
+           "-d <n> delay in µs between notification/requests\n"
            "-e <n> expected replies\n"
            "-r    be responder\n"
            "-c    respond with confirmation\n"
@@ -131,7 +134,7 @@ void mdCallback (void                   *pRefCon,
                     {
                     	printf("-> sending reply with query\n");
                         err = tlm_replyQuery(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
-                                        pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
+                                        pMsg->topoCount, pMsg->comId, ownIP,
                                         pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 10000000, NULL,
                                         (UINT8 *) "I'm fine, how are you?", 23, NULL, NULL);
                     }
@@ -139,7 +142,7 @@ void mdCallback (void                   *pRefCon,
                     {
                         printf("-> sending reply\n");
                         err = tlm_reply(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
-                                        pMsg->topoCount, pMsg->comId, pMsg->destIpAddr,
+                                        pMsg->topoCount, pMsg->comId, ownIP,
                                         pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL,
                                         (UINT8 *) "I'm fine, thanx!", 17, NULL, NULL);
                     }
@@ -167,7 +170,7 @@ void mdCallback (void                   *pRefCon,
                     }
                     printf("-> sending confirmation\n");
                     err = tlm_confirm(myGlobals->appHandle, pRefCon, (const TRDP_UUID_T *) &pMsg->sessionId,
-                                    pMsg->comId, pMsg->topoCount, pMsg->destIpAddr,
+                                    pMsg->comId, pMsg->topoCount, ownIP,
                                     pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 0,
                                     NULL, NULL, NULL);
                     if (err != TRDP_NO_ERR)
@@ -256,9 +259,9 @@ int main (int argc, char *argv[])
 
     int          rv      = 0;
     UINT32       destIP  = 0;
-    UINT32       ownIP   = 0;
     UINT32       counter = 0;
     UINT32       expReplies = 1;
+    UINT32       delay   = 1000;
     TRDP_FLAGS_T flags = TRDP_FLAGS_CALLBACK; /* default settings: callback and UDP */
     int          ch;
 
@@ -268,7 +271,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:p:e:h?vrcn01")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:p:d:e:h?vrcn01")) != -1)
     {
         switch (ch)
         {
@@ -331,9 +334,18 @@ int main (int argc, char *argv[])
                 sSessionData.sNotifyOnly = TRUE;
                 break;
             }
+            case 'd':
+            {   /*  delay between notify/request   */
+                if (sscanf(optarg, "%u", &delay ) < 1)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                break;
+            }
             case 'e':
             {   /*  expected replies   */
-                if (sscanf(optarg, "%u", expReplies ) < 1)
+                if (sscanf(optarg, "%u", &expReplies ) < 1)
                 {
                     usage(argv[0]);
                     exit(1);
@@ -507,8 +519,9 @@ int main (int argc, char *argv[])
             {
                 sSessionData.sExitAfterReply = TRUE;
             }
-        }
 
+            vos_threadDelay(delay);
+        }
     }
 
     /*
