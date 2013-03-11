@@ -46,12 +46,12 @@ extern "C" {
 #define VOS_MAX_SOCKET_CNT  80
 
 /**    The maximum hops a multicast packet can go    */
-#define VOS_TTL_MULTICAST	64
+#define VOS_TTL_MULTICAST  64
 
 /**    The maximum number of multicast groups a socket can join    */
-#define VOS_MAX_MULTICAST_CNT  	20
+#define VOS_MAX_MULTICAST_CNT   20
 
-#define VOS_MAX_IF_NAME_SIZE	16
+#define VOS_MAX_IF_NAME_SIZE    16
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -71,8 +71,8 @@ typedef fd_set VOS_FDS_T;
 
 typedef struct
 {
-	CHAR8			name[VOS_MAX_IF_NAME_SIZE];
-	VOS_IP4_ADDR_T	ipAddr;
+    CHAR8           name[VOS_MAX_IF_NAME_SIZE];
+    VOS_IP4_ADDR_T  ipAddr;
 } VOS_IF_REC_T;
 
 /***********************************************************************************************************************
@@ -163,14 +163,14 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
  *
- *  @param[in]      maxAddrCnt        array size of interface record 
+ *  @param[in]      maxAddrCnt        array size of interface record
  *  @param[in,out]  ifAddrs           array of interface records
  *
  *  @retval         number of filled in entries
  */
-EXT_DECL UINT32 vos_getInterfaces (
-    UINT32           maxAddrCnt,
-    VOS_IF_REC_T     ifAddrs[]);
+EXT_DECL UINT32 vos_getInterfaces(
+    UINT32 maxAddrCnt,
+    VOS_IF_REC_T ifAddrs[]);
 
 /**********************************************************************************************************************/
 /** Initialize the socket library.
@@ -211,11 +211,11 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC(
  */
 
 EXT_DECL INT32 vos_select (
-	INT32			highDesc,
-    VOS_FDS_T		*pReadableFD,
-	VOS_FDS_T		*pWriteableFD,
-	VOS_FDS_T		*pErrorFD,
-    VOS_TIME_T		*pTimeOut);
+    INT32       highDesc,
+    VOS_FDS_T   *pReadableFD,
+    VOS_FDS_T   *pWriteableFD,
+    VOS_FDS_T   *pErrorFD,
+    VOS_TIME_T  *pTimeOut);
 
 /**********************************************************************************************************************/
 /** Create an UDP socket.

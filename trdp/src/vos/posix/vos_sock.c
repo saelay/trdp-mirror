@@ -155,20 +155,20 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
  *
- *  @param[in]      maxAddrCnt        array size of interface record 
+ *  @param[in]      maxAddrCnt        array size of interface record
  *  @param[in,out]  ifAddrs           array of interface records
  *
  *  @retval         number of filled in entries
  */
 EXT_DECL UINT32 vos_getInterfaces (
-	UINT32           maxAddrCnt,
-	VOS_IF_REC_T     ifAddrs[])
+    UINT32          maxAddrCnt,
+    VOS_IF_REC_T    ifAddrs[])
 {
-    int  success;
-    struct ifaddrs * addrs;
-    struct ifaddrs * cursor;
-    int	count = 0;
-    
+    int success;
+    struct ifaddrs *addrs;
+    struct ifaddrs *cursor;
+    int count = 0;
+
     success = getifaddrs(&addrs) == 0;
     if (success)
     {
@@ -177,23 +177,23 @@ EXT_DECL UINT32 vos_getInterfaces (
         {
             if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
             {
-                ifAddrs[count].ipAddr = ntohl(*(UINT32*)&cursor->ifa_addr->sa_data[2]);
+                ifAddrs[count].ipAddr = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
                 if (cursor->ifa_name != NULL)
                 {
-                	strncpy ((char*) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
+                    strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
                     ifAddrs[count].name[VOS_MAX_IF_NAME_SIZE - 1] = 0;
                 }
-                vos_printf (VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
-                			 ifAddrs[count].name,
-                             (ifAddrs[count].ipAddr >> 24) & 0xFF,
-                             (ifAddrs[count].ipAddr >> 16) & 0xFF,
-                             (ifAddrs[count].ipAddr >> 8)  & 0xFF,
-                             ifAddrs[count].ipAddr        & 0xFF);
+                vos_printf(VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
+                           ifAddrs[count].name,
+                           (ifAddrs[count].ipAddr >> 24) & 0xFF,
+                           (ifAddrs[count].ipAddr >> 16) & 0xFF,
+                           (ifAddrs[count].ipAddr >> 8)  & 0xFF,
+                           ifAddrs[count].ipAddr        & 0xFF);
                 count++;
             }
             cursor = cursor->ifa_next;
         }
-        
+
         freeifaddrs(addrs);
     }
     return count;
@@ -214,11 +214,11 @@ EXT_DECL UINT32 vos_getInterfaces (
  */
 
 EXT_DECL INT32 vos_select (
-                           INT32			highDesc,
-                           VOS_FDS_T		*pReadableFD,
-                           VOS_FDS_T		*pWriteableFD,
-                           VOS_FDS_T		*pErrorFD,
-                           VOS_TIME_T		*pTimeOut)
+    INT32       highDesc,
+    VOS_FDS_T   *pReadableFD,
+    VOS_FDS_T   *pWriteableFD,
+    VOS_FDS_T   *pErrorFD,
+    VOS_TIME_T  *pTimeOut)
 {
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);
@@ -274,7 +274,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 #ifndef __APPLE__
 
     /* Has it been determined before? */
-    for(i = 0; i < 6 && gIfr.ifr_hwaddr.sa_data[i] != 0; i++)
+    for (i = 0; i < 6 && gIfr.ifr_hwaddr.sa_data[i] != 0; i++)
     {
         ;
     }
@@ -305,7 +305,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         close(sock);
     }
 
-    for( i = 0; i < 6; i++ )
+    for ( i = 0; i < 6; i++ )
     {
         pMAC[i] = (UINT8) gIfr.ifr_hwaddr.sa_data[i];
     }
@@ -736,7 +736,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
             *pSize += sendSize;
         }
 
-        if(sendSize == -1 && errno == EWOULDBLOCK)
+        if (sendSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
@@ -815,7 +815,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         }
 #endif
 
-        if(rcvSize == -1 && errno == EWOULDBLOCK)
+        if (rcvSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
@@ -1091,7 +1091,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
             pBuffer     += sendSize;
             *pSize      += sendSize;
         }
-        if(sendSize == -1 && errno == EWOULDBLOCK)
+        if (sendSize == -1 && errno == EWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
@@ -1153,7 +1153,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             *pSize      += rcvSize;
         }
 
-        if(rcvSize == -1 && errno == EWOULDBLOCK)
+        if (rcvSize == -1 && errno == EWOULDBLOCK)
         {
             if (*pSize == 0)
             {
