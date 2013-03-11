@@ -643,6 +643,7 @@ TRDP_ERR_T  trdp_mdRecv (
                 {
                     /* We found a listener, set some values for this new session  */
                     iterMD = appHandle->pMDRcvEle;
+                    iterMD->pUserRef = iterListener->pUserRef;
                     iterMD->stateEle = state;
                     trdp_MDqueueInsFirst (&appHandle->pMDRcvQueue, iterMD);
                     appHandle->pMDRcvEle = NULL;
