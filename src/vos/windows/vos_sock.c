@@ -931,7 +931,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
     for (;; )
     {
         int sockLen = sizeof(srcAddress);
-        connFd = accept(*pSock, (struct sockaddr *) &srcAddress, &sockLen);
+        connFd = accept(sock, (struct sockaddr *) &srcAddress, &sockLen);
         if (connFd < 0)
         {
             int err = WSAGetLastError();
