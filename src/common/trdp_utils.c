@@ -610,7 +610,8 @@ TRDP_ERR_T  trdp_requestSocket (
             }
 
 /* add_start TOSHIBA 0306 */
-            if (iface[index].bindAddr != 0)
+            if (    (usage != TRDP_SOCK_MD_TCP)
+                 && (iface[index].bindAddr != 0))
             {
                 err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
                 if (err != TRDP_NO_ERR)
