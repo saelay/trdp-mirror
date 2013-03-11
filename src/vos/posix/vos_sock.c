@@ -49,6 +49,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <sys/types.h>
+#include <ifaddrs.h>
+
 #include "vos_utils.h"
 #include "vos_sock.h"
 #include "vos_thread.h"
@@ -149,6 +152,54 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 }
 
 /**********************************************************************************************************************/
+/** Get a list of interface addresses
+ *  The caller has to provide an array of interface records to be filled.
+ *
+ *  @param[in]      maxAddrCnt        array size of interface record 
+ *  @param[in,out]  ifAddrs           array of interface records
+ *
+ *  @retval         number of filled in entries
+ */
+EXT_DECL UINT32 vos_getInterfaces (
+	UINT32           maxAddrCnt,
+	VOS_IF_REC_T     ifAddrs[])
+{
+    int  success;
+    struct ifaddrs * addrs;
+    struct ifaddrs * cursor;
+    int	count = 0;
+    
+    success = getifaddrs(&addrs) == 0;
+    if (success)
+    {
+        cursor = addrs;
+        while (cursor != 0 && count < maxAddrCnt)
+        {
+            if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
+            {
+                ifAddrs[count].ipAddr = ntohl(*(UINT32*)&cursor->ifa_addr->sa_data[2]);
+                if (cursor->ifa_name != NULL)
+                {
+                	strncpy ((char*) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
+                    ifAddrs[count].name[VOS_MAX_IF_NAME_SIZE - 1] = 0;
+                }
+                vos_printf (VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
+                			 ifAddrs[count].name,
+                             (ifAddrs[count].ipAddr >> 24) & 0xFF,
+                             (ifAddrs[count].ipAddr >> 16) & 0xFF,
+                             (ifAddrs[count].ipAddr >> 8)  & 0xFF,
+                             ifAddrs[count].ipAddr        & 0xFF);
+                count++;
+            }
+            cursor = cursor->ifa_next;
+        }
+        
+        freeifaddrs(addrs);
+    }
+    return count;
+}
+
+/**********************************************************************************************************************/
 /** select function.
  *  Set the ready sockets in the supplied sets.
  *    Note: Some target systems might define this function as NOP.
@@ -242,7 +293,8 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
         /* get the MAC address; we will construct our UUID from this (if UUID generation is not supported) */
         gIfr.ifr_addr.sa_family = AF_INET;
-        strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ - 1);
+        strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ);
+        gIfr.ifr_name[IFNAMSIZ - 1] = 0;
 
         if (ioctl(sock, SIOCGIFHWADDR, &gIfr) < 0)
         {
@@ -515,7 +567,9 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             char    ifStr[16];
 
             strncpy(mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
-            strncpy(ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
+            mcStr[sizeof(mcStr) - 1] = 0;
+            strncpy(ifStr, inet_ntoa(mreq.imr_interface), sizeof(ifStr));
+            ifStr[sizeof(ifStr) - 1] = 0;
 
             vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
@@ -597,7 +651,9 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             char    ifStr[16];
 
             strncpy(mcStr, inet_ntoa(mreq.imr_multiaddr), sizeof(mcStr));
-            strncpy(ifStr, inet_ntoa(mreq.imr_interface), sizeof(mcStr));
+            mcStr[sizeof(mcStr) - 1] = 0;
+            strncpy(ifStr, inet_ntoa(mreq.imr_interface), sizeof(ifStr));
+            ifStr[sizeof(ifStr) - 1] = 0;
 
             vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
         }

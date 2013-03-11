@@ -185,6 +185,9 @@ typedef struct
 #define TIMEDATE64  VOS_TIME_T
 #endif
 
+typedef UINT32 VOS_IP4_ADDR_T;
+typedef UINT8  VOS_IP6_ADDR_T[16];
+    
 /***********************************************************************************************************************
  * PROTOTYPES
  */
