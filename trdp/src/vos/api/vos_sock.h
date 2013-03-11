@@ -46,10 +46,12 @@ extern "C" {
 #define VOS_MAX_SOCKET_CNT  80
 
 /**    The maximum hops a multicast packet can go    */
-#define VOS_TTL_MULTICAST  64
+#define VOS_TTL_MULTICAST	64
 
 /**    The maximum number of multicast groups a socket can join    */
-#define VOS_MAX_MULTICAST_CNT  20
+#define VOS_MAX_MULTICAST_CNT  	20
+
+#define VOS_MAX_IF_NAME_SIZE	16
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -66,6 +68,12 @@ typedef struct
 } VOS_SOCK_OPT_T;
 
 typedef fd_set VOS_FDS_T;
+
+typedef struct
+{
+	CHAR8			name[VOS_MAX_IF_NAME_SIZE];
+	VOS_IP4_ADDR_T	ipAddr;
+} VOS_IF_REC_T;
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -150,6 +158,19 @@ EXT_DECL const CHAR8 *vos_ipDotted (
     UINT32 ipAddress);
 
 /*    Sockets    */
+
+/**********************************************************************************************************************/
+/** Get a list of interface addresses
+ *  The caller has to provide an array of interface records to be filled.
+ *
+ *  @param[in]      maxAddrCnt        array size of interface record 
+ *  @param[in,out]  ifAddrs           array of interface records
+ *
+ *  @retval         number of filled in entries
+ */
+EXT_DECL UINT32 vos_getInterfaces (
+    UINT32           maxAddrCnt,
+    VOS_IF_REC_T     ifAddrs[]);
 
 /**********************************************************************************************************************/
 /** Initialize the socket library.
