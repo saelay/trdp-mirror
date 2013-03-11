@@ -1,12 +1,31 @@
 @echo off
-SET WS_VERSION=1.8.0
-rem set PATH=%PATH%;D:\Program Files\SlikSvn\bin;
+SET WS_VERSION=1.8.3
+
 set PATH=%PATH%;.
 set PATH=%PATH%;c:\cygwin\bin
+SET WORKINGDIR=%~dp0
+SET WORKINGDISK=%CD:~0,2%
+SET RESOURCES_DIR=..\..\resources\windows
+SET LIBXML=libxml
+SET LIBXML_DIR=%RESOURCES_DIR%\%LIBXML%
+SET ICONV=iconv-1.9.2.win32
+SET ICONV_DIR=%RESOURCES_DIR%\%ICONV%
+
+echo ====================== TRDP-SPY setup ======================
+rem copy the plugin to the place where it is needed to be when compiling
+mkdir c:\wireshark-%WS_VERSION%\plugins\trdp_spy\
+mkdir c:\wireshark-%WS_VERSION%\plugins\trdp_spy\%LIBXML%
+mkdir c:\wireshark-%WS_VERSION%\plugins\trdp_spy\%ICONV%
+cd ..
+copy trdp_spy c:\wireshark-%WS_VERSION%\plugins\trdp_spy\
+xcopy /Y /S %LIBXML_DIR% c:\wireshark-%WS_VERSION%\plugins\trdp_spy\%LIBXML%
+xcopy /Y /S %ICONV_DIR% c:\wireshark-%WS_VERSION%\plugins\trdp_spy\%ICONV%
+
 c:
-cd "c:\Program Files\Microsoft Visual Studio 9.0\VC\"
+cd "C:\Program Files\Microsoft Visual Studio 10.0\VC\"
 call "bin\vcvars32.bat"
 
+echo ====================== build the expected wireshark version ======================
 c:
 cd "c:\wireshark-%WS_VERSION%"
 set http_proxy=webproxy.apac.bombardier.com:8080
@@ -27,17 +46,20 @@ rem nmake -f Makefile.nmake distclean
 nmake -f Makefile.nmake all
 rem nmake -f Makefile.nmake wireshark.bsc
 
+echo ====================== build the plugin ======================
 cd plugins\trdp_spy
 nmake -f Makefile.nmake distclean
 nmake -f Makefile.nmake all
 
-
 IF     ERRORLEVEL 1 goto :quit
 
-copy trdp_spy.dll C:\wireshark-%WS_VERSION%\wireshark-gtk2\plugins\1.8.0
+copy trdp_spy.dll C:\wireshark-%WS_VERSION%\wireshark-gtk2\plugins\%WS_VERSION%
 copy C:\wireshark-%WS_VERSION%\wireshark-gtk2\libxml2-2.dll C:\wireshark-%WS_VERSION%\wireshark-gtk2\libxml2.dll
-goto:eof
 
+goto:end
+
+rem generate a package
+cd "c:\wireshark-%WS_VERSION%"
 cd ..
 cd ..
 nmake -f makefile.nmake packaging
@@ -45,3 +67,7 @@ nmake -f makefile.nmake packaging
 :quit
 echo ERROR..!!build fail
 
+:end
+rem go back to the directory we came from
+%WORKINGDISK%
+cd %WORKINGDIR%
