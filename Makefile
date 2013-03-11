@@ -47,11 +47,21 @@ RM = rm -f
 MD = mkdir -p
 CP = cp
 
+# adapte for operating system
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+# flags needed for Linux
+CFLAGS += -D_GNU_SOURCE
+endif
+ifeq ($(UNAME), Darwin)
+# föags needed for OSX
+CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE
+endif
 
 ifeq ($(MD_SUPPORT),1)
-CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=1
+CFLAGS += -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=1
 else
-CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=0
+CFLAGS += -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=0
 endif
 
 SUBDIRS	= src
