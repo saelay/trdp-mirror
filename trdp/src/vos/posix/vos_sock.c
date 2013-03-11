@@ -42,12 +42,12 @@
 
 #ifdef __linux
 #include <linux/if.h>
-#include <linux/in.h>
 #else
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <net/if.h>
 #endif
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "vos_utils.h"
 #include "vos_sock.h"
