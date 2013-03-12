@@ -262,16 +262,31 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         {
             pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
 
-            /* first address is 00000000, skip it */
-            (void) swscanf_s(
-                (wchar_t *)pwkti[1].wkti0_transport_address,
-                L"%2hx%2hx%2hx%2hx%2hx%2hx",
-                &mac[0],
-                &mac[1],
-                &mac[2],
-                &mac[3],
-                &mac[4],
-                &mac[5]);
+
+            /* skip all MAC addresses like 00000000 and search the first suitable one */
+            for(i = 0; i < dwEntriesRead; i++)
+            {
+                (void) swscanf_s(
+                    (wchar_t *)pwkti[i].wkti0_transport_address,
+                    L"%2hx%2hx%2hx%2hx%2hx%2hx",
+                    &mac[0],
+                    &mac[1],
+                    &mac[2],
+                    &mac[3],
+                    &mac[4],
+                    &mac[5]);
+
+                if (mac[0] != 0
+                    || mac[1] != 0
+                    || mac[2] != 0
+                    || mac[3] != 0
+                    || mac[4] != 0
+                    || mac[5] != 0)
+                {
+                    /* at least one byte is set, stop the search */
+                    break;
+                }
+            }
         }
 
         /* Release pbBuffer allocated by NetWkstaTransportEnum */
