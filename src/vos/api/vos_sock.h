@@ -73,6 +73,7 @@ typedef struct
 {
     CHAR8           name[VOS_MAX_IF_NAME_SIZE];
     VOS_IP4_ADDR_T  ipAddr;
+    VOS_IP4_ADDR_T  netMask;
 } VOS_IF_REC_T;
 
 /***********************************************************************************************************************

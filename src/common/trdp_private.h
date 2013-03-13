@@ -48,6 +48,8 @@
 #endif
 
 #define TRDP_PROTO_VER                      0x0100                      /**< Protocol version                       */
+#define TRDP_SESS_ID_SIZE                   16                          /**< Session ID (UUID) size in MD header    */
+#define TRDP_DEST_URI_SIZE                  32                          /**< max. Dest URI size in MD header        */
 
 #define TRDP_TIMER_GRANULARITY              10000                       /**< granularity in us                      */
 #define TRDP_TIMER_FOREVER                  0xffffffff                  /**< granularity in us                      */
@@ -164,7 +166,7 @@ typedef struct TRDP_SOCKETS
     TRDP_IP_ADDR_T      bindAddr;                        /**< Defines the interface to use                */
     TRDP_SEND_PARAM_T   sendParam;                       /**< Send parameters                             */
     TRDP_SOCK_TYPE_T    type;                            /**< Usage of this socket                        */
-    BOOL                rcvOnly;                         /**< Used for receiving                          */
+    BOOL                rcvMostly;                       /**< Used for receiving                          */
     UINT16              usage;                           /**< No. of current users of this socket         */
     TRDP_SOCKET_TCP_T   tcpParams;                       /**< Params used for TCP                         */
     TRDP_IP_ADDR_T      mcGroups[VOS_MAX_MULTICAST_CNT]; /**< List of multicast addresses for this socket */
@@ -254,7 +256,7 @@ typedef struct PD_ELE
     PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                               */
 } PD_ELE_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
-/** Queue element for MD listeners    */
+/** Queue element for MD listeners (UDP and TCP)   */
 typedef struct MD_LIS_ELE
 {
     struct MD_LIS_ELE       *pNext;             /**< pointer to next element or NULL                        */
@@ -266,7 +268,7 @@ typedef struct MD_LIS_ELE
     INT32                   socketIdx;          /**< index into the socket list                             */
 } MD_LIS_ELE_T;
 
-/** Queue element for MD packets to send or receive or acknowledge    */
+/** Session queue element for MD (UDP and TCP)  */
 typedef struct MD_ELE
 {
     struct MD_ELE       *pNext;                 /**< pointer to next element or NULL                        */

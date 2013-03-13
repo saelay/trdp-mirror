@@ -537,7 +537,8 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  *  @param[in]      mcGroup         MC group to join (0 = do not join)
  *  @param[in]      usage           type and port to bind to (PD, MD/UDP, MD/TCP)
  *  @param[in]      options         blocking/nonblocking
- *  @param[in]      rcvOnly         only used for receiving
+ *  @param[in]      rcvMostly       primarily used for receiving (tbd: bind on sender, too?)
+ *  @param[out]     useSocket       socket to use, do not open a new one
  *  @param[out]     pIndex          returned index of socket pool
  *  @param[in]      cornerIp        only used for receiving
  *
@@ -552,7 +553,8 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_IP_ADDR_T          mcGroup,
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
-    BOOL                    rcvOnly,
+    BOOL                    rcvMostly,
+    INT32                   useSocket,
     INT32                   *pIndex,
     TRDP_IP_ADDR_T          cornerIp)
 {
@@ -572,19 +574,29 @@ TRDP_ERR_T  trdp_requestSocket (
      and possibly add that group, if everything else fits.
      We remember already closed sockets on the way to be able to fill up gaps  */
 
-    if (vos_isMulticast(mcGroup) && rcvOnly)
+    if (vos_isMulticast(mcGroup) && rcvMostly)
     {
         bindAddr = 0;
     }
 
     for (index = 0; index < sCurrentMaxSocketCnt; index++)
     {
-        if (iface[index].sock != -1 &&
+        /*  Check if the wanted socket is already in our list; if yes, increment usage */
+        if (useSocket != -1 &&
+            useSocket == iface[index].sock)
+        {
+            /* Use that socket */
+            *pIndex = index;
+            iface[index].usage++;
+            return TRDP_NO_ERR;
+        }
+        
+        else if (iface[index].sock != -1 &&
             iface[index].bindAddr == bindAddr &&
             iface[index].type == usage &&
             iface[index].sendParam.qos == params->qos &&
             iface[index].sendParam.ttl == params->ttl &&
-            iface[index].rcvOnly == rcvOnly &&
+            iface[index].rcvMostly == rcvMostly &&
             ((usage != TRDP_SOCK_MD_TCP) ||
              ((usage == TRDP_SOCK_MD_TCP) && (iface[index].tcpParams.cornerIp == cornerIp))))
         {
@@ -642,7 +654,7 @@ TRDP_ERR_T  trdp_requestSocket (
         }
     }
 
-    /* Not found, create a new socket */
+    /* Not found, create a new socket entry */
     if (index < VOS_MAX_SOCKET_CNT)
     {
         if (emptySock != -1 && index != emptySock)
@@ -659,25 +671,26 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[index].type           = usage;
         iface[index].sendParam.qos  = params->qos;
         iface[index].sendParam.ttl  = params->ttl;
-        iface[index].rcvOnly        = rcvOnly;
+        iface[index].rcvMostly      = rcvMostly;
         iface[index].tcpParams.connectionTimeout.tv_sec     = 0;
         iface[index].tcpParams.connectionTimeout.tv_usec    = 0;
         iface[index].tcpParams.cornerIp = cornerIp;
         memset(iface[index].mcGroups, 0, sizeof(iface[index].mcGroups));
 
-        sock_options.qos    = params->qos;
-        sock_options.ttl    = params->ttl;
-        sock_options.ttl_multicast  = VOS_TTL_MULTICAST;
-        sock_options.reuseAddrPort  = TRUE;
-        sock_options.nonBlocking    = (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
-
-        if((usage == TRDP_SOCK_MD_TCP) && (rcvOnly == TRUE))
+        /* if a socket descriptor was supplied, take that one (for the TCP connection)   */
+        if (useSocket != -1)
         {
-            iface[index].sock = *pIndex;
+            iface[index].sock = useSocket;
+            iface[index].usage = 1;         /* Mark as used */
             *pIndex = index;
-            iface[index].usage = 0;
             return err;
         }
+
+        sock_options.qos    = params->qos;
+        sock_options.ttl    = params->ttl;
+        sock_options.reuseAddrPort  = TRUE;
+        sock_options.nonBlocking    = (options == TRDP_OPTION_BLOCK) ? FALSE : TRUE;
+        sock_options.ttl_multicast  = (usage != TRDP_SOCK_MD_TCP)? VOS_TTL_MULTICAST : 0;
 
         switch (usage)
         {
@@ -695,7 +708,7 @@ TRDP_ERR_T  trdp_requestSocket (
                     iface[index].usage = 1;
                     *pIndex = index;
 
-                    if (rcvOnly)
+                    if (rcvMostly)
                     {
                         /*  Only bind to local IP if we are not a multicast listener  */
                         if (0 == mcGroup)
@@ -959,5 +972,5 @@ BOOL  trdp_isRcvSeqCnt (
 
 BOOL trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T destUri)
 {
-    return (vos_strnicmp(listUri, destUri, sizeof(TRDP_URI_USER_T)) == 0);
+    return (vos_strnicmp(listUri, destUri, TRDP_DEST_URI_SIZE) == 0);
 }
