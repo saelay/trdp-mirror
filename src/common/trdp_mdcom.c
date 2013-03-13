@@ -2113,6 +2113,12 @@ TRDP_ERR_T trdp_mdCommonSend (
         return TRDP_MUTEX_ERR;
     }
 
+    /* set correct source IP address */
+    if (srcIpAddr == 0)
+    {
+        srcIpAddr = appHandle->realIP;
+    }
+
     /* mutex protected */
     do
     {
@@ -2309,8 +2315,8 @@ TRDP_ERR_T trdp_mdCommonSend (
                         appHandle->iface,
                         appHandle->mdDefault.tcpPort,
                         (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
-                        vos_isMulticast(destIpAddr) ? destIpAddr : 0,
-                        destIpAddr,
+                        srcIpAddr,
+                        0,                 /* no TCP multicast possible */
                         TRDP_SOCK_MD_TCP,
                         TRDP_OPTION_NONE,
                         FALSE,

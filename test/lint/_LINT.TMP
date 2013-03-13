@@ -24,15 +24,27 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(471) : Warning 421: Caution --
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
+            _
+            {
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2848) : Warning 525: Negative
+    indentation from line 2847
+            _
+            }
+D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2851) : Warning 525: Negative
+    indentation from line 2847
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
-              _
-    } while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1004) : Warning 506: Constant
+                                                         _
+        appHandle->pMDRcvEle->pktFlags &= ~TRDP_FLAGS_TCP;
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(550) : Error 64: Type mismatch
+    (assignment) (int/enum) [MISRA Rule 29]
+            _
+    while (1);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1036) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
-              _
-    } while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1876) : Warning 506: Constant
+            _
+    while (1);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1990) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
