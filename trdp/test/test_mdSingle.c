@@ -81,7 +81,7 @@ void usage (const char *appName)
            "-o <own IP address> in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
            "-p <TCP|UDP> protocol to communicate with\n"
-           "-d <n> delay in µs between notification/requests\n"
+           "-d <n> delay in us between notification/requests\n"
            "-e <n> expected replies\n"
            "-r    be responder\n"
            "-c    respond with confirmation\n"

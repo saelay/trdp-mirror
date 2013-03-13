@@ -178,6 +178,7 @@ EXT_DECL UINT32 vos_getInterfaces (
             if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
             {
                 ifAddrs[count].ipAddr = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
+                ifAddrs[count].netMask = ntohl(*(UINT32 *)&cursor->ifa_netmask->sa_data[2]);
                 if (cursor->ifa_name != NULL)
                 {
                     strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);

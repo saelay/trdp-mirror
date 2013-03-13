@@ -115,7 +115,8 @@ void trdp_initSockets(
  *  @param[in]      mcGroup         MC group to join (0 = do not join)
  *  @param[in]      usage           type and port to bind to
  *  @param[in]      options         blocking/nonblocking
- *  @param[in]      rcvOnly         only used for receiving
+ *  @param[in]      rcvMostly       only used for receiving
+ *  @param[out]     useSocket       socket to use, do not open a new one
  *  @param[out]     pIndex          returned index of socket pool
  *  @param[in]      cornerIp        only used for receiving
  *
@@ -124,16 +125,17 @@ void trdp_initSockets(
  */
 
 TRDP_ERR_T trdp_requestSocket(
-    TRDP_SOCKETS_T iface[],
-    UINT32 port,
+    TRDP_SOCKETS_T          iface[],
+    UINT32                  port,
     const TRDP_SEND_PARAM_T * params,
-    TRDP_IP_ADDR_T srcIP,
-    TRDP_IP_ADDR_T mcGroup,
-    TRDP_SOCK_TYPE_T usage,
-    TRDP_OPTION_T options,
-    BOOL rcvOnly,
+    TRDP_IP_ADDR_T          srcIP,
+    TRDP_IP_ADDR_T          mcGroup,
+    TRDP_SOCK_TYPE_T        usage,
+    TRDP_OPTION_T           options,
+    BOOL                    rcvMostly,
+    INT32                   useSocket,
     INT32                   * pIndex,
-    TRDP_IP_ADDR_T cornerIp);
+    TRDP_IP_ADDR_T          cornerIp);
 
 /*********************************************************************************************************************/
 /** Handle the socket pool: Release a socket from our socket pool

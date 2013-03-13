@@ -1041,6 +1041,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         TRDP_SOCK_PD,
                         appHandle->option,
                         FALSE,
+                        -1,
                         &pNewElement->socketIdx,
                         0);
 
@@ -1356,7 +1357,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                            && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP))
                         {
                             /* Copy the master_set to the pFileDesc */
-                            if(FD_ISSET(appHandle->iface[index].sock, &appHandle->tcpFd.master_set))
+                            //if(FD_ISSET(appHandle->iface[index].sock, &appHandle->tcpFd.master_set))
                             {
                                 FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
                                 if (appHandle->iface[index].sock > *pNoDesc)
@@ -1364,10 +1365,10 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                                     *pNoDesc = appHandle->iface[index].sock;
                                 }
                             }
-                            else
+                            /*else
                             {
                                 FD_CLR(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-                            }
+                            }*/
                         }
                     }
 
@@ -1379,7 +1380,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterListener->socketIdx != -1 &&
                             (appHandle->iface[iterListener->socketIdx].sock != -1)
-                            && (appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP))
+                            /*&& (appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP)*/)
                         {
                             if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1397,8 +1398,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterMD->socketIdx != -1 &&
                             (appHandle->iface[iterMD->socketIdx].sock != -1 /*&&
-                                                                            appHandle->option & TRDP_OPTION_BLOCK*/)
-                            && (appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP))
+                                                                            appHandle->option & TRDP_OPTION_BLOCK)
+                            && (appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP*/))
                         {
                             if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1416,8 +1417,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterMD->socketIdx != -1 &&
                             (appHandle->iface[iterMD->socketIdx].sock != -1 /*&&
-                                                                            appHandle->option & TRDP_OPTION_BLOCK*/)
-                            && (appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP))
+                                                                            appHandle->option & TRDP_OPTION_BLOCK)
+                            && (appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP*/))
                         {
                             if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1722,6 +1723,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                                                  TRDP_SOCK_PD,
                                                  appHandle->option,
                                                  FALSE,
+                                                 -1,
                                                  &pReqElement->socketIdx,
                                                  0);
 
@@ -1895,6 +1897,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                  TRDP_SOCK_PD,
                                  appHandle->option,
                                  TRUE,
+                                 -1,
                                  &index,
                                  0);
 
@@ -2399,6 +2402,7 @@ TRDP_ERR_T tlm_addListener (
                             TRDP_SOCK_MD_UDP,
                             appHandle->option,
                             TRUE,
+                            -1,
                             &pNewElement->socketIdx,
                             0);
                 }
@@ -2844,7 +2848,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
         
         if (NULL != iterMD)
         {
-           	if (vos_strnicmp((CHAR8*)iterMD->sessionID, (CHAR8*) pSessionId, sizeof(TRDP_UUID_T)) == 0)
+           	if (memcmp(iterMD->sessionID, pSessionId, TRDP_SESS_ID_SIZE) == 0)
             {
             	iterMD->morituri = TRUE;
                 err = TRDP_NO_ERR;

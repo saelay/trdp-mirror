@@ -45,6 +45,9 @@
 void trdp_closeMDSessions(
     TRDP_SESSION_PT appHandle);
 
+void trdp_mdFreeSession(
+    MD_ELE_T    *pMDSession);
+
 TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
     UINT32          port,
@@ -55,8 +58,8 @@ void trdp_mdUpdatePacket (
 
 TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT 	appHandle,
-    INT32           	sock,
-    TRDP_SOCK_TYPE_T	sockType);
+    UINT32           	sock/*,
+    TRDP_SOCK_TYPE_T	sockType*/);
 
 TRDP_ERR_T  trdp_mdSend (
     TRDP_SESSION_PT appHandle);
