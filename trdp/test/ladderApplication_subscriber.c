@@ -138,10 +138,14 @@ UINT8   firstPutData[PD_DATA_SIZE_MAX] = "First Put";
 
 TRDP_DATASET_T DATASET1_TYPE =
 {
-	10001,		/* dataset/com ID */
+	1001,		/* datasetID */
 	0,			/* reserved */
-	15,			/* No of elements */
+	16,			/* No of elements */
 	{			/* TRDP_DATASET_ELEMENT_T [] */
+			{
+					TRDP_BOOLEAN, 	/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+					1					/* No of elements */
+			},
 			{
 					TRDP_CHAR8, 		/* data type < char, can be used also as UTF8  */
 					1					/* No of elements */
@@ -187,8 +191,8 @@ TRDP_DATASET_T DATASET1_TYPE =
 					1					/* No of elements */
 			},
 			{
-					TRDP_CHAR8,		    /* data type < Zero-terminated array of CHAR8, fixed size */
-					16					/* No of elements */
+					TRDP_REAL64,		/* data type < Floating point real, 64 bit */
+					1					/* No of elements */
 			},
 			{
 					TRDP_TIMEDATE32,	/* data type < 32 bit UNIX time  */
@@ -341,6 +345,9 @@ int main (int argc, char *argv[])
 /*	void *pRefConMarshallDataset1;
 	void *pRefConMarshallDataset2;
 */
+	/* Display PD Application Version */
+	printf("PD Application Version %s: ladderApplication_subscriber Start \n", PD_APP_VERSION);
+
 	/* Command analysis */
 	struct option long_options[] = {		/* Command Option */
 			{"topo",					required_argument,	NULL, 't'},
@@ -352,10 +359,6 @@ int main (int argc, char *argv[])
 			{"marshall",				required_argument,	NULL, 'm'},
 			{"comid1",					required_argument,	NULL, 'c'},
 			{"comid2",					required_argument,	NULL, 'C'},
-/*			{"src-ip1",				    required_argument,	NULL, 'a'},
-			{"dst-ip1",				    required_argument,	NULL, 'b'},
-			{"src-ip2",				    required_argument,	NULL, 'A'},
-			{"dst-ip2",				    required_argument,	NULL, 'B'},	*/
 			{"comid1-sub-src-ip1",	    required_argument,	NULL, 'a'},
 			{"comid1-sub-dst-ip1",	    required_argument,	NULL, 'b'},
 			{"comid2-sub-src-ip1",	    required_argument,	NULL, 'A'},
@@ -653,34 +656,33 @@ int main (int argc, char *argv[])
 				printf("Unknown or required argument option -%c\n", optopt);
 				printf("Usage: COMMAND [-t] [-1] [-2] [-3] [-4] [-s] [-m] [-c] [-C] [-a] [-b] [-A] [-B] [-f] [-F] [-o] [-O] [-d] [-e] [-T] [-h] \n");
 				printf("-t,	--topo			Ladder:1, not Lader:0\n");
-				printf("-1,	--offset1		OFFSET1 val hex\n");
-				printf("-2,	--offset2		OFFSET2 val hex\n");
-				printf("-3,	--offset3		OFFSET3 val hex\n");
-				printf("-4,	--offset4		OFFSET4 val hex\n");
-				printf("-s,	--sub-app-cycle		micro sec\n");
+				printf("-1,	--offset1		OFFSET1 for Publish val hex: 0xXXXX\n");
+				printf("-2,	--offset2		OFFSET2 for Publish val hex: 0xXXXX\n");
+				printf("-3,	--offset3		OFFSET3 for Subscribe val hex: 0xXXXX\n");
+				printf("-4,	--offset4		OFFSET4 for Subscribe val hex: 0xXXXX\n");
+				printf("-s,	--sub-app-cycle		Subscriber PD Receive/send cycle time: micro sec\n");
 				printf("-m,	--marshall		Marshall:1, not Marshall:0\n");
-				printf("-c,	--comid1		ComId1 val\n");
-				printf("-C,	--comid2		ComId2 val\n");
-/*				printf("-a,	--src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-b,	- dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-A,	--src-ip2		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-B,	--dst-ip2		IP Address xxx.xxx.xxx.xxx\n");
-*/
-				printf("-a,	--comid1-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-b,	--comid1-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-A,	--comid2-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-B,	--comid2-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-f		--comid1-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-F,	--comid2-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-o,	--timeout-comid1	micro sec\n");
-				printf("-O,	--timeout-comid2	micro sec\n");
-				printf("-d,	--send-comid1-cycle	micro sec\n");
-				printf("-e,	--send-comid2-cycle	micro sec\n");
-				printf("-T,	--traffic-store-subnet	Subnet1:1,subnet2:2\n");
+				printf("-c,	--publish-comid1	Publish ComId1 val\n");
+				printf("-C,	--publish-comid2	Publish ComId2 val\n");
+//				printf("-g,	--subscribe-comid1	Subscribe ComId1 val\n");
+//				printf("-G,	--subscribe-comid2	Subscribe ComId2 val\n");
+				printf("-a,	--comid1-sub-src-ip1	Subscribe ComId1 Source IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-b,	--comid1-sub-dst-ip1	Subscribe COmId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-A,	--comid2-sub-src-ip1	Subscribe ComId2 Source IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-B,	--comid2-sub-dst-ip1	Subscribe COmId2 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-f,	--comid1-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-F,	--comid2-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-o,	--timeout-comid1	Subscribe Timeout: micro sec\n");
+				printf("-O,	--timeout-comid2	Subscribe TImeout: micro sec\n");
+				printf("-d,	--send-comid1-cycle	Publish Cycle TIme: micro sec\n");
+				printf("-e,	--send-comid2-cycle	Publish Cycle TIme: micro sec\n");
+				printf("-T,	--traffic-store-subnet	Write Traffic Store Receive Subnet1:1,subnet2:2\n");
 				printf("-h,	--help\n");
+				return 1;
 			break;
 			default:
 				printf("Unknown or required argument option -%c\n", optopt);
+				return 1;
 		}
 	}
 
@@ -1023,9 +1025,9 @@ int main (int argc, char *argv[])
 
 			/* Display Get Receive PD DATASET from Traffic Store*/
 			printf("Receive PD DATASET1\n");
-			dumpMemory(&getDataSet1, dataSet1Size);
+//			dumpMemory(&getDataSet1, dataSet1Size);
 			printf("Receive PD DATASET2\n");
-			dumpMemory(&getDataSet2, dataSet2Size);
+//			dumpMemory(&getDataSet2, dataSet2Size);
 
     		/* Set PD DataSet1 in Traffic Store */
     		memcpy((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1), &getDataSet1, dataSet1Size);
@@ -1066,9 +1068,9 @@ int main (int argc, char *argv[])
 
 			/* Display tlp_put PD DATASET */
 			printf("tlp_put PD DATASET1\n");
-			dumpMemory((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1), dataSet1Size);
+//			dumpMemory((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1), dataSet1Size);
 			printf("tlp_put PD DATASET2\n");
-			dumpMemory((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS2), dataSet2Size);
+//			dumpMemory((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS2), dataSet2Size);
 
 			/* Release access right to Traffic Store*/
 			err = tlp_unlockTrafficStore();

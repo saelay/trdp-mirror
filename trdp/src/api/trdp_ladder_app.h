@@ -38,17 +38,21 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.01"
+#define PD_APP_VERSION	"V0.07"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.01"
+#define PD_APP_VERSION	"V0.07"
 #else
-#define PD_APP_VERSION	"V0.01"
+#define PD_APP_VERSION	"V0.07"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
 #define PDCOM_LADDER_THREAD_DELAY_TIME				10000				/* PDComLadder Thread starting Judge Cycle in us */
 #define PDCOM_MULTICAST_GROUPING_DELAY_TIME		    10000000			/* PDComLadder Thread starting Wait Time in us */
 #define PUT_DATASET_BUFFER_SIZE						1					/* putDataSet Backup Buffer */
+
+#define PD_APP_THREAD_NOT_SUBSCRIBE	0x1				/* PDAppThread Not tlp_subscribe */
+#define PD_APP_THREAD_NOT_PUBLISH		0x2				/* PDAppThread Not tlp_publish */
+#define PD_APP_THREAD_NOT_SUB_PUB		PD_APP_THREAD_NOT_SUBSCRIBE | PD_APP_THREAD_NOT_PUBLISH	/* PDAppThread Not tlp_subscribe, tlp_publish */
 
 /* Some sample comId definitions	*/
 #define PD_DATA_SIZE_MAX			300					/* PD DATA MAX SIZE */
@@ -83,17 +87,18 @@ typedef enum
     PD_APP_PARAM_ERR		= -2,			/**< PD Application Parameter Error */
     PD_APP_MEM_ERR		= -3,			/**< PD Application Memory Error */
     PD_APP_THREAD_ERR	= -4,			/**< PD Application Thread Error */
-    PD_APP_MUTEX_ERR		= -5			/**< PD Application Thread Mutex Error */
+    PD_APP_MUTEX_ERR		= -5,			/**< PD Application Thread Mutex Error */
+    PD_APP_COMMAND_ERR	= -6			/**< PD Application Command Error */
 } PD_APP_ERR_TYPE;
 
 /* Command Value */
-typedef struct
+typedef struct PD_COMMAND_VALUE
 {
 //	BOOL ladderTopologyFlag;						/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
 	UINT16 OFFSET_ADDRESS1;						/* offsetAddress comId1 publish */
-	UINT16 OFFSET_ADDRESS2;						/* offsetAddress comId2 publish */
+//	UINT16 OFFSET_ADDRESS2;						/* offsetAddress comId2 publish */
 	UINT16 OFFSET_ADDRESS3;						/* offsetAddress comId1 subscribe */
-	UINT16 OFFSET_ADDRESS4;						/* offsetAddress comId2 subscribe */
+//	UINT16 OFFSET_ADDRESS4;						/* offsetAddress comId2 subscribe */
 	UINT32	LADDER_APP_CYCLE;						/* Ladder Application cycle in us */
 	UINT32 PD_PUB_COMID1;						/* Publish ComId1 */
 //	UINT32 PD_PUB_COMID2;						/* Publish ComId2 */
@@ -116,6 +121,9 @@ typedef struct
 	UINT32 PD_COMID1_CYCLE;						/* Publish ComID1 Cycle TIme */
 //	UINT32 PD_COMID2_CYCLE;						/* Publish ComID2 Cycle TIme */
 	UINT32 TS_SUBNET;								/* Traffic Store Using Subnet */
+	UINT32 receiveCount;							/* Subscriber receive Count */
+	UINT32 timeoutReceiveCount;					/* Subscriber timeout receive Count */
+	struct PD_COMMAND_VALUE *pNextPdCommandValue;	/* pointer to next PD_COMMAND_VALUE or NULL */
 } PD_COMMAND_VALUE;
 
 /* PD Thread Parameter */
@@ -127,21 +135,23 @@ typedef struct
 /**	DataSet definition	*/
 typedef struct
 {
-	CHAR8						character;		/**< char, can be used also as UTF8 */
-	UTF16						utf16;			/**< Unicode UTF-16 character */
-	INT8						integer8;		/**< Signed integer, 8 bit */
-	INT16						integer16;		/**< Signed integer, 16 bit */
-	INT32						integer32;		/**< Signed integer, 32 bit */
-	INT64						integer64;		/**< Signed integer, 64 bit */
-	UINT8						uInteger8;		/**< Unsigned integer, 8 bit */
-	UINT16						uInteger16;	    /**< Unsigned integer, 16 bit */
-	UINT32						uInteger32;	    /**< Unsigned integer, 32 bit */
-	UINT64						uInteger64;	    /**< Unsigned integer, 64 bit */
-	REAL32						real32;		    /**< Floating point real, 32 bit */
-	CHAR8						string[16];	    /**< Zero-terminated array of CHAR8, fixed size */
-	TIMEDATE32					timeDate32;	    /**< 32 bit UNIX time  */
-	TIMEDATE48					timeDate48;	    /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
-	TIMEDATE64					timeDate64;	    /**< 32 bit UNIX time + 32 bit miliseconds  */
+	BOOL			boolean;		/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+	CHAR8			character;		/**< char, can be used also as UTF8 */
+	UTF16			utf16;			/**< Unicode UTF-16 character */
+	INT8			integer8;		/**< Signed integer, 8 bit */
+	INT16			integer16;		/**< Signed integer, 16 bit */
+	INT32			integer32;		/**< Signed integer, 32 bit */
+	INT64			integer64;		/**< Signed integer, 64 bit */
+	UINT8			uInteger8;		/**< Unsigned integer, 8 bit */
+	UINT16			uInteger16;    /**< Unsigned integer, 16 bit */
+	UINT32			uInteger32;    /**< Unsigned integer, 32 bit */
+	UINT64			uInteger64;    /**< Unsigned integer, 64 bit */
+	REAL32			real32;	    /**< Floating point real, 32 bit */
+	REAL64			real64;	    /**< Floating point real, 64 bit */
+//	CHAR8			string[16];    /**< Zero-terminated array of CHAR8, fixed size */
+	TIMEDATE32		timeDate32;    /**< 32 bit UNIX time  */
+	TIMEDATE48		timeDate48;    /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
+	TIMEDATE64		timeDate64;    /**< 32 bit UNIX time + 32 bit miliseconds (== struct timeval) */
 } DATASET1;
 
 typedef struct
@@ -358,6 +368,60 @@ PD_APP_ERR_TYPE trdp_pdInitialize (
  */
 PD_APP_ERR_TYPE PDApplication (
 		PD_THREAD_PARAMETER *pPdThreadParameter);
+
+/**********************************************************************************************************************/
+/** Append an pdCommandValue at end of List
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of List
+ *  @param[in]      pNew            pointer to pdCommandValue to append
+ *
+ *  @retval         PD_APP_NO_ERR			no error
+ *  @retval         PD_APP_ERR				error
+ */
+PD_APP_ERR_TYPE appendPdComamndValueList(
+		PD_COMMAND_VALUE    * *ppHeadPdCommandValue,
+		PD_COMMAND_VALUE    *pNewPdCommandValue);
+
+/**********************************************************************************************************************/
+/** Return the PdCommandValue with same comId and IP addresses
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         		pointer to PdCommandValue
+ *  @retval         NULL            		No PD PdCommandValue found
+ */
+PD_APP_ERR_TYPE serachPdCommandValueToCommand (
+		PD_COMMAND_VALUE	*pHeadPdCommandValue,
+		PD_COMMAND_VALUE	*pNewPdCommandValue);
+
+/**********************************************************************************************************************/
+/** Return the PdCommandValue with same comId and IP addresses
+ *
+ *  @param[in]      pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         		pointer to PdCommandValue
+ *  @retval         NULL            		No PD PdCommandValue found
+ */
+PD_COMMAND_VALUE *serachPdCommandValueToAddr (
+		TRDP_ADDRESSES_T    *addr);
+
+/**********************************************************************************************************************/
+/** Return the PdCommandValue with same comId and IP addresses
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         		pointer to PdCommandValue
+ *  @retval         NULL            		No PD PdCommandValue found
+ */
+PD_APP_ERR_TYPE printPdCommandValue (
+		PD_COMMAND_VALUE	*pHeadPdCommandValue);
+
+// Convert an IP address to string
+char * miscIpToString(
+		int ipAdd,
+		char *strTmp);
 
 #endif	/* TRDP_OPTION_LADDER */
 

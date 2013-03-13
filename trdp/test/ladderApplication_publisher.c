@@ -26,6 +26,8 @@
 #include <getopt.h>
 #include <errno.h>
 #include <ifaddrs.h>
+#include <limits.h>
+#include <float.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -143,8 +145,12 @@ TRDP_DATASET_T DATASET1_TYPE =
 {
 	1001,		/* datasetID */
 	0,			/* reserved */
-	15,			/* No of elements */
+	16,			/* No of elements */
 	{			/* TRDP_DATASET_ELEMENT_T [] */
+			{
+					TRDP_BOOLEAN, 	/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+					1					/* No of elements */
+			},
 			{
 					TRDP_CHAR8, 		/* data type < char, can be used also as UTF8  */
 					1					/* No of elements */
@@ -190,8 +196,8 @@ TRDP_DATASET_T DATASET1_TYPE =
 					1					/* No of elements */
 			},
 			{
-					TRDP_CHAR8,		    /* data type < Zero-terminated array of CHAR8, fixed size */
-					16					/* No of elements */
+					TRDP_REAL64,		/* data type < Floating point real, 64 bit */
+					1					/* No of elements */
 			},
 			{
 					TRDP_TIMEDATE32,	/* data type < 32 bit UNIX time  */
@@ -360,7 +366,7 @@ INT8 dumpMemory (
 int main (int argc, char *argv[])
 {
 	TRDP_ERR_T err;
-	CHAR8 stringMaxData[16] = "STRING MAX SIZE";
+//	CHAR8 stringMaxData[16] = "STRING MAX SIZE";
 	PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;	    /* Sender's IP: 10.4.33.17 (default) */
 	PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;	    /* Sender's IP: 10.4.33.17 (default) */
 
@@ -393,9 +399,9 @@ int main (int argc, char *argv[])
 	memset(putDataSet2Buffer, 0, sizeof(putDataSet2Buffer));
 
 	/* First Put Data in Dataset1 */
-	strncpy(dataSet1.string, firstPutData, strlen(firstPutData));
+//	strncpy(dataSet1.string, firstPutData, strlen(firstPutData));
 	/* First Put Data in Dataset2 */
-	strncpy(dataSet2.dataset1[1].string, firstPutData, strlen(firstPutData));
+//	strncpy(dataSet2.dataset1[1].string, firstPutData, strlen(firstPutData));
 	dataSet1Size = sizeof(dataSet1);
 	dataSet2Size = sizeof(dataSet2);
 
@@ -403,6 +409,9 @@ int main (int argc, char *argv[])
 	UINT32 usingComIdNumber = 2;							/* 2 = ComId:10001,10002 */
 	UINT32 usingDatasetNumber =2;							/* 2 = DATASET1,DATASET2 */
 	TRDP_MARSHALL_CONFIG_T	*pMarshallConfigPtr = NULL;	    /* Marshaling/unMarshalling configuration Pointer	*/
+
+	/* Display PD Application Version */
+	printf("PD Application Version %s: ladderApplication_publisher Start \n", PD_APP_VERSION);
 
 	/* Command analysis */
 	struct option long_options[] = {		/* Command Option */
@@ -415,10 +424,6 @@ int main (int argc, char *argv[])
 			{"marshall",				required_argument,	NULL, 'm'},
 			{"comid1",					required_argument,	NULL, 'c'},
 			{"comid2",					required_argument,	NULL, 'C'},
-/*			{"src-ip1",				    required_argument,	NULL, 'a'},
-			{"dst-ip1",				    required_argument,	NULL, 'b'},
-			{"src-ip2",				    required_argument,	NULL, 'A'},
-			{"dst-ip2",				    required_argument,	NULL, 'B'},	*/
 			{"comid1-sub-src-ip1",	    required_argument,	NULL, 'a'},
 			{"comid1-sub-dst-ip1",	    required_argument,	NULL, 'b'},
 			{"comid2-sub-src-ip1",	    required_argument,	NULL, 'A'},
@@ -725,35 +730,34 @@ int main (int argc, char *argv[])
 				printf("Unknown or required argument option -%c\n", optopt);
 				printf("Usage: COMMAND [-t] [-1] [-2] [-3] [-4] [-p] [-m] [-c] [-C] [-a] [-b] [-A] [-B] [-f] [-F] [-o] [-O] [-d] [-e] [-T] [-r] [-h] \n");
 				printf("-t,	--topo			Ladder:1, not Lader:0\n");
-				printf("-1,	--offset1		OFFSET1 val hex\n");
-				printf("-2,	--offset2		OFFSET2 val hex\n");
-				printf("-3,	--offset3		OFFSET3 val hex\n");
-				printf("-4,	--offset4		OFFSET4 val hex\n");
-				printf("-p,	--pub-app-cycle		micro sec\n");
+				printf("-1,	--offset1		OFFSET1 for Publish val hex: 0xXXXX\n");
+				printf("-2,	--offset2		OFFSET2 for Publish val hex: 0xXXXX\n");
+				printf("-3,	--offset3		OFFSET3 for Subscribe val hex: 0xXXXX\n");
+				printf("-4,	--offset4		OFFSET4 for Subscribe val hex: 0xXXXX\n");
+				printf("-p,	--pub-app-cycle		Publisher tlp_put cycle time: micro sec\n");
 				printf("-m,	--marshall		Marshall:1, not Marshall:0\n");
-				printf("-c,	--comid1		ComId1 val\n");
-				printf("-C,	--comid2		ComId2 val\n");
-/*				printf("-a,	--src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-b,	--dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-A,	--src-ip2		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-B,	--dst-ip2		IP Address xxx.xxx.xxx.xxx\n");
-*/
-				printf("-a,	--comid1-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-b,	--comid1-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-A,	--comid2-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-B,	--comid2-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-f,	--comid1-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-F,	--comid2-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-o,	--timeout-comid1	micro sec\n");
-				printf("-O,	--timeout-comid2	micro sec\n");
-				printf("-d,	--send-comid1-cycle	micro sec\n");
-				printf("-e,	--send-comid2-cycle	micro sec\n");
-				printf("-T,	--traffic-store-subnet	Subnet1:1,subnet2:2\n");
+				printf("-c,	--publish-comid1	Publish ComId1 val\n");
+				printf("-C,	--publish-comid2	Publish ComId2 val\n");
+//				printf("-g,	--subscribe-comid1	Subscribe ComId1 val\n");
+//				printf("-G,	--subscribe-comid2	Subscribe ComId2 val\n");
+				printf("-a,	--comid1-sub-src-ip1	Subscribe ComId1 Source IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-b,	--comid1-sub-dst-ip1	Subscribe COmId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-A,	--comid2-sub-src-ip1	Subscribe ComId2 Source IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-B,	--comid2-sub-dst-ip1	Subscribe COmId2 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-f,	--comid1-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-F,	--comid2-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-o,	--timeout-comid1	Subscribe Timeout: micro sec\n");
+				printf("-O,	--timeout-comid2	Subscribe TImeout: micro sec\n");
+				printf("-d,	--send-comid1-cycle	Publish Cycle TIme: micro sec\n");
+				printf("-e,	--send-comid2-cycle	Publish Cycle TIme: micro sec\n");
+				printf("-T,	--traffic-store-subnet	Write Traffic Store Receive Subnet1:1,subnet2:2\n");
 				printf("-r,	--pd-return-ng-counter	PD Return NG = Continuation compare NG\n");
 				printf("-h,	--help\n");
+				return 1;
 			break;
 			default:
 				printf("Unknown or required argument option -%c\n", optopt);
+				return 1;
 		}
 	}
 
@@ -772,42 +776,47 @@ int main (int argc, char *argv[])
 	}
 
 	/* Initialize PD DataSet1 */
-	dataSet1.character = 0;
-	dataSet1.utf16 = 1;
-	dataSet1.integer8 = 2;
-	dataSet1.integer16 = 3;
-	dataSet1.integer32 = 4;
-	dataSet1.integer64 = 5;
-	dataSet1.uInteger8 = 6;
-	dataSet1.uInteger16 = 7;
-	dataSet1.uInteger32 = 8;
-	dataSet1.uInteger64 = 9;
-	dataSet1.real32 = 10;
-	strncpy(dataSet1.string, stringMaxData, sizeof(stringMaxData));
-	dataSet1.timeDate32 = 11;
-	dataSet1.timeDate48.sec = 12;
-	dataSet1.timeDate48.ticks = 13;
-	dataSet1.timeDate64.tv_sec = 14;
-	dataSet1.timeDate64.tv_usec = 15;
+	dataSet1.boolean = 0;
+	dataSet1.character = 1;
+	dataSet1.utf16 = 2;
+	dataSet1.integer8 = 3;
+	dataSet1.integer16 = 4;
+	dataSet1.integer32 = 5;
+	dataSet1.integer64 = 6;
+	dataSet1.uInteger8 = 7;
+	dataSet1.uInteger16 = 8;
+	dataSet1.uInteger32 = 9;
+	dataSet1.uInteger64 = 10;
+	dataSet1.real32 = 11;
+	dataSet1.real64 = 12;
+//	strncpy(dataSet1.string, stringMaxData, sizeof(stringMaxData));
+	dataSet1.timeDate32 = 13;
+	dataSet1.timeDate48.sec = 14;
+	dataSet1.timeDate48.ticks = 15;
+	dataSet1.timeDate64.tv_sec = 16;
+	dataSet1.timeDate64.tv_usec = 17;
 
 	/* Initialize PD DataSet2 */
-	dataSet2.dataset1[0].character = 0;
-	dataSet2.dataset1[0].utf16 = 1;
-	dataSet2.dataset1[0].integer8 = 2;
-	dataSet2.dataset1[0].integer16 = 3;
-	dataSet2.dataset1[0].integer32 = 4;
-	dataSet2.dataset1[0].integer64 = 5;
-	dataSet2.dataset1[0].uInteger8 = 6;
-	dataSet2.dataset1[0].uInteger16 = 7;
-	dataSet2.dataset1[0].uInteger32 = 8;
-	dataSet2.dataset1[0].uInteger64 = 9;
-	dataSet2.dataset1[0].real32 = 10;
-	strncpy(dataSet2.dataset1[0].string, stringMaxData, sizeof(stringMaxData));
-	dataSet2.dataset1[0].timeDate32 = 11;
-	dataSet2.dataset1[0].timeDate48.sec = 12;
-	dataSet2.dataset1[0].timeDate48.ticks = 13;
-	dataSet2.dataset1[0].timeDate64.tv_sec = 14;
-	dataSet2.dataset1[0].timeDate64.tv_usec = 15;
+	dataSet2.dataset1[0].boolean = 0;
+	dataSet2.dataset1[0].character = 1;
+	dataSet2.dataset1[0].utf16 = 2;
+	dataSet2.dataset1[0].integer8 = 3;
+	dataSet2.dataset1[0].integer16 = 4;
+	dataSet2.dataset1[0].integer32 = 5;
+	dataSet2.dataset1[0].integer64 = 6;
+	dataSet2.dataset1[0].uInteger8 = 7;
+	dataSet2.dataset1[0].uInteger16 = 8;
+	dataSet2.dataset1[0].uInteger32 = 9;
+	dataSet2.dataset1[0].uInteger64 = 10;
+	dataSet2.dataset1[0].real32 = 11;
+	dataSet2.dataset1[0].real64 = 12;
+//	strncpy(dataSet2.dataset1[0].string, stringMaxData, sizeof(stringMaxData));
+	dataSet2.dataset1[0].timeDate32 = 13;
+	dataSet2.dataset1[0].timeDate48.sec = 14;
+	dataSet2.dataset1[0].timeDate48.ticks = 15;
+	dataSet2.dataset1[0].timeDate64.tv_sec = 16;
+	dataSet2.dataset1[0].timeDate64.tv_usec = 17;
+	dataSet2.dataset1[1].boolean = 1;
 	dataSet2.dataset1[1].character = 127-1;
 	dataSet2.dataset1[1].utf16 = 0xFFFFFFFF-1;
 	dataSet2.dataset1[1].integer8 = 127-1;
@@ -818,8 +827,11 @@ int main (int argc, char *argv[])
 	dataSet2.dataset1[1].uInteger16 = 0xFFFF-1;
 	dataSet2.dataset1[1].uInteger32 = 0xFFFFFFFF-1;
 	dataSet2.dataset1[1].uInteger64 = 0xFFFFFFFFFFFFFFFFull-1;
-	dataSet2.dataset1[1].real32 = 2147483647-1;
-	strncpy(dataSet2.dataset1[1].string, stringMaxData, sizeof(stringMaxData));
+//	dataSet2.dataset1[1].real32 = 2147483647-1;
+	dataSet2.dataset1[1].real32 = FLT_MAX_EXP - 1;
+//	dataSet2.dataset1[1].real64 = 1.79769313486232e308 - 1;
+	dataSet2.dataset1[1].real64 = DBL_MAX_EXP - 1;
+//	strncpy(dataSet2.dataset1[1].string, stringMaxData, sizeof(stringMaxData));
 	dataSet2.dataset1[1].timeDate32 = 2147483647-1;
 	dataSet2.dataset1[1].timeDate48.sec = 2147483647-1;
 	dataSet2.dataset1[1].timeDate48.ticks = 0xFFFF-1;
@@ -1141,6 +1153,7 @@ vos_threadDelay(publisherAppCycle);
     		if (pdDataset1ReturnNgCounter == PD_RETURN_NG_COUNTER)
     		{
 				/* Create PD DataSet1 */
+    			dataSet1.boolean++;
 				dataSet1.character++;
 				dataSet1.utf16++;
 				dataSet1.integer8++;
@@ -1152,7 +1165,8 @@ vos_threadDelay(publisherAppCycle);
 				dataSet1.uInteger32++;
 				dataSet1.uInteger64++;
 				dataSet1.real32++;
-				strncpy(dataSet1.string, stringMaxData, sizeof(stringMaxData));
+				dataSet1.real64++;
+//				strncpy(dataSet1.string, stringMaxData, sizeof(stringMaxData));
 				dataSet1.timeDate32++;
 				dataSet1.timeDate48.sec++;
 				dataSet1.timeDate48.ticks++;
@@ -1166,6 +1180,7 @@ vos_threadDelay(publisherAppCycle);
     		if (pdDataset2ReturnNgCounter == PD_RETURN_NG_COUNTER)
 	 		{
 				/* Create PD DataSet2 */
+    			dataSet2.dataset1[0].boolean++;
 				dataSet2.dataset1[0].character++;
 				dataSet2.dataset1[0].utf16++;
 				dataSet2.dataset1[0].integer8++;
@@ -1177,12 +1192,14 @@ vos_threadDelay(publisherAppCycle);
 				dataSet2.dataset1[0].uInteger32++;
 				dataSet2.dataset1[0].uInteger64++;
 				dataSet2.dataset1[0].real32++;
-				strncpy(dataSet2.dataset1[0].string, stringMaxData, sizeof(stringMaxData));
+				dataSet2.dataset1[0].real64++;
+//				strncpy(dataSet2.dataset1[0].string, stringMaxData, sizeof(stringMaxData));
 				dataSet2.dataset1[0].timeDate32++;
 				dataSet2.dataset1[0].timeDate48.sec++;
 				dataSet2.dataset1[0].timeDate48.ticks++;
 				dataSet2.dataset1[0].timeDate64.tv_sec++;
 				dataSet2.dataset1[0].timeDate64.tv_usec++;
+				dataSet2.dataset1[1].boolean++;
 				dataSet2.dataset1[1].character++;
 				dataSet2.dataset1[1].utf16++;
 				dataSet2.dataset1[1].integer8++;
@@ -1194,7 +1211,8 @@ vos_threadDelay(publisherAppCycle);
 				dataSet2.dataset1[1].uInteger32++;
 				dataSet2.dataset1[1].uInteger64++;
 				dataSet2.dataset1[1].real32++;
-				strncpy(dataSet2.dataset1[1].string, stringMaxData, sizeof(stringMaxData));
+				dataSet2.dataset1[1].real64++;
+//				strncpy(dataSet2.dataset1[1].string, stringMaxData, sizeof(stringMaxData));
 				dataSet2.dataset1[1].timeDate32++;
 				dataSet2.dataset1[1].timeDate48.sec++;
 				dataSet2.dataset1[1].timeDate48.ticks++;
@@ -1256,9 +1274,9 @@ vos_threadDelay(publisherAppCycle);
 
 			/* Display tlp_put PD DATASET */
 			printf("tlp_put PD DATASET1\n");
-    		dumpMemory(&putDataSet1, dataSet1Size);
+//    		dumpMemory(&putDataSet1, dataSet1Size);
     		printf("tlp_put PD DATASET2\n");
-    		dumpMemory(&putDataSet2, dataSet2Size);
+//    		dumpMemory(&putDataSet2, dataSet2Size);
 
 			/* Release access right to Traffic Store*/
 			err = tlp_unlockTrafficStore();
@@ -1320,9 +1338,9 @@ vos_threadDelay(publisherAppCycle);
 
 				/* Display Get Receive PD DATASET from Traffic Store*/
 				printf("Receive PD DATASET1\n");
-	    		dumpMemory(&getDataSet1, dataSet1Size);
+//	    		dumpMemory(&getDataSet1, dataSet1Size);
 	    		printf("Receive PD DATASET2\n");
-	    		dumpMemory(&getDataSet2, dataSet2Size);
+//	    		dumpMemory(&getDataSet2, dataSet2Size);
 
 				for(i=0; i <= PUT_DATASET_BUFFER_SIZE - 1; i++)
 				{

@@ -80,6 +80,8 @@ UINT16 OFFSET_ADDRESS2	= 0x1180;				/* offsetAddress comId1 */
 
 UINT8   firstPutData[PD_DATA_SIZE_MAX] = "First Put";
 
+PD_COMMAND_VALUE *pFirstPdCommandValue = NULL;		/* First PD Command Value */
+
 /***********************************************************************************************************************
  * DEFINES
  */
@@ -147,14 +149,14 @@ void dbgOut (
  */
 int main (int argc, char *argv[])
 {
-	PD_COMMAND_VALUE *pPdCommandValue = NULL;		/* PD Command Value */
+//	PD_COMMAND_VALUE *pPdCommandValue = NULL;		/* PD Command Value */
 
-    /* Traffic Store */
-//	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
+	/* Display PD Application Version */
+	printf("PD Application Version %s: ladderApplication_multiPD Start \n", PD_APP_VERSION);
 
 	/* Get PD_COMMAND_VALUE Area */
-	pPdCommandValue = (PD_COMMAND_VALUE *)malloc(sizeof(PD_COMMAND_VALUE));
-	if (pPdCommandValue == NULL)
+	pFirstPdCommandValue = (PD_COMMAND_VALUE *)malloc(sizeof(PD_COMMAND_VALUE));
+	if (pFirstPdCommandValue == NULL)
 	{
 		printf("PD_COMMAND_VALUE malloc Err\n");
 		return PD_APP_MEM_ERR;
@@ -162,14 +164,25 @@ int main (int argc, char *argv[])
 	else
 	{
 		/* Decide Create Thread */
-		err = decideCreatePdThread(argc, argv, pPdCommandValue);
+		err = decideCreatePdThread(argc, argv, pFirstPdCommandValue);
 		if (err !=  PD_APP_NO_ERR)
 		{
-			printf("Decide Create Thread Err\n");
-			return PD_APP_THREAD_ERR;
+			/* command -h = PD_APP_COMMAND_ERR */
+			if (err == PD_APP_COMMAND_ERR)
+			{
+				/* Get Command, Create Application Thread Loop */
+				pdCommand_main_proc();
+			}
+			else
+			{
+				/* command err */
+				/* Get Command, Create Application Thread Loop */
+				pdCommand_main_proc();
+			}
 		}
 		else
 		{
+			/* command OK */
 			/* Get Command, Create Application Thread Loop */
 			pdCommand_main_proc();
 		}
@@ -202,8 +215,18 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 	err = analyzePdCommand(argc, argv, pPdCommandValue);
 	if (err != PD_APP_NO_ERR)
 	{
-		printf("PD_COMMAND_VALUE Err\n");
-		return PD_APP_ERR;
+		/* command -h */
+		if (err == PD_APP_COMMAND_ERR)
+		{
+			/* Continue Input Command */
+			return PD_APP_COMMAND_ERR;
+		}
+		else
+		{
+			/* command err */
+			printf("PD_COMMAND_VALUE Err\n");
+			return PD_APP_ERR;
+		}
 	}
 
 	/* Only the First Time */
@@ -230,6 +253,19 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 	           PD_APP_VERSION);
 	}
 
+	/* Search New Command in CommandList */
+	err = serachPdCommandValueToCommand (pFirstPdCommandValue, pPdCommandValue);
+	if (err== PD_APP_COMMAND_ERR)
+	{
+		printf("decideCreatePdThread Err. There is already Command Err\n");
+		return PD_APP_PARAM_ERR;
+	}
+	else if (err == PD_APP_PARAM_ERR)
+	{
+		printf("decideCreatePdThread Err. Not ComId Command Value Err\n");
+		return PD_APP_PARAM_ERR;
+	}
+
 	/* Create PD Thread */
 	/* Get Thread Parameter Area */
 	pPdThreadParameter = (PD_THREAD_PARAMETER *)malloc(sizeof(PD_THREAD_PARAMETER));
@@ -243,11 +279,11 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 		/* Set Thread Parameter */
 		pPdThreadParameter->pPdCommandValue = pPdCommandValue;
 		/* Lock PD Application Thread Mutex */
-		lockPdApplicationThread();
+//		lockPdApplicationThread();
 		/* Create PD Thread */
 		err = createPdThread(pPdThreadParameter);
 		/* UnLock PD Application Thread Mutex */
-		unlockPdApplicationThread();
+//		unlockPdApplicationThread();
 		if (err != PD_APP_NO_ERR)
 		{
 			printf("Create PD Thread Err\n");
@@ -400,8 +436,22 @@ PD_APP_ERR_TYPE pdCommand_main_proc(void)
 			err = decideCreatePdThread(operand+1, argvCommand, pPdCommandValue);
 			if (err !=  PD_APP_NO_ERR)
 			{
-				printf("Decide Create Thread Err\n");
-				return PD_APP_THREAD_ERR;
+				/* command -h = PD_APP_COMMAND_ERR */
+				if (err == PD_APP_COMMAND_ERR)
+				{
+					continue;
+				}
+				else
+				{
+					/* command err */
+					printf("Decide Create Thread Err\n");
+				}
+				free(pPdCommandValue);
+			}
+			else
+			{
+				/* Set pPdCommandValue List */
+				appendPdComamndValueList(&pFirstPdCommandValue, pPdCommandValue);
 			}
 		}
 	}
@@ -641,37 +691,46 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 				/* Set Traffic Store subnet */
 				getPdCommandValue.TS_SUBNET = uint32_value;
 			break;
+			case 's':
+				if (printPdCommandValue(pFirstPdCommandValue) != PD_APP_NO_ERR)
+				{
+					printf("PD Command Value Dump Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
 			case 'h':
 			case '?':
 				printf("Unknown or required argument option -%c\n", optopt);
-				printf("Usage: COMMAND [-t] [-1] [-2] [-3] [-4] [-p] [-m] [-c] [-C] [-g] [-G] [-a] [-b] [-A] [-B] [-o] [-O] [-d] [-e] [-T] [-r] [-h] \n");
+				printf("Usage: COMMAND [-1] [-3] [-p] [-c] [-g] [-a] [-b] [-f] [-o] [-d] [-T] [-h] \n");
 //				printf("-t,	--topo			Ladder:1, not Lader:0\n");
-				printf("-1,	--offset1		OFFSET1 for Publish val hex\n");
-//				printf("-2,	--offset2		OFFSET2 for Publish val hex\n");
-				printf("-3,	--offset3		OFFSET3 for Subscribe val hex\n");
-//				printf("-4,	--offset4		OFFSET4 for Subscribe val hex\n");
-				printf("-p,	--pub-app-cycle		micro sec\n");
+				printf("-1,	--offset1		OFFSET1 for Publish val hex: 0xXXXX\n");
+//				printf("-2,	--offset2		OFFSET2 for Publish val hex: 0xXXXX\n");
+				printf("-3,	--offset3		OFFSET3 for Subscribe val hex: 0xXXXX\n");
+//				printf("-4,	--offset4		OFFSET4 for Subscribe val hex: 0xXXXX\n");
+				printf("-p,	--pub-app-cycle		Publisher tlp_put cycle time: micro sec\n");
 //				printf("-m,	--marshall		Marshall:1, not Marshall:0\n");
-				printf("-c,	--publish-comid1		Publish ComId1 val\n");
-//				printf("-C,	--publish-comid2		Publish ComId2 val\n");
-				printf("-g,	--subscribe-comid1		Subscribe ComId1 val\n");
-//				printf("-G,	--subscribe-comid2		Subscribe ComId2 val\n");
-				printf("-a,	--comid1-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-b,	--comid1-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-//				printf("-A,	--comid2-sub-src-ip1		IP Address xxx.xxx.xxx.xxx\n");
-//				printf("-B,	--comid2-sub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-f,	--comid1-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-//				printf("-F,	--comid2-pub-dst-ip1		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-o,	--timeout-comid1	Subscribe Timeout micro sec\n");
-//				printf("-O,	--timeout-comid2	Subscribe TImeout micro sec\n");
-				printf("-d,	--send-comid1-cycle	Publish Cycle TIme micro sec\n");
-//				printf("-e,	--send-comid2-cycle	Publish Cycle TIme micro sec\n");
-				printf("-T,	--traffic-store-subnet	Subnet1:1,subnet2:2\n");
+				printf("-c,	--publish-comid1	Publish ComId1 val\n");
+//				printf("-C,	--publish-comid2	Publish ComId2 val\n");
+				printf("-g,	--subscribe-comid1	Subscribe ComId1 val\n");
+//				printf("-G,	--subscribe-comid2	Subscribe ComId2 val\n");
+				printf("-a,	--comid1-sub-src-ip1	Subscribe ComId1 Source IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-b,	--comid1-sub-dst-ip1	Subscribe ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+//				printf("-A,	--comid2-sub-src-ip1	Subscribe ComId2 Source IP Address: xxx.xxx.xxx.xxx\n");
+//				printf("-B,	--comid2-sub-dst-ip1	Subscribe COmId2 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-f,	--comid1-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+//				printf("-F,	--comid2-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-o,	--timeout-comid1	Subscribe Timeout: micro sec\n");
+//				printf("-O,	--timeout-comid2	Subscribe TImeout: micro sec\n");
+				printf("-d,	--send-comid1-cycle	Publish Cycle TIme: micro sec\n");
+//				printf("-e,	--send-comid2-cycle	Publish Cycle TIme: micro sec\n");
+				printf("-T,	--traffic-store-subnet	Write Traffic Store Receive Subnet1:1,subnet2:2\n");
+				printf("-s,	--show-set-command	Display Setup Command until now\n");
 				printf("-h,	--help\n");
-				return PD_APP_NO_ERR;
+				return PD_APP_COMMAND_ERR;
 			break;
 			default:
 				printf("Unknown or required argument option -%c\n", optopt);
+				return PD_APP_COMMAND_ERR;
 			}
 		}
 	}
@@ -785,106 +844,129 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 	TRDP_SUB_T          subHandleNet2ComId1;		/*	Sub-network Id2 ComID1 identifier to the subscription	*/
 	TRDP_PUB_T          pubHandleNet2ComId1;		/*	Sub-network Id2 ComID2 identifier to the publication	*/
 
+	UINT32 subPubValidFlag = 0;						/* Subscribe Publish valid flag */
+
     /* Traffic Store */
 	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
 	CHAR8 putData[PD_DATA_SIZE_MAX];				/* put DATA */
 	INT32 putCounter = 0;							/* put counter */
 
 	/*	Sub-network Id1 Subscribe */
-    err = tlp_subscribe( appHandle,															/* our application identifier */
-                         &subHandleNet1ComId1,												/* our subscription identifier */
-                         &pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
-                         pPdThreadParameter->pPdCommandValue->PD_SUB_COMID1,             	/* ComID */
-                         0,                        											/* topocount: local consist only */
-                         pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_SRC_IP1,		/* Source IP filter */
-                         0,                        											/* Source IP filter2 : no used */
-                         pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_DST_IP1,		/* Default destination	(or MC Group) */
-                         0,																		/* Option */
-                         pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,			/* Time out in us	*/
-                         TRDP_TO_SET_TO_ZERO,       											/* delete invalid data on timeout */
-                         PD_DATA_SIZE_MAX);													/* net data size */
-    if (err != TRDP_NO_ERR)
-    {
-        printf("prep  Sub-network Id1 pd receive error\n");
-        tlc_terminate();
-        trdp_ladder_terminate();
-        return PD_APP_ERR;
-    }
+	/* Check Subscribe ComId */
+	if (pPdThreadParameter->pPdCommandValue->PD_SUB_COMID1 == 0)
+	{
+		/* Set not tlp_subscreibe flag */
+		subPubValidFlag = PD_APP_THREAD_NOT_SUBSCRIBE;
+	}
+	else
+	{
+		err = tlp_subscribe( appHandle,															/* our application identifier */
+							 &subHandleNet1ComId1,												/* our subscription identifier */
+							 &pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
+							 pPdThreadParameter->pPdCommandValue->PD_SUB_COMID1,             	/* ComID */
+							 0,                        											/* topocount: local consist only */
+							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_SRC_IP1,		/* Source IP filter */
+							 0,                        											/* Source IP filter2 : no used */
+							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_DST_IP1,		/* Default destination	(or MC Group) */
+							 0,																		/* Option */
+							 pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,			/* Time out in us	*/
+							 TRDP_TO_SET_TO_ZERO,       											/* delete invalid data on timeout */
+							 PD_DATA_SIZE_MAX);													/* net data size */
+		if (err != TRDP_NO_ERR)
+		{
+			printf("prep  Sub-network Id1 pd receive error\n");
+			return PD_APP_ERR;
+		}
 
-    /* Start PdComLadderThread */
-    trdp_setPdComLadderThreadStartFlag(TRUE);
+		/*	Sub-network Id2 Subscribe */
+		err = tlp_subscribe( appHandle2,															/* our application identifier */
+							 &subHandleNet2ComId1,												/* our subscription identifier */
+							 &pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
+							 pPdThreadParameter->pPdCommandValue->PD_SUB_COMID1,              /* ComID */
+							 0,                        											/* topocount: local consist only */
+							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_SRC_IP2,		/* Source IP filter */
+							 0,                        											/* Source IP filter2 : no used */
+							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_DST_IP2,      /* Default destination	(or MC Group) */
+							 0,																		/* Option */
+							 pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,         /* Time out in us	*/
+							 TRDP_TO_SET_TO_ZERO,       											/* delete invalid data on timeout */
+							 PD_DATA_SIZE_MAX);    											    /* net data size */
 
-    /*	Sub-network Id2 Subscribe */
-    err = tlp_subscribe( appHandle2,															/* our application identifier */
-                         &subHandleNet2ComId1,												/* our subscription identifier */
-                         &pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
-                         pPdThreadParameter->pPdCommandValue->PD_SUB_COMID1,              /* ComID */
-                         0,                        											/* topocount: local consist only */
-                         pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_SRC_IP2,		/* Source IP filter */
-                         0,                        											/* Source IP filter2 : no used */
-                         pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_DST_IP2,      /* Default destination	(or MC Group) */
-                         0,																		/* Option */
-                         pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,         /* Time out in us	*/
-                         TRDP_TO_SET_TO_ZERO,       											/* delete invalid data on timeout */
-                         PD_DATA_SIZE_MAX);    											    /* net data size */
+		if (err != TRDP_NO_ERR)
+		{
+			printf("prep  Sub-network Id2 pd receive error\n");
+			return PD_APP_ERR;
+		}
+	}
 
-    if (err != TRDP_NO_ERR)
-    {
-        printf("prep  Sub-network Id2 pd receive error\n");
-        tlc_terminate();
-        trdp_ladder_terminate();
-        return 1;
-    }
+	/* Check Publish Destination IP Address */
+	if (pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP1 == 0)
+	{
+		/* Set not tlp_publish flag */
+		subPubValidFlag = subPubValidFlag | PD_APP_THREAD_NOT_PUBLISH;
+	}
+	else
+	{
+		/*	Sub-network Id1 Publish */
+		err = tlp_publish(  appHandle,															/* our application identifier */
+							&pubHandleNet1ComId1,												/* our pulication identifier */
+							pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
+							0,																	/* local consist only */
+							subnetId1Address,													/* default source IP */
+							pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP1,	/* where to send to */
+							pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
+							0,																	/* not redundant */
+							TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+							NULL,																/* default qos and ttl */
+							firstPutData,														/* initial data */
+							PD_DATA_SIZE_MAX);												/* data size */
+		if (err != TRDP_NO_ERR)
+		{
+			printf("prep Sub-network Id1 pd publish error\n");
+			return PD_APP_ERR;
+		}
 
-    /*	Sub-network Id1 Publish */
-    err = tlp_publish(  appHandle,															/* our application identifier */
-                        &pubHandleNet1ComId1,												/* our pulication identifier */
-                        pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
-                        0,																	/* local consist only */
-                        subnetId1Address,													/* default source IP */
-                        pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP1,	/* where to send to */
-                        pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
-                        0,																	/* not redundant */
-                        TRDP_FLAGS_NONE,													/* Don't use callback for errors */
-                        NULL,																/* default qos and ttl */
-                        firstPutData,														/* initial data */
-                        PD_DATA_SIZE_MAX);												/* data size */
-    if (err != TRDP_NO_ERR)
-    {
-        printf("prep Sub-network Id1 pd publish error\n");
-        tlc_terminate();
-        trdp_ladder_terminate();
-        return 1;
-    }
-
-    /*	Sub-network Id2 Publish */
-    err = tlp_publish(  appHandle2,					    								/* our application identifier */
-                        &pubHandleNet2ComId1,												/* our pulication identifier */
-                        pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
-                        0,																	/* local consist only */
-                        subnetId2Address,			    									/* default source IP */
-                        pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP2,	/* where to send to */
-                        pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
-                        0,																	/* not redundant */
-                        TRDP_FLAGS_NONE,													/* Don't use callback for errors */
-                        NULL,																/* default qos and ttl */
-                        firstPutData,														/* initial data */
-                        PD_DATA_SIZE_MAX);												/* data size */
-    if (err != TRDP_NO_ERR)
-    {
-        printf("prep Sub-network Id2 pd publish error\n");
-        tlc_terminate();
-        trdp_ladder_terminate();
-        return 1;
-    }
+		/*	Sub-network Id2 Publish */
+		err = tlp_publish(  appHandle2,					    								/* our application identifier */
+							&pubHandleNet2ComId1,												/* our pulication identifier */
+							pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
+							0,																	/* local consist only */
+							subnetId2Address,			    									/* default source IP */
+							pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP2,	/* where to send to */
+							pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
+							0,																	/* not redundant */
+							TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+							NULL,																/* default qos and ttl */
+							firstPutData,														/* initial data */
+							PD_DATA_SIZE_MAX);												/* data size */
+		if (err != TRDP_NO_ERR)
+		{
+			printf("prep Sub-network Id2 pd publish error\n");
+			return PD_APP_ERR;
+		}
+	}
 
     /* Using Sub-Network : SUBNET1 */
     err = tlp_setNetworkContext(SUBNET1);
     if (err != TRDP_NO_ERR)
     {
         printf("prep Sub-network error\n");
-        return 1;
+        return PD_APP_ERR;
     }
+
+	/* Check Not tlp_subscribe and Not tlp_publish */
+	if (subPubValidFlag == (PD_APP_THREAD_NOT_SUB_PUB))
+	{
+    	return PD_APP_THREAD_ERR;
+	}
+
+	/* Start PdComLadderThread */
+	trdp_setPdComLadderThreadStartFlag(TRUE);
+
+	if(subPubValidFlag == PD_APP_THREAD_NOT_PUBLISH)
+	{
+		return PD_APP_NO_ERR;
+	}
 
     /*
         Enter the main processing loop.
@@ -945,5 +1027,193 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
     tlc_terminate();
 
     return rv;
+}
+
+/**********************************************************************************************************************/
+/** Append an pdCommandValue at end of List
+ *
+ *  @param[in]      ppHeadPdCommandValue			pointer to pointer to head of List
+ *  @param[in]      pNewPdCommandValue				pointer to pdCommandValue to append
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE appendPdComamndValueList(
+		PD_COMMAND_VALUE    * *ppHeadPdCommandValue,
+		PD_COMMAND_VALUE    *pNewPdCommandValue)
+{
+	PD_COMMAND_VALUE *iterPdCommandValue;
+
+    if (ppHeadPdCommandValue == NULL || pNewPdCommandValue == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+    /* Ensure this List is last! */
+    pNewPdCommandValue->pNextPdCommandValue = NULL;
+
+    if (*ppHeadPdCommandValue == NULL)
+    {
+        *ppHeadPdCommandValue = pNewPdCommandValue;
+        return PD_APP_NO_ERR;
+    }
+
+    for (iterPdCommandValue = *ppHeadPdCommandValue;
+    	  iterPdCommandValue->pNextPdCommandValue != NULL;
+    	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
+    {
+        ;
+    }
+    iterPdCommandValue->pNextPdCommandValue = pNewPdCommandValue;
+    return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Return the PdCommandValue with same comId and IP addresses
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         		pointer to PdCommandValue
+ *  @retval         NULL            		No PD PdCommandValue found
+ */
+PD_APP_ERR_TYPE serachPdCommandValueToCommand (
+		PD_COMMAND_VALUE	*pHeadPdCommandValue,
+		PD_COMMAND_VALUE	*pNewPdCommandValue)
+{
+	PD_COMMAND_VALUE *iterPdCommandValue;
+
+    if (pHeadPdCommandValue == NULL
+    	|| pNewPdCommandValue == NULL
+    	|| (pNewPdCommandValue->PD_SUB_COMID1 == 0 && pNewPdCommandValue->PD_PUB_COMID1 == 0))
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+    for (iterPdCommandValue = pHeadPdCommandValue;
+    	  iterPdCommandValue != NULL;
+    	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
+    {
+        /*  Subscribe Command: We match if src/dst address is zero or matches */
+        if ((iterPdCommandValue->PD_SUB_COMID1 == pNewPdCommandValue->PD_SUB_COMID1 && iterPdCommandValue->PD_SUB_COMID1 != 0 ) &&
+            (iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == pNewPdCommandValue->PD_COMID1_SUB_SRC_IP1) &&
+            (iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == pNewPdCommandValue->PD_COMID1_SUB_DST_IP1)
+            )
+        {
+            return PD_APP_COMMAND_ERR;
+        }
+        /*  Publish Command: We match if dst address is zero or matches */
+        else if ((iterPdCommandValue->PD_PUB_COMID1 == pNewPdCommandValue->PD_PUB_COMID1 && iterPdCommandValue->PD_PUB_COMID1 != 0) &&
+        		(iterPdCommandValue->PD_COMID1_PUB_DST_IP1 == 0 || iterPdCommandValue->PD_COMID1_PUB_DST_IP1 == pNewPdCommandValue->PD_COMID1_PUB_DST_IP1)
+        		)
+        {
+        	return PD_APP_COMMAND_ERR;
+        }
+        else
+        {
+        	continue;
+        }
+
+    }
+    return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Return the PdCommandValue with same comId and IP addresses
+ *
+ *  @param[in]      pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         		pointer to PdCommandValue
+ *  @retval         NULL            		No PD PdCommandValue found
+ */
+PD_COMMAND_VALUE *serachPdCommandValueToAddr (
+		TRDP_ADDRESSES_T    *addr)
+{
+	PD_COMMAND_VALUE *iterPdCommandValue;
+
+    if (addr == NULL)
+    {
+        return NULL;
+    }
+
+    for (iterPdCommandValue = pFirstPdCommandValue;
+    	  iterPdCommandValue != NULL;
+    	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
+    {
+        /*  Subscribe Command: We match if src/dst address is zero or matches */
+        if (iterPdCommandValue->PD_SUB_COMID1 == addr->comId &&
+            (iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == addr->srcIpAddr) &&
+            (iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == addr->destIpAddr)
+            )
+        {
+            return iterPdCommandValue;
+        }
+        else
+        {
+        	continue;
+        }
+
+    }
+    return NULL;
+}
+
+/**********************************************************************************************************************/
+/** Return the PdCommandValue with same comId and IP addresses
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         		pointer to PdCommandValue
+ *  @retval         NULL            		No PD PdCommandValue found
+ */
+PD_APP_ERR_TYPE printPdCommandValue (
+		PD_COMMAND_VALUE	*pHeadPdCommandValue)
+{
+	PD_COMMAND_VALUE *iterPdCommandValue;
+	UINT16 pdCommnadValueNumber = 1;
+	char strIp[16] = {0};
+
+    if (pHeadPdCommandValue == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+    for (iterPdCommandValue = pHeadPdCommandValue;
+    	  iterPdCommandValue != NULL;
+    	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
+    {
+    	/*  Dump PdCommandValue */
+		printf("PD Command Value Thread No.%u\n", pdCommnadValueNumber);
+		printf("-1,	OFFSET1 for Publish val hex: 0x%x\n", iterPdCommandValue->OFFSET_ADDRESS1);
+		printf("-3,	OFFSET3 for Subscribe val hex: 0x%x\n", iterPdCommandValue->OFFSET_ADDRESS3);
+		printf("-p,	Publisher tlp_put cycle time: %u micro sec\n", iterPdCommandValue->LADDER_APP_CYCLE);
+		printf("-c,	Publish ComId1: %u\n", iterPdCommandValue->PD_PUB_COMID1);
+		printf("-g,	Subscribe ComId1: %u\n", iterPdCommandValue->PD_SUB_COMID1);
+		miscIpToString(iterPdCommandValue->PD_COMID1_SUB_SRC_IP1, strIp);
+		printf("-a,	Subscribe ComId1 Source IP Address: %s\n", strIp);
+		miscIpToString(iterPdCommandValue->PD_COMID1_SUB_DST_IP1, strIp);
+		printf("-b,	Subscribe ComId1 Destination IP Address: %s\n", strIp);
+		miscIpToString(iterPdCommandValue->PD_COMID1_PUB_DST_IP1, strIp);
+		printf("-f,	Publish ComId1 Destination IP Address: %s\n", strIp);
+		printf("-o,	Subscribe Timeout: %u micro sec\n", iterPdCommandValue->PD_COMID1_TIMEOUT);
+		printf("-d,	Publish Cycle TIme: %u micro sec\n", iterPdCommandValue->PD_COMID1_CYCLE);
+		printf("-T,	Write Traffic Store Receive Subnet: %u\n", iterPdCommandValue->TS_SUBNET);
+		pdCommnadValueNumber++;
+    }
+    return PD_APP_NO_ERR;
+}
+
+// Convert an IP address to string
+char * miscIpToString(int ipAdd, char *strTmp)
+{
+    int ipVal1 = (ipAdd >> 24) & 0xff;
+    int ipVal2 = (ipAdd >> 16) & 0xff;
+    int ipVal3 = (ipAdd >>  8) & 0xff;
+    int ipVal4 = (ipAdd >>  0) & 0xff;
+
+    int strSize = sprintf(strTmp,"%u.%u.%u.%u", ipVal1, ipVal2, ipVal3, ipVal4);
+    strTmp[strSize] = 0;
+
+    return strTmp;
 }
 #endif /* TRDP_OPTION_LADDER */
