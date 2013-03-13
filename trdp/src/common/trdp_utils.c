@@ -608,6 +608,10 @@ TRDP_ERR_T  trdp_requestSocket (
                     }
                 }
             }
+            else if (iface[index].bindAddr != 0)
+            {
+                (void) vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
+            }
 
 /* add_start TOSHIBA 0306 */
             if (    (usage != TRDP_SOCK_MD_TCP)
@@ -690,6 +694,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     iface[index].usage = 1;
                     *pIndex = index;
+
                     if (rcvOnly)
                     {
                         /*  Only bind to local IP if we are not a multicast listener  */
@@ -728,6 +733,10 @@ TRDP_ERR_T  trdp_requestSocket (
                             }
                         }
                     }
+                    else if (iface[index].bindAddr != 0)
+                    {
+                        (void) vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
+                    }
                     
                     /*    Multicast sender shall be bound to an interface    */
                     if (iface[index].bindAddr != 0)
@@ -754,6 +763,11 @@ TRDP_ERR_T  trdp_requestSocket (
                 {
                     iface[index].usage = 1;
                     *pIndex = index;
+                }
+                
+                if (iface[index].bindAddr != 0)
+                {
+                    (void) vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
                 }
                 break;
             default:
