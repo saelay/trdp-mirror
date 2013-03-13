@@ -50,7 +50,7 @@
 
 /* Traffic Store Mutex */
 VOS_MUTEX_T pTrafficStoreMutex = NULL;					/* Pointer to Mutex for Traffic Store */
-/* UINT32 mutexLockRetryTimeout = 1000;	*/				/* Mutex Lock Retry Timeout : Max. time in us to wait, 0 means forever */
+/* UINT32 mutexLockRetryTimeout = 1000;	*/				/* Mutex Lock Retry Timeout : micro second */
 
 /* Traffic Store */
 CHAR8 TRAFFIC_STORE[] = "/ladder_ts";					/* Traffic Store shared memory name */
@@ -291,9 +291,11 @@ TRDP_ERR_T  tlp_lockTrafficStore (
     void)
 {
 	extern VOS_MUTEX_T pTrafficStoreMutex;					/* pointer to Mutex for Traffic Store */
+	VOS_ERR_T err = VOS_NO_ERR;
 
 	/* Lock Traffic Store by Mutex */
-	if ((vos_mutexTryLock(pTrafficStoreMutex)) != VOS_NO_ERR)
+	err = vos_mutexLock(pTrafficStoreMutex);
+	if (err != VOS_NO_ERR)
 	{
 		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Lock failed\n");
 		return TRDP_MUTEX_ERR;

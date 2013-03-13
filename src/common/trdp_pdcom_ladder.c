@@ -51,16 +51,26 @@ void tlp_recvPdDs (
     UINT8 *pData,
     UINT32 dataSize)
 {
-	UINT32 subnetId;							/* Using Sub-network Id */
-	UINT16 offset = 0;							/* Traffic Store Offset Address */
-	extern UINT8 *pTrafficStoreAddr;			/* pointer to pointer to Traffic Store Address */
+	UINT32 subnetId;											/* Using Sub-network Id */
+	UINT16 offset = 0;										/* Traffic Store Offset Address */
+	extern UINT8 *pTrafficStoreAddr;						/* pointer to pointer to Traffic Store Address */
+	PD_COMMAND_VALUE *subscriberPdCommandValue = NULL;	/* Subscriber PD Command Value */
+	TRDP_ADDRESSES_T addr = {0};
+
+	/* Set Receive PD addr */
+	addr.comId = pPDInfo->comId;
+	addr.destIpAddr = pPDInfo->destIpAddr;
+	addr.srcIpAddr = pPDInfo->srcIpAddr;
+
+	/* Search Subscriber command Value */
+//	subscriberPdCommandValue = serachPdCommandValueToAddr(&addr);
 
 	/* check parameter */
 /*	if ((pRefCon == NULL) || (pData == NULL) || (dataSize == 0)) */
 /*	if ((pData == NULL) || (dataSize == 0)) */
 	if ((pData == NULL) || (dataSize == 0) || (pPDInfo->pUserRef == 0))
 	{
-       vos_printf(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
+//       vos_printf(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
 		return;
 	}
 
