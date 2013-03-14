@@ -143,11 +143,9 @@ TRDP_ERR_T trdp_requestSocket(
  *  @param[in,out]  iface           socket pool
  *  @param[in]      index           index of socket to release
  *
- *  @retval         TRDP_NO_ERR
- *  @retval         TRDP_PARAM_ERR
  */
 
-TRDP_ERR_T trdp_releaseSocket(
+void trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
     INT32 index);
 

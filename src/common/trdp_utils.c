@@ -804,10 +804,8 @@ TRDP_ERR_T  trdp_requestSocket (
  *  @param[in,out]  iface           socket pool
  *  @param[in]      index           index of socket to release
  *
- *  @retval         TRDP_NO_ERR
- *  @retval         TRDP_PARAM_ERR
  */
-TRDP_ERR_T  trdp_releaseSocket (
+void  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
     INT32           index)
 {
@@ -815,6 +813,7 @@ TRDP_ERR_T  trdp_releaseSocket (
 
     if (iface != NULL)
     {
+        vos_printf(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[index].sock, iface[index].usage);
         if (iface[index].sock > -1)
         {
             if (--iface[index].usage == 0)
@@ -822,11 +821,13 @@ TRDP_ERR_T  trdp_releaseSocket (
                 /* Close that socket, nobody uses it anymore */
                 err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
                 iface[index].sock = -1;
+                if (err != VOS_NO_ERR)
+                {
+                    vos_printf(VOS_LOG_DBG, "Trying to close socket again?\n");
+                }
             }
         }
     }
-
-    return err;
 }
 
 

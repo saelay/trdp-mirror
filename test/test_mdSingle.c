@@ -63,7 +63,8 @@ typedef struct sSessionData
     BOOL				sNoData;
     UINT32              sComID;
     TRDP_APP_SESSION_T  appHandle;      /*    Our identifier to the library instance    */
-    TRDP_LIS_T          listenHandle;   /*    Our identifier to the publication         */
+    TRDP_LIS_T          listenHandle1;   /*    Our identifier to the publication         */
+    TRDP_LIS_T          listenHandle2;   /*    Our identifier to the publication         */
 } SESSION_DATA_T;
 
 SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL};
@@ -302,7 +303,7 @@ int main (int argc, char *argv[])
                 if (strcmp(optarg,"TCP") == 0)
                 {
                     flags |= TRDP_FLAGS_TCP;
-                    mdConfiguration.flags |= TRDP_FLAGS_TCP;
+                    //mdConfiguration.flags |= TRDP_FLAGS_TCP;
                 }
                 else if (strcmp(optarg,"UDP") == 0)
                 {
@@ -403,10 +404,16 @@ int main (int argc, char *argv[])
     /*    Set up a listener  */
     if (sSessionData.sResponder == TRUE)
     {
-        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle, NULL, sSessionData.sComID, 0, destIP,
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, sSessionData.sComID, 0, destIP,
                             flags, NULL) != TRDP_NO_ERR)
         {
-            printf("tlm_addListener error\n");
+            printf("tlm_addListener error (TCP)\n");
+            return 1;
+        }
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, sSessionData.sComID, 0, destIP,
+                            flags &= ~TRDP_FLAGS_TCP, NULL) != TRDP_NO_ERR)
+        {
+            printf("tlm_addListener error (UDP)\n");
             return 1;
         }
     }
@@ -529,7 +536,8 @@ int main (int argc, char *argv[])
      */
     if (sSessionData.sResponder == TRUE)
     {
-        tlm_delListener(sSessionData.appHandle, sSessionData.listenHandle);
+        tlm_delListener(sSessionData.appHandle, sSessionData.listenHandle1);
+        tlm_delListener(sSessionData.appHandle, sSessionData.listenHandle2);
     }
 
     tlc_closeSession(sSessionData.appHandle);

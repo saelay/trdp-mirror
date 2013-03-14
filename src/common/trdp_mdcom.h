@@ -42,11 +42,18 @@
  * GLOBAL FUNCTIONS
  */
 
+TRDP_ERR_T trdp_getTCPSocket (
+    TRDP_SESSION_PT pSession);
+
 void trdp_closeMDSessions(
     TRDP_SESSION_PT appHandle);
 
 void trdp_mdFreeSession(
     MD_ELE_T    *pMDSession);
+
+void trdp_mdSetSessionTimeout(
+    MD_ELE_T    *pMDSession,
+    UINT32      usTimeOut);
 
 TRDP_ERR_T  trdp_mdSendPacket (
     INT32           pdSock,
