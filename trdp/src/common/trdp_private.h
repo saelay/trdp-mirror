@@ -167,7 +167,7 @@ typedef struct TRDP_SOCKETS
     TRDP_SEND_PARAM_T   sendParam;                       /**< Send parameters                             */
     TRDP_SOCK_TYPE_T    type;                            /**< Usage of this socket                        */
     BOOL                rcvMostly;                       /**< Used for receiving                          */
-    UINT16              usage;                           /**< No. of current users of this socket         */
+    INT16               usage;                           /**< No. of current users of this socket         */
     TRDP_SOCKET_TCP_T   tcpParams;                       /**< Params used for TCP                         */
     TRDP_IP_ADDR_T      mcGroups[VOS_MAX_MULTICAST_CNT]; /**< List of multicast addresses for this socket */
 } TRDP_SOCKETS_T;

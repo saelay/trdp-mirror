@@ -61,69 +61,7 @@ static BOOL                 sInited         = FALSE;
  * LOCAL FUNCTIONS
  */
 
-#if MD_SUPPORT
-/**********************************************************************************************************************/
-/** Initialize the specific parameters for message data
- *
- *
- *  @param[in]      pSessionHandle        session parameters
- *
- *  @retval         TRDP_NO_ERR           no error
- *  @retval         TRDP_PARAM_ERR        initialization error
- */
-TRDP_ERR_T trdp_initMD (TRDP_SESSION_PT pSession)
-{
-    TRDP_ERR_T      result = TRDP_NO_ERR;
-    VOS_SOCK_OPT_T  trdp_sock_opt;
-    UINT32          backlog = 10; /* Backlog = maximum connection atempts if system is busy. */
 
-    if((pSession->mdDefault.flags & TRDP_FLAGS_TCP) != 0) /* TCP is used */
-    {
-        /* Define the common TCP socket options */
-        trdp_sock_opt.qos   = pSession->mdDefault.sendParam.qos;  /* (default should be 5 for PD and 3 for MD) */
-        trdp_sock_opt.ttl   = pSession->mdDefault.sendParam.ttl;  /* Time to live (default should be 64) */
-        trdp_sock_opt.ttl_multicast = 0;
-        trdp_sock_opt.reuseAddrPort = TRUE;
-
-        /* The socket is defined non-blocking */
-        trdp_sock_opt.nonBlocking = TRUE;
-
-        result = (TRDP_ERR_T)vos_sockOpenTCP(&pSession->tcpFd.listen_sd, &trdp_sock_opt);
-
-        if (result != TRDP_NO_ERR)
-        {
-            vos_printf(VOS_LOG_ERROR, "vos_sockOpenTCP() failed (Err: %d)\n", result);
-            return result;
-        }
-
-        result = (TRDP_ERR_T)vos_sockBind(pSession->tcpFd.listen_sd,
-                                          pSession->realIP,
-                                          pSession->mdDefault.tcpPort);
-
-        if (result != TRDP_NO_ERR)
-        {
-            vos_printf(VOS_LOG_ERROR, "vos_sockBind failed() (Err: %d)\n", result);
-            return result;
-        }
-
-        result = (TRDP_ERR_T)vos_sockListen(pSession->tcpFd.listen_sd, backlog);
-
-        if (result != TRDP_NO_ERR)
-        {
-            vos_printf(VOS_LOG_ERROR, "TRDP vos_sockListen() failed (Err: %d)\n", result);
-            return result;
-        }
-
-        vos_printf(VOS_LOG_INFO, "Socket information (listen_sd=%d)\n", pSession->tcpFd.listen_sd);
-        FD_SET(pSession->tcpFd.listen_sd, (fd_set *)&pSession->tcpFd.master_set);
-        pSession->tcpFd.max_sd = pSession->tcpFd.listen_sd;
-
-        return TRDP_NO_ERR;
-    }
-
-    return result;
-}
-#endif
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
  */
@@ -374,6 +312,8 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         pSession->pdDefault.sendParam.retries   = 0;
     }
 
+#if MD_SUPPORT
+    
     if (pMdDefault != NULL)
     {
         pSession->mdDefault = *pMdDefault;
@@ -434,6 +374,11 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         pSession->mdDefault.sendParam.retries   = TRDP_MD_DEFAULT_RETRIES;
     }
 
+    /* zero is a valid file/socket descriptor! */ 
+    pSession->tcpFd.listen_sd = -1;
+
+#endif
+
     ret = (TRDP_ERR_T) vos_mutexCreate(&pSession->mutex);
 
     if (ret != TRDP_NO_ERR)
@@ -451,18 +396,6 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     /*    Clear the statistics for this session */
     trdp_initStats(pSession);
-
-#if MD_SUPPORT
-
-    ret = trdp_initMD(pSession);
-    if (ret != TRDP_NO_ERR)
-    {
-        vos_printf(VOS_LOG_ERROR, "trdp_initMD() failed (Err: %d)\n", ret);
-        vos_memFree(pSession);
-        return ret;
-    }
-
-#endif
 
     /*    Queue the session in    */
     ret = (TRDP_ERR_T) vos_mutexLock(sSessionMutex);
@@ -574,17 +507,10 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pSndQueue != NULL)
                 {
-                    TRDP_ERR_T  err;
                     PD_ELE_T    *pNext = pSession->pSndQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    err = trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx);
-                    if (err != TRDP_NO_ERR)
-                    {
-                        /* save the error code in case of an error */
-                        ret = err;
-                        vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err: %d)\n", ret);
-                    }
+                    trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx);
                     vos_memFree(pSession->pSndQueue);
                     pSession->pSndQueue = pNext;
                 }
@@ -599,65 +525,37 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     vos_memFree(pSession->pMDRcvEle);
                     pSession->pMDRcvEle = NULL;
                 }
+
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pMDSndQueue != NULL)
                 {
-                    TRDP_ERR_T  err;
                     MD_ELE_T    *pNext = pSession->pMDSndQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    err = trdp_releaseSocket(pSession->iface, pSession->pMDSndQueue->socketIdx);
-                    if (err != TRDP_NO_ERR)
-                    {
-                        /* save the error code in case of an error */
-                        ret = err;
-                        vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err: %d)\n", ret);
-                    }
-                    if (pSession->pMDSndQueue->pPacket != NULL)
-                    {
-                        vos_memFree(pSession->pMDSndQueue->pPacket);
-                    }
-
-                    vos_memFree(pSession->pMDSndQueue);
+                    trdp_releaseSocket(pSession->iface, pSession->pMDSndQueue->socketIdx);
+                    trdp_mdFreeSession(pSession->pMDSndQueue);
                     pSession->pMDSndQueue = pNext;
                 }
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pMDRcvQueue != NULL)
                 {
-                    TRDP_ERR_T  err;
                     MD_ELE_T    *pNext = pSession->pMDRcvQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    err = trdp_releaseSocket(pSession->iface, pSession->pMDRcvQueue->socketIdx);
-                    if (err != TRDP_NO_ERR)
-                    {
-                        /* save the error code in case of an error */
-                        ret = err;
-                        vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err: %d)\n", ret);
-                    }
-                    if (pSession->pMDRcvQueue->pPacket != NULL)
-                    {
-                        vos_memFree(pSession->pMDRcvQueue->pPacket);
-                    }
-
-                    vos_memFree(pSession->pMDRcvQueue);
+                    trdp_releaseSocket(pSession->iface, pSession->pMDRcvQueue->socketIdx);
+                    trdp_mdFreeSession(pSession->pMDRcvQueue);
                     pSession->pMDRcvQueue = pNext;
                 }
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pMDListenQueue != NULL)
                 {
-                    TRDP_ERR_T      err;
                     MD_LIS_ELE_T    *pNext = pSession->pMDListenQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    err = trdp_releaseSocket(pSession->iface, pSession->pMDListenQueue->socketIdx);
-                    if (err != TRDP_NO_ERR)
+                    if (pSession->pMDListenQueue->socketIdx != -1)
                     {
-                        /* save the error code in case of an error */
-                        ret = err;
-                        vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err: %d)\n", ret);
+                        trdp_releaseSocket(pSession->iface, pSession->pMDListenQueue->socketIdx);
                     }
-
                     vos_memFree(pSession->pMDListenQueue);
                     pSession->pMDListenQueue = pNext;
                 }
@@ -1344,13 +1242,14 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     int          index;
                     MD_ELE_T     *iterMD;
                     MD_LIS_ELE_T *iterListener;
-
-                    FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
-                    if (appHandle->tcpFd.listen_sd > *pNoDesc)
+                    if (appHandle->tcpFd.listen_sd != -1)
                     {
-                        *pNoDesc = appHandle->tcpFd.listen_sd;
+                        FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
+                        if (appHandle->tcpFd.listen_sd > *pNoDesc)
+                        {
+                            *pNoDesc = appHandle->tcpFd.listen_sd;
+                        }
                     }
-
                     for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
                     {
                         if((appHandle->iface[index].sock != -1)
@@ -2314,48 +2213,14 @@ TRDP_ERR_T tlm_addListener (
 
     /* mutex protected */
     {
-
-        /* NOTE: enabling following code it is possible to have only one listener for comID/Adress/Destination */
-#if 0
+        /* Make sure that there is a TCP listener socket */
+        if ((pktFlags & TRDP_FLAGS_TCP) != 0)
         {
-            MD_ELE_T *iterMD;
-
-            /* seach for existing listener */
-            for(iterMD = appHandle->pMDListenQueue; iterMD != NULL; iterMD = iterMD->pNext)
-            {
-                /* not armed for rx */
-                if (iterMD->stateEle != TRDP_MD_ELE_ST_RX_ARM)
-                {
-                    continue;
-                }
-
-                /* check for com_ID */
-                if (iterMD->u.listener.comId != comId)
-                {
-                    continue;
-                }
-
-                /* check for address */
-                if (iterMD->u.listener.destIpAddr != destIpAddr)
-                {
-                    continue;
-                }
-
-                /* check for dest URI */
-                if (0 != memcmp(iterMD->u.listener.destURI, destURI, TRDP_MAX_URI_USER_LEN))
-                {
-                    continue;
-                }
-
-                /* Found: do not duplicate. */
-                errv = TRDP_NOPUB_ERR;
-                break;
-            }
+            errv = trdp_getTCPSocket(appHandle);
         }
-#endif
-
+        
         /* no error... */
-        if (TRDP_NO_ERR == errv)
+        if (errv == TRDP_NO_ERR)
         {
             /* Room for MD element */
             pNewElement = (MD_LIS_ELE_T *) vos_memAlloc(sizeof(MD_LIS_ELE_T));
@@ -2514,14 +2379,11 @@ TRDP_ERR_T tlm_delListener (
 
         if (TRUE == dequeued)
         {
-            TRDP_ERR_T err;
-
             /* cleanup instance */
-            err = trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
-            if (err != TRDP_NO_ERR)
+            if (pDelete->socketIdx != -1)
             {
-                vos_printf(VOS_LOG_ERROR, "trdp_releaseSocket() failed (Err:%d)\n", err);
-            }            
+                trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
+            }
             /* free memory space for element */
             vos_memFree(pDelete);
         }
