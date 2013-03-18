@@ -256,7 +256,8 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 EXT_DECL VOS_ERR_T vos_sockGetMAC (
     UINT8 pMAC[6])
 {
-#ifndef __APPLE__
+#if   defined(__APPLE__)
+#elif defined(__linux__)
     int sock;
     int i;
 #endif
@@ -272,7 +273,10 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
     }
 
     /* Not every system supports this! */
-#ifndef __APPLE__
+#if   defined(__APPLE__)
+	#warning APPLE does not support this!
+    return VOS_SOCK_ERR;
+#elif defined(__linux__)
 
     /* Has it been determined before? */
     for (i = 0; i < 6 && gIfr.ifr_hwaddr.sa_data[i] != 0; i++)
@@ -311,7 +315,11 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         pMAC[i] = (UINT8) gIfr.ifr_hwaddr.sa_data[i];
     }
     return VOS_NO_ERR;
+#elif defined(__QNXNTO__)
+	#warning QNX neutrino does not support this!
+    return VOS_SOCK_ERR;
 #else
+	#warning Unhandled OS! Do not support this!
     return VOS_SOCK_ERR;
 #endif
 }
