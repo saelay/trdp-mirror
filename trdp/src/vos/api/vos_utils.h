@@ -82,7 +82,7 @@ extern void *gRefCon;
     #define ALIGNOF(type)   __alignof__(type)
 */
 #else
-    #define ALIGNOF(type)  offsetof(struct { char c; type member; }, member)
+    #define ALIGNOF(type)  ((UINT32)offsetof(struct { char c; type member; }, member))
 #endif
 
 /***********************************************************************************************************************

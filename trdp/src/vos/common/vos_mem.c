@@ -113,7 +113,7 @@ struct VOS_QUEUE
 
 static MEM_CONTROL_T gMem =
 {
-    {0, {0}}, NULL, NULL, 0L, 0L, 0L, FALSE,
+    {0, PTHREAD_MUTEX_INITIALIZER}, NULL, NULL, 0L, 0L, 0L, FALSE,
 	{
         {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL},
         {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}, {0L, NULL}

@@ -821,7 +821,7 @@ void  trdp_releaseSocket (
                 /* Close that socket, nobody uses it anymore */
                 err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
                 iface[index].sock = -1;
-                if (err != VOS_NO_ERR)
+                if (err != TRDP_NO_ERR)
                 {
                     vos_printf(VOS_LOG_DBG, "Trying to close socket again?\n");
                 }
