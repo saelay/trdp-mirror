@@ -24,27 +24,91 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(471) : Warning 421: Caution --
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
-            _
-            {
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2848) : Warning 525: Negative
-    indentation from line 2847
-            _
-            }
-D:\TCNOpen\trunk\trdp\src\common\trdp_if.c(2851) : Warning 525: Negative
-    indentation from line 2847
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
                                                          _
         appHandle->pMDRcvEle->pktFlags &= ~TRDP_FLAGS_TCP;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(550) : Error 64: Type mismatch
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(633) : Error 64: Type mismatch
     (assignment) (int/enum) [MISRA Rule 29]
             _
     while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1036) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1132) : Warning 506: Constant
+    value Boolean [MISRA Rule 52]
+                                                             _
+    for (index = 0; index < VOS_MAX_SOCKET_CNT && *pCount > 0; index++)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1424) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1424) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+                       _
+            (*pCount)--;
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1430) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+                                                                               _
+                        trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1465) : Warning 613: Possible use
+    of null pointer 'iterMD' in left argument to operator '->' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: lines 1159, 1327] [MISRA
+    Rule 107]
+_
+}
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1495) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_if.c line 1500:
+    trdp_mdCheckListenSocks(?, 0?, 0?)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1424) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: lines 1467, 1500; file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_if.c line 1500:
+    trdp_mdCheckListenSocks(?, 0?, 0?)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1424) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: lines 1467, 1500; file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_if.c line 1500:
+    trdp_mdCheckListenSocks(?, 0?, 0?)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1430) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: lines 1467, 1500; file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_if.c line 1500:
+    trdp_mdCheckListenSocks(?, 0?, 0?)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1465) : Warning 613: Possible use
+    of null pointer 'iterMD' in left argument to operator '->' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: lines 1159, 1327] [MISRA
+    Rule 107]
+
+During Specific Walk:
+  File D:\TCNOpen\trunk\trdp\src\common\trdp_if.c line 1500:
+    trdp_mdCheckListenSocks(?, 0?, 0?)
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1424) : Warning 613: Possible use
+    of null pointer 'pCount' in argument to operator 'unary *' [Reference: file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_if.c: lines 1467, 1500; file
+    D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c: line 1200] [MISRA Rule 107]
+                         _
+                    if (0) /* if (sndReplyTimeout == 1) */
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1718) : Warning 506: Constant
+    value Boolean [MISRA Rule 52]
+                         _
+                    if (0) /* ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0) */
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1775) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
             _
     while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1990) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1914) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 

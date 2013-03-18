@@ -193,11 +193,11 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
  */
 
 EXT_DECL INT32 vos_select (
-    INT32			highDesc,
-    VOS_FDS_T		*pReadableFD,
-    VOS_FDS_T		*pWriteableFD,
-    VOS_FDS_T		*pErrorFD,
-    VOS_TIME_T		*pTimeOut)
+    INT32            highDesc,
+    VOS_FDS_T        *pReadableFD,
+    VOS_FDS_T        *pWriteableFD,
+    VOS_FDS_T        *pErrorFD,
+    VOS_TIME_T        *pTimeOut)
 {
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);

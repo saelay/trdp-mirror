@@ -2678,7 +2678,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
 {
     MD_ELE_T    *iterMD = appHandle->pMDSndQueue;
     BOOL        firstLoop = TRUE;
-    TRDP_ERR_T	err = TRDP_NOSESSION_ERR;
+    TRDP_ERR_T  err = TRDP_NOSESSION_ERR;
     
     if (!trdp_isValidSession(appHandle))
     {
@@ -2698,7 +2698,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
     }
 
     /*  Find the session which needs to be killed. Actual release will be done in tlc_process().
-     	Note: We must also check the receive queue for pending replies! */
+        Note: We must also check the receive queue for pending replies! */
     do
     {        
         /*  Switch to receive queue */
@@ -2710,9 +2710,9 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
         
         if (NULL != iterMD)
         {
-           	if (memcmp(iterMD->sessionID, pSessionId, TRDP_SESS_ID_SIZE) == 0)
+            if (memcmp(iterMD->sessionID, pSessionId, TRDP_SESS_ID_SIZE) == 0)
             {
-            	iterMD->morituri = TRUE;
+                iterMD->morituri = TRUE;
                 err = TRDP_NO_ERR;
             }
             iterMD = iterMD->pNext;
