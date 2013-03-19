@@ -2221,12 +2221,7 @@ static int test_main_proc()
         tv.tv_usec = x_period * 1000;
 
         // execute Select()...
-        int rv = vos_select(
-					noDesc + 1,
-					&rfds,
-					NULL,
-					NULL,
-					(VOS_TIME_T *)&tv);
+        int rv = vos_select(noDesc + 1, &rfds, NULL, NULL, (VOS_TIME_T *)&tv);
         if (-1 == rv)
         {
             perror("select()");
