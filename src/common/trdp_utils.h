@@ -105,6 +105,16 @@ void trdp_initSockets(
     TRDP_SOCKETS_T iface[]);
 
 
+/**********************************************************************************************************************/
+/** Handle the socket pool: Initialize it
+ *
+ *  @param[in]      iface          pointer to the socket pool
+ */
+
+void trdp_initUncompletedTCP (
+    TRDP_APP_SESSION_T appHandle);
+
+
 /*********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
  *
