@@ -573,7 +573,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     }
     
     /* Compare if all the data has been read */
-    if(data_size > pElement->dataSize)
+    if(data_size > pElement->dataSize) // @Gari: data_size might not be initialized, if UDP
     {
         /* Uncompleted message received */
         if(storedSize == 0)
@@ -1558,13 +1558,20 @@ void  trdp_mdCheckListenSocks (
     /*  Loop through the socket list and check readiness
         (but only while there are ready descriptors left) */
 
-    for (index = 0; index < VOS_MAX_SOCKET_CNT && *pCount > 0; index++)
+    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
     {
         if (appHandle->iface[index].sock != -1 &&
             appHandle->iface[index].type != TRDP_SOCK_PD &&
             FD_ISSET(appHandle->iface[index].sock, (fd_set *)pRfds) != 0)
         {
-            (*pCount)--;
+            if (pCount != NULL)
+            {
+                (*pCount)--;
+                if (*pCount <= 0)
+                {
+                    break;
+                }
+            }
             FD_CLR(appHandle->iface[index].sock, (fd_set *)pRfds);
             err = trdp_mdRecv(appHandle, index);
 
@@ -1605,7 +1612,7 @@ void  trdp_mdCheckListenSocks (
                     if (iterMD_find->socketIdx == index)
                     {
                         /*This session is using the socket */
-                        trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+                        trdp_releaseSocket(appHandle->iface, iterMD_find->socketIdx);
                         /* Remove element from queue */
                         trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD_find);
 
@@ -2207,7 +2214,6 @@ TRDP_ERR_T trdp_mdCommonSend (
                             pSenderElement = iterMD;
 
                             /* do not change vital parameters for reply */
-                            pktFlags = iterMD->pktFlags;
 
                             if (NULL != iterMD->pPacket)
                             {
