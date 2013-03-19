@@ -93,7 +93,7 @@ all:		outdir libtrdp demo
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
 example:	outdir $(OUTDIR)/mdManager
-test:		outdir $(OUTDIR)/getstats
+test:		outdir $(OUTDIR)/getstats $(OUTDIR)/vostest
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test
 mdtest:		outdir $(OUTDIR)/mdTest0001		$(OUTDIR)/mdTest0002	$(OUTDIR)/test_mdSingle
@@ -215,6 +215,13 @@ $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
 $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building PD test application $(@F)'
 			$(CC) test/pdpatterns/trdp-pd-test.cpp \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+$(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building VOS test application $(@F)'
+			$(CC) VisualC/Win32TRDP_Tests/LibraryTests.cpp \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
