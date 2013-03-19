@@ -523,6 +523,22 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
 
 
 /**********************************************************************************************************************/
+/** Initialize the UncompletedTCP pointers to null
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ */
+void trdp_initUncompletedTCP (TRDP_APP_SESSION_T appHandle)
+{
+    int index;
+    /* Initialize the pointers to Null */
+    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+    {
+        appHandle->uncompletedTCP[index] = NULL;
+    }
+}
+
+
+/**********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
  *  First we loop through the socket pool and check if there is already a socket
  *  which would suit us. If a multicast group should be joined, we do that on an otherwise suitable socket - up to 20

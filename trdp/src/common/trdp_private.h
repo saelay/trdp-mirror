@@ -155,6 +155,7 @@ typedef struct TRDP_HANDLE
 typedef struct TRDP_SOCKET_TCP
 {
     TRDP_IP_ADDR_T      cornerIp;                       /**< The other TCP corner Ip                      */
+    BOOL                notSend;                        /**< If the socket is connected                   */
     TRDP_TIME_T         connectionTimeout;              /**< TCP socket connection Timeout                */
 }TRDP_SOCKET_TCP_T;
 
@@ -268,6 +269,13 @@ typedef struct MD_LIS_ELE
     INT32                   socketIdx;          /**< index into the socket list                             */
 } MD_LIS_ELE_T;
 
+/** Tcp connection parameters    */
+typedef struct TRDP_MD_TCP
+{
+    BOOL                    doConnect;         /**< Tcp connection state                                   */
+    BOOL                    msgUncomplete;        /**< The receive message is uncomplete                   */
+} TRDP_MD_TCP_T;
+
 /** Session queue element for MD (UDP and TCP)  */
 typedef struct MD_ELE
 {
@@ -298,7 +306,7 @@ typedef struct MD_ELE
     UINT32              numConfirmTimeout;      /**< number of Confirm Timeouts (incremented by listeners   */
     const void          *pUserRef;              /**< user reference for call_back from tlm_request()        */
     TRDP_URI_USER_T     destURI;                /**< filter on incoming MD by destination URI               */
-    BOOL                connectDone;
+    TRDP_MD_TCP_T       tcpParameters;          /**< Tcp connection parameters                              */
     MD_PACKET_T         *pPacket;               /**< Packet    header in network byte order                 */
                                                 /**< data ready to be sent (with CRCs)                      */
 } MD_ELE_T;
@@ -335,8 +343,9 @@ typedef struct TRDP_SESSION
     PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue                  */
     MD_LIS_ELE_T            *pMDListenQueue;    /**< pointer to first element of listeners queue            */
     MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue (caller)     */
-    MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue (replier)     */
+    MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue (replier)    */
     MD_ELE_T                *pMDRcvEle;         /**< pointer to received MD element                         */
+    MD_ELE_T                *uncompletedTCP[VOS_MAX_SOCKET_CNT];     /**< uncompleted TCP messages buffer   */
     TRDP_STATISTICS_T       stats;              /**< statistics of this session                             */
 } TRDP_SESSION_T, *TRDP_SESSION_PT;
 

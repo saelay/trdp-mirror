@@ -394,6 +394,9 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     /*    Clear the socket pool    */
     trdp_initSockets(pSession->iface);
 
+    /* Initialize pointers to Null in the incomplete message structure */
+    trdp_initUncompletedTCP(pSession);
+
     /*    Clear the statistics for this session */
     trdp_initStats(pSession);
 
@@ -1456,8 +1459,15 @@ EXT_DECL TRDP_ERR_T tlc_process (
         err = trdp_mdSend(appHandle);
         if (err != TRDP_NO_ERR)
         {
-            result = err;
-            vos_printf(VOS_LOG_ERROR, "trdp_mdSend() failed (Err: %d)\n", err);
+            if(err == TRDP_IO_ERR)
+            {
+                vos_printf(VOS_LOG_INFO, "trdp_mdSend() incomplete \n");
+
+            }else
+            {
+                result = err;
+                vos_printf(VOS_LOG_ERROR, "trdp_mdSend() failed (Err: %d)\n", err);
+            }
         }
 
 #endif
