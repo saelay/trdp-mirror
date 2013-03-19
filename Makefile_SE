@@ -10,7 +10,7 @@
 # 2.Linux Slackware 14
 # 3.QNX 650SP1
 #
-# v0.2 19-mar-2013
+# v0.3 19-mar-2013
 #
 
 UNAME := $(shell uname)
