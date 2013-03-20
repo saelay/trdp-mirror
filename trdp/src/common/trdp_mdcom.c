@@ -412,7 +412,7 @@ TRDP_ERR_T  trdp_mdSendPacket (
 
         }else
         {
-            if((tmpSndSize - sizeof(MD_HEADER_T)) >= 0)
+            if(tmpSndSize >= sizeof(MD_HEADER_T))
             {
                 err = vos_sockSendTCP(pdSock, (UINT8 *)(&pElement->pPacket->data[(tmpSndSize - sizeof(MD_HEADER_T))]), &pElement->sendSize);
             }else
@@ -463,23 +463,23 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     TRDP_ERR_T  err = TRDP_NO_ERR;
     
     UINT32      size;
-    INT32       data_size = 0;
-    INT32       socket_index = 0;
+    UINT32      dataSize = 0;
+    UINT32      socketIndex = 0;
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
-        UINT32 read_size;
+        UINT32 readSize;
 
         /* Find the socket index */
-        for (socket_index = 0; socket_index < VOS_MAX_SOCKET_CNT; socket_index++)
+        for (socketIndex = 0; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++)
         {
-            if(appHandle->iface[socket_index].sock == mdSock)
+            if(appHandle->iface[socketIndex].sock == mdSock)
             {
                 break;
             }
         }
 
-        if(appHandle->uncompletedTCP[socket_index] == NULL)
+        if(appHandle->uncompletedTCP[socketIndex] == NULL)
         {
             /* Not waiting to an incomplete message in this socket */
 
@@ -502,45 +502,45 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
             /* Get the rest of the message length */
             {
-                data_size = vos_ntohl(pElement->pPacket->frameHead.datasetLength) +
+                dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength) +
                       sizeof(pElement->pPacket->frameHead.frameCheckSum);
 
                 /*  padding to 4 */
-                if ((data_size & 0x3) > 0)
+                if ((dataSize & 0x3) > 0)
                 {
-                    data_size += (4 - (data_size % 4));    /* be aware that the check sum is on 4 byte aligned position */
+                    dataSize += (4 - (dataSize % 4));    /* be aware that the check sum is on 4 byte aligned position */
                 }
 
-                read_size = data_size;
+                readSize = dataSize;
 
                 /*Read Data + CRC */
-                err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)pElement->pPacket->data, &read_size);
-                vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", read_size);
+                err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)pElement->pPacket->data, &readSize);
+                vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", readSize);
 
-                size = size + read_size;
+                size = size + readSize;
             }
 
         }else
         {
             /* Uncompleted message */
 
-            data_size = vos_ntohl(appHandle->uncompletedTCP[socket_index]->pPacket->frameHead.datasetLength) + sizeof(appHandle->uncompletedTCP[socket_index]->pPacket->frameHead.frameCheckSum);
+            dataSize = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) + sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum);
 
             /*  padding to 4 */
-            if ((data_size & 0x3) > 0)
+            if ((dataSize & 0x3) > 0)
             {
-                data_size += (4 - (data_size % 4));
+                dataSize += (4 - (dataSize % 4));
             }
 
-            data_size = data_size - appHandle->uncompletedTCP[socket_index]->dataSize;
-            read_size = data_size;
+            dataSize = dataSize - appHandle->uncompletedTCP[socketIndex]->dataSize;
+            readSize = dataSize;
 
             /*Read Data + CRC */
-            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)pElement->pPacket->data, &read_size);
-            vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", read_size);
+            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)pElement->pPacket->data, &readSize);
+            vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", readSize);
 
             /* All the data received so far. Add the last data to the rest */
-            size = pElement->grossSize + read_size;
+            size = pElement->grossSize + readSize;
 
         }
     }
@@ -579,16 +579,16 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     {
         UINT32      storedDataSize = 0;
 
-        if(data_size > pElement->dataSize)
+        if(dataSize > pElement->dataSize)
         {
             /* Uncompleted message received */
-            if(appHandle->uncompletedTCP[socket_index] == NULL)
+            if(appHandle->uncompletedTCP[socketIndex] == NULL)
             {
                 /* It is the first loop, no data store yet. Allocate memory for the message */
-                appHandle->uncompletedTCP[socket_index] = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
-                appHandle->uncompletedTCP[socket_index]->pPacket = (MD_PACKET_T *) vos_memAlloc(sizeof(MD_PACKET_T));
+                appHandle->uncompletedTCP[socketIndex] = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
+                appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(sizeof(MD_PACKET_T));
 
-                if (appHandle->uncompletedTCP[socket_index] == NULL)
+                if (appHandle->uncompletedTCP[socketIndex] == NULL)
                 {
                     /* vos_memDelete(NULL); */
                     vos_printf(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
@@ -596,22 +596,22 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 }
 
                 /* Copy the receive information in the uncomplete array (in the socket index position)*/
-                memcpy((&appHandle->uncompletedTCP[socket_index]->pPacket->frameHead), &pElement->pPacket->frameHead, sizeof(MD_HEADER_T));
-                memcpy(appHandle->uncompletedTCP[socket_index]->pPacket->data, pElement->pPacket->data, pElement->dataSize);
-                appHandle->uncompletedTCP[socket_index]->grossSize = pElement->grossSize;
-                appHandle->uncompletedTCP[socket_index]->dataSize = pElement->dataSize;
+                memcpy((&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), &pElement->pPacket->frameHead, sizeof(MD_HEADER_T));
+                memcpy(appHandle->uncompletedTCP[socketIndex]->pPacket->data, pElement->pPacket->data, pElement->dataSize);
+                appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
+                appHandle->uncompletedTCP[socketIndex]->dataSize = pElement->dataSize;
 
             }else
             {
                 /*It is already some data stored. Add the last information */
 
-                storedDataSize = appHandle->uncompletedTCP[socket_index]->dataSize;
+                storedDataSize = appHandle->uncompletedTCP[socketIndex]->dataSize;
 
                 if((storedDataSize > 0) && (pElement->dataSize - storedDataSize > 0))
                 {
-                    memcpy(&(appHandle->uncompletedTCP[socket_index]->pPacket->data[storedDataSize]), pElement->pPacket->data, (pElement->dataSize - storedDataSize));
-                    appHandle->uncompletedTCP[socket_index]->grossSize = pElement->grossSize;
-                    appHandle->uncompletedTCP[socket_index]->dataSize = pElement->dataSize;
+                    memcpy(&(appHandle->uncompletedTCP[socketIndex]->pPacket->data[storedDataSize]), pElement->pPacket->data, (pElement->dataSize - storedDataSize));
+                    appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
+                    appHandle->uncompletedTCP[socketIndex]->dataSize = pElement->dataSize;
                 }else
                 {
                     return TRDP_PARAM_ERR;
@@ -623,22 +623,22 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         {
             /* All data is read, but check if there was some data stored before */
 
-            if(appHandle->uncompletedTCP[socket_index] != NULL)
+            if(appHandle->uncompletedTCP[socketIndex] != NULL)
             {
-                storedDataSize = appHandle->uncompletedTCP[socket_index]->dataSize;
+                storedDataSize = appHandle->uncompletedTCP[socketIndex]->dataSize;
 
                 /* Add the received information and copy all the data to the pElement */
                 if((storedDataSize > 0) && (pElement->dataSize - storedDataSize > 0))
                 {
-                    memcpy(&(appHandle->uncompletedTCP[socket_index]->pPacket->data[storedDataSize]), pElement->pPacket->data, (pElement->dataSize - storedDataSize));
-                    appHandle->uncompletedTCP[socket_index]->grossSize = pElement->grossSize;
-                    appHandle->uncompletedTCP[socket_index]->dataSize = pElement->dataSize;
-                    memcpy(&pElement->pPacket->frameHead, (&appHandle->uncompletedTCP[socket_index]->pPacket->frameHead), sizeof(MD_HEADER_T));
-                    memcpy(pElement->pPacket->data, appHandle->uncompletedTCP[socket_index]->pPacket->data, (pElement->grossSize - sizeof(MD_HEADER_T)));
+                    memcpy(&(appHandle->uncompletedTCP[socketIndex]->pPacket->data[storedDataSize]), pElement->pPacket->data, (pElement->dataSize - storedDataSize));
+                    appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
+                    appHandle->uncompletedTCP[socketIndex]->dataSize = pElement->dataSize;
+                    memcpy(&pElement->pPacket->frameHead, (&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), sizeof(MD_HEADER_T));
+                    memcpy(pElement->pPacket->data, appHandle->uncompletedTCP[socketIndex]->pPacket->data, (pElement->grossSize - sizeof(MD_HEADER_T)));
 
                     /* Disallocate the memory */
-                    vos_memFree(appHandle->uncompletedTCP[socket_index]);
-                    appHandle->uncompletedTCP[socket_index] = NULL;
+                    vos_memFree(appHandle->uncompletedTCP[socketIndex]);
+                    appHandle->uncompletedTCP[socketIndex] = NULL;
                 }else
                 {
                     return TRDP_PARAM_ERR;
@@ -1459,22 +1459,22 @@ void  trdp_mdCheckListenSocks (
 
                 /* Compare with the sockets stored in the socket list */
                 {
-                    INT32   socket_index;
-                    BOOL    socket_found = FALSE;
+                    INT32   socketIndex;
+                    BOOL    socketFound = FALSE;
 
-                    for (socket_index = 0; socket_index < VOS_MAX_SOCKET_CNT; socket_index++)
+                    for (socketIndex = 0; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++)
                     {
-                        if ((appHandle->iface[socket_index].sock != -1)
-                            && (appHandle->iface[socket_index].type == TRDP_SOCK_MD_TCP)
-                            && (appHandle->iface[socket_index].tcpParams.cornerIp == newIp)
-                            && (appHandle->iface[socket_index].rcvMostly == TRUE))
+                        if ((appHandle->iface[socketIndex].sock != -1)
+                            && (appHandle->iface[socketIndex].type == TRDP_SOCK_MD_TCP)
+                            && (appHandle->iface[socketIndex].tcpParams.cornerIp == newIp)
+                            && (appHandle->iface[socketIndex].rcvMostly == TRUE))
                         {
                             vos_printf(VOS_LOG_INFO, "New socket accepted from the same device (Ip = %u)\n", newIp);
 
                             /* Delete the items from SndQueue that are using the old socket */
                             for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
                             {
-                                if (iterMD->socketIdx == socket_index)
+                                if (iterMD->socketIdx == socketIndex)
                                 {
                                     /* Remove element from queue */
                                     trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
@@ -1487,7 +1487,7 @@ void  trdp_mdCheckListenSocks (
                             /* Clean the session in the listener */
                             for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
                             {
-                                if (iterMD->socketIdx == socket_index)
+                                if (iterMD->socketIdx == socketIndex)
                                 {
                                     iterMD->stateEle    = TRDP_ST_RX_READY;
                                     iterMD->socketIdx   = -1;
@@ -1495,7 +1495,7 @@ void  trdp_mdCheckListenSocks (
                             }
 
                             /* Close the old socket */
-                            err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[socket_index].sock);
+                            err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[socketIndex].sock);
                             if (err != TRDP_NO_ERR)
                             {
                                 vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
@@ -1503,21 +1503,21 @@ void  trdp_mdCheckListenSocks (
 
                             vos_printf(VOS_LOG_INFO,
                                        "The old socket (Socket = %d, Ip = %u) will be closed\n",
-                                       appHandle->iface[socket_index].sock,
-                                       appHandle->iface[socket_index].tcpParams.cornerIp);
+                                       appHandle->iface[socketIndex].sock,
+                                       appHandle->iface[socketIndex].tcpParams.cornerIp);
 
 
-                            if (FD_ISSET(appHandle->iface[socket_index].sock, (fd_set *) pRfds))
+                            if (FD_ISSET(appHandle->iface[socketIndex].sock, (fd_set *) pRfds))
                             {
                                 /* Decrement the Ready descriptors counter */
                                 (*pCount)--;
-                                FD_CLR(appHandle->iface[socket_index].sock, (fd_set *) pRfds);
+                                FD_CLR(appHandle->iface[socketIndex].sock, (fd_set *) pRfds);
                             }
 
                             /* Clear from the master_set */
-                            FD_CLR(appHandle->iface[socket_index].sock, &appHandle->tcpFd.master_set);
+                            FD_CLR(appHandle->iface[socketIndex].sock, &appHandle->tcpFd.master_set);
 
-                            if (appHandle->iface[socket_index].sock == (appHandle->tcpFd.max_sd))
+                            if (appHandle->iface[socketIndex].sock == (appHandle->tcpFd.max_sd))
                             {
                                 for (;
                                      FD_ISSET((appHandle->tcpFd.max_sd),
@@ -1529,21 +1529,21 @@ void  trdp_mdCheckListenSocks (
                             }
 
                             /* Replace the old socket by the new one */
-                            appHandle->iface[socket_index].sock         = new_sd;
-                            appHandle->iface[socket_index].rcvMostly    = TRUE;
-                            appHandle->iface[socket_index].tcpParams.connectionTimeout.tv_sec   = 0;
-                            appHandle->iface[socket_index].tcpParams.connectionTimeout.tv_usec  = 0;
-                            appHandle->iface[socket_index].tcpParams.notSend = FALSE;
-                            appHandle->iface[socket_index].tcpParams.cornerIp = newIp;
-                            appHandle->iface[socket_index].type     = TRDP_SOCK_MD_TCP;
-                            appHandle->iface[socket_index].usage    = 0;
+                            appHandle->iface[socketIndex].sock         = new_sd;
+                            appHandle->iface[socketIndex].rcvMostly    = TRUE;
+                            appHandle->iface[socketIndex].tcpParams.connectionTimeout.tv_sec   = 0;
+                            appHandle->iface[socketIndex].tcpParams.connectionTimeout.tv_usec  = 0;
+                            appHandle->iface[socketIndex].tcpParams.notSend = FALSE;
+                            appHandle->iface[socketIndex].tcpParams.cornerIp = newIp;
+                            appHandle->iface[socketIndex].type     = TRDP_SOCK_MD_TCP;
+                            appHandle->iface[socketIndex].usage    = 0;
 
-                            socket_found = TRUE;
+                            socketFound = TRUE;
                             break;
                         }
                     }
 
-                    if (socket_found == FALSE)
+                    if (socketFound == FALSE)
                     {
                         /* Save the new socket in the iface.
                            On receiving MD data on this connection, a listener will be searched and a receive
@@ -1559,7 +1559,7 @@ void  trdp_mdCheckListenSocks (
                                 TRDP_OPTION_NONE,
                                 TRUE,
                                 new_sd,
-                                &socket_index,
+                                &socketIndex,
                                 newIp);
 
                         if (err != TRDP_NO_ERR)

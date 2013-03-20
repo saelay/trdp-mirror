@@ -288,7 +288,7 @@ typedef struct MD_ELE
     TRDP_TIME_T         interval;               /**< time out value for received packets or
                                                      interval for packets to send (set from ms)             */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
-    INT32               dataSize;               /**< net data size                                          */
+    UINT32              dataSize;               /**< net data size                                          */
     UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
     UINT32              sendSize;               /**< data size sent out                                     */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
