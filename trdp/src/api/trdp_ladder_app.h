@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.07"
+#define PD_APP_VERSION	"V0.11"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.07"
+#define PD_APP_VERSION	"V0.11"
 #else
-#define PD_APP_VERSION	"V0.07"
+#define PD_APP_VERSION	"V0.11"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
@@ -75,6 +75,14 @@ extern "C" {
 /* Input Command */
 #define GET_COMMAND_MAX				1000			/* INPUT COMMAND MAX */
 #define SPACE							 ' '			/* SPACE Character */
+
+/* Valid ComId Type */
+#define ENABLE_COMDID1				0x1				/* comId1 Enable */
+#define ENABLE_COMDID2				0x2				/* comid2 Enable */
+
+/* DATASET of COMID */
+#define DATASET1_COMID				10001			/* DATASET1 of ComId : 10001 */
+#define DATASET2_COMID				10002			/* DATASET2 of ComId : 10002 */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -121,8 +129,10 @@ typedef struct PD_COMMAND_VALUE
 	UINT32 PD_COMID1_CYCLE;						/* Publish ComID1 Cycle TIme */
 //	UINT32 PD_COMID2_CYCLE;						/* Publish ComID2 Cycle TIme */
 	UINT32 TS_SUBNET;								/* Traffic Store Using Subnet */
-	UINT32 receiveCount;							/* Subscriber receive Count */
-	UINT32 timeoutReceiveCount;					/* Subscriber timeout receive Count */
+	UINT32 subnet1ReceiveCount;					/* Subscribe subnet1 receive Count */
+	UINT32 subnet2ReceiveCount;					/* Subscribe subnet2 receive Count */
+	UINT32 subnet1TimeoutReceiveCount;			/* Subscribe subnet1 timeout receive Count */
+	UINT32 subnet2TimeoutReceiveCount;			/* Subscribe subnet2 timeout receive Count */
 	struct PD_COMMAND_VALUE *pNextPdCommandValue;	/* pointer to next PD_COMMAND_VALUE or NULL */
 } PD_COMMAND_VALUE;
 
@@ -230,6 +240,9 @@ extern UINT16 OFFSET_ADDRESS4;				/* offsetAddress comId2 subscribe */
 extern BOOL marshallingFlag;				/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
 /* publisher Application Cycle Time */
 extern UINT32	publisherAppCycle;			/* Publisher Application cycle in us */
+
+/* pointer to first command value for ladderApplication_multiPD */
+extern PD_COMMAND_VALUE *pFirstPdCommandValue;		/* First PD Command Value */
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -398,13 +411,15 @@ PD_APP_ERR_TYPE serachPdCommandValueToCommand (
 /**********************************************************************************************************************/
 /** Return the PdCommandValue with same comId and IP addresses
  *
- *  @param[in]      pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @param[in]		pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @param[out]		pMatchSubnet            	pointer to match subnet number
  *
  *  @retval         != NULL         		pointer to PdCommandValue
  *  @retval         NULL            		No PD PdCommandValue found
  */
 PD_COMMAND_VALUE *serachPdCommandValueToAddr (
-		TRDP_ADDRESSES_T    *addr);
+		TRDP_ADDRESSES_T    *addr,
+		UINT32	*pMatchSubnet);
 
 /**********************************************************************************************************************/
 /** Return the PdCommandValue with same comId and IP addresses
@@ -417,6 +432,60 @@ PD_COMMAND_VALUE *serachPdCommandValueToAddr (
  */
 PD_APP_ERR_TYPE printPdCommandValue (
 		PD_COMMAND_VALUE	*pHeadPdCommandValue);
+
+/**********************************************************************************************************************/
+/** Display PD Statistics
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+/**********************************************************************************************************************/
+/** Display PD Subscriber Receive Count / Receive Timeout Count
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *
+ */
+PD_APP_ERR_TYPE printPdSubscribeResult (
+		PD_COMMAND_VALUE	*pHeadPdCommandValue);
+
+/**********************************************************************************************************************/
+/** Create PD DataSet1
+ *
+ *  @param[in]		firstCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[out]		pPdDataSet1				pointer to Created PD DATASET1
+ *
+ *  @retval         MD_APP_NO_ERR				no error
+ *  @retval         MD_APP_PARAM_ERR			Parameter error
+ *
+ */
+PD_APP_ERR_TYPE createPdDataSet1 (
+		BOOL firstCreateFlag,
+		DATASET1 *pPdDataSet1);
+
+/**********************************************************************************************************************/
+/** Create PD DataSet2
+ *
+ *  @param[in]		fristCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[out]		pPdDataSet2				pointer to Created PD DATASET2
+ *
+ *  @retval         MD_APP_NO_ERR				no error
+ *  @retval         MD_APP_PARAM_ERR			Parameter error
+ *
+ */
+PD_APP_ERR_TYPE createPdDataSet2 (
+		BOOL firstCreateFlag,
+		DATASET2 *pPdDataSet2);
 
 // Convert an IP address to string
 char * miscIpToString(

@@ -48,6 +48,7 @@ extern CHAR8 TRAFFIC_STORE[];				/* Traffic Store shared memory name */
 extern mode_t PERMISSION	;					/* Traffic Store permission is rw-rw-rw- */
 extern UINT8 *pTrafficStoreAddr;			/* pointer to pointer to Traffic Store Address */
 extern VOS_SHRD_T  pTrafficStoreHandle;	/* Pointer to Traffic Store Handle */
+extern UINT16 TRAFFIC_STORE_MUTEX_VALUE_AREA;		/* Traffic Store mutex ID Area */
 
 /* PDComLadderThread */
 extern CHAR8 pdComLadderThreadName[];		/* Thread name is PDComLadder Thread. */
