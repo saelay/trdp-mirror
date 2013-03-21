@@ -22,6 +22,7 @@
 /*******************************************************************************
  * INCLUDES
  */
+#include <string.h>
 
 #include "trdp_utils.h"
 #include "trdp_if.h"
@@ -50,13 +51,14 @@
 
 /* Traffic Store Mutex */
 VOS_MUTEX_T pTrafficStoreMutex = NULL;					/* Pointer to Mutex for Traffic Store */
-/* UINT32 mutexLockRetryTimeout = 1000;	*/				/* Mutex Lock Retry Timeout : micro second */
+/* UINT32 mutexLockRetryTimeout = 1000;	*/			/* Mutex Lock Retry Timeout : micro second */
 
 /* Traffic Store */
 CHAR8 TRAFFIC_STORE[] = "/ladder_ts";					/* Traffic Store shared memory name */
-mode_t PERMISSION	 = 0666;							/* Traffic Store permission is rw-rw-rw- */
+mode_t PERMISSION	 = 0666;								/* Traffic Store permission is rw-rw-rw- */
 UINT8 *pTrafficStoreAddr;								/* pointer to pointer to Traffic Store Address */
-VOS_SHRD_T  pTrafficStoreHandle;				/* Pointer to Traffic Store Handle */
+VOS_SHRD_T  pTrafficStoreHandle;						/* Pointer to Traffic Store Handle */
+UINT16 TRAFFIC_STORE_MUTEX_VALUE_AREA = 0xFF00;		/* Traffic Store mutex ID Area */
 
 /* PDComLadderThread */
 CHAR8 pdComLadderThreadName[] ="PDComLadderThread";		/* Thread name is PDComLadder Thread. */
@@ -65,6 +67,9 @@ BOOL pdComLadderThreadStartFlag = FALSE;				/* PDComLadder Thread instruction st
 
 /* Sub-net */
 UINT32 usingSubnetId;									/* Using SubnetId */
+
+/* pointer to first command value for ladderApplication_multiPD */
+PD_COMMAND_VALUE *pFirstPdCommandValue = NULL;		/* First PD Command Value */
 
 /******************************************************************************/
 /** Initialize TRDP Ladder Support
@@ -153,6 +158,10 @@ TRDP_ERR_T trdp_ladder_init (void)
 		return ret;
 	}
 */
+	/* Set Traffic Store Semaphore Value */
+	memcpy((void *)((int)pTrafficStoreAddr + TRAFFIC_STORE_MUTEX_VALUE_AREA),
+			&pTrafficStoreMutex->mutexId,
+			sizeof(pTrafficStoreMutex->mutexId));
 
 	/*	PDComLadder Thread Create */
 	if (pdComLadderThreadActiveFlag == FALSE)

@@ -56,19 +56,69 @@ void tlp_recvPdDs (
 	extern UINT8 *pTrafficStoreAddr;						/* pointer to pointer to Traffic Store Address */
 	PD_COMMAND_VALUE *subscriberPdCommandValue = NULL;	/* Subscriber PD Command Value */
 	TRDP_ADDRESSES_T addr = {0};
+	PD_ELE_T *pSubscriberElement = NULL;
 
 	/* Set Receive PD addr */
 	addr.comId = pPDInfo->comId;
 	addr.destIpAddr = pPDInfo->destIpAddr;
 	addr.srcIpAddr = pPDInfo->srcIpAddr;
+	if (vos_isMulticast(pPDInfo->destIpAddr))
+	{
+		addr.mcGroup = pPDInfo->destIpAddr;
+	}
+	else
+	{
+		addr.mcGroup = 0;
+	}
+	addr.topoCount = pPDInfo->topoCount;
 
 	/* Search Subscriber command Value */
-//	subscriberPdCommandValue = serachPdCommandValueToAddr(&addr);
+	subscriberPdCommandValue = serachPdCommandValueToAddr(&addr, &subnetId);
+	if (subscriberPdCommandValue == NULL)
+	{
+#if 0
+		/* for ladderApplication_multiPD */
+		vos_printf(VOS_LOG_ERROR, "UnMatch Subscribe\n");
+		return;
+#endif /* if 0 */
+	}
+	else
+	{
+		/* Receive Subnet1 */
+		if (subnetId == SUBNET1)
+		{
+			/* Set Receive Count */
+			subscriberPdCommandValue->subnet1ReceiveCount = subscriberPdCommandValue->subnet1ReceiveCount + 1;
+			if (pPDInfo->resultCode == TRDP_TIMEOUT_ERR)
+			{
+				/* Set Timeout Count */
+				subscriberPdCommandValue->subnet1TimeoutReceiveCount = subscriberPdCommandValue->subnet1TimeoutReceiveCount + 1;
+			}
+		}
+		/* Receive Subnet2 */
+		else if(subnetId == SUBNET2)
+		{
+			/* Set Receive Count */
+			subscriberPdCommandValue->subnet2ReceiveCount = subscriberPdCommandValue->subnet2ReceiveCount + 1;
+			if (pPDInfo->resultCode == TRDP_TIMEOUT_ERR)
+			{
+				/* Set Timeout Count */
+				subscriberPdCommandValue->subnet2TimeoutReceiveCount = subscriberPdCommandValue->subnet2TimeoutReceiveCount + 1;
+			}
+		}
+		else
+		{
+			vos_printf(VOS_LOG_ERROR, "Write Receive Count Err\n");
+		}
+	}
 
 	/* check parameter */
 /*	if ((pRefCon == NULL) || (pData == NULL) || (dataSize == 0)) */
 /*	if ((pData == NULL) || (dataSize == 0)) */
-	if ((pData == NULL) || (dataSize == 0) || (pPDInfo->pUserRef == 0))
+	/* ( Receive Data Noting OR Receive Data Size: 0 OR Offset Address not registered ) */
+	/* AND result: other then Timeout */
+	if (((pData == NULL)	|| (dataSize == 0) || (pPDInfo->pUserRef == 0))
+		&&	(pPDInfo->resultCode != TRDP_TIMEOUT_ERR))
 	{
 //       vos_printf(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
 		return;
@@ -80,12 +130,33 @@ void tlp_recvPdDs (
 	/* Write received PD from using subnetwork in Traffic Store */
 	if ((pPDInfo->srcIpAddr & SUBNET2_NETMASK) == subnetId)
 	{
-		/* Set received PD Data in Traffic Store */
-/*		memcpy(&offset, pRefCon, sizeof(offset)); */
-		memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
-		memcpy((void *)((int)pTrafficStoreAddr + (int)offset), pData, dataSize);
+		/* Receive Timeout ? */
+		if (pPDInfo->resultCode == TRDP_TIMEOUT_ERR)
+		{
+			/* Get Subscriber */
+			pSubscriberElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, &addr);
+			/* Check toBechavior */
+			if (pSubscriberElement->toBehavior == TRDP_TO_SET_TO_ZERO)
+			{
+				/* Clear Traffic Store */
+				memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
+				memset((void *)((int)pTrafficStoreAddr + (int)offset), 0, pSubscriberElement->dataSize);
+				tlp_unlockTrafficStore();
+			}
+		}
+		else
+		{
+			/* Set received PD Data in Traffic Store */
+/*			memcpy(&offset, pRefCon, sizeof(offset)); */
+			memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
+			memcpy((void *)((int)pTrafficStoreAddr + (int)offset), pData, dataSize);
+			tlp_unlockTrafficStore();
+		}
 	}
-	tlp_unlockTrafficStore();
+	else
+	{
+		tlp_unlockTrafficStore();
+	}
 }
 
 /**********************************************************************************************************************/
@@ -217,4 +288,56 @@ VOS_THREAD_FUNC_T PDComLadder (void)
 
 	return NULL;
 }
+
+/**********************************************************************************************************************/
+/** Return the PdCommandValue with same comId and IP addresses
+ *
+ *  @param[in]		pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @param[out]		pMatchSubnet            	pointer to match subnet number
+ *
+ *  @retval         != NULL         		pointer to PdCommandValue
+ *  @retval         NULL            		No PD PdCommandValue found
+ */
+PD_COMMAND_VALUE *serachPdCommandValueToAddr (
+		TRDP_ADDRESSES_T    *addr,
+		UINT32	*pMatchSubnet)
+{
+	PD_COMMAND_VALUE *iterPdCommandValue;
+
+    if (addr == NULL)
+    {
+        return NULL;
+    }
+
+    for (iterPdCommandValue = pFirstPdCommandValue;
+    	  iterPdCommandValue != NULL;
+    	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
+    {
+        /*  Subscribe subnet1 Command: We match if src/dst address is zero or matches */
+    	if (iterPdCommandValue->PD_SUB_COMID1 == addr->comId &&
+            (iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == addr->srcIpAddr) &&
+            (iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == addr->destIpAddr)
+            )
+        {
+            *pMatchSubnet = SUBNET1;
+            return iterPdCommandValue;
+        }
+        /*  Subscribe subnet2 Command: We match if src/dst address is zero or matches */
+    	else if(iterPdCommandValue->PD_SUB_COMID1 == addr->comId &&
+                (iterPdCommandValue->PD_COMID1_SUB_SRC_IP2 == 0 || iterPdCommandValue->PD_COMID1_SUB_SRC_IP2 == addr->srcIpAddr) &&
+                (iterPdCommandValue->PD_COMID1_SUB_DST_IP2 == 0 || iterPdCommandValue->PD_COMID1_SUB_DST_IP2 == addr->destIpAddr)
+                )
+		{
+            *pMatchSubnet = SUBNET2;
+            return iterPdCommandValue;
+		}
+        else
+        {
+        	continue;
+        }
+
+    }
+    return NULL;
+}
+
 #endif /* TRDP_OPTION_LADDER */

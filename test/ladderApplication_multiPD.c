@@ -80,7 +80,7 @@ UINT16 OFFSET_ADDRESS2	= 0x1180;				/* offsetAddress comId1 */
 
 UINT8   firstPutData[PD_DATA_SIZE_MAX] = "First Put";
 
-PD_COMMAND_VALUE *pFirstPdCommandValue = NULL;		/* First PD Command Value */
+//PD_COMMAND_VALUE *pFirstPdCommandValue = NULL;		/* First PD Command Value */
 
 /***********************************************************************************************************************
  * DEFINES
@@ -264,6 +264,13 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 	{
 		printf("decideCreatePdThread Err. Not ComId Command Value Err\n");
 		return PD_APP_PARAM_ERR;
+	}
+
+	/* First Command NG ? */
+	if ((pFirstPdCommandValue->PD_PUB_COMID1 == 0)	&& (pFirstPdCommandValue->PD_SUB_COMID1 == 0))
+	{
+		free(pFirstPdCommandValue);
+		pFirstPdCommandValue = NULL;
 	}
 
 	/* Create PD Thread */
@@ -698,10 +705,28 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 				}
 				return PD_APP_COMMAND_ERR;
 			break;
+			case 'S':
+				if (printPdStatistics(appHandle) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle1 PD Statistics Dump Err\n");
+				}
+				if (printPdStatistics(appHandle2) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle2 PD Statistics Dump Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
+			case 'D':
+				if (printPdSubscribeResult(pFirstPdCommandValue) != PD_APP_NO_ERR)
+				{
+					printf("Subscriber Receive Count Dump Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
 			case 'h':
 			case '?':
 				printf("Unknown or required argument option -%c\n", optopt);
-				printf("Usage: COMMAND [-1] [-3] [-p] [-c] [-g] [-a] [-b] [-f] [-o] [-d] [-T] [-h] \n");
+				printf("Usage: COMMAND [-1] [-3] [-p] [-c] [-g] [-a] [-b] [-f] [-o] [-d] [-T] [-s] [-S] [-D] [-h] \n");
 //				printf("-t,	--topo			Ladder:1, not Lader:0\n");
 				printf("-1,	--offset1		OFFSET1 for Publish val hex: 0xXXXX\n");
 //				printf("-2,	--offset2		OFFSET2 for Publish val hex: 0xXXXX\n");
@@ -725,6 +750,8 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 //				printf("-e,	--send-comid2-cycle	Publish Cycle TIme: micro sec\n");
 				printf("-T,	--traffic-store-subnet	Write Traffic Store Receive Subnet1:1,subnet2:2\n");
 				printf("-s,	--show-set-command	Display Setup Command until now\n");
+				printf("-S,	--show-pd-statistics	Display PD Statistics\n");
+				printf("-D,	--show-subscribe-result	Display subscribe-result\n");
 				printf("-h,	--help\n");
 				return PD_APP_COMMAND_ERR;
 			break;
@@ -848,8 +875,10 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 
     /* Traffic Store */
 	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
-	CHAR8 putData[PD_DATA_SIZE_MAX];				/* put DATA */
 	INT32 putCounter = 0;							/* put counter */
+
+	UINT8 *pPdDataSet = NULL;						/* pointer to PD DATASET */
+	size_t pdDataSetSize = 0;						/* subscirbe or publish DATASET SIZE */
 
 	/*	Sub-network Id1 Subscribe */
 	/* Check Subscribe ComId */
@@ -860,6 +889,18 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 	}
 	else
 	{
+		/* Get PD DATASET */
+		if (pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1 == DATASET1_COMID)
+		{
+			/* DATASET1 Size */
+			pdDataSetSize = sizeof(DATASET1);
+		}
+		else
+		{
+			/* DATASET2 Size */
+			pdDataSetSize = sizeof(DATASET2);
+		}
+
 		err = tlp_subscribe( appHandle,															/* our application identifier */
 							 &subHandleNet1ComId1,												/* our subscription identifier */
 							 &pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
@@ -871,7 +912,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 							 0,																		/* Option */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,			/* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,       											/* delete invalid data on timeout */
-							 PD_DATA_SIZE_MAX);													/* net data size */
+							 pdDataSetSize);													/* net data size */
 		if (err != TRDP_NO_ERR)
 		{
 			printf("prep  Sub-network Id1 pd receive error\n");
@@ -890,7 +931,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 							 0,																		/* Option */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,         /* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,       											/* delete invalid data on timeout */
-							 PD_DATA_SIZE_MAX);    											    /* net data size */
+							 pdDataSetSize);    											    /* net data size */
 
 		if (err != TRDP_NO_ERR)
 		{
@@ -907,6 +948,50 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 	}
 	else
 	{
+		/* Create PD DATASET */
+		if (pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1 == DATASET1_COMID)
+		{
+			/* DATASET1 Size */
+			pdDataSetSize = sizeof(DATASET1);
+			/* Get PD DATASET1 Area */
+			pPdDataSet = (UINT8 *)malloc(pdDataSetSize);
+			if (pPdDataSet == NULL)
+			{
+				printf("Create PD DATASET1 ERROR. malloc Err\n");
+				return PD_APP_MEM_ERR;
+			}
+			else
+			{
+				/* Initialize PD DTASET1 */
+				if ((createPdDataSet1(TRUE, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
+				{
+					printf("Create PD DATASET1 ERROR. Initialize Err\n");
+					return PD_APP_ERR;
+				}
+			}
+		}
+		else
+		{
+			/* DATASET1 Size */
+			pdDataSetSize = sizeof(DATASET2);
+			/* Get PD DATASET2 Area */
+			pPdDataSet = (UINT8 *)malloc(pdDataSetSize);
+			if (pPdDataSet == NULL)
+			{
+				printf("Create PD DATASET2 ERROR. malloc Err\n");
+				return PD_APP_MEM_ERR;
+			}
+			else
+			{
+				/* Initialize PD DTASET1 */
+				if ((createPdDataSet2(TRUE, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
+				{
+					printf("Create PD DATASET2 ERROR. Initialize Err\n");
+					return PD_APP_ERR;
+				}
+			}
+		}
+
 		/*	Sub-network Id1 Publish */
 		err = tlp_publish(  appHandle,															/* our application identifier */
 							&pubHandleNet1ComId1,												/* our pulication identifier */
@@ -918,13 +1003,16 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 							0,																	/* not redundant */
 							TRDP_FLAGS_NONE,													/* Don't use callback for errors */
 							NULL,																/* default qos and ttl */
-							firstPutData,														/* initial data */
-							PD_DATA_SIZE_MAX);												/* data size */
+							pPdDataSet,														/* initial data */
+							pdDataSetSize);													/* data size */
 		if (err != TRDP_NO_ERR)
 		{
 			printf("prep Sub-network Id1 pd publish error\n");
 			return PD_APP_ERR;
 		}
+
+		/* Set PD Data in Traffic Store */
+		memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), pPdDataSet, pdDataSetSize);
 
 		/*	Sub-network Id2 Publish */
 		err = tlp_publish(  appHandle2,					    								/* our application identifier */
@@ -937,8 +1025,8 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 							0,																	/* not redundant */
 							TRDP_FLAGS_NONE,													/* Don't use callback for errors */
 							NULL,																/* default qos and ttl */
-							firstPutData,														/* initial data */
-							PD_DATA_SIZE_MAX);												/* data size */
+							pPdDataSet,														/* initial data */
+							pdDataSetSize);														/* data size */
 		if (err != TRDP_NO_ERR)
 		{
 			printf("prep Sub-network Id2 pd publish error\n");
@@ -977,11 +1065,42 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
     	err = tlp_lockTrafficStore();
     	if (err == TRDP_NO_ERR)
     	{
-        	/* Create PD Data */
-    		memset(putData, 0, sizeof(putData));
-    		sprintf(putData, "Put Counter %d", putCounter++);
+
+#if 0
+/* Don't Update PD DATASET for Literal Data */
+    		/* Create PD DATASET */
+    		if (pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1 == DATASET1_COMID)
+    		{
+				/* Update PD DTASET1 */
+				if ((createPdDataSet1(FALSE, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
+				{
+					printf("Create PD DATASET1 ERROR. Update Err\n");
+					return PD_APP_ERR;
+				}
+				else
+				{
+					/* Set DATASET1 Size */
+					pdDataSetSize = sizeof(DATASET1);
+				}
+    		}
+    		else
+    		{
+				/* Update PD DTASET1 */
+				if ((createPdDataSet2(FALSE, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
+				{
+					printf("Create PD DATASET2 ERROR. Update Err\n");
+					return PD_APP_ERR;
+				}
+				else
+				{
+					/* Set DATASET2 Size */
+					pdDataSetSize = sizeof(DATASET2);
+				}
+    		}
+
     		/* Set PD Data in Traffic Store */
-    		memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), putData, sizeof(putData));
+    		memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), pPdDataSet, pdDataSetSize);
+#endif /* if 0 */
 
 			/* First TRDP instance in TRDP publish buffer */
 			tlp_put(appHandle,
@@ -993,6 +1112,8 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 					pubHandleNet2ComId1,
 					(void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1),
 					appHandle2->pSndQueue->dataSize);
+			/* put count up */
+			putCounter++;
 
           	/* Release access right to Traffic Store*/
     		err = tlp_unlockTrafficStore();
@@ -1083,11 +1204,25 @@ PD_APP_ERR_TYPE serachPdCommandValueToCommand (
 {
 	PD_COMMAND_VALUE *iterPdCommandValue;
 
+	/* Check Parameter */
     if (pHeadPdCommandValue == NULL
     	|| pNewPdCommandValue == NULL
-    	|| (pNewPdCommandValue->PD_SUB_COMID1 == 0 && pNewPdCommandValue->PD_PUB_COMID1 == 0))
+    	|| (pNewPdCommandValue->PD_SUB_COMID1 == 0 && pNewPdCommandValue->PD_PUB_COMID1 == 0))	/* Check comid:0 */
     {
         return PD_APP_PARAM_ERR;
+    }
+
+	/* Check publish comid:10001,10002 */
+	if ((pNewPdCommandValue->PD_PUB_COMID1 != 0)
+		&& !(pNewPdCommandValue->PD_PUB_COMID1 == DATASET1_COMID)
+		&& !(pNewPdCommandValue->PD_PUB_COMID1 == DATASET2_COMID))
+	{
+		return PD_APP_PARAM_ERR;
+	}
+
+    if (pHeadPdCommandValue == pNewPdCommandValue)
+    {
+    	return PD_APP_NO_ERR;
     }
 
     for (iterPdCommandValue = pHeadPdCommandValue;
@@ -1095,7 +1230,7 @@ PD_APP_ERR_TYPE serachPdCommandValueToCommand (
     	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
     {
         /*  Subscribe Command: We match if src/dst address is zero or matches */
-        if ((iterPdCommandValue->PD_SUB_COMID1 == pNewPdCommandValue->PD_SUB_COMID1 && iterPdCommandValue->PD_SUB_COMID1 != 0 ) &&
+        if ((iterPdCommandValue->PD_SUB_COMID1 == pNewPdCommandValue->PD_SUB_COMID1 && pNewPdCommandValue->PD_SUB_COMID1 != 0 ) &&
             (iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == pNewPdCommandValue->PD_COMID1_SUB_SRC_IP1) &&
             (iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == pNewPdCommandValue->PD_COMID1_SUB_DST_IP1)
             )
@@ -1103,7 +1238,7 @@ PD_APP_ERR_TYPE serachPdCommandValueToCommand (
             return PD_APP_COMMAND_ERR;
         }
         /*  Publish Command: We match if dst address is zero or matches */
-        else if ((iterPdCommandValue->PD_PUB_COMID1 == pNewPdCommandValue->PD_PUB_COMID1 && iterPdCommandValue->PD_PUB_COMID1 != 0) &&
+        else if ((iterPdCommandValue->PD_PUB_COMID1 == pNewPdCommandValue->PD_PUB_COMID1 && pNewPdCommandValue->PD_PUB_COMID1 != 0) &&
         		(iterPdCommandValue->PD_COMID1_PUB_DST_IP1 == 0 || iterPdCommandValue->PD_COMID1_PUB_DST_IP1 == pNewPdCommandValue->PD_COMID1_PUB_DST_IP1)
         		)
         {
@@ -1119,46 +1254,7 @@ PD_APP_ERR_TYPE serachPdCommandValueToCommand (
 }
 
 /**********************************************************************************************************************/
-/** Return the PdCommandValue with same comId and IP addresses
- *
- *  @param[in]      pNewPdCommandValue		Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
- *
- *  @retval         != NULL         		pointer to PdCommandValue
- *  @retval         NULL            		No PD PdCommandValue found
- */
-PD_COMMAND_VALUE *serachPdCommandValueToAddr (
-		TRDP_ADDRESSES_T    *addr)
-{
-	PD_COMMAND_VALUE *iterPdCommandValue;
-
-    if (addr == NULL)
-    {
-        return NULL;
-    }
-
-    for (iterPdCommandValue = pFirstPdCommandValue;
-    	  iterPdCommandValue != NULL;
-    	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
-    {
-        /*  Subscribe Command: We match if src/dst address is zero or matches */
-        if (iterPdCommandValue->PD_SUB_COMID1 == addr->comId &&
-            (iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_SRC_IP1 == addr->srcIpAddr) &&
-            (iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == 0 || iterPdCommandValue->PD_COMID1_SUB_DST_IP1 == addr->destIpAddr)
-            )
-        {
-            return iterPdCommandValue;
-        }
-        else
-        {
-        	continue;
-        }
-
-    }
-    return NULL;
-}
-
-/**********************************************************************************************************************/
-/** Return the PdCommandValue with same comId and IP addresses
+/** Display PdCommandValue
  *
  *  @param[in]      pHeadPdCommandValue	pointer to head of queue
  *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
@@ -1176,6 +1272,14 @@ PD_APP_ERR_TYPE printPdCommandValue (
     if (pHeadPdCommandValue == NULL)
     {
         return PD_APP_PARAM_ERR;
+    }
+
+    /* Check Valid First Command */
+    /* Publish ComId = 0 && Subscribe ComId = 0 */
+    if ((pHeadPdCommandValue->PD_PUB_COMID1 == 0) && (pHeadPdCommandValue->PD_SUB_COMID1 == 0))
+    {
+    	printf("Valid First PD Command isn't Set up\n");
+    	return PD_APP_NO_ERR;
     }
 
     for (iterPdCommandValue = pHeadPdCommandValue;
@@ -1203,6 +1307,319 @@ PD_APP_ERR_TYPE printPdCommandValue (
     return PD_APP_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** Display PD Statistics
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	TRDP_ERR_T err;
+	TRDP_STATISTICS_T   pdStatistics;
+	char strIp[16] = {0};
+
+	if (appHandle == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+	/* Get PD Statistics */
+	err = tlc_getStatistics(appHandle, &pdStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+		/*  Dump PD Statistics */
+		printf("===   PD Statistics   ===\n");
+		miscIpToString(appHandle->realIP, strIp);
+		printf("Application Handle RealIP(Network I/F Address): %s\n", strIp);
+		printf("Default Timeout in us for PD: %u micro sec\n", pdStatistics.pd.defTimeout);
+		printf("Number of subscribed ComId's: %u\n", pdStatistics.pd.numSubs);
+		printf("Number of published ComId's: %u\n", pdStatistics.pd.numPub);
+		printf("Number of received PD packets with No err: %u\n", pdStatistics.pd.numRcv);
+		printf("Number of received PD packets with CRC err: %u\n", pdStatistics.pd.numCrcErr);
+		printf("Number of received PD packets with protocol err: %u\n", pdStatistics.pd.numProtErr);
+		printf("Number of received PD packets with wrong topo count: %u\n", pdStatistics.pd.numTopoErr);
+//		printf("Number of received PD push packets without subscription: %u\n", pdStatistics.pd.numNoSubs);
+//		printf("Number of received PD pull packets without publisher: %u\n", pdStatistics.pd.numNoPub);
+		printf("Number of PD timeouts: %u\n", pdStatistics.pd.numTimeout);
+		printf("Number of sent PD packets: %u\n", pdStatistics.pd.numSend);
+	}
+	else
+	{
+		return PD_APP_ERR;
+	}
+	return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Display PD Subscriber Receive Count / Receive Timeout Count
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *
+ */
+PD_APP_ERR_TYPE printPdSubscribeResult (
+		PD_COMMAND_VALUE	*pHeadPdCommandValue)
+{
+	PD_COMMAND_VALUE *iterPdCommandValue;
+	UINT16 pdCommnadValueNumber = 1;
+	char strIp[16] = {0};
+
+    if (pHeadPdCommandValue == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+    for (iterPdCommandValue = pHeadPdCommandValue;
+    	  iterPdCommandValue != NULL;
+    	  iterPdCommandValue = iterPdCommandValue->pNextPdCommandValue)
+    {
+		/* Check Valid Subscriber */
+		/* Subscribe ComId != 0 */
+		if (iterPdCommandValue->PD_SUB_COMID1 != 0)
+		{
+	    	/*  Dump PdCommandValue */
+			printf("Subscriber No.%u\n", pdCommnadValueNumber);
+			printf("-3,	OFFSET3 for Subscribe val hex: 0x%x\n", iterPdCommandValue->OFFSET_ADDRESS3);
+			printf("-g,	Subscribe ComId1: %u\n", iterPdCommandValue->PD_SUB_COMID1);
+			miscIpToString(iterPdCommandValue->PD_COMID1_SUB_SRC_IP1, strIp);
+			printf("-a,	Subscribe ComId1 Source IP Address: %s\n", strIp);
+			miscIpToString(iterPdCommandValue->PD_COMID1_SUB_DST_IP1, strIp);
+			printf("-b,	Subscribe ComId1 Destination IP Address: %s\n", strIp);
+			printf("-o,	Subscribe Timeout: %u micro sec\n", iterPdCommandValue->PD_COMID1_TIMEOUT);
+			printf("Subnet1 Receive PD Count: %u\n", iterPdCommandValue->subnet1ReceiveCount);
+			printf("Subnet1 Receive PD Timeout Count: %u\n", iterPdCommandValue->subnet1TimeoutReceiveCount);
+			printf("Subnet2 Receive PD Count: %u\n", iterPdCommandValue->subnet2ReceiveCount);
+			printf("Subnet2 Receive PD Timeout Count: %u\n", iterPdCommandValue->subnet2TimeoutReceiveCount);
+			pdCommnadValueNumber++;
+		}
+    }
+
+    if (pdCommnadValueNumber == 1 )
+    {
+    	printf("Valid Subscriber PD Command isn't Set up\n");
+    }
+
+    return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Create PD DataSet1
+ *
+ *  @param[in]		firstCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[out]		pPdDataSet1				pointer to Created PD DATASET1
+ *
+ *  @retval         MD_APP_NO_ERR				no error
+ *  @retval         MD_APP_PARAM_ERR			Parameter error
+ *
+ */
+PD_APP_ERR_TYPE createPdDataSet1 (
+		BOOL firstCreateFlag,
+		DATASET1 *pPdDataSet1)
+{
+	/* Parameter Check */
+	if (pPdDataSet1 == NULL)
+	{
+		printf("create PD DATASET1 error\n");
+		return PD_APP_PARAM_ERR;
+	}
+
+	if (firstCreateFlag == TRUE)
+	{
+		/* DATASET1 Zero Clear */
+		memset(pPdDataSet1, 0, sizeof(DATASET1));
+		/* Set Initial PD DataSet1 */
+		pPdDataSet1->boolean = 1;
+		pPdDataSet1->character = 2;
+		pPdDataSet1->utf16 = 3;
+		pPdDataSet1->integer8 = 4;
+		pPdDataSet1->integer16 = 5;
+		pPdDataSet1->integer32 = 6;
+		pPdDataSet1->integer64 = 7;
+		pPdDataSet1->uInteger8 = 8;
+		pPdDataSet1->uInteger16 = 9;
+		pPdDataSet1->uInteger32 = 10;
+		pPdDataSet1->uInteger64 = 11;
+		pPdDataSet1->real32 = 12;
+		pPdDataSet1->real64 = 13;
+		pPdDataSet1->timeDate32 = 14;
+		pPdDataSet1->timeDate48.sec = 15;
+		pPdDataSet1->timeDate48.ticks = 16;
+		pPdDataSet1->timeDate64.tv_sec = 17;
+		pPdDataSet1->timeDate64.tv_usec = 18;
+	}
+	else
+	{
+		/* Increment PD DataSet1 */
+		pPdDataSet1->boolean++;
+		pPdDataSet1->character++;
+		pPdDataSet1->utf16++;
+		pPdDataSet1->integer8++;
+		pPdDataSet1->integer16++;
+		pPdDataSet1->integer32++;
+		pPdDataSet1->integer64++;
+		pPdDataSet1->uInteger8++;
+		pPdDataSet1->uInteger16++;
+		pPdDataSet1->uInteger32++;
+		pPdDataSet1->uInteger64++;
+		pPdDataSet1->real32++;
+		pPdDataSet1->real64++;
+		pPdDataSet1->timeDate32++;
+		pPdDataSet1->timeDate48.sec++;
+		pPdDataSet1->timeDate48.ticks++;
+		pPdDataSet1->timeDate64.tv_sec++;
+		pPdDataSet1->timeDate64.tv_usec++;
+	}
+	return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Create PD DataSet2
+ *
+ *  @param[in]		fristCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[out]		pPdDataSet2				pointer to Created PD DATASET2
+ *
+ *  @retval         MD_APP_NO_ERR				no error
+ *  @retval         MD_APP_PARAM_ERR			Parameter error
+ *
+ */
+PD_APP_ERR_TYPE createPdDataSet2 (
+		BOOL firstCreateFlag,
+		DATASET2 *pPdDataSet2)
+{
+	int i = 0;
+
+	/* Parameter Check */
+	if (pPdDataSet2 == NULL)
+	{
+		printf("create PD DATASET2 error\n");
+		return PD_APP_PARAM_ERR;
+	}
+
+	if (firstCreateFlag == TRUE)
+	{
+		/* DATASET2 Zero Clear */
+		memset(pPdDataSet2, 0, sizeof(DATASET2));
+		/* Set Initial PD DataSet2 */
+		pPdDataSet2->dataset1[0].boolean = 1;
+		pPdDataSet2->dataset1[0].character = 2;
+		pPdDataSet2->dataset1[0].utf16 = 3;
+		pPdDataSet2->dataset1[0].integer8 = 4;
+		pPdDataSet2->dataset1[0].integer16 = 5;
+		pPdDataSet2->dataset1[0].integer32 = 6;
+		pPdDataSet2->dataset1[0].integer64 = 7;
+		pPdDataSet2->dataset1[0].uInteger8 = 8;
+		pPdDataSet2->dataset1[0].uInteger16 = 9;
+		pPdDataSet2->dataset1[0].uInteger32 = 10;
+		pPdDataSet2->dataset1[0].uInteger64 = 11;
+		pPdDataSet2->dataset1[0].real32 = 12;
+		pPdDataSet2->dataset1[0].real64 = 13;
+		pPdDataSet2->dataset1[0].timeDate32 = 14;
+		pPdDataSet2->dataset1[0].timeDate48.sec = 15;
+		pPdDataSet2->dataset1[0].timeDate48.ticks = 16;
+		pPdDataSet2->dataset1[0].timeDate64.tv_sec = 17;
+		pPdDataSet2->dataset1[0].timeDate64.tv_usec = 18;
+
+/* Max -1 */
+/*		pPdDataSet2->dataset1[1].boolean = 1;
+		pPdDataSet2->dataset1[1].character = 127-1;
+		pPdDataSet2->dataset1[1].utf16 = 0xFFFFFFFF-1;
+		pPdDataSet2->dataset1[1].integer8 = 127-1;
+		pPdDataSet2->dataset1[1].integer16 = 32767-1;
+		pPdDataSet2->dataset1[1].integer32 = 2147483647-1;
+		pPdDataSet2->dataset1[1].integer64 = 9223372036854775807ll-1;
+		pPdDataSet2->dataset1[1].uInteger8 = 0xFF-1;
+		pPdDataSet2->dataset1[1].uInteger16 = 0xFFFF-1;
+		pPdDataSet2->dataset1[1].uInteger32 = 0xFFFFFFFF-1;
+		pPdDataSet2->dataset1[1].uInteger64 = 0xFFFFFFFFFFFFFFFFull-1;
+		pPdDataSet2->dataset1[1].real32 = FLT_MAX_EXP - 1;
+		pPdDataSet2->dataset1[1].real64 = DBL_MAX_EXP - 1;
+		pPdDataSet2->dataset1[1].timeDate32 = 2147483647-1;
+		pPdDataSet2->dataset1[1].timeDate48.sec = 2147483647-1;
+		pPdDataSet2->dataset1[1].timeDate48.ticks = 0xFFFF-1;
+		pPdDataSet2->dataset1[1].timeDate64.tv_sec =2147483647-1;
+		pPdDataSet2->dataset1[1].timeDate64.tv_usec = 0xFFFFFFFF-1;
+*/
+
+		pPdDataSet2->dataset1[1].boolean = 1;
+		pPdDataSet2->dataset1[1].character = 2;
+		pPdDataSet2->dataset1[1].utf16 = 3;
+		pPdDataSet2->dataset1[1].integer8 = 4;
+		pPdDataSet2->dataset1[1].integer16 = 5;
+		pPdDataSet2->dataset1[1].integer32 = 6;
+		pPdDataSet2->dataset1[1].integer64 = 7;
+		pPdDataSet2->dataset1[1].uInteger8 = 8;
+		pPdDataSet2->dataset1[1].uInteger16 = 9;
+		pPdDataSet2->dataset1[1].uInteger32 = 10;
+		pPdDataSet2->dataset1[1].uInteger64 = 11;
+		pPdDataSet2->dataset1[1].real32 = 12;
+		pPdDataSet2->dataset1[1].real64 = 13;
+		pPdDataSet2->dataset1[1].timeDate32 = 14;
+		pPdDataSet2->dataset1[1].timeDate48.sec = 15;
+		pPdDataSet2->dataset1[1].timeDate48.ticks = 16;
+		pPdDataSet2->dataset1[1].timeDate64.tv_sec = 17;
+		pPdDataSet2->dataset1[1].timeDate64.tv_usec = 18;
+		for(i = 0; i < 64; i++)
+		{
+			pPdDataSet2->int16[i] = i;
+		}
+	}
+	else
+	{
+		/* Set Initial PD DataSet2 */
+		pPdDataSet2->dataset1[0].boolean++;
+		pPdDataSet2->dataset1[0].character++;
+		pPdDataSet2->dataset1[0].utf16++;
+		pPdDataSet2->dataset1[0].integer8++;
+		pPdDataSet2->dataset1[0].integer16++;
+		pPdDataSet2->dataset1[0].integer32++;
+		pPdDataSet2->dataset1[0].integer64++;
+		pPdDataSet2->dataset1[0].uInteger8++;
+		pPdDataSet2->dataset1[0].uInteger16++;
+		pPdDataSet2->dataset1[0].uInteger32++;
+		pPdDataSet2->dataset1[0].uInteger64++;
+		pPdDataSet2->dataset1[0].real32 ++;
+		pPdDataSet2->dataset1[0].real64++;
+		pPdDataSet2->dataset1[0].timeDate32++;
+		pPdDataSet2->dataset1[0].timeDate48.sec++;
+		pPdDataSet2->dataset1[0].timeDate48.ticks++;
+		pPdDataSet2->dataset1[0].timeDate64.tv_sec++;
+		pPdDataSet2->dataset1[0].timeDate64.tv_usec++;
+
+		pPdDataSet2->dataset1[1].boolean++;
+		pPdDataSet2->dataset1[1].character++;
+		pPdDataSet2->dataset1[1].utf16++;
+		pPdDataSet2->dataset1[1].integer8++;
+		pPdDataSet2->dataset1[1].integer16++;
+		pPdDataSet2->dataset1[1].integer32++;
+		pPdDataSet2->dataset1[1].integer64++;
+		pPdDataSet2->dataset1[1].uInteger8++;
+		pPdDataSet2->dataset1[1].uInteger16++;
+		pPdDataSet2->dataset1[1].uInteger32++;
+		pPdDataSet2->dataset1[1].uInteger64++;
+		pPdDataSet2->dataset1[1].real32++;
+		pPdDataSet2->dataset1[1].real64++;
+		pPdDataSet2->dataset1[1].timeDate32++;
+		pPdDataSet2->dataset1[1].timeDate48.sec++;
+		pPdDataSet2->dataset1[1].timeDate48.ticks++;
+		pPdDataSet2->dataset1[1].timeDate64.tv_sec++;
+		pPdDataSet2->dataset1[1].timeDate64.tv_usec++;
+		for(i = 0; i < 64; i++)
+		{
+			pPdDataSet2->int16[i]++;
+		}
+	}
+	return PD_APP_NO_ERR;
+}
+
 // Convert an IP address to string
 char * miscIpToString(int ipAdd, char *strTmp)
 {
@@ -1216,4 +1633,5 @@ char * miscIpToString(int ipAdd, char *strTmp)
 
     return strTmp;
 }
+
 #endif /* TRDP_OPTION_LADDER */
