@@ -770,6 +770,7 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         md_config.replyTimeout   = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
         md_config.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
         md_config.connectTimeout = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+        md_config.sendingTimeout = TRDP_MD_DEFAULT_SENDING_TIMEOUT;
         md_config.udpPort        = TRDP_MD_UDP_PORT;
         md_config.tcpPort        = TRDP_MD_TCP_PORT;
 
@@ -1319,7 +1320,7 @@ int main (int argc, char * *argv)
                     return 1;
         }
 
-
+        noOfDesc = 0;
 
         tlc_getInterval(appHandle,
                                (TRDP_TIME_T *) &tv,
