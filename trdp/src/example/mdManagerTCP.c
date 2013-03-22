@@ -1340,13 +1340,14 @@ int main (int argc, char * *argv)
            what ever comes first.
         */
 
+        /* Use these in the case of select mode */
         noOfDesc++;
 
         rv = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
 
-
         tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 
+        /* Use this in the case of polling mode */
         //tlc_process(appHandle, (TRDP_FDS_T *) NULL, NULL);
 
         if(tcpStatistics == TRUE)
