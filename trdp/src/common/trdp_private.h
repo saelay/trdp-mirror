@@ -55,9 +55,10 @@
 #define TRDP_TIMER_FOREVER                  0xffffffff                  /**< granularity in us                      */
 
 /*  Default MD communication parameters   */
-#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000                     /**< default reply time out 5s              */
+#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000                      /**< default reply time out 5s               */
 #define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000                     /**< default confirm time out 1s            */
 #define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000                    /**< Socket connection time out 1 minute    */
+#define TRDP_MD_DEFAULT_SENDING_TIMEOUT     5000000                      /**< Socket sending time out 5s             */
 #define TRDP_MD_DEFAULT_QOS                 3
 #define TRDP_MD_DEFAULT_TTL                 64
 #define TRDP_MD_DEFAULT_RETRIES             2
@@ -155,8 +156,11 @@ typedef struct TRDP_HANDLE
 typedef struct TRDP_SOCKET_TCP
 {
     TRDP_IP_ADDR_T      cornerIp;                       /**< The other TCP corner Ip                      */
-    BOOL                notSend;                        /**< If the socket is connected                   */
+    BOOL                notSend;                        /**< If the message has been sent uncompleted     */
     TRDP_TIME_T         connectionTimeout;              /**< TCP socket connection Timeout                */
+    BOOL                sendNotOk;                      /**< The sending timeout will be start            */
+    TRDP_TIME_T         sendingTimeout;                 /**< The timeout sending the message              */
+    BOOL                addFileDesc;                    /**< Ready to add the socket in the fd            */
 }TRDP_SOCKET_TCP_T;
 
 
@@ -272,8 +276,8 @@ typedef struct MD_LIS_ELE
 /** Tcp connection parameters    */
 typedef struct TRDP_MD_TCP
 {
-    BOOL                    doConnect;         /**< Tcp connection state                                   */
-    BOOL                    msgUncomplete;        /**< The receive message is uncomplete                   */
+    BOOL                    doConnect;          /**< TCP connection state                                   */
+    BOOL                    msgUncomplete;      /**< The receive message is uncomplete                   */
 } TRDP_MD_TCP_T;
 
 /** Session queue element for MD (UDP and TCP)  */
@@ -316,7 +320,7 @@ typedef struct
 {
     INT32   listen_sd;          /**< TCP general socket listening connection requests   */
     INT32   max_sd;             /**< Maximum socket number in the file descriptor   */
-    fd_set  master_set;         /**< Local file descriptor   */
+    //fd_set  master_set;         /**< Local file descriptor   */
 } TRDP_TCP_FD_T;
 
 /** Session/application variables store */
