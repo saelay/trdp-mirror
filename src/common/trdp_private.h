@@ -55,10 +55,10 @@
 #define TRDP_TIMER_FOREVER                  0xffffffff                  /**< granularity in us                      */
 
 /*  Default MD communication parameters   */
-#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000                      /**< default reply time out 5s               */
-#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000                     /**< default confirm time out 1s            */
-#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000                    /**< Socket connection time out 1 minute    */
-#define TRDP_MD_DEFAULT_SENDING_TIMEOUT     5000000                      /**< Socket sending time out 5s             */
+#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000                      /**< default reply time out 5s             */
+#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000                      /**< default confirm time out 1s           */
+#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000                     /**< Socket connection time out 1 minute   */
+#define TRDP_MD_DEFAULT_SENDING_TIMEOUT     5000000                      /**< Socket sending time out 5s            */
 #define TRDP_MD_DEFAULT_QOS                 3
 #define TRDP_MD_DEFAULT_TTL                 64
 #define TRDP_MD_DEFAULT_RETRIES             2
