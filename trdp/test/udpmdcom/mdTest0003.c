@@ -187,17 +187,14 @@ char * miscIpToString(int ipAdd, char *strTmp)
     int ipVal3 = (ipAdd >> 8) & 0xff;
     int ipVal4 = (ipAdd >> 0) & 0xff;
 
-    int strSize = sprintf(strTmp, "%u.%u.%u.%u", ipVal1, ipVal2, ipVal3, ipVal4);
-    strTmp[strSize] = 0;
-
+    sprintf(strTmp, "%u.%u.%u.%u", ipVal1, ipVal2, ipVal3, ipVal4);
+	
     return strTmp;
 }
 
 // Convert Session to String
-// WARNING: non reentrant code!
-char *miscSession2String(const UINT8 *p)
+char *miscSession2String(const UINT8 *p, char *strTmp)
 {
-    static char strTmp[48 + 1];
     sprintf(strTmp, "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
             p[0],
             p[1],
@@ -221,10 +218,8 @@ char *miscSession2String(const UINT8 *p)
 }
 
 // Convert URI to String
-// WARNING: non reentrant code!
-char *miscUriToString(const CHAR8 *p)
+char *miscUriToString(const CHAR8 *p, char *strTmp)
 {
-    static char strTmp[32 + 1];
     strncpy(strTmp, p, 32);
     strTmp[32] = 0;
     return strTmp;
@@ -233,11 +228,9 @@ char *miscUriToString(const CHAR8 *p)
 
 // memory to string
 // TODO
-// WARNING: non reentrant code!
-char *miscMem2String(const void *p, const int l)
+char *miscMem2String(const void *p, const int l, char *strTmp)
 {
-    static char strTmp[1024 + 1];
-
+	strTmp[0]=0;
     /*
        if (p != NULL || l > 0)
        {
@@ -245,31 +238,31 @@ char *miscMem2String(const void *p, const int l)
         const UINT8 *b = p;
         for(i = 0; i < l; i += 16)
         {
-            fprintf(stderr,"%04X ", i );
+            printf("%04X ", i );
 
             for(j = 0; j < 16; j++)
             {
                 if (j == 8)
-                    fprintf(stderr,"- ");
+                    printf("- ");
                 if((i+j) < l)
                 {
                     int ch = b[i+j];
-                    fprintf(stderr,"%02X ",ch);
+                    printf("%02X ",ch);
                 }
                 else
                 {
-                    fprintf(stderr,"   ");
+                    printf("   ");
                 }
             }
 
-            fprintf(stderr,"   ");
+            printf("   ");
 
             for(j = 0; j < 16 && (i+j) < l; j++)
             {
                 int ch = b[i+j];
-                fprintf(stderr,"%c", (ch >= ' ' && ch <= '~') ? ch : '.');
+                printf("%c", (ch >= ' ' && ch <= '~') ? ch : '.');
             }
-            fprintf(stderr,"\n");
+            printf("\n");
         }
        }
      */
@@ -278,10 +271,8 @@ char *miscMem2String(const void *p, const int l)
 }
 
 // Dump message content
-// WARNING: non reentrant code!
-char *miscEnv2String(trdp_apl_cbenv_t msg)
+char *miscEnv2String(trdp_apl_cbenv_t msg, char *strTmp)
 {
-    static char strTmp[128 + 1];
     sprintf(strTmp, "md_indication(r=%p d=%p l=%d)\n", msg.pRefCon, msg.pData, msg.dataSize);
     /*
        sprintf(str02,"srcIpAddr         = x%08X\n",msg.Msg.srcIpAddr);
@@ -308,8 +299,6 @@ char *miscEnv2String(trdp_apl_cbenv_t msg)
 
 // *** Log2file: End ***
 
-char trdpLogString[1024];
-
 /* code */
 
 /* debug display function */
@@ -321,7 +310,7 @@ static void private_debug_printf(
     UINT16 LineNumber,
     const CHAR8 *pMsgStr)
 {
-    fprintf(stderr, "r=%p c=%d t=%s f=%s l=%d m=%s", pRefCon, category, pTime, pFile, LineNumber, pMsgStr);
+    printf( "r=%p c=%d t=%s f=%s l=%d m=%s", pRefCon, category, pTime, pFile, LineNumber, pMsgStr);
     //char strTmp[2047];
     //sprintf(strTmp,"r=%p c=%d t=%s f=%s l=%d m=%s",pRefCon,category,pTime,pFile,LineNumber,pMsgStr);
     //l2fLog(strTmp);
@@ -335,10 +324,10 @@ static void print_session(const UINT8 *p)
     for (i = 0; i < 16; i++)
     {
         if (i == 4 || i == 6 || i == 8 || i == 10)
-            fprintf(stderr, "-");
-        fprintf(stderr, "%02X", p[i] & 0xFF);
+            printf( "-");
+        printf( "%02X", p[i] & 0xFF);
     }
-    fprintf(stderr, "\n");
+    printf( "\n");
 }
 
 static void print_uri(const CHAR8 *p)
@@ -348,7 +337,7 @@ static void print_uri(const CHAR8 *p)
     {
         if (p[i] == 0)
             break;
-        fprintf(stderr, "%c", p[i] & 0xFF);
+        printf( "%c", p[i] & 0xFF);
     }
 }
 
@@ -360,29 +349,29 @@ static void print_memory(const void *p, const int l)
         const UINT8 *b = p;
         for (i = 0; i < l; i += 16)
         {
-            fprintf(stderr, "%04X ", i);
+            printf( "%04X ", i);
 
             for (j = 0; j < 16; j++)
             {
                 if (j == 8)
-                    fprintf(stderr, "- ");
+                    printf( "- ");
                 if ((i + j) < l)
                 {
                     int ch = b[i + j];
-                    fprintf(stderr, "%02X ", ch);
+                    printf( "%02X ", ch);
                 }
                 else
                 {
-                    fprintf(stderr, "   ");
+                    printf( "   ");
                 }
             }
-            fprintf(stderr, "   ");
+            printf( "   ");
             for (j = 0; j < 16 && (i + j) < l; j++)
             {
                 int ch = b[i + j];
-                fprintf(stderr, "%c", (ch >= ' ' && ch <= '~') ? ch : '.');
+                printf( "%c", (ch >= ' ' && ch <= '~') ? ch : '.');
             }
-            fprintf(stderr, "\n");
+            printf( "\n");
         }
     }
 }
@@ -411,26 +400,26 @@ static void queue_initialize()
     pma = &new_ma;
         #endif
 
-    fprintf(stderr, "pma=%p\n", pma);
+    printf( "pma=%p\n", pma);
 
     /* create a queue */
     trdp_mq = mq_open(TRDP_QUEUE_NAME, O_RDWR | O_CREAT, S_IWUSR | S_IRUSR, pma);
     if ((mqd_t) -1 == trdp_mq)
     {
-        fprintf(stderr, "mq_open()");
+        printf( "mq_open()");
         exit(EXIT_FAILURE);
     }
     /* get attirubtes */
     rc = mq_getattr(trdp_mq, &old_ma);
     if (-1 == rc)
     {
-        fprintf(stderr, "mq_getattr()");
+        printf( "mq_getattr()");
         exit(EXIT_FAILURE);
     }
-    fprintf(stderr, "mq_flags   = x%lX\n", old_ma.mq_flags);
-    fprintf(stderr, "mq_maxmsg  = %ld\n", old_ma.mq_maxmsg);
-    fprintf(stderr, "mq_msgsize = %ld\n", old_ma.mq_msgsize);
-    fprintf(stderr, "mq_curmsgs = %ld\n", old_ma.mq_curmsgs);
+    printf( "mq_flags   = x%lX\n", old_ma.mq_flags);
+    printf( "mq_maxmsg  = %ld\n", old_ma.mq_maxmsg);
+    printf( "mq_msgsize = %ld\n", old_ma.mq_msgsize);
+    printf( "mq_curmsgs = %ld\n", old_ma.mq_curmsgs);
 
     new_ma = old_ma;
 
@@ -440,7 +429,7 @@ static void queue_initialize()
     rc = mq_setattr(trdp_mq, &new_ma, &old_ma);
     if (-1 == rc)
     {
-        fprintf(stderr, "mq_setattr()");
+        printf( "mq_setattr()");
         exit(EXIT_FAILURE);
     }
 
@@ -448,13 +437,13 @@ static void queue_initialize()
     rc = mq_getattr(trdp_mq, &old_ma);
     if (-1 == rc)
     {
-        fprintf(stderr, "mq_getattr()");
+        printf( "mq_getattr()");
         exit(EXIT_FAILURE);
     }
-    fprintf(stderr, "mq_flags   = x%lX\n", old_ma.mq_flags);
-    fprintf(stderr, "mq_maxmsg  = %ld\n", old_ma.mq_maxmsg);
-    fprintf(stderr, "mq_msgsize = %ld\n", old_ma.mq_msgsize);
-    fprintf(stderr, "mq_curmsgs = %ld\n", old_ma.mq_curmsgs);
+    printf( "mq_flags   = x%lX\n", old_ma.mq_flags);
+    printf( "mq_maxmsg  = %ld\n", old_ma.mq_maxmsg);
+    printf( "mq_msgsize = %ld\n", old_ma.mq_msgsize);
+    printf( "mq_curmsgs = %ld\n", old_ma.mq_curmsgs);
 }
 
 /* send message trough queue */
@@ -466,7 +455,7 @@ static void queue_sendmessage(trdp_apl_cbenv_t * msg)
     rc = mq_send(trdp_mq, p_bf, l_bf, 0);
     if (-1 == rc)
     {
-        fprintf(stderr, "mq_send()");
+        printf( "mq_send()");
         exit(EXIT_FAILURE);
     }
 }
@@ -488,15 +477,15 @@ static int queue_receivemessage(trdp_apl_cbenv_t * msg)
         {
             return errno;
         }
-        fprintf(stderr, "mq_receive()");
+        printf( "mq_receive()");
         exit(EXIT_FAILURE);
     }
     if (rc != l_bf)
     {
-        fprintf(stderr, "mq_receive() expected %d bytes, not %d\n", l_bf, (int) rc);
+        printf( "mq_receive() expected %d bytes, not %d\n", l_bf, (int) rc);
         exit(EXIT_FAILURE);
     }
-    fprintf(stderr, "Received %d bytes\n", (int) rc);
+    printf( "Received %d bytes\n", (int) rc);
     return EOK;
 }
 
@@ -530,12 +519,12 @@ static int testConfirmSend(trdp_apl_cbenv_t msg)
     //
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "testConfirmSend(): error = %d\n", errv);
+        printf( "testConfirmSend(): error = %d\n", errv);
         exit(EXIT_FAILURE);
     }
 
     // LOG
-    fprintf(stderr, "testConfirmSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    printf( "testConfirmSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
 
     return 0;
 }
@@ -566,12 +555,12 @@ static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
     //
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "testReplySend(): error = %d\n", errv);
+        printf( "testReplySend(): error = %d\n", errv);
         exit(EXIT_FAILURE);
     }
 
     // LOG
-    fprintf(stderr, "testReplySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    printf( "testReplySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
 
     return 0;
 }
@@ -603,12 +592,12 @@ static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData
     //
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "testReplyQuerySend(): error = %d\n", errv);
+        printf( "testReplyQuerySend(): error = %d\n", errv);
         exit(EXIT_FAILURE);
     }
 
     // LOG
-    fprintf(stderr, "testReplyQuerySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    printf( "testReplyQuerySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
 
     return 0;
 }
@@ -630,31 +619,31 @@ static void queue_procricz()
 
     {
         // Message info
-        fprintf(stderr, "md_indication(r=%p d=%p l=%d)\n", msg.pRefCon, msg.pData, msg.dataSize);
-        fprintf(stderr, "rx_test_fsm_state = %d\n", rx_test_fsm_state);
-        fprintf(stderr, "srcIpAddr         = %s\n", miscIpToString(msg.Msg.srcIpAddr, strIp));
-        fprintf(stderr, "destIpAddr        = %s\n", miscIpToString(msg.Msg.destIpAddr, strIp));
-        fprintf(stderr, "seqCount          = %d\n", msg.Msg.seqCount);
-        fprintf(stderr, "protVersion       = %d\n", msg.Msg.protVersion);
-        fprintf(stderr, "msgType           = x%04X\n", msg.Msg.msgType);
-        fprintf(stderr, "comId             = %d\n", msg.Msg.comId);
-        fprintf(stderr, "topoCount         = %d\n", msg.Msg.topoCount);
-        fprintf(stderr, "userStatus        = %d\n", msg.Msg.userStatus);
-        fprintf(stderr, "replyStatus       = %d\n", msg.Msg.replyStatus);
-        fprintf(stderr, "sessionId         = ");
+        printf( "md_indication(r=%p d=%p l=%d)\n", msg.pRefCon, msg.pData, msg.dataSize);
+        printf( "rx_test_fsm_state = %d\n", rx_test_fsm_state);
+        printf( "srcIpAddr         = %s\n", miscIpToString(msg.Msg.srcIpAddr, strIp));
+        printf( "destIpAddr        = %s\n", miscIpToString(msg.Msg.destIpAddr, strIp));
+        printf( "seqCount          = %d\n", msg.Msg.seqCount);
+        printf( "protVersion       = %d\n", msg.Msg.protVersion);
+        printf( "msgType           = x%04X\n", msg.Msg.msgType);
+        printf( "comId             = %d\n", msg.Msg.comId);
+        printf( "topoCount         = %d\n", msg.Msg.topoCount);
+        printf( "userStatus        = %d\n", msg.Msg.userStatus);
+        printf( "replyStatus       = %d\n", msg.Msg.replyStatus);
+        printf( "sessionId         = ");
         print_session(msg.Msg.sessionId);
-        fprintf(stderr, "replyTimeout      = %d\n", msg.Msg.replyTimeout);
-        fprintf(stderr, "destURI           = ");      print_uri(msg.Msg.destURI); fprintf(stderr, "\n");
-        fprintf(stderr, "srcURI            = ");      print_uri(msg.Msg.srcURI); fprintf(stderr, "\n");
-        fprintf(stderr, "numRetriesMax     = %d\n", msg.Msg.numRetriesMax);
-        fprintf(stderr, "numRetries        = %d\n", msg.Msg.numRetries);
-        fprintf(stderr, "numExpReplies     = %d\n", msg.Msg.numExpReplies);
-        fprintf(stderr, "numReplies        = %d\n", msg.Msg.numReplies);
-        fprintf(stderr, "numRepliesQuery   = %d\n", msg.Msg.numRepliesQuery);
-        fprintf(stderr, "numConfirmSent    = %d\n", msg.Msg.numConfirmSent);
-        fprintf(stderr, "numConfirmTimeout = %d\n", msg.Msg.numConfirmTimeout);
-        fprintf(stderr, "pUserRef          = %p\n", msg.Msg.pUserRef);
-        fprintf(stderr, "resultCode        = %d\n", msg.Msg.resultCode);
+        printf( "replyTimeout      = %d\n", msg.Msg.replyTimeout);
+        printf( "destURI           = ");      print_uri(msg.Msg.destURI); printf( "\n");
+        printf( "srcURI            = ");      print_uri(msg.Msg.srcURI); printf( "\n");
+        printf( "numRetriesMax     = %d\n", msg.Msg.numRetriesMax);
+        printf( "numRetries        = %d\n", msg.Msg.numRetries);
+        printf( "numExpReplies     = %d\n", msg.Msg.numExpReplies);
+        printf( "numReplies        = %d\n", msg.Msg.numReplies);
+        printf( "numRepliesQuery   = %d\n", msg.Msg.numRepliesQuery);
+        printf( "numConfirmSent    = %d\n", msg.Msg.numConfirmSent);
+        printf( "numConfirmTimeout = %d\n", msg.Msg.numConfirmTimeout);
+        printf( "pUserRef          = %p\n", msg.Msg.pUserRef);
+        printf( "resultCode        = %d\n", msg.Msg.resultCode);
 
         print_memory(msg.pData, msg.dataSize);
     }
@@ -664,7 +653,7 @@ static void queue_procricz()
     if (tstId < 0)
     {
         // Error
-        fprintf(stderr, "[ERROR] queue_procricz()\n  Test undefined for comId %u\n", msg.Msg.comId);
+        printf( "[ERROR] queue_procricz()\n  Test undefined for comId %u\n", msg.Msg.comId);
         sprintf(strTstName, "Callback ERROR [%u, UNDEFINED TEST, %u]", x_testmode, msg.Msg.comId);
     }
     else
@@ -683,20 +672,20 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state == 0)
                 {
-                    fprintf(stderr, "%s: timeout 1.\n", strTstName);
+                    printf( "%s: timeout 1.\n", strTstName);
                 }
                 else if (rx_test_fsm_state == 1)
                 {
-                    fprintf(stderr, "%s: timeout 2.\n", strTstName);
+                    printf( "%s: timeout 2.\n", strTstName);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                    printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
                 }
             }
             else
             {
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -713,16 +702,16 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    fprintf(stderr, "%s: Reply payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: Reply payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -733,20 +722,20 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state == 0)
                 {
-                    fprintf(stderr, "%s: timeout 1.\n", strTstName);
+                    printf( "%s: timeout 1.\n", strTstName);
                 }
                 else if (rx_test_fsm_state == 1)
                 {
-                    fprintf(stderr, "%s: timeout 2.\n", strTstName);
+                    printf( "%s: timeout 2.\n", strTstName);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                    printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
                 }
             }
             else
             {
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -762,23 +751,23 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: MD ReplyQuery, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send Confirm
                     testConfirmSend(msg);
 
-                    fprintf(stderr, "%s: Confirm sent\n", strTstName);
+                    printf( "%s: Confirm sent\n", strTstName);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -795,28 +784,28 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     // No send confirm to check Confirm timeout in Dev2
-                    fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
             {
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-                fprintf(stderr, "%s: Listener timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Listener timeout on not sent confirm.\n", strTstName);
             }
             else if (msg.Msg.resultCode == TRDP_REQCONFIRMTO_ERR)
             {
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-                fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Application timeout on not sent confirm.\n", strTstName);
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -826,16 +815,16 @@ static void queue_procricz()
             {
                 if (msg.Msg.numReplies == 0)
                 {
-                    fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: timeout, expected %d replies, found %d.\n", strTstName, 0, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %d replies, found %d.\n", strTstName, 0, msg.Msg.numReplies);
                 }
             }
             else
             {
-                fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
             break;
 
@@ -846,7 +835,7 @@ static void queue_procricz()
                 // 1) Reception
                 if (rx_test_fsm_state != 0)
                 {
-                    fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 0, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 0, rx_test_fsm_state);
                     break;
                 }
 
@@ -861,11 +850,11 @@ static void queue_procricz()
                     //
                     if (msg.Msg.numReplies == 1)
                     {
-                        fprintf(stderr, "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+                        printf( "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
                     }
                     else
                     {
-                        fprintf(stderr, "%s ERROR: expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
+                        printf( "%s ERROR: expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
                     }
                 }
             }
@@ -874,24 +863,24 @@ static void queue_procricz()
                 // 2) Timeout
                 if (rx_test_fsm_state != 1)
                 {
-                    fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 1, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 1, rx_test_fsm_state);
                     break;
                 }
 
                 // 2 replies expected, 1 received
                 if (msg.Msg.numReplies == 1)
                 {
-                    fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: timeout, expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
                 }
             }
             else
             {
                 // Unexpected result code
-                fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -913,34 +902,34 @@ static void queue_procricz()
                     {
                         if (msg.Msg.numReplies == 1)
                         {
-                            fprintf(stderr, "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+                            printf( "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
                         }
                         else
                         {
-                            fprintf(stderr, "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else if (rx_test_fsm_state == 1)
                     {
                         if (msg.Msg.numReplies == 2)
                         {
-                            fprintf(stderr, "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+                            printf( "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
                         }
                         else
                         {
-                            fprintf(stderr, "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else
                     {
-                        fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                        printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
                     }
                 }
             }
             else
             {
                 // Unexpected  result code
-                fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -950,22 +939,22 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 0)
                 {
-                    fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
                     break;
                 }
 
                 if (msg.Msg.numReplies == 0)
                 {
-                    fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: timeout, expected %d replies, found %d\n", strTstName, 0, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %d replies, found %d\n", strTstName, 0, msg.Msg.numReplies);
                 }
             }
             else
             {
-                fprintf(stderr, "%s ERROR: resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
             break;
 
@@ -976,7 +965,7 @@ static void queue_procricz()
                 // 1) Reception
                 if (rx_test_fsm_state != 0)
                 {
-                    fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
                     break;
                 }
 
@@ -991,11 +980,11 @@ static void queue_procricz()
                     //
                     if (msg.Msg.numReplies == 1)
                     {
-                        fprintf(stderr, "%s: Reply, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                        printf( "%s: Reply, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                     }
                     else
                     {
-                        fprintf(stderr, "%s ERROR: expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
+                        printf( "%s ERROR: expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
                     }
                 }
             }
@@ -1004,24 +993,24 @@ static void queue_procricz()
                 // 2) Timeout
                 if (rx_test_fsm_state != 1)
                 {
-                    fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 1, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 1, rx_test_fsm_state);
                     break;
                 }
 
                 // Unknown replies expected, 1 received
                 if (msg.Msg.numReplies == 1)
                 {
-                    fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
                 }
             }
             else
             {
                 // Unexpected  result code
-                fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1043,27 +1032,27 @@ static void queue_procricz()
                     {
                         if (msg.Msg.numReplies == 1)
                         {
-                            fprintf(stderr, "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
+                            printf( "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
                         }
                         else
                         {
-                            fprintf(stderr, "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else if (rx_test_fsm_state == 1)
                     {
                         if (msg.Msg.numReplies == 2)
                         {
-                            fprintf(stderr, "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
+                            printf( "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
                         }
                         else
                         {
-                            fprintf(stderr, "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else
                     {
-                        fprintf(stderr, "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                        printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
                     }
                 }
             }
@@ -1071,24 +1060,24 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    fprintf(stderr, "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
                     break;
                 }
 
                 // Timeout, unknown replies expected, 2 received
                 if (msg.Msg.numReplies == 2)
                 {
-                    fprintf(stderr, "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 2, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 2, msg.Msg.numReplies);
                 }
             }
             else
             {
                 // Unexpected  result code
-                fprintf(stderr, "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1105,12 +1094,12 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     // No send confirm to check Confirm timeout in Dev2
-                    fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
@@ -1118,32 +1107,32 @@ static void queue_procricz()
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
                 if ((rx_test_fsm_state == 2) && (msg.Msg.numConfirmTimeout == 1))
                 {
-                    fprintf(stderr, "%s: Listener timeout on not sent confirm 1.\n", strTstName);
+                    printf( "%s: Listener timeout on not sent confirm 1.\n", strTstName);
                 }
                 else if ((rx_test_fsm_state == 3) && (msg.Msg.numConfirmTimeout == 2))
                 {
-                    fprintf(stderr, "%s: Listener timeout on not sent confirm 2.\n", strTstName);
+                    printf( "%s: Listener timeout on not sent confirm 2.\n", strTstName);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
+                    printf( "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_REQCONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 4)
                 {
-                    fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-                fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Application timeout on not sent confirm.\n", strTstName);
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1160,12 +1149,12 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     // No send confirm to check Confirm timeout in Dev2
-                    fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
@@ -1173,42 +1162,42 @@ static void queue_procricz()
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
                 if ((rx_test_fsm_state == 2) && (msg.Msg.numConfirmTimeout == 1))
                 {
-                    fprintf(stderr, "%s: Listener timeout on not sent confirm 1.\n", strTstName);
+                    printf( "%s: Listener timeout on not sent confirm 1.\n", strTstName);
                 }
                 else if ((rx_test_fsm_state == 3) && (msg.Msg.numConfirmTimeout == 2))
                 {
-                    fprintf(stderr, "%s: Listener timeout on not sent confirm 2.\n", strTstName);
+                    printf( "%s: Listener timeout on not sent confirm 2.\n", strTstName);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
+                    printf( "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_REPLYTO_ERR)
             {
                 if (rx_test_fsm_state != 4)
                 {
-                    fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
-                fprintf(stderr, "%s: Application timeout (due to unknown repliers).\n", strTstName);
+                printf( "%s: Application timeout (due to unknown repliers).\n", strTstName);
             }
             else if (msg.Msg.resultCode == TRDP_REQCONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 5)
                 {
-                    fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
                     break;
                 }
 
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-                fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Application timeout on not sent confirm.\n", strTstName);
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1224,7 +1213,7 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send only one confirm
                     if (rx_test_fsm_state == 0)
@@ -1233,40 +1222,40 @@ static void queue_procricz()
                         testConfirmSend(msg);
 
                         // Send confirm to check Confirm timeout in Dev2
-                        fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+                        printf( "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
                     }
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    fprintf(stderr, "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
-                fprintf(stderr, "%s: Listener timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Listener timeout on not sent confirm.\n", strTstName);
             }
             else if (msg.Msg.resultCode == TRDP_REQCONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 3)
                 {
-                    fprintf(stderr, "%s ERROR: Application request confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application request confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-                fprintf(stderr, "%s: Application request timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Application request timeout on not sent confirm.\n", strTstName);
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1282,7 +1271,7 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send only one confirm
                     if (rx_test_fsm_state == 0)
@@ -1291,51 +1280,51 @@ static void queue_procricz()
                         testConfirmSend(msg);
 
                         // Send confirm to check Confirm timeout in Dev2
-                        fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+                        printf( "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
                     }
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    fprintf(stderr, "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-                fprintf(stderr, "%s: Listener timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Listener timeout on not sent confirm.\n", strTstName);
             }
             else if (msg.Msg.resultCode == TRDP_REPLYTO_ERR)
             {
                 if (rx_test_fsm_state != 3)
                 {
-                    fprintf(stderr, "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
-                fprintf(stderr, "%s: Application timeout (due to unknown repliers).\n", strTstName);
+                printf( "%s: Application timeout (due to unknown repliers).\n", strTstName);
             }
             else if (msg.Msg.resultCode == TRDP_REQCONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 4)
                 {
-                    fprintf(stderr, "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
                     break;
                 }
 
                 // Application timeout event because it was received a ReplyQuery but no Confirm is sent up now
-                fprintf(stderr, "%s: Application timeout on not sent confirm.\n", strTstName);
+                printf( "%s: Application timeout on not sent confirm.\n", strTstName);
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1351,24 +1340,24 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send confirm
                     testConfirmSend(msg);
 
                     // Send confirm
-                    fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+                    printf( "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1384,34 +1373,34 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send confirm
                     testConfirmSend(msg);
 
                     // Send confirm
-                    fprintf(stderr, "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
+                    printf( "%s: Confirm sent to %s\n", strTstName, miscIpToString(msg.Msg.destIpAddr, strIp));
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_REPLYTO_ERR)
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    fprintf(stderr, "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
+                    printf( "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
                     break;
                 }
 
-                fprintf(stderr, "%s: Application timeout (due to unknown repliers).\n", strTstName);
+                printf( "%s: Application timeout (due to unknown repliers).\n", strTstName);
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1419,7 +1408,7 @@ static void queue_procricz()
         default:
         {
             // Error
-            fprintf(stderr, "%s ERROR]: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
+            printf( "%s ERROR]: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
         }
         break;
         }
@@ -1436,7 +1425,7 @@ static void queue_procricz()
         case 2001:
         case 2003:
         {
-            fprintf(stderr, "%s ERROR: no callback execution expected\n", strTstName);
+            printf( "%s ERROR: no callback execution expected\n", strTstName);
         }
         break;
 
@@ -1453,16 +1442,16 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: notify recived, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: notify recived, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1479,7 +1468,7 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1489,16 +1478,16 @@ static void queue_procricz()
 
                     testReplySend(msg, mdTestData1);
 
-                    fprintf(stderr, "%s: Reply sent\n", strTstName);
+                    printf( "%s: Reply sent\n", strTstName);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
                 }
             }
             else
             {
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1520,7 +1509,7 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1530,26 +1519,26 @@ static void queue_procricz()
 
                     testReplyQuerySend(msg, mdTestData1);
 
-                    fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
+                    printf( "%s: ReplyQuery sent\n", strTstName);
                 }
                 else if (msg.Msg.msgType == TRDP_MSG_MC)
                 {
                     //
-                    fprintf(stderr, "%s: MD Confirm received\n", strTstName);
+                    printf( "%s: MD Confirm received\n", strTstName);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
+                    printf( "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_CONFIRMTO_ERR)
             {
                 //
-                fprintf(stderr, "%s: MD Confirm reception timeout.\n", strTstName);
+                printf( "%s: MD Confirm reception timeout.\n", strTstName);
             }
             else
             {
-                fprintf(stderr, "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1569,7 +1558,7 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    fprintf(stderr, "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1579,7 +1568,7 @@ static void queue_procricz()
 
                     testReplyQuerySend(msg, mdTestData1);
 
-                    fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
+                    printf( "%s: ReplyQuery sent\n", strTstName);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_CONFIRMTO_ERR)
@@ -1587,18 +1576,18 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Confirmation timeout is generated with ReplyQ msgType because it is the one waiting the confirmation
-                    fprintf(stderr, "%s: confirm reception timeout\n", strTstName);
+                    printf( "%s: confirm reception timeout\n", strTstName);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
+                    printf( "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1615,17 +1604,17 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1646,7 +1635,7 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1655,25 +1644,25 @@ static void queue_procricz()
                     sprintf(mdTestData1.testId, "MD Reply test");
 
                     testReplySend(msg, mdTestData1);
-                    fprintf(stderr, "%s: Reply sent\n", strTstName);
+                    printf( "%s: Reply sent\n", strTstName);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
 
         default:
         {
-            fprintf(stderr, "%s ERROR: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
+            printf( "%s ERROR: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
         }
         break;
         }
@@ -1696,17 +1685,17 @@ static void queue_procricz()
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    fprintf(stderr, "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
                 }
                 else
                 {
-                    fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1725,7 +1714,7 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1734,18 +1723,18 @@ static void queue_procricz()
                     sprintf(mdTestData1.testId, "MD Reply test");
 
                     testReplySend(msg, mdTestData1);
-                    fprintf(stderr, "%s: Reply sent\n", strTstName);
+                    printf( "%s: Reply sent\n", strTstName);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1764,7 +1753,7 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    fprintf(stderr, "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1774,7 +1763,7 @@ static void queue_procricz()
 
                     testReplyQuerySend(msg, mdTestData1);
 
-                    fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
+                    printf( "%s: ReplyQuery sent\n", strTstName);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_CONFIRMTO_ERR)
@@ -1782,18 +1771,18 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Confirmation timeout is generated with ReplyQ msgType because it is the one waiting the confirmation
-                    fprintf(stderr, "%s: confirm reception timeout\n", strTstName);
+                    printf( "%s: confirm reception timeout\n", strTstName);
                 }
                 else
                 {
                     // Error
-                    fprintf(stderr, "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
+                    printf( "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                fprintf(stderr, "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1814,7 +1803,7 @@ static void queue_procricz()
                     mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    fprintf(stderr, "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1824,34 +1813,34 @@ static void queue_procricz()
 
                     testReplyQuerySend(msg, mdTestData1);
 
-                    fprintf(stderr, "%s: ReplyQuery sent\n", strTstName);
+                    printf( "%s: ReplyQuery sent\n", strTstName);
                 }
                 else if (msg.Msg.msgType == TRDP_MSG_MC)
                 {
                     //
-                    fprintf(stderr, "%s: MD Confirm received\n", strTstName);
+                    printf( "%s: MD Confirm received\n", strTstName);
                 }
 
                 else
                 {
-                    fprintf(stderr, "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
+                    printf( "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_CONFIRMTO_ERR)
             {
                 //
-                fprintf(stderr, "%s: MD Confirm reception timeout.\n", strTstName);
+                printf( "%s: MD Confirm reception timeout.\n", strTstName);
             }
             else
             {
-                fprintf(stderr, "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
 
         default:
         {
-            fprintf(stderr, "%s ERROR: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
+            printf( "%s ERROR: Unexpected message with comID = %d\n", strTstName, msg.Msg.comId);
         }
         break;
         }
@@ -1869,7 +1858,7 @@ static void md_indication(
     UINT8                   *pData,
     UINT32 dataSize)
 {
-    fprintf(stderr, "md_indication(r=%p m=%p d=%p l=%d comId=%d)\n", pRefCon, pMsg, pData, dataSize, pMsg->comId);
+    printf( "md_indication(r=%p m=%p d=%p l=%d comId=%d)\n", pRefCon, pMsg, pData, dataSize, pMsg->comId);
 
     #if 0
     printf("srcIpAddr         = x%08X\n", pMsg->srcIpAddr);
@@ -1952,7 +1941,7 @@ static int test_initialize()
 
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "tlc_init() error = %d\n", errv);
+        printf( "tlc_init() error = %d\n", errv);
         exit(EXIT_FAILURE);
     }
 
@@ -1970,7 +1959,7 @@ static int test_initialize()
 
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "tlc_openSession() error = %d\n", errv);
+        printf( "tlc_openSession() error = %d\n", errv);
         exit(EXIT_FAILURE);
     }
 
@@ -2018,12 +2007,12 @@ static int testNotifySend(
     //
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "testNotifySend() error = %d\n", errv);
+        printf( "testNotifySend() error = %d\n", errv);
         exit(EXIT_FAILURE);
     }
 
     // LOG
-    fprintf(stderr, "testNotifySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, x_ip4_dest);
+    printf( "testNotifySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, x_ip4_dest);
 
     return 0;
 }
@@ -2072,20 +2061,58 @@ static int testRequestSend(
     //
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "testRequestSend(): error = %d\n", errv);
+        printf( "testRequestSend(): error = %d\n", errv);
         exit(EXIT_FAILURE);
     }
 
     // LOG
-    fprintf(stderr, "testRequestSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, x_ip4_dest);
+    printf( "testRequestSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, x_ip4_dest);
 
     return 0;
 }
 
+static double timeconvs(const TRDP_TIME_T *t)
+{
+	if (t == NULL) return 0;
+	return (double)t->tv_sec + (double)t->tv_usec / 1.0e6;
+}
+
+static void dumpMDlist(const char *name, MD_ELE_T *itm)
+{
+	if (name != NULL && itm != NULL)
+	{
+		int id=0;
+		printf("list: %s\n",name);
+		while(itm != NULL)
+		{
+			printf("[%d]: stateEle=%d morituri=%d interval=%g timeToGo=%g\n",
+				id,
+				itm->stateEle,
+				itm->morituri,
+				timeconvs(&itm->interval),
+				timeconvs(&itm->timeToGo)
+				);
+			printf("\n");
+			
+			itm=itm->pNext;
+			id++;
+		}
+	}
+}
+
+static void dumpMDcontext()
+{
+	if (NULL == appHandle) return;
+	dumpMDlist("pMDSndQueue",appHandle->pMDSndQueue);
+	dumpMDlist("pMDRcvQueue",appHandle->pMDRcvQueue);
+	dumpMDlist("pMDRcvEle",appHandle->pMDRcvEle);
+}
+
+
 static void exec_cmd(const int cliCmd)
 {
     // Cli command
-    fprintf(stderr, "cliCmd = %c.\n", cliCmd);
+    printf( "cliCmd = %c.\n", cliCmd);
 
     // Command execution
     int n;
@@ -2123,9 +2150,9 @@ static void exec_cmd(const int cliCmd)
         int      i;
 
         printf("UDPMDcom statistics:\n");
-        printf("    defQos: %d\n", appHandle->stats.udpMd.defQos);
-        printf("    defTtl: %d\n", appHandle->stats.udpMd.defTtl);
-        printf("    defReplyTimeout: %d\n", appHandle->stats.udpMd.defReplyTimeout);
+        printf("    defQos           : %d\n", appHandle->stats.udpMd.defQos);
+        printf("    defTtl           : %d\n", appHandle->stats.udpMd.defTtl);
+        printf("    defReplyTimeout  : %d\n", appHandle->stats.udpMd.defReplyTimeout);
         printf("    defConfirmTimeout: %d\n", appHandle->stats.udpMd.defConfirmTimeout);
 
         printf("    numList: %d\n", appHandle->stats.udpMd.numList);
@@ -2147,38 +2174,40 @@ static void exec_cmd(const int cliCmd)
             i++;
         }
 
-        printf("    numRcv: %d\n", appHandle->stats.udpMd.numRcv);
-        printf("    numCrcErr: %d\n", appHandle->stats.udpMd.numCrcErr);
-        printf("    numProtErr: %d\n", appHandle->stats.udpMd.numProtErr);
-        printf("    numTopoErr: %d\n", appHandle->stats.udpMd.numTopoErr);
-        printf("    numNoListener: %d\n", appHandle->stats.udpMd.numNoListener);
-        printf("    numReplyTimeout: %d\n", appHandle->stats.udpMd.numReplyTimeout);
+        printf("    numRcv           : %d\n", appHandle->stats.udpMd.numRcv);
+        printf("    numCrcErr        : %d\n", appHandle->stats.udpMd.numCrcErr);
+        printf("    numProtErr       : %d\n", appHandle->stats.udpMd.numProtErr);
+        printf("    numTopoErr       : %d\n", appHandle->stats.udpMd.numTopoErr);
+        printf("    numNoListener    : %d\n", appHandle->stats.udpMd.numNoListener);
+        printf("    numReplyTimeout  : %d\n", appHandle->stats.udpMd.numReplyTimeout);
         printf("    numConfirmTimeout: %d\n", appHandle->stats.udpMd.numConfirmTimeout);
-        printf("    numSend: %d\n", appHandle->stats.udpMd.numSend);
+        printf("    numSend          : %d\n", appHandle->stats.udpMd.numSend);
         printf("\n");
     }
+	
+	// inspect
+	if (cliCmd == '^')
+	{
+		dumpMDcontext();
+	}
 
     // Help
     if (cliCmd == 'h')
     {
+		// Help
+		printf("Commands:\n");
+		printf("h) Print menu comands\n");
+		printf("^) Display MD queue context\n");
+		printf("s) Print UDMPDcom statistics\n");
+			
         if (x_testmode == 1)
         {
             // Help
-            printf("Commands:\n");
-            printf("h) Print menu comands\n");
-            printf("s) Print UDMPDcom statistics\n");
             printf("   ---------------   \n");
             for (n = 0; n < sizeof(cliTests) / sizeof(cli_test); n++)
             {
                 printf("%c) %s [ComID %u] : %s\n", cliTests[n].cliChar, cliTests[n].tstName, cliTests[n].comID, cliTests[n].tstDescr);
             }
-        }
-        else
-        {
-            // Help
-            printf("Commands:\n");
-            printf("h) Print menu comands\n");
-            printf("s) Print UDMPDcom statistics\n");
         }
     }
 }
@@ -2209,7 +2238,7 @@ static int test_main_proc()
             &noDesc);
         // INFO
         //double sec = (double)tv.tv_sec + (double)tv.tv_usec * 1.0e-9;
-        //fprintf(stderr,"tlc_getInterval()=%d, time = %g, noDesc=%d\n",errv, sec, noDesc);
+        //printf("tlc_getInterval()=%d, time = %g, noDesc=%d\n",errv, sec, noDesc);
 
         // standard input for interactive commands...
         FD_SET(0, &rfds);        // stdin
@@ -2230,7 +2259,7 @@ static int test_main_proc()
         if (rv == 0)
         {
             // timeout ... no fd inputs....
-            //fprintf(stderr,"select() timeout\n");
+            //printf("select() timeout\n");
         }
         if (rv > 0)
         {
@@ -2258,7 +2287,7 @@ static int test_main_proc()
 
         // Polling Mode
         errv = tlc_process(appHandle, &rfds, &rv);
-        //fprintf(stderr,"tlc_process()=%d\n",errv);
+        // printf("tlc_process()=%d\n",errv);
 
 
         // call back process
@@ -2295,11 +2324,11 @@ static int testAddListener(
         destURI);
     if (errv != TRDP_NO_ERR)
     {
-        fprintf(stderr, "testAddListener() comID = %d error = %d\n", comId, errv);
+        printf( "testAddListener() comID = %d error = %d\n", comId, errv);
         exit(EXIT_FAILURE);
     }
 
-    fprintf(stderr, "testAddListener(): comID = %d, lisHandle = x%p\n", comId, lisHandle);
+    printf( "testAddListener(): comID = %d, lisHandle = x%p\n", comId, lisHandle);
 
     return 0;
 }
@@ -2512,7 +2541,7 @@ static int testInitListeners()
     }
 
     // LOG
-    fprintf(stderr, "testInitListeners(): done.\n");
+    printf( "testInitListeners(): done.\n");
     return 0;
 }
 
@@ -2524,7 +2553,7 @@ static int testInitListeners()
 
 static void cmdlinerr(int argc, char * argv[])
 {
-    fprintf(stderr, "usage: %s [--dest a.b.c.d] [--period <perido in ms>]  [--testmode <1..3>]\n", argv[0]);
+    printf( "usage: %s [--dest a.b.c.d] [--period <perido in ms>]  [--testmode <1..3>]\n", argv[0]);
 }
 
 #define needargs(n)    { if ((n) > (argc - i)) { cmdlinerr(argc, argv); exit(EXIT_FAILURE); } }
@@ -2588,10 +2617,10 @@ int main(int argc, char * argv[])
         exit(EXIT_FAILURE);
     }
 
-    //fprintf(stderr, "MD_HEADER_T size: %u\n", sizeof(MD_HEADER_T));
+    //printf( "MD_HEADER_T size: %u\n", sizeof(MD_HEADER_T));
 
     // Log test mode
-    fprintf(stderr, "main: start with testmode %u.", x_testmode);
+    printf( "main: start with testmode %u.", x_testmode);
 
 
     // Init test patterns destination IP
@@ -2620,7 +2649,7 @@ int main(int argc, char * argv[])
         break;
         default:
         {
-            fprintf(stderr, "Error in %s: Unexpected destination type %u\n", cliTests[n].tstName, cliTests[n].dstIP);
+            printf( "Error in %s: Unexpected destination type %u\n", cliTests[n].tstName, cliTests[n].dstIP);
             exit(EXIT_FAILURE);
         }
         break;
