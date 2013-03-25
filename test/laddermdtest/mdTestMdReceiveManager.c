@@ -37,7 +37,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-// SP 30/10/2012
 // Suppor for log library
 #include <sys/types.h>
 #include <signal.h>
@@ -133,20 +132,19 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	//	MD config1
 	memset(&md_config,0,sizeof(md_config));
 	md_config.pfCbFunction = md_indication;
-//	useMdSendSubnet = MD_SEND_USE_SUBNET1;
 	md_config.pRefCon = &useMdSendSubnet1;
 	md_config.sendParam.qos = TRDP_MD_DEFAULT_QOS;
 	md_config.sendParam.ttl = TRDP_MD_DEFAULT_TTL;
 	md_config.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
 	md_config.flags = 0
 		| TRDP_FLAGS_NONE      * 0
-		| TRDP_FLAGS_MARSHALL  * trdpInitializeParameter.mdMarshallingFlag
+		| TRDP_FLAGS_MARSHALL  * pTrdpInitializeParameter->mdMarshallingFlag
 		| TRDP_FLAGS_CALLBACK  * 1
-		| TRDP_FLAGS_TCP       * trdpInitializeParameter.mdTransportType /* 1=TCP, 0=UDP */
+		| TRDP_FLAGS_TCP       * pTrdpInitializeParameter->mdTransportType /* 1=TCP, 0=UDP */
 		;
-	md_config.replyTimeout   = trdpInitializeParameter.mdTimeoutReply;
+	md_config.replyTimeout   = pTrdpInitializeParameter->mdTimeoutReply;
 	md_config.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
-/*	md_config.confirmTimeout = trdpInitializeParameter.mdTimeoutConfirm; */	/* Not Command Support */
+/*	md_config.confirmTimeout = pTrdpInitializeParameter->mdTimeoutConfirm; */	/* Not Command Support */
 	md_config.udpPort        = TRDP_MD_UDP_PORT;
 	md_config.tcpPort        = TRDP_MD_UDP_PORT;
 
@@ -155,23 +153,13 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	struct ifaddrs *ifa;
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
 	CHAR8 addrStr[256] = {0};
-/* Global Value */
-/*  TRDP_IP_ADDR_T subnetId1Address = 0;
-	TRDP_IP_ADDR_T subnetId2Address = 0; */
-
-	/* Lock MD Application Thread Mutex */
-	lockMdApplicationThread();
 
 	/* Get I/F address */
 	if (getifaddrs(&ifa_list) != 0)
 	{
     	printf("getifaddrs error. errno=%d\n", errno);
-    	/* UnLock MD Application Thread Mutex */
-    	unlockMdApplicationThread();
        return 1;
 	}
-	/* UnLock MD Application Thread Mutex */
-	unlockMdApplicationThread();
 
 	/* Get All I/F List */
 	for(ifa = ifa_list; ifa != NULL; ifa = ifa->ifa_next)
@@ -197,7 +185,6 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 
 	/*	Init the library  */
 	errv = tlc_init(
-//	    private_debug_printf,		/* debug print function */
 	    dbgOut,						/* debug print function */
 	    &mem_config					/* Use application supplied memory	*/
 	    );
@@ -228,14 +215,13 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	tlc_setTopoCount(appHandle, 151);
 
 	/* Is this Ladder Topology ? */
-	if (trdpInitializeParameter.mdLadderTopologyFlag == TRUE)
+	if (pTrdpInitializeParameter->mdLadderTopologyFlag == TRUE)
 	{
 		/* Set Sub-net Id2 parameter */
 		subnetId2Address = subnetId1Address | SUBNET2_NETMASK;
 		//	MD config2
 		memset(&md_config2,0,sizeof(md_config2));
 		md_config2 = md_config;
-//		useMdSendSubnet = MD_SEND_USE_SUBNET2;
 		md_config2.pRefCon = &useMdSendSubnet2;
 
 		/*	Open a session  */
@@ -367,10 +353,6 @@ MD_APP_ERR_TYPE mdReceive_main_proc(void)
 		 Enter the MDReceive main processing loop.
 	 */
 	while (1)
-/* DEBUG
-	int i;
-	for(i=0; i>=1; i++)
-*/
 	{
 		int receive = 0;
 		fd_set  rfds;
@@ -458,15 +440,20 @@ MD_APP_ERR_TYPE mdReceive_main_proc(void)
 
 		/* First TRDP instance, calls the call back function to handle1 received data
 		* and copy them into the Traffic Store using offset address from configuration. */
+
+#if 0
 		/* Select Mode */
-//		tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &receive);
+		tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &receive);
+#endif /* if 0 */
 		/* Polling Mode */
 		tlc_process(appHandle, NULL, NULL);
 
 		/* Second TRDP instance, calls the call back function to handle1 received data
 		* and copy them into the Traffic Store using offset address from configuration. */
+#if 0
 		/* Select Mode */
-//		tlc_process(appHandle2, (TRDP_FDS_T *) &rfds, &receive);
+		tlc_process(appHandle2, (TRDP_FDS_T *) &rfds, &receive);
+#endif /* if 0 */
 		if (appHandle2 != NULL)
 		{
 			/* Polling Mode */

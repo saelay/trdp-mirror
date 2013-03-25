@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/time.h>
 #include <sys/select.h>
 
 #include <mqueue.h>
@@ -47,7 +46,6 @@
 
 /* global vars */
 static APP_THREAD_SESSION_HANDLE_MQ_DESCRIPTOR appThreadSessionHandleMqDescriptorTable[APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX] = {{{{0}}}};
-/*static UINT32 tableNumber = 0; */
 static COMID_MD_DATA_FILE_NAME comIdMdDataFileNameTable[] =
 {
 		{COMID_FIXED_DATA1, "mdLiteral1"},		/* Single Packet DATA */
@@ -63,7 +61,6 @@ static COMID_MD_DATA_FILE_NAME comIdMdDataFileNameTable[] =
 };
 
 VOS_MUTEX_T pMdApplicationThreadMutex = NULL;					/* pointer to Mutex for MD Application Thread */
-
 
 /* Mutex functions */
 /**********************************************************************************************************************/
@@ -126,10 +123,7 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	pma = &new_ma;
 	#endif
 
-	printf("pma=%p\n",pma);
-
 	/* create a queue */
-//	trdp_mq = mq_open(TRDP_QUEUE_NAME, O_RDWR | O_CREAT, S_IWUSR|S_IRUSR, pma);
 	trdp_mq = mq_open(pMqName, O_RDWR | O_CREAT, S_IWUSR|S_IRUSR, pma);
 	if ((mqd_t)-1 == trdp_mq)
 	{
@@ -143,10 +137,6 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 		printf("mq_getattr() Error");
 		return MD_APP_ERR;
 	}
-	printf("mq_flags   = x%lX\n",old_ma.mq_flags  );
-	printf("mq_maxmsg  = %ld\n",old_ma.mq_maxmsg );
-	printf("mq_msgsize = %ld\n",old_ma.mq_msgsize);
-	printf("mq_curmsgs = %ld\n",old_ma.mq_curmsgs);
 
 	new_ma = old_ma;
 
@@ -167,10 +157,6 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 		printf("mq_getattr() Error");
 		return MD_APP_ERR;
 	}
-	printf("mq_flags   = x%lX\n",old_ma.mq_flags  );
-	printf("mq_maxmsg  = %ld\n",old_ma.mq_maxmsg );
-	printf("mq_msgsize = %ld\n",old_ma.mq_msgsize);
-	printf("mq_curmsgs = %ld\n",old_ma.mq_curmsgs);
 
 	/* Return Message Queue Descriptor */
 	*pMpDescriptor = trdp_mq;
@@ -183,7 +169,7 @@ MD_APP_ERR_TYPE queue_sendMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 	int rc;
 	char * p_bf = (char *)msg;
 	int    l_bf = sizeof(*msg) - sizeof(msg->dummy);
-//	rc = mq_send(trdp_mq,p_bf,l_bf,0);
+
 	rc = mq_send(mqDescriptor,p_bf,l_bf,0);
 	if (-1 == rc)
 	{
@@ -206,7 +192,6 @@ MD_APP_ERR_TYPE queue_receiveMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 	unsigned msg_prio;
 
 	msg_prio = 0;
-//	rc = mq_receive(trdp_mq,p_bf,s_bf,&msg_prio);
 	rc = mq_receive(mqDescriptor,p_bf,s_bf,&msg_prio);
 	if ((ssize_t)-1 == rc)
 	{
@@ -302,7 +287,6 @@ mqd_t deleteAppThreadSessionMessageQueueDescriptor(
 			}
 		}
 	}
-/*	printf("There is No MqDescriptor\n"); */
 	return -1;
 }
 
@@ -328,7 +312,6 @@ mqd_t getAppThreadSessionMessageQueueDescriptor(
 		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener == NULL)
 		{
 			/* Not Maching */
-/*			printf("There is No MqDescriptor\n"); */
 			return -1;
 		}
 		/* Matching ComId : equal */
@@ -353,7 +336,6 @@ mqd_t getAppThreadSessionMessageQueueDescriptor(
 					        	if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
 					        			pAppThreadSessionHandle->mdAppThreadSessionId,
 					        			sizeof(TRDP_UUID_T)) == 0)
-//					        	if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == pAppThreadSessionHandle->mdAppThreadSessionId)
 					        	{
 					    			*pLoopStartNumber = i;
 					    			return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
@@ -372,7 +354,6 @@ mqd_t getAppThreadSessionMessageQueueDescriptor(
 			}
 		}
 	}
-/*	printf("There is No MqDescriptor\n"); */
 	return -1;
 }
 
@@ -400,9 +381,6 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 	if ((mdDataSize >= MD_INCREMENT_DATA_MIN_SIZE)
 			&& (mdDataSize <= MD_INCREMENT_DATA_MAX_SIZE))
 	{
-/* Lock MD Application Thread Mutex */
-//lockMdApplicationThread();
-
 		/* Get MD DATA Area */
 		**pppMdData = (UINT8 *)malloc(mdDataSize);
 		if (**pppMdData == NULL)
@@ -433,12 +411,8 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 	else
 	{
 		printf("createMdIncrementData ERROR. parameter Err\n");
-/* UnLock MD Application Thread Mutex */
-//unlockMdApplicationThread();
 		return MD_APP_PARAM_ERR;
 	}
-/* UnLock MD Application Thread Mutex */
-//unlockMdApplicationThread();
 	return MD_APP_NO_ERR;
 }
 
@@ -458,7 +432,6 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMdDataSize)
 {
 	MD_APP_ERR_TYPE err = MD_APP_NO_ERR;
-/*	UINT32 fixedMdDataSize = 0; */
 	char mdDataFileName[MD_DATA_FILE_NAME_MAX_SIZE] = {0};
 	FILE *fpMdDataFile = NULL;
 	long mdDataFileSize = 0;
@@ -513,12 +486,9 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 			}
 
 			/* Read MdDataFile */
-//			**pppMdDataSize = fread(**pppMdData, sizeof(char), mdDataFileSize, fpMdDataFile);
 			fread(**pppMdData, sizeof(char), mdDataFileSize, fpMdDataFile);
 			/* Close MdDataFile */
 			fclose(fpMdDataFile);
-			/* Release FileName */
-//			free(mdDataFileName);
 		}
 	}
 	return MD_APP_NO_ERR;
@@ -652,10 +622,6 @@ MD_APP_ERR_TYPE miscMemory2String (
 		int dumpOnOff,
 		int callCount)
 {
-/* Lock MD Application Thread Mutex */
-//lockMdApplicationThread();
-
-//	char strTmpBuffer[CALLER_LOG_BUFFER_SIZE] = {0};
 	char *strTmpStartAddress = NULL;
 	char *strTmp = NULL;
 	size_t remainderMemorySize = 0;
@@ -688,7 +654,6 @@ MD_APP_ERR_TYPE miscMemory2String (
 			/* Hold remaining Log String */
 			remainderMemorySize = memorySize - LOG_OUTPUT_BUFFER_SIZE;
 			memorySize = LOG_OUTPUT_BUFFER_SIZE;
-//			callCount++;
 		}
 
 		/* Create Log String */
@@ -727,10 +692,6 @@ MD_APP_ERR_TYPE miscMemory2String (
 			}
 			sprintf(strTmp, "\n");
 			strTmp = strTmp + 1;
-/*			l2fLog(strTmpBuffer,	logKind, dumpOnOff);
-			memset(strTmpBuffer, 0, sizeof(strTmpBuffer));
-			strTmp = strTmpBuffer;
-*/
 		}
 		/* LOG OUTPUT */
 		l2fLog(strTmpStartAddress, logKind, dumpOnOff);
@@ -753,12 +714,8 @@ MD_APP_ERR_TYPE miscMemory2String (
 	{
 		/* Release String Area */
 		free(strTmpStartAddress);
-		/* UnLock MD Application Thread Mutex */
-//		unlockMdApplicationThread();
 		return MD_APP_ERR;
 	}
-	/* UnLock MD Application Thread Mutex */
-//	unlockMdApplicationThread();
 	return MD_APP_NO_ERR;
 }
 
@@ -777,14 +734,6 @@ MD_APP_ERR_TYPE miscMemory2String (
  *  @retval         MD_APP_MEM_ERR				Memory error
  *
  */
-/*
-MD_APP_ERR_TYPE getMdDataFromComId(
-		UINT32 receiveComId,
-		UINT8 *pReceiveMdData,
-		UINT32 *pReceiveMdDataSize,
-		UINT8 *pCheckMdData,
-		UINT32 *pCheckMdDataSize)
-*/
 MD_APP_ERR_TYPE getMdDataFromComId(
 		UINT32 receiveComId,
 		UINT8 *pReceiveMdData,
@@ -809,10 +758,8 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_INCREMENT_DATA:
 		case COMID_INCREMENT_DATA_REPLY:
 			/* Get Increment Start Byte of Receive MD DATA */
-//			sprintf((char *) pReceiveMdData + 4, "%1u", startCharacter);
 			memcpy(&startCharacter, pReceiveMdData + 4, sizeof(char));
 			/* Create Increment DATA */
-//			err = createMdIncrementData(startCharacter, *pReceiveMdDataSize, &pCheckMdData);
 			err = createMdIncrementData(startCharacter, *pReceiveMdDataSize, &ppCheckMdData);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -821,14 +768,12 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			}
 			else
 			{
-//				pCheckMdDataSize = pReceiveMdDataSize;
 				**ppCheckMdDataSize = *pReceiveMdDataSize;
 			}
 		break;
 		case COMID_FIXED_DATA1:
 		case COMID_FIXED_DATA1_REPLY:
 			/* Create Fixed DATA1 */
-//			err = createMdFixedData(COMID_FIXED_DATA1, &pCheckMdData, &pCheckMdDataSize);
 			err = createMdFixedData(COMID_FIXED_DATA1, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -839,7 +784,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_FIXED_DATA2:
 		case COMID_FIXED_DATA2_REPLY:
 			/* Create Fixed DATA2 */
-//			err = createMdFixedData(COMID_FIXED_DATA2, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_FIXED_DATA2, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -850,7 +794,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_FIXED_DATA3:
 		case COMID_FIXED_DATA3_REPLY:
 			/* Create Fixed DATA3 */
-//			err = createMdFixedData(COMID_FIXED_DATA3, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_FIXED_DATA3, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -861,7 +804,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_FIXED_DATA4:
 		case COMID_FIXED_DATA4_REPLY:
 			/* Create Fixed DATA4 */
-//			err = createMdFixedData(COMID_FIXED_DATA4, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_FIXED_DATA4, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -872,7 +814,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_FIXED_DATA5:
 		case COMID_FIXED_DATA5_REPLY:
 			/* Create Fixed DATA5 */
-//			err = createMdFixedData(COMID_FIXED_DATA5, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_FIXED_DATA5, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -883,7 +824,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_FIXED_DATA6:
 		case COMID_FIXED_DATA6_REPLY:
 			/* Create Fixed DATA6 */
-//			err = createMdFixedData(COMID_FIXED_DATA6, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_FIXED_DATA6, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -894,7 +834,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_ERROR_DATA_1:
 		case COMID_ERROR_DATA_1_REPLY:
 			/* Create Error DATA1 */
-//			err = createMdFixedData(COMID_ERROR_DATA_1, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_ERROR_DATA_1, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -905,7 +844,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_ERROR_DATA_2:
 		case COMID_ERROR_DATA_2_REPLY:
 			/* Create Error DATA2 */
-//			err = createMdFixedData(COMID_ERROR_DATA_2, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_ERROR_DATA_2, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -916,7 +854,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_ERROR_DATA_3:
 		case COMID_ERROR_DATA_3_REPLY:
 			/* Create Error DATA3 */
-//			err = createMdFixedData(COMID_ERROR_DATA_3, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_ERROR_DATA_3, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -927,7 +864,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_ERROR_DATA_4:
 		case COMID_ERROR_DATA_4_REPLY:
 			/* Create Error DATA4 */
-//			err = createMdFixedData(COMID_ERROR_DATA_4, pCheckMdData, pCheckMdDataSize);
 			err = createMdFixedData(COMID_ERROR_DATA_4, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
@@ -943,7 +879,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 	}
 	return err;
 }
-
 
 /**********************************************************************************************************************/
 /** Decide MD Transmission Success or Failure
@@ -963,8 +898,9 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 		UINT32 *pReceiveMdDataSize,
 		CHAR8 *pLogString)
 {
-/* Lock MD Application Thread Mutex */
-lockMdApplicationThread();
+	/* Lock MD Application Thread Mutex */
+	lockMdApplicationThread();
+
 	MD_APP_ERR_TYPE err = MD_APP_ERR;		/* MD Application Result Code */
 	UINT8 *pCheckMdData = NULL;
 	UINT32 *pCheckMdDataSize = NULL;
@@ -975,7 +911,6 @@ lockMdApplicationThread();
 	receiveMdDataSetSize = receiveMdDataSetSize - MD_HEADER_SIZE - MD_FCS_SIZE;
 
 	/* Create for check MD DATA */
-//	err = getMdDataFromComId(receiveComId, pReceiveMdData, pReceiveMdDataSize, pCheckMdData, pCheckMdDataSize);
 	err = getMdDataFromComId(
 			receiveComId,
 			pReceiveMdData + MD_HEADER_SIZE,
@@ -1019,7 +954,6 @@ lockMdApplicationThread();
 		else
 		{
 			/* Compare Contents */
-//			if (memcmp(pReceiveMdData, pCheckMdData, *pReceiveMdDataSize) != 0)
 			if (memcmp(pReceiveMdData + MD_HEADER_SIZE, pCheckMdData, receiveMdDataSetSize) != 0)
 			{
 				sprintf(pLogString, "<NG> Receive MD error. Contents is different.\n");
@@ -1051,8 +985,8 @@ lockMdApplicationThread();
 			}
 		}
 	}
-/* UnLock MD Application Thread Mutex */
-unlockMdApplicationThread();
+	/* UnLock MD Application Thread Mutex */
+	unlockMdApplicationThread();
 	return MD_APP_NO_ERR;
 }
 
@@ -1082,46 +1016,12 @@ MD_APP_ERR_TYPE decideResultCode(
 		case TRDP_CONFIRMTO_ERR:
 		case TRDP_REQCONFIRMTO_ERR:
 			return mdResultCode;
-/*
-			memset(gBuffer, 0, sizeof(gBuffer));
-
-			if(memcmp(pMsg->sessionId, not_ini, sizeof(TRDP_UUID_T)) != 0)
-			{
-				for(index=0; index < count_session; index++)
-				{
-					if((memcmp(APP_SESSION_TEST[index].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T)) == 0)
-						&& (APP_SESSION_TEST[index].cornerIp == pMsg->destIpAddr)
-						&& (APP_SESSION_TEST[index].comId == pMsg->comId))
-					{
-						printf("Session timed out (DstIP: %u) - (ComId: %u) \n", pMsg->destIpAddr, pMsg->comId);
-						delete_session(index);
-						break;
-					}
-				}
-			}else
-			{
-				pundeclaredrintf("Socket timed out (Destination IP: %u)\n", pMsg->destIpAddr);
-			}
-*/
 			break;
-
 
 		case TRDP_APP_TIMEOUT_ERR:
 		case TRDP_APP_REPLYTO_ERR:
 		case TRDP_APP_CONFIRMTO_ERR:
 			return mdResultCode;
-/*
-		   for(index=0; index < count_session; index++)
-		   {
-			   if((memcmp(APP_SESSION_TEST[index].pSessionId, pMsg->sessionId, sizeof(TRDP_UUID_T)) == 0)
-				   && (APP_SESSION_TEST[index].comId == pMsg->comId))
-			   {
-				   printf("Session App timed out (ComId: %u) \n", pMsg->comId);
-				   delete_session(index);
-				   break;
-			   }
-		   }
-*/
 		   break;
 
 		default:
@@ -1131,15 +1031,246 @@ MD_APP_ERR_TYPE decideResultCode(
 	}
 }
 
-/* debug display function */
-void private_debug_printf(
-	void *pRefCon,
-	VOS_LOG_T category,
-	const CHAR8 *pTime,
-	const CHAR8 *pFile,
-	UINT16 LineNumber,
-	const CHAR8 *pMsgStr)
+/**********************************************************************************************************************/
+/** Display CommandValue
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *
+ *  @retval         != NULL         		pointer to CommandValue
+ *  @retval         NULL            		No MD CommandValue found
+ */
+MD_APP_ERR_TYPE printCommandValue (
+		COMMAND_VALUE	*pHeadCommandValue)
 {
-	printf("r=%p c=%d t=%s f=%s l=%d m=%s",pRefCon,category,pTime,pFile,LineNumber,pMsgStr);
+	COMMAND_VALUE *iterCommandValue;
+	UINT16 commnadValueNumber = 1;
+	char strIp[16] = {0};
+
+    if (pHeadCommandValue == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+    /* Check Valid First Command */
+    /* Caller: destination IP = 0 */
+    /* Replier: listener comId = 0 */
+    if (((pHeadCommandValue->mdCallerReplierType == CALLER) && (pHeadCommandValue->mdDestinationAddress == 0))
+    	|| ((pHeadCommandValue->mdCallerReplierType == REPLIER) && (pHeadCommandValue->mdAddListenerComId == 0)))
+    {
+    	printf("Valid First MD Command isn't Set up\n");
+    	return MD_APP_NO_ERR;
+    }
+
+    for (iterCommandValue = pHeadCommandValue;
+    	  iterCommandValue != NULL;
+    	  iterCommandValue = iterCommandValue->pNextCommandValue)
+    {
+    	/*  Dump CommandValue */
+		printf("MD Command Value Thread No.%u\n", commnadValueNumber);
+		printf("-b,	Application Type (Caller:0, Replier:1): %u\n", iterCommandValue->mdCallerReplierType);
+		printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
+		printf("-d,	Caller Request Message Type (Mn:0, Mr-Mp:1): %u\n", iterCommandValue->mdMessageKind);
+		printf("-e,	Caller Send MD DATASET Telegram Type (Increment:0, Fixed:1-6, Error:7-10): %u\n", iterCommandValue->mdTelegramType);
+		printf("-f,	MD Increment Message Size Byte: %u\n", iterCommandValue->mdMessageSize);
+		miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
+		printf("-g,	Caller MD Send Destination IP Address: %s\n", strIp);
+		printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
+		printf("-j,	Caller known MD Replier Number: %u\n", iterCommandValue->mdReplierNumber);
+		printf("-k,	Caller MD Request Send Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
+		printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
+		printf("-m,	Caller MD Request Send Cycle Time: %u micro sec\n", iterCommandValue->mdCycleTime);
+		printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+		printf("-o,	Replier MD Reply Error Type(1-6): %u\n", iterCommandValue->mdReplyErr);
+		printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
+		printf("-q,	Replier Add Listener ComId: %u\n", iterCommandValue->mdReplierNumber);
+		printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
+		printf("-t,	Caller Using Network I/F (Subnet1:1,subnet2:2): %u\n", iterCommandValue->mdSendSubnet);
+		commnadValueNumber++;
+    }
+    return MD_APP_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** Display MD Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *  @retval         MD_APP_ERR						error
+ */
+MD_APP_ERR_TYPE printMdStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	TRDP_ERR_T err;
+	TRDP_STATISTICS_T   mdStatistics;
+	char strIp[16] = {0};
+
+	if (appHandle == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+	/* Get MD Statistics */
+	err = tlc_getStatistics(appHandle, &mdStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+		/*  Dump MD Statistics */
+		printf("===   MD Statistics  ===\n");
+		miscIpToString(appHandle->realIP, strIp);
+		printf("Application Handle RealIP(Network I/F Address): %s\n", strIp);
+		printf("===   UDP  ===\n");
+		printf("Default QoS for MD: %u \n", mdStatistics.udpMd.defQos);
+		printf("Default TTL for MD: %u \n", mdStatistics.udpMd.defTtl);
+		printf("Default reply timeout in us for MD: %u micro sec\n", mdStatistics.udpMd.defReplyTimeout);
+		printf("Default confirm timeout in us for MD: %u micro sec\n", mdStatistics.udpMd.defConfirmTimeout);
+		printf("Number of listeners: %u \n", mdStatistics.udpMd.numList);
+		printf("Number of received MD packets: %u \n", mdStatistics.udpMd.numRcv);
+		printf("Number of received MD packets with CRC err: %u \n", mdStatistics.udpMd.numCrcErr);
+		printf("Number of received MD packets with protocol err: %u \n", mdStatistics.udpMd.numProtErr);
+		printf("Number of received MD packets with wrong topo count : %u \n", mdStatistics.udpMd.numTopoErr);
+		printf("Number of received MD packets without listener: %u \n", mdStatistics.udpMd.numNoListener);
+		printf("Number of reply timeouts: %u \n", mdStatistics.udpMd.numReplyTimeout);
+		printf("Number of confirm timeouts: %u \n", mdStatistics.udpMd.numConfirmTimeout);
+		printf("Number of sent MD packets: %u \n", mdStatistics.udpMd.numSend);
+		printf("===   TCP  ===\n");
+		printf("Default QoS for MD: %u \n", mdStatistics.tcpMd.defQos);
+		printf("Default TTL for MD: %u \n", mdStatistics.tcpMd.defTtl);
+		printf("Default reply timeout in us for MD: %u micro sec\n", mdStatistics.tcpMd.defReplyTimeout);
+		printf("Default confirm timeout in us for MD: %u micro sec\n", mdStatistics.tcpMd.defConfirmTimeout);
+		printf("Number of listeners: %u \n", mdStatistics.tcpMd.numList);
+		printf("Number of received MD packets: %u \n", mdStatistics.tcpMd.numRcv);
+		printf("Number of received MD packets with CRC err: %u \n", mdStatistics.tcpMd.numCrcErr);
+		printf("Number of received MD packets with protocol err: %u \n", mdStatistics.tcpMd.numProtErr);
+		printf("Number of received MD packets with wrong topo count : %u \n", mdStatistics.tcpMd.numTopoErr);
+		printf("Number of received MD packets without listener: %u \n", mdStatistics.tcpMd.numNoListener);
+		printf("Number of reply timeouts: %u \n", mdStatistics.tcpMd.numReplyTimeout);
+		printf("Number of confirm timeouts: %u \n", mdStatistics.tcpMd.numConfirmTimeout);
+		printf("Number of sent MD packets: %u \n", mdStatistics.tcpMd.numSend);
+	}
+	else
+	{
+		return MD_APP_ERR;
+	}
+	return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Display MD Caller Receive Count
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *
+ */
+MD_APP_ERR_TYPE printCallerResult (
+		COMMAND_VALUE	*pHeadCommandValue)
+{
+	COMMAND_VALUE *iterCommandValue;
+	UINT16 commnadValueNumber = 1;
+	char strIp[16] = {0};
+
+    if (pHeadCommandValue == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+    for (iterCommandValue = pHeadCommandValue;
+    	  iterCommandValue != NULL;
+    	  iterCommandValue = iterCommandValue->pNextCommandValue)
+    {
+		/* Check Valid Caller */
+		if ((iterCommandValue->mdCallerReplierType == CALLER) && (pHeadCommandValue->mdDestinationAddress != 0))
+		{
+	    	/*  Dump CommandValue */
+			printf("Caller No.%u\n", commnadValueNumber);
+			printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
+			printf("-d,	Caller Request Message Type (Mn:0, Mr-Mp:1): %u\n", iterCommandValue->mdMessageKind);
+			printf("-e,	Caller Send MD DATASET Telegram Type (Increment:0, Fixed:1-6, Error:7-10): %u\n", iterCommandValue->mdTelegramType);
+			printf("-f,	MD Increment Message Size Byte: %u\n", iterCommandValue->mdMessageSize);
+			miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
+			printf("-g,	Caller MD Send Destination IP Address: %s\n", strIp);
+//			printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
+			printf("-j,	Caller known MD Replier Number: %u\n", iterCommandValue->mdReplierNumber);
+			printf("-k,	Caller MD Request Send Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
+//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
+			printf("-m,	Caller MD Request Send Cycle Time: %u micro sec\n", iterCommandValue->mdCycleTime);
+			printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+			printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
+			printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
+			printf("-t,	Caller Using Network I/F (Subnet1:1,subnet2:2): %u\n", iterCommandValue->mdSendSubnet);
+			printf("Caller Receive MD Count: %u\n", iterCommandValue->callerMdReceiveCounter);
+			printf("Caller Receive MD Success Count: %u\n", iterCommandValue->callerMdReceiveSuccessCounter);
+			printf("Caller Receive MD Failure Count: %u\n", iterCommandValue->callerMdReceiveFailureCounter);
+			printf("Caller Retry Count: %u\n", iterCommandValue->callerMdRetryCounter);
+			commnadValueNumber++;
+		}
+    }
+
+    if (commnadValueNumber == 1 )
+    {
+    	printf("Valid Subscriber MD Command isn't Set up\n");
+    }
+
+    return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Display MD Replier Receive Count
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *
+ */
+MD_APP_ERR_TYPE printReplierResult (
+		COMMAND_VALUE	*pHeadCommandValue)
+{
+	COMMAND_VALUE *iterCommandValue;
+	UINT16 commnadValueNumber = 1;
+	char strIp[16] = {0};
+
+    if (pHeadCommandValue == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+    for (iterCommandValue = pHeadCommandValue;
+    	  iterCommandValue != NULL;
+    	  iterCommandValue = iterCommandValue->pNextCommandValue)
+    {
+		/* Check Valid Replier */
+		if ((iterCommandValue->mdCallerReplierType == REPLIER) && (pHeadCommandValue->mdAddListenerComId != 0))
+		{
+	    	/*  Dump CommandValue */
+			printf("Replier No.%u\n", commnadValueNumber);
+			printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
+			miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
+			printf("-g,	Replier MD Receive Destination IP Address: %s\n", strIp);
+//			printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
+			printf("-k,	Replier MD Request Receive Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
+//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
+			printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+			printf("-o,	Replier MD Reply Error Type(1-6): %u\n", iterCommandValue->mdReplyErr);
+			printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
+			printf("-q,	Replier Add Listener ComId: %u\n", iterCommandValue->mdReplierNumber);
+//			printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
+			printf("Replier Receive MD Count: %u\n", iterCommandValue->callerMdReceiveCounter);
+			printf("Replier Receive MD Success Count: %u\n", iterCommandValue->callerMdReceiveSuccessCounter);
+			printf("Replier Receive MD Failure Count: %u\n", iterCommandValue->callerMdReceiveFailureCounter);
+			printf("Replier Retry Count: %u\n", iterCommandValue->callerMdRetryCounter);
+			commnadValueNumber++;
+		}
+    }
+
+    if (commnadValueNumber == 1 )
+    {
+    	printf("Valid Subscriber MD Command isn't Set up\n");
+    }
+
+    return MD_APP_NO_ERR;
+}

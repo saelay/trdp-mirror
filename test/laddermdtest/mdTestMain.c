@@ -58,12 +58,6 @@ CHAR8 mdCallerThreadName[] ="MDCallerThread";							/* Thread name is MDCaller T
 CHAR8 mdReplierThreadName[] ="MDReplierThread";						/* Thread name is MDReplier Thread. */
 CHAR8 mdLogThreadName[] ="MDLogThread";								/* Thread name is MDlog Thread. */
 
-/* Thread Handle */
-//VOS_THREAD_T mdReceiveManagerThreadHandle = NULL;			/* MDReceiveManager Thread handle */
-//VOS_THREAD_T mdCallerThreadHandle = NULL;						/* MDCaller Thread handle */
-//VOS_THREAD_T mdReplierThreadHandle = NULL;					/* MDReplier Thread handle */
-//VOS_THREAD_T mdLogThreadHandle = NULL;							/* MDLog Thread handle */
-
 /* Create Thread Counter */
 UINT32 callerThreadNoCount = 0;				/* Counter which Create Caller Thread */
 UINT32 replierThreadNoCount = 0;			/* Counter which Create Replier Thread */
@@ -72,9 +66,9 @@ UINT32 replierThreadNoCount = 0;			/* Counter which Create Replier Thread */
 CHAR8 callerThreadName[] ="/caller_mq";			/* Caller Message Queue Name Base */
 CHAR8 replierThreadName[] ="/replier_mq";			/* Replier Message Queue Name Base */
 
-COMMAND_VALUE				trdpInitializeParameter = {0};		/* Use to trdp_initialize for MDReceiveManager Thread */
-//UINT32						*pMdData = NULL;						/* Create MD DATA */
-//UINT32						*pMdDataSize = NULL;					/* Create MD DATA Size */
+//COMMAND_VALUE				trdpInitializeParameter = {0};		/* Use to trdp_initialize for MDReceiveManager Thread */
+COMMAND_VALUE *pTrdpInitializeParameter = NULL;		/* First PD Command Value */
+
 UINT32						sendMdTransferRequestCounter = 0;	/* Send MD Transfer Request Count */
 
 /* MD DATA for Caller Thread */
@@ -102,9 +96,6 @@ TRDP_URI_USER_T noneURI = "";						/* URI nothing */
 CHAR8 firstArgv[50] = {0};
 CHAR8 **ppFirstArgv = NULL;
 
-//TRDP_IP_ADDR_T subnetId1Address = 0;		/* Subnet1 Network I/F Address */
-//TRDP_IP_ADDR_T subnetId2Address = 0;		/* Subnet2 Network I/F Address */
-
 /* Thread Stack Size */
 const size_t    threadStackSize   = 256 * 1024;
 
@@ -117,11 +108,13 @@ const size_t    threadStackSize   = 256 * 1024;
 int main (int argc, char *argv[])
 {
 	MD_APP_ERR_TYPE err = 0;						/* result */
-	COMMAND_VALUE *pCommandValue = NULL;		/* Command Value */
+
+	/* Display MD Application Version */
+	printf("MD Application Version %s: mdTestLadder Start \n", MD_APP_VERSION);
 
 	/* Get COMMAND_VALUE Area */
-	pCommandValue = (COMMAND_VALUE *)malloc(sizeof(COMMAND_VALUE));
-	if (pCommandValue == NULL)
+	pTrdpInitializeParameter = (COMMAND_VALUE *)malloc(sizeof(COMMAND_VALUE));
+	if (pTrdpInitializeParameter == NULL)
 	{
 		printf("COMMAND_VALUE malloc Err\n");
 		return MD_APP_MEM_ERR;
@@ -129,14 +122,25 @@ int main (int argc, char *argv[])
 	else
 	{
 		/* Decide Create Thread */
-		err = decideCreateThread(argc, argv, pCommandValue);
+		err = decideCreateThread(argc, argv, pTrdpInitializeParameter);
 		if (err !=  MD_APP_NO_ERR)
 		{
-			printf("Decide Create Thread Err\n");
-			return MD_APP_THREAD_ERR;
+			/* command -h = MD_APP_COMMAND_ERR */
+			if (err == MD_APP_COMMAND_ERR)
+			{
+				/* Get Command, Create Application Thread Loop */
+				command_main_proc();
+			}
+			else
+			{
+				/* command err */
+				/* Get Command, Create Application Thread Loop */
+				command_main_proc();
+			}
 		}
 		else
 		{
+			/* command OK */
 			/* Get Command, Create Application Thread Loop */
 			command_main_proc();
 		}
@@ -157,7 +161,6 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 	/* Back up argv[0](program name) for after next command */
 	if (firstAnalyzeCommand == TRUE)
 	{
-		//strncpy(firstArgv ,argv[0], sizeof(firstArgv));
 		ppFirstArgv = &argv[0];
 	}
 
@@ -278,32 +281,81 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				/* Set MD Sender Subnet */
 				getCommandValue.mdSendSubnet = int32_value;
 				break;
+
+			case 's':
+				if (printCommandValue(pTrdpInitializeParameter) != PD_APP_NO_ERR)
+				{
+					printf("MD Command Value Dump Err\n");
+				}
+				return MD_APP_COMMAND_ERR;
+				break;
+			case 'S':
+				if (printMdStatistics(appHandle) != MD_APP_NO_ERR)
+				{
+					printf("Application Handle1 MD Statistics Dump Err\n");
+				}
+				if (printMdStatistics(appHandle2) != MD_APP_NO_ERR)
+				{
+					printf("Application Handle2 MD Statistics Dump Err\n");
+				}
+				return MD_APP_COMMAND_ERR;
+				break;
+			case 'u':
+				if (printCallerResult(pTrdpInitializeParameter) != MD_APP_NO_ERR)
+				{
+					printf("Caller Receive Count Dump Err\n");
+				}
+				return MD_APP_COMMAND_ERR;
+				break;
+			case 'U':
+				if (printReplierResult(pTrdpInitializeParameter) != MD_APP_NO_ERR)
+				{
+					printf("Replier Receive Count Dump Err\n");
+				}
+				return MD_APP_COMMAND_ERR;
+				break;
+
 			case 'h':
 			case '?':
 				printf("Unknown or required argument option -%c\n", optopt);
-				printf("Usage: COMMAND [-b] [-c] [-d] [-e] [-f] [-g] [-i] [-j] [-k] [-l] [-m] [-n] [-o] [-p] [-q] [-r] [-t] [-h] \n");
+				printf("Usage: COMMAND [-b callerReplierType] [-c transportType] [-d messegeKind]\n"
+						"[-e telegramType] [-f incrementDataSize] [-g callerMdDestination]\n"
+						"[-i dumpType] [-j callerKnownReplierNumber] [-k callerSendCycleNumber]\n"
+						"[-l logType] [-m callerMdSendCycleTime] [-n topologyType]\n"
+						"[-o replierReplyErrType] [-p marshallingTYpe] [-q replierListenerComid]\n"
+						"[-r replyTimeout] [-t callerSendUsingSubnetType] [-h] \n");
 				printf("long option(--) Not Support \n");
-				printf("-b,	--md-caller-replier-type		Caller:0, Replier:1\n");
-				printf("-c,	--md-transport-type			UDP:0, TCP:1\n");
-				printf("-d,	--md-message-kind			Mn:0, Mr-Mp:1\n");
-				printf("-e,	--md-telegram-type			Increment:0, Fixed:1-6, Error:7-10\n");
-				printf("-f,	--md-message-size			MD Message Size Byte\n");
-				printf("-g,	--md-destination-address		IP Address xxx.xxx.xxx.xxx\n");
-				printf("-i,	--md-dump				DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
-				printf("-j,	--md-replier-number			MD Replier Number\n");
-				printf("-k,	--md-cycle-number			MD Request Send Cycle Number\n");
-				printf("-l,	--md-log				LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
-				printf("-m,	--md-cycle-time				MD Request Send Cycle Time micro sec\n");
-				printf("-n,	--md-topo				Ladder:1, not Lader:0\n");
-				printf("-o,	--md-reply-err				MD Reply Error Type(1-6)\n");
-				printf("-p,	--md-marshall				Marshall:1, not Marshall:0\n");
-				printf("-q,	--md-listener-comid			Add Listener ComId val\n");
-				printf("-r,	--md-timeout-reply			micro sec\n");
-				printf("-t,	--md-send-subnet			Subnet1:1,subnet2:2\n");
+				printf("-b,	--md-caller-replier-type		Application Type Caller:0, Replier:1\n");
+				printf("-c,	--md-transport-type			Transport Type UDP:0, TCP:1\n");
+				printf("-d,	--md-message-kind			Caller Request Message Type Mn:0, Mr-Mp:1\n");
+				printf("-e,	--md-telegram-type			Caller Send MD DATASET Telegram Type Increment:0, Fixed:1-6, Error:7-10\n");
+				printf("-f,	--md-message-size			MD Increment Message Size Byte\n");
+				printf("-g,	--md-destination-address		Caller MD Send Destination IP Address, Replier MD Receive Destination IP Address xxx.xxx.xxx.xxx\n");
+				printf("-i,	--md-dump				Dump Type DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
+				printf("-j,	--md-replier-number			Caller known MD Replier Number\n");
+				printf("-k,	--md-cycle-number			Caller MD Request Send Cycle Number, Replier MD Request Receive Cycle Number\n");
+				printf("-l,	--md-log				Log Type LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
+				printf("-m,	--md-cycle-time				Caller MD Request Send Cycle Time micro sec\n");
+				printf("-n,	--md-topo				Topology TYpe Ladder:1, not Lader:0\n");
+				printf("-o,	--md-reply-err				Replier MD Reply Error Type(1-6)\n");
+				printf("-p,	--md-marshall				Marshalling Type Marshall:1, not Marshall:0\n");
+				printf("-q,	--md-listener-comid			Replier Add Listener ComId val\n");
+				printf("-r,	--md-timeout-reply			Reply TImeout: micro sec\n");
+				printf("-t,	--md-send-subnet			Caller Using Network I/F Subnet1:1,subnet2:2\n");
+				printf("-s,	--show-set-command	Display Setup Command until now\n");
+				printf("-S,	--show-md-statistics	Display MD Statistics\n");
+				printf("-u,	--show-caller-result	Display caller-result\n");
+				printf("-U,	--show-replier-result	Display replier-result\n");
 				printf("-h,	--help\n");
+				printf("Caller example\n"
+						"-b 0 -c 0 -d 1 -e 1 -g 239.255.1.1 -i 0 -j 0 -k 10 -l 0 -m 100000 -n 1 -p 0 -r 1000000 -t 1\n");
+				printf("Replier example\n"
+						"-b 1 -c 0 -g 239.255.1.1 -i 0 -k 10 -l 0 -n 1 -o 0 -p 0 -q 200001 -r 1000000\n");
+				return MD_APP_COMMAND_ERR;
 			break;
 			default:
 				printf("Unknown or required argument option -%c\n", optopt);
+				return MD_APP_PARAM_ERR;
 			}
 		}
 	}
@@ -314,7 +366,7 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 	if(firstAnalyzeCommand == TRUE)
 	{
 		/* Set TRDP Initialize Parameter */
-		trdpInitializeParameter = getCommandValue;
+		*pTrdpInitializeParameter = getCommandValue;
 	}
 	/* Set finishing the first command Analyze */
 	firstAnalyzeCommand = FALSE;
@@ -333,7 +385,6 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, UINT32 **ppMdDataSize)
 {
 	MD_APP_ERR_TYPE err = MD_APP_ERR;		/* MD Application Result Code */
-//	UINT32 *pCreateMdDatazSize = NULL;		/* Create MD Data Size */
 
 	/* Set createMdDataFlag : OFF */
 	pCommandValue->createMdDataFlag = MD_DATA_CREATE_DISABLE;
@@ -548,26 +599,6 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 			printf("Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCommandValue->mdCallerReplierType);
 		break;
 	}
-	/* MD DATA Create OK ? */
-/*	if (err == MD_APP_NO_ERR)
-	{	*/
-		/* Decide MD Request Type */
-/*		switch(pCommandValue->mdMessageKind)
-		{
-			case MD_MESSAGE_MN:
-
-			break;
-			case MD_MESSAGE_MR_MP:
-
-			break;
-			default:	*/
-					/* MD Message Kind NOTHING */
-/*					printf("MD Message kind ERROR. mdMessageKind = %d\n", pCommandValue->mdMessageKind);
-					err = MD_APP_ERR;
-			break;
-		}
-	}
-*/
 	return err;
 }
 
@@ -611,10 +642,6 @@ MD_APP_ERR_TYPE command_main_proc(void)
 		getCommandLength = strlen(getCommand);
 
 		/* Set argvGetCommand[0] as program name */
-//		strncpy(&argvGetCommand[0], firstArgv, sizeof(firstArgv));
-//		argvCommand[operand] = &argvGetCommand[0];
-
-//		argvCommand[operand] = firstArgv;
 		argvCommand[operand] = *ppFirstArgv;
 		operand++;
 
@@ -647,10 +674,25 @@ MD_APP_ERR_TYPE command_main_proc(void)
 		{
 			/* Decide Create Thread */
 			err = decideCreateThread(operand+1, argvCommand, pCommandValue);
+
 			if (err !=  MD_APP_NO_ERR)
 			{
-				printf("Decide Create Thread Err\n");
-				return MD_APP_THREAD_ERR;
+				/* command -h = MD_APP_COMMAND_ERR */
+				if (err == MD_APP_COMMAND_ERR)
+				{
+					continue;
+				}
+				else
+				{
+					/* command err */
+					printf("Decide Create Thread Err\n");
+				}
+				free(pCommandValue);
+			}
+			else
+			{
+				/* Set pCommandValue List */
+				appendComamndValueList(&pTrdpInitializeParameter, pCommandValue);
 			}
 		}
 	}
@@ -723,7 +765,6 @@ MD_APP_ERR_TYPE createMdReceiveManagerThread(MD_RECEIVE_MANAGER_THREAD_PARAMETER
 		return MD_APP_THREAD_ERR;
 	}
 }
-
 
 /**********************************************************************************************************************/
 /** Create MdCaller Thread
@@ -851,13 +892,19 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 	err = analyzeCommand(argc, argv, pCommandValue);
 	if (err != MD_APP_NO_ERR)
 	{
-		printf("COMMAND_VALUE Err\n");
-		return MD_APP_ERR;
+		/* command -h */
+		if (err == MD_APP_COMMAND_ERR)
+		{
+			/* Continue Input Command */
+			return MD_APP_COMMAND_ERR;
+		}
+		else
+		{
+			/* command err */
+			printf("COMMAND_VALUE Err\n");
+			return MD_APP_ERR;
+		}
 	}
-
-/* Debug start */
-//	return MD_APP_NO_ERR;
-/* Debug end */
 
 	/* Decide MD Transmission Pattern */
 	err = decideMdPattern(pCommandValue, &pFirstCreateMdData, &pFirstCreateMdDataSize);
@@ -870,6 +917,18 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 	/* Only the First Time */
 	if (firstTimeFlag == TRUE)
 	{
+		/* First Command NG ? */
+	    /* Caller: destination IP = 0 */
+	    /* Replier: listener comId = 0 */
+	    if (((pTrdpInitializeParameter->mdCallerReplierType == CALLER) && (pTrdpInitializeParameter->mdDestinationAddress == 0))
+	    	|| ((pTrdpInitializeParameter->mdCallerReplierType == REPLIER) && (pTrdpInitializeParameter->mdAddListenerComId == 0)))
+	    {
+	    	free(pTrdpInitializeParameter);
+	    	pTrdpInitializeParameter = NULL;
+	    	/* Set pCommandValue List */
+			appendComamndValueList(&pTrdpInitializeParameter, pCommandValue);
+		}
+
 		/* Create MD Application Thread Mutex */
 		if (vos_mutexCreate(&pMdApplicationThreadMutex) != VOS_NO_ERR)
 		{
@@ -905,10 +964,6 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 		}
 		firstTimeFlag = FALSE;
 	}
-
-/* Debug start */
-//	return MD_APP_NO_ERR;
-/* Debug end */
 
 	/* Create Application (Caller or Replier) Thread */
 	if (pCommandValue->mdCallerReplierType == CALLER)
@@ -980,6 +1035,44 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 	return MD_APP_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** Append an pdCommandValue at end of List
+ *
+ *  @param[in]      ppHeadCommandValue			pointer to pointer to head of List
+ *  @param[in]      pNewCommandValue				pointer to pdCommandValue to append
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE appendComamndValueList(
+		COMMAND_VALUE    * *ppHeadCommandValue,
+		COMMAND_VALUE    *pNewCommandValue)
+{
+	COMMAND_VALUE *iterCommandValue;
 
+    if (ppHeadCommandValue == NULL || pNewCommandValue == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
 
+    /* Ensure this List is last! */
+    pNewCommandValue->pNextCommandValue = NULL;
 
+    if (*ppHeadCommandValue == NULL)
+    {
+        *ppHeadCommandValue = pNewCommandValue;
+        return PD_APP_NO_ERR;
+    }
+
+    for (iterCommandValue = *ppHeadCommandValue;
+    	  iterCommandValue->pNextCommandValue != NULL;
+    	  iterCommandValue = iterCommandValue->pNextCommandValue)
+    {
+        ;
+    }
+    if (iterCommandValue != pNewCommandValue)
+    {
+    	iterCommandValue->pNextCommandValue = pNewCommandValue;
+    }
+	return PD_APP_NO_ERR;
+}
