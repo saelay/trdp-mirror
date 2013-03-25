@@ -636,10 +636,6 @@ TRDP_ERR_T  trdp_requestSocket (
                     }
                 }
             }
-            else if (iface[index].bindAddr != 0)
-            {
-                (void) vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
-            }
 
 /* add_start TOSHIBA 0306 */
             if (    (usage != TRDP_SOCK_MD_TCP)
