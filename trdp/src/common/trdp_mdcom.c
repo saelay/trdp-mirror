@@ -327,7 +327,7 @@ TRDP_ERR_T trdp_mdCheck (
     /* check topocounter */
     if (TRDP_NO_ERR == err)
     {
-		uint32_t l_tc = vos_ntohl(pPacket->topoCount);
+		UINT32 l_tc = vos_ntohl(pPacket->topoCount);
         if (l_tc != 0 && l_tc != appHandle->topoCount)
         {
             appHandle->stats.udpMd.numTopoErr++;
