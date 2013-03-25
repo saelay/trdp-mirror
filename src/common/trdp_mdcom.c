@@ -44,6 +44,8 @@
 /***********************************************************************************************************************
  *   Locals
  */
+ 
+static const TRDP_MD_INFO_T trdp_md_info_default;
 
 /**********************************************************************************************************************/
 /** Initialize the specific parameters for message data
@@ -1025,7 +1027,7 @@ TRDP_ERR_T  trdp_mdRecv (
     /* Inform user  */
     if (NULL != iterMD && appHandle->mdDefault.pfCbFunction != NULL)
     {
-        TRDP_MD_INFO_T theMessage;
+        TRDP_MD_INFO_T theMessage = trdp_md_info_default;
 
         theMessage.srcIpAddr    = iterMD->addr.srcIpAddr;
         theMessage.destIpAddr   = iterMD->addr.destIpAddr;
@@ -1484,7 +1486,7 @@ void  trdp_mdCheckListenSocks (
                         /* Callback the error to the application  */
                         if (appHandle->mdDefault.pfCbFunction != NULL)
                         {
-                            TRDP_MD_INFO_T theMessage;
+                            TRDP_MD_INFO_T theMessage = trdp_md_info_default;
 
                             theMessage.topoCount    = appHandle->topoCount;
                             theMessage.resultCode   = TRDP_SOCK_ERR;
@@ -2075,7 +2077,7 @@ void  trdp_mdCheckTimeouts (
             /* Execute callback */
             if (appHandle->mdDefault.pfCbFunction != NULL)
             {
-                TRDP_MD_INFO_T theMessage;
+                TRDP_MD_INFO_T theMessage = trdp_md_info_default;
 
                 theMessage.srcIpAddr    = 0;
                 theMessage.destIpAddr   = iterMD->addr.destIpAddr;
@@ -2146,7 +2148,7 @@ void  trdp_mdCheckTimeouts (
                     /* Execute callback */
                     if (appHandle->mdDefault.pfCbFunction != NULL)
                     {
-                        TRDP_MD_INFO_T theMessage;
+                        TRDP_MD_INFO_T theMessage = trdp_md_info_default;
 
                         theMessage.destIpAddr   = appHandle->iface[index].tcpParams.cornerIp;
                         theMessage.resultCode   = TRDP_TIMEOUT_ERR;
@@ -2205,7 +2207,7 @@ void  trdp_mdCheckTimeouts (
                     /* Execute callback */
                     if (appHandle->mdDefault.pfCbFunction != NULL)
                     {
-                        TRDP_MD_INFO_T theMessage;
+                        TRDP_MD_INFO_T theMessage = trdp_md_info_default;
 
                         theMessage.destIpAddr   = appHandle->iface[index].tcpParams.cornerIp;
                         theMessage.resultCode   = TRDP_TIMEOUT_ERR;
