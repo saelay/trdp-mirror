@@ -327,11 +327,12 @@ TRDP_ERR_T trdp_mdCheck (
     /* check topocounter */
     if (TRDP_NO_ERR == err)
     {
-        if (pPacket->topoCount != 0 && pPacket->topoCount != appHandle->topoCount)
+		uint32_t l_tc = vos_ntohl(pPacket->topoCount);
+        if (l_tc != 0 && l_tc != appHandle->topoCount)
         {
             appHandle->stats.udpMd.numTopoErr++;
             vos_printf(VOS_LOG_ERROR, "MDframe topocount error %u, expected %u\n",
-                       pPacket->topoCount,
+                       l_tc,
                        appHandle->topoCount);
             err = TRDP_TOPO_ERR;
         }
