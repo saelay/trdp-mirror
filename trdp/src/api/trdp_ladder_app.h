@@ -425,7 +425,6 @@ PD_COMMAND_VALUE *serachPdCommandValueToAddr (
 /** Return the PdCommandValue with same comId and IP addresses
  *
  *  @param[in]      pHeadPdCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
  *
  *  @retval         != NULL         		pointer to PdCommandValue
  *  @retval         NULL            		No PD PdCommandValue found
@@ -436,8 +435,7 @@ PD_APP_ERR_TYPE printPdCommandValue (
 /**********************************************************************************************************************/
 /** Display PD Statistics
  *
- *  @param[in]      pHeadPdCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *
  *  @retval         PD_APP_NO_ERR					no error
  *  @retval         PD_PARAM_ERR					parameter	error

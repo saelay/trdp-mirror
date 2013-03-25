@@ -55,9 +55,6 @@ VOS_THREAD_FUNC_T MDCaller (
 {
  	mqd_t callerMqDescriptor = 0;		/* Message Queue Descriptor for Caller */
 	int err = MD_APP_NO_ERR;
-/*	TRDP_LIS_T lisHandle, lisHandle2; */
-//	APP_THREAD_SESSION_HANDLE appThreadSessionHandle ={{0}};		/* appThreadSessionHandle for Subnet1 */
-//	APP_THREAD_SESSION_HANDLE appThreadSessionHandle2 ={{0}};		/* appThreadSessionHandle for Subnet2 */
 
 	/* Add Listener for Subnet1 */
 	err = tlm_addListener(
@@ -68,7 +65,7 @@ VOS_THREAD_FUNC_T MDCaller (
 				0,							/* topocount to use */
 				subnetId1Address,			/* destination Address */
 				0,							/* OPTION FLAG */
-				subnetId1URI);			/* destination URI */
+				NULL);			/* destination URI */
 	/* Check tlm_addListener Return Code */
 	if (err != TRDP_NO_ERR)
 	{
@@ -76,9 +73,6 @@ VOS_THREAD_FUNC_T MDCaller (
 				(pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK, err);
 		return 0;
 	}
-	printf("AddListener: comID = 0x%x, lisHandle = %p\n",
-			((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK),
-			appThreadSessionHandle.pMdAppThreadListener);
 
 	/* Is this Ladder Topology ? */
 	if (pCallerThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
@@ -92,7 +86,7 @@ VOS_THREAD_FUNC_T MDCaller (
 					0,
 					subnetId2Address,
 					0,
-					subnetId2URI);
+					NULL);
 		/* Check tlm_addListener Return Code */
 		if (err != TRDP_NO_ERR)
 		{
@@ -134,28 +128,17 @@ VOS_THREAD_FUNC_T MDCaller (
 		}
 	}
 
-	/* Caller Thread main process */
-/*	caller_main_proc(
-			callerMqDescriptor,
-			((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK),
-			pCallerThreadParameter);
-*/
-
 	UINT32 i = 0;
 	fd_set  rfds;
 	INT32 rv = 0;
-/*	INT32   noOfDesc = 0; */
 	struct timeval  tv_interval = {0};
 	TRDP_TIME_T trdp_time_tv_interval = {0};
-/*	struct timeval  next  = {0, 100000}; */
-/*	TRDP_TIME_T tv_interval; */
     TRDP_TIME_T nowTime;
     TRDP_TIME_T nextTime;
     struct timespec wanted_delay;
     struct timespec remaining_delay;
     TRDP_LIS_T callerThreadListener = {0};						/* callerThreadListener */
 	APP_THREAD_SESSION_HANDLE *pRequestSessionHandle = NULL;	/* in the case of send Request(MR) */
-//	APP_THREAD_SESSION_HANDLE mrSendSessionTable[REQUEST_SESSIONID_TABLE_MAX] = {{{0}}};	/* MD Request(Mr) Session Table */
 	APP_THREAD_SESSION_HANDLE *pMrSendSessionTable[REQUEST_SESSIONID_TABLE_MAX] = {0};		/* MD Request(Mr) Session Table */
 	BOOL mrSendSessionFlag = FALSE;									/* for Check reply session */
 	char firstCharacter = 0;
@@ -164,7 +147,6 @@ VOS_THREAD_FUNC_T MDCaller (
 	UINT32 incrementMdSendCounter = 0;							/* MD Increment DATA Create Count */
 
 	/* Result Counter */
-/*	UINT32 mdRequestSendCounter = 0;	*/				/* MD Request Send Counter */
 	static UINT32 mdReceiveCounter = 0;						/* MD Receive Counter */
 	static UINT32 mdReceiveFailureCounter = 0;				/* MD Receive OK Counter */
 	static UINT32 mdReceiveSuccessCounter = 0;				/* MD Receive NG Counter */
@@ -173,7 +155,6 @@ VOS_THREAD_FUNC_T MDCaller (
 	/* LOG */
 	CHAR8 logString[CALLER_LOG_BUFFER_SIZE] ={0};		/* Caller Log String */
 	size_t logStringLength = 0;
-/*	CHAR8 *pWorkLogString = logString; */
 	size_t workLogStringLength = 0;
 	char strIp[16] = {0};
 
@@ -183,9 +164,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	/* Parameter for MD Send */
 	TRDP_APP_SESSION_T mdAppHandle = {0};
 	void *pMdUserRef = NULL;
-//	TRDP_UUID_T *pMdSessionId = NULL;
 	TRDP_UUID_T mdSessionId = {0};
-//	UINT32 mdSendComId = 0;
 	UINT32 mdTopocount = 0;
 	TRDP_IP_ADDR_T mdSrcIpAddr = 0;
 	TRDP_IP_ADDR_T mdDestIpAddr = 0;
@@ -313,8 +292,6 @@ VOS_THREAD_FUNC_T MDCaller (
 		{
 			sendMdTransferRequestCounter++;
 		}
-//		if ((pCallerThreadParameter->pCommandValue->createMdDataFlag == MD_DATA_CREATE_ENABLE)
-//			&& (sendMdTransferRequestCounter < 0))
 		if (pCallerThreadParameter->pCommandValue->createMdDataFlag == MD_DATA_CREATE_ENABLE)
 		{
 			if (incrementMdSendCounter != 0)
@@ -352,21 +329,6 @@ VOS_THREAD_FUNC_T MDCaller (
 			{
 				incrementMdSendCounter++;
 			}
-
-/*			UINT8 **ppCallerCreateMdData = NULL;
-			err = createMdIncrementData(sendMdTransferRequestCounter,
-											pCallerThreadParameter->pCommandValue->mdMessageSize,
-											&ppCallerCreateMdData);
-
-			err = createMdIncrementData(sendMdTransferRequestCounter,
-											pCallerThreadParameter->pCommandValue->mdMessageSize,
-											pCallerThreadParameter->pMdData);
-			if (err != MD_APP_NO_ERR)
-			{
-*/				/* Error : Create Increment DATA */
-/*				printf("Create Increment DATA ERROR\n");
-			}
-*/
 		}
 
 		/* Set Parameter for MD Send */
@@ -375,7 +337,6 @@ VOS_THREAD_FUNC_T MDCaller (
 		{
 			/* Set Subnet2 parameter */
 			mdAppHandle = appHandle2;
-//			pMdSessionId = NULL;
 			mdSrcIpAddr = subnetId2Address;
 			mdDestIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
 			mdOptionFlag = md_config2.flags ;
@@ -390,7 +351,6 @@ VOS_THREAD_FUNC_T MDCaller (
 		{
 			/* Set Subnet1 parameter */
 			mdAppHandle = appHandle;
-//			pMdSessionId = NULL;
 			mdSrcIpAddr = subnetId1Address;
 			mdDestIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
 			mdOptionFlag = md_config.flags ;
@@ -468,7 +428,6 @@ VOS_THREAD_FUNC_T MDCaller (
 				err = tlm_request(
 						mdAppHandle,			/* the handle returned by tlc_openSession */
 						pMdUserRef,			/* user supplied value returned with reply */
-//						pMdSessionId,			/* return session ID */
 						&mdSessionId,			/* return session ID */
 						pCallerThreadParameter->pCommandValue->mdSendComId,				/* comId of packet to be sent */
 						mdTopocount,										/* topocount to use */
@@ -499,7 +458,6 @@ VOS_THREAD_FUNC_T MDCaller (
 				{
 					/* Set Request Session Handle */
 					pRequestSessionHandle->pMdAppThreadListener = callerThreadListener;
-//					memcpy(pRequestSessionHandle->mdAppThreadSessionId, pMdSessionId, sizeof(TRDP_UUID_T));
 					memcpy(pRequestSessionHandle->mdAppThreadSessionId, mdSessionId, sizeof(mdSessionId));
 					/* Set Request Session Handle Message Queue Descriptor */
 					err = setAppThreadSessionMessageQueueDescriptor(pRequestSessionHandle, callerMqDescriptor);
@@ -512,11 +470,9 @@ VOS_THREAD_FUNC_T MDCaller (
 						/* Set mrSendSessionTable */
 						for(i=0; i < REQUEST_SESSIONID_TABLE_MAX; i++)
 						{
-//							if(mrSendSessionTable[i].mdAppThreadSessionId == 0)
 							if(pMrSendSessionTable[i]->mdAppThreadSessionId == 0)
 							{
 								/* Set Request Session Handle */
-//								mrSendSessionTable[i] = *pRequestSessionHandle;
 								pMrSendSessionTable[i] = pRequestSessionHandle;
 								break;
 							}
@@ -638,8 +594,6 @@ VOS_THREAD_FUNC_T MDCaller (
 							for(i=0; i < REQUEST_SESSIONID_TABLE_MAX; i++)
 							{
 								/* Check sessionId */
-//								if(mrSendSessionTable[i].mdAppThreadSessionId == receiveMqMsg.Msg.sessionId)
-//								if(pMrSendSessionTable[i]->mdAppThreadSessionId == receiveMqMsg.Msg.sessionId)
 								if (pMrSendSessionTable[i]->mdAppThreadSessionId == NULL)
 								{
 									continue;
@@ -663,16 +617,12 @@ VOS_THREAD_FUNC_T MDCaller (
 							{
 								printf("Receive Session ERROR\n");
 							}
-/* Lock MD Application Thread Mutex */
-//lockMdApplicationThread();
 							/* Decide MD Transmission Result */
 							err = decideMdTransmissionResult(
 									receiveMqMsg.Msg.comId,
 									receiveMqMsg.pData,
 									&receiveMqMsg.dataSize,
 									logString);
-/* UnLock MD Application Thread Mutex */
-//unlockMdApplicationThread();
 							if (err == MD_APP_NO_ERR)
 							{
 								/* MD Receive OK Count UP*/
@@ -697,6 +647,11 @@ VOS_THREAD_FUNC_T MDCaller (
 								l2fLog(logString,
 										((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG),
 										((pCallerThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG));
+								/* Set Caller Receive Count */
+								pCallerThreadParameter->pCommandValue->callerMdReceiveCounter = mdReceiveCounter;
+								pCallerThreadParameter->pCommandValue->callerMdReceiveSuccessCounter =  mdReceiveSuccessCounter;
+								pCallerThreadParameter->pCommandValue->callerMdReceiveFailureCounter = mdReceiveFailureCounter;
+								pCallerThreadParameter->pCommandValue->callerMdRetryCounter = mdRetryCounter;
 							}
 							/* Clear Log String */
 							memset(logString, 0, sizeof(logString));
@@ -718,8 +673,6 @@ VOS_THREAD_FUNC_T MDCaller (
 				/* Delete mrSendSessionTable */
 				for(i=0; i < REQUEST_SESSIONID_TABLE_MAX; i++)
 				{
-//					if(mrSendSessionTable[i].mdAppThreadSessionId == receiveMqMsg.Msg.sessionId)
-//					if(pMrSendSessionTable[i]->mdAppThreadSessionId == receiveMqMsg.Msg.sessionId)
 					if (pMrSendSessionTable[i]->mdAppThreadSessionId == NULL)
 					{
 						continue;
@@ -729,12 +682,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						if (strncmp((char *)pMrSendSessionTable[i]->mdAppThreadSessionId, (char *)receiveMqMsg.Msg.sessionId, sizeof(pMrSendSessionTable[i]->mdAppThreadSessionId)) == 0)
 						{
 							/* delete Application Thread Session Message Queue Descriptor */
-	//						deleteAppThreadSessionMessageQueueDescriptor(&(mrSendSessionTable[i]), callerMqDescriptor);
 							deleteAppThreadSessionMessageQueueDescriptor(pMrSendSessionTable[i], callerMqDescriptor);
-							/* Clear sessionId */
-	//						memset(&(mrSendSessionTable[i].mdAppThreadSessionId), 0, sizeof(TRDP_UUID_T));
-							/* Clear Listener */
-	//						memset(&(mrSendSessionTable[i].pMdAppThreadListener), 0, sizeof(TRDP_LIS_T));
 							break;
 						}
 					}
@@ -759,23 +707,10 @@ VOS_THREAD_FUNC_T MDCaller (
 			}
 		}
 	}
-	return 0;
-}
-
-/**********************************************************************************************************************/
-/** Caller thread main loop process
- *
- *  @param[in]		mqDescriptor						Message Queue Descriptor
- *  @param[in]		replierComId						Replier ComId
- *  @param[in]		pCallerThreadParameter			pointer to Message Queue Descriptor
- *
- *  @retval         0					no error
- *  @retval         1					error
- */
-MD_APP_ERR_TYPE caller_main_proc (
-		mqd_t mqDescriptor,
-		UINT32 replierComId,
-		CALLER_THREAD_PARAMETER *pCallerThreadParameter)
-{
+	/* Dump Caller Receive Result */
+	if (printCallerResult(pTrdpInitializeParameter) != MD_APP_NO_ERR)
+	{
+		printf("Caller Receive Count Dump Err\n");
+	}
 	return 0;
 }

@@ -47,7 +47,6 @@ extern "C" {
 #include <arpa/inet.h>
 #include <netdb.h>
 
-// SP 30/10/2012
 // Suppor for log library
 #include <sys/types.h>
 #include <signal.h>
@@ -70,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.01"
+#define MD_APP_VERSION	"V0.03"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.01"
+#define MD_APP_VERSION	"V0.03"
 #else
-#define MD_APP_VERSION	"V0.01"
+#define MD_APP_VERSION	"V0.03"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -87,10 +86,6 @@ extern "C" {
 #define TRDP_IP4_ADDR(a,b,c,d) ( (am_big_endian()) ? \
 	((UINT32)((d) & 0xFF) << 24) | ((UINT32)((c) & 0xFF) << 16) | ((UINT32)((b) & 0xFF) << 8) | ((UINT32)((a) & 0xFF)) : \
 	((UINT32)((a) & 0xFF) << 24) | ((UINT32)((b) & 0xFF) << 16) | ((UINT32)((c) & 0xFF) << 8) | ((UINT32)((d) & 0xFF)))
-/*
-	((UINT32)((a) & 0xFF) << 24) | ((UINT32)((b) & 0xFF) << 16) | ((UINT32)((c) & 0xFF) << 8) | ((UINT32)((d) & 0xFF)) : \
-	((UINT32)((d) & 0xFF) << 24) | ((UINT32)((c) & 0xFF) << 16) | ((UINT32)((b) & 0xFF) << 8) | ((UINT32)((a) & 0xFF)))
-*/
 
 /* MD Transfer Request ComId */
 #define COMID_INCREMENT_DATA		0x200006
@@ -104,6 +99,7 @@ extern "C" {
 #define COMID_ERROR_DATA_2			0x400002
 #define COMID_ERROR_DATA_3			0x400003
 #define COMID_ERROR_DATA_4			0x400004
+
 /* MD Transfer Reply ComId */
 #define COMID_INCREMENT_DATA_REPLY		0x2A0006
 #define COMID_FIXED_DATA1_REPLY			0x2A0001		/* Single Packet */
@@ -116,6 +112,7 @@ extern "C" {
 #define COMID_ERROR_DATA_2_REPLY		0x4A0002
 #define COMID_ERROR_DATA_3_REPLY		0x4A0003
 #define COMID_ERROR_DATA_4_REPLY		0x4A0004
+
 /* MD Reply ComId Mask */
 #define COMID_REPLY_MASK					0xA0000
 
@@ -145,7 +142,6 @@ extern "C" {
 /* LOG */
 #define CALLER_LOG_BUFFER_SIZE		1024			/* Caller Log String Buffer Size : 1KB */
 #define PIPE_BUFFER_SIZE				64 * 1024		/* LOG Pipe Message Buffer Size : 64KB */
-//#define PIPE_BUFFER_SIZE				CALLER_LOG_BUFFER_SIZE		/* LOG Pipe Message Buffer Size : 64KB */
 #define HALF_PIPE_BUFFER_SIZE		PIPE_BUFFER_SIZE / 2
 #define LOG_OUTPUT_BUFFER_SIZE		12 * 1024		/* LOG Output Buffer Size : 12KB */
 #define MD_OPERARTION_RESULT_LOG	0x1				/* MD Operation Result Log Enable */
@@ -233,7 +229,8 @@ typedef enum
     MD_APP_PARAM_ERR		= -2,			/**< MD Application Parameter Error */
     MD_APP_MEM_ERR		= -3,			/**< MD Application Memory Error */
     MD_APP_THREAD_ERR	= -4,			/**< MD Application Thread Error */
-    MD_APP_MUTEX_ERR		= -5			/**< MD Application Thread Mutex Error */
+    MD_APP_MUTEX_ERR		= -5,			/**< MD Application Thread Mutex Error */
+    MD_APP_COMMAND_ERR	= -6			/**< MD Application Command Error */
 } MD_APP_ERR_TYPE;
 
 /* MD Reply Error Type definition */
@@ -247,7 +244,6 @@ typedef enum
 	MD_REPLY_NOSEND_ERR			= 5,	/**< Not Send Error */
 	MD_REPLY_NOLISTENER_ERR		= 6		/**< Not Add Listener Error */
 } MD_REPLY_ERR_TYPE;
-
 
 /* MD DATA CREATE FLAG Type definition */
 typedef enum
@@ -264,7 +260,7 @@ typedef enum
 } MD_SEND_USE_SUBNET;
 
 /* Command Value */
-typedef struct
+typedef struct COMMAND_VALUE
 {
 /*	UINT8 mdSourceSinkType; */					/* -a --md-application-type Value */
 	UINT8 mdCallerReplierType;					/* -b --md-caller-replier-type Value */
@@ -287,8 +283,19 @@ typedef struct
 	UINT32 mdTimeoutReply;						/* -r --md-timeout-reply Value */
 /*	UINT32 mdTimeoutConfirm;	*/					/* -s --md-timeout-confirm Value */
 	UINT8 mdSendSubnet;							/* -t --md-send-subnet Value */
+	/* Caller Result */
+	UINT32 callerMdReceiveCounter;				/* Caller Receive Count */
+	UINT32 callerMdReceiveSuccessCounter;		/* Caller Success Receive Count */
+	UINT32 callerMdReceiveFailureCounter;		/* Caller Failure Receive Count */
+	UINT32 callerMdRetryCounter;				/* Caller Retry Count */
+	/* Replier Result */
+	UINT32 replierMdReceiveCounter;				/* Caller Receive Count */
+	UINT32 replierMdReceiveSuccessCounter;		/* Caller Success Receive Count */
+	UINT32 replierMdReceiveFailureCounter;		/* Caller Failure Receive Count */
+	UINT32 replierMdRetryCounter;				/* Caller Retry Count */
+	/* For List */
+	struct COMMAND_VALUE *pNextCommandValue;	/* pointer to next COMMAND_VALUE or NULL */
 } COMMAND_VALUE;
-
 
 /* ComId - MD Data File Name */
 typedef struct
@@ -339,7 +346,7 @@ extern TRDP_APP_SESSION_T		appHandle;					/*	Sub-network Id1 identifier to the l
 extern TRDP_MD_CONFIG_T			md_config;
 extern TRDP_MEM_CONFIG_T			mem_config;
 extern TRDP_PROCESS_CONFIG_T	processConfig;
-extern COMMAND_VALUE				trdpInitializeParameter;	/* Use to trdp_initialize */
+extern COMMAND_VALUE				*pTrdpInitializeParameter;	/* Use to trdp_initialize */
 
 /* Subnet2 */
 extern TRDP_APP_SESSION_T		appHandle2;				/*	Sub-network Id2 identifier to the library instance	*/
@@ -552,14 +559,6 @@ MD_APP_ERR_TYPE getMdDataFileNameFromComId (
  *  @retval         MD_APP_MEM_ERR				Memory error
  *
  */
-/*
-MD_APP_ERR_TYPE getMdDataFromComId (
-		UINT32 receiveComId,
-		UINT8 *pReceiveMdData,
-		UINT32 *pReceiveMdDataSize,
-		UINT8 *pCheckMdData,
-		UINT32 *pCheckMdDataSize);
-*/
 MD_APP_ERR_TYPE getMdDataFromComId(
 		UINT32 receiveComId,
 		UINT8 *pReceiveMdData,
@@ -586,11 +585,6 @@ MD_APP_ERR_TYPE miscMemory2String (
 		int logKind,
 		int dumpOnOff,
 		int callCount);
-
-// Convert an IP address to string
-char * miscIpToString(
-		int ipAdd,
-		char *strTmp);
 
 /**********************************************************************************************************************/
 /** Send log string to server
@@ -621,16 +615,6 @@ int l2fLog (
  */
 MD_APP_ERR_TYPE decideResultCode(
 		TRDP_ERR_T mdResultCode);
-
-/* debug display function */
-void private_debug_printf (
-	void *pRefCon,
-	VOS_LOG_T category,
-	const CHAR8 *pTime,
-	const CHAR8 *pFile,
-	UINT16 LineNumber,
-	const CHAR8 *pMsgStr);
-
 
 /* main */
 /**********************************************************************************************************************/
@@ -737,6 +721,73 @@ MD_APP_ERR_TYPE decideCreateThread (
 		char *argv[],
 		COMMAND_VALUE *pCommandValue);
 
+/**********************************************************************************************************************/
+/** Append an pdCommandValue at end of List
+ *
+ *  @param[in]      ppHeadCommandValue			pointer to pointer to head of List
+ *  @param[in]      pNewCommandValue				pointer to pdCommandValue to append
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE appendComamndValueList(
+		COMMAND_VALUE    * *ppHeadCommandValue,
+		COMMAND_VALUE    *pNewCommandValue);
+
+/**********************************************************************************************************************/
+/** Display CommandValue
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *
+ *  @retval         != NULL         		pointer to CommandValue
+ *  @retval         NULL            		No MD CommandValue found
+ */
+MD_APP_ERR_TYPE printCommandValue (
+		COMMAND_VALUE	*pHeadCommandValue);
+
+/**********************************************************************************************************************/
+/** Display MD Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *  @retval         MD_APP_ERR						error
+ */
+MD_APP_ERR_TYPE printMdStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+/**********************************************************************************************************************/
+/** Display MD Caller Receive Count
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *
+ */
+MD_APP_ERR_TYPE printCallerResult (
+		COMMAND_VALUE	*pHeadCommandValue);
+
+/**********************************************************************************************************************/
+/** Display MD Replier Receive Count
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *
+ */
+MD_APP_ERR_TYPE printReplierResult (
+		COMMAND_VALUE	*pHeadCommandValue);
+
+// Convert an IP address to string
+char * miscIpToString(
+		int ipAdd,
+		char *strTmp);
+
 
 /* MDReceiveManager */
 /**********************************************************************************************************************/
@@ -778,20 +829,6 @@ MD_APP_ERR_TYPE mdReceive_main_proc (
 		void);
 
 /* Caller */
-/**********************************************************************************************************************/
-/** Caller thread main loop process
- *
- *  @param[in]		mqDescriptor						Message Queue Descriptor
- *  @param[in]		replierComId						Replier ComId
- *  @param[in]		pCallerThreadParameter			pointer to Caller Thread parameter
- *
- *  @retval         0					no error
- *  @retval         1					error
- */
-MD_APP_ERR_TYPE caller_main_proc (
-		mqd_t mqDescriptor,
-		UINT32 replierComId,
-		CALLER_THREAD_PARAMETER *pCallerThreadParameter);
 
 
 /* Replier */

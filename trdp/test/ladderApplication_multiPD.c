@@ -726,7 +726,10 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 			case 'h':
 			case '?':
 				printf("Unknown or required argument option -%c\n", optopt);
-				printf("Usage: COMMAND [-1] [-3] [-p] [-c] [-g] [-a] [-b] [-f] [-o] [-d] [-T] [-s] [-S] [-D] [-h] \n");
+				printf("Usage: COMMAND [-1 offset1] [-3 offset3] [-p publisherCycleTiem] [-c publishComid1Number]\n"
+						"[-g subscribeComid1] [-a subscribeComid1SorceIP] [-b subscribeComid1DestinationIP] [-f publishComid1DestinationIP]\n"
+						" [-o subscribeComid1Timeout] [-d publishComid1CycleTime] [-T writeTrafficStoreSubnetType]\n"
+						" [-s] [-S] [-D] [-h] \n");
 //				printf("-t,	--topo			Ladder:1, not Lader:0\n");
 				printf("-1,	--offset1		OFFSET1 for Publish val hex: 0xXXXX\n");
 //				printf("-2,	--offset2		OFFSET2 for Publish val hex: 0xXXXX\n");
@@ -757,7 +760,7 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 			break;
 			default:
 				printf("Unknown or required argument option -%c\n", optopt);
-				return PD_APP_COMMAND_ERR;
+				return PD_APP_PARAM_ERR;
 			}
 		}
 	}
@@ -1257,7 +1260,6 @@ PD_APP_ERR_TYPE serachPdCommandValueToCommand (
 /** Display PdCommandValue
  *
  *  @param[in]      pHeadPdCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
  *
  *  @retval         != NULL         		pointer to PdCommandValue
  *  @retval         NULL            		No PD PdCommandValue found
@@ -1310,8 +1312,7 @@ PD_APP_ERR_TYPE printPdCommandValue (
 /**********************************************************************************************************************/
 /** Display PD Statistics
  *
- *  @param[in]      pHeadPdCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *
  *  @retval         PD_APP_NO_ERR					no error
  *  @retval         PD_PARAM_ERR					parameter	error
