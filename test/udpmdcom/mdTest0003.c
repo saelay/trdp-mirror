@@ -653,12 +653,12 @@ static void queue_procricz()
     if (tstId < 0)
     {
         // Error
-        printf( "[ERROR] queue_procricz()\n  Test undefined for comId %u\n", msg.Msg.comId);
-        sprintf(strTstName, "Callback ERROR [%u, UNDEFINED TEST, %u]", x_testmode, msg.Msg.comId);
+        printf( "[ERROR] queue_procricz()\n  Test undefined for comId %d\n", msg.Msg.comId);
+        sprintf(strTstName, "Callback ERROR [%d, UNDEFINED TEST, %d]", x_testmode, msg.Msg.comId);
     }
     else
     {
-        sprintf(strTstName, "Callback [%u, %s, %u]", x_testmode, cliTests[tstId].tstName, cliTests[tstId].comID);
+        sprintf(strTstName, "Callback [%d, %s, %d]", x_testmode, cliTests[tstId].tstName, cliTests[tstId].comID);
     }
 
     // Dev 1
@@ -680,12 +680,12 @@ static void queue_procricz()
                 }
                 else
                 {
-                    printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                    printf( "%s ERROR: unexpected rx fsm state %d\n", strTstName, rx_test_fsm_state);
                 }
             }
             else
             {
-                printf( "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -697,21 +697,20 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MP)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    printf( "%s: Reply payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: Reply payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                 }
                 else
                 {
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
-                printf( "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d.\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -730,12 +729,12 @@ static void queue_procricz()
                 }
                 else
                 {
-                    printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                    printf( "%s ERROR: unexpected rx fsm state %d\n", strTstName, rx_test_fsm_state);
                 }
             }
             else
             {
-                printf( "%s ERROR: resultCode expected %u, found %u.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d.\n", strTstName, TRDP_REPLYTO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -747,11 +746,10 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get payload
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: MD ReplyQuery, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send Confirm
                     testConfirmSend(msg);
@@ -761,13 +759,13 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X, received x%04X\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -779,17 +777,16 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     // No send confirm to check Confirm timeout in Dev2
-                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                 }
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
@@ -805,7 +802,7 @@ static void queue_procricz()
             else
             {
                 // Error
-                printf( "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -815,7 +812,7 @@ static void queue_procricz()
             {
                 if (msg.Msg.numReplies == 0)
                 {
-                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %d\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
@@ -835,7 +832,7 @@ static void queue_procricz()
                 // 1) Reception
                 if (rx_test_fsm_state != 0)
                 {
-                    printf( "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 0, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %d, found %d.\n", strTstName, 0, rx_test_fsm_state);
                     break;
                 }
 
@@ -843,18 +840,17 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MP)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
                     if (msg.Msg.numReplies == 1)
                     {
-                        printf( "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+                        printf( "%s: Reply from %s, payload Cnt = %d testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), vos_ntohl(mdTestData->cnt), mdTestData->testId);
                     }
                     else
                     {
-                        printf( "%s ERROR: expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
+                        printf( "%s ERROR: expected %d replies, found %d.\n", strTstName, 1, msg.Msg.numReplies);
                     }
                 }
             }
@@ -863,18 +859,18 @@ static void queue_procricz()
                 // 2) Timeout
                 if (rx_test_fsm_state != 1)
                 {
-                    printf( "%s ERROR: expected rx fsm state %u, found %u.\n", strTstName, 1, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %d, found %d.\n", strTstName, 1, rx_test_fsm_state);
                     break;
                 }
 
                 // 2 replies expected, 1 received
                 if (msg.Msg.numReplies == 1)
                 {
-                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %d\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    printf( "%s ERROR: timeout, expected %u replies, found %u.\n", strTstName, 1, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %d replies, found %d.\n", strTstName, 1, msg.Msg.numReplies);
                 }
             }
             else
@@ -893,36 +889,35 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MP)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     // Reply 1
                     if (rx_test_fsm_state == 0)
                     {
                         if (msg.Msg.numReplies == 1)
                         {
-                            printf( "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+                            printf( "%s: Reply from %s, payload Cnt = %d\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), vos_ntohl(mdTestData->cnt), mdTestData->testId);
                         }
                         else
                         {
-                            printf( "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 1 replies, found %d\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else if (rx_test_fsm_state == 1)
                     {
                         if (msg.Msg.numReplies == 2)
                         {
-                            printf( "%s: Reply from %s, payload Cnt = %u\n testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), mdTestData->cnt, mdTestData->testId);
+                            printf( "%s: Reply from %s, payload Cnt = %d testId = %s\n", strTstName, miscIpToString(msg.Msg.srcIpAddr, strIp), vos_ntohl(mdTestData->cnt), mdTestData->testId);
                         }
                         else
                         {
-                            printf( "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 2 replies, found %d\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else
                     {
-                        printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                        printf( "%s ERROR: unexpected rx fsm state %d\n", strTstName, rx_test_fsm_state);
                     }
                 }
             }
@@ -939,13 +934,13 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 0)
                 {
-                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %d, found %d\n", strTstName, 0, rx_test_fsm_state);
                     break;
                 }
 
                 if (msg.Msg.numReplies == 0)
                 {
-                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %d\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
@@ -965,7 +960,7 @@ static void queue_procricz()
                 // 1) Reception
                 if (rx_test_fsm_state != 0)
                 {
-                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 0, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %d, found %d\n", strTstName, 0, rx_test_fsm_state);
                     break;
                 }
 
@@ -973,18 +968,17 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MP)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
                     if (msg.Msg.numReplies == 1)
                     {
-                        printf( "%s: Reply, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                        printf( "%s: Reply, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                     }
                     else
                     {
-                        printf( "%s ERROR: expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
+                        printf( "%s ERROR: expected %d replies, found %d\n", strTstName, 1, msg.Msg.numReplies);
                     }
                 }
             }
@@ -993,18 +987,18 @@ static void queue_procricz()
                 // 2) Timeout
                 if (rx_test_fsm_state != 1)
                 {
-                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 1, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %d, found %d\n", strTstName, 1, rx_test_fsm_state);
                     break;
                 }
 
                 // Unknown replies expected, 1 received
                 if (msg.Msg.numReplies == 1)
                 {
-                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %d\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    printf( "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 1, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %d replies, found %d\n", strTstName, 1, msg.Msg.numReplies);
                 }
             }
             else
@@ -1024,35 +1018,34 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MP)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     if (rx_test_fsm_state == 0)
                     {
                         if (msg.Msg.numReplies == 1)
                         {
-                            printf( "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
+                            printf( "%s: Reply, payload Cnt = %d, testId = %s; numReplies = %d\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId, msg.Msg.numReplies);
                         }
                         else
                         {
-                            printf( "%s ERROR: expected 1 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 1 replies, found %d\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else if (rx_test_fsm_state == 1)
                     {
                         if (msg.Msg.numReplies == 2)
                         {
-                            printf( "%s: Reply, payload Cnt = %u\n, testId = %s; numReplies = %u\n", strTstName, mdTestData->cnt, mdTestData->testId, msg.Msg.numReplies);
+                            printf( "%s: Reply, payload Cnt = %d\n, testId = %s; numReplies = %u\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId, msg.Msg.numReplies);
                         }
                         else
                         {
-                            printf( "%s ERROR: expected 2 replies, found %u\n", strTstName, msg.Msg.numReplies);
+                            printf( "%s ERROR: expected 2 replies, found %d\n", strTstName, msg.Msg.numReplies);
                         }
                     }
                     else
                     {
-                        printf( "%s ERROR: unexpected rx fsm state %u\n", strTstName, rx_test_fsm_state);
+                        printf( "%s ERROR: unexpected rx fsm state %d\n", strTstName, rx_test_fsm_state);
                     }
                 }
             }
@@ -1060,18 +1053,18 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    printf( "%s ERROR: expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
+                    printf( "%s ERROR: expected rx fsm state %d, found %d\n", strTstName, 2, rx_test_fsm_state);
                     break;
                 }
 
                 // Timeout, unknown replies expected, 2 received
                 if (msg.Msg.numReplies == 2)
                 {
-                    printf( "%s: timeout, numReplies = %u\n", strTstName, msg.Msg.numReplies);
+                    printf( "%s: timeout, numReplies = %d\n", strTstName, msg.Msg.numReplies);
                 }
                 else
                 {
-                    printf( "%s ERROR: timeout, expected %u replies, found %u\n", strTstName, 2, msg.Msg.numReplies);
+                    printf( "%s ERROR: timeout, expected %d replies, found %d\n", strTstName, 2, msg.Msg.numReplies);
                 }
             }
             else
@@ -1089,17 +1082,16 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     // No send confirm to check Confirm timeout in Dev2
-                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                 }
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
@@ -1115,14 +1107,14 @@ static void queue_procricz()
                 }
                 else
                 {
-                    printf( "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
+                    printf( "%s ERROR: unexpected rx fsm state %d and numConfirmTimeout %d.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_REQCONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 4)
                 {
-                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %d, found %d\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
@@ -1132,7 +1124,7 @@ static void queue_procricz()
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1144,17 +1136,16 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     // No send confirm to check Confirm timeout in Dev2
-                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                 }
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
@@ -1170,14 +1161,14 @@ static void queue_procricz()
                 }
                 else
                 {
-                    printf( "%s ERROR: unexpected rx fsm state %u and numConfirmTimeout %u.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
+                    printf( "%s ERROR: unexpected rx fsm state %d and numConfirmTimeout %d.\n", strTstName, rx_test_fsm_state, msg.Msg.numConfirmTimeout);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_REPLYTO_ERR)
             {
                 if (rx_test_fsm_state != 4)
                 {
-                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %d, found %d\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
@@ -1187,7 +1178,7 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 5)
                 {
-                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %d, found %d\n", strTstName, 5, rx_test_fsm_state);
                     break;
                 }
 
@@ -1197,7 +1188,7 @@ static void queue_procricz()
             else
             {
                 // Error
-                printf( "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1209,11 +1200,10 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send only one confirm
                     if (rx_test_fsm_state == 0)
@@ -1228,14 +1218,14 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    printf( "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %d, found %d\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
@@ -1245,7 +1235,7 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 3)
                 {
-                    printf( "%s ERROR: Application request confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application request confirm timeout, expected rx fsm state %d, found %d\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
@@ -1255,7 +1245,7 @@ static void queue_procricz()
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1267,11 +1257,10 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send only one confirm
                     if (rx_test_fsm_state == 0)
@@ -1286,14 +1275,14 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_APP_CONFIRMTO_ERR)
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    printf( "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Listener confirm confirm timeout, expected rx fsm state %d, found %d\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
@@ -1304,7 +1293,7 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 3)
                 {
-                    printf( "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 4, rx_test_fsm_state);
+                    printf( "%s ERROR: Application request timeout, expected rx fsm state %d, found %d\n", strTstName, 4, rx_test_fsm_state);
                     break;
                 }
 
@@ -1314,7 +1303,7 @@ static void queue_procricz()
             {
                 if (rx_test_fsm_state != 4)
                 {
-                    printf( "%s ERROR: Application timeout, expected rx fsm state %u, found %u\n", strTstName, 5, rx_test_fsm_state);
+                    printf( "%s ERROR: Application timeout, expected rx fsm state %d, found %d\n", strTstName, 5, rx_test_fsm_state);
                     break;
                 }
 
@@ -1324,7 +1313,7 @@ static void queue_procricz()
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1336,11 +1325,10 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send confirm
                     testConfirmSend(msg);
@@ -1351,13 +1339,13 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1369,11 +1357,10 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MQ)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: MD ReplyQuery reception, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: MD ReplyQuery reception, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send confirm
                     testConfirmSend(msg);
@@ -1384,14 +1371,14 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MQ, msg.Msg.msgType);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_REPLYTO_ERR)
             {
                 if (rx_test_fsm_state != 2)
                 {
-                    printf( "%s ERROR: Application request timeout, expected rx fsm state %u, found %u\n", strTstName, 2, rx_test_fsm_state);
+                    printf( "%s ERROR: Application request timeout, expected rx fsm state %d, found %d\n", strTstName, 2, rx_test_fsm_state);
                     break;
                 }
 
@@ -1400,7 +1387,7 @@ static void queue_procricz()
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u or %u, found %u\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d or %d, found %d\n", strTstName, TRDP_NO_ERR, TRDP_APP_TIMEOUT_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1438,20 +1425,19 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MN)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: notify recived, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: notify recived, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                 }
                 else
                 {
-                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X, received x%04X\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
-                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1464,11 +1450,10 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MR)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1482,12 +1467,12 @@ static void queue_procricz()
                 }
                 else
                 {
-                    printf( "%s ERROR: Expected msgType %u but received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X but received x%04X\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
                 }
             }
             else
             {
-                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1504,12 +1489,11 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MR)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1528,7 +1512,7 @@ static void queue_procricz()
                 }
                 else
                 {
-                    printf( "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
+                    printf( "%s ERROR: Unexpected msgType x%04X and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_CONFIRMTO_ERR)
@@ -1538,7 +1522,7 @@ static void queue_procricz()
             }
             else
             {
-                printf( "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1553,12 +1537,11 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MR)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    printf( "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1581,13 +1564,13 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
+                    printf( "%s ERROR: Unexpected msgType x%04X\n", strTstName, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1600,21 +1583,20 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MN)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                 }
                 else
                 {
-                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X, received x%04X\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR:resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1630,12 +1612,11 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MR)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1649,13 +1630,13 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X, received x%04X\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected x%04X, found x%04X\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1681,21 +1662,20 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MN)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
-                    printf( "%s: notify received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: notify received, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
                 }
                 else
                 {
-                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X, received x%04X\n", strTstName, TRDP_MSG_MN, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR:resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR:resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1709,12 +1689,11 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MR)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1728,13 +1707,13 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Expected msgType %u, received %u\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
+                    printf( "%s ERROR: Expected msgType x%04X, received x%04X\n", strTstName, TRDP_MSG_MR, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR: resultCode expected %u, found %u\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
+                printf( "%s ERROR: resultCode expected %d, found %d\n", strTstName, TRDP_NO_ERR, msg.Msg.resultCode);
             }
         }
         break;
@@ -1748,12 +1727,11 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MR)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    printf( "%s: request received payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1776,13 +1754,13 @@ static void queue_procricz()
                 else
                 {
                     // Error
-                    printf( "%s ERROR: Unexpected msgType %d\n", strTstName, msg.Msg.msgType);
+                    printf( "%s ERROR: Unexpected msgType x%04X\n", strTstName, msg.Msg.msgType);
                 }
             }
             else
             {
                 // Error
-                printf( "%s ERROR: unexpected resultCode %u\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
@@ -1798,12 +1776,11 @@ static void queue_procricz()
                 if (msg.Msg.msgType == TRDP_MSG_MR)
                 {
                     // Get data
-                    UINT8             *pPayload   = &msg.pData[sizeof(MD_HEADER_T)];
+                    UINT8             *pPayload   = &msg.pData[0];
                     TRDP_MD_TEST_DS_T *mdTestData = (TRDP_MD_TEST_DS_T *) pPayload;
-                    mdTestData->cnt = vos_ntohl(mdTestData->cnt);
 
                     //
-                    printf( "%s: request received, payload Cnt = %u, testId = %s\n", strTstName, mdTestData->cnt, mdTestData->testId);
+                    printf( "%s: request received, payload Cnt = %d, testId = %s\n", strTstName, vos_ntohl(mdTestData->cnt), mdTestData->testId);
 
                     // Send MD Reply
                     TRDP_MD_TEST_DS_T mdTestData1;
@@ -1823,7 +1800,7 @@ static void queue_procricz()
 
                 else
                 {
-                    printf( "%s ERROR: Unexpected msgType %d and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
+                    printf( "%s ERROR: Unexpected msgType x%04X and resultCode %d\n", strTstName, msg.Msg.msgType, msg.Msg.resultCode);
                 }
             }
             else if (msg.Msg.resultCode == TRDP_CONFIRMTO_ERR)
@@ -1833,7 +1810,7 @@ static void queue_procricz()
             }
             else
             {
-                printf( "%s ERROR: unexpected resultCode %u.\n", strTstName, msg.Msg.resultCode);
+                printf( "%s ERROR: unexpected resultCode %d.\n", strTstName, msg.Msg.resultCode);
             }
         }
         break;
