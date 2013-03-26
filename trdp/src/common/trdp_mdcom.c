@@ -2076,11 +2076,21 @@ void  trdp_mdCheckTimeouts (
                     iterMD->morituri = TRUE;
                     break;
                 case TRDP_ST_TX_REPLY_RECEIVED:
-                    /* kill session if number of repliers have been received  */
-                    if (iterMD->noOfRepliers == iterMD->numReplies)
-                    {
+					/* kill session if # of repliers is undefined (ie multicast) */
+					if (iterMD->noOfRepliers == 0)
+					{
+                        resultCode       = TRDP_REPLYTO_ERR;
+						timeOut          = TRUE;
                         iterMD->morituri = TRUE;
-                    }
+					}
+					else
+					{
+						/* kill session if number of repliers have been received  */
+						if (iterMD->noOfRepliers == iterMD->numReplies)
+						{
+							iterMD->morituri = TRUE;
+						}
+					}
                     break;
                 default:
                     break;
