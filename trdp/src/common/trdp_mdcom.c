@@ -466,10 +466,10 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     UINT32      size;
     UINT32      dataSize = 0;
     UINT32      socketIndex = 0;
+    UINT32      readSize = 0;
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
-        UINT32 readSize;
 
         /* Find the socket index */
         for (socketIndex = 0; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++)
@@ -519,6 +519,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", readSize);
 
                 size = size + readSize;
+
+                readSize = size;
             }
 
         }else
@@ -541,7 +543,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", readSize);
 
             /* All the data received so far. Add the last data to the rest */
-            size = pElement->grossSize + readSize;
+            size = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
 
         }
     }
@@ -567,7 +569,14 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             /* no data -> rx timeout */
             return TRDP_TIMEOUT_ERR;
         case TRDP_BLOCK_ERR:
-            return TRDP_BLOCK_ERR;
+            if((((pElement->pktFlags & TRDP_FLAGS_TCP) != 0) && (readSize == 0))
+                    || ((pElement->pktFlags & TRDP_FLAGS_TCP) == 0))
+            {
+                return TRDP_BLOCK_ERR;
+            }else
+            {
+                break;
+            }
         case TRDP_NO_ERR:
             break;
         default:
@@ -629,7 +638,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 storedDataSize = appHandle->uncompletedTCP[socketIndex]->dataSize;
 
                 /* Add the received information and copy all the data to the pElement */
-                if((storedDataSize > 0) && (pElement->dataSize - storedDataSize > 0))
+                if((storedDataSize >= 0) && (pElement->dataSize - storedDataSize > 0))
                 {
                     memcpy(&(appHandle->uncompletedTCP[socketIndex]->pPacket->data[storedDataSize]), pElement->pPacket->data, (pElement->dataSize - storedDataSize));
                     appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
