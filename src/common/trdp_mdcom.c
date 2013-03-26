@@ -160,7 +160,12 @@ void trdp_closeMDSessions (
     {
         if (TRUE == iterMD->morituri)
         {
-            trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+			/* dq: in UDP the socked create/destroy depends on listerner and not on message data packet */
+			/* dq: TODO : in TCP ? */
+			if (0 != (iterMD->pktFlags & TRDP_FLAGS_TCP))
+			{
+				trdp_releaseSocket(appHandle->iface, iterMD->socketIdx);
+			}
             trdp_MDqueueDelElement(&appHandle->pMDRcvQueue, iterMD);
             vos_printf(VOS_LOG_INFO, "Freeing replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
                        iterMD->sessionID[0], iterMD->sessionID[1], iterMD->sessionID[2], iterMD->sessionID[3],
