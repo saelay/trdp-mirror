@@ -47,6 +47,8 @@
 #include <signal.h>
 #include <sys/wait.h>
 
+#include <arpa/inet.h>
+
 #ifdef __linux__
         #include <uuid/uuid.h>
 #endif
@@ -55,13 +57,12 @@
 #include "trdp_if_light.h"
 #include "trdp_private.h"
 #include "trdp_utils.h"
-#include "../api/trdp_types.h"
 
 #define TRDP_IP4_ADDR(a, b, c, d)    ((am_big_endian()) ?                                                                                                      \
                                       ((UINT32) ((a) & 0xFF) << 24) | ((UINT32) ((b) & 0xFF) << 16) | ((UINT32) ((c) & 0xFF) << 8) | ((UINT32) ((d) & 0xFF)) : \
                                       ((UINT32) ((d) & 0xFF) << 24) | ((UINT32) ((c) & 0xFF) << 16) | ((UINT32) ((b) & 0xFF) << 8) | ((UINT32) ((a) & 0xFF)))
 
-#define HEAP_MEMORY_SIZE    (4 * 1024 * 1024)
+#define HEAP_MEMORY_SIZE    (1 * 1024 * 1024)
 
 #ifndef EOK
         #define EOK         0
@@ -182,14 +183,11 @@ static int rx_test_fsm_state = 0;
 // Convert an IP address to string
 char * miscIpToString(int ipAdd, char *strTmp)
 {
-    int ipVal1 = (ipAdd >> 24) & 0xff;
-    int ipVal2 = (ipAdd >> 16) & 0xff;
-    int ipVal3 = (ipAdd >> 8) & 0xff;
-    int ipVal4 = (ipAdd >> 0) & 0xff;
-
-    sprintf(strTmp, "%u.%u.%u.%u", ipVal1, ipVal2, ipVal3, ipVal4);
-	
-    return strTmp;
+	struct in_addr ia;
+	ia.s_addr = htonl(ipAdd);
+	char *s = inet_ntoa(ia);
+	strcpy(strTmp,s);
+	return strTmp;
 }
 
 // Convert Session to String
@@ -1825,6 +1823,13 @@ static void queue_procricz()
 
     // Increment current FSM state
     rx_test_fsm_state++;
+	
+	// free message data buffer
+	if (NULL != msg.pData)
+	{
+		free(msg.pData);
+		msg.pData = NULL;
+	}
 }
 
 // call back function for message data
@@ -1836,35 +1841,6 @@ static void md_indication(
     UINT32 dataSize)
 {
     printf( "md_indication(r=%p m=%p d=%p l=%d comId=%d)\n", pRefCon, pMsg, pData, dataSize, pMsg->comId);
-
-    #if 0
-    printf("srcIpAddr         = x%08X\n", pMsg->srcIpAddr);
-    printf("destIpAddr        = x%08X\n", pMsg->destIpAddr);
-    printf("seqCount          = %d\n", pMsg->seqCount);
-    printf("protVersion       = %d\n", pMsg->protVersion);
-    printf("msgType           = x%04X\n", pMsg->msgType);
-    printf("comId             = %d\n", pMsg->comId);
-    printf("topoCount         = %d\n", pMsg->topoCount);
-    printf("userStatus        = %d\n", pMsg->userStatus);
-    printf("replyStatus       = %d\n", pMsg->replyStatus);
-    printf("sessionId         = ");      print_session(pMsg->sessionId);
-    printf("replyTimeout      = %d\n", pMsg->replyTimeout);
-    printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
-    printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
-    printf("noOfReplies       = %d\n", pMsg->noOfReplies);
-    printf("numReplies        = %d\n", pMsg->numReplies);
-    printf("numRetriesMax     = %d\n", pMsg->numRetriesMax);
-    printf("numRetries        = %d\n", pMsg->numRetries);
-    printf("disableReplyRx    = %d\n", pMsg->disableReplyRx);
-    printf("numRepliesQuery   = %d\n", pMsg->numRepliesQuery);
-    printf("numConfirmSent    = %d\n", pMsg->numConfirmSent);
-    printf("numConfirmTimeout = %d\n", pMsg->numConfirmTimeout);
-    printf("pUserRef          = %p\n", pMsg->pUserRef);
-    printf("resultCode        = %d\n", pMsg->resultCode);
-
-    print_memory(pData, dataSize);
-    #endif
-
     {
         // ADd message to application event queue
         trdp_apl_cbenv_t fwd;
@@ -1873,7 +1849,23 @@ static void md_indication(
         fwd.Msg      = *pMsg;
         fwd.pData    = pData;
         fwd.dataSize = dataSize;
-
+		
+		if (pData != NULL && dataSize > 0)
+		{
+			fwd.pData = malloc(dataSize);
+			if (NULL == fwd.pData)
+			{
+				perror("malloc()");
+				exit(EXIT_FAILURE);
+			}
+			memcpy(fwd.pData,pData,dataSize);
+			fwd.dataSize = dataSize;
+		}
+		else
+		{
+			fwd.pData    = NULL;
+			fwd.dataSize = 0;
+		}
         queue_sendmessage(&fwd);
     }
 }
