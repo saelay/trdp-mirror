@@ -1546,6 +1546,14 @@ void  trdp_mdCheckListenSocks (
                         {
                             vos_printf(VOS_LOG_INFO, "New socket accepted from the same device (Ip = %u)\n", newIp);
 
+                            if(appHandle->iface[socketIndex].usage > 0)
+                            {
+                                vos_printf(VOS_LOG_INFO, "The new socket accepted from the same device (Ip = %u), won't be removed, because it is still using\n", newIp);
+                                socketFound = TRUE;
+                                break;
+                            }
+
+
                             /* Delete the items from SndQueue that are using the old socket */
                             for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
                             {
