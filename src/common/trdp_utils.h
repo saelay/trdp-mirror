@@ -157,7 +157,8 @@ TRDP_ERR_T trdp_requestSocket(
 
 void trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
-    INT32 index);
+    INT32 index,
+    UINT32 connectTimeout);
 
 
 /*********************************************************************************************************************/
