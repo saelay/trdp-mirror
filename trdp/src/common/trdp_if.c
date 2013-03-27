@@ -518,7 +518,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     PD_ELE_T    *pNext = pSession->pSndQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx);
+                    trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx, 0);
                     vos_memFree(pSession->pSndQueue);
                     pSession->pSndQueue = pNext;
                 }
@@ -540,7 +540,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     MD_ELE_T    *pNext = pSession->pMDSndQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pMDSndQueue->socketIdx);
+                    trdp_releaseSocket(pSession->iface, pSession->pMDSndQueue->socketIdx, pSession->mdDefault.connectTimeout);
                     trdp_mdFreeSession(pSession->pMDSndQueue);
                     pSession->pMDSndQueue = pNext;
                 }
@@ -550,7 +550,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     MD_ELE_T    *pNext = pSession->pMDRcvQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pMDRcvQueue->socketIdx);
+                    trdp_releaseSocket(pSession->iface, pSession->pMDRcvQueue->socketIdx, pSession->mdDefault.connectTimeout);
                     trdp_mdFreeSession(pSession->pMDRcvQueue);
                     pSession->pMDRcvQueue = pNext;
                 }
@@ -562,7 +562,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     /*    Only close socket if not used anymore    */
                     if (pSession->pMDListenQueue->socketIdx != -1)
                     {
-                        trdp_releaseSocket(pSession->iface, pSession->pMDListenQueue->socketIdx);
+                        trdp_releaseSocket(pSession->iface, pSession->pMDListenQueue->socketIdx, pSession->mdDefault.connectTimeout);
                     }
                     vos_memFree(pSession->pMDListenQueue);
                     pSession->pMDListenQueue = pNext;
@@ -2392,7 +2392,7 @@ TRDP_ERR_T tlm_delListener (
             /* cleanup instance */
             if (pDelete->socketIdx != -1)
             {
-                trdp_releaseSocket(appHandle->iface, pDelete->socketIdx);
+                trdp_releaseSocket(appHandle->iface, pDelete->socketIdx, appHandle->mdDefault.connectTimeout);
             }
             /* free memory space for element */
             vos_memFree(pDelete);

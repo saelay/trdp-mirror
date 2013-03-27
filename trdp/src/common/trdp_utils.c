@@ -822,31 +822,61 @@ TRDP_ERR_T  trdp_requestSocket (
 
 
 /**********************************************************************************************************************/
-/** Handle the socket pool: Release a socket from our socket pool
- *
+/** Handle the socket pool: if a received TCP socket is unused, the socket connection timeout is started.
+ *  In Udp, Release a socket from our socket pool
  *  @param[in,out]  iface           socket pool
  *  @param[in]      index           index of socket to release
  *
  */
 void  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
-    INT32           index)
+    INT32           index,
+    UINT32 connectTimeout)
 {
     TRDP_ERR_T err = TRDP_PARAM_ERR;
 
     if (iface != NULL)
     {
-        vos_printf(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[index].sock, iface[index].usage);
-        if (iface[index].sock > -1)
+        if (iface[index].type == TRDP_SOCK_MD_UDP)
         {
-            if (--iface[index].usage == 0)
+            vos_printf(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[index].sock, iface[index].usage);
+            if (iface[index].sock > -1)
             {
-                /* Close that socket, nobody uses it anymore */
-                err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
-                iface[index].sock = -1;
-                if (err != TRDP_NO_ERR)
+                if (--iface[index].usage == 0)
                 {
-                    vos_printf(VOS_LOG_DBG, "Trying to close socket again?\n");
+                    /* Close that socket, nobody uses it anymore */
+                    err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
+                    iface[index].sock = -1;
+                    if (err != TRDP_NO_ERR)
+                    {
+                        vos_printf(VOS_LOG_DBG, "Trying to close socket again?\n");
+                    }
+                }
+            }
+
+        }else
+        {
+            vos_printf(VOS_LOG_DBG, "Decrement the socket %d usage = %d\n", iface[index].sock, iface[index].usage);
+            if (iface[index].sock > -1)
+            {
+                if ((--iface[index].usage == 0) && (iface[index].rcvMostly == FALSE))
+                {
+                    /* Start the socket connection timeout */
+                    TRDP_TIME_T tmpt_interval, tmpt_now;
+
+                    vos_printf(VOS_LOG_INFO,
+                               "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
+                               iface[index].sock);
+
+                    tmpt_interval.tv_sec    = connectTimeout / 1000000;
+                    tmpt_interval.tv_usec   = connectTimeout % 1000000;
+
+                    vos_getTime(&tmpt_now);
+                    vos_addTime(&tmpt_now, &tmpt_interval);
+
+                    memcpy(&iface[index].tcpParams.connectionTimeout,
+                           &tmpt_now,
+                           sizeof(TRDP_TIME_T));
                 }
             }
         }
