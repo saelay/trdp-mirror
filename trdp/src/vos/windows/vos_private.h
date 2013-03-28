@@ -45,6 +45,11 @@ struct VOS_MUTEX
     pthread_mutex_t mutexId;
 };
 
+struct VOS_SEMA
+{
+    struct sem_t_ *semaphore;
+};
+
 VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
 void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 

@@ -453,7 +453,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
  *  @param[in]      sema            semaphore handle
  */
 
-EXT_DECL VOS_ERR_T vos_semaGive (
+EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema);
 
 
