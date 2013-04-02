@@ -2427,22 +2427,22 @@ static int testInitListeners()
     if (x_testmode == 2)
     {
         // TEST-0002: listener
-        testAddListener(&test0002_lenv, 1002, 0, "");
+        testAddListener(&test0002_lenv, 1002, x_ip4_dest, "");
 
         // TEST-0003: listener
-        testAddListener(&test0003_lenv, 1004, 0, "");
+        testAddListener(&test0003_lenv, 1004, x_ip4_dest, "");
 
         // TEST-0005: listener for comID 2002 Request
-        testAddListener(&test0005_lenv2, 2002, 0, "");
+        testAddListener(&test0005_lenv2, 2002, x_ip4_dest, "");
 
         // TEST-0006: listener for comID 2004 Request
-        testAddListener(&test0006_lenv2, 2004, 0, "");
+        testAddListener(&test0006_lenv2, 2004, x_ip4_dest, "");
 
         // TEST-0007: listener for comID 3001 Request and Confirm
-        testAddListener(&test0007_lenv2, 3001, 0, "");
+        testAddListener(&test0007_lenv2, 3001, x_ip4_dest, "");
 
         // TEST-0008: listener for comID 3002 Request and Confirm
-        testAddListener(&test0008_lenv2, 3002, 0, "");
+        testAddListener(&test0008_lenv2, 3002, x_ip4_dest, "");
 
         // TEST-0009: listener for comID 4001 Multicast Notify
         testAddListener(&test0009_lenv2, 4001, x_ip4_mc_01, "");
