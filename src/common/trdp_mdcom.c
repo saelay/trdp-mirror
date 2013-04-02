@@ -874,6 +874,11 @@ TRDP_ERR_T  trdp_mdRecv (
                 {
                     continue;
                 }
+				if (iterListener->addr.mcGroup == 0 && iterListener->addr.destIpAddr != 0 && iterListener->addr.destIpAddr != appHandle->pMDRcvEle->addr.srcIpAddr)
+				{
+					/* no IP match for unicast addressing */
+					continue;
+				}
                 if ((iterListener->destURI[0] == 0 &&                               /* ComId listener ?    */
                      vos_ntohl(pH->comId) == iterListener->addr.comId) ||
                     (iterListener->destURI[0] != 0 &&                               /* URI listener   */
