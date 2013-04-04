@@ -96,7 +96,7 @@ example:	outdir $(OUTDIR)/mdManager
 test:		outdir $(OUTDIR)/getstats $(OUTDIR)/vostest
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test
-mdtest:		outdir $(OUTDIR)/mdTest0001		$(OUTDIR)/mdTest0002	$(OUTDIR)/test_mdSingle
+mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest0001 $(OUTDIR)/mdTest0002 $(OUTDIR)/test_mdSingle
 
 doc:		doc/latex/refman.pdf
 
@@ -219,6 +219,15 @@ $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
+
+$(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
+			@$(ECHO) ' ### Building MD test application $(@F)'
+			$(CC) test/mdpatterns/trdp-md-test.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
 $(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building VOS test application $(@F)'
 			$(CC) VisualC/Win32TRDP_Tests/LibraryTests.cpp \
