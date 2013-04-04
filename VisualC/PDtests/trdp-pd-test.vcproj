@@ -180,7 +180,7 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			>
 			<File
-				RelativePath="..\..\test\pdpatterns\trdp-pd-test.cpp"
+				RelativePath="..\..\test\pdpatterns\trdp-pd-test.c"
 				>
 			</File>
 		</Filter>
