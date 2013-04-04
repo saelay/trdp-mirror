@@ -69,14 +69,14 @@ INCLUDES = -I $(INCPATH) -I $(VOS_INCPATH) -I $(VOS_PATH)
 OUTDIR = $(BUILD_PATH)
 
 LDFLAGS = -L $(OUTDIR)
-# files, all tests need to run 
+# files, all tests need to run
 SRC_TEST = test/test_general.c
 
 ifeq ($(DEBUG),1)
 CFLAGS += -g -O -DDEBUG
 LDFLAGS += -g
 # Display the strip command and do not execut it
-STRIP = $(ECHO) "do NOT strip: " 
+STRIP = $(ECHO) "do NOT strip: "
 else
 CFLAGS += -Os  -DNO_DEBUG
 endif
@@ -113,36 +113,36 @@ $(OUTDIR)/libtrdp.a:	$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
 			$(AR) cq $@ $^
 
 
-$(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/echoSelect.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
 			    $(LDFLAGS) \
-			    
+
 			$(STRIP) $@
 
-			
-$(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a 
+
+$(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/echoSelectcmdline.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
 			    $(LDFLAGS) \
-			    
+
 			$(STRIP) $@
-			
-$(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a 
+
+$(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/echoPolling.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
 			    $(LDFLAGS) \
-			    
+
 			$(STRIP) $@
 
 
-$(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/sendHello.c \
 			    -ltrdp \
@@ -150,15 +150,15 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building statistics commandline tool $(@F)'
 			$(CC) test/getStats.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
-			
-$(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a 
+
+$(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building example MD application $(@F)'
 			$(CC) $(SUBDIRS)/example/mdManager.c \
 			    -ltrdp \
@@ -167,7 +167,7 @@ $(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building UDPMDCom test application $(@F)'
 			$(CC) test/udpmdcom/mdTest0001.c \
 			    -ltrdp \
@@ -176,7 +176,7 @@ $(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building UDPMDCom test application $(@F)'
 			$(CC) test/udpmdcom/mdTest0002.c \
 			    -ltrdp \
@@ -184,8 +184,8 @@ $(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
-			
-$(OUTDIR)/test_mdSingle: $(OUTDIR)/libtrdp.a 
+
+$(OUTDIR)/test_mdSingle: $(OUTDIR)/libtrdp.a
 			$(CC) test/test_mdSingle.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -193,7 +193,7 @@ $(OUTDIR)/test_mdSingle: $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 
-$(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building TCPMDCom Siemens test application $(@F)'
 			$(CC) $(SUBDIRS)/example/mdManagerTCP_Siemens.c \
 			    -ltrdp \
@@ -203,7 +203,7 @@ $(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 
-$(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building TCPMDCom test application $(@F)'
 			$(CC) $(SUBDIRS)/example/mdManagerTCP.c \
 			    -ltrdp \
@@ -212,21 +212,21 @@ $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building PD test application $(@F)'
-			$(CC) test/pdpatterns/trdp-pd-test.cpp \
+			$(CC) test/pdpatterns/trdp-pd-test.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
-$(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a 
+$(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
 			@$(ECHO) ' ### Building VOS test application $(@F)'
 			$(CC) VisualC/Win32TRDP_Tests/LibraryTests.cpp \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
-			
+
 outdir:
 		$(MD) $(OUTDIR)
 

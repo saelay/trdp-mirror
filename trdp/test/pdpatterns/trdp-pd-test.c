@@ -9,7 +9,7 @@
 #include <sys/select.h>
 #include <sys/ioctl.h>
 #include <time.h>
-#endif 
+#endif
 
 // --- globals -----------------------------------------------------------------
 
@@ -23,18 +23,18 @@ TRDP_IP_ADDR_T srcip;
 TRDP_IP_ADDR_T dstip;
 TRDP_IP_ADDR_T mcast;
 
-enum Type
+typedef enum
 {
     PORT_PUSH,                      // outgoing port ('Pd'/push)
     PORT_PULL,                      // outgoing port ('Pp'/pull)
     PORT_REQUEST,                   // outgoing port ('Pr'/request)
     PORT_SINK,                      // incoming port
-};
+} Type;
 
 static const char * types[] =
     { "Pd ->", "Pp ->", "Pr ->", "   <-" };
 
-struct Port
+typedef struct
 {
     Type type;                      // port type
     TRDP_ERR_T err;                 // put/get status
@@ -50,7 +50,7 @@ struct Port
     UINT32 timeout;                 // timeout (for SINK ports)
     unsigned char data[1432];       // data buffer
     int link;                       // index of linked port (echo or subscribe)
-};
+} Port;
 
 int size[3] = { 0, 256, 1432 };     // small/medium/big dataset
 int period[2]  = { 100, 250 };      // fast/slow cycle
@@ -63,10 +63,12 @@ int nports = 0;                     // number of ports
 
 void gen_push_ports_master(UINT32 comid, UINT32 echoid)
 {
-    printf("- generating PUSH ports (master side) ... ");
-    int num = nports;
-
     Port src, snk;
+    int num = nports;
+    int a, sz, per;
+    
+    printf("- generating PUSH ports (master side) ... ");
+
     memset(&src, 0, sizeof(src));
     memset(&snk, 0, sizeof(snk));
 
@@ -75,11 +77,11 @@ void gen_push_ports_master(UINT32 comid, UINT32 echoid)
     snk.timeout = 4000000;         // 4 secs timeout
 
     // for unicast/multicast address
-    for (int a = 0; a < 2; ++a)
+    for (a = 0; a < 2; ++a)
     {   // for all dataset sizes
-        for (int sz = 1; sz < 3; ++sz)
+        for (sz = 1; sz < 3; ++sz)
         {   // for all cycle periods
-            for (int per = 0; per < 2; ++per)
+            for (per = 0; per < 2; ++per)
             {   // comid
                 src.comid = comid + 100*a+40*(per+1)+3*(sz+1);
                 snk.comid = echoid + 100*a+40*(per+1)+3*(sz+1);
@@ -112,10 +114,12 @@ void gen_push_ports_master(UINT32 comid, UINT32 echoid)
 
 void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
 {
-    printf("- generating PUSH ports (slave side) ... ");
-    int num = nports;
-
     Port src, snk;
+    int num = nports;
+    int a, sz, per;
+
+    printf("- generating PUSH ports (slave side) ... ");
+
     memset(&src, 0, sizeof(src));
     memset(&snk, 0, sizeof(snk));
 
@@ -124,11 +128,11 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
     snk.timeout = 4000000;         // 4 secs timeout
 
     // for unicast/multicast address
-    for (int a = 0; a < 2; ++a)
+    for (a = 0; a < 2; ++a)
     {   // for all dataset sizes
-        for (int sz = 1; sz < 3; ++sz)
+        for (sz = 1; sz < 3; ++sz)
         {   // for all cycle periods
-            for (int per = 0; per < 2; ++per)
+            for (per = 0; per < 2; ++per)
             {   // comid
                 src.comid = echoid + 100*a+40*(per+1)+3*(sz+1);
                 snk.comid = comid + 100*a+40*(per+1)+3*(sz+1);
@@ -163,10 +167,12 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
 
 void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
 {
-    printf("- generating PULL ports (master side) ... ");
-    int num = nports;
-
     Port req, rep;
+    int num = nports;
+    int a, sz;
+
+    printf("- generating PULL ports (master side) ... ");
+
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
 
@@ -174,9 +180,9 @@ void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
     rep.type = PORT_SINK;
 
     // for unicast/multicast address
-    for (int a = 0; a < 2; ++a)
+    for (a = 0; a < 2; ++a)
     {   // for all dataset sizes
-        for (int sz = 0; sz < 2; ++sz)
+        for (sz = 0; sz < 2; ++sz)
         {   // comid
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
@@ -214,10 +220,12 @@ void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
 
 void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
 {
-    printf("- generating PULL ports (slave side) ... ");
-    int num = nports;
-
     Port req, rep;
+    int num = nports;
+    int a, sz;
+
+    printf("- generating PULL ports (slave side) ... ");
+
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
 
@@ -226,9 +234,9 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
     req.timeout = 4000000;      // 4 secs timeout
 
     // for unicast/multicast address
-    for (int a = 0; a < 2; ++a)
+    for (a = 0; a < 2; ++a)
     {   // for all dataset sizes
-        for (int sz = 0; sz < 2; ++sz)
+        for (sz = 0; sz < 2; ++sz)
         {   // comid
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
@@ -264,83 +272,83 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
 
 void setup_ports()
 {
+    int i;
     printf("- setup ports:\n");
     // setup ports one-by-one
-    for (int i = 0; i < nports; ++i)
+    for (i = 0; i < nports; ++i)
     {
-        Port & p = ports[i];
+        Port * p = &ports[i];
 
         printf("  %3d: <%d> / %s / %4d / %3d ... ",
-            i, p.comid, types[p.type], p.size, p.cycle / 1000);
+            i, p->comid, types[p->type], p->size, p->cycle / 1000);
 
         // depending on port type
-        switch (p.type)
+        switch (p->type)
         {
         case PORT_PUSH:
         case PORT_PULL:
-            p.err = tlp_publish(
+            p->err = tlp_publish(
                 apph,               // session handle
-                &p.ph,              // publish handle
-                p.comid,            // comid
+                &p->ph,             // publish handle
+                p->comid,           // comid
                 0,                  // topo counter
-                p.src,              // source address
-                p.dst,              // destination address
-                p.cycle,            // cycle period
+                p->src,             // source address
+                p->dst,             // destination address
+                p->cycle,           // cycle period
                 0,                  // redundancy
                 TRDP_FLAGS_NONE,    // flags
                 NULL,               // default send parameters
-                p.data,             // data
-                p.size);            // data size
+                p->data,            // data
+                p->size);           // data size
 
-            if (p.err != TRDP_NO_ERR)
-                printf("tlp_publish() failed, err: %d\n", p.err);
+            if (p->err != TRDP_NO_ERR)
+                printf("tlp_publish() failed, err: %d\n", p->err);
             else
                 printf("ok\n");
             break;
 
         case PORT_REQUEST:
-            p.err = tlp_request(
+            p->err = tlp_request(
                 apph,               // session handle
-                ports[p.link].sh,   // related subscribe handle
-                p.comid,            // comid
+                ports[p->link].sh,  // related subscribe handle
+                p->comid,           // comid
                 0,                  // topo counter
-                p.src,              // source address
-                p.dst,              // destination address
+                p->src,             // source address
+                p->dst,             // destination address
                 0,                  // redundancy
                 TRDP_FLAGS_NONE,    // flags
                 NULL,               // default send parameters
-                p.data,             // data
-                p.size,             // data size
-                p.repid,            // reply comid
-                p.rep);             // reply ip address
+                p->data,            // data
+                p->size,            // data size
+                p->repid,           // reply comid
+                p->rep);            // reply ip address
 
-            if (p.err != TRDP_NO_ERR)
-                printf("tlp_request() failed, err: %d\n", p.err);
+            if (p->err != TRDP_NO_ERR)
+                printf("tlp_request() failed, err: %d\n", p->err);
             else
                 printf("ok\n");
             break;
 
         case PORT_SINK:
-            p.err = tlp_subscribe(
+            p->err = tlp_subscribe(
                 apph,               // session handle
-                &p.sh,              // subscribe handle
+                &p->sh,             // subscribe handle
                 NULL,               // user ref
-                p.comid,            // comid
+                p->comid,           // comid
                 0,                  // topo counter
-                p.src,              // source address
+                p->src,             // source address
                 0,                  // second source address
-                p.dst,              // destination address
+                p->dst,             // destination address
                 TRDP_FLAGS_NONE,    // No flags set
-                p.timeout,          // timeout [usec]
+                p->timeout,         // timeout [usec]
                 TRDP_TO_SET_TO_ZERO,// timeout behavior
-                p.size);            // maximum size
+                p->size);           // maximum size
 
-            if (p.err != TRDP_NO_ERR)
-                printf("tlp_subscribe() failed, err: %d\n", p.err);
+            if (p->err != TRDP_NO_ERR)
+                printf("tlp_subscribe() failed, err: %d\n", p->err);
             else
                 printf("ok\n");
             break;
-
         }
     }
 }
@@ -470,22 +478,24 @@ void _set_color_default()
         FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 }
 
-void sleep(int msec)
+void _sleep_msec(int msec)
 {
     Sleep(msec);
 }
 
 int snprintf(char * str, size_t size, const char * format, ...)
 {
+    va_list args;
+    int n;
+
     // verify buffer size
     if (size <= 0)
         // empty buffer
         return -1;
 
     // use vsnprintf function
-    va_list args;
     va_start(args, format);
-    int n = _vsnprintf(str, size, format, args);
+    n = _vsnprintf(str, size, format, args);
     va_end(args);
 
     // check for truncated text
@@ -543,7 +553,7 @@ void _set_color_default()
     printf("\033" "[0m");
 }
 
-void sleep(int msec)
+void _sleep_msec(int msec)
 {
     struct timespec ts;
     ts.tv_sec = msec / 1000;
@@ -554,7 +564,7 @@ void sleep(int msec)
 
 #else
 #error "Target not defined!"
-#endif 
+#endif
 
 // --- test data processing ----------------------------------------------------
 
@@ -562,6 +572,7 @@ void process_data()
 {
     static int w = 80, h = 24;
     int _w, _h;
+    int i, n;
     // get terminal size
     if (_get_term_size(&_w, &_h) == 0)
     {   // changed width?
@@ -581,74 +592,75 @@ void process_data()
     }
 
     // go through ports one-by-one
-    for (int i = 0; i < nports; ++i)
+    for (i = 0; i < nports; ++i)
     {
-        Port & p = ports[i];
+        Port * p = &ports[i];
         // write port data
-        if (p.type == PORT_PUSH || p.type == PORT_PULL)
+        if (p->type == PORT_PUSH || p->type == PORT_PULL)
         {
-            if (p.link == -1)
+            if (p->link == -1)
             {   // data generator
-                memset(p.data, '_', p.size);
                 unsigned o = cycle % 128;
-                if (o < p.size)
+                memset(p->data, '_', p->size);
+                if (o < p->size)
                 {
-                    snprintf((char *) p.data + o, p.size - o,
+                    snprintf((char *) p->data + o, p->size - o,
                         "<%s/%d.%d.%d.%d->%d.%d.%d.%d/%dms/%db:%d>",
-                        p.type == PORT_PUSH ? "Pd" : "Pp",
-                        (p.src >> 24) & 0xff, (p.src >> 16) & 0xff,
-                        (p.src >> 8) & 0xff, p.src & 0xff,
-                        (p.dst >> 24) & 0xff, (p.dst >> 16) & 0xff,
-                        (p.dst >> 8) & 0xff, p.dst & 0xff,
-                        p.cycle / 1000, p.size, cycle);
+                        p->type == PORT_PUSH ? "Pd" : "Pp",
+                        (p->src >> 24) & 0xff, (p->src >> 16) & 0xff,
+                        (p->src >> 8) & 0xff, p->src & 0xff,
+                        (p->dst >> 24) & 0xff, (p->dst >> 16) & 0xff,
+                        (p->dst >> 8) & 0xff, p->dst & 0xff,
+                        p->cycle / 1000, p->size, cycle);
                 }
             }
             else
             {   // echo data from incoming port, replace all '_' by '~'
-                unsigned char * src = ports[p.link].data;
-                unsigned char * dst = p.data;
-                for (int n = p.size; n; --n, ++src, ++dst)
+                unsigned char * src = ports[p->link].data;
+                unsigned char * dst = p->data;
+                for (n = p->size; n; --n, ++src, ++dst)
                     *dst = (*src == '_') ? '~' : *src;
             }
 
-            p.err = tlp_put(apph, p.ph, p.data, p.size);
+            p->err = tlp_put(apph, p->ph, p->data, p->size);
         }
-        else if (p.type == PORT_REQUEST)
+        else if (p->type == PORT_REQUEST)
         {
-            memset(p.data, '_', p.size);
             unsigned o = cycle % 128;
-            if (o < p.size)
+            memset(p->data, '_', p->size);
+            if (o < p->size)
             {
-                snprintf((char *) p.data + o, p.size - o,
+                snprintf((char *) p->data + o, p->size - o,
                     "<Pr/%d.%d.%d.%d->%d.%d.%d.%d/%dms/%db:%d>",
-                    (p.src >> 24) & 0xff, (p.src >> 16) & 0xff,
-                    (p.src >> 8) & 0xff, p.src & 0xff,
-                    (p.dst >> 24) & 0xff, (p.dst >> 16) & 0xff,
-                    (p.dst >> 8) & 0xff, p.dst & 0xff,
-                    p.cycle / 1000, p.size, cycle);
+                    (p->src >> 24) & 0xff, (p->src >> 16) & 0xff,
+                    (p->src >> 8) & 0xff, p->src & 0xff,
+                    (p->dst >> 24) & 0xff, (p->dst >> 16) & 0xff,
+                    (p->dst >> 8) & 0xff, p->dst & 0xff,
+                    p->cycle / 1000, p->size, cycle);
             }
 
-            p.err = tlp_request(apph, ports[p.link].sh, p.comid, 0,
-                p.src, p.dst, 0, TRDP_FLAGS_NONE, NULL, p.data, p.size,
-                p.repid, p.rep);
+            p->err = tlp_request(apph, ports[p->link].sh, p->comid, 0,
+                p->src, p->dst, 0, TRDP_FLAGS_NONE, NULL, p->data, p->size,
+                p->repid, p->rep);
         }
 
         // print port data
         fflush(stdout);
-        if (vos_isMulticast(p.dst) || vos_isMulticast(p.src))
+        if (vos_isMulticast(p->dst) || vos_isMulticast(p->src))
             _set_color_blue();
         else
             _set_color_default();
-        printf("%5d ", p.comid);
+        printf("%5d ", p->comid);
         _set_color_default();
-        printf("%s [", types[p.type]);
+        printf("%s [", types[p->type]);
 
-        if (p.err == TRDP_NO_ERR)
+        if (p->err == TRDP_NO_ERR)
         {
-            unsigned char * ptr = p.data;
-            for (unsigned j = 0; j < (unsigned) w - 19; ++j, ++ptr)
+            unsigned char * ptr = p->data;
+            unsigned j;
+            for (j = 0; j < (unsigned) w - 19; ++j, ++ptr)
             {
-                if (j < p.size)
+                if (j < p->size)
                 {
                     if (*ptr < ' ' || *ptr > 127)
                         putchar('.');
@@ -661,15 +673,15 @@ void process_data()
         }
         else
         {
-            int n = printf(" -- %s", get_result_string(p.err));
+            int n = printf(" -- %s", get_result_string(p->err));
             while (n++ < w - 19) putchar(' ');
         }
         putchar(']'); fflush(stdout);
-        if (p.err != TRDP_NO_ERR)
+        if (p->err != TRDP_NO_ERR)
             _set_color_red();
         else
             _set_color_green();
-        printf(" %3d\n", p.err);
+        printf(" %3d\n", p->err);
         _set_color_default();
     }
     // increment cycle counter
@@ -681,16 +693,17 @@ void process_data()
 void poll_data()
 {
     TRDP_PD_INFO_T pdi;
+    int i;
     // go through ports one-by-one
-    for (int i = 0; i < nports; ++i)
+    for (i = 0; i < nports; ++i)
     {
-        Port & p = ports[i];
-        if (p.type != PORT_SINK)
+        Port * p = &ports[i];
+        UINT32 size = p->size;
+        if (p->type != PORT_SINK)
             // poll only sink ports
             continue;
 
-        UINT32 size = p.size;
-        p.err = tlp_get(apph, p.sh, &pdi, p.data, &size);
+        p->err = tlp_get(apph, p->sh, &pdi, p->data, &size);
     }
 }
 
@@ -785,9 +798,9 @@ int main(int argc, char * argv[])
     gen_pull_ports_master(30000, 40000);
     gen_pull_ports_slave(30000, 40000);
     setup_ports();
-    sleep(2000);
+    _sleep_msec(2000);
     // main test loop
-    while (true)
+    while (1)
     {   // drive TRDP communications
         tlc_process(apph, NULL, NULL);
         // poll (receive) data
@@ -796,7 +809,7 @@ int main(int argc, char * argv[])
         if (!(++tick % 50))
             process_data();
         // wait 10 msec
-        sleep(10);
+        _sleep_msec(10);
     }
 
     return 0;
