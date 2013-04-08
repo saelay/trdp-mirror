@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <err.h>
 #include <memory.h>
 #include <unistd.h>
 #include <sys/select.h>
@@ -47,7 +48,9 @@
 #include <signal.h>
 #include <sys/wait.h>
 
+#include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #ifdef __linux__
         #include <uuid/uuid.h>
@@ -116,6 +119,9 @@ static TRDP_IP_ADDR_T x_ip4_mc_02;
 static int            x_period;         // Main loop period in ms
 static int            x_testmode;       // Test mode: dev1 o dev 2
 
+
+static TRDP_IP_ADDR_T g_ip4_mine;   // my ipaddress
+
 // Command line test data structure
 typedef struct
 {
@@ -129,6 +135,34 @@ typedef struct
     int            noOfRepliers;                // Expected replyers: 0 = Unknown, >0 known (for Unicast is always considered 1)
 } cli_test;
 
+
+// get my ip address
+static void
+getmyipaddress()
+ {
+
+    struct ifaddrs *ifaddrs, *ifap;
+
+    if (getifaddrs(&ifaddrs) == -1)
+        err(EXIT_FAILURE, "getifaddrs");
+
+    for (ifap = ifaddrs; ifap != NULL; ifap = ifap->ifa_next)
+    {
+        if (ifap->ifa_addr->sa_family == AF_INET)
+        {
+            struct sockaddr_in *sa = (struct sockaddr_in *) ifap->ifa_addr;
+            if (htonl(sa->sin_addr.s_addr) != INADDR_LOOPBACK)
+            {
+                char *addr = inet_ntoa(sa->sin_addr);
+                printf("Interface: %s\tAddress: %s\n", ifap->ifa_name, addr);
+				
+				g_ip4_mine = ntohl(sa->sin_addr.s_addr);
+            }
+        }
+    }
+
+    freeifaddrs(ifaddrs);
+}
 
 
 // Cli tests
@@ -1918,7 +1952,7 @@ static int test_initialize()
     /*	Open a session  */
     errv = tlc_openSession(
         &appHandle,             // TRDP_APP_SESSION_T			*pAppHandle
-        0,                      // TRDP_IP_ADDR_T				ownIpAddr
+        g_ip4_mine,             // TRDP_IP_ADDR_T				ownIpAddr
         0,                      // TRDP_IP_ADDR_T				leaderIpAddr
         NULL,                   // TRDP_MARSHALL_CONFIG_T		*pMarshall
         NULL,                   // const TRDP_PD_CONFIG_T		*pPdDefault
@@ -2542,7 +2576,7 @@ int main(int argc, char * argv[])
     x_ip4_mc_02 = TRDP_IP4_ADDR(225, 0, 0, 6);
     x_period    = 100;    // Defaul main loop period
     x_testmode  = 1;
-
+	
     // Process command line parameters
     for (i = 1; i < argc; i++)
     {
@@ -2585,6 +2619,11 @@ int main(int argc, char * argv[])
         cmdlinerr(argc, argv);
         exit(EXIT_FAILURE);
     }
+	
+	
+	// get my ip address
+	getmyipaddress();
+
 
     //printf( "MD_HEADER_T size: %u\n", sizeof(MD_HEADER_T));
 
