@@ -2538,8 +2538,11 @@ TRDP_ERR_T trdp_mdCommonSend (
                 /* Multiple replies expected only for multicast */
                 pSenderElement->noOfRepliers = noOfRepliers;
 
-                /* No retries on UDP multicast */
-                pSenderElement->numRetriesMax = 0;
+				if (noOfRepliers != 1)
+				{
+					/* No retries on UDP multicast with expected repliers =1 */
+					pSenderElement->numRetriesMax = 0;
+				}
             }
             else
             {
