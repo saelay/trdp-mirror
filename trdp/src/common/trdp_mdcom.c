@@ -560,6 +560,10 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 &size,
                 &pElement->addr.srcIpAddr,
                 &pElement->replyPort);
+				
+		/* my ip address is destination address */
+		/* also in case of multicast ! */
+		pElement->addr.destIpAddr = appHandle->realIP;
     }
 
     pElement->grossSize = size;
