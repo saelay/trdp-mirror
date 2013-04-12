@@ -466,10 +466,12 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
     
-    UINT32      size;
+    UINT32      size = 0;
     UINT32      dataSize = 0;
     UINT32      socketIndex = 0;
     UINT32      readSize = 0;
+    UINT32      readDataSize = 0;
+    BOOL        headerCompleted = FALSE;
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
@@ -483,74 +485,75 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             }
         }
 
-        if(appHandle->uncompletedTCP[socketIndex] == NULL)
+        /* Read Header */
+        if((appHandle->uncompletedTCP[socketIndex] == NULL)
+            || ((appHandle->uncompletedTCP[socketIndex] != NULL)
+            && (appHandle->uncompletedTCP[socketIndex]->grossSize < sizeof(MD_HEADER_T))))
         {
-            /* Not waiting to an incomplete message in this socket */
+            UINT32 storedHeader = 0;
 
-            /* Read Header */
-            size    = sizeof(MD_HEADER_T);
-            err     = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)&pElement->pPacket->frameHead, &size);
-            vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", size);
-
-            if(err == TRDP_NODATA_ERR)
+            if(appHandle->uncompletedTCP[socketIndex] == NULL)
             {
-                vos_printf(VOS_LOG_INFO, "vos_sockReceiveTCP - The socket = %u has been closed \n", mdSock);
-                return TRDP_NODATA_ERR;
+                readSize = sizeof(MD_HEADER_T);
+
+            }else
+            {
+                /* If we have read some data before, read the rest */
+                readSize = sizeof(MD_HEADER_T) - appHandle->uncompletedTCP[socketIndex]->grossSize;
+                storedHeader = appHandle->uncompletedTCP[socketIndex]->grossSize;
             }
 
-            if(err != TRDP_NO_ERR)
+            err     = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, ((UINT8 *)&pElement->pPacket->frameHead) + storedHeader, &readSize);
+            vos_printf(VOS_LOG_INFO, "Read Header Size = %d\n", readSize);
+
+            /* Add the read data size to the size read before */
+            size = storedHeader + readSize;
+
+            if((appHandle->uncompletedTCP[socketIndex] != NULL)
+                    && (size == sizeof(MD_HEADER_T)))
             {
-                vos_printf(VOS_LOG_ERROR, "vos_sockReceiveTCP failed (Reading the msg Header) = %d\n", err);
-                return TRDP_IO_ERR;
+                /* Uncompleted Header, completed. Save some parameters in the uncompletedTCP structure */
+                appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength = pElement->pPacket->frameHead.datasetLength;
+                appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum = pElement->pPacket->frameHead.frameCheckSum;
             }
 
-            /* Get the rest of the message length */
+        }
+
+        /* Read Data */
+        if((size >= sizeof(MD_HEADER_T)) || ((appHandle->uncompletedTCP[socketIndex] != NULL)
+                && (appHandle->uncompletedTCP[socketIndex]->grossSize >= sizeof(MD_HEADER_T))))
+        {
+
+            if(appHandle->uncompletedTCP[socketIndex] == NULL)
             {
+                /* Get the rest of the message length */
                 dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength) +
                       sizeof(pElement->pPacket->frameHead.frameCheckSum);
 
-                /*  padding to 4 */
-                if ((dataSize & 0x3) > 0)
-                {
-                    dataSize += (4 - (dataSize % 4));    /* be aware that the check sum is on 4 byte aligned position */
-                }
+                readDataSize = dataSize;
 
-                readSize = dataSize;
-
-                /*Read Data + CRC */
-                err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)pElement->pPacket->data, &readSize);
-                vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", readSize);
-
-                size = size + readSize;
-
-                readSize = size;
-            }
-
-        }else
-        {
-            /* Uncompleted message */
-
-            dataSize = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) + sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum);
-
-            /*  padding to 4 */
-            if ((dataSize & 0x3) > 0)
+            }else
             {
-                dataSize += (4 - (dataSize % 4));
+                /* Calculate the data size that is pending to read */
+                size = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
+                dataSize = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) + sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum);
+                dataSize = dataSize - (size - sizeof(MD_HEADER_T));
+                readDataSize = dataSize;
+
             }
 
-            dataSize = dataSize - appHandle->uncompletedTCP[socketIndex]->dataSize;
-            readSize = dataSize;
+            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, ((UINT8 *)&pElement->pPacket->frameHead) + size, &readDataSize);
+            vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", readDataSize);
 
-            /*Read Data + CRC */
-            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock, (UINT8 *)pElement->pPacket->data, &readSize);
-            vos_printf(VOS_LOG_INFO, "Read Data Size = %d\n", readSize);
+            /* Add the read data size */
+            size = size + readDataSize;
 
-            /* All the data received so far. Add the last data to the rest */
-            size = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
+            /* Add the read Data size to the size read during this cycle */
+            readSize = readSize + readDataSize;
 
         }
-    }
-    else
+
+    }else
     {
         size = TRDP_MAX_MD_PACKET_SIZE;
 
@@ -567,12 +570,26 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     }
 
     pElement->grossSize = size;
-    pElement->dataSize  = size - sizeof(MD_HEADER_T);
+
+    /* If the Header is incomplete, the data size will be "0". Otherwise it will be calculated. */
+    if((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
+    {
+        pElement->dataSize = readDataSize;
+
+    }else
+    {
+        pElement->dataSize  = size - sizeof(MD_HEADER_T);
+    }
 
     /* preliminary: this all has to be changed! */
     switch (err)
     {
         case TRDP_NODATA_ERR:
+            if((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
+            {
+                vos_printf(VOS_LOG_INFO, "vos_sockReceiveTCP - The socket = %u has been closed \n", mdSock);
+                return TRDP_NODATA_ERR;
+            }
             /* no data -> rx timeout */
             return TRDP_TIMEOUT_ERR;
         case TRDP_BLOCK_ERR:
@@ -591,17 +608,19 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             return err;
     }
     
-    /* Compare if all the data has been read */
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
+
         UINT32      storedDataSize = 0;
 
-        if(dataSize > pElement->dataSize)
+        /* Compare if all the data has been read */
+        if((pElement->dataSize == 0) || (pElement->dataSize != dataSize))
         {
             /* Uncompleted message received */
+
             if(appHandle->uncompletedTCP[socketIndex] == NULL)
             {
-                /* It is the first loop, no data store yet. Allocate memory for the message */
+                /* It is the first loop, no data stored yet. Allocate memory for the message */
                 appHandle->uncompletedTCP[socketIndex] = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
                 appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(sizeof(MD_PACKET_T));
 
@@ -612,56 +631,58 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                     return TRDP_MEM_ERR;
                 }
 
-                /* Copy the receive information in the uncomplete array (in the socket index position)*/
-                memcpy((&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), &pElement->pPacket->frameHead, sizeof(MD_HEADER_T));
-                memcpy(appHandle->uncompletedTCP[socketIndex]->pPacket->data, pElement->pPacket->data, pElement->dataSize);
-                appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
-                appHandle->uncompletedTCP[socketIndex]->dataSize = pElement->dataSize;
+                storedDataSize = 0;
 
             }else
             {
-                /*It is already some data stored. Add the last information */
+                /* Get the size that have been already stored in the uncompletedTCP[] */
+                storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
+            }
 
-                storedDataSize = appHandle->uncompletedTCP[socketIndex]->dataSize;
+            if(readSize > 0)
+            {
+                /* Copy the read data in the uncompletedTCP[] */
+               memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize, ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
+               appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
+               appHandle->uncompletedTCP[socketIndex]->dataSize = pElement->dataSize;
 
-                if((storedDataSize > 0) && (pElement->dataSize - storedDataSize > 0))
-                {
-                    memcpy(&(appHandle->uncompletedTCP[socketIndex]->pPacket->data[storedDataSize]), pElement->pPacket->data, (pElement->dataSize - storedDataSize));
-                    appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
-                    appHandle->uncompletedTCP[socketIndex]->dataSize = pElement->dataSize;
-                }else
-                {
-                    return TRDP_PARAM_ERR;
-                }
+            }else
+            {
+               return TRDP_PARAM_ERR;
             }
 
             return TRDP_IO_ERR;
+
         }else
         {
-            /* All data is read, but check if there was some data stored before */
+            /* Complete message */
+            /* All data is read. Save all the data and copy to the pElement to continue */
 
             if(appHandle->uncompletedTCP[socketIndex] != NULL)
             {
-                storedDataSize = appHandle->uncompletedTCP[socketIndex]->dataSize;
-
                 /* Add the received information and copy all the data to the pElement */
-                if((storedDataSize >= 0) && (pElement->dataSize - storedDataSize > 0))
+
+                storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
+
+                if((readSize > 0))
                 {
-                    memcpy(&(appHandle->uncompletedTCP[socketIndex]->pPacket->data[storedDataSize]), pElement->pPacket->data, (pElement->dataSize - storedDataSize));
-                    appHandle->uncompletedTCP[socketIndex]->grossSize = pElement->grossSize;
-                    appHandle->uncompletedTCP[socketIndex]->dataSize = pElement->dataSize;
-                    memcpy(&pElement->pPacket->frameHead, (&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), sizeof(MD_HEADER_T));
-                    memcpy(pElement->pPacket->data, appHandle->uncompletedTCP[socketIndex]->pPacket->data, (pElement->grossSize - sizeof(MD_HEADER_T)));
+                    memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize, ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
+
+                    /* Copy all the uncompletedTCP data to the pElement */
+                    memcpy(((UINT8 *)&pElement->pPacket->frameHead), ((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), pElement->grossSize);
 
                     /* Disallocate the memory */
                     vos_memFree(appHandle->uncompletedTCP[socketIndex]);
                     appHandle->uncompletedTCP[socketIndex] = NULL;
+
                 }else
                 {
                     return TRDP_PARAM_ERR;
                 }
             }
+
         }
+
     }
     
     /* received data */
