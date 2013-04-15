@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2013-04-09: ID 92: Pull request led to reset of push message type
  *      BL 2013-01-25: ID 20: Redundancy handling fixed
  */
 
@@ -264,17 +265,16 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 }
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
-                
-                if (iterPD->pFrame->frameHead.topoCount != 0 && 
-                     vos_ntohl(iterPD->pFrame->frameHead.topoCount) != appHandle->topoCount)
+
+                if (iterPD->pFrame->frameHead.topoCount != 0 &&
+                    vos_ntohl(iterPD->pFrame->frameHead.topoCount) != appHandle->topoCount)
                 {
                     err = TRDP_TOPO_ERR;
                     vos_printf(VOS_LOG_INFO, "Sending PD: TopoCount is out of date!\n");
                 }
                 /*    Send the packet if it is not redundant    */
                 else if (iterPD->socketIdx != -1 &&
-                    (!appHandle->beQuiet || (iterPD->privFlags & TRDP_REDUNDANT)))
-                    
+                         (!appHandle->beQuiet || (iterPD->privFlags & TRDP_REDUNDANT)))
                 {
                     TRDP_ERR_T result;
                     /* We pass the error to the application, but we keep on going    */
@@ -290,18 +290,23 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 }
             }
 
-            /* Reset "immediate" flag for request or requested packet */
-            iterPD->privFlags = (TRDP_PRIV_FLAGS_T) (iterPD->privFlags & ~TRDP_REQ_2B_SENT);
-
-            /*  Set timer if interval was set.
-             In case of a requested cyclically PD packet, this will lead to one time jump (jitter) in the interval
-             */
-            if (timerisset(&iterPD->interval))
+            if (iterPD->privFlags & TRDP_REQ_2B_SENT &&
+                iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PP))       /*  PULL packet?  */
             {
-                /*    set new time    */
+                /* Do not reset timer, but restore msgType */
+                iterPD->pFrame->frameHead.msgType = vos_htons(TRDP_MSG_PD);
+            }
+            else if (timerisset(&iterPD->interval))
+            {
+                /*  Set timer if interval was set.
+                    In case of a requested cyclically PD packet, this will lead to one time jump (jitter) in the interval
+                */
                 iterPD->timeToGo = iterPD->interval;
                 vos_addTime(&iterPD->timeToGo, &now);
             }
+
+            /* Reset "immediate" flag for request or requested packet */
+            iterPD->privFlags = (TRDP_PRIV_FLAGS_T) (iterPD->privFlags & ~TRDP_REQ_2B_SENT);
         }
     }
     return err;
@@ -620,7 +625,7 @@ TRDP_ERR_T trdp_pdCheck (
     }
     /*  Check protocol version  */
     else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (TRDP_PROTO_VER & 0xFF000000) ||
-              vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
+             vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
     {
         vos_printf(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
                    vos_ntohs(pPacket->protocolVersion),
@@ -688,10 +693,10 @@ TRDP_ERR_T  trdp_pdSend (
 
     err = vos_sockSendUDP(pdSock,
                           (UINT8 *)&pPacket->pFrame->frameHead,
-                          &pPacket->sendSize,  
+                          &pPacket->sendSize,
                           destIp,
                           port);
-    
+
     if (err != VOS_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "trdp_pdSend failed\n");

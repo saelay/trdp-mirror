@@ -55,21 +55,21 @@ typedef struct testData
 typedef struct sSessionData
 {
     BOOL                sResponder;
-    BOOL				sConfirmRequested;
-    BOOL				sNotifyOnly;
-    BOOL				sOnlyOnce;
-    BOOL				sExitAfterReply;
-    BOOL				sLoop;
-    BOOL				sNoData;
+    BOOL                sConfirmRequested;
+    BOOL                sNotifyOnly;
+    BOOL                sOnlyOnce;
+    BOOL                sExitAfterReply;
+    BOOL                sLoop;
+    BOOL                sNoData;
     UINT32              sComID;
     TRDP_APP_SESSION_T  appHandle;      /*    Our identifier to the library instance    */
     TRDP_LIS_T          listenHandle1;   /*    Our identifier to the publication         */
     TRDP_LIS_T          listenHandle2;   /*    Our identifier to the publication         */
 } SESSION_DATA_T;
 
-SESSION_DATA_T sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL};
+SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL};
 
-UINT32       ownIP   = 0;
+UINT32          ownIP = 0;
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -103,7 +103,7 @@ void usage (const char *appName)
  *  @retval         none
  */
 void mdCallback (void                   *pRefCon,
-				 TRDP_APP_SESSION_T		appHandle,
+                 TRDP_APP_SESSION_T     appHandle,
                  const TRDP_MD_INFO_T   *pMsg,
                  UINT8                  *pData,
                  UINT32                 dataSize)
@@ -122,22 +122,22 @@ void mdCallback (void                   *pRefCon,
                     printf("<- MD Notification %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                    	printf("   Data: %s\n", pData);
+                        printf("   Data: %s\n", pData);
                     }
                     break;
                 case  TRDP_MSG_MR:      /**< 'Mr' MD Request with reply                      */
                     printf("<- MR Request with reply %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                    	printf("   Data: %s\n", pData);
+                        printf("   Data: %s\n", pData);
                     }
                     if (sSessionData.sConfirmRequested)
                     {
-                    	printf("-> sending reply with query\n");
+                        printf("-> sending reply with query\n");
                         err = tlm_replyQuery(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
-                                        pMsg->topoCount, pMsg->comId, ownIP,
-                                        pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 10000000, NULL,
-                                        (UINT8 *) "I'm fine, how are you?", 23, NULL, NULL);
+                                             pMsg->topoCount, pMsg->comId, ownIP,
+                                             pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 10000000, NULL,
+                                             (UINT8 *) "I'm fine, how are you?", 23, NULL, NULL);
                     }
                     else
                     {
@@ -156,24 +156,24 @@ void mdCallback (void                   *pRefCon,
                     printf("<- MR Reply received %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                    	printf("   Data: %s\n", pData);
+                        printf("   Data: %s\n", pData);
                     }
                     if (sSessionData.sExitAfterReply == TRUE)
-                    { 
-                    	sSessionData.sLoop = FALSE;
-                	}
+                    {
+                        sSessionData.sLoop = FALSE;
+                    }
                     break;
                 case  TRDP_MSG_MQ:      /**< 'Mq' MD Reply with confirmation                 */
                     printf("<- MR Reply with confirmation received %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                    	printf("   Data: %s\n", pData);
+                        printf("   Data: %s\n", pData);
                     }
                     printf("-> sending confirmation\n");
                     err = tlm_confirm(myGlobals->appHandle, pRefCon, (const TRDP_UUID_T *) &pMsg->sessionId,
-                                    pMsg->comId, pMsg->topoCount, ownIP,
-                                    pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 0,
-                                    NULL, NULL, NULL);
+                                      pMsg->comId, pMsg->topoCount, ownIP,
+                                      pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 0,
+                                      NULL, NULL, NULL);
                     if (err != TRDP_NO_ERR)
                     {
                         printf("tlm_confirm returned error %d\n", err);
@@ -257,14 +257,15 @@ int main (int argc, char *argv[])
     {mdCallback, &sSessionData, {0, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    VOS_IF_REC_T            interfaces[10];
 
-    int          rv      = 0;
-    UINT32       destIP  = 0;
-    UINT32       counter = 0;
-    UINT32       expReplies = 1;
-    UINT32       delay   = 1000;
-    TRDP_FLAGS_T flags = TRDP_FLAGS_CALLBACK; /* default settings: callback and UDP */
-    int          ch;
+    int             rv          = 0;
+    UINT32          destIP      = 0;
+    UINT32          counter     = 0;
+    UINT32          expReplies  = 1;
+    UINT32          delay       = 1000;
+    TRDP_FLAGS_T    flags       = TRDP_FLAGS_CALLBACK; /* default settings: callback and UDP */
+    int             ch;
 
     if (argc <= 1)
     {
@@ -300,14 +301,13 @@ int main (int argc, char *argv[])
             }
             case 'p':
             {   /*  determine protocol    */
-                if (strcmp(optarg,"TCP") == 0)
+                if (strcmp(optarg, "TCP") == 0)
                 {
                     flags |= TRDP_FLAGS_TCP;
-                    //mdConfiguration.flags |= TRDP_FLAGS_TCP;
+                    /* mdConfiguration.flags |= TRDP_FLAGS_TCP; */
                 }
-                else if (strcmp(optarg,"UDP") == 0)
-                {
-                }
+                else if (strcmp(optarg, "UDP") == 0)
+                {}
                 else
                 {
                     usage(argv[0]);
@@ -388,12 +388,18 @@ int main (int argc, char *argv[])
         return 1;
     }
 
+    /*  Output available interfaces (in debug output)  */
+    {
+        UINT32 availableIfaces = vos_getInterfaces(10, interfaces);
+        printf("%u IP interfaces found\n", availableIfaces);
+    }
+
     /*    Open a session  */
     if (tlc_openSession(&sSessionData.appHandle,
                         ownIP,
                         0,                         /* use default IP address    */
                         NULL,                      /* no Marshalling            */
-                        NULL, 
+                        NULL,
                         &mdConfiguration,    /* system defaults for PD    */
                         &processConfig) != TRDP_NO_ERR)
     {
@@ -425,8 +431,8 @@ int main (int argc, char *argv[])
     {
         fd_set  rfds;
         INT32   noDesc = 0;
-        struct timeval tv;
-        struct timeval max_tv   = {0, 100000};
+        struct timeval  tv;
+        struct timeval  max_tv = {0, 100000};
 
         /*
          Prepare the file descriptor set for the select call.
@@ -488,37 +494,37 @@ int main (int argc, char *argv[])
         {
             TRDP_UUID_T sessionId;
             printf("\n");
-           if (sSessionData.sNotifyOnly)
+            if (sSessionData.sNotifyOnly)
             {
                 printf("-> sending MR Notification %u\n", sSessionData.sComID);
 
-				if (sSessionData.sNoData == TRUE)
+                if (sSessionData.sNoData == TRUE)
                 {
-                	tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
-                          		destIP, flags, NULL,  NULL, 0, 0, 0);
-                    
+                    tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, ownIP,
+                               destIP, flags, NULL, NULL, 0, 0, 0);
+
                 }
                 else
                 {
-                	tlm_notify(sSessionData.appHandle,&sSessionData, sSessionData.sComID, 0, ownIP,
-                          	destIP, flags, NULL,  (const UINT8*) "Hello, World", 13, 0, 0);
-                    
+                    tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, ownIP,
+                               destIP, flags, NULL, (const UINT8 *) "Hello, World", 13, 0, 0);
+
                 }
 
             }
             else
             {
                 printf("-> sending MR Request with reply %u\n", sSessionData.sComID);
-				if (sSessionData.sNoData == TRUE)
+                if (sSessionData.sNoData == TRUE)
                 {
-                    
-            		tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        		destIP, flags, expReplies, 0, NULL, NULL, 0, 0, 0);
+
+                    tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
+                                destIP, flags, expReplies, 0, NULL, NULL, 0, 0, 0);
                 }
-             	else
+                else
                 {
-                	tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                        	destIP, flags, expReplies, 0, NULL, (const UINT8*) "How are you?", 13, 0, 0);
+                    tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
+                                destIP, flags, expReplies, 0, NULL, (const UINT8 *) "How are you?", 13, 0, 0);
                 }
             }
             printf("\n");
