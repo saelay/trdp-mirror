@@ -2186,7 +2186,7 @@ TRDP_ERR_T tlm_request (
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      comId               comId to be observed
  *  @param[in]      topoCount           topocount to use
- *  @param[in]      destIpAddr          destination IP address
+ *  @param[in]      mcDestIpAddr        multicast group to listen on
  *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL
  *  @param[in]      destURI             only functional group of destination URI
@@ -2202,7 +2202,7 @@ TRDP_ERR_T tlm_addListener (
     const void              *pUserRef,
     UINT32                  comId,
     UINT32                  topoCount,
-    TRDP_IP_ADDR_T          destIpAddr,
+    TRDP_IP_ADDR_T          mcDestIpAddr,
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI)
 {
@@ -2246,7 +2246,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->pUserRef = pUserRef;
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.topoCount     = topoCount;
-                pNewElement->addr.destIpAddr    = destIpAddr;
+                pNewElement->addr.destIpAddr    = 0;
                 pNewElement->pktFlags           = pktFlags;
 
                 /* 2013-02-06 BL: Check for zero pointer  */
@@ -2255,9 +2255,9 @@ TRDP_ERR_T tlm_addListener (
                     vos_strncpy(pNewElement->destURI, destURI, TRDP_MAX_URI_USER_LEN);
                 }
 
-                if (vos_isMulticast(destIpAddr))
+                if (vos_isMulticast(mcDestIpAddr))
                 {
-                    pNewElement->addr.mcGroup   = destIpAddr;       /* Set multicast group address */
+                    pNewElement->addr.mcGroup   = mcDestIpAddr;     /* Set multicast group address */
                     pNewElement->privFlags      |= TRDP_MC_JOINT;   /* Set multicast flag */
                 }
                 else
