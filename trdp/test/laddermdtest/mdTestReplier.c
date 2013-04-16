@@ -47,11 +47,46 @@ VOS_THREAD_FUNC_T MDReplier (
 {
 	mqd_t replierMqDescriptor = 0;
 	int err = MD_APP_NO_ERR;
+	TRDP_FLAGS_T pktFlags = 0;			/* OPTION FLAG */
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle ={{0}};		/* appThreadSessionHandle for Subnet1 */
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle2 ={{0}};		/* appThreadSessionHandle for Subnet2 */
-	/* AppThreadListener Area */
+
+	/* AppHandle  AppThreadListener Area */
+	if (appThreadSessionHandle.pMdAppThreadListener != NULL)
+	{
+		free(appThreadSessionHandle.pMdAppThreadListener);
+	}
 	appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_LIS_T));
+	if (appThreadSessionHandle.pMdAppThreadListener == NULL)
+	{
+		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
+		return 0;
+	}
+	else
+	{
+		memset(appThreadSessionHandle.pMdAppThreadListener, 0, sizeof(TRDP_LIS_T));
+	}
+	/* AppHandle2 AppThreadListener Area */
+	if (appThreadSessionHandle2.pMdAppThreadListener != NULL)
+	{
+		free(appThreadSessionHandle2.pMdAppThreadListener);
+	}
 	appThreadSessionHandle2.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_LIS_T));
+	if (appThreadSessionHandle2.pMdAppThreadListener == NULL)
+	{
+		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle2.pMdAppThreadListener malloc Err\n");
+		return 0;
+	}
+	else
+	{
+		memset(appThreadSessionHandle2.pMdAppThreadListener, 0, sizeof(TRDP_LIS_T));
+	}
+
+	/*	Set OPTION FLAG for TCP */
+	if (pReplierThreadParameter->pCommandValue->mdTransportType == MD_TRANSPORT_TCP)
+	{
+		pktFlags = TRDP_FLAGS_TCP;
+	}
 
 	/* Check Reply Error Type */
 	/* Other than MD_REPLY_ERROR_TYPE_6 */
@@ -63,12 +98,12 @@ VOS_THREAD_FUNC_T MDReplier (
 			/* Add Listener for Multicast */
 			err = tlm_addListener(
 					appHandle,
-					NULL,
+					&(appThreadSessionHandle.pMdAppThreadListener),
 					0,						/* user supplied value returned with reply */
 					pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 					0,							/* topocount to use */
 					pReplierThreadParameter->pCommandValue->mdDestinationAddress,	/* destination Address (Multicast Group) */
-					0,							/* OPTION FLAG */
+					pktFlags,					/* OPTION FLAG */
 					NULL);						/* destination URI */
 		}
 		else
@@ -76,32 +111,19 @@ VOS_THREAD_FUNC_T MDReplier (
 			/* Add Listener for Subnet1 */
 			err = tlm_addListener(
 					appHandle,
-					NULL,
+					&(appThreadSessionHandle.pMdAppThreadListener),
 					0,						/* user supplied value returned with reply */
 					pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 					0,							/* topocount to use */
 					subnetId1Address,			/* destination Address */
-					0,							/* OPTION FLAG */
+					pktFlags,					/* OPTION FLAG */
 					NULL);			/* destination URI */
 		}
 		/* Check tlm_addListener Return Code */
 		if (err != TRDP_NO_ERR)
 		{
-			printf("AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+			vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
 			return 0;
-		}
-
-		/* Set Subnet1 appThreadListener */
-		appThreadSessionHandle.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
-		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
-		/* Multicast I/F ? */
-		if (vos_isMulticast(pReplierThreadParameter->pCommandValue->mdDestinationAddress))
-		{
-			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
-		}
-		else
-		{
-			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
 		}
 
 		/* Is this Ladder Topology ? */
@@ -113,12 +135,12 @@ VOS_THREAD_FUNC_T MDReplier (
 				/* Add Listener for Multicast */
 				err = tlm_addListener(
 							appHandle2,
-							NULL,
+							&(appThreadSessionHandle2.pMdAppThreadListener),
 							0,						/* user supplied value returned with reply */
 							pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 							0,							/* topocount to use */
 							subnetId2Address,			/* destination Address */
-							0,							/* OPTION FLAG */
+							pktFlags,					/* OPTION FLAG */
 							NULL);			/* destination URI */
 			}
 			else
@@ -126,31 +148,19 @@ VOS_THREAD_FUNC_T MDReplier (
 				/* Add Listener for Subnet2 */
 				err = tlm_addListener(
 							appHandle2,
-							NULL,
+							&(appThreadSessionHandle2.pMdAppThreadListener),
 							0,						/* user supplied value returned with reply */
 							pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 							0,							/* topocount to use */
 							subnetId2Address,			/* destination Address */
-							0,							/* OPTION FLAG */
+							pktFlags,					/* OPTION FLAG */
 							NULL);			/* destination URI */
 			}
 			/* Check tlm_addListener Return Code */
 			if (err != TRDP_NO_ERR)
 			{
-				printf("AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+				vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
 				return 0;
-			}
-			/* Set Subnet2 appThreadListener */
-			appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
-			appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
-			/* Multicast I/F ? */
-			if (vos_isMulticast(pReplierThreadParameter->pCommandValue->mdDestinationAddress))
-			{
-				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
-			}
-			else
-			{
-				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
 			}
 		}
 	}
@@ -164,7 +174,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	err = queue_initialize(pReplierThreadParameter->mqName, &replierMqDescriptor);
 	if (err != MD_APP_NO_ERR)
 	{
-		printf("Replier Message Queue Open error\n");
+		vos_printf(VOS_LOG_ERROR, "Replier Message Queue Open error\n");
 		return 0;
 	}
 	else
@@ -173,7 +183,7 @@ VOS_THREAD_FUNC_T MDReplier (
 		err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle, replierMqDescriptor);
 		if (err != MD_APP_NO_ERR)
 		{
-			printf("Subnet1 setAppThreadSessionMessageQueueDescriptor error\n");
+			vos_printf(VOS_LOG_ERROR, "Subnet1 setAppThreadSessionMessageQueueDescriptor error\n");
 			return 0;
 		}
 		/* Is this Ladder Topology ? */
@@ -183,7 +193,7 @@ VOS_THREAD_FUNC_T MDReplier (
 			err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle2, replierMqDescriptor);
 			if (err != MD_APP_NO_ERR)
 			{
-				printf("Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
+				vos_printf(VOS_LOG_ERROR, "Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
 				return 0;
 			}
 		}
@@ -194,6 +204,33 @@ VOS_THREAD_FUNC_T MDReplier (
 			replierMqDescriptor,
 			pReplierThreadParameter->pCommandValue->mdAddListenerComId,
 			pReplierThreadParameter);
+
+	/* Delete Listener */
+    /* delete Subnet1 Listener */
+    err = tlm_delListener(appHandle, appThreadSessionHandle.pMdAppThreadListener);
+    if(err != TRDP_NO_ERR)
+	{
+    	vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+	}
+    /* Is this Ladder Topology ? */
+	if (pReplierThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
+	{
+		/* delete Subnet2 Listener */
+		err = tlm_delListener(appHandle2, appThreadSessionHandle2.pMdAppThreadListener);
+		if(err != TRDP_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+		}
+	}
+
+	/* Delete command Value form COMMAND VALUE LIST */
+	if (deleteCommandValueList(&pTrdpInitializeParameter, pReplierThreadParameter->pCommandValue) != MD_APP_NO_ERR)
+	{
+		vos_printf(VOS_LOG_ERROR, "Replier COMMAND_VALUE delete Err\n");
+	}
+	/* Delete pReplierThreadParameter */
+	free(pReplierThreadParameter);
+	pReplierThreadParameter = NULL;
 
 	return 0;
 }
@@ -341,6 +378,10 @@ MD_APP_ERR_TYPE replier_main_proc (
 		logStringLength = 0;
 	}
 
+	/* Display TimeStamp when Replier test start time */
+	printf("%s Replier test start.\n", vos_getTimeStamp());
+
+	/* Replier Receive Send Loop */
 	while(1)
 	{
 		/* Receive Message Queue */
@@ -388,22 +429,25 @@ MD_APP_ERR_TYPE replier_main_proc (
 			err = decideReceiveMdDataToReplier(&receiveMqMsg, pReplierThreadParameter);
 			if (err != MD_APP_NO_ERR)
 			{
-				printf( "decideReceiveMdDataToReplier ERROR.\n");
+				vos_printf(VOS_LOG_ERROR, "decideReceiveMdDataToReplier ERROR.\n");
 			}
 			replierReceiveCount++;
 			/* Check Replier Receive Count */
 			if ((pReplierThreadParameter->pCommandValue->mdCycleNumber != 0)
 			&& (replierReceiveCount >= pReplierThreadParameter->pCommandValue->mdCycleNumber))
 			{
+				/* Display TimeStamp when Replier test finish time */
+				printf("%s Replier test finish.\n", vos_getTimeStamp());
 				/* Dump Replier Receive Result */
-				if (printReplierResult(pTrdpInitializeParameter) != MD_APP_NO_ERR)
+				if (printReplierResult(pTrdpInitializeParameter, pReplierThreadParameter->pCommandValue->commandValueId) != MD_APP_NO_ERR)
 				{
-					printf("Replier Receive Count Dump Err\n");
+					vos_printf(VOS_LOG_ERROR, "Replier Receive Count Dump Err\n");
 				}
 				break;
 			}
 		}
 	}
+
 	return MD_APP_NO_ERR;
 }
 
@@ -428,20 +472,15 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 	/* LOG */
 	CHAR8 replierLogString[CALLER_LOG_BUFFER_SIZE] ={0};		/* Replier Log String */
 	size_t replierLogStringLength = 0;
-	/* Result Counter */
-	static UINT32 mdReceiveCounter = 0;						/* MD Receive Counter */
-	static UINT32 mdReceiveFailureCounter = 0;				/* MD Receive OK Counter */
-	static UINT32 mdReceiveSuccessCounter = 0;				/* MD Receive NG Counter */
-	static UINT32 mdRetryCounter = 0;							/* MD Retry Counter */
 
-	/* Get MD DATASET Size (MD DATA = MD HEADER + MD DATASET + FCR) */
-	receiveMdDataSetSize = (pReceiveMsg->dataSize) - MD_HEADER_SIZE - MD_FCS_SIZE;
+	/* Get MD DATASET Size */
+	receiveMdDataSetSize = pReceiveMsg->dataSize;
 
 	/* Check ComId */
 	if (pReceiveMsg->Msg.comId != pReplierThreadParameter->pCommandValue->mdAddListenerComId)
 	{
 		/* ComId Err*/
-		printf( "Receive ComId ERROR\n");
+		vos_printf(VOS_LOG_ERROR, "Receive ComId ERROR\n");
 	}
 	else
 	{
@@ -461,15 +500,15 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					if (err == MD_APP_NO_ERR)
 					{
 						/* MD Receive OK Count UP*/
-						mdReceiveSuccessCounter++;
+						pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter++;
 					}
 					else
 					{
 						/* MD Receive NG Count */
-						mdReceiveFailureCounter++;
+						pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter++;
 					}
 					/* MD Receive Count */
-					mdReceiveCounter++;
+					pReplierThreadParameter->pCommandValue->replierMdReceiveCounter++;
 
 					/* Output LOG : Operation Log */
 					if ((((pReplierThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)
@@ -477,15 +516,13 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					{
 						replierLogStringLength = strlen(replierLogString);
 						sprintf((char *)(replierLogString + replierLogStringLength), "MD Receive Count = %u\nMD Receive OK Count = %u\nMD Receive NG Count = %u\nMD Retry Count = %u\n",
-								mdReceiveCounter, mdReceiveSuccessCounter, mdReceiveFailureCounter, mdRetryCounter);
+								pReplierThreadParameter->pCommandValue->replierMdReceiveCounter,
+								pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter,
+								pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter,
+								pReplierThreadParameter->pCommandValue->replierMdRetryCounter);
 						l2fLog(replierLogString,
 								((pReplierThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG),
 								((pReplierThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG));
-						/* Set Replier Receive Count */
-						pReplierThreadParameter->pCommandValue->replierMdReceiveCounter = mdReceiveCounter;
-						pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter =  mdReceiveSuccessCounter;
-						pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter = mdReceiveFailureCounter;
-						pReplierThreadParameter->pCommandValue->replierMdRetryCounter = mdRetryCounter;
 					}
 					/* Clear Log String */
 					memset(replierLogString, 0, sizeof(replierLogString));
@@ -520,7 +557,10 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* Get TimeStamp when call tlm_reply() */
 							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
 
-							/* Set Reply Status = -1 (trdp_mdCommonSend 13 argument) */
+							/* MD Send Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
+
+							/* Set Reply Status = 1 (trdp_mdCommonSend 13 argument) */
 							/* Send MD Reply */
 							trdp_mdCommonSend(
 									TRDP_MSG_MP,							/* reply without confirm */
@@ -536,16 +576,23 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 									0,             						 /* confirm timeout */
 									0,             						 /* noOfRepliers */
 									0,              						/* replyTimeout */
-									TRDP_REPLY_APPL_TIMEOUT,  			/* reply state (TRDP_REPLY_APPL_TIMEOUT = -1) */
+									MD_REPLY_STATUS_ERR,  			/* reply state (MD_REPLY_STATUS_ERR = 1) */
 									NULL, 									/* send param */
-									(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+									(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
 									receiveMdDataSetSize,			/* size of packet data */
 									pReceiveMsg->Msg.destURI,			/* source URI */
 									pReceiveMsg->Msg.srcURI);			/* destination URI */
 							if (err != TRDP_NO_ERR)
 							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								printf( "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 							}
 						}
 						/* MD_REPLY_ERROR_TYPE_2 */
@@ -554,6 +601,9 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* Resource Error */
 							/* Get TimeStamp when call tlm_reply() */
 							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+
+							/* MD Send Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
 							/* Set Reply Status = no memory (trdp_mdCommonSend 13 argument) */
 							/* Send MD Reply */
@@ -571,16 +621,23 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 									0,             						 /* confirm timeout */
 									0,             						 /* noOfRepliers */
 									0,              						/* replyTimeout */
-									TRDP_REPLY_NO_MEM_REPL,  			/* reply state (TRDP_REPLY_NO_MEM_REPL = no memory) */
+									MD_REPLY_MEMORY_ERR,  			/* reply state (MD_REPLY_MEMORY_ERR = 2) */
 									NULL, 									/* send param */
-									(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+									(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
 									receiveMdDataSetSize,			/* size of packet data */
 									pReceiveMsg->Msg.destURI,			/* source URI */
 									pReceiveMsg->Msg.srcURI);			/* destination URI */
 							if (err != TRDP_NO_ERR)
 							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								printf( "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+							}
+							else
+							{
+								/* MD Send Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 							}
 						}
 						/* MD_REPLY_ERROR_TYPE_3 */
@@ -588,6 +645,8 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						{
 							/* Get TimeStamp when call tlm_reply() */
 							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+							/* MD Send Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
 							/* ComId Error */
 							/* Set ComId = 0 (tlm_reply 5 argument) */
@@ -609,8 +668,15 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								pReceiveMsg->Msg.srcURI);			/* destination URI */
 							if (err != TRDP_NO_ERR)
 							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								printf( "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 							}
 						}
 						/* MD_REPLY_ERROR_TYPE_4 */
@@ -618,10 +684,11 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						{
 							/* Get TimeStamp when call tlm_reply() */
 							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+							/* MD Send Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
 							/* Set DataSize Error (return TRDP_PARAM_ERR) */
-							/* Set pData = NULL (tlm_reply 11 argument) */
-							/* Set DataSize != 0 (tlm_reply 12 argument) */
+							/* Set DataSize != -1 (tlm_reply 12 argument) */
 							/* Send MD Reply */
 							err = tlm_reply (
 								replierAppHandle,						/* the handle returned by tlc_init */
@@ -634,16 +701,22 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
 								0, 										/* userStatus */
 								NULL, 									/* send param */
-								NULL,									/* DATASET Nothing */
-								1,										/* size of packet data */
+								(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* DATASET Nothing */
+								-1,										/* size of packet data */
 								pReceiveMsg->Msg.destURI,			/* source URI */
 								pReceiveMsg->Msg.srcURI);			/* destination URI */
 							if (err != TRDP_NO_ERR)
 							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								printf( "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
 							}
-
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							}
 						}
 						/* MD_REPLY_ERROR_TYPE_5 */
 						else if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_5)
@@ -666,6 +739,8 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					{
 						/* Get TimeStamp when call tlm_reply() */
 						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+						/* MD Send Count */
+						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
 						/* ComId Error */
 						/* Set ComId = 0 (tlm_common_send 5 argument) */
@@ -681,14 +756,21 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
 							0, 										/* userStatus */
 							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
 							receiveMdDataSetSize,				/* size of packet data */
 							pReceiveMsg->Msg.destURI,			/* source URI */
 							pReceiveMsg->Msg.srcURI);			/* destination URI */
 						if (err != TRDP_NO_ERR)
 						{
+							/* MD Send Failure Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							printf( "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+						}
+						else
+						{
+							/* MD Send Success Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 						}
 					}
 					/* COMID_ERROR_DATA_4 */
@@ -696,6 +778,8 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					{
 						/* Get TimeStamp when call tlm_reply() */
 						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+						/* MD Send Count */
+						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
 						/* Retry Reply */
 						/* Send MD Reply */
@@ -710,17 +794,26 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
 							0, 										/* userStatus */
 							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
 							receiveMdDataSetSize,			/* size of packet data */
 							pReceiveMsg->Msg.destURI,			/* source URI */
 							pReceiveMsg->Msg.srcURI);			/* destination URI */
 						if (err != TRDP_NO_ERR)
 						{
+							/* MD Send Failure Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							printf( "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+						}
+						else
+						{
+							/* MD Send Success Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 						}
 						/* Get TimeStamp when call tlm_reply() */
 						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+						/* MD Send Count */
+						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
 						/* Retry Send MD Reply */
 						err = tlm_reply (
@@ -734,14 +827,21 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
 							0, 										/* userStatus */
 							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
 							receiveMdDataSetSize,				/* size of packet data */
 							pReceiveMsg->Msg.destURI,			/* source URI */
 							pReceiveMsg->Msg.srcURI);			/* destination URI */
 						if (err != TRDP_NO_ERR)
 						{
+							/* MD Send Failure Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							printf( "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+						}
+						else
+						{
+							/* MD Send Success Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 						}
 					}
 					/* Normal ComId */
@@ -749,6 +849,8 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					{
 						/* Get TimeStamp when call tlm_reply() */
 						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+						/* MD Send Count */
+						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
 						/* Send MD Reply */
 						err = tlm_reply (
@@ -762,14 +864,21 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
 							0, 										/* userStatus */
 							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
 							receiveMdDataSetSize,			/* size of packet data */
 							pReceiveMsg->Msg.destURI,			/* source URI */
 							pReceiveMsg->Msg.srcURI);			/* destination URI */
 						if (err != TRDP_NO_ERR)
 						{
+							/* MD Send Failure Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							printf( "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+						}
+						else
+						{
+							/* MD Send Success Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 						}
 					}
 
@@ -814,15 +923,15 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					if (err == MD_APP_NO_ERR)
 					{
 						/* MD Receive OK Count UP*/
-						mdReceiveSuccessCounter++;
+						pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter++;
 					}
 					else
 					{
 						/* MD Receive NG Count */
-						mdReceiveFailureCounter++;
+						pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter++;
 					}
 					/* MD Receive Count */
-					mdReceiveCounter++;
+					pReplierThreadParameter->pCommandValue->replierMdReceiveCounter++;
 					/* MD Retry Count */
 
 					/* Output LOG */
@@ -830,16 +939,24 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						|| (((pReplierThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG))
 					{
 						replierLogStringLength = strlen(replierLogString);
-						sprintf((char *)(replierLogString + replierLogStringLength), "MD Receive Count = %u\nMD Receive OK Count = %u\nMD Receive NG Count = %u\nMD Retry Count = %u\n",
-								mdReceiveCounter, mdReceiveSuccessCounter, mdReceiveFailureCounter, mdRetryCounter);
+						sprintf((char *)(replierLogString + replierLogStringLength),
+								"MD Receive Count = %u\n"
+								"MD Receive OK Count = %u\n"
+								"MD Receive NG Count = %u\n"
+								"MD Retry Count = %u\n"
+								"MD Send Count = %u\n"
+								"MD Send OK Count = %u\n"
+								"MD Send NG Count = %u\n",
+								pReplierThreadParameter->pCommandValue->replierMdReceiveCounter,
+								pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter,
+								pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter,
+								pReplierThreadParameter->pCommandValue->replierMdRetryCounter,
+								pReplierThreadParameter->pCommandValue->replierMdSendCounter,
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter,
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter);
 						l2fLog(replierLogString,
 								((pReplierThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG),
 								((pReplierThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG));
-						/* Set Replier Receive Count */
-						pReplierThreadParameter->pCommandValue->replierMdReceiveCounter = mdReceiveCounter;
-						pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter =  mdReceiveSuccessCounter;
-						pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter = mdReceiveFailureCounter;
-						pReplierThreadParameter->pCommandValue->replierMdRetryCounter = mdRetryCounter;
 					}
 					/* Clear Log String */
 					memset(replierLogString, 0, sizeof(replierLogString));
@@ -849,12 +966,18 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 				case TRDP_MSG_MC:
 				case TRDP_MSG_ME:
 						/* Error : msgType Other than Mn,Mr */
-						printf( "Receive Message Type ERROR. Other than Mn,Mr\n");
+					vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR. Other than Mn,Mr\n");
 				break;
 				default:
 					/* Not TRDP msgType */
-					printf( "Receive Message Type ERROR. Not TRDP Message Type\n");
+					vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR. Not TRDP Message Type\n");
 				break;
+			}
+			/* Release Send Relpy MD DATA SET */
+			if (pReceiveMsg->pData != NULL)
+			{
+				free(pReceiveMsg->pData);
+				pReceiveMsg->pData = NULL;
 			}
 		}
 		else

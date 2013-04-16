@@ -137,6 +137,8 @@ UINT32 TS_SUBNET =1;
 INT32     rv2 = 0;
 UINT8   firstPutData[PD_DATA_SIZE_MAX] = "First Put";
 
+UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printf. for dbgOut */
+
 TRDP_DATASET_T DATASET1_TYPE =
 {
 	1001,		/* datasetID */
@@ -260,12 +262,52 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s",
-           pTime,
-           catStr[category],
-           pFile,
-           LineNumber,
-           pMsgStr);
+    BOOL logPrintOnFlag = FALSE;	/* FALSE is not print */
+
+    switch(category)
+    {
+    	case VOS_LOG_ERROR:
+			/* logCategoryOnOffType : ERROR */
+			if ((logCategoryOnOffType & LOG_CATEGORY_ERROR) == LOG_CATEGORY_ERROR)
+			{
+				logPrintOnFlag = TRUE;
+			}
+		break;
+    	case VOS_LOG_WARNING:
+			/* logCategoryOnOffType : WARNING */
+    		if((logCategoryOnOffType & LOG_CATEGORY_WARNING) == LOG_CATEGORY_WARNING)
+			{
+				logPrintOnFlag = TRUE;
+			}
+    	break;
+    	case VOS_LOG_INFO:
+			/* logCategoryOnOffType : INFO */
+    		if((logCategoryOnOffType & LOG_CATEGORY_INFO) == LOG_CATEGORY_INFO)
+			{
+				logPrintOnFlag = TRUE;
+			}
+    	break;
+    	case VOS_LOG_DBG:
+			/* logCategoryOnOffType : DEBUG */
+			if((logCategoryOnOffType & LOG_CATEGORY_DEBUG) == LOG_CATEGORY_DEBUG)
+			{
+				logPrintOnFlag = TRUE;
+			}
+		break;
+    	default:
+    	break;
+    }
+
+    /* Check log Print */
+    if (logPrintOnFlag == TRUE)
+    {
+		printf("%s %s %s:%d %s",
+			   pTime,
+			   catStr[category],
+			   pFile,
+			   LineNumber,
+			   pMsgStr);
+    }
 }
 
 /**********************************************************************************************************************/
@@ -372,6 +414,9 @@ int main (int argc, char *argv[])
 			{"send-comid1-cycle",	    required_argument,	NULL, 'd'},
 			{"send-comid2-cycle",	    required_argument,	NULL, 'e'},
 			{"traffic-store-subnet",	required_argument,	NULL, 'T'},
+
+			{"log-type-onoff",	required_argument,	NULL, 'l'},
+
 			{"help",					no_argument,		NULL, 'h'},
 			{0, 0, 0, 0}
 	};
@@ -383,283 +428,358 @@ int main (int argc, char *argv[])
 	INT32 ip[4];					/* use variable number in order to get IP address value */
 
 	while((option = getopt_long(argc, argv,
-									"t:1:2:3:4:s:m:E:c:C:a:b:A:B:f:F:o:O:d:e:T:h",
+									"t:1:2:3:4:s:m:E:c:C:a:b:A:B:f:F:o:O:d:e:T:l:h",
 									long_options,
 									&option_index)) != -1)
 	{
 		switch(option)
 		{
 			case 't':
-				/* Get ladderTopologyFlag from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%1d", &int32_value);
-					if ((int32_value == TRUE) || (int32_value == FALSE))
+					/* Get ladderTopologyFlag from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set ladderTopologyFlag */
-						ladderTopologyFlag = int32_value;
+						sscanf(optarg, "%1d", &int32_value);
+						if ((int32_value == TRUE) || (int32_value == FALSE))
+						{
+							/* Set ladderTopologyFlag */
+							ladderTopologyFlag = int32_value;
+						}
 					}
 				}
 			break;
 			case '1':
-				/* Get OFFSET1 from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%hx", &uint16_value);
-					if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
+					/* Get OFFSET1 from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set OFFSET1 */
-						OFFSET_ADDRESS1 = uint16_value;
+						sscanf(optarg, "%hx", &uint16_value);
+						if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
+						{
+							/* Set OFFSET1 */
+							OFFSET_ADDRESS1 = uint16_value;
+						}
 					}
 				}
 			break;
 			case '2':
-				/* Get OFFSET2 from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%hx", &uint16_value);
-					if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+					/* Get OFFSET2 from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set OFFSET2 */
-						OFFSET_ADDRESS2 = uint16_value;
+						sscanf(optarg, "%hx", &uint16_value);
+						if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+						{
+							/* Set OFFSET2 */
+							OFFSET_ADDRESS2 = uint16_value;
+						}
 					}
 				}
 			break;
 			case '3':
-				/* Get OFFSET3 from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%hx", &uint16_value);
-					if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+					/* Get OFFSET3 from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set OFFSET3 */
-						OFFSET_ADDRESS3 = uint16_value;
+						sscanf(optarg, "%hx", &uint16_value);
+						if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+						{
+							/* Set OFFSET3 */
+							OFFSET_ADDRESS3 = uint16_value;
+						}
 					}
 				}
 			break;
 			case '4':
-				/* Get OFFSET4 from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%hx", &uint16_value);
-					if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+					/* Get OFFSET4 from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set OFFSET4 */
-						OFFSET_ADDRESS4 = uint16_value;
+						sscanf(optarg, "%hx", &uint16_value);
+						if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+						{
+							/* Set OFFSET4 */
+							OFFSET_ADDRESS4 = uint16_value;
+						}
 					}
 				}
 			break;
 			case 's':
-				/* Get subscriber application cycle from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set subscriber application cycle */
-					subscriberAppCycle = uint32_value;
+					/* Get subscriber application cycle from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set subscriber application cycle */
+						subscriberAppCycle = uint32_value;
+					}
 				}
 			break;
 			case 'm':
-				/* Get marshallingFlag from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%1d", &int32_value);
-					if ((int32_value == TRUE) || (int32_value == FALSE))
+					/* Get marshallingFlag from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set marshallingFlag */
-						marshallingFlag = int32_value;
+						sscanf(optarg, "%1d", &int32_value);
+						if ((int32_value == TRUE) || (int32_value == FALSE))
+						{
+							/* Set marshallingFlag */
+							marshallingFlag = int32_value;
+						}
 					}
 				}
 			break;
 			case 'E':
-				/* Get Valid PD ComId from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%1u", &uint32_value);
-					/* Set Valid PD ComId */
-					VALID_PD_COMID = uint32_value;
+					/* Get Valid PD ComId from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%1u", &uint32_value);
+						/* Set Valid PD ComId */
+						VALID_PD_COMID = uint32_value;
+					}
 				}
 			break;
 			case 'c':
-				/* Get PD ComId1 from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set PD ComId1 */
-					PD_COMID1 = uint32_value;
+					/* Get PD ComId1 from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set PD ComId1 */
+						PD_COMID1 = uint32_value;
+					}
 				}
 			break;
 			case 'C':
-				/* Get PD ComId2 from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set PD ComId2 */
-					PD_COMID2 = uint32_value;
+					/* Get PD ComId2 from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set PD ComId2 */
+						PD_COMID2 = uint32_value;
+					}
 				}
 			break;
 			case 'a':
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					/* Get ComId1 Subscribe source IP address comid1 subnet1 from an option argument */
-					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set source IP address comid1 subnet1 */
-//						PD_COMID1_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						PD_COMID1_SUB_SRC_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						/* Set source IP address comid1 subnet2 */
-//						PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;
-						PD_COMID1_SUB_SRC_IP2 = PD_COMID1_SUB_SRC_IP1 | SUBNET2_NETMASK;
+						/* Get ComId1 Subscribe source IP address comid1 subnet1 from an option argument */
+						if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
+						{
+							/* Set source IP address comid1 subnet1 */
+	//						PD_COMID1_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							PD_COMID1_SUB_SRC_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							/* Set source IP address comid1 subnet2 */
+	//						PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;
+							PD_COMID1_SUB_SRC_IP2 = PD_COMID1_SUB_SRC_IP1 | SUBNET2_NETMASK;
+						}
 					}
 				}
 			break;
 			case 'b':
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					/* Get ComId1 Subscribe destination IP address1 from an option argument */
-					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set destination IP address1 */
-//						PD_COMID1_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						PD_COMID1_SUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						/* Set destination IP address2 */
-						if (vos_isMulticast(PD_COMID1_SUB_DST_IP1))
+						/* Get ComId1 Subscribe destination IP address1 from an option argument */
+						if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
 						{
-							/* Multicast Group */
-							PD_COMID1_SUB_DST_IP2 = PD_COMID1_SUB_DST_IP1;
-						}
-						else
-						{
-							/* Unicast IP Address */
-							PD_COMID1_SUB_DST_IP2 = PD_COMID1_SUB_DST_IP1 | SUBNET2_NETMASK;
+							/* Set destination IP address1 */
+	//						PD_COMID1_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							PD_COMID1_SUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							/* Set destination IP address2 */
+							if (vos_isMulticast(PD_COMID1_SUB_DST_IP1))
+							{
+								/* Multicast Group */
+								PD_COMID1_SUB_DST_IP2 = PD_COMID1_SUB_DST_IP1;
+							}
+							else
+							{
+								/* Unicast IP Address */
+								PD_COMID1_SUB_DST_IP2 = PD_COMID1_SUB_DST_IP1 | SUBNET2_NETMASK;
+							}
 						}
 					}
 				}
 			break;
 			case 'A':
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					/* Get ComId2 Subscribe source IP address comid2 subnet1 from an option argument */
-					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set source IP address comid2 subnet1 */
-//						PD_COMID2_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						PD_COMID2_SUB_SRC_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						/* Set source IP address comid2 subnet2 */
-//						PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;
-						PD_COMID2_SUB_SRC_IP2 = PD_COMID2_SUB_SRC_IP1 | SUBNET2_NETMASK;
+						/* Get ComId2 Subscribe source IP address comid2 subnet1 from an option argument */
+						if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
+						{
+							/* Set source IP address comid2 subnet1 */
+	//						PD_COMID2_SRC_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							PD_COMID2_SUB_SRC_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							/* Set source IP address comid2 subnet2 */
+	//						PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;
+							PD_COMID2_SUB_SRC_IP2 = PD_COMID2_SUB_SRC_IP1 | SUBNET2_NETMASK;
+						}
 					}
 				}
 			break;
 			case 'B':
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					/* Get ComId2 Subscribe destination IP address2 from an option argument */
-					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set destination IP address1 */
-//						PD_COMID2_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						PD_COMID2_SUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						/* Set destination IP address2 */
-						if (vos_isMulticast(PD_COMID2_SUB_DST_IP1))
+						/* Get ComId2 Subscribe destination IP address2 from an option argument */
+						if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
 						{
-							/* Multicast Group */
-							PD_COMID2_SUB_DST_IP2 = PD_COMID2_SUB_DST_IP1;
-						}
-						else
-						{
-							/* Unicast IP Address */
-							PD_COMID2_SUB_DST_IP2 = PD_COMID2_SUB_DST_IP1 | SUBNET2_NETMASK;
+							/* Set destination IP address1 */
+	//						PD_COMID2_DST_IP = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							PD_COMID2_SUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							/* Set destination IP address2 */
+							if (vos_isMulticast(PD_COMID2_SUB_DST_IP1))
+							{
+								/* Multicast Group */
+								PD_COMID2_SUB_DST_IP2 = PD_COMID2_SUB_DST_IP1;
+							}
+							else
+							{
+								/* Unicast IP Address */
+								PD_COMID2_SUB_DST_IP2 = PD_COMID2_SUB_DST_IP1 | SUBNET2_NETMASK;
+							}
 						}
 					}
 				}
 			break;
 			case 'f':
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					/* Get ComId1 Publish destination IP address1 from an option argument */
-					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set destination IP address1 */
-						PD_COMID1_PUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						/* Set destination IP address2 */
-						if (vos_isMulticast(PD_COMID1_PUB_DST_IP1))
+						/* Get ComId1 Publish destination IP address1 from an option argument */
+						if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
 						{
-							/* Multicast Group */
-							PD_COMID1_PUB_DST_IP2 = PD_COMID1_PUB_DST_IP1;
-						}
-						else
-						{
-							/* Unicast IP Address */
-							PD_COMID1_PUB_DST_IP2 = PD_COMID1_PUB_DST_IP1 | SUBNET2_NETMASK;
+							/* Set destination IP address1 */
+							PD_COMID1_PUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							/* Set destination IP address2 */
+							if (vos_isMulticast(PD_COMID1_PUB_DST_IP1))
+							{
+								/* Multicast Group */
+								PD_COMID1_PUB_DST_IP2 = PD_COMID1_PUB_DST_IP1;
+							}
+							else
+							{
+								/* Unicast IP Address */
+								PD_COMID1_PUB_DST_IP2 = PD_COMID1_PUB_DST_IP1 | SUBNET2_NETMASK;
+							}
 						}
 					}
 				}
 			break;
 			case 'F':
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					/* Get ComId1 Publish destination IP address1 from an option argument */
-					if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
+					if (strncmp(optarg, "-", 1) != 0)
 					{
-						/* Set destination IP address1 */
-						PD_COMID2_PUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
-						/* Set destination IP address2 */
-						if (vos_isMulticast(PD_COMID2_PUB_DST_IP1))
+						/* Get ComId1 Publish destination IP address1 from an option argument */
+						if (sscanf(optarg, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4 )
 						{
-							/* Multicast Group */
-							PD_COMID2_PUB_DST_IP2 = PD_COMID2_PUB_DST_IP1;
-						}
-						else
-						{
-							/* Unicast IP Address */
-							PD_COMID2_PUB_DST_IP2 = PD_COMID2_PUB_DST_IP1 | SUBNET2_NETMASK;
+							/* Set destination IP address1 */
+							PD_COMID2_PUB_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+							/* Set destination IP address2 */
+							if (vos_isMulticast(PD_COMID2_PUB_DST_IP1))
+							{
+								/* Multicast Group */
+								PD_COMID2_PUB_DST_IP2 = PD_COMID2_PUB_DST_IP1;
+							}
+							else
+							{
+								/* Unicast IP Address */
+								PD_COMID2_PUB_DST_IP2 = PD_COMID2_PUB_DST_IP1 | SUBNET2_NETMASK;
+							}
 						}
 					}
 				}
 			break;
 			case 'o':
-				/* Get PD ComId1 timeout from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set PD ComId1 timeout */
-					PD_COMID1_TIMEOUT = uint32_value;
+					/* Get PD ComId1 timeout from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set PD ComId1 timeout */
+						PD_COMID1_TIMEOUT = uint32_value;
+					}
 				}
 			break;
 			case 'O':
-				/* Get PD ComId2 timeout from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set PD ComId2 timeout */
-					PD_COMID2_TIMEOUT = uint32_value;
+					/* Get PD ComId2 timeout from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set PD ComId2 timeout */
+						PD_COMID2_TIMEOUT = uint32_value;
+					}
 				}
 			break;
 			case 'd':
-				/* Get PD ComId1 send cycle time from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set PD ComId1 send cycle time */
-					PD_COMID1_CYCLE = uint32_value;
+					/* Get PD ComId1 send cycle time from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set PD ComId1 send cycle time */
+						PD_COMID1_CYCLE = uint32_value;
+					}
 				}
 			break;
 			case 'e':
-				/* Get PD ComId2 send cycle time from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set PD ComId2 send cycle time */
-					PD_COMID2_CYCLE = uint32_value;
+					/* Get PD ComId2 send cycle time from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set PD ComId2 send cycle time */
+						PD_COMID2_CYCLE = uint32_value;
+					}
 				}
 			break;
 			case 'T':
-				/* Get Traffic Store subnet from an option argument */
-				if (strncmp(optarg, "-", 1) != 0)
+				if (optarg != NULL)
 				{
-					sscanf(optarg, "%u", &uint32_value);
-					/* Set Traffic Store subnet */
-					TS_SUBNET = uint32_value;
+					/* Get Traffic Store subnet from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set Traffic Store subnet */
+						TS_SUBNET = uint32_value;
+					}
+				}
+			break;
+			case 'l':
+				if (optarg != NULL)
+				{
+					/* Get Log Category OnOff Type from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set MD Log */
+						logCategoryOnOffType = uint32_value;
+					}
 				}
 			break;
 			case 'h':
@@ -669,7 +789,8 @@ int main (int argc, char *argv[])
 						"[-s subscriberCycleTiem] [-m marshallingTYpe] [-E validComid] [-c publishComid1Number] [-C publishComid2Number] \n"
 						"[-a subscribeComid1SorceIP] [-b subscribeComid1DestinationIP] [-A subscribeComid2SourceIP] [-B subscribeComid2DestinationIP] \n"
 						"[-f publishComid1DestinationIP] [-F publishComid2DestinationIP] [-o subscribeComid1Timeout] [-O subscribeComid2Timeout] \n"
-						"[-d publishComid1CycleTime] [-e publishComid2CycleTime] [-T writeTrafficStoreSubnetType] [-h] \n");
+						"[-d publishComid1CycleTime] [-e publishComid2CycleTime] [-T writeTrafficStoreSubnetType] [-l logCategoryOnOffType]\n"
+						"[-h] \n");
 				printf("-t,	--topo			Ladder:1, not Lader:0\n");
 				printf("-1,	--offset1		OFFSET1 for Publish val hex: 0xXXXX\n");
 				printf("-2,	--offset2		OFFSET2 for Publish val hex: 0xXXXX\n");
@@ -683,9 +804,9 @@ int main (int argc, char *argv[])
 //				printf("-g,	--subscribe-comid1	Subscribe ComId1 val\n");
 //				printf("-G,	--subscribe-comid2	Subscribe ComId2 val\n");
 				printf("-a,	--comid1-sub-src-ip1	Subscribe ComId1 Source IP Address: xxx.xxx.xxx.xxx\n");
-				printf("-b,	--comid1-sub-dst-ip1	Subscribe COmId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-b,	--comid1-sub-dst-ip1	Subscribe ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
 				printf("-A,	--comid2-sub-src-ip1	Subscribe ComId2 Source IP Address: xxx.xxx.xxx.xxx\n");
-				printf("-B,	--comid2-sub-dst-ip1	Subscribe COmId2 Destination IP Address: xxx.xxx.xxx.xxx\n");
+				printf("-B,	--comid2-sub-dst-ip1	Subscribe ComId2 Destination IP Address: xxx.xxx.xxx.xxx\n");
 				printf("-f,	--comid1-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
 				printf("-F,	--comid2-pub-dst-ip1	Publish ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
 				printf("-o,	--timeout-comid1	Subscribe Timeout: micro sec\n");
@@ -693,6 +814,9 @@ int main (int argc, char *argv[])
 				printf("-d,	--send-comid1-cycle	Publish Cycle TIme: micro sec\n");
 				printf("-e,	--send-comid2-cycle	Publish Cycle TIme: micro sec\n");
 				printf("-T,	--traffic-store-subnet	Write Traffic Store Receive Subnet1:1,subnet2:2\n");
+				printf("-l,	--log-type-onoff	LOG Category OnOff Type Log On:1, Log Off:0, 0bit:ERROR, 1bit:WARNING, 2bit:INFO, 3bit:DBG\n");
+
+
 				printf("-h,	--help\n");
 				return 1;
 			break;
@@ -713,7 +837,7 @@ int main (int argc, char *argv[])
 /*	err = tau_initMarshall(pRefConMarshallDataset1, 2, gComIdMap, 2, gDataSets);
 	if (err != TRDP_NO_ERR)
 	{
-    	printf("tau_initMarshall returns error = %d\n", err);
+    	vos_printf(VOS_LOG_ERROR, "tau_initMarshall returns error = %d\n", err);
        return 1;
 	}
 */
@@ -731,7 +855,7 @@ int main (int argc, char *argv[])
 	/* Get I/F address */
 	if (getifaddrs(&ifa_list) != VOS_NO_ERR)
 	{
-    	printf("getifaddrs error. errno=%d\n", errno);
+		vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
        return 1;
 	}
 	/* Get All I/F List */
@@ -747,7 +871,7 @@ int main (int argc, char *argv[])
 							&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr,
 							addrStr,
 							sizeof(addrStr));
-				printf("IP:%s\n", addrStr);
+				vos_printf(VOS_LOG_INFO, "IP:%s\n", addrStr);
 				subnetId1Address = inet_network(addrStr);
 				break;
 			}
@@ -761,7 +885,7 @@ int main (int argc, char *argv[])
 				 &dynamicConfig						/* Use application supplied memory	*/
 				) != TRDP_NO_ERR)
 	{
-		printf("Sub-network Initialization error (tlc_init)\n");
+		vos_printf(VOS_LOG_ERROR, "Sub-network Initialization error (tlc_init)\n");
 		return 1;
 	}
 
@@ -773,14 +897,14 @@ int main (int argc, char *argv[])
 							&pdConfiguration, NULL,					/* system defaults for PD and MD		*/
 							&processConfig) != TRDP_NO_ERR)
 	{
-		printf("Sub-network Id1 Initialization error (tlc_openSession)\n");
+		vos_printf(VOS_LOG_ERROR, "Sub-network Id1 Initialization error (tlc_openSession)\n");
 		return 1;
 	}
 
 	/* TRDP Ladder support initialize */
 	if (trdp_ladder_init() != TRDP_NO_ERR)
 	{
-		printf("TRDP Ladder Support Initialize failed\n");
+		vos_printf(VOS_LOG_ERROR, "TRDP Ladder Support Initialize failed\n");
 		return 1;
 	}
 
@@ -798,7 +922,7 @@ int main (int argc, char *argv[])
 								&pdConfiguration2, NULL,					/* system defaults for PD and MD		*/
 								&processConfig2) != TRDP_NO_ERR)
 		{
-			printf("Sub-network Id2 Initialization error (tlc_openSession)\n");
+			vos_printf(VOS_LOG_ERROR, "Sub-network Id2 Initialization error (tlc_openSession)\n");
 			return 1;
 		}
 	}
@@ -823,7 +947,7 @@ int main (int argc, char *argv[])
 							 dataSet1Size);	         	/* net data size */
 		if (err != TRDP_NO_ERR)
 		{
-			printf("prep  Sub-network Id1 pd receive error\n");
+			vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
 			tlc_terminate();
 			trdp_ladder_terminate();
 			return 1;
@@ -849,7 +973,7 @@ int main (int argc, char *argv[])
 							 dataSet2Size);  	       	/* net data size */
 		if (err != TRDP_NO_ERR)
 		{
-			printf("prep  Sub-network Id1 pd receive error\n");
+			vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
 			tlc_terminate();
 			trdp_ladder_terminate();
 			return 1;
@@ -882,7 +1006,7 @@ int main (int argc, char *argv[])
 								 dataSet1Size);	        	/* net data size */
 			if (err != TRDP_NO_ERR)
 			{
-				printf("prep  Sub-network Id2 pd receive error\n");
+				vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
 				tlc_terminate();
 				trdp_ladder_terminate();
 				return 1;
@@ -908,7 +1032,7 @@ int main (int argc, char *argv[])
 								 dataSet2Size);        	/* net data size */
 			if (err != TRDP_NO_ERR)
 			{
-				printf("prep  Sub-network Id2 pd receive error\n");
+				vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
 				tlc_terminate();
 				trdp_ladder_terminate();
 				return 1;
@@ -935,7 +1059,7 @@ int main (int argc, char *argv[])
 							dataSet1Size);					/* data size */
 		if (err != TRDP_NO_ERR)
 		{
-			printf("prep Sub-network Id1 pd publish error\n");
+			vos_printf(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
 			tlc_terminate();
 			trdp_ladder_terminate();
 			return 1;
@@ -960,7 +1084,7 @@ int main (int argc, char *argv[])
 							dataSet2Size);					/* data size */
 		if (err != TRDP_NO_ERR)
 		{
-			printf("prep Sub-network Id1 pd publish error\n");
+			vos_printf(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
 			tlc_terminate();
 			trdp_ladder_terminate();
 			return 1;
@@ -989,7 +1113,7 @@ int main (int argc, char *argv[])
 								dataSet1Size);				/* data size */
 			if (err != TRDP_NO_ERR)
 			{
-				printf("prep Sub-network Id2 pd publish error\n");
+				vos_printf(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
 				tlc_terminate();
 				trdp_ladder_terminate();
 				return 1;
@@ -1014,7 +1138,7 @@ int main (int argc, char *argv[])
 								dataSet2Size);				/* data size */
 			if (err != TRDP_NO_ERR)
 			{
-				printf("prep Sub-network Id2 pd publish error\n");
+				vos_printf(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
 				tlc_terminate();
 				trdp_ladder_terminate();
 				return 1;
@@ -1033,13 +1157,13 @@ int main (int argc, char *argv[])
 	}
 	else
 	{
-        printf("prep Sub-network error\n");
+		vos_printf(VOS_LOG_ERROR, "prep Sub-network error\n");
         return 1;
 	}
     err = tlp_setNetworkContext(TS_SUBNET);
     if (err != TRDP_NO_ERR)
     {
-        printf("prep Sub-network tlp_setNetworkContext error\n");
+    	vos_printf(VOS_LOG_ERROR, "prep Sub-network tlp_setNetworkContext error\n");
         return 1;
     }
 
@@ -1085,14 +1209,14 @@ int main (int argc, char *argv[])
 			if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 			{
 				/* Display Get Receive PD DATASET1 from Traffic Store*/
-				printf("Receive PD DATASET1\n");
+				vos_printf(VOS_LOG_DBG, "Receive PD DATASET1\n");
 				dumpMemory(&getDataSet1, dataSet1Size);
 			}
 			/* Enable Comid2 ? */
 			if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 			{
 				/* Display Get Receive PD DATASET2 from Traffic Store*/
-				printf("Receive PD DATASET2\n");
+				vos_printf(VOS_LOG_DBG, "Receive PD DATASET2\n");
 				dumpMemory(&getDataSet2, dataSet2Size);
 			}
 #endif /* if 0 */
@@ -1114,7 +1238,7 @@ int main (int argc, char *argv[])
 			err = tlp_unlockTrafficStore();
 			if (err != TRDP_NO_ERR)
 			{
-				printf("Release Traffic Store accessibility Failed\n");
+				vos_printf(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
 			}
 
     		/* Enable Comid1 ? */
@@ -1167,20 +1291,20 @@ int main (int argc, char *argv[])
 			if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 			{
 				/* Display tlp_put PD DATASET1 */
-				printf("tlp_put PD DATASET1\n");
+				vos_printf(VOS_LOG_DBG, "tlp_put PD DATASET1\n");
 				dumpMemory((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1), dataSet1Size);
 			/* Enable Comid1 ? */
 			if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 			{
 				/* Display tlp_put PD DATASET2 */
-				printf("tlp_put PD DATASET2\n");
+				vos_printf(VOS_LOG_DBG, "tlp_put PD DATASET2\n");
 				dumpMemory((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS2), dataSet2Size);
 			}
 #endif /* if 0 */
     	}
     	else
     	{
-    		printf("Get Traffic Store accessibility Failed\n");
+    		vos_printf(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
     	}
 
 		/* Waits for a next to Traffic Store put/get cycle */

@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.03"
+#define MD_APP_VERSION	"V0.14"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.03"
+#define MD_APP_VERSION	"V0.14"
 #else
-#define MD_APP_VERSION	"V0.03"
+#define MD_APP_VERSION	"V0.14"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -117,10 +117,10 @@ extern "C" {
 #define COMID_REPLY_MASK					0xA0000
 
 /* MD DATA SIZE */
-#define MD_INCREMENT_DATA_MIN_SIZE	4				/* MD Increment DATA Minimum Size : 4B */
-#define MD_INCREMENT_DATA_MAX_SIZE	58760			/* MD Increment DATA Max Size : 58760B */
-#define MD_DATA_UDP_MAX_SIZE		65536			/* UDP MD DATA Max Size : 64KB */
-#define MD_DATA_TCP_MAX_SIZE		65536			/* TCP MD DATA Max Size : 64KB */
+#define MD_INCREMENT_DATA_MIN_SIZE	0				/* MD Increment DATA Minimum Size : 4B */
+#define MD_INCREMENT_DATA_MAX_SIZE	65388			/* MD Increment DATA Max Size : 58760B */
+#define MD_DATA_UDP_MAX_SIZE		65388			/* UDP MD DATA Max Size : 64KB */
+#define MD_DATA_TCP_MAX_SIZE		65388			/* TCP MD DATA Max Size : 64KB */
 #define MD_HEADER_SIZE				112				/* MD Header */
 #define MD_FCS_SIZE					4				/* MD FCS Size */
 
@@ -132,6 +132,7 @@ extern "C" {
 /* Input Command */
 #define GET_COMMAND_MAX				1000			/* INPUT COMMAND MAX */
 #define SPACE							 ' '			/* SPACE Character */
+#define DUMP_ALL_COMMAND_VALUE			0			/* Dump ALL COMMAND_VALUE */
 
 /* Message Queue */
 #define MESSAGE_QUEUE_NAME_SIZE				24			/* Message Queue Name Size */
@@ -224,13 +225,15 @@ typedef enum
 /* MD Application Error Type definition */
 typedef enum
 {
-    MD_APP_NO_ERR			= 0,			/**< MD Application No Error */
-    MD_APP_ERR			= -1,			/**< MD Application Error */
-    MD_APP_PARAM_ERR		= -2,			/**< MD Application Parameter Error */
-    MD_APP_MEM_ERR		= -3,			/**< MD Application Memory Error */
-    MD_APP_THREAD_ERR	= -4,			/**< MD Application Thread Error */
-    MD_APP_MUTEX_ERR		= -5,			/**< MD Application Thread Mutex Error */
-    MD_APP_COMMAND_ERR	= -6			/**< MD Application Command Error */
+    MD_APP_NO_ERR					= 0,			/**< MD Application No Error */
+    MD_APP_ERR					= -1,			/**< MD Application Error */
+    MD_APP_PARAM_ERR				= -2,			/**< MD Application Parameter Error */
+    MD_APP_MEM_ERR				= -3,			/**< MD Application Memory Error */
+    MD_APP_THREAD_ERR			= -4,			/**< MD Application Thread Error */
+    MD_APP_MUTEX_ERR				= -5,			/**< MD Application Thread Mutex Error */
+    MD_APP_COMMAND_ERR			= -6,			/**< MD Application Command Error */
+    MD_APP_QUIT_ERR				= -7,			/**< MD Application Quit Command */
+    MD_APP_EMPTY_MESSAGE_ERR	= -8			/**< MD Application Command Error */
 } MD_APP_ERR_TYPE;
 
 /* MD Reply Error Type definition */
@@ -288,12 +291,19 @@ typedef struct COMMAND_VALUE
 	UINT32 callerMdReceiveSuccessCounter;		/* Caller Success Receive Count */
 	UINT32 callerMdReceiveFailureCounter;		/* Caller Failure Receive Count */
 	UINT32 callerMdRetryCounter;				/* Caller Retry Count */
+	UINT32 callerMdSendCounter;					/* Caller Send Count */
+	UINT32 callerMdSendSuccessCounter;			/* Caller Success Send Count */
+	UINT32 callerMdSendFailureCounter;			/* Caller Failure Send Count */
 	/* Replier Result */
-	UINT32 replierMdReceiveCounter;				/* Caller Receive Count */
-	UINT32 replierMdReceiveSuccessCounter;		/* Caller Success Receive Count */
-	UINT32 replierMdReceiveFailureCounter;		/* Caller Failure Receive Count */
-	UINT32 replierMdRetryCounter;				/* Caller Retry Count */
+	UINT32 replierMdReceiveCounter;				/* Replier Receive Count */
+	UINT32 replierMdReceiveSuccessCounter;		/* Replier Success Receive Count */
+	UINT32 replierMdReceiveFailureCounter;		/* Replier Failure Receive Count */
+	UINT32 replierMdRetryCounter;				/* Replier Retry Count */
+	UINT32 replierMdSendCounter;				/* Replier Send Count */
+	UINT32 replierMdSendSuccessCounter;		/* Replier Success Send Count */
+	UINT32 replierMdSendFailureCounter;		/* Replier Failure Send Count */
 	/* For List */
+	UINT32 commandValueId;						/* COMMAND_VALUE ID */
 	struct COMMAND_VALUE *pNextCommandValue;	/* pointer to next COMMAND_VALUE or NULL */
 } COMMAND_VALUE;
 
@@ -365,6 +375,8 @@ extern TRDP_URI_USER_T noneURI;					/* URI nothing */
 extern CHAR8 LOG_PIPE[];							/* named PIPE for log */
 
 extern UINT32 sendMdTransferRequestCounter;	/* Send MD Transfer Request Count */
+
+extern UINT32 logCategoryOnOffType;			/* 0x0 is disable TRDP vos_printf. for dbgOut */
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -487,9 +499,9 @@ mqd_t getAppThreadSessionMessageQueueDescriptor (
  *
  */
 MD_APP_ERR_TYPE decideMdTransmissionResult(
-		UINT32 receiveComId,
-		UINT8 *pReceiveMdData,
-		UINT32 *pReceiveMdDataSize,
+		const UINT32 receiveComId,
+		const UINT8 *pReceiveMdData,
+		const UINT32 *pReceiveMdDataSize,
 		CHAR8 *pLogString);
 
 /**********************************************************************************************************************/
@@ -560,9 +572,9 @@ MD_APP_ERR_TYPE getMdDataFileNameFromComId (
  *
  */
 MD_APP_ERR_TYPE getMdDataFromComId(
-		UINT32 receiveComId,
-		UINT8 *pReceiveMdData,
-		UINT32 *pReceiveMdDataSize,
+		const UINT32 receiveComId,
+		const UINT8 *pReceiveMdData,
+		const UINT32 *pReceiveMdDataSize,
 		UINT8 **ppCheckMdData,
 		UINT32 **ppCheckMdDataSize);
 
@@ -724,13 +736,13 @@ MD_APP_ERR_TYPE decideCreateThread (
 /**********************************************************************************************************************/
 /** Append an pdCommandValue at end of List
  *
- *  @param[in]      ppHeadCommandValue			pointer to pointer to head of List
+ *  @param[in]      ppHeadCommandValue				pointer to pointer to head of List
  *  @param[in]      pNewCommandValue				pointer to pdCommandValue to append
  *
- *  @retval         PD_APP_NO_ERR					no error
- *  @retval         PD_APP_ERR						error
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
  */
-PD_APP_ERR_TYPE appendComamndValueList(
+MD_APP_ERR_TYPE appendComamndValueList(
 		COMMAND_VALUE    * *ppHeadCommandValue,
 		COMMAND_VALUE    *pNewCommandValue);
 
@@ -768,7 +780,8 @@ MD_APP_ERR_TYPE printMdStatistics (
  *
  */
 MD_APP_ERR_TYPE printCallerResult (
-		COMMAND_VALUE	*pHeadCommandValue);
+		COMMAND_VALUE	*pHeadCommandValue,
+		UINT32 commandValueId);
 
 /**********************************************************************************************************************/
 /** Display MD Replier Receive Count
@@ -781,7 +794,22 @@ MD_APP_ERR_TYPE printCallerResult (
  *
  */
 MD_APP_ERR_TYPE printReplierResult (
-		COMMAND_VALUE	*pHeadCommandValue);
+		COMMAND_VALUE	*pHeadCommandValue,
+		UINT32 commandValueId);
+
+/**********************************************************************************************************************/
+/** Delete an element
+ *
+ *  @param[in]      ppHeadCommandValue          pointer to pointer to head of queue
+ *  @param[in]      pDeleteCommandValue         pointer to element to delete
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ *
+ */
+MD_APP_ERR_TYPE deleteCommandValueList (
+		COMMAND_VALUE    * *ppHeadCommandValue,
+		COMMAND_VALUE    *pDeleteCommandValue);
 
 // Convert an IP address to string
 char * miscIpToString(

@@ -69,7 +69,7 @@ VOS_THREAD_FUNC_T MDLog(void)
 		if (errno != EEXIST)
 		{
 			/* Error : mkfifo() */
-			printf("mkfifo() ERROR\n");
+			vos_printf(VOS_LOG_ERROR, "mkfifo() ERROR\n");
 		}
 	}
 	/* LOG proc Start */
@@ -94,7 +94,7 @@ int l2fFlash(char *logMsg, const char *logFilePath, int dumpOnOff)
 	    FILE *flog = fopen(logFilePath, "a");
 	    if (flog == NULL)
 	    {
-			printf("Log File Open Err\n");
+	    	vos_printf(VOS_LOG_ERROR, "Log File Open Err\n");
 			return MD_APP_ERR;
 	    }
 	    // Append string to file
@@ -117,7 +117,21 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
 	char *pStartFifoBuffer = NULL;
 
 	/* Get Log FIFO Buffer */
+	if (pFifoBuffer != NULL)
+	{
+		free(pFifoBuffer);
+		pFifoBuffer = NULL;
+	}
 	pFifoBuffer = (char *)malloc(PIPE_BUFFER_SIZE);
+	if (pFifoBuffer == NULL)
+	{
+		return MD_APP_MEM_ERR;
+	}
+	else
+	{
+		memset(pFifoBuffer, 0, PIPE_BUFFER_SIZE);
+	}
+
 	/* Set FifoBuffer start Address */
 	pStartFifoBuffer = pFifoBuffer;
 	
@@ -126,7 +140,7 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
 	if (logFifoFd == -1)
 	{
 		/* Log FIFO(named pipe) Open Error */
-		printf("Log FIFO Open ERROR\n");
+		vos_printf(VOS_LOG_ERROR, "Log FIFO Open ERROR\n");
 		return MD_APP_ERR;
 	}
 
@@ -141,7 +155,7 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
     	if (readSize == -1)
     	{
     		/* Log FIFO(named pipe) Open Error */
-/*    		printf("Log FIFO Read ERROR\n"); */
+/*    		vos_printf(VOS_LOG_ERROR, "Log FIFO Read ERROR\n"); */
     	}
     	else if(readSize == 0)
     	{
@@ -150,9 +164,15 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
     	else
     	{
     		/* Get Log Type */
-			sscanf(pFifoBuffer, "%1u", &logType);
-    		/* Get Dump Flag */
-			sscanf(pFifoBuffer+1, "%1u", &dumpFlag);
+			if (pFifoBuffer != NULL)
+			{
+				sscanf(pFifoBuffer, "%1u", &logType);
+			}
+			/* Get Dump Flag */
+			if (pFifoBuffer+1 != NULL)
+			{
+				sscanf(pFifoBuffer+1, "%1u", &dumpFlag);
+			}
 			/* Move first Log Character */
 			pFifoBuffer = pFifoBuffer + 2;
 
