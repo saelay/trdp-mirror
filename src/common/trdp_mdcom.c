@@ -1288,44 +1288,6 @@ TRDP_ERR_T  trdp_mdSend (
                                iterMD->stateEle = nextstate;
                                iterMD->morituri = TRUE;
                            }
-
-                           /*if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
-                           {
-                               appHandle->iface[iterMD->socketIdx].usage--;
-
-                               vos_printf(VOS_LOG_INFO,
-                                          "Socket (Num = %d) usage decremented to (Num = %d)\n",
-                                          appHandle->iface[iterMD->socketIdx].sock,
-                                          appHandle->iface[iterMD->socketIdx].usage);
-
-                               /* If there is no at least one session using the socket, start the socket connectionTimeout
-                                */
-                              /* if((appHandle->iface[iterMD->socketIdx].usage == 0)
-                                  && (appHandle->iface[iterMD->socketIdx].rcvMostly == FALSE)
-                                  && ((iterMD->stateEle == TRDP_ST_TX_NOTIFY_ARM)
-                                      || (iterMD->stateEle == TRDP_ST_TX_CONFIRM_ARM)))
-                               {
-                                   vos_printf(VOS_LOG_INFO,
-                                              "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                                              appHandle->iface[iterMD->socketIdx].sock);
-
-                                   /* Start the socket connectionTimeout */
-                                /*   {
-                                       TRDP_TIME_T tmpt_interval, tmpt_now;
-
-                                       tmpt_interval.tv_sec    = appHandle->mdDefault.connectTimeout / 1000000;
-                                       tmpt_interval.tv_usec   = appHandle->mdDefault.connectTimeout % 1000000;
-
-                                       vos_getTime(&tmpt_now);
-                                       vos_addTime(&tmpt_now, &tmpt_interval);
-
-                                       memcpy(&appHandle->iface[iterMD->socketIdx].tcpParams.connectionTimeout,
-                                              &tmpt_now,
-                                              sizeof(TRDP_TIME_T));
-                                   }
-                               }
-                           }*/
-
                        }
                        else
                        {
