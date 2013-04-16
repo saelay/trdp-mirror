@@ -55,6 +55,13 @@ VOS_THREAD_FUNC_T MDCaller (
 {
  	mqd_t callerMqDescriptor = 0;		/* Message Queue Descriptor for Caller */
 	int err = MD_APP_NO_ERR;
+	TRDP_FLAGS_T pktFlags = 0;			/* OPTION FLAG */
+
+	/*	Set OPTION FLAG for TCP */
+	if (pCallerThreadParameter->pCommandValue->mdTransportType == MD_TRANSPORT_TCP)
+	{
+		pktFlags = TRDP_FLAGS_TCP;
+	}
 
 	/* Add Listener for Subnet1 */
 	err = tlm_addListener(
@@ -64,12 +71,12 @@ VOS_THREAD_FUNC_T MDCaller (
 				(pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK,	/* comId to be observed */
 				0,							/* topocount to use */
 				subnetId1Address,			/* destination Address */
-				0,							/* OPTION FLAG */
+				pktFlags,					/* OPTION FLAG */
 				NULL);			/* destination URI */
 	/* Check tlm_addListener Return Code */
 	if (err != TRDP_NO_ERR)
 	{
-		printf("AddListener comID = 0x%x error = %d\n",
+		vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n",
 				(pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK, err);
 		return 0;
 	}
@@ -85,25 +92,22 @@ VOS_THREAD_FUNC_T MDCaller (
 					(pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK,
 					0,
 					subnetId2Address,
-					0,
+					pktFlags,					/* OPTION FLAG */
 					NULL);
 		/* Check tlm_addListener Return Code */
 		if (err != TRDP_NO_ERR)
 		{
-			printf("AddListener comID = 0x%x error = %d\n",
+			vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n",
 					(pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK, err);
 			return 0;
 		}
-		printf("AddListener: comID = 0x%x, lisHandle2 = x%p\n",
-				((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK),
-				appThreadSessionHandle2.pMdAppThreadListener);
 	}
 
 	/* Message Queue Open */
 	err = queue_initialize(pCallerThreadParameter->mqName, &callerMqDescriptor);
 	if (err != MD_APP_NO_ERR)
 	{
-		printf("Caller Message Queue Open error\n");
+		vos_printf(VOS_LOG_ERROR, "Caller Message Queue Open error\n");
 		return 0;
 	}
 	else
@@ -112,7 +116,7 @@ VOS_THREAD_FUNC_T MDCaller (
 		err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle, callerMqDescriptor);
 		if (err != MD_APP_NO_ERR)
 		{
-			printf("Subnet1 setAppSessionIdMessageQueueDescriptor error\n");
+			vos_printf(VOS_LOG_ERROR, "Subnet1 setAppSessionIdMessageQueueDescriptor error\n");
 			return 0;
 		}
 		/* Is this Ladder Topology ? */
@@ -122,19 +126,18 @@ VOS_THREAD_FUNC_T MDCaller (
 			err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle2, callerMqDescriptor);
 			if (err != MD_APP_NO_ERR)
 			{
-				printf("Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
+				vos_printf(VOS_LOG_ERROR, "Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
 				return 0;
 			}
 		}
 	}
 
 	UINT32 i = 0;
-	fd_set  rfds;
-	INT32 rv = 0;
 	struct timeval  tv_interval = {0};
 	TRDP_TIME_T trdp_time_tv_interval = {0};
-    TRDP_TIME_T nowTime;
-    TRDP_TIME_T nextTime;
+    TRDP_TIME_T nowTime = {0};
+    TRDP_TIME_T nextSendTime = {0};
+    TRDP_TIME_T nextReplyTimeoutTime = {0};
     struct timespec wanted_delay;
     struct timespec remaining_delay;
     TRDP_LIS_T callerThreadListener = {0};						/* callerThreadListener */
@@ -147,10 +150,10 @@ VOS_THREAD_FUNC_T MDCaller (
 	UINT32 incrementMdSendCounter = 0;							/* MD Increment DATA Create Count */
 
 	/* Result Counter */
-	static UINT32 mdReceiveCounter = 0;						/* MD Receive Counter */
-	static UINT32 mdReceiveFailureCounter = 0;				/* MD Receive OK Counter */
-	static UINT32 mdReceiveSuccessCounter = 0;				/* MD Receive NG Counter */
-	static UINT32 mdRetryCounter = 0;							/* MD Retry Counter */
+	UINT32 mdReceiveCounter = 0;						/* MD Receive Counter */
+	UINT32 mdReceiveFailureCounter = 0;				/* MD Receive OK Counter */
+	UINT32 mdReceiveSuccessCounter = 0;				/* MD Receive NG Counter */
+	UINT32 mdRetryCounter = 0;							/* MD Retry Counter */
 
 	/* LOG */
 	CHAR8 logString[CALLER_LOG_BUFFER_SIZE] ={0};		/* Caller Log String */
@@ -284,50 +287,59 @@ VOS_THREAD_FUNC_T MDCaller (
 		logStringLength = 0;
 	}
 
+	/* Display TimeStamp when caller test start time */
+	printf("%s Caller test start.\n", vos_getTimeStamp());
+
 	/* MD Request Send loop */
 	while(sendMdTransferRequestCounter <= pCallerThreadParameter->pCommandValue->mdCycleNumber)
 	{
-		if ((pCallerThreadParameter->pCommandValue->mdCycleNumber != 0)
-			&& (sendMdTransferRequestCounter == 0))
-		{
-			sendMdTransferRequestCounter++;
-		}
+		/* Check Send Counter */
+//		if ((pCallerThreadParameter->pCommandValue->mdCycleNumber != 0)
+//			&& (sendMdTransferRequestCounter == 0))
+//		{
+//			sendMdTransferRequestCounter++;
+//		}
+		/* Check Send MD DATASET Type : increment Data */
 		if (pCallerThreadParameter->pCommandValue->createMdDataFlag == MD_DATA_CREATE_ENABLE)
 		{
+			/* First Increment Data ? */
 			if (incrementMdSendCounter != 0)
 			{
 				/* Clear Last Time Increment MD DATA */
-				free(pCallerThreadParameter->pMdData);
-				/* Create Increment MD DATA */
-				/* Get MD DATA Area */
-				pCallerCreateIncrementMdData = (UINT8 *)malloc(pCallerThreadParameter->pCommandValue->mdMessageSize);
-				if (pCallerCreateIncrementMdData == NULL)
+				/* Store pCallerCreateIncrementMdData First Address */
+				pFirstCallerCreateMdData = pCallerCreateIncrementMdData;
+#if 0
+				/* Set DATA Size */
+				sprintf((char *)pCallerCreateIncrementMdData, "%4u", pCallerThreadParameter->pCommandValue->mdMessageSize);
+				pCallerCreateIncrementMdData = pCallerCreateIncrementMdData + 4;
+#endif
+				/* Create Top Character */
+				firstCharacter = (char)(incrementMdSendCounter % MD_DATA_INCREMENT_CYCLE);
+				/* Create MD Increment Data */
+//				for(i=0; i <= pCallerThreadParameter->pCommandValue->mdMessageSize - 4; i++)
+				for(i=0; i < pCallerThreadParameter->pCommandValue->mdMessageSize; i++)
 				{
-					printf("Caller createMdIncrement DataERROR. malloc Err\n");
+					*pCallerCreateIncrementMdData = (char)((firstCharacter + i) % MD_DATA_INCREMENT_CYCLE);
+					pCallerCreateIncrementMdData = pCallerCreateIncrementMdData + 1;
 				}
-				else
-				{
-					pFirstCallerCreateMdData = pCallerCreateIncrementMdData;
-					/* Set DATA Size */
-					sprintf((char *)pCallerCreateIncrementMdData, "%4u", pCallerThreadParameter->pCommandValue->mdMessageSize);
-					pCallerCreateIncrementMdData = pCallerCreateIncrementMdData + 4;
-
-					/* Create Top Character */
-					firstCharacter = (char)(incrementMdSendCounter % MD_DATA_INCREMENT_CYCLE);
-					/* Create MD Increment Data */
-					for(i=0; i <= pCallerThreadParameter->pCommandValue->mdMessageSize - 4; i++)
-					{
-						*pCallerCreateIncrementMdData = (char)((firstCharacter + i) % MD_DATA_INCREMENT_CYCLE);
-						pCallerCreateIncrementMdData = pCallerCreateIncrementMdData + 1;
-					}
-					pCallerCreateIncrementMdData = pFirstCallerCreateMdData;
-					pCallerThreadParameter->pMdData = pCallerCreateIncrementMdData;
-					incrementMdSendCounter++;
-				}
+				pCallerCreateIncrementMdData = pFirstCallerCreateMdData;
+				pCallerThreadParameter->pMdData = pCallerCreateIncrementMdData;
+				incrementMdSendCounter++;
 			}
 			else
 			{
 				incrementMdSendCounter++;
+				if (pCallerCreateIncrementMdData != NULL)
+				{
+					free(pCallerCreateIncrementMdData);
+					pCallerCreateIncrementMdData = NULL;
+				}
+				pCallerCreateIncrementMdData = (UINT8 *)malloc(pCallerThreadParameter->pCommandValue->mdMessageSize);
+				if (pCallerCreateIncrementMdData == NULL)
+				{
+					vos_printf(VOS_LOG_ERROR, "Caller createMdIncrement DataERROR. malloc Err\n");
+				}
+				memset(pCallerCreateIncrementMdData, 0, pCallerThreadParameter->pCommandValue->mdMessageSize);
 			}
 		}
 
@@ -368,6 +380,8 @@ VOS_THREAD_FUNC_T MDCaller (
 			case MD_MESSAGE_MN:
 				/* Get TimeStamp when call tlm_notify() */
 				sprintf(logString, "%s tlm_notify()", vos_getTimeStamp());
+				/* MD Send Count */
+				pCallerThreadParameter->pCommandValue->callerMdSendCounter++;
 
 				/* Notification */
 				err = tlm_notify(
@@ -385,8 +399,15 @@ VOS_THREAD_FUNC_T MDCaller (
 						mdDestURI);										/* destination URI */
 				if (err != TRDP_NO_ERR)
 				{
+					/* MD Send Failure Count */
+					pCallerThreadParameter->pCommandValue->callerMdSendFailureCounter++;
 					/* Error : Send Notification */
-					printf("Send Notification ERROR\n");
+					vos_printf(VOS_LOG_ERROR, "Send Notification ERROR\n");
+				}
+				else
+				{
+					/* MD Send Success Count */
+					pCallerThreadParameter->pCommandValue->callerMdSendSuccessCounter++;
 				}
 
 				/* Output LOG : MD Operation Result Log ? */
@@ -423,6 +444,8 @@ VOS_THREAD_FUNC_T MDCaller (
 			case MD_MESSAGE_MR_MP:
 				/* Get TimeStamp when call tlm_request() */
 				sprintf(logString, "%s tlm_request()", vos_getTimeStamp());
+				/* MD Send Count */
+				pCallerThreadParameter->pCommandValue->callerMdSendCounter++;
 
 				/* Request */
 				err = tlm_request(
@@ -443,19 +466,27 @@ VOS_THREAD_FUNC_T MDCaller (
 						mdDestURI);										/* destination URI */
 				if (err != TRDP_NO_ERR)
 				{
+					/* MD Send Failure Count */
+					pCallerThreadParameter->pCommandValue->callerMdSendFailureCounter++;
 					/* Error : Send Request */
-					printf("Send Request ERROR\n");
+					vos_printf(VOS_LOG_ERROR, "Send Request ERROR\n");
+				}
+				else
+				{
+					/* MD Send Success Count */
+					pCallerThreadParameter->pCommandValue->callerMdSendSuccessCounter++;
 				}
 
 				/* Get Request Thread Session Handle Area */
 				pRequestSessionHandle = (APP_THREAD_SESSION_HANDLE *)malloc(sizeof(APP_THREAD_SESSION_HANDLE));
 				if (pRequestSessionHandle == NULL)
 				{
-					printf("Create Request Session Area ERROR. malloc Err\n");
+					vos_printf(VOS_LOG_ERROR, "Create Request Session Area ERROR. malloc Err\n");
 					return 0;
 				}
 				else
 				{
+					memset(pRequestSessionHandle, 0, sizeof(APP_THREAD_SESSION_HANDLE));
 					/* Set Request Session Handle */
 					pRequestSessionHandle->pMdAppThreadListener = callerThreadListener;
 					memcpy(pRequestSessionHandle->mdAppThreadSessionId, mdSessionId, sizeof(mdSessionId));
@@ -463,7 +494,7 @@ VOS_THREAD_FUNC_T MDCaller (
 					err = setAppThreadSessionMessageQueueDescriptor(pRequestSessionHandle, callerMqDescriptor);
 					if (err != MD_APP_NO_ERR)
 					{
-						printf("setAppSessionIdMessageQueueDescriptor error\n");
+						vos_printf(VOS_LOG_ERROR, "setAppSessionIdMessageQueueDescriptor error\n");
 					}
 					else
 					{
@@ -514,7 +545,7 @@ VOS_THREAD_FUNC_T MDCaller (
 			break;
 			default:
 				/* Other than Caller and Replier */
-				printf("Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCallerThreadParameter->pCommandValue->mdCallerReplierType);
+				vos_printf(VOS_LOG_ERROR, "Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCallerThreadParameter->pCommandValue->mdCallerReplierType);
 			break;
 		}
 
@@ -525,24 +556,66 @@ VOS_THREAD_FUNC_T MDCaller (
 			sendMdTransferRequestCounter++;
 		}
 
-		/* Wait Next MD Transmission Send timing */
-		vos_getTime(&nextTime);
+		/* Get Next MD Transmission Send timing */
+		vos_getTime(&nextSendTime);
+		nextReplyTimeoutTime = nextSendTime;
 		tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdCycleTime / 1000000;
 		tv_interval.tv_usec     = pCallerThreadParameter->pCommandValue->mdCycleTime % 1000000;
 		trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
 		trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
-		vos_addTime(&nextTime, &trdp_time_tv_interval);
+		vos_addTime(&nextSendTime, &trdp_time_tv_interval);
+		/* Get Reply time out of day */
+		tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdTimeoutReply / 1000000;
+		tv_interval.tv_usec     = pCallerThreadParameter->pCommandValue->mdTimeoutReply % 1000000;
+		trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
+		trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
+		vos_addTime(&nextReplyTimeoutTime, &trdp_time_tv_interval);
 
-		/* FD ZERO */
-		FD_ZERO(&rfds);
-		/* FD SET */
-		FD_SET(callerMqDescriptor, &rfds);
+		/* Receive Wait */
+		/* Last send ? */
+		if (sendMdTransferRequestCounter >= pCallerThreadParameter->pCommandValue->mdCycleNumber)
+		{
+			/* Wait Reply Time Out for Last Time Request receive all Reply*/
+			vos_threadDelay(pCallerThreadParameter->pCommandValue->mdTimeoutReply);
+		}
+		/* Not Last Send && nextReplyTimeout < nextSendTime */
+		else if (vos_cmpTime((TRDP_TIME_T *) &nextReplyTimeoutTime, (TRDP_TIME_T *) &nextSendTime) < 0)
+		{
+			/* Wait Reply Timeout for receive all Reply */
+			vos_threadDelay(pCallerThreadParameter->pCommandValue->mdTimeoutReply);
+		}
+		/* Not Last Send && nextReplyTimeout >= nextSendTime */
+		else
+		{
+			/* Wait Next MD Transmission Send Timing for receive all Reply */
+			vos_getTime(&nowTime);
+			if (vos_cmpTime((TRDP_TIME_T *) &nowTime, (TRDP_TIME_T *) &nextSendTime) < 0)
+			{
+				wanted_delay.tv_sec = nextSendTime.tv_sec - nowTime.tv_sec;
+				wanted_delay.tv_nsec = (((nextSendTime.tv_usec - nextSendTime.tv_usec) % 1000000) * 1000);
+				do
+				{
+					/* wait */
+					err = nanosleep(&wanted_delay, &remaining_delay);
+					if (err == -1 && errno == EINTR)
+					{
+						wanted_delay = remaining_delay;
+					}
+				}
+				while (errno == EINTR);
+			}
+		}
 
-		rv = select(callerMqDescriptor+1, &rfds, NULL, NULL, &tv_interval);
-		if(rv > 0)
+		/* Receive Message Queue Loop */
+		while(1)
 		{
 			/* Receive Message Queue Message */
-			queue_receiveMessage(&receiveMqMsg, callerMqDescriptor);
+			err = queue_receiveMessage(&receiveMqMsg, callerMqDescriptor);
+			if (err != MD_APP_NO_ERR)
+			{
+				/* Break Receive Message Queue because not Receive Message Queue */
+				break;
+			}
 
 			/* Output LOG : MD Operation Result Log ? */
 			if ((((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)
@@ -580,7 +653,7 @@ VOS_THREAD_FUNC_T MDCaller (
 			if (receiveMqMsg.Msg.comId != ((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK))
 			{
 				/* ComId Err*/
-				printf("Receive ComId ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Receive ComId ERROR\n");
 			}
 			else
 			{
@@ -615,7 +688,7 @@ VOS_THREAD_FUNC_T MDCaller (
 							}
 							else
 							{
-								printf("Receive Session ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Receive Session ERROR\n");
 							}
 							/* Decide MD Transmission Result */
 							err = decideMdTransmissionResult(
@@ -647,22 +720,22 @@ VOS_THREAD_FUNC_T MDCaller (
 								l2fLog(logString,
 										((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG),
 										((pCallerThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG));
-								/* Set Caller Receive Count */
-								pCallerThreadParameter->pCommandValue->callerMdReceiveCounter = mdReceiveCounter;
-								pCallerThreadParameter->pCommandValue->callerMdReceiveSuccessCounter =  mdReceiveSuccessCounter;
-								pCallerThreadParameter->pCommandValue->callerMdReceiveFailureCounter = mdReceiveFailureCounter;
-								pCallerThreadParameter->pCommandValue->callerMdRetryCounter = mdRetryCounter;
 							}
+							/* Set Caller Receive Count */
+							pCallerThreadParameter->pCommandValue->callerMdReceiveCounter = mdReceiveCounter;
+							pCallerThreadParameter->pCommandValue->callerMdReceiveSuccessCounter =  mdReceiveSuccessCounter;
+							pCallerThreadParameter->pCommandValue->callerMdReceiveFailureCounter = mdReceiveFailureCounter;
+							pCallerThreadParameter->pCommandValue->callerMdRetryCounter = mdRetryCounter;
 							/* Clear Log String */
 							memset(logString, 0, sizeof(logString));
 						break;
 						case TRDP_MSG_ME:
 								/* Error : Receive Me */
-								printf("Receive Message Type ERROR. Receive Me\n");
+							vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR. Receive Me\n");
 						break;
 						default:
 							/* Other than Mq and Me */
-							printf("Receive Message Type ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR\n");
 						break;
 					}
 				}
@@ -688,29 +761,75 @@ VOS_THREAD_FUNC_T MDCaller (
 					}
 				}
 			}
-			/* Wait Next MD Transmission Send Timing */
-			vos_getTime(&nowTime);
-			if (vos_cmpTime((TRDP_TIME_T *) &nowTime, (TRDP_TIME_T *) &nextTime) < 0)
+		}
+
+		/* Release Send Relpy MD DATA SET */
+		if (receiveMqMsg.pData != NULL)
+		{
+			free(receiveMqMsg.pData);
+			receiveMqMsg.pData = NULL;
+		}
+
+		/* Check Caller send finish ? */
+		if ((sendMdTransferRequestCounter != 0)
+		&& (sendMdTransferRequestCounter >= pCallerThreadParameter->pCommandValue->mdCycleNumber))
+		{
+			/* Break MD Request Send loop */
+			break;
+		}
+
+		/* Wait Next MD Transmission Send Timing */
+		vos_getTime(&nowTime);
+		if (vos_cmpTime((TRDP_TIME_T *) &nowTime, (TRDP_TIME_T *) &nextSendTime) < 0)
+		{
+			wanted_delay.tv_sec = nextSendTime.tv_sec - nowTime.tv_sec;
+			wanted_delay.tv_nsec = (((nextSendTime.tv_usec - nextSendTime.tv_usec) % 1000000) * 1000);
+			do
 			{
-				wanted_delay.tv_sec = nextTime.tv_sec - nowTime.tv_sec;
-				wanted_delay.tv_nsec = (((nextTime.tv_usec - nextTime.tv_usec) % 1000000) * 1000);
-				do
+				/* wait */
+				err = nanosleep(&wanted_delay, &remaining_delay);
+				if (err == -1 && errno == EINTR)
 				{
-					/* wait */
-					err = nanosleep(&wanted_delay, &remaining_delay);
-					if (err == -1 && errno == EINTR)
-					{
-						wanted_delay = remaining_delay;
-					}
+					wanted_delay = remaining_delay;
 				}
-				while (errno == EINTR);
 			}
+			while (errno == EINTR);
 		}
 	}
+
+	/* Display TimeStamp when caller test finish time */
+	printf("%s Caller test finish.\n", vos_getTimeStamp());
 	/* Dump Caller Receive Result */
-	if (printCallerResult(pTrdpInitializeParameter) != MD_APP_NO_ERR)
+	if (printCallerResult(pTrdpInitializeParameter, pCallerThreadParameter->pCommandValue->commandValueId) != MD_APP_NO_ERR)
 	{
-		printf("Caller Receive Count Dump Err\n");
+		vos_printf(VOS_LOG_ERROR, "Caller Receive Count Dump Err\n");
 	}
+
+	/* Delete Listener */
+    /* delete Subnet1 Listener */
+    err = tlm_delListener(appHandle, appThreadSessionHandle.pMdAppThreadListener);
+    if(err != TRDP_NO_ERR)
+	{
+    	vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+	}
+    /* Is this Ladder Topology ? */
+	if (pCallerThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
+	{
+		/* delete Subnet2 Listener */
+		err = tlm_delListener(appHandle2, appThreadSessionHandle2.pMdAppThreadListener);
+		if(err != TRDP_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+		}
+	}
+
+	/* Delete command Value form COMMAND VALUE LIST */
+	if (deleteCommandValueList(&pTrdpInitializeParameter, pCallerThreadParameter->pCommandValue) != MD_APP_NO_ERR)
+	{
+		vos_printf(VOS_LOG_ERROR, "Caller COMMAND_VALUE delete Err\n");
+	}
+	/* Delete pCallerThreadParameter */
+	free(pCallerThreadParameter);
+	pCallerThreadParameter = NULL;
 	return 0;
 }

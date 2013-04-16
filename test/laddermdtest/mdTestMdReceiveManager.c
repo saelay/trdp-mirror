@@ -84,12 +84,52 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s",
-           pTime,
-           catStr[category],
-           pFile,
-           LineNumber,
-           pMsgStr);
+    BOOL logPrintOnFlag = FALSE;	/* FALSE is not print */
+
+    switch(category)
+    {
+    	case VOS_LOG_ERROR:
+			/* logCategoryOnOffType : ERROR */
+			if ((logCategoryOnOffType & LOG_CATEGORY_ERROR) == LOG_CATEGORY_ERROR)
+			{
+				logPrintOnFlag = TRUE;
+			}
+		break;
+    	case VOS_LOG_WARNING:
+			/* logCategoryOnOffType : WARNING */
+    		if((logCategoryOnOffType & LOG_CATEGORY_WARNING) == LOG_CATEGORY_WARNING)
+			{
+				logPrintOnFlag = TRUE;
+			}
+    	break;
+    	case VOS_LOG_INFO:
+			/* logCategoryOnOffType : INFO */
+    		if((logCategoryOnOffType & LOG_CATEGORY_INFO) == LOG_CATEGORY_INFO)
+			{
+				logPrintOnFlag = TRUE;
+			}
+    	break;
+    	case VOS_LOG_DBG:
+			/* logCategoryOnOffType : DEBUG */
+			if((logCategoryOnOffType & LOG_CATEGORY_DEBUG) == LOG_CATEGORY_DEBUG)
+			{
+				logPrintOnFlag = TRUE;
+			}
+		break;
+    	default:
+    	break;
+    }
+
+    /* Check log Print */
+    if (logPrintOnFlag == TRUE)
+    {
+		printf("%s %s %s:%d %s",
+			   pTime,
+			   catStr[category],
+			   pFile,
+			   LineNumber,
+			   pMsgStr);
+    }
 }
 
 /**********************************************************************************************************************/
@@ -125,11 +165,11 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 
 	memset(&mem_config,0,sizeof(mem_config));
 
-	// Memory allocator config
+	/* Memory allocator config */
 	mem_config.p    = NULL;
 	mem_config.size = HEAP_MEMORY_SIZE;
 
-	//	MD config1
+	/*	MD config1 */
 	memset(&md_config,0,sizeof(md_config));
 	md_config.pfCbFunction = md_indication;
 	md_config.pRefCon = &useMdSendSubnet1;
@@ -148,6 +188,13 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	md_config.udpPort        = TRDP_MD_UDP_PORT;
 	md_config.tcpPort        = TRDP_MD_UDP_PORT;
 
+	/*	PD Process config for TCP */
+	if (pTrdpInitializeParameter->mdTransportType == MD_TRANSPORT_TCP)
+	{
+		processConfig.options = TRDP_OPTION_NONE;
+		processConfig2.options = TRDP_OPTION_NONE;
+	}
+
 	/* Get IP Address */
 	struct ifaddrs *ifa_list;
 	struct ifaddrs *ifa;
@@ -157,7 +204,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	/* Get I/F address */
 	if (getifaddrs(&ifa_list) != 0)
 	{
-    	printf("getifaddrs error. errno=%d\n", errno);
+		vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
        return 1;
 	}
 
@@ -174,7 +221,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 							&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr,
 							addrStr,
 							sizeof(addrStr));
-				printf("ip:%s\n",addrStr);
+				vos_printf(VOS_LOG_INFO, "ip:%s\n", addrStr);
 				subnetId1Address = inet_network(addrStr);
 				break;
 			}
@@ -191,7 +238,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 
 	if (errv != TRDP_NO_ERR)
 	{
-		printf("tlc_init() error = %d\n",errv);
+		vos_printf(VOS_LOG_ERROR, "tlc_init() error = %d\n",errv);
 		return MD_APP_ERR;
 	}
 
@@ -207,7 +254,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	);
 	if (errv != TRDP_NO_ERR)
 	{
-	    printf("Subnet1 tlc_openSession() error = %d\n",errv);
+		vos_printf(VOS_LOG_ERROR, "Subnet1 tlc_openSession() error = %d\n",errv);
 	    return MD_APP_ERR;;
 	}
 
@@ -236,7 +283,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 		);
 		if (errv != TRDP_NO_ERR)
 		{
-		    printf("Subnet2 tlc_openSession() error = %d\n",errv);
+			vos_printf(VOS_LOG_ERROR, "Subnet2 tlc_openSession() error = %d\n",errv);
 		    return MD_APP_ERR;
 		}
 
@@ -263,7 +310,11 @@ void md_indication(
 	/* Get TimeStamp when call md_indication() */
 	sprintf(timeStamp, "%s md_indication()", vos_getTimeStamp());
 
-    printf("md_indication(r=%p m=%p d=%p l=%d comId=%d)\n",pRefCon,pMsg,pData,dataSize,pMsg->comId);
+	vos_printf(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%d)\n",
+			pRefCon,
+			pMsg,
+			pData,
+			dataSize,pMsg->comId);
 
     #if 0
 
@@ -296,20 +347,39 @@ void md_indication(
     #endif
 
     {
+
+
 		// ADd message to application event queue
 		trdp_apl_cbenv_t fwd;
 
 		fwd.pRefCon  = pRefCon;
 		fwd.Msg      = * pMsg;
-		fwd.pData    = (UINT8 *)pData;
+//		fwd.pData    = (UINT8 *)pData;
+    	fwd.pData = (UINT8 *)malloc(dataSize);
+		if (fwd.pData == NULL)
+		{
+			vos_printf(VOS_LOG_ERROR, "md_indicate Error. malloc Err\n");
+		}
+		memset(fwd.pData, 0, dataSize);
+		memcpy(fwd.pData, pData, dataSize);
 		fwd.dataSize = dataSize;
 		memset(fwd.timeStampString, 0, sizeof(fwd.timeStampString));
 		strncpy(fwd.timeStampString, timeStamp, sizeof(timeStamp));
 
 		/* Set AppThreadSessionHandle */
 		APP_THREAD_SESSION_HANDLE appThreadSessionHandle ={{0}};
-		/* AppThreadLisner Area */
-		appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T )malloc(sizeof(TRDP_LIS_T));
+		/* AppThreadListener Area */
+		if (appThreadSessionHandle.pMdAppThreadListener != NULL)
+		{
+			free(appThreadSessionHandle.pMdAppThreadListener);
+		}
+		appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T )malloc(sizeof(TRDP_ADDRESSES_T));
+		if (appThreadSessionHandle.pMdAppThreadListener == NULL)
+		{
+			vos_printf(VOS_LOG_ERROR, "md_indication ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
+		}
+		/* Clear AppThreadListener Area */
+		memset(appThreadSessionHandle.pMdAppThreadListener, 0, sizeof(TRDP_ADDRESSES_T));
 		/* Set AppThreadSessionHandle AppThreadListener comId */
 		appThreadSessionHandle.pMdAppThreadListener->comId = fwd.Msg.comId;
 		/* Set AppThreadSessionHandle AppThreadListener Source IP Address */
@@ -328,11 +398,12 @@ void md_indication(
 					&appThreadSessionHandle);
 			if(sendMessageQueueDescriptor <= 0)
 			{
-/*				printf("Message Queue Descriptor Error. Don't Send Message Queue.\n"); */
+/*				vos_printf(VOS_LOG_ERROR, "Message Queue Descriptor Error. Don't Send Message Queue.\n"); */
 			}
 			else
 			{
 				queue_sendMessage(&fwd, sendMessageQueueDescriptor);
+				break;
 			}
 		}
 
@@ -440,25 +511,27 @@ MD_APP_ERR_TYPE mdReceive_main_proc(void)
 
 		/* First TRDP instance, calls the call back function to handle1 received data
 		* and copy them into the Traffic Store using offset address from configuration. */
-
-#if 0
 		/* Select Mode */
 		tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &receive);
-#endif /* if 0 */
+#if 0
 		/* Polling Mode */
 		tlc_process(appHandle, NULL, NULL);
+#endif /* if 0 */
 
 		/* Second TRDP instance, calls the call back function to handle1 received data
 		* and copy them into the Traffic Store using offset address from configuration. */
+		if (appHandle2 != NULL)
+		{
+			/* Select Mode */
+			tlc_process(appHandle2, (TRDP_FDS_T *) &rfds, &receive);
+		}
 #if 0
-		/* Select Mode */
-		tlc_process(appHandle2, (TRDP_FDS_T *) &rfds, &receive);
-#endif /* if 0 */
 		if (appHandle2 != NULL)
 		{
 			/* Polling Mode */
 			tlc_process(appHandle2, NULL, NULL);
 		}
+#endif /* if 0 */
 	}   /*	Bottom of while-loop	*/
 
 	tlc_terminate();

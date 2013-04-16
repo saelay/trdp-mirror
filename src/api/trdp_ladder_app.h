@@ -84,6 +84,12 @@ extern "C" {
 #define DATASET1_COMID				10001			/* DATASET1 of ComId : 10001 */
 #define DATASET2_COMID				10002			/* DATASET2 of ComId : 10002 */
 
+/* LOG CATEGORY */
+#define LOG_CATEGORY_ERROR			0x1				/**< This is a critical error                 */
+#define LOG_CATEGORY_WARNING		0x2				/**< This is a warning                        */
+#define LOG_CATEGORY_INFO			0x4				/**< This is an info                          */
+#define LOG_CATEGORY_DEBUG			0x8				/**< This is a debug info                     */
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */
@@ -96,7 +102,8 @@ typedef enum
     PD_APP_MEM_ERR		= -3,			/**< PD Application Memory Error */
     PD_APP_THREAD_ERR	= -4,			/**< PD Application Thread Error */
     PD_APP_MUTEX_ERR		= -5,			/**< PD Application Thread Mutex Error */
-    PD_APP_COMMAND_ERR	= -6			/**< PD Application Command Error */
+    PD_APP_COMMAND_ERR	= -6,			/**< PD Application Command Error */
+    PD_APP_QUIT_ERR	= -7				/**< PD Application Quit Command */
 } PD_APP_ERR_TYPE;
 
 /* Command Value */
@@ -139,7 +146,12 @@ typedef struct PD_COMMAND_VALUE
 /* PD Thread Parameter */
 typedef struct
 {
-	PD_COMMAND_VALUE *pPdCommandValue;
+	PD_COMMAND_VALUE	*pPdCommandValue;
+	TRDP_SUB_T			subHandleNet1ComId1;		/*	Sub-network Id1 ComID1 identifier to the subscription	*/
+	TRDP_PUB_T			pubHandleNet1ComId1;		/*	Sub-network Id1 ComID2 identifier to the publication	*/
+	TRDP_SUB_T			subHandleNet2ComId1;		/*	Sub-network Id2 ComID1 identifier to the subscription	*/
+	TRDP_PUB_T			pubHandleNet2ComId1;		/*	Sub-network Id2 ComID2 identifier to the publication	*/
+	UINT32				subPubValidFlag;			/* Subscribe Publish valid flag */
 } PD_THREAD_PARAMETER;
 
 /**	DataSet definition	*/
@@ -370,6 +382,17 @@ PD_APP_ERR_TYPE analyzePdCommand(
  */
 PD_APP_ERR_TYPE trdp_pdInitialize (
 		void);
+
+/**********************************************************************************************************************/
+/** TRDP PD Application initialization
+ *
+ *  @param[in]		pPDThreadParameter			pointer to PDThread Parameter
+ *
+ *  @retval			PD_APP_NO_ERR					no error
+ *  @retval			PD_APP_ERR						some error
+ */
+PD_APP_ERR_TYPE trdp_pdApplicationInitialize (
+		PD_THREAD_PARAMETER *pPdThreadParameter);
 
 /**********************************************************************************************************************/
 /** PD Application main

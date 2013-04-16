@@ -123,18 +123,21 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	pma = &new_ma;
 	#endif
 
+	/* delete a queue for remained queue */
+	mq_unlink(pMqName);
+
 	/* create a queue */
 	trdp_mq = mq_open(pMqName, O_RDWR | O_CREAT, S_IWUSR|S_IRUSR, pma);
 	if ((mqd_t)-1 == trdp_mq)
 	{
-		printf("mq_open() Error");
+		vos_printf(VOS_LOG_ERROR, "mq_open() Error");
 		return MD_APP_ERR;
 	}
 	/* get attributes */
 	rc = mq_getattr(trdp_mq,&old_ma);
 	if (-1 == rc)
 	{
-		printf("mq_getattr() Error");
+		vos_printf(VOS_LOG_ERROR, "mq_getattr() Error");
 		return MD_APP_ERR;
 	}
 
@@ -146,7 +149,7 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	rc = mq_setattr(trdp_mq,&new_ma,&old_ma);
 	if (-1 == rc)
 	{
-		printf("mq_setattr() Error");
+		vos_printf(VOS_LOG_ERROR, "mq_setattr() Error");
 		return MD_APP_ERR;
 	}
 
@@ -154,7 +157,7 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	rc = mq_getattr(trdp_mq,&old_ma);
 	if (-1 == rc)
 	{
-		printf("mq_getattr() Error");
+		vos_printf(VOS_LOG_ERROR, "mq_getattr() Error");
 		return MD_APP_ERR;
 	}
 
@@ -173,7 +176,7 @@ MD_APP_ERR_TYPE queue_sendMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 	rc = mq_send(mqDescriptor,p_bf,l_bf,0);
 	if (-1 == rc)
 	{
-		printf("mq_send() Error");
+		vos_printf(VOS_LOG_ERROR, "mq_send() Error");
 		return MD_APP_ERR;
 	}
 	else
@@ -197,17 +200,19 @@ MD_APP_ERR_TYPE queue_receiveMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 	{
 		if (EAGAIN == errno)
 		{
-			return errno;
+			/* Message Queue Empty */
+			return MD_APP_EMPTY_MESSAGE_ERR;
 		}
-		printf("mq_receive() Error");
+		vos_printf(VOS_LOG_ERROR, "mq_receive() Error");
 		return MD_APP_ERR;
 	}
+	/* Receive Message Size err ? */
 	if (rc != l_bf)
 	{
-		printf("mq_receive() expected %d bytes, not %d\n",l_bf,(int)rc);
+		vos_printf(VOS_LOG_ERROR, "mq_receive() expected %d bytes, not %d\n",l_bf,(int)rc);
 		return MD_APP_ERR;
 	}
-	printf("Received %d bytes\n",(int)rc);
+	vos_printf(VOS_LOG_INFO, "Received Message Queue in datasize %d bytes\n", msg->dataSize);
 	return MD_APP_NO_ERR;
 }
 
@@ -232,7 +237,7 @@ MD_APP_ERR_TYPE setAppThreadSessionMessageQueueDescriptor(
 			return MD_APP_NO_ERR;
 		}
 	}
-	printf("Don't Set MQ Descriptor.\n");
+	vos_printf(VOS_LOG_ERROR, "Don't Set MQ Descriptor.\n");
 	return MD_APP_ERR;
 }
 
@@ -252,6 +257,12 @@ mqd_t deleteAppThreadSessionMessageQueueDescriptor(
 	UINT32 i = 0;
 	for(i = 0; i < APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX; i++)
 	{
+		/* Check appThreadSessionHadle.pMdAppThreadListener */
+		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener == NULL)
+		{
+			/* pMdAppThereaListener Noting */
+			break;
+		}
 		/* Matching ComId : equal */
 		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
 		{
@@ -280,6 +291,7 @@ mqd_t deleteAppThreadSessionMessageQueueDescriptor(
 							memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
 							/* Free Request Thread Session Handle Area */
 							free(pAppThreadSessionHandle);
+							pAppThreadSessionHandle = NULL;
 							return MD_APP_NO_ERR;
 						}
 					}
@@ -382,24 +394,33 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 			&& (mdDataSize <= MD_INCREMENT_DATA_MAX_SIZE))
 	{
 		/* Get MD DATA Area */
-		**pppMdData = (UINT8 *)malloc(mdDataSize);
+		if (**pppMdData != NULL)
+		{
+			free(**pppMdData);
+			**pppMdData = NULL;
+		}
+//		**pppMdData = (UINT8 *)malloc(mdDataSize);
+		**pppMdData = (UINT8 *)realloc(**pppMdData, mdDataSize);
 		if (**pppMdData == NULL)
 		{
-			printf("createMdIncrement DataERROR. malloc Err\n");
+			vos_printf(VOS_LOG_ERROR, "createMdIncrement DataERROR. malloc Err\n");
 			return MD_APP_MEM_ERR;
 		}
 		else
 		{
+			memset(**pppMdData, 0, mdDataSize);
 			/* Store pMdData Address */
 			pFirstMdData = **pppMdData;
+#if 0
 			/* Set DATA Size */
 			sprintf((char *)**pppMdData, "%4u", mdDataSize);
 			**pppMdData = **pppMdData + 4;
-
+#endif
 			/* Create Top Character */
 			firstCharacter = (char)(mdSendCount % MD_DATA_INCREMENT_CYCLE);
 			/* Create MD Increment Data */
-			for(i=0; i <= mdDataSize - 4; i++)
+//			for(i=0; i <= mdDataSize - 4; i++)
+			for(i=0; i < mdDataSize; i++)
 			{
 				***pppMdData = (char)((firstCharacter + i) % MD_DATA_INCREMENT_CYCLE);
 				**pppMdData = **pppMdData + 1;
@@ -407,10 +428,10 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 		}
 		/* Return start pMdaData Address */
 		**pppMdData = pFirstMdData;
-		}
+	}
 	else
 	{
-		printf("createMdIncrementData ERROR. parameter Err\n");
+		vos_printf(VOS_LOG_ERROR, "createMdIncrementData ERROR. parameter Err\n");
 		return MD_APP_PARAM_ERR;
 	}
 	return MD_APP_NO_ERR;
@@ -441,7 +462,7 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 	if ((pppMdData == NULL)
 			&& (pMdDataSize == NULL))
 	{
-		printf("createMdFixedDataERROR. parameter Err\n");
+		vos_printf(VOS_LOG_ERROR, "createMdFixedDataERROR. parameter Err\n");
 		return MD_APP_PARAM_ERR;
 	}
 	else
@@ -450,7 +471,7 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 		err = getMdDataFileNameFromComId(comId, mdDataFileName);
 		if (err != MD_APP_NO_ERR)
 		{
-			printf("createMdFixedData ERROR. comId:%d Err\n", comId);
+			vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. comId:%d Err\n", comId);
 			return MD_APP_PARAM_ERR;
 		}
 		else
@@ -460,7 +481,7 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 			fpMdDataFile = fopen(mdDataFileName, "rb");
 			if (fpMdDataFile == NULL)
 			{
-				printf("createMdFixedData ERROR. MdDataFile Open Err\n");
+				vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Open Err\n");
 				return MD_APP_PARAM_ERR;
 			}
 			/* Get MdDataFile Size */
@@ -471,24 +492,32 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 */
 			if ((fstat(fileno(fpMdDataFile), &fileStat)) == -1)
 			{
-				printf("createMdFixedData ERROR. MdDataFile Stat Err\n");
+				vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Stat Err\n");
 				return MD_APP_PARAM_ERR;
 			}
 			mdDataFileSize = fileStat.st_size;
 			*pMdDataSize = mdDataFileSize;
 
 			/* Get MD DATA Area */
+			if (**pppMdData != NULL)
+			{
+				free(**pppMdData);
+				**pppMdData = NULL;
+			}
 			**pppMdData = (UINT8 *)malloc(mdDataFileSize);
 			if (**pppMdData == NULL)
 			{
-				printf("createMdFixedData ERROR. malloc Err\n");
+				vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. malloc Err\n");
 				return MD_APP_MEM_ERR;
 			}
-
-			/* Read MdDataFile */
-			fread(**pppMdData, sizeof(char), mdDataFileSize, fpMdDataFile);
-			/* Close MdDataFile */
-			fclose(fpMdDataFile);
+			else
+			{
+				memset(**pppMdData, 0, mdDataFileSize);
+				/* Read MdDataFile */
+				fread(**pppMdData, sizeof(char), mdDataFileSize, fpMdDataFile);
+				/* Close MdDataFile */
+				fclose(fpMdDataFile);
+			}
 		}
 	}
 	return MD_APP_NO_ERR;
@@ -514,7 +543,7 @@ MD_APP_ERR_TYPE getMdDataFileNameFromComId (UINT32 comId, CHAR8 *pMdDataFileName
 	/* Parameter Check */
 	if (pMdDataFileName == NULL)
 	{
-		printf("getMdDataFileNameFromComIdERROR. parameter Err\n");
+		vos_printf(VOS_LOG_ERROR, "getMdDataFileNameFromComIdERROR. parameter Err\n");
 		return MD_APP_PARAM_ERR;
 	}
 	else
@@ -532,7 +561,7 @@ MD_APP_ERR_TYPE getMdDataFileNameFromComId (UINT32 comId, CHAR8 *pMdDataFileName
 			}
 		}
 	}
-	printf("getMdDataFileNameFromComId ERROR. Unmatch ComId:%d Err\n", comId);
+	vos_printf(VOS_LOG_ERROR, "getMdDataFileNameFromComId ERROR. Unmatch ComId:%d Err\n", comId);
 	return MD_APP_PARAM_ERR;
 }
 
@@ -573,7 +602,7 @@ int l2fLog(char *logString, int logKind, int dumpOnOff)
 		if (writeLogFifoFd == -1)
 		{
 			/* Log FIFO(named pipe) Open Error */
-			printf("Write Log FIFO Open ERROR\n");
+			vos_printf(VOS_LOG_ERROR, "Write Log FIFO Open ERROR\n");
 			return MD_APP_ERR;
 		}
 	}
@@ -582,7 +611,7 @@ int l2fLog(char *logString, int logKind, int dumpOnOff)
 	writeFifoSize = write(writeLogFifoFd, writeFifoBuffer, writeFifoBufferSize);
 	if (writeFifoSize == -1)
 	{
-		printf("l2fLogERROR. write FIFO Err\n");
+		vos_printf(VOS_LOG_ERROR, "l2fLogERROR. write FIFO Err\n");
 		return MD_APP_ERR;
 	}
 	return MD_APP_NO_ERR;
@@ -628,13 +657,22 @@ MD_APP_ERR_TYPE miscMemory2String (
 	int recursiveCallCount = 0;
 
 	/* Get String Area */
+	if (strTmp)
+	{
+		free(strTmp);
+		strTmp = NULL;
+	}
 	strTmp = (char *)malloc(PIPE_BUFFER_SIZE);
 	if (strTmp == NULL)
 	{
-		printf("miscMemory2String(): Could not allocate memory.\n");
+		vos_printf(VOS_LOG_ERROR, "miscMemory2String(): Could not allocate memory.\n");
 		return MD_APP_MEM_ERR;
 	}
-	strTmpStartAddress = strTmp;
+	else
+	{
+		memset(strTmp, 0, PIPE_BUFFER_SIZE);
+		strTmpStartAddress = strTmp;
+	}
 
 //	strTmp = strTmpBuffer;
 	if (pStartAddress != NULL && memorySize > 0)
@@ -697,6 +735,7 @@ MD_APP_ERR_TYPE miscMemory2String (
 		l2fLog(strTmpStartAddress, logKind, dumpOnOff);
 		/* Release String Area */
 		free(strTmpStartAddress);
+		strTmpStartAddress = NULL;
 
 		/* Remaining Log String ? */
 		if (remainderMemorySize > 0)
@@ -714,6 +753,7 @@ MD_APP_ERR_TYPE miscMemory2String (
 	{
 		/* Release String Area */
 		free(strTmpStartAddress);
+		strTmpStartAddress = NULL;
 		return MD_APP_ERR;
 	}
 	return MD_APP_NO_ERR;
@@ -735,9 +775,9 @@ MD_APP_ERR_TYPE miscMemory2String (
  *
  */
 MD_APP_ERR_TYPE getMdDataFromComId(
-		UINT32 receiveComId,
-		UINT8 *pReceiveMdData,
-		UINT32 *pReceiveMdDataSize,
+		const UINT32 receiveComId,
+		const UINT8 *pReceiveMdData,
+		const UINT32 *pReceiveMdDataSize,
 		UINT8 **ppCheckMdData,
 		UINT32 **ppCheckMdDataSize)
 {
@@ -745,11 +785,20 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 	MD_APP_ERR_TYPE err = MD_APP_NO_ERR;
 
 	/* Get Check MD DATA Size Area */
+	if (*ppCheckMdDataSize != NULL)
+	{
+		free(*ppCheckMdDataSize);
+		*ppCheckMdDataSize = NULL;
+	}
 	*ppCheckMdDataSize = (UINT32 *)malloc(sizeof(UINT32));
 	if (*ppCheckMdDataSize == NULL)
 	{
-		printf("getMdDataFromId ERROR. malloc Err\n");
+		vos_printf(VOS_LOG_ERROR, "getMdDataFromId ERROR. malloc Err\n");
 		return MD_APP_MEM_ERR;
+	}
+	else
+	{
+		memset(*ppCheckMdDataSize, 0, sizeof(UINT32));
 	}
 
 	/* Decide MD DATA Type*/
@@ -758,13 +807,14 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 		case COMID_INCREMENT_DATA:
 		case COMID_INCREMENT_DATA_REPLY:
 			/* Get Increment Start Byte of Receive MD DATA */
-			memcpy(&startCharacter, pReceiveMdData + 4, sizeof(char));
+//			memcpy(&startCharacter, pReceiveMdData + 4, sizeof(char));
+			memcpy(&startCharacter, pReceiveMdData, sizeof(char));
 			/* Create Increment DATA */
 			err = createMdIncrementData(startCharacter, *pReceiveMdDataSize, &ppCheckMdData);
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Increment DATA */
-				printf("Create Increment DATA ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Increment DATA ERROR\n");
 			}
 			else
 			{
@@ -778,7 +828,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Fixed DATA1 */
-				printf("Create Fixed DATA1 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA1 ERROR\n");
 			}
 		break;
 		case COMID_FIXED_DATA2:
@@ -788,7 +838,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Fixed DATA2 */
-				printf("Create Fixed DATA2 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA2 ERROR\n");
 			}
 		break;
 		case COMID_FIXED_DATA3:
@@ -798,7 +848,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Fixed DATA3 */
-				printf("Create Fixed DATA3 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA3 ERROR\n");
 			}
 		break;
 		case COMID_FIXED_DATA4:
@@ -808,7 +858,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Fixed DATA4 */
-				printf("Create Fixed DATA4 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA4 ERROR\n");
 			}
 		break;
 		case COMID_FIXED_DATA5:
@@ -818,7 +868,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Fixed DATA5 */
-				printf("Create Fixed DATA5 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA5 ERROR\n");
 			}
 		break;
 		case COMID_FIXED_DATA6:
@@ -828,7 +878,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Fixed DATA6 */
-				printf("Create Fixed DATA6 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA6 ERROR\n");
 			}
 		break;
 		case COMID_ERROR_DATA_1:
@@ -838,7 +888,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Error DATA1 */
-				printf("Create Error DATA1 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Error DATA1 ERROR\n");
 			}
 		break;
 		case COMID_ERROR_DATA_2:
@@ -848,7 +898,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Error DATA2 */
-				printf("Create Error DATA2 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Error DATA2 ERROR\n");
 			}
 		break;
 		case COMID_ERROR_DATA_3:
@@ -858,7 +908,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Error DATA3 */
-				printf("Create Error DATA3 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Error DATA3 ERROR\n");
 			}
 		break;
 		case COMID_ERROR_DATA_4:
@@ -868,12 +918,12 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Error DATA4 */
-				printf("Create Error DATA4 ERROR\n");
+				vos_printf(VOS_LOG_ERROR, "Create Error DATA4 ERROR\n");
 			}
 		break;
 		default:
 				/* MD DATA TYPE NOTHING */
-				printf("Receive ComId ERROR. receiveComId = %d\n", receiveComId);
+			vos_printf(VOS_LOG_ERROR, "Receive ComId ERROR. receiveComId = %d\n", receiveComId);
 				err = MD_APP_ERR;
 		break;
 	}
@@ -893,27 +943,26 @@ MD_APP_ERR_TYPE getMdDataFromComId(
  *
  */
 MD_APP_ERR_TYPE decideMdTransmissionResult(
-		UINT32 receiveComId,
-		UINT8 *pReceiveMdData,
-		UINT32 *pReceiveMdDataSize,
+		const UINT32 receiveComId,
+		const UINT8 *pReceiveMdData,
+		const UINT32 *pReceiveMdDataSize,
 		CHAR8 *pLogString)
 {
 	/* Lock MD Application Thread Mutex */
 	lockMdApplicationThread();
 
-	MD_APP_ERR_TYPE err = MD_APP_ERR;		/* MD Application Result Code */
+	MD_APP_ERR_TYPE err = MD_APP_NO_ERR;		/* MD Application Result Code */
 	UINT8 *pCheckMdData = NULL;
 	UINT32 *pCheckMdDataSize = NULL;
 	UINT32 receiveMdDataSetSize = 0;
 
-	/* Get MD DATASET Size (MD DATA = MD HEADER + MD DATASET + FCR) */
+	/* Get MD DATASET Size */
 	memcpy(&receiveMdDataSetSize, pReceiveMdDataSize, sizeof(UINT32));
-	receiveMdDataSetSize = receiveMdDataSetSize - MD_HEADER_SIZE - MD_FCS_SIZE;
 
 	/* Create for check MD DATA */
 	err = getMdDataFromComId(
 			receiveComId,
-			pReceiveMdData + MD_HEADER_SIZE,
+			pReceiveMdData,
 			&receiveMdDataSetSize,
 			&pCheckMdData,
 			&pCheckMdDataSize);
@@ -921,17 +970,6 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 	{
 		/* Error : Create Increment DATA */
 		sprintf(pLogString, "<NG> Receive MD DATA error. Create Check MD DATA Err.\n");
-		if (pCheckMdDataSize != NULL)
-		{
-			/* Free check MD DATA Size Area */
-			free(pCheckMdDataSize);
-		}
-		if (pCheckMdData != NULL)
-		{
-			/* Free check MD DATA Area */
-			free(pCheckMdData);
-		}
-		return err;
 	}
 	else
 	{
@@ -939,55 +977,40 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 		if (receiveMdDataSetSize != *pCheckMdDataSize)
 		{
 			sprintf(pLogString, "<NG> Receive MD DATA error. The size of is different.\n");
-			if (pCheckMdDataSize != NULL)
-			{
-				/* Free check MD DATA Size Area */
-				free(pCheckMdDataSize);
-			}
-			if (pCheckMdData != NULL)
-			{
-				/* Free check MD DATA Area */
-				free(pCheckMdData);
-			}
-			return MD_APP_ERR;
+			err = MD_APP_ERR;
 		}
 		else
 		{
 			/* Compare Contents */
-			if (memcmp(pReceiveMdData + MD_HEADER_SIZE, pCheckMdData, receiveMdDataSetSize) != 0)
+			if (memcmp(pReceiveMdData, pCheckMdData, receiveMdDataSetSize) != 0)
 			{
 				sprintf(pLogString, "<NG> Receive MD error. Contents is different.\n");
-				if (pCheckMdDataSize != NULL)
-				{
-					/* Free check MD DATA Size Area */
-					free(pCheckMdDataSize);
-				}
-				if (pCheckMdData != NULL)
-				{
-					/* Free check MD DATA Area */
-					free(pCheckMdData);
-				}
 				return MD_APP_ERR;
 			}
 			else
 			{
 				sprintf(pLogString,"<OK> Receive MD DATA normal.\n");
-				if (pCheckMdDataSize != NULL)
-				{
-					/* Free check MD DATA Size Area */
-					free(pCheckMdDataSize);
-				}
-				if (pCheckMdData != NULL)
-				{
-					/* Free check MD DATA Area */
-					free(pCheckMdData);
-				}
+				err = MD_APP_NO_ERR;
 			}
 		}
 	}
+
+	if (pCheckMdDataSize != NULL)
+	{
+		/* Free check MD DATA Size Area */
+		free(pCheckMdDataSize);
+		pCheckMdDataSize = NULL;
+	}
+	if (pCheckMdData != NULL)
+	{
+		/* Free check MD DATA Area */
+		free(pCheckMdData);
+		pCheckMdData = NULL;
+	}
+
 	/* UnLock MD Application Thread Mutex */
 	unlockMdApplicationThread();
-	return MD_APP_NO_ERR;
+	return err;
 }
 
 /**********************************************************************************************************************/
@@ -1025,7 +1048,7 @@ MD_APP_ERR_TYPE decideResultCode(
 		   break;
 
 		default:
-		   printf("Error on packet err = %d\n",mdResultCode);
+			vos_printf(VOS_LOG_ERROR, "Error on packet err = %d\n",mdResultCode);
 		   return mdResultCode;
 		   break;
 	}
@@ -1159,14 +1182,15 @@ MD_APP_ERR_TYPE printMdStatistics (
 /** Display MD Caller Receive Count
  *
  *  @param[in]      pHeadCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @param[in]      commandValueId		COMMAND_VALUE ID
  *
  *  @retval         MD_APP_NO_ERR					no error
  *  @retval         MD_PARAM_ERR					parameter	error
  *
  */
 MD_APP_ERR_TYPE printCallerResult (
-		COMMAND_VALUE	*pHeadCommandValue)
+		COMMAND_VALUE	*pHeadCommandValue,
+		UINT32 commandValueId)
 {
 	COMMAND_VALUE *iterCommandValue;
 	UINT16 commnadValueNumber = 1;
@@ -1184,34 +1208,42 @@ MD_APP_ERR_TYPE printCallerResult (
 		/* Check Valid Caller */
 		if ((iterCommandValue->mdCallerReplierType == CALLER) && (pHeadCommandValue->mdDestinationAddress != 0))
 		{
-	    	/*  Dump CommandValue */
-			printf("Caller No.%u\n", commnadValueNumber);
-			printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
-			printf("-d,	Caller Request Message Type (Mn:0, Mr-Mp:1): %u\n", iterCommandValue->mdMessageKind);
-			printf("-e,	Caller Send MD DATASET Telegram Type (Increment:0, Fixed:1-6, Error:7-10): %u\n", iterCommandValue->mdTelegramType);
-			printf("-f,	MD Increment Message Size Byte: %u\n", iterCommandValue->mdMessageSize);
-			miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
-			printf("-g,	Caller MD Send Destination IP Address: %s\n", strIp);
-//			printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
-			printf("-j,	Caller known MD Replier Number: %u\n", iterCommandValue->mdReplierNumber);
-			printf("-k,	Caller MD Request Send Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
-//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
-			printf("-m,	Caller MD Request Send Cycle Time: %u micro sec\n", iterCommandValue->mdCycleTime);
-			printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
-			printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
-			printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
-			printf("-t,	Caller Using Network I/F (Subnet1:1,subnet2:2): %u\n", iterCommandValue->mdSendSubnet);
-			printf("Caller Receive MD Count: %u\n", iterCommandValue->callerMdReceiveCounter);
-			printf("Caller Receive MD Success Count: %u\n", iterCommandValue->callerMdReceiveSuccessCounter);
-			printf("Caller Receive MD Failure Count: %u\n", iterCommandValue->callerMdReceiveFailureCounter);
-			printf("Caller Retry Count: %u\n", iterCommandValue->callerMdRetryCounter);
-			commnadValueNumber++;
+			/* Check ALL commanValue or select commandValue */
+			if( (commandValueId == 0)
+			|| ((commandValueId != 0) && (commandValueId == iterCommandValue->commandValueId)))
+			{
+				/*  Dump CommandValue */
+				printf("Caller No.%u\n", commnadValueNumber);
+				printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
+				printf("-d,	Caller Request Message Type (Mn:0, Mr-Mp:1): %u\n", iterCommandValue->mdMessageKind);
+				printf("-e,	Caller Send MD DATASET Telegram Type (Increment:0, Fixed:1-6, Error:7-10): %u\n", iterCommandValue->mdTelegramType);
+				printf("-f,	MD Increment Message Size Byte: %u\n", iterCommandValue->mdMessageSize);
+				miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
+				printf("-g,	Caller MD Send Destination IP Address: %s\n", strIp);
+	//			printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
+				printf("-j,	Caller known MD Replier Number: %u\n", iterCommandValue->mdReplierNumber);
+				printf("-k,	Caller MD Request Send Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
+	//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
+				printf("-m,	Caller MD Request Send Cycle Time: %u micro sec\n", iterCommandValue->mdCycleTime);
+				printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+				printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
+				printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
+				printf("-t,	Caller Using Network I/F (Subnet1:1,subnet2:2): %u\n", iterCommandValue->mdSendSubnet);
+				printf("Caller Receive MD Count: %u\n", iterCommandValue->callerMdReceiveCounter);
+				printf("Caller Receive MD Success Count: %u\n", iterCommandValue->callerMdReceiveSuccessCounter);
+				printf("Caller Receive MD Failure Count: %u\n", iterCommandValue->callerMdReceiveFailureCounter);
+				printf("Caller Retry Count: %u\n", iterCommandValue->callerMdRetryCounter);
+				printf("Caller Send MD Count: %u\n", iterCommandValue->callerMdSendCounter);
+				printf("Caller Send MD Success Count: %u\n", iterCommandValue->callerMdSendSuccessCounter);
+				printf("Caller Send MD Failure Count: %u\n", iterCommandValue->callerMdSendFailureCounter);
+				commnadValueNumber++;
+			}
 		}
     }
 
     if (commnadValueNumber == 1 )
     {
-    	printf("Valid Subscriber MD Command isn't Set up\n");
+    	printf("Valid Caller MD Command isn't Set up\n");
     }
 
     return MD_APP_NO_ERR;
@@ -1221,14 +1253,15 @@ MD_APP_ERR_TYPE printCallerResult (
 /** Display MD Replier Receive Count
  *
  *  @param[in]      pHeadCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *  @param[in]      commandValueId		COMMAND_VALUE ID
  *
  *  @retval         MD_APP_NO_ERR					no error
  *  @retval         MD_PARAM_ERR					parameter	error
  *
  */
 MD_APP_ERR_TYPE printReplierResult (
-		COMMAND_VALUE	*pHeadCommandValue)
+		COMMAND_VALUE	*pHeadCommandValue,
+		UINT32 commandValueId)
 {
 	COMMAND_VALUE *iterCommandValue;
 	UINT16 commnadValueNumber = 1;
@@ -1246,31 +1279,84 @@ MD_APP_ERR_TYPE printReplierResult (
 		/* Check Valid Replier */
 		if ((iterCommandValue->mdCallerReplierType == REPLIER) && (pHeadCommandValue->mdAddListenerComId != 0))
 		{
-	    	/*  Dump CommandValue */
-			printf("Replier No.%u\n", commnadValueNumber);
-			printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
-			miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
-			printf("-g,	Replier MD Receive Destination IP Address: %s\n", strIp);
-//			printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
-			printf("-k,	Replier MD Request Receive Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
-//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
-			printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
-			printf("-o,	Replier MD Reply Error Type(1-6): %u\n", iterCommandValue->mdReplyErr);
-			printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
-			printf("-q,	Replier Add Listener ComId: %u\n", iterCommandValue->mdReplierNumber);
-//			printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
-			printf("Replier Receive MD Count: %u\n", iterCommandValue->callerMdReceiveCounter);
-			printf("Replier Receive MD Success Count: %u\n", iterCommandValue->callerMdReceiveSuccessCounter);
-			printf("Replier Receive MD Failure Count: %u\n", iterCommandValue->callerMdReceiveFailureCounter);
-			printf("Replier Retry Count: %u\n", iterCommandValue->callerMdRetryCounter);
-			commnadValueNumber++;
+			/* Check ALL commanValue or select commandValue */
+			if( (commandValueId == 0)
+			|| ((commandValueId != 0) && (commandValueId == iterCommandValue->commandValueId)))
+			{
+				/*  Dump CommandValue */
+				printf("Replier No.%u\n", commnadValueNumber);
+				printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
+				miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
+				printf("-g,	Replier MD Receive Destination IP Address: %s\n", strIp);
+	//			printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
+				printf("-k,	Replier MD Request Receive Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
+	//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
+				printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+				printf("-o,	Replier MD Reply Error Type(1-6): %u\n", iterCommandValue->mdReplyErr);
+				printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
+				printf("-q,	Replier Add Listener ComId: %u\n", iterCommandValue->mdReplierNumber);
+	//			printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
+				printf("Replier Receive MD Count: %u\n", iterCommandValue->replierMdReceiveCounter);
+				printf("Replier Receive MD Success Count: %u\n", iterCommandValue->replierMdReceiveSuccessCounter);
+				printf("Replier Receive MD Failure Count: %u\n", iterCommandValue->replierMdReceiveFailureCounter);
+				printf("Replier Retry Count: %u\n", iterCommandValue->replierMdRetryCounter);
+				printf("Replier Send MD Count: %u\n", iterCommandValue->replierMdSendCounter);
+				printf("Replier Send MD Success Count: %u\n", iterCommandValue->replierMdSendSuccessCounter);
+				printf("Replier Send MD Failure Count: %u\n", iterCommandValue->replierMdSendFailureCounter);
+				commnadValueNumber++;
+			}
 		}
     }
 
     if (commnadValueNumber == 1 )
     {
-    	printf("Valid Subscriber MD Command isn't Set up\n");
+    	printf("Valid Replier MD Command isn't Set up\n");
     }
 
+    return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Delete an element
+ *
+ *  @param[in]      ppHeadCommandValue          pointer to pointer to head of queue
+ *  @param[in]      pDeleteCommandValue         pointer to element to delete
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ *
+ */
+MD_APP_ERR_TYPE deleteCommandValueList (
+		COMMAND_VALUE    * *ppHeadCommandValue,
+		COMMAND_VALUE    *pDeleteCommandValue)
+{
+	COMMAND_VALUE *iterCommandValue;
+
+    if (ppHeadCommandValue == NULL || *ppHeadCommandValue == NULL || pDeleteCommandValue == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+    /* handle removal of first element */
+    if (pDeleteCommandValue == *ppHeadCommandValue)
+    {
+        *ppHeadCommandValue = pDeleteCommandValue->pNextCommandValue;
+        free(pDeleteCommandValue);
+        pDeleteCommandValue = NULL;
+        return MD_APP_NO_ERR;
+    }
+
+    for (iterCommandValue = *ppHeadCommandValue;
+    	  iterCommandValue != NULL;
+    	  iterCommandValue = iterCommandValue->pNextCommandValue)
+    {
+        if (iterCommandValue->pNextCommandValue && iterCommandValue->pNextCommandValue == pDeleteCommandValue)
+        {
+            iterCommandValue->pNextCommandValue = pDeleteCommandValue->pNextCommandValue;
+            free(pDeleteCommandValue);
+            pDeleteCommandValue = NULL;
+            break;
+        }
+    }
     return MD_APP_NO_ERR;
 }
