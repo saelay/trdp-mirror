@@ -62,12 +62,13 @@ typedef struct sSessionData
     BOOL                sLoop;
     BOOL                sNoData;
     UINT32              sComID;
-    TRDP_APP_SESSION_T  appHandle;      /*    Our identifier to the library instance    */
-    TRDP_LIS_T          listenHandle1;   /*    Our identifier to the publication         */
-    TRDP_LIS_T          listenHandle2;   /*    Our identifier to the publication         */
+    TRDP_APP_SESSION_T  appHandle;          /*    Our identifier to the library instance    */
+    TRDP_LIS_T          listenHandle1;   	/*    Our identifier to the publication         */
+    TRDP_LIS_T          listenHandle2;   	/*    Our identifier to the publication         */
+    int                 sBlockingMode;      /*    TRUE if select shall be used              */
 } SESSION_DATA_T;
 
-SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL};
+SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE};
 
 UINT32          ownIP = 0;
 
@@ -79,16 +80,17 @@ void usage (const char *appName)
     printf("Usage of %s\n", appName);
     printf("This tool sends MD messages to an ED.\n"
            "Arguments are:\n"
-           "-o <own IP address> in dotted decimal\n"
+           "-o <own IP address>    in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
-           "-p <TCP|UDP> protocol to communicate with\n"
-           "-d <n> delay in us between notification/requests\n"
-           "-e <n> expected replies\n"
-           "-r    be responder\n"
-           "-c    respond with confirmation\n"
-           "-n    notify only\n"
-           "-0    send no data\n"
-           "-1    send only one request/notification\n"
+           "-p <TCP|UDP>           protocol to communicate with\n"
+           "-d <n>                 delay in us between notification/requests\n"
+           "-e <n>                 expected replies\n"
+           "-r                     be responder\n"
+           "-c                     respond with confirmation\n"
+           "-n                     notify only\n"
+           "-0                     send no data\n"
+           "-1                     send only one request/notification\n"
+           "-b <0|1>               blocking mode (default = 1, blocking)\n"
            "-v    print version and quit\n"
            );
 }
@@ -178,9 +180,17 @@ void mdCallback (void                   *pRefCon,
                     {
                         printf("tlm_confirm returned error %d\n", err);
                     }
+                    if (sSessionData.sExitAfterReply == TRUE)
+                    {
+                        sSessionData.sLoop = FALSE;
+                    }
                     break;
                 case  TRDP_MSG_MC:      /**< 'Mc' MD Confirm                                 */
                     printf("<- MR Confirmation received %u\n", pMsg->comId);
+                    if (sSessionData.sExitAfterReply == TRUE)
+                    {
+                        sSessionData.sLoop = FALSE;
+                    }
                     break;
                 case  TRDP_MSG_ME:      /**< 'Me' MD Error                                   */
                 default:
@@ -258,6 +268,7 @@ int main (int argc, char *argv[])
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     VOS_IF_REC_T            interfaces[10];
+    BOOL					lastRun = FALSE;
 
     int             rv          = 0;
     UINT32          destIP      = 0;
@@ -273,7 +284,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:p:d:e:h?vrcn01")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:p:d:e:b:h?vrcn01")) != -1)
     {
         switch (ch)
         {
@@ -283,7 +294,7 @@ int main (int argc, char *argv[])
                            &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
                 {
                     usage(argv[0]);
-                    exit(1);
+                    return 1;
                 }
                 ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
                 break;
@@ -294,7 +305,7 @@ int main (int argc, char *argv[])
                            &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
                 {
                     usage(argv[0]);
-                    exit(1);
+                    return 1;
                 }
                 destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
                 break;
@@ -311,14 +322,14 @@ int main (int argc, char *argv[])
                 else
                 {
                     usage(argv[0]);
-                    exit(1);
+                    return 1;
                 }
                 break;
             }
             case 'v':   /*  version */
                 printf("%s: Version %s\t(%s - %s)\n",
                        argv[0], APP_VERSION, __DATE__, __TIME__);
-                exit(0);
+                return 0;
                 break;
             case 'r':
             {
@@ -340,7 +351,7 @@ int main (int argc, char *argv[])
                 if (sscanf(optarg, "%u", &delay ) < 1)
                 {
                     usage(argv[0]);
-                    exit(1);
+                    return 1;
                 }
                 break;
             }
@@ -349,7 +360,24 @@ int main (int argc, char *argv[])
                 if (sscanf(optarg, "%u", &expReplies ) < 1)
                 {
                     usage(argv[0]);
-                    exit(1);
+                    return 1;
+                }
+                break;
+            }
+            case 'b':
+            {   /*  use non blocking    */
+                if (sscanf(optarg, "%d", &sSessionData.sBlockingMode ) < 1)
+                {
+                    usage(argv[0]);
+                    return 1;
+                }
+                if (sSessionData.sBlockingMode == FALSE)
+	            {   
+                	processConfig.options &= ~TRDP_OPTION_BLOCK;
+                }
+                else
+	            {   
+                	processConfig.options |= TRDP_OPTION_BLOCK;
                 }
                 break;
             }
@@ -431,49 +459,61 @@ int main (int argc, char *argv[])
     {
         fd_set  rfds;
         INT32   noDesc = 0;
-        struct timeval  tv;
-        struct timeval  max_tv = {0, 100000};
+        struct timeval  tv = {0, 0};
+        struct timeval  max_tv = {1, 0};       	/* 1 second  */
 
-        /*
-         Prepare the file descriptor set for the select call.
-         Additional descriptors can be added here.
-         */
-        FD_ZERO(&rfds);
+        if (sSessionData.sBlockingMode == TRUE)
+        {
+            /*
+                Prepare the file descriptor set for the select call.
+                Additional descriptors can be added here.
+             */
+             FD_ZERO(&rfds);
 
+            /*
+                Compute the min. timeout value for select.
+                This way we can guarantee that PDs are sent in time
+                with minimum CPU load and minimum jitter.
+             */
+             tlc_getInterval(sSessionData.appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
+		}
         /*
-         Compute the min. timeout value for select.
-         This way we can guarantee that PDs are sent in time
-         with minimum CPU load and minimum jitter.
-         */
-        tlc_getInterval(sSessionData.appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
-
-        /*
-         The wait time for select must consider cycle times and timeouts of
-         the PD packets received or sent.
-         If we need to poll something faster than the lowest PD cycle,
-         we need to set the maximum time out our self.
-         */
+            The wait time for select must consider cycle times and timeouts of
+            the PD packets received or sent.
+            If we need to poll something faster than the lowest PD cycle,
+            we need to set the maximum time out our self.
+        */
         if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
         {
             tv = max_tv;
         }
 
-        /*
-         Select() will wait for ready descriptors or time out,
-         what ever comes first.
-         */
-        rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+        if (sSessionData.sBlockingMode == TRUE)
+        {
+            /*
+                Select() will wait for ready descriptors or time out,
+                what ever comes first.
+            */
+        	rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+        	tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        }
+        else
+        {
+        	vos_threadDelay (tv.tv_sec * 1000000 + tv.tv_usec);
+            rv = 0;
 
-        /*
-         Check for overdue PDs (sending and receiving)
-         Send any pending PDs if it's time...
-         Detect missing PDs...
-         'rv' will be updated to show the handled events, if there are
-         more than one...
-         The callback function will be called from within the tlc_process
-         function (in it's context and thread)!
-         */
-        tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
+
+            /*
+                Check for overdue PDs (sending and receiving)
+                Send any pending PDs if it's time...
+                Detect missing PDs...
+                'rv' will be updated to show the handled events, if there are
+                more than one...
+                The callback function will be called from within the tlc_process
+                function (in it's context and thread)!
+            */
+        	tlc_process(sSessionData.appHandle, NULL, NULL);
+        }
 
         /* Handle other ready descriptors... */
         if (rv > 0)
@@ -488,6 +528,11 @@ int main (int argc, char *argv[])
                 printf("...\n");
                 fflush(stdout);
             }
+        }
+
+		if (lastRun == TRUE)
+        {
+            sSessionData.sLoop = FALSE;
         }
 
         if (sSessionData.sResponder == FALSE && sSessionData.sExitAfterReply == FALSE)
@@ -527,13 +572,16 @@ int main (int argc, char *argv[])
                                 destIP, flags, expReplies, 0, NULL, (const UINT8 *) "How are you?", 13, 0, 0);
                 }
             }
-            printf("\n");
+            
             if (sSessionData.sOnlyOnce == TRUE)
             {
-                sSessionData.sExitAfterReply = TRUE;
+                lastRun = TRUE;
             }
+            
+            printf("\n");
 
             vos_threadDelay(delay);
+
         }
     }
 
