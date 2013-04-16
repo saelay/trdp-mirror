@@ -1267,6 +1267,7 @@ TRDP_ERR_T  trdp_mdSend (
                            /* Update timeout */
                            vos_getTime(&iterMD->timeToGo);
                            vos_addTime(&iterMD->timeToGo, &iterMD->interval);
+                           vos_printf(VOS_LOG_INFO, "Setting timeout for confirmation!\n");
                        }
 
                        appHandle->stats.udpMd.numSend++;
@@ -1391,7 +1392,9 @@ void  trdp_mdCheckListenSocks (
     if (pRfds == NULL)
     {
         /* polling mode */
+    	VOS_TIME_T  timeOut = {0, 1000};	/* at least 1 ms */
         FD_ZERO((fd_set *)&rfds);
+        
 
         /* Add the listen_sd in the file descriptor */
         if (appHandle->tcpFd.listen_sd != -1)
@@ -1423,7 +1426,7 @@ void  trdp_mdCheckListenSocks (
         {
             return;
         }
-        noOfDesc = vos_select(highDesc + 1, &rfds, NULL, NULL, NULL);
+        noOfDesc = vos_select(highDesc + 1, &rfds, NULL, NULL, &timeOut);
         if (noOfDesc == -1)
         {
             vos_printf(VOS_LOG_ERROR, "select() failed\n");
