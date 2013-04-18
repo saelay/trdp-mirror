@@ -144,7 +144,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
     static CHAR8 dotted[16];
 
     (void) sprintf_s(dotted, sizeof(dotted), "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
-              (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
+                     (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
     return dotted;
 }
 
@@ -193,11 +193,11 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
  */
 
 EXT_DECL INT32 vos_select (
-    INT32            highDesc,
-    VOS_FDS_T        *pReadableFD,
-    VOS_FDS_T        *pWriteableFD,
-    VOS_FDS_T        *pErrorFD,
-    VOS_TIME_T        *pTimeOut)
+    INT32       highDesc,
+    VOS_FDS_T   *pReadableFD,
+    VOS_FDS_T   *pWriteableFD,
+    VOS_FDS_T   *pErrorFD,
+    VOS_TIME_T  *pTimeOut)
 {
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);
@@ -230,7 +230,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
     }
 
     /*    Has it been determined before?    */
-    for(i = 0; (i < sizeof(mac)) && (mac[i] != 0); i++)
+    for (i = 0; (i < sizeof(mac)) && (mac[i] != 0); i++)
     {
         ;
     }
@@ -264,7 +264,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
 
             /* skip all MAC addresses like 00000000 and search the first suitable one */
-            for(i = 0; i < dwEntriesRead; i++)
+            for (i = 0; i < dwEntriesRead; i++)
             {
                 (void) swscanf_s(
                     (wchar_t *)pwkti[i].wkti0_transport_address,
@@ -692,15 +692,15 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     int size        = 0;
     int err         = 0;
 
-    if (    (sock == (INT32)INVALID_SOCKET)
-         || (pBuffer == NULL)
-         || (pSize   == NULL) )
+    if ((sock == (INT32)INVALID_SOCKET)
+        || (pBuffer == NULL)
+        || (pSize == NULL))
     {
         return VOS_PARAM_ERR;
     }
 
-    size = *pSize;
-    *pSize = 0;
+    size    = *pSize;
+    *pSize  = 0;
 
     /*      We send UDP packets to the address  */
     memset(&destAddr, 0, sizeof(destAddr));
@@ -723,7 +723,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
             *pSize += sendSize;
         }
 
-        if(sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
+        if (sendSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
@@ -742,16 +742,18 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 /**********************************************************************************************************************/
 /** Receive UDP data.
  *  The caller must provide a sufficient sized buffer. If the supplied buffer is smaller than the bytes received, *pSize
- *    will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
- *    If the socket was created in blocking-mode (default), then this call will block and will only return if data has
- *    been received or the socket was closed or an error occured.
- *    If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *  will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
+ *  If the socket was created in blocking-mode (default), then this call will block and will only return if data has
+ *  been received or the socket was closed or an error occured.
+ *  If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *  If pointers are provided, source IP, source port and destination IP will be reported on return.
  *
  *  @param[in]      sock            socket descriptor
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
- *  @param[out]     pIPAddr         source IP
- *  @param[out]     pIPPort         source port
+ *  @param[out]     pSrcIPAddr      pointer to source IP
+ *  @param[out]     pSrcIPPort      pointer to source port
+ *  @param[out]     pDstIPAddr      pointer to dest IP
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
@@ -764,15 +766,16 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
-    UINT32  *pIPAddr,
-    UINT16  *pIPPort)
+    UINT32  *pSrcIPAddr,
+    UINT16  *pSrcIPPort,
+    UINT32  *pDstIPAddr)
 {
     struct sockaddr_in srcAddr;
     int sockLen = sizeof(srcAddr);
     int rcvSize = 0;
     int err     = 0;
 
-    if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
+    if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL || pSrcIPAddr == NULL)
     {
         return VOS_PARAM_ERR;
     }
@@ -789,14 +792,14 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
                            &sockLen);
         err = WSAGetLastError();
 
-        *pIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
-        if (NULL != pIPPort)
+        *pSrcIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
+        if (NULL != pSrcIPPort)
         {
-            *pIPPort = (UINT32) vos_ntohs(srcAddr.sin_port);
+            *pSrcIPPort = (UINT32) vos_ntohs(srcAddr.sin_port);
         }
-        /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pIPAddr); */
+        /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pSrcIPAddr); */
 
-        if(rcvSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
+        if (rcvSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
@@ -1019,9 +1022,9 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     {
         int err = WSAGetLastError();
 
-        if (    (err == WSAEINPROGRESS)
-             || (err == WSAEWOULDBLOCK)
-             || (err == WSAEALREADY))
+        if ((err == WSAEINPROGRESS)
+            || (err == WSAEWOULDBLOCK)
+            || (err == WSAEALREADY))
         {
             return VOS_BLOCK_ERR;
         }
@@ -1053,13 +1056,13 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     const UINT8 *pBuffer,
     UINT32      *pSize)
 {
-    int sendSize    = 0;
+    int sendSize = 0;
     int bufferSize;
-    int err         = 0;
+    int err = 0;
 
-    if (    (sock == (INT32)INVALID_SOCKET )
-         || (pBuffer == NULL)
-         || (pSize == NULL) )
+    if ((sock == (INT32)INVALID_SOCKET)
+        || (pBuffer == NULL)
+        || (pSize == NULL))
     {
         return VOS_PARAM_ERR;
     }
@@ -1080,7 +1083,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
             *pSize      += sendSize;
         }
 
-        if(sendSize == -1 && err == WSAEWOULDBLOCK)
+        if (sendSize == -1 && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
@@ -1143,7 +1146,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             *pSize      += rcvSize;
         }
 
-        if(rcvSize == -1 && err == WSAEWOULDBLOCK)
+        if (rcvSize == -1 && err == WSAEWOULDBLOCK)
         {
             if (*pSize == 0)
             {

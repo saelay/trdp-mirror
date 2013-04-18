@@ -345,22 +345,23 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 /**********************************************************************************************************************/
 /** Receive UDP data.
  *  The caller must provide a sufficient sized buffer. If the supplied buffer is smaller than the bytes received, *pSize
- *    will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
- *    If the socket was created in blocking-mode (default), then this call will block and will only return if data has
- *    been received or the socket was closed or an error occured.
- *    If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *  will reflect the number of copied bytes and the call should be repeated until *pSize is 0 (zero).
+ *  If the socket was created in blocking-mode (default), then this call will block and will only return if data has
+ *  been received or the socket was closed or an error occured.
+ *  If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *  If pointers are provided, source IP, source port and destination IP will be reported on return.
  *
- *  @param[in]      sock               socket descriptor
- *  @param[out]     pBuffer            pointer to applications data buffer
- *  @param[in,out]  pSize              pointer to the received data size
- *  @param[out]     pIPAddr            source IP
- *  @param[out]     pIPPort            source port
-*
- *  @retval         VOS_NO_ERR         no error
- *  @retval         VOS_PARAM_ERR      parameter out of range/invalid
- *  @retval         VOS_IO_ERR         data could not be read
- *  @retval         VOS_MEM_ERR        resource error
- *  @retval         VOS_NODATA_ERR     no data in non-blocking
+ *  @param[in]      sock            socket descriptor
+ *  @param[out]     pBuffer         pointer to applications data buffer
+ *  @param[in,out]  pSize           pointer to the received data size
+ *  @param[out]     pSrcIPAddr      pointer to source IP
+ *  @param[out]     pSrcIPPort      pointer to source port
+ *  @param[out]     pDstIPAddr      pointer to dest IP
+ *
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
+ *  @retval         VOS_IO_ERR      data could not be read
+ *  @retval         VOS_NODATA_ERR  no data
  *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
@@ -368,8 +369,9 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
-    UINT32  *pIPAddr,
-    UINT16  *pIPPort);
+    UINT32  *pSrcIPAddr,
+    UINT16  *pSrcIPPort,
+    UINT32  *pDstIPAddr);
 
 /**********************************************************************************************************************/
 /** Bind a socket to an address and port.

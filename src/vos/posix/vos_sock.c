@@ -177,8 +177,8 @@ EXT_DECL UINT32 vos_getInterfaces (
         {
             if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
             {
-                ifAddrs[count].ipAddr = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
-                ifAddrs[count].netMask = ntohl(*(UINT32 *)&cursor->ifa_netmask->sa_data[2]);
+                ifAddrs[count].ipAddr   = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
+                ifAddrs[count].netMask  = ntohl(*(UINT32 *)&cursor->ifa_netmask->sa_data[2]);
                 if (cursor->ifa_name != NULL)
                 {
                     strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
@@ -274,7 +274,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
     /* Not every system supports this! */
 #if   defined(__APPLE__)
-	#warning APPLE does not support this!
+    #warning APPLE does not support this!
     return VOS_SOCK_ERR;
 #elif defined(__linux__)
 
@@ -316,10 +316,10 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
     }
     return VOS_NO_ERR;
 #elif defined(__QNXNTO__)
-	#warning QNX neutrino does not support this!
+    #warning QNX neutrino does not support this!
     return VOS_SOCK_ERR;
 #else
-	#warning Unhandled OS! Do not support this!
+    #warning Unhandled OS! Do not support this!
     return VOS_SOCK_ERR;
 #endif
 }
@@ -534,6 +534,16 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %s)\n", buff);
             }
         }
+    }
+    /*  Include struct in_pktinfo in the message "ancilliary" control data.
+        This way we can get the destination IP address for received UDP packets */
+    errno           = 0;
+    sockOptValue    = 1;
+    if (setsockopt(sock, IPPROTO_IP, IP_RECVDSTADDR, &sockOptValue, sizeof(sockOptValue)) == -1)
+    {
+        char buff[VOS_MAX_ERR_STR_SIZE];
+        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %s)\n", buff);
     }
     return VOS_NO_ERR;
 }
@@ -770,12 +780,14 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  If the socket was created in blocking-mode (default), then this call will block and will only return if data has
  *  been received or the socket was closed or an error occured.
  *  If called in non-blocking mode, and no data is available, VOS_NODATA_ERR will be returned.
+ *  If pointers are provided, source IP, source port and destination IP will be reported on return.
  *
  *  @param[in]      sock            socket descriptor
  *  @param[out]     pBuffer         pointer to applications data buffer
  *  @param[in,out]  pSize           pointer to the received data size
- *  @param[out]     pIPAddr         source IP
- *  @param[out]     pIPPort         source port
+ *  @param[out]     pSrcIPAddr      pointer to source IP
+ *  @param[out]     pSrcIPPort      pointer to source port
+ *  @param[out]     pDstIPAddr      pointer to dest IP
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
@@ -788,41 +800,68 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
-    UINT32  *pIPAddr,
-    UINT16  *pIPPort)
+    UINT32  *pSrcIPAddr,
+    UINT16  *pSrcIPPort,
+    UINT32  *pDstIPAddr)
 {
+    size_t              cCMSGSize = 16;             /* size of buffer for destination address */
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen = sizeof(srcAddr);
-    ssize_t rcvSize = 0;
+    ssize_t             rcvSize = 0;
+    struct msghdr       msg;
+    struct iovec        iov;
+    UINT8 buffer[cCMSGSize];                        /* buffer for destination address record */
+    struct cmsghdr      *pControlMsg = (struct cmsghdr *) buffer;
 
-    memset(&srcAddr, 0, sizeof(srcAddr));
-
-    if (sock == -1 || pBuffer == NULL || pSize == NULL || pIPAddr == NULL)
+    if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
 
+    /* clear our address buffers */
+    memset(&msg, 0, sizeof(msg));
+    memset(&buffer, 0, cCMSGSize);
+
+    /* fill the scatter/gather list with our data buffer */
+    iov.iov_base    = pBuffer;
+    iov.iov_len     = *pSize;
+
+    /* fill the msg block for recvmsg */
+    msg.msg_iov         = &iov;
+    msg.msg_iovlen      = 1;
+    msg.msg_name        = &srcAddr;
+    msg.msg_namelen     = sockLen;
+    msg.msg_control     = pControlMsg;
+    msg.msg_controllen  = cCMSGSize;
+
     do
     {
-        rcvSize = recvfrom(sock,
-                           pBuffer,
-                           *pSize,
-                           0,
-                           (struct sockaddr *) &srcAddr,
-                           &sockLen);
+        rcvSize = recvmsg(sock, &msg, 0);
 
-        *pIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
-        if (pIPPort)
+        if (rcvSize != -1)
         {
-            *pIPPort = (UINT16) vos_ntohs(srcAddr.sin_port);
-        }
 
-#if 0
-        if (rcvSize > 0)
-        {
-            vos_printf(VOS_LOG_INFO, "recvfrom found %ld bytes for IP address %08x\n", rcvSize, *pIPAddr);
+            if (pDstIPAddr != NULL &&
+                msg.msg_controllen >= cCMSGSize &&
+                pControlMsg->cmsg_level == IPPROTO_IP &&
+                pControlMsg->cmsg_type == IP_RECVDSTADDR &&
+                pControlMsg->cmsg_len >= cCMSGSize)
+            {
+                *pDstIPAddr = (uint32_t) vos_ntohl(*(uint32_t *)CMSG_DATA(pControlMsg));
+                /* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
+            }
+
+            if (pSrcIPAddr != NULL)
+            {
+                *pSrcIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
+                /* vos_printf(VOS_LOG_DBG, "udp message source IP: %s\n", vos_ipDotted(*pSrcIPAddr)); */
+            }
+
+            if (pSrcIPPort != NULL)
+            {
+                *pSrcIPPort = (UINT16) vos_ntohs(srcAddr.sin_port);
+            }
         }
-#endif
 
         if (rcvSize == -1 && errno == EWOULDBLOCK)
         {
@@ -837,7 +876,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
-        vos_printf(VOS_LOG_ERROR, "recvfrom() from failed (Err: %s)\n", buff);
+        vos_printf(VOS_LOG_ERROR, "recvmsg() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
     else if (rcvSize == 0)
