@@ -989,5 +989,5 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema)
 {
-    return VOS_SEMA_ERR;
+    /*return VOS_SEMA_ERR;*/
 }
