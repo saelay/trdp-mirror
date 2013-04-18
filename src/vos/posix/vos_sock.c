@@ -1243,7 +1243,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 /** Set Using Multicast I/F
  *
  *  @param[in]      sock                        socket descriptor
- *  @param[in]      usingMulticastIfAddress     using Multicast I/F Address
+ *  @param[in]      mcIfAddress                 using Multicast I/F Address
  *
  *  @retval         VOS_NO_ERR                  no error
  *  @retval         VOS_PARAM_ERR               sock descriptor unknown, parameter error
@@ -1251,7 +1251,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
     INT32   sock,
-    UINT32  usingMulticastIfAddress)
+    UINT32  mcIfAddress)
 {
     struct sockaddr_in  multicastIFAddress;
     VOS_ERR_T           result = VOS_NO_ERR;
@@ -1264,7 +1264,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
     {
         /* Multicast I/F setting */
         memset((char *)&multicastIFAddress, 0, sizeof(multicastIFAddress));
-        multicastIFAddress.sin_addr.s_addr = vos_htonl(usingMulticastIfAddress);
+        multicastIFAddress.sin_addr.s_addr = vos_htonl(mcIfAddress);
 
         if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &multicastIFAddress.sin_addr, sizeof(struct in_addr)) == -1)
         {

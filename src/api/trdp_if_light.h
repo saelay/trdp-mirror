@@ -226,7 +226,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      interval            frequency of PD packet (>= 10ms) in usec
  *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags            OPTION: 
+ *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
@@ -336,7 +336,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags            OPTIONS: 
+ *  @param[in]      pktFlags            OPTIONS:
  *                                      TTRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
@@ -379,7 +379,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
  *                                      Used e.g. for source filtering of redundant devices.
  *  @param[in]      destIpAddr          IP address to join
- *  @param[in]      pktFlags            OPTION: 
+ *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      timeout             timeout (>= 10ms) in usec
  *  @param[in]      toBehavior          OPTION: TRDP_TO_DEFAULT, TRDP_TO_SET_TO_ZERO, TRDP_TO_KEEP_LAST_VALUE
@@ -498,10 +498,9 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *  @param[in]      topoCount           topocount to use
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP 
+ *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
  *  @param[in]      noOfRepliers        number of expected repliers, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
- *  @param[in]      noOfRetries         number of retries
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data

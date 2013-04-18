@@ -826,6 +826,7 @@ TRDP_ERR_T  trdp_requestSocket (
  *  In Udp, Release a socket from our socket pool
  *  @param[in,out]  iface           socket pool
  *  @param[in]      index           index of socket to release
+ *  @param[in]      connectTimeout  time out
  *
  */
 void  trdp_releaseSocket (
