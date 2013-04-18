@@ -289,21 +289,21 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* trdp Posix */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = "trdp Posix";
 		};
 		73F5F9AE171C39570087C6B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* trdp Posix */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = "trdp Posix";
 		};
 		73F5F9B0171C39590087C6B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* trdp Posix */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = "trdp Posix";
 		};
 		73FD2F1D16C1687900626293 /* PBXContainerItemProxy */ = {
@@ -471,6 +471,29 @@
 		7366AC7516B68CC80068A893 /* mdTest0002.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTest0002.c; sourceTree = "<group>"; };
 		7366AC7616B68CC80068A893 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		7366AC7716B68CC80068A893 /* TRDP_UDPMDCom_TestPatterns.xlsx */ = {isa = PBXFileReference; lastKnownFileType = file; path = TRDP_UDPMDCom_TestPatterns.xlsx; sourceTree = "<group>"; };
+		7367954617202D5D003C68ED /* tau_tti.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_tti.h; sourceTree = "<group>"; };
+		7367954717202D71003C68ED /* trdp_ladder_app.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_ladder_app.h; sourceTree = "<group>"; };
+		7367954817202D71003C68ED /* trdp_ladder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_ladder.h; sourceTree = "<group>"; };
+		7367954917202D93003C68ED /* trdp_ladder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_ladder.c; sourceTree = "<group>"; };
+		7367954B17202E93003C68ED /* mdErrMode1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdErrMode1; sourceTree = "<group>"; };
+		7367954C17202E93003C68ED /* mdErrMode2 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdErrMode2; sourceTree = "<group>"; };
+		7367954D17202E93003C68ED /* mdErrMode3 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdErrMode3; sourceTree = "<group>"; };
+		7367954E17202E93003C68ED /* mdErrMode4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdErrMode4; sourceTree = "<group>"; };
+		7367954F17202E93003C68ED /* mdLiteral1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdLiteral1; sourceTree = "<group>"; };
+		7367955017202E93003C68ED /* mdLiteral2 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdLiteral2; sourceTree = "<group>"; };
+		7367955117202E93003C68ED /* mdLiteral3 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdLiteral3; sourceTree = "<group>"; };
+		7367955217202E93003C68ED /* mdLiteral4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdLiteral4; sourceTree = "<group>"; };
+		7367955317202E93003C68ED /* mdLiteral5 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdLiteral5; sourceTree = "<group>"; };
+		7367955417202E93003C68ED /* mdLiteral6 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdLiteral6; sourceTree = "<group>"; };
+		7367955517202E93003C68ED /* mdTestApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mdTestApp.h; sourceTree = "<group>"; };
+		7367955617202E93003C68ED /* mdTestCaller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTestCaller.c; sourceTree = "<group>"; };
+		7367955717202E93003C68ED /* mdTestCommon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTestCommon.c; sourceTree = "<group>"; };
+		7367955817202E93003C68ED /* mdTestLog.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTestLog.c; sourceTree = "<group>"; };
+		7367955917202E93003C68ED /* mdTestMain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTestMain.c; sourceTree = "<group>"; };
+		7367955A17202E93003C68ED /* mdTestMdReceiveManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTestMdReceiveManager.c; sourceTree = "<group>"; };
+		7367955B17202E93003C68ED /* mdTestReplier.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTestReplier.c; sourceTree = "<group>"; };
+		7367955D17202EBE003C68ED /* trdp-md-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "trdp-md-test.c"; sourceTree = "<group>"; };
+		7367955E17202EF3003C68ED /* ladderApplication_multiPD.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ladderApplication_multiPD.c; sourceTree = "<group>"; };
 		7373E4AF157CE42C0084966B /* trdp_if.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_if.h; sourceTree = "<group>"; };
 		737B18BE15D9015800724FEF /* test_marshalling */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_marshalling; sourceTree = BUILT_PRODUCTS_DIR; };
 		737B18CD15D901F000724FEF /* test_marshalling.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test_marshalling.h; sourceTree = "<group>"; };
@@ -1099,6 +1122,38 @@
 			path = xml;
 			sourceTree = "<group>";
 		};
+		7367954A17202E93003C68ED /* laddermdtest */ = {
+			isa = PBXGroup;
+			children = (
+				7367954B17202E93003C68ED /* mdErrMode1 */,
+				7367954C17202E93003C68ED /* mdErrMode2 */,
+				7367954D17202E93003C68ED /* mdErrMode3 */,
+				7367954E17202E93003C68ED /* mdErrMode4 */,
+				7367954F17202E93003C68ED /* mdLiteral1 */,
+				7367955017202E93003C68ED /* mdLiteral2 */,
+				7367955117202E93003C68ED /* mdLiteral3 */,
+				7367955217202E93003C68ED /* mdLiteral4 */,
+				7367955317202E93003C68ED /* mdLiteral5 */,
+				7367955417202E93003C68ED /* mdLiteral6 */,
+				7367955517202E93003C68ED /* mdTestApp.h */,
+				7367955617202E93003C68ED /* mdTestCaller.c */,
+				7367955717202E93003C68ED /* mdTestCommon.c */,
+				7367955817202E93003C68ED /* mdTestLog.c */,
+				7367955917202E93003C68ED /* mdTestMain.c */,
+				7367955A17202E93003C68ED /* mdTestMdReceiveManager.c */,
+				7367955B17202E93003C68ED /* mdTestReplier.c */,
+			);
+			path = laddermdtest;
+			sourceTree = "<group>";
+		};
+		7367955C17202EBE003C68ED /* mdpatterns */ = {
+			isa = PBXGroup;
+			children = (
+				7367955D17202EBE003C68ED /* trdp-md-test.c */,
+			);
+			path = mdpatterns;
+			sourceTree = "<group>";
+		};
 		73821F27150777B00046E0AC /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -1116,11 +1171,14 @@
 			isa = PBXGroup;
 			children = (
 				73F457C8152DE1FE00D1C522 /* tau_addr.h */,
+				7367954617202D5D003C68ED /* tau_tti.h */,
 				73F457CB152DE1FE00D1C522 /* tau_xml.h */,
 				73F457CA152DE1FE00D1C522 /* tau_types.h */,
 				73F457C9152DE1FE00D1C522 /* tau_marshall.h */,
 				73821F29150777B00046E0AC /* trdp_if_light.h */,
 				73821F2A150777B00046E0AC /* trdp_types.h */,
+				7367954717202D71003C68ED /* trdp_ladder_app.h */,
+				7367954817202D71003C68ED /* trdp_ladder.h */,
 			);
 			path = api;
 			sourceTree = "<group>";
@@ -1142,6 +1200,7 @@
 				737B1A9515DB930F00724FEF /* trdp_marshall_fast.c */,
 				7366AC3E16B673B80068A893 /* tau_xml.c */,
 				73D6657A15D3D88700A352D4 /* tau_marshall.c */,
+				7367954917202D93003C68ED /* trdp_ladder.c */,
 				73472183169B116200EC18C6 /* trdp_pdcom_ladder.c */,
 			);
 			path = common;
@@ -1150,19 +1209,19 @@
 		73821F3B150777B00046E0AC /* example */ = {
 			isa = PBXGroup;
 			children = (
+				738220021508E3710046E0AC /* echoPolling.c */,
 				73821F3C150777B00046E0AC /* echoSelect.c */,
 				7381BE511643FAC4003BC539 /* echoSelectcmdline.c */,
-				738220021508E3710046E0AC /* echoPolling.c */,
-				73821F3D150777B00046E0AC /* sendHello.c */,
-				73517C4A16BBFDA800DB5208 /* receiveHello.c */,
+				7366AC6116B68C100068A893 /* example.xml */,
+				7366AC6216B68C100068A893 /* interoperability_test.xml */,
 				734721F9169C272E00EC18C6 /* ladderApplication.c */,
 				08CE20C716496F760038151B /* mdManager.c */,
 				08CE20C816496F760038151B /* mdManager1.c */,
 				08CE20C916496F760038151B /* mdManager2.c */,
 				73A9BE1616EE29CC00FE87C8 /* mdManagerTCP_Siemens.c */,
 				73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */,
-				7366AC6116B68C100068A893 /* example.xml */,
-				7366AC6216B68C100068A893 /* interoperability_test.xml */,
+				73517C4A16BBFDA800DB5208 /* receiveHello.c */,
+				73821F3D150777B00046E0AC /* sendHello.c */,
 			);
 			path = example;
 			sourceTree = "<group>";
@@ -1246,23 +1305,26 @@
 		73821F7C150777D40046E0AC /* test */ = {
 			isa = PBXGroup;
 			children = (
+				7322487F16A97E7900148295 /* crc-test.c */,
+				732D2792162DBD84009D7857 /* getStats.c */,
+				7381BEF916442C14003BC539 /* getStatsMarshall.c */,
 				73F5F9A0171C33970087C6B7 /* pdPull.c */,
+				7367955E17202EF3003C68ED /* ladderApplication_multiPD.c */,
 				734721F7169C272E00EC18C6 /* ladderApplication_publisher.c */,
 				734721F8169C272E00EC18C6 /* ladderApplication_subscriber.c */,
-				7322487F16A97E7900148295 /* crc-test.c */,
 				08CE2171164A6E130038151B /* trdp_reserved.h */,
 				08CE2172164A6E130038151B /* trdp_reserved.c */,
-				7381BEF916442C14003BC539 /* getStatsMarshall.c */,
-				732D2792162DBD84009D7857 /* getStats.c */,
 				737B18CD15D901F000724FEF /* test_marshalling.h */,
 				737B18CE15D901F000724FEF /* test_marshalling.c */,
 				73361446165BBF4500A70D3D /* test_trafficShaping.c */,
 				73FD2EEB16C1374700626293 /* test_mdSingle.c */,
 				7331A55C171566E400270642 /* pd_md_responder.c */,
+				7367955C17202EBE003C68ED /* mdpatterns */,
 				7366AC6E16B68C920068A893 /* xml */,
 				730DAF9516A07B150019B4D0 /* pdpatterns */,
 				733615A9165BF91200A70D3D /* udpmdcom */,
 				7366AC6716B68C570068A893 /* lint */,
+				7367954A17202E93003C68ED /* laddermdtest */,
 			);
 			name = test;
 			path = ../test;
