@@ -51,7 +51,7 @@ static const TRDP_MD_INFO_T trdp_md_info_default;
 /** Initialize the specific parameters for message data
  *  Open a listening socket.
  *
- *  @param[in]      pSessionHandle        session parameters
+ *  @param[in]      pSession              session parameters
  *
  *  @retval         TRDP_NO_ERR           no error
  *  @retval         TRDP_PARAM_ERR        initialization error
@@ -127,8 +127,6 @@ void trdp_mdFreeSession (
 /** Close and free any session marked as dead.
  *
  *  @param[in]      appHandle       session pointer
- *  @param[in]      pPacket         pointer to the packet to check
- *  @param[in]      packetSize      size of the packet
  */
 void trdp_closeMDSessions (
     TRDP_SESSION_PT appHandle)
@@ -206,6 +204,10 @@ void trdp_mdSetSessionTimeout (
  *  @param[in]      appHandle       session pointer
  *  @param[in]      pPacket         pointer to the packet to check
  *  @param[in]      packetSize      size of the packet
+ *  @retval         TRDP_NO_ERR          no error
+ *  @retval         TRDP_TOPO_ERR
+ *  @retval         TRDP_WIRE_ERR
+ *  @retval         TRDP_CRC_ERR
  */
 TRDP_ERR_T trdp_mdCheck (
     TRDP_SESSION_PT appHandle,
@@ -349,7 +351,7 @@ TRDP_ERR_T trdp_mdCheck (
 /**********************************************************************************************************************/
 /** Update the header values
  *
- *  @param[in]      pPacket         pointer to the packet to update
+ *  @param[in]      pElement         pointer to the packet to update
  */
 void    trdp_mdUpdatePacket (
     MD_ELE_T *pElement)
@@ -386,7 +388,7 @@ void    trdp_mdUpdatePacket (
  *
  *  @param[in]      pdSock          socket descriptor
  *  @param[in]      port            port on which to send
- *  @param[in]      pPacket         pointer to packet to be sent
+ *  @param[in]      pElement        pointer to element to be sent
  *  @retval         != NULL         error
  */
 TRDP_ERR_T  trdp_mdSendPacket (
@@ -399,8 +401,8 @@ TRDP_ERR_T  trdp_mdSendPacket (
 
     if (pElement->tcpParameters.msgUncomplete == TRUE)
     {
-        tmpSndSize = pElement->sendSize;
-        pElement->sendSize = pElement->grossSize - tmpSndSize;
+        tmpSndSize          = pElement->sendSize;
+        pElement->sendSize  = pElement->grossSize - tmpSndSize;
 
     }
     else
@@ -461,7 +463,7 @@ TRDP_ERR_T  trdp_mdSendPacket (
  *
  *  @param[in]      appHandle       session pointer
  *  @param[in]      mdSock          socket descriptor
- *  @param[in]      pPacket         pointer to received packet
+ *  @param[in]      pElement        pointer to received packet
  *  @retval         != NULL         error
  */
 TRDP_ERR_T  trdp_mdRecvPacket (
@@ -471,7 +473,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
-    UINT32      size = 0;
+    UINT32      size            = 0;
     UINT32      dataSize        = 0;
     UINT32      socketIndex     = 0;
     UINT32      readSize        = 0;
@@ -547,8 +549,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             else
             {
                 /* Calculate the data size that is pending to read */
-                size = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
-                dataSize = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) +
+                size        = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
+                dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) +
                     sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum);
                 dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
                 readDataSize    = dataSize;
@@ -782,8 +784,8 @@ TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
     UINT32          sockIndex)
 {
-    TRDP_ERR_T result = TRDP_NO_ERR;
-    MD_HEADER_T *pH = NULL;
+    TRDP_ERR_T          result          = TRDP_NO_ERR;
+    MD_HEADER_T         *pH             = NULL;
     MD_ELE_T            *iterMD         = NULL;
     MD_LIS_ELE_T        *iterListener   = NULL;
     TRDP_MD_ELE_ST_T    state;
@@ -1500,8 +1502,8 @@ void  trdp_mdCheckListenSocks (
                 TRDP_IP_ADDR_T  newIp;
                 UINT16          read_tcpPort;
 
-                newIp = appHandle->realIP;
-                read_tcpPort = appHandle->mdDefault.tcpPort;
+                newIp           = appHandle->realIP;
+                read_tcpPort    = appHandle->mdDefault.tcpPort;
 
                 err = (TRDP_ERR_T) vos_sockAccept(appHandle->tcpFd.listen_sd,
                                                   &new_sd, &newIp,
@@ -1781,7 +1783,7 @@ void  trdp_mdCheckTimeouts (
 
     do
     {
-        TRDP_ERR_T  resultCode = TRDP_UNKNOWN_ERR;
+        TRDP_ERR_T  resultCode          = TRDP_UNKNOWN_ERR;
         INT32       sndReplyTimeout     = 0;
         INT32       sndConfirmTimeout   = 0;
 
@@ -2129,9 +2131,9 @@ void  trdp_mdCheckTimeouts (
 
                     if (iterMD->noOfRepliers == 0)
                     {
-                        resultCode = TRDP_REPLYTO_ERR;
-                        timeOut = TRUE;
-                        iterMD->morituri = TRUE;
+                        resultCode          = TRDP_REPLYTO_ERR;
+                        timeOut             = TRUE;
+                        iterMD->morituri    = TRUE;
                     }
                     else
                     {
@@ -2169,7 +2171,7 @@ void  trdp_mdCheckTimeouts (
                 theMessage.numExpReplies    = iterMD->noOfRepliers;
                 theMessage.pUserRef         = iterMD->pUserRef;
 
-                theMessage.numReplies = iterMD->numReplies;
+                theMessage.numReplies           = iterMD->numReplies;
                 theMessage.numRetriesMax        = iterMD->numRetriesMax;
                 theMessage.numRetries           = iterMD->numRetries;
                 theMessage.aboutToDie           = iterMD->morituri;
@@ -2246,13 +2248,13 @@ void  trdp_mdCheckTimeouts (
                                appHandle->iface[index].sock);
                     vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
                     appHandle->iface[index].sock = -1;
-                    appHandle->iface[index].sendParam.qos       = 0;
-                    appHandle->iface[index].sendParam.ttl       = 0;
-                    appHandle->iface[index].usage               = 0;
-                    appHandle->iface[index].bindAddr            = 0;
-                    appHandle->iface[index].type                = (TRDP_SOCK_TYPE_T) 0;
-                    appHandle->iface[index].rcvMostly           = FALSE;
-                    appHandle->iface[index].tcpParams.cornerIp  = 0;
+                    appHandle->iface[index].sendParam.qos   = 0;
+                    appHandle->iface[index].sendParam.ttl   = 0;
+                    appHandle->iface[index].usage           = 0;
+                    appHandle->iface[index].bindAddr        = 0;
+                    appHandle->iface[index].type        = (TRDP_SOCK_TYPE_T) 0;
+                    appHandle->iface[index].rcvMostly   = FALSE;
+                    appHandle->iface[index].tcpParams.cornerIp = 0;
                     appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
                     appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
                     appHandle->iface[index].tcpParams.addFileDesc = FALSE;
@@ -2306,13 +2308,13 @@ void  trdp_mdCheckTimeouts (
                                appHandle->iface[index].sock);
                     vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
                     appHandle->iface[index].sock = -1;
-                    appHandle->iface[index].sendParam.qos       = 0;
-                    appHandle->iface[index].sendParam.ttl       = 0;
-                    appHandle->iface[index].usage               = 0;
-                    appHandle->iface[index].bindAddr            = 0;
-                    appHandle->iface[index].type                = (TRDP_SOCK_TYPE_T) 0;
-                    appHandle->iface[index].rcvMostly           = FALSE;
-                    appHandle->iface[index].tcpParams.cornerIp  = 0;
+                    appHandle->iface[index].sendParam.qos   = 0;
+                    appHandle->iface[index].sendParam.ttl   = 0;
+                    appHandle->iface[index].usage           = 0;
+                    appHandle->iface[index].bindAddr        = 0;
+                    appHandle->iface[index].type        = (TRDP_SOCK_TYPE_T) 0;
+                    appHandle->iface[index].rcvMostly   = FALSE;
+                    appHandle->iface[index].tcpParams.cornerIp = 0;
                     appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
                     appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
                     appHandle->iface[index].tcpParams.addFileDesc = FALSE;

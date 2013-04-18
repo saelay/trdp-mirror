@@ -106,9 +106,9 @@ void trdp_initSockets(
 
 
 /**********************************************************************************************************************/
-/** Handle the socket pool: Initialize it
+/** ???
  *
- *  @param[in]      iface          pointer to the socket pool
+ *  @param[in]      appHandle          session handle
  */
 
 void trdp_initUncompletedTCP (
@@ -135,23 +135,24 @@ void trdp_initUncompletedTCP (
  */
 
 TRDP_ERR_T trdp_requestSocket(
-    TRDP_SOCKETS_T          iface[],
-    UINT32                  port,
+    TRDP_SOCKETS_T iface[],
+    UINT32 port,
     const TRDP_SEND_PARAM_T * params,
-    TRDP_IP_ADDR_T          srcIP,
-    TRDP_IP_ADDR_T          mcGroup,
-    TRDP_SOCK_TYPE_T        usage,
-    TRDP_OPTION_T           options,
-    BOOL                    rcvMostly,
-    INT32                   useSocket,
+    TRDP_IP_ADDR_T srcIP,
+    TRDP_IP_ADDR_T mcGroup,
+    TRDP_SOCK_TYPE_T usage,
+    TRDP_OPTION_T options,
+    BOOL rcvMostly,
+    INT32 useSocket,
     INT32                   * pIndex,
-    TRDP_IP_ADDR_T          cornerIp);
+    TRDP_IP_ADDR_T cornerIp);
 
 /*********************************************************************************************************************/
 /** Handle the socket pool: Release a socket from our socket pool
  *
  *  @param[in,out]  iface           socket pool
  *  @param[in]      index           index of socket to release
+ *  @param[in]      connectTimeout  timeout value
  *
  */
 

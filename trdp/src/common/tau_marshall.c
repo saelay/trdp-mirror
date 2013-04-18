@@ -1335,7 +1335,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
  *  @param[in]      pRefCon         Pointer to user context
  *  @param[in]      comId           ComId id to identify the structure out of a configuration
  *  @param[in]      pSrc            Pointer to received original message
- *  @param[out]     pSize           Pointer to the size of the data set
+ *  @param[out]     pDestSize       Pointer to the size of the data set
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
  *                                  set NULL if not used, set content NULL if unknown
  *

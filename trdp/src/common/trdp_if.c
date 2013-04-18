@@ -54,7 +54,7 @@
 
 static TRDP_APP_SESSION_T   sSession        = NULL;
 static VOS_MUTEX_T          sSessionMutex   = NULL;
-static BOOL                 sInited         = FALSE;
+static BOOL sInited = FALSE;
 
 
 /******************************************************************************
@@ -313,7 +313,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
 
 #if MD_SUPPORT
-    
+
     if (pMdDefault != NULL)
     {
         pSession->mdDefault = *pMdDefault;
@@ -379,7 +379,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         pSession->mdDefault.sendParam.retries   = TRDP_MD_DEFAULT_RETRIES;
     }
 
-    /* zero is a valid file/socket descriptor! */ 
+    /* zero is a valid file/socket descriptor! */
     pSession->tcpFd.listen_sd = -1;
 
 #endif
@@ -515,7 +515,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pSndQueue != NULL)
                 {
-                    PD_ELE_T    *pNext = pSession->pSndQueue->pNext;
+                    PD_ELE_T *pNext = pSession->pSndQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
                     trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx, 0);
@@ -537,32 +537,38 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pMDSndQueue != NULL)
                 {
-                    MD_ELE_T    *pNext = pSession->pMDSndQueue->pNext;
+                    MD_ELE_T *pNext = pSession->pMDSndQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pMDSndQueue->socketIdx, pSession->mdDefault.connectTimeout);
+                    trdp_releaseSocket(pSession->iface,
+                                       pSession->pMDSndQueue->socketIdx,
+                                       pSession->mdDefault.connectTimeout);
                     trdp_mdFreeSession(pSession->pMDSndQueue);
                     pSession->pMDSndQueue = pNext;
                 }
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pMDRcvQueue != NULL)
                 {
-                    MD_ELE_T    *pNext = pSession->pMDRcvQueue->pNext;
+                    MD_ELE_T *pNext = pSession->pMDRcvQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pMDRcvQueue->socketIdx, pSession->mdDefault.connectTimeout);
+                    trdp_releaseSocket(pSession->iface,
+                                       pSession->pMDRcvQueue->socketIdx,
+                                       pSession->mdDefault.connectTimeout);
                     trdp_mdFreeSession(pSession->pMDRcvQueue);
                     pSession->pMDRcvQueue = pNext;
                 }
                 /*    Release all allocated sockets and memory    */
                 while (pSession->pMDListenQueue != NULL)
                 {
-                    MD_LIS_ELE_T    *pNext = pSession->pMDListenQueue->pNext;
+                    MD_LIS_ELE_T *pNext = pSession->pMDListenQueue->pNext;
 
                     /*    Only close socket if not used anymore    */
                     if (pSession->pMDListenQueue->socketIdx != -1)
                     {
-                        trdp_releaseSocket(pSession->iface, pSession->pMDListenQueue->socketIdx, pSession->mdDefault.connectTimeout);
+                        trdp_releaseSocket(pSession->iface,
+                                           pSession->pMDListenQueue->socketIdx,
+                                           pSession->mdDefault.connectTimeout);
                     }
                     vos_memFree(pSession->pMDListenQueue);
                     pSession->pMDListenQueue = pNext;
@@ -854,8 +860,6 @@ EXT_DECL TRDP_ERR_T tlc_setTopoCount (
  *  @param[in]      pSendParam           optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData                pointer to packet data / dataset
  *  @param[in]      dataSize             size of packet data <= 1436 without FCS
- *  @param[in]      subs                 substitution (Ladder)
- *  @param[in]      offsetAddress        offset (Ladder)
  *
  *  @retval         TRDP_NO_ERR          no error
  *  @retval         TRDP_PARAM_ERR       parameter error
@@ -982,15 +986,15 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             else
             {
                 vos_getTime(&nextTime);
-                tv_interval.tv_sec      = interval / 1000000;
-                tv_interval.tv_usec     = interval % 1000000;
+                tv_interval.tv_sec  = interval / 1000000;
+                tv_interval.tv_usec = interval % 1000000;
                 vos_addTime(&nextTime, &tv_interval);
                 pNewElement->interval   = tv_interval;
                 pNewElement->timeToGo   = nextTime;
             }
 
             /*    Update the internal data */
-            pNewElement->addr           = pubHandle;
+            pNewElement->addr = pubHandle;
             pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
@@ -1134,7 +1138,7 @@ TRDP_ERR_T tlp_put (
     {
         return TRDP_NOPUB_ERR;
     }
-    
+
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
@@ -1247,8 +1251,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 #if MD_SUPPORT
                 /*    Add the socket to the pFileDesc    */
                 {
-                    int          index;
-                    MD_ELE_T     *iterMD;
+                    int index;
+                    MD_ELE_T *iterMD;
                     MD_LIS_ELE_T *iterListener;
                     if (appHandle->tcpFd.listen_sd != -1)
                     {
@@ -1260,9 +1264,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     }
                     for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
                     {
-                        if((appHandle->iface[index].sock != -1)
-                           && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
-                           && (appHandle->iface[index].tcpParams.addFileDesc == TRUE))
+                        if ((appHandle->iface[index].sock != -1)
+                            && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
+                            && (appHandle->iface[index].tcpParams.addFileDesc == TRUE))
                         {
                             FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
                             if (appHandle->iface[index].sock > *pNoDesc)
@@ -1273,14 +1277,16 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     }
 
                     /*  Include MD UDP listener sockets sockets  */
-                    for (iterListener = appHandle->pMDListenQueue; iterListener != NULL; iterListener = iterListener->pNext)
+                    for (iterListener = appHandle->pMDListenQueue;
+                         iterListener != NULL;
+                         iterListener = iterListener->pNext)
                     {
                         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
                         if (iterListener->socketIdx != -1 &&
                             (appHandle->iface[iterListener->socketIdx].sock != -1)
                             && ((appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP)
-                            || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
-                            && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
+                                || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
+                                    && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
                         {
                             if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1299,8 +1305,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                         if (iterMD->socketIdx != -1 &&
                             (appHandle->iface[iterMD->socketIdx].sock != -1)
                             && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
-                            || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
-                            && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
+                                || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
+                                    && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
                         {
                             if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1319,8 +1325,8 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                         if (iterMD->socketIdx != -1 &&
                             (appHandle->iface[iterMD->socketIdx].sock != -1)
                             && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
-                            || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
-                            && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
+                                || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
+                                    && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
                         {
                             if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
                             {
@@ -1459,11 +1465,12 @@ EXT_DECL TRDP_ERR_T tlc_process (
         err = trdp_mdSend(appHandle);
         if (err != TRDP_NO_ERR)
         {
-            if(err == TRDP_IO_ERR)
+            if (err == TRDP_IO_ERR)
             {
                 vos_printf(VOS_LOG_INFO, "trdp_mdSend() incomplete \n");
 
-            }else
+            }
+            else
             {
                 result = err;
                 vos_printf(VOS_LOG_ERROR, "trdp_mdSend() failed (Err: %d)\n", err);
@@ -1540,8 +1547,6 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      dataSize            size of packet data
  *  @param[in]      replyComId          comId of reply
  *  @param[in]      replyIpAddr         IP for reply
- *  @param[in]      subs                substitution (Ladder)
- *  @param[in]      offsetAddr          offset (Ladder)
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -1565,7 +1570,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     TRDP_IP_ADDR_T          replyIpAddr)
 {
     TRDP_ERR_T  ret = TRDP_NO_ERR;
-    PD_ELE_T    *pSubPD         = (PD_ELE_T*) subHandle;
+    PD_ELE_T    *pSubPD         = (PD_ELE_T *) subHandle;
     PD_ELE_T    *pReqElement    = NULL;
 
     /*    Check params    */
@@ -1582,7 +1587,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     {
         return TRDP_NOSUB_ERR;
     }
-    
+
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
@@ -1735,7 +1740,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T            *newPD = NULL;
+    PD_ELE_T    *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
@@ -1852,13 +1857,13 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       =
                         (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
-                    newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef          = pUserRef;
-                    newPD->socketIdx        = index;
-                    newPD->privFlags        |= TRDP_INVALID_DATA;
-                    newPD->pktFlags         = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
-                    newPD->pCachedDS        = NULL;
-                    newPD->magic            = TRDP_MAGIC_SUB_HNDL_VALUE;
+                    newPD->grossSize    = TRDP_MAX_PD_PACKET_SIZE;
+                    newPD->userRef      = pUserRef;
+                    newPD->socketIdx    = index;
+                    newPD->privFlags    |= TRDP_INVALID_DATA;
+                    newPD->pktFlags     = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    newPD->pCachedDS    = NULL;
+                    newPD->magic        = TRDP_MAGIC_SUB_HNDL_VALUE;
 
                     if (timeout == TRDP_TIMER_FOREVER)
                     {
@@ -1903,7 +1908,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_SUB_T          subHandle)
 {
-    PD_ELE_T    *pElement = (PD_ELE_T*) subHandle;
+    PD_ELE_T    *pElement = (PD_ELE_T *) subHandle;
     TRDP_ERR_T  ret;
 
     if (pElement == NULL )
@@ -1964,8 +1969,8 @@ EXT_DECL TRDP_ERR_T tlp_get (
     UINT8               *pData,
     UINT32              *pDataSize)
 {
-    PD_ELE_T    *pElement = (PD_ELE_T*) subHandle;
-    TRDP_ERR_T  ret = TRDP_NOSUB_ERR;
+    PD_ELE_T    *pElement   = (PD_ELE_T *) subHandle;
+    TRDP_ERR_T  ret         = TRDP_NOSUB_ERR;
     TRDP_TIME_T now;
 
     if (pElement == NULL)
@@ -1977,7 +1982,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
     {
         return TRDP_NOSUB_ERR;
     }
-    
+
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
@@ -2025,7 +2030,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL && pElement != NULL)
         {
-            pPdInfo->comId          = pElement->addr.comId;
+            pPdInfo->comId = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
@@ -2090,7 +2095,7 @@ TRDP_ERR_T tlm_notify (
                TRDP_MSG_MN,                            /* notify without reply */
                appHandle,
                pUserRef,
-               NULL,                                   /* no return session id? 
+               NULL,                                   /* no return session id?
                                                           useful to abort send while waiting of output queue */
                comId,
                topoCount,
@@ -2228,7 +2233,7 @@ TRDP_ERR_T tlm_addListener (
         {
             errv = trdp_getTCPSocket(appHandle);
         }
-        
+
         /* no error... */
         if (errv == TRDP_NO_ERR)
         {
@@ -2400,7 +2405,7 @@ TRDP_ERR_T tlm_delListener (
     }
 
     /* Statistics */
-    if(errv == TRDP_NO_ERR)
+    if (errv == TRDP_NO_ERR)
     {
         if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
         {
@@ -2686,22 +2691,22 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_UUID_T         *pSessionId)
 {
-    MD_ELE_T    *iterMD = appHandle->pMDSndQueue;
-    BOOL        firstLoop = TRUE;
-    TRDP_ERR_T  err = TRDP_NOSESSION_ERR;
-    
+    MD_ELE_T    *iterMD     = appHandle->pMDSndQueue;
+    BOOL        firstLoop   = TRUE;
+    TRDP_ERR_T  err         = TRDP_NOSESSION_ERR;
+
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
-    
+
     if (pSessionId == NULL)
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     /* lock mutex */
-    
+
     if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
     {
         return TRDP_NOINIT_ERR;
@@ -2710,14 +2715,14 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
     /*  Find the session which needs to be killed. Actual release will be done in tlc_process().
         Note: We must also check the receive queue for pending replies! */
     do
-    {        
+    {
         /*  Switch to receive queue */
         if (NULL == iterMD && TRUE == firstLoop)
         {
-            iterMD = appHandle->pMDRcvQueue;
-            firstLoop = FALSE;
+            iterMD      = appHandle->pMDRcvQueue;
+            firstLoop   = FALSE;
         }
-        
+
         if (NULL != iterMD)
         {
             if (memcmp(iterMD->sessionID, pSessionId, TRDP_SESS_ID_SIZE) == 0)
