@@ -312,7 +312,6 @@ TRDP_ERR_T  trdp_pdSendQueued (
     return err;
 }
 
-
 /******************************************************************************/
 /** Receiving PD messages
  *  Read the receive socket for arriving PDs, copy the packet to a new PD_ELE_T
@@ -343,8 +342,7 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
     UINT32 recSize;
     int informUser = 0;
-    TRDP_ADDRESSES_T    subHandle = { 0, 0, 0, 0};
-
+    TRDP_ADDRESSES_T    subAddresses = { 0, 0, 0, 0};
 
     /*  Get a buffer    */
     if (pNewFrame == NULL)
@@ -362,7 +360,12 @@ TRDP_ERR_T  trdp_pdReceive (
     recSize = TRDP_MAX_PD_PACKET_SIZE;
 
     /*  Get the packet from the wire:  */
-    err = (TRDP_ERR_T) vos_sockReceiveUDP(sock, (UINT8 *) &pNewFrame->frameHead, &recSize, &subHandle.srcIpAddr, NULL);
+    err = (TRDP_ERR_T) vos_sockReceiveUDP(sock,
+                                          (UINT8 *) &pNewFrame->frameHead,
+                                          &recSize,
+                                          &subAddresses.srcIpAddr,
+                                          NULL,
+                                          &subAddresses.destIpAddr);
     if ( err != TRDP_NO_ERR)
     {
         return err;
@@ -399,18 +402,7 @@ TRDP_ERR_T  trdp_pdReceive (
     }
 
     /*  Compute the subscription handle */
-    subHandle.comId = vos_ntohl(pNewFrame->frameHead.comId);
-
-#if 0
-    /*  Check if sequence counter is OK
-        Is this packet a redundant one?  */
-    if (trdp_isRcvSeqCnt(vos_ntohl(pNewFrame->frameHead.sequenceCounter), subHandle.comId,
-                         vos_ntohs(pNewFrame->frameHead.msgType), subHandle.srcIpAddr))
-    {
-        vos_printf(VOS_LOG_INFO, "Redundant PD data ignored (comId %u)\n", vos_ntohl(pNewFrame->frameHead.comId));
-        return TRDP_NO_ERR;
-    }
-#endif
+    subAddresses.comId = vos_ntohl(pNewFrame->frameHead.comId);
 
     /*  It might be a PULL request      */
     if (vos_ntohs(pNewFrame->frameHead.msgType) == (UINT16) TRDP_MSG_PR)
@@ -450,7 +442,7 @@ TRDP_ERR_T  trdp_pdReceive (
             }
             else
             {
-                pPulledElement->pullIpAddress = subHandle.srcIpAddr;
+                pPulledElement->pullIpAddress = subAddresses.srcIpAddr;
             }
 
             /* trigger immediate sending of PD  */
@@ -467,12 +459,12 @@ TRDP_ERR_T  trdp_pdReceive (
     }
 
     /*  Examine subscription queue, are we interested in this PD?   */
-    pExistingElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, &subHandle);
+    pExistingElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, &subAddresses);
 
     if (pExistingElement == NULL)
     {
         /*
-        vos_printf(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+        vos_printf(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
         */
     }
     else
@@ -487,13 +479,13 @@ TRDP_ERR_T  trdp_pdReceive (
                 vos_ntohl(pNewFrame->frameHead.sequenceCounter))
             {
                 vos_printf(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
-                               subHandle.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
+                               subAddresses.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
                 return TRDP_NO_ERR;
             }
         }
 
         /*
-        vos_printf(VOS_LOG_INFO, "Received (SrcIp: %s comId %u)\n", vos_ipDotted(subHandle.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+        vos_printf(VOS_LOG_INFO, "Received (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
         */
 
         /*  This might have not been set!   */
@@ -543,7 +535,7 @@ TRDP_ERR_T  trdp_pdReceive (
             TRDP_PD_INFO_T theMessage;
             theMessage.comId        = pExistingElement->addr.comId;
             theMessage.srcIpAddr    = pExistingElement->addr.srcIpAddr;
-            theMessage.destIpAddr   = pExistingElement->addr.destIpAddr;
+            theMessage.destIpAddr   = subAddresses.destIpAddr;
             theMessage.topoCount    = vos_ntohl(pExistingElement->pFrame->frameHead.topoCount);
             theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
             theMessage.seqCount     = pExistingElement->curSeqCnt;
