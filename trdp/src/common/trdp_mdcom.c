@@ -476,7 +476,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     UINT32      socketIndex     = 0;
     UINT32      readSize        = 0;
     UINT32      readDataSize    = 0;
-    BOOL        headerCompleted = FALSE;
+    /* BOOL        headerCompleted = FALSE; */
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
@@ -2360,7 +2360,7 @@ TRDP_ERR_T trdp_mdCommonSend (
         return TRDP_NOINIT_ERR;
     }
 
-    if ((pData == NULL) && (dataSize != 0))
+    if ((pData == NULL) && (dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE)
     {
         return TRDP_PARAM_ERR;
     }
