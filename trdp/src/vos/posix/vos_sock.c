@@ -62,6 +62,10 @@
 
 #define VOS_DEFAULT_IFACE  "eth0"
 
+#ifdef __linux
+#define IP_RECVDSTADDR IP_PKTINFO
+#endif
+
 /***********************************************************************************************************************
  *  LOCALS
  */
@@ -804,7 +808,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT16  *pSrcIPPort,
     UINT32  *pDstIPAddr)
 {
-    size_t              cCMSGSize = 16;             /* size of buffer for destination address */
+    const size_t        cCMSGSize = 16;             /* size of buffer for destination address */
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen = sizeof(srcAddr);
     ssize_t             rcvSize = 0;
