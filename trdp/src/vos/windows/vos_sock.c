@@ -37,6 +37,7 @@
 #include <fcntl.h>
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+#include <mswsock.h>
 #include <lm.h>
 
 #include "vos_utils.h"
