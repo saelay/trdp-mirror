@@ -79,7 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\resources\windows\getopt\getopt.c" />
-    <ClCompile Include="..\..\test\pdpatterns\trdp-pd-test.cpp" />
+    <ClCompile Include="..\..\test\pdpatterns\trdp-pd-test.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Win32TRDP\Win32TRDP.vcxproj">
