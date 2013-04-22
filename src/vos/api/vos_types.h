@@ -29,6 +29,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef VXWORKS
+#include <types/vxTypesOld.h>
+#endif
 
 /***********************************************************************************************************************
  * DEFINES
