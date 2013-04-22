@@ -9,10 +9,12 @@
  * @note            Project: TCNOpen TRDP prototype stack
  *
  * @author          Simone Pachera, FARsystems
+ *                  Gari Oiarbide, CAF
+ *                  Bernd Loehr, NewTec
  *
  * @remarks All rights reserved. Reproduction, modification, use or disclosure
  *          to third parties without express authority is forbidden,
- *          Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *          Copyright Bombardier Transportation GmbH, Germany, 2013.
  *
  *
  * $Id$
@@ -574,17 +576,22 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     else
     {
         size = TRDP_MAX_MD_PACKET_SIZE;
+        pElement->addr.srcIpAddr    = 0;
+        pElement->addr.destIpAddr   = 0;
 
         err = (TRDP_ERR_T) vos_sockReceiveUDP(
                 mdSock,
                 (UINT8 *)&pElement->pPacket->frameHead,
                 &size,
                 &pElement->addr.srcIpAddr,
-                &pElement->replyPort, NULL);
+                &pElement->replyPort, pElement->addr.destIpAddr);
 
-        /* my ip address is destination address */
-        /* also in case of multicast ! */
-        pElement->addr.destIpAddr = appHandle->realIP;
+        /* only if there is no destIP available, we use our own IP as destination!
+           destIpAddr can be multicast group address as well!  */
+        if (pElement->addr.destIpAddr == 0)
+        {
+            pElement->addr.destIpAddr = appHandle->realIP;
+        }
     }
 
     pElement->grossSize = size;
@@ -926,8 +933,9 @@ TRDP_ERR_T  trdp_mdRecv (
                 {
                     continue;
                 }
-                if (iterListener->addr.mcGroup == 0 && iterListener->addr.destIpAddr != 0 &&
-                    iterListener->addr.destIpAddr != appHandle->pMDRcvEle->addr.srcIpAddr)
+                /* If multicast address is set, but does not match, we go to the next listener (if any) */
+                if (iterListener->addr.mcGroup != 0 &&
+                    iterListener->addr.mcGroup != appHandle->pMDRcvEle->addr.destIpAddr)
                 {
                     /* no IP match for unicast addressing */
                     continue;
