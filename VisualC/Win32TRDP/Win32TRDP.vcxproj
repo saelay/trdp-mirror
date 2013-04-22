@@ -64,7 +64,7 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <PostBuildEvent>
-      <Command>copy $(ProjectDir)..\..\resources\windows\pthread\bin\pthreadVC2.* $(TargetDir)</Command>
+      <Command>copy "$(ProjectDir)..\..\resources\windows\pthread\bin\pthreadVC2.*" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
