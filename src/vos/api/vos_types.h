@@ -73,6 +73,13 @@ typedef wchar_t UTF16;
 typedef float REAL32;
 typedef double REAL64;
 
+#elif defined(VXWORKS)
+
+typedef char CHAR8;
+typedef short UTF16;
+typedef float REAL32;
+typedef double REAL64;
+
 #else
     #error "Standard types must be defined for each target!"
 #endif
