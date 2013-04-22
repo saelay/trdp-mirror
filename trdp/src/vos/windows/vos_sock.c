@@ -37,7 +37,7 @@
 #include <fcntl.h>
 #include <winsock2.h>
 #include <Ws2tcpip.h>
-#include <mswsock.h>
+#include <MSWSock.h>
 #include <lm.h>
 
 #include "vos_utils.h"
@@ -59,6 +59,26 @@
 
 #define WIN32_LEAN_AND_MEAN
 
+/* Defines for recvmsg: */
+
+#define msghdr _WSAMSG 
+#define msg_name name 
+#define msg_namelen namelen 
+#define msg_iov lpBuffers 
+#define msg_iovlen dwBufferCount 
+#define msg_flags dwFlags 
+#define msg_control Control.buf 
+#define msg_controllen Control.len 
+
+#define iovec _WSABUF 
+#define iov_base buf 
+#define iov_len len 
+
+#define CMSG_FIRSTHDR WSA_CMSG_FIRSTHDR 
+#define CMSGSize  64             /* size of buffer for destination address */
+
+#define cmsghdr WSACMSGHDR
+
 /***********************************************************************************************************************
  *  LOCALS
  */
@@ -66,6 +86,28 @@
 BOOL    vosSockInitialised      = FALSE;
 UINT32  gNumberOfOpenSockets    = 0;
 UINT8   mac[6];
+
+
+/***********************************************************************************************************************
+ * LOCAL FUNCTIONS
+ */
+
+INT32 recvmsg (int sock_id, struct msghdr *message, int flags)
+{ 
+    GUID            WSARecvMsg_GUID = WSAID_WSARECVMSG; 
+    LPFN_WSARECVMSG WSARecvMsg; 
+    DWORD           number_of_bytes = 0; 
+    int res = WSAIoctl (sock_id, SIO_GET_EXTENSION_FUNCTION_POINTER, 
+                        &WSARecvMsg_GUID, sizeof (WSARecvMsg_GUID), &WSARecvMsg, 
+                        sizeof WSARecvMsg, &number_of_bytes, NULL, NULL); 
+
+    res = WSARecvMsg (sock_id, message, &number_of_bytes, NULL, NULL); 
+    if (0 != res)
+    { 
+        return -1; 
+    }
+    return number_of_bytes; 
+}
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
@@ -516,6 +558,19 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             }
         }
     }
+    /*   This seems to be unsupported on XP (but IP_RECVDSTADDR is defined!)   */
+	/*  Include struct in_pktinfo in the message "ancilliary" control data.
+        This way we can get the destination IP address for received UDP packets */
+    {
+        DWORD optValue = TRUE;
+        if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_PKTINFO, (const char *)&optValue, sizeof(optValue)) == -1)
+        {
+                int err = WSAGetLastError();
+                err = err; /* for lint */
+                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %d)\n", err);
+        }
+    }
+
     return VOS_NO_ERR;
 }
 
@@ -740,6 +795,8 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     return VOS_NO_ERR;
 }
 
+
+
 /**********************************************************************************************************************/
 /** Receive UDP data.
  *  The caller must provide a sufficient sized buffer. If the supplied buffer is smaller than the bytes received, *pSize
@@ -771,45 +828,84 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT16  *pSrcIPPort,
     UINT32  *pDstIPAddr)
 {
-    struct sockaddr_in srcAddr;
-    int sockLen = sizeof(srcAddr);
-    int rcvSize = 0;
-    int err     = 0;
+    struct sockaddr_in  srcAddr;
+    int                 sockLen = sizeof(srcAddr);
+    DWORD               rcvSize = 0;
+    int                 err     = 0;
+    int                 retVal = 0;
 
-    if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL || pSrcIPAddr == NULL)
+    char controlBuffer[64];                  /* buffer for destination address record */
+    struct iovec wsabuf; 
+    struct msghdr Msg; 
+
+    if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
 
+    memset (&srcAddr, 0, sizeof (struct sockaddr_in)); 
+    memset (&controlBuffer [0], 0, CMSGSize); 
+
+    /* fill the scatter/gather list with our data buffer */
+    wsabuf.iov_base = (CHAR*) pBuffer; 
+    wsabuf.iov_len = *pSize; 
+
+    Msg.msg_name = (struct sockaddr *) &srcAddr; 
+    Msg.msg_namelen = sizeof (struct sockaddr_in); 
+    Msg.msg_iov = &wsabuf; 
+    Msg.msg_iovlen = 1; 
+    Msg.msg_control = &controlBuffer [0]; 
+    Msg.msg_controllen = sizeof (controlBuffer); 
+    Msg.msg_flags = 0; 
+
     memset(&srcAddr, 0, sizeof(srcAddr));
 
+    /* fill the msg block for recvmsg */
     do
     {
-        rcvSize = recvfrom(sock,
-                           (char *) pBuffer,
-                           *pSize,
-                           0,
-                           (SOCKADDR *) &srcAddr,
-                           &sockLen);
-        err = WSAGetLastError();
+        rcvSize = recvmsg (sock, &Msg, 0); 
 
-        *pSrcIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
-        if (NULL != pSrcIPPort)
+        if (rcvSize != SOCKET_ERROR)
         {
-            *pSrcIPPort = (UINT32) vos_ntohs(srcAddr.sin_port);
+
+            if (pDstIPAddr != NULL)
+            {
+                WSACMSGHDR *pCMsgHdr; 
+
+                pCMsgHdr = (WSACMSGHDR *) WSA_CMSG_FIRSTHDR (&Msg); 
+                if (pCMsgHdr &&
+                    pCMsgHdr->cmsg_type == IP_PKTINFO)
+                { 
+                    struct in_pktinfo *pPktInfo = (struct in_pktinfo *) WSA_CMSG_DATA (pCMsgHdr); 
+                    *pDstIPAddr = (UINT32) vos_ntohl(pPktInfo->ipi_addr.S_un.S_addr);
+                    /* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
+                }
+            }
+            if (pSrcIPAddr != NULL)
+            {
+                *pSrcIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
+                /* vos_printf(VOS_LOG_INFO, "recvmsg found %d bytes from IP address %x to \n", rcvSize, *pSrcIPAddr); */
+            }
+            if (NULL != pSrcIPPort)
+            {
+                *pSrcIPPort = (UINT32) vos_ntohs(srcAddr.sin_port);
+            }
         }
-        /* vos_printf(VOS_LOG_INFO, "recvfrom found %d bytes for IP address %x\n", rcvSize, *pSrcIPAddr); */
+        else
+        {
+            err = WSAGetLastError();
+        }
 
         if (rcvSize == SOCKET_ERROR && err == WSAEWOULDBLOCK)
         {
             return VOS_BLOCK_ERR;
         }
     }
-    while (rcvSize == SOCKET_ERROR && err == WSAEINTR);
+    while (rcvSize < 0 && err == WSAEINTR);
 
     *pSize = 0;
 
-    if (rcvSize == SOCKET_ERROR)
+    if (retVal == SOCKET_ERROR)
     {
         vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
@@ -823,6 +919,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         *pSize = rcvSize;
         return VOS_NO_ERR;
     }
+
 }
 
 /**********************************************************************************************************************/
