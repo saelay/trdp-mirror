@@ -25,11 +25,7 @@ MD=mkdir -p
 BLDDIR=bld/posix
 
 PROJ1=$(BLDDIR)/mdManager
-PROJ2=$(BLDDIR)/mdManager1
-PROJ3=$(BLDDIR)/mdManager2
-PROJ4=$(BLDDIR)/mdTest0001
-PROJ5=$(BLDDIR)/mdTest0002
-PROJ6=$(BLDDIR)/mdTest0003
+PROJ2=$(BLDDIR)/mdTest4
 
 TRDPLIB=$(BLDDIR)/libtrdp.a
 
@@ -57,11 +53,7 @@ OBJLIB=\
 	$(VOS_POSIX)/vos_thread.o
 
 OBJPRJ1= src/example/mdManager.o
-OBJPRJ2= src/example/mdManager1.o
-OBJPRJ3= src/example/mdManager2.o
-OBJPRJ4= test/udpmdcom/mdTest0001.o
-OBJPRJ5= test/udpmdcom/mdTest0002.o
-OBJPRJ6= test/udpmdcom/mdTest0003.o
+OBJPRJ2= test/udpmdcom/mdTest4.o
 
 CFLAGS=-Wall -D_GNU_SOURCE -DPOSIX -I$(VOS_POSIX) -I$(VOS_API) -I$(COM_CMM) -I$(API_INC) -DMD_SUPPORT=1
 
@@ -70,7 +62,7 @@ CFLAGS=-Wall -D_GNU_SOURCE -DPOSIX -I$(VOS_POSIX) -I$(VOS_API) -I$(COM_CMM) -I$(
 all: $(TRDPLIB) $(PROJ1) $(PROJ2) $(PROJ3) $(PROJ4) $(PROJ5) $(PROJ6)
 
 clean:
-	$(RM) $(OBJLIB) $(TRDPLIB) $(OBJPRJ1) $(OBJPRJ2) $(OBJPRJ3) $(OBJPRJ4) $(OBJPRJ5) $(OBJPRJ6) $(PROJ1) $(PROJ2) $(PROJ3) $(PROJ4) $(PROJ5) $(PROJ6)
+	$(RM) $(OBJLIB) $(TRDPLIB) $(OBJPRJ1) $(OBJPRJ2) $(PROJ1) $(PROJ2)
 
 $(PROJ1) : $(TRDPLIB) $(OBJPRJ1) 
 	$(CC) -o $(PROJ1) $(OBJPRJ1) -L $(BLDDIR) $(OSLIB)
@@ -78,17 +70,5 @@ $(PROJ1) : $(TRDPLIB) $(OBJPRJ1)
 $(PROJ2) : $(TRDPLIB) $(OBJPRJ2) 
 	$(CC) -o $(PROJ2) $(OBJPRJ2) -L $(BLDDIR) $(OSLIB)
 
-$(PROJ3) : $(TRDPLIB) $(OBJPRJ3) 
-	$(CC) -o $(PROJ3) $(OBJPRJ3) -L $(BLDDIR) $(OSLIB)
-
-$(PROJ4) : $(TRDPLIB) $(OBJPRJ4) 
-	$(CC) -o $(PROJ4) $(OBJPRJ4) -L $(BLDDIR) $(OSLIB)
-
-$(PROJ5) : $(TRDPLIB) $(OBJPRJ5) 
-	$(CC) -o $(PROJ5) $(OBJPRJ5) -L $(BLDDIR) $(OSLIB)
-
-$(PROJ6) : $(TRDPLIB) $(OBJPRJ6) 
-	$(CC) -o $(PROJ6) $(OBJPRJ6) -L $(BLDDIR) $(OSLIB)
-	
 $(TRDPLIB) : $(OBJLIB)
 	$(AR) cr $(TRDPLIB) $(OBJLIB)
