@@ -31,7 +31,9 @@
 
 #include <stdio.h>
 #include <stddef.h>
+#ifndef VXWORKS
 #include <stdint.h>
+#endif
 #include <stdlib.h>
 
 #include <errno.h>
