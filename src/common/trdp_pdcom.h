@@ -79,6 +79,14 @@ TRDP_ERR_T trdp_pdReceive (
     TRDP_SESSION_PT pSessionHandle,
     INT32           sock);
 
+void trdp_pdHandleTimeOuts(
+	TRDP_SESSION_PT appHandle);
+
+TRDP_ERR_T   trdp_pdCheckListenSocks (
+    TRDP_SESSION_PT appHandle,
+    TRDP_FDS_T      *pRfds,
+    INT32           *pCount);
+
 TRDP_ERR_T trdp_pdDistribute (
     PD_ELE_T        *pSndQueue);
 
