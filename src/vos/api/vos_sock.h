@@ -30,6 +30,7 @@
 
 #ifdef WIN32
 #include <winsock2.h>
+#elif defined(VXWORKS)
 #else
 #include <sys/select.h>
 #endif
