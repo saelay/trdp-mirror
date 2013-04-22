@@ -584,7 +584,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 (UINT8 *)&pElement->pPacket->frameHead,
                 &size,
                 &pElement->addr.srcIpAddr,
-                &pElement->replyPort, pElement->addr.destIpAddr);
+                &pElement->replyPort, &pElement->addr.destIpAddr);
 
         /* only if there is no destIP available, we use our own IP as destination!
            destIpAddr can be multicast group address as well!  */
