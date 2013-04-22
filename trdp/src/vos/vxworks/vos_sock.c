@@ -342,8 +342,9 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     INT32   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
-    UINT32  *pIPAddr,
-    UINT16  *pIPPort)
+    UINT32  *pSrcIPAddr,
+    UINT16  *pSrcIpPort,
+    UINT32  *pDstIPAddr)
 {
     
 }
