@@ -62,10 +62,6 @@
 
 #define VOS_DEFAULT_IFACE  "eth0"
 
-#ifdef __linux
-#define IP_RECVDSTADDR IP_PKTINFO
-#endif
-
 /***********************************************************************************************************************
  *  LOCALS
  */
@@ -543,12 +539,22 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         This way we can get the destination IP address for received UDP packets */
     errno           = 0;
     sockOptValue    = 1;
+	#if defined(IP_RECVDSTADDR)
     if (setsockopt(sock, IPPROTO_IP, IP_RECVDSTADDR, &sockOptValue, sizeof(sockOptValue)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %s)\n", buff);
     }
+	#elif defined(IP_PKTINFO)
+    if (setsockopt(sock, IPPROTO_IP, IP_PKTINFO, &sockOptValue, sizeof(sockOptValue)) == -1)
+    {
+        char buff[VOS_MAX_ERR_STR_SIZE];
+        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        vos_printf(VOS_LOG_ERROR, "setsockopt() IP_PKTINFO failed (Err: %s)\n", buff);
+    }
+	#endif
+	
     return VOS_NO_ERR;
 }
 
@@ -808,14 +814,17 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT16  *pSrcIPPort,
     UINT32  *pDstIPAddr)
 {
-    const size_t        cCMSGSize = 16;             /* size of buffer for destination address */
+	union
+	{
+		struct cmsghdr cm;
+		char           raw[32];
+	} control_un;
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen = sizeof(srcAddr);
     ssize_t             rcvSize = 0;
     struct msghdr       msg;
     struct iovec        iov;
-    UINT8 buffer[cCMSGSize];                        /* buffer for destination address record */
-    struct cmsghdr      *pControlMsg = (struct cmsghdr *) buffer;
+	struct cmsghdr      *cmsg;
 
     if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
@@ -824,7 +833,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
     /* clear our address buffers */
     memset(&msg, 0, sizeof(msg));
-    memset(&buffer, 0, cCMSGSize);
+    memset(&control_un, 0, sizeof(control_un));
 
     /* fill the scatter/gather list with our data buffer */
     iov.iov_base    = pBuffer;
@@ -835,8 +844,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     msg.msg_iovlen      = 1;
     msg.msg_name        = &srcAddr;
     msg.msg_namelen     = sockLen;
-    msg.msg_control     = pControlMsg;
-    msg.msg_controllen  = cCMSGSize;
+    msg.msg_control     = &control_un.cm;
+    msg.msg_controllen  = sizeof(control_un);
 
     do
     {
@@ -844,16 +853,28 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
         if (rcvSize != -1)
         {
-
-            if (pDstIPAddr != NULL &&
-                msg.msg_controllen >= cCMSGSize &&
-                pControlMsg->cmsg_level == IPPROTO_IP &&
-                pControlMsg->cmsg_type == IP_RECVDSTADDR &&
-                pControlMsg->cmsg_len >= cCMSGSize)
-            {
-                *pDstIPAddr = (uint32_t) vos_ntohl(*(uint32_t *)CMSG_DATA(pControlMsg));
-                /* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
-            }
+            if (pDstIPAddr != NULL)
+			{
+				for(cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL; cmsg = CMSG_NXTHDR(&msg,cmsg))
+				{
+					#if defined(IP_RECVDSTADDR)
+					if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == IP_RECVDSTADDR)
+					{
+						struct in_addr *pia = (struct in_addr *)CMSG_DATA(cmsg);
+						*pDstIPAddr = (UINT32)vos_ntohl(pia->s_addr);
+						/* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
+					}
+					#elif defined(IP_PKTINFO)
+					if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_PKTINFO)
+					{
+						struct in_pktinfo *pia = (struct in_pktinfo *)CMSG_DATA(cmsg);
+						*pDstIPAddr = (UINT32)vos_ntohl(pia->ipi_addr.s_addr);
+						/* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
+					}
+					#endif
+				}
+			}
+		
 
             if (pSrcIPAddr != NULL)
             {
