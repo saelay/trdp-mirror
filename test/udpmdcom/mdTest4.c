@@ -531,6 +531,7 @@ static int testReplyQSendID = 0;
 static int testConfirmSend(trdp_apl_cbenv_t msg)
 {
     TRDP_ERR_T errv;
+    char       strIp[16];
 
     // Send confirm
     errv = tlm_confirm(
@@ -539,8 +540,8 @@ static int testConfirmSend(trdp_apl_cbenv_t msg)
         (const TRDP_UUID_T *) &msg.Msg.sessionId,
         msg.Msg.comId,
         msg.Msg.topoCount,
-        msg.Msg.destIpAddr,
-        msg.Msg.srcIpAddr,
+        0,    /* own IP address from trdp stack */
+        msg.Msg.srcIpAddr, /* destination IP */
         0,         // pktFlags
         0,         //  userStatus
         0,         // replystatus
@@ -557,7 +558,7 @@ static int testConfirmSend(trdp_apl_cbenv_t msg)
     }
 
     // LOG
-    printf( "testConfirmSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    printf( "testConfirmSend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr, strIp));
 
     return 0;
 }
@@ -566,6 +567,7 @@ static int testConfirmSend(trdp_apl_cbenv_t msg)
 static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
 {
     TRDP_ERR_T errv;
+    char       strIp[16];
 
     // Send reply
     errv = tlm_reply(
@@ -574,8 +576,8 @@ static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
         &msg.Msg.sessionId,
         msg.Msg.topoCount,
         msg.Msg.comId,
-        msg.Msg.destIpAddr,
-        msg.Msg.srcIpAddr,
+        0,    /* own IP address from trdp stack */
+        msg.Msg.srcIpAddr, /* destination IP */
         0,         /* pktFlags */
         0,         /*  userStatus */
         NULL,      /* send param */
@@ -593,7 +595,7 @@ static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
     }
 
     // LOG
-    printf( "testReplySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    printf( "testReplySend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr,strIp));
 
     return 0;
 }
@@ -602,6 +604,7 @@ static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
 static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
 {
     TRDP_ERR_T errv;
+    char       strIp[16];
 
     // Send reply query
     errv = tlm_replyQuery(
@@ -610,8 +613,8 @@ static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData
         &msg.Msg.sessionId,
         msg.Msg.topoCount,
         msg.Msg.comId,
-        msg.Msg.destIpAddr,
-        msg.Msg.srcIpAddr,
+        0,    /* own IP address from trdp stack */
+        msg.Msg.srcIpAddr, /* destination IP */
         0,               /* pktFlags */
         0,               /*  userStatus */
         2 * 1000 * 1000, /* confirm timeout */
@@ -630,7 +633,7 @@ static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData
     }
 
     // LOG
-    printf( "testReplyQuerySend(): comID = %u, topoCount = %u, dstIP = x%08X\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.destIpAddr);
+    printf( "testReplyQuerySend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr,strIp));
 
     return 0;
 }
@@ -658,7 +661,7 @@ static void queue_procricz()
         printf( "destIpAddr        = %s\n", miscIpToString(msg.Msg.destIpAddr, strIp));
         printf( "seqCount          = %d\n", msg.Msg.seqCount);
         printf( "protVersion       = %d\n", msg.Msg.protVersion);
-        printf( "msgType           = x%04X\n", msg.Msg.msgType);
+        printf( "msgType           = x%04X=%c%c\n", msg.Msg.msgType, (msg.Msg.msgType >> 8 )& 0xFF, msg.Msg.msgType & 0xFF);
         printf( "comId             = %d\n", msg.Msg.comId);
         printf( "topoCount         = %d\n", msg.Msg.topoCount);
         printf( "userStatus        = %d\n", msg.Msg.userStatus);
@@ -1495,7 +1498,6 @@ static void queue_procricz()
                     sprintf(mdTestData1.testId, "MD Reply test");
 
                     testReplySend(msg, mdTestData1);
-
                     printf( "%s: Reply sent\n", strTstName);
                 }
                 else
@@ -1533,7 +1535,7 @@ static void queue_procricz()
                     testReplyQSendID++;
                     mdTestData1.cnt = vos_htonl(testReplyQSendID);
                     sprintf(mdTestData1.testId, "MD ReplyQ test");
-
+					
                     testReplyQuerySend(msg, mdTestData1);
 
                     printf( "%s: ReplyQuery sent\n", strTstName);
@@ -1999,7 +2001,7 @@ static int testNotifySend(
         comId,
         topoCount,
         0,    /* own IP address from trdp stack */
-        vos_htonl(ipDst),
+        vos_htonl(ipDst), /* destination IP */
         0,    /* flags */
         NULL, /* default send param */
         (UINT8 *) &mdTestData,
@@ -2070,7 +2072,7 @@ static int testRequestSend(
     }
 
     // LOG
-    printf( "testRequestSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, x_ip4_dest);
+    printf( "testRequestSend(): comID = %u, topoCount = %u, dstIP = x%08X\n", comId, topoCount, vos_htonl(ipDst));
 
     return 0;
 }
