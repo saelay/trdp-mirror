@@ -1718,10 +1718,6 @@ void  trdp_mdCheckListenSocks (
             {
                 MD_ELE_T *iterMD_find;
 
-                /* Code removed:
-                    Manual closing a socket should not be necessary!
-                    Sockets are closed when the last user (session) was closed */
-
                 /* Delete the sessions that are opened in this socket */
                 for (iterMD_find = appHandle->pMDSndQueue;
                      iterMD_find != NULL;
@@ -1729,10 +1725,6 @@ void  trdp_mdCheckListenSocks (
                 {
                     if (iterMD_find->socketIdx == index)
                     {
-                        /*This session is using the socket */
-                        trdp_releaseSocket(appHandle->iface,
-                                           iterMD_find->socketIdx,
-                                           appHandle->mdDefault.connectTimeout);
                         /* Remove element from queue */
                         trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD_find);
 
@@ -1748,11 +1740,6 @@ void  trdp_mdCheckListenSocks (
                 {
                     if (iterMD_find->socketIdx == index)
                     {
-                        /*This session was using the socket */
-                        trdp_releaseSocket(appHandle->iface,
-                                           iterMD_find->socketIdx,
-                                           appHandle->mdDefault.connectTimeout);
-
                         /* Remove element from queue */
                         trdp_MDqueueDelElement(&appHandle->pMDRcvQueue, iterMD_find);
 
@@ -1761,6 +1748,30 @@ void  trdp_mdCheckListenSocks (
 
                     }
                 }
+
+                /* Close the socket */
+                err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[index].sock);
+                if (err != TRDP_NO_ERR)
+                {
+                    vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
+                }
+
+                /* Delete the socket from the iface */
+                vos_printf(VOS_LOG_INFO,
+                           "Deleting socket (Num = %d) from the iface\n",
+                           appHandle->iface[index].sock);
+                vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
+                appHandle->iface[index].sock = -1;
+                appHandle->iface[index].sendParam.qos   = 0;
+                appHandle->iface[index].sendParam.ttl   = 0;
+                appHandle->iface[index].usage           = 0;
+                appHandle->iface[index].bindAddr        = 0;
+                appHandle->iface[index].type        = (TRDP_SOCK_TYPE_T) 0;
+                appHandle->iface[index].rcvMostly   = FALSE;
+                appHandle->iface[index].tcpParams.cornerIp = 0;
+                appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
+                appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
+                appHandle->iface[index].tcpParams.addFileDesc = FALSE;
             }
         }
     }
@@ -1840,61 +1851,6 @@ void  trdp_mdCheckTimeouts (
 
                     timeOut = TRUE;
 
-                    /* TCP handling */
-                    /*if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
-                    {
-                        MD_ELE_T *iterMD_find;
-
-                       */ /* Delete the sessions that are opened in this socket */
-                    /* for (iterMD_find = appHandle->pMDSndQueue;
-                          iterMD_find != NULL;
-                          iterMD_find = iterMD_find->pNext)
-                     {
-                         if (vos_ntohl(iterMD_find->pPacket->frameHead.comId) == iterMD->addr.comId)
-                         {
-                          */   /*This session is using the socket */
-                    /* Remove element from queue */
-                    /*       trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD_find); */
-
-                    /* free element */
-                    /*         trdp_mdFreeSession(iterMD);
-                         }
-                     }
-
-   */ /* TBD: */
-                    /*  Decrementing usage will prevend releasing of socket!    * / */
-                    /* appHandle->iface[iterMD->socketIdx].usage--;
-
-                    vos_printf(VOS_LOG_INFO,
-                               "Socket (Num = %d) usage decremented to %d\n",
-                               appHandle->iface[iterMD->socketIdx].sock,
-                               appHandle->iface[iterMD->socketIdx].usage);
-                        */
-                    /* If there is not at least one session using the socket, start the socket connectionTimeout
-                     */
-                    /*
-                       if ((appHandle->iface[iterMD->socketIdx].usage == 0)
-                          && (appHandle->iface[iterMD->socketIdx].rcvMostly == FALSE))
-                     */
-                    /*{
-                        TRDP_TIME_T tmpt_interval, tmpt_now;
-
-                        vos_printf(VOS_LOG_INFO,
-                                   "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                                   appHandle->iface[iterMD->socketIdx].sock);
-
-                      */  /* Start the socket connectionTimeout */
-                    /* tmpt_interval.tv_sec    = appHandle->mdDefault.connectTimeout / 1000000;
-                     tmpt_interval.tv_usec   = appHandle->mdDefault.connectTimeout % 1000000;
-
-                     vos_getTime(&tmpt_now);
-                     vos_addTime(&tmpt_now, &tmpt_interval);
-
-                     memcpy(&appHandle->iface[iterMD->socketIdx].tcpParams.connectionTimeout,
-                            &tmpt_now,
-                            sizeof(TRDP_TIME_T));
-                 }
-             }*/
                 }
                 break;
 
@@ -1993,56 +1949,6 @@ void  trdp_mdCheckTimeouts (
                         timeOut = TRUE;
                     }
 
-                    /* TCP handling of ReplyTimeout */
-                    /*if (0) */ /* if (sndReplyTimeout == 1) */
-                    /*{
-                        if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
-                        {
-                            MD_ELE_T *iterMD_find;
-
-                        */    /* Clean the session in the listener */
-                    /*       for (iterMD_find = appHandle->pMDRcvQueue;
-                                iterMD_find != NULL;
-                                iterMD_find = iterMD_find->pNext)
-                           {
-                               if (vos_ntohl(iterMD->pPacket->frameHead.comId) == iterMD_find->addr.comId)
-                               {
-                                   iterMD_find->stateEle   = TRDP_ST_RX_READY;
-                                   iterMD_find->socketIdx  = -1;
-                               }
-                           }
-
-                           appHandle->iface[iterMD->socketIdx].usage--;
-
-                           vos_printf(VOS_LOG_INFO,
-                                      "Socket (Num = %d) usage decremented to (Num = %d)\n",
-                                      appHandle->iface[iterMD->socketIdx].sock,
-                                      appHandle->iface[iterMD->socketIdx].usage);
-
-                         */  /* If there is not at least one session using the socket, start the socket connectionTimeout
-                            */
-                    /*    if ((appHandle->iface[iterMD->socketIdx].usage == 0)
-                            && (appHandle->iface[iterMD->socketIdx].rcvMostly == FALSE))
-                        {
-                            TRDP_TIME_T tmpt_interval, tmpt_now;
-
-                            vos_printf(VOS_LOG_INFO,
-                                       "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                                       appHandle->iface[iterMD->socketIdx].sock);
-
-                       */     /*  Start the socket connectionTimeout */
-                    /*      tmpt_interval.tv_sec    = appHandle->mdDefault.connectTimeout / 1000000;
-                          tmpt_interval.tv_usec   = appHandle->mdDefault.connectTimeout % 1000000;
-
-                          vos_getTime(&tmpt_now);
-                          vos_addTime(&tmpt_now, &tmpt_interval);
-
-                          memcpy(&appHandle->iface[iterMD->socketIdx].tcpParams.connectionTimeout,
-                                 &tmpt_now,
-                                 sizeof(TRDP_TIME_T));
-                      }
-                  }
-              }*/
                 }
                 break;
                 case TRDP_ST_RX_REPLYQUERY_W4C:
@@ -2050,53 +1956,6 @@ void  trdp_mdCheckTimeouts (
                     timeOut = TRUE;
 
                     resultCode = TRDP_CONFIRMTO_ERR;
-                    /* TCP handling */
-                    /* if (0) */ /* ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0) */
-                    /*{
-                        MD_ELE_T *iterMD_find;
-
-                       */ /* Clean the session in the listener */
-                    /*  for (iterMD_find = appHandle->pMDRcvQueue;
-                           iterMD_find != NULL;
-                           iterMD_find = iterMD_find->pNext)
-                      {
-                          if (vos_ntohl(iterMD->pPacket->frameHead.comId) == iterMD_find->addr.comId)
-                          {
-                              iterMD_find->stateEle   = TRDP_ST_RX_READY;
-                              iterMD_find->socketIdx  = -1;
-                          }
-                      }
-
-                      appHandle->iface[iterMD->socketIdx].usage--;
-
-                      vos_printf(VOS_LOG_INFO,
-                                 "Socket (Num = %d) usage decremented to (Num = %d)\n",
-                                 appHandle->iface[iterMD->socketIdx].sock,
-                                 appHandle->iface[iterMD->socketIdx].usage);
-
-                    */  /* If there is not at least one session using the socket, start the socket connectionTimeout
-                       */
-                    /*   if ((appHandle->iface[iterMD->socketIdx].usage == 0)
-                           && (appHandle->iface[iterMD->socketIdx].rcvMostly == FALSE))
-                       {
-                           TRDP_TIME_T tmpt_interval, tmpt_now;
-
-                           vos_printf(VOS_LOG_INFO,
-                                      "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                                      appHandle->iface[iterMD->socketIdx].sock);
-
-                         */  /*  Start the socket connectionTimeout */
-                    /*    tmpt_interval.tv_sec    = appHandle->mdDefault.connectTimeout / 1000000;
-                        tmpt_interval.tv_usec   = appHandle->mdDefault.connectTimeout % 1000000;
-
-                        vos_getTime(&tmpt_now);
-                        vos_addTime(&tmpt_now, &tmpt_interval);
-
-                        memcpy(&appHandle->iface[iterMD->socketIdx].tcpParams.connectionTimeout,
-                               &tmpt_now,
-                               sizeof(TRDP_TIME_T));
-                    }
-                }*/
 
                     /* Statistics */
                     if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
