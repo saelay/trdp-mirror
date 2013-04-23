@@ -1,0 +1,18 @@
+#//
+#// $Id$
+#//
+#// DESCRIPTION    Config file to make TRDP for VXWORKS_PPC target
+#//
+#// AUTHOR         Christoph Schneider, Bombardier Transportation GmbH
+#//
+#// All rights reserved. Reproduction, modification, use or disclosure
+#// to third parties without express authority is forbidden.
+#// Copyright Bombardier Transportation GmbH, Germany, 2013.
+#//
+
+TARGET_VOS = vxworks
+TARGET_FLAG = VXWORKS
+TCPREFIX = 
+TCPOSTFIX = ppc
+
+CFLAGS += -O2 -Wall -DO_DC -DO_BE -fstrength-reduce -fno-builtin -mlongcall -fsigned-char -D$(TARGET_FLAG)  -lpthread
