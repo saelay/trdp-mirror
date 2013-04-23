@@ -10,87 +10,76 @@
 #// Copyright Bombardier Transportation GmbH, Germany, 2012.
 #//
 
-# Preliminary: Currently, posix support only
+#// Support for POSIX and VXWORKS, set buildsettings and config first!
 
-TARGET_VOS = posix
-TARGET_FLAG = POSIX
-
-# --------------------------------------------------------------------
-
-VOS_PATH = src/vos/$(TARGET_VOS)
-
-vpath %.c src/common src/example src/vos/common test/udpmdcom $(VOS_PATH) test
-vpath %.h src/api src/vos/api src/common src/vos/common
-
-INCPATH = src/api
-VOS_INCPATH = src/vos/api -I src/common
-BUILD_PATH = bld/$(TARGET_VOS)
-DOXYPATH = /usr/local/bin/
-
-ifdef TARGET
-DIR_PATH=$(TARGET)/
-CROSS=$(TARGET)-
-
-CC=$(CROSS)gcc
-AR=$(CROSS)ar
-LD=$(CROSS)ld
-STRIP=$(CROSS)strip
-else
-CC = $(GNUPATH)gcc
-AR = $(GNUPATH)ar
-LD = $(GNUPATH)ld
-STRIP = $(GNUPATH)strip
+# Check if configuration is present
+ifeq (config/config.mk,$(wildcard config/config.mk)) 
+# load target specific configuration
+include config/config.mk
 endif
 
-ECHO = echo
-RM = rm -f
-MD = mkdir -p
-CP = cp
+# Set paths
+INCPATH += -I src/api
+VOS_PATH = -I src/vos/$(TARGET_VOS)
+VOS_INCPATH = -I src/vos/api -I src/common
+BUILD_PATH = bld/$(TARGET_VOS)
+vpath %.c src/common src/example src/vos/common test/udpmdcom $(VOS_PATH) test 
+vpath %.h src/api src/vos/api src/common src/vos/common
+SUBDIRS	= src
+INCLUDES = $(INCPATH) $(VOS_INCPATH) $(VOS_PATH)
+OUTDIR = $(BUILD_PATH)
 
-# adapte for operating system
+# Set Objects
+VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o vos_shared_mem.o
+TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o $(VOS_OBJS)
+
+# Set LDFLAGS
+LDFLAGS = -L $(OUTDIR)
+
+# Enable / disable MD Support
+ifeq ($(MD_SUPPORT),1)
+TRDP_OBJS += trdp_mdcom.o
+CFLAGS += -DMD_SUPPORT=1
+endif
+
+# adapt for operating system
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
 # flags needed for Linux
 CFLAGS += -D_GNU_SOURCE
 endif
 ifeq ($(UNAME), Darwin)
-# föags needed for OSX
+# flags needed for OSX
 CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE
 endif
 
-ifeq ($(MD_SUPPORT),1)
-CFLAGS += -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=1
-else
-CFLAGS += -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=0
-endif
-
-SUBDIRS	= src
-INCLUDES = -I $(INCPATH) -I $(VOS_INCPATH) -I $(VOS_PATH)
-OUTDIR = $(BUILD_PATH)
-
-LDFLAGS = -L $(OUTDIR)
-# files, all tests need to run
-SRC_TEST = test/test_general.c
-
+# Enable / disable Debug
 ifeq ($(DEBUG),1)
 CFLAGS += -g -O -DDEBUG
 LDFLAGS += -g
-# Display the strip command and do not execut it
-STRIP = $(ECHO) "do NOT strip: "
+# Display the strip command and do not execute it
+STRIP = @echo "do NOT strip: "
 else
 CFLAGS += -Os  -DNO_DEBUG
 endif
 
-VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o
-TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o $(VOS_OBJS)
+AS = $(TCPREFIX)as$(TCPOSTFIX)
+LD = $(TCPREFIX)ld$(TCPOSTFIX)
+CC = $(TCPREFIX)gcc$(TCPOSTFIX)
+CPP	= $(CC) -E
+AR = $(TCPREFIX)ar$(TCPOSTFIX)
+NM = $(TCPREFIX)nm$(TCPOSTFIX)
+STRIP = $(TCPREFIX)strip$(TCPOSTFIX)
 
-ifeq ($(MD_SUPPORT),1)
-TRDP_OBJS += trdp_mdcom.o
+# Special setting for VXWORKS
+ifeq ($(TARGET_FLAG),VXWORKS)
+CC = $(TCPREFIX)cc$(TCPOSTFIX)
 endif
 
-all:		outdir libtrdp demo
+all:	outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
+
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
 example:	outdir $(OUTDIR)/mdManager
 test:		outdir $(OUTDIR)/getstats $(OUTDIR)/vostest
@@ -100,50 +89,46 @@ mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest0001 $(OUTDIR)/mdTest0002
 
 doc:		doc/latex/refman.pdf
 
+%_config:
+	cp -f config/$@ config/config.mk
+	
 $(OUTDIR)/trdp_if.o:	trdp_if.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(OUTDIR)/%.o: %.c %.h trdp_if_light.h trdp_types.h vos_types.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-
 $(OUTDIR)/libtrdp.a:	$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
-			@$(ECHO) ' ### Building the lib $(@F)'
+			@echo ' ### Building the lib $(@F)'
 			$(RM) $@
 			$(AR) cq $@ $^
 
-
 $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building application $(@F)'
+			@echo ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/echoSelect.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
-			    $(LDFLAGS) \
-
+			    $(LDFLAGS)
 			$(STRIP) $@
 
-
 $(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building application $(@F)'
+			@echo ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/echoSelectcmdline.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
-			    $(LDFLAGS) \
-
+			    $(LDFLAGS) 
 			$(STRIP) $@
 
 $(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building application $(@F)'
+			@echo ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/echoPolling.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
-			    $(LDFLAGS) \
-
+			    $(LDFLAGS)
 			$(STRIP) $@
 
-
 $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building application $(@F)'
+			@echo ' ### Building application $(@F)'
 			$(CC) $(SUBDIRS)/example/sendHello.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -151,7 +136,7 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building statistics commandline tool $(@F)'
+			@echo ' ### Building statistics commandline tool $(@F)'
 			$(CC) test/getStats.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -159,7 +144,7 @@ $(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building example MD application $(@F)'
+			@echo ' ### Building example MD application $(@F)'
 			$(CC) $(SUBDIRS)/example/mdManager.c \
 			    -ltrdp \
 			    -luuid -lrt \
@@ -168,7 +153,7 @@ $(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building UDPMDCom test application $(@F)'
+			@echo ' ### Building UDPMDCom test application $(@F)'
 			$(CC) test/udpmdcom/mdTest0001.c \
 			    -ltrdp \
 			    -luuid -lrt \
@@ -177,7 +162,7 @@ $(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building UDPMDCom test application $(@F)'
+			@echo ' ### Building UDPMDCom test application $(@F)'
 			$(CC) test/udpmdcom/mdTest0002.c \
 			    -ltrdp \
 			    -luuid -lrt \
@@ -192,9 +177,8 @@ $(OUTDIR)/test_mdSingle: $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-
 $(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building TCPMDCom Siemens test application $(@F)'
+			@echo ' ### Building TCPMDCom Siemens test application $(@F)'
 			$(CC) $(SUBDIRS)/example/mdManagerTCP_Siemens.c \
 			    -ltrdp \
 			    -luuid -lrt \
@@ -202,9 +186,8 @@ $(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-
 $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building TCPMDCom test application $(@F)'
+			@echo ' ### Building TCPMDCom test application $(@F)'
 			$(CC) $(SUBDIRS)/example/mdManagerTCP.c \
 			    -ltrdp \
 			    -luuid -lrt \
@@ -213,7 +196,7 @@ $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building PD test application $(@F)'
+			@echo ' ### Building PD test application $(@F)'
 			$(CC) test/pdpatterns/trdp-pd-test.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -221,7 +204,7 @@ $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building MD test application $(@F)'
+			@echo ' ### Building MD test application $(@F)'
 			$(CC) test/mdpatterns/trdp-md-test.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -229,29 +212,28 @@ $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
-			@$(ECHO) ' ### Building VOS test application $(@F)'
+			@echo ' ### Building VOS test application $(@F)'
 			$(CC) VisualC/Win32TRDP_Tests/LibraryTests.cpp \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
 
-outdir:
-		$(MD) $(OUTDIR)
 
+outdir:
+	mkdir -p $(OUTDIR)
 
 doc/latex/refman.pdf: Doxyfile trdp_if_light.h trdp_types.h
-			@$(ECHO) ' ### Making the PDF document'
+			@echo ' ### Making the PDF document'
 			$(DOXYPATH)/doxygen Doxyfile
 			make -C doc/latex
-			$(CP) doc/latex/refman.pdf doc
-
-
+			cp doc/latex/refman.pdf doc
 
 help:
 	@echo " " >&2
 	@echo "BUILD TARGETS FOR TRDP" >&2
-	@echo "Edit the paths in the top part of this Makefile to suit your environment." >&2
+	@echo "Edit the paths in the buildsettings_%target file to prepare your build shell and apply changes to your environment variables." >&2
+	@echo "Then call 'make %config' to copy target specific config settings to 'config/config.mk', e.g. 'make POSIX_X86_config' " >&2
 	@echo "Then call 'make' or 'make all' to build everything." >&2
 	@echo "To build debug binaries, append 'DEBUG=TRUE' to the make command " >&2
 	@echo "To include message data support, append 'MD_SUPPORT=1' to the make command " >&2
@@ -270,10 +252,8 @@ help:
 
 #########################################################################
 
-
 clean:
-	$(RM) -r bld/*
-	$(RM) -r doc/latex/*
-
+	rm -f -r bld/*
+	rm -f -r doc/latex/*
 
 #########################################################################
