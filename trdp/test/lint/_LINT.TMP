@@ -20,31 +20,32 @@ D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(471) : Warning 421: Caution --
     function 'free(void *)' is considered dangerous [MISRA Rule 118]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
+_
+}
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c(1018) : Warning 529: Symbol
+    'err' (line 980) not subsequently referenced
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
+        _
+#define cmsghdr WSACMSGHDR
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(80) : Warning 652: #define of
+    symbol 'cmsghdr' declared previously at line 668, file C:\Program
+    Files\Microsoft SDKs\Windows\v7.0A\Include\ws2def.h
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
                                                          _
         appHandle->pMDRcvEle->pktFlags &= ~TRDP_FLAGS_TCP;
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(775) : Error 64: Type mismatch
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(847) : Error 64: Type mismatch
     (assignment) (int/enum) [MISRA Rule 29]
             _
     while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1293) : Warning 506: Constant
-    value Boolean [MISRA Rule 52]
-                         _
-                    if (0) /* if (sndReplyTimeout == 1) */
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1893) : Warning 506: Constant
-    value Boolean [MISRA Rule 52]
-                         _
-                    if (0) /* ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0) */
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1950) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1393) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
             _
     while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2089) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2210) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
@@ -59,17 +60,20 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2089) : Warning 506: Constant
 
 --- Global Wrap-up
 
-Warning 526: 'ig_endian()' (line 618, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'ig_endian()' (line 615, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
-    618, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+    615, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
 Warning 526: 'e()' (line 212, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
     not defined
 Warning 628: no argument information provided for function 'e()' (line 212,
     file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
-Warning 552: Symbol 'gNumberOfOpenSockets' (line 66, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
+Warning 552: Symbol 'gNumberOfOpenSockets' (line 87, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
     not accessed
 Warning 526: '__alignof()' (line 121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)
     not defined
 Warning 628: no argument information provided for function '__alignof()' (line
     121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)
+Warning 628: no argument information provided for function 'NetWkstaTransportEnum()'
+    (line 102, file C:\Program Files\Microsoft SDKs\Windows\v7.0A\Include\lmwksta.h,
+    module D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
