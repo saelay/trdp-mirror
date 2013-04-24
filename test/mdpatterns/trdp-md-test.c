@@ -653,6 +653,7 @@ int main(int argc, char * argv[])
     while (process_data())
     {   // drive TRDP stack
         FD_ZERO(&rfds);
+        noOfDesc = 0;
         tlc_getInterval(apph, &tv, &rfds, &noOfDesc);
         rv = select(noOfDesc + 1, &rfds, NULL, NULL, &tv_null);
         tlc_process(apph, &rfds, &rv);
