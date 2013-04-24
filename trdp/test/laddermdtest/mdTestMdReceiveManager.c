@@ -185,8 +185,11 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	md_config.replyTimeout   = pTrdpInitializeParameter->mdTimeoutReply;
 	md_config.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
 /*	md_config.confirmTimeout = pTrdpInitializeParameter->mdTimeoutConfirm; */	/* Not Command Support */
+	md_config.connectTimeout = pTrdpInitializeParameter->mdConnectTimeout;
+	md_config.sendingTimeout = pTrdpInitializeParameter->mdSendingTimeout;
 	md_config.udpPort        = TRDP_MD_UDP_PORT;
 	md_config.tcpPort        = TRDP_MD_UDP_PORT;
+	md_config.maxNumSessions = pTrdpInitializeParameter->mdMaxSessionNumber;
 
 	/*	PD Process config for TCP */
 	if (pTrdpInitializeParameter->mdTransportType == MD_TRANSPORT_TCP)

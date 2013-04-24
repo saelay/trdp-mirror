@@ -69,18 +69,21 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.14"
+#define MD_APP_VERSION	"V0.18"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.14"
+#define MD_APP_VERSION	"V0.18"
 #else
-#define MD_APP_VERSION	"V0.14"
+#define MD_APP_VERSION	"V0.18"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
-#define APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX 1000
+#define APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX		1000
+
+/* Caller Receive Reply Resutl Table Size Max */
+#define RECEIVE_REPLY_RESULT_TABLE_MAX				1000
 
 /* MD Request (Mr) sessionId(UUID) Table Size Max */
-#define REQUEST_SESSIONID_TABLE_MAX 1000
+#define REQUEST_SESSIONID_TABLE_MAX				1000
 
 /* Convert into IP address from number */
 #define TRDP_IP4_ADDR(a,b,c,d) ( (am_big_endian()) ? \
@@ -156,6 +159,8 @@ extern "C" {
 
 #define RECURSIVE_CALL_NOTHING		0				/* Recursive Call Count Nothing */
 
+#define TLC_PROCESS_CYCLE_TIME		10000			/* default MD tlc_process cycle time for tlm_delListener wait */
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */
@@ -164,6 +169,9 @@ typedef struct
 {
 	TRDP_UUID_T			mdAppThreadSessionId;
 	TRDP_LIS_T				pMdAppThreadListener;
+	UINT32					sendRequestNumExpReplies;
+	UINT32					decidedSessionSuccessCount;
+	UINT32					decidedSessionFailureCount;
 } APP_THREAD_SESSION_HANDLE;
 
 /* Application Thread Session Handle - Message Queue Descriptor Table */
@@ -274,9 +282,11 @@ typedef struct COMMAND_VALUE
 	TRDP_IP_ADDR_T mdDestinationAddress;		/* -g --md-destination-address Value */
 	UINT8 mdDump;									/* -i --md-dump Value */
 	UINT8 mdReplierNumber;						/* -j --md-replier-number Value */
+	UINT32 mdMaxSessionNumber;					/* -J --md-max-session Value */
 	UINT32 mdCycleNumber;						/* -k --md-cycle-number Value */
 	UINT8 mdLog;									/* -l --md-log Value */
 	UINT32 mdCycleTime;							/* -m --md-cycle-time Value */
+	UINT32 mdSendingTimeout;						/* -M --md-timeout-sending */
 	BOOL mdLadderTopologyFlag;					/* -n --md-topo Value */
 	UINT8 mdReplyErr;								/* -o --md-reply-err Value */
 	BOOL mdMarshallingFlag;						/* -p --md-marshall Value*/
@@ -284,6 +294,7 @@ typedef struct COMMAND_VALUE
 	UINT32 mdSendComId;							/* Caller Send comId */
 	MD_DATA_CREATE_FLAG createMdDataFlag;		/* Caller use for a decision of MD create */
 	UINT32 mdTimeoutReply;						/* -r --md-timeout-reply Value */
+	UINT32 mdConnectTimeout;						/* -R -md-timeout-connect */
 /*	UINT32 mdTimeoutConfirm;	*/					/* -s --md-timeout-confirm Value */
 	UINT8 mdSendSubnet;							/* -t --md-send-subnet Value */
 	/* Caller Result */
@@ -294,6 +305,8 @@ typedef struct COMMAND_VALUE
 	UINT32 callerMdSendCounter;					/* Caller Send Count */
 	UINT32 callerMdSendSuccessCounter;			/* Caller Success Send Count */
 	UINT32 callerMdSendFailureCounter;			/* Caller Failure Send Count */
+	UINT32 callerMdRequestReplySuccessCounter;/* Caller Success Send Request Receive Reply Count */
+	UINT32 callerMdRequestReplyFailureCounter;/* Caller Failure Send Request Receive Reply Count */
 	/* Replier Result */
 	UINT32 replierMdReceiveCounter;				/* Replier Receive Count */
 	UINT32 replierMdReceiveSuccessCounter;		/* Replier Success Receive Count */
@@ -346,6 +359,15 @@ typedef struct
 	CHAR8					timeStampString[64];
 	int                  dummy;
 } trdp_apl_cbenv_t;
+
+
+/* Caller Receive Reply Result Table */
+typedef struct RECEIVE_REPLY_RESULT_TABLE
+{
+	TRDP_UUID_T callerReceiveReplySessionId;
+	UINT32 callerReceiveReplyNumReplies;
+	MD_APP_ERR_TYPE callerDecideMdTranssmissionResultCode;
+} RECEIVE_REPLY_RESULT_TABLE_T;
 
 
 /***********************************************************************************************************************
@@ -857,7 +879,93 @@ MD_APP_ERR_TYPE mdReceive_main_proc (
 		void);
 
 /* Caller */
+/**********************************************************************************************************************/
+/** Set Receive Reply Result
+ *
+ *  @param[in]		pReceiveReplyResultTable				pointer to Receive Reply Result Table
+ *  @param[in]		receiveReplySessionId				Receive Reply SessionId
+ *  @param[in]		receiveReplyNumReplies				Receive Reply Number of Repliers
+ *  @param[in]		decideMdTranssmissionResultcode		Receive Reply deceideMdTranssimision() ResultCode
+ *
+ */
+MD_APP_ERR_TYPE setReceiveReplyResultTable(
+		RECEIVE_REPLY_RESULT_TABLE_T *pReceiveReplyResultTable,
+		TRDP_UUID_T receiveReplySessionId,
+		UINT32 receiveReplyNumReplies,
+		MD_APP_ERR_TYPE decideMdTranssmissionResutlCode);
 
+/**********************************************************************************************************************/
+/** Delete Receive Reply Result
+ *
+ *  @param[in]		pReceiveReplyResultTable				pointer to Receive Reply Result Table
+ *  @param[in]		deleteReceiveReplySessionId			Delete Receive Reply SessionId
+ *
+ *  @retval         MD_APP_NO_ERR				no error
+ *  @retval         MD_APP_PARAM_ERR			Parameter error
+ *
+ */
+MD_APP_ERR_TYPE deleteReceiveReplyResultTable(
+		RECEIVE_REPLY_RESULT_TABLE_T *pReceiveReplyResultTable,
+		TRDP_UUID_T deleteReceiveReplySessionId);
+
+
+/**********************************************************************************************************************/
+/** Delete Mr(Request) Send Session Table
+ *
+ *  @param[in]		pMrSendSessionTable					pointer to Mr Send Session Table Start Address
+ *  @param[in]		deleteSendRequestSessionId			delete Send Request SessionId
+ *
+ */
+MD_APP_ERR_TYPE deleteMrSendSessionTable(
+		APP_THREAD_SESSION_HANDLE **ppMrSendSessionTable,
+		TRDP_UUID_T deleteSendRequestSessionId);
+
+/**********************************************************************************************************************/
+/** Decide Request-Reply Result
+ *
+ *  @param[in]		pMrSendSessionTable				pointer to Mr Send Session Table
+ *  @param[in]		pReceiveReplyResultTable			pointer to Mp Receive Reply Result Table
+ *  @param[in]		callerMqDescriptor				Caller Message Queues Descriptor
+ *  @param[in]		pCallerCommandValue				pointer to Caller Command Value for wirte Mr-Mp Result
+ *
+ *  @retval         MD_APP_NO_ERR				Mr-Mp OK or deciding
+ *  @retval         MD_APP_ERR					Mr-Mp NG
+ *  @retval         MD_APP_PARAM_ERR			Parameter error
+ *
+ */
+MD_APP_ERR_TYPE decideRequestReplyResult (
+		APP_THREAD_SESSION_HANDLE **ppMrSendSessionTable,
+		RECEIVE_REPLY_RESULT_TABLE_T *pReceiveReplyResultTable,
+		COMMAND_VALUE *pCallerCommandValue,
+		mqd_t callerMqDescriptor);
+
+/**********************************************************************************************************************/
+/** Check Caller Send Request SessionId is alive or release
+ *
+ *  @param[in]		appHandle								caller appHandle
+ *  @param[in]		pCallerSendRequestSessionId			check Send Request sessionId
+ *
+ *  @retval         TRUE              is valid		session alive
+ *  @retval         FALSE             is invalid		session release
+ *
+ */
+BOOL isValidCallerSendRequestSession (
+		TRDP_SESSION_PT appHandle,
+		UINT8 *pCallerSendRequestSessionId);
+
+/**********************************************************************************************************************/
+/** Check Caller Receive Reply SessionId is alive or release
+ *
+ *  @param[in]		appHandle									caller appHandle
+ *  @param[in]		pCallerReceiveReplySessionId			check Receive Reply sessionId
+ *
+ *  @retval         TRUE              is valid		session alive
+ *  @retval         FALSE             is invalid		session release
+ *
+ */
+BOOL isValidCallerReceiveReplySession (
+		TRDP_SESSION_PT appHandle,
+		UINT8 *pCallerReceiveReplySessionId);
 
 /* Replier */
 /**********************************************************************************************************************/

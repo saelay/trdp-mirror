@@ -253,6 +253,15 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 					getCommandValue.mdReplierNumber = int32_value;
 				}
 				break;
+			case 'J':
+				if (argv[i+1] != NULL)
+				{
+					/* Get MD Session Max Number from an option argument */
+					sscanf(argv[i+1], "%u", &int32_value);
+					/* Set MD Session Max Number */
+					getCommandValue.mdMaxSessionNumber = int32_value;
+				}
+				break;
 			case 'k':
 				if (argv[i+1] != NULL)
 				{
@@ -287,6 +296,15 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 					sscanf(argv[i+1], "%u", &uint32_value);
 					/* Set MD Request Send Cycle Time */
 					getCommandValue.mdCycleTime = uint32_value;
+				}
+				break;
+			case 'M':
+				if (argv[i+1] != NULL)
+				{
+					/* Get MD Sending Timeout from an option argument */
+					sscanf(argv[i+1], "%u", &int32_value);
+					/* Set MD Sending Timeout */
+					getCommandValue.mdSendingTimeout = int32_value;
 				}
 				break;
 			case 'n':
@@ -340,6 +358,15 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 					getCommandValue.mdTimeoutReply = uint32_value;
 				}
 				break;
+			case 'R':
+				if (argv[i+1] != NULL)
+				{
+					/* Get MD Connect Timeout from an option argument */
+					sscanf(argv[i+1], "%u", &int32_value);
+					/* Set MD connect Timeout */
+					getCommandValue.mdConnectTimeout = int32_value;
+				}
+				break;
 			case 't':
 				if (argv[i+1] != NULL)
 				{
@@ -384,13 +411,37 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 			case 'h':
 			case '?':
 				printf("Unknown or required argument option -%c\n", optopt);
-				printf("Usage: COMMAND [-b callerReplierType] [-c transportType] [-d messegeKind]\n"
-						"[-e telegramType] [-f incrementDataSize] [-g callerMdDestination]\n"
-						"[-i dumpType] [-j callerKnownReplierNumber] [-k callerSendCycleNumber]\n"
-						"[-l logType] [-L logCategoryOnOffType] [-m callerMdSendCycleTime]\n"
-						"[-n topologyType] [-o replierReplyErrType] [-p marshallingTYpe]\n"
-						"[-q replierListenerComid] [-r replyTimeout] [-t callerSendUsingSubnetType]\n"
-						"[-h] \n");
+				printf("Usage: COMMAND "
+						"[-b callerReplierType] "
+						"[-c transportType] "
+						"[-d messegeKind] "
+						"\n"
+						"[-e telegramType] "
+						"[-f incrementDataSize] "
+						"[-g callerMdDestination] "
+						"\n"
+						"[-i dumpType] "
+						"[-j callerKnownReplierNumber] "
+						"[-J replierSessionMaxNumber] "
+						"\n"
+						"[-k callerSendCycleNumber] "
+						"[-l logType] "
+						"[-L logCategoryOnOffType] "
+						"\n"
+						"[-m callerMdSendCycleTime] "
+						"[-m sendingTimeout] "
+						"[-n topologyType] "
+						"\n"
+						"[-o replierReplyErrType] "
+						"[-p marshallingTYpe] "
+						"[-q replierListenerComid] "
+						"\n"
+						"[-r replyTimeout] "
+						"[-r connectTimeout] "
+						"[-t callerSendUsingSubnetType] "
+						"\n"
+						"[-h] "
+						"\n");
 				printf("long option(--) Not Support \n");
 				printf("-b,	--md-caller-replier-type		Application Type Caller:0, Replier:1\n");
 				printf("-c,	--md-transport-type			Transport Type UDP:0, TCP:1\n");
@@ -400,15 +451,18 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("-g,	--md-destination-address		Caller MD Send Destination IP Address, Replier MD Receive Destination IP Address xxx.xxx.xxx.xxx\n");
 				printf("-i,	--md-dump				Dump Type DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
 				printf("-j,	--md-replier-number			Caller known MD Replier Number\n");
+				printf("-J,	--md-max-session			Max Replier Session Number\n");
 				printf("-k,	--md-cycle-number			Caller MD Request Send Cycle Number, Replier MD Request Receive Cycle Number\n");
 				printf("-l,	--md-log				Log Type LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
 				printf("-L,	--md-log-type-onoff	LOG Category OnOff Type Log On:1, Log Off:0, 0bit:ERROR, 1bit:WARNING, 2bit:INFO, 3bit:DBG\n");
 				printf("-m,	--md-cycle-time				Caller MD Request Send Cycle Time micro sec\n");
+				printf("-M,	--md-timeout-sending				Sending Timeout: micro sec\n");
 				printf("-n,	--md-topo				Topology TYpe Ladder:1, not Lader:0\n");
 				printf("-o,	--md-reply-err				Replier MD Reply Error Type(1-6)\n");
 				printf("-p,	--md-marshall				Marshalling Type Marshall:1, not Marshall:0\n");
 				printf("-q,	--md-listener-comid			Replier Add Listener ComId val\n");
 				printf("-r,	--md-timeout-reply			Reply TImeout: micro sec\n");
+				printf("-R,	--md-timeout-connect			Connect TImeout: micro sec\n");
 				printf("-t,	--md-send-subnet			Caller Using Network I/F Subnet1:1,subnet2:2\n");
 				printf("-s,	--show-set-command	Display Setup Command until now\n");
 				printf("-S,	--show-md-statistics	Display MD Statistics\n");
