@@ -50,13 +50,15 @@ VOS_THREAD_FUNC_T MDReplier (
 	TRDP_FLAGS_T pktFlags = 0;			/* OPTION FLAG */
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle ={{0}};		/* appThreadSessionHandle for Subnet1 */
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle2 ={{0}};		/* appThreadSessionHandle for Subnet2 */
+	TRDP_LIS_T pTrdpListenerHandle = NULL;		/* TRDP Listener Handle for Subnet1 by tlm_addListener */
+	TRDP_LIS_T pTrdpListenerHandle2 = NULL;	/* TRDP Listener Handle for Subnet2 by tlm_addListener */
 
 	/* AppHandle  AppThreadListener Area */
 	if (appThreadSessionHandle.pMdAppThreadListener != NULL)
 	{
 		free(appThreadSessionHandle.pMdAppThreadListener);
 	}
-	appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_LIS_T));
+	appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 	if (appThreadSessionHandle.pMdAppThreadListener == NULL)
 	{
 		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
@@ -64,14 +66,14 @@ VOS_THREAD_FUNC_T MDReplier (
 	}
 	else
 	{
-		memset(appThreadSessionHandle.pMdAppThreadListener, 0, sizeof(TRDP_LIS_T));
+		memset(appThreadSessionHandle.pMdAppThreadListener, 0, sizeof(TRDP_ADDRESSES_T));
 	}
 	/* AppHandle2 AppThreadListener Area */
 	if (appThreadSessionHandle2.pMdAppThreadListener != NULL)
 	{
 		free(appThreadSessionHandle2.pMdAppThreadListener);
 	}
-	appThreadSessionHandle2.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_LIS_T));
+	appThreadSessionHandle2.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 	if (appThreadSessionHandle2.pMdAppThreadListener == NULL)
 	{
 		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle2.pMdAppThreadListener malloc Err\n");
@@ -79,7 +81,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	}
 	else
 	{
-		memset(appThreadSessionHandle2.pMdAppThreadListener, 0, sizeof(TRDP_LIS_T));
+		memset(appThreadSessionHandle2.pMdAppThreadListener, 0, sizeof(TRDP_ADDRESSES_T));
 	}
 
 	/*	Set OPTION FLAG for TCP */
@@ -98,32 +100,43 @@ VOS_THREAD_FUNC_T MDReplier (
 			/* Add Listener for Multicast */
 			err = tlm_addListener(
 					appHandle,
-					&(appThreadSessionHandle.pMdAppThreadListener),
+					&pTrdpListenerHandle,
 					0,						/* user supplied value returned with reply */
 					pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 					0,							/* topocount to use */
 					pReplierThreadParameter->pCommandValue->mdDestinationAddress,	/* destination Address (Multicast Group) */
 					pktFlags,					/* OPTION FLAG */
 					NULL);						/* destination URI */
+			/* Set Subnet1 appThreadListener destIP : Multicast */
+			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
 		}
 		else
 		{
 			/* Add Listener for Subnet1 */
 			err = tlm_addListener(
 					appHandle,
-					&(appThreadSessionHandle.pMdAppThreadListener),
+					&pTrdpListenerHandle,
 					0,						/* user supplied value returned with reply */
 					pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 					0,							/* topocount to use */
 					subnetId1Address,			/* destination Address */
 					pktFlags,					/* OPTION FLAG */
 					NULL);			/* destination URI */
+			/* Set Subnet1 appThreadListener destIP : Unicast */
+			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
 		}
 		/* Check tlm_addListener Return Code */
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
 			return 0;
+		}
+		else
+		{
+			/* Set Subnet1 appThreadListener */
+			appThreadSessionHandle.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
 		}
 
 		/* Is this Ladder Topology ? */
@@ -135,32 +148,42 @@ VOS_THREAD_FUNC_T MDReplier (
 				/* Add Listener for Multicast */
 				err = tlm_addListener(
 							appHandle2,
-							&(appThreadSessionHandle2.pMdAppThreadListener),
+							&pTrdpListenerHandle2,
 							0,						/* user supplied value returned with reply */
 							pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 							0,							/* topocount to use */
 							subnetId2Address,			/* destination Address */
 							pktFlags,					/* OPTION FLAG */
 							NULL);			/* destination URI */
+				/* Set Subnet2 appThreadListener destIP : Multicast */
+				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
 			}
 			else
 			{
 				/* Add Listener for Subnet2 */
 				err = tlm_addListener(
 							appHandle2,
-							&(appThreadSessionHandle2.pMdAppThreadListener),
+							&pTrdpListenerHandle2,
 							0,						/* user supplied value returned with reply */
 							pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 							0,							/* topocount to use */
 							subnetId2Address,			/* destination Address */
 							pktFlags,					/* OPTION FLAG */
 							NULL);			/* destination URI */
+				/* Set Subnet2 appThreadListener destIp : Unicast */
+				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
 			}
 			/* Check tlm_addListener Return Code */
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
 				return 0;
+			}
+			{
+				/* Set Subnet2 appThreadListener */
+				appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+				appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
 			}
 		}
 	}
@@ -206,21 +229,33 @@ VOS_THREAD_FUNC_T MDReplier (
 			pReplierThreadParameter);
 
 	/* Delete Listener */
+	/* wait tlc_process 1 cycle time = 10000 for Last Reply trdp_mdSend() */
+	vos_threadDelay(TLC_PROCESS_CYCLE_TIME);
     /* delete Subnet1 Listener */
-    err = tlm_delListener(appHandle, appThreadSessionHandle.pMdAppThreadListener);
+    err = tlm_delListener(appHandle, pTrdpListenerHandle);
     if(err != TRDP_NO_ERR)
 	{
     	vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
 	}
+    else
+    {
+    	/* Display TimeStamp when delete Listener time */
+    	printf("%s Subnet1 Listener Delete.\n", vos_getTimeStamp());
+    }
     /* Is this Ladder Topology ? */
 	if (pReplierThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
 	{
 		/* delete Subnet2 Listener */
-		err = tlm_delListener(appHandle2, appThreadSessionHandle2.pMdAppThreadListener);
+		err = tlm_delListener(appHandle2, pTrdpListenerHandle2);
 		if(err != TRDP_NO_ERR)
 		{
 			vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
 		}
+	    else
+	    {
+	    	/* Display TimeStamp when delete Listener time */
+	    	printf("%s Subnet2 Listener Delete.\n", vos_getTimeStamp());
+	    }
 	}
 
 	/* Delete command Value form COMMAND VALUE LIST */

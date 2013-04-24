@@ -949,7 +949,7 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 		CHAR8 *pLogString)
 {
 	/* Lock MD Application Thread Mutex */
-	lockMdApplicationThread();
+//	lockMdApplicationThread();
 
 	MD_APP_ERR_TYPE err = MD_APP_NO_ERR;		/* MD Application Result Code */
 	UINT8 *pCheckMdData = NULL;
@@ -1009,7 +1009,7 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 	}
 
 	/* UnLock MD Application Thread Mutex */
-	unlockMdApplicationThread();
+//	unlockMdApplicationThread();
 	return err;
 }
 
@@ -1236,6 +1236,8 @@ MD_APP_ERR_TYPE printCallerResult (
 				printf("Caller Send MD Count: %u\n", iterCommandValue->callerMdSendCounter);
 				printf("Caller Send MD Success Count: %u\n", iterCommandValue->callerMdSendSuccessCounter);
 				printf("Caller Send MD Failure Count: %u\n", iterCommandValue->callerMdSendFailureCounter);
+				printf("Caller Send Request Receive Reply Success Count: %u\n", iterCommandValue->callerMdRequestReplySuccessCounter);
+				printf("Caller Send Request Receive Reply Failure Count: %u\n", iterCommandValue->callerMdRequestReplyFailureCounter);
 				commnadValueNumber++;
 			}
 		}
