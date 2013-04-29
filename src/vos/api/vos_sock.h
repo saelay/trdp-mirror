@@ -43,16 +43,23 @@ extern "C" {
  * DEFINES
  */
 
-/** The maximum number of concurrent usable sockets  */
-#define VOS_MAX_SOCKET_CNT  80
+/** The maximum number of sockets influences memory usage; for small systems we should define a smaller set */
 
-/**    The maximum hops a multicast packet can go    */
-#define VOS_TTL_MULTICAST  64
+#if MD_SUPPORT						/* ### Eventually this could be changed to be target dependant... */
 
-/**    The maximum number of multicast groups a socket can join    */
-#define VOS_MAX_MULTICAST_CNT   20
 
-#define VOS_MAX_IF_NAME_SIZE    16
+#define VOS_MAX_SOCKET_CNT  	80  /**< The maximum number of concurrent usable sockets per application session */
+#define VOS_MAX_MULTICAST_CNT   20	/**< The maximum number of multicast groups one socket can join              */
+
+#else
+
+#define VOS_MAX_SOCKET_CNT  	4   /**< The maximum number of concurrent usable sockets per application session */
+#define VOS_MAX_MULTICAST_CNT   5	/**< The maximum number of multicast groups one socket can join              */
+
+#endif
+
+#define VOS_TTL_MULTICAST       64  /**< The maximum number of hops a multicast packet can take    */
+#define VOS_MAX_IF_NAME_SIZE    16  /**< The maximum size for the interface name                   */
 
 /***********************************************************************************************************************
  * TYPEDEFS
