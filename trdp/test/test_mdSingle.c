@@ -423,6 +423,7 @@ int main (int argc, char *argv[])
     }
 
     /*    Open a session  */
+    printf("open session\n");
     if (tlc_openSession(&sSessionData.appHandle,
                         ownIP,
                         0,                         /* use default IP address    */
@@ -438,12 +439,14 @@ int main (int argc, char *argv[])
     /*    Set up a listener  */
     if (sSessionData.sResponder == TRUE)
     {
+    	printf("add listener\n");
         if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, sSessionData.sComID, 0, destIP,
                             flags, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error (TCP)\n");
             return 1;
         }
+    	printf("add listener\n");
         if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, sSessionData.sComID, 0, destIP,
                             flags &= ~TRDP_FLAGS_TCP, NULL) != TRDP_NO_ERR)
         {
