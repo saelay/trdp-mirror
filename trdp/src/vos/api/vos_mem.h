@@ -44,14 +44,32 @@ extern "C" {
 
 #define VOS_MEM_MAX_PREALLOCATE  10     /*<< Max blocks to pre-allocate */
 
+#if MD_SUPPORT
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
     the overal size of the used memory allocation area is larger. */
-#define VOS_MEM_BLOCKSIZES  {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, \
-                             16384, 32768, 65536, 131072, 262144, 524288}
+
+#define VOS_MEM_BLOCKSIZES  {48, 72, 128, 180, 296, 416, 1024, 1480, 4096, \
+                             11520, 16384, 32768, 65536, 131072, 262144}
 
 /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
    Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
-#define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 4, 0, 0}
+
+#define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 0, 0, 4, 0, 0}
+
+#else /* Small systems, PD only */
+
+    /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
+     the overal size of the used memory allocation area is larger. */
+
+#define VOS_MEM_BLOCKSIZES  {32, 48, 128, 180, 296, 416, 1024, 1480, 2048, \
+							 4096, 11520, 16384, 32768, 65536, 131072}
+    
+    /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
+     Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
+
+#define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 1, 0, 0, 0, 0}
+    
+#endif
 
 /***********************************************************************************************************************
  * TYPEDEFS
