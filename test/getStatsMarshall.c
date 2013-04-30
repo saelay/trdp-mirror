@@ -53,27 +53,27 @@
 #define PD_COMID2_DATA_SIZE     0
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY  64000
-#define PREALLOCATE        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+#define RESERVED_MEMORY     64000
+#define PREALLOCATE         {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
-#define APP_VERSION  "0.0.0.3"
+#define APP_VERSION         "0.0.0.3"
 
-TRDP_STATISTICS_T   gBuffer;
-BOOL                gKeepOnRunning = TRUE;
+TRDP_STATISTICS_T gBuffer;
+BOOL gKeepOnRunning = TRUE;
 
 /**********************************************************************************************************************/
 /*
  *  Dataset definitions
  */
 #if 0
-#define    TRDP_STATS_DS_ID        111
-#define    TRDP_MEM_STATS_DS_ID    TRDP_STATS_DS_ID + 1
-#define    TRDP_PD_STATS_DS_ID        TRDP_MEM_STATS_DS_ID + 1
-#define    TRDP_MD_STATS_DS_ID        TRDP_PD_STATS_DS_ID + 1
+#define    TRDP_STATS_DS_ID         111
+#define    TRDP_MEM_STATS_DS_ID     TRDP_STATS_DS_ID + 1
+#define    TRDP_PD_STATS_DS_ID      TRDP_MEM_STATS_DS_ID + 1
+#define    TRDP_MD_STATS_DS_ID      TRDP_PD_STATS_DS_ID + 1
 
 /*    Statistics data set    */
 
-TRDP_DATASET_T gMemStatisticsDS =
+TRDP_DATASET_T  gMemStatisticsDS =
 {
     TRDP_MEM_STATS_DS_ID,        /*    dataset/com ID  */
     0,                          /*    reserved        */
@@ -97,7 +97,7 @@ TRDP_DATASET_T gMemStatisticsDS =
     }
 };
 
-TRDP_DATASET_T gPDStatisticsDS =
+TRDP_DATASET_T  gPDStatisticsDS =
 {
     TRDP_PD_STATS_DS_ID,        /*    dataset/com ID  */
     0,                          /*    reserved        */
@@ -111,7 +111,7 @@ TRDP_DATASET_T gPDStatisticsDS =
     }
 };
 
-TRDP_DATASET_T gMDStatisticsDS =
+TRDP_DATASET_T  gMDStatisticsDS =
 {
     TRDP_MD_STATS_DS_ID,        /*    dataset/com ID  */
     0,                          /*    reserved        */
@@ -125,7 +125,7 @@ TRDP_DATASET_T gMDStatisticsDS =
     }
 };
 
-TRDP_DATASET_T gStatisticsDS =
+TRDP_DATASET_T  gStatisticsDS =
 {
     TRDP_STATS_DS_ID,       /*    dataset/com ID  */
     0,          /*    reserved        */
@@ -175,7 +175,7 @@ TRDP_DATASET_T gStatisticsDS =
 };
 
 /*    Will be sorted by tau_initMarshall    */
-TRDP_DATASET_T*    gDataSets[] =
+TRDP_DATASET_T  *gDataSets[] =
 {
     &gStatisticsDS,
     &gMemStatisticsDS,
@@ -191,8 +191,8 @@ extern TRDP_COMID_DSID_MAP_T    gComIdMap[];
 extern TRDP_DATASET_T           *gDataSets[];
 extern const UINT32             cNoOfDatasets;
 
-void print_stats(
-    TRDP_STATISTICS_T*  pData)
+void print_stats (
+    TRDP_STATISTICS_T *pData)
 {
     int i;
 
@@ -216,9 +216,9 @@ void print_stats(
     printf("mem.allocBlockSizes: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", pData->mem.preAllocBlockSize[i]);
+        printf("%u, ", pData->mem.blockSize[i]);
     }
-    
+
     printf("\nmem.usedBlockSize:   ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
@@ -311,7 +311,7 @@ void myPDcallBack (
             {
                 if (pMsg->comId == 12)
                 {
-                    tau_unmarshall(NULL, pMsg->comId, pData, (UINT8*) &gBuffer, &dataSize, NULL);
+                    tau_unmarshall(NULL, pMsg->comId, pData, (UINT8 *) &gBuffer, &dataSize, NULL);
                     print_stats(&gBuffer);
                     gKeepOnRunning = FALSE;
                 }
@@ -345,18 +345,18 @@ int main (int argc, char * *argv)
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                            TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, RESERVED_MEMORY, {0}};
-    TRDP_PROCESS_CONFIG_T    processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-    TRDP_MARSHALL_CONFIG_T    marshall = {NULL, tau_unmarshall, 0};
+                                               TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_MARSHALL_CONFIG_T  marshall        = {NULL, tau_unmarshall, 0};
 
-    int                 rv = 0;
-    int                 ch;
-    int                 ip[4];
-    UINT32              destIP = 0;
-    UINT32              ownIP = 0;
-    UINT32              replyIP = 0;
-    UINT32              *refCon;
+    int     rv = 0;
+    int     ch;
+    int     ip[4];
+    UINT32  destIP  = 0;
+    UINT32  ownIP   = 0;
+    UINT32  replyIP = 0;
+    UINT32  *refCon;
 
     if (argc <= 1)
     {
@@ -413,7 +413,7 @@ int main (int argc, char * *argv)
     /*    Init the library for callback operation    (PD only) */
     if (tlc_init(dbgOut,                            /* actually printf    */
                  &dynamicConfig                    /* Use application supplied memory    */
-                ) != TRDP_NO_ERR)
+                 ) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
@@ -424,14 +424,14 @@ int main (int argc, char * *argv)
         printf("Marshalling initialization error\n");
         return 1;
     }
-    
+
     /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&appHandle,
-                 ownIP,
-                 0,                                 /* use default IP addresses */
-                 &marshall,                         /* marshalling    */
-                 &pdConfiguration, NULL,            /* system defaults for PD and MD    */
-                 &processConfig) != TRDP_NO_ERR)
+                        ownIP,
+                        0,                          /* use default IP addresses */
+                        &marshall,                  /* marshalling    */
+                        &pdConfiguration, NULL,     /* system defaults for PD and MD    */
+                        &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
@@ -453,7 +453,7 @@ int main (int argc, char * *argv)
                          PD_COMID1_TIMEOUT,             /*    Time out in us                        */
                          TRDP_TO_SET_TO_ZERO,           /*  delete invalid data    on timeout      */
                          sizeof(gBuffer));              /*    net data size                        */
-    
+
     if (err != TRDP_NO_ERR)
     {
         printf("prep pd receive error\n");
@@ -462,7 +462,19 @@ int main (int argc, char * *argv)
     }
 
     /*    Request statistics PD        */
-    err = tlp_request(appHandle, subHandle, TRDP_STATISTICS_REQUEST_COMID, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, TRDP_GLOBAL_STATISTICS_COMID, replyIP);
+    err = tlp_request(appHandle,
+                      subHandle,
+                      TRDP_STATISTICS_REQUEST_COMID,
+                      0,
+                      0,
+                      destIP,
+                      0,
+                      TRDP_FLAGS_NONE,
+                      0,
+                      NULL,
+                      0,
+                      TRDP_GLOBAL_STATISTICS_COMID,
+                      replyIP);
 
     if (err != TRDP_NO_ERR)
     {
