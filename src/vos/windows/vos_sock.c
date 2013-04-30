@@ -148,51 +148,6 @@ EXT_DECL UINT32 vos_ntohl (
     return ntohl(val);
 }
 
-/**********************************************************************************************************************/
-/** Check if the supplied address is a multicast group address.
- *
- *  @param[in]          ipAddress   IP address to check.
- *
- *  @retval             TRUE        address is multicast
- *  @retval             FALSE       address is not a multicast address
- */
-
-EXT_DECL BOOL vos_isMulticast (
-    UINT32 ipAddress)
-{
-    return IN_MULTICAST(ipAddress);
-}
-
-/**********************************************************************************************************************/
-/** Convert IP address.
- *
- *  @param[in]          pDottedIP   IP address as dotted decimal.
- *
- *  @retval             address in UINT32 in host endianess
- */
-EXT_DECL UINT32 vos_dottedIP (
-    const CHAR8 *pDottedIP)
-{
-    return vos_ntohl(inet_addr(pDottedIP));
-}
-
-/**********************************************************************************************************************/
-/** Convert IP address to dotted dec.
- *
- *  @param[in]          ipAddress   IP address as dotted decimal.
- *
- *  @retval             address in UINT32 in host endianess
- */
-
-EXT_DECL const CHAR8 *vos_ipDotted (
-    UINT32 ipAddress)
-{
-    static CHAR8 dotted[16];
-
-    (void) sprintf_s(dotted, sizeof(dotted), "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
-                     (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
-    return dotted;
-}
 
 /*    Sockets    */
 
@@ -225,6 +180,21 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 }
 
 /**********************************************************************************************************************/
+/** Check if the supplied address is a multicast group address.
+ *
+ *  @param[in]          ipAddress   IP address to check.
+ *
+ *  @retval             TRUE        address is multicast
+ *  @retval             FALSE       address is not a multicast address
+ */
+
+EXT_DECL BOOL vos_isMulticast (
+    UINT32 ipAddress)
+{
+    return IN_MULTICAST(ipAddress);
+}
+
+/**********************************************************************************************************************/
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
  *
@@ -235,7 +205,7 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
-EXT_DECL VOS_ERR_T vos_getInterfaces (
+EXT_DECL VOS_ERR_T vos_sockGetInterfaces (
     UINT32         *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
@@ -357,7 +327,7 @@ EXT_DECL INT32 vos_select (
  */
 
 EXT_DECL VOS_ERR_T vos_sockGetMAC (
-    UINT8 pMAC[6])
+    UINT8 pMAC[VOS_MAC_SIZE])
 {
     UINT32 i;
 
