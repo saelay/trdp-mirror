@@ -42,14 +42,15 @@ extern "C" {
 #define __cdecl
 #endif
 
-#define VOS_MEM_MAX_PREALLOCATE  10     /*<< Max blocks to pre-allocate */
+#define VOS_MEM_MAX_PREALLOCATE     10  /*<< Max blocks to pre-allocate */
+#define VOS_MEM_NBLOCKSIZES         15  /*<< No of pre-defined block sizes */
 
 #if MD_SUPPORT
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
     the overal size of the used memory allocation area is larger. */
 
-#define VOS_MEM_BLOCKSIZES  {48, 72, 128, 180, 296, 416, 1024, 1480, 4096, \
-                             11520, 16384, 32768, 65536, 131072, 262144}
+#define VOS_MEM_BLOCKSIZES  {48, 72, 128, 180, 256, 512, 1024, 1480, 2048, 4096, \
+                             11520, 16384, 32768, 65536, 131072}
 
 /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
    Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
@@ -58,17 +59,17 @@ extern "C" {
 
 #else /* Small systems, PD only */
 
-    /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
-     the overal size of the used memory allocation area is larger. */
+/** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
+ the overal size of the used memory allocation area is larger. */
 
-#define VOS_MEM_BLOCKSIZES  {32, 48, 128, 180, 296, 416, 1024, 1480, 2048, \
-							 4096, 11520, 16384, 32768, 65536, 131072}
-    
-    /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
-     Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
+#define VOS_MEM_BLOCKSIZES  {32, 48, 128, 180, 256, 512, 1024, 1480, 2048, \
+                             4096, 11520, 16384, 32768, 65536, 131072}
+
+/** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
+ Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
 
 #define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 1, 0, 0, 0, 0}
-    
+
 #endif
 
 /***********************************************************************************************************************
@@ -77,27 +78,6 @@ extern "C" {
 
 /** Opaque queue define  */
 typedef struct VOS_QUEUE *VOS_QUEUE_T;
-
-/** enumeration for memory block sizes */
-typedef enum
-{
-    TRDP_MEM_BLK_32 = 0,
-    TRDP_MEM_BLK_64,
-    TRDP_MEM_BLK_128,
-    TRDP_MEM_BLK_256,
-    TRDP_MEM_BLK_512,
-    TRDP_MEM_BLK_1024,
-    TRDP_MEM_BLK_2048,
-    TRDP_MEM_BLK_4096,
-    TRDP_MEM_BLK_8192,
-    TRDP_MEM_BLK_16384,
-    TRDP_MEM_BLK_32768,
-    TRDP_MEM_BLK_65536,
-    TRDP_MEM_BLK_131072,
-    TRDP_MEM_BLK_262144,
-    TRDP_MEM_BLK_524288,
-    VOS_MEM_NBLOCKSIZES         /*<< Total number of different sizes of memory allocation blocks */
-} VOS_MEM_BLK_T;
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -234,17 +214,17 @@ EXT_DECL void *vos_bsearch (
  *
  *  @param[in]      pStr1         Null terminated string to compare
  *  @param[in]      pStr2         Null terminated string to compare
- *  @param[in]      count         Maximum number of characters to compare 
+ *  @param[in]      count         Maximum number of characters to compare
  *
- *  @retval         0  - equal 
+ *  @retval         0  - equal
  *  @retval         <0 - string1 less than string 2
  *  @retval         >0 - string 1 greater than string 2
  */
 
-EXT_DECL INT32 vos_strnicmp ( 
+EXT_DECL INT32 vos_strnicmp (
     const CHAR8 *pStr1,
     const CHAR8 *pStr2,
-    UINT32       count );
+    UINT32      count );
 
 
 /**********************************************************************************************************************/
@@ -252,15 +232,15 @@ EXT_DECL INT32 vos_strnicmp (
  *
  *  @param[in]      pStrDst       Destination string
  *  @param[in]      pStrSrc       Null terminated string to copy
- *  @param[in]      count         Maximum number of characters to copy 
+ *  @param[in]      count         Maximum number of characters to copy
  *
  *  @retval         none
  */
 
-EXT_DECL void vos_strncpy ( 
+EXT_DECL void vos_strncpy (
     CHAR8       *pStr1,
     const CHAR8 *pStr2,
-    UINT32       count );
+    UINT32      count );
 
 #ifdef __cplusplus
 }

@@ -52,16 +52,16 @@
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY  64000
-#define PREALLOCATE        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+#define RESERVED_MEMORY     64000
+#define PREALLOCATE         {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
-#define APP_VERSION  "0.0.0.3"
+#define APP_VERSION         "0.0.0.3"
 
-TRDP_STATISTICS_T   gBuffer;
-BOOL                gKeepOnRunning = TRUE;
+TRDP_STATISTICS_T gBuffer;
+BOOL gKeepOnRunning = TRUE;
 
-void print_stats(
-    TRDP_STATISTICS_T*  pData)
+void print_stats (
+    TRDP_STATISTICS_T *pData)
 {
     int i;
 
@@ -82,12 +82,12 @@ void print_stats(
     printf("mem.numAllocErr:    %u\n", vos_ntohl(pData->mem.numAllocErr));
     printf("mem.numFreeErr:     %u\n", vos_ntohl(pData->mem.numFreeErr));
 
-    printf("mem.preAllocBlockSize: ");
+    printf("mem.blockSize: ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        printf("%u, ", vos_ntohl(pData->mem.preAllocBlockSize[i]));
+        printf("%u, ", vos_ntohl(pData->mem.blockSize[i]));
     }
-    
+
     printf("\nmem.usedBlockSize:   ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
@@ -216,17 +216,18 @@ int main (int argc, char * *argv)
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                            (TRDP_FLAGS_CALLBACK|TRDP_FLAGS_MARSHALL), 10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T       dynamicConfig = {NULL, RESERVED_MEMORY, PREALLOCATE};
-    TRDP_PROCESS_CONFIG_T    processConfig = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+                                               (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_MARSHALL), 10000000,
+                                               TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, PREALLOCATE};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
-    int                 rv = 0;
-    int                 ip[4];
-    UINT32              destIP = 0;
-    UINT32              replyIP = 0;
-    UINT32              ownIP = 0;
-    int                 count = 0, i;
-    int                 ch;
+    int     rv = 0;
+    int     ip[4];
+    UINT32  destIP  = 0;
+    UINT32  replyIP = 0;
+    UINT32  ownIP   = 0;
+    int     count   = 0, i;
+    int     ch;
 
     if (argc <= 1)
     {
@@ -289,19 +290,19 @@ int main (int argc, char * *argv)
     /*    Init the library for callback operation    (PD only) */
     if (tlc_init(dbgOut,                            /* actually printf    */
                  &dynamicConfig                    /* Use application supplied memory    */
-                ) != TRDP_NO_ERR)
+                 ) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
-    
+
     /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&appHandle,
-                 ownIP,
-                 0,                                 /* use default IP addresses */
-                 NULL,                              /* no Marshalling    */
-                 &pdConfiguration, NULL,            /* system defaults for PD and MD    */
-                 &processConfig) != TRDP_NO_ERR)
+                        ownIP,
+                        0,                          /* use default IP addresses */
+                        NULL,                       /* no Marshalling    */
+                        &pdConfiguration, NULL,     /* system defaults for PD and MD    */
+                        &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
@@ -332,7 +333,19 @@ int main (int argc, char * *argv)
     }
 
     /*    Request statistics PD        */
-    err = tlp_request(appHandle, subHandle, TRDP_STATISTICS_REQUEST_COMID, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, TRDP_GLOBAL_STATISTICS_COMID, replyIP);
+    err = tlp_request(appHandle,
+                      subHandle,
+                      TRDP_STATISTICS_REQUEST_COMID,
+                      0,
+                      0,
+                      destIP,
+                      0,
+                      TRDP_FLAGS_NONE,
+                      0,
+                      NULL,
+                      0,
+                      TRDP_GLOBAL_STATISTICS_COMID,
+                      replyIP);
 
     if (err != TRDP_NO_ERR)
     {
@@ -409,7 +422,7 @@ int main (int argc, char * *argv)
             printf(".");
             fflush(stdout);
         }
-        
+
         if (count++ > 10)
         {
             UINT32  allocatedMemory;
@@ -421,7 +434,7 @@ int main (int argc, char * *argv)
             UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES];
             UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];
             vos_memCount(&allocatedMemory, &freeMemory, &minFree, &numAllocBlocks, &numAllocErr, &numFreeErr,
-                            allocBlockSize, usedBlockSize);
+                         allocBlockSize, usedBlockSize);
             printf("Memory usage:\n");
             printf(" allocatedMemory:    %u\n", allocatedMemory);
             printf(" freeMemory:        %u\n", freeMemory);
@@ -436,7 +449,7 @@ int main (int argc, char * *argv)
             }
             printf("\n\n");
             count = 0;
-         }
+        }
 
     }   /*    Bottom of while-loop    */
 

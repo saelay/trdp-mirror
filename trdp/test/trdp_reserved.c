@@ -32,12 +32,12 @@
 /***********************************************************************************************************************
  * LOCALS
  */
-TRDP_DATASET_T dsStatisticsRequest =    /* ComId request used for statistics */
+TRDP_DATASET_T  dsStatisticsRequest =   /* ComId request used for statistics */
 {
-    TRDP_STATISTICS_REQUEST_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    1,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_STATISTICS_REQUEST_DSID,         /* dataset/com ID  */
+    0,         /*  reserved                          */
+    1,         /*   No of elements, var size  */
+    {          /*  TRDP_DATASET_ELEMENT_T[]  */
         {
             TRDP_UINT32,   /* requested ComId for statistics*/
             1
@@ -45,30 +45,30 @@ TRDP_DATASET_T dsStatisticsRequest =    /* ComId request used for statistics */
     }
 };
 
-TRDP_DATASET_T dsMemStatistics =    /* mem statistics */
+TRDP_DATASET_T  dsMemStatistics =   /* mem statistics */
 {
-    TRDP_MEM_STATISTICS_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    8,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_MEM_STATISTICS_DSID,         /* dataset/com ID  */
+    0,         /*  reserved */
+    8,         /*  No of elements, var size  */
+    {          /*  TRDP_DATASET_ELEMENT_T[] */
         {
-            TRDP_UINT32,   /**< total memory size */ 
+            TRDP_UINT32,   /**< total memory size */
             1
         },
         {
-            TRDP_UINT32,   /**< free memory size */ 
+            TRDP_UINT32,   /**< free memory size */
             1
         },
         {
-            TRDP_UINT32,   /**< minimal free memory size in statistics interval */ 
+            TRDP_UINT32,   /**< minimal free memory size in statistics interval */
             1
         },
         {
-            TRDP_UINT32,   /**< allocated memory blocks */ 
+            TRDP_UINT32,   /**< allocated memory blocks */
             1
         },
         {
-            TRDP_UINT32,   /**< allocation errors */ 
+            TRDP_UINT32,   /**< allocation errors */
             1
         },
         {
@@ -76,38 +76,38 @@ TRDP_DATASET_T dsMemStatistics =    /* mem statistics */
             1
         },
         {
-            TRDP_UINT32,   /**< allocated memory blocks */ 
-            (TRDP_MEM_BLK_524288 + 1)
+            TRDP_UINT32,   /**< allocated memory blocks */
+            (VOS_MEM_NBLOCKSIZES)
         },
         {
-            TRDP_UINT32,   /**< used memory blocks */ 
-            (TRDP_MEM_BLK_524288 + 1)
+            TRDP_UINT32,   /**< used memory blocks */
+            (VOS_MEM_NBLOCKSIZES)
         },
 
     }
 };
 
 
-TRDP_DATASET_T dsPdStatistics =    /* pd statistics */
+TRDP_DATASET_T  dsPdStatistics =   /* pd statistics */
 {
-    TRDP_PD_STATISTICS_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    13,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_PD_STATISTICS_DSID,         /*    dataset/com ID  */
+    0,          /* reserved */
+    13,         /* No of elements, var size */
+    {           /* TRDP_DATASET_ELEMENT_T[] */
         {
-            TRDP_UINT32,   /**< default QoS for PD */ 
+            TRDP_UINT32,   /**< default QoS for PD */
             1
         },
         {
-            TRDP_UINT32,   /**< default TTL for PD */ 
+            TRDP_UINT32,   /**< default TTL for PD */
             1
         },
         {
-            TRDP_UINT32,   /**< default timeout in us for PD */ 
+            TRDP_UINT32,   /**< default timeout in us for PD */
             1
         },
         {
-            TRDP_UINT32,   /**< number of subscribed ComId's */ 
+            TRDP_UINT32,   /**< number of subscribed ComId's */
             1
         },
         {
@@ -115,123 +115,123 @@ TRDP_DATASET_T dsPdStatistics =    /* pd statistics */
             1
         },
         {
-            TRDP_UINT32,   /**< number of received PD packets */ 
+            TRDP_UINT32,   /**< number of received PD packets */
             1
         },
         {
-            TRDP_UINT32,   /**< number of received PD packets with CRC err */ 
+            TRDP_UINT32,   /**< number of received PD packets with CRC err */
             1
         },
         {
-            TRDP_UINT32,   /**< number of received PD packets with protocol err */  
+            TRDP_UINT32,   /**< number of received PD packets with protocol err */
             1
         },
         {
-            TRDP_UINT32,   /**< number of received PD packets with wrong topo count */  
+            TRDP_UINT32,   /**< number of received PD packets with wrong topo count */
             1
         },
         {
-            TRDP_UINT32,   /**< number of received PD push packets without subscription */  
+            TRDP_UINT32,   /**< number of received PD push packets without subscription */
             1
         },
         {
-            TRDP_UINT32,   /**< number of received PD pull packets without publisher */  
+            TRDP_UINT32,   /**< number of received PD pull packets without publisher */
             1
         },
         {
-            TRDP_UINT32,   /**< number of PD timeouts */   
+            TRDP_UINT32,   /**< number of PD timeouts */
             1
         },
         {
-            TRDP_UINT32,   /**< number of sent PD  packets */ 
-            1
-        },
-
-    }
-};
-
-TRDP_DATASET_T dsMdStatistics =    /* md statistics */
-{
-    TRDP_MD_STATISTICS_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    13,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
-        {
-            TRDP_UINT32,   /**< default QoS for MD */ 
-            1
-        },
-        {
-            TRDP_UINT32,   /**< default TTL for MD */ 
-            1
-        },
-        {
-            TRDP_UINT32,   /**< default reply timeout in us for PD */ 
-            1
-        },
-        {
-            TRDP_UINT32,   /**< default confirm timeout in us for PD */ 
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of listeners */ 
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of received MD packets */ 
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of received MD packets with CRC err */ 
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of received MD packets with protocol err */  
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of received MD packets with wrong topo count */  
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of received MD packets without listener */  
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of MD reply timeouts */   
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of MD confirm timeouts */   
-            1
-        },
-        {
-            TRDP_UINT32,   /**< number of sent MD  packets */ 
+            TRDP_UINT32,   /**< number of sent PD  packets */
             1
         },
 
     }
 };
 
-TRDP_DATASET_T dsGlobalStatistics =    /* global statistics */
+TRDP_DATASET_T  dsMdStatistics =   /* md statistics */
 {
-    TRDP_GLOBAL_STATISTICS_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    15,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_MD_STATISTICS_DSID,         /*    dataset/com ID  */
+    0,          /*  reserved  */
+    13,         /*  No of elements, var size  */
+    {           /*  TRDP_DATASET_ELEMENT_T[]  */
         {
-            TRDP_UINT32,   /**< TRDP version  */  
+            TRDP_UINT32,   /**< default QoS for MD */
             1
         },
         {
-            TRDP_TIMEDATE64,   /**< actual time stamp */  
+            TRDP_UINT32,   /**< default TTL for MD */
             1
         },
         {
-            TRDP_TIMEDATE32,   /**< time in sec since last initialisation */  
+            TRDP_UINT32,   /**< default reply timeout in us for PD */
             1
         },
         {
-            TRDP_TIMEDATE32,   /**< time in sec since last reset of statistics */ 
+            TRDP_UINT32,   /**< default confirm timeout in us for PD */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of listeners */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of received MD packets */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of received MD packets with CRC err */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of received MD packets with protocol err */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of received MD packets with wrong topo count */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of received MD packets without listener */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of MD reply timeouts */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of MD confirm timeouts */
+            1
+        },
+        {
+            TRDP_UINT32,   /**< number of sent MD  packets */
+            1
+        },
+
+    }
+};
+
+TRDP_DATASET_T  dsGlobalStatistics =   /* global statistics */
+{
+    TRDP_GLOBAL_STATISTICS_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    15,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
+        {
+            TRDP_UINT32,   /**< TRDP version  */
+            1
+        },
+        {
+            TRDP_TIMEDATE64,   /**< actual time stamp */
+            1
+        },
+        {
+            TRDP_TIMEDATE32,   /**< time in sec since last initialisation */
+            1
+        },
+        {
+            TRDP_TIMEDATE32,   /**< time in sec since last reset of statistics */
             1
         },
         {
@@ -239,35 +239,35 @@ TRDP_DATASET_T dsGlobalStatistics =    /* global statistics */
             16
         },
         {
-            TRDP_CHAR8,   /**< leader host name */  
+            TRDP_CHAR8,   /**< leader host name */
             16
         },
         {
-            TRDP_UINT32,   /**< own IP address */  
+            TRDP_UINT32,   /**< own IP address */
             1
         },
         {
-            TRDP_UINT32,   /**< leader IP address */  
+            TRDP_UINT32,   /**< leader IP address */
             1
         },
         {
-            TRDP_UINT32,   /**< priority of TRDP process */   
+            TRDP_UINT32,   /**< priority of TRDP process */
             1
         },
         {
-            TRDP_UINT32,   /**< cycle time of TRDP process in microseconds */ 
+            TRDP_UINT32,   /**< cycle time of TRDP process in microseconds */
             1
         },
         {
-            TRDP_UINT32,   /**< number of joins */     
+            TRDP_UINT32,   /**< number of joins */
             1
         },
         {
-            TRDP_UINT32,   /**< number of redundancy groups */     
+            TRDP_UINT32,   /**< number of redundancy groups */
             1
         },
         {
-            TRDP_MEM_STATISTICS_DSID,   /**< memory statistics */    
+            TRDP_MEM_STATISTICS_DSID,   /**< memory statistics */
             1
         },
         {
@@ -286,182 +286,183 @@ TRDP_DATASET_T dsGlobalStatistics =    /* global statistics */
     }
 };
 
-TRDP_DATASET_T dsSubsStatistics =    /* subs statistics */
+TRDP_DATASET_T  dsSubsStatistics =   /* subs statistics */
 {
-    TRDP_SUBS_STATISTICS_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    8,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_SUBS_STATISTICS_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    8,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,   /**< Subscribed ComId */  
+            TRDP_UINT32,   /**< Subscribed ComId */
             1
         },
         {
-            TRDP_UINT32,   /**< Joined IP address */  
+            TRDP_UINT32,   /**< Joined IP address */
             1
         },
         {
-            TRDP_UINT32,   /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0 in case all senders. */ 
+            TRDP_UINT32,   /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0 in case
+                             all senders. */
             1
         },
         {
-            TRDP_UINT32,   /**< Reference for call back function if used */ 
+            TRDP_UINT32,   /**< Reference for call back function if used */
             1
         },
         {
-            TRDP_UINT32,   /**< Time-out value in us. 0 = No time-out supervision */ 
+            TRDP_UINT32,   /**< Time-out value in us. 0 = No time-out supervision */
             1
         },
         {
-            TRDP_UINT32,   /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */ 
+            TRDP_UINT32,   /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
             1
         },
         {
-            TRDP_UINT32,   /**< Behaviour at time-out. Set data to zero / keep last value */  
+            TRDP_UINT32,   /**< Behaviour at time-out. Set data to zero / keep last value */
             1
         },
         {
-            TRDP_UINT32,   /**< Number of packets received for this subscription. */ 
+            TRDP_UINT32,   /**< Number of packets received for this subscription. */
             1
         }
     }
 };
 
-TRDP_DATASET_T dsSubsStatisticsArray =       /* pub statistics */
+TRDP_DATASET_T  dsSubsStatisticsArray =      /* pub statistics */
 {
-    TRDP_SUBS_STATISTICS_ARRAY_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_SUBS_STATISTICS_ARRAY_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */
             1
         },
         {
-            TRDP_SUBS_STATISTICS_DSID,       /*	dataset/com ID  */
+            TRDP_SUBS_STATISTICS_DSID,       /*    dataset/com ID  */
             0
         }
     }
 };
 
-TRDP_DATASET_T dsPubStatistics =    /* pub statistics */
+TRDP_DATASET_T  dsPubStatistics =   /* pub statistics */
 {
-    TRDP_PUB_STATISTICS_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    7,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_PUB_STATISTICS_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    7,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,   /**< Published ComId  */  
+            TRDP_UINT32,   /**< Published ComId  */
             1
         },
         {
-            TRDP_UINT32,   /**< IP address of destination for this publishing. */  
+            TRDP_UINT32,   /**< IP address of destination for this publishing. */
             1
         },
         {
-            TRDP_UINT32,   /**< Publishing cycle in us */ 
+            TRDP_UINT32,   /**< Publishing cycle in us */
             1
         },
         {
-            TRDP_UINT32,   /**< Redundancy group id */ 
+            TRDP_UINT32,   /**< Redundancy group id */
             1
         },
         {
-            TRDP_UINT32,   /**< Redundant state.Leader or Follower */ 
+            TRDP_UINT32,   /**< Redundant state.Leader or Follower */
             1
         },
         {
-            TRDP_UINT32,   /**< Number of packet updates */  
+            TRDP_UINT32,   /**< Number of packet updates */
             1
         },
         {
-            TRDP_UINT32,   /**< Number of packets sent out */ 
+            TRDP_UINT32,   /**< Number of packets sent out */
             1
         }
 
     }
 };
 
-TRDP_DATASET_T dsPubStatisticsArray =       /* pub statistics */
+TRDP_DATASET_T  dsPubStatisticsArray =      /* pub statistics */
 {
-    TRDP_PUB_STATISTICS_ARRAY_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_PUB_STATISTICS_ARRAY_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */
             1
         },
         {
-            TRDP_PUB_STATISTICS_DSID,       /*	dataset/com ID  */
+            TRDP_PUB_STATISTICS_DSID,       /*    dataset/com ID  */
             0
         }
     }
 };
 
-TRDP_DATASET_T dsListStatistics =    /* md listener statistics */
+TRDP_DATASET_T  dsListStatistics =   /* md listener statistics */
 {
-    TRDP_LIST_STATISTIC_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    7,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_LIST_STATISTIC_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    7,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,   /**< ComId to listen to */   
+            TRDP_UINT32,   /**< ComId to listen to */
             1
         },
         {
-            TRDP_UINT32,   /**< URI user part to listen to */   
+            TRDP_UINT32,   /**< URI user part to listen to */
             32
         },
         {
-            TRDP_UINT32,   /**< Joined IP address */   
+            TRDP_UINT32,   /**< Joined IP address */
             1
         },
         {
-            TRDP_UINT32,   /**< Call back function reference if used */ 
+            TRDP_UINT32,   /**< Call back function reference if used */
             1
         },
         {
-            TRDP_UINT32,   /**< Queue reference if used */  
+            TRDP_UINT32,   /**< Queue reference if used */
             1
         },
         {
-            TRDP_UINT32,   /**< User reference if used */ 
+            TRDP_UINT32,   /**< User reference if used */
             1
         },
         {
-            TRDP_UINT32,   /**< Number of received packets */ 
+            TRDP_UINT32,   /**< Number of received packets */
             1
         }
     }
 };
 
 
-TRDP_DATASET_T dsListStatisticsArray =      /* md listener statistics */
+TRDP_DATASET_T  dsListStatisticsArray =     /* md listener statistics */
 {
-    TRDP_LIST_STATISTIC_ARRAY_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_LIST_STATISTIC_ARRAY_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */
             1
         },
         {
-            TRDP_LIST_STATISTIC_DSID,       /*	dataset/com ID  */
+            TRDP_LIST_STATISTIC_DSID,       /*    dataset/com ID  */
             0
         }
     }
 };
 
-TRDP_DATASET_T dsRedStatistics =      /* md listener statistics */
+TRDP_DATASET_T  dsRedStatistics =     /* md listener statistics */
 {
-    TRDP_RED_STATISTICS_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_RED_STATISTICS_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,      /**< id  */  
+            TRDP_UINT32,      /**< id  */
             1
         },
         {
@@ -472,35 +473,35 @@ TRDP_DATASET_T dsRedStatistics =      /* md listener statistics */
 };
 
 
-TRDP_DATASET_T dsRedStatisticsArray =      /* md listener statistics */
+TRDP_DATASET_T  dsRedStatisticsArray =     /* md listener statistics */
 {
-    TRDP_RED_STATISTICS_ARRAY_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_RED_STATISTICS_ARRAY_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */
             1
         },
         {
-            TRDP_RED_STATISTICS_DSID,       /*	redundancy statistics  */
+            TRDP_RED_STATISTICS_DSID,       /*    redundancy statistics  */
             0
         }
     }
 };
 
-TRDP_DATASET_T dsJoinStatisticsArray =      /* md join statistics */
+TRDP_DATASET_T  dsJoinStatisticsArray =     /* md join statistics */
 {
-    TRDP_JOIN_STATISTICS_ARRAY_DSID,         /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,          /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_JOIN_STATISTICS_ARRAY_DSID,         /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_UINT32,    /**< size  */  
+            TRDP_UINT32,    /**< size  */
             1
         },
         {
-            TRDP_UINT32,       /*	joined IP addr  */
+            TRDP_UINT32,       /*    joined IP addr  */
             0
         }
     }
@@ -508,13 +509,13 @@ TRDP_DATASET_T dsJoinStatisticsArray =      /* md join statistics */
 
 
 
-/*	Test data sets	*/
-TRDP_DATASET_T dsNest1Test =
+/*    Test data sets    */
+TRDP_DATASET_T          dsNest1Test =
 {
-    TRDP_NEST1_TEST_DSID,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    0,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_NEST1_TEST_DSID,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    0,         /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT32,
             1
@@ -526,12 +527,12 @@ TRDP_DATASET_T dsNest1Test =
     }
 };
 
-TRDP_DATASET_T dsNest2Test =
+TRDP_DATASET_T          dsNest2Test =
 {
-    TRDP_NEST2_TEST_DSID,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_NEST2_TEST_DSID,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
             1
@@ -543,12 +544,12 @@ TRDP_DATASET_T dsNest2Test =
     }
 };
 
-TRDP_DATASET_T dsNest3Test =
+TRDP_DATASET_T          dsNest3Test =
 {
-    TRDP_NEST3_TEST_DSID,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_NEST3_TEST_DSID,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
             1
@@ -560,12 +561,12 @@ TRDP_DATASET_T dsNest3Test =
     }
 };
 
-TRDP_DATASET_T dsNest4Test =
+TRDP_DATASET_T          dsNest4Test =
 {
-    TRDP_NEST4_TEST_DSID,       /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    2,         /*	No of elements, var size	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_NEST4_TEST_DSID,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    2,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
             1
@@ -577,27 +578,27 @@ TRDP_DATASET_T dsNest4Test =
     }
 };
 
-TRDP_DATASET_T dsTest =
+TRDP_DATASET_T          dsTest =
 {
-    TRDP_TEST_DSID,        /*	dataset/com ID  */
-    0,          /*	reserved		*/
-    65,         /*	No of elements	*/
-    {           /*	TRDP_DATASET_ELEMENT_T[]	*/
+    TRDP_TEST_DSID,        /*    dataset/com ID  */
+    0,          /*    reserved        */
+    65,         /*    No of elements    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_BOOLEAN,  /*	data type		*/
-            1               /*	no of elements	*/
+            TRDP_BOOLEAN,  /*    data type        */
+            1               /*    no of elements    */
         },
         {
             TRDP_CHAR8,
             1
         },
-       {
+        {
             TRDP_UTF16,
             1
         },
         {
             TRDP_INT8,
-            1           
+            1
         },
         {
             TRDP_INT16,
@@ -648,20 +649,20 @@ TRDP_DATASET_T dsTest =
             1
         },
         {
-            TRDP_BOOLEAN,  /*	data type		*/
-            4               /*	no of elements	*/
+            TRDP_BOOLEAN,  /*    data type        */
+            4               /*    no of elements    */
         },
         {
             TRDP_CHAR8,
             16
         },
-       {
+        {
             TRDP_UTF16,
             16
         },
         {
             TRDP_INT8,
-            4           
+            4
         },
         {
             TRDP_INT16,
@@ -716,8 +717,8 @@ TRDP_DATASET_T dsTest =
             1
         },
         {
-            TRDP_BOOLEAN,  /*	data type		*/
-            0               /*	no of elements	*/
+            TRDP_BOOLEAN,   /*    data type        */
+            0               /*    no of elements    */
         },
         {
             TRDP_UINT16,
@@ -741,7 +742,7 @@ TRDP_DATASET_T dsTest =
         },
         {
             TRDP_INT8,
-            0           
+            0
         },
         {
             TRDP_UINT16,
@@ -846,20 +847,21 @@ TRDP_DATASET_T dsTest =
     }
 };
 
-TRDP_COMID_DSID_MAP_T	gComIdMap[] = {
+TRDP_COMID_DSID_MAP_T   gComIdMap[] =
+{
     {TRDP_TEST_DSID, TRDP_TEST_DSID},
     {TRDP_STATISTICS_REQUEST_COMID, TRDP_STATISTICS_REQUEST_DSID},
     {TRDP_GLOBAL_STATISTICS_COMID, TRDP_GLOBAL_STATISTICS_DSID},
     {TRDP_SUBS_STATISTICS_COMID, TRDP_SUBS_STATISTICS_DSID},
     {TRDP_PUB_STATISTICS_COMID, TRDP_PUB_STATISTICS_DSID},
-    {TRDP_RED_STATISTICS_COMID , TRDP_RED_STATISTICS_DSID},
-    {TRDP_JOIN_STATISTICS_COMID , TRDP_JOIN_STATISTICS_DSID},
+    {TRDP_RED_STATISTICS_COMID, TRDP_RED_STATISTICS_DSID},
+    {TRDP_JOIN_STATISTICS_COMID, TRDP_JOIN_STATISTICS_DSID},
     {TRDP_UDP_LIST_STATISTICS_COMID, TRDP_LIST_STATISTIC_DSID},
     {TRDP_TCP_LIST_STATISTICS_COMID, TRDP_LIST_STATISTIC_DSID}
 };
 
-/*	Will be sorted by tau_initMarshall	*/
-TRDP_DATASET_T*	gDataSets[] =
+/*    Will be sorted by tau_initMarshall    */
+TRDP_DATASET_T          *gDataSets[] =
 {
     &dsStatisticsRequest,
     &dsMemStatistics,
@@ -877,9 +879,9 @@ TRDP_DATASET_T*	gDataSets[] =
     &dsNest2Test,
     &dsNest3Test,
     &dsNest4Test,
-    &dsTest    
+    &dsTest
 };
 
-const UINT32    cNoOfDatasets = sizeof(gDataSets)/sizeof(TRDP_DATASET_T*);
+const UINT32            cNoOfDatasets = sizeof(gDataSets) / sizeof(TRDP_DATASET_T *);
 
-#endif /* TRDP_RESERVED_C */ 
+#endif /* TRDP_RESERVED_C */

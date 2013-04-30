@@ -27,6 +27,7 @@
  */
 
 #include "trdp_types.h"
+#include "trdp_proto.h"
 #include "vos_thread.h"
 #include "vos_sock.h"
 
@@ -35,21 +36,7 @@
  * DEFINES
  */
 
-#define LIB_VERSION  "0.0.3.0"
-
-#ifndef TRDP_PD_UDP_PORT
-#define TRDP_PD_UDP_PORT  20548                                         /**< process data UDP port                  */
-#endif
-#ifndef TRDP_MD_UDP_PORT
-#define TRDP_MD_UDP_PORT  20550                                         /**< message data UDP port                  */
-#endif
-#ifndef TRDP_MD_TCP_PORT
-#define TRDP_MD_TCP_PORT  20550                                         /**< message data TCP port                  */
-#endif
-
-#define TRDP_PROTO_VER          0x0100                                  /**< Protocol version                       */
-#define TRDP_SESS_ID_SIZE       16                                      /**< Session ID (UUID) size in MD header    */
-#define TRDP_DEST_URI_SIZE      32                                      /**< max. Dest URI size in MD header        */
+#define LIB_VERSION             "0.0.3.0"
 
 #define TRDP_TIMER_GRANULARITY  10000                                   /**< granularity in us                      */
 #define TRDP_TIMER_FOREVER      0xffffffff                              /**< granularity in us                      */
@@ -71,13 +58,6 @@
 #define TRDP_PD_DEFAULT_TIMEOUT     100000
 #define TRDP_PD_DEFAULT_SEND_PARAM  {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
 
-/*  PD packet properties    */
-#define TRDP_MIN_PD_HEADER_SIZE     sizeof(PD_HEADER_T)                 /**< PD header size with FCS                */
-#define TRDP_MAX_PD_DATA_SIZE       1436
-#define TRDP_MAX_PD_PACKET_SIZE     (TRDP_MAX_PD_DATA_SIZE + TRDP_MIN_PD_HEADER_SIZE)
-#define TRDP_MAX_MD_DATA_SIZE       ((1024 * 64) - 8 - sizeof(MD_HEADER_T))
-#define TRDP_MAX_MD_PACKET_SIZE     (TRDP_MAX_MD_DATA_SIZE + sizeof(MD_HEADER_T))
-
 /*  Default TRDP process options    */
 #define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000                       /**< Default cycle time for TRDP process    */
 #define TRDP_PROCESS_DEFAULT_PRIORITY       64                          /**< Default priority of TRDP process       */
@@ -85,14 +65,8 @@
 
 #define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536                       /**< Default maximum size of log file       */
 
-/*  Default SDT values  */
-#define TRDP_SDT_DEFAULT_SMI2       0                                   /**< Default SDT safe message identifier    */
-#define TRDP_SDT_DEFAULT_NRXSAFE    3                                   /**< Default SDT timeout cycles             */
-#define TRDP_SDT_DEFAULT_NGUARD     100                                 /**< Default SDT initial timeout cycles     */
-#define TRDP_SDT_DEFAULT_CMTHR      10                                  /**< Default SDT chan. monitoring threshold */
-
-#define TRDP_MAGIC_PUB_HNDL_VALUE   0xCAFEBABE
-#define TRDP_MAGIC_SUB_HNDL_VALUE   0xBABECAFE
+#define TRDP_MAGIC_PUB_HNDL_VALUE           0xCAFEBABE
+#define TRDP_MAGIC_SUB_HNDL_VALUE           0xBABECAFE
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -181,39 +155,6 @@ typedef struct TRDP_SOCKETS
 #ifdef WIN32
 #pragma pack(push, 1)
 #endif
-
-/** TRDP process data header - network order and alignment    */
-typedef struct
-{
-    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
-    UINT16  protocolVersion;                    /**< fix value for compatibility (set by the API)           */
-    UINT16  msgType;                            /**< of datagram: PD Request (0x5072) or PD_MSG (0x5064)    */
-    UINT32  comId;                              /**< set by user: unique id                                 */
-    UINT32  topoCount;                          /**< set by user: ETB to use, '0' to deacticate             */
-    UINT32  datasetLength;                      /**< length of the data to transmit 0...1436
-                                                    without padding and FCS                                 */
-    UINT32  reserved;                           /**< before used for ladder support                         */
-    UINT32  replyComId;                         /**< used in PD request                                     */
-    UINT32  replyIpAddress;                     /**< used for PD request                                    */
-    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
-} GNU_PACKED PD_HEADER_T;
-
-/** TRDP message data header - network order and alignment    */
-typedef struct
-{
-    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
-    UINT16  protocolVersion;                    /**< fix value for compatibility                            */
-    UINT16  msgType;                            /**< of datagram: Mn, Mr, Mp, Mq, Mc or Me                  */
-    UINT32  comId;                              /**< set by user: unique id                                 */
-    UINT32  topoCount;                          /**< set by user: ETB to use, '0' to deacticate             */
-    UINT32  datasetLength;                      /**< defined by user: length of data to transmit            */
-    INT32   replyStatus;                        /**< 0 = OK                                                 */
-    UINT8   sessionID[16];                      /**< UUID as a byte stream                                  */
-    UINT32  replyTimeout;                       /**< in us                                                  */
-    UINT8   sourceURI[32];                      /**< User part of URI                                       */
-    UINT8   destinationURI[32];                 /**< User part of URI                                       */
-    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
-} GNU_PACKED MD_HEADER_T;
 
 /** TRDP PD packet    */
 typedef struct

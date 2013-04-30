@@ -139,7 +139,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[index].comId        = iter->addr.comId;     /* Subscribed ComId                                   */
         pStatistics[index].joinedAddr   = iter->addr.mcGroup;   /* Joined IP address                                  */
         pStatistics[index].filterAddr   = iter->addr.srcIpAddr; /* Filter IP address                                  */
-        pStatistics[index].callBack     = (void*) iter->userRef; /* Reference for call back function if used
+        pStatistics[index].callBack     = (void *) iter->userRef; /* Reference for call back function if used
                                                                              */
         pStatistics[index].timeout      = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */
@@ -341,33 +341,39 @@ void    trdp_UpdateStats (
 {
     PD_ELE_T    *iter;
     UINT16      index;
-    VOS_ERR_T  ret;
+    VOS_ERR_T   ret;
 
     /*  Get a new time stamp    */
     vos_getTime(&appHandle->stats.timeStamp);
 
     /*  Update memory statsp    */
     ret = vos_memCount(&appHandle->stats.mem.total,
-                 &appHandle->stats.mem.free,
-                 &appHandle->stats.mem.minFree,
-                 &appHandle->stats.mem.numAllocBlocks,
-                 &appHandle->stats.mem.numAllocErr,
-                 &appHandle->stats.mem.numFreeErr,
-                 appHandle->stats.mem.preAllocBlockSize,
-                 appHandle->stats.mem.usedBlockSize);
+                       &appHandle->stats.mem.free,
+                       &appHandle->stats.mem.minFree,
+                       &appHandle->stats.mem.numAllocBlocks,
+                       &appHandle->stats.mem.numAllocErr,
+                       &appHandle->stats.mem.numFreeErr,
+                       appHandle->stats.mem.blockSize,
+                       appHandle->stats.mem.usedBlockSize);
     if (ret != VOS_NO_ERR)
     {
         vos_printf(VOS_LOG_ERROR, "vos_memCount() failed (Err: %d)\n", ret);
     }
 
     /*  Count our subscriptions */
-    for (index = 0, iter = appHandle->pRcvQueue; iter != NULL; index++, iter = iter->pNext) {;}
+    for (index = 0, iter = appHandle->pRcvQueue; iter != NULL; index++, iter = iter->pNext)
+    {
+        ;
+    }
 
     appHandle->stats.pd.numSubs = index;
 
     /*  Count our publishers */
-    for (index = 0, iter = appHandle->pSndQueue; iter != NULL; index++, iter = iter->pNext) {;}
-    
+    for (index = 0, iter = appHandle->pSndQueue; iter != NULL; index++, iter = iter->pNext)
+    {
+        ;
+    }
+
     appHandle->stats.pd.numPub = index;
 }
 
@@ -396,15 +402,15 @@ void    trdp_pdPrepareStats (
     pData = (TRDP_STATISTICS_T *) pPacket->pFrame->data;
 
     /*  Fill in the values  */
-    pData->version              = vos_htonl(appHandle->stats.version);
+    pData->version = vos_htonl(appHandle->stats.version);
     pData->timeStamp.tv_sec     = vos_htonl(appHandle->stats.timeStamp.tv_sec);
     pData->timeStamp.tv_usec    = vos_htonl(appHandle->stats.timeStamp.tv_usec);
-    pData->upTime               = vos_htonl(appHandle->stats.upTime);
-    pData->statisticTime        = vos_htonl(appHandle->stats.statisticTime);
-    pData->ownIpAddr            = vos_htonl(appHandle->stats.ownIpAddr);
-    pData->leaderIpAddr         = vos_htonl(appHandle->stats.leaderIpAddr);
-    pData->processPrio          = vos_htonl(appHandle->stats.processPrio);
-    pData->processCycle         = vos_htonl(appHandle->stats.processCycle);
+    pData->upTime           = vos_htonl(appHandle->stats.upTime);
+    pData->statisticTime    = vos_htonl(appHandle->stats.statisticTime);
+    pData->ownIpAddr        = vos_htonl(appHandle->stats.ownIpAddr);
+    pData->leaderIpAddr     = vos_htonl(appHandle->stats.leaderIpAddr);
+    pData->processPrio      = vos_htonl(appHandle->stats.processPrio);
+    pData->processCycle     = vos_htonl(appHandle->stats.processCycle);
 
     /*  Memory  */
     pData->mem.total            = vos_htonl(appHandle->stats.mem.total);
@@ -416,8 +422,8 @@ void    trdp_pdPrepareStats (
 
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
-        pData->mem.preAllocBlockSize[i]    = vos_htonl(appHandle->stats.mem.preAllocBlockSize[i]);
-        pData->mem.usedBlockSize[i]     = vos_htonl(appHandle->stats.mem.usedBlockSize[i]);
+        pData->mem.blockSize[i]     = vos_htonl(appHandle->stats.mem.blockSize[i]);
+        pData->mem.usedBlockSize[i] = vos_htonl(appHandle->stats.mem.usedBlockSize[i]);
     }
 
     /* Process data */
@@ -436,33 +442,33 @@ void    trdp_pdPrepareStats (
     pData->pd.numSend       = vos_htonl(appHandle->stats.pd.numSend);
 
     /* Message data */
-    pData->udpMd.defQos            = vos_htonl(appHandle->stats.udpMd.defQos);
-    pData->udpMd.defTtl            = vos_htonl(appHandle->stats.udpMd.defTtl);
-    pData->udpMd.defReplyTimeout   = vos_htonl(appHandle->stats.udpMd.defReplyTimeout);
-    pData->udpMd.defConfirmTimeout = vos_htonl(appHandle->stats.udpMd.defConfirmTimeout);
-    pData->udpMd.numList           = vos_htonl(appHandle->stats.udpMd.numList);
-    pData->udpMd.numRcv            = vos_htonl(appHandle->stats.udpMd.numRcv);
-    pData->udpMd.numCrcErr         = vos_htonl(appHandle->stats.udpMd.numCrcErr);
-    pData->udpMd.numProtErr        = vos_htonl(appHandle->stats.udpMd.numProtErr);
-    pData->udpMd.numTopoErr        = vos_htonl(appHandle->stats.udpMd.numTopoErr);
-    pData->udpMd.numNoListener     = vos_htonl(appHandle->stats.udpMd.numNoListener);
-    pData->udpMd.numReplyTimeout   = vos_htonl(appHandle->stats.udpMd.numReplyTimeout);
-    pData->udpMd.numConfirmTimeout = vos_htonl(appHandle->stats.udpMd.numConfirmTimeout);
-    pData->udpMd.numSend           = vos_htonl(appHandle->stats.udpMd.numSend);
+    pData->udpMd.defQos = vos_htonl(appHandle->stats.udpMd.defQos);
+    pData->udpMd.defTtl = vos_htonl(appHandle->stats.udpMd.defTtl);
+    pData->udpMd.defReplyTimeout    = vos_htonl(appHandle->stats.udpMd.defReplyTimeout);
+    pData->udpMd.defConfirmTimeout  = vos_htonl(appHandle->stats.udpMd.defConfirmTimeout);
+    pData->udpMd.numList            = vos_htonl(appHandle->stats.udpMd.numList);
+    pData->udpMd.numRcv             = vos_htonl(appHandle->stats.udpMd.numRcv);
+    pData->udpMd.numCrcErr          = vos_htonl(appHandle->stats.udpMd.numCrcErr);
+    pData->udpMd.numProtErr         = vos_htonl(appHandle->stats.udpMd.numProtErr);
+    pData->udpMd.numTopoErr         = vos_htonl(appHandle->stats.udpMd.numTopoErr);
+    pData->udpMd.numNoListener      = vos_htonl(appHandle->stats.udpMd.numNoListener);
+    pData->udpMd.numReplyTimeout    = vos_htonl(appHandle->stats.udpMd.numReplyTimeout);
+    pData->udpMd.numConfirmTimeout  = vos_htonl(appHandle->stats.udpMd.numConfirmTimeout);
+    pData->udpMd.numSend            = vos_htonl(appHandle->stats.udpMd.numSend);
 
-    pData->tcpMd.defQos            = vos_htonl(appHandle->stats.tcpMd.defQos);
-    pData->tcpMd.defTtl            = vos_htonl(appHandle->stats.tcpMd.defTtl);
-    pData->tcpMd.defReplyTimeout   = vos_htonl(appHandle->stats.tcpMd.defReplyTimeout);
-    pData->tcpMd.defConfirmTimeout = vos_htonl(appHandle->stats.tcpMd.defConfirmTimeout);
-    pData->tcpMd.numList           = vos_htonl(appHandle->stats.tcpMd.numList);
-    pData->tcpMd.numRcv            = vos_htonl(appHandle->stats.tcpMd.numRcv);
-    pData->tcpMd.numCrcErr         = vos_htonl(appHandle->stats.tcpMd.numCrcErr);
-    pData->tcpMd.numProtErr        = vos_htonl(appHandle->stats.tcpMd.numProtErr);
-    pData->tcpMd.numTopoErr        = vos_htonl(appHandle->stats.tcpMd.numTopoErr);
-    pData->tcpMd.numNoListener     = vos_htonl(appHandle->stats.tcpMd.numNoListener);
-    pData->tcpMd.numReplyTimeout   = vos_htonl(appHandle->stats.tcpMd.numReplyTimeout);
-    pData->tcpMd.numConfirmTimeout = vos_htonl(appHandle->stats.tcpMd.numConfirmTimeout);
-    pData->tcpMd.numSend           = vos_htonl(appHandle->stats.tcpMd.numSend);
+    pData->tcpMd.defQos = vos_htonl(appHandle->stats.tcpMd.defQos);
+    pData->tcpMd.defTtl = vos_htonl(appHandle->stats.tcpMd.defTtl);
+    pData->tcpMd.defReplyTimeout    = vos_htonl(appHandle->stats.tcpMd.defReplyTimeout);
+    pData->tcpMd.defConfirmTimeout  = vos_htonl(appHandle->stats.tcpMd.defConfirmTimeout);
+    pData->tcpMd.numList            = vos_htonl(appHandle->stats.tcpMd.numList);
+    pData->tcpMd.numRcv             = vos_htonl(appHandle->stats.tcpMd.numRcv);
+    pData->tcpMd.numCrcErr          = vos_htonl(appHandle->stats.tcpMd.numCrcErr);
+    pData->tcpMd.numProtErr         = vos_htonl(appHandle->stats.tcpMd.numProtErr);
+    pData->tcpMd.numTopoErr         = vos_htonl(appHandle->stats.tcpMd.numTopoErr);
+    pData->tcpMd.numNoListener      = vos_htonl(appHandle->stats.tcpMd.numNoListener);
+    pData->tcpMd.numReplyTimeout    = vos_htonl(appHandle->stats.tcpMd.numReplyTimeout);
+    pData->tcpMd.numConfirmTimeout  = vos_htonl(appHandle->stats.tcpMd.numConfirmTimeout);
+    pData->tcpMd.numSend            = vos_htonl(appHandle->stats.tcpMd.numSend);
     pPacket->dataSize = sizeof(TRDP_STATISTICS_T);
 
     /*  Compute the CRC */
