@@ -29,6 +29,7 @@
 #include "vos_types.h"
 #include "vos_mem.h"
 #include "vos_sock.h"
+#include "trdp_proto.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,22 +39,6 @@ extern "C" {
  * DEFINES
  */
 
-/** Maximum values    */
-
-/**  A uri is a string of the following form:                                 */
-/**  trdp://[user part]@[host part]                                           */
-/**  trdp://instLabel.funcLabel@devLabel.carLabel.cstLabel.trainLabel         */
-/**  Hence the exact max. uri length is:                                      */
-/**  7 + (6 * 15) + 5 * (sizeof (separator)) + 1(terminating 0)               */
-/**  to facilitate alignment the size will be increased by 1 byte             */
-#define TRDP_MAX_LABEL_LEN      16                              /**< label length incl. terminating '0' */
-#define TRDP_MAX_URI_USER_LEN   (2 * TRDP_MAX_LABEL_LEN)        /**< URI user part incl. terminating '0' */
-#define TRDP_MAX_URI_HOST_LEN   (4 * TRDP_MAX_LABEL_LEN)        /**< URI host part length incl. terminating '0' */
-#define TRDP_MAX_URI_LEN        ((6 * TRDP_MAX_LABEL_LEN) + 8)  /**< URI length incl. terminating '0' and 1 padding byte
-                                                                  */
-#define TRDP_MAX_FILE_NAME_LEN  128                             /**< path and file name length incl. terminating '0' */
-
-#define TDRP_VAR_SIZE           0                               /**< Variable size dataset    */
 
 #ifndef USE_HEAP
     #define USE_HEAP  0                 /**< If this is set, we can allocate dynamically memory    */
@@ -93,77 +78,6 @@ typedef CHAR8 TRDP_URI_USER_T[TRDP_MAX_URI_USER_LEN];
 
 typedef CHAR8 TRDP_FILE_NAME_T[TRDP_MAX_FILE_NAME_LEN];
 
-/**********************************************************************************************************************/
-/**                          TRDP reserved COMID's in the range 1 ... 1000                                            */
-/**********************************************************************************************************************/
-
-#define TRDP_COMID_ECHO                 10
-
-#define TRDP_STATISTICS_REQUEST_COMID   31
-#define TRDP_GLOBAL_STATISTICS_COMID    35
-#define TRDP_SUBS_STATISTICS_COMID      36
-#define TRDP_PUB_STATISTICS_COMID       37
-#define TRDP_RED_STATISTICS_COMID       38
-#define TRDP_JOIN_STATISTICS_COMID      39
-#define TRDP_UDP_LIST_STATISTICS_COMID  40
-#define TRDP_TCP_LIST_STATISTICS_COMID  41
-#define TRDP_TEST_COMID                 1000
-
-/* more reserved comIds:
-
- 100    PD push Inauguration state and topo count telegram
- 101    PD pull request telegram to retrieve dynamic train configuration information
- 102    PD pull reply telegram with dynamic train configuration information
- 103    MD request telegram to retrieve static consist and car information
- 104    MD reply telegram with static consist and car information
- 105    MD request telegram to retrieve device information for a given consist/car/device
- 106    MD reply telegram with device information for a given consist/car/device
- 107    MD request telegram to retrieve consist and car properties for a given consist/car
- 108    MD reply telegram with consist and car properties for a given consist/car
- 109    MD request telegram to retrieve device properties for a given consist/car/device
- 110    MD reply telegram with device properties for a given consist/car/device
- 111    MD request telegram for manual insertion of a given consist/car
- 112    MD reply telegram for manual insertion of a given consist/car
-
- 120..129    IPTSwitch Control&Monitoring Interface
- 125    MD Data (Version) Request Telegram
- 126    MD Counter Telegram
- 127    MD Dynamic Configuration Telegram
- 128    MD Dynamic Configuration Telegram Response
- 129    PD Dynamic Configuration Telegram (redundant TS to TS IPC)
-
- 400..415     SDTv2 validation test
- */
-
-
-/**********************************************************************************************************************/
-/**                          TRDP reserved data set id's in the range 1 ... 1000                                      */
-/**********************************************************************************************************************/
-
-#define TRDP_STATISTICS_REQUEST_DSID        31
-#define TRDP_MEM_STATISTICS_DSID            32
-#define TRDP_PD_STATISTICS_DSID             33
-#define TRDP_MD_STATISTICS_DSID             34
-#define TRDP_GLOBAL_STATISTICS_DSID         35
-#define TRDP_SUBS_STATISTICS_DSID           36
-#define TRDP_SUBS_STATISTICS_ARRAY_DSID     37
-#define TRDP_PUB_STATISTICS_DSID            38
-#define TRDP_PUB_STATISTICS_ARRAY_DSID      39
-#define TRDP_RED_STATISTICS_DSID            40
-#define TRDP_RED_STATISTICS_ARRAY_DSID      41
-#define TRDP_JOIN_STATISTICS_DSID           42
-#define TRDP_JOIN_STATISTICS_ARRAY_DSID     43
-#define TRDP_LIST_STATISTIC_DSID            44
-#define TRDP_LIST_STATISTIC_ARRAY_DSID      45
-
-#define TRDP_NEST1_TEST_DSID                990
-#define TRDP_NEST2_TEST_DSID                991
-#define TRDP_NEST3_TEST_DSID                992
-#define TRDP_NEST4_TEST_DSID                993
-
-#define TRDP_TEST_DSID                      1000
-
-
 
 /** Return codes for all API functions, -1..-29 taken over from vos */
 typedef enum
@@ -200,7 +114,7 @@ typedef enum
     TRDP_REPLYTO_ERR        = -43,  /**< Protocol Reply Timeout                         */
     TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout                       */
     TRDP_REQCONFIRMTO_ERR   = -45,  /**< Protocol Confirm Timeout (Request sender)      */
-    TRDP_PACKET_ERR         = -46,  /**< Incomplete message packet                      */
+    TRDP_PACKET_ERR			= -46,  /**< Incomplete message data packet                 */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 
@@ -225,21 +139,6 @@ typedef VOS_FDS_T TRDP_FDS_T;
 /**********************************************************************************************************************/
 /**                          TRDP data transfer type definitions.                                                     */
 /**********************************************************************************************************************/
-
-/** Message Types    */
-typedef enum
-{
-    TRDP_MSG_PD = 0x5064,     /**< 'Pd' PD Data                                    */
-    TRDP_MSG_PP = 0x5070,     /**< 'Pp' PD Data (Pull Reply)                       */
-    TRDP_MSG_PR = 0x5072,     /**< 'Pr' PD Request                                 */
-    TRDP_MSG_PE = 0x5065,     /**< 'Pe' PD Error                                   */
-    TRDP_MSG_MN = 0x4D6E,     /**< 'Mn' MD Notification (Request without reply)    */
-    TRDP_MSG_MR = 0x4D72,     /**< 'Mr' MD Request with reply                      */
-    TRDP_MSG_MP = 0x4D70,     /**< 'Mp' MD Reply without confirmation              */
-    TRDP_MSG_MQ = 0x4D71,     /**< 'Mq' MD Reply with confirmation                 */
-    TRDP_MSG_MC = 0x4D63,     /**< 'Mc' MD Confirm                                 */
-    TRDP_MSG_ME = 0x4D65      /**< 'Me' MD Error                                   */
-} TRDP_MSG_T;
 
 /** Reply status messages    */
 typedef enum
@@ -431,7 +330,7 @@ typedef struct
     UINT32  numAllocBlocks;                             /**< allocated memory blocks */
     UINT32  numAllocErr;                                /**< allocation errors */
     UINT32  numFreeErr;                                 /**< free errors */
-    UINT32  preAllocBlockSize[VOS_MEM_NBLOCKSIZES];     /**< preallocated memory blocks */
+    UINT32  blockSize[VOS_MEM_NBLOCKSIZES];             /**< preallocated memory blocks */
     UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];         /**< used memory blocks */
 } TRDP_MEM_STATISTICS_T;
 
@@ -502,7 +401,7 @@ typedef struct
     TRDP_IP_ADDR_T      joinedAddr; /**< Joined IP address   */
     TRDP_IP_ADDR_T      filterAddr; /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0
                                       in case all senders. */
-    void                 *callBack; /**< Reference for call back function if used */
+    void                *callBack;  /**< Reference for call back function if used */
     UINT32              timeout;  /**< Time-out value in us. 0 = No time-out supervision */
     TRDP_ERR_T          status;   /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
     TRDP_TO_BEHAVIOR_T  toBehav;  /**< Behaviour at time-out. Set data to zero / keep last value */
@@ -547,8 +446,8 @@ typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
 typedef struct TRDP_HANDLE *TRDP_PUB_T;
 typedef struct TRDP_HANDLE *TRDP_SUB_T;
 typedef struct TRDP_HANDLE *TRDP_LIS_T;
-    
-    
+
+
 
 /**********************************************************************************************************************/
 /**                          TRDP configuration type definitions.                                                     */
@@ -696,7 +595,7 @@ typedef struct
     UINT16              udpPort;                /**< Port to be used for UDP MD communication   */
     UINT16              tcpPort;                /**< Port to be used for TCP MD communication   */
     UINT32              maxNumSessions;         /**< Maximal number of replier sessions         */
- } TRDP_MD_CONFIG_T;
+} TRDP_MD_CONFIG_T;
 
 
 
