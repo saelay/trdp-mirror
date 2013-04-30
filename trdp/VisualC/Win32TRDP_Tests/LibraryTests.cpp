@@ -257,13 +257,17 @@ int testNetwork()
 int testInterfaces()
 {
     VOS_IF_REC_T    ifAddrs[VOS_MAX_NUM_IF];
-    UINT32          ifCnt=0;
+    UINT32          ifCnt = sizeof(ifAddrs)/sizeof(VOS_IF_REC_T);
     UINT32          i;
     VOS_ERR_T       ret;
 
     ret = vos_sockInit();
 
-    ifCnt = vos_getInterfaces ( sizeof(ifAddrs)/sizeof(VOS_IF_REC_T), ifAddrs);
+    if ( vos_sockGetInterfaces ( &ifCnt, ifAddrs) != VOS_NO_ERR)
+    {
+        printf("No interface information returned\n");
+    	return 1;
+    }
 
     /* Check if a MAC address was received */
     if (ifCnt == 0)

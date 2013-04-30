@@ -59,11 +59,18 @@ extern "C" {
 #endif
 
 #define VOS_TTL_MULTICAST       64  /**< The maximum number of hops a multicast packet can take    */
+#ifndef VOS_MAX_IF_NAME_SIZE
 #define VOS_MAX_IF_NAME_SIZE    16  /**< The maximum size for the interface name                   */
-#define VOS_MAX_NUM_IF          4   /**< The maximum number of IP interface adapters that can be handled by VOS */    
+#endif
+#ifndef VOS_MAX_NUM_IF
+#define VOS_MAX_NUM_IF          4   /**< The maximum number of IP interface adapters that can be handled by VOS */
+#endif
+#ifndef VOS_MAX_NUM_UNICAST
 #define VOS_MAX_NUM_UNICAST     10  /**< The maximum number of unicast addresses that can be handled by VOS    */
+#endif
+#ifndef VOS_MAC_SIZE
 #define VOS_MAC_SIZE            6   /**< The MAC size supported by VOS */
-
+#endif
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -142,33 +149,11 @@ EXT_DECL UINT32 vos_ntohl (
  *
  *  @param[in]          ipAddress      IP address to check.
  *
- *  @retval             TRUE           address is multicast
+ *  @retval             TRUE           address is a multicast address
  *  @retval             FALSE          address is not a multicast address
  */
 
 EXT_DECL BOOL vos_isMulticast (
-    UINT32 ipAddress);
-
-/**********************************************************************************************************************/
-/** Convert IP address from dotted dec. to !host! endianess
- *
- *  @param[in]          pDottedIP     IP address as dotted decimal.
- *
- *  @retval             address in UINT32 in host endianess
- */
-
-EXT_DECL UINT32 vos_dottedIP (
-    const CHAR8 *pDottedIP);
-
-/**********************************************************************************************************************/
-/** Convert IP address to dotted dec. from !host! endianess
- *
- *  @param[in]          ipAddress    IP address as dotted decimal.
- *
- *  @retval             address in UINT32 in host endianess
- */
-
-EXT_DECL const CHAR8 *vos_ipDotted (
     UINT32 ipAddress);
 
 /*    Sockets    */
@@ -184,7 +169,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
-EXT_DECL VOS_ERR_T vos_getInterfaces (
+EXT_DECL VOS_ERR_T vos_sockGetInterfaces (
     UINT32         *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[]);
 
