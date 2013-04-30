@@ -94,28 +94,6 @@ extern void *gRefCon;
  */
 
 /**********************************************************************************************************************/
-/** Convert IP address from dotted dec. to !host! endianess
- *
- *  @param[in]          pDottedIP     IP address as dotted decimal.
- *
- *  @retval             address in UINT32 in host endianess
- */
-
-EXT_DECL UINT32 vos_dottedIP (
-    const CHAR8 *pDottedIP);
-
-/**********************************************************************************************************************/
-/** Convert IP address to dotted dec. from !host! endianess
- *
- *  @param[in]          ipAddress   address in UINT32 in host endianess 
- *
- *  @retval             IP address as dotted decimal.
- */
-
-EXT_DECL const CHAR8 *vos_ipDotted (
-    UINT32 ipAddress);
-
-/**********************************************************************************************************************/
 /** Calculate CRC for the given buffer and length.
  *  For TRDP FCS CRC calculation the CRC32 according to IEEE802.3 with start value 0xffffffff is used.
  *

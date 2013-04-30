@@ -205,7 +205,7 @@ EXT_DECL BOOL vos_isMulticast (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
-EXT_DECL VOS_ERR_T vos_sockGetInterfaces (
+EXT_DECL VOS_ERR_T vos_getInterfaces (
     UINT32         *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
