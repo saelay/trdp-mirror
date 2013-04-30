@@ -274,37 +274,6 @@ VOS_ERR_T vos_init (
     return vos_sockInit();
 }
 
-
-/**********************************************************************************************************************/
-/** Convert IP address.
- *
- *  @param[in]          pDottedIP   IP address as dotted decimal.
- *
- *  @retval             address in UINT32 in host endianess
- */
-EXT_DECL UINT32 vos_dottedIP (
-    const CHAR8 *pDottedIP)
-{
-    return vos_ntohl(inet_addr(pDottedIP));
-}
-
-/**********************************************************************************************************************/
-/** Convert IP address to dotted dec.
- *
- *  @param[in]          ipAddress   IP address as dotted decimal.
- *
- *  @retval             address in UINT32 in host endianess
- */
-
-EXT_DECL const CHAR8 *vos_ipDotted (
-    UINT32 ipAddress)
-{
-    static CHAR8 dotted[16];
-    sprintf(dotted, "%u.%u.%u.%u", ipAddress >> 24, (ipAddress >> 16) & 0xFF,
-            (ipAddress >> 8) & 0xFF, ipAddress & 0xFF);
-    return dotted;
-}
-
 /**********************************************************************************************************************/
 /** Compute crc32 according to IEEE802.3.
  *
