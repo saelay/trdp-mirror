@@ -60,6 +60,10 @@ extern "C" {
 
 #define VOS_TTL_MULTICAST       64  /**< The maximum number of hops a multicast packet can take    */
 #define VOS_MAX_IF_NAME_SIZE    16  /**< The maximum size for the interface name                   */
+#define VOS_MAX_NUM_IF          4   /**< The maximum number of IP interface adapters that can be handled by VOS */    
+#define VOS_MAX_NUM_UNICAST     10  /**< The maximum number of unicast addresses that can be handled by VOS    */
+#define VOS_MAC_SIZE            6   /**< The MAC size supported by VOS */
+
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -82,6 +86,7 @@ typedef struct
     CHAR8           name[VOS_MAX_IF_NAME_SIZE];
     VOS_IP4_ADDR_T  ipAddr;
     VOS_IP4_ADDR_T  netMask;
+    UINT8           mac[VOS_MAC_SIZE]; 
 } VOS_IF_REC_T;
 
 /***********************************************************************************************************************
