@@ -177,14 +177,16 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
  *
- *  @param[in]      maxAddrCnt        array size of interface record
+ *  @param[in,out]  pAddrCnt          in:   pointer to array size of interface record
+ *                                    out:  pointer to number of interface records read
  *  @param[in,out]  ifAddrs           array of interface records
  *
- *  @retval         number of filled in entries
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
-EXT_DECL UINT32 vos_getInterfaces(
-    UINT32 maxAddrCnt,
-    VOS_IF_REC_T ifAddrs[]);
+EXT_DECL VOS_ERR_T vos_getInterfaces (
+    UINT32         *pAddrCnt,
+    VOS_IF_REC_T    ifAddrs[]);
 
 /**********************************************************************************************************************/
 /** Initialize the socket library.

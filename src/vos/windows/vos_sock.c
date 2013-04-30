@@ -228,13 +228,15 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
  *
- *  @param[in]      maxAddrCnt        array size of interface record
+ *  @param[in,out]  pAddrCnt          in:   pointer to array size of interface record
+ *                                    out:  pointer to number of interface records read
  *  @param[in,out]  ifAddrs           array of interface records
  *
- *  @retval         number of filled in entries
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
-EXT_DECL UINT32 vos_getInterfaces (
-    UINT32          maxAddrCnt,
+EXT_DECL VOS_ERR_T vos_getInterfaces (
+    UINT32         *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
     UINT8 buf[  VOS_MAX_NUM_IF * sizeof(IP_ADAPTER_ADDRESSES)
@@ -246,9 +248,10 @@ EXT_DECL UINT32 vos_getInterfaces (
     PIP_ADAPTER_UNICAST_ADDRESS pAdapterUnicast;
     UINT32 addrCnt = 0;
 
-    if (ifAddrs == NULL)
+    if (   (pAddrCnt == NULL) 
+        || (ifAddrs == NULL) )
     { 
-        return 0;
+        return VOS_PARAM_ERR;
     }
 
     /* get the actual data we want */
@@ -259,11 +262,11 @@ EXT_DECL UINT32 vos_getInterfaces (
         | GAA_FLAG_SKIP_FRIENDLY_NAME,
         NULL, pAdapterList, &bufLen) != NO_ERROR)
     {   
-        return 0;
+        return VOS_PARAM_ERR;
     }
 
     /* go through all adapters */
-    for (pAdapter = pAdapterList; (pAdapter != NULL) && (addrCnt < maxAddrCnt) ; pAdapter = pAdapter->Next)
+    for (pAdapter = pAdapterList; (pAdapter != NULL) && (addrCnt < *pAddrCnt) ; pAdapter = pAdapter->Next)
     {   
         /* skip adapters which are down */
         if (pAdapter->OperStatus != IfOperStatusUp)
@@ -288,7 +291,7 @@ EXT_DECL UINT32 vos_getInterfaces (
             }
 
             /* store interface address if ddress will fit into output array */
-            if (addrCnt < maxAddrCnt)
+            if (addrCnt < *pAddrCnt)
             {
                 struct sockaddr_in *p = (struct sockaddr_in *) pAdapterUnicast->Address.lpSockaddr;
                 
@@ -313,8 +316,9 @@ EXT_DECL UINT32 vos_getInterfaces (
             }
         }
     }
-
-    return addrCnt;
+    
+    *pAddrCnt = addrCnt;
+    return VOS_NO_ERR;
 } 
 
 /**********************************************************************************************************************/
