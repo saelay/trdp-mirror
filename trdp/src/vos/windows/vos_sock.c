@@ -39,6 +39,7 @@
 #include <Ws2tcpip.h>
 #include <MSWSock.h>
 #include <lm.h>
+#include <iphlpapi.h>
 
 #include "vos_utils.h"
 #include "vos_sock.h"
@@ -49,6 +50,8 @@
 /* include the needed windows network libraries */
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "Netapi32.lib")
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "iphlpapi.lib")
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -85,7 +88,7 @@
 
 BOOL    vosSockInitialised      = FALSE;
 UINT32  gNumberOfOpenSockets    = 0;
-UINT8   mac[6];
+UINT8   mac[VOS_MAC_SIZE];
 
 
 /***********************************************************************************************************************
@@ -234,45 +237,84 @@ EXT_DECL UINT32 vos_getInterfaces (
     UINT32          maxAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
-/*  
-TO BE ADAPTED TO WIN32
-    int success;
-    struct ifaddrs *addrs;
-    struct ifaddrs *cursor;
-    int count = 0;
+    UINT8 buf[  VOS_MAX_NUM_IF * sizeof(IP_ADAPTER_ADDRESSES)
+              + VOS_MAX_NUM_IF * VOS_MAX_IF_NAME_SIZE
+              + VOS_MAX_NUM_UNICAST * sizeof(IP_ADAPTER_UNICAST_ADDRESS)];
+    ULONG bufLen = sizeof(buf);
+    PIP_ADAPTER_ADDRESSES pAdapterList = (PIP_ADAPTER_ADDRESSES) buf;
+    PIP_ADAPTER_ADDRESSES pAdapter;
+    PIP_ADAPTER_UNICAST_ADDRESS pAdapterUnicast;
+    UINT32 addrCnt = 0;
 
+    if (ifAddrs == NULL)
+    { 
+        return 0;
+    }
 
-    success = getifaddrs(&addrs) == 0;
-    if (success)
-    {
-        cursor = addrs;
-        while (cursor != 0 && count < maxAddrCnt)
+    /* get the actual data we want */
+    if (GetAdaptersAddresses(AF_INET,
+        GAA_FLAG_SKIP_ANYCAST
+        | GAA_FLAG_SKIP_MULTICAST
+        | GAA_FLAG_SKIP_DNS_SERVER
+        | GAA_FLAG_SKIP_FRIENDLY_NAME,
+        NULL, pAdapterList, &bufLen) != NO_ERROR)
+    {   
+        return 0;
+    }
+
+    /* go through all adapters */
+    for (pAdapter = pAdapterList; (pAdapter != NULL) && (addrCnt < maxAddrCnt) ; pAdapter = pAdapter->Next)
+    {   
+        /* skip adapters which are down */
+        if (pAdapter->OperStatus != IfOperStatusUp)
         {
-            if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
-            {
-                ifAddrs[count].ipAddr   = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
-                ifAddrs[count].netMask  = ntohl(*(UINT32 *)&cursor->ifa_netmask->sa_data[2]);
-                if (cursor->ifa_name != NULL)
-                {
-                    strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
-                    ifAddrs[count].name[VOS_MAX_IF_NAME_SIZE - 1] = 0;
-                }
-                vos_printf(VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
-                           ifAddrs[count].name,
-                           (ifAddrs[count].ipAddr >> 24) & 0xFF,
-                           (ifAddrs[count].ipAddr >> 16) & 0xFF,
-                           (ifAddrs[count].ipAddr >> 8)  & 0xFF,
-                           ifAddrs[count].ipAddr        & 0xFF);
-                count++;
-            }
-            cursor = cursor->ifa_next;
+            continue;
         }
 
-        freeifaddrs(addrs);
+        /* skip loopback interfaces */
+        if (pAdapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK)
+        {
+            continue;
+        }
+
+        /* go through all IP addresses */
+        for (pAdapterUnicast = pAdapter->FirstUnicastAddress; pAdapterUnicast != NULL; pAdapterUnicast = pAdapterUnicast->Next)
+        {   
+            /* collect IPv4 addresses only */
+            if (!pAdapterUnicast->Address.lpSockaddr
+                || pAdapterUnicast->Address.lpSockaddr->sa_family != AF_INET)
+            {
+                continue;
+            }
+
+            /* store interface address if ddress will fit into output array */
+            if (addrCnt < maxAddrCnt)
+            {
+                struct sockaddr_in *p = (struct sockaddr_in *) pAdapterUnicast->Address.lpSockaddr;
+                
+                /* store interface attributes */
+                ifAddrs[addrCnt].ipAddr = ntohl(p->sin_addr.s_addr);
+                ifAddrs[addrCnt].netMask = 0;
+                strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
+        
+                if (pAdapter->PhysicalAddressLength != sizeof(ifAddrs[addrCnt].mac))
+                {
+                    memset(ifAddrs[addrCnt].mac, 0, sizeof(ifAddrs[addrCnt].mac));
+                }
+                else
+                {
+                    memcpy(ifAddrs[addrCnt].mac, pAdapter->PhysicalAddress, sizeof(ifAddrs[addrCnt].mac));
+                }    
+             
+                ifAddrs[addrCnt].netMask = 0;
+
+                /* increment number of addresses stored */
+                addrCnt++;
+            }
+        }
     }
-    return count;
-    */
-    return 0;
+
+    return addrCnt;
 } 
 
 /**********************************************************************************************************************/

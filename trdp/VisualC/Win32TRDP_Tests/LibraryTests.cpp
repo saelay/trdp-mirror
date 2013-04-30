@@ -254,9 +254,57 @@ int testNetwork()
 }
 
 
+int testInterfaces()
+{
+    VOS_IF_REC_T    ifAddrs[VOS_MAX_NUM_IF];
+    UINT32          ifCnt=0;
+    UINT32          i;
+    VOS_ERR_T       ret;
+
+    ret = vos_sockInit();
+
+    ifCnt = vos_getInterfaces ( sizeof(ifAddrs)/sizeof(VOS_IF_REC_T), ifAddrs);
+
+    /* Check if a MAC address was received */
+    if (ifCnt == 0)
+    {
+    	printf("No interface information returned\n");
+    	return 1;
+    }
+
+    for (i = 0; i < ifCnt; i++)
+    {
+        CHAR8 ipString[16];
+        CHAR8 maskString[16];
+
+        strcpy(ipString, vos_ipDotted(ifAddrs[i].ipAddr));
+        strcpy(maskString, vos_ipDotted(ifAddrs[i].netMask));
+
+        printf(" Interface %d:\nName: %s IP: %s SubnetMask: %s MAC: %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n\n",
+                i,
+                ifAddrs[i].name,
+                ipString,
+                maskString,
+                ifAddrs[i].mac[0],
+                ifAddrs[i].mac[1],
+                ifAddrs[i].mac[2],
+                ifAddrs[i].mac[3],
+                ifAddrs[i].mac[4],
+                ifAddrs[i].mac[5]);
+    }
+
+    return 0; /* all time tests succeeded */
+}
+
 int main(int argc, char *argv[])
 {
 	printf("Starting tests\n");
+    if (testInterfaces())
+	{
+		printf("Interface test failed\n");
+		return 1;
+	}
+
 	if (testTimeCompare())
 	{
 		printf("Time COMPARE test failed\n");
