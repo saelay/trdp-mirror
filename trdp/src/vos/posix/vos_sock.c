@@ -155,13 +155,15 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
  *
- *  @param[in]      maxAddrCnt        array size of interface record
+ *  @param[in,out]  pAddrCnt          in:   pointer to array size of interface record
+ *                                    out:  pointer to number of interface records read
  *  @param[in,out]  ifAddrs           array of interface records
  *
- *  @retval         number of filled in entries
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
-EXT_DECL UINT32 vos_getInterfaces (
-    UINT32          maxAddrCnt,
+EXT_DECL VOS_ERR_T vos_getInterfaces (
+    UINT32         *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
     int success;
@@ -169,11 +171,17 @@ EXT_DECL UINT32 vos_getInterfaces (
     struct ifaddrs *cursor;
     int count = 0;
 
+    if (   (pAddrCnt == NULL) 
+        || (ifAddrs == NULL) )
+    { 
+        return VOS_PARAM_ERR;
+    }
+
     success = getifaddrs(&addrs) == 0;
     if (success)
     {
         cursor = addrs;
-        while (cursor != 0 && count < maxAddrCnt)
+        while (cursor != 0 && count < pAddrCnt)
         {
             if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
             {
@@ -197,7 +205,13 @@ EXT_DECL UINT32 vos_getInterfaces (
 
         freeifaddrs(addrs);
     }
-    return count;
+    else
+    {
+        return VOS_PARAM_ERR;
+    }
+
+    *pAddrCnt = count;
+    return VOS_NO_ERR;
 }
 
 /**********************************************************************************************************************/
