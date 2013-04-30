@@ -31,6 +31,7 @@
 #endif
 #include "trdp_if_light.h"
 #include "vos_thread.h"
+#include "vos_sock.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -44,6 +45,7 @@
 
 /* We use dynamic memory    */
 #define RESERVED_MEMORY  2000000
+#define MAX_IF           10
 
 typedef struct testData
 {
@@ -267,7 +269,7 @@ int main (int argc, char *argv[])
     {mdCallback, &sSessionData, {0, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-    VOS_IF_REC_T            interfaces[10];
+    VOS_IF_REC_T            interfaces[MAX_IF];
     BOOL					lastRun = FALSE;
 
     int             rv          = 0;
@@ -418,8 +420,11 @@ int main (int argc, char *argv[])
 
     /*  Output available interfaces (in debug output)  */
     {
-        UINT32 availableIfaces = vos_getInterfaces(10, interfaces);
-        printf("%u IP interfaces found\n", availableIfaces);
+    	UINT32 availableIfaces = MAX_IF;
+        if (vos_getInterfaces(&availableIfaces, interfaces) == VOS_NO_ERR)
+        {
+	        printf("%u IP interfaces found\n", availableIfaces);
+        }
     }
 
     /*    Open a session  */
