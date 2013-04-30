@@ -198,8 +198,9 @@ typedef enum
     TRDP_APP_REPLYTO_ERR    = -41,  /**< Application Reply Sent Timeout                 */
     TRDP_APP_CONFIRMTO_ERR  = -42,  /**< Application Confirm Sent Timeout               */
     TRDP_REPLYTO_ERR        = -43,  /**< Protocol Reply Timeout                         */
-    TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout                        */
+    TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout                       */
     TRDP_REQCONFIRMTO_ERR   = -45,  /**< Protocol Confirm Timeout (Request sender)      */
+    TRDP_PACKET_ERR         = -46,  /**< Incomplete message packet                      */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 
@@ -702,8 +703,6 @@ typedef struct
 /**********************************************************************************************************************/
 /** Enumeration type for memory pre-fragmentation, reuse of VOS definition.
  */
-typedef VOS_MEM_BLK_T TRDP_MEM_BLK_T;
-
 
 /** Structure describing memory    (and its pre-fragmentation)    */
 typedef struct
