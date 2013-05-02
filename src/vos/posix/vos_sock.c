@@ -60,7 +60,9 @@
  * DEFINITIONS
  */
 
+#ifndef VOS_DEFAULT_IFACE 
 #define VOS_DEFAULT_IFACE  "eth0"
+#endif
 
 /***********************************************************************************************************************
  *  LOCALS

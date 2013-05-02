@@ -47,14 +47,19 @@ extern "C" {
 
 #if MD_SUPPORT                      /* ### Eventually this could be changed to be target dependant... */
 
-
+#ifndef VOS_MAX_SOCKET_CNT
 #define VOS_MAX_SOCKET_CNT      80  /**< The maximum number of concurrent usable sockets per application session */
+#endif
+#ifndef VOS_MAX_MULTICAST_CNT
 #define VOS_MAX_MULTICAST_CNT   20  /**< The maximum number of multicast groups one socket can join              */
+#endif
 
 #else
 
 #define VOS_MAX_SOCKET_CNT      4   /**< The maximum number of concurrent usable sockets per application session */
+#ifndef VOS_MAX_MULTICAST_CNT
 #define VOS_MAX_MULTICAST_CNT   5   /**< The maximum number of multicast groups one socket can join              */
+#endif
 
 #endif
 
