@@ -637,11 +637,20 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
-
+		BOOL noDataToRead = FALSE;
         UINT32 storedDataSize = 0;
 
+		if(pElement->grossSize == sizeof(MD_HEADER_T))
+		{
+			if(dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
+			{
+				noDataToRead = TRUE;
+			}
+		}
+
         /* Compare if all the data has been read */
-        if ((pElement->dataSize == 0) || (pElement->dataSize != dataSize))
+		if (((pElement->grossSize < sizeof(MD_HEADER_T)) && (pElement->dataSize == 0)) 
+			|| ((noDataToRead == FALSE) && (pElement->dataSize != dataSize)))
         {
             /* Uncompleted message received */
 
@@ -2467,13 +2476,14 @@ TRDP_ERR_T trdp_mdCommonSend (
 
                 /* In the case that it is the first connection, do connect() */
 
-                if (appHandle->iface[pSenderElement->socketIdx].usage > 1)
+                if (appHandle->iface[pSenderElement->socketIdx].usage > 0)
                 {
                     pSenderElement->tcpParameters.doConnect = FALSE;
                 }
                 else
                 {
                     pSenderElement->tcpParameters.doConnect = TRUE;
+					appHandle->iface[pSenderElement->socketIdx].usage++;
                 }
 
             }
