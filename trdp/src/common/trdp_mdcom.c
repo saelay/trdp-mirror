@@ -690,7 +690,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 return TRDP_PARAM_ERR;
             }
 
-            return TRDP_IO_ERR;
+            return TRDP_PACKET_ERR;
 
         }
         else
@@ -1717,7 +1717,7 @@ void  trdp_mdCheckListenSocks (
             err = trdp_mdRecv(appHandle, index);
 
             /* The receive message is incomplete */
-            if (err == TRDP_IO_ERR && appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
+            if (err == TRDP_PACKET_ERR && appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
             {
                 vos_printf(VOS_LOG_INFO, "Incomplete message received \n");
             }
