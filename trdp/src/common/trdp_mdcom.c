@@ -2385,9 +2385,11 @@ TRDP_ERR_T trdp_mdCommonSend (
             {
                 switch (msgType)
                 {
+                    case TRDP_MSG_MN: /* notify (no reply)*/
+                        tmo = 0;
+                        break;
                     case TRDP_MSG_MP: /* reply without confirm */
                     case TRDP_MSG_MR: /* request with reply */
-                    case TRDP_MSG_MN: /* notify (not reply)*/
                     case TRDP_MSG_ME: /* reply error */
                         tmo = replyTimeout ? replyTimeout : appHandle->mdDefault.replyTimeout; /* min time for delivery
                                                                                                  */
@@ -2583,8 +2585,18 @@ TRDP_ERR_T trdp_mdCommonSend (
             pSenderElement->pPacket->frameHead.topoCount        = vos_htonl(topoCount);
             pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(dataSize);
             pSenderElement->pPacket->frameHead.replyStatus      = vos_htonl(replyStatus);
-            memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
-            pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(tmo);
+
+            if (TRDP_MSG_MN != msgType)
+            {
+                memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
+            	pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(tmo);
+            }
+            else
+            {
+                memset(pSenderElement->pPacket->frameHead.sessionID, 0, TRDP_SESS_ID_SIZE);
+            	pSenderElement->pPacket->frameHead.replyTimeout = 0;
+            }
+
 
             if (sourceURI != NULL)
             {
