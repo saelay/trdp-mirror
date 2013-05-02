@@ -35,9 +35,19 @@
 /*******************************************************************************
  * DEFINES
  */
-/*  Define snprintf function for Microsoft Visual Studio compiler */
-#if _MSC_VER
-    #define snprintf _snprintf
+
+/*  Default SDT values  */
+#ifndef TRDP_SDT_DEFAULT_SMI2
+#define TRDP_SDT_DEFAULT_SMI2       0                                   /**< Default SDT safe message identifier    */
+#endif
+#ifndef TRDP_SDT_DEFAULT_NRXSAFE
+#define TRDP_SDT_DEFAULT_NRXSAFE    3                                   /**< Default SDT timeout cycles             */
+#endif
+#ifndef TRDP_SDT_DEFAULT_NGUARD
+#define TRDP_SDT_DEFAULT_NGUARD     100                                 /**< Default SDT initial timeout cycles     */
+#endif
+#ifndef TRDP_SDT_DEFAULT_CMTHR
+#define TRDP_SDT_DEFAULT_CMTHR      10                                  /**< Default SDT chan. monitoring threshold */
 #endif
 
 /*******************************************************************************
