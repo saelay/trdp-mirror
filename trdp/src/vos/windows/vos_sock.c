@@ -268,7 +268,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                 /* store interface attributes */
                 ifAddrs[addrCnt].ipAddr = ntohl(p->sin_addr.s_addr);
                 ifAddrs[addrCnt].netMask = 0;
-                strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
+                (void) strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
         
                 if (pAdapter->PhysicalAddressLength != sizeof(ifAddrs[addrCnt].mac))
                 {

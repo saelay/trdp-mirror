@@ -844,7 +844,7 @@ TRDP_ERR_T  trdp_mdRecv (
     }
     else
     {
-        appHandle->pMDRcvEle->pktFlags &= ~TRDP_FLAGS_TCP;
+        appHandle->pMDRcvEle->pktFlags = (TRDP_FLAGS_T) (appHandle->pMDRcvEle->pktFlags & ~TRDP_FLAGS_TCP);
         isTCP = FALSE;
     }
 

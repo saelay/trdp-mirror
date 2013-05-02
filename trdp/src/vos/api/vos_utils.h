@@ -46,6 +46,19 @@ extern void *gRefCon;
 #define VOS_MAX_FRMT_SIZE       64          /**< Max. size of the 'format' part */
 #define VOS_MAX_ERR_STR_SIZE    (VOS_MAX_PRNT_STR_SIZE - VOS_MAX_FRMT_SIZE) /**< Max. size of the error part */
 
+/** Safe printf function */
+#ifdef WIN32
+    #define vos_snprintf(str, size, format, ...)                       \
+    {                                                                  \
+        (void) _snprintf_s(str, size, _TRUNCATE, format, __VA_ARGS__); \
+    }
+#else
+    #define vos_snprintf(str, size, level, format, args ...) \
+    {                                                        \
+        (void) snprintf(str, size, format, ## args);         \
+    }
+#endif
+
 /** Debug output macro without formatting options */
 #define vos_print(level, string)  {if(gPDebugFunction != NULL)          \
                                    {gPDebugFunction(gRefCon,            \
@@ -74,6 +87,7 @@ extern void *gRefCon;
     }
 #endif
 
+
 /** Alignment macros  */
 #ifdef WIN32
     #define ALIGNOF(type)  __alignof(type)
@@ -92,6 +106,28 @@ extern void *gRefCon;
 /***********************************************************************************************************************
  * PROTOTYPES
  */
+
+/**********************************************************************************************************************/
+/** Convert IP address from dotted dec. to !host! endianess
+ *
+ *  @param[in]          pDottedIP     IP address as dotted decimal.
+ *
+ *  @retval             address in UINT32 in host endianess
+ */
+
+EXT_DECL UINT32 vos_dottedIP (
+    const CHAR8 *pDottedIP);
+
+/**********************************************************************************************************************/
+/** Convert IP address to dotted dec. from !host! endianess
+ *
+ *  @param[in]          ipAddress   address in UINT32 in host endianess 
+ *
+ *  @retval             IP address as dotted decimal.
+ */
+
+EXT_DECL const CHAR8 *vos_ipDotted (
+    UINT32 ipAddress);
 
 /**********************************************************************************************************************/
 /** Calculate CRC for the given buffer and length.
