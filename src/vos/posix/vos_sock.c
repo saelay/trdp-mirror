@@ -107,6 +107,37 @@ EXT_DECL UINT32 vos_ntohl (
 }
 
 /**********************************************************************************************************************/
+/** Convert IP address from dotted dec. to !host! endianess
+ *
+ *  @param[in]          pDottedIP     IP address as dotted decimal.
+ *
+ *  @retval             address in UINT32 in host endianess
+ */
+EXT_DECL UINT32 vos_dottedIP (
+    const CHAR8 *pDottedIP)
+{
+    return vos_ntohl(inet_addr(pDottedIP));
+}
+
+/**********************************************************************************************************************/
+/** Convert IP address to dotted dec. from !host! endianess.
+ *
+ *  @param[in]          ipAddress   address in UINT32 in host endianess
+ *
+ *  @retval             IP address as dotted decimal.
+ */
+
+EXT_DECL const CHAR8 *vos_ipDotted (
+    UINT32 ipAddress)
+{
+    static CHAR8 dotted[16];
+
+    vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
+            ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+    return dotted;
+}
+
+/**********************************************************************************************************************/
 /** Check if the supplied address is a multicast group address.
  *
  *  @param[in]          ipAddress   IP address to check.

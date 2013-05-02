@@ -148,35 +148,35 @@ EXT_DECL UINT32 vos_ntohl (
     return ntohl(val);
 }
 
-
-/*    Sockets    */
+/**********************************************************************************************************************/
+/** Convert IP address from dotted dec. to !host! endianess
+ *
+ *  @param[in]          pDottedIP     IP address as dotted decimal.
+ *
+ *  @retval             address in UINT32 in host endianess
+ */
+EXT_DECL UINT32 vos_dottedIP (
+    const CHAR8 *pDottedIP)
+{
+    return vos_ntohl(inet_addr(pDottedIP));
+}
 
 /**********************************************************************************************************************/
-/** Initialize the socket library.
- *  Must be called once before any other call
+/** Convert IP address to dotted dec. from !host! endianess.
  *
- *  @retval         VOS_NO_ERR            no error
- *  @retval         VOS_SOCK_ERR        sockets not supported
+ *  @param[in]          ipAddress   address in UINT32 in host endianess
+ *
+ *  @retval             IP address as dotted decimal.
  */
 
-EXT_DECL VOS_ERR_T vos_sockInit (void)
+EXT_DECL const CHAR8 *vos_ipDotted (
+    UINT32 ipAddress)
 {
-    WSADATA WsaDat;
-
-    /* The windows socket library has to be prepared, before it could be used */
-    if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
-    {
-        int err = WSAGetLastError();
-
-        err = err; /* for lint */
-        vos_printf(VOS_LOG_ERROR, "WSAStartup() failed (Err: %d)\n", err);
-        return VOS_SOCK_ERR;
-    }
-
-    memset(mac, 0, sizeof(mac));
-    vosSockInitialised = TRUE;
-
-    return VOS_NO_ERR;
+    static CHAR8 dotted[16];
+    
+    vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF), 
+        ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+    return dotted;
 }
 
 /**********************************************************************************************************************/
@@ -193,6 +193,7 @@ EXT_DECL BOOL vos_isMulticast (
 {
     return IN_MULTICAST(ipAddress);
 }
+
 
 /**********************************************************************************************************************/
 /** Get a list of interface addresses
@@ -315,6 +316,37 @@ EXT_DECL INT32 vos_select (
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);
 }
+
+/*    Sockets    */
+
+/**********************************************************************************************************************/
+/** Initialize the socket library.
+ *  Must be called once before any other call
+ *
+ *  @retval         VOS_NO_ERR            no error
+ *  @retval         VOS_SOCK_ERR        sockets not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockInit (void)
+{
+    WSADATA WsaDat;
+
+    /* The windows socket library has to be prepared, before it could be used */
+    if (WSAStartup(MAKEWORD(2, 2), &WsaDat) != 0)
+    {
+        int err = WSAGetLastError();
+
+        err = err; /* for lint */
+        vos_printf(VOS_LOG_ERROR, "WSAStartup() failed (Err: %d)\n", err);
+        return VOS_SOCK_ERR;
+    }
+
+    memset(mac, 0, sizeof(mac));
+    vosSockInitialised = TRUE;
+
+    return VOS_NO_ERR;
+}
+
 
 /**********************************************************************************************************************/
 /** Return the MAC address of the default adapter.

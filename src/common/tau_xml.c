@@ -1401,8 +1401,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     }
 
     /* Execute XPath expression - find given interface element  */
-    length = snprintf(strXPath, sizeof(strXPath),
-        "/device/bus-interface-list/bus-interface[@name='%s']", pIfName);
+    {
+        length = vos_snprintf(strXPath, sizeof(strXPath),
+            "/device/bus-interface-list/bus-interface[@name='%s']", pIfName);
+    }
+
     if (length < 0 || length > (int) sizeof(strXPath))
         return TRDP_PARAM_ERR;
     pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
@@ -1437,8 +1440,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
 
 
     /* Execute XPath expression - find all telegram elemments for given interface  */
-    length = snprintf(strXPath, sizeof(strXPath),
-        "/device/bus-interface-list/bus-interface[@name='%s']/telegram", pIfName);
+    {
+        length = vos_snprintf(strXPath, sizeof(strXPath),
+            "/device/bus-interface-list/bus-interface[@name='%s']/telegram", pIfName);
+    }
+
     if (length < 0 || length > (int) sizeof(strXPath))
         return TRDP_PARAM_ERR;
     pXPathObj = xmlXPathEvalExpression(BAD_CAST strXPath, pXPathCtx);
