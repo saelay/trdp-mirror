@@ -35,8 +35,8 @@ options.lnt  -si4 -sp4
 -e537   // "Repeated include file 'FileName'"
 -e755   // "global macro 'Symbol' (Location) not referenced"
 -e40
--emacro({*},vos_snprintf)     // due to definition of internal used __VA_ARGS__
---emacro({42},vos_snprintf)   // statement expected - due to definition of __VA_ARGS__
+-emacro({*},vos_snprintf)       // due to definition of internal used __VA_ARGS__
+--emacro({42},vos_snprintf)     // statement expected - due to definition of __VA_ARGS__
 -emacro({*},vos_printf)       // due to definition of internal used __VA_ARGS__
 --emacro({42},vos_printf)     // statement expected - due to definition of __VA_ARGS__
 -emacro((530,516,78),ALIGNOF) // due to definition of internal used __alignof
