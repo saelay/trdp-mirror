@@ -45,10 +45,10 @@
 #include <sys/wait.h>
 
 #include "vos_types.h"
+#include "vos_mem.h"
 #include "vos_utils.h"
-#include "vos_shared_mem.h"
-#include "vos_thread.h"
 #include "vos_private.h"
+#include "vos_shared_mem.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -126,7 +126,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     memset(*ppMemoryArea, 0, sharedMemoryStat.st_size);
     /* Handle */
     *pHandle = (VOS_SHRD_T) vos_memAlloc(sizeof (struct VOS_SHRD));
-    if(*pHandle == NULL)
+    if (*pHandle == NULL)
     {
         vos_printf(VOS_LOG_ERROR, "Shared Memory Handle create failed\n");
         return ret;
