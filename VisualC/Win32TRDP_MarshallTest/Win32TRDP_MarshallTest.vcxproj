@@ -75,10 +75,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\test_marshalling.c" />
+    <Library Include="..\Debug\Win32TRDP.lib" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\Debug\Win32TRDP.lib" />
+    <ClCompile Include="..\..\test\marshalling\test_marshalling.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

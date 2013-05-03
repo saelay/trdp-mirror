@@ -76,7 +76,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\resources\windows\getopt\getopt.c" />
-    <ClCompile Include="..\..\test\test_mdSingle.c" />
+    <ClCompile Include="..\..\test\diverse\test_mdSingle.c" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\Debug\Win32TRDP.lib">

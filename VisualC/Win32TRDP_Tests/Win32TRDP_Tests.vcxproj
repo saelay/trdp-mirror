@@ -77,7 +77,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\resources\windows\getopt\getopt.c" />
-    <ClCompile Include="LibraryTests.cpp" />
+    <ClCompile Include="..\..\test\diverse\LibraryTests.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Win32TRDP\Win32TRDP.vcxproj">
