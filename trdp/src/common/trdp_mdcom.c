@@ -1869,7 +1869,11 @@ void  trdp_mdCheckTimeouts (
 
                     if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
                     {
+                        vos_printf(VOS_LOG_INFO, "MD reply timeout.\n");
+                        timeOut = TRUE;
+                        resultCode = TRDP_REPLYTO_ERR;
                         iterMD->morituri = TRUE;
+                        appHandle->stats.tcpMd.numReplyTimeout++;
                         break;
                     }
 
@@ -1916,15 +1920,8 @@ void  trdp_mdCheckTimeouts (
                         resultCode      = TRDP_REPLYTO_ERR;
 
                         /* Statistics */
+                        appHandle->stats.udpMd.numReplyTimeout++;
 
-                        if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
-                        {
-                            appHandle->stats.udpMd.numReplyTimeout++;
-                        }
-                        else
-                        {
-                            appHandle->stats.tcpMd.numReplyTimeout++;
-                        }
                     }
 
                     /* Manage send Confirm */
@@ -2055,7 +2052,7 @@ void  trdp_mdCheckTimeouts (
                 theMessage.numConfirmSent       = iterMD->numConfirmSent;
                 theMessage.numConfirmTimeout    = iterMD->numConfirmTimeout;
 
-                theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
+                //theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
                 theMessage.resultCode   = resultCode;
 
                 appHandle->mdDefault.pfCbFunction(
