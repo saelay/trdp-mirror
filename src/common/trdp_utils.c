@@ -25,8 +25,8 @@
 
 #include <string.h>
 
-#include "trdp_utils.h"
 #include "trdp_if.h"
+#include "trdp_utils.h"
 
 /***********************************************************************************************************************
  * DEFINES
