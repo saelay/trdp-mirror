@@ -48,10 +48,10 @@ extern "C" {
 #if MD_SUPPORT                      /* ### Eventually this could be changed to be target dependant... */
 
 #ifndef VOS_MAX_SOCKET_CNT
-#define VOS_MAX_SOCKET_CNT      80  /**< The maximum number of concurrent usable sockets per application session */
+#define VOS_MAX_SOCKET_CNT  80      /**< The maximum number of concurrent usable sockets per application session */
 #endif
 #ifndef VOS_MAX_MULTICAST_CNT
-#define VOS_MAX_MULTICAST_CNT   20  /**< The maximum number of multicast groups one socket can join              */
+#define VOS_MAX_MULTICAST_CNT  20   /**< The maximum number of multicast groups one socket can join              */
 #endif
 
 #else
@@ -68,13 +68,13 @@ extern "C" {
 #define VOS_MAX_IF_NAME_SIZE    16  /**< The maximum size for the interface name                   */
 #endif
 #ifndef VOS_MAX_NUM_IF
-#define VOS_MAX_NUM_IF          4   /**< The maximum number of IP interface adapters that can be handled by VOS */
+#define VOS_MAX_NUM_IF  4           /**< The maximum number of IP interface adapters that can be handled by VOS */
 #endif
 #ifndef VOS_MAX_NUM_UNICAST
-#define VOS_MAX_NUM_UNICAST     10  /**< The maximum number of unicast addresses that can be handled by VOS    */
+#define VOS_MAX_NUM_UNICAST  10     /**< The maximum number of unicast addresses that can be handled by VOS    */
 #endif
 #ifndef VOS_MAC_SIZE
-#define VOS_MAC_SIZE            6   /**< The MAC size supported by VOS */
+#define VOS_MAC_SIZE  6             /**< The MAC size supported by VOS */
 #endif
 
 /***********************************************************************************************************************
@@ -163,7 +163,7 @@ EXT_DECL UINT32 vos_dottedIP (
 /**********************************************************************************************************************/
 /** Convert IP address to dotted dec. from !host! endianess
  *
- *  @param[in]          ipAddress   address in UINT32 in host endianess 
+ *  @param[in]          ipAddress   address in UINT32 in host endianess
  *
  *  @retval             IP address as dotted decimal.
  */
@@ -183,9 +183,6 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 EXT_DECL BOOL vos_isMulticast (
     UINT32 ipAddress);
 
-
-/*    Sockets    */
-
 /**********************************************************************************************************************/
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
@@ -197,33 +194,9 @@ EXT_DECL BOOL vos_isMulticast (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
-EXT_DECL VOS_ERR_T vos_getInterfaces (
-    UINT32         *pAddrCnt,
-    VOS_IF_REC_T    ifAddrs[]);
-
-/**********************************************************************************************************************/
-/** Initialize the socket library.
- *  Must be called once before any other call
- *
- *  @retval         VOS_NO_ERR            no error
- *  @retval         VOS_SOCK_ERR          sockets not supported
- */
-
-EXT_DECL VOS_ERR_T vos_sockInit (
-    void);
-
-/**********************************************************************************************************************/
-/** Return the MAC address of the default adapter.
- *
- *  @param[out]     pMAC              return MAC address.
- *
- *  @retval         VOS_NO_ERR        no error
- *  @retval         VOS_PARAM_ERR     pMAC == NULL
- *  @retval         VOS_SOCK_ERR      socket not available or option not supported
- */
-
-EXT_DECL VOS_ERR_T vos_sockGetMAC(
-    UINT8 pMAC[6]);
+EXT_DECL VOS_ERR_T vos_getInterfaces(
+    UINT32         * pAddrCnt,
+    VOS_IF_REC_T ifAddrs[]);
 
 /**********************************************************************************************************************/
 /** select function.
@@ -245,6 +218,32 @@ EXT_DECL INT32 vos_select (
     VOS_FDS_T   *pWriteableFD,
     VOS_FDS_T   *pErrorFD,
     VOS_TIME_T  *pTimeOut);
+
+/*    Sockets    */
+
+/**********************************************************************************************************************/
+/** Initialize the socket library.
+ *  Must be called once before any other call
+ *
+ *  @retval         VOS_NO_ERR            no error
+ *  @retval         VOS_SOCK_ERR          sockets not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockInit (
+    void);
+
+/**********************************************************************************************************************/
+/** Return the MAC address of the default adapter.
+ *
+ *  @param[out]     pMAC            return MAC address.
+ *
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   pMAC == NULL
+ *  @retval         VOS_SOCK_ERR    socket not available or option not supported
+ */
+
+EXT_DECL VOS_ERR_T vos_sockGetMAC(
+    UINT8 pMAC[VOS_MAC_SIZE]);
 
 /**********************************************************************************************************************/
 /** Create an UDP socket.

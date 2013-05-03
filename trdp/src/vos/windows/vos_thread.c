@@ -13,7 +13,7 @@
  *
  * @remarks         All rights reserved. Reproduction, modification, use or disclosure
  *                  to third parties without express authority is forbidden,
- *                  Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *                  Copyright Bombardier Transportation GmbH, Germany, 2013.
  *                  vos_thread.c uses pthreads-w32 (http://sourceware.org/pthreads-win32/) under LGPL license
  *
  *
@@ -26,9 +26,9 @@
     "You are trying to compile the WIN32 implementation of vos_thread.c - either define WIN32 or exclude this file!"
 #endif
 
-#define NSECS_PER_USEC 1000
-#define USECS_PER_MSEC 1000
-#define MSECS_PER_SEC 1000
+#define NSECS_PER_USEC  1000
+#define USECS_PER_MSEC  1000
+#define MSECS_PER_SEC   1000
 
 /***********************************************************************************************************************
  * INCLUDES
@@ -76,7 +76,7 @@ void cyclicThread (
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
-    for(;; )
+    for (;; )
     {
         (void) vos_threadDelay(interval);
         pFunction(pArguments);
@@ -91,7 +91,7 @@ void cyclicThread (
 
 
 /**********************************************************************************************************************/
-/* Threads 
+/* Threads
                                                                                                            */
 /**********************************************************************************************************************/
 
@@ -418,11 +418,11 @@ EXT_DECL void vos_getTime (
 
     if (pTime == NULL)
     {
-         vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
-        if (_ftime32_s( &curTime )==0)
+        if (_ftime32_s( &curTime ) == 0)
         {
             pTime->tv_sec   = curTime.time;
             pTime->tv_usec  = curTime.millitm * 1000;
@@ -451,20 +451,20 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 
     memset(timeString, 0, sizeof(timeString));
 
-    if (_ftime32_s( &curTime )==0)
+    if (_ftime32_s( &curTime ) == 0)
     {
         if (_localtime32_s(&curTimeTM, &curTime.time) == 0)
         {
-            (void) sprintf_s(timeString, 
-                sizeof(timeString),
-                "%04d%02d%02d-%02d:%02d:%02d.%03hd ",
-                1900 + curTimeTM.tm_year /* offset in years from 1900 */,
-                1 + curTimeTM.tm_mon     /* january is zero */,
-                curTimeTM.tm_mday,
-                curTimeTM.tm_hour,
-                curTimeTM.tm_min,
-                curTimeTM.tm_sec,
-                curTime.millitm);
+            (void) sprintf_s(timeString,
+                             sizeof(timeString),
+                             "%04d%02d%02d-%02d:%02d:%02d.%03hd ",
+                             1900 + curTimeTM.tm_year /* offset in years from 1900 */,
+                             1 + curTimeTM.tm_mon /* january is zero */,
+                             curTimeTM.tm_mday,
+                             curTimeTM.tm_hour,
+                             curTimeTM.tm_min,
+                             curTimeTM.tm_sec,
+                             curTime.millitm);
         }
     }
 
@@ -484,11 +484,11 @@ EXT_DECL void vos_clearTime (
 {
     if (pTime == NULL)
     {
-         vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
-         timerclear(pTime);
+        timerclear(pTime);
     }
 }
 
@@ -510,9 +510,9 @@ EXT_DECL void vos_addTime (
     }
     else
     {
-        pTime->tv_sec += pAdd->tv_sec;
-        pTime->tv_usec += pAdd->tv_usec;
-    
+        pTime->tv_sec   += pAdd->tv_sec;
+        pTime->tv_usec  += pAdd->tv_usec;
+
         while (pTime->tv_usec >= 1000000)
         {
             pTime->tv_sec++;
@@ -538,7 +538,7 @@ EXT_DECL void vos_subTime (
         vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
-    {    
+    {
         /* handle carry over:
          * when the usec are too large at pSub, move one second from tv_sec to tv_usec */
         if (pSub->tv_usec > pTime->tv_usec)
@@ -547,8 +547,8 @@ EXT_DECL void vos_subTime (
             pTime->tv_usec += 1000000;
         }
 
-        pTime->tv_usec   = pTime->tv_usec - pSub->tv_usec;
-        pTime->tv_sec    = pTime->tv_sec - pSub->tv_sec;
+        pTime->tv_usec  = pTime->tv_usec - pSub->tv_usec;
+        pTime->tv_sec   = pTime->tv_sec - pSub->tv_sec;
     }
 }
 
@@ -650,9 +650,6 @@ EXT_DECL INT32 vos_cmpTime (
 EXT_DECL void vos_getUuid (
     VOS_UUID_T pUuID)
 {
-#ifdef __APPLE__
-    uuid_generate_time(pUuID);
-#else
     /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1;
     VOS_TIME_T      current;
@@ -680,13 +677,13 @@ EXT_DECL void vos_getUuid (
     {
         vos_printf(VOS_LOG_ERROR, "vos_sockGetMAC() failed (Err:%d)\n", ret);
     }
-#endif
 }
 
 
 
 /**********************************************************************************************************************/
-/*    Mutex & Semaphores                                                                                                */
+/*    Mutex & Semaphores
+                                                                                                 */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
@@ -841,7 +838,7 @@ EXT_DECL void vos_mutexLocalDelete (
     else
     {
         int err;
-        
+
         err = pthread_mutex_destroy(&pMutex->mutexId);
         if (err == 0)
         {
@@ -975,23 +972,23 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_T          *pSema,
     VOS_SEMA_STATE_T    initialState)
 {
-    VOS_ERR_T retVal = VOS_SEMA_ERR;
-    INT32 ret = (INT32) NULL;
- 
+    VOS_ERR_T   retVal  = VOS_SEMA_ERR;
+    INT32       ret     = (INT32) NULL;
+
     /*Check parameters*/
     if (pSema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR,"vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
+        vos_printf(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
     {
-        vos_printf(VOS_LOG_ERROR,"vos_SemaCreate() ERROR invalid parameter initialState\n");
+        vos_printf(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
         retVal = VOS_PARAM_ERR;
     }
     else
-        /*Parameters are OK*/
     {
+        /*Parameters are OK*/
         *pSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
 
         if (*pSema == NULL)
@@ -1000,7 +997,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         }
 
         /*pThread Semaphore init*/
-        ret = sem_init((sem_t*)pSema,0,(UINT8)initialState);
+        ret = sem_init((sem_t *)pSema, 0, (UINT8)initialState);
         if (ret != (int)NULL)
         {
             /*Semaphore init failed*/
@@ -1027,25 +1024,25 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 EXT_DECL void vos_semaDelete (
     VOS_SEMA_T sema)
 {
-    INT32 ret = (INT32) NULL;
-    INT32 err = (INT32) NULL;
+    INT32   ret = (INT32) NULL;
+    INT32   err = (INT32) NULL;
 
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR,"vos_semaDelete() ERROR invalid parameter\n");
+        vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
     }
     else
     {
         /* Check if this is a valid semaphore handle*/
-        err = sem_getvalue((sem_t*)&sema,&ret);
+        err = sem_getvalue((sem_t *)&sema, &ret);
         if (err == (INT32) NULL)
         {
-            ret = sem_destroy((sem_t*)&sema);       
+            ret = sem_destroy((sem_t *)&sema);
             if (ret != (INT32) NULL)
             {
                 /* Error destroying Semaphore */
-                vos_printf(VOS_LOG_ERROR,"vos_semaDelete() ERROR CloseHandle failed\n");
+                vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
             }
             else
             {
@@ -1074,33 +1071,33 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     VOS_SEMA_T  sema,
     UINT32      timeout)
 {
-    INT32 err = (INT32) NULL;
-    VOS_ERR_T retVal = VOS_SEMA_ERR;
-    VOS_TIME_T waitTimeVos = {(UINT32) NULL, (UINT32) NULL};
-    struct timespec waitTimeSpec = {(UINT32) NULL,(UINT32) NULL};
+    INT32           err             = (INT32) NULL;
+    VOS_ERR_T       retVal          = VOS_SEMA_ERR;
+    VOS_TIME_T      waitTimeVos     = {(UINT32) NULL, (UINT32) NULL};
+    struct timespec waitTimeSpec    = {(UINT32) NULL, (UINT32) NULL};
 
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR,"vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printf(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if (timeout != (UINT32) NULL)
     {
         /* Get time since 01/01/1970 and convert it to timespec format */
         vos_getTime(&waitTimeVos);
-        waitTimeSpec.tv_sec = waitTimeVos.tv_sec;
-        waitTimeSpec.tv_nsec = waitTimeVos.tv_usec * NSECS_PER_USEC;
+        waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
+        waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * NSECS_PER_USEC;
 
         /* add offset */
         if (timeout >= (USECS_PER_MSEC * MSECS_PER_SEC))
         {
             /* Timeout longer than 1 sec, add sec and nsec seperately */
-            waitTimeSpec.tv_sec += timeout / (USECS_PER_MSEC * MSECS_PER_SEC);
-            waitTimeSpec.tv_nsec += (timeout % (USECS_PER_MSEC * MSECS_PER_SEC)) * NSECS_PER_USEC;
+            waitTimeSpec.tv_sec     += timeout / (USECS_PER_MSEC * MSECS_PER_SEC);
+            waitTimeSpec.tv_nsec    += (timeout % (USECS_PER_MSEC * MSECS_PER_SEC)) * NSECS_PER_USEC;
         }
         else
-        {   
+        {
             /* Timeout shorter than 1 sec, only add nsecs */
             waitTimeSpec.tv_nsec += timeout * NSECS_PER_USEC;
         }
@@ -1117,12 +1114,12 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         }
 
         /* take semaphore with specified timeout */
-        err = sem_timedwait((sem_t*)&sema,&waitTimeSpec);
+        err = sem_timedwait((sem_t *)&sema, &waitTimeSpec);
     }
     else
     {
         /* take semaphore without timeout */
-        err = sem_wait((sem_t*)&sema);
+        err = sem_wait((sem_t *)&sema);
     }
     if (err != (INT32) NULL)
     {
@@ -1153,12 +1150,12 @@ EXT_DECL void vos_semaGive (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR,"vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printf(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
     }
     else
     {
         /* release semaphore */
-        err = sem_post((sem_t*)&sema);
+        err = sem_post((sem_t *)&sema);
         if (err == (INT32) NULL)
         {
             /* Semaphore released */
@@ -1166,7 +1163,7 @@ EXT_DECL void vos_semaGive (
         else
         {
             /* Could not release Semaphore */
-            vos_printf(VOS_LOG_ERROR,"vos_semaGive() ERROR could not release semaphore\n");
+            vos_printf(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
         }
     }
     return;
