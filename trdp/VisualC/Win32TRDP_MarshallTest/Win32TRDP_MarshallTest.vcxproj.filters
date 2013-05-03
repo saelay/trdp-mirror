@@ -9,7 +9,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\test_marshalling.c">
+    <ClCompile Include="..\..\test\marshalling\test_marshalling.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
