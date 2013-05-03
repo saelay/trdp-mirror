@@ -349,7 +349,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 7384E6F2172987CE00830413 /* trdp PDonly */;
+			remoteGlobalIDString = 7384E6F2172987CE00830413;
 			remoteInfo = "trdp PDonly";
 		};
 		73E14B301560221600FAC175 /* PBXContainerItemProxy */ = {
@@ -420,20 +420,20 @@
 /* Begin PBXFileReference section */
 		08014D0B16483EAD0065AADD /* SenderDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SenderDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		08014D1716483F240065AADD /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		08014D22164840020065AADD /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Controller.h; path = SenderDemo/Controller.h; sourceTree = "<group>"; };
-		08014D23164840020065AADD /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Controller.m; path = SenderDemo/Controller.m; sourceTree = "<group>"; };
+		08014D22164840020065AADD /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
+		08014D23164840020065AADD /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		08014D26164840030065AADD /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		08014D28164840030065AADD /* MainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
-		08014D29164840030065AADD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SenderDemo/Info.plist; sourceTree = "<group>"; };
-		08014D2A164840030065AADD /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = SenderDemo/main.m; sourceTree = "<group>"; };
-		08014D2B164840030065AADD /* pdsend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pdsend.c; path = SenderDemo/pdsend.c; sourceTree = "<group>"; };
-		08014D2C164840030065AADD /* pdsend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pdsend.h; path = SenderDemo/pdsend.h; sourceTree = "<group>"; };
+		08014D29164840030065AADD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		08014D2A164840030065AADD /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		08014D2B164840030065AADD /* pdsend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pdsend.c; sourceTree = "<group>"; };
+		08014D2C164840030065AADD /* pdsend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pdsend.h; sourceTree = "<group>"; };
 		08014D2E164840030065AADD /* Bombardier.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Bombardier.png; sourceTree = "<group>"; };
 		08014D2F164840030065AADD /* Engineering.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Engineering.png; sourceTree = "<group>"; };
 		08014D30164840030065AADD /* FARsystems.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FARsystems.png; sourceTree = "<group>"; };
 		08014D31164840030065AADD /* NewTec.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NewTec.png; sourceTree = "<group>"; };
 		08014D32164840030065AADD /* Siemens.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Siemens.png; sourceTree = "<group>"; };
-		08014D33164840030065AADD /* SenderDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SenderDemo_Prefix.pch; path = SenderDemo/SenderDemo_Prefix.pch; sourceTree = "<group>"; };
+		08014D33164840030065AADD /* SenderDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SenderDemo_Prefix.pch; sourceTree = "<group>"; };
 		08CE20C716496F760038151B /* mdManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManager.c; sourceTree = "<group>"; };
 		08CE20C816496F760038151B /* mdManager1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManager1.c; sourceTree = "<group>"; };
 		08CE20C916496F760038151B /* mdManager2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManager2.c; sourceTree = "<group>"; };
@@ -664,6 +664,11 @@
 		73CE246C1733F40900314E1C /* libxml2.dll */ = {isa = PBXFileReference; lastKnownFileType = file; path = libxml2.dll; sourceTree = "<group>"; };
 		73CE246D1733F40900314E1C /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		73CE246E1733F40900314E1C /* trdp_spy.dll */ = {isa = PBXFileReference; lastKnownFileType = file; path = trdp_spy.dll; sourceTree = "<group>"; };
+		73CE24F017340E2B00314E1C /* buildsettings_posix_TEMPLATE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = buildsettings_posix_TEMPLATE; sourceTree = "<group>"; };
+		73CE24F117340E2B00314E1C /* buildsettings_vxworks_TEMPLATE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = buildsettings_vxworks_TEMPLATE; sourceTree = "<group>"; };
+		73CE24F217340E2B00314E1C /* config.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = config.mk; sourceTree = "<group>"; };
+		73CE24F317340E2B00314E1C /* POSIX_X86_config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = POSIX_X86_config; sourceTree = "<group>"; };
+		73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = VXWORKS_PPC_config; sourceTree = "<group>"; };
 		73D6657A15D3D88700A352D4 /* tau_marshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_marshall.c; sourceTree = "<group>"; };
 		73E051EF15123F600058D590 /* Doxyfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Doxyfile; path = ../Doxyfile; sourceTree = SOURCE_ROOT; };
 		73E051F015123F690058D590 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = SOURCE_ROOT; };
@@ -675,7 +680,7 @@
 		73E0535C1513685D0058D590 /* vos_thread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_thread.c; sourceTree = "<group>"; };
 		73E0535F15136BF60058D590 /* vos_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_utils.h; sourceTree = "<group>"; };
 		73E0536115136CC90058D590 /* vos_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_utils.c; sourceTree = "<group>"; };
-		73E4978116CE977300045EFA /* TCN-TRDP1-A-BOM-008-04_-_Coding_Rules.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TCN-TRDP1-A-BOM-008-04_-_Coding_Rules.doc"; sourceTree = "<group>"; };
+		73E4978116CE977300045EFA /* TCN-TRDP1-A-BOM-008-07 - Coding Rules.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TCN-TRDP1-A-BOM-008-07 - Coding Rules.doc"; sourceTree = "<group>"; };
 		73E4978516CE981E00045EFA /* Deviation Request.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Deviation Request.txt"; path = "../Deviation Request.txt"; sourceTree = "<group>"; };
 		73E4979C16CEA1DA00045EFA /* INSTALL.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = INSTALL.txt; sourceTree = "<group>"; };
 		73E4979E16CEA1DA00045EFA /* build-1_8_3.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-1_8_3.bat"; sourceTree = "<group>"; };
@@ -897,7 +902,7 @@
 				08014D33164840030065AADD /* SenderDemo_Prefix.pch */,
 				08014D1616483F240065AADD /* Linked Frameworks */,
 			);
-			name = SenderDemo;
+			path = SenderDemo;
 			sourceTree = "<group>";
 		};
 		08014D24164840020065AADD /* English.lproj */ = {
@@ -906,8 +911,7 @@
 				08014D25164840020065AADD /* InfoPlist.strings */,
 				08014D27164840030065AADD /* MainMenu.xib */,
 			);
-			name = English.lproj;
-			path = SenderDemo/English.lproj;
+			path = English.lproj;
 			sourceTree = "<group>";
 		};
 		08014D2D164840030065AADD /* Resources */ = {
@@ -919,8 +923,7 @@
 				08014D31164840030065AADD /* NewTec.png */,
 				08014D32164840030065AADD /* Siemens.png */,
 			);
-			name = Resources;
-			path = SenderDemo/Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		08FB7794FE84155DC02AAC07 /* trdp */ = {
@@ -931,9 +934,10 @@
 				7387F6441578FDCC00DBAB73 /* readme.txt */,
 				73E4978516CE981E00045EFA /* Deviation Request.txt */,
 				73E051F015123F690058D590 /* Makefile */,
+				73CE24EF17340E2B00314E1C /* config */,
 				73821F27150777B00046E0AC /* src */,
+				73821F3B150777B00046E0AC /* example */,
 				7322485C16A975DD00148295 /* config */,
-				73821F41150777D30046E0AC /* demo */,
 				73821F42150777D30046E0AC /* doc */,
 				73821F7C150777D40046E0AC /* test */,
 				73E4979516CEA1DA00045EFA /* spy */,
@@ -1278,7 +1282,6 @@
 				73822056150A5B9A0046E0AC /* vos */,
 				73821F28150777B00046E0AC /* api */,
 				73821F2C150777B00046E0AC /* common */,
-				73821F3B150777B00046E0AC /* example */,
 				73821F3E150777B00046E0AC /* private */,
 			);
 			name = src;
@@ -1328,6 +1331,7 @@
 		73821F3B150777B00046E0AC /* example */ = {
 			isa = PBXGroup;
 			children = (
+				08014D1D16483FC50065AADD /* SenderDemo */,
 				738220021508E3710046E0AC /* echoPolling.c */,
 				73821F3C150777B00046E0AC /* echoSelect.c */,
 				7381BE511643FAC4003BC539 /* echoSelectcmdline.c */,
@@ -1342,7 +1346,8 @@
 				73517C4A16BBFDA800DB5208 /* receiveHello.c */,
 				73821F3D150777B00046E0AC /* sendHello.c */,
 			);
-			path = example;
+			name = example;
+			path = ../example;
 			sourceTree = "<group>";
 		};
 		73821F3E150777B00046E0AC /* private */ = {
@@ -1352,20 +1357,11 @@
 			path = private;
 			sourceTree = "<group>";
 		};
-		73821F41150777D30046E0AC /* demo */ = {
-			isa = PBXGroup;
-			children = (
-				08014D1D16483FC50065AADD /* SenderDemo */,
-			);
-			name = demo;
-			path = ../demo;
-			sourceTree = SOURCE_ROOT;
-		};
 		73821F42150777D30046E0AC /* doc */ = {
 			isa = PBXGroup;
 			children = (
 				735BAD12172EC1AB00837D0E /* memory.xls */,
-				73E4978116CE977300045EFA /* TCN-TRDP1-A-BOM-008-04_-_Coding_Rules.doc */,
+				73E4978116CE977300045EFA /* TCN-TRDP1-A-BOM-008-07 - Coding Rules.doc */,
 				7387F63B1578FCDD00DBAB73 /* TCN-TRDP2-D-BOM-019-01 - System Architecture & Design.doc */,
 				7387F63A1578FC2B00DBAB73 /* refman.pdf */,
 				731292961535BEA1006B3A88 /* images */,
@@ -1516,6 +1512,19 @@
 			);
 			path = win32;
 			sourceTree = "<group>";
+		};
+		73CE24EF17340E2B00314E1C /* config */ = {
+			isa = PBXGroup;
+			children = (
+				73CE24F017340E2B00314E1C /* buildsettings_posix_TEMPLATE */,
+				73CE24F117340E2B00314E1C /* buildsettings_vxworks_TEMPLATE */,
+				73CE24F217340E2B00314E1C /* config.mk */,
+				73CE24F317340E2B00314E1C /* POSIX_X86_config */,
+				73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */,
+			);
+			name = config;
+			path = ../config;
+			sourceTree = SOURCE_ROOT;
 		};
 		73E05263151352CE0058D590 /* api */ = {
 			isa = PBXGroup;
@@ -2506,17 +2515,14 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = ../demo/SenderDemo/SenderDemo_Prefix.pch;
+				GCC_PREFIX_HEADER = ../example/SenderDemo/SenderDemo_Prefix.pch;
 				HEADER_SEARCH_PATHS = (
 					../../src/vos/api,
 					../../src/api,
 				);
-				INFOPLIST_FILE = ../demo/SenderDemo/Info.plist;
+				INFOPLIST_FILE = ../example/SenderDemo/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../bld/darwin/Debug\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_CFLAGS = "-DPOSIX";
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;

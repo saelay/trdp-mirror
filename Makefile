@@ -23,11 +23,13 @@ INCPATH += -I src/api
 VOS_PATH = -I src/vos/$(TARGET_VOS)
 VOS_INCPATH = -I src/vos/api -I src/common
 BUILD_PATH = bld/$(TARGET_VOS)
-vpath %.c src/common src/example src/vos/common test/udpmdcom $(VOS_PATH) test 
+vpath %.c src/common  src/vos/common test/udpmdcom $(VOS_PATH) test example
 vpath %.h src/api src/vos/api src/common src/vos/common
 SUBDIRS	= src
 INCLUDES = $(INCPATH) $(VOS_INCPATH) $(VOS_PATH)
 OUTDIR = $(BUILD_PATH)
+# path to doxygen binary
+DOXYPATH = /usr/local/bin/
 
 # Set Objects
 VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o vos_shared_mem.o
@@ -40,6 +42,8 @@ LDFLAGS = -L $(OUTDIR)
 ifeq ($(MD_SUPPORT),1)
 TRDP_OBJS += trdp_mdcom.o
 CFLAGS += -DMD_SUPPORT=1
+else
+CFLAGS += -DMD_SUPPORT=0
 endif
 
 # adapt for operating system
@@ -82,7 +86,7 @@ libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
 example:	outdir $(OUTDIR)/mdManager
-test:		outdir $(OUTDIR)/getstats $(OUTDIR)/vostest
+test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test
 mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest0001 $(OUTDIR)/mdTest0002 $(OUTDIR)/test_mdSingle
@@ -105,7 +109,7 @@ $(OUTDIR)/libtrdp.a:	$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
 
 $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
-			$(CC) $(SUBDIRS)/example/echoSelect.c \
+			$(CC) example/echoSelect.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
 			    $(LDFLAGS)
@@ -113,7 +117,7 @@ $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
-			$(CC) $(SUBDIRS)/example/echoSelectcmdline.c \
+			$(CC) example/echoSelectcmdline.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
 			    $(LDFLAGS) 
@@ -121,7 +125,7 @@ $(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
-			$(CC) $(SUBDIRS)/example/echoPolling.c \
+			$(CC) example/echoPolling.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
 			    $(LDFLAGS)
@@ -129,15 +133,15 @@ $(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
-			$(CC) $(SUBDIRS)/example/sendHello.c \
+			$(CC) example/sendHello.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a
+$(OUTDIR)/getStats:   marshalling/getStats.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building statistics commandline tool $(@F)'
-			$(CC) test/getStats.c \
+			$(CC) test/marshalling/getStats.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
@@ -145,7 +149,7 @@ $(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building example MD application $(@F)'
-			$(CC) $(SUBDIRS)/example/mdManager.c \
+			$(CC) example/mdManager.c \
 			    -ltrdp \
 			    -luuid -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -179,7 +183,7 @@ $(OUTDIR)/test_mdSingle: $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building TCPMDCom Siemens test application $(@F)'
-			$(CC) $(SUBDIRS)/example/mdManagerTCP_Siemens.c \
+			$(CC) example/mdManagerTCP_Siemens.c \
 			    -ltrdp \
 			    -luuid -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -188,7 +192,7 @@ $(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building TCPMDCom test application $(@F)'
-			$(CC) $(SUBDIRS)/example/mdManagerTCP.c \
+			$(CC) example/mdManagerTCP.c \
 			    -ltrdp \
 			    -luuid -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
@@ -213,7 +217,7 @@ $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building VOS test application $(@F)'
-			$(CC) VisualC/Win32TRDP_Tests/LibraryTests.cpp \
+			$(CC) test/diverse/LibraryTests.cpp \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
