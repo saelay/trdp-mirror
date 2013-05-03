@@ -95,10 +95,10 @@ typedef fd_set VOS_FDS_T;
 
 typedef struct
 {
-    CHAR8           name[VOS_MAX_IF_NAME_SIZE];
-    VOS_IP4_ADDR_T  ipAddr;
-    VOS_IP4_ADDR_T  netMask;
-    UINT8           mac[VOS_MAC_SIZE]; 
+    CHAR8           name[VOS_MAX_IF_NAME_SIZE]; /**< interface adapter name        */
+    VOS_IP4_ADDR_T  ipAddr;                     /**< IP address                    */
+    VOS_IP4_ADDR_T  netMask;                    /**< subnet mask                   */
+    UINT8           mac[VOS_MAC_SIZE];          /**< interface adapter MAC address */
 } VOS_IF_REC_T;
 
 /***********************************************************************************************************************
