@@ -13,7 +13,7 @@
  *
  * @remarks         All rights reserved. Reproduction, modification, use or disclosure
  *                  to third parties without express authority is forbidden,
- *                  Copyright Bombardier Transportation GmbH, Germany, 2012.
+ *                  Copyright Bombardier Transportation GmbH, Germany, 2012-2013.
  *
  *
  * $Id$
@@ -41,9 +41,9 @@
 #include <sys/ioctl.h>
 
 #ifdef __linux
-#include <linux/if.h>
+#   include <linux/if.h>
 #else
-#include <net/if.h>
+#   include <net/if.h>
 #endif
 
 #include <netinet/in.h>
@@ -60,8 +60,12 @@
  * DEFINITIONS
  */
 
-#ifndef VOS_DEFAULT_IFACE 
-#define VOS_DEFAULT_IFACE  "eth0"
+#ifndef VOS_DEFAULT_IFACE
+#   if defined(__APPLE__) || defined(__QNXNTO__)
+#       define VOS_DEFAULT_IFACE    "en0"
+#   else
+#       define VOS_DEFAULT_IFACE    "eth0"
+#   endif
 #endif
 
 /***********************************************************************************************************************
@@ -71,6 +75,91 @@
 BOOL            vosSockInitialised      = FALSE;
 uint32_t        gNumberOfOpenSockets    = 0;
 struct ifreq    gIfr;
+
+/***********************************************************************************************************************
+ * LOCAL FUNCTIONS
+ */
+
+/**********************************************************************************************************************/
+/** Get the MAC address for a named interface.
+ *
+ *  @param[out]         pMacAddr   pointer to array of MAC address to return
+ *  @param[in]          pIfName    pointer to interface name
+ *
+ *  @retval             TRUE if successfull
+ */
+
+BOOL vos_getMacAddress (
+    UINT8       *pMacAddr,
+    const char  *pIfName)
+{
+#ifdef __linux
+    struct ifreq    ifinfo;
+    int             sd;
+    int             result = -1;
+
+    if (pIfName == NULL)
+    {
+        strcpy(ifinfo.ifr_name, VOS_DEFAULT_IFACE);
+    }
+    else
+    {
+        strcpy(ifinfo.ifr_name, pIfName);
+    }
+    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sd != -1)
+    {
+        result = ioctl(sd, SIOCGIFHWADDR, &ifinfo);
+        close(sd);
+    }
+    if ((result == 0) && (ifinfo.ifr_hwaddr.sa_family == 1))
+    {
+        memcpy(pMacAddr, ifinfo.ifr_hwaddr.sa_data, IFHWADDRLEN);
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+
+#elif defined(__APPLE__)
+#   define LLADDR_OFF  11
+
+    struct ifaddrs  *pIfList;
+    BOOL found = FALSE;
+    const char      *pName = VOS_DEFAULT_IFACE;
+
+    if (pIfName != NULL)
+    {
+        pName = pIfName;
+    }
+
+    if (getifaddrs(&pIfList) == 0)
+    {
+        for (struct ifaddrs *cur = pIfList; cur; cur = cur->ifa_next)
+        {
+            if ((cur->ifa_addr->sa_family == AF_LINK) &&
+                (strcmp(cur->ifa_name, pName) == 0) &&
+                cur->ifa_addr)
+            {
+                UINT8 *p = (UINT8 *)cur->ifa_addr;
+                memcpy(pMacAddr, p + LLADDR_OFF, VOS_MAC_SIZE);
+                found = TRUE;
+                break;
+            }
+        }
+
+        freeifaddrs(pIfList);
+    }
+
+    return found;
+
+#elif defined(__QNXNTO__)
+#   warning "no definition for get_mac_address() on this platform!"
+#else
+#   error no definition for get_mac_address() on this platform!
+#endif
+}
 
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
@@ -134,8 +223,12 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 {
     static CHAR8 dotted[16];
 
-    vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
-            ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+    snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
+             ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+    /*
+       vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
+              ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+     */
     return dotted;
 }
 
@@ -154,68 +247,6 @@ EXT_DECL BOOL vos_isMulticast (
     return IN_MULTICAST(ipAddress);
 }
 
-/**********************************************************************************************************************/
-/** Get a list of interface addresses
- *  The caller has to provide an array of interface records to be filled.
- *
- *  @param[in,out]  pAddrCnt          in:   pointer to array size of interface record
- *                                    out:  pointer to number of interface records read
- *  @param[in,out]  ifAddrs           array of interface records
- *
- *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   pMAC == NULL
- */
-EXT_DECL VOS_ERR_T vos_getInterfaces (
-    UINT32         *pAddrCnt,
-    VOS_IF_REC_T    ifAddrs[])
-{
-    int success;
-    struct ifaddrs *addrs;
-    struct ifaddrs *cursor;
-    int count = 0;
-
-    if (   (pAddrCnt == NULL) 
-        || (ifAddrs == NULL) )
-    { 
-        return VOS_PARAM_ERR;
-    }
-
-    success = getifaddrs(&addrs) == 0;
-    if (success)
-    {
-        cursor = addrs;
-        while (cursor != 0 && count < pAddrCnt)
-        {
-            if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
-            {
-                ifAddrs[count].ipAddr   = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
-                ifAddrs[count].netMask  = ntohl(*(UINT32 *)&cursor->ifa_netmask->sa_data[2]);
-                if (cursor->ifa_name != NULL)
-                {
-                    strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
-                    ifAddrs[count].name[VOS_MAX_IF_NAME_SIZE - 1] = 0;
-                }
-                vos_printf(VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
-                           ifAddrs[count].name,
-                           (ifAddrs[count].ipAddr >> 24) & 0xFF,
-                           (ifAddrs[count].ipAddr >> 16) & 0xFF,
-                           (ifAddrs[count].ipAddr >> 8)  & 0xFF,
-                           ifAddrs[count].ipAddr        & 0xFF);
-                count++;
-            }
-            cursor = cursor->ifa_next;
-        }
-
-        freeifaddrs(addrs);
-    }
-    else
-    {
-        return VOS_PARAM_ERR;
-    }
-
-    *pAddrCnt = count;
-    return VOS_NO_ERR;
-}
 
 /**********************************************************************************************************************/
 /** select function.
@@ -240,6 +271,82 @@ EXT_DECL INT32 vos_select (
 {
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);
+}
+
+/**********************************************************************************************************************/
+/** Get a list of interface addresses
+ *  The caller has to provide an array of interface records to be filled.
+ *
+ *  @param[in,out]  pAddrCnt          in:   pointer to array size of interface record
+ *                                    out:  pointer to number of interface records read
+ *  @param[in,out]  ifAddrs           array of interface records
+ *
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   pMAC == NULL
+ */
+EXT_DECL VOS_ERR_T vos_getInterfaces (
+    UINT32          *pAddrCnt,
+    VOS_IF_REC_T    ifAddrs[])
+{
+    int success;
+    struct ifaddrs *addrs;
+    struct ifaddrs *cursor;
+    int count = 0;
+
+    if (pAddrCnt == NULL ||
+        *pAddrCnt == 0 ||
+        ifAddrs == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
+
+    success = getifaddrs(&addrs) == 0;
+    if (success)
+    {
+        cursor = addrs;
+        while (cursor != 0 && count < *pAddrCnt)
+        {
+            if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
+            {
+                ifAddrs[count].ipAddr   = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
+                ifAddrs[count].netMask  = ntohl(*(UINT32 *)&cursor->ifa_netmask->sa_data[2]);
+                if (cursor->ifa_name != NULL)
+                {
+                    strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
+                    ifAddrs[count].name[VOS_MAX_IF_NAME_SIZE - 1] = 0;
+                }
+                vos_printf(VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
+                           ifAddrs[count].name,
+                           (ifAddrs[count].ipAddr >> 24) & 0xFF,
+                           (ifAddrs[count].ipAddr >> 16) & 0xFF,
+                           (ifAddrs[count].ipAddr >> 8)  & 0xFF,
+                           ifAddrs[count].ipAddr        & 0xFF);
+
+                if (vos_getMacAddress(ifAddrs[count].mac, ifAddrs[count].name) == TRUE)
+                {
+                    vos_printf(VOS_LOG_INFO, "Mac-Addr for '%s': %02x:%02x:%02x:%02x:%02x:%02x\n",
+                               ifAddrs[count].name,
+                               ifAddrs[count].mac[0],
+                               ifAddrs[count].mac[1],
+                               ifAddrs[count].mac[2],
+                               ifAddrs[count].mac[3],
+                               ifAddrs[count].mac[4],
+                               ifAddrs[count].mac[5]);
+                }
+                count++;
+            }
+            cursor = cursor->ifa_next;
+        }
+
+        freeifaddrs(addrs);
+    }
+    else
+    {
+        return VOS_PARAM_ERR;
+    }
+
+    *pAddrCnt = count;
+    return VOS_NO_ERR;
 }
 
 /*    Sockets    */
@@ -273,72 +380,18 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 EXT_DECL VOS_ERR_T vos_sockGetMAC (
     UINT8 pMAC[VOS_MAC_SIZE])
 {
-#if   defined(__APPLE__)
-#elif defined(__linux__)
-    int sock;
-    int i;
-#endif
-    if (!vosSockInitialised)
-    {
-        return VOS_INIT_ERR;
-    }
-
     if (pMAC == NULL)
     {
         vos_printf(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
-    /* Not every system supports this! */
-#if   defined(__APPLE__)
-    #warning APPLE does not support this!
-    return VOS_SOCK_ERR;
-#elif defined(__linux__)
-
-    /* Has it been determined before? */
-    for (i = 0; i < 6 && gIfr.ifr_hwaddr.sa_data[i] != 0; i++)
+    if (vos_getMacAddress(pMAC, VOS_DEFAULT_IFACE) == TRUE)
     {
-        ;
+        return VOS_NO_ERR;
     }
 
-    if (i < 6) /* needs to be determined */
-    {
-
-        if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) == -1)
-        {
-/*
-              memset(pMAC, 0, sizeof(mac));
-            vos_printf(VOS_LOG_ERROR, "socket() failed\n");
-            return VOS_SOCK_ERR;
-*/
-        }
-
-        /* get the MAC address; we will construct our UUID from this (if UUID generation is not supported) */
-        gIfr.ifr_addr.sa_family = AF_INET;
-        strncpy(gIfr.ifr_name, VOS_DEFAULT_IFACE, IFNAMSIZ);
-        gIfr.ifr_name[IFNAMSIZ - 1] = 0;
-
-        if (ioctl(sock, SIOCGIFHWADDR, &gIfr) < 0)
-        {
-            vos_printf(VOS_LOG_ERROR, "Could not fetch IFHW address on %s\n", gIfr.ifr_name);
-            return VOS_SOCK_ERR;
-        }
-
-        close(sock);
-    }
-
-    for ( i = 0; i < 6; i++ )
-    {
-        pMAC[i] = (UINT8) gIfr.ifr_hwaddr.sa_data[i];
-    }
-    return VOS_NO_ERR;
-#elif defined(__QNXNTO__)
-    #warning QNX neutrino does not support this!
     return VOS_SOCK_ERR;
-#else
-    #warning Unhandled OS! Do not support this!
-    return VOS_SOCK_ERR;
-#endif
 }
 
 /**********************************************************************************************************************/
@@ -556,22 +609,22 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         This way we can get the destination IP address for received UDP packets */
     errno           = 0;
     sockOptValue    = 1;
-	#if defined(IP_RECVDSTADDR)
+    #if defined(IP_RECVDSTADDR)
     if (setsockopt(sock, IPPROTO_IP, IP_RECVDSTADDR, &sockOptValue, sizeof(sockOptValue)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %s)\n", buff);
     }
-	#elif defined(IP_PKTINFO)
+    #elif defined(IP_PKTINFO)
     if (setsockopt(sock, IPPROTO_IP, IP_PKTINFO, &sockOptValue, sizeof(sockOptValue)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "setsockopt() IP_PKTINFO failed (Err: %s)\n", buff);
     }
-	#endif
-	
+    #endif
+
     return VOS_NO_ERR;
 }
 
@@ -831,17 +884,17 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT16  *pSrcIPPort,
     UINT32  *pDstIPAddr)
 {
-	union
-	{
-		struct cmsghdr cm;
-		char           raw[32];
-	} control_un;
+    union
+    {
+        struct cmsghdr  cm;
+        char            raw[32];
+    } control_un;
     struct sockaddr_in  srcAddr;
     socklen_t           sockLen = sizeof(srcAddr);
-    ssize_t             rcvSize = 0;
+    ssize_t rcvSize = 0;
     struct msghdr       msg;
     struct iovec        iov;
-	struct cmsghdr      *cmsg;
+    struct cmsghdr      *cmsg;
 
     if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
@@ -871,27 +924,27 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         if (rcvSize != -1)
         {
             if (pDstIPAddr != NULL)
-			{
-				for(cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL; cmsg = CMSG_NXTHDR(&msg,cmsg))
-				{
-					#if defined(IP_RECVDSTADDR)
-					if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == IP_RECVDSTADDR)
-					{
-						struct in_addr *pia = (struct in_addr *)CMSG_DATA(cmsg);
-						*pDstIPAddr = (UINT32)vos_ntohl(pia->s_addr);
-						/* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
-					}
-					#elif defined(IP_PKTINFO)
-					if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_PKTINFO)
-					{
-						struct in_pktinfo *pia = (struct in_pktinfo *)CMSG_DATA(cmsg);
-						*pDstIPAddr = (UINT32)vos_ntohl(pia->ipi_addr.s_addr);
-						/* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
-					}
-					#endif
-				}
-			}
-		
+            {
+                for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL; cmsg = CMSG_NXTHDR(&msg, cmsg))
+                {
+                    #if defined(IP_RECVDSTADDR)
+                    if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == IP_RECVDSTADDR)
+                    {
+                        struct in_addr *pia = (struct in_addr *)CMSG_DATA(cmsg);
+                        *pDstIPAddr = (UINT32)vos_ntohl(pia->s_addr);
+                        /* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
+                    }
+                    #elif defined(IP_PKTINFO)
+                    if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_PKTINFO)
+                    {
+                        struct in_pktinfo *pia = (struct in_pktinfo *)CMSG_DATA(cmsg);
+                        *pDstIPAddr = (UINT32)vos_ntohl(pia->ipi_addr.s_addr);
+                        /* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
+                    }
+                    #endif
+                }
+            }
+
 
             if (pSrcIPAddr != NULL)
             {
