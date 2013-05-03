@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\resources\windows\getopt\getopt.c" />
-    <ClCompile Include="..\..\test\test_trafficShaping.c" />
+    <ClCompile Include="..\..\test\diverse\test_trafficShaping.c" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\Debug\Win32TRDP.lib" />
