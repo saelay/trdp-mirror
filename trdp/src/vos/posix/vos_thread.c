@@ -25,9 +25,9 @@
     "You are trying to compile the POSIX implementation of vos_thread.c - either define POSIX or exclude this file!"
 #endif
 
-#define NSECS_PER_USEC 1000
-#define USECS_PER_MSEC 1000
-#define MSECS_PER_SEC 1000
+#define NSECS_PER_USEC  1000
+#define USECS_PER_MSEC  1000
+#define MSECS_PER_SEC   1000
 
 /***********************************************************************************************************************
  * INCLUDES
@@ -75,6 +75,38 @@ BOOL            vosThreadInitialised = FALSE;
 /***********************************************************************************************************************
  *  LOCALS
  */
+#ifdef __APPLE__
+int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
+{
+    /* sem_timedwait() is not supported by DARWIN / Mac OS X!  */
+    /* This is a very simple replacement - only suitable for debugging/testing!!!
+       It will fail if there are more than 2 threads waiting... */
+    VOS_TIME_T now, timeOut;
+
+    timeOut.tv_sec  = abs_timeout->tv_sec;
+    timeOut.tv_usec = abs_timeout->tv_nsec;
+
+    while (1)
+    {
+        if (sem_trywait(sem) == 0)
+        {
+            return 0;
+        }
+        if (errno == EINTR)
+        {
+            break;
+        }
+        vos_getTime(&now);
+        if (vos_cmpTime(&timeOut, &now) < 0)
+        {
+            errno = ETIMEDOUT;
+            break;
+        }
+    }
+
+    return -1;
+}
+#endif
 
 /**********************************************************************************************************************/
 /** Cyclic thread functions.
@@ -91,7 +123,7 @@ void cyclicThread (
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
-    for(;; )
+    for (;; )
     {
         vos_threadDelay(interval);
         pFunction(pArguments);
@@ -945,23 +977,23 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_T          *pSema,
     VOS_SEMA_STATE_T    initialState)
 {
-    VOS_ERR_T retVal = VOS_SEMA_ERR;
-    INT32 ret = (INT32) NULL;
+    VOS_ERR_T   retVal  = VOS_SEMA_ERR;
+    INT32       ret     = (INT32) NULL;
 
     /*Check parameters*/
     if (pSema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR,"vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
+        vos_printf(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
     {
-        vos_printf(VOS_LOG_ERROR,"vos_SemaCreate() ERROR invalid parameter initialState\n");
+        vos_printf(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
         retVal = VOS_PARAM_ERR;
     }
     else
-        /*Parameters are OK*/
     {
+        /*Parameters are OK*/
         *pSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
 
         if (*pSema == NULL)
@@ -970,7 +1002,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         }
 
         /*pThread Semaphore init*/
-        ret = sem_init((sem_t*)*pSema,0,(UINT8)initialState);
+        ret = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
         if (ret != (int)NULL)
         {
             /*Semaphore init failed*/
@@ -994,24 +1026,24 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
  *  @param[in]      sema            semaphore handle
  */
 
-EXT_DECL void vos_semaDelete(VOS_SEMA_T sema)
+EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
 {
-    INT32 ret = (INT32) NULL;
-    INT32 err = (INT32) NULL;
+    INT32   ret = (INT32) NULL;
+    INT32   err = (INT32) NULL;
 
     /* Check parameter */
-    if(sema == NULL)
+    if (sema == NULL)
     {
         vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
     }
     else
     {
         /* Check if this is a valid semaphore handle*/
-        err = sem_getvalue((sem_t*)sema, &ret);
-        if(err == (INT32) NULL)
+        err = sem_getvalue((sem_t *)sema, &ret);
+        if (err == (INT32) NULL)
         {
-            ret = sem_destroy((sem_t*)sema);
-            if(ret != (INT32) NULL)
+            ret = sem_destroy((sem_t *)sema);
+            if (ret != (INT32) NULL)
             {
                 /* Error destroying Semaphore */
                 vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
@@ -1044,29 +1076,29 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     VOS_SEMA_T  sema,
     UINT32      timeout)
 {
-    INT32 err = (INT32) NULL;
-    VOS_ERR_T retVal = VOS_SEMA_ERR;
-    VOS_TIME_T waitTimeVos = {(UINT32) NULL, (UINT32) NULL};
-    struct timespec waitTimeSpec = {(UINT32) NULL,(UINT32) NULL};
+    INT32           err             = (INT32) NULL;
+    VOS_ERR_T       retVal          = VOS_SEMA_ERR;
+    VOS_TIME_T      waitTimeVos     = {(UINT32) NULL, (UINT32) NULL};
+    struct timespec waitTimeSpec    = {(UINT32) NULL, (UINT32) NULL};
 
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR,"vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printf(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if (timeout != (UINT32) NULL)
     {
         /* Get time since 01/01/1970 and convert it to timespec format */
         vos_getTime(&waitTimeVos);
-        waitTimeSpec.tv_sec = waitTimeVos.tv_sec;
-        waitTimeSpec.tv_nsec = waitTimeVos.tv_usec * NSECS_PER_USEC;
+        waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
+        waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * NSECS_PER_USEC;
         /* add offset */
         if (timeout >= (USECS_PER_MSEC * MSECS_PER_SEC))
         {
             /* Timeout longer than 1 sec, add sec and nsec seperately */
-            waitTimeSpec.tv_sec += timeout / (USECS_PER_MSEC * MSECS_PER_SEC);
-            waitTimeSpec.tv_nsec += (timeout % (USECS_PER_MSEC * MSECS_PER_SEC)) * NSECS_PER_USEC;
+            waitTimeSpec.tv_sec     += timeout / (USECS_PER_MSEC * MSECS_PER_SEC);
+            waitTimeSpec.tv_nsec    += (timeout % (USECS_PER_MSEC * MSECS_PER_SEC)) * NSECS_PER_USEC;
         }
         else
         {
@@ -1084,12 +1116,18 @@ EXT_DECL VOS_ERR_T vos_semaTake (
             /* carry not necessary */
         }
         /* take semaphore with specified timeout */
-        err = sem_timedwait((sem_t*)sema,&waitTimeSpec);
+        /* BL 2013-05-06:
+           This call will fail under QNX, because it depends on CLOCK_REALTIME (opposed to CLOCK_MONOTONIC)!
+        */
+        #ifdef __QNXNTO__
+            #warning "CLOCK_REALTIME (opposed to CLOCK_MONOTONIC) is the base"
+        #endif
+        err = sem_timedwait((sem_t *)sema, &waitTimeSpec);
     }
     else
     {
         /* take semaphore without timeout */
-        err = sem_wait((sem_t*)sema);
+        err = sem_wait((sem_t *)sema);
     }
     if (err != (INT32) NULL)
     {
@@ -1121,12 +1159,12 @@ EXT_DECL void vos_semaGive (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR,"vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printf(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
     }
     else
     {
         /* release semaphore */
-        err = sem_post((sem_t*)sema);
+        err = sem_post((sem_t *)sema);
         if (err == (INT32) NULL)
         {
             /* Semaphore released */
@@ -1134,7 +1172,7 @@ EXT_DECL void vos_semaGive (
         else
         {
             /* Could not release Semaphore */
-            vos_printf(VOS_LOG_ERROR,"vos_semaGive() ERROR could not release semaphore\n");
+            vos_printf(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
         }
     }
     return;
