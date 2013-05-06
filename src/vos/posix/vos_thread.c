@@ -25,6 +25,10 @@
     "You are trying to compile the POSIX implementation of vos_thread.c - either define POSIX or exclude this file!"
 #endif
 
+#define NSECS_PER_USEC 1000
+#define USECS_PER_MSEC 1000
+#define MSECS_PER_SEC 1000
+
 /***********************************************************************************************************************
  * INCLUDES
  */
@@ -87,7 +91,7 @@ void cyclicThread (
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
-    for (;; )
+    for(;; )
     {
         vos_threadDelay(interval);
         pFunction(pArguments);
@@ -941,7 +945,45 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_T          *pSema,
     VOS_SEMA_STATE_T    initialState)
 {
-    return VOS_SEMA_ERR;
+    VOS_ERR_T retVal = VOS_SEMA_ERR;
+    INT32 ret = (INT32) NULL;
+
+    /*Check parameters*/
+    if (pSema == NULL)
+    {
+        vos_printf(VOS_LOG_ERROR,"vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
+        retVal = VOS_PARAM_ERR;
+    }
+    else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
+    {
+        vos_printf(VOS_LOG_ERROR,"vos_SemaCreate() ERROR invalid parameter initialState\n");
+        retVal = VOS_PARAM_ERR;
+    }
+    else
+        /*Parameters are OK*/
+    {
+        *pSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
+
+        if (*pSema == NULL)
+        {
+            return VOS_MEM_ERR;
+        }
+
+        /*pThread Semaphore init*/
+        ret = sem_init((sem_t*)*pSema,0,(UINT8)initialState);
+        if (ret != (int)NULL)
+        {
+            /*Semaphore init failed*/
+            vos_printf(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
+            retVal = VOS_SEMA_ERR;
+        }
+        else
+        {
+            /*Semaphore init successful*/
+            retVal = VOS_NO_ERR;
+        }
+    }
+    return retVal;
 }
 
 
@@ -952,9 +994,37 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
  *  @param[in]      sema            semaphore handle
  */
 
-EXT_DECL void vos_semaDelete (
-    VOS_SEMA_T sema)
-{}
+EXT_DECL void vos_semaDelete(VOS_SEMA_T sema)
+{
+    INT32 ret = (INT32) NULL;
+    INT32 err = (INT32) NULL;
+
+    /* Check parameter */
+    if(sema == NULL)
+    {
+        vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
+    }
+    else
+    {
+        /* Check if this is a valid semaphore handle*/
+        err = sem_getvalue((sem_t*)sema, &ret);
+        if(err == (INT32) NULL)
+        {
+            ret = sem_destroy((sem_t*)sema);
+            if(ret != (INT32) NULL)
+            {
+                /* Error destroying Semaphore */
+                vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
+            }
+            else
+            {
+                /* Semaphore deleted successfully, free allocated memory */
+                vos_memFree(sema);
+            }
+        }
+    }
+    return;
+}
 
 
 /**********************************************************************************************************************/
@@ -974,7 +1044,64 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     VOS_SEMA_T  sema,
     UINT32      timeout)
 {
-    return VOS_SEMA_ERR;
+    INT32 err = (INT32) NULL;
+    VOS_ERR_T retVal = VOS_SEMA_ERR;
+    VOS_TIME_T waitTimeVos = {(UINT32) NULL, (UINT32) NULL};
+    struct timespec waitTimeSpec = {(UINT32) NULL,(UINT32) NULL};
+
+    /* Check parameter */
+    if (sema == NULL)
+    {
+        vos_printf(VOS_LOG_ERROR,"vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
+        retVal = VOS_PARAM_ERR;
+    }
+    else if (timeout != (UINT32) NULL)
+    {
+        /* Get time since 01/01/1970 and convert it to timespec format */
+        vos_getTime(&waitTimeVos);
+        waitTimeSpec.tv_sec = waitTimeVos.tv_sec;
+        waitTimeSpec.tv_nsec = waitTimeVos.tv_usec * NSECS_PER_USEC;
+        /* add offset */
+        if (timeout >= (USECS_PER_MSEC * MSECS_PER_SEC))
+        {
+            /* Timeout longer than 1 sec, add sec and nsec seperately */
+            waitTimeSpec.tv_sec += timeout / (USECS_PER_MSEC * MSECS_PER_SEC);
+            waitTimeSpec.tv_nsec += (timeout % (USECS_PER_MSEC * MSECS_PER_SEC)) * NSECS_PER_USEC;
+        }
+        else
+        {
+            /* Timeout shorter than 1 sec, only add nsecs */
+            waitTimeSpec.tv_nsec += timeout * NSECS_PER_USEC;
+        }
+        /* Carry if tv_nsec > 1.000.000.000 */
+        if (waitTimeSpec.tv_nsec >= NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC)
+        {
+            waitTimeSpec.tv_sec++;
+            waitTimeSpec.tv_nsec -= NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC;
+        }
+        else
+        {
+            /* carry not necessary */
+        }
+        /* take semaphore with specified timeout */
+        err = sem_timedwait((sem_t*)sema,&waitTimeSpec);
+    }
+    else
+    {
+        /* take semaphore without timeout */
+        err = sem_wait((sem_t*)sema);
+    }
+    if (err != (INT32) NULL)
+    {
+        /* Could not take Semaphore in time */
+        retVal = VOS_SEMA_ERR;
+    }
+    else
+    {
+        /* Semaphore take success */
+        retVal = VOS_NO_ERR;
+    }
+    return retVal;
 }
 
 
@@ -989,5 +1116,26 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema)
 {
-    /*return VOS_SEMA_ERR;*/
+    INT32 err = (INT32) NULL;
+
+    /* Check parameter */
+    if (sema == NULL)
+    {
+        vos_printf(VOS_LOG_ERROR,"vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
+    }
+    else
+    {
+        /* release semaphore */
+        err = sem_post((sem_t*)sema);
+        if (err == (INT32) NULL)
+        {
+            /* Semaphore released */
+        }
+        else
+        {
+            /* Could not release Semaphore */
+            vos_printf(VOS_LOG_ERROR,"vos_semaGive() ERROR could not release semaphore\n");
+        }
+    }
+    return;
 }
