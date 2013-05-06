@@ -997,7 +997,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         }
 
         /*pThread Semaphore init*/
-        ret = sem_init((sem_t *)pSema, 0, (UINT8)initialState);
+        ret = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
         if (ret != (int)NULL)
         {
             /*Semaphore init failed*/
@@ -1035,10 +1035,10 @@ EXT_DECL void vos_semaDelete (
     else
     {
         /* Check if this is a valid semaphore handle*/
-        err = sem_getvalue((sem_t *)&sema, &ret);
+        err = sem_getvalue((sem_t *)sema, &ret);
         if (err == (INT32) NULL)
         {
-            ret = sem_destroy((sem_t *)&sema);
+            ret = sem_destroy((sem_t *)sema);
             if (ret != (INT32) NULL)
             {
                 /* Error destroying Semaphore */
@@ -1114,12 +1114,12 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         }
 
         /* take semaphore with specified timeout */
-        err = sem_timedwait((sem_t *)&sema, &waitTimeSpec);
+        err = sem_timedwait((sem_t *)sema, &waitTimeSpec);
     }
     else
     {
         /* take semaphore without timeout */
-        err = sem_wait((sem_t *)&sema);
+        err = sem_wait((sem_t *)sema);
     }
     if (err != (INT32) NULL)
     {
@@ -1155,7 +1155,7 @@ EXT_DECL void vos_semaGive (
     else
     {
         /* release semaphore */
-        err = sem_post((sem_t *)&sema);
+        err = sem_post((sem_t *)sema);
         if (err == (INT32) NULL)
         {
             /* Semaphore released */
