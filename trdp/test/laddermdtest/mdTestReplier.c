@@ -52,6 +52,8 @@ VOS_THREAD_FUNC_T MDReplier (
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle2 ={{0}};		/* appThreadSessionHandle for Subnet2 */
 	TRDP_LIS_T pTrdpListenerHandle = NULL;		/* TRDP Listener Handle for Subnet1 by tlm_addListener */
 	TRDP_LIS_T pTrdpListenerHandle2 = NULL;	/* TRDP Listener Handle for Subnet2 by tlm_addListener */
+	/* Session Valid */
+	BOOL aliveSession = TRUE;
 
 	/* AppHandle  AppThreadListener Area */
 	if (appThreadSessionHandle.pMdAppThreadListener != NULL)
@@ -136,7 +138,7 @@ VOS_THREAD_FUNC_T MDReplier (
 			/* Set Subnet1 appThreadListener */
 			appThreadSessionHandle.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
 			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
-			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
+//			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
 		}
 
 		/* Is this Ladder Topology ? */
@@ -179,11 +181,12 @@ VOS_THREAD_FUNC_T MDReplier (
 				vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
 				return 0;
 			}
+			else
 			{
 				/* Set Subnet2 appThreadListener */
 				appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
 				appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
-				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
+//				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
 			}
 		}
 	}
@@ -231,31 +234,60 @@ VOS_THREAD_FUNC_T MDReplier (
 	/* Delete Listener */
 	/* wait tlc_process 1 cycle time = 10000 for Last Reply trdp_mdSend() */
 	vos_threadDelay(TLC_PROCESS_CYCLE_TIME);
-    /* delete Subnet1 Listener */
-    err = tlm_delListener(appHandle, pTrdpListenerHandle);
-    if(err != TRDP_NO_ERR)
+	/* Replier Send Request Session Close Wait */
+	while(1)
 	{
-    	vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+		/* Check Replier Receive Request or Notify Session Alive */
+		aliveSession = isValidReplierReceiveRequestNotifySession(appHandle, 0);
+		if (aliveSession == FALSE)
+		{
+			/* Check Replier Send Reply Session Alive */
+			aliveSession = isValidReplierSendReplySession(appHandle, 0);
+			if (aliveSession == FALSE)
+			{
+				/* delete Subnet1 Listener */
+				err = tlm_delListener(appHandle, pTrdpListenerHandle);
+				if(err != TRDP_NO_ERR)
+				{
+					vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+				}
+				else
+				{
+					/* Display TimeStamp when delete Listener time */
+					printf("%s Subnet1 Listener Delete.\n", vos_getTimeStamp());
+				}
+				break;
+			}
+		}
 	}
-    else
-    {
-    	/* Display TimeStamp when delete Listener time */
-    	printf("%s Subnet1 Listener Delete.\n", vos_getTimeStamp());
-    }
     /* Is this Ladder Topology ? */
 	if (pReplierThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
 	{
-		/* delete Subnet2 Listener */
-		err = tlm_delListener(appHandle2, pTrdpListenerHandle2);
-		if(err != TRDP_NO_ERR)
+		while(1)
 		{
-			vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+			/* Check Replier Receive Request or Notify Session Alive */
+			aliveSession = isValidReplierReceiveRequestNotifySession(appHandle2, 0);
+			if (aliveSession == FALSE)
+			{
+				/* Check Replier Send Reply Session Alive */
+				aliveSession = isValidReplierSendReplySession(appHandle, 0);
+				if (aliveSession == FALSE)
+				{
+					/* delete Subnet2 Listener */
+					err = tlm_delListener(appHandle2, pTrdpListenerHandle2);
+					if(err != TRDP_NO_ERR)
+					{
+						vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+					}
+					else
+					{
+						/* Display TimeStamp when delete Listener time */
+						printf("%s Subnet2 Listener Delete.\n", vos_getTimeStamp());
+					}
+					break;
+				}
+			}
 		}
-	    else
-	    {
-	    	/* Display TimeStamp when delete Listener time */
-	    	printf("%s Subnet2 Listener Delete.\n", vos_getTimeStamp());
-	    }
 	}
 
 	/* Delete command Value form COMMAND VALUE LIST */
@@ -622,7 +654,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -667,7 +699,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -706,7 +738,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -745,7 +777,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -800,7 +832,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -838,7 +870,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -871,7 +903,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -908,7 +940,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR\n");
+							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -1022,3 +1054,80 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 	}
 	return 0;
 }
+
+/**********************************************************************************************************************/
+/** Check Replier Send Reply SessionId is alive or release
+ *
+ *  @param[in]		appHandle								caller appHandle
+ *  @param[in]		pReplierSendReplySessionId			check Send Request sessionId
+ *
+ *  @retval         TRUE              is valid		session alive
+ *  @retval         FALSE             is invalid		session release
+ *
+ */
+BOOL isValidReplierSendReplySession (
+		TRDP_SESSION_PT appHandle,
+		UINT8 *pReplierSendReplySessionId)
+{
+    MD_ELE_T *iterMD = appHandle->pMDSndQueue;
+
+    while (NULL != iterMD)
+    {
+		/* Check SessionId : 0 */
+    	if (pReplierSendReplySessionId == NULL)
+    	{
+    		return TRUE;
+    	}
+		/* Check sessionId : Request SessionId equal Reply SessionId */
+		if (strncmp((char *)iterMD->sessionID,
+						(char *)pReplierSendReplySessionId,
+						sizeof(iterMD->sessionID)) == 0)
+		{
+			return TRUE;
+		}
+		else
+		{
+			iterMD = iterMD->pNext;
+		}
+    }
+    return FALSE;
+}
+
+/**********************************************************************************************************************/
+/** Check Caller Receive Request or Notify SessionId is alive or release
+ *
+ *  @param[in]		appHandle									caller appHandle
+ *  @param[in]		pReplierReceiveRequestNotifySessionId			check Receive Reply sessionId
+ *
+ *  @retval         TRUE              is valid		session alive
+ *  @retval         FALSE             is invalid		session release
+ *
+ */
+BOOL isValidReplierReceiveRequestNotifySession (
+		TRDP_SESSION_PT appHandle,
+		UINT8 *pReplierReceiveRequestNotifySessionId)
+{
+    MD_ELE_T *iterMD = appHandle->pMDRcvQueue;
+
+    while (NULL != iterMD)
+    {
+		/* Check SessionId : 0 */
+    	if (pReplierReceiveRequestNotifySessionId == NULL)
+    	{
+    		return TRUE;
+    	}
+    	/* Check sessionId : Request SessionId equal Reply SessionId */
+		if (strncmp((char *)iterMD->sessionID,
+						(char *)pReplierReceiveRequestNotifySessionId,
+						sizeof(iterMD->sessionID)) == 0)
+		{
+			return TRUE;
+		}
+		else
+		{
+			iterMD = iterMD->pNext;
+		}
+    }
+    return FALSE;
+}
+

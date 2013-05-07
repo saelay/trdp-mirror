@@ -71,8 +71,6 @@ COMMAND_VALUE *pTrdpInitializeParameter = NULL;		/* First MD Command Value */
 
 UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printf. for dbgOut */
 
-UINT32	sendMdTransferRequestCounter = 0;				/* Send MD Transfer Request Count */
-
 /* MD DATA for Caller Thread */
 UINT8 *pFirstCreateMdData = NULL;									/* pointer to First of Create MD DATA */
 UINT32 *pFirstCreateMdDataSize = NULL;								/* pointer to First of Create MD DATA Size */
@@ -533,7 +531,7 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 			{
 				case INCREMENT_DATA:
 					/* Create Increment DATA */
-					err = createMdIncrementData(sendMdTransferRequestCounter, pCommandValue->mdMessageSize, &ppMdData);
+					err = createMdIncrementData(0, pCommandValue->mdMessageSize, &ppMdData);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Increment DATA */
@@ -732,6 +730,20 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 			vos_printf(VOS_LOG_ERROR, "Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCommandValue->mdCallerReplierType);
 		break;
 	}
+
+	/* Check TCP - Multicast */
+	if ((pCommandValue->mdTransportType == MD_TRANSPORT_TCP)
+		&& (vos_isMulticast(pCommandValue->mdDestinationAddress)))
+	{
+		err = MD_APP_ERR;
+	}
+
+	/* Check destination IP Address */
+	if (pCommandValue->mdDestinationAddress == IP_ADDRESS_NOTHING)
+	{
+		err = MD_APP_ERR;
+	}
+
 	return err;
 }
 
@@ -796,12 +808,14 @@ MD_APP_ERR_TYPE command_main_proc(void)
 		strncpy(&argvGetCommand[startPoint], &getCommand[startPoint], getCommandLength-startPoint-1);
 		argvCommand[operand] = &argvGetCommand[startPoint];
 
+#if 0
 		/* Get COMMAND_VALUE Area */
 		if (pCommandValue != NULL)
 		{
 			free(pCommandValue);
 			pCommandValue = NULL;
 		}
+#endif
 		pCommandValue = (COMMAND_VALUE *)malloc(sizeof(COMMAND_VALUE));
 		if (pCommandValue == NULL)
 		{
@@ -1203,10 +1217,17 @@ MD_APP_ERR_TYPE appendComamndValueList(
 	COMMAND_VALUE *iterCommandValue;
 	static UINT32 commandValueId = 1;
 
-    if (ppHeadCommandValue == NULL || pNewCommandValue == NULL)
+    /* Parameter Check */
+	if (ppHeadCommandValue == NULL || pNewCommandValue == NULL)
     {
         return MD_APP_PARAM_ERR;
     }
+
+	/*  */
+	if (*ppHeadCommandValue == pNewCommandValue)
+	{
+		return MD_APP_NO_ERR;
+	}
 
     /* Set Command Value ID */
     pNewCommandValue->commandValueId = commandValueId;
