@@ -180,6 +180,7 @@ VOS_THREAD_FUNC_T MDCaller (
 
 	/* Loop Counter */
 	UINT32 i = 0;
+	UINT32	sendMdTransferRequestCounter = 0;				/* Send MD Transfer Request Count */
 
 	/* Session Valid */
 	BOOL aliveSession = TRUE;
@@ -409,7 +410,8 @@ VOS_THREAD_FUNC_T MDCaller (
 				mdNoOfRepliers = pCallerThreadParameter->pCommandValue->mdReplierNumber;
 				mdReplyTimeout = pCallerThreadParameter->pCommandValue->mdTimeoutReply;
 				pMdSendParam = NULL;
-				strncpy(mdSourceURI, subnetId2URI, sizeof(subnetId2URI));
+//				strncpy(mdSourceURI, subnetId2URI, sizeof(subnetId2URI));
+				strncpy(mdSourceURI, noneURI, sizeof(noneURI));
 				strncpy(mdDestURI, noneURI, sizeof(noneURI));
 				callerThreadListener = appThreadSessionHandle2.pMdAppThreadListener;
 			}
@@ -423,7 +425,8 @@ VOS_THREAD_FUNC_T MDCaller (
 				mdNoOfRepliers = pCallerThreadParameter->pCommandValue->mdReplierNumber;
 				mdReplyTimeout = pCallerThreadParameter->pCommandValue->mdTimeoutReply;
 				pMdSendParam = NULL;
-				strncpy(mdSourceURI, subnetId1URI, sizeof(subnetId1URI));
+//				strncpy(mdSourceURI, subnetId1URI, sizeof(subnetId1URI));
+				strncpy(mdSourceURI, noneURI, sizeof(noneURI));
 				strncpy(mdDestURI, noneURI, sizeof(noneURI));
 				callerThreadListener = appThreadSessionHandle.pMdAppThreadListener;
 			}
@@ -809,6 +812,33 @@ VOS_THREAD_FUNC_T MDCaller (
 						else
 						{
 							/* Result Code Err */
+							vos_printf(VOS_LOG_ERROR, "Receive Message Result Code ERROR\n");
+							/* Set Receive Reply Result Table */
+							setReceiveReplyResultTable(
+									receiveReplyResultTable,
+									receiveMqMsg.Msg.sessionId,
+									receiveMqMsg.Msg.numReplies,
+									MD_APP_ERR);
+							/* MD Receive NG Count */
+							mdReceiveFailureCounter++;
+							/* MD Receive Count */
+							mdReceiveCounter++;
+							/* Output LOG : Operation Log */
+							if ((((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)
+								|| (((pCallerThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG))
+							{
+								logStringLength = strlen(logString);
+								sprintf((char *)(logString + logStringLength), "MD Receive Count = %u\nMD Receive OK Count = %u\nMD Receive NG Count = %u\nMD Retry Count = %u\n",
+										mdReceiveCounter, mdReceiveSuccessCounter, mdReceiveFailureCounter, mdRetryCounter);
+								l2fLog(logString,
+										((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG),
+										((pCallerThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG));
+							}
+							/* Set Caller Receive Count */
+							pCallerThreadParameter->pCommandValue->callerMdReceiveCounter = mdReceiveCounter;
+							pCallerThreadParameter->pCommandValue->callerMdReceiveSuccessCounter =  mdReceiveSuccessCounter;
+							pCallerThreadParameter->pCommandValue->callerMdReceiveFailureCounter = mdReceiveFailureCounter;
+							pCallerThreadParameter->pCommandValue->callerMdRetryCounter = mdRetryCounter;
 						}
 //#if 0
 						/* decide Request-Reply Result */
@@ -843,12 +873,22 @@ VOS_THREAD_FUNC_T MDCaller (
 		&& (sendMdTransferRequestCounter >= pCallerThreadParameter->pCommandValue->mdCycleNumber))
 		{
 			/* Check Receive Finish */
-			if ((pCallerThreadParameter->pCommandValue->mdCycleNumber != 0)
-			&& ((pCallerThreadParameter->pCommandValue->callerMdReceiveCounter) >= pCallerThreadParameter->pCommandValue->mdCycleNumber)
-			&& ((pCallerThreadParameter->pCommandValue->callerMdRequestReplySuccessCounter) + (pCallerThreadParameter->pCommandValue->callerMdRequestReplyFailureCounter)	 >= pCallerThreadParameter->pCommandValue->mdCycleNumber))
+			/* Caller Send Type : Notify (Mn) */
+			if (pCallerThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MN)
 			{
 				/* Send Receive Loop Break */
 				break;
+			}
+			/* Caller Send Type : Request (Mr) */
+			else
+			{
+				if ((pCallerThreadParameter->pCommandValue->mdCycleNumber != 0)
+				&& ((pCallerThreadParameter->pCommandValue->callerMdReceiveCounter) >= pCallerThreadParameter->pCommandValue->mdCycleNumber)
+				&& ((pCallerThreadParameter->pCommandValue->callerMdRequestReplySuccessCounter) + (pCallerThreadParameter->pCommandValue->callerMdRequestReplyFailureCounter)	 >= pCallerThreadParameter->pCommandValue->mdCycleNumber))
+				{
+					/* Send Receive Loop Break */
+					break;
+				}
 			}
 		}
 
@@ -889,18 +929,23 @@ VOS_THREAD_FUNC_T MDCaller (
 		aliveSession = isValidCallerSendRequestSession(appHandle, 0);
 		if (aliveSession == FALSE)
 		{
-			/* delete Subnet1 Listener */
-			err = tlm_delListener(appHandle, appThreadSessionHandle.pMdAppThreadListener);
-			if(err != TRDP_NO_ERR)
+			/* Check Caller Receive Reply Session Alive */
+			aliveSession = isValidCallerReceiveReplySession(appHandle, 0);
+			if (aliveSession == FALSE)
 			{
-				vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+				/* delete Subnet1 Listener */
+				err = tlm_delListener(appHandle, appThreadSessionHandle.pMdAppThreadListener);
+				if(err != TRDP_NO_ERR)
+				{
+					vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+				}
+				else
+				{
+					/* Display TimeStamp when delete Listener time */
+					printf("%s Subnet1 Listener Delete.\n", vos_getTimeStamp());
+				}
+				break;
 			}
-			else
-			{
-				/* Display TimeStamp when delete Listener time */
-				printf("%s Subnet1 Listener Delete.\n", vos_getTimeStamp());
-			}
-			break;
 		}
 	}
 	/* Is this Ladder Topology ? */
@@ -912,18 +957,23 @@ VOS_THREAD_FUNC_T MDCaller (
 			aliveSession = isValidCallerSendRequestSession(appHandle2, 0);
 			if (aliveSession == FALSE)
 			{
-				/* delete Subnet2 Listener */
-				err = tlm_delListener(appHandle2, appThreadSessionHandle2.pMdAppThreadListener);
-				if(err != TRDP_NO_ERR)
+				/* Check Caller Receive Reply Session Alive */
+				aliveSession = isValidCallerReceiveReplySession(appHandle, 0);
+				if (aliveSession == FALSE)
 				{
-					vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+					/* delete Subnet2 Listener */
+					err = tlm_delListener(appHandle2, appThreadSessionHandle2.pMdAppThreadListener);
+					if(err != TRDP_NO_ERR)
+					{
+						vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+					}
+					else
+					{
+						/* Display TimeStamp when delete Listener time */
+						printf("%s Subnet2 Listener Delete.\n", vos_getTimeStamp());
+					}
+					break;
 				}
-				else
-				{
-					/* Display TimeStamp when delete Listener time */
-					printf("%s Subnet2 Listener Delete.\n", vos_getTimeStamp());
-				}
-				break;
 			}
 		}
 	}

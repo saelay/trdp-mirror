@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.18"
+#define MD_APP_VERSION	"V0.20"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.18"
+#define MD_APP_VERSION	"V0.20"
 #else
-#define MD_APP_VERSION	"V0.18"
+#define MD_APP_VERSION	"V0.20"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -395,8 +395,6 @@ extern TRDP_URI_USER_T subnetId2URI;			/* Subnet2 Network I/F URI */
 extern TRDP_URI_USER_T noneURI;					/* URI nothing */
 
 extern CHAR8 LOG_PIPE[];							/* named PIPE for log */
-
-extern UINT32 sendMdTransferRequestCounter;	/* Send MD Transfer Request Count */
 
 extern UINT32 logCategoryOnOffType;			/* 0x0 is disable TRDP vos_printf. for dbgOut */
 
@@ -997,6 +995,34 @@ MD_APP_ERR_TYPE replier_main_proc (
 MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 		trdp_apl_cbenv_t *pReceiveMsg,
 		REPLIER_THREAD_PARAMETER *pReplierThreadParameter);
+
+/**********************************************************************************************************************/
+/** Check Replier Send Reply SessionId is alive or release
+ *
+ *  @param[in]		appHandle								caller appHandle
+ *  @param[in]		pReplierSendReplySessionId			check Send Request sessionId
+ *
+ *  @retval         TRUE              is valid		session alive
+ *  @retval         FALSE             is invalid		session release
+ *
+ */
+BOOL isValidReplierSendReplySession (
+		TRDP_SESSION_PT appHandle,
+		UINT8 *pReplierSendReplySessionId);
+
+/**********************************************************************************************************************/
+/** Check Caller Receive Request or Notify SessionId is alive or release
+ *
+ *  @param[in]		appHandle									caller appHandle
+ *  @param[in]		pReplierReceiveRequestNotifySessionId			check Receive Reply sessionId
+ *
+ *  @retval         TRUE              is valid		session alive
+ *  @retval         FALSE             is invalid		session release
+ *
+ */
+BOOL isValidReplierReceiveRequestNotifySession (
+		TRDP_SESSION_PT appHandle,
+		UINT8 *pReplierReceiveRequestNotifySessionId);
 
 
 /* Log */
