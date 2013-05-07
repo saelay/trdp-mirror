@@ -443,6 +443,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
+	vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
 }
 
@@ -491,6 +492,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
     }
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
+	vos_printf(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
 }
 
@@ -509,9 +511,14 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     if (close(sock) == -1)
     {
         vos_printf(VOS_LOG_ERROR,
-                   "vos_sockClose called with unknown descriptor\n");
+                   "vos_sockClose(%d) called with unknown descriptor\n",sock);
         return VOS_PARAM_ERR;
     }
+	else
+	{
+        vos_printf(VOS_LOG_INFO,
+                   "vos_sockClose(%d) okay\n",sock);
+	}
     gNumberOfOpenSockets--;
     return VOS_NO_ERR;
 }
