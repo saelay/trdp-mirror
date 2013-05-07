@@ -635,7 +635,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
     }
     /*   This seems to be unsupported on XP (but IP_RECVDSTADDR is defined!)   */
-	/*  Include struct in_pktinfo in the message "ancilliary" control data.
+    /*  Include struct in_pktinfo in the message "ancilliary" control data.
         This way we can get the destination IP address for received UDP packets */
     {
         DWORD optValue = TRUE;

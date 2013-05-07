@@ -136,7 +136,7 @@ BOOL vos_getMacAddress (
 
     if (getifaddrs(&pIfList) == 0)
     {
-    	struct ifaddrs *cur;
+        struct ifaddrs *cur;
 
         for (cur = pIfList; cur; cur = cur->ifa_next)
         {
@@ -443,7 +443,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
-	vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: socket()=%d success\n", sock);
+    vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
 }
 
@@ -492,7 +492,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
     }
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
-	vos_printf(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", sock);
+    vos_printf(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
 }
 
@@ -514,11 +514,11 @@ EXT_DECL VOS_ERR_T vos_sockClose (
                    "vos_sockClose(%d) called with unknown descriptor\n",sock);
         return VOS_PARAM_ERR;
     }
-	else
-	{
+    else
+    {
         vos_printf(VOS_LOG_INFO,
                    "vos_sockClose(%d) okay\n",sock);
-	}
+    }
     gNumberOfOpenSockets--;
     return VOS_NO_ERR;
 }
