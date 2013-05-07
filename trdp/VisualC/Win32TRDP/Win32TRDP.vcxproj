@@ -124,7 +124,6 @@
     <ClInclude Include="..\..\src\api\tau_addr.h" />
     <ClInclude Include="..\..\src\api\tau_marshall.h" />
     <ClInclude Include="..\..\src\api\tau_tci.h" />
-    <ClInclude Include="..\..\src\api\tau_types.h" />
     <ClInclude Include="..\..\src\api\tau_xml.h" />
     <ClInclude Include="..\..\src\api\trdp_if_light.h" />
     <ClInclude Include="..\..\src\api\trdp_types.h" />
