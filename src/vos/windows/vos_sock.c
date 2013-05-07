@@ -194,7 +194,6 @@ EXT_DECL BOOL vos_isMulticast (
     return IN_MULTICAST(ipAddress);
 }
 
-
 /**********************************************************************************************************************/
 /** Get a list of interface addresses
  *  The caller has to provide an array of interface records to be filled.
@@ -210,13 +209,12 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     UINT32         *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
-    UINT8 buf[  VOS_MAX_NUM_IF * sizeof(IP_ADAPTER_ADDRESSES)
+    UINT8 buf[  VOS_MAX_NUM_IF * sizeof(IP_ADAPTER_INFO)
               + VOS_MAX_NUM_IF * VOS_MAX_IF_NAME_SIZE
               + VOS_MAX_NUM_UNICAST * sizeof(IP_ADAPTER_UNICAST_ADDRESS)];
     ULONG bufLen = sizeof(buf);
-    PIP_ADAPTER_ADDRESSES pAdapterList = (PIP_ADAPTER_ADDRESSES) buf;
-    PIP_ADAPTER_ADDRESSES pAdapter;
-    PIP_ADAPTER_UNICAST_ADDRESS pAdapterUnicast;
+    PIP_ADAPTER_INFO pAdapterList = (PIP_ADAPTER_INFO) buf;
+    PIP_ADAPTER_INFO pAdapter;
     UINT32 addrCnt = 0;
 
     if (   (pAddrCnt == NULL) 
@@ -224,70 +222,46 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     { 
         return VOS_PARAM_ERR;
     }
-
     /* get the actual data we want */
-    if (GetAdaptersAddresses(AF_INET,
-        GAA_FLAG_SKIP_ANYCAST
-        | GAA_FLAG_SKIP_MULTICAST
-        | GAA_FLAG_SKIP_DNS_SERVER
-        | GAA_FLAG_SKIP_FRIENDLY_NAME,
-        NULL, pAdapterList, &bufLen) != NO_ERROR)
+    if (GetAdaptersInfo(pAdapterList, &bufLen) != NO_ERROR)
     {   
         return VOS_PARAM_ERR;
     }
-
-    /* go through all adapters */
-    for (pAdapter = pAdapterList; (pAdapter != NULL) && (addrCnt < *pAddrCnt) ; pAdapter = pAdapter->Next)
-    {   
-        /* skip adapters which are down */
-        if (pAdapter->OperStatus != IfOperStatusUp)
+    pAdapter = pAdapterList;
+    /* Iterate adapter list */
+    while(pAdapter) 
+    {
+        /* Skip adapters with IP Address = 0.0.0.0 */
+        if (vos_dottedIP(pAdapter->IpAddressList.IpAddress.String) != (UINT32)NULL)
         {
-            continue;
-        }
-
-        /* skip loopback interfaces */
-        if (pAdapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK)
-        {
-            continue;
-        }
-
-        /* go through all IP addresses */
-        for (pAdapterUnicast = pAdapter->FirstUnicastAddress; pAdapterUnicast != NULL; pAdapterUnicast = pAdapterUnicast->Next)
-        {   
-            /* collect IPv4 addresses only */
-            if (!pAdapterUnicast->Address.lpSockaddr
-                || pAdapterUnicast->Address.lpSockaddr->sa_family != AF_INET)
+            /* Only consider ethernet adapters (no loopback adapters etc.) */
+            if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
             {
-                continue;
-            }
-
-            /* store interface address if ddress will fit into output array */
-            if (addrCnt < *pAddrCnt)
-            {
-                struct sockaddr_in *p = (struct sockaddr_in *) pAdapterUnicast->Address.lpSockaddr;
-                
-                /* store interface attributes */
-                ifAddrs[addrCnt].ipAddr = ntohl(p->sin_addr.s_addr);
-                ifAddrs[addrCnt].netMask = 0;
-                (void) strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
-        
-                if (pAdapter->PhysicalAddressLength != sizeof(ifAddrs[addrCnt].mac))
+                /* store interface information if address will fit into output array */
+                if (addrCnt < *pAddrCnt)
                 {
-                    memset(ifAddrs[addrCnt].mac, 0, sizeof(ifAddrs[addrCnt].mac));
+                    /* Store IP address */
+                    ifAddrs[addrCnt].ipAddr = vos_dottedIP(pAdapter->IpAddressList.IpAddress.String);
+                    /* Store MAC address */
+                    if (pAdapter->AddressLength != sizeof(ifAddrs[addrCnt].mac))
+                    {
+                        memset(ifAddrs[addrCnt].mac, 0, sizeof(ifAddrs[addrCnt].mac));
+                    }
+                    else
+                    {
+                        memcpy(ifAddrs[addrCnt].mac, pAdapter->Address, sizeof(ifAddrs[addrCnt].mac));
+                    }
+                    /* Store adapter name */
+                    (void) strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
+                    /* Store subnet mask */
+                    ifAddrs[addrCnt].netMask = vos_dottedIP(pAdapter->IpAddressList.IpMask.String);
+                    /* increment number of addresses stored */
+                   addrCnt++;
                 }
-                else
-                {
-                    memcpy(ifAddrs[addrCnt].mac, pAdapter->PhysicalAddress, sizeof(ifAddrs[addrCnt].mac));
-                }    
-             
-                ifAddrs[addrCnt].netMask = 0;
-
-                /* increment number of addresses stored */
-                addrCnt++;
             }
         }
+        pAdapter = pAdapter->Next;
     }
-    
     *pAddrCnt = addrCnt;
     return VOS_NO_ERR;
 } 
