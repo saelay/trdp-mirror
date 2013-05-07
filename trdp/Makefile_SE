@@ -24,8 +24,7 @@ MD=mkdir -p
 
 BLDDIR=bld/posix
 
-PROJ1=$(BLDDIR)/mdManager
-PROJ2=$(BLDDIR)/mdTest4
+PROJ1=$(BLDDIR)/mdTest4
 
 TRDPLIB=$(BLDDIR)/libtrdp.a
 
@@ -52,23 +51,19 @@ OBJLIB=\
 	$(VOS_POSIX)/vos_sock.o \
 	$(VOS_POSIX)/vos_thread.o
 
-OBJPRJ1= src/example/mdManager.o
-OBJPRJ2= test/udpmdcom/mdTest4.o
+OBJPRJ1= test/udpmdcom/mdTest4.o
 
 CFLAGS=-Wall -D_GNU_SOURCE -DPOSIX -I$(VOS_POSIX) -I$(VOS_API) -I$(COM_CMM) -I$(API_INC) -DMD_SUPPORT=1
 
 .PHONY: all clean
 
-all: $(TRDPLIB) $(PROJ1) $(PROJ2) $(PROJ3) $(PROJ4) $(PROJ5) $(PROJ6)
+all: $(TRDPLIB) $(PROJ1)
 
 clean:
-	$(RM) $(OBJLIB) $(TRDPLIB) $(OBJPRJ1) $(OBJPRJ2) $(PROJ1) $(PROJ2)
+	$(RM) $(OBJLIB) $(TRDPLIB) $(OBJPRJ1) $(PROJ1)
 
 $(PROJ1) : $(TRDPLIB) $(OBJPRJ1) 
 	$(CC) -o $(PROJ1) $(OBJPRJ1) -L $(BLDDIR) $(OSLIB)
-	
-$(PROJ2) : $(TRDPLIB) $(OBJPRJ2) 
-	$(CC) -o $(PROJ2) $(OBJPRJ2) -L $(BLDDIR) $(OSLIB)
 
 $(TRDPLIB) : $(OBJLIB)
 	$(AR) cr $(TRDPLIB) $(OBJLIB)
