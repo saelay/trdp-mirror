@@ -978,7 +978,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_STATE_T    initialState)
 {
     VOS_ERR_T   retVal  = VOS_SEMA_ERR;
-    INT32       ret     = (INT32) NULL;
+    int         rc     = 0;
 
     /*Check parameters*/
     if (pSema == NULL)
@@ -1002,8 +1002,8 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         }
 
         /*pThread Semaphore init*/
-        ret = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
-        if (ret != (int)NULL)
+        rc = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
+        if (0 != rc)
         {
             /*Semaphore init failed*/
             vos_printf(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
@@ -1028,8 +1028,8 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 
 EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
 {
-    INT32   ret = (INT32) NULL;
-    INT32   err = (INT32) NULL;
+    int     rc   = 0;
+    int     sval = 0;
 
     /* Check parameter */
     if (sema == NULL)
@@ -1039,11 +1039,11 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
     else
     {
         /* Check if this is a valid semaphore handle*/
-        err = sem_getvalue((sem_t *)sema, &ret);
-        if (err == (INT32) NULL)
+        rc = sem_getvalue((sem_t *)sema, &sval);
+        if (0 == rc)
         {
-            ret = sem_destroy((sem_t *)sema);
-            if (ret != (INT32) NULL)
+            rc = sem_destroy((sem_t *)sema);
+            if (0 != rc)
             {
                 /* Error destroying Semaphore */
                 vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
@@ -1076,10 +1076,10 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     VOS_SEMA_T  sema,
     UINT32      timeout)
 {
-    INT32           err             = (INT32) NULL;
+    int             rc              = 0;
     VOS_ERR_T       retVal          = VOS_SEMA_ERR;
-    VOS_TIME_T      waitTimeVos     = {(UINT32) NULL, (UINT32) NULL};
-    struct timespec waitTimeSpec    = {(UINT32) NULL, (UINT32) NULL};
+    VOS_TIME_T      waitTimeVos     = {0,0};
+    struct timespec waitTimeSpec    = {0,0};
 
     /* Check parameter */
     if (sema == NULL)
@@ -1087,7 +1087,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         vos_printf(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
-    else if (timeout != (UINT32) NULL)
+    else if (timeout != 0)
     {
         /* Get time since 01/01/1970 and convert it to timespec format */
         vos_getTime(&waitTimeVos);
@@ -1120,16 +1120,17 @@ EXT_DECL VOS_ERR_T vos_semaTake (
            This call will fail under QNX, because it depends on CLOCK_REALTIME (opposed to CLOCK_MONOTONIC)!
         */
         #ifdef __QNXNTO__
-            #warning "CLOCK_REALTIME (opposed to CLOCK_MONOTONIC) is the base"
-        #endif
-        err = sem_timedwait((sem_t *)sema, &waitTimeSpec);
+			rc = sem_timedwait_monotonic((sem_t *)sema, &waitTimeSpec);
+        #else
+			rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
+		#endif
     }
     else
     {
         /* take semaphore without timeout */
-        err = sem_wait((sem_t *)sema);
+        rc = sem_wait((sem_t *)sema);
     }
-    if (err != (INT32) NULL)
+    if (0 != rc)
     {
         /* Could not take Semaphore in time */
         retVal = VOS_SEMA_ERR;
@@ -1154,7 +1155,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema)
 {
-    INT32 err = (INT32) NULL;
+    int rc = 0;
 
     /* Check parameter */
     if (sema == NULL)
@@ -1164,8 +1165,8 @@ EXT_DECL void vos_semaGive (
     else
     {
         /* release semaphore */
-        err = sem_post((sem_t *)sema);
-        if (err == (INT32) NULL)
+        rc = sem_post((sem_t *)sema);
+        if (0 == rc)
         {
             /* Semaphore released */
         }
