@@ -441,6 +441,30 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_SOCK_ERR;
     }
 
+	/* enlarge send and receive buffers for UDP to 64k */
+	{
+    	int 		optval = 64 * 1024;
+        socklen_t 	option_len = sizeof(optval);
+		if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, option_len) == -1)
+        {
+            getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
+            vos_printf(VOS_LOG_WARNING, "vos_sockOpenUDP: UDP send message size out of limit (max: %u)\n", optval);
+            return VOS_SOCK_ERR;
+        }
+
+        optval = 64 * 1024;
+        if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, option_len) == -1)
+        {
+            getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
+            vos_printf(VOS_LOG_WARNING, "vos_sockOpenUDP: UDP recv message size out of limit (max: %u)\n", optval);
+            return VOS_SOCK_ERR;
+        }
+        getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
+        vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: UDP send message limit = %u\n", optval);
+        getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
+        vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: UDP recv message limit = %u\n", optval);
+    }
+
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
     vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: socket()=%d success\n", sock);
@@ -849,7 +873,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
             return VOS_BLOCK_ERR;
         }
     }
-    while (sendSize == -1 && errno != EINTR);
+    while (sendSize == -1 && errno == EINTR);
 
     if (sendSize == -1)
     {
