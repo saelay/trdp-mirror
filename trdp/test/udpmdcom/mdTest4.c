@@ -71,6 +71,62 @@
         #define EOK         0
 #endif
 
+typedef struct
+{
+	int code;
+	char * name;
+} trdp_err_st_t;
+
+static const trdp_err_st_t trdp_err_st_v[] = {
+
+    { TRDP_NO_ERR             ,"NO_ERR"            }, // = 0,    /**< No error  */
+    { TRDP_PARAM_ERR          ,"PARAM_ERR"         }, // = -1,   /**< Parameter missing or out of range              */
+    { TRDP_INIT_ERR           ,"INIT_ERR"          }, // = -2,   /**< Call without valid initialization              */
+    { TRDP_NOINIT_ERR         ,"NOINIT_ERR"        }, // = -3,   /**< Call with invalid handle                       */
+    { TRDP_TIMEOUT_ERR        ,"TIMEOUT_ERR"       }, // = -4,   /**< Timout                                         */
+    { TRDP_NODATA_ERR         ,"NODATA_ERR"        }, // = -5,   /**< Non blocking mode: no data received            */
+    { TRDP_SOCK_ERR           ,"SOCK_ERR"          }, // = -6,   /**< Socket error / option not supported            */
+    { TRDP_IO_ERR             ,"IO_ERR"            }, // = -7,   /**< Socket IO error, data can't be received/sent   */
+    { TRDP_MEM_ERR            ,"MEM_ERR"           }, // = -8,   /**< No more memory available                       */
+    { TRDP_SEMA_ERR           ,"SEMA_ERR"          }, // = -9,   /**< Semaphore not available                        */
+    { TRDP_QUEUE_ERR          ,"QUEUE_ERR"         }, // = -10,  /**< Queue empty                                    */
+    { TRDP_QUEUE_FULL_ERR     ,"QUEUE_FULL_ERR"    }, // = -11,  /**< Queue full                                     */
+    { TRDP_MUTEX_ERR          ,"MUTEX_ERR"         }, // = -12,  /**< Mutex not available                            */
+    { TRDP_THREAD_ERR         ,"THREAD_ERR"        }, // = -13,  /**< Thread error                                   */
+    { TRDP_BLOCK_ERR          ,"BLOCK_ERR"         }, // = -14,  /**< System call would have blocked in blocking mode  */
+    { TRDP_INTEGRATION_ERR    ,"INTEGRATION_ERR"   }, // = -15,  /**< Alignment or endianess for selected target wrong */
+    { TRDP_NOSESSION_ERR      ,"NOSESSION_ERR"     }, // = -30,  /**< No such session                                */
+    { TRDP_SESSION_ABORT_ERR  ,"SESSION_ABORT_ERR" }, // = -31,  /**< Session aborted                                */
+    { TRDP_NOSUB_ERR          ,"NOSUB_ERR"         }, // = -32,  /**< No subscriber                                  */
+    { TRDP_NOPUB_ERR          ,"NOPUB_ERR"         }, // = -33,  /**< No publisher                                   */
+    { TRDP_NOLIST_ERR         ,"NOLIST_ERR"        }, // = -34,  /**< No listener                                    */
+    { TRDP_CRC_ERR            ,"CRC_ERR"           }, // = -35,  /**< Wrong CRC                                      */
+    { TRDP_WIRE_ERR           ,"WIRE_ERR"          }, // = -36,  /**< Wire                                           */
+    { TRDP_TOPO_ERR           ,"TOPO_ERR"          }, // = -37,  /**< Invalid topo count                             */
+    { TRDP_COMID_ERR          ,"COMID_ERR"         }, // = -38,  /**< Unknown ComId                                  */
+    { TRDP_STATE_ERR          ,"STATE_ERR"         }, // = -39,  /**< Call in wrong state                            */
+    { TRDP_APP_TIMEOUT_ERR    ,"APP_TIMEOUT_ERR"   }, // = -40,  /**< Application Timeout                            */
+    { TRDP_APP_REPLYTO_ERR    ,"APP_REPLYTO_ERR"   }, // = -41,  /**< Application Reply Sent Timeout                 */
+    { TRDP_APP_CONFIRMTO_ERR  ,"APP_CONFIRMTO_ERR" }, // = -42,  /**< Application Confirm Sent Timeout               */
+    { TRDP_REPLYTO_ERR        ,"REPLYTO_ERR"       }, // = -43,  /**< Protocol Reply Timeout                         */
+    { TRDP_CONFIRMTO_ERR      ,"CONFIRMTO_ERR"     }, // = -44,  /**< Protocol Confirm Timeout                       */
+    { TRDP_REQCONFIRMTO_ERR   ,"REQCONFIRMTO_ERR"  }, // = -45,  /**< Protocol Confirm Timeout (Request sender)      */
+    { TRDP_PACKET_ERR         ,"PACKET_ERR"        }, // = -46,  /**< Incomplete message data packet                 */
+    { TRDP_UNKNOWN_ERR        ,"UNKNOWN_ERR"       }  // = -99   /**< Unspecified error                              */
+
+};
+
+static const char * trdp_get_strerr(const int eri)
+{
+	int i;
+	for(i = 0; i < (sizeof(trdp_err_st_v) / sizeof(trdp_err_st_v[0])); i++)
+	{
+		if (eri == trdp_err_st_v[i].code)
+			return trdp_err_st_v[i].name;
+	}
+	return "?";
+}
+
 /* message queue trdp to application */
 typedef struct
 {
@@ -679,7 +735,7 @@ static void queue_procricz()
         printf( "numConfirmSent    = %d\n", msg.Msg.numConfirmSent);
         printf( "numConfirmTimeout = %d\n", msg.Msg.numConfirmTimeout);
         printf( "pUserRef          = %p\n", msg.Msg.pUserRef);
-        printf( "resultCode        = %d\n", msg.Msg.resultCode);
+        printf( "resultCode        = %d=%s\n", msg.Msg.resultCode, trdp_get_strerr(msg.Msg.resultCode));
 
         print_memory(msg.pData, msg.dataSize);
     }
