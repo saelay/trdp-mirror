@@ -1120,10 +1120,10 @@ EXT_DECL VOS_ERR_T vos_semaTake (
            This call will fail under QNX, because it depends on CLOCK_REALTIME (opposed to CLOCK_MONOTONIC)!
         */
         #ifdef __QNXNTO__
-			rc = sem_timedwait_monotonic((sem_t *)sema, &waitTimeSpec);
+            rc = sem_timedwait_monotonic((sem_t *)sema, &waitTimeSpec);
         #else
-			rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
-		#endif
+            rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
+        #endif
     }
     else
     {

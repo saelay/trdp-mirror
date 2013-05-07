@@ -561,7 +561,7 @@ TRDP_ERR_T  trdp_pdReceive (
  *  @param[in]      appHandle         application handle
  */
 void trdp_pdHandleTimeOuts(
-	TRDP_SESSION_PT appHandle)
+    TRDP_SESSION_PT appHandle)
 {
     PD_ELE_T    *iterPD = NULL;
     TRDP_TIME_T now;

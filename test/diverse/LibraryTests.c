@@ -48,149 +48,149 @@
 
 int testTimeCompare()
 {
-	VOS_TIME_T time1 = { 1 /*sec */, 2 /* usec */ };
-	VOS_TIME_T time2 = { 1 /*sec */, 2 /* usec */ };
-	/* time 1 and time 2 should be equal */
-	if (vos_cmpTime(&time1, &time2) != 0)
-		return 1;
+    VOS_TIME_T time1 = { 1 /*sec */, 2 /* usec */ };
+    VOS_TIME_T time2 = { 1 /*sec */, 2 /* usec */ };
+    /* time 1 and time 2 should be equal */
+    if (vos_cmpTime(&time1, &time2) != 0)
+        return 1;
 
-	time1.tv_sec = 1; time1.tv_usec = 2;
-	time2.tv_sec = 1; time2.tv_usec = 3;
-	/* time 1 should be shorter than time 2 */
-	if (vos_cmpTime(&time1, &time2) != -1)
-		return 1;
+    time1.tv_sec = 1; time1.tv_usec = 2;
+    time2.tv_sec = 1; time2.tv_usec = 3;
+    /* time 1 should be shorter than time 2 */
+    if (vos_cmpTime(&time1, &time2) != -1)
+        return 1;
 
-	time1.tv_sec = 1; time1.tv_usec = 2;
-	time2.tv_sec = 2; time2.tv_usec = 4;
-	/* time 1 should be shorter than time 2 */
-	if (vos_cmpTime(&time1, &time2) != -1)
-		return 1;
+    time1.tv_sec = 1; time1.tv_usec = 2;
+    time2.tv_sec = 2; time2.tv_usec = 4;
+    /* time 1 should be shorter than time 2 */
+    if (vos_cmpTime(&time1, &time2) != -1)
+        return 1;
 
-	time1.tv_sec = 1; time1.tv_usec = 3;
-	time2.tv_sec = 1; time2.tv_usec = 2;
-	/* time 1 should be greater than time 2 */
-	if (vos_cmpTime(&time1, &time2) != 1)
-		return 1;
+    time1.tv_sec = 1; time1.tv_usec = 3;
+    time2.tv_sec = 1; time2.tv_usec = 2;
+    /* time 1 should be greater than time 2 */
+    if (vos_cmpTime(&time1, &time2) != 1)
+        return 1;
 
-	time1.tv_sec = 2; time1.tv_usec = 4;
-	time2.tv_sec = 1; time2.tv_usec = 2;
-	/* time 1 should be greater than time 2 */
-	if (vos_cmpTime(&time1, &time2) != 1)
-		return 1;
+    time1.tv_sec = 2; time1.tv_usec = 4;
+    time2.tv_sec = 1; time2.tv_usec = 2;
+    /* time 1 should be greater than time 2 */
+    if (vos_cmpTime(&time1, &time2) != 1)
+        return 1;
 
 
-	/* macro timercmp() */
-	/* there is a problem with >= and <= in windows */
-	time1.tv_sec = 1; time1.tv_usec = 1;
-	time2.tv_sec = 2; time2.tv_usec = 2;
-	if (timercmp(&time1, &time2, <=) != 1)
-		return 1;
+    /* macro timercmp() */
+    /* there is a problem with >= and <= in windows */
+    time1.tv_sec = 1; time1.tv_usec = 1;
+    time2.tv_sec = 2; time2.tv_usec = 2;
+    if (timercmp(&time1, &time2, <=) != 1)
+        return 1;
 
-	time1.tv_sec = 1; time1.tv_usec = 1;
-	time2.tv_sec = 1; time2.tv_usec = 2;
-	if (timercmp(&time1, &time2, <=) != 1)
-		return 1;
+    time1.tv_sec = 1; time1.tv_usec = 1;
+    time2.tv_sec = 1; time2.tv_usec = 2;
+    if (timercmp(&time1, &time2, <=) != 1)
+        return 1;
 
-	time1.tv_sec = 2; time1.tv_usec = 999999;
-	time2.tv_sec = 3; time2.tv_usec = 0;
-	if (timercmp(&time1, &time2, <=) != 1)
-		return 1;
+    time1.tv_sec = 2; time1.tv_usec = 999999;
+    time2.tv_sec = 3; time2.tv_usec = 0;
+    if (timercmp(&time1, &time2, <=) != 1)
+        return 1;
 
-	/* test for equal */
-	time1.tv_sec = 1; time1.tv_usec = 1;
-	time2.tv_sec = 1; time2.tv_usec = 1;
-	if (timercmp(&time1, &time2, <=) != 1)
-		return 1; 
+    /* test for equal */
+    time1.tv_sec = 1; time1.tv_usec = 1;
+    time2.tv_sec = 1; time2.tv_usec = 1;
+    if (timercmp(&time1, &time2, <=) != 1)
+        return 1; 
 
-	time1.tv_sec = 2; time1.tv_usec = 2;
-	time2.tv_sec = 1; time2.tv_usec = 1;
-	if (timercmp(&time1, &time2, >=) != 1)
-		return 1;
+    time1.tv_sec = 2; time1.tv_usec = 2;
+    time2.tv_sec = 1; time2.tv_usec = 1;
+    if (timercmp(&time1, &time2, >=) != 1)
+        return 1;
 
-	time1.tv_sec = 1; time1.tv_usec = 2;
-	time2.tv_sec = 1; time2.tv_usec = 1;
-	if (timercmp(&time1, &time2, >=) != 1)
-		return 1;
+    time1.tv_sec = 1; time1.tv_usec = 2;
+    time2.tv_sec = 1; time2.tv_usec = 1;
+    if (timercmp(&time1, &time2, >=) != 1)
+        return 1;
 
-	time1.tv_sec = 2; time1.tv_usec = 0;
-	time2.tv_sec = 1; time2.tv_usec = 999999;
-	if (timercmp(&time1, &time2, >=) != 1)
-		return 1;
+    time1.tv_sec = 2; time1.tv_usec = 0;
+    time2.tv_sec = 1; time2.tv_usec = 999999;
+    if (timercmp(&time1, &time2, >=) != 1)
+        return 1;
 
-	/* test for equal */
-	time1.tv_sec = 3; time1.tv_usec = 4;
-	time2.tv_sec = 3; time2.tv_usec = 4;
-	if (timercmp(&time1, &time2, >=) != 1)
-		return 1; 
+    /* test for equal */
+    time1.tv_sec = 3; time1.tv_usec = 4;
+    time2.tv_sec = 3; time2.tv_usec = 4;
+    if (timercmp(&time1, &time2, >=) != 1)
+        return 1; 
 
-	return 0; /* all time tests succeeded */
+    return 0; /* all time tests succeeded */
 }
 
 int testTimeAdd()
 {
-	VOS_TIME_T time = { 1 /*sec */, 0 /* usec */ };
-	VOS_TIME_T add =  { 0 /*sec */, 2 /* usec */ };
+    VOS_TIME_T time = { 1 /*sec */, 0 /* usec */ };
+    VOS_TIME_T add =  { 0 /*sec */, 2 /* usec */ };
 
-	vos_addTime(&time, &add);
-	if (time.tv_sec != 1 || time.tv_usec != 2)
-		return 1;
+    vos_addTime(&time, &add);
+    if (time.tv_sec != 1 || time.tv_usec != 2)
+        return 1;
 
-	time.tv_sec =  1 /*sec */;	time.tv_usec = 1 /* usec */;
-	add.tv_sec = 1 /*sec */;	add.tv_usec = 2 /* usec */;
+    time.tv_sec =  1 /*sec */;    time.tv_usec = 1 /* usec */;
+    add.tv_sec = 1 /*sec */;    add.tv_usec = 2 /* usec */;
 
-	vos_addTime(&time, &add);
-	if (time.tv_sec != 2 || time.tv_usec != 3)
-		return 1;
+    vos_addTime(&time, &add);
+    if (time.tv_sec != 2 || time.tv_usec != 3)
+        return 1;
 
-	time.tv_sec =  1 /*sec */;	time.tv_usec = 1 /* usec */;
-	add.tv_sec = 1 /*sec */;	add.tv_usec = 999999 /* usec */;
+    time.tv_sec =  1 /*sec */;    time.tv_usec = 1 /* usec */;
+    add.tv_sec = 1 /*sec */;    add.tv_usec = 999999 /* usec */;
 
-	vos_addTime(&time, &add);
-	if (time.tv_sec != 3 || time.tv_usec != 0)
-		return 1;
+    vos_addTime(&time, &add);
+    if (time.tv_sec != 3 || time.tv_usec != 0)
+        return 1;
 
-	time.tv_sec =  2 /*sec */;	time.tv_usec = 999999 /* usec */;
-	add.tv_sec = 1 /*sec */;	add.tv_usec = 999999 /* usec */;
+    time.tv_sec =  2 /*sec */;    time.tv_usec = 999999 /* usec */;
+    add.tv_sec = 1 /*sec */;    add.tv_usec = 999999 /* usec */;
 
-	vos_addTime(&time, &add);
-	if (time.tv_sec != 4 || time.tv_usec != 999998)
-		return 1;
+    vos_addTime(&time, &add);
+    if (time.tv_sec != 4 || time.tv_usec != 999998)
+        return 1;
 
-	return 0; /* all time tests succeeded */
+    return 0; /* all time tests succeeded */
 }
 
 
 int testTimeSubs()
 {
-	VOS_TIME_T time = { 1 /*sec */, 4 /* usec */ };
-	VOS_TIME_T subs =  { 0 /*sec */, 2 /* usec */ };
+    VOS_TIME_T time = { 1 /*sec */, 4 /* usec */ };
+    VOS_TIME_T subs =  { 0 /*sec */, 2 /* usec */ };
 
     vos_subTime(&time, &subs);
-	if (time.tv_sec != 1 || time.tv_usec != 2)
-		return 1;
+    if (time.tv_sec != 1 || time.tv_usec != 2)
+        return 1;
 
-	time.tv_sec =  1 /*sec */;	time.tv_usec = 3 /* usec */;
-	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 2 /* usec */;
+    time.tv_sec =  1 /*sec */;    time.tv_usec = 3 /* usec */;
+    subs.tv_sec = 1 /*sec */;    subs.tv_usec = 2 /* usec */;
 
-	vos_subTime(&time, &subs);
-	if (time.tv_sec != 0 || time.tv_usec != 1)
-		return 1;
+    vos_subTime(&time, &subs);
+    if (time.tv_sec != 0 || time.tv_usec != 1)
+        return 1;
 
-	time.tv_sec =  3 /*sec */;	time.tv_usec = 1 /* usec */;
-	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 999998 /* usec */;
+    time.tv_sec =  3 /*sec */;    time.tv_usec = 1 /* usec */;
+    subs.tv_sec = 1 /*sec */;    subs.tv_usec = 999998 /* usec */;
 
-	vos_subTime(&time, &subs);
-	if (time.tv_sec != 1 || time.tv_usec != 3)
-		return 1;
+    vos_subTime(&time, &subs);
+    if (time.tv_sec != 1 || time.tv_usec != 3)
+        return 1;
 
-	time.tv_sec =  3 /*sec */;	time.tv_usec = 0 /* usec */;
-	subs.tv_sec = 1 /*sec */;	subs.tv_usec = 999999 /* usec */;
+    time.tv_sec =  3 /*sec */;    time.tv_usec = 0 /* usec */;
+    subs.tv_sec = 1 /*sec */;    subs.tv_usec = 999999 /* usec */;
 
-	vos_subTime(&time, &subs);
-	if (time.tv_sec != 1 || time.tv_usec != 1)
-		return 1;
+    vos_subTime(&time, &subs);
+    if (time.tv_sec != 1 || time.tv_usec != 1)
+        return 1;
 
-	return 0; /* all time tests succeeded */
+    return 0; /* all time tests succeeded */
 }
 
 int testCRCcalculation()
@@ -237,18 +237,18 @@ int testNetwork()
     /* Check if a MAC address was received */
     if (ret != VOS_NO_ERR)
     {
-    	printf("Got %d when asking for own MAC address\n", ret);
-    	return 1;
+        printf("Got %d when asking for own MAC address\n", ret);
+        return 1;
     }
 
-	for(i = 0; i < 6 && MAC[i] == 0; i++)
-	{
-	   ;
-	}
-	if (i >= 6) {
-		printf("The return MAC is \"empty\"\n");
-		return 1;
-	}
+    for(i = 0; i < 6 && MAC[i] == 0; i++)
+    {
+       ;
+    }
+    if (i >= 6) {
+        printf("The return MAC is \"empty\"\n");
+        return 1;
+    }
 
     return 0; /* all time tests succeeded */
 }
@@ -266,14 +266,14 @@ int testInterfaces()
     if ( vos_getInterfaces ( &ifCnt, ifAddrs) != VOS_NO_ERR)
     {
         printf("No interface information returned\n");
-    	return 1;
+        return 1;
     }
 
     /* Check if a MAC address was received */
     if (ifCnt == 0)
     {
-    	printf("No interface information returned\n");
-    	return 1;
+        printf("No interface information returned\n");
+        return 1;
     }
 
     for (i = 0; i < ifCnt; i++)
@@ -302,30 +302,30 @@ int testInterfaces()
 
 int main(int argc, char *argv[])
 {
-	printf("Starting tests\n");
+    printf("Starting tests\n");
     if (testInterfaces())
-	{
-		printf("Interface test failed\n");
-		return 1;
-	}
+    {
+        printf("Interface test failed\n");
+        return 1;
+    }
 
-	if (testTimeCompare())
-	{
-		printf("Time COMPARE test failed\n");
-		return 1;
-	}
+    if (testTimeCompare())
+    {
+        printf("Time COMPARE test failed\n");
+        return 1;
+    }
 
-	if (testTimeAdd())
-	{
-		printf("Time ADD test failed\n");
-		return 1;
-	}
+    if (testTimeAdd())
+    {
+        printf("Time ADD test failed\n");
+        return 1;
+    }
 
     if (testTimeSubs())
-	{
-		printf("Time SUBSCRACT test failed\n");
-		return 1;
-	}
+    {
+        printf("Time SUBSCRACT test failed\n");
+        return 1;
+    }
 
     if(testCRCcalculation())
     {
@@ -339,6 +339,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-	printf("All tests successfully finished.\n");
-	return 0;
+    printf("All tests successfully finished.\n");
+    return 0;
 }

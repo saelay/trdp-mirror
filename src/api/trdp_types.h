@@ -115,7 +115,7 @@ typedef enum
     TRDP_REPLYTO_ERR        = -43,  /**< Protocol Reply Timeout                         */
     TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout                       */
     TRDP_REQCONFIRMTO_ERR   = -45,  /**< Protocol Confirm Timeout (Request sender)      */
-    TRDP_PACKET_ERR			= -46,  /**< Incomplete message data packet                 */
+    TRDP_PACKET_ERR            = -46,  /**< Incomplete message data packet                 */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 

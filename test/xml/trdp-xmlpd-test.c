@@ -5,7 +5,7 @@
  *  Created by Tomas Svoboda on 17.12.12.
  *  Copyright 2012 UniControls,a.s. All rights reserved.
  *
- *	$ID:$
+ *    $ID:$
  */
 
 #include <stdio.h>
@@ -174,12 +174,12 @@ void setColorDefault()
 /*********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]		category		Log category (Error, Warning, Info etc.)
- *  @param[in]		pTime			pointer to NULL-terminated string of time stamp
- *  @param[in]		pFile			pointer to NULL-terminated string of source module
- *  @param[in]		LineNumber		line
- *  @param[in]		pMsgStr         pointer to NULL-terminated string
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]        category        Log category (Error, Warning, Info etc.)
+ *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
+ *  @param[in]        pFile            pointer to NULL-terminated string of source module
+ *  @param[in]        LineNumber        line
+ *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
 static void dbgOut (
