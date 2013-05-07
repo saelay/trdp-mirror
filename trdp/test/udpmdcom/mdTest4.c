@@ -127,6 +127,24 @@ static const char * trdp_get_strerr(const int eri)
 	return "?";
 }
 
+static const char * trdp_get_msgtype(const int cdm)
+{
+	switch(cdm)
+	{
+		case TRDP_MSG_PD: return "Pd:Data";
+		case TRDP_MSG_PP: return "Pp:Pull";
+		case TRDP_MSG_PR: return "Pr:Request";
+		case TRDP_MSG_PE: return "Pe:Error";
+		case TRDP_MSG_MN: return "Mn:Notify";
+		case TRDP_MSG_MR: return "Mr:Request";
+		case TRDP_MSG_MP: return "Mp:Reply";
+		case TRDP_MSG_MQ: return "Mq:Query";
+		case TRDP_MSG_MC: return "Mc:Confirm";
+		case TRDP_MSG_ME: return "Me:Error";
+		default: return "?";
+	}
+}
+
 /* message queue trdp to application */
 typedef struct
 {
@@ -717,7 +735,7 @@ static void queue_procricz()
         printf( "destIpAddr        = %s\n", miscIpToString(msg.Msg.destIpAddr, strIp));
         printf( "seqCount          = %d\n", msg.Msg.seqCount);
         printf( "protVersion       = %d\n", msg.Msg.protVersion);
-        printf( "msgType           = x%04X=%c%c\n", msg.Msg.msgType, (msg.Msg.msgType >> 8 )& 0xFF, msg.Msg.msgType & 0xFF);
+        printf( "msgType           = x%04X:%s\n", msg.Msg.msgType, trdp_get_msgtype(msg.Msg.msgType));
         printf( "comId             = %d\n", msg.Msg.comId);
         printf( "topoCount         = %d\n", msg.Msg.topoCount);
         printf( "userStatus        = %d\n", msg.Msg.userStatus);
