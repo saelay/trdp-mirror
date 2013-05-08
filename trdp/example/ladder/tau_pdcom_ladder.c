@@ -1,6 +1,6 @@
 /**********************************************************************************************************************/
 /**
- * @file            trdp_pdcom_Ladder.c
+ * @file            tau_pdcom_Ladder.c
  *
  * @brief           Functions for TRDP Ladder Topology PD communication (PDComLadder Thread)
  *
@@ -31,8 +31,8 @@
 #include "vos_thread.h"
 #include "trdp_pdcom.h"
 #include "trdp_if_light.h"
-#include "trdp_ladder.h"
-#include "trdp_ladder_app.h"
+#include "tau_ladder.h"
+#include "tau_ladder_app.h"
 
 /**********************************************************************************************************************/
 /** callback function PD receive
@@ -44,7 +44,7 @@
  *  @param[in]		dataSize        receive PD Data Size
  *
  */
-void tlp_recvPdDs (
+void tau_recvPdDs (
     void *pRefCon,
     TRDP_APP_SESSION_T appHandle,
     const TRDP_PD_INFO_T *pPDInfo,
@@ -124,8 +124,8 @@ void tlp_recvPdDs (
 		return;
 	}
 
-	tlp_lockTrafficStore();
-	tlp_getNetworkContext(&subnetId);
+	tau_lockTrafficStore();
+	tau_getNetworkContext(&subnetId);
 
 	/* Write received PD from using subnetwork in Traffic Store */
 	if ((pPDInfo->srcIpAddr & SUBNET2_NETMASK) == subnetId)
@@ -141,7 +141,7 @@ void tlp_recvPdDs (
 				/* Clear Traffic Store */
 				memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
 				memset((void *)((int)pTrafficStoreAddr + (int)offset), 0, pSubscriberElement->dataSize);
-				tlp_unlockTrafficStore();
+				tau_unlockTrafficStore();
 			}
 		}
 		else
@@ -150,12 +150,12 @@ void tlp_recvPdDs (
 /*			memcpy(&offset, pRefCon, sizeof(offset)); */
 			memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
 			memcpy((void *)((int)pTrafficStoreAddr + (int)offset), pData, dataSize);
-			tlp_unlockTrafficStore();
+			tau_unlockTrafficStore();
 		}
 	}
 	else
 	{
-		tlp_unlockTrafficStore();
+		tau_unlockTrafficStore();
 	}
 }
 

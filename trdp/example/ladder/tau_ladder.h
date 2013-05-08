@@ -1,6 +1,6 @@
 /**********************************************************************************************************************/
 /**
- * @file            trdp_ladder.h
+ * @file            tau_ladder.h
  *
  * @brief           Global Variables for TRDP Ladder Topology Support
  *
@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef TRDP_LADDER_H_
-#define TRDP_LADDER_H_
+#ifndef TAU_LADDER_H_
+#define TAU_LADDER_H_
 
 #ifdef TRDP_OPTION_LADDER
 /*******************************************************************************
@@ -71,7 +71,7 @@ extern UINT32 usingSubnetId;				/* Using SubnetId */
  *	@retval			TRDP_NO_ERR
  *	@retval			TRDP_MUTEX_ERR
  */
-TRDP_ERR_T trdp_ladder_init (
+TRDP_ERR_T tau_ladder_init (
 	void);
 
 /******************************************************************************/
@@ -83,7 +83,7 @@ TRDP_ERR_T trdp_ladder_init (
  *	@retval			TRDP_NO_ERR
  *	@retval			TRDP_MEM_ERR
  */
-TRDP_ERR_T trdp_ladder_terminate (
+TRDP_ERR_T tau_ladder_terminate (
 	void);
 
 /**********************************************************************************************************************/
@@ -93,7 +93,7 @@ TRDP_ERR_T trdp_ladder_terminate (
  *
  *  @retval         TRDP_NO_ERR			no error
  */
-TRDP_ERR_T  trdp_setPdComLadderThreadStartFlag (
+TRDP_ERR_T  tau_setPdComLadderThreadStartFlag (
     BOOL startFlag);
 
 /**********************************************************************************************************************/
@@ -107,7 +107,7 @@ TRDP_ERR_T  trdp_setPdComLadderThreadStartFlag (
  *  @retval         TRDP_NOINIT_ERR	handle invalid
  */
 
-TRDP_ERR_T  tlp_setNetworkContext (
+TRDP_ERR_T  tau_setNetworkContext (
     UINT32          subnetId);
 
 /**********************************************************************************************************************/
@@ -121,7 +121,7 @@ TRDP_ERR_T  tlp_setNetworkContext (
  *  @retval         TRDP_NOINIT_ERR	handle invalid
  */
 
-TRDP_ERR_T  tlp_getNetworkContext (
+TRDP_ERR_T  tau_getNetworkContext (
     UINT32          *pSubnetId);
 
 /**********************************************************************************************************************/
@@ -133,7 +133,7 @@ TRDP_ERR_T  tlp_getNetworkContext (
  *  @retval         TRDP_NOINIT_ERR	handle invalid
  */
 
-TRDP_ERR_T  tlp_lockTrafficStore (
+TRDP_ERR_T  tau_lockTrafficStore (
     void);
 
 /**********************************************************************************************************************/
@@ -145,7 +145,7 @@ TRDP_ERR_T  tlp_lockTrafficStore (
  *  @retval         TRDP_NOINIT_ERR	handle invalid
  */
 
-TRDP_ERR_T  tlp_unlockTrafficStore (
+TRDP_ERR_T  tau_unlockTrafficStore (
     void);
 
 #endif	/* TRDP_OPTION_LADDER */
@@ -153,4 +153,4 @@ TRDP_ERR_T  tlp_unlockTrafficStore (
 #ifdef __cplusplus
 }
 #endif
-#endif /* TRDP_LADDER_H_ */
+#endif /* TAU_LADDER_H_ */

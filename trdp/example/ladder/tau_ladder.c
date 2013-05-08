@@ -1,6 +1,6 @@
 /******************************************************************************/
 /**
- * @file            trdp_ladder.c
+ * @file            tau_ladder.c
  *
  * @brief           Functions for Ladder Support
  *
@@ -30,8 +30,8 @@
 #include "vos_private.h"
 #include "vos_thread.h"
 #include "vos_shared_mem.h"
-#include "trdp_ladder.h"
-#include "trdp_ladder_app.h"
+#include "tau_ladder.h"
+#include "tau_ladder_app.h"
 
 /*******************************************************************************
  * DEFINES
@@ -80,7 +80,7 @@ PD_COMMAND_VALUE *pFirstPdCommandValue = NULL;		/* First PD Command Value */
  *	@retval			TRDP_NO_ERR
  *	@retval			TRDP_MUTEX_ERR
  */
-TRDP_ERR_T trdp_ladder_init (void)
+TRDP_ERR_T tau_ladder_init (void)
 {
 	/* Traffic Store */
 	extern CHAR8 TRAFFIC_STORE[];					/* Traffic Store shared memory name */
@@ -202,19 +202,19 @@ TRDP_ERR_T trdp_ladder_init (void)
  *	@retval			TRDP_NO_ERR
  *	@retval			TRDP_MEM_ERR
  */
-TRDP_ERR_T trdp_ladder_terminate (void)
+TRDP_ERR_T tau_ladder_terminate (void)
 {
 	extern UINT8 *pTrafficStoreAddr;					/* pointer to pointer to Traffic Store Address */
 	extern VOS_MUTEX_T pTrafficStoreMutex;				/* Pointer to Mutex for Traffic Store */
 
 	/* Delete Traffic Store */
-	tlp_lockTrafficStore();
+	tau_lockTrafficStore();
 	if (vos_sharedClose(pTrafficStoreHandle, pTrafficStoreAddr) != VOS_NO_ERR)
 	{
 		vos_printf(VOS_LOG_ERROR, "Release Traffic Store shared memory failed\n");
 		return TRDP_MEM_ERR;
 	}
-	tlp_unlockTrafficStore();
+	tau_unlockTrafficStore();
 
 	/* Delete Traffic Store Mutex */
 	vos_mutexDelete(pTrafficStoreMutex);
@@ -229,7 +229,7 @@ TRDP_ERR_T trdp_ladder_terminate (void)
  *
  *  @retval         TRDP_NO_ERR			no error
  */
-TRDP_ERR_T  trdp_setPdComLadderThreadStartFlag (
+TRDP_ERR_T  tau_setPdComLadderThreadStartFlag (
     BOOL startFlag)
 {
 	extern BOOL pdComLadderThreadStartFlag; /* PDComLadder Thread instruction start up Flag
@@ -249,7 +249,7 @@ TRDP_ERR_T  trdp_setPdComLadderThreadStartFlag (
  *  @retval         TRDP_NOPUB_ERR		not published
  *  @retval         TRDP_NOINIT_ERR	handle invalid
  */
-TRDP_ERR_T  tlp_setNetworkContext (
+TRDP_ERR_T  tau_setNetworkContext (
     UINT32 subnetId)
 {
     /* Check Sub-network Id */
@@ -275,7 +275,7 @@ TRDP_ERR_T  tlp_setNetworkContext (
  *  @retval         TRDP_NOPUB_ERR		not published
  *  @retval         TRDP_NOINIT_ERR	handle invalid
  */
-TRDP_ERR_T  tlp_getNetworkContext (
+TRDP_ERR_T  tau_getNetworkContext (
     UINT32 *pSubnetId)
 {
     if (pSubnetId == NULL)
@@ -296,7 +296,7 @@ TRDP_ERR_T  tlp_getNetworkContext (
  *  @retval         TRDP_NO_ERR			no error
  *  @retval         TRDP_MUTEX_ERR		mutex error
  */
-TRDP_ERR_T  tlp_lockTrafficStore (
+TRDP_ERR_T  tau_lockTrafficStore (
     void)
 {
 	extern VOS_MUTEX_T pTrafficStoreMutex;					/* pointer to Mutex for Traffic Store */
@@ -319,7 +319,7 @@ TRDP_ERR_T  tlp_lockTrafficStore (
  *  @retval         TRDP_MUTEX_ERR		mutex error
  *
   */
-TRDP_ERR_T  tlp_unlockTrafficStore (
+TRDP_ERR_T  tau_unlockTrafficStore (
     void)
 {
 	extern VOS_MUTEX_T pTrafficStoreMutex;							/* pointer to Mutex for Traffic Store */

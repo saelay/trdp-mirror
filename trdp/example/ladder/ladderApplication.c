@@ -32,8 +32,8 @@
 #include "vos_sock.h"
 #include "trdp_pdcom.h"
 #include "trdp_if_light.h"
-#include "trdp_ladder.h"
-#include "trdp_ladder_app.h"
+#include "tau_ladder.h"
+#include "tau_ladder_app.h"
 
 /***********************************************************************************************************************
  * GLOBAL VARIABLES
@@ -44,7 +44,7 @@ TRDP_APP_SESSION_T  appHandle;					/*	Sub-network Id1 identifier to the library 
 TRDP_SUB_T          subHandleNet1ComId1;		/*	Sub-network Id1 ComID1 identifier to the subscription	*/
 TRDP_PUB_T          pubHandleNet1ComId1;		/*	Sub-network Id1 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err;
-TRDP_PD_CONFIG_T    pdConfiguration = {tlp_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
+TRDP_PD_CONFIG_T    pdConfiguration = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};
 TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
 TRDP_PROCESS_CONFIG_T	processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -56,7 +56,7 @@ TRDP_APP_SESSION_T  appHandle2;					/*	Sub-network Id2 identifier to the library
 TRDP_SUB_T          subHandleNet2ComId1;		/*	Sub-network Id2 ComID1 identifier to the subscription	*/
 TRDP_PUB_T          pubHandleNet2ComId1;		/*	Sub-network Id2 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err2;
-TRDP_PD_CONFIG_T    pdConfiguration2 = {tlp_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
+TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};	    /* Sub-network Id2 PDconfiguration */
 TRDP_MEM_CONFIG_T   dynamicConfig2 = {NULL, RESERVED_MEMORY, {}};					/* Sub-network Id2 Structure describing memory */
 TRDP_PROCESS_CONFIG_T   processConfig2   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -195,7 +195,7 @@ int main (void)
 	}
 
 	/* TRDP Ladder support initialize */
-	if (trdp_ladder_init() != TRDP_NO_ERR)
+	if (tau_ladder_init() != TRDP_NO_ERR)
 	{
 		printf("TRDP Ladder Support Initialize failed\n");
 		return 1;
@@ -231,12 +231,12 @@ int main (void)
     {
         printf("prep  Sub-network Id1 pd receive error\n");
         tlc_terminate();
-        trdp_ladder_terminate();
+        tau_ladder_terminate();
         return 1;
     }
 
     /* Start PdComLadderThread */
-    trdp_setPdComLadderThreadStartFlag(TRUE);
+    tau_setPdComLadderThreadStartFlag(TRUE);
 
     /*	Sub-network Id2 Subscribe */
     err = tlp_subscribe( appHandle2,				/* our application identifier */
@@ -256,7 +256,7 @@ int main (void)
     {
         printf("prep  Sub-network Id2 pd receive error\n");
         tlc_terminate();
-        trdp_ladder_terminate();
+        tau_ladder_terminate();
         return 1;
     }
 
@@ -277,7 +277,7 @@ int main (void)
     {
         printf("prep Sub-network Id1 pd publish error\n");
         tlc_terminate();
-        trdp_ladder_terminate();
+        tau_ladder_terminate();
         return 1;
     }
 
@@ -298,12 +298,12 @@ int main (void)
     {
         printf("prep Sub-network Id2 pd publish error\n");
         tlc_terminate();
-        trdp_ladder_terminate();
+        tau_ladder_terminate();
         return 1;
     }
 
     /* Using Sub-Network : SUBNET1 */
-    err = tlp_setNetworkContext(SUBNET1);
+    err = tau_setNetworkContext(SUBNET1);
     if (err != TRDP_NO_ERR)
     {
         printf("prep Sub-network error\n");
@@ -316,7 +316,7 @@ int main (void)
     while (1)
     {
       	/* Get access right to Traffic Store*/
-    	err = tlp_lockTrafficStore();
+    	err = tau_lockTrafficStore();
     	if (err == TRDP_NO_ERR)
     	{
         	/* Create PD Data */
@@ -337,7 +337,7 @@ int main (void)
 					appHandle2->pSndQueue->dataSize);
 
           	/* Release access right to Traffic Store*/
-    		err = tlp_unlockTrafficStore();
+    		err = tau_unlockTrafficStore();
     		if (err != TRDP_NO_ERR)
     		{
     			printf("Release Traffic Store accessibility Failed\n");
@@ -361,7 +361,7 @@ int main (void)
     tlp_unsubscribe(appHandle, subHandleNet1ComId1);
 
     tlc_terminate();
-    trdp_ladder_terminate();
+    tau_ladder_terminate();
 
     tlp_unpublish(appHandle2, pubHandleNet2ComId1);
     tlp_unsubscribe(appHandle2, subHandleNet2ComId1);

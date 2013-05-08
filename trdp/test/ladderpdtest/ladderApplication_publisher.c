@@ -39,8 +39,8 @@
 #include "trdp_pdcom.h"
 #include "trdp_utils.h"
 #include "trdp_if_light.h"
-#include "trdp_ladder.h"
-#include "trdp_ladder_app.h"
+#include "tau_ladder.h"
+#include "tau_ladder_app.h"
 #include "tau_marshall.h"
 
 /***********************************************************************************************************************
@@ -54,9 +54,9 @@ TRDP_PUB_T          pubHandleNet1ComId1;		/*	Sub-network Id1 ComID2 identifier t
 TRDP_SUB_T          subHandleNet1ComId2;		/*	Sub-network Id1 ComID1 identifier to the subscription	*/
 TRDP_PUB_T          pubHandleNet1ComId2;		/*	Sub-network Id1 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err;
-/* TRDP_PD_CONFIG_T    pdConfiguration = {tlp_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
+/* TRDP_PD_CONFIG_T    pdConfiguration = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};*/
-TRDP_PD_CONFIG_T    pdConfiguration = {tlp_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+TRDP_PD_CONFIG_T    pdConfiguration = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};
 TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
 TRDP_PROCESS_CONFIG_T	processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -71,9 +71,9 @@ TRDP_PUB_T          pubHandleNet2ComId1;		/*	Sub-network Id2 ComID2 identifier t
 TRDP_SUB_T          subHandleNet2ComId2;		/*	Sub-network Id2 ComID1 identifier to the subscription	*/
 TRDP_PUB_T          pubHandleNet2ComId2;		/*	Sub-network Id2 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err2;
-/* TRDP_PD_CONFIG_T    pdConfiguration2 = {tlp_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
+/* TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};*/	/* Sub-network Id2 PDconfiguration */
-TRDP_PD_CONFIG_T    pdConfiguration2 = {tlp_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};
 TRDP_MEM_CONFIG_T   dynamicConfig2 = {NULL, RESERVED_MEMORY, {}};					/* Sub-network Id2 Structure describing memory */
 TRDP_PROCESS_CONFIG_T   processConfig2   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -1058,7 +1058,7 @@ int main (int argc, char *argv[])
 	}
 
 	/* TRDP Ladder support initialize */
-	if (trdp_ladder_init() != TRDP_NO_ERR)
+	if (tau_ladder_init() != TRDP_NO_ERR)
 	{
 		vos_printf(VOS_LOG_ERROR, "TRDP Ladder Support Initialize failed\n");
 		return 1;
@@ -1126,13 +1126,13 @@ int main (int argc, char *argv[])
 		{
 			vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
 			tlc_terminate();
-			trdp_ladder_terminate();
+			tau_ladder_terminate();
 			return 1;
 		}
 	}
 
     /* Start PdComLadderThread */
-    trdp_setPdComLadderThreadStartFlag(TRUE);
+    tau_setPdComLadderThreadStartFlag(TRUE);
 
 	/* Is this Ladder Topology ? */
 	if (ladderTopologyFlag == TRUE)
@@ -1157,7 +1157,7 @@ int main (int argc, char *argv[])
 			{
 				vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
 				tlc_terminate();
-				trdp_ladder_terminate();
+				tau_ladder_terminate();
 				return 1;
 			}
 		}
@@ -1181,7 +1181,7 @@ int main (int argc, char *argv[])
 			{
 				vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
 				tlc_terminate();
-				trdp_ladder_terminate();
+				tau_ladder_terminate();
 				return 1;
 			}
 		}
@@ -1207,7 +1207,7 @@ int main (int argc, char *argv[])
 		{
 			vos_printf(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
 			tlc_terminate();
-			trdp_ladder_terminate();
+			tau_ladder_terminate();
 			return 1;
 		}
 	}
@@ -1232,7 +1232,7 @@ int main (int argc, char *argv[])
 		{
 			vos_printf(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
 			tlc_terminate();
-			trdp_ladder_terminate();
+			tau_ladder_terminate();
 			return 1;
 		}
 	}
@@ -1260,7 +1260,7 @@ int main (int argc, char *argv[])
 			{
 				vos_printf(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
 				tlc_terminate();
-				trdp_ladder_terminate();
+				tau_ladder_terminate();
 				return 1;
 			}
 		}
@@ -1285,7 +1285,7 @@ int main (int argc, char *argv[])
 			{
 				vos_printf(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
 				tlc_terminate();
-				trdp_ladder_terminate();
+				tau_ladder_terminate();
 				return 1;
 			}
 		}
@@ -1305,10 +1305,10 @@ int main (int argc, char *argv[])
 		vos_printf(VOS_LOG_ERROR, "prep Sub-network error\n");
         return 1;
 	}
-    err = tlp_setNetworkContext(TS_SUBNET);
+    err = tau_setNetworkContext(TS_SUBNET);
     if (err != TRDP_NO_ERR)
     {
-    	vos_printf(VOS_LOG_ERROR, "prep Sub-network tlp_setNetworkContext error\n");
+    	vos_printf(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
         return 1;
     }
 
@@ -1410,7 +1410,7 @@ int main (int argc, char *argv[])
     	}
 
 		/* Get access right to Traffic Store*/
-		err = tlp_lockTrafficStore();
+		err = tau_lockTrafficStore();
 		if (err == TRDP_NO_ERR)
 		{
 			/* Enable Comid1 ? */
@@ -1430,7 +1430,7 @@ int main (int argc, char *argv[])
 				memcpy(&putDataSet2, &dataSet2, dataSet2Size);
 			}
 			/* Release access right to Traffic Store*/
-			err = tlp_unlockTrafficStore();
+			err = tau_unlockTrafficStore();
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printf(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
@@ -1534,7 +1534,7 @@ int main (int argc, char *argv[])
 		if (marshallingFlag == TRUE)
 		{
 			/* Get access right to Traffic Store*/
-			err = tlp_lockTrafficStore();
+			err = tau_lockTrafficStore();
 			if (err == TRDP_NO_ERR)
 			{
 				/* Enable Comid1 ? */
@@ -1573,7 +1573,7 @@ int main (int argc, char *argv[])
 				}
 
 				/* Release access right to Traffic Store*/
-				err = tlp_unlockTrafficStore();
+				err = tau_unlockTrafficStore();
 				if (err != TRDP_NO_ERR)
 				{
 					vos_printf(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
@@ -1587,7 +1587,7 @@ int main (int argc, char *argv[])
 		else
 		{
 			/* Get access right to Traffic Store*/
-			err = tlp_lockTrafficStore();
+			err = tau_lockTrafficStore();
 			if (err == TRDP_NO_ERR)
 			{
 				/* Enable Comid1 ? */
@@ -1606,7 +1606,7 @@ int main (int argc, char *argv[])
 				}
 
 				/* Release access right to Traffic Store*/
-				err = tlp_unlockTrafficStore();
+				err = tau_unlockTrafficStore();
 				if (err != TRDP_NO_ERR)
 				{
 					vos_printf(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
@@ -1718,7 +1718,7 @@ int main (int argc, char *argv[])
 		tlp_unsubscribe(appHandle2, subHandleNet2ComId1);
 	}
     tlc_terminate();
-    trdp_ladder_terminate();
+    tau_ladder_terminate();
 
     tlp_unpublish(appHandle, pubHandleNet1ComId2);
     tlp_unsubscribe(appHandle, subHandleNet1ComId2);
