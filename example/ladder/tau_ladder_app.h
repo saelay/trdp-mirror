@@ -1,6 +1,6 @@
 /**********************************************************************************************************************/
 /**
- * @file            trdp_ladder_app.h
+ * @file            tau_ladder_app.h
  *
  * @brief           Define, Global Variables, ProtoType  for TRDP Ladder Topology Support
  *
@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef TRDP_LADDER_APP_H_
-#define TRDP_LADDER_APP_H_
+#ifndef TAU_LADDER_APP_H_
+#define TAU_LADDER_APP_H_
 
 #ifdef TRDP_OPTION_LADDER
 /*******************************************************************************
@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.11"
+#define PD_APP_VERSION	"V0.14"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.11"
+#define PD_APP_VERSION	"V0.14"
 #else
-#define PD_APP_VERSION	"V0.11"
+#define PD_APP_VERSION	"V0.14"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
@@ -269,7 +269,7 @@ extern PD_COMMAND_VALUE *pFirstPdCommandValue;		/* First PD Command Value */
  *  @param[in]		dataSize        receive PD Data Size
  *
  */
-void tlp_recvPdDs (
+void tau_recvPdDs (
     void *pRefCon,
     TRDP_APP_SESSION_T appHandle,
     const TRDP_PD_INFO_T *pPDInfo,
@@ -519,4 +519,4 @@ char * miscIpToString(
 }
 #endif
 
-#endif /* TRDP_LADDER_APP_H_ */
+#endif /* TAU_LADDER_APP_H_ */

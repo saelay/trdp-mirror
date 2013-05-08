@@ -23,7 +23,7 @@ vpath %.c src/common src/example src/vos/common test/udpmdcom $(VOS_PATH) test
 vpath %.h src/api src/vos/api src/common src/vos/common
 
 INCPATH = src/api
-VOS_INCPATH = src/vos/api -I src/common
+VOS_INCPATH = src/vos/api -I src/common -I example/ladder
 BUILD_PATH = bld/$(TARGET_VOS)
 
 ifdef TARGET
@@ -61,11 +61,13 @@ CFLAGS += -DTRDP_OPTION_LADDER
 endif
 
 SUBDIRS	= src
+LADDER_PDTEST_DIRS = test/ladderpdtest
 INCLUDES = -I $(INCPATH) -I $(VOS_INCPATH) -I $(VOS_PATH)
 OUTDIR = $(BUILD_PATH)
+LADDER_DIR = example/ladder
 
 ifeq ($(TRDP_OPTION_LADDER),1)
-LDFLAGS = -lpthread -lrt -ltrdp -L $(OUTDIR)
+LDFLAGS = -lpthread -lrt -ltrdp -lladder -L $(OUTDIR)
 else
 LDFLAGS = -L $(OUTDIR)
 endif
@@ -82,17 +84,20 @@ CFLAGS += -Os  -DNO_DEBUG
 endif
 
 VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o vos_shared_mem.o
-TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o trdp_pdcom_ladder.o tau_marshall.o trdp_ladder.o $(VOS_OBJS)
+TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o tau_marshall.o $(VOS_OBJS)
+LADDER_OBJS = tau_pdcom_ladder.o tau_ladder.o $(TRDP_OBJS)
 
 ifeq ($(MD_SUPPORT),1)
 TRDP_OBJS += trdp_mdcom.o
 endif
 
 #all:		outdir libtrdp demo
-all:		outdir libtrdp example laddertest
+all:		outdir libtrdp libladder example laddertest
 
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
+libladder:	outdir $(OUTDIR)/libladder.a
+
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP outdir
 #example:	outdir $(OUTDIR)/mdManager
 example:	outdir $(OUTDIR)/ladderApplication
@@ -105,9 +110,6 @@ doc:		doc/latex/refman.pdf
 
 $(OUTDIR)/vos_shared_mem.o:	vos_shared_mem.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c src/vos/posix/vos_shared_mem.c -o $(OUTDIR)/vos_shared_mem.o
-
-$(OUTDIR)/trdp_pdcom_ladder.o:	trdp_pdcom_ladder.c
-			$(CC) $(CFLAGS) $(INCLUDES) -c src/common/trdp_pdcom_ladder.c -o $(OUTDIR)/trdp_pdcom_ladder.o
 
 $(OUTDIR)/tau_marshall.o:	tau_marshall.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c src/common/tau_marshall.c -o $(OUTDIR)/tau_marshall.o
@@ -124,6 +126,77 @@ $(OUTDIR)/libtrdp.a:	$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
 			$(RM) $@
 			$(AR) cq $@ $^
 
+$(OUTDIR)/tau_ladder.o:	$(LADDER_DIR)/tau_ladder.c
+			$(CC) $(CFLAGS) $(INCLUDES) -c $(LADDER_DIR)/tau_ladder.c -o $(OUTDIR)/tau_ladder.o
+
+$(OUTDIR)/tau_pdcom_ladder.o:	$(LADDER_DIR)/tau_pdcom_ladder.c
+			$(CC) $(CFLAGS) $(INCLUDES) -c $(LADDER_DIR)/tau_pdcom_ladder.c -o $(OUTDIR)/tau_pdcom_ladder.o
+
+$(OUTDIR)/libladder.a:	$(addprefix $(OUTDIR)/,$(notdir $(LADDER_OBJS)))
+			@$(ECHO) ' ### Building the lib $(@F)'
+			$(RM) $@
+			$(AR) cq $@ $^
+
+ifeq ($(DEBUG),0)
+$(OUTDIR)/ladderApplication:   $(LADDER_DIR)/ladderApplication.c  $(OUTDIR)/libtrdp.a $(OUTDIR)/libladder.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_DIR)/ladderApplication.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+else
+$(OUTDIR)/ladderApplication:   $(LADDER_DIR)/ladderApplication.c  $(OUTDIR)/libtrdp.a $(OUTDIR)/libladder.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_DIR)/ladderApplication.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+endif
+
+ifeq ($(DEBUG),0)
+$(OUTDIR)/ladderApplication_publisher:   ladderpdtest/ladderApplication_publisher.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_PDTEST_DIRS)/ladderApplication_publisher.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+else
+$(OUTDIR)/ladderApplication_publisher:   ladderpdtest/ladderApplication_publisher.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_PDTEST_DIRS)/ladderApplication_publisher.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+endif
+
+ifeq ($(DEBUG),0)
+$(OUTDIR)/ladderApplication_subscriber:   ladderpdtest/ladderApplication_subscriber.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_PDTEST_DIRS)/ladderApplication_subscriber.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+else
+$(OUTDIR)/ladderApplication_subscriber:   ladderpdtest/ladderApplication_subscriber.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_PDTEST_DIRS)/ladderApplication_subscriber.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+endif
+
+ifeq ($(DEBUG),0)
+$(OUTDIR)/ladderApplication_multiPD:   ladderpdtest/ladderpdtest/ladderApplication_multiPD.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_PDTEST_DIRS)/ladderApplication_multiPD.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+else
+$(OUTDIR)/ladderApplication_multiPD:   ladderpdtest/ladderApplication_multiPD.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $(LADDER_PDTEST_DIRS)/ladderApplication_multiPD.c \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+endif
+
 
 $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building application $(@F)'
@@ -133,7 +206,6 @@ $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			    $(LDFLAGS) \
 			    
 			$(STRIP) $@
-
 			
 $(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building application $(@F)'
@@ -204,69 +276,6 @@ $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
-
-			
-ifeq ($(DEBUG),0)
-$(OUTDIR)/ladderApplication:   ladderApplication.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) $(SUBDIRS)/example/ladderApplication.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-else
-$(OUTDIR)/ladderApplication:   ladderApplication.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) $(SUBDIRS)/example/ladderApplication.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-endif
-
-ifeq ($(DEBUG),0)
-$(OUTDIR)/ladderApplication_publisher:   ladderApplication_publisher.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) test/ladderApplication_publisher.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-else
-$(OUTDIR)/ladderApplication_publisher:   ladderApplication_publisher.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) test/ladderApplication_publisher.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-endif
-
-ifeq ($(DEBUG),0)
-$(OUTDIR)/ladderApplication_subscriber:   ladderApplication_subscriber.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) test/ladderApplication_subscriber.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-else
-$(OUTDIR)/ladderApplication_subscriber:   ladderApplication_subscriber.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) test/ladderApplication_subscriber.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-endif
-
-ifeq ($(DEBUG),0)
-$(OUTDIR)/ladderApplication_multiPD:   ladderApplication_multiPD.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) test/ladderApplication_multiPD.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-else
-$(OUTDIR)/ladderApplication_multiPD:   ladderApplication_multiPD.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building application $(@F)'
-			$(CC) test/ladderApplication_multiPD.c \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-endif
-
-
 
 ifeq ($(DEBUG),0)
 $(OUTDIR)/test_marshalling:   test_marshalling.c  $(OUTDIR)/libtrdp.a 
