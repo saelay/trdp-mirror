@@ -365,7 +365,8 @@ TRDP_ERR_T  trdp_pdReceive (
                                           &recSize,
                                           &subAddresses.srcIpAddr,
                                           NULL,
-                                          &subAddresses.destIpAddr);
+                                          &subAddresses.destIpAddr,
+                                          FALSE);
     if ( err != TRDP_NO_ERR)
     {
         return err;
@@ -560,12 +561,12 @@ TRDP_ERR_T  trdp_pdReceive (
  *
  *  @param[in]      appHandle         application handle
  */
-void trdp_pdHandleTimeOuts(
+void trdp_pdHandleTimeOuts (
     TRDP_SESSION_PT appHandle)
 {
     PD_ELE_T    *iterPD = NULL;
     TRDP_TIME_T now;
-    
+
     /*    Update the current time    */
     vos_getTime(&now);
 
@@ -580,7 +581,7 @@ void trdp_pdHandleTimeOuts(
             /*  Update some statistics  */
             appHandle->stats.pd.numTimeout++;
             iterPD->lastErr = TRDP_TIMEOUT_ERR;
-            
+
             /* Packet is late! We inform the user about this:    */
             if (appHandle->pdDefault.pfCbFunction != NULL)
             {
@@ -596,14 +597,14 @@ void trdp_pdHandleTimeOuts(
                 theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
                 theMessage.pUserRef     = iterPD->userRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
-                
+
                 appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0);
             }
-            
+
             /*    Prevent repeated time out events    */
             iterPD->privFlags |= TRDP_TIMED_OUT;
         }
-        
+
         /*    Update the current time    */
         vos_getTime(&now);
     }
@@ -642,16 +643,16 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
             {
                 /*  Compare the received data to the data in our receive queue
                  Call user's callback if data changed    */
-                
+
                 err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
-                
+
                 if (err != TRDP_NO_ERR &&
                     err != TRDP_TIMEOUT_ERR)
                 {
                     result = err;
                     vos_printf(VOS_LOG_ERROR, "trdp_pdReceive() failed (Err: %d)\n", err);
                 }
-                
+
                 (*pCount)--;
                 FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds);
             }
