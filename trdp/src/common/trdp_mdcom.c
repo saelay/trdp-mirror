@@ -2094,21 +2094,6 @@ void  trdp_mdCheckTimeouts (
 
                     vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[index].sock);
 
-                    /* Execute callback */
-                    if (appHandle->mdDefault.pfCbFunction != NULL)
-                    {
-                        TRDP_MD_INFO_T theMessage = trdp_md_info_default;
-
-                        theMessage.destIpAddr   = appHandle->iface[index].tcpParams.cornerIp;
-                        theMessage.resultCode   = TRDP_TIMEOUT_ERR;
-                        memset(theMessage.sessionId, 0, TRDP_SESS_ID_SIZE);
-
-                        appHandle->mdDefault.pfCbFunction(
-                            appHandle->mdDefault.pRefCon,
-                            appHandle,
-                            &theMessage, NULL, 0);
-                    }
-
                     err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[index].sock);
                     if (err != TRDP_NO_ERR)
                     {
