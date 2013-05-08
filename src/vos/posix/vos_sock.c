@@ -441,11 +441,11 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_SOCK_ERR;
     }
 
-	/* enlarge send and receive buffers for UDP to 64k */
-	{
-    	int 		optval = 64 * 1024;
-        socklen_t 	option_len = sizeof(optval);
-		if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, option_len) == -1)
+    /* enlarge send and receive buffers for UDP to 64k */
+    {
+        int         optval      = 64 * 1024;
+        socklen_t   option_len  = sizeof(optval);
+        if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, option_len) == -1)
         {
             getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
             vos_printf(VOS_LOG_WARNING, "vos_sockOpenUDP: UDP send message size out of limit (max: %u)\n", optval);
@@ -535,13 +535,13 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     if (close(sock) == -1)
     {
         vos_printf(VOS_LOG_ERROR,
-                   "vos_sockClose(%d) called with unknown descriptor\n",sock);
+                   "vos_sockClose(%d) called with unknown descriptor\n", sock);
         return VOS_PARAM_ERR;
     }
     else
     {
         vos_printf(VOS_LOG_INFO,
-                   "vos_sockClose(%d) okay\n",sock);
+                   "vos_sockClose(%d) okay\n", sock);
     }
     gNumberOfOpenSockets--;
     return VOS_NO_ERR;
@@ -901,6 +901,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @param[out]     pSrcIPAddr      pointer to source IP
  *  @param[out]     pSrcIPPort      pointer to source port
  *  @param[out]     pDstIPAddr      pointer to dest IP
+ *  @param[in]      peek            if true, leave data in queue
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
@@ -915,7 +916,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT32  *pSize,
     UINT32  *pSrcIPAddr,
     UINT16  *pSrcIPPort,
-    UINT32  *pDstIPAddr)
+    UINT32  *pDstIPAddr,
+    BOOL    peek)
 {
     union
     {
@@ -952,7 +954,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
     do
     {
-        rcvSize = recvmsg(sock, &msg, 0);
+        rcvSize = recvmsg(sock, &msg, (peek != 0) ? MSG_PEEK : 0);
 
         if (rcvSize != -1)
         {

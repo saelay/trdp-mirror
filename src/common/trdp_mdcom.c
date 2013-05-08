@@ -36,7 +36,8 @@
 /***********************************************************************************************************************
  * DEFINES
  */
-
+#define CHECK_HEADER_ONLY   TRUE
+#define CHECK_DATA_TOO      FALSE
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -47,6 +48,7 @@
  *   Locals
  */
 
+static const UINT32 cMinimumMDSize = 1024;                            /**< Initial size for message data received */
 static const TRDP_MD_INFO_T trdp_md_info_default;
 
 /**********************************************************************************************************************/
@@ -199,13 +201,14 @@ void trdp_mdSetSessionTimeout (
     }
 }
 
-
 /**********************************************************************************************************************/
 /** Check for incoming md packet
  *
  *  @param[in]      appHandle       session pointer
  *  @param[in]      pPacket         pointer to the packet to check
  *  @param[in]      packetSize      size of the packet
+ *  @param[in]      checkHeaderOnly TRUE if data crc should not be checked
+ *
  *  @retval         TRDP_NO_ERR          no error
  *  @retval         TRDP_TOPO_ERR
  *  @retval         TRDP_WIRE_ERR
@@ -214,7 +217,8 @@ void trdp_mdSetSessionTimeout (
 TRDP_ERR_T trdp_mdCheck (
     TRDP_SESSION_PT appHandle,
     MD_HEADER_T     *pPacket,
-    UINT32          packetSize)
+    UINT32          packetSize,
+    BOOL            checkHeaderOnly)
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
     UINT32      l_datasetLength = vos_ntohl(pPacket->datasetLength);
@@ -249,7 +253,8 @@ TRDP_ERR_T trdp_mdCheck (
         }
 
         /* Check Data CRC */
-        if (l_datasetLength > 0)
+        if (l_datasetLength > 0 &&
+            checkHeaderOnly == FALSE)       /*  Only check header consistency? */
         {
             /* Check only if we have some data */
             UINT32  crc32       = vos_crc32(0xffffffff, (UINT8 *) pPacket + sizeof(MD_HEADER_T), l_datasetLength);
@@ -311,7 +316,8 @@ TRDP_ERR_T trdp_mdCheck (
     }
 
     /* check telegram length */
-    if (TRDP_NO_ERR == err)
+    if (TRDP_NO_ERR == err &&
+        checkHeaderOnly == FALSE)
     {
         UINT32 expectedLength = 0;
 
@@ -348,7 +354,6 @@ TRDP_ERR_T trdp_mdCheck (
     }
     return err;
 }
-
 
 /**********************************************************************************************************************/
 /** Update the header values
@@ -480,7 +485,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     UINT32      socketIndex     = 0;
     UINT32      readSize        = 0;
     UINT32      readDataSize    = 0;
-    /* BOOL        headerCompleted = FALSE; */
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
@@ -571,41 +575,80 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             readSize = readSize + readDataSize;
 
         }
-
+        pElement->grossSize = size;
+        pElement->dataSize  = readDataSize;
     }
     else
     {
-        size = TRDP_MAX_MD_PACKET_SIZE;
+        /* We read the header first */
+        size = sizeof(MD_HEADER_T);
         pElement->addr.srcIpAddr    = 0;
-        pElement->addr.destIpAddr   = 0;
+        pElement->addr.destIpAddr   = appHandle->realIP;    /* Preset destination IP  */
 
         err = (TRDP_ERR_T) vos_sockReceiveUDP(
                 mdSock,
-                (UINT8 *)&pElement->pPacket->frameHead,
+                (UINT8 *)pElement->pPacket,
                 &size,
                 &pElement->addr.srcIpAddr,
-                &pElement->replyPort, &pElement->addr.destIpAddr);
+                &pElement->replyPort, &pElement->addr.destIpAddr,
+                TRUE);
 
-        /* only if there is no destIP available, we use our own IP as destination!
-           destIpAddr can be multicast group address as well!  */
-        if (pElement->addr.destIpAddr == 0)
+        /* does the announced data fit into our (small) allocated buffer?   */
+        if (err == TRDP_NO_ERR)
         {
-            pElement->addr.destIpAddr = appHandle->realIP;
+            if (size == sizeof(MD_HEADER_T) &&
+                trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, size, CHECK_HEADER_ONLY) == TRDP_NO_ERR)
+            {
+                pElement->dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength);
+
+                if (trdp_packetSizeMD(pElement->dataSize) <= cMinimumMDSize)
+                {
+                    pElement->grossSize = size;
+                }
+                else
+                {
+                    /* we have to allocate a bigger buffer */
+                    MD_PACKET_T *pBigData = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
+                    if (pBigData == NULL)
+                    {
+                        return TRDP_MEM_ERR;
+                    }
+                    /*  Swap the pointers ...  */
+                    vos_memFree(pElement->pPacket);
+                    pElement->pPacket   = pBigData;
+                    pElement->grossSize = trdp_packetSizeMD(pElement->dataSize);
+                }
+
+                /*  get the complete packet */
+                if (pElement->dataSize > 0)
+                {
+                    size    = pElement->grossSize;
+                    err     = (TRDP_ERR_T) vos_sockReceiveUDP(mdSock,
+                                                              (UINT8 *)pElement->pPacket,
+                                                              &size,
+                                                              &pElement->addr.srcIpAddr,
+                                                              &pElement->replyPort,
+                                                              &pElement->addr.destIpAddr,
+                                                              FALSE);
+                }
+            }
+            else
+            {
+                /* throw packet away */
+                err = (TRDP_ERR_T) vos_sockReceiveUDP(
+                        mdSock,
+                        (UINT8 *)pElement->pPacket,
+                        &size,
+                        &pElement->addr.srcIpAddr,
+                        &pElement->replyPort, &pElement->addr.destIpAddr,
+                        FALSE);
+            }
         }
+
     }
 
-    pElement->grossSize = size;
 
     /* If the Header is incomplete, the data size will be "0". Otherwise it will be calculated. */
-    if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
-    {
-        pElement->dataSize = readDataSize;
-
-    }
-    else
-    {
-        pElement->dataSize = size - sizeof(MD_HEADER_T);
-    }
 
     /* preliminary: this all has to be changed! */
     switch (err)
@@ -637,20 +680,20 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
-		BOOL noDataToRead = FALSE;
-        UINT32 storedDataSize = 0;
+        BOOL    noDataToRead    = FALSE;
+        UINT32  storedDataSize  = 0;
 
-		if(pElement->grossSize == sizeof(MD_HEADER_T))
-		{
-			if(dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
-			{
-				noDataToRead = TRUE;
-			}
-		}
+        if (pElement->grossSize == sizeof(MD_HEADER_T))
+        {
+            if (dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
+            {
+                noDataToRead = TRUE;
+            }
+        }
 
         /* Compare if all the data has been read */
-		if (((pElement->grossSize < sizeof(MD_HEADER_T)) && (pElement->dataSize == 0)) 
-			|| ((noDataToRead == FALSE) && (pElement->dataSize != dataSize)))
+        if (((pElement->grossSize < sizeof(MD_HEADER_T)) && (pElement->dataSize == 0))
+            || ((noDataToRead == FALSE) && (pElement->dataSize != dataSize)))
         {
             /* Uncompleted message received */
 
@@ -729,7 +772,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     }
 
     /* received data */
-    err = trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, pElement->grossSize);
+    err = trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, pElement->grossSize, CHECK_DATA_TOO);
 
     /*  Update statistics   */
     switch (err)
@@ -819,7 +862,7 @@ TRDP_ERR_T  trdp_mdRecv (
         appHandle->pMDRcvEle = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
         if (NULL != appHandle->pMDRcvEle)
         {
-            appHandle->pMDRcvEle->pPacket   = (MD_PACKET_T *) vos_memAlloc(TRDP_MAX_MD_PACKET_SIZE);
+            appHandle->pMDRcvEle->pPacket   = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
             appHandle->pMDRcvEle->pktFlags  = appHandle->mdDefault.flags;
             if (NULL == appHandle->pMDRcvEle->pPacket)
             {
@@ -838,7 +881,7 @@ TRDP_ERR_T  trdp_mdRecv (
 
     if (appHandle->pMDRcvEle->pPacket == NULL)
     {
-        appHandle->pMDRcvEle->pPacket = (MD_PACKET_T *) vos_memAlloc(TRDP_MAX_MD_PACKET_SIZE);
+        appHandle->pMDRcvEle->pPacket = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
         if (appHandle->pMDRcvEle->pPacket == NULL)
         {
             vos_printf(VOS_LOG_ERROR, "Receiving MD: Out of receive buffers!\n");
@@ -1870,9 +1913,9 @@ void  trdp_mdCheckTimeouts (
                     if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
                     {
                         vos_printf(VOS_LOG_INFO, "MD reply timeout.\n");
-                        timeOut = TRUE;
-                        resultCode = TRDP_REPLYTO_ERR;
-                        iterMD->morituri = TRUE;
+                        timeOut             = TRUE;
+                        resultCode          = TRDP_REPLYTO_ERR;
+                        iterMD->morituri    = TRUE;
                         appHandle->stats.tcpMd.numReplyTimeout++;
                         break;
                     }
@@ -2052,8 +2095,8 @@ void  trdp_mdCheckTimeouts (
                 theMessage.numConfirmSent       = iterMD->numConfirmSent;
                 theMessage.numConfirmTimeout    = iterMD->numConfirmTimeout;
 
-                //theMessage.pUserRef     = appHandle->mdDefault.pRefCon;
-                theMessage.resultCode   = resultCode;
+                /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
+                theMessage.resultCode = resultCode;
 
                 appHandle->mdDefault.pfCbFunction(
                     appHandle->mdDefault.pRefCon,
@@ -2467,7 +2510,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                 else
                 {
                     pSenderElement->tcpParameters.doConnect = TRUE;
-					appHandle->iface[pSenderElement->socketIdx].usage++;
+                    appHandle->iface[pSenderElement->socketIdx].usage++;
                 }
 
             }
@@ -2571,12 +2614,12 @@ TRDP_ERR_T trdp_mdCommonSend (
             if (TRDP_MSG_MN != msgType)
             {
                 memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
-            	pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(tmo);
+                pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(tmo);
             }
             else
             {
                 memset(pSenderElement->pPacket->frameHead.sessionID, 0, TRDP_SESS_ID_SIZE);
-            	pSenderElement->pPacket->frameHead.replyTimeout = 0;
+                pSenderElement->pPacket->frameHead.replyTimeout = 0;
             }
 
 

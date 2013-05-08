@@ -64,23 +64,23 @@
 
 /* Defines for recvmsg: */
 
-#define msghdr _WSAMSG 
-#define msg_name name 
-#define msg_namelen namelen 
-#define msg_iov lpBuffers 
-#define msg_iovlen dwBufferCount 
-#define msg_flags dwFlags 
-#define msg_control Control.buf 
-#define msg_controllen Control.len 
+#define msghdr          _WSAMSG
+#define msg_name        name
+#define msg_namelen     namelen
+#define msg_iov         lpBuffers
+#define msg_iovlen      dwBufferCount
+#define msg_flags       dwFlags
+#define msg_control     Control.buf
+#define msg_controllen  Control.len
 
-#define iovec _WSABUF 
-#define iov_base buf 
-#define iov_len len 
+#define iovec           _WSABUF
+#define iov_base        buf
+#define iov_len         len
 
-#define CMSG_FIRSTHDR WSA_CMSG_FIRSTHDR 
-#define CMSGSize  64             /* size of buffer for destination address */
+#define CMSG_FIRSTHDR   WSA_CMSG_FIRSTHDR
+#define CMSGSize        64       /* size of buffer for destination address */
 
-#define cmsghdr WSACMSGHDR
+#define cmsghdr         WSACMSGHDR
 
 /***********************************************************************************************************************
  *  LOCALS
@@ -96,20 +96,20 @@ UINT8   mac[VOS_MAC_SIZE];
  */
 
 INT32 recvmsg (int sock_id, struct msghdr *message, int flags)
-{ 
-    GUID            WSARecvMsg_GUID = WSAID_WSARECVMSG; 
-    LPFN_WSARECVMSG WSARecvMsg; 
-    DWORD           number_of_bytes = 0; 
-    int res = WSAIoctl (sock_id, SIO_GET_EXTENSION_FUNCTION_POINTER, 
-                        &WSARecvMsg_GUID, sizeof (WSARecvMsg_GUID), &WSARecvMsg, 
-                        sizeof WSARecvMsg, &number_of_bytes, NULL, NULL); 
+{
+    GUID    WSARecvMsg_GUID = WSAID_WSARECVMSG;
+    LPFN_WSARECVMSG WSARecvMsg;
+    DWORD   number_of_bytes = 0;
+    int     res = WSAIoctl(sock_id, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                           &WSARecvMsg_GUID, sizeof (WSARecvMsg_GUID), &WSARecvMsg,
+                           sizeof WSARecvMsg, &number_of_bytes, NULL, NULL);
 
-    res = WSARecvMsg (sock_id, message, &number_of_bytes, NULL, NULL); 
+    res = WSARecvMsg(sock_id, message, &number_of_bytes, NULL, NULL);
     if (0 != res)
-    { 
-        return -1; 
+    {
+        return -1;
     }
-    return number_of_bytes; 
+    return number_of_bytes;
 }
 
 /***********************************************************************************************************************
@@ -173,9 +173,9 @@ EXT_DECL const CHAR8 *vos_ipDotted (
     UINT32 ipAddress)
 {
     static CHAR8 dotted[16];
-    
-    vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF), 
-        ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+
+    vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
+                 ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
     return dotted;
 }
 
@@ -206,30 +206,30 @@ EXT_DECL BOOL vos_isMulticast (
  *  @retval         VOS_PARAM_ERR   pMAC == NULL
  */
 EXT_DECL VOS_ERR_T vos_getInterfaces (
-    UINT32         *pAddrCnt,
+    UINT32          *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
-    UINT8 buf[  VOS_MAX_NUM_IF * sizeof(IP_ADAPTER_INFO)
-              + VOS_MAX_NUM_IF * VOS_MAX_IF_NAME_SIZE
-              + VOS_MAX_NUM_UNICAST * sizeof(IP_ADAPTER_UNICAST_ADDRESS)];
-    ULONG bufLen = sizeof(buf);
+    UINT8   buf[  VOS_MAX_NUM_IF * sizeof(IP_ADAPTER_INFO)
+                  + VOS_MAX_NUM_IF * VOS_MAX_IF_NAME_SIZE
+                  + VOS_MAX_NUM_UNICAST * sizeof(IP_ADAPTER_UNICAST_ADDRESS)];
+    ULONG   bufLen = sizeof(buf);
     PIP_ADAPTER_INFO pAdapterList = (PIP_ADAPTER_INFO) buf;
     PIP_ADAPTER_INFO pAdapter;
-    UINT32 addrCnt = 0;
+    UINT32  addrCnt = 0;
 
-    if (   (pAddrCnt == NULL) 
-        || (ifAddrs == NULL) )
-    { 
+    if ((pAddrCnt == NULL)
+        || (ifAddrs == NULL))
+    {
         return VOS_PARAM_ERR;
     }
     /* get the actual data we want */
     if (GetAdaptersInfo(pAdapterList, &bufLen) != NO_ERROR)
-    {   
+    {
         return VOS_PARAM_ERR;
     }
     pAdapter = pAdapterList;
     /* Iterate adapter list */
-    while(pAdapter) 
+    while (pAdapter)
     {
         /* Skip adapters with IP Address = 0.0.0.0 */
         if (vos_dottedIP(pAdapter->IpAddressList.IpAddress.String) != (UINT32)NULL)
@@ -252,11 +252,14 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                         memcpy(ifAddrs[addrCnt].mac, pAdapter->Address, sizeof(ifAddrs[addrCnt].mac));
                     }
                     /* Store adapter name */
-                    (void) strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
+                    (void) strncpy_s(ifAddrs[addrCnt].name,
+                                     sizeof(ifAddrs[addrCnt].name),
+                                     pAdapter->AdapterName,
+                                     _TRUNCATE);
                     /* Store subnet mask */
                     ifAddrs[addrCnt].netMask = vos_dottedIP(pAdapter->IpAddressList.IpMask.String);
                     /* increment number of addresses stored */
-                   addrCnt++;
+                    addrCnt++;
                 }
             }
         }
@@ -264,7 +267,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     }
     *pAddrCnt = addrCnt;
     return VOS_NO_ERR;
-} 
+}
 
 /**********************************************************************************************************************/
 /** select function.
@@ -379,9 +382,9 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         }
         else
         {
-            pwkti = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
-            pwkti = pwkti;    /* to make lint happy */
-            
+            pwkti   = (WKSTA_TRANSPORT_INFO_0 *)pbBuffer;
+            pwkti   = pwkti;  /* to make lint happy */
+
             /* skip all MAC addresses like 00000000 and search the first suitable one */
             for (i = 0; i < dwEntriesRead; i++)
             {
@@ -641,9 +644,9 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         DWORD optValue = TRUE;
         if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_PKTINFO, (const char *)&optValue, sizeof(optValue)) == -1)
         {
-                int err = WSAGetLastError();
-                err = err; /* for lint */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %d)\n", err);
+            int err = WSAGetLastError();
+            err = err;     /* for lint */
+            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %d)\n", err);
         }
     }
 
@@ -888,6 +891,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  *  @param[out]     pSrcIPAddr      pointer to source IP
  *  @param[out]     pSrcIPPort      pointer to source port
  *  @param[out]     pDstIPAddr      pointer to dest IP
+ *  @param[in]      peek            if true, leave data in queue
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
@@ -902,56 +906,57 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT32  *pSize,
     UINT32  *pSrcIPAddr,
     UINT16  *pSrcIPPort,
-    UINT32  *pDstIPAddr)
+    UINT32  *pDstIPAddr,
+    BOOL    peek)
 {
     struct sockaddr_in  srcAddr;
-    INT32               rcvSize = 0;
-    int                 err     = 0;
-    int                 retVal = 0;
+    INT32           rcvSize = 0;
+    int             err     = 0;
+    int             retVal  = 0;
 
-    char controlBuffer[64];                  /* buffer for destination address record */
-    struct iovec wsabuf; 
-    struct msghdr Msg; 
+    char            controlBuffer[64];       /* buffer for destination address record */
+    struct iovec    wsabuf;
+    struct msghdr   Msg;
 
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
         return VOS_PARAM_ERR;
     }
 
-    memset (&srcAddr, 0, sizeof (struct sockaddr_in)); 
-    memset (&controlBuffer [0], 0, CMSGSize); 
+    memset(&srcAddr, 0, sizeof (struct sockaddr_in));
+    memset(&controlBuffer [0], 0, CMSGSize);
 
     /* fill the scatter/gather list with our data buffer */
-    wsabuf.iov_base = (CHAR*) pBuffer; 
-    wsabuf.iov_len = *pSize; 
+    wsabuf.iov_base = (CHAR *) pBuffer;
+    wsabuf.iov_len  = *pSize;
 
-    Msg.msg_name = (struct sockaddr *) &srcAddr; 
-    Msg.msg_namelen = sizeof (struct sockaddr_in); 
-    Msg.msg_iov = &wsabuf; 
-    Msg.msg_iovlen = 1; 
-    Msg.msg_control = &controlBuffer [0]; 
-    Msg.msg_controllen = sizeof (controlBuffer); 
-    Msg.msg_flags = 0; 
+    Msg.msg_name        = (struct sockaddr *) &srcAddr;
+    Msg.msg_namelen     = sizeof (struct sockaddr_in);
+    Msg.msg_iov         = &wsabuf;
+    Msg.msg_iovlen      = 1;
+    Msg.msg_control     = &controlBuffer [0];
+    Msg.msg_controllen  = sizeof (controlBuffer);
+    Msg.msg_flags       = 0;
 
     memset(&srcAddr, 0, sizeof(srcAddr));
 
     /* fill the msg block for recvmsg */
     do
     {
-        rcvSize = recvmsg (sock, &Msg, 0); 
+        rcvSize = recvmsg(sock, &Msg, (peek != 0) ? MSG_PEEK : 0);
 
         if (rcvSize != SOCKET_ERROR)
         {
 
             if (pDstIPAddr != NULL)
             {
-                WSACMSGHDR *pCMsgHdr; 
+                WSACMSGHDR *pCMsgHdr;
 
-                pCMsgHdr = (WSACMSGHDR *) WSA_CMSG_FIRSTHDR (&Msg); 
+                pCMsgHdr = (WSACMSGHDR *) WSA_CMSG_FIRSTHDR(&Msg);
                 if (pCMsgHdr &&
                     pCMsgHdr->cmsg_type == IP_PKTINFO)
-                { 
-                    struct in_pktinfo *pPktInfo = (struct in_pktinfo *) WSA_CMSG_DATA (pCMsgHdr); 
+                {
+                    struct in_pktinfo *pPktInfo = (struct in_pktinfo *) WSA_CMSG_DATA(pCMsgHdr);
                     *pDstIPAddr = (UINT32) vos_ntohl(pPktInfo->ipi_addr.S_un.S_addr);
                     /* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
                 }

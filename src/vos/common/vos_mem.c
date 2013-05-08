@@ -324,6 +324,8 @@ EXT_DECL UINT8 *vos_memAlloc (
         return NULL;
     }
 
+    vos_printf(VOS_LOG_DBG, "vos_memAlloc: Requested size = 0x%x (%u)\n", size, size);
+
     /*    Use standard heap memory    */
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
@@ -331,7 +333,6 @@ EXT_DECL UINT8 *vos_memAlloc (
         if (p != NULL)
         {
             memset(p, 0, size);
-            /* vos_printf(VOS_LOG_DBG, "vos_memAlloc %p Requested size = 0x%x\n", p, size); */
         }
         return p;
     }
