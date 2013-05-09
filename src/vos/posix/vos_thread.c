@@ -52,17 +52,6 @@
 #include "vos_utils.h"
 #include "vos_private.h"
 
-/*
-#ifdef TRDP_OPTION_LADDER
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/times.h>
-
-
-#endif *//* TRDP_OPTION_LADDER */
-
 /***********************************************************************************************************************
  * DEFINITIONS
  */
