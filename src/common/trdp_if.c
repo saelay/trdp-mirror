@@ -1191,7 +1191,6 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
     INT32               *pNoDesc)
 {
     TRDP_TIME_T now;
-    PD_ELE_T    *iterPD;
     TRDP_ERR_T  ret = TRDP_NOINIT_ERR;
 
     if (trdp_isValidSession(appHandle))
@@ -1212,135 +1211,10 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 vos_getTime(&now);
                 vos_clearTime(&appHandle->interval);
 
-                /*    Walk over the registered PDs, find pending packets */
-                /*    Find the packet which has to be received next:    */
-                for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
-                {
-                    if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
-                        (!timerisset(&appHandle->interval) ||
-                         !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
-                    {
-                        appHandle->interval = iterPD->timeToGo;
-
-                        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-                        if (iterPD->socketIdx != -1 &&
-                            appHandle->iface[iterPD->socketIdx].sock != -1 &&
-                            appHandle->option & TRDP_OPTION_BLOCK)
-                        {
-                            if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))
-                            {
-                                FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
-                                {
-                                    *pNoDesc = appHandle->iface[iterPD->socketIdx].sock;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                /*    Find the packet which has to be sent even earlier:    */
-                for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
-                {
-                    if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
-                        (!timerisset(&appHandle->interval) ||
-                         !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
-                    {
-                        appHandle->interval = iterPD->timeToGo;
-                    }
-                }
+                trdp_pdCheckPending(appHandle, pFileDesc, pNoDesc);
 
 #if MD_SUPPORT
-                /*    Add the socket to the pFileDesc    */
-                {
-                    int             index;
-                    MD_ELE_T        *iterMD;
-                    MD_LIS_ELE_T    *iterListener;
-                    if (appHandle->tcpFd.listen_sd != -1)
-                    {
-                        FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
-                        if (appHandle->tcpFd.listen_sd > *pNoDesc)
-                        {
-                            *pNoDesc = appHandle->tcpFd.listen_sd;
-                        }
-                    }
-                    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
-                    {
-                        if ((appHandle->iface[index].sock != -1)
-                            && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
-                            && (appHandle->iface[index].tcpParams.addFileDesc == TRUE))
-                        {
-                            FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-                            if (appHandle->iface[index].sock > *pNoDesc)
-                            {
-                                *pNoDesc = appHandle->iface[index].sock;
-                            }
-                        }
-                    }
 
-                    /*  Include MD UDP listener sockets sockets  */
-                    for (iterListener = appHandle->pMDListenQueue;
-                         iterListener != NULL;
-                         iterListener = iterListener->pNext)
-                    {
-                        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-                        if (iterListener->socketIdx != -1 &&
-                            (appHandle->iface[iterListener->socketIdx].sock != -1)
-                            && ((appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP)
-                                || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
-                                    && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
-                        {
-                            if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc))
-                            {
-                                FD_SET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[iterListener->socketIdx].sock > *pNoDesc)
-                                {
-                                    *pNoDesc = appHandle->iface[iterListener->socketIdx].sock;
-                                }
-                            }
-                        }
-                    }
-                    /*  Include MD UDP receive sockets */
-                    for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
-                    {
-                        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-                        if (iterMD->socketIdx != -1 &&
-                            (appHandle->iface[iterMD->socketIdx].sock != -1)
-                            && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
-                                || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
-                                    && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
-                        {
-                            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
-                            {
-                                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[iterMD->socketIdx].sock > *pNoDesc)
-                                {
-                                    *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
-                                }
-                            }
-                        }
-                    }
-
-                    for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
-                    {
-                        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-                        if (iterMD->socketIdx != -1 &&
-                            (appHandle->iface[iterMD->socketIdx].sock != -1)
-                            && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
-                                || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
-                                    && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
-                        {
-                            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
-                            {
-                                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
-                                if (appHandle->iface[iterMD->socketIdx].sock >= *pNoDesc)
-                                {
-                                    *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
-                                }
-                            }
-                        }
-                    }
-                }
 
 #endif
                 /*    if lowest time is not zero   */
@@ -1350,15 +1224,11 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     vos_subTime(&appHandle->interval, &now);
                     *pInterval = appHandle->interval;
 
-                    /*    vos_printf(VOS_LOG_INFO, "interval sec = %lu, usec = %u\n",
-                     appHandle->interval.tv_sec,
-                     appHandle->interval.tv_usec); */
                 }
                 else    /*    Default minimum time is 10ms    */
                 {
                     pInterval->tv_sec   = 0;
-                    pInterval->tv_usec  = 10000; /* Minimum poll time 10ms    */
-                    /* vos_printf(VOS_LOG_INFO, "no interval\n"); */
+                    pInterval->tv_usec  = TRDP_PROCESS_DEFAULT_CYCLE_TIME;      /* Minimum poll time 10ms    */
                 }
 
                 if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)

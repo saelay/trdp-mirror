@@ -53,41 +53,46 @@ TRDP_ERR_T  trdp_pdPut (
     const UINT8     *pData,
     UINT32          dataSize);
 
-void trdp_pdDataUpdate (
-    PD_ELE_T        *pPacket);
+void        trdp_pdDataUpdate (
+    PD_ELE_T *pPacket);
 
 TRDP_ERR_T  trdp_pdCheck (
-    PD_HEADER_T     *pPacket,
-    UINT32          packetSize);
+    PD_HEADER_T *pPacket,
+    UINT32      packetSize);
 
 TRDP_ERR_T  trdp_pdSend (
-    INT32           pdSock,
-    PD_ELE_T        *pPacket,
-    UINT16          port);
+    INT32       pdSock,
+    PD_ELE_T    *pPacket,
+    UINT16      port);
 
-TRDP_ERR_T  trdp_pdGet (
+TRDP_ERR_T trdp_pdGet (
     PD_ELE_T            *pPacket,
     TRDP_UNMARSHALL_T   unmarshall,
     void                *refCon,
     const UINT8         *pData,
     UINT32              *pDataSize);
 
-TRDP_ERR_T trdp_pdSendQueued (
+TRDP_ERR_T  trdp_pdSendQueued (
     TRDP_SESSION_PT appHandle);
 
-TRDP_ERR_T trdp_pdReceive (
+TRDP_ERR_T  trdp_pdReceive (
     TRDP_SESSION_PT pSessionHandle,
     INT32           sock);
 
-void trdp_pdHandleTimeOuts(
-	TRDP_SESSION_PT appHandle);
+void        trdp_pdCheckPending (
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_FDS_T          *pFileDesc,
+    INT32               *pNoDesc);
 
-TRDP_ERR_T   trdp_pdCheckListenSocks (
+void trdp_pdHandleTimeOuts (
+    TRDP_SESSION_PT appHandle);
+
+TRDP_ERR_T trdp_pdCheckListenSocks (
     TRDP_SESSION_PT appHandle,
     TRDP_FDS_T      *pRfds,
     INT32           *pCount);
 
 TRDP_ERR_T trdp_pdDistribute (
-    PD_ELE_T        *pSndQueue);
+    PD_ELE_T *pSndQueue);
 
 #endif
