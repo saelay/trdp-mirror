@@ -340,8 +340,8 @@ int main (int argc, char * *argv)
      */
     while (1)
     {
-        fd_set  rfds;
-        INT32   noOfDesc;
+        VOS_FDS_T		rfds;
+        INT32   		noOfDesc;
         struct timeval  tv;
         struct timeval  max_tv = {0, 100000};
         
@@ -376,7 +376,7 @@ int main (int argc, char * *argv)
          what ever comes first.
          */
         
-        rv = select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
+        rv = vos_select(noOfDesc + 1, &rfds, NULL, NULL, &tv);
         
         /* printf("Pending events: %d\n", rv); */
         /*
