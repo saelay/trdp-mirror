@@ -1449,6 +1449,115 @@ TRDP_ERR_T  trdp_mdSend (
     return result;
 }
 
+
+/******************************************************************************/
+/** Check for pending packets, set FD if non blocking
+ *
+ *  @param[in]      appHandle           session pointer
+ *  @param[in,out]  pFileDesc           pointer to set of ready descriptors
+ *  @param[in,out]  pNoDesc             pointer to number of ready descriptors
+ */
+
+void trdp_mdCheckPending (
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_FDS_T          *pFileDesc,
+    INT32               *pNoDesc)
+{
+    int             index;
+    MD_ELE_T        *iterMD;
+    MD_LIS_ELE_T    *iterListener;
+
+    /*    Add the socket to the pFileDesc    */
+
+    if (appHandle->tcpFd.listen_sd != -1)
+    {
+        FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
+        if (appHandle->tcpFd.listen_sd > *pNoDesc)
+        {
+            *pNoDesc = appHandle->tcpFd.listen_sd;
+        }
+    }
+
+    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+    {
+        if ((appHandle->iface[index].sock != -1)
+            && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
+            && (appHandle->iface[index].tcpParams.addFileDesc == TRUE))
+        {
+            FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
+            if (appHandle->iface[index].sock > *pNoDesc)
+            {
+                *pNoDesc = appHandle->iface[index].sock;
+            }
+        }
+    }
+
+    /*  Include MD UDP listener sockets sockets  */
+    for (iterListener = appHandle->pMDListenQueue;
+         iterListener != NULL;
+         iterListener = iterListener->pNext)
+    {
+        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
+        if (iterListener->socketIdx != -1 &&
+            (appHandle->iface[iterListener->socketIdx].sock != -1)
+            && ((appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP)
+                || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
+                    && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
+        {
+            if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc))
+            {
+                FD_SET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc);
+                if (appHandle->iface[iterListener->socketIdx].sock > *pNoDesc)
+                {
+                    *pNoDesc = appHandle->iface[iterListener->socketIdx].sock;
+                }
+            }
+        }
+    }
+
+    /*  Include MD UDP receive sockets */
+    for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+    {
+        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
+        if (iterMD->socketIdx != -1 &&
+            (appHandle->iface[iterMD->socketIdx].sock != -1)
+            && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
+                || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
+                    && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
+        {
+            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
+            {
+                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
+                if (appHandle->iface[iterMD->socketIdx].sock > *pNoDesc)
+                {
+                    *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
+                }
+            }
+        }
+    }
+
+    for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
+    {
+        /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
+        if (iterMD->socketIdx != -1 &&
+            (appHandle->iface[iterMD->socketIdx].sock != -1)
+            && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
+                || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
+                    && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
+        {
+            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
+            {
+                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
+                if (appHandle->iface[iterMD->socketIdx].sock >= *pNoDesc)
+                {
+                    *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
+                }
+            }
+        }
+    }
+}
+
+
 /**********************************************************************************************************************/
 /** Checking receive connection requests and data
  *  Call user's callback if needed
