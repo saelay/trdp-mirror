@@ -60,7 +60,7 @@ extern "C" {
 #include "trdp_if_light.h"
 #include "trdp_private.h"
 #include "trdp_utils.h"
-#include "trdp_ladder_app.h"
+#include "tau_ladder_app.h"
 #include "trdp_mdcom.h"
 
 /***********************************************************************************************************************
@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.20"
+#define MD_APP_VERSION	"V0.21"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.20"
+#define MD_APP_VERSION	"V0.21"
 #else
-#define MD_APP_VERSION	"V0.20"
+#define MD_APP_VERSION	"V0.21"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */

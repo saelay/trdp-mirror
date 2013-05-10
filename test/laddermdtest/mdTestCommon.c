@@ -290,8 +290,8 @@ mqd_t deleteAppThreadSessionMessageQueueDescriptor(
 							/* Clear appThreadSessionHandle */
 							memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
 							/* Free Request Thread Session Handle Area */
-							free(pAppThreadSessionHandle);
-							pAppThreadSessionHandle = NULL;
+							free(pAppThreadSessionHandle->pMdAppThreadListener);
+							pAppThreadSessionHandle->pMdAppThreadListener = NULL;
 							return MD_APP_NO_ERR;
 						}
 					}

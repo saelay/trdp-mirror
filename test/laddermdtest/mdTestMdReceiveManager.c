@@ -50,7 +50,7 @@
 #include "trdp_if_light.h"
 #include "trdp_private.h"
 #include "trdp_utils.h"
-#include "trdp_ladder_app.h"
+#include "tau_ladder_app.h"
 
 #include "mdTestApp.h"
 
