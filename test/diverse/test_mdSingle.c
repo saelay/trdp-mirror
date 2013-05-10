@@ -36,7 +36,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION         "0.3"
+#define APP_VERSION         "1.0"
 
 #define DATA_MAX            1000
 
@@ -68,11 +68,32 @@ typedef struct sSessionData
     TRDP_LIS_T          listenHandle1;   	/*    Our identifier to the publication         */
     TRDP_LIS_T          listenHandle2;   	/*    Our identifier to the publication         */
     int                 sBlockingMode;      /*    TRUE if select shall be used              */
+    UINT32				sDataSize;
 } SESSION_DATA_T;
 
-SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE};
+SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE, 0};
 
 UINT32          ownIP = 0;
+
+const UINT8 cDemoData[] = " "
+"Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+"This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+"And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+"Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+"And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+"Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+"This is not her story.\n"
+"But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+"It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+"Nevertheless, a wholly remarkable book.\n"
+"In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+"Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+"In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+"First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+"But the story of this terrible, stupid Thursday, the story of its extraordinary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+"It begins with a house.\n";
+
+UINT8	gBuffer[64*1024];
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -85,11 +106,12 @@ void usage (const char *appName)
            "-o <own IP address>    in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
            "-p <TCP|UDP>           protocol to communicate with\n"
-           "-d <n>                 delay in us between notification/requests\n"
+           "-d <n>                 additional main loop delay in us (default 1ms)\n"
            "-e <n>                 expected replies\n"
            "-r                     be responder\n"
            "-c                     respond with confirmation\n"
            "-n                     notify only\n"
+           "-l <n>                 send large random message (up to 65420 Bytes)\n"
            "-0                     send no data\n"
            "-1                     send only one request/notification\n"
            "-b <0|1>               blocking mode (default = 1, blocking)\n"
@@ -126,14 +148,14 @@ void mdCallback (void                   *pRefCon,
                     printf("<- MD Notification %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                        printf("   Data: %s\n", pData);
+                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
                     }
                     break;
                 case  TRDP_MSG_MR:      /**< 'Mr' MD Request with reply                      */
                     printf("<- MR Request with reply %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                        printf("   Data: %s\n", pData);
+                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
                     }
                     if (sSessionData.sConfirmRequested)
                     {
@@ -160,7 +182,7 @@ void mdCallback (void                   *pRefCon,
                     printf("<- MR Reply received %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                        printf("   Data: %s\n", pData);
+                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
                     }
                     if (sSessionData.sExitAfterReply == TRUE)
                     {
@@ -171,7 +193,7 @@ void mdCallback (void                   *pRefCon,
                     printf("<- MR Reply with confirmation received %u\n", pMsg->comId);
                     if (NULL != pData && dataSize > 0)
                     {
-                        printf("   Data: %s\n", pData);
+                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
                     }
                     printf("-> sending confirmation\n");
                     err = tlm_confirm(myGlobals->appHandle, pRefCon, (const TRDP_UUID_T *) &pMsg->sessionId,
@@ -286,7 +308,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:p:d:e:b:h?vrcn01")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:p:d:l:e:b:h?vrcn01")) != -1)
     {
         switch (ch)
         {
@@ -336,6 +358,15 @@ int main (int argc, char *argv[])
             case 'r':
             {
                 sSessionData.sResponder = TRUE;
+                break;
+            }
+            case 'l':
+            {   /*  used data size   */
+                if (sscanf(optarg, "%u", &sSessionData.sDataSize ) < 1)
+                {
+                    usage(argv[0]);
+                    return 1;
+                }
                 break;
             }
             case 'c':
@@ -546,6 +577,8 @@ int main (int argc, char *argv[])
         if (sSessionData.sResponder == FALSE && sSessionData.sExitAfterReply == FALSE)
         {
             TRDP_UUID_T sessionId;
+            int i, j;
+            
             printf("\n");
             if (sSessionData.sNotifyOnly)
             {
@@ -555,6 +588,20 @@ int main (int argc, char *argv[])
                 {
                     tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, ownIP,
                                destIP, flags, NULL, NULL, 0, 0, 0);
+
+                }
+                else if (sSessionData.sDataSize > 0)
+                {
+                	for (i = 0, j = 0; i < sSessionData.sDataSize; i++)
+                    {
+                    	gBuffer[i] = cDemoData[j++];
+                        if (j >= sizeof(cDemoData))
+                        {
+                        	j = 0;
+                        }
+                    }
+                    tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, ownIP,
+                               destIP, flags, NULL, (const UINT8 *) gBuffer, sSessionData.sDataSize, 0, 0);
 
                 }
                 else
@@ -574,6 +621,20 @@ int main (int argc, char *argv[])
                     tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
                                 destIP, flags, expReplies, 0, NULL, NULL, 0, 0, 0);
                 }
+                else if (sSessionData.sDataSize > 0)
+                {
+                	for (i = 0, j = 0; i < sSessionData.sDataSize; i++)
+                    {
+                    	gBuffer[i] = cDemoData[j++];
+                        if (j >= sizeof(cDemoData))
+                        {
+                        	j = 0;
+                        }
+                    }
+                    tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
+                               destIP, flags, expReplies, 0, NULL, (const UINT8 *) gBuffer, sSessionData.sDataSize, 0, 0);
+
+                }
                 else
                 {
                     tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
@@ -588,6 +649,7 @@ int main (int argc, char *argv[])
             
             printf("\n");
 
+			/* additional delay */
             vos_threadDelay(delay);
 
         }
