@@ -435,8 +435,6 @@
 		08014D32164840030065AADD /* Siemens.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Siemens.png; sourceTree = "<group>"; };
 		08014D33164840030065AADD /* SenderDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SenderDemo_Prefix.pch; sourceTree = "<group>"; };
 		08CE20C716496F760038151B /* mdManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManager.c; sourceTree = "<group>"; };
-		08CE20C816496F760038151B /* mdManager1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManager1.c; sourceTree = "<group>"; };
-		08CE20C916496F760038151B /* mdManager2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManager2.c; sourceTree = "<group>"; };
 		08CE2171164A6E130038151B /* trdp_reserved.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trdp_reserved.h; path = marshalling/trdp_reserved.h; sourceTree = "<group>"; };
 		08CE2172164A6E130038151B /* trdp_reserved.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trdp_reserved.c; path = marshalling/trdp_reserved.c; sourceTree = "<group>"; };
 		730DAF9616A07B150019B4D0 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
@@ -463,7 +461,7 @@
 		7331A5621715AB1F00270642 /* pd_md_responder */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pd_md_responder; sourceTree = BUILT_PRODUCTS_DIR; };
 		73361446165BBF4500A70D3D /* test_trafficShaping.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = test_trafficShaping.c; path = ../test/diverse/test_trafficShaping.c; sourceTree = "<group>"; };
 		7336144C165BBF5B00A70D3D /* test_traffic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_traffic; sourceTree = BUILT_PRODUCTS_DIR; };
-		733615AA165BF91200A70D3D /* mdTest0001.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTest0001.c; sourceTree = "<group>"; };
+		733615AA165BF91200A70D3D /* mdTest4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTest4.c; sourceTree = "<group>"; };
 		733615AB165BF91200A70D3D /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		73472183169B116200EC18C6 /* trdp_pdcom_ladder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_pdcom_ladder.c; sourceTree = "<group>"; };
 		734721F7169C272E00EC18C6 /* ladderApplication_publisher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_publisher.c; path = ../test/ladderpdtest/ladderApplication_publisher.c; sourceTree = "<group>"; };
@@ -560,7 +558,6 @@
 		7366AC7216B68C920068A893 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		7366AC7316B68C920068A893 /* trdp-xmlpd-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "trdp-xmlpd-test.c"; sourceTree = "<group>"; };
 		7366AC7416B68C920068A893 /* trdp-xmlprint-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "trdp-xmlprint-test.c"; sourceTree = "<group>"; };
-		7366AC7516B68CC80068A893 /* mdTest0002.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTest0002.c; sourceTree = "<group>"; };
 		7366AC7616B68CC80068A893 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		7366AC7716B68CC80068A893 /* TRDP_UDPMDCom_TestPatterns.xlsx */ = {isa = PBXFileReference; lastKnownFileType = file; path = TRDP_UDPMDCom_TestPatterns.xlsx; sourceTree = "<group>"; };
 		7367954617202D5D003C68ED /* tau_tti.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_tti.h; sourceTree = "<group>"; };
@@ -1011,8 +1008,7 @@
 		733615A9165BF91200A70D3D /* udpmdcom */ = {
 			isa = PBXGroup;
 			children = (
-				733615AA165BF91200A70D3D /* mdTest0001.c */,
-				7366AC7516B68CC80068A893 /* mdTest0002.c */,
+				733615AA165BF91200A70D3D /* mdTest4.c */,
 				7366AC7616B68CC80068A893 /* readme.txt */,
 				7366AC7716B68CC80068A893 /* TRDP_UDPMDCom_TestPatterns.xlsx */,
 				733615AB165BF91200A70D3D /* readme.txt */,
@@ -1311,8 +1307,8 @@
 				73821F36150777B00046E0AC /* trdp_private.h */,
 				7373E4AF157CE42C0084966B /* trdp_if.h */,
 				73821F2F150777B00046E0AC /* trdp_if.c */,
-				73821F30150777B00046E0AC /* trdp_mdcom.c */,
 				73821F31150777B00046E0AC /* trdp_mdcom.h */,
+				73821F30150777B00046E0AC /* trdp_mdcom.c */,
 				73821F35150777B00046E0AC /* trdp_pdcom.h */,
 				73821F34150777B00046E0AC /* trdp_pdcom.c */,
 				73821F3A150777B00046E0AC /* trdp_utils.h */,
@@ -1339,8 +1335,6 @@
 				7366AC6216B68C100068A893 /* interoperability_test.xml */,
 				734721F9169C272E00EC18C6 /* ladderApplication.c */,
 				08CE20C716496F760038151B /* mdManager.c */,
-				08CE20C816496F760038151B /* mdManager1.c */,
-				08CE20C916496F760038151B /* mdManager2.c */,
 				73A9BE1616EE29CC00FE87C8 /* mdManagerTCP_Siemens.c */,
 				73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */,
 				73517C4A16BBFDA800DB5208 /* receiveHello.c */,
