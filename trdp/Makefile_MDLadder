@@ -59,7 +59,7 @@ endif
 
 ifeq ($(TRDP_OPTION_LADDER),1)
 CFLAGS += -DTRDP_OPTION_LADDER
-CFLAGS += -I src/api -I src/vos/api -I src/common
+CFLAGS += -I src/api -I src/vos/api -I src/common -I example/ladder
 endif
 
 SUBDIRS	= src
@@ -84,7 +84,7 @@ CFLAGS += -Os  -DNO_DEBUG
 endif
 
 VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o vos_shared_mem.o
-TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o trdp_pdcom_ladder.o trdp_ladder.o $(VOS_OBJS)
+TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o $(VOS_OBJS)
 MDTESTLADDER_OBJS = mdTestMain.o mdTestLog.o mdTestMdReceiveManager.o mdTestCaller.o mdTestReplier.o mdTestCommon.o
 MDTESTLADDER_SRC = mdTestMain.c mdTestLog.c mdTestMdReceiveManager.c mdTestCaller.c mdTestReplier.c mdTestCommon.c
 
@@ -101,9 +101,6 @@ doc:		doc/latex/refman.pdf
 
 $(OUTDIR)/vos_shared_mem.o:	vos_shared_mem.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c src/vos/posix/vos_shared_mem.c -o $(OUTDIR)/vos_shared_mem.o
-
-$(OUTDIR)/trdp_pdcom_ladder.o:	trdp_pdcom_ladder.c
-			$(CC) $(CFLAGS) $(INCLUDES) -c src/common/trdp_pdcom_ladder.c -o $(OUTDIR)/trdp_pdcom_ladder.o
 
 $(OUTDIR)/trdp_if.o:	trdp_if.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

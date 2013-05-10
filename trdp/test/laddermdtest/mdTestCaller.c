@@ -197,6 +197,7 @@ VOS_THREAD_FUNC_T MDCaller (
 
 	/* Listener Management */
 	TRDP_LIS_T callerThreadListener = {0};						/* callerThreadListener */
+	TRDP_LIS_T callerThreadRequestTimeoutListener = {0};		/* callerThreadRequestTimeoutListener */
 	APP_THREAD_SESSION_HANDLE *pRequestSessionHandle = NULL;	/* in the case of send Request(MR) */
 	APP_THREAD_SESSION_HANDLE *pMrSendSessionTable[REQUEST_SESSIONID_TABLE_MAX] = {0};		/* MD Request(Mr) Session Table */
 	BOOL mrSendSessionFlag = FALSE;									/* for Check reply session */
@@ -534,27 +535,87 @@ VOS_THREAD_FUNC_T MDCaller (
 						pCallerThreadParameter->pCommandValue->callerMdSendSuccessCounter++;
 					}
 
-					/* Get Request Thread Session Handle Area */
+					/* Get Request Thread Reply Receive Session Handle Area */
 					pRequestSessionHandle = (APP_THREAD_SESSION_HANDLE *)malloc(sizeof(APP_THREAD_SESSION_HANDLE));
 					if (pRequestSessionHandle == NULL)
 					{
-						vos_printf(VOS_LOG_ERROR, "Create Request Session Area ERROR. malloc Err\n");
+						vos_printf(VOS_LOG_ERROR, "Create Reply Receive Session Area ERROR. malloc Err\n");
 						return 0;
 					}
 					else
 					{
 						memset(pRequestSessionHandle, 0, sizeof(APP_THREAD_SESSION_HANDLE));
-						/* Set Request Session Handle */
+						/* Set Reply Receive Session Handle */
 						pRequestSessionHandle->pMdAppThreadListener = callerThreadListener;
 						memcpy(pRequestSessionHandle->mdAppThreadSessionId, mdSessionId, sizeof(mdSessionId));
 						pRequestSessionHandle->sendRequestNumExpReplies = mdNoOfRepliers;
 						pRequestSessionHandle->decidedSessionSuccessCount = 0;
 						pRequestSessionHandle->decidedSessionFailureCount = 0;
-						/* Set Request Session Handle Message Queue Descriptor */
+						/* Set Reply Receive Session Handle Message Queue Descriptor */
 						err = setAppThreadSessionMessageQueueDescriptor(pRequestSessionHandle, callerMqDescriptor);
 						if (err != MD_APP_NO_ERR)
 						{
-							vos_printf(VOS_LOG_ERROR, "setAppSessionIdMessageQueueDescriptor error\n");
+							vos_printf(VOS_LOG_ERROR, "Reply Receive Session setAppSessionIdMessageQueueDescriptor error\n");
+						}
+						else
+						{
+							/* Set mrSendSessionTable */
+							for(i=0; i < REQUEST_SESSIONID_TABLE_MAX; i++)
+							{
+								if(pMrSendSessionTable[i]->mdAppThreadSessionId == 0)
+								{
+									/* Set Request Session Handle */
+									pMrSendSessionTable[i] = pRequestSessionHandle;
+									break;
+								}
+							}
+						}
+					}
+
+					/* Get Request Thread Request Send Session Handle Area */
+					pRequestSessionHandle = (APP_THREAD_SESSION_HANDLE *)malloc(sizeof(APP_THREAD_SESSION_HANDLE));
+					if (pRequestSessionHandle == NULL)
+					{
+						vos_printf(VOS_LOG_ERROR, "Create Request Send Session Area ERROR. malloc Err\n");
+						return 0;
+					}
+					else
+					{
+						memset(pRequestSessionHandle, 0, sizeof(APP_THREAD_SESSION_HANDLE));
+						/* Get Request Send Session Handle Area */
+						if (callerThreadRequestTimeoutListener != NULL)
+						{
+							free(callerThreadRequestTimeoutListener);
+						}
+						callerThreadRequestTimeoutListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
+						if (callerThreadRequestTimeoutListener == NULL)
+						{
+							vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. callerThreadRequestTimeoutListener malloc Err\n");
+							return 0;
+						}
+						else
+						{
+							memset(callerThreadRequestTimeoutListener, 0, sizeof(TRDP_ADDRESSES_T));
+						}
+
+						/* Set Request Send Session Handle */
+						callerThreadRequestTimeoutListener->comId =  pCallerThreadParameter->pCommandValue->mdSendComId;
+						callerThreadRequestTimeoutListener->destIpAddr =  mdDestIpAddr;
+						callerThreadRequestTimeoutListener->srcIpAddr =  IP_ADDRESS_NOTHING;
+
+						pRequestSessionHandle->pMdAppThreadListener = callerThreadRequestTimeoutListener;
+//						pRequestSessionHandle->pMdAppThreadListener->comId = pCallerThreadParameter->pCommandValue->mdSendComId;
+//						pRequestSessionHandle->pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+//						pRequestSessionHandle->pMdAppThreadListener->destIpAddr = mdDestIpAddr;
+						memcpy(pRequestSessionHandle->mdAppThreadSessionId, mdSessionId, sizeof(mdSessionId));
+						pRequestSessionHandle->sendRequestNumExpReplies = mdNoOfRepliers;
+						pRequestSessionHandle->decidedSessionSuccessCount = 0;
+						pRequestSessionHandle->decidedSessionFailureCount = 0;
+						/* Set Request Send Session Handle Message Queue Descriptor */
+						err = setAppThreadSessionMessageQueueDescriptor(pRequestSessionHandle, callerMqDescriptor);
+						if (err != MD_APP_NO_ERR)
+						{
+							vos_printf(VOS_LOG_ERROR, "Request Send Session setAppSessionIdMessageQueueDescriptor error\n");
 						}
 						else
 						{
@@ -713,7 +774,9 @@ VOS_THREAD_FUNC_T MDCaller (
 					logStringLength = 0;
 
 					/* Check ComId */
-					if (receiveMqMsg.Msg.comId != ((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK))
+					/* Request comID and Reply comId */
+					if ((receiveMqMsg.Msg.comId != ((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK))
+						&& (receiveMqMsg.Msg.comId != pCallerThreadParameter->pCommandValue->mdSendComId))
 					{
 						/* ComId Err*/
 						vos_printf(VOS_LOG_ERROR, "Receive ComId ERROR\n");
@@ -978,6 +1041,15 @@ VOS_THREAD_FUNC_T MDCaller (
 		}
 	}
 
+	/* Delete AppThereadSession Message Queue Descriptor */
+	deleteAppThreadSessionMessageQueueDescriptor(
+			&appThreadSessionHandle,
+			callerMqDescriptor);
+	deleteAppThreadSessionMessageQueueDescriptor(
+			&appThreadSessionHandle2,
+			callerMqDescriptor);
+
+
 	/* Delete command Value form COMMAND VALUE LIST */
 	if (deleteCommandValueList(&pTrdpInitializeParameter, pCallerThreadParameter->pCommandValue) != MD_APP_NO_ERR)
 	{
@@ -1021,7 +1093,8 @@ MD_APP_ERR_TYPE setReceiveReplyResultTable(
 	{
 		if(pReceiveReplyResultTable[i].callerReceiveReplyNumReplies == 0)
 		{
-			memcpy(pReceiveReplyResultTable[i].callerReceiveReplySessionId, receiveReplySessionId, sizeof(receiveReplySessionId));
+//			memcpy(pReceiveReplyResultTable[i].callerReceiveReplySessionId, receiveReplySessionId, sizeof(receiveReplySessionId));
+			memcpy(pReceiveReplyResultTable[i].callerReceiveReplySessionId, receiveReplySessionId, sizeof(TRDP_UUID_T));
 			pReceiveReplyResultTable[i].callerReceiveReplyNumReplies = receiveReplyNumReplies;
 			pReceiveReplyResultTable[i].callerDecideMdTranssmissionResultCode = decideMdTranssmissionResutlCode;
 			return MD_APP_NO_ERR;
@@ -1170,7 +1243,8 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 		for(receiveTableLoopCounter = 0; receiveTableLoopCounter < RECEIVE_REPLY_RESULT_TABLE_MAX; receiveTableLoopCounter++)
 		{
 //			if (&pReceiveReplyResultTable[receiveTableLoopCounter] == NULL)
-			if (pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies == 0)
+			if ((pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies == 0)
+				&& (pReceiveReplyResultTable[receiveTableLoopCounter].callerDecideMdTranssmissionResultCode == MD_APP_NO_ERR))
 			{
 				continue;
 			}
@@ -1199,13 +1273,15 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 		if (ppMrSendSessionTable[sendTableLoopCounter]->sendRequestNumExpReplies == 1)
 		{
 			/* Single replier decideMdTranssmission Result Code Success */
-			if (ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount == 1)
+			/* and Receive Reply */
+			if ((ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount == 1)
+				&& (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK))
 			{
 				/* Request - Reply Success */
 				err = MD_APP_NO_ERR;
 				pCallerCommandValue->callerMdRequestReplySuccessCounter++;
 				/* Send Table Delete */
-				deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+				deleteMrSendSessionTable(ppMrSendSessionTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Receive Table Delete */
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
@@ -1221,7 +1297,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 										ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Send Table Delete */
-				deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+				deleteMrSendSessionTable(ppMrSendSessionTable,
 										ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
 			/* Not Receive */
@@ -1242,7 +1318,9 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				/* Request - Reply Success */
 				err = MD_APP_NO_ERR;
 				/* First Success */
-				if (ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount == 1)
+				/* and Receive Reply */
+				if ((ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount == 1)
+					&& (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK))
 				{
 					pCallerCommandValue->callerMdRequestReplySuccessCounter++;
 				}
@@ -1250,7 +1328,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Send Table Delete */
-				deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+				deleteMrSendSessionTable(ppMrSendSessionTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
 			/* Result Code Failure */
@@ -1258,11 +1336,15 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 			{
 				if (ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount > 0)
 				{
-					/* Decrement Success Counter */
-					pCallerCommandValue->callerMdRequestReplySuccessCounter--;
-					/* Request - Reply Failure */
-					err = MD_APP_ERR;
-					pCallerCommandValue->callerMdRequestReplyFailureCounter++;
+					/* Receive Reply */
+					if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+					{
+						/* Decrement Success Counter */
+						pCallerCommandValue->callerMdRequestReplySuccessCounter--;
+						/* Request - Reply Failure */
+						err = MD_APP_ERR;
+						pCallerCommandValue->callerMdRequestReplyFailureCounter++;
+					}
 				}
 				else
 				{
@@ -1274,7 +1356,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Send Table Delete */
-				deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+				deleteMrSendSessionTable(ppMrSendSessionTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
 			else
@@ -1290,7 +1372,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Send Table Delete */
-				deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+				deleteMrSendSessionTable(ppMrSendSessionTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
 
@@ -1306,7 +1388,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 					deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 					/* Send Table Delete */
-					deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+					deleteMrSendSessionTable(ppMrSendSessionTable,
 												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				}
 			}
@@ -1316,7 +1398,9 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 		else
 		{
 			/* All Repliers decideMdTranssmission Result Code Success */
-			if (ppMrSendSessionTable[sendTableLoopCounter]->sendRequestNumExpReplies == ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount)
+			/* and Receive Reply */
+			if ((ppMrSendSessionTable[sendTableLoopCounter]->sendRequestNumExpReplies == ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount)
+			&& (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK))
 			{
 				/* Request - Reply Success */
 				err = MD_APP_NO_ERR;
@@ -1325,7 +1409,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Send Table Delete */
-				deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+				deleteMrSendSessionTable(ppMrSendSessionTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
 			/* Result Code Failure */
@@ -1338,7 +1422,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Send Table Delete */
-				deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+				deleteMrSendSessionTable(ppMrSendSessionTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
 			/* any Replier Receiving */
@@ -1359,7 +1443,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 					deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 					/* Send Table Delete */
-					deleteMrSendSessionTable(&ppMrSendSessionTable[sendTableLoopCounter],
+					deleteMrSendSessionTable(ppMrSendSessionTable,
 												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				}
 #endif
