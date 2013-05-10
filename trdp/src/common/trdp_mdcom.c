@@ -49,7 +49,8 @@
  */
 
 static const UINT32 cMinimumMDSize = 1024;                            /**< Initial size for message data received */
-static const TRDP_MD_INFO_T trdp_md_info_default;
+static const UINT8  cEmptySession[TRDP_SESS_ID_SIZE] = {0};           /**< Empty sessionID to compare             */
+static const TRDP_MD_INFO_T cTrdp_md_info_default;
 
 /**********************************************************************************************************************/
 /** Initialize the specific parameters for message data
@@ -276,7 +277,6 @@ TRDP_ERR_T trdp_mdCheck (
     if (TRDP_NO_ERR == err)
     {
         UINT16 l_protocolVersion = vos_ntohs(pPacket->protocolVersion);
-#define TRDP_PROTOCOL_VERSION_CHECK_MASK  0xFF00
         if ((l_protocolVersion & TRDP_PROTOCOL_VERSION_CHECK_MASK) !=
             (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK))
         {
@@ -620,7 +620,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 }
 
                 /*  get the complete packet */
-                if (pElement->dataSize > 0)
+                /* if (pElement->dataSize > 0) */
                 {
                     size    = pElement->grossSize;
                     err     = (TRDP_ERR_T) vos_sockReceiveUDP(mdSock,
@@ -862,27 +862,10 @@ TRDP_ERR_T  trdp_mdRecv (
         appHandle->pMDRcvEle = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
         if (NULL != appHandle->pMDRcvEle)
         {
-            appHandle->pMDRcvEle->pPacket   = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
+            appHandle->pMDRcvEle->pPacket   = NULL; /* (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize); */
             appHandle->pMDRcvEle->pktFlags  = appHandle->mdDefault.flags;
-            if (NULL == appHandle->pMDRcvEle->pPacket)
-            {
-                vos_memFree(appHandle->pMDRcvEle);
-                appHandle->pMDRcvEle = NULL;
-                vos_printf(VOS_LOG_ERROR, "Receiving MD: Out of receive buffers!\n");
-                return TRDP_MEM_ERR;
-            }
         }
         else
-        {
-            vos_printf(VOS_LOG_ERROR, "Receiving MD: Out of receive buffers!\n");
-            return TRDP_MEM_ERR;
-        }
-    }
-
-    if (appHandle->pMDRcvEle->pPacket == NULL)
-    {
-        appHandle->pMDRcvEle->pPacket = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
-        if (appHandle->pMDRcvEle->pPacket == NULL)
         {
             vos_printf(VOS_LOG_ERROR, "Receiving MD: Out of receive buffers!\n");
             return TRDP_MEM_ERR;
@@ -899,6 +882,22 @@ TRDP_ERR_T  trdp_mdRecv (
         appHandle->pMDRcvEle->pktFlags = (TRDP_FLAGS_T) (appHandle->pMDRcvEle->pktFlags & ~TRDP_FLAGS_TCP);
         isTCP = FALSE;
     }
+
+    if (appHandle->pMDRcvEle->pPacket == NULL)
+    {
+        /* We malloc a big buffer for TCP only; for UDP cMinimumSize (= 1024) suffices
+           This should be changed to allow smaller footprint for TCP traffic, as well. Gari?)  */
+        appHandle->pMDRcvEle->pPacket = (MD_PACKET_T *) vos_memAlloc(
+                (isTCP == TRUE) ? TRDP_MAX_MD_PACKET_SIZE : cMinimumMDSize);
+        if (appHandle->pMDRcvEle->pPacket == NULL)
+        {
+            vos_memFree(appHandle->pMDRcvEle);
+            appHandle->pMDRcvEle = NULL;
+            vos_printf(VOS_LOG_ERROR, "Receiving MD: Out of receive buffers!\n");
+            return TRDP_MEM_ERR;
+        }
+    }
+
 
     /* get packet: */
 
@@ -1157,7 +1156,7 @@ TRDP_ERR_T  trdp_mdRecv (
     /* Inform user  */
     if (NULL != iterMD && appHandle->mdDefault.pfCbFunction != NULL)
     {
-        TRDP_MD_INFO_T theMessage = trdp_md_info_default;
+        TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
         theMessage.srcIpAddr    = iterMD->addr.srcIpAddr;
         theMessage.destIpAddr   = iterMD->addr.destIpAddr;
@@ -1583,7 +1582,7 @@ void  trdp_mdCheckListenSocks (
                         /* Callback the error to the application  */
                         if (appHandle->mdDefault.pfCbFunction != NULL)
                         {
-                            TRDP_MD_INFO_T theMessage = trdp_md_info_default;
+                            TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
                             theMessage.topoCount    = appHandle->topoCount;
                             theMessage.resultCode   = TRDP_SOCK_ERR;
@@ -2069,7 +2068,7 @@ void  trdp_mdCheckTimeouts (
             /* Execute callback */
             if (appHandle->mdDefault.pfCbFunction != NULL)
             {
-                TRDP_MD_INFO_T theMessage = trdp_md_info_default;
+                TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
                 theMessage.srcIpAddr    = 0;
                 theMessage.destIpAddr   = iterMD->addr.destIpAddr;
@@ -2184,7 +2183,7 @@ void  trdp_mdCheckTimeouts (
                     /* Execute callback */
                     if (appHandle->mdDefault.pfCbFunction != NULL)
                     {
-                        TRDP_MD_INFO_T theMessage = trdp_md_info_default;
+                        TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
                         theMessage.destIpAddr   = appHandle->iface[index].tcpParams.cornerIp;
                         theMessage.resultCode   = TRDP_TIMEOUT_ERR;
@@ -2560,8 +2559,8 @@ TRDP_ERR_T trdp_mdCommonSend (
                     break;
             }
 
-            /* already exist session ID .. */
-            if (0 != pSenderElement->sessionID[0])
+            /* already existing session ID .. */
+            if (memcmp(pSenderElement->sessionID, cEmptySession, TRDP_SESS_ID_SIZE) != 0)
             {
                 vos_printf(VOS_LOG_INFO, "Using session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
                            pSenderElement->sessionID[0], pSenderElement->sessionID[1],
