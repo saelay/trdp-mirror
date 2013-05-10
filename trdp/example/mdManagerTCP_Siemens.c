@@ -25,6 +25,7 @@
 #include <string.h>
 //#include <sys/time.h>
 #include <sys/select.h>
+#include <unistd.h>
 
 #include <mqueue.h>
 #include <errno.h>
@@ -110,7 +111,6 @@ static UINT32 count_session = 0;
 static TRDP_APP_SESSION_T  appHandle;  /*    Our identifier to the library instance    */
 
 
-static int x_reqconf ;
 static mqd_t trdp_mq;
 
 static TRDP_IP_ADDR_T    MD_COMID1_SRC_IP;
@@ -141,7 +141,12 @@ void get_IPs()
     INT32 read_data;
 
     printf("What is your PC?  PC-1[1] / PC-2[2] \n");
-    scanf("%d", &read_data);
+    if(scanf("%d", &read_data) < 0)
+    {
+        printf("--- Bad Selection ---\n");
+        return;
+    }
+
     if(read_data == 1)
     {
         MD_COMID1_SRC_IP = MD_DEFAULT_IP_1;
@@ -155,7 +160,7 @@ void get_IPs()
     printf(" The IPs configured correctly\n");
 }
 
-
+#if 0
 static void print_memory(const void *p, const int l)
 {
     if (p != NULL || l > 0)
@@ -189,7 +194,7 @@ static void print_memory(const void *p, const int l)
         }
     }
 }
-
+#endif
 
 /* QUEUE FUNCTIONS */
 
@@ -304,97 +309,6 @@ static int queue_receivemessage(trdp_apl_cbenv_t * msg)
     return EOK;
 }
 
-/* MD application server */
-static void queue_procricz()
-{
-    trdp_apl_cbenv_t msg;
-    int rc = queue_receivemessage(&msg);
-    if (rc != EOK) return;
-
-    {
-        printf("md_indication(r=%p d=%p l=%d)\n",msg.pRefCon,msg.pData,msg.dataSize);
-
-        printf("srcIpAddr         = x%08X\n",msg.Msg.srcIpAddr);
-        printf("destIpAddr        = x%08X\n",msg.Msg.destIpAddr);
-        printf("seqCount          = %d\n"   ,msg.Msg.seqCount);
-        printf("protVersion       = %d\n"   ,msg.Msg.protVersion);
-        printf("msgType           = x%04X\n",msg.Msg.msgType);
-        printf("comId             = %d\n"   ,msg.Msg.comId);
-        printf("topoCount         = %d\n"   ,msg.Msg.topoCount);
-        printf("userStatus        = %d\n"   ,msg.Msg.userStatus);
-        printf("replyStatus       = %d\n"   ,msg.Msg.replyStatus);
-        //printf("sessionId         = ");      print_session(msg.Msg.sessionId);
-        printf("replyTimeout      = %d\n"   ,msg.Msg.replyTimeout);
-        //printf("destURI           = ");      print_uri(msg.Msg.destURI); printf("\n");
-        //printf("srcURI            = ");      print_uri(msg.Msg.srcURI); printf("\n");
-        printf("noOfReplies       = %d\n"   ,msg.Msg.numReplies);
-        printf("pUserRef          = %p\n"   ,msg.Msg.pUserRef);
-        printf("resultCode        = %d\n"   ,msg.Msg.resultCode);
-
-//        print_memory(msg.pData,msg.dataSize);
-    }
-
-    /* Prepare for the CallBack function */
-
-    /* Will be like this if we pass the lF = &frameHead like in UDP */
-    //UINT8 *pDataCall = &msg.pData[sizeof(MD_HEADER_T)];
-
-    UINT8 *pDataCall = &msg.pData[0];
-
-    const TRDP_MD_INFO_T    *pMsg = &msg.Msg;
-
-    /****************************************/
-
-    myMDcallBack(msg.Msg.pUserRef, pMsg,    pDataCall,
-                                    msg.dataSize);
-}
-
-
-/* call back function for message data */
-static void md_indication(
-    void                 *pRefCon,
-    const TRDP_MD_INFO_T *pMsg,
-    UINT8                *pData,
-    UINT32               dataSize)
-{
-    printf("md_indication(r=%p m=%p d=%p l=%d)\n",pRefCon,pMsg,pData,dataSize);
-
-    #if 0
-
-    printf("srcIpAddr         = x%08X\n",pMsg->srcIpAddr);
-    printf("destIpAddr        = x%08X\n",pMsg->destIpAddr);
-    printf("seqCount          = %d\n"   ,pMsg->seqCount);
-    printf("protVersion       = %d\n"   ,pMsg->protVersion);
-    printf("msgType           = x%04X\n",pMsg->msgType);
-    printf("comId             = %d\n"   ,pMsg->comId);
-    printf("topoCount         = %d\n"   ,pMsg->topoCount);
-    printf("userStatus        = %d\n"   ,pMsg->userStatus);
-    printf("replyStatus       = %d\n"   ,pMsg->replyStatus);
-    printf("sessionId         = ");      print_session(pMsg->sessionId);
-    printf("replyTimeout      = %d\n"   ,pMsg->replyTimeout);
-    printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
-    printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
-    printf("noOfReplies       = %d\n"   ,pMsg->noOfReplies);
-    printf("pUserRef          = %p\n"   ,pMsg->pUserRef);
-    printf("resultCode        = %d\n"   ,pMsg->resultCode);
-
-    print_memory(pData,dataSize);
-
-    #endif
-
-    {
-        trdp_apl_cbenv_t fwd;
-
-        fwd.pRefCon  = pRefCon;
-        fwd.Msg      = * pMsg;
-        fwd.pData    = pData;
-        fwd.dataSize = dataSize;
-
-        queue_sendmessage(&fwd);
-    }
-
-}
-
 
 /* Delete MD session */
 void delete_session(INT32 found_index)
@@ -415,8 +329,6 @@ void delete_session(INT32 found_index)
 void tlm_digest_session(const TRDP_MD_INFO_T *pMsg)
 {
     UINT32 index;
-    BOOL session_exist = FALSE;
-
 
     /* Request message received */
     if(pMsg->msgType == TRDP_MSG_MR)
@@ -534,65 +446,6 @@ void tlm_digest_session(const TRDP_MD_INFO_T *pMsg)
     }
 }
 
-/* Check if there is any received message that is waiting the response */
-BOOL prep_toSend(TRDP_MSG_T type)
-{    TRDP_IP_ADDR_T tmp_ip;
-    INT32 index;
-
-    for(index = 0; index < count_session;index++)
-    {
-        if(type == TRDP_MSG_MR)
-        {
-            //Reply
-
-            if((APP_SESSION_TEST[index].sessionState.msgType == type)
-                && (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
-            {
-                return TRUE;
-            }
-        }else if(type == TRDP_MSG_MQ)
-        {
-            //Confirm
-            if((APP_SESSION_TEST[index].sessionState.msgType == type)
-                && (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
-            {
-                return TRUE;
-            }
-        }
-    }
-
-    return FALSE;
-}
-
-
-
-/**********************************************************************************************************************/
-/** callback routine for TRDP logging/error output
- *
- *  @param[in]      pRefCon            user supplied context pointer
- *  @param[in]        category        Log category (Error, Warning, Info etc.)
- *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
- *  @param[in]        pFile            pointer to NULL-terminated string of source module
- *  @param[in]        LineNumber        line
- *  @param[in]        pMsgStr         pointer to NULL-terminated string
- *  @retval         none
- */
-void dbgOut (
-    void        *pRefCon,
-    TRDP_LOG_T  category,
-    const CHAR8 *pTime,
-    const CHAR8 *pFile,
-    UINT16      LineNumber,
-    const CHAR8 *pMsgStr)
-{
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s",
-           pTime,
-           catStr[category],
-           pFile,
-           LineNumber,
-           pMsgStr);
-}
 
 
 /**********************************************************************************************************************/
@@ -615,8 +468,6 @@ void myMDcallBack (
     CHAR8 not_ini[TRDP_QUEUE_MAX_MESG];
     memset(not_ini, 0, sizeof(not_ini));
     UINT32 index;
-    UINT32 found_index;
-    BOOL session_exist = FALSE;
 
     /*    Check why we have been called    */
     switch (pMsg->resultCode)
@@ -751,6 +602,160 @@ void myMDcallBack (
 }
 
 
+/* MD application server */
+static void queue_procricz()
+{
+    trdp_apl_cbenv_t msg;
+    int rc = queue_receivemessage(&msg);
+    if (rc != EOK) return;
+
+    {
+        printf("md_indication(r=%p d=%p l=%d)\n",msg.pRefCon,msg.pData,msg.dataSize);
+
+        printf("srcIpAddr         = x%08X\n",msg.Msg.srcIpAddr);
+        printf("destIpAddr        = x%08X\n",msg.Msg.destIpAddr);
+        printf("seqCount          = %d\n"   ,msg.Msg.seqCount);
+        printf("protVersion       = %d\n"   ,msg.Msg.protVersion);
+        printf("msgType           = x%04X\n",msg.Msg.msgType);
+        printf("comId             = %d\n"   ,msg.Msg.comId);
+        printf("topoCount         = %d\n"   ,msg.Msg.topoCount);
+        printf("userStatus        = %d\n"   ,msg.Msg.userStatus);
+        printf("replyStatus       = %d\n"   ,msg.Msg.replyStatus);
+        //printf("sessionId         = ");      print_session(msg.Msg.sessionId);
+        printf("replyTimeout      = %d\n"   ,msg.Msg.replyTimeout);
+        //printf("destURI           = ");      print_uri(msg.Msg.destURI); printf("\n");
+        //printf("srcURI            = ");      print_uri(msg.Msg.srcURI); printf("\n");
+        printf("noOfReplies       = %d\n"   ,msg.Msg.numReplies);
+        printf("pUserRef          = %p\n"   ,msg.Msg.pUserRef);
+        printf("resultCode        = %d\n"   ,msg.Msg.resultCode);
+
+//        print_memory(msg.pData,msg.dataSize);
+    }
+
+    /* Prepare for the CallBack function */
+
+    /* Will be like this if we pass the lF = &frameHead like in UDP */
+    //UINT8 *pDataCall = &msg.pData[sizeof(MD_HEADER_T)];
+
+    UINT8 *pDataCall = &msg.pData[0];
+
+    const TRDP_MD_INFO_T    *pMsg = &msg.Msg;
+
+    /****************************************/
+
+    myMDcallBack((void *)msg.Msg.pUserRef, appHandle, pMsg,    pDataCall,
+                                    msg.dataSize);
+}
+
+
+/* call back function for message data */
+static void md_indication(
+    void                 *pRefCon,
+    TRDP_APP_SESSION_T   appHandle,
+    const TRDP_MD_INFO_T *pMsg,
+    UINT8                *pData,
+    UINT32               dataSize)
+{
+    printf("md_indication(r=%p m=%p d=%p l=%d)\n",pRefCon,pMsg,pData,dataSize);
+
+    #if 0
+
+    printf("srcIpAddr         = x%08X\n",pMsg->srcIpAddr);
+    printf("destIpAddr        = x%08X\n",pMsg->destIpAddr);
+    printf("seqCount          = %d\n"   ,pMsg->seqCount);
+    printf("protVersion       = %d\n"   ,pMsg->protVersion);
+    printf("msgType           = x%04X\n",pMsg->msgType);
+    printf("comId             = %d\n"   ,pMsg->comId);
+    printf("topoCount         = %d\n"   ,pMsg->topoCount);
+    printf("userStatus        = %d\n"   ,pMsg->userStatus);
+    printf("replyStatus       = %d\n"   ,pMsg->replyStatus);
+    printf("sessionId         = ");      print_session(pMsg->sessionId);
+    printf("replyTimeout      = %d\n"   ,pMsg->replyTimeout);
+    printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
+    printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
+    printf("noOfReplies       = %d\n"   ,pMsg->noOfReplies);
+    printf("pUserRef          = %p\n"   ,pMsg->pUserRef);
+    printf("resultCode        = %d\n"   ,pMsg->resultCode);
+
+    print_memory(pData,dataSize);
+
+    #endif
+
+    {
+        trdp_apl_cbenv_t fwd;
+
+        fwd.pRefCon  = pRefCon;
+        fwd.Msg      = * pMsg;
+        fwd.pData    = pData;
+        fwd.dataSize = dataSize;
+
+        queue_sendmessage(&fwd);
+    }
+
+}
+
+
+/* Check if there is any received message that is waiting the response */
+BOOL prep_toSend(TRDP_MSG_T type)
+{
+    INT32 index;
+
+    for(index = 0; index < count_session;index++)
+    {
+        if(type == TRDP_MSG_MR)
+        {
+            //Reply
+
+            if((APP_SESSION_TEST[index].sessionState.msgType == type)
+                && (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+            {
+                return TRUE;
+            }
+        }else if(type == TRDP_MSG_MQ)
+        {
+            //Confirm
+            if((APP_SESSION_TEST[index].sessionState.msgType == type)
+                && (APP_SESSION_TEST[index].sessionState.sent_recv_prep == TRDP_RECEIVED))
+            {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+
+
+/**********************************************************************************************************************/
+/** callback routine for TRDP logging/error output
+ *
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]        category        Log category (Error, Warning, Info etc.)
+ *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
+ *  @param[in]        pFile            pointer to NULL-terminated string of source module
+ *  @param[in]        LineNumber        line
+ *  @param[in]        pMsgStr         pointer to NULL-terminated string
+ *  @retval         none
+ */
+void dbgOut (
+    void        *pRefCon,
+    TRDP_LOG_T  category,
+    const CHAR8 *pTime,
+    const CHAR8 *pFile,
+    UINT16      LineNumber,
+    const CHAR8 *pMsgStr)
+{
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    printf("%s %s %s:%d %s",
+           pTime,
+           catStr[category],
+           pFile,
+           LineNumber,
+           pMsgStr);
+}
+
+
 TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set*  rfds, BOOL *tcpStatistics)
 {
     UINT32 read_data = 1;
@@ -781,7 +786,10 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 
 
         printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");
-        scanf("%d", &read_data);
+        if(scanf("%d", &read_data) == 1)
+        {
+            printf("The application queue will be used\n");
+        }
 
         //read_data = 0;
 
@@ -830,13 +838,21 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         memset(mdata.testId, 0, sizeof(mdata.testId));
 
         printf("Do you want to add the Listener?\n Yes[1] / No[0]\n");
-        scanf("%d", &read_data);
+        if(scanf("%d", &read_data) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
 
         while(read_data == 1)
         {
 
             printf("Which is the comId that you want to add the Listener?\n");
-            scanf("%d", &MD_listen_COMID[*listeners_count]);
+            if(scanf("%d", &MD_listen_COMID[*listeners_count]) < 0)
+            {
+                printf("--- Bad Selection ---\n");
+                return TRDP_PARAM_ERR;
+            }
 
             err = tlm_addListener( appHandle,                                 /*    our application identifier            */
                                     &(listenHandle[*listeners_count]),         /*    our subscription identifier            */
@@ -859,15 +875,23 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
             }
 
             printf("Do you want to continue adding listeners?\n Yes[1] / No[0]\n");
-            scanf("%d", &read_data);
+            if(scanf("%d", &read_data) < 0)
+            {
+                printf("--- Bad Selection ---\n");
+                return TRDP_PARAM_ERR;
+            }
 
             (*listeners_count) ++;
 
         }
 
         /* TCP Statistics Support */
-        printf("Do you want to print TCP Statiscs?\n Yes[1] / No[0]\n");
-        scanf("%d", &read_data);
+        printf("Do you want to print TCP Statistics?\n Yes[1] / No[0]\n");
+        if(scanf("%d", &read_data) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
 
         if(read_data == TRUE)
         {
@@ -887,7 +911,11 @@ TRDP_ERR_T notifies_requests()
 
     read_data = 0;
     printf("Do you want to send any notify or request msg? Yes[1] / No[0]\n");
-    scanf("%d", &read_data);
+    if(scanf("%d", &read_data) < 0)
+    {
+        printf("--- Bad Selection ---\n");
+        return TRDP_PARAM_ERR;
+    }
 
     while(read_data == 1)
     {
@@ -895,12 +923,26 @@ TRDP_ERR_T notifies_requests()
         TRDP_UUID_T pSessionId;
         memset(mdata.testId, 0, sizeof(mdata.testId));
         printf("Specify the kind of message you want to send. ComId:\n");
-        scanf("%d",&MD_COMID);
+        if(scanf("%d",&MD_COMID) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
+
         printf("Enter: 1 for notify, 2 for request\n");
-        scanf("%d", &read_data);
+        if(scanf("%d", &read_data) < 1)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
 
         printf("Enter the message data to send (Maximum 16 chars - Without whitespaces):\n");
-        scanf("%s", mdata.testId);
+        if(scanf("%s", mdata.testId) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
+
         mdata.cnt = 0;
         //fgets(gBuffer, 30, stdin);
         //gets(gBuffer);
@@ -927,7 +969,7 @@ TRDP_ERR_T notifies_requests()
         {
             err = tlm_request(appHandle,
                                 NULL,
-                                pSessionId,
+                                (TRDP_UUID_T *)&pSessionId,
                                 MD_COMID,
                                 0,
                                 MD_COMID1_SRC_IP,
@@ -963,7 +1005,11 @@ TRDP_ERR_T notifies_requests()
         read_data=0;
         MD_COMID=0;
         printf("Do you want to send more messages? Yes[1] / No[0]\n");
-        scanf("%d", &read_data);
+        if(scanf("%d", &read_data) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
     }
     return err;
 }
@@ -973,7 +1019,6 @@ TRDP_ERR_T reply_msgs()
 {
     BOOL to_reply;
     UINT32 replies_count=0;
-    UINT32 comid_num;
     UINT32 read_data = 1;
     UINT32 found_index;
     UINT32 answer_kind;
@@ -998,21 +1043,37 @@ TRDP_ERR_T reply_msgs()
             session_num ++;
         }
         printf("\n Do you want to reply any of those? Yes[1] / No[0]\n");
-        scanf("%d", &read_data);
+        if(scanf("%d", &read_data) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
     }
 
     while(read_data)
     {
         printf("\nWhich one? Enter the number (0,1,2...): \n");
-        scanf("%d", &session_num);
+        if(scanf("%d", &session_num) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
 
         printf("Which kind of reply? 0-REPLY | 1-REPLY QUERY | 2-REPLY ERR\n");
-        scanf("%d", &answer_kind);
+        if(scanf("%d", &answer_kind) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
 
         if((answer_kind == 0) || (answer_kind == 1))
         {
             printf("Enter the message data to send (Maximum 32 characters - Without whitespaces):\n");
-            scanf("%s", mdata.testId);
+            if(scanf("%s", mdata.testId) < 0)
+            {
+                printf("Wrong message data to send\n");
+                return TRDP_PARAM_ERR;
+            }
         }
 
         switch (answer_kind)
@@ -1026,7 +1087,7 @@ TRDP_ERR_T reply_msgs()
                             MD_COMID1_SRC_IP,
                             MD_COMID1_DST_IP,
                             TRDP_FLAGS_TCP,
-                            NULL, //UINT16                  userStatus,
+                            0, //UINT16                  userStatus,
                             NULL,
                             (UINT8 *)&mdata,
                             sizeof(mdata),
@@ -1044,7 +1105,7 @@ TRDP_ERR_T reply_msgs()
                             MD_COMID1_SRC_IP,
                             MD_COMID1_DST_IP,
                             TRDP_FLAGS_TCP,
-                            NULL, //UINT16                  userStatus,
+                            0, //UINT16                  userStatus,
                             TRDP_MD_DEFAULT_CONFIRM_TIMEOUT,
                             NULL,
                             (UINT8 *)&mdata,
@@ -1097,7 +1158,11 @@ TRDP_ERR_T reply_msgs()
         if(replies_count > 0)
         {
             printf("Do you want to reply another one? Yes[1] / No[0]\n");
-            scanf("%d", &read_data);
+            if(scanf("%d", &read_data) < 0)
+            {
+                printf("--- Bad Selection ---\n");
+                return TRDP_PARAM_ERR;
+            }
 
             if(read_data)
             {
@@ -1128,11 +1193,9 @@ TRDP_ERR_T confirm_msgs()
 {
     BOOL to_reply;
     UINT32 read_data = 1;
-    UINT32 comid_num;
     UINT32 found_index;
     UINT32 confirms_count=0;
     TRDP_ERR_T err = TRDP_NO_ERR;
-    TRDP_UUID_T pSessionId;
     UINT32 session_num;
 
     to_reply = prep_toSend(TRDP_MSG_MQ);
@@ -1153,13 +1216,21 @@ TRDP_ERR_T confirm_msgs()
             session_num++;
         }
         printf("\nDo you want to send a confirm of any of those? Yes[1] / No[0]\n");
-        scanf("%d", &read_data);
+        if(scanf("%d", &read_data) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
     }
 
     while(read_data)
     {
         printf("\nWhich one? Enter the number (0,1,2...): \n");
-        scanf("%d", &session_num);
+        if(scanf("%d", &session_num) < 0)
+        {
+            printf("--- Bad Selection ---\n");
+            return TRDP_PARAM_ERR;
+        }
 
         if(err != TRDP_NO_ERR)
         {
@@ -1168,13 +1239,13 @@ TRDP_ERR_T confirm_msgs()
 
         err = tlm_confirm(appHandle,
                 NULL,
-                &(APP_SESSION_TEST[(session_num)].pSessionId),
+                (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
                 APP_SESSION_TEST[(session_num)].comId,
                 0,
                 MD_COMID1_SRC_IP,
                 MD_COMID1_DST_IP,
                 TRDP_FLAGS_TCP,
-                NULL, //UINT16                  userStatus,
+                0, //UINT16                  userStatus,
                 TRDP_REPLY_NO_REPLY,
                 NULL,
                 SOURCE_URI,
@@ -1194,7 +1265,11 @@ TRDP_ERR_T confirm_msgs()
         if(confirms_count > 0)
         {
             printf("Do you want to send another confirm message? Yes[1] / No[0]\n");
-            scanf("%d", &read_data);
+            if(scanf("%d", &read_data) < 0)
+            {
+                printf("--- Bad Selection ---\n");
+                return TRDP_PARAM_ERR;
+            }
 
             if(read_data)
             {
@@ -1271,7 +1346,6 @@ void statistics()
 int main (int argc, char * *argv)
 {
     TRDP_LIS_T          listenHandle[TRDP_QUEUE_MAX_MESG];  /*    Array of identifier to the listeners    */
-    TRDP_PUB_T          pubHandle;  /*    Our identifier to the publication    */
     TRDP_ERR_T          err;
     int rv = 0;
     fd_set  rfds;
@@ -1377,7 +1451,11 @@ int main (int argc, char * *argv)
         else
         {
            printf("Do you want to continue? (looping) Yes[1] / No[0]\n");
-           scanf("%d",&continue_looping);
+           if(scanf("%d",&continue_looping) < 0)
+           {
+               printf("--- Bad Selection ---\n");
+               return TRDP_PARAM_ERR;
+           }
         }
     }
 
