@@ -44,6 +44,7 @@
 #include "vos_utils.h"
 #include "vos_sock.h"
 #include "vos_thread.h"
+#include "vos_mem.h"
 
 #pragma comment(lib, "IPHLPAPI.lib")
 
@@ -203,33 +204,44 @@ EXT_DECL BOOL vos_isMulticast (
  *  @param[in,out]  ifAddrs           array of interface records
  *
  *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   pMAC == NULL
+ *  @retval         VOS_PARAM_ERR   pAddrCnt and/or ifAddrs == NULL
+ *  @retval         VOS_MEM_ERR     memory allocation error
+ *  @retval         VOS_SOCK_ERR    GetAdaptersInfo() error
  */
 EXT_DECL VOS_ERR_T vos_getInterfaces (
-    UINT32          *pAddrCnt,
+    UINT32         *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
-    UINT8   buf[  VOS_MAX_NUM_IF * sizeof(IP_ADAPTER_INFO)
-                  + VOS_MAX_NUM_IF * VOS_MAX_IF_NAME_SIZE
-                  + VOS_MAX_NUM_UNICAST * sizeof(IP_ADAPTER_UNICAST_ADDRESS)];
-    ULONG   bufLen = sizeof(buf);
-    PIP_ADAPTER_INFO pAdapterList = (PIP_ADAPTER_INFO) buf;
-    PIP_ADAPTER_INFO pAdapter;
-    UINT32  addrCnt = 0;
+    UINT8 *buf = NULL;
+    UINT32 bufLen = (UINT32) NULL;
+    PIP_ADAPTER_INFO pAdapterList = NULL;
+    PIP_ADAPTER_INFO pAdapter = NULL;
+    UINT32 addrCnt = 0;
+    UINT32 err = 0;
 
-    if ((pAddrCnt == NULL)
-        || (ifAddrs == NULL))
-    {
+    if (   (pAddrCnt == NULL) 
+        || (ifAddrs == NULL) )
+    { 
         return VOS_PARAM_ERR;
     }
-    /* get the actual data we want */
-    if (GetAdaptersInfo(pAdapterList, &bufLen) != NO_ERROR)
+    /* determine required buffer size, therefore no error check */
+    err = GetAdaptersInfo(pAdapterList, (PULONG)&bufLen);
+    buf = vos_memAlloc(bufLen);
+    if (buf == NULL)
     {
-        return VOS_PARAM_ERR;
+        return VOS_MEM_ERR;
+    }
+    pAdapterList = (PIP_ADAPTER_INFO) buf;
+    /* get the actual data we want */
+    err = GetAdaptersInfo(pAdapterList, (PULONG)&bufLen);
+    if (err != NO_ERROR)
+    {   
+        vos_printf(VOS_LOG_ERROR, "GetAdaptersInfo failed (Err: %d)\n", err);
+        return VOS_SOCK_ERR;
     }
     pAdapter = pAdapterList;
     /* Iterate adapter list */
-    while (pAdapter)
+    while(pAdapter != NULL) 
     {
         /* Skip adapters with IP Address = 0.0.0.0 */
         if (vos_dottedIP(pAdapter->IpAddressList.IpAddress.String) != (UINT32)NULL)
@@ -252,20 +264,18 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                         memcpy(ifAddrs[addrCnt].mac, pAdapter->Address, sizeof(ifAddrs[addrCnt].mac));
                     }
                     /* Store adapter name */
-                    (void) strncpy_s(ifAddrs[addrCnt].name,
-                                     sizeof(ifAddrs[addrCnt].name),
-                                     pAdapter->AdapterName,
-                                     _TRUNCATE);
+                    (void) strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
                     /* Store subnet mask */
                     ifAddrs[addrCnt].netMask = vos_dottedIP(pAdapter->IpAddressList.IpMask.String);
                     /* increment number of addresses stored */
-                    addrCnt++;
+                   addrCnt++;
                 }
             }
         }
         pAdapter = pAdapter->Next;
     }
     *pAddrCnt = addrCnt;
+    vos_memFree(buf);
     return VOS_NO_ERR;
 }
 
