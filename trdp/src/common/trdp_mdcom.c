@@ -48,7 +48,7 @@
  *   Locals
  */
 
-static const UINT32 cMinimumMDSize = 1024;                            /**< Initial size for message data received */
+static const UINT32 cMinimumMDSize = 1480;                            /**< Initial size for message data received */
 static const UINT8  cEmptySession[TRDP_SESS_ID_SIZE] = {0};           /**< Empty sessionID to compare             */
 static const TRDP_MD_INFO_T cTrdp_md_info_default;
 
@@ -1441,7 +1441,7 @@ TRDP_ERR_T  trdp_mdSend (
         iterMD = iterMD->pNext;
 
     }
-    while (1);
+    while (TRUE);
 
 
     trdp_closeMDSessions(appHandle);
@@ -2223,7 +2223,7 @@ void  trdp_mdCheckTimeouts (
         iterMD = iterMD->pNext;
 
     }
-    while (1);
+    while (TRUE);
 
     /* Check for sockets Connection Timeouts */
     /* if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0) */
