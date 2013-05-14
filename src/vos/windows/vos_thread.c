@@ -752,7 +752,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
  *  @retval         VOS_MUTEX_ERR   no mutex available
  */
 
-EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
+VOS_ERR_T vos_mutexLocalCreate (
     struct VOS_MUTEX *pMutex)
 {
     int err = 0;
@@ -828,7 +828,7 @@ EXT_DECL void vos_mutexDelete (
  *  @param[in]      pMutex          Pointer to mutex struct
  */
 
-EXT_DECL void vos_mutexLocalDelete (
+void vos_mutexLocalDelete (
     struct VOS_MUTEX *pMutex)
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
