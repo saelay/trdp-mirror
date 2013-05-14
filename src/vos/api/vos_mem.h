@@ -46,6 +46,15 @@ extern "C" {
 #define VOS_MEM_MAX_PREALLOCATE     10  /*<< Max blocks to pre-allocate */
 #define VOS_MEM_NBLOCKSIZES         15  /*<< No of pre-defined block sizes */
 
+/** Queue policy matching pthread/Posix defines    */
+typedef enum
+{
+    VOS_QUEUE_POLICY_OTHER,         /*  Default for the target system    */
+    VOS_QUEUE_POLICY_FIFO,          /*  First in, first out              */
+    VOS_QUEUE_POLICY_LIFO           /*  Last in, first out               */
+} VOS_QUEUE_POLICY_T;
+
+
 #if MD_SUPPORT
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
     the overal size of the used memory allocation area is larger. */
@@ -267,11 +276,11 @@ EXT_DECL void vos_strncpy (
  */
 
 EXT_DECL VOS_ERR_T vos_queueCreate (
-    UINT8           queueType,
-    UINT32          maxNoOfMsg,
-    UINT32          maxMsgLength,
-    VOS_SEMA_T      *pSemaHandle,
-    VOS_QUEUE_T     *pQueueHandle );
+    VOS_QUEUE_POLICY_T  queueType,
+    UINT32              maxNoOfMsg,
+    UINT32              maxMsgLength,
+    VOS_SEMA_T         *pSemaHandle,
+    VOS_QUEUE_T        *pQueueHandle );
 
 
 /**********************************************************************************************************************/
