@@ -51,7 +51,7 @@ extern void *gRefCon;
     #define vos_snprintf(str, size, format, ...)              \
         _snprintf_s(str, size, _TRUNCATE, format, __VA_ARGS__)
 #else
-    #define vos_snprintf(str, size, level, format, args ...)  \
+    #define vos_snprintf(str, size, format, args ...)  \
         snprintf(str, size, format, ## args)
 #endif
 
