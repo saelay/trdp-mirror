@@ -4,40 +4,40 @@
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
                                            _
         gMem.pArea = (UINT8 *) malloc(size);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(215) : Warning 421: Caution --
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(219) : Warning 421: Caution --
     function 'malloc(unsigned int)' is considered dangerous [MISRA Rule 118]
                             _
             free(gMem.pArea);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(295) : Warning 421: Caution --
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(299) : Warning 421: Caution --
     function 'free(void *)' is considered dangerous [MISRA Rule 118]
                                          _
         UINT8 *p = (UINT8 *) malloc(size);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(326) : Warning 421: Caution --
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(332) : Warning 421: Caution --
     function 'malloc(unsigned int)' is considered dangerous [MISRA Rule 118]
                        _
         free(pMemBlock);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(473) : Warning 421: Caution --
+D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(478) : Warning 421: Caution --
     function 'free(void *)' is considered dangerous [MISRA Rule 118]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
         _
-#define cmsghdr WSACMSGHDR
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(83) : Warning 652: #define of
+#define cmsghdr         WSACMSGHDR
+D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(84) : Warning 652: #define of
     symbol 'cmsghdr' declared previously at line 668, file C:\Program
     Files\Microsoft SDKs\Windows\v7.0A\Include\ws2def.h
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
-            _
-    while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1393) : Warning 506: Constant
+           _
+    while (TRUE);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1444) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
-            _
-    while (1);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2069) : Warning 506: Constant
+           _
+    while (TRUE);
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2226) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
@@ -52,15 +52,15 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2069) : Warning 506: Constant
 
 --- Global Wrap-up
 
-Warning 526: 'ig_endian()' (line 720, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'ig_endian()' (line 774, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
-    720, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+    774, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
 Warning 526: 'e()' (line 212, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
     not defined
 Warning 628: no argument information provided for function 'e()' (line 212,
     file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
-Warning 552: Symbol 'gNumberOfOpenSockets' (line 90, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
+Warning 552: Symbol 'gNumberOfOpenSockets' (line 91, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
     not accessed
 Warning 526: '__alignof()' (line 121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)
     not defined

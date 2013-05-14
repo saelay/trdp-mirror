@@ -13,4 +13,7 @@
       <UniqueIdentifier>{8aad62c4-6560-4fcd-bd7f-b6e3d559912b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\Debug\Win32TRDP_DLL.lib" />
+  </ItemGroup>
 </Project>

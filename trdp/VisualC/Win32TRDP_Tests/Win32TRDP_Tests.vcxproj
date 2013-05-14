@@ -80,14 +80,7 @@
     <ClCompile Include="..\..\test\diverse\LibraryTests.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Win32TRDP\Win32TRDP.vcxproj">
-      <Project>{4e059552-03ff-4ee4-a868-c2253289e9f6}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
+    <Library Include="..\Debug\Win32TRDP_DLL.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
