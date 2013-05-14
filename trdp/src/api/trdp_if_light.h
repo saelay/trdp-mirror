@@ -767,9 +767,16 @@ EXT_DECL TRDP_ERR_T tlm_replyErr (
  *
  *  @retval            const string
  */
-EXT_DECL const CHAR8 *tlc_getVersion (
+EXT_DECL const CHAR8 *tlc_getVersionString (
     void);
 
+/**********************************************************************************************************************/
+/** Return version.
+ *    Return pointer to version structure
+ *
+ *  @retval            const TRDP_VERSION_T
+ */
+EXT_DECL const TRDP_VERSION_T *tlc_getVersion (void);
 
 /**********************************************************************************************************************/
 /** Return statistics.

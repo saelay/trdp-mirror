@@ -52,6 +52,7 @@
  * LOCALS
  */
 
+const  TRDP_VERSION_T       trdpVersion     = {TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION};
 static TRDP_APP_SESSION_T   sSession        = NULL;
 static VOS_MUTEX_T          sSessionMutex   = NULL;
 static BOOL sInited = FALSE;
@@ -682,13 +683,30 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
     return ret;
 }
 
-const char *tlc_getVersion (void)
+/**********************************************************************************************************************/
+/** Return a human readable version representation.
+ *    Return string in the form 'v.r.u.b'
+ *
+ *  @retval            const string
+ */
+const char *tlc_getVersionString (void)
 {
     static CHAR8  version[16];
 
     vos_snprintf(version, sizeof(version), "%d.%d.%d.%d", TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION);
 
     return version;
+}
+
+/**********************************************************************************************************************/
+/** Return version.
+ *    Return pointer to version structure
+ *
+ *  @retval            TRDP_VERSION_T
+ */
+EXT_DECL const TRDP_VERSION_T *tlc_getVersion (void)
+{
+    return &trdpVersion;
 }
 
 /**********************************************************************************************************************/
