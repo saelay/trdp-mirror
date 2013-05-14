@@ -51,9 +51,6 @@
     <ClInclude Include="..\..\src\api\tau_marshall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\api\tau_tci.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\api\tau_xml.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_MDTest_Basic", "W
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WIN32TRDP_MDTest", "WIN32TRDP_MDTest\WIN32TRDP_MDTest.vcxproj", "{C9301603-1FDE-4D2E-9BC0-2FDCAE2A6B10}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_DLL", "Win32TRDP_DLL\Win32TRDP_DLL.vcxproj", "{55FA6B4F-4D5A-4F49-8CB7-5DACDAEF44D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -67,6 +69,10 @@ Global
 		{C9301603-1FDE-4D2E-9BC0-2FDCAE2A6B10}.Debug|Win32.Build.0 = Debug|Win32
 		{C9301603-1FDE-4D2E-9BC0-2FDCAE2A6B10}.Release|Win32.ActiveCfg = Release|Win32
 		{C9301603-1FDE-4D2E-9BC0-2FDCAE2A6B10}.Release|Win32.Build.0 = Release|Win32
+		{55FA6B4F-4D5A-4F49-8CB7-5DACDAEF44D6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{55FA6B4F-4D5A-4F49-8CB7-5DACDAEF44D6}.Debug|Win32.Build.0 = Debug|Win32
+		{55FA6B4F-4D5A-4F49-8CB7-5DACDAEF44D6}.Release|Win32.ActiveCfg = Release|Win32
+		{55FA6B4F-4D5A-4F49-8CB7-5DACDAEF44D6}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
