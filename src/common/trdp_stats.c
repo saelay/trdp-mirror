@@ -58,7 +58,7 @@ void trdp_UpdateStats (TRDP_APP_SESSION_T appHandle);
 void trdp_initStats (
     TRDP_APP_SESSION_T appHandle)
 {
-    int int0, int1, int2, int3;
+    const TRDP_VERSION_T *pVersion;
 
     if (appHandle == NULL)
     {
@@ -67,8 +67,8 @@ void trdp_initStats (
 
     memset(&appHandle->stats, 0, sizeof(TRDP_STATISTICS_T));
 
-    sscanf(tlc_getVersion(), "%d.%d.%d.%d", &int0, &int1, &int2, &int3);
-    appHandle->stats.version = int0 << 24 | int1 << 16 | int2 << 8 | int3;
+    pVersion = tlc_getVersion();
+    appHandle->stats.version = pVersion->ver << 24 | pVersion->rel << 16 | pVersion->upd << 8 | pVersion->evo;
 }
 
 /**********************************************************************************************************************/

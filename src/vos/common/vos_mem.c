@@ -712,7 +712,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
     UINT32              maxNoOfMsg,
     VOS_QUEUE_T        *pQueueHandle )
 {
-   return VOS_UNKNOWN_ERR;; 
+   return VOS_UNKNOWN_ERR; 
 }
 
 /**********************************************************************************************************************/
