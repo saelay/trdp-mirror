@@ -183,7 +183,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
         if (ret == TRDP_NO_ERR)
         {
             sInited = TRUE;
-            vos_printf(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", tlc_getVersion);
+            vos_printf(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", tlc_getVersionString());
         }
         return ret;
     }
@@ -437,7 +437,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
         vos_printf(VOS_LOG_INFO,
                    "TRDP Stack Version %s: session opened successfully\n",
-                   tlc_getVersion);
+                   tlc_getVersionString());
 
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
         {
