@@ -182,7 +182,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
         if (ret == TRDP_NO_ERR)
         {
             sInited = TRUE;
-            vos_printf(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", LIB_VERSION);
+            vos_printf(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", tlc_getVersion);
         }
         return ret;
     }
@@ -436,7 +436,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
         vos_printf(VOS_LOG_INFO,
                    "TRDP Stack Version %s: session opened successfully\n",
-                   LIB_VERSION);
+                   tlc_getVersion);
 
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
         {
@@ -684,7 +684,11 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
 
 const char *tlc_getVersion (void)
 {
-    return LIB_VERSION;
+    static CHAR8  version[16];
+
+    vos_snprintf(version, sizeof(version), "%d.%d.%d.%d", TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION);
+
+    return version;
 }
 
 /**********************************************************************************************************************/
