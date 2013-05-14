@@ -263,8 +263,6 @@ EXT_DECL void vos_strncpy (
  *
  *  @param[in]      queueType       Define queue type (1 = FIFO, 2 = LIFO, 3 = PRIO)
  *  @param[in]      maxNoOfMsg		Maximum number of messages
- *  @param[in]      maxMsgLength    Maximum size of one message
- *  @param[in,out]  pSemaHandle     Pointer to semaphore handle
  *  @param[out]     pQueueHandle    Handle of created queue
  *
  *  @retval         VOS_NO_ERR		no error
@@ -278,8 +276,6 @@ EXT_DECL void vos_strncpy (
 EXT_DECL VOS_ERR_T vos_queueCreate (
     VOS_QUEUE_POLICY_T  queueType,
     UINT32              maxNoOfMsg,
-    UINT32              maxMsgLength,
-    VOS_SEMA_T         *pSemaHandle,
     VOS_QUEUE_T        *pQueueHandle );
 
 
@@ -289,7 +285,6 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
  *  @param[in]      queueHandle     Queue handle
  *  @param[in]      pData   		Pointer to data to be sent
  *  @param[in]      size            Size of data to be sent
- *  @param[in]      usTimeout       Maximum wait time to send a message (in usec)
  *
  *  @retval         VOS_NO_ERR		no error
  *  @retval         VOS_INIT_ERR	module not initialised
@@ -302,20 +297,18 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
 EXT_DECL VOS_ERR_T vos_queueSend (
     VOS_QUEUE_T     queueHandle,
     UINT8           *pData,
-    UINT32          size,
-    UINT32          usTimeout );
+    UINT32          size);
 
 
 /**********************************************************************************************************************/
 /** Get a message.
  *
- *
  *  @param[in]      queueHandle		Queue handle
- *  @param[in,out]  pMaxSize		Maximum size of receive data
- *  @param[in,out]  pData			Pointer to data to be received
+ *  @param[out]     ppData			Pointer to data pointer to be received
+ *  @param[out]     pSize		    Size of receive data
  *  @param[in]      usTimeout		Maximum time to wait for a message (in usec)
  *
- *  @retval         VOS_NO_ERR		no error
+ *  @retval         VOSNO_ERR		no error
  *  @retval         VOS_INIT_ERR	module not initialised
  *  @retval         VOS_NOINIT_ERR	invalid handle
  *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
@@ -324,8 +317,8 @@ EXT_DECL VOS_ERR_T vos_queueSend (
 
 EXT_DECL VOS_ERR_T vos_queueReceive (
     VOS_QUEUE_T     queueHandle,
-    UINT8           *pData,
-    UINT32          size,
+    UINT8           **ppData,
+    UINT32          *pSize,
     UINT32          usTimeout );
 
 
@@ -334,7 +327,6 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
  *  Free all resources used by this queue
  *
  *  @param[in]      queueHandle		Queue handle
- *  @param[in]      usTimeout       Maximum time to wait to destroy a queue (in usec)
  *
  *  @retval         VOS_NO_ERR		no error
  *  @retval         VOS_INIT_ERR	module not initialised
@@ -343,8 +335,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
  */
 
 EXT_DECL VOS_ERR_T vos_queueDestroy (
-    VOS_QUEUE_T     queueHandle,
-    UINT32          usTimeout );
+    VOS_QUEUE_T     queueHandle);
 
 
 #ifdef __cplusplus
