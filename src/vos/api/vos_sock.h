@@ -192,7 +192,9 @@ EXT_DECL BOOL vos_isMulticast (
  *  @param[in,out]  ifAddrs           array of interface records
  *
  *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   pMAC == NULL
+ *  @retval         VOS_PARAM_ERR   pAddrCnt and/or ifAddrs == NULL
+ *  @retval         VOS_MEM_ERR     memory allocation error
+ *  @retval         VOS_SOCK_ERR    GetAdaptersInfo() error
  */
 EXT_DECL VOS_ERR_T vos_getInterfaces(
     UINT32         * pAddrCnt,
