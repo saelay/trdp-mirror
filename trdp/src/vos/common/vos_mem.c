@@ -710,13 +710,13 @@ EXT_DECL void vos_strncpy (
  */
 
 EXT_DECL VOS_ERR_T vos_queueCreate (
-    UINT8           queueType,
-    UINT32          maxNoOfMsg,
-    UINT32          maxMsgLength,
-    VOS_SEMA_T      *pSemaHandle,
-    VOS_QUEUE_T     *pQueueHandle )
+    VOS_QUEUE_POLICY_T  queueType,
+    UINT32              maxNoOfMsg,
+    UINT32              maxMsgLength,
+    VOS_SEMA_T          *pSemaHandle,
+    VOS_QUEUE_T         *pQueueHandle )
 {
-    
+   return VOS_UNKNOWN_ERR;; 
 }
 
 /**********************************************************************************************************************/
@@ -741,7 +741,7 @@ EXT_DECL VOS_ERR_T vos_queueSend (
     UINT32          size,
     UINT32          usTimeout )
 {
-
+    return VOS_UNKNOWN_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -786,5 +786,5 @@ EXT_DECL VOS_ERR_T vos_queueDestroy (
     VOS_QUEUE_T     queueHandle,
     UINT32          usTimeout )
 {
-
+    return VOS_UNKNOWN_ERR;
 }
