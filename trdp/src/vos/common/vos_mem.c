@@ -216,7 +216,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
 
     if (pMemoryArea == NULL && size != 0)       /* We must allocate memory from the heap once   */
     {
-        gMem.pArea = (UINT8 *) malloc(size);
+        gMem.pArea = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development */
         if (gMem.pArea == NULL)
         {
             return VOS_MEM_ERR;
@@ -296,7 +296,7 @@ EXT_DECL void vos_memDelete (
         vos_mutexLocalDelete(&gMem.mutex);
         if (gMem.wasMalloced)
         {
-            free(gMem.pArea);
+            free(gMem.pArea);    /*lint !e421 optional use of heap memory for debugging/development */
         }
         memset(&gMem, 0, sizeof(gMem));
     }
@@ -329,7 +329,7 @@ EXT_DECL UINT8 *vos_memAlloc (
     /*    Use standard heap memory    */
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
-        UINT8 *p = (UINT8 *) malloc(size);
+        UINT8 *p = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development */
         if (p != NULL)
         {
             memset(p, 0, size);
@@ -475,7 +475,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
         vos_printf(VOS_LOG_DBG, "vos_memFree() %p\n", pMemBlock);
-        free(pMemBlock);
+        free(pMemBlock);    /*lint !e421 optional use of heap memory for debugging/development */
         return;
     }
 
