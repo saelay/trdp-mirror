@@ -28,9 +28,6 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
-#include "trdp_if.h"
-#include "trdp_private.h"
-#include "vos_utils.h"
 
 
 /***********************************************************************************************************************
