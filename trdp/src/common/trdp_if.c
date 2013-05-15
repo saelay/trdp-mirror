@@ -52,7 +52,7 @@
  * LOCALS
  */
 
-const  TRDP_VERSION_T       trdpVersion     = {TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION};
+const TRDP_VERSION_T        trdpVersion = {TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION};
 static TRDP_APP_SESSION_T   sSession        = NULL;
 static VOS_MUTEX_T          sSessionMutex   = NULL;
 static BOOL sInited = FALSE;
@@ -691,7 +691,7 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
  */
 const char *tlc_getVersionString (void)
 {
-    static CHAR8  version[16];
+    static CHAR8 version[16];
 
     vos_snprintf(version, sizeof(version), "%d.%d.%d.%d", TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION);
 
@@ -1236,9 +1236,9 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 trdp_pdCheckPending(appHandle, pFileDesc, pNoDesc);
 
 #if MD_SUPPORT
-
-
+                trdp_mdCheckPending(appHandle, pFileDesc, pNoDesc);
 #endif
+
                 /*    if lowest time is not zero   */
                 if (timerisset(&appHandle->interval) &&
                     !timercmp(&now, &appHandle->interval, >))
