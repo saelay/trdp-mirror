@@ -688,7 +688,7 @@ EXT_DECL void vos_strncpy (
 }
 
 /**********************************************************************************************************************/
-/*	Queues																										      */
+/*    Queues                                                                                                              */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
@@ -696,15 +696,15 @@ EXT_DECL void vos_strncpy (
  *  Returns a handle for further calls
  *
  *  @param[in]      queueType       Define queue type (1 = FIFO, 2 = LIFO, 3 = PRIO)
- *  @param[in]      maxNoOfMsg		Maximum number of messages
+ *  @param[in]      maxNoOfMsg      Maximum number of messages
  *  @param[out]     pQueueHandle    Handle of created queue
  *
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_INIT_ERR	not supported
- *  @retval         VOS_QUEUE_ERR	error creating queue
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_NOINIT_ERR  invalid handle
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_INIT_ERR    not supported
+ *  @retval         VOS_QUEUE_ERR   error creating queue
  */
 
 EXT_DECL VOS_ERR_T vos_queueCreate (
@@ -719,15 +719,15 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
 /** Send a message.
  *
  *  @param[in]      queueHandle     Queue handle
- *  @param[in]      pData   		Pointer to data to be sent
+ *  @param[in]      pData           Pointer to data to be sent
  *  @param[in]      size            Size of data to be sent
  *
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_INIT_ERR	not supported
- *  @retval         VOS_QUEUE_ERR	error creating queue
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_NOINIT_ERR  invalid handle
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_INIT_ERR    not supported
+ *  @retval         VOS_QUEUE_ERR   error creating queue
  */
 
 EXT_DECL VOS_ERR_T vos_queueSend (
@@ -741,16 +741,16 @@ EXT_DECL VOS_ERR_T vos_queueSend (
 /**********************************************************************************************************************/
 /** Get a message.
  *
- *  @param[in]      queueHandle		Queue handle
- *  @param[out]     ppData			Pointer to data pointer to be received
- *  @param[out]     pSize		    Size of receive data
- *  @param[in]      usTimeout		Maximum time to wait for a message (in usec)
+ *  @param[in]      queueHandle      Queue handle
+ *  @param[out]     ppData           Pointer to data pointer to be received
+ *  @param[out]     pSize            Size of receive data
+ *  @param[in]      usTimeout        Maximum time to wait for a message (in usec)
  *
- *  @retval         VOSNO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
- *  @retval         VOS_QUEUE_ERR	queue is empty
+ *  @retval         VOSNO_ERR        no error
+ *  @retval         VOS_INIT_ERR     module not initialised
+ *  @retval         VOS_NOINIT_ERR   invalid handle
+ *  @retval         VOS_PARAM_ERR    parameter out of range/invalid
+ *  @retval         VOS_QUEUE_ERR    queue is empty
  */
 
 EXT_DECL VOS_ERR_T vos_queueReceive (
@@ -766,12 +766,12 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
 /** Destroy a message queue.
  *  Free all resources used by this queue
  *
- *  @param[in]      queueHandle		Queue handle
+ *  @param[in]      queueHandle      Queue handle
  *
- *  @retval         VOS_NO_ERR		no error
- *  @retval         VOS_INIT_ERR	module not initialised
- *  @retval         VOS_NOINIT_ERR	invalid handle
- *  @retval         VOS_PARAM_ERR	parameter out of range/invalid
+ *  @retval         VOS_NO_ERR       no error
+ *  @retval         VOS_INIT_ERR     module not initialised
+ *  @retval         VOS_NOINIT_ERR   invalid handle
+ *  @retval         VOS_PARAM_ERR    parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_queueDestroy (

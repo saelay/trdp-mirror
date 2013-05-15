@@ -33,11 +33,11 @@ D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(84) : Warning 652: #define of
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
            _
     while (TRUE);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1444) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1438) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
            _
     while (TRUE);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2226) : Warning 506: Constant
+D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2220) : Warning 506: Constant
     value Boolean [MISRA Rule 52]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
