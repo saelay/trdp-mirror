@@ -65,10 +65,10 @@ typedef struct sSessionData
     BOOL                sNoData;
     UINT32              sComID;
     TRDP_APP_SESSION_T  appHandle;          /*    Our identifier to the library instance    */
-    TRDP_LIS_T          listenHandle1;   	/*    Our identifier to the publication         */
-    TRDP_LIS_T          listenHandle2;   	/*    Our identifier to the publication         */
+    TRDP_LIS_T          listenHandle1;       /*    Our identifier to the publication         */
+    TRDP_LIS_T          listenHandle2;       /*    Our identifier to the publication         */
     int                 sBlockingMode;      /*    TRUE if select shall be used              */
-    UINT32				sDataSize;
+    UINT32                sDataSize;
 } SESSION_DATA_T;
 
 SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE, 0};
@@ -93,7 +93,7 @@ const UINT8 cDemoData[] = " "
 "But the story of this terrible, stupid Thursday, the story of its extraordinary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
 "It begins with a house.\n";
 
-UINT8	gBuffer[64*1024];
+UINT8    gBuffer[64*1024];
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -292,7 +292,7 @@ int main (int argc, char *argv[])
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     VOS_IF_REC_T            interfaces[MAX_IF];
-    BOOL					lastRun = FALSE;
+    BOOL                    lastRun = FALSE;
 
     int             rv          = 0;
     UINT32          destIP      = 0;
@@ -405,12 +405,12 @@ int main (int argc, char *argv[])
                     return 1;
                 }
                 if (sSessionData.sBlockingMode == FALSE)
-	            {   
-                	processConfig.options &= ~TRDP_OPTION_BLOCK;
+                {   
+                    processConfig.options &= ~TRDP_OPTION_BLOCK;
                 }
                 else
-	            {   
-                	processConfig.options |= TRDP_OPTION_BLOCK;
+                {   
+                    processConfig.options |= TRDP_OPTION_BLOCK;
                 }
                 break;
             }
@@ -451,10 +451,10 @@ int main (int argc, char *argv[])
 
     /*  Output available interfaces (in debug output)  */
     {
-    	UINT32 availableIfaces = MAX_IF;
+        UINT32 availableIfaces = MAX_IF;
         if (vos_getInterfaces(&availableIfaces, interfaces) == VOS_NO_ERR)
         {
-	        printf("%u IP interfaces found\n", availableIfaces);
+            printf("%u IP interfaces found\n", availableIfaces);
         }
     }
 
@@ -475,14 +475,14 @@ int main (int argc, char *argv[])
     /*    Set up a listener  */
     if (sSessionData.sResponder == TRUE)
     {
-    	printf("add listener\n");
+        printf("add listener\n");
         if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, sSessionData.sComID, 0, destIP,
                             flags, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error (TCP)\n");
             return 1;
         }
-    	printf("add listener\n");
+        printf("add listener\n");
         if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, sSessionData.sComID, 0, destIP,
                             flags &= ~TRDP_FLAGS_TCP, NULL) != TRDP_NO_ERR)
         {
@@ -499,7 +499,7 @@ int main (int argc, char *argv[])
         fd_set  rfds;
         INT32   noDesc = 0;
         struct timeval  tv = {0, 0};
-        struct timeval  max_tv = {1, 0};       	/* 1 second  */
+        struct timeval  max_tv = {1, 0};           /* 1 second  */
 
         if (sSessionData.sBlockingMode == TRUE)
         {
@@ -515,7 +515,7 @@ int main (int argc, char *argv[])
                 with minimum CPU load and minimum jitter.
              */
              tlc_getInterval(sSessionData.appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
-		}
+        }
         /*
             The wait time for select must consider cycle times and timeouts of
             the PD packets received or sent.
@@ -533,12 +533,12 @@ int main (int argc, char *argv[])
                 Select() will wait for ready descriptors or time out,
                 what ever comes first.
             */
-        	rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
-        	tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
+            rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+            tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
         }
         else
         {
-        	vos_threadDelay (tv.tv_sec * 1000000 + tv.tv_usec);
+            vos_threadDelay (tv.tv_sec * 1000000 + tv.tv_usec);
             rv = 0;
 
 
@@ -551,7 +551,7 @@ int main (int argc, char *argv[])
                 The callback function will be called from within the tlc_process
                 function (in it's context and thread)!
             */
-        	tlc_process(sSessionData.appHandle, NULL, NULL);
+            tlc_process(sSessionData.appHandle, NULL, NULL);
         }
 
         /* Handle other ready descriptors... */
@@ -569,7 +569,7 @@ int main (int argc, char *argv[])
             }
         }
 
-		if (lastRun == TRUE)
+        if (lastRun == TRUE)
         {
             sSessionData.sLoop = FALSE;
         }
@@ -592,12 +592,12 @@ int main (int argc, char *argv[])
                 }
                 else if (sSessionData.sDataSize > 0)
                 {
-                	for (i = 0, j = 0; i < sSessionData.sDataSize; i++)
+                    for (i = 0, j = 0; i < sSessionData.sDataSize; i++)
                     {
-                    	gBuffer[i] = cDemoData[j++];
+                        gBuffer[i] = cDemoData[j++];
                         if (j >= sizeof(cDemoData))
                         {
-                        	j = 0;
+                            j = 0;
                         }
                     }
                     tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, ownIP,
@@ -623,12 +623,12 @@ int main (int argc, char *argv[])
                 }
                 else if (sSessionData.sDataSize > 0)
                 {
-                	for (i = 0, j = 0; i < sSessionData.sDataSize; i++)
+                    for (i = 0, j = 0; i < sSessionData.sDataSize; i++)
                     {
-                    	gBuffer[i] = cDemoData[j++];
+                        gBuffer[i] = cDemoData[j++];
                         if (j >= sizeof(cDemoData))
                         {
-                        	j = 0;
+                            j = 0;
                         }
                     }
                     tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
@@ -649,7 +649,7 @@ int main (int argc, char *argv[])
             
             printf("\n");
 
-			/* additional delay */
+            /* additional delay */
             vos_threadDelay(delay);
 
         }

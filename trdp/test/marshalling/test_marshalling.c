@@ -664,7 +664,7 @@ int main ()
         return 1;
     }
 
-    /*	Compute size of marshalled data */
+    /*    Compute size of marshalled data */
     err = tau_calcDatasetSizeByComId(refCon, 1000, (UINT8 *) &gMyDataSet1000, &bufSize, NULL);
 
     if (err != TRDP_NO_ERR)

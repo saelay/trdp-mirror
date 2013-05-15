@@ -10,7 +10,7 @@
  *  Created by Tomas Svoboda on 17.12.12.
  *  Copyright 2012 UniControls,a.s. All rights reserved.
  *
- *	$ID:$
+ *    $ID:$
  */
 
 #include <stdio.h>
@@ -20,7 +20,7 @@
 #include "vos_sock.h"
 
 /***********************************************************************************************************************
-	Print configuration
+    Print configuration
 ***********************************************************************************************************************/
 static void printProcessConfig(TRDP_PROCESS_CONFIG_T  * pProcessConfig)
 {
@@ -278,7 +278,7 @@ static void printTelegrams(
 
 
 /***********************************************************************************************************************
-	Test XML configuration file parsing
+    Test XML configuration file parsing
 ***********************************************************************************************************************/
 int main(int argc, char * argv[])
 {
