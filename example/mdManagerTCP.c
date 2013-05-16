@@ -138,10 +138,9 @@ void get_IPs()
     INT32 read_data;
 
     printf("What is your PC?  PC-1[1] / PC-2[2] \n");
-    if(scanf("%d", &read_data) < 0)
+    if(scanf("%d", &read_data) == EOF)
     {
         printf("You have to choose 1 or 2 for your PC number\n");
-        return;
     }
 
     if(read_data == 1)
@@ -783,12 +782,15 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 
 
         printf("Do you want to use the application queue to process the msgs? Yes[1] / No[0] \n");
-        if(scanf("%d", &read_data) == 1)
+        if(scanf("%d", &read_data) == EOF)
+        {
+            return TRDP_PARAM_ERR;
+        }
+
+        if(read_data == 1)
         {
             printf("The application queue will be used to store the messages\n");
         }
-
-        //read_data = 0;
 
         /* MD config */
         if(read_data == 1)
@@ -835,9 +837,9 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         memset(gBuffer, 0, sizeof(gBuffer));
 
         printf("Do you want to add the Listener?\n Yes[1] / No[0]\n");
-        if(scanf("%d", &read_data) == 0)
+        if(scanf("%d", &read_data) == EOF)
         {
-            printf("------- No Listener --------\n");
+            return TRDP_PARAM_ERR;
         }
 
 
@@ -846,7 +848,7 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
         {
 
             printf("Which is the comId that you want to add the Listener?\n");
-            if(scanf("%d", &MD_listen_COMID[*listeners_count]) < 0)
+            if(scanf("%d", &MD_listen_COMID[*listeners_count]) == EOF)
             {
                 printf("Wrong comId number\n");
                 continue;
@@ -873,9 +875,9 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
             }
 
             printf("Do you want to continue adding listeners?\n Yes[1] / No[0]\n");
-            if(scanf("%d", &read_data) == 0)
+            if(scanf("%d", &read_data) == EOF)
             {
-                printf("Finished adding the listeners\n");
+                return TRDP_PARAM_ERR;
             }
 
             (*listeners_count) ++;
@@ -884,7 +886,7 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
 
         /* TCP Statistics Support */
         printf("Do you want to print TCP Statistics?\n Yes[1] / No[0]\n");
-        if(scanf("%d", &read_data) < 0)
+        if(scanf("%d", &read_data) == EOF)
         {
             printf("--- Bad selection ---\n");
             return TRDP_PARAM_ERR;
@@ -908,7 +910,7 @@ TRDP_ERR_T notifies_requests()
 
     read_data = 0;
     printf("Do you want to send any notify or request msg? Yes[1] / No[0]\n");
-    if(scanf("%d", &read_data) < 0)
+    if(scanf("%d", &read_data) == EOF)
     {
         printf("--- Bad selection ---\n");
         return TRDP_PARAM_ERR;
@@ -920,14 +922,14 @@ TRDP_ERR_T notifies_requests()
         TRDP_UUID_T pSessionId;
         memset(gBuffer, 0, sizeof(gBuffer));
         printf("Specify the kind of message you want to send. ComId:\n");
-        if(scanf("%d",&MD_COMID) < 0)
+        if(scanf("%d",&MD_COMID) == EOF)
         {
             printf("Error getting the comId\n");
             return TRDP_COMID_ERR;
         }
 
         printf("Enter: 1 for notify, 2 for request\n");
-        if(scanf("%d", &read_data) < 1)
+        if(scanf("%d", &read_data) == EOF)
         {
             printf("--- Bad selection ---\n");
             return TRDP_PARAM_ERR;
@@ -1001,9 +1003,10 @@ TRDP_ERR_T notifies_requests()
         read_data=0;
         MD_COMID=0;
         printf("Do you want to send more messages? Yes[1] / No[0]\n");
-        if(scanf("%d", &read_data) < 0)
+        if(scanf("%d", &read_data) == EOF)
         {
             printf("--- Bad selection ---\n");
+            return TRDP_PARAM_ERR;
         }
     }
     return err;
@@ -1038,7 +1041,7 @@ TRDP_ERR_T reply_msgs()
             session_num ++;
         }
         printf("\n Do you want to reply any of those? Yes[1] / No[0]\n");
-        if(scanf("%d", &read_data) < 0)
+        if(scanf("%d", &read_data) == EOF)
         {
             printf("--- Bad Selection ---\n");
             return TRDP_PARAM_ERR;
@@ -1048,14 +1051,14 @@ TRDP_ERR_T reply_msgs()
     while(read_data)
     {
         printf("\nWhich one? Enter the number (0,1,2...): \n");
-        if(scanf("%d", &session_num) < 0)
+        if(scanf("%d", &session_num) == EOF)
         {
             printf("--- Bad Selection ---\n");
             return TRDP_PARAM_ERR;
         }
 
         printf("Which kind of reply? 0-REPLY | 1-REPLY QUERY | 2-REPLY ERR\n");
-        if(scanf("%d", &answer_kind) < 0)
+        if(scanf("%d", &answer_kind) == EOF)
         {
             printf("--- Bad Selection ---\n");
             return TRDP_PARAM_ERR;
@@ -1064,7 +1067,7 @@ TRDP_ERR_T reply_msgs()
         if((answer_kind == 0) || (answer_kind == 1))
         {
             printf("Enter the message data to send (Maximum 32 characters - Without whitespaces):\n");
-            if(scanf("%s", gBuffer) < 0)
+            if(scanf("%s", gBuffer) == EOF)
             {
                 printf("--- Bad Selection ---\n");
                 return TRDP_PARAM_ERR;
@@ -1153,7 +1156,7 @@ TRDP_ERR_T reply_msgs()
         if(replies_count > 0)
         {
             printf("Do you want to reply another one? Yes[1] / No[0]\n");
-            if(scanf("%d", &read_data) < 0)
+            if(scanf("%d", &read_data) == EOF)
             {
                 printf("--- Bad Selection ---\n");
                 return TRDP_PARAM_ERR;
@@ -1211,7 +1214,7 @@ TRDP_ERR_T confirm_msgs()
             session_num++;
         }
         printf("\nDo you want to send a confirm of any of those? Yes[1] / No[0]\n");
-        if(scanf("%d",&read_data) < 0)
+        if(scanf("%d",&read_data) == EOF)
         {
             printf("--- Bad Selection ---\n");
             return TRDP_PARAM_ERR;
@@ -1222,7 +1225,7 @@ TRDP_ERR_T confirm_msgs()
     {
         printf("\nWhich one? Enter the number (0,1,2...): \n");
 
-        if(scanf("%d",&session_num) < 0)
+        if(scanf("%d",&session_num) == EOF)
         {
             printf("--- Bad Selection ---\n");
             return TRDP_PARAM_ERR;
@@ -1262,7 +1265,7 @@ TRDP_ERR_T confirm_msgs()
         {
             printf("Do you want to send another confirm message? Yes[1] / No[0]\n");
 
-            if(scanf("%d",&read_data) < 0)
+            if(scanf("%d",&read_data) == EOF)
             {
                 printf("--- Bad Selection ---\n");
                 return TRDP_PARAM_ERR;
@@ -1452,7 +1455,7 @@ int main (int argc, char * *argv)
         else
         {
            printf("Do you want to continue? (looping) Yes[1] / No[0]\n");
-           if(scanf("%d",&continue_looping) < 0)
+           if(scanf("%d",&continue_looping) == EOF)
            {
                printf("--- Bad Selection ---\n");
                return TRDP_PARAM_ERR;
