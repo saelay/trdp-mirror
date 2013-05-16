@@ -412,12 +412,14 @@ TRDP_ERR_T  trdp_mdSendPacket (
 
         pElement->sendSize = pElement->grossSize - tmpSndSize;
 
-        if((tmpSndSize >= 0) && (pElement->sendSize >= 0))
+        if ((tmpSndSize >= 0) && (pElement->sendSize >= 0))   /* TBD Lint error ###: Relational operator '>=' always
+                                                                evaluates to 'true' */
         {
             err = vos_sockSendTCP(pdSock, ((UINT8 *)&pElement->pPacket->frameHead) + tmpSndSize, &pElement->sendSize);
             pElement->sendSize = tmpSndSize + pElement->sendSize;
 
-        }else
+        }
+        else
         {
             return TRDP_NODATA_ERR;
         }
@@ -464,14 +466,14 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
     /* Size of the all data read until now */
-    UINT32      size            = 0;
+    UINT32      size = 0;
     /* The pending data to read */
-    UINT32      dataSize        = 0;
-    UINT32      socketIndex     = 0;
+    UINT32      dataSize    = 0;
+    UINT32      socketIndex = 0;
     /* All the data read in this cycle (Header + Data) */
-    UINT32      readSize        = 0;
+    UINT32      readSize = 0;
     /* All the data part read in this cycle (Data) */
-    UINT32      readDataSize    = 0;
+    UINT32      readDataSize = 0;
 
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
@@ -492,10 +494,19 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             }
         }
 
+        if (socketIndex >= VOS_MAX_SOCKET_CNT)
+        {
+            vos_printf(VOS_LOG_ERROR, "trdp_mdRecvPacket: Socket index out of range\n");
+            return TRDP_UNKNOWN_ERR;
+        }
+
         /* Read Header */
         if ((appHandle->uncompletedTCP[socketIndex] == NULL)
             || ((appHandle->uncompletedTCP[socketIndex] != NULL)
-                && (appHandle->uncompletedTCP[socketIndex]->grossSize < sizeof(MD_HEADER_T))))
+                && (appHandle->uncompletedTCP[socketIndex]->grossSize < sizeof(MD_HEADER_T))))  /* TBD Lint error ###:
+                                                                                                  Relational operator
+                                                                                                  '>=' always evaluates
+                                                                                                  to 'true' */
         {
 
             if (appHandle->uncompletedTCP[socketIndex] == NULL)
@@ -543,8 +554,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength) +
                     sizeof(pElement->pPacket->frameHead.frameCheckSum);
 
-                readDataSize = dataSize;
-                pElement->dataSize = dataSize;
+                readDataSize        = dataSize;
+                pElement->dataSize  = dataSize;
 
             }
             else
@@ -561,10 +572,10 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
 
             /* If all the Header is read, check if more memory is needed */
-            if(size >= sizeof(MD_HEADER_T))
+            if (size >= sizeof(MD_HEADER_T))
             {
 
-                if(trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
+                if (trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
                 {
                     /* we have to allocate a bigger buffer */
                     MD_PACKET_T *pBigData = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
@@ -573,10 +584,12 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                         return TRDP_MEM_ERR;
                     }
                     /*  Swap the pointers ...  */
-                    memcpy(((UINT8 *)&pBigData->frameHead) + storedHeader,((UINT8 *)&pElement->pPacket->frameHead) + storedHeader, readSize);
+                    memcpy(((UINT8 *)&pBigData->frameHead) + storedHeader,
+                           ((UINT8 *)&pElement->pPacket->frameHead) + storedHeader,
+                           readSize);
 
                     vos_memFree(pElement->pPacket);
-                    pElement->pPacket   = pBigData;
+                    pElement->pPacket = pBigData;
                 }
             }
 
@@ -689,139 +702,143 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     }
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
-   {
-       BOOL    noDataToRead    = FALSE;
-       /* All the data (Header + Data) stored in the uncompletedTCP[] array */
-       UINT32  storedDataSize  = 0;
+    {
+        BOOL    noDataToRead = FALSE;
+        /* All the data (Header + Data) stored in the uncompletedTCP[] array */
+        UINT32  storedDataSize = 0;
 
 
-       /* Check if it's necessary to read some data */
-       if (pElement->grossSize == sizeof(MD_HEADER_T))
-       {
-           if (dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
-           {
-               noDataToRead = TRUE;
-           }
-       }
+        /* Check if it's necessary to read some data */
+        if (pElement->grossSize == sizeof(MD_HEADER_T))
+        {
+            if (dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
+            {
+                noDataToRead = TRUE;
+            }
+        }
 
-       /* Compare if all the data has been read */
-       if (((pElement->grossSize < sizeof(MD_HEADER_T)) && (readDataSize == 0))
-           || ((noDataToRead == FALSE) && (readDataSize != dataSize)))
-       {
-           /* Uncompleted message received */
+        /* Compare if all the data has been read */
+        if (((pElement->grossSize < sizeof(MD_HEADER_T)) && (readDataSize == 0))
+            || ((noDataToRead == FALSE) && (readDataSize != dataSize)))
+        {
+            /* Uncompleted message received */
 
-           if (appHandle->uncompletedTCP[socketIndex] == NULL)
-           {
-               /* It is the first loop, no data stored yet. Allocate memory for the message */
-               appHandle->uncompletedTCP[socketIndex] = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
+            if (appHandle->uncompletedTCP[socketIndex] == NULL)
+            {
+                /* It is the first loop, no data stored yet. Allocate memory for the message */
+                appHandle->uncompletedTCP[socketIndex] = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
 
-               if (appHandle->uncompletedTCP[socketIndex] == NULL)
-               {
-                   /* vos_memDelete(NULL); */
-                   vos_printf(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
-                   return TRDP_MEM_ERR;
-               }
+                if (appHandle->uncompletedTCP[socketIndex] == NULL)
+                {
+                    /* vos_memDelete(NULL); */
+                    vos_printf(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
+                    return TRDP_MEM_ERR;
+                }
 
-               /* Check the memory that is needed */
-               if(trdp_packetSizeMD(pElement->dataSize) < cMinimumMDSize)
-               {
-                   /* Allocate the cMinimumMDSize memory at least for now*/
-                   appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
+                /* Check the memory that is needed */
+                if (trdp_packetSizeMD(pElement->dataSize) < cMinimumMDSize)
+                {
+                    /* Allocate the cMinimumMDSize memory at least for now*/
+                    appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
 
-               }else
-               {
-                   /* Allocate the dataSize memory */
-                   /* we have to allocate a bigger buffer */
-                   appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
-               }
+                }
+                else
+                {
+                    /* Allocate the dataSize memory */
+                    /* we have to allocate a bigger buffer */
+                    appHandle->uncompletedTCP[socketIndex]->pPacket =
+                        (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
+                }
 
-               if (appHandle->uncompletedTCP[socketIndex]->pPacket == NULL)
-               {
-                   return TRDP_MEM_ERR;
-               }
+                if (appHandle->uncompletedTCP[socketIndex]->pPacket == NULL)
+                {
+                    return TRDP_MEM_ERR;
+                }
 
-               storedDataSize = 0;
+                storedDataSize = 0;
 
-           }
-           else
-           {
-               /* Get the size that have been already stored in the uncompletedTCP[] */
-               storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
+            }
+            else
+            {
+                /* Get the size that have been already stored in the uncompletedTCP[] */
+                storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
 
-               if((storedDataSize < sizeof(MD_HEADER_T))
-                       && (pElement->grossSize > sizeof(MD_HEADER_T)))
-               {
-                   if(trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
-                   {
-                       /* we have to allocate a bigger buffer */
-                       MD_PACKET_T *pBigData = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
-                       if (pBigData == NULL)
-                       {
-                           return TRDP_MEM_ERR;
-                       }
+                if ((storedDataSize < sizeof(MD_HEADER_T))
+                    && (pElement->grossSize > sizeof(MD_HEADER_T)))
+                {
+                    if (trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
+                    {
+                        /* we have to allocate a bigger buffer */
+                        MD_PACKET_T *pBigData = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
+                        if (pBigData == NULL)
+                        {
+                            return TRDP_MEM_ERR;
+                        }
 
-                       /* Copy the data to the pBigData->frameHead */
-                       memcpy(((UINT8 *)&pBigData->frameHead),((UINT8 *)&pElement->pPacket->frameHead), storedDataSize);
+                        /* Copy the data to the pBigData->frameHead */
+                        memcpy(((UINT8 *)&pBigData->frameHead),
+                               ((UINT8 *)&pElement->pPacket->frameHead),
+                               storedDataSize);
 
-                       /*  Swap the pointers ...  */
-                       vos_memFree(appHandle->uncompletedTCP[socketIndex]->pPacket);
-                       appHandle->uncompletedTCP[socketIndex]->pPacket   = pBigData;
-                   }
-               }
-           }
+                        /*  Swap the pointers ...  */
+                        vos_memFree(appHandle->uncompletedTCP[socketIndex]->pPacket);
+                        appHandle->uncompletedTCP[socketIndex]->pPacket = pBigData;
+                    }
+                }
+            }
 
-           if (readSize > 0)
-           {
-               /* Copy the read data in the uncompletedTCP[] */
-               memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
-                      ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
-               appHandle->uncompletedTCP[socketIndex]->grossSize   = pElement->grossSize;
-               appHandle->uncompletedTCP[socketIndex]->dataSize    = readDataSize;
+            if (readSize > 0)
+            {
+                /* Copy the read data in the uncompletedTCP[] */
+                memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
+                       ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
+                appHandle->uncompletedTCP[socketIndex]->grossSize   = pElement->grossSize;
+                appHandle->uncompletedTCP[socketIndex]->dataSize    = readDataSize;
 
-           }
-           else
-           {
-               return TRDP_PARAM_ERR;
-           }
+            }
+            else
+            {
+                return TRDP_PARAM_ERR;
+            }
 
-           return TRDP_PACKET_ERR;
+            return TRDP_PACKET_ERR;
 
-       }
-       else
-       {
-           /* Complete message */
-           /* All data is read. Save all the data and copy to the pElement to continue */
+        }
+        else
+        {
+            /* Complete message */
+            /* All data is read. Save all the data and copy to the pElement to continue */
 
-           if (appHandle->uncompletedTCP[socketIndex] != NULL)
-           {
-               /* Add the received information and copy all the data to the pElement */
+            if (appHandle->uncompletedTCP[socketIndex] != NULL)
+            {
+                /* Add the received information and copy all the data to the pElement */
 
-               storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
+                storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
 
-               if ((readSize > 0))
-               {
-                   /* Copy the read data in the uncompletedTCP[] */
-                   memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
-                          ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
+                if ((readSize > 0))
+                {
+                    /* Copy the read data in the uncompletedTCP[] */
+                    memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
+                           ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
 
-                   /* Copy all the uncompletedTCP data to the pElement */
-                   memcpy(((UINT8 *)&pElement->pPacket->frameHead),
-                          ((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), pElement->grossSize);
+                    /* Copy all the uncompletedTCP data to the pElement */
+                    memcpy(((UINT8 *)&pElement->pPacket->frameHead),
+                           ((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), pElement->grossSize);
 
-                   /* Disallocate the memory */
-                   vos_memFree(appHandle->uncompletedTCP[socketIndex]);
-                   appHandle->uncompletedTCP[socketIndex] = NULL;
+                    /* Disallocate the memory */
+                    vos_memFree(appHandle->uncompletedTCP[socketIndex]);
+                    appHandle->uncompletedTCP[socketIndex] = NULL;
 
-               }
-               else
-               {
-                   return TRDP_PARAM_ERR;
-               }
-           }
+                }
+                else
+                {
+                    return TRDP_PARAM_ERR;
+                }
+            }
 
-       }
+        }
 
-   }
+    }
 
     /* received data */
     err = trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, pElement->grossSize, CHECK_DATA_TOO);
@@ -1492,7 +1509,7 @@ TRDP_ERR_T  trdp_mdSend (
         iterMD = iterMD->pNext;
 
     }
-    while (TRUE);
+    while (TRUE); /*lint !e506 */
 
 
     trdp_closeMDSessions(appHandle);
@@ -1514,7 +1531,7 @@ void trdp_mdCheckPending (
     TRDP_FDS_T          *pFileDesc,
     INT32               *pNoDesc)
 {
-    int             index;
+    int             lIndex;
     MD_ELE_T        *iterMD;
     MD_LIS_ELE_T    *iterListener;
 
@@ -1522,23 +1539,24 @@ void trdp_mdCheckPending (
 
     if (appHandle->tcpFd.listen_sd != -1)
     {
-        FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc);
+        FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned division in macro */
         if (appHandle->tcpFd.listen_sd > *pNoDesc)
         {
             *pNoDesc = appHandle->tcpFd.listen_sd;
         }
     }
 
-    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
-        if ((appHandle->iface[index].sock != -1)
-            && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
-            && (appHandle->iface[index].tcpParams.addFileDesc == TRUE))
+        if ((appHandle->iface[lIndex].sock != -1)
+            && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
+            && (appHandle->iface[lIndex].tcpParams.addFileDesc == TRUE))
         {
-            FD_SET(appHandle->iface[index].sock, (fd_set *)pFileDesc);
-            if (appHandle->iface[index].sock > *pNoDesc)
+            FD_SET(appHandle->iface[lIndex].sock, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned division in macro
+                                                                          */
+            if (appHandle->iface[lIndex].sock > *pNoDesc)
             {
-                *pNoDesc = appHandle->iface[index].sock;
+                *pNoDesc = appHandle->iface[lIndex].sock;
             }
         }
     }
@@ -1555,9 +1573,13 @@ void trdp_mdCheckPending (
                 || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
         {
-            if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc))
+            if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573
+                                                                                                  signed/unsigned
+                                                                                                  division in macro */
             {
-                FD_SET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc);
+                FD_SET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573
+                                                                                               signed/unsigned division
+                                                                                               in macro */
                 if (appHandle->iface[iterListener->socketIdx].sock > *pNoDesc)
                 {
                     *pNoDesc = appHandle->iface[iterListener->socketIdx].sock;
@@ -1576,9 +1598,11 @@ void trdp_mdCheckPending (
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
         {
-            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
+            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573 signed/unsigned
+                                                                                            division in macro */
             {
-                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
+                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned
+                                                                                         division in macro */
                 if (appHandle->iface[iterMD->socketIdx].sock > *pNoDesc)
                 {
                     *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
@@ -1596,9 +1620,11 @@ void trdp_mdCheckPending (
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
         {
-            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc))
+            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573 signed/unsigned
+                                                                                            division in macro */
             {
-                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc);
+                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned
+                                                                                         division in macro */
                 if (appHandle->iface[iterMD->socketIdx].sock >= *pNoDesc)
                 {
                     *pNoDesc = appHandle->iface[iterMD->socketIdx].sock;
@@ -1625,7 +1651,7 @@ void  trdp_mdCheckListenSocks (
     TRDP_FDS_T  rfds;
     INT32       noOfDesc;
     INT32       highDesc = -1;
-    INT32       index;
+    INT32       lIndex;
     TRDP_ERR_T  err;
     INT32       new_sd  = -1;
     MD_ELE_T    *iterMD = NULL;
@@ -1648,7 +1674,7 @@ void  trdp_mdCheckListenSocks (
         /* Add the listen_sd in the file descriptor */
         if (appHandle->tcpFd.listen_sd != -1)
         {
-            FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)&rfds);
+            FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)&rfds); /*lint !e573 signed/unsigned division in macro */
             if (appHandle->tcpFd.listen_sd > highDesc)
             {
                 highDesc = appHandle->tcpFd.listen_sd;
@@ -1656,18 +1682,19 @@ void  trdp_mdCheckListenSocks (
         }
 
         /* scan for sockets */
-        for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
         {
-            if (appHandle->iface[index].sock != -1 &&
-                appHandle->iface[index].type != TRDP_SOCK_PD
-                && ((appHandle->iface[index].type != TRDP_SOCK_MD_TCP)
-                    || ((appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
-                        && (appHandle->iface[index].tcpParams.addFileDesc == TRUE))))
+            if (appHandle->iface[lIndex].sock != -1 &&
+                appHandle->iface[lIndex].type != TRDP_SOCK_PD
+                && ((appHandle->iface[lIndex].type != TRDP_SOCK_MD_TCP)
+                    || ((appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
+                        && (appHandle->iface[lIndex].tcpParams.addFileDesc == TRUE))))
             {
-                FD_SET(appHandle->iface[index].sock, (fd_set *)&rfds);
-                if (highDesc < appHandle->iface[index].sock)
+                FD_SET(appHandle->iface[lIndex].sock, (fd_set *)&rfds); /*lint !e573 signed/unsigned division in macro
+                                                                          */
+                if (highDesc < appHandle->iface[lIndex].sock)
                 {
-                    highDesc = appHandle->iface[index].sock;
+                    highDesc = appHandle->iface[lIndex].sock;
                 }
             }
         }
@@ -1701,7 +1728,7 @@ void  trdp_mdCheckListenSocks (
         /* vos_printf(VOS_LOG_INFO, " ----- CHECKING READY DESCRIPTORS -----\n"); */
 
         if (appHandle->tcpFd.listen_sd != -1 &&
-            FD_ISSET(appHandle->tcpFd.listen_sd, (fd_set *)pRfds))
+            FD_ISSET(appHandle->tcpFd.listen_sd, (fd_set *)pRfds)) /*lint !e573 signed/unsigned division in macro */
         {
             /****************************************************/
             /* A TCP connection request in the listen socket.   */
@@ -1837,11 +1864,15 @@ void  trdp_mdCheckListenSocks (
                                        appHandle->iface[socketIndex].tcpParams.cornerIp);
 
 
-                            if (FD_ISSET(appHandle->iface[socketIndex].sock, (fd_set *) pRfds))
+                            if (FD_ISSET(appHandle->iface[socketIndex].sock, (fd_set *) pRfds)) /*lint !e573
+                                                                                                  signed/unsigned
+                                                                                                  division in macro */
                             {
                                 /* Decrement the Ready descriptors counter */
                                 (*pCount)--;
-                                FD_CLR(appHandle->iface[socketIndex].sock, (fd_set *) pRfds);
+                                FD_CLR(appHandle->iface[socketIndex].sock, (fd_set *) pRfds); /*lint !e502 !e573
+                                                                                                signed/unsigned division
+                                                                                                in macro */
                             }
 
                             /* Replace the old socket by the new one */
@@ -1901,11 +1932,12 @@ void  trdp_mdCheckListenSocks (
     /*  Loop through the socket list and check readiness
         (but only while there are ready descriptors left) */
 
-    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
-        if (appHandle->iface[index].sock != -1 &&
-            appHandle->iface[index].type != TRDP_SOCK_PD &&
-            FD_ISSET(appHandle->iface[index].sock, (fd_set *)pRfds) != 0)
+        if (appHandle->iface[lIndex].sock != -1 &&
+            appHandle->iface[lIndex].type != TRDP_SOCK_PD &&
+            FD_ISSET(appHandle->iface[lIndex].sock, (fd_set *)pRfds) != 0) /*lint !e573 signed/unsigned division in
+                                                                             macro */
         {
             if (pCount != NULL)
             {
@@ -1915,17 +1947,18 @@ void  trdp_mdCheckListenSocks (
                     break;
                 }
             }
-            FD_CLR(appHandle->iface[index].sock, (fd_set *)pRfds);
-            err = trdp_mdRecv(appHandle, index);
+            FD_CLR(appHandle->iface[lIndex].sock, (fd_set *)pRfds); /*lint !e502 !e573 signed/unsigned division in macro
+                                                                      */
+            err = trdp_mdRecv(appHandle, lIndex);
 
             /* The receive message is incomplete */
-            if (err == TRDP_PACKET_ERR && appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
+            if (err == TRDP_PACKET_ERR && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
             {
                 vos_printf(VOS_LOG_INFO, "Incomplete message received \n");
             }
 
             /* Check if the socket has been closed in the other corner */
-            if (err == TRDP_NODATA_ERR && appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
+            if (err == TRDP_NODATA_ERR && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
             {
                 MD_ELE_T *iterMD_find;
 
@@ -1934,7 +1967,7 @@ void  trdp_mdCheckListenSocks (
                      iterMD_find != NULL;
                      iterMD_find = iterMD_find->pNext)
                 {
-                    if (iterMD_find->socketIdx == index)
+                    if (iterMD_find->socketIdx == lIndex)
                     {
                         /* Remove element from queue */
                         trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD_find);
@@ -1949,7 +1982,7 @@ void  trdp_mdCheckListenSocks (
                      iterMD_find != NULL;
                      iterMD_find = iterMD_find->pNext)
                 {
-                    if (iterMD_find->socketIdx == index)
+                    if (iterMD_find->socketIdx == lIndex)
                     {
                         /* Remove element from queue */
                         trdp_MDqueueDelElement(&appHandle->pMDRcvQueue, iterMD_find);
@@ -1961,7 +1994,7 @@ void  trdp_mdCheckListenSocks (
                 }
 
                 /* Close the socket */
-                err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[index].sock);
+                err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[lIndex].sock);
                 if (err != TRDP_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
@@ -1970,19 +2003,19 @@ void  trdp_mdCheckListenSocks (
                 /* Delete the socket from the iface */
                 vos_printf(VOS_LOG_INFO,
                            "Deleting socket (Num = %d) from the iface\n",
-                           appHandle->iface[index].sock);
-                vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
-                appHandle->iface[index].sock = -1;
-                appHandle->iface[index].sendParam.qos   = 0;
-                appHandle->iface[index].sendParam.ttl   = 0;
-                appHandle->iface[index].usage           = 0;
-                appHandle->iface[index].bindAddr        = 0;
-                appHandle->iface[index].type        = (TRDP_SOCK_TYPE_T) 0;
-                appHandle->iface[index].rcvMostly   = FALSE;
-                appHandle->iface[index].tcpParams.cornerIp = 0;
-                appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
-                appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
-                appHandle->iface[index].tcpParams.addFileDesc = FALSE;
+                           appHandle->iface[lIndex].sock);
+                vos_printf(VOS_LOG_INFO, "Close socket iface lIndex=%d\n", lIndex);
+                appHandle->iface[lIndex].sock = -1;
+                appHandle->iface[lIndex].sendParam.qos  = 0;
+                appHandle->iface[lIndex].sendParam.ttl  = 0;
+                appHandle->iface[lIndex].usage          = 0;
+                appHandle->iface[lIndex].bindAddr       = 0;
+                appHandle->iface[lIndex].type       = (TRDP_SOCK_TYPE_T) 0;
+                appHandle->iface[lIndex].rcvMostly  = FALSE;
+                appHandle->iface[lIndex].tcpParams.cornerIp = 0;
+                appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec     = 0;
+                appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec    = 0;
+                appHandle->iface[lIndex].tcpParams.addFileDesc = FALSE;
             }
         }
     }
@@ -2274,29 +2307,29 @@ void  trdp_mdCheckTimeouts (
         iterMD = iterMD->pNext;
 
     }
-    while (TRUE);
+    while (TRUE); /*lint !e506 */
 
     /* Check for sockets Connection Timeouts */
     /* if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0) */
     {
-        INT32 index;
+        INT32 lIndex;
 
-        for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
         {
-            if ((appHandle->iface[index].sock != -1)
-                && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
-                && (appHandle->iface[index].usage == 0)
-                && (appHandle->iface[index].rcvMostly == FALSE)
-                && ((appHandle->iface[index].tcpParams.connectionTimeout.tv_sec > 0)
-                    || (appHandle->iface[index].tcpParams.connectionTimeout.tv_usec > 0)))
+            if ((appHandle->iface[lIndex].sock != -1)
+                && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
+                && (appHandle->iface[lIndex].usage == 0)
+                && (appHandle->iface[lIndex].rcvMostly == FALSE)
+                && ((appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec > 0)
+                    || (appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec > 0)))
             {
-                if (0 > vos_cmpTime(&appHandle->iface[index].tcpParams.connectionTimeout, &now))
+                if (0 > vos_cmpTime(&appHandle->iface[lIndex].tcpParams.connectionTimeout, &now))
                 {
                     TRDP_ERR_T err;
 
-                    vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[index].sock);
+                    vos_printf(VOS_LOG_INFO, "The socket (Num = %d) TIMEOUT\n", appHandle->iface[lIndex].sock);
 
-                    err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[index].sock);
+                    err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[lIndex].sock);
                     if (err != TRDP_NO_ERR)
                     {
                         vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
@@ -2305,19 +2338,19 @@ void  trdp_mdCheckTimeouts (
                     /* Delete the socket from the iface */
                     vos_printf(VOS_LOG_INFO,
                                "Deleting socket (Num = %d) from the iface\n",
-                               appHandle->iface[index].sock);
-                    vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
-                    appHandle->iface[index].sock = -1;
-                    appHandle->iface[index].sendParam.qos   = 0;
-                    appHandle->iface[index].sendParam.ttl   = 0;
-                    appHandle->iface[index].usage           = 0;
-                    appHandle->iface[index].bindAddr        = 0;
-                    appHandle->iface[index].type        = (TRDP_SOCK_TYPE_T) 0;
-                    appHandle->iface[index].rcvMostly   = FALSE;
-                    appHandle->iface[index].tcpParams.cornerIp = 0;
-                    appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
-                    appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
-                    appHandle->iface[index].tcpParams.addFileDesc = FALSE;
+                               appHandle->iface[lIndex].sock);
+                    vos_printf(VOS_LOG_INFO, "Close socket iface lIndex=%d\n", lIndex);
+                    appHandle->iface[lIndex].sock = -1;
+                    appHandle->iface[lIndex].sendParam.qos  = 0;
+                    appHandle->iface[lIndex].sendParam.ttl  = 0;
+                    appHandle->iface[lIndex].usage          = 0;
+                    appHandle->iface[lIndex].bindAddr       = 0;
+                    appHandle->iface[lIndex].type       = (TRDP_SOCK_TYPE_T) 0;
+                    appHandle->iface[lIndex].rcvMostly  = FALSE;
+                    appHandle->iface[lIndex].tcpParams.cornerIp = 0;
+                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec     = 0;
+                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec    = 0;
+                    appHandle->iface[lIndex].tcpParams.addFileDesc = FALSE;
                 }
             }
         }
@@ -2325,27 +2358,27 @@ void  trdp_mdCheckTimeouts (
 
     /* Check Sending Timeouts for send() failed/incomplete sockets */
     {
-        INT32 index;
+        INT32 lIndex;
 
-        for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
         {
-            if ((appHandle->iface[index].sock != -1)
-                && (appHandle->iface[index].type == TRDP_SOCK_MD_TCP)
-                && (appHandle->iface[index].rcvMostly == FALSE)
-                && (appHandle->iface[index].tcpParams.sendNotOk == TRUE))
+            if ((appHandle->iface[lIndex].sock != -1)
+                && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
+                && (appHandle->iface[lIndex].rcvMostly == FALSE)
+                && (appHandle->iface[lIndex].tcpParams.sendNotOk == TRUE))
             {
-                if (0 > vos_cmpTime(&appHandle->iface[index].tcpParams.sendingTimeout, &now))
+                if (0 > vos_cmpTime(&appHandle->iface[lIndex].tcpParams.sendingTimeout, &now))
                 {
                     TRDP_ERR_T err;
 
-                    vos_printf(VOS_LOG_INFO, "The socket (Num = %d) Sending TIMEOUT\n", appHandle->iface[index].sock);
+                    vos_printf(VOS_LOG_INFO, "The socket (Num = %d) Sending TIMEOUT\n", appHandle->iface[lIndex].sock);
 
                     /* Execute callback */
                     if (appHandle->mdDefault.pfCbFunction != NULL)
                     {
                         TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
-                        theMessage.destIpAddr   = appHandle->iface[index].tcpParams.cornerIp;
+                        theMessage.destIpAddr   = appHandle->iface[lIndex].tcpParams.cornerIp;
                         theMessage.resultCode   = TRDP_TIMEOUT_ERR;
                         memset(theMessage.sessionId, 0, TRDP_SESS_ID_SIZE);
 
@@ -2356,7 +2389,7 @@ void  trdp_mdCheckTimeouts (
                     }
 
                     /* Close the socket */
-                    err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[index].sock);
+                    err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[lIndex].sock);
                     if (err != TRDP_NO_ERR)
                     {
                         vos_printf(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
@@ -2365,19 +2398,19 @@ void  trdp_mdCheckTimeouts (
                     /* Delete the socket from the iface */
                     vos_printf(VOS_LOG_INFO,
                                "Deleting socket (Num = %d) from the iface\n",
-                               appHandle->iface[index].sock);
-                    vos_printf(VOS_LOG_INFO, "Close socket iface index=%d\n", index);
-                    appHandle->iface[index].sock = -1;
-                    appHandle->iface[index].sendParam.qos   = 0;
-                    appHandle->iface[index].sendParam.ttl   = 0;
-                    appHandle->iface[index].usage           = 0;
-                    appHandle->iface[index].bindAddr        = 0;
-                    appHandle->iface[index].type        = (TRDP_SOCK_TYPE_T) 0;
-                    appHandle->iface[index].rcvMostly   = FALSE;
-                    appHandle->iface[index].tcpParams.cornerIp = 0;
-                    appHandle->iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
-                    appHandle->iface[index].tcpParams.connectionTimeout.tv_usec = 0;
-                    appHandle->iface[index].tcpParams.addFileDesc = FALSE;
+                               appHandle->iface[lIndex].sock);
+                    vos_printf(VOS_LOG_INFO, "Close socket iface lIndex=%d\n", lIndex);
+                    appHandle->iface[lIndex].sock = -1;
+                    appHandle->iface[lIndex].sendParam.qos  = 0;
+                    appHandle->iface[lIndex].sendParam.ttl  = 0;
+                    appHandle->iface[lIndex].usage          = 0;
+                    appHandle->iface[lIndex].bindAddr       = 0;
+                    appHandle->iface[lIndex].type       = (TRDP_SOCK_TYPE_T) 0;
+                    appHandle->iface[lIndex].rcvMostly  = FALSE;
+                    appHandle->iface[lIndex].tcpParams.cornerIp = 0;
+                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec     = 0;
+                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec    = 0;
+                    appHandle->iface[lIndex].tcpParams.addFileDesc = FALSE;
                 }
             }
         }

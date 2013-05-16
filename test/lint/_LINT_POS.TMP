@@ -1,0 +1,41 @@
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\vos\common\vos_mem.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\vos\common\vos_utils.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\vos\posix\vos_thread.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\vos\posix\vos_sock.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_if.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_mdcom.c (C++)
+                            _
+        if ((tmpSndSize >= 0) && (pElement->sendSize >= 0))   /* TBD Lint error ###: Relational operator '>=' always
+Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_mdcom.c  415  Warning 685:
+    Relational operator '>=' always evaluates to 'true'
+Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_mdcom.c  415  Warning 568:
+    non-negative quantity is never less than zero
+Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_mdcom.c  415  Warning 685:
+    Relational operator '>=' always evaluates to 'true'
+Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_mdcom.c  415  Warning 568:
+    non-negative quantity is never less than zero
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_pdcom.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_utils.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\common\trdp_stats.c (C++)
+
+--- Module:   Y:\Sourcen\trdp\trunk\trdp\src\common\tau_marshall.c (C++)
+
+--- Global Wrap-up
+
+Warning 526: Symbol 'offsetof_violates_MISRA_Rule_120()' (line 121, file
+    Y:\Sourcen\trdp\trunk\trdp\src\common\tau_marshall.c) not defined
+Y:\Sourcen\trdp\trunk\trdp\src\common\tau_marshall.c  121  Info 830: Location
+    cited in prior message
+Warning 628: no argument information provided for function 'offsetof_violates_MISRA_Rule_120()'
+    (line 121, file Y:\Sourcen\trdp\trunk\trdp\src\common\tau_marshall.c)
+Y:\Sourcen\trdp\trunk\trdp\src\common\tau_marshall.c  121  Info 830: Location
+    cited in prior message

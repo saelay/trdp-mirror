@@ -175,7 +175,7 @@ typedef UINT8 VOS_UUID_T[16];   /**< universal unique identifier according to RF
 typedef struct
 {
     UINT32  tv_sec;         /**< full seconds                                     */
-    UINT32  tv_usec;        /**< Micro seconds (max. value 999999)                */
+    INT32   tv_usec;        /**< Micro seconds (max. value 999999)                */
 } VOS_TIME_T;
 
 

@@ -585,9 +585,13 @@ void trdp_pdCheckPending (
                 appHandle->iface[iterPD->socketIdx].sock != -1 &&
                 appHandle->option & TRDP_OPTION_BLOCK)
             {
-                if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))
+                if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573
+                                                                                                signed/unsigned division
+                                                                                                in macro */
                 {
-                    FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);
+                    FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);   /*lint !e573
+                                                                                               signed/unsigned division
+                                                                                               in macro */
                     if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
                     {
                         *pNoDesc = appHandle->iface[iterPD->socketIdx].sock;
@@ -691,9 +695,9 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
         for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
         {
             if (iterPD->socketIdx != -1 &&
-                FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))     /*    PD frame received?
-                                                                                           */
-            {
+                FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))  /*lint !e573 signed/unsigned
+                                                                                         division in macro */
+            {       /*    PD frame received? */
                 /*  Compare the received data to the data in our receive queue
                  Call user's callback if data changed    */
 
@@ -707,7 +711,8 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                 }
 
                 (*pCount)--;
-                FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds);
+                FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds); /*lint !e502 !e573 signed/unsigned division
+                                                                                     in macro */
             }
         }
     }

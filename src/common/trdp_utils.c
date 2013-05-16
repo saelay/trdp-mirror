@@ -513,11 +513,11 @@ void    trdp_MDqueueInsFirst (
  */
 void trdp_initSockets (TRDP_SOCKETS_T iface[])
 {
-    int index;
+    int lIndex;
     /* Clear the socket pool */
-    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
-        iface[index].sock = -1;
+        iface[lIndex].sock = -1;
     }
 }
 
@@ -529,11 +529,11 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  */
 void trdp_initUncompletedTCP (TRDP_APP_SESSION_T appHandle)
 {
-    int index;
+    int lIndex;
     /* Initialize the pointers to Null */
-    for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
-        appHandle->uncompletedTCP[index] = NULL;
+        appHandle->uncompletedTCP[lIndex] = NULL;
     }
 }
 #endif
@@ -575,7 +575,7 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_IP_ADDR_T          cornerIp)
 {
     VOS_SOCK_OPT_T  sock_options;
-    INT32           index, emptySock = -1;
+    INT32           lIndex, emptySock = -1;
     TRDP_ERR_T      err         = TRDP_NO_ERR;
     TRDP_IP_ADDR_T  bindAddr    = srcIP;
 
@@ -595,39 +595,39 @@ TRDP_ERR_T  trdp_requestSocket (
         bindAddr = 0;
     }
 
-    for (index = 0; index < sCurrentMaxSocketCnt; index++)
+    for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
     {
         /*  Check if the wanted socket is already in our list; if yes, increment usage */
         if (useSocket != -1 &&
-            useSocket == iface[index].sock)
+            useSocket == iface[lIndex].sock)
         {
             /* Use that socket */
-            *pIndex = index;
-            iface[index].usage++;
+            *pIndex = lIndex;
+            iface[lIndex].usage++;
             return TRDP_NO_ERR;
         }
-        else if (iface[index].sock != -1 &&
-                 iface[index].bindAddr == bindAddr &&
-                 iface[index].type == usage &&
-                 iface[index].sendParam.qos == params->qos &&
-                 iface[index].sendParam.ttl == params->ttl &&
-                 iface[index].rcvMostly == rcvMostly &&
+        else if (iface[lIndex].sock != -1 &&
+                 iface[lIndex].bindAddr == bindAddr &&
+                 iface[lIndex].type == usage &&
+                 iface[lIndex].sendParam.qos == params->qos &&
+                 iface[lIndex].sendParam.ttl == params->ttl &&
+                 iface[lIndex].rcvMostly == rcvMostly &&
                  ((usage != TRDP_SOCK_MD_TCP) ||
-                  ((usage == TRDP_SOCK_MD_TCP) && (iface[index].tcpParams.cornerIp == cornerIp))))
+                  ((usage == TRDP_SOCK_MD_TCP) && (iface[lIndex].tcpParams.cornerIp == cornerIp))))
         {
             /*  Did this socket join the required multicast group?  */
-            if (mcGroup != 0 && trdp_SockIsJoined(iface[index].mcGroups, mcGroup) == FALSE)
+            if (mcGroup != 0 && trdp_SockIsJoined(iface[lIndex].mcGroups, mcGroup) == FALSE)
             {
                 /*  No, but can we add it? */
-                if (trdp_SockAddJoin(iface[index].mcGroups, mcGroup) == FALSE)
+                if (trdp_SockAddJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
                 {
                     continue;   /* No, socket cannot join more MC groups */
                 }
                 else
                 {
-                    if (vos_sockJoinMC(iface[index].sock, mcGroup, iface[index].bindAddr) != VOS_NO_ERR)
+                    if (vos_sockJoinMC(iface[lIndex].sock, mcGroup, iface[lIndex].bindAddr) != VOS_NO_ERR)
                     {
-                        if (trdp_SockDelJoin(iface[index].mcGroups, mcGroup) == FALSE)
+                        if (trdp_SockDelJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
                         {
                             vos_printf(VOS_LOG_ERROR, "trdp_SockDelJoin() failed!\n");
                         }
@@ -638,9 +638,9 @@ TRDP_ERR_T  trdp_requestSocket (
 
 /* add_start TOSHIBA 0306 */
             if ((usage != TRDP_SOCK_MD_TCP)
-                && (iface[index].bindAddr != 0))
+                && (iface[lIndex].bindAddr != 0))
             {
-                err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
+                err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
                 if (err != TRDP_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err);
@@ -649,63 +649,63 @@ TRDP_ERR_T  trdp_requestSocket (
 /* add_end TOSHIBA */
 
             /* Use that socket */
-            *pIndex = index;
+            *pIndex = lIndex;
 
-            if(((usage != TRDP_SOCK_MD_TCP)) || ((usage == TRDP_SOCK_MD_TCP) && (iface[index].usage > -1)))
+            if (((usage != TRDP_SOCK_MD_TCP)) || ((usage == TRDP_SOCK_MD_TCP) && (iface[lIndex].usage > -1)))
             {
-                iface[index].usage++;
+                iface[lIndex].usage++;
             }
 
             return err;
         }
-        else if (iface[index].sock == -1 && emptySock == -1)
+        else if (iface[lIndex].sock == -1 && emptySock == -1)
         {
             /* Remember the first empty slot */
-            emptySock = index;
+            emptySock = lIndex;
         }
     }
 
     /* Not found, create a new socket entry */
-    if (index < VOS_MAX_SOCKET_CNT)
+    if (lIndex < VOS_MAX_SOCKET_CNT)
     {
-        if (emptySock != -1 && index != emptySock)
+        if (emptySock != -1 && lIndex != emptySock)
         {
-            index = emptySock;
+            lIndex = emptySock;
         }
         else
         {
-            sCurrentMaxSocketCnt = index + 1;
+            sCurrentMaxSocketCnt = lIndex + 1;
         }
 
-        iface[index].sock           = -1;
-        iface[index].bindAddr       = srcIP;
-        iface[index].type           = usage;
-        iface[index].sendParam.qos  = params->qos;
-        iface[index].sendParam.ttl  = params->ttl;
-        iface[index].rcvMostly      = rcvMostly;
-        iface[index].tcpParams.connectionTimeout.tv_sec     = 0;
-        iface[index].tcpParams.connectionTimeout.tv_usec    = 0;
-        iface[index].tcpParams.cornerIp     = cornerIp;
-        iface[index].tcpParams.sendNotOk    = FALSE;
+        iface[lIndex].sock          = -1;
+        iface[lIndex].bindAddr      = srcIP;
+        iface[lIndex].type          = usage;
+        iface[lIndex].sendParam.qos = params->qos;
+        iface[lIndex].sendParam.ttl = params->ttl;
+        iface[lIndex].rcvMostly     = rcvMostly;
+        iface[lIndex].tcpParams.connectionTimeout.tv_sec    = 0;
+        iface[lIndex].tcpParams.connectionTimeout.tv_usec   = 0;
+        iface[lIndex].tcpParams.cornerIp    = cornerIp;
+        iface[lIndex].tcpParams.sendNotOk   = FALSE;
 
         /* Add to the file desc only if it's an accepted socket */
         if (rcvMostly == TRUE)
         {
-            iface[index].tcpParams.addFileDesc = TRUE;
+            iface[lIndex].tcpParams.addFileDesc = TRUE;
         }
         else
         {
-            iface[index].tcpParams.addFileDesc = FALSE;
+            iface[lIndex].tcpParams.addFileDesc = FALSE;
         }
 
-        memset(iface[index].mcGroups, 0, sizeof(iface[index].mcGroups));
+        memset(iface[lIndex].mcGroups, 0, sizeof(iface[lIndex].mcGroups));
 
         /* if a socket descriptor was supplied, take that one (for the TCP connection)   */
         if (useSocket != -1)
         {
-            iface[index].sock   = useSocket;
-            iface[index].usage  = 1;        /* Mark as used */
-            *pIndex = index;
+            iface[lIndex].sock  = useSocket;
+            iface[lIndex].usage = 1;         /* Mark as used */
+            *pIndex = lIndex;
             return err;
         }
 
@@ -720,7 +720,7 @@ TRDP_ERR_T  trdp_requestSocket (
             case TRDP_SOCK_MD_UDP:
                 sock_options.nonBlocking = TRUE; /* MD UDP sockets are always non blocking because they are polled */
             case TRDP_SOCK_PD:
-                err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[index].sock, &sock_options);
+                err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[lIndex].sock, &sock_options);
                 if (err != TRDP_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "vos_sockOpenUDP failed! (Err: %d)\n", err);
@@ -728,19 +728,19 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
                 else
                 {
-                    iface[index].usage = 1;
-                    *pIndex = index;
+                    iface[lIndex].usage = 1;
+                    *pIndex = lIndex;
 
                     if (rcvMostly)
                     {
                         /*  Only bind to local IP if we are not a multicast listener  */
                         if (0 == mcGroup)
                         {
-                            err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, iface[index].bindAddr, port);
+                            err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, port);
                         }
                         else
                         {
-                            err = (TRDP_ERR_T) vos_sockBind(iface[index].sock, 0 /*mcGroup*/, port);
+                            err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, 0 /*mcGroup*/, port);
                         }
 
                         if (err != TRDP_NO_ERR)
@@ -753,7 +753,7 @@ TRDP_ERR_T  trdp_requestSocket (
                         if (0 != mcGroup)
                         {
 
-                            err = (TRDP_ERR_T) vos_sockJoinMC(iface[index].sock, mcGroup, iface[index].bindAddr);
+                            err = (TRDP_ERR_T) vos_sockJoinMC(iface[lIndex].sock, mcGroup, iface[lIndex].bindAddr);
                             if (err != TRDP_NO_ERR)
                             {
                                 vos_printf(VOS_LOG_ERROR, "vos_sockJoinMC() for UDP rcv failed! (Err: %d)\n", err);
@@ -762,22 +762,22 @@ TRDP_ERR_T  trdp_requestSocket (
                             }
                             else
                             {
-                                if (trdp_SockAddJoin(iface[index].mcGroups, mcGroup) == FALSE)
+                                if (trdp_SockAddJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
                                 {
                                     vos_printf(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
                                 }
                             }
                         }
                     }
-                    else if (iface[index].bindAddr != 0)
+                    else if (iface[lIndex].bindAddr != 0)
                     {
-                        (void) vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
+                        (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
                     }
 
                     /*    Multicast sender shall be bound to an interface    */
-                    if (iface[index].bindAddr != 0)
+                    if (iface[lIndex].bindAddr != 0)
                     {
-                        err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[index].sock, iface[index].bindAddr);
+                        err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
                         if (err != TRDP_NO_ERR)
                         {
                             vos_printf(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err);
@@ -789,7 +789,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
                 break;
             case TRDP_SOCK_MD_TCP:
-                err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[index].sock, &sock_options);
+                err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[lIndex].sock, &sock_options);
                 if (err != TRDP_NO_ERR)
                 {
                     vos_printf(VOS_LOG_ERROR, "vos_sockOpenTCP() failed! (Err: %d)\n", err);
@@ -797,13 +797,13 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
                 else
                 {
-                    iface[index].usage = 0;
-                    *pIndex = index;
+                    iface[lIndex].usage = 0;
+                    *pIndex = lIndex;
                 }
 
-                if (iface[index].bindAddr != 0)
+                if (iface[lIndex].bindAddr != 0)
                 {
-                    (void) vos_sockBind(iface[index].sock, iface[index].bindAddr, 0);
+                    (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
                 }
                 break;
             default:
@@ -825,29 +825,29 @@ TRDP_ERR_T  trdp_requestSocket (
 /** Handle the socket pool: if a received TCP socket is unused, the socket connection timeout is started.
  *  In Udp, Release a socket from our socket pool
  *  @param[in,out]  iface           socket pool
- *  @param[in]      index           index of socket to release
+ *  @param[in]      lIndex           index of socket to release
  *  @param[in]      connectTimeout  time out
  *
  */
 void  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
-    INT32           index,
+    INT32           lIndex,
     UINT32          connectTimeout)
 {
     TRDP_ERR_T err = TRDP_PARAM_ERR;
 
     if (iface != NULL)
     {
-        if (iface[index].type == TRDP_SOCK_MD_UDP)
+        if (iface[lIndex].type == TRDP_SOCK_MD_UDP)
         {
-            vos_printf(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[index].sock, iface[index].usage);
-            if (iface[index].sock > -1)
+            vos_printf(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[lIndex].sock, iface[lIndex].usage);
+            if (iface[lIndex].sock > -1)
             {
-                if (--iface[index].usage == 0)
+                if (--iface[lIndex].usage == 0)
                 {
                     /* Close that socket, nobody uses it anymore */
-                    err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
-                    iface[index].sock = -1;
+                    err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
+                    iface[lIndex].sock = -1;
                     if (err != TRDP_NO_ERR)
                     {
                         vos_printf(VOS_LOG_DBG, "Trying to close socket again?\n");
@@ -858,19 +858,19 @@ void  trdp_releaseSocket (
         }
         else
         {
-            if ((iface[index].sock > -1) && (iface[index].rcvMostly == FALSE))
+            if ((iface[lIndex].sock > -1) && (iface[lIndex].rcvMostly == FALSE))
             {
-                vos_printf(VOS_LOG_DBG, "Decrement the socket %d usage = %d\n", iface[index].sock, iface[index].usage);
-                iface[index].usage--;
+                vos_printf(VOS_LOG_DBG, "Decrement the socket %d usage = %d\n", iface[lIndex].sock, iface[lIndex].usage);
+                iface[lIndex].usage--;
 
-                if (iface[index].usage == 0)
+                if (iface[lIndex].usage == 0)
                 {
                     /* Start the socket connection timeout */
                     TRDP_TIME_T tmpt_interval, tmpt_now;
 
                     vos_printf(VOS_LOG_INFO,
                                "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                               iface[index].sock);
+                               iface[lIndex].sock);
 
                     tmpt_interval.tv_sec    = connectTimeout / 1000000;
                     tmpt_interval.tv_usec   = connectTimeout % 1000000;
@@ -878,7 +878,7 @@ void  trdp_releaseSocket (
                     vos_getTime(&tmpt_now);
                     vos_addTime(&tmpt_now, &tmpt_interval);
 
-                    memcpy(&iface[index].tcpParams.connectionTimeout,
+                    memcpy(&iface[lIndex].tcpParams.connectionTimeout,
                            &tmpt_now,
                            sizeof(TRDP_TIME_T));
                 }

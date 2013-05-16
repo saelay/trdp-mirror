@@ -121,7 +121,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
     PD_ELE_T    *iter;
-    UINT16      index;
+    UINT16      lIndex;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -134,25 +134,31 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     }
 
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
-    for (index = 0, iter = appHandle->pRcvQueue; index < *pNumSubs && iter != NULL; index++, iter = iter->pNext)
+    for (lIndex = 0, iter = appHandle->pRcvQueue; lIndex < *pNumSubs && iter != NULL; lIndex++, iter = iter->pNext)
     {
-        pStatistics[index].comId        = iter->addr.comId;     /* Subscribed ComId                                   */
-        pStatistics[index].joinedAddr   = iter->addr.mcGroup;   /* Joined IP address                                  */
-        pStatistics[index].filterAddr   = iter->addr.srcIpAddr; /* Filter IP address                                  */
-        pStatistics[index].callBack     = (void *) iter->userRef; /* Reference for call back function if used
+        pStatistics[lIndex].comId       = iter->addr.comId;      /* Subscribed ComId
+                                                                                                     */
+        pStatistics[lIndex].joinedAddr  = iter->addr.mcGroup;    /* Joined IP address
+                                                                                                    */
+        pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr;  /* Filter IP address
+                                                                                                    */
+        pStatistics[lIndex].callBack    = (void *) iter->userRef;  /* Reference for call back function if used
                                                                              */
-        pStatistics[index].timeout      = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
+        pStatistics[lIndex].timeout     = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */
-        pStatistics[index].toBehav  = iter->toBehavior;         /* Behaviour at time-out                              */
-        pStatistics[index].numRecv  = iter->numRxTx;            /* Number of packets received for this subscription.  */
-        pStatistics[index].status   = iter->lastErr;            /* Receive status information                         */
+        pStatistics[lIndex].toBehav = iter->toBehavior;          /* Behaviour at time-out
+                                                                                                */
+        pStatistics[lIndex].numRecv = iter->numRxTx;             /* Number of packets received for this subscription.
+                                                                    */
+        pStatistics[lIndex].status  = iter->lastErr;             /* Receive status information
+                                                                                           */
 
     }
-    if (index >= *pNumSubs && iter != NULL)
+    if (lIndex >= *pNumSubs && iter != NULL)
     {
         err = TRDP_MEM_ERR;
     }
-    *pNumSubs = index;
+    *pNumSubs = lIndex;
     return err;
 }
 
@@ -175,7 +181,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
     PD_ELE_T    *iter;
-    UINT16      index;
+    UINT16      lIndex;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -188,26 +194,32 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     }
 
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
-    for (index = 0, iter = appHandle->pRcvQueue; index < *pNumPub && iter != NULL; index++, iter = iter->pNext)
+    for (lIndex = 0, iter = appHandle->pRcvQueue; lIndex < *pNumPub && iter != NULL; lIndex++, iter = iter->pNext)
     {
-        pStatistics[index].comId    = iter->addr.comId;         /* Published ComId                                    */
-        pStatistics[index].destAddr = iter->addr.destIpAddr;    /* IP address of destination for this publishing.     */
+        pStatistics[lIndex].comId       = iter->addr.comId;      /* Published ComId
+                                                                                                      */
+        pStatistics[lIndex].destAddr    = iter->addr.destIpAddr; /* IP address of destination for this publishing.
+                                                                       */
 
         /* TBD: */
-        pStatistics[index].redId    = appHandle->redID;         /* Redundancy group id                                */
-        pStatistics[index].redState = 0;                        /* Redundancy state                                   */
+        pStatistics[lIndex].redId       = appHandle->redID;      /* Redundancy group id
+                                                                                                  */
+        pStatistics[lIndex].redState    = 0;                     /* Redundancy state
+                                                                                                     */
 
-        pStatistics[index].cycle = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
+        pStatistics[lIndex].cycle = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
         /* Interval/cycle in us. 0 = No time-out supervision  */
-        pStatistics[index].numSend  = iter->numRxTx;            /* Number of packets sent for this publisher.         */
-        pStatistics[index].numPut   = iter->updPkts;            /* Updated packets (via put)                          */
+        pStatistics[lIndex].numSend = iter->numRxTx;             /* Number of packets sent for this publisher.
+                                                                           */
+        pStatistics[lIndex].numPut  = iter->updPkts;             /* Updated packets (via put)
+                                                                                            */
 
     }
-    if (index >= *pNumPub && iter != NULL)
+    if (lIndex >= *pNumPub && iter != NULL)
     {
         err = TRDP_MEM_ERR;
     }
-    *pNumPub = index;
+    *pNumPub = lIndex;
     return err;
 }
 
@@ -282,7 +294,7 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
     PD_ELE_T    *iter;
-    UINT16      index;
+    UINT16      lIndex;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -295,17 +307,17 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
     }
 
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
-    for (index = 0, iter = appHandle->pRcvQueue; index < *pNumJoin && iter != NULL; index++, iter = iter->pNext)
+    for (lIndex = 0, iter = appHandle->pRcvQueue; lIndex < *pNumJoin && iter != NULL; lIndex++, iter = iter->pNext)
     {
         *pIpAddr++ = iter->addr.mcGroup;                        /* Subscribed MC address.                       */
     }
 
-    if (index >= *pNumJoin && iter != NULL)
+    if (lIndex >= *pNumJoin && iter != NULL)
     {
         err = TRDP_MEM_ERR;
     }
 
-    *pNumJoin = index;
+    *pNumJoin = lIndex;
 
     return err;
 }
@@ -340,7 +352,7 @@ void    trdp_UpdateStats (
     TRDP_APP_SESSION_T appHandle)
 {
     PD_ELE_T    *iter;
-    UINT16      index;
+    UINT16      lIndex;
     VOS_ERR_T   ret;
 
     /*  Get a new time stamp    */
@@ -361,20 +373,20 @@ void    trdp_UpdateStats (
     }
 
     /*  Count our subscriptions */
-    for (index = 0, iter = appHandle->pRcvQueue; iter != NULL; index++, iter = iter->pNext)
+    for (lIndex = 0, iter = appHandle->pRcvQueue; iter != NULL; lIndex++, iter = iter->pNext)
     {
         ;
     }
 
-    appHandle->stats.pd.numSubs = index;
+    appHandle->stats.pd.numSubs = lIndex;
 
     /*  Count our publishers */
-    for (index = 0, iter = appHandle->pSndQueue; iter != NULL; index++, iter = iter->pNext)
+    for (lIndex = 0, iter = appHandle->pSndQueue; iter != NULL; lIndex++, iter = iter->pNext)
     {
         ;
     }
 
-    appHandle->stats.pd.numPub = index;
+    appHandle->stats.pd.numPub = lIndex;
 }
 
 /**********************************************************************************************************************/

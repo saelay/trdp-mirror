@@ -114,7 +114,7 @@ void cyclicThread (
 {
     for (;; )
     {
-        vos_threadDelay(interval);
+        (void) vos_threadDelay(interval);
         pFunction(pArguments);
         pthread_testcancel();
     }
@@ -430,6 +430,7 @@ EXT_DECL void vos_getTime (
             changing the system clock during operation
             might interrupt process data packet transmissions!    */
 
+        /*lint -e(534) ignore return value */
         gettimeofday(&myTime, NULL);
 
 #else
@@ -461,6 +462,7 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
     struct timeval  curTime;
     struct tm       *curTimeTM;
 
+    /*lint -e(534) ignore return value */
     gettimeofday(&curTime, NULL);
     curTimeTM = localtime(&curTime.tv_sec);
 
@@ -576,7 +578,7 @@ EXT_DECL void vos_divTime (
         {
             pTime->tv_usec += temp * 1000000;
         }
-        pTime->tv_usec /= divisor;
+        pTime->tv_usec /= (INT32)divisor;
     }
 }
 
@@ -721,7 +723,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
         err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
         if (err == 0)
         {
-            err = pthread_mutex_init(&(*pMutex)->mutexId, &attr);
+            err = pthread_mutex_init((pthread_mutex_t *)&(*pMutex)->mutexId, &attr);
         }
         pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
     }
@@ -769,7 +771,7 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
         err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
         if (err == 0)
         {
-            err = pthread_mutex_init(&pMutex->mutexId, &attr);
+            err = pthread_mutex_init((pthread_mutex_t *)&pMutex->mutexId, &attr);
         }
         pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
     }
@@ -806,7 +808,7 @@ EXT_DECL void vos_mutexDelete (
     {
         int err;
 
-        err = pthread_mutex_destroy(&pMutex->mutexId);
+        err = pthread_mutex_destroy((pthread_mutex_t *)&pMutex->mutexId);
         if (err == 0)
         {
             pMutex->magicNo = 0;
@@ -838,7 +840,7 @@ EXT_DECL void vos_mutexLocalDelete (
     {
         int err;
 
-        err = pthread_mutex_destroy(&pMutex->mutexId);
+        err = pthread_mutex_destroy((pthread_mutex_t *)&pMutex->mutexId);
         if (err == 0)
         {
             pMutex->magicNo = 0;
@@ -871,7 +873,7 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
         return VOS_PARAM_ERR;
     }
 
-    err = pthread_mutex_lock(&pMutex->mutexId);
+    err = pthread_mutex_lock((pthread_mutex_t *)&pMutex->mutexId);
     if (err != 0)
     {
         vos_printf(VOS_LOG_ERROR, "Unable to lock Mutex (pthread err=%d)\n", err);
@@ -902,7 +904,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
         return VOS_PARAM_ERR;
     }
 
-    err = pthread_mutex_trylock(&pMutex->mutexId);
+    err = pthread_mutex_trylock((pthread_mutex_t *)&pMutex->mutexId);
     if (err == EBUSY)
     {
         return VOS_MUTEX_ERR;
@@ -937,7 +939,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
     {
         int err;
 
-        err = pthread_mutex_unlock(&pMutex->mutexId);
+        err = pthread_mutex_unlock((pthread_mutex_t *)&pMutex->mutexId);
         if (err != 0)
         {
             vos_printf(VOS_LOG_ERROR, "Unable to unlock Mutex (pthread err=%d)\n", err);
@@ -967,7 +969,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_STATE_T    initialState)
 {
     VOS_ERR_T   retVal  = VOS_SEMA_ERR;
-    int         rc     = 0;
+    int         rc      = 0;
 
     /*Check parameters*/
     if (pSema == NULL)
@@ -1017,8 +1019,8 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 
 EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
 {
-    int     rc   = 0;
-    int     sval = 0;
+    int rc      = 0;
+    int sval    = 0;
 
     /* Check parameter */
     if (sema == NULL)
@@ -1067,8 +1069,8 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 {
     int             rc              = 0;
     VOS_ERR_T       retVal          = VOS_SEMA_ERR;
-    VOS_TIME_T      waitTimeVos     = {0,0};
-    struct timespec waitTimeSpec    = {0,0};
+    VOS_TIME_T      waitTimeVos     = {0, 0};
+    struct timespec waitTimeSpec    = {0, 0};
 
     /* Check parameter */
     if (sema == NULL)
@@ -1106,13 +1108,13 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         }
         /* take semaphore with specified timeout */
         /* BL 2013-05-06:
-           This call will fail under QNX, because it depends on CLOCK_REALTIME (opposed to CLOCK_MONOTONIC)!
+           This call will fail under LINUX, because it depends on CLOCK_REALTIME (opposed to CLOCK_MONOTONIC)!
         */
-        #ifdef __QNXNTO__
-            rc = sem_timedwait_monotonic((sem_t *)sema, &waitTimeSpec);
-        #else
-            rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
-        #endif
+#ifdef __QNXNTO__
+        rc = sem_timedwait_monotonic((sem_t *)sema, &waitTimeSpec);
+#else
+        rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
+#endif
     }
     else
     {

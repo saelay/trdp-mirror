@@ -1,0 +1,48 @@
+//  Gnu C/C++, -si4 -sp4, lib-stl.lnt
+//  Standard lint options
+
+co-gnu3.lnt
+lib-stl.lnt
+au-misra.lnt
+-si4 -sp4
+
+-i"Y:\Sourcen\trdp\trunk\trdp\src\api"
+-i"Y:\Sourcen\trdp\trunk\trdp\src\common"
+-i"Y:\Sourcen\trdp\trunk\trdp\src\vos\posix"
+-i"Y:\Sourcen\trdp\trunk\trdp\src\vos\api"
+-i"Y:\Sourcen\trdp\trunk\trdp\src\vos\common"
+-i"Y:\Sourcen\trdp\trunk\trdp\src\vos"
+-i"Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\lib\gcc\i486-linux-gnu\4.2.4\include"
+-i"Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\include"
+
+-D__ARMEB__=0
+-D__MIPSEB__=0
+-D__AARCH64EB__=0
+
+-D__GNUC__=1
+-D_GNU_SOURCE=1
+-DNO_DEBUG=1
+-D__linux=1
+-D__USE_GNU=1
+
+-w2
++macros
++ppw(warning)
+-cpp
+
++libdir(Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\lib\gcc\i486-linux-gnu\4.2.4\include)
++libdir(Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\include)
+
+-elib(*)
+-e537   // "Repeated include file 'FileName'"
+-e755   // "global macro 'Symbol' (Location) not referenced"
+-e40
+-emacro({*},vos_snprintf)       // due to definition of internal used __VA_ARGS__
+--emacro({42},vos_snprintf)     // statement expected - due to definition of __VA_ARGS__
+-emacro({*},vos_printf)       // due to definition of internal used __VA_ARGS__
+--emacro({42},vos_printf)     // statement expected - due to definition of __VA_ARGS__
+-emacro((530,516,78,26,10,155,1055),ALIGNOF) // due to definition of internal used __alignof
+-emacro((10),MAKEWORD)        // due to definition of internal used macros
+-e131
+-e655   // bit-wise operation uses (compatible) enum's
+-e641   // Converting enum to int

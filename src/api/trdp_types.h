@@ -82,10 +82,10 @@ typedef CHAR8 TRDP_FILE_NAME_T[TRDP_MAX_FILE_NAME_LEN];
 /** Version information */
 typedef struct
 {
-  UINT8 ver;        /**< Version    - incremented for incompatible changes */
-  UINT8 rel;        /**< Release    - incremented for compatible changes   */
-  UINT8 upd;        /**< Update     - incremented for bug fixes            */
-  UINT8 evo;        /**< Evolution  - incremented for build                */
+    UINT8   ver;    /**< Version    - incremented for incompatible changes */
+    UINT8   rel;    /**< Release    - incremented for compatible changes   */
+    UINT8   upd;    /**< Update     - incremented for bug fixes            */
+    UINT8   evo;    /**< Evolution  - incremented for build                */
 } TRDP_VERSION_T;
 
 
@@ -124,7 +124,7 @@ typedef enum
     TRDP_REPLYTO_ERR        = -43,  /**< Protocol Reply Timeout                         */
     TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout                       */
     TRDP_REQCONFIRMTO_ERR   = -45,  /**< Protocol Confirm Timeout (Request sender)      */
-    TRDP_PACKET_ERR            = -46,  /**< Incomplete message data packet                 */
+    TRDP_PACKET_ERR         = -46,  /**< Incomplete message data packet                 */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 
