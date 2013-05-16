@@ -406,37 +406,20 @@ TRDP_ERR_T  trdp_mdSendPacket (
     VOS_ERR_T   err         = VOS_NO_ERR;
     UINT32      tmpSndSize  = 0;
 
-    if (pElement->tcpParameters.msgUncomplete == TRUE)
-    {
-        tmpSndSize          = pElement->sendSize;
-        pElement->sendSize  = pElement->grossSize - tmpSndSize;
-
-    }
-    else
-    {
-        pElement->sendSize = pElement->grossSize;
-    }
-
-
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
-        if (pElement->tcpParameters.msgUncomplete == FALSE)
-        {
-            err = vos_sockSendTCP(pdSock, (UINT8 *)&pElement->pPacket->frameHead, &pElement->sendSize);
+        tmpSndSize = pElement->sendSize;
 
-        }
-        else
+        pElement->sendSize = pElement->grossSize - tmpSndSize;
+
+        if((tmpSndSize >= 0) && (pElement->sendSize >= 0))
         {
-            if (tmpSndSize >= sizeof(MD_HEADER_T))
-            {
-                err = vos_sockSendTCP(pdSock,
-                                      (UINT8 *)(&pElement->pPacket->data[(tmpSndSize - sizeof(MD_HEADER_T))]),
-                                      &pElement->sendSize);
-            }
-            else
-            {
-                return TRDP_NODATA_ERR;
-            }
+            err = vos_sockSendTCP(pdSock, ((UINT8 *)&pElement->pPacket->frameHead) + tmpSndSize, &pElement->sendSize);
+            pElement->sendSize = tmpSndSize + pElement->sendSize;
+
+        }else
+        {
+            return TRDP_NODATA_ERR;
         }
 
     }
@@ -455,7 +438,7 @@ TRDP_ERR_T  trdp_mdSendPacket (
         return TRDP_IO_ERR;
     }
 
-    if ((tmpSndSize + pElement->sendSize) != pElement->grossSize)
+    if ((pElement->sendSize) != pElement->grossSize)
     {
         vos_printf(VOS_LOG_INFO, "vos_sockSend incomplete\n");
         return TRDP_IO_ERR;
@@ -480,14 +463,25 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
+    /* Size of the all data read until now */
     UINT32      size            = 0;
+    /* The pending data to read */
     UINT32      dataSize        = 0;
     UINT32      socketIndex     = 0;
+    /* All the data read in this cycle (Header + Data) */
     UINT32      readSize        = 0;
+    /* All the data part read in this cycle (Data) */
     UINT32      readDataSize    = 0;
+
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
+        /* Initialize to 0 the pElement->dataSize
+         * Once it is known, the message complete data size will be saved*/
+        pElement->dataSize = 0;
+
+        /* Initialize to 0 the stored header size*/
+        UINT32 storedHeader = 0;
 
         /* Find the socket index */
         for (socketIndex = 0; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++)
@@ -503,7 +497,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             || ((appHandle->uncompletedTCP[socketIndex] != NULL)
                 && (appHandle->uncompletedTCP[socketIndex]->grossSize < sizeof(MD_HEADER_T))))
         {
-            UINT32 storedHeader = 0;
 
             if (appHandle->uncompletedTCP[socketIndex] == NULL)
             {
@@ -533,6 +526,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                     pElement->pPacket->frameHead.datasetLength;
                 appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum =
                     pElement->pPacket->frameHead.frameCheckSum;
+
             }
 
         }
@@ -550,6 +544,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                     sizeof(pElement->pPacket->frameHead.frameCheckSum);
 
                 readDataSize = dataSize;
+                pElement->dataSize = dataSize;
 
             }
             else
@@ -558,9 +553,31 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 size        = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
                 dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) +
                     sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum);
+
+                pElement->dataSize = dataSize;
                 dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
                 readDataSize    = dataSize;
+            }
 
+
+            /* If all the Header is read, check if more memory is needed */
+            if(size == sizeof(MD_HEADER_T))
+            {
+
+                if(trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
+                {
+                    /* we have to allocate a bigger buffer */
+                    MD_PACKET_T *pBigData = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
+                    if (pBigData == NULL)
+                    {
+                        return TRDP_MEM_ERR;
+                    }
+                    /*  Swap the pointers ...  */
+                    memcpy(((UINT8 *)&pBigData->frameHead) + storedHeader,((UINT8 *)&pElement->pPacket->frameHead) + storedHeader, readSize);
+
+                    vos_memFree(pElement->pPacket);
+                    pElement->pPacket   = pBigData;
+                }
             }
 
             err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock,
@@ -576,7 +593,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
         }
         pElement->grossSize = size;
-        pElement->dataSize  = readDataSize;
     }
     else
     {
@@ -673,97 +689,139 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     }
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
-    {
-        BOOL    noDataToRead    = FALSE;
-        UINT32  storedDataSize  = 0;
+   {
+       BOOL    noDataToRead    = FALSE;
+       /* All the data (Header + Data) stored in the uncompletedTCP[] array */
+       UINT32  storedDataSize  = 0;
 
-        if (pElement->grossSize == sizeof(MD_HEADER_T))
-        {
-            if (dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
-            {
-                noDataToRead = TRUE;
-            }
-        }
 
-        /* Compare if all the data has been read */
-        if (((pElement->grossSize < sizeof(MD_HEADER_T)) && (pElement->dataSize == 0))
-            || ((noDataToRead == FALSE) && (pElement->dataSize != dataSize)))
-        {
-            /* Uncompleted message received */
+       /* Check if it's necessary to read some data */
+       if (pElement->grossSize == sizeof(MD_HEADER_T))
+       {
+           if (dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
+           {
+               noDataToRead = TRUE;
+           }
+       }
 
-            if (appHandle->uncompletedTCP[socketIndex] == NULL)
-            {
-                /* It is the first loop, no data stored yet. Allocate memory for the message */
-                appHandle->uncompletedTCP[socketIndex] = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
-                appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(sizeof(MD_PACKET_T));
+       /* Compare if all the data has been read */
+       if (((pElement->grossSize < sizeof(MD_HEADER_T)) && (readDataSize == 0))
+           || ((noDataToRead == FALSE) && (readDataSize != dataSize)))
+       {
+           /* Uncompleted message received */
 
-                if (appHandle->uncompletedTCP[socketIndex] == NULL)
-                {
-                    /* vos_memDelete(NULL); */
-                    vos_printf(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
-                    return TRDP_MEM_ERR;
-                }
+           if (appHandle->uncompletedTCP[socketIndex] == NULL)
+           {
+               /* It is the first loop, no data stored yet. Allocate memory for the message */
+               appHandle->uncompletedTCP[socketIndex] = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
 
-                storedDataSize = 0;
+               if (appHandle->uncompletedTCP[socketIndex] == NULL)
+               {
+                   /* vos_memDelete(NULL); */
+                   vos_printf(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
+                   return TRDP_MEM_ERR;
+               }
 
-            }
-            else
-            {
-                /* Get the size that have been already stored in the uncompletedTCP[] */
-                storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
-            }
+               /* Check the memory that is needed */
+               if(trdp_packetSizeMD(pElement->dataSize) < cMinimumMDSize)
+               {
+                   /* Allocate the cMinimumMDSize memory at least for now*/
+                   appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
 
-            if (readSize > 0)
-            {
-                /* Copy the read data in the uncompletedTCP[] */
-                memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
-                       ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
-                appHandle->uncompletedTCP[socketIndex]->grossSize   = pElement->grossSize;
-                appHandle->uncompletedTCP[socketIndex]->dataSize    = pElement->dataSize;
+               }else
+               {
+                   /* Allocate the dataSize memory */
+                   /* we have to allocate a bigger buffer */
+                   appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
+               }
 
-            }
-            else
-            {
-                return TRDP_PARAM_ERR;
-            }
+               if (appHandle->uncompletedTCP[socketIndex]->pPacket == NULL)
+               {
+                   return TRDP_MEM_ERR;
+               }
 
-            return TRDP_PACKET_ERR;
+               storedDataSize = 0;
 
-        }
-        else
-        {
-            /* Complete message */
-            /* All data is read. Save all the data and copy to the pElement to continue */
+           }
+           else
+           {
+               /* Get the size that have been already stored in the uncompletedTCP[] */
+               storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
 
-            if (appHandle->uncompletedTCP[socketIndex] != NULL)
-            {
-                /* Add the received information and copy all the data to the pElement */
+               if((storedDataSize < sizeof(MD_HEADER_T))
+                       && (pElement->grossSize > sizeof(MD_HEADER_T)))
+               {
+                   if(trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
+                   {
+                       /* we have to allocate a bigger buffer */
+                       MD_PACKET_T *pBigData = (MD_PACKET_T *) vos_memAlloc(trdp_packetSizeMD(pElement->dataSize));
+                       if (pBigData == NULL)
+                       {
+                           return TRDP_MEM_ERR;
+                       }
 
-                storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
+                       /* Copy the data to the pBigData->frameHead */
+                       memcpy(((UINT8 *)&pBigData->frameHead),((UINT8 *)&pElement->pPacket->frameHead), storedDataSize);
 
-                if ((readSize > 0))
-                {
-                    memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
-                           ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
+                       /*  Swap the pointers ...  */
+                       vos_memFree(appHandle->uncompletedTCP[socketIndex]->pPacket);
+                       appHandle->uncompletedTCP[socketIndex]->pPacket   = pBigData;
+                   }
+               }
+           }
 
-                    /* Copy all the uncompletedTCP data to the pElement */
-                    memcpy(((UINT8 *)&pElement->pPacket->frameHead),
-                           ((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), pElement->grossSize);
+           if (readSize > 0)
+           {
+               /* Copy the read data in the uncompletedTCP[] */
+               memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
+                      ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
+               appHandle->uncompletedTCP[socketIndex]->grossSize   = pElement->grossSize;
+               appHandle->uncompletedTCP[socketIndex]->dataSize    = readDataSize;
 
-                    /* Disallocate the memory */
-                    vos_memFree(appHandle->uncompletedTCP[socketIndex]);
-                    appHandle->uncompletedTCP[socketIndex] = NULL;
+           }
+           else
+           {
+               return TRDP_PARAM_ERR;
+           }
 
-                }
-                else
-                {
-                    return TRDP_PARAM_ERR;
-                }
-            }
+           return TRDP_PACKET_ERR;
 
-        }
+       }
+       else
+       {
+           /* Complete message */
+           /* All data is read. Save all the data and copy to the pElement to continue */
 
-    }
+           if (appHandle->uncompletedTCP[socketIndex] != NULL)
+           {
+               /* Add the received information and copy all the data to the pElement */
+
+               storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
+
+               if ((readSize > 0))
+               {
+                   /* Copy the read data in the uncompletedTCP[] */
+                   memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
+                          ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
+
+                   /* Copy all the uncompletedTCP data to the pElement */
+                   memcpy(((UINT8 *)&pElement->pPacket->frameHead),
+                          ((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead), pElement->grossSize);
+
+                   /* Disallocate the memory */
+                   vos_memFree(appHandle->uncompletedTCP[socketIndex]);
+                   appHandle->uncompletedTCP[socketIndex] = NULL;
+
+               }
+               else
+               {
+                   return TRDP_PARAM_ERR;
+               }
+           }
+
+       }
+
+   }
 
     /* received data */
     err = trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, pElement->grossSize, CHECK_DATA_TOO);
@@ -879,10 +937,9 @@ TRDP_ERR_T  trdp_mdRecv (
 
     if (appHandle->pMDRcvEle->pPacket == NULL)
     {
-        /* We malloc a big buffer for TCP only; for UDP cMinimumSize (= 1024) suffices
-           This should be changed to allow smaller footprint for TCP traffic, as well. Gari?)  */
-        appHandle->pMDRcvEle->pPacket = (MD_PACKET_T *) vos_memAlloc(
-                (isTCP == TRUE) ? TRDP_MAX_MD_PACKET_SIZE : cMinimumMDSize);
+        /* Malloc the minimum size for now */
+        appHandle->pMDRcvEle->pPacket = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
+
         if (appHandle->pMDRcvEle->pPacket == NULL)
         {
             vos_memFree(appHandle->pMDRcvEle);
