@@ -72,9 +72,9 @@
  *  LOCALS
  */
 
-BOOL            vosSockInitialised      = FALSE;
-uint32_t        gNumberOfOpenSockets    = 0;
-struct ifreq    gIfr;
+BOOL vosSockInitialised = FALSE;
+
+struct ifreq gIfr;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -225,8 +225,8 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 {
     static CHAR8 dotted[16];
 
-    snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
-             ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+    (void)snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
+                   ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
     /*
        vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
               ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
@@ -291,9 +291,9 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     VOS_IF_REC_T    ifAddrs[])
 {
     int success;
-    struct ifaddrs *addrs;
-    struct ifaddrs *cursor;
-    int count = 0;
+    struct ifaddrs  *addrs;
+    struct ifaddrs  *cursor;
+    unsigned int    count = 0;
 
     if (pAddrCnt == NULL ||
         *pAddrCnt == 0 ||
@@ -430,7 +430,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -447,7 +447,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         socklen_t   option_len  = sizeof(optval);
         if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, option_len) == -1)
         {
-            getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
+            (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
             vos_printf(VOS_LOG_WARNING, "vos_sockOpenUDP: UDP send message size out of limit (max: %u)\n", optval);
             return VOS_SOCK_ERR;
         }
@@ -455,18 +455,18 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         optval = 64 * 1024;
         if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, option_len) == -1)
         {
-            getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
+            (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
             vos_printf(VOS_LOG_WARNING, "vos_sockOpenUDP: UDP recv message size out of limit (max: %u)\n", optval);
             return VOS_SOCK_ERR;
         }
-        getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
+        (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
         vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: UDP send message limit = %u\n", optval);
-        getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
+        (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
         vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: UDP recv message limit = %u\n", optval);
     }
 
     *pSock = (INT32) sock;
-    gNumberOfOpenSockets++;
+
     vos_printf(VOS_LOG_INFO, "vos_sockOpenUDP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
 }
@@ -504,7 +504,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -515,7 +515,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         return VOS_SOCK_ERR;
     }
     *pSock = (INT32) sock;
-    gNumberOfOpenSockets++;
+
     vos_printf(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
 }
@@ -543,7 +543,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
         vos_printf(VOS_LOG_INFO,
                    "vos_sockClose(%d) okay\n", sock);
     }
-    gNumberOfOpenSockets--;
+
     return VOS_NO_ERR;
 }
 
@@ -570,32 +570,29 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         {
             sockOptValue = 1;
 #ifdef SO_REUSEPORT
-            errno = 0;
             if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (Err: %s)\n", buff);
             }
 #else
-            errno = 0;
             if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (Err: %s)\n", buff);
             }
 #endif
         }
         if (1 == pOptions->nonBlocking)
         {
-            errno = 0;
             if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() O_NONBLOCK failed (Err: %s)\n", buff);
                 return VOS_SOCK_ERR;
             }
@@ -603,60 +600,56 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         if (pOptions->qos > 0 && pOptions->qos < 8)
         {
             /* The QoS value (0-7) is mapped to MSB bits 7-5, bit 2 is set for local use */
-            errno           = 0;
-            sockOptValue    = (int) ((pOptions->qos << 5) | 4);
+            sockOptValue = (int) ((pOptions->qos << 5) | 4);
             if (setsockopt(sock, IPPROTO_IP, IP_TOS, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (Err: %s)\n", buff);
             }
         }
         if (pOptions->ttl > 0)
         {
-            errno           = 0;
-            sockOptValue    = pOptions->ttl;
+            sockOptValue = pOptions->ttl;
             if (setsockopt(sock, IPPROTO_IP, IP_TTL, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %s)\n", buff);
             }
         }
         if (pOptions->ttl_multicast > 0)
         {
-            errno           = 0;
-            sockOptValue    = pOptions->ttl_multicast;
+            sockOptValue = pOptions->ttl_multicast;
             if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %s)\n", buff);
             }
         }
     }
     /*  Include struct in_pktinfo in the message "ancilliary" control data.
         This way we can get the destination IP address for received UDP packets */
-    errno           = 0;
-    sockOptValue    = 1;
-    #if defined(IP_RECVDSTADDR)
+    sockOptValue = 1;
+#if defined(IP_RECVDSTADDR)
     if (setsockopt(sock, IPPROTO_IP, IP_RECVDSTADDR, &sockOptValue, sizeof(sockOptValue)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %s)\n", buff);
     }
-    #elif defined(IP_PKTINFO)
+#elif defined(IP_PKTINFO)
     if (setsockopt(sock, IPPROTO_IP, IP_PKTINFO, &sockOptValue, sizeof(sockOptValue)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "setsockopt() IP_PKTINFO failed (Err: %s)\n", buff);
     }
-    #endif
+#endif
 
     return VOS_NO_ERR;
 }
@@ -706,11 +699,11 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
 
-        errno = 0;
+        /*errno = 0;*/
         if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1 &&
             errno != EADDRINUSE)
         {
-            strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %s)\n", buff);
             result = VOS_SOCK_ERR;
         }
@@ -724,11 +717,11 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         {
             UINT32 enMcLb = 0;
 
-            errno = 0;
+
             if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1
                  && errno != 0)
             {
-                strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                 vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (%s)\n", buff);
                 result = VOS_SOCK_ERR;
             }
@@ -790,11 +783,11 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
         }
 
-        errno = 0;
+        /*errno = 0;*/
         if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
-            strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %s)\n", buff);
 
             result = VOS_SOCK_ERR;
@@ -855,13 +848,13 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     do
     {
-        errno       = 0;
-        sendSize    = sendto(sock,
-                             (const char *)pBuffer,
-                             size,
-                             0,
-                             (struct sockaddr *) &destAddr,
-                             sizeof(destAddr));
+        /*errno       = 0;*/
+        sendSize = sendto(sock,
+                          (const char *)pBuffer,
+                          size,
+                          0,
+                          (struct sockaddr *) &destAddr,
+                          sizeof(destAddr));
 
         if (sendSize >= 0)
         {
@@ -878,7 +871,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     if (sendSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %s)\n",
                    inet_ntoa(destAddr.sin_addr), port, buff);
         return VOS_IO_ERR;
@@ -1005,7 +998,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     if (rcvSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "recvmsg() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -1061,7 +1054,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     if (bind(sock, (struct sockaddr *)&srcAddress, sizeof(srcAddress)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "bind() failed (Err: %s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -1092,7 +1085,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
     if (listen(sock, (int) backlog) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_ERROR, "listen() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -1159,7 +1152,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
                 default:
                 {
                     char buff[VOS_MAX_ERR_STR_SIZE];
-                    strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                    (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
                     vos_printf(VOS_LOG_ERROR,
                                "accept() listenFd(%d) failed (Err: %s)\n",
                                *pSock,
@@ -1221,7 +1214,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
         else if (errno != EISCONN)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
-            strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_WARNING, "connect() failed (Err: %s)\n", buff);
             return VOS_IO_ERR;
         }
@@ -1279,7 +1272,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     if (sendSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_WARNING, "send() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -1348,7 +1341,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     if ((rcvSize == -1) && !(errno == EMSGSIZE))
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
         vos_printf(VOS_LOG_WARNING, "receive() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -1399,7 +1392,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &multicastIFAddress.sin_addr, sizeof(struct in_addr)) == -1)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
-            strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
             vos_printf(VOS_LOG_WARNING, "setsockopt() IP_MULTICAST_IF failed (Err: %s)\n", buff);
             result = VOS_SOCK_ERR;
         }

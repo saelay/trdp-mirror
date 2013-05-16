@@ -320,7 +320,11 @@ static TRDP_DATASET_T *find_DS (
     TRDP_DATASET_T  * *key3;
 
     key2.id = datasetId;
-    key3    = vos_bsearch(&key2, sDataSets, sNumEntries, sizeof(TRDP_DATASET_T *), dataset_compare_deref);
+    key3    = (TRDP_DATASET_T * *) vos_bsearch(&key2,
+                                               sDataSets,
+                                               sNumEntries,
+                                               sizeof(TRDP_DATASET_T *),
+                                               dataset_compare_deref);
     if (key3 != NULL)
     {
         return *key3;
@@ -348,7 +352,7 @@ static TRDP_ERR_T do_marshall (
     TRDP_DATASET_T      *pDataset)
 {
     TRDP_ERR_T  err;
-    UINT16      index;
+    UINT16      lIndex;
     UINT32      var_size = 0;
     UINT8       *pSrc;
     UINT8       *pDst = pInfo->pDst;
@@ -364,9 +368,9 @@ static TRDP_ERR_T do_marshall (
     pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
 
     /*    Loop over all datasets in the array    */
-    for (index = 0; index < pDataset->numElement; ++index)
+    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
     {
-        UINT32 noOfItems = pDataset->pElement[index].size;
+        UINT32 noOfItems = pDataset->pElement[lIndex].size;
 
         if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
         {
@@ -374,26 +378,26 @@ static TRDP_ERR_T do_marshall (
         }
 
         /*    Is this a composite type?    */
-        if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
+        if (pDataset->pElement[lIndex].type > (UINT32) TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
             {
                 /* Dataset, call ourself recursively */
 
                 /* Never used before?  */
-                if (NULL == pDataset->pElement[index].pCachedDS)
+                if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
+                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
                 }
 
-                if (NULL == pDataset->pElement[index].pCachedDS)      /* Not in our DB    */
+                if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
                 {
-                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
+                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
                     return TRDP_COMID_ERR;
                 }
 
-                err = do_marshall(pInfo, pDataset->pElement[index].pCachedDS);
+                err = do_marshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -402,7 +406,7 @@ static TRDP_ERR_T do_marshall (
         }
         else
         {
-            switch (pDataset->pElement[index].type)
+            switch (pDataset->pElement[lIndex].type)
             {
                 case TRDP_BOOLEAN:
                 case TRDP_CHAR8:
@@ -565,7 +569,7 @@ static TRDP_ERR_T do_unmarshall (
     TRDP_DATASET_T      *pDataset)
 {
     TRDP_ERR_T  err;
-    UINT16      index;
+    UINT16      lIndex;
     UINT32      var_size    = 0;
     UINT8       *pSrc       = pInfo->pSrc;
     UINT8       *pDst       = pInfo->pDst;
@@ -578,34 +582,34 @@ static TRDP_ERR_T do_unmarshall (
     }
 
     /*    Loop over all datasets in the array    */
-    for (index = 0; index < pDataset->numElement; ++index)
+    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
     {
-        UINT32 noOfItems = pDataset->pElement[index].size;
+        UINT32 noOfItems = pDataset->pElement[lIndex].size;
 
         if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
         {
             noOfItems = var_size;
         }
         /*    Is this a composite type?    */
-        if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
+        if (pDataset->pElement[lIndex].type > (UINT32) TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
             {
                 /* Dataset, call ourself recursively */
                 /* Never used before?  */
-                if (NULL == pDataset->pElement[index].pCachedDS)
+                if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
+                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
                 }
 
-                if (NULL == pDataset->pElement[index].pCachedDS)      /* Not in our DB    */
+                if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
                 {
-                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
+                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
                     return TRDP_COMID_ERR;
                 }
 
-                err = do_unmarshall(pInfo, pDataset->pElement[index].pCachedDS);
+                err = do_unmarshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -617,7 +621,7 @@ static TRDP_ERR_T do_unmarshall (
         }
         else
         {
-            switch (pDataset->pElement[index].type)
+            switch (pDataset->pElement[lIndex].type)
             {
                 case TRDP_BOOLEAN:
                 case TRDP_CHAR8:
@@ -776,7 +780,7 @@ static TRDP_ERR_T size_marshall (
     TRDP_DATASET_T      *pDataset)
 {
     TRDP_ERR_T  err;
-    UINT16      index;
+    UINT16      lIndex;
     UINT32      var_size = 0;
     UINT8       *pSrc;
     UINT8       *pDst = pInfo->pDst;
@@ -792,9 +796,9 @@ static TRDP_ERR_T size_marshall (
     pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
 
     /*    Loop over all datasets in the array    */
-    for (index = 0; index < pDataset->numElement; ++index)
+    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
     {
-        UINT32 noOfItems = pDataset->pElement[index].size;
+        UINT32 noOfItems = pDataset->pElement[lIndex].size;
 
         if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
         {
@@ -802,26 +806,26 @@ static TRDP_ERR_T size_marshall (
         }
 
         /*    Is this a composite type?    */
-        if (pDataset->pElement[index].type > (UINT32) TRDP_TYPE_MAX)
+        if (pDataset->pElement[lIndex].type > (UINT32) TRDP_TYPE_MAX)
         {
             while (noOfItems-- > 0)
             {
                 /* Dataset, call ourself recursively */
 
                 /* Never used before?  */
-                if (NULL == pDataset->pElement[index].pCachedDS)
+                if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[index].pCachedDS = find_DS(pDataset->pElement[index].type);
+                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
                 }
 
-                if (NULL == pDataset->pElement[index].pCachedDS)      /* Not in our DB    */
+                if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
                 {
-                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[index].type);
+                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
                     return TRDP_COMID_ERR;
                 }
 
-                err = size_marshall(pInfo, pDataset->pElement[index].pCachedDS);
+                err = size_marshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -830,7 +834,7 @@ static TRDP_ERR_T size_marshall (
         }
         else
         {
-            switch (pDataset->pElement[index].type)
+            switch (pDataset->pElement[lIndex].type)
             {
                 case TRDP_BOOLEAN:
                 case TRDP_CHAR8:
@@ -1021,7 +1025,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T          err;
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1088,7 +1092,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T          err;
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1157,7 +1161,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T          err;
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1224,7 +1228,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T          err;
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1289,7 +1293,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T          err;
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1352,7 +1356,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T          err;
+    TRDP_ERR_T err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 

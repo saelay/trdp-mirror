@@ -151,14 +151,14 @@ TRDP_ERR_T trdp_requestSocket(
 /** Handle the socket pool: Release a socket from our socket pool
  *
  *  @param[in,out]  iface           socket pool
- *  @param[in]      index           index of socket to release
+ *  @param[in]      lIndex           index of socket to release
  *  @param[in]      connectTimeout  timeout value
  *
  */
 
 void trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
-    INT32 index,
+    INT32 lIndex,
     UINT32 connectTimeout);
 
 
