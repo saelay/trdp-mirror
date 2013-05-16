@@ -561,7 +561,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
 
             /* If all the Header is read, check if more memory is needed */
-            if(size == sizeof(MD_HEADER_T))
+            if(size >= sizeof(MD_HEADER_T))
             {
 
                 if(trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
