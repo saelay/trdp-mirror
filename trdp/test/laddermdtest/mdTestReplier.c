@@ -52,6 +52,8 @@ VOS_THREAD_FUNC_T MDReplier (
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle2 ={{0}};		/* appThreadSessionHandle for Subnet2 */
 	TRDP_LIS_T pTrdpListenerHandle = NULL;		/* TRDP Listener Handle for Subnet1 by tlm_addListener */
 	TRDP_LIS_T pTrdpListenerHandle2 = NULL;	/* TRDP Listener Handle for Subnet2 by tlm_addListener */
+	LISTENER_HANDLE_T *pListenerHandle = NULL;	/* Listener Handle for All Listener Delete */
+	LISTENER_HANDLE_T *pListenerHandle2 = NULL;	/* Listener Handle2 for All Listener Delete */
 	/* Session Valid */
 	BOOL aliveSession = TRUE;
 
@@ -84,6 +86,28 @@ VOS_THREAD_FUNC_T MDReplier (
 	else
 	{
 		memset(appThreadSessionHandle2.pMdAppThreadListener, 0, sizeof(TRDP_ADDRESSES_T));
+	}
+	/* Listener Handle Area */
+	pListenerHandle = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
+	if (pListenerHandle == NULL)
+	{
+		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle malloc Err\n");
+		return 0;
+	}
+	else
+	{
+		memset(pListenerHandle, 0, sizeof(LISTENER_HANDLE_T));
+	}
+	/* Listener Handle2 Area */
+	pListenerHandle2 = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
+	if (pListenerHandle2 == NULL)
+	{
+		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle2 malloc Err\n");
+		return 0;
+	}
+	else
+	{
+		memset(pListenerHandle2, 0, sizeof(LISTENER_HANDLE_T));
 	}
 
 	/*	Set OPTION FLAG for TCP */
@@ -135,6 +159,13 @@ VOS_THREAD_FUNC_T MDReplier (
 		}
 		else
 		{
+			/* Set Listener Handle List */
+			pListenerHandle->appHandle = appHandle;
+			pListenerHandle->pTrdpListenerHandle = pTrdpListenerHandle;
+			if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
+			{
+				vos_printf(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+			}
 			/* Set Subnet1 appThreadListener */
 			appThreadSessionHandle.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
 			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
@@ -183,6 +214,13 @@ VOS_THREAD_FUNC_T MDReplier (
 			}
 			else
 			{
+				/* Set Listener Handle List */
+				pListenerHandle2->appHandle = appHandle2;
+				pListenerHandle2->pTrdpListenerHandle = pTrdpListenerHandle2;
+				if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
+				{
+					vos_printf(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+				}
 				/* Set Subnet2 appThreadListener */
 				appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
 				appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
@@ -256,6 +294,11 @@ VOS_THREAD_FUNC_T MDReplier (
 					/* Display TimeStamp when delete Listener time */
 					printf("%s Subnet1 Listener Delete.\n", vos_getTimeStamp());
 				}
+				/* Delete Listener Handle List */
+				if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
+				{
+					vos_printf(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
+				}
 				break;
 			}
 		}
@@ -270,7 +313,7 @@ VOS_THREAD_FUNC_T MDReplier (
 			if (aliveSession == FALSE)
 			{
 				/* Check Replier Send Reply Session Alive */
-				aliveSession = isValidReplierSendReplySession(appHandle, 0);
+				aliveSession = isValidReplierSendReplySession(appHandle2, 0);
 				if (aliveSession == FALSE)
 				{
 					/* delete Subnet2 Listener */
@@ -284,9 +327,28 @@ VOS_THREAD_FUNC_T MDReplier (
 						/* Display TimeStamp when delete Listener time */
 						printf("%s Subnet2 Listener Delete.\n", vos_getTimeStamp());
 					}
+					/* Delete Listener Handle List */
+					if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
+					{
+						vos_printf(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
+					}
 					break;
 				}
 			}
+		}
+	}
+
+	/* Delete AppThereadSession Message Queue Descriptor */
+	if (deleteAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle,	replierMqDescriptor) != MD_APP_NO_ERR)
+	{
+		vos_printf(VOS_LOG_ERROR, "Replier Subnet1 AppThread Session Message Queue Descriptor delete Err\n");
+	}
+	/* Is this Ladder Topology ? */
+	if (pReplierThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
+	{
+		if (deleteAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle2, replierMqDescriptor) != MD_APP_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "Replier Subnet2 AppThread Session Message Queue Descriptor delete Err\n");
 		}
 	}
 
@@ -298,6 +360,9 @@ VOS_THREAD_FUNC_T MDReplier (
 	/* Delete pReplierThreadParameter */
 	free(pReplierThreadParameter);
 	pReplierThreadParameter = NULL;
+
+	/* Set MD Log : disable */
+	logCategoryOnOffType = MD_DUMP_OFF;
 
 	return 0;
 }

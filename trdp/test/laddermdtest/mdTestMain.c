@@ -71,6 +71,8 @@ COMMAND_VALUE *pTrdpInitializeParameter = NULL;		/* First MD Command Value */
 
 UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printf. for dbgOut */
 
+LISTENER_HANDLE_T *pHeadListenerHandleList = NULL;		/* Head Listener Handle List */
+
 /* MD DATA for Caller Thread */
 UINT8 *pFirstCreateMdData = NULL;									/* pointer to First of Create MD DATA */
 UINT32 *pFirstCreateMdDataSize = NULL;								/* pointer to First of Create MD DATA Size */
@@ -136,6 +138,12 @@ int main (int argc, char *argv[])
 			{
 				/* Get Command, Create Application Thread Loop */
 				command_main_proc();
+			}
+			/* command -Q : Quit */
+			else if(err == MD_APP_QUIT_ERR)
+			{
+				/* Quit Command */
+				return 0;
 			}
 			else
 			{
@@ -347,6 +355,24 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 					getCommandValue.mdAddListenerComId = uint32_value;
 				}
 				break;
+			case 'Q':
+				/* -u : Display Caller Result */
+				if (printCallerResult(pTrdpInitializeParameter, DUMP_ALL_COMMAND_VALUE) != MD_APP_NO_ERR)
+				{
+					printf("Caller Receive Count Dump Err\n");
+				}
+				/* -U : Display Replier Result */
+				if (printReplierResult(pTrdpInitializeParameter, DUMP_ALL_COMMAND_VALUE) != MD_APP_NO_ERR)
+				{
+					printf("Replier Receive Count Dump Err\n");
+				}
+				/* Trdp Terminate */
+				if (mdTerminate() != MD_APP_NO_ERR)
+				{
+					printf("TRDP MD Terminate Err\n");
+				}
+				return MD_APP_QUIT_ERR;
+				break;
 			case 'r':
 				if (argv[i+1] != NULL)
 				{
@@ -434,8 +460,10 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 						"[-p marshallingTYpe] "
 						"[-q replierListenerComid] "
 						"\n"
+						"[-Q mdTestQuit] "
 						"[-r replyTimeout] "
-						"[-r connectTimeout] "
+						"[-R connectTimeout] "
+						"\n"
 						"[-t callerSendUsingSubnetType] "
 						"\n"
 						"[-h] "
@@ -466,6 +494,7 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("-S,	--show-md-statistics	Display MD Statistics\n");
 				printf("-u,	--show-caller-result	Display caller-result\n");
 				printf("-U,	--show-replier-result	Display replier-result\n");
+				printf("-Q,	--md-test-quit	MD TEST Quit\n");
 				printf("-h,	--help\n");
 				printf("Caller example\n"
 						"-b 0 -c 0 -d 1 -e 1 -g 239.255.1.1 -i 0 -j 0 -k 10 -l 0 -m 100000 -n 1 -p 0 -r 1000000 -t 1\n");
@@ -827,13 +856,18 @@ MD_APP_ERR_TYPE command_main_proc(void)
 			memset(pCommandValue, 0, sizeof(COMMAND_VALUE));
 			/* Decide Create Thread */
 			err = decideCreateThread(operand+1, argvCommand, pCommandValue);
-
 			if (err !=  MD_APP_NO_ERR)
 			{
 				/* command -h = MD_APP_COMMAND_ERR */
 				if (err == MD_APP_COMMAND_ERR)
 				{
 					continue;
+				}
+				/* command -Q : Quit */
+				else if(err == MD_APP_QUIT_ERR)
+				{
+					/* Quit Command */
+					return MD_APP_QUIT_ERR;
 				}
 				else
 				{
@@ -1052,6 +1086,12 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 			/* Continue Input Command */
 			return MD_APP_COMMAND_ERR;
 		}
+		/* command -Q : Quit */
+		else if(err == MD_APP_QUIT_ERR)
+		{
+			/* Quit Command */
+			return MD_APP_QUIT_ERR;
+		}
 		else
 		{
 			/* command err */
@@ -1202,7 +1242,7 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 }
 
 /**********************************************************************************************************************/
-/** Append an pdCommandValue at end of List
+/** Append an CommandValue at end of List
  *
  *  @param[in]      ppHeadCommandValue			pointer to pointer to head of List
  *  @param[in]      pNewCommandValue				pointer to pdCommandValue to append
@@ -1223,7 +1263,7 @@ MD_APP_ERR_TYPE appendComamndValueList(
         return MD_APP_PARAM_ERR;
     }
 
-	/*  */
+	/* First Command */
 	if (*ppHeadCommandValue == pNewCommandValue)
 	{
 		return MD_APP_NO_ERR;
@@ -1253,4 +1293,102 @@ MD_APP_ERR_TYPE appendComamndValueList(
     	iterCommandValue->pNextCommandValue = pNewCommandValue;
     }
 	return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** TRDP MD Terminate
+ *
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ */
+MD_APP_ERR_TYPE mdTerminate(
+		void)
+{
+	TRDP_ERR_T err = TRDP_NO_ERR;
+	LISTENER_HANDLE_T *iterListenerHandle;
+#if 0
+	BOOL aliveSession = TRUE;					/* Session Valid */
+
+	/* Check Session Close */
+	while(1)
+	{
+		/* Check Caller Send Request Session Alive */
+		aliveSession = isValidCallerSendRequestSession(appHandle, 0);
+		if (aliveSession == FALSE)
+		{
+			/* Check Caller Receive Reply Session Alive */
+			aliveSession = isValidCallerReceiveReplySession(appHandle, 0);
+			if (aliveSession == FALSE)
+			{
+				/* Check Caller Send Request Session Alive */
+				aliveSession = isValidCallerSendRequestSession(appHandle2, 0);
+				if (aliveSession == FALSE)
+				{
+					/* Check Caller Receive Reply Session Alive */
+					aliveSession = isValidCallerReceiveReplySession(appHandle2, 0);
+					if (aliveSession == FALSE)
+					{
+						break;
+					}
+				}
+			}
+		}
+	}
+#endif
+	/* Delete Listener */
+	for (iterListenerHandle = pHeadListenerHandleList;
+		  iterListenerHandle->pNextListenerHandle != NULL;
+	   	  iterListenerHandle = iterListenerHandle->pNextListenerHandle)
+	{
+		err = tlm_delListener(iterListenerHandle->appHandle, iterListenerHandle->pTrdpListenerHandle);
+        if(err != TRDP_NO_ERR)
+        {
+        	vos_printf(VOS_LOG_ERROR, "tlm_delListener() error = %d\n",err);
+        }
+	}
+	/* Display TimeStamp when close Session time */
+	printf("%s All Listener Delete.\n", vos_getTimeStamp());
+
+	/*	Close a session  */
+	if (appHandle != NULL)
+	{
+		err = tlc_closeSession(appHandle);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "Subnet1 tlc_closeSession() error = %d\n",err);
+		}
+		else
+		{
+			/* Display TimeStamp when close Session time */
+			printf("%s Subnet1 Close Session.\n", vos_getTimeStamp());
+		}
+	}
+	/*	Close a session  */
+	if (appHandle2 != NULL)
+	{
+		err = tlc_closeSession(appHandle2);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printf(VOS_LOG_ERROR, "Subnet2 tlc_closeSession() error = %d\n",err);
+		}
+		else
+		{
+			/* Display TimeStamp when close Session time */
+			printf("%s Subnet2 Close Session.\n", vos_getTimeStamp());
+		}
+	}
+
+	/* TRDP Terminate */
+    err = tlc_terminate();
+    if(err != TRDP_NO_ERR)
+    {
+    	vos_printf(VOS_LOG_ERROR, "tlc_terminate() error = %d\n",err);
+    }
+	else
+	{
+		/* Display TimeStamp when tlc_terminate time */
+		printf("%s TRDP Termiinate.\n", vos_getTimeStamp());
+	}
+    return err;
 }

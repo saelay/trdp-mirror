@@ -350,8 +350,6 @@ void md_indication(
     #endif
 
     {
-
-
 		// ADd message to application event queue
 		trdp_apl_cbenv_t fwd;
 

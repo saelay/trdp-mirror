@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.21"
+#define MD_APP_VERSION	"V0.24"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.21"
+#define MD_APP_VERSION	"V0.24"
 #else
-#define MD_APP_VERSION	"V0.21"
+#define MD_APP_VERSION	"V0.24"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -118,6 +118,8 @@ extern "C" {
 
 /* MD Reply ComId Mask */
 #define COMID_REPLY_MASK					0xA0000
+/* MD Request ComId Mask */
+#define COMID_REQUEST_MASK				0xFFF0FFFF
 
 /* MD DATA SIZE */
 #define MD_INCREMENT_DATA_MIN_SIZE	0				/* MD Increment DATA Minimum Size : 4B */
@@ -169,6 +171,7 @@ typedef struct
 {
 	TRDP_UUID_T			mdAppThreadSessionId;
 	TRDP_LIS_T				pMdAppThreadListener;
+	TRDP_LIS_T				pMdAppThreadTimeoutListener;
 	UINT32					sendRequestNumExpReplies;
 	UINT32					decidedSessionSuccessCount;
 	UINT32					decidedSessionFailureCount;
@@ -369,6 +372,14 @@ typedef struct RECEIVE_REPLY_RESULT_TABLE
 	MD_APP_ERR_TYPE callerDecideMdTranssmissionResultCode;
 } RECEIVE_REPLY_RESULT_TABLE_T;
 
+/* Listener Handle Table */
+typedef struct LISTENER_HANDLE
+{
+	TRDP_APP_SESSION_T appHandle;
+	TRDP_LIS_T pTrdpListenerHandle;
+	struct LISTENER_HANDLE *pNextListenerHandle;	/* pointer to next COMMAND_VALUE or NULL */
+} LISTENER_HANDLE_T;
+
 
 /***********************************************************************************************************************
  * GLOBAL VARIABLES
@@ -397,6 +408,7 @@ extern TRDP_URI_USER_T noneURI;					/* URI nothing */
 extern CHAR8 LOG_PIPE[];							/* named PIPE for log */
 
 extern UINT32 logCategoryOnOffType;			/* 0x0 is disable TRDP vos_printf. for dbgOut */
+extern LISTENER_HANDLE_T *pHeadListenerHandleList;		/* Head Listener Handle List */
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -473,6 +485,8 @@ MD_APP_ERR_TYPE queue_receiveMessage (
  *  @param[in]		pAppThreadSessionHandle		pointer to MD Application Thread Session Handle
  *  @param[in]		mqDescriptor					Message Queue Descriptor
  *
+ *  @retval         MD_APP_NO_ERR		no error
+ *  @retval         MD_APP_ERR			error
  */
 MD_APP_ERR_TYPE setAppThreadSessionMessageQueueDescriptor (
 		APP_THREAD_SESSION_HANDLE *pAppThreadSessionHandle,
@@ -484,10 +498,10 @@ MD_APP_ERR_TYPE setAppThreadSessionMessageQueueDescriptor (
  *  @param[in]		pAppThreadSessionHandle		pointer to MD Application Thread Session Handle
  *  @param[in]		mqDescriptor					Message Queue Descriptor
  *
- *  @retval         mqDescriptor		no error
- *  @retval         -1					error
+ *  @retval         MD_APP_NO_ERR		no error
+ *  @retval         MD_APP_ERR			error
  */
-mqd_t deleteAppThreadSessionMessageQueueDescriptor(
+MD_APP_ERR_TYPE deleteAppThreadSessionMessageQueueDescriptor(
 		APP_THREAD_SESSION_HANDLE *pAppThreadSessionHandle,
 		mqd_t mqDescriptor);
 
@@ -648,6 +662,105 @@ int l2fLog (
 MD_APP_ERR_TYPE decideResultCode(
 		TRDP_ERR_T mdResultCode);
 
+/**********************************************************************************************************************/
+/** Display CommandValue
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *
+ *  @retval         != NULL         		pointer to CommandValue
+ *  @retval         NULL            		No MD CommandValue found
+ */
+MD_APP_ERR_TYPE printCommandValue (
+		COMMAND_VALUE	*pHeadCommandValue);
+
+/**********************************************************************************************************************/
+/** Display MD Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *  @retval         MD_APP_ERR						error
+ */
+MD_APP_ERR_TYPE printMdStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+/**********************************************************************************************************************/
+/** Display MD Caller Receive Count
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *
+ */
+MD_APP_ERR_TYPE printCallerResult (
+		COMMAND_VALUE	*pHeadCommandValue,
+		UINT32 commandValueId);
+
+/**********************************************************************************************************************/
+/** Display MD Replier Receive Count
+ *
+ *  @param[in]      pHeadCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_PARAM_ERR					parameter	error
+ *
+ */
+MD_APP_ERR_TYPE printReplierResult (
+		COMMAND_VALUE	*pHeadCommandValue,
+		UINT32 commandValueId);
+
+/**********************************************************************************************************************/
+/** Delete an element
+ *
+ *  @param[in]      ppHeadCommandValue          pointer to pointer to head of queue
+ *  @param[in]      pDeleteCommandValue         pointer to element to delete
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ *
+ */
+MD_APP_ERR_TYPE deleteCommandValueList (
+		COMMAND_VALUE    * *ppHeadCommandValue,
+		COMMAND_VALUE    *pDeleteCommandValue);
+
+/**********************************************************************************************************************/
+/** Append an Listener Handle at end of List
+ *
+ *  @param[in]      ppHeadListenerHandle			pointer to pointer to head of List
+ *  @param[in]      pNewListenerHandle				pointer to Listener Handle to append
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ */
+MD_APP_ERR_TYPE appendListenerHandleList (
+		LISTENER_HANDLE_T    * *ppHeadListenerHandle,
+		LISTENER_HANDLE_T    *pNewListenerHandle);
+
+/**********************************************************************************************************************/
+/** Delete an Listener Handle List
+ *
+ *  @param[in]      ppHeadListenerHandle          pointer to pointer to head of queue
+ *  @param[in]      pDeleteCommandValue         pointer to element to delete
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ *
+ */
+MD_APP_ERR_TYPE deleteListenerHandleList (
+		LISTENER_HANDLE_T    * *ppHeadListenerHandle,
+		LISTENER_HANDLE_T    *pDeleteListenerHandle);
+
+
+// Convert an IP address to string
+char * miscIpToString(
+		int ipAdd,
+		char *strTmp);
+
+
 /* main */
 /**********************************************************************************************************************/
 /** Create MdLog Thread
@@ -767,75 +880,14 @@ MD_APP_ERR_TYPE appendComamndValueList(
 		COMMAND_VALUE    *pNewCommandValue);
 
 /**********************************************************************************************************************/
-/** Display CommandValue
+/** TRDP MD Terminate
  *
- *  @param[in]      pHeadCommandValue	pointer to head of queue
- *
- *  @retval         != NULL         		pointer to CommandValue
- *  @retval         NULL            		No MD CommandValue found
- */
-MD_APP_ERR_TYPE printCommandValue (
-		COMMAND_VALUE	*pHeadCommandValue);
-
-/**********************************************************************************************************************/
-/** Display MD Statistics
- *
- *  @param[in]      appHandle           the handle returned by tlc_openSession
- *
- *  @retval         MD_APP_NO_ERR					no error
- *  @retval         MD_PARAM_ERR					parameter	error
- *  @retval         MD_APP_ERR						error
- */
-MD_APP_ERR_TYPE printMdStatistics (
-		TRDP_APP_SESSION_T  appHandle);
-
-/**********************************************************************************************************************/
-/** Display MD Caller Receive Count
- *
- *  @param[in]      pHeadCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
- *
- *  @retval         MD_APP_NO_ERR					no error
- *  @retval         MD_PARAM_ERR					parameter	error
- *
- */
-MD_APP_ERR_TYPE printCallerResult (
-		COMMAND_VALUE	*pHeadCommandValue,
-		UINT32 commandValueId);
-
-/**********************************************************************************************************************/
-/** Display MD Replier Receive Count
- *
- *  @param[in]      pHeadCommandValue	pointer to head of queue
- *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
- *
- *  @retval         MD_APP_NO_ERR					no error
- *  @retval         MD_PARAM_ERR					parameter	error
- *
- */
-MD_APP_ERR_TYPE printReplierResult (
-		COMMAND_VALUE	*pHeadCommandValue,
-		UINT32 commandValueId);
-
-/**********************************************************************************************************************/
-/** Delete an element
- *
- *  @param[in]      ppHeadCommandValue          pointer to pointer to head of queue
- *  @param[in]      pDeleteCommandValue         pointer to element to delete
  *
  *  @retval         MD_APP_NO_ERR					no error
  *  @retval         MD_APP_ERR						error
- *
  */
-MD_APP_ERR_TYPE deleteCommandValueList (
-		COMMAND_VALUE    * *ppHeadCommandValue,
-		COMMAND_VALUE    *pDeleteCommandValue);
-
-// Convert an IP address to string
-char * miscIpToString(
-		int ipAdd,
-		char *strTmp);
-
+MD_APP_ERR_TYPE mdTerminate (
+		void);
 
 /* MDReceiveManager */
 /**********************************************************************************************************************/

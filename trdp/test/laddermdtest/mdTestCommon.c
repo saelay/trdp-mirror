@@ -222,6 +222,8 @@ MD_APP_ERR_TYPE queue_receiveMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
  *  @param[in]		pAppThreadSessionHandle		pointer to MD Application Thread Session Handle
  *  @param[in]		mqDescriptor					Message Queue Descriptor
  *
+ *  @retval         MD_APP_NO_ERR		no error
+ *  @retval         MD_APP_ERR			error
  */
 MD_APP_ERR_TYPE setAppThreadSessionMessageQueueDescriptor(
 		APP_THREAD_SESSION_HANDLE *pAppThreadSessionHandle,
@@ -247,10 +249,11 @@ MD_APP_ERR_TYPE setAppThreadSessionMessageQueueDescriptor(
  *  @param[in]		pAppThreadSessionHandle		pointer to MD Application Thread Session Handle
  *  @param[in]		mqDescriptor					Message Queue Descriptor
  *
- *  @retval         mqDescriptor		no error
- *  @retval         -1					error
+ *  @retval         MD_APP_NO_ERR		no error
+ *  @retval         MD_APP_ERR			error
+ *
  */
-mqd_t deleteAppThreadSessionMessageQueueDescriptor(
+MD_APP_ERR_TYPE deleteAppThreadSessionMessageQueueDescriptor(
 		APP_THREAD_SESSION_HANDLE *pAppThreadSessionHandle,
 		mqd_t mqDescriptor)
 {
@@ -261,45 +264,97 @@ mqd_t deleteAppThreadSessionMessageQueueDescriptor(
 		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener == NULL)
 		{
 			/* pMdAppThereaListener Noting */
-			break;
+//			break;
+			continue;
 		}
-		/* Matching ComId : equal */
-		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+		else
 		{
-			/* Matching Source IP Address : equal or nothing */
-			if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-				||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+			/* Matching ComId : equal */
+			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
 			{
-				/* Matching Destination IP Address : equal */
-				if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+				/* Matching Source IP Address : equal or nothing */
+				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
 				{
-					/* Matching sessionId : equal */
-//					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == pAppThreadSessionHandle->mdAppThreadSessionId)
-					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == NULL)
+					/* Matching Destination IP Address : equal */
+					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
 					{
-						continue;
-					}
-					else
-					{
-						if (strncmp((char *)appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
-									(char *)pAppThreadSessionHandle->mdAppThreadSessionId,
-									sizeof(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId)) == 0)
+						/* Matching sessionId : equal */
+	//					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == pAppThreadSessionHandle->mdAppThreadSessionId)
+						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == NULL)
 						{
-							/* Clear mqDescriptor */
-							appThreadSessionHandleMqDescriptorTable[i].mqDescriptor = 0;
-							/* Clear appThreadSessionHandle */
-							memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
-							/* Free Request Thread Session Handle Area */
-							free(pAppThreadSessionHandle->pMdAppThreadListener);
-							pAppThreadSessionHandle->pMdAppThreadListener = NULL;
-							return MD_APP_NO_ERR;
+							continue;
+						}
+						else
+						{
+							if (strncmp((char *)appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
+										(char *)pAppThreadSessionHandle->mdAppThreadSessionId,
+										sizeof(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId)) == 0)
+							{
+								/* Clear mqDescriptor */
+								appThreadSessionHandleMqDescriptorTable[i].mqDescriptor = 0;
+								/* Clear appThreadSessionHandle */
+								memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
+								/* Free Request Thread Session Handle Area */
+	//							free(pAppThreadSessionHandle->pMdAppThreadListener);
+								free(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener);
+	//							pAppThreadSessionHandle->pMdAppThreadListener = NULL;
+								appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener = NULL;
+								return MD_APP_NO_ERR;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/* Check appThreadSessionHadle.pMdAppThreadTimeoutListener */
+		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener == NULL)
+		{
+			/* pMdAppThereaListener Noting */
+//			break;
+			continue;
+		}
+		else
+		{
+			/* Matching ComId : equal */
+			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+			{
+				/* Matching Source IP Address : equal or nothing */
+				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == IP_ADDRESS_NOTHING))
+				{
+					/* Matching Destination IP Address : equal */
+					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+					{
+						/* Matching sessionId : equal */
+	//					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == pAppThreadSessionHandle->mdAppThreadSessionId)
+						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == NULL)
+						{
+							continue;
+						}
+						else
+						{
+							if (strncmp((char *)appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
+										(char *)pAppThreadSessionHandle->mdAppThreadSessionId,
+										sizeof(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId)) == 0)
+							{
+								/* Clear mqDescriptor */
+								appThreadSessionHandleMqDescriptorTable[i].mqDescriptor = 0;
+								/* Clear appThreadSessionHandle */
+								memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
+								/* Free Request Thread Session Handle Area */
+								free(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener);
+								appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener = NULL;
+								return MD_APP_NO_ERR;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	return -1;
+	return MD_APP_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -321,49 +376,97 @@ mqd_t getAppThreadSessionMessageQueueDescriptor(
 	for(i = *pLoopStartNumber; i < APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX; i++)
 	{
 		/* Check Table Listener == NULL*/
-		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener == NULL)
+		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener != NULL)
 		{
-			/* Not Maching */
-			return -1;
-		}
-		/* Matching ComId : equal */
-		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
-		{
-			/* Matching Source IP Address : equal or nothing */
-			if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-				||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+			/* Check Listener */
+			/* Matching ComId : equal */
+			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
 			{
-				/* Matching Destination IP Address : equal */
-				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
-					||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
+				/* Matching Source IP Address : equal or nothing */
+				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
 				{
-					/* Matching mcGroup Address : equal */
-/*					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.comId == pAppThreadSessionHandle->comId)
-					{ */
-						/* Check msgType */
-					    switch (mdMsgType)
-					    {
-					        case TRDP_MSG_MP:
-					        	/* Matching sessionId : equal */
-					        	if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
-					        			pAppThreadSessionHandle->mdAppThreadSessionId,
-					        			sizeof(TRDP_UUID_T)) == 0)
-					        	{
-					    			*pLoopStartNumber = i;
-					    			return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
-					        	}
-					        break;
-					        case TRDP_MSG_MN:
-					        case TRDP_MSG_MR:
-								*pLoopStartNumber = i;
-								return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
-					        break;
-					        default:
-					        break;
-					    }
-/*					} */
+					/* Matching Destination IP Address : equal */
+					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+						||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
+					{
+						/* Matching mcGroup Address : equal */
+	/*					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.comId == pAppThreadSessionHandle->comId)
+						{ */
+							/* Check msgType */
+							switch (mdMsgType)
+							{
+								case TRDP_MSG_MP:
+									/* Matching sessionId : equal */
+									if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
+											pAppThreadSessionHandle->mdAppThreadSessionId,
+											sizeof(TRDP_UUID_T)) == 0)
+									{
+										*pLoopStartNumber = i;
+										return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
+									}
+								break;
+								case TRDP_MSG_MN:
+								case TRDP_MSG_MR:
+									*pLoopStartNumber = i;
+									return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
+								break;
+								default:
+								break;
+							}
+	/*					} */
+					}
 				}
 			}
+		}
+		/* Check Timeout Listener */
+		/* Check Table Listener == NULL*/
+		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener != NULL)
+		{
+			/* Matching ComId : equal */
+			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+			{
+				/* Matching Source IP Address : equal or nothing */
+				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == IP_ADDRESS_NOTHING))
+				{
+					/* Matching Destination IP Address : equal */
+					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+						||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
+					{
+						/* Matching mcGroup Address : equal */
+	/*					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.comId == pAppThreadSessionHandle->comId)
+						{ */
+							/* Check msgType */
+							switch (mdMsgType)
+							{
+								case TRDP_MSG_MP:
+								case TRDP_MSG_MN:
+										*pLoopStartNumber = i;
+										return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
+								break;
+								case TRDP_MSG_MR:
+									/* Matching sessionId : equal */
+									if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
+											pAppThreadSessionHandle->mdAppThreadSessionId,
+											sizeof(TRDP_UUID_T)) == 0)
+									{
+										*pLoopStartNumber = i;
+										return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
+									}
+								break;
+								default:
+								break;
+							}
+	/*					} */
+					}
+				}
+			}
+		}
+		else
+		{
+			/* Not Maching */
+			continue;
 		}
 	}
 	return -1;
@@ -1352,12 +1455,108 @@ MD_APP_ERR_TYPE deleteCommandValueList (
     	  iterCommandValue != NULL;
     	  iterCommandValue = iterCommandValue->pNextCommandValue)
     {
-        if (iterCommandValue->pNextCommandValue && iterCommandValue->pNextCommandValue == pDeleteCommandValue)
+//        if (iterCommandValue->pNextCommandValue && iterCommandValue->pNextCommandValue == pDeleteCommandValue)
+        if (iterCommandValue->pNextCommandValue == pDeleteCommandValue)
         {
             iterCommandValue->pNextCommandValue = pDeleteCommandValue->pNextCommandValue;
             free(pDeleteCommandValue);
             pDeleteCommandValue = NULL;
             break;
+        }
+    }
+    return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Append an Listener Handle at end of List
+ *
+ *  @param[in]      ppHeadListenerHandle			pointer to pointer to head of List
+ *  @param[in]      pNewListenerHandle				pointer to Listener Handle to append
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ */
+MD_APP_ERR_TYPE appendListenerHandleList(
+		LISTENER_HANDLE_T    * *ppHeadListenerHandle,
+		LISTENER_HANDLE_T    *pNewListenerHandle)
+{
+	LISTENER_HANDLE_T *iterListenerHandle;
+
+    /* Parameter Check */
+	if (ppHeadListenerHandle == NULL || pNewListenerHandle == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+	/* First Listener Handle */
+	if (*ppHeadListenerHandle == pNewListenerHandle)
+	{
+		return MD_APP_NO_ERR;
+	}
+
+    /* Ensure this List is last! */
+	pNewListenerHandle->pNextListenerHandle = NULL;
+
+    if (*ppHeadListenerHandle == NULL)
+    {
+        *ppHeadListenerHandle = pNewListenerHandle;
+        return MD_APP_NO_ERR;
+    }
+
+    for (iterListenerHandle = *ppHeadListenerHandle;
+    	  iterListenerHandle->pNextListenerHandle != NULL;
+    	  iterListenerHandle = iterListenerHandle->pNextListenerHandle)
+    {
+        ;
+    }
+    if (iterListenerHandle != pNewListenerHandle)
+    {
+    	iterListenerHandle->pNextListenerHandle = pNewListenerHandle;
+    }
+	return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Delete an Listener Handle List
+ *
+ *  @param[in]      ppHeadListenerHandle          pointer to pointer to head of queue
+ *  @param[in]      pDeleteCommandValue         pointer to element to delete
+ *
+ *  @retval         MD_APP_NO_ERR					no error
+ *  @retval         MD_APP_ERR						error
+ *
+ */
+MD_APP_ERR_TYPE deleteListenerHandleList (
+		LISTENER_HANDLE_T    * *ppHeadListenerHandle,
+		LISTENER_HANDLE_T    *pDeleteListenerHandle)
+{
+	LISTENER_HANDLE_T *iterListenerHandle;
+
+    if (ppHeadListenerHandle == NULL || *ppHeadListenerHandle == NULL || pDeleteListenerHandle == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+    /* handle removal of first element */
+    if (pDeleteListenerHandle == *ppHeadListenerHandle)
+    {
+        *ppHeadListenerHandle = pDeleteListenerHandle->pNextListenerHandle;
+        free(pDeleteListenerHandle);
+        pDeleteListenerHandle = NULL;
+        return MD_APP_NO_ERR;
+    }
+
+    for (iterListenerHandle = *ppHeadListenerHandle;
+    	  iterListenerHandle != NULL;
+    	  iterListenerHandle = iterListenerHandle->pNextListenerHandle)
+    {
+//        if (iterListenerHandle->pNextListenerHandle && iterListenerHandle->pNextListenerHandle == pDeleteListenerHandle)
+        if (iterListenerHandle->pNextListenerHandle == pDeleteListenerHandle)
+        {
+        	iterListenerHandle->pNextListenerHandle = pDeleteListenerHandle->pNextListenerHandle;
+        	free(pDeleteListenerHandle);
+        	pDeleteListenerHandle = NULL;
+        	break;
         }
     }
     return MD_APP_NO_ERR;
