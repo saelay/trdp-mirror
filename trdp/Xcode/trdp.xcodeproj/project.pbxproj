@@ -57,7 +57,6 @@
 		7322488016A97E7900148295 /* crc-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7322487F16A97E7900148295 /* crc-test.c */; };
 		7322488516A97EE200148295 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		7327CA6016555BEA0020536A /* tau_marshall.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F457C9152DE1FE00D1C522 /* tau_marshall.h */; };
-		7327CA6216555BF00020536A /* tau_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F457CA152DE1FE00D1C522 /* tau_types.h */; };
 		732D278C162DBD1D009D7857 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		732D2794162DBD84009D7857 /* getStats.c in Sources */ = {isa = PBXBuildFile; fileRef = 732D2792162DBD84009D7857 /* getStats.c */; };
 		7331A5661715AB3400270642 /* pd_md_responder.c in Sources */ = {isa = PBXBuildFile; fileRef = 7331A55C171566E400270642 /* pd_md_responder.c */; };
@@ -65,7 +64,6 @@
 		733613A7165A58F200A70D3D /* vos_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 7327CA871656AB080020536A /* vos_private.h */; };
 		73361451165BBF7B00A70D3D /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73361454165BBFCD00A70D3D /* test_trafficShaping.c in Sources */ = {isa = PBXBuildFile; fileRef = 73361446165BBF4500A70D3D /* test_trafficShaping.c */; };
-		73472184169B116200EC18C6 /* trdp_pdcom_ladder.c in Sources */ = {isa = PBXBuildFile; fileRef = 73472183169B116200EC18C6 /* trdp_pdcom_ladder.c */; };
 		73517C4B16BBFDA800DB5208 /* receiveHello.c in Sources */ = {isa = PBXBuildFile; fileRef = 73517C4A16BBFDA800DB5208 /* receiveHello.c */; };
 		73517C5616BBFFAB00DB5208 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		735BACDE172E67CD00837D0E /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
@@ -459,14 +457,28 @@
 		732D2792162DBD84009D7857 /* getStats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = getStats.c; path = marshalling/getStats.c; sourceTree = "<group>"; };
 		7331A55C171566E400270642 /* pd_md_responder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pd_md_responder.c; path = ../test/diverse/pd_md_responder.c; sourceTree = "<group>"; };
 		7331A5621715AB1F00270642 /* pd_md_responder */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pd_md_responder; sourceTree = BUILT_PRODUCTS_DIR; };
+		7334C13C1742780300CA739C /* ladderApplication.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ladderApplication.c; sourceTree = "<group>"; };
+		7334C13D1742780300CA739C /* tau_ladder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_ladder.c; sourceTree = "<group>"; };
+		7334C13E1742780300CA739C /* tau_ladder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_ladder.h; sourceTree = "<group>"; };
+		7334C13F1742780300CA739C /* tau_ladder_app.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_ladder_app.h; sourceTree = "<group>"; };
+		7334C1401742780300CA739C /* tau_pdcom_ladder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_pdcom_ladder.c; sourceTree = "<group>"; };
+		7334C1411742783700CA739C /* Makefile_Ladder */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_Ladder; path = ../Makefile_Ladder; sourceTree = SOURCE_ROOT; };
+		7334C1421742783700CA739C /* Makefile_MDLadder */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_MDLadder; path = ../Makefile_MDLadder; sourceTree = SOURCE_ROOT; };
+		7334C1431742783700CA739C /* Makefile_SE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_SE; path = ../Makefile_SE; sourceTree = SOURCE_ROOT; };
+		7334C1441742783700CA739C /* Makefile_xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_xml; path = ../Makefile_xml; sourceTree = SOURCE_ROOT; };
+		7334C1491742912200CA739C /* Lint_posix.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Lint_posix.bat; sourceTree = "<group>"; };
 		73361446165BBF4500A70D3D /* test_trafficShaping.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = test_trafficShaping.c; path = ../test/diverse/test_trafficShaping.c; sourceTree = "<group>"; };
 		7336144C165BBF5B00A70D3D /* test_traffic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_traffic; sourceTree = BUILT_PRODUCTS_DIR; };
 		733615AA165BF91200A70D3D /* mdTest4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTest4.c; sourceTree = "<group>"; };
 		733615AB165BF91200A70D3D /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
-		73472183169B116200EC18C6 /* trdp_pdcom_ladder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_pdcom_ladder.c; sourceTree = "<group>"; };
 		734721F7169C272E00EC18C6 /* ladderApplication_publisher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_publisher.c; path = ../test/ladderpdtest/ladderApplication_publisher.c; sourceTree = "<group>"; };
 		734721F8169C272E00EC18C6 /* ladderApplication_subscriber.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_subscriber.c; path = ../test/ladderpdtest/ladderApplication_subscriber.c; sourceTree = "<group>"; };
-		734721F9169C272E00EC18C6 /* ladderApplication.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ladderApplication.c; sourceTree = "<group>"; };
+		7349B3D4173D23E300EC7AEF /* TCN-TRDP1-A-BOM-008-07 - TRDP Coding Rules.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP1-A-BOM-008-07 - TRDP Coding Rules.pdf"; sourceTree = "<group>"; };
+		7349B3D5173D23E300EC7AEF /* TCN-TRDP1-D-BOM-003-07 - TRDP System Requirement Specification.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP1-D-BOM-003-07 - TRDP System Requirement Specification.pdf"; sourceTree = "<group>"; };
+		7349B3D6173D23E300EC7AEF /* TCN-TRDP2-D-BOM-011-18 - TRDP User's Manual.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-011-18 - TRDP User's Manual.pdf"; sourceTree = "<group>"; };
+		7349B3D7173D23E300EC7AEF /* TCN-TRDP2-D-BOM-019-01 - TRDP System Architecture & Design.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-019-01 - TRDP System Architecture & Design.pdf"; sourceTree = "<group>"; };
+		7349B3D8173D23E300EC7AEF /* TCN-TRDP2-D-BOM-030-01 - TRDP Release Notes.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-030-01 - TRDP Release Notes.pdf"; sourceTree = "<group>"; };
+		7349B3EC173D2CF700EC7AEF /* std_posix.lnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = std_posix.lnt; sourceTree = "<group>"; };
 		734A94FB16CEA320002D0F9B /* getopt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = getopt.c; sourceTree = "<group>"; };
 		734A94FC16CEA320002D0F9B /* getopt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getopt.h; sourceTree = "<group>"; };
 		734A94FF16CEA320002D0F9B /* iconv.dll */ = {isa = PBXFileReference; lastKnownFileType = file; path = iconv.dll; sourceTree = "<group>"; };
@@ -549,8 +561,6 @@
 		7366AC3E16B673B80068A893 /* tau_xml.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_xml.c; sourceTree = "<group>"; };
 		7366AC6116B68C100068A893 /* example.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = example.xml; sourceTree = "<group>"; };
 		7366AC6216B68C100068A893 /* interoperability_test.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = interoperability_test.xml; sourceTree = "<group>"; };
-		7366AC6816B68C570068A893 /* _LINT.TMP */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _LINT.TMP; sourceTree = "<group>"; };
-		7366AC6916B68C570068A893 /* Lin_win.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Lin_win.bat; sourceTree = "<group>"; };
 		7366AC6A16B68C570068A893 /* std_win.lnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = std_win.lnt; sourceTree = "<group>"; };
 		7366AC6F16B68C920068A893 /* device1.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = device1.xml; sourceTree = "<group>"; };
 		7366AC7016B68C920068A893 /* device2.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = device2.xml; sourceTree = "<group>"; };
@@ -561,9 +571,6 @@
 		7366AC7616B68CC80068A893 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		7366AC7716B68CC80068A893 /* TRDP_UDPMDCom_TestPatterns.xlsx */ = {isa = PBXFileReference; lastKnownFileType = file; path = TRDP_UDPMDCom_TestPatterns.xlsx; sourceTree = "<group>"; };
 		7367954617202D5D003C68ED /* tau_tti.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_tti.h; sourceTree = "<group>"; };
-		7367954717202D71003C68ED /* trdp_ladder_app.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_ladder_app.h; sourceTree = "<group>"; };
-		7367954817202D71003C68ED /* trdp_ladder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_ladder.h; sourceTree = "<group>"; };
-		7367954917202D93003C68ED /* trdp_ladder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_ladder.c; sourceTree = "<group>"; };
 		7367954B17202E93003C68ED /* mdErrMode1 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdErrMode1; sourceTree = "<group>"; };
 		7367954C17202E93003C68ED /* mdErrMode2 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdErrMode2; sourceTree = "<group>"; };
 		7367954D17202E93003C68ED /* mdErrMode3 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = mdErrMode3; sourceTree = "<group>"; };
@@ -604,38 +611,6 @@
 		73821F3A150777B00046E0AC /* trdp_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_utils.h; sourceTree = "<group>"; };
 		73821F3C150777B00046E0AC /* echoSelect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = echoSelect.c; sourceTree = "<group>"; };
 		73821F3D150777B00046E0AC /* sendHello.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sendHello.c; sourceTree = "<group>"; };
-		73821F44150777D30046E0AC /* annotated.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = annotated.html; sourceTree = "<group>"; };
-		73821F45150777D30046E0AC /* doxygen.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = doxygen.css; sourceTree = "<group>"; };
-		73821F46150777D30046E0AC /* doxygen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = doxygen.png; sourceTree = "<group>"; };
-		73821F47150777D30046E0AC /* files.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = files.html; sourceTree = "<group>"; };
-		73821F48150777D30046E0AC /* functions.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = functions.html; sourceTree = "<group>"; };
-		73821F49150777D30046E0AC /* functions_vars.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = functions_vars.html; sourceTree = "<group>"; };
-		73821F4A150777D30046E0AC /* globals.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = globals.html; sourceTree = "<group>"; };
-		73821F4B150777D30046E0AC /* globals_defs.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = globals_defs.html; sourceTree = "<group>"; };
-		73821F4C150777D30046E0AC /* globals_enum.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = globals_enum.html; sourceTree = "<group>"; };
-		73821F4D150777D30046E0AC /* globals_eval.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = globals_eval.html; sourceTree = "<group>"; };
-		73821F4E150777D30046E0AC /* globals_func.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = globals_func.html; sourceTree = "<group>"; };
-		73821F4F150777D30046E0AC /* globals_type.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = globals_type.html; sourceTree = "<group>"; };
-		73821F50150777D30046E0AC /* graph_legend.dot */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = graph_legend.dot; sourceTree = "<group>"; };
-		73821F51150777D30046E0AC /* graph_legend.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = graph_legend.html; sourceTree = "<group>"; };
-		73821F52150777D30046E0AC /* graph_legend.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = graph_legend.png; sourceTree = "<group>"; };
-		73821F53150777D30046E0AC /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
-		73821F55150777D30046E0AC /* struct_t_r_d_p___p_d___i_n_f_o___t.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "struct_t_r_d_p___p_d___i_n_f_o___t.html"; sourceTree = "<group>"; };
-		73821F57150777D30046E0AC /* tab_b.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = tab_b.gif; sourceTree = "<group>"; };
-		73821F58150777D30046E0AC /* tab_l.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = tab_l.gif; sourceTree = "<group>"; };
-		73821F59150777D30046E0AC /* tab_r.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = tab_r.gif; sourceTree = "<group>"; };
-		73821F5A150777D30046E0AC /* tabs.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = tabs.css; sourceTree = "<group>"; };
-		73821F5B150777D30046E0AC /* trdp__if__light_8h.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = trdp__if__light_8h.html; sourceTree = "<group>"; };
-		73821F5C150777D30046E0AC /* trdp__if__light_8h__incl.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = trdp__if__light_8h__incl.map; sourceTree = "<group>"; };
-		73821F5D150777D30046E0AC /* trdp__if__light_8h__incl.md5 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = trdp__if__light_8h__incl.md5; sourceTree = "<group>"; };
-		73821F5E150777D30046E0AC /* trdp__if__light_8h__incl.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trdp__if__light_8h__incl.png; sourceTree = "<group>"; };
-		73821F5F150777D30046E0AC /* trdp__types_8h.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = trdp__types_8h.html; sourceTree = "<group>"; };
-		73821F60150777D30046E0AC /* trdp__types_8h__dep__incl.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = trdp__types_8h__dep__incl.map; sourceTree = "<group>"; };
-		73821F61150777D30046E0AC /* trdp__types_8h__dep__incl.md5 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = trdp__types_8h__dep__incl.md5; sourceTree = "<group>"; };
-		73821F62150777D30046E0AC /* trdp__types_8h__dep__incl.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trdp__types_8h__dep__incl.png; sourceTree = "<group>"; };
-		73821F63150777D30046E0AC /* trdp__types_8h__incl.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = trdp__types_8h__incl.map; sourceTree = "<group>"; };
-		73821F64150777D30046E0AC /* trdp__types_8h__incl.md5 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = trdp__types_8h__incl.md5; sourceTree = "<group>"; };
-		73821F65150777D30046E0AC /* trdp__types_8h__incl.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trdp__types_8h__incl.png; sourceTree = "<group>"; };
 		73821FBC1508DCA80046E0AC /* receiveSelect */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = receiveSelect; sourceTree = BUILT_PRODUCTS_DIR; };
 		738220021508E3710046E0AC /* echoPolling.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = echoPolling.c; sourceTree = "<group>"; };
 		7382200C1508E9FA0046E0AC /* receivePolling */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = receivePolling; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -644,9 +619,13 @@
 		7384E6F3172987CE00830413 /* libtrdpPD.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtrdpPD.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7387F505157795FE00DBAB73 /* trdp_stats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_stats.h; sourceTree = "<group>"; };
 		7387F506157795FE00DBAB73 /* trdp_stats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_stats.c; sourceTree = "<group>"; };
-		7387F63A1578FC2B00DBAB73 /* refman.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = refman.pdf; sourceTree = "<group>"; };
-		7387F63B1578FCDD00DBAB73 /* TCN-TRDP2-D-BOM-019-01 - System Architecture & Design.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TCN-TRDP2-D-BOM-019-01 - System Architecture & Design.doc"; sourceTree = "<group>"; };
 		7387F6441578FDCC00DBAB73 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = readme.txt; path = ../readme.txt; sourceTree = SOURCE_ROOT; };
+		73890B371743D1EC004C0F75 /* _LINT_POS.TMP */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _LINT_POS.TMP; sourceTree = "<group>"; };
+		73890B581743D9B0004C0F75 /* trdp_dllmain.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_dllmain.c; sourceTree = "<group>"; };
+		73890E1C17455036004C0F75 /* posix.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = posix.zip; sourceTree = "<group>"; };
+		73890EC217464F8A004C0F75 /* TCN-TRDP2-D-BOM-033-01 - TRDP Reference Manual.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-033-01 - TRDP Reference Manual.pdf"; sourceTree = "<group>"; };
+		73890F401746744B004C0F75 /* Lint_win.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Lint_win.bat; sourceTree = "<group>"; };
+		73890F421746748D004C0F75 /* _LINT_WIN.TMP */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _LINT_WIN.TMP; sourceTree = "<group>"; };
 		73A9BE1616EE29CC00FE87C8 /* mdManagerTCP_Siemens.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManagerTCP_Siemens.c; sourceTree = "<group>"; };
 		73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManagerTCP.c; sourceTree = "<group>"; };
 		73A9BE1D16EE2A0000FE87C8 /* mdManagerTCP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mdManagerTCP; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -663,7 +642,6 @@
 		73CE246E1733F40900314E1C /* trdp_spy.dll */ = {isa = PBXFileReference; lastKnownFileType = file; path = trdp_spy.dll; sourceTree = "<group>"; };
 		73CE24F017340E2B00314E1C /* buildsettings_posix_TEMPLATE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = buildsettings_posix_TEMPLATE; sourceTree = "<group>"; };
 		73CE24F117340E2B00314E1C /* buildsettings_vxworks_TEMPLATE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = buildsettings_vxworks_TEMPLATE; sourceTree = "<group>"; };
-		73CE24F217340E2B00314E1C /* config.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = config.mk; sourceTree = "<group>"; };
 		73CE24F317340E2B00314E1C /* POSIX_X86_config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = POSIX_X86_config; sourceTree = "<group>"; };
 		73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = VXWORKS_PPC_config; sourceTree = "<group>"; };
 		73D6657A15D3D88700A352D4 /* tau_marshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_marshall.c; sourceTree = "<group>"; };
@@ -677,10 +655,8 @@
 		73E0535C1513685D0058D590 /* vos_thread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_thread.c; sourceTree = "<group>"; };
 		73E0535F15136BF60058D590 /* vos_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_utils.h; sourceTree = "<group>"; };
 		73E0536115136CC90058D590 /* vos_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_utils.c; sourceTree = "<group>"; };
-		73E4978116CE977300045EFA /* TCN-TRDP1-A-BOM-008-07 - Coding Rules.doc */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TCN-TRDP1-A-BOM-008-07 - Coding Rules.doc"; sourceTree = "<group>"; };
 		73E4978516CE981E00045EFA /* Deviation Request.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Deviation Request.txt"; path = "../Deviation Request.txt"; sourceTree = "<group>"; };
 		73E4979C16CEA1DA00045EFA /* INSTALL.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = INSTALL.txt; sourceTree = "<group>"; };
-		73E4979E16CEA1DA00045EFA /* build-1_8_3.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "build-1_8_3.bat"; sourceTree = "<group>"; };
 		73E4979F16CEA1DA00045EFA /* build.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = build.bat; sourceTree = "<group>"; };
 		73E497A016CEA1DA00045EFA /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
 		73E497A116CEA1DA00045EFA /* clean.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = clean.bat; sourceTree = "<group>"; };
@@ -701,7 +677,6 @@
 		73F2D2351518C6F200BA962A /* sendHello */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sendHello; sourceTree = BUILT_PRODUCTS_DIR; };
 		73F457C8152DE1FE00D1C522 /* tau_addr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_addr.h; sourceTree = "<group>"; };
 		73F457C9152DE1FE00D1C522 /* tau_marshall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_marshall.h; sourceTree = "<group>"; };
-		73F457CA152DE1FE00D1C522 /* tau_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_types.h; sourceTree = "<group>"; };
 		73F457CB152DE1FE00D1C522 /* tau_xml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_xml.h; sourceTree = "<group>"; };
 		73F5A50B16A408CE00335006 /* vos_shared_mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_shared_mem.c; sourceTree = "<group>"; };
 		73F5A50C16A408DC00335006 /* vos_shared_mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_shared_mem.c; sourceTree = "<group>"; };
@@ -931,6 +906,10 @@
 				7387F6441578FDCC00DBAB73 /* readme.txt */,
 				73E4978516CE981E00045EFA /* Deviation Request.txt */,
 				73E051F015123F690058D590 /* Makefile */,
+				7334C1411742783700CA739C /* Makefile_Ladder */,
+				7334C1421742783700CA739C /* Makefile_MDLadder */,
+				7334C1431742783700CA739C /* Makefile_SE */,
+				7334C1441742783700CA739C /* Makefile_xml */,
 				73CE24EF17340E2B00314E1C /* config */,
 				73821F27150777B00046E0AC /* src */,
 				73821F3B150777B00046E0AC /* example */,
@@ -1004,6 +983,18 @@
 			name = config;
 			path = ../config;
 			sourceTree = SOURCE_ROOT;
+		};
+		7334C13B1742780300CA739C /* ladder */ = {
+			isa = PBXGroup;
+			children = (
+				7334C13C1742780300CA739C /* ladderApplication.c */,
+				7334C13D1742780300CA739C /* tau_ladder.c */,
+				7334C13E1742780300CA739C /* tau_ladder.h */,
+				7334C13F1742780300CA739C /* tau_ladder_app.h */,
+				7334C1401742780300CA739C /* tau_pdcom_ladder.c */,
+			);
+			path = ladder;
+			sourceTree = "<group>";
 		};
 		733615A9165BF91200A70D3D /* udpmdcom */ = {
 			isa = PBXGroup;
@@ -1220,9 +1211,13 @@
 		7366AC6716B68C570068A893 /* lint */ = {
 			isa = PBXGroup;
 			children = (
-				7366AC6816B68C570068A893 /* _LINT.TMP */,
-				7366AC6916B68C570068A893 /* Lin_win.bat */,
+				7334C1491742912200CA739C /* Lint_posix.bat */,
+				7349B3EC173D2CF700EC7AEF /* std_posix.lnt */,
+				73890B371743D1EC004C0F75 /* _LINT_POS.TMP */,
+				73890E1C17455036004C0F75 /* posix.zip */,
+				73890F401746744B004C0F75 /* Lint_win.bat */,
 				7366AC6A16B68C570068A893 /* std_win.lnt */,
+				73890F421746748D004C0F75 /* _LINT_WIN.TMP */,
 			);
 			path = lint;
 			sourceTree = "<group>";
@@ -1278,7 +1273,6 @@
 				73822056150A5B9A0046E0AC /* vos */,
 				73821F28150777B00046E0AC /* api */,
 				73821F2C150777B00046E0AC /* common */,
-				73821F3E150777B00046E0AC /* private */,
 			);
 			name = src;
 			path = ../src;
@@ -1290,13 +1284,10 @@
 				73F457C8152DE1FE00D1C522 /* tau_addr.h */,
 				7367954617202D5D003C68ED /* tau_tti.h */,
 				73F457CB152DE1FE00D1C522 /* tau_xml.h */,
-				73F457CA152DE1FE00D1C522 /* tau_types.h */,
 				73F457C9152DE1FE00D1C522 /* tau_marshall.h */,
 				73821F29150777B00046E0AC /* trdp_if_light.h */,
 				73821F2A150777B00046E0AC /* trdp_types.h */,
 				735BAD15172EC38900837D0E /* trdp_proto.h */,
-				7367954717202D71003C68ED /* trdp_ladder_app.h */,
-				7367954817202D71003C68ED /* trdp_ladder.h */,
 			);
 			path = api;
 			sourceTree = "<group>";
@@ -1318,8 +1309,7 @@
 				737B1A9515DB930F00724FEF /* trdp_marshall_fast.c */,
 				7366AC3E16B673B80068A893 /* tau_xml.c */,
 				73D6657A15D3D88700A352D4 /* tau_marshall.c */,
-				7367954917202D93003C68ED /* trdp_ladder.c */,
-				73472183169B116200EC18C6 /* trdp_pdcom_ladder.c */,
+				73890B581743D9B0004C0F75 /* trdp_dllmain.c */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -1329,11 +1319,11 @@
 			children = (
 				08014D1D16483FC50065AADD /* SenderDemo */,
 				738220021508E3710046E0AC /* echoPolling.c */,
+				7334C13B1742780300CA739C /* ladder */,
 				73821F3C150777B00046E0AC /* echoSelect.c */,
 				7381BE511643FAC4003BC539 /* echoSelectcmdline.c */,
 				7366AC6116B68C100068A893 /* example.xml */,
 				7366AC6216B68C100068A893 /* interoperability_test.xml */,
-				734721F9169C272E00EC18C6 /* ladderApplication.c */,
 				08CE20C716496F760038151B /* mdManager.c */,
 				73A9BE1616EE29CC00FE87C8 /* mdManagerTCP_Siemens.c */,
 				73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */,
@@ -1344,66 +1334,22 @@
 			path = ../example;
 			sourceTree = "<group>";
 		};
-		73821F3E150777B00046E0AC /* private */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = private;
-			sourceTree = "<group>";
-		};
 		73821F42150777D30046E0AC /* doc */ = {
 			isa = PBXGroup;
 			children = (
 				735BAD12172EC1AB00837D0E /* memory.xls */,
-				73E4978116CE977300045EFA /* TCN-TRDP1-A-BOM-008-07 - Coding Rules.doc */,
-				7387F63B1578FCDD00DBAB73 /* TCN-TRDP2-D-BOM-019-01 - System Architecture & Design.doc */,
-				7387F63A1578FC2B00DBAB73 /* refman.pdf */,
+				7349B3D4173D23E300EC7AEF /* TCN-TRDP1-A-BOM-008-07 - TRDP Coding Rules.pdf */,
+				7349B3D5173D23E300EC7AEF /* TCN-TRDP1-D-BOM-003-07 - TRDP System Requirement Specification.pdf */,
+				7349B3D6173D23E300EC7AEF /* TCN-TRDP2-D-BOM-011-18 - TRDP User's Manual.pdf */,
+				7349B3D7173D23E300EC7AEF /* TCN-TRDP2-D-BOM-019-01 - TRDP System Architecture & Design.pdf */,
+				7349B3D8173D23E300EC7AEF /* TCN-TRDP2-D-BOM-030-01 - TRDP Release Notes.pdf */,
+				73890EC217464F8A004C0F75 /* TCN-TRDP2-D-BOM-033-01 - TRDP Reference Manual.pdf */,
 				731292961535BEA1006B3A88 /* images */,
-				73821F43150777D30046E0AC /* html */,
 				73821F66150777D30046E0AC /* latex */,
 			);
 			name = doc;
 			path = ../doc;
 			sourceTree = SOURCE_ROOT;
-		};
-		73821F43150777D30046E0AC /* html */ = {
-			isa = PBXGroup;
-			children = (
-				73821F44150777D30046E0AC /* annotated.html */,
-				73821F45150777D30046E0AC /* doxygen.css */,
-				73821F46150777D30046E0AC /* doxygen.png */,
-				73821F47150777D30046E0AC /* files.html */,
-				73821F48150777D30046E0AC /* functions.html */,
-				73821F49150777D30046E0AC /* functions_vars.html */,
-				73821F4A150777D30046E0AC /* globals.html */,
-				73821F4B150777D30046E0AC /* globals_defs.html */,
-				73821F4C150777D30046E0AC /* globals_enum.html */,
-				73821F4D150777D30046E0AC /* globals_eval.html */,
-				73821F4E150777D30046E0AC /* globals_func.html */,
-				73821F4F150777D30046E0AC /* globals_type.html */,
-				73821F50150777D30046E0AC /* graph_legend.dot */,
-				73821F51150777D30046E0AC /* graph_legend.html */,
-				73821F52150777D30046E0AC /* graph_legend.png */,
-				73821F53150777D30046E0AC /* index.html */,
-				73821F55150777D30046E0AC /* struct_t_r_d_p___p_d___i_n_f_o___t.html */,
-				73821F57150777D30046E0AC /* tab_b.gif */,
-				73821F58150777D30046E0AC /* tab_l.gif */,
-				73821F59150777D30046E0AC /* tab_r.gif */,
-				73821F5A150777D30046E0AC /* tabs.css */,
-				73821F5B150777D30046E0AC /* trdp__if__light_8h.html */,
-				73821F5C150777D30046E0AC /* trdp__if__light_8h__incl.map */,
-				73821F5D150777D30046E0AC /* trdp__if__light_8h__incl.md5 */,
-				73821F5E150777D30046E0AC /* trdp__if__light_8h__incl.png */,
-				73821F5F150777D30046E0AC /* trdp__types_8h.html */,
-				73821F60150777D30046E0AC /* trdp__types_8h__dep__incl.map */,
-				73821F61150777D30046E0AC /* trdp__types_8h__dep__incl.md5 */,
-				73821F62150777D30046E0AC /* trdp__types_8h__dep__incl.png */,
-				73821F63150777D30046E0AC /* trdp__types_8h__incl.map */,
-				73821F64150777D30046E0AC /* trdp__types_8h__incl.md5 */,
-				73821F65150777D30046E0AC /* trdp__types_8h__incl.png */,
-			);
-			path = html;
-			sourceTree = "<group>";
 		};
 		73821F66150777D30046E0AC /* latex */ = {
 			isa = PBXGroup;
@@ -1512,7 +1458,6 @@
 			children = (
 				73CE24F017340E2B00314E1C /* buildsettings_posix_TEMPLATE */,
 				73CE24F117340E2B00314E1C /* buildsettings_vxworks_TEMPLATE */,
-				73CE24F217340E2B00314E1C /* config.mk */,
 				73CE24F317340E2B00314E1C /* POSIX_X86_config */,
 				73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */,
 			);
@@ -1606,7 +1551,6 @@
 		73E4979D16CEA1DA00045EFA /* trdp_spy */ = {
 			isa = PBXGroup;
 			children = (
-				73E4979E16CEA1DA00045EFA /* build-1_8_3.bat */,
 				73E4979F16CEA1DA00045EFA /* build.bat */,
 				73E497A016CEA1DA00045EFA /* build.sh */,
 				73E497A116CEA1DA00045EFA /* clean.bat */,
@@ -1671,7 +1615,6 @@
 				08CE20721649613C0038151B /* trdp_pdcom.h in Headers */,
 				08CE2082164962BB0038151B /* trdp_mdcom.h in Headers */,
 				7327CA6016555BEA0020536A /* tau_marshall.h in Headers */,
-				7327CA6216555BF00020536A /* tau_types.h in Headers */,
 				733613A7165A58F200A70D3D /* vos_private.h in Headers */,
 				73F5A53B16A41A2000335006 /* vos_shared_mem.h in Headers */,
 				735BAD16172EC38900837D0E /* trdp_proto.h in Headers */,
@@ -2288,7 +2231,6 @@
 				7387F508157795FE00DBAB73 /* trdp_stats.c in Sources */,
 				73D6657C15D3D88700A352D4 /* tau_marshall.c in Sources */,
 				08CE2085164962BE0038151B /* trdp_mdcom.c in Sources */,
-				73472184169B116200EC18C6 /* trdp_pdcom_ladder.c in Sources */,
 				73F5A50D16A408DC00335006 /* vos_shared_mem.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
