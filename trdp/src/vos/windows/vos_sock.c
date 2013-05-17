@@ -105,6 +105,7 @@ INT32 recvmsg (int sock_id, struct msghdr *message, int flags)
                            &WSARecvMsg_GUID, sizeof (WSARecvMsg_GUID), &WSARecvMsg,
                            sizeof WSARecvMsg, &number_of_bytes, NULL, NULL);
 
+    message->dwFlags = flags;
     res = WSARecvMsg(sock_id, message, &number_of_bytes, NULL, NULL);
     if (0 != res)
     {
