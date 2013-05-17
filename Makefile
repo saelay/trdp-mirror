@@ -228,10 +228,10 @@ outdir:
 	mkdir -p $(OUTDIR)
 
 doc/latex/refman.pdf: Doxyfile trdp_if_light.h trdp_types.h
-			@echo ' ### Making the PDF document'
+			@echo ' ### Making the Reference Manual PDF'
 			$(DOXYPATH)/doxygen Doxyfile
 			make -C doc/latex
-			cp doc/latex/refman.pdf doc
+			cp doc/latex/refman.pdf "doc/TCN-TRDP2-D-BOM-033-01 - TRDP Reference Manual.pdf"
 
 help:
 	@echo " " >&2
