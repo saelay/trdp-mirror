@@ -2627,6 +2627,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             pSenderElement->interval        = tv_interval;
             pSenderElement->dataSize        = dataSize;
             pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
+            pSenderElement->sendSize        = 0;
             pSenderElement->numReplies      = 0;
             pSenderElement->numRetries      = 0;
             pSenderElement->pCachedDS       = NULL;
