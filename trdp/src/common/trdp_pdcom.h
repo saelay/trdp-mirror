@@ -84,10 +84,10 @@ void        trdp_pdCheckPending (
     TRDP_FDS_T          *pFileDesc,
     INT32               *pNoDesc);
 
-void trdp_pdHandleTimeOuts (
+void        trdp_pdHandleTimeOuts (
     TRDP_SESSION_PT appHandle);
 
-TRDP_ERR_T trdp_pdCheckListenSocks (
+TRDP_ERR_T  trdp_pdCheckListenSocks (
     TRDP_SESSION_PT appHandle,
     TRDP_FDS_T      *pRfds,
     INT32           *pCount);
