@@ -185,6 +185,10 @@ EXT_DECL VOS_ERR_T vos_memCount(
  *  @param[in]      num             number of elements
  *  @param[in]      size            size of one element
  *  @param[in]      compare         Pointer to compare function
+ *                                      return -n if arg1 < arg2,
+ *                                      return 0  if arg1 == arg2,
+ *                                      return +n if arg1 > arg2
+ *                                  where n is an integer != 0
  *  @retval         none
  */
 
@@ -199,14 +203,18 @@ EXT_DECL void vos_qsort (
 
 /**********************************************************************************************************************/
 /** Binary search in a sorted array.
- *  This is just a wrapper for the standard qsort function.
+ *  This is just a wrapper for the standard bsearch function.
  *
  *  @param[in]      pKey            Key to search for
  *  @param[in]      pBuf            Pointer to the array to sort
  *  @param[in]      num             number of elements
  *  @param[in]      size            size of one element
  *  @param[in]      compare         Pointer to compare function
- *  @retval
+ *                                      return -n if arg1 < arg2,
+ *                                      return 0  if arg1 == arg2,
+ *                                      return +n if arg1 > arg2
+ *                                  where n is an integer != 0
+ *  @retval         Pointer to found element or NULL
  */
 
 EXT_DECL void *vos_bsearch (
@@ -254,7 +262,8 @@ EXT_DECL void vos_strncpy (
 
 
 /**********************************************************************************************************************/
-/*    Queues                                                                                                              */
+/*    Queues
+                                                                                                               */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
@@ -276,7 +285,7 @@ EXT_DECL void vos_strncpy (
 EXT_DECL VOS_ERR_T vos_queueCreate (
     VOS_QUEUE_POLICY_T  queueType,
     UINT32              maxNoOfMsg,
-    VOS_QUEUE_T        *pQueueHandle );
+    VOS_QUEUE_T         *pQueueHandle );
 
 
 /**********************************************************************************************************************/
@@ -295,9 +304,9 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
  */
 
 EXT_DECL VOS_ERR_T vos_queueSend (
-    VOS_QUEUE_T     queueHandle,
-    UINT8           *pData,
-    UINT32          size);
+    VOS_QUEUE_T queueHandle,
+    UINT8       *pData,
+    UINT32      size);
 
 
 /**********************************************************************************************************************/
@@ -316,10 +325,10 @@ EXT_DECL VOS_ERR_T vos_queueSend (
  */
 
 EXT_DECL VOS_ERR_T vos_queueReceive (
-    VOS_QUEUE_T     queueHandle,
-    UINT8           **ppData,
-    UINT32          *pSize,
-    UINT32          usTimeout );
+    VOS_QUEUE_T queueHandle,
+    UINT8       * *ppData,
+    UINT32      *pSize,
+    UINT32      usTimeout );
 
 
 /**********************************************************************************************************************/
@@ -335,7 +344,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
  */
 
 EXT_DECL VOS_ERR_T vos_queueDestroy (
-    VOS_QUEUE_T     queueHandle);
+    VOS_QUEUE_T queueHandle);
 
 
 #ifdef __cplusplus

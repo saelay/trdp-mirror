@@ -623,8 +623,8 @@ EXT_DECL void vos_qsort (
  *  @param[in]      num             number of elements
  *  @param[in]      size            size of one element
  *  @param[in]      compare         Pointer to compare function
- *                                      return -n if arg1 < arg2
- *                                      return 0  if arg1 == arg2
+ *                                      return -n if arg1 < arg2,
+ *                                      return 0  if arg1 == arg2,
  *                                      return +n if arg1 > arg2
  *                                  where n is an integer != 0
  *  @retval         Pointer to found element or NULL
