@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "TCNOpen TRDP"
-PROJECT_NUMBER         = Prototype
+PROJECT_NUMBER         = Prototype V 1.0
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -94,15 +94,13 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = src/api \
-                         src/example \
                          src/common \
                          src/vos \
                          src/vos/api \
                          src/vos/common \
                          src/vos/posix \
-                         src/vos/windows \
-                         src/vos/css \
-                         src/vos/integrity
+                         src/vos/windows
+                         example \
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
