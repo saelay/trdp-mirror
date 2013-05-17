@@ -108,7 +108,9 @@ INT32 recvmsg (int sock_id, struct msghdr *message, int flags)
     res = WSARecvMsg(sock_id, message, &number_of_bytes, NULL, NULL);
     if (0 != res)
     {
-        return -1;
+        DWORD err = WSAGetLastError();
+        if (err != WSAEMSGSIZE)
+            return -1;
     }
     return number_of_bytes;
 }
