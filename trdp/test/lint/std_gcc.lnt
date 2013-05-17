@@ -6,14 +6,14 @@ lib-stl.lnt
 au-misra.lnt
 -si4 -sp4
 
--i"Y:\Sourcen\trdp\trunk\trdp\src\api"
--i"Y:\Sourcen\trdp\trunk\trdp\src\common"
--i"Y:\Sourcen\trdp\trunk\trdp\src\vos\posix"
--i"Y:\Sourcen\trdp\trunk\trdp\src\vos\api"
--i"Y:\Sourcen\trdp\trunk\trdp\src\vos\common"
--i"Y:\Sourcen\trdp\trunk\trdp\src\vos"
--i"Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\lib\gcc\i486-linux-gnu\4.2.4\include"
--i"Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\include"
+-i"..\..\src\api"
+-i"..\..\src\common"
+-i"..\..\src\vos\posix"
+-i"..\..\src\vos\api"
+-i"..\..\src\vos\common"
+-i"..\..\src\vos"
+-i"posix\usr\lib\gcc\i486-linux-gnu\4.2.4\include"
+-i"posix\usr\include"
 
 -D__ARMEB__=0
 -D__MIPSEB__=0
@@ -30,8 +30,8 @@ au-misra.lnt
 +ppw(warning)
 -cpp
 
-+libdir(Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\lib\gcc\i486-linux-gnu\4.2.4\include)
-+libdir(Y:\Sourcen\trdp\trunk\trdp\test\lint\posix\usr\include)
++libdir(posix\usr\lib\gcc\i486-linux-gnu\4.2.4\include)
++libdir(posix\usr\include)
 
 -elib(*)
 -e537   // "Repeated include file 'FileName'"
