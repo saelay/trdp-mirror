@@ -49,10 +49,10 @@ extern void *gRefCon;
 /** Safe printf function */
 #ifdef WIN32
     #define vos_snprintf(str, size, format, ...)              \
-        _snprintf_s(str, size, _TRUNCATE, format, __VA_ARGS__)
+        (void)_snprintf_s(str, size, _TRUNCATE, format, __VA_ARGS__)
 #else
     #define vos_snprintf(str, size, format, args ...)  \
-        snprintf(str, size, format, ## args)
+        (void)snprintf(str, size, format, ## args)
 #endif
 
 /** Debug output macro without formatting options */
