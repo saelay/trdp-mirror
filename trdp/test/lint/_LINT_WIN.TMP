@@ -2,22 +2,6 @@
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
-                                           _
-        gMem.pArea = (UINT8 *) malloc(size);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(219) : Warning 421: Caution --
-    function 'malloc(unsigned int)' is considered dangerous [MISRA Rule 118]
-                            _
-            free(gMem.pArea);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(299) : Warning 421: Caution --
-    function 'free(void *)' is considered dangerous [MISRA Rule 118]
-                                         _
-        UINT8 *p = (UINT8 *) malloc(size);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(332) : Warning 421: Caution --
-    function 'malloc(unsigned int)' is considered dangerous [MISRA Rule 118]
-                       _
-        free(pMemBlock);
-D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c(478) : Warning 421: Caution --
-    function 'free(void *)' is considered dangerous [MISRA Rule 118]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
 
@@ -31,14 +15,6 @@ D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(84) : Warning 652: #define of
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
-           _
-    while (TRUE);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(1438) : Warning 506: Constant
-    value Boolean [MISRA Rule 52]
-           _
-    while (TRUE);
-D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2220) : Warning 506: Constant
-    value Boolean [MISRA Rule 52]
 
 --- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
 
@@ -52,10 +28,10 @@ D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c(2220) : Warning 506: Constant
 
 --- Global Wrap-up
 
-Warning 526: 'ig_endian()' (line 774, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+Warning 526: 'ig_endian()' (line 779, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
     not defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
-    774, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
+    779, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
 Warning 526: 'e()' (line 212, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
     not defined
 Warning 628: no argument information provided for function 'e()' (line 212,
