@@ -412,17 +412,8 @@ TRDP_ERR_T  trdp_mdSendPacket (
 
         pElement->sendSize = pElement->grossSize - tmpSndSize;
 
-        if ((tmpSndSize >= 0) && (pElement->sendSize >= 0))   /* TBD Lint error ###: Relational operator '>=' always
-                                                                evaluates to 'true' */
-        {
-            err = vos_sockSendTCP(pdSock, ((UINT8 *)&pElement->pPacket->frameHead) + tmpSndSize, &pElement->sendSize);
-            pElement->sendSize = tmpSndSize + pElement->sendSize;
-
-        }
-        else
-        {
-            return TRDP_NODATA_ERR;
-        }
+        err = vos_sockSendTCP(pdSock, ((UINT8 *)&pElement->pPacket->frameHead) + tmpSndSize, &pElement->sendSize);
+        pElement->sendSize = tmpSndSize + pElement->sendSize;
 
     }
     else
