@@ -578,7 +578,7 @@ EXT_DECL void vos_divTime (
         {
             pTime->tv_usec += temp * 1000000;
         }
-        pTime->tv_usec /= divisor;
+        pTime->tv_usec /= divisor;  /*lint !e573 mix of signed and unsigned */
     }
 }
 
