@@ -1,47 +1,47 @@
 
---- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c 
+--- Module:   ..\..\src\vos\common\vos_utils.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\vos\common\vos_mem.c 
+--- Module:   ..\..\src\vos\common\vos_mem.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_thread.c 
+--- Module:   ..\..\src\vos\windows\vos_thread.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c 
+--- Module:   ..\..\src\vos\windows\vos_sock.c 
         _
 #define cmsghdr         WSACMSGHDR
-D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c(84) : Warning 652: #define of
-    symbol 'cmsghdr' declared previously at line 668, file C:\Program
-    Files\Microsoft SDKs\Windows\v7.0A\Include\ws2def.h
+..\..\src\vos\windows\vos_sock.c(84) : Warning 652: #define of symbol 'cmsghdr'
+    declared previously at line 668, file C:\Program Files\Microsoft
+    SDKs\Windows\v7.0A\Include\ws2def.h
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_if.c 
+--- Module:   ..\..\src\common\trdp_if.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_mdcom.c 
+--- Module:   ..\..\src\common\trdp_mdcom.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c 
+--- Module:   ..\..\src\common\trdp_pdcom.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_utils.c 
+--- Module:   ..\..\src\common\trdp_utils.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\trdp_stats.c 
+--- Module:   ..\..\src\common\trdp_stats.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c 
+--- Module:   ..\..\src\common\tau_marshall.c 
 
---- Module:   D:\TCNOpen\trunk\trdp\src\common\tau_xml.c 
+--- Module:   ..\..\src\common\tau_xml.c 
 
 --- Global Wrap-up
 
-Warning 526: 'ig_endian()' (line 779, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
-    not defined
+Warning 526: 'ig_endian()' (line 779, file ..\..\src\common\trdp_pdcom.c) not
+    defined
 Warning 628: no argument information provided for function 'ig_endian()' (line
-    779, file D:\TCNOpen\trunk\trdp\src\common\trdp_pdcom.c)
-Warning 526: 'e()' (line 212, file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
-    not defined
+    779, file ..\..\src\common\trdp_pdcom.c)
+Warning 526: 'e()' (line 212, file ..\..\src\vos\common\vos_utils.c) not
+    defined
 Warning 628: no argument information provided for function 'e()' (line 212,
-    file D:\TCNOpen\trunk\trdp\src\vos\common\vos_utils.c)
-Warning 552: Symbol 'gNumberOfOpenSockets' (line 91, file D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
+    file ..\..\src\vos\common\vos_utils.c)
+Warning 552: Symbol 'gNumberOfOpenSockets' (line 91, file ..\..\src\vos\windows\vos_sock.c)
     not accessed
-Warning 526: '__alignof()' (line 121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)
-    not defined
+Warning 526: '__alignof()' (line 121, file ..\..\src\common\tau_marshall.c) not
+    defined
 Warning 628: no argument information provided for function '__alignof()' (line
-    121, file D:\TCNOpen\trunk\trdp\src\common\tau_marshall.c)
+    121, file ..\..\src\common\tau_marshall.c)
 Warning 628: no argument information provided for function 'NetWkstaTransportEnum()'
     (line 102, file C:\Program Files\Microsoft SDKs\Windows\v7.0A\Include\lmwksta.h,
-    module D:\TCNOpen\trunk\trdp\src\vos\windows\vos_sock.c)
+    module ..\..\src\vos\windows\vos_sock.c)

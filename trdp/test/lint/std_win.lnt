@@ -6,13 +6,13 @@ lib-stl.lnt
 au-misra.lnt
 options.lnt  -si4 -sp4
 
--i"D:\TCNOpen\trunk\trdp\src\api"
--i"D:\TCNOpen\trunk\trdp\src\common"
--i"D:\TCNOpen\trunk\trdp\src\vos\api"
--i"D:\TCNOpen\trunk\trdp\src\vos\common"
--i"D:\TCNOpen\trunk\trdp\src\vos\windows"
--i"D:\TCNOpen\trunk\trdp\resources\windows\pthread\inc"
--i"D:\TCNOpen\trunk\trdp\resources\windows\libxml\inc"
+-i"..\..\src\api"
+-i"..\..\src\common"
+-i"..\..\src\vos\api"
+-i"..\..\src\vos\common"
+-i"..\..\src\vos\windows"
+-i"..\..\resources\windows\pthread\inc"
+-i"..\..\resources\windows\libxml\inc"
 -i"C:\Program Files\Microsoft Visual Studio 10.0\VC\include"
 -i"C:\Program Files\Microsoft Visual Studio 9.0\VC\include"
 -i"C:\Program Files\Microsoft Visual Studio 8\VC\include"
@@ -26,7 +26,7 @@ options.lnt  -si4 -sp4
 +macros
 +ppw(warning)
 
-+libdir(D:\TCNOpen\trunk\trdp\resources\windows\libxml\inc)
++libdir(..\..\resources\windows\libxml\inc)
 +libdir(C:\Program Files\Microsoft Visual Studio 10.0\VC\include)
 +libdir(C:\Program Files\Microsoft Visual Studio 9.0\VC\include)
 +libdir(C:\Program Files\Microsoft Visual Studio 8\VC\include)
