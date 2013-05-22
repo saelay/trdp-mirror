@@ -697,7 +697,7 @@ const char *tlc_getVersionString (void)
 {
     static CHAR8 version[16];
 
-    vos_snprintf(version, sizeof(version), "%d.%d.%d.%d", TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION);
+    (void) vos_snprintf(version, sizeof(version), "%d.%d.%d.%d", TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION);
 
     return version;
 }
