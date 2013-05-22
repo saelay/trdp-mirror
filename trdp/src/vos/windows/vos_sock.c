@@ -178,7 +178,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 {
     static CHAR8 dotted[16];
 
-    vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
+    (void) vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
                  ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
     return dotted;
 }
