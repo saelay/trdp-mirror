@@ -27,14 +27,6 @@ C:\Program Files\Microsoft SDKs\Windows\v7.0A\Include\ws2def.h(668) : Info 830:
 --- Module:   ..\..\src\common\tau_marshall.c (C)
 
 --- Module:   ..\..\src\common\tau_xml.c (C)
-                                                                                             _
-                              "/device/bus-interface-list/bus-interface[@name='%s']", pIfName);
-..\..\src\common\tau_xml.c(1647) : Error 64: Type mismatch (assignment) (int =
-    void)
-                                                                                                      _
-                              "/device/bus-interface-list/bus-interface[@name='%s']/telegram", pIfName);
-..\..\src\common\tau_xml.c(1694) : Error 64: Type mismatch (assignment) (int =
-    void)
 
 /// Start of Pass 2 ///
 
