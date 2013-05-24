@@ -54,13 +54,13 @@ During Specific Walk:
 
 During Specific Walk:
   File ..\..\src\common\trdp_mdcom.c line 588: vos_sockReceiveTCP(?, [0]?, [1])
-..\..\src\vos\windows\vos_sock.c(1333) : Warning 662: Possible creation of
+..\..\src\vos\windows\vos_sock.c(1336) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1330, 1333; file
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1333, 1336; file
     ..\..\src\common\trdp_mdcom.c: lines 565, 587]
-..\..\src\vos\windows\vos_sock.c(1330) : Info 831: Reference cited in prior
-    message
 ..\..\src\vos\windows\vos_sock.c(1333) : Info 831: Reference cited in prior
+    message
+..\..\src\vos\windows\vos_sock.c(1336) : Info 831: Reference cited in prior
     message
 ..\..\src\common\trdp_mdcom.c(565) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(587) : Info 831: Reference cited in prior message
