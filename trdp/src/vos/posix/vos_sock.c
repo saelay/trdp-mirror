@@ -55,6 +55,7 @@
 #include "vos_utils.h"
 #include "vos_sock.h"
 #include "vos_thread.h"
+#include "vos_private.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -315,22 +316,22 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                     ifAddrs[count].name[VOS_MAX_IF_NAME_SIZE - 1] = 0;
                 }
                 vos_printLog(VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
-                           ifAddrs[count].name,
-                           (ifAddrs[count].ipAddr >> 24) & 0xFF,
-                           (ifAddrs[count].ipAddr >> 16) & 0xFF,
-                           (ifAddrs[count].ipAddr >> 8)  & 0xFF,
-                           ifAddrs[count].ipAddr        & 0xFF);
+                             ifAddrs[count].name,
+                             (ifAddrs[count].ipAddr >> 24) & 0xFF,
+                             (ifAddrs[count].ipAddr >> 16) & 0xFF,
+                             (ifAddrs[count].ipAddr >> 8)  & 0xFF,
+                             ifAddrs[count].ipAddr        & 0xFF);
 
                 if (vos_getMacAddress(ifAddrs[count].mac, ifAddrs[count].name) == TRUE)
                 {
                     vos_printLog(VOS_LOG_INFO, "Mac-Addr for '%s': %02x:%02x:%02x:%02x:%02x:%02x\n",
-                               ifAddrs[count].name,
-                               ifAddrs[count].mac[0],
-                               ifAddrs[count].mac[1],
-                               ifAddrs[count].mac[2],
-                               ifAddrs[count].mac[3],
-                               ifAddrs[count].mac[4],
-                               ifAddrs[count].mac[5]);
+                                 ifAddrs[count].name,
+                                 ifAddrs[count].mac[0],
+                                 ifAddrs[count].mac[1],
+                                 ifAddrs[count].mac[2],
+                                 ifAddrs[count].mac[3],
+                                 ifAddrs[count].mac[4],
+                                 ifAddrs[count].mac[5]);
                 }
                 count++;
             }
@@ -427,7 +428,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -501,7 +502,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -532,13 +533,13 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     if (close(sock) == -1)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "vos_sockClose(%d) called with unknown descriptor\n", sock);
+                     "vos_sockClose(%d) called with unknown descriptor\n", sock);
         return VOS_PARAM_ERR;
     }
     else
     {
         vos_printLog(VOS_LOG_INFO,
-                   "vos_sockClose(%d) okay\n", sock);
+                     "vos_sockClose(%d) okay\n", sock);
     }
 
     return VOS_NO_ERR;
@@ -571,7 +572,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                STRING_ERR(buff);
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (Err: %s)\n", buff);
             }
 #else
@@ -579,7 +580,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                STRING_ERR(buff);
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (Err: %s)\n", buff);
             }
 #endif
@@ -589,7 +590,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             if (fcntl(sock, F_SETFL, O_NONBLOCK) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                STRING_ERR(buff);
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() O_NONBLOCK failed (Err: %s)\n", buff);
                 return VOS_SOCK_ERR;
             }
@@ -602,7 +603,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                STRING_ERR(buff);
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (Err: %s)\n", buff);
             }
         }
@@ -613,7 +614,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                STRING_ERR(buff);
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %s)\n", buff);
             }
         }
@@ -624,7 +625,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
-                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                STRING_ERR(buff);
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %s)\n", buff);
             }
         }
@@ -636,14 +637,14 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
     if (setsockopt(sock, IPPROTO_IP, IP_RECVDSTADDR, &sockOptValue, sizeof(sockOptValue)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %s)\n", buff);
     }
 #elif defined(IP_PKTINFO)
     if (setsockopt(sock, IPPROTO_IP, IP_PKTINFO, &sockOptValue, sizeof(sockOptValue)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_PKTINFO failed (Err: %s)\n", buff);
     }
 #endif
@@ -700,7 +701,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
         if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) == -1 &&
             errno != EADDRINUSE)
         {
-            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            STRING_ERR(buff);
             vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %s)\n", buff);
             result = VOS_SOCK_ERR;
         }
@@ -718,7 +719,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &enMcLb, sizeof(enMcLb)) == -1
                  && errno != 0)
             {
-                (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                STRING_ERR(buff);
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (%s)\n", buff);
                 result = VOS_SOCK_ERR;
             }
@@ -784,7 +785,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         if (setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
-            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            STRING_ERR(buff);
             vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %s)\n", buff);
 
             result = VOS_SOCK_ERR;
@@ -868,9 +869,9 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     if (sendSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %s)\n",
-                   inet_ntoa(destAddr.sin_addr), port, buff);
+                     inet_ntoa(destAddr.sin_addr), port, buff);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -995,7 +996,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     if (rcvSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "recvmsg() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -1045,13 +1046,13 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     srcAddress.sin_port         = vos_htons(port);
 
     vos_printLog(VOS_LOG_INFO, "binding to: %s:%hu\n",
-               inet_ntoa(srcAddress.sin_addr), port);
+                 inet_ntoa(srcAddress.sin_addr), port);
 
     /*  Try to bind the socket to the PD port. */
     if (bind(sock, (struct sockaddr *)&srcAddress, sizeof(srcAddress)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "bind() failed (Err: %s)\n", buff);
         return VOS_SOCK_ERR;
     }
@@ -1082,7 +1083,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
     if (listen(sock, (int) backlog) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "listen() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -1149,11 +1150,11 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
                 default:
                 {
                     char buff[VOS_MAX_ERR_STR_SIZE];
-                    (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+                    STRING_ERR(buff);
                     vos_printLog(VOS_LOG_ERROR,
-                               "accept() listenFd(%d) failed (Err: %s)\n",
-                               *pSock,
-                               buff);
+                                 "accept() listenFd(%d) failed (Err: %s)\n",
+                                 *pSock,
+                                 buff);
                     return VOS_UNKNOWN_ERR;
                 }
             }
@@ -1211,7 +1212,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
         else if (errno != EISCONN)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
-            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            STRING_ERR(buff);
             vos_printLog(VOS_LOG_WARNING, "connect() failed (Err: %s)\n", buff);
             return VOS_IO_ERR;
         }
@@ -1270,11 +1271,11 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
     if (sendSize == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_WARNING, "send() failed (Err: %s)\n", buff);
 
-        if (   (err == ENOTCONN) 
-            || (err == ECONNREFUSED))
+        if ((errno == ENOTCONN)
+            || (errno == ECONNREFUSED))
         {
             return VOS_NOCONN_ERR;
         }
@@ -1348,7 +1349,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     if ((rcvSize == -1) && !(errno == EMSGSIZE))
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
-        (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+        STRING_ERR(buff);
         vos_printLog(VOS_LOG_WARNING, "receive() failed (Err: %s)\n", buff);
         return VOS_IO_ERR;
     }
@@ -1399,7 +1400,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
         if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &multicastIFAddress.sin_addr, sizeof(struct in_addr)) == -1)
         {
             char buff[VOS_MAX_ERR_STR_SIZE];
-            (void)strerror_r(errno, buff, VOS_MAX_ERR_STR_SIZE);
+            STRING_ERR(buff);
             vos_printLog(VOS_LOG_WARNING, "setsockopt() IP_MULTICAST_IF failed (Err: %s)\n", buff);
             result = VOS_SOCK_ERR;
         }

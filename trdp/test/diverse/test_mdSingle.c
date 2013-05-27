@@ -286,9 +286,8 @@ void dbgOut (
 int main (int argc, char *argv[])
 {
     int ip[4];
-    /*    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO}; */
     TRDP_MD_CONFIG_T        mdConfiguration =
-    {mdCallback, &sSessionData, {0, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
+                {mdCallback, &sSessionData, {0, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     VOS_IF_REC_T            interfaces[MAX_IF];
@@ -498,8 +497,8 @@ int main (int argc, char *argv[])
     {
         fd_set  rfds;
         INT32   noDesc = 0;
-        struct timeval  tv = {0, 0};
-        struct timeval  max_tv = {1, 0};           /* 1 second  */
+        TRDP_TIME_T  tv = {0, 0};
+        TRDP_TIME_T  max_tv = {1, 0};           /* 1 second  */
 
         if (sSessionData.sBlockingMode == TRUE)
         {
@@ -514,7 +513,7 @@ int main (int argc, char *argv[])
                 This way we can guarantee that PDs are sent in time
                 with minimum CPU load and minimum jitter.
              */
-             tlc_getInterval(sSessionData.appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
+             tlc_getInterval(sSessionData.appHandle, &tv, (TRDP_FDS_T *) &rfds, &noDesc);
         }
         /*
             The wait time for select must consider cycle times and timeouts of
@@ -522,7 +521,7 @@ int main (int argc, char *argv[])
             If we need to poll something faster than the lowest PD cycle,
             we need to set the maximum time out our self.
         */
-        if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
+        if (vos_cmpTime(&tv, &max_tv) > 0)
         {
             tv = max_tv;
         }
@@ -533,7 +532,7 @@ int main (int argc, char *argv[])
                 Select() will wait for ready descriptors or time out,
                 what ever comes first.
             */
-            rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+            rv = vos_select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
             tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
         }
         else

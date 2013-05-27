@@ -55,6 +55,19 @@ struct VOS_SHRD
 VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
 void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 
+#if (((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE) || __APPLE__)
+#   define STRING_ERR(pStrBuf)  (void)strerror_r(errno, pStrBuf, VOS_MAX_ERR_STR_SIZE);
+#else
+#   define STRING_ERR(pStrBuf)                                         \
+    {                                                                  \
+        char *pStr = strerror_r(errno, pStrBuf, VOS_MAX_ERR_STR_SIZE); \
+        if (pStr != NULL)                                              \
+        {                                                              \
+            strncpy(pStrBuf, pStr, VOS_MAX_ERR_STR_SIZE);              \
+        }                                                              \
+    }
+#endif
+
 #ifdef __cplusplus
 }
 #endif
