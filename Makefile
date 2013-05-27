@@ -23,7 +23,7 @@ INCPATH += -I src/api
 VOS_PATH = -I src/vos/$(TARGET_VOS)
 VOS_INCPATH = -I src/vos/api -I src/common
 BUILD_PATH = bld/$(TARGET_VOS)
-vpath %.c src/common  src/vos/common test/udpmdcom $(VOS_PATH) test example
+vpath %.c src/common  src/vos/common test/udpmdcom $(VOS_PATH) test example test/diverse
 vpath %.h src/api src/vos/api src/common src/vos/common
 SUBDIRS	= src
 INCLUDES = $(INCPATH) $(VOS_INCPATH) $(VOS_PATH)
@@ -83,13 +83,14 @@ endif
 all:	outdir libtrdp demo
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
+libtrdppd:	outdir $(OUTDIR)/libtrdppd.a 
 
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
 example:	outdir $(OUTDIR)/mdManager
-test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest
+test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test
-mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest0001 $(OUTDIR)/mdTest0002 $(OUTDIR)/test_mdSingle
+mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest4
 
 doc:		doc/latex/refman.pdf
 
@@ -115,7 +116,7 @@ $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			    $(LDFLAGS)
 			$(STRIP) $@
 
-$(OUTDIR)/cmdlineSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
+$(OUTDIR)/cmdlineSelect:  echoSelectcmdline.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
 			$(CC) example/echoSelectcmdline.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
@@ -156,26 +157,17 @@ $(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a
+$(OUTDIR)/mdTest4: mdTest4.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building UDPMDCom test application $(@F)'
-			$(CC) test/udpmdcom/mdTest0001.c \
+			$(CC) test/udpmdcom/mdTest4.c \
 			    -ltrdp \
 			    -luuid -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a
-			@echo ' ### Building UDPMDCom test application $(@F)'
-			$(CC) test/udpmdcom/mdTest0002.c \
-			    -ltrdp \
-			    -luuid -lrt \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-
-$(OUTDIR)/test_mdSingle: $(OUTDIR)/libtrdp.a
-			$(CC) test/test_mdSingle.c \
+$(OUTDIR)/test_mdSingle: test_mdSingle.c $(OUTDIR)/libtrdp.a
+			$(CC) test/diverse/test_mdSingle.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
@@ -217,7 +209,7 @@ $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
 
 $(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building VOS test application $(@F)'
-			$(CC) test/diverse/LibraryTests.cpp \
+			$(CC) test/diverse/LibraryTests.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
