@@ -78,7 +78,7 @@ void tau_recvPdDs (
 	{
 #if 0
 		/* for ladderApplication_multiPD */
-		vos_printf(VOS_LOG_ERROR, "UnMatch Subscribe\n");
+		vos_printLog(VOS_LOG_ERROR, "UnMatch Subscribe\n");
 		return;
 #endif /* if 0 */
 	}
@@ -108,7 +108,7 @@ void tau_recvPdDs (
 		}
 		else
 		{
-			vos_printf(VOS_LOG_ERROR, "Write Receive Count Err\n");
+			vos_printLog(VOS_LOG_ERROR, "Write Receive Count Err\n");
 		}
 	}
 
@@ -120,7 +120,7 @@ void tau_recvPdDs (
 	if (((pData == NULL)	|| (dataSize == 0) || (pPDInfo->pUserRef == 0))
 		&&	(pPDInfo->resultCode != TRDP_TIMEOUT_ERR))
 	{
-//       vos_printf(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
+//       vos_printLog(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
 		return;
 	}
 

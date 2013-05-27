@@ -108,6 +108,7 @@ typedef enum
     TRDP_THREAD_ERR         = -13,  /**< Thread error                                   */
     TRDP_BLOCK_ERR          = -14,  /**< System call would have blocked in blocking mode  */
     TRDP_INTEGRATION_ERR    = -15,  /**< Alignment or endianess for selected target wrong */
+    TRDP_NOCONN_ERR         = -16,  /**< No TCP connection                              */
     TRDP_NOSESSION_ERR      = -30,  /**< No such session                                */
     TRDP_SESSION_ABORT_ERR  = -31,  /**< Session aborted                                */
     TRDP_NOSUB_ERR          = -32,  /**< No subscriber                                  */

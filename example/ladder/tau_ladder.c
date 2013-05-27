@@ -125,7 +125,7 @@ TRDP_ERR_T tau_ladder_init (void)
 			}
 			else
 			{
-				vos_printf(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
+				vos_printLog(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
 				return ret;
 			}
 		}
@@ -134,14 +134,14 @@ TRDP_ERR_T tau_ladder_init (void)
 	/* Lock Traffic Store Mutex */
 	if ((vos_mutexTryLock(pTrafficStoreMutex)) != VOS_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Lock failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Lock failed\n");
 		return ret;
 	}
 
 	/* Create the Traffic Store */
     if ((vos_sharedOpen(TRAFFIC_STORE, &pTrafficStoreHandle, &pTrafficStoreAddr, &trafficStoreSize)) != VOS_NO_ERR)
     {
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Creat failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Creat failed\n");
 		ret = TRDP_MEM_ERR;
 		return ret;
     }
@@ -154,7 +154,7 @@ TRDP_ERR_T tau_ladder_init (void)
 	vos_mutexUnlock(pTrafficStoreMutex);
 /*	if ((vos_mutexUnlock(pTrafficStoreMutex)) != VOS_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Unlock failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Unlock failed\n");
 		return ret;
 	}
 */
@@ -181,7 +181,7 @@ TRDP_ERR_T tau_ladder_init (void)
 		}
 		else
 		{
-			vos_printf(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
+			vos_printLog(VOS_LOG_ERROR, "TRDP PDComLadderThread Create failed\n");
 			return ret;
 		}
 	}
@@ -211,7 +211,7 @@ TRDP_ERR_T tau_ladder_terminate (void)
 	tau_lockTrafficStore();
 	if (vos_sharedClose(pTrafficStoreHandle, pTrafficStoreAddr) != VOS_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Release Traffic Store shared memory failed\n");
+		vos_printLog(VOS_LOG_ERROR, "Release Traffic Store shared memory failed\n");
 		return TRDP_MEM_ERR;
 	}
 	tau_unlockTrafficStore();
@@ -306,7 +306,7 @@ TRDP_ERR_T  tau_lockTrafficStore (
 	err = vos_mutexLock(pTrafficStoreMutex);
 	if (err != VOS_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Lock failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Lock failed\n");
 		return TRDP_MUTEX_ERR;
 	}
     return TRDP_NO_ERR;
@@ -328,7 +328,7 @@ TRDP_ERR_T  tau_unlockTrafficStore (
 	vos_mutexUnlock(pTrafficStoreMutex);
 /*	if (vos_mutexUnlock(pTrafficStoreMutex) != VOS_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Unlock failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Unlock failed\n");
 		return TRDP_MUTEX_ERR;
 	}
 */

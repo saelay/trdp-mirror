@@ -98,20 +98,20 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     fd = shm_open(pKey, O_CREAT | O_RDWR, PERMISSION);
     if (fd == -1)
     {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory Create failed\n");
+        vos_printLog(VOS_LOG_ERROR, "Shared Memory Create failed\n");
         return ret;
     }
     /* Shared Memory acquire */
     if (ftruncate(fd, (off_t )*pSize) == -1)
     {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory Acquire failed\n");
+        vos_printLog(VOS_LOG_ERROR, "Shared Memory Acquire failed\n");
         return ret;
     }
     /* Get Shared Memory Stats */
     fstat(fd, &sharedMemoryStat);
     if (sharedMemoryStat.st_size != (off_t )*pSize)
     {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory Size failed\n");
+        vos_printLog(VOS_LOG_ERROR, "Shared Memory Size failed\n");
         return ret;
     }
 
@@ -119,7 +119,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     *ppMemoryArea = mmap(NULL, sharedMemoryStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (*ppMemoryArea == MAP_FAILED)
     {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory memory-mapping failed\n");
+        vos_printLog(VOS_LOG_ERROR, "Shared Memory memory-mapping failed\n");
         return ret;
     }
     /* Initialize Shared Memory */
@@ -128,7 +128,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     *pHandle = (VOS_SHRD_T) vos_memAlloc(sizeof (struct VOS_SHRD));
     if (*pHandle == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory Handle create failed\n");
+        vos_printLog(VOS_LOG_ERROR, "Shared Memory Handle create failed\n");
         return ret;
     }
     else
@@ -158,12 +158,12 @@ EXT_DECL VOS_ERR_T vos_sharedClose (
 {
     if (close(handle->fd) == -1)
     {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory file close failed\n");
+        vos_printLog(VOS_LOG_ERROR, "Shared Memory file close failed\n");
         return VOS_MEM_ERR;
     }
     if (shm_unlink(handle->sharedMemoryName) == -1)
     {
-        vos_printf(VOS_LOG_ERROR, "Shared Memory unLink failed\n");
+        vos_printLog(VOS_LOG_ERROR, "Shared Memory unLink failed\n");
         return VOS_MEM_ERR;
     }
     return VOS_NO_ERR;

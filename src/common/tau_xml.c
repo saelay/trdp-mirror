@@ -107,10 +107,10 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
         /*  Get parser error    */
         xmlError *pError = xmlGetLastError();
 
-        vos_printf(VOS_LOG_ERROR, "Prepare XML doc: failed to parsed XML file\n");
+        vos_printLog(VOS_LOG_ERROR, "Prepare XML doc: failed to parsed XML file\n");
         if (pError)
         {
-            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
+            vos_printLog(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
         }
 
         return TRDP_PARAM_ERR;
@@ -122,7 +122,7 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
     /*  Check result    */
     if (!pRootElement)
     {
-        vos_printf(VOS_LOG_ERROR, "Prepare XML doc: failed to get document root element\n");
+        vos_printLog(VOS_LOG_ERROR, "Prepare XML doc: failed to get document root element\n");
         return TRDP_PARAM_ERR;
     }
 
@@ -140,10 +140,10 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
         /*  Get parser error    */
         xmlError *pError = xmlGetLastError();
 
-        vos_printf(VOS_LOG_ERROR, "Prepare XML doc: failed to prepare XPath context\n");
+        vos_printLog(VOS_LOG_ERROR, "Prepare XML doc: failed to prepare XPath context\n");
         if (pError)
         {
-            vos_printf(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
+            vos_printLog(VOS_LOG_ERROR, "  line: %i: %s\n", pError->line, pError->message);
         }
 
         return TRDP_PARAM_ERR;

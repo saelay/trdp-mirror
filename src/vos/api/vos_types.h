@@ -151,6 +151,7 @@ typedef enum
     VOS_THREAD_ERR      = -13,  /**< Thread creation error                           */
     VOS_BLOCK_ERR       = -14,  /**< System call would have blocked in blocking mode */
     VOS_INTEGRATION_ERR = -15,  /**< Alignment or endianess for selected target wrong */
+    VOS_NOCONN_ERR      = -16,  /**< No TCP connection                               */
     VOS_UNKNOWN_ERR     = -99   /**< Unknown error                                   */
 } VOS_ERR_T;
 
