@@ -2466,6 +2466,8 @@ TRDP_ERR_T trdp_mdCommonSend (
     /* mutex protected */
     do
     {
+        UINT32 tmo = 0;
+
         switch (msgType)
         {
             /* in case of reply ... */
@@ -2583,14 +2585,12 @@ TRDP_ERR_T trdp_mdCommonSend (
             }
         }
 
-
+        /**/
         /* evaluate start time and timeout. For notify I use replyTimeout as sendTimeout */
 
         switch (msgType)
         {
-            UINT32 tmo;
             case TRDP_MSG_MN:     /* notify (no reply)*/
-                tmo = 0;
                 pSenderElement->interval.tv_sec     = 0;
                 pSenderElement->interval.tv_usec    = 0;
                 trdp_mdSetSessionTimeout(pSenderElement, tmo);
@@ -2614,6 +2614,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             default:
                 break;
         }
+
 
         /* Prepare element data */
         pSenderElement->addr.comId      = comId;
@@ -2850,26 +2851,22 @@ TRDP_ERR_T trdp_mdCommonSend (
                      pSenderElement->stateEle,
                      msgType);
     }
-}
-while (0)
-{
-    ;
-}
+    while (0);
 
-/* Error and allocated element ! */
-if (TRDP_NO_ERR != errv &&
-    NULL != pSenderElement &&
-    TRUE == newSession)
-{
-    trdp_mdFreeSession(pSenderElement);
-    pSenderElement = NULL;
-}
+    /* Error and allocated element ! */
+    if (TRDP_NO_ERR != errv &&
+        NULL != pSenderElement &&
+        TRUE == newSession)
+    {
+        trdp_mdFreeSession(pSenderElement);
+        pSenderElement = NULL;
+    }
 
-/* Release mutex */
-if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
-{
-    vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
-}
+    /* Release mutex */
+    if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+    }
 
-return errv;
+    return errv;
 }
