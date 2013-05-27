@@ -179,7 +179,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
     /*  Create the memory mutex   */
     if (vos_mutexLocalCreate(&gMem.mutex) != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_memInit Mutex creation failed\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memInit Mutex creation failed\n");
         return VOS_MUTEX_ERR;
     }
 
@@ -234,7 +234,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
         {
             gMem.memCnt.preAlloc[i] = 0;
         }
-        vos_printf(VOS_LOG_INFO, "vos_memInit Pre-Allocation disabled\n");
+        vos_printLog(VOS_LOG_INFO, "vos_memInit Pre-Allocation disabled\n");
     }
 
     minSize = 0;
@@ -261,7 +261,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
             p[j] = vos_memAlloc(blockSize[i]);
             if (p[j] == NULL)
             {
-                vos_printf(VOS_LOG_ERROR, "vos_memInit Pre-Allocation size exceeds overall memory size!!! (%u > %u)\n",
+                vos_printLog(VOS_LOG_ERROR, "vos_memInit Pre-Allocation size exceeds overall memory size!!! (%u > %u)\n",
                            minSize, size);
                 break;
             }
@@ -292,7 +292,7 @@ EXT_DECL void vos_memDelete (
 {
     if (NULL == gMem.pArea || (pMemoryArea != NULL && pMemoryArea != gMem.pArea))
     {
-        vos_printf(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/Parameter\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/Parameter\n");
     }
     else
     {
@@ -323,11 +323,11 @@ EXT_DECL UINT8 *vos_memAlloc (
     if (size == 0)
     {
         gMem.memCnt.allocErrCnt++;
-        vos_printf(VOS_LOG_ERROR, "vos_memAlloc Requested size = %u\n", size);
+        vos_printLog(VOS_LOG_ERROR, "vos_memAlloc Requested size = %u\n", size);
         return NULL;
     }
 
-    vos_printf(VOS_LOG_DBG, "vos_memAlloc: Requested size = 0x%x (%u)\n", size, size);
+    vos_printLog(VOS_LOG_DBG, "vos_memAlloc: Requested size = 0x%x (%u)\n", size, size);
 
     /*    Use standard heap memory    */
     if (gMem.memSize == 0 && gMem.pArea == NULL)
@@ -356,7 +356,7 @@ EXT_DECL UINT8 *vos_memAlloc (
     {
         gMem.memCnt.allocErrCnt++;
 
-        vos_printf(VOS_LOG_ERROR, "vos_memAlloc No block size big enough. Requested size=%d\n", size);
+        vos_printLog(VOS_LOG_ERROR, "vos_memAlloc No block size big enough. Requested size=%d\n", size);
 
         return NULL; /* No block size big enough */
     }
@@ -366,7 +366,7 @@ EXT_DECL UINT8 *vos_memAlloc (
     {
         gMem.memCnt.allocErrCnt++;
 
-        vos_printf(VOS_LOG_ERROR, "vos_memAlloc can't get semaphore\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memAlloc can't get semaphore\n");
 
         return NULL;
     }
@@ -402,7 +402,7 @@ EXT_DECL UINT8 *vos_memAlloc (
                     pBlock = gMem.freeBlock[i].pFirst;
                     if (pBlock != NULL)
                     {
-                        vos_printf(
+                        vos_printLog(
                             VOS_LOG_ERROR,
                             "IPTVosMalloc Used a bigger buffer size=%d asked size=%d\n",
                             gMem.freeBlock[i].size,
@@ -417,7 +417,7 @@ EXT_DECL UINT8 *vos_memAlloc (
                 if (pBlock == NULL)
                 {
                     /* Not enough memory */
-                    vos_printf(VOS_LOG_ERROR, "IPTVosMalloc Not enough memory\n");
+                    vos_printLog(VOS_LOG_ERROR, "IPTVosMalloc Not enough memory\n");
                 }
             }
         }
@@ -425,7 +425,7 @@ EXT_DECL UINT8 *vos_memAlloc (
         /* Release semaphore */
         if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
 
         if (pBlock != NULL)
@@ -470,14 +470,14 @@ EXT_DECL void vos_memFree (void *pMemBlock)
     if (pMemBlock == NULL)
     {
         gMem.memCnt.freeErrCnt++;
-        vos_printf(VOS_LOG_ERROR, "vos_memFree() ERROR NULL pointer\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memFree() ERROR NULL pointer\n");
         return;
     }
 
     /*    Use standard heap memory    */
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
-        vos_printf(VOS_LOG_DBG, "vos_memFree() %p\n", pMemBlock);
+        vos_printLog(VOS_LOG_DBG, "vos_memFree() %p\n", pMemBlock);
         free(pMemBlock);    /*lint !e421 optional use of heap memory for debugging/development */
         return;
     }
@@ -487,7 +487,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         ((UINT8 *)pMemBlock >= (gMem.pArea + gMem.memSize)))
     {
         gMem.memCnt.freeErrCnt++;
-        vos_printf(VOS_LOG_ERROR, "vos_memFree ERROR returned memory not within allocated memory\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memFree ERROR returned memory not within allocated memory\n");
         return;
     }
 
@@ -496,7 +496,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
     {
         gMem.memCnt.freeErrCnt++;
 
-        vos_printf(VOS_LOG_ERROR, "vos_memFree can't get semaphore\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memFree can't get semaphore\n");
     }
     else
     {
@@ -517,7 +517,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         {
             gMem.memCnt.freeErrCnt++;
 
-            vos_printf(VOS_LOG_ERROR, "vos_memFree illegal sized memory\n");
+            vos_printLog(VOS_LOG_ERROR, "vos_memFree illegal sized memory\n");
         }
         else
         {
@@ -535,7 +535,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         /* Release semaphore */
         if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 }

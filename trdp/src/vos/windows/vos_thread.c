@@ -189,7 +189,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
 
     if (interval > 0)
     {
-        vos_printf(VOS_LOG_ERROR,
+        vos_printLog(VOS_LOG_ERROR,
                    "%s cyclic threads not implemented yet\n",
                    pName);
         return VOS_INIT_ERR;
@@ -199,7 +199,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     retCode = pthread_attr_init(&threadAttrib);
     if (retCode != 0)
     {
-        vos_printf(VOS_LOG_ERROR,
+        vos_printLog(VOS_LOG_ERROR,
                    "%s pthread_attr_init() failed (Err:%d)\n",
                    pName,
                    retCode );
@@ -218,7 +218,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
 
     if (retCode != 0)
     {
-        vos_printf(
+        vos_printLog(
             VOS_LOG_ERROR,
             "%s pthread_attr_setstacksize() failed (Err:%d)\n",
             pName,
@@ -231,7 +231,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
                                           PTHREAD_CREATE_DETACHED);
     if (retCode != 0)
     {
-        vos_printf(
+        vos_printLog(
             VOS_LOG_ERROR,
             "%s pthread_attr_setdetachstate() failed (Err:%d)\n",
             pName,
@@ -243,7 +243,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     retCode = pthread_attr_setschedpolicy(&threadAttrib, (int) policy);
     if (retCode != 0)
     {
-        vos_printf(
+        vos_printLog(
             VOS_LOG_ERROR,
             "%s pthread_attr_setschedpolicy() failed (Err:%d)\n",
             pName,
@@ -256,7 +256,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     retCode = pthread_attr_setschedparam(&threadAttrib, &schedParam);
     if (retCode != 0)
     {
-        vos_printf(
+        vos_printLog(
             VOS_LOG_ERROR,
             "%s pthread_attr_setschedparam() failed (Err:%d)\n",
             pName,
@@ -269,7 +269,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
                                            PTHREAD_EXPLICIT_SCHED);
     if (retCode != 0)
     {
-        vos_printf(
+        vos_printLog(
             VOS_LOG_ERROR,
             "%s pthread_attr_setinheritsched() failed (Err:%d)\n",
             pName,
@@ -284,7 +284,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
                               pArguments);
     if (retCode != 0)
     {
-        vos_printf(VOS_LOG_ERROR,
+        vos_printLog(VOS_LOG_ERROR,
                    "%s pthread_create() failed (Err:%d)\n",
                    pName,
                    retCode );
@@ -297,7 +297,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     retCode = pthread_attr_destroy(&threadAttrib);
     if (retCode != 0)
     {
-        vos_printf(
+        vos_printLog(
             VOS_LOG_ERROR,
             "%s pthread_attr_destroy() failed (Err:%d)\n",
             pName,
@@ -332,7 +332,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
     retCode = pthread_cancel(*(pthread_t *)thread);
     if (retCode != 0)
     {
-        vos_printf(VOS_LOG_ERROR,
+        vos_printLog(VOS_LOG_ERROR,
                    "pthread_cancel() failed (Err:%d)\n",
                    retCode );
         return VOS_THREAD_ERR;
@@ -418,7 +418,7 @@ EXT_DECL void vos_getTime (
 
     if (pTime == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -484,7 +484,7 @@ EXT_DECL void vos_clearTime (
 {
     if (pTime == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -506,7 +506,7 @@ EXT_DECL void vos_addTime (
 {
     if (pTime == NULL || pAdd == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -535,7 +535,7 @@ EXT_DECL void vos_subTime (
 {
     if (pTime == NULL || pSub == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -566,7 +566,7 @@ EXT_DECL void vos_divTime (
 {
     if (pTime == NULL || divisor == 0)
     {
-        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -596,7 +596,7 @@ EXT_DECL void vos_mulTime (
 {
     if (pTime == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -675,7 +675,7 @@ EXT_DECL void vos_getUuid (
     ret = vos_sockGetMAC(&pUuID[10]);
     if (ret != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_sockGetMAC() failed (Err:%d)\n", ret);
+        vos_printLog(VOS_LOG_ERROR, "vos_sockGetMAC() failed (Err:%d)\n", ret);
     }
 }
 
@@ -732,7 +732,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
     }
     else
     {
-        vos_printf(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
         vos_memFree(*pMutex);
         *pMutex = NULL;
         return VOS_MUTEX_ERR;
@@ -780,7 +780,7 @@ VOS_ERR_T vos_mutexLocalCreate (
     }
     else
     {
-        vos_printf(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
         return VOS_MUTEX_ERR;
     }
 
@@ -800,7 +800,7 @@ EXT_DECL void vos_mutexDelete (
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
     }
     else
     {
@@ -814,7 +814,7 @@ EXT_DECL void vos_mutexDelete (
         }
         else
         {
-            vos_printf(VOS_LOG_ERROR,
+            vos_printLog(VOS_LOG_ERROR,
                        "Can not destroy Mutex (pthread err=%d)\n",
                        err);
         }
@@ -833,7 +833,7 @@ void vos_mutexLocalDelete (
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
     }
     else
     {
@@ -846,7 +846,7 @@ void vos_mutexLocalDelete (
         }
         else
         {
-            vos_printf(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
         }
     }
 }
@@ -875,7 +875,7 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     err = pthread_mutex_lock(&pMutex->mutexId);
     if (err != 0)
     {
-        vos_printf(VOS_LOG_ERROR,
+        vos_printLog(VOS_LOG_ERROR,
                    "Unable to lock Mutex (pthread err=%d)\n",
                    err);
         return VOS_MUTEX_ERR;
@@ -912,7 +912,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     }
     if (err == EINVAL)
     {
-        vos_printf(VOS_LOG_ERROR,
+        vos_printLog(VOS_LOG_ERROR,
                    "Unable to trylock Mutex (pthread err=%d)\n",
                    err);
         return VOS_MUTEX_ERR;
@@ -935,7 +935,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
 
-        vos_printf(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
         return VOS_PARAM_ERR;
     }
     else
@@ -945,7 +945,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
         err = pthread_mutex_unlock(&pMutex->mutexId);
         if (err != 0)
         {
-            vos_printf(VOS_LOG_ERROR,
+            vos_printLog(VOS_LOG_ERROR,
                        "Unable to unlock Mutex (pthread err=%d)\n",
                        err);
             return VOS_MUTEX_ERR;
@@ -978,12 +978,12 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     /*Check parameters*/
     if (pSema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
     {
-        vos_printf(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
         retVal = VOS_PARAM_ERR;
     }
     else
@@ -1001,7 +1001,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         if (ret != (int)NULL)
         {
             /*Semaphore init failed*/
-            vos_printf(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
+            vos_printLog(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
             retVal = VOS_SEMA_ERR;
         }
         else
@@ -1030,7 +1030,7 @@ EXT_DECL void vos_semaDelete (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
     }
     else
     {
@@ -1042,7 +1042,7 @@ EXT_DECL void vos_semaDelete (
             if (ret != (INT32) NULL)
             {
                 /* Error destroying Semaphore */
-                vos_printf(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
+                vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
             }
             else
             {
@@ -1079,7 +1079,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if (timeout != (UINT32) NULL)
@@ -1150,7 +1150,7 @@ EXT_DECL void vos_semaGive (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
     }
     else
     {
@@ -1163,7 +1163,7 @@ EXT_DECL void vos_semaGive (
         else
         {
             /* Could not release Semaphore */
-            vos_printf(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
+            vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
         }
     }
     return;

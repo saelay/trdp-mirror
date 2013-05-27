@@ -270,7 +270,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
                     vos_ntohl(iterPD->pFrame->frameHead.topoCount) != appHandle->topoCount)
                 {
                     err = TRDP_TOPO_ERR;
-                    vos_printf(VOS_LOG_INFO, "Sending PD: TopoCount is out of date!\n");
+                    vos_printLog(VOS_LOG_INFO, "Sending PD: TopoCount is out of date!\n");
                 }
                 /*    Send the packet if it is not redundant    */
                 else if (iterPD->socketIdx != -1 &&
@@ -350,7 +350,7 @@ TRDP_ERR_T  trdp_pdReceive (
         pNewFrame = (PD_PACKET_T *) vos_memAlloc(TRDP_MAX_PD_PACKET_SIZE);
         if (pNewFrame == NULL)
         {
-            vos_printf(VOS_LOG_ERROR, "Receiving PD: Out of receive buffers!\n");
+            vos_printLog(VOS_LOG_ERROR, "Receiving PD: Out of receive buffers!\n");
             return TRDP_MEM_ERR;
         }
     }
@@ -396,7 +396,7 @@ TRDP_ERR_T  trdp_pdReceive (
         vos_ntohl(pNewFrame->frameHead.topoCount) != appHandle->topoCount)
     {
         appHandle->stats.pd.numTopoErr++;
-        vos_printf(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
+        vos_printLog(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
                    vos_ntohl(pNewFrame->frameHead.comId),
                    vos_ntohl(pNewFrame->frameHead.topoCount));
         return TRDP_TOPO_ERR;
@@ -423,7 +423,7 @@ TRDP_ERR_T  trdp_pdReceive (
             }
             else
             {
-                vos_printf(VOS_LOG_ERROR, "Statistics request failed, not published!\n");
+                vos_printLog(VOS_LOG_ERROR, "Statistics request failed, not published!\n");
             }
         }
         else
@@ -452,7 +452,7 @@ TRDP_ERR_T  trdp_pdReceive (
             if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
             {
                 /*  We do not break here, only report error */
-                vos_printf(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
             }
 
             informUser = TRUE;
@@ -465,7 +465,7 @@ TRDP_ERR_T  trdp_pdReceive (
     if (pExistingElement == NULL)
     {
         /*
-        vos_printf(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+        vos_printLog(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
         */
     }
     else
@@ -479,14 +479,14 @@ TRDP_ERR_T  trdp_pdReceive (
                 vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter) <
                 vos_ntohl(pNewFrame->frameHead.sequenceCounter))
             {
-                vos_printf(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
+                vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
                                subAddresses.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
                 return TRDP_NO_ERR;
             }
         }
 
         /*
-        vos_printf(VOS_LOG_INFO, "Received (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+        vos_printLog(VOS_LOG_INFO, "Received (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
         */
 
         /*  This might have not been set!   */
@@ -707,7 +707,7 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                     err != TRDP_TIMEOUT_ERR)
                 {
                     result = err;
-                    vos_printf(VOS_LOG_ERROR, "trdp_pdReceive() failed (Err: %d)\n", err);
+                    vos_printLog(VOS_LOG_ERROR, "trdp_pdReceive() failed (Err: %d)\n", err);
                 }
 
                 (*pCount)--;
@@ -767,7 +767,7 @@ TRDP_ERR_T trdp_pdCheck (
     if (packetSize < TRDP_MIN_PD_HEADER_SIZE ||
         packetSize > TRDP_MAX_PD_PACKET_SIZE)
     {
-        vos_printf(VOS_LOG_INFO, "PDframe size error (%u))\n", packetSize);
+        vos_printLog(VOS_LOG_INFO, "PDframe size error (%u))\n", packetSize);
         err = TRDP_WIRE_ERR;
     }
 
@@ -776,14 +776,14 @@ TRDP_ERR_T trdp_pdCheck (
 
     if (pPacket->frameCheckSum != MAKE_LE(myCRC))
     {
-        vos_printf(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
+        vos_printLog(VOS_LOG_INFO, "PDframe crc error (%08x != %08x))\n", pPacket->frameCheckSum, MAKE_LE(myCRC));
         err = TRDP_CRC_ERR;
     }
     /*  Check protocol version  */
     else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (TRDP_PROTO_VER & 0xFF000000) ||
              vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
     {
-        vos_printf(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
+        vos_printLog(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
                    vos_ntohs(pPacket->protocolVersion),
                    TRDP_PROTO_VER);
         err = TRDP_WIRE_ERR;
@@ -794,7 +794,7 @@ TRDP_ERR_T trdp_pdCheck (
              vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PR &&
              vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PE)
     {
-        vos_printf(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
+        vos_printLog(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
         err = TRDP_WIRE_ERR;
     }
     /*  Check Data CRC (FCS)   */
@@ -805,7 +805,7 @@ TRDP_ERR_T trdp_pdCheck (
 
         if (*pDataFCS != MAKE_LE(myCRC))
         {
-            vos_printf(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
+            vos_printLog(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
             err = TRDP_CRC_ERR;
         }
     }
@@ -855,13 +855,13 @@ TRDP_ERR_T  trdp_pdSend (
 
     if (err != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "trdp_pdSend failed\n");
+        vos_printLog(VOS_LOG_ERROR, "trdp_pdSend failed\n");
         return TRDP_IO_ERR;
     }
 
     if (pPacket->sendSize != pPacket->grossSize)
     {
-        vos_printf(VOS_LOG_ERROR, "trdp_pdSend incomplete\n");
+        vos_printLog(VOS_LOG_ERROR, "trdp_pdSend incomplete\n");
         return TRDP_IO_ERR;
     }
 
@@ -934,16 +934,16 @@ TRDP_ERR_T  trdp_pdDistribute (
     if (vos_cmpTime(&deltaTmax, &temp) == 0 ||
         noOfPackets == 0)
     {
-        vos_printf(VOS_LOG_ERROR, "trdp_pdDistribute: no minimal interval in %d packets found!\n", noOfPackets);
+        vos_printLog(VOS_LOG_ERROR, "trdp_pdDistribute: no minimal interval in %d packets found!\n", noOfPackets);
         return TRDP_PARAM_ERR;
     }
 
     /*  This is the delta time we can jitter...   */
     vos_divTime(&deltaTmax, noOfPackets);
 
-    vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %u.%06u\n", deltaTmax.tv_sec, deltaTmax.tv_usec);
-    vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %u.%06u\n", tNull.tv_sec, tNull.tv_usec);
-    vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: noOfPackets = %d\n", noOfPackets);
+    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %u.%06u\n", deltaTmax.tv_sec, deltaTmax.tv_usec);
+    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %u.%06u\n", tNull.tv_sec, tNull.tv_usec);
+    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: noOfPackets = %d\n", noOfPackets);
 
     for (packetIndex = 0, pPacket = pSndQueue; packetIndex < noOfPackets && pPacket != NULL; )
     {
@@ -960,14 +960,14 @@ TRDP_ERR_T  trdp_pdDistribute (
 
             if (vos_cmpTime(&temp, &pPacket->interval) > 0)
             {
-                vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: packet [%d] with interval %u.%06u could timeout...\n",
+                vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: packet [%d] with interval %u.%06u could timeout...\n",
                            packetIndex, temp.tv_sec, temp.tv_usec);
-                vos_printf(VOS_LOG_INFO, "...no change in send time!\n");
+                vos_printLog(VOS_LOG_INFO, "...no change in send time!\n");
             }
             else
             {
                 pPacket->timeToGo = nextTime2Go;
-                vos_printf(VOS_LOG_INFO, "trdp_pdDistribute: nextTime2Go[%d] = %u.%06u\n",
+                vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: nextTime2Go[%d] = %u.%06u\n",
                            packetIndex, nextTime2Go.tv_sec, nextTime2Go.tv_usec);
 
             }

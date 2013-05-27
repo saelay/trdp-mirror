@@ -239,7 +239,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     err = GetAdaptersInfo(pAdapterList, (PULONG)&bufLen);
     if (err != NO_ERROR)
     {   
-        vos_printf(VOS_LOG_ERROR, "GetAdaptersInfo failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "GetAdaptersInfo failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
     pAdapter = pAdapterList;
@@ -327,7 +327,7 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
         int err = WSAGetLastError();
 
         err = err; /* for lint */
-        vos_printf(VOS_LOG_ERROR, "WSAStartup() failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "WSAStartup() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
 
@@ -360,7 +360,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
     if (pMAC == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "Parameter error");
+        vos_printLog(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -460,7 +460,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     if (pSock == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "Parameter error");
+        vos_printLog(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -469,7 +469,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         int err = WSAGetLastError();
 
         err = err; /* for lint */
-        vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
 
@@ -510,7 +510,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if (pSock == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "Parameter error");
+        vos_printLog(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -519,7 +519,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         int err = WSAGetLastError();
 
         err = err; /* for lint */
-        vos_printf(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
 
@@ -551,7 +551,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
         int err = WSAGetLastError();
 
         err = err; /* for lint */
-        vos_printf(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n");
+        vos_printLog(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n");
         return VOS_PARAM_ERR;
     }
     gNumberOfOpenSockets--;
@@ -584,7 +584,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (Err: %d)\n", err);
             }
 #else
             if (setsockopt((SOCKET)sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&optValue,
@@ -593,7 +593,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 int err = WSAGetLastError();
 
                 err = err; /* for lint */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (Err: %d)\n", err);
             }
 #endif
         }
@@ -607,7 +607,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 int err = WSAGetLastError();
 
                 err = err; /* for lint */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() FIONBIO failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() FIONBIO failed (Err: %d)\n", err);
                 return VOS_SOCK_ERR;
             }
         }
@@ -622,7 +622,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 int err = WSAGetLastError();
 
                 err = err; /* for lint */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (Err: %d)\n", err);
             }
         }
         if (pOptions->ttl > 0)
@@ -634,7 +634,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 int err = WSAGetLastError();
 
                 err = err; /* for lint */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %d)\n", err);
             }
         }
         if (pOptions->ttl_multicast > 0)
@@ -646,7 +646,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 int err = WSAGetLastError();
 
                 err = err; /* for lint */
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %d)\n", err);
             }
         }
     }
@@ -659,7 +659,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         {
             int err = WSAGetLastError();
             err = err;     /* for lint */
-            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %d)\n", err);
         }
     }
 
@@ -703,7 +703,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
 
             (void) strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
             (void) strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
-            vos_printf(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
+            vos_printLog(VOS_LOG_INFO, "joining MC: %s on iface %s\n", mcStr, ifStr);
         }
 
         if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&mreq, sizeof(mreq)) == SOCKET_ERROR)
@@ -712,7 +712,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
 
             if (WSAEADDRINUSE != err)
             {
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_ADD_MEMBERSHIP failed (Err: %d)\n", err);
                 result = VOS_SOCK_ERR;
             }
         }
@@ -731,7 +731,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             {
                 int err = WSAGetLastError();
 
-                vos_printf(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", result);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", result);
                 result = VOS_SOCK_ERR;
             }
             else
@@ -787,7 +787,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
 
             (void) strcpy_s(mcStr, sizeof(mcStr), inet_ntoa(mreq.imr_multiaddr));
             (void) strcpy_s(ifStr, sizeof(mcStr), inet_ntoa(mreq.imr_interface));
-            vos_printf(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
+            vos_printLog(VOS_LOG_INFO, "leaving MC: %s on iface %s\n", mcStr, ifStr);
         }
 
         if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, (const char *)&mreq,
@@ -796,7 +796,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
             int err = WSAGetLastError();
 
             err = err; /* for lint */
-            vos_printf(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %d)\n", err);
             result = VOS_SOCK_ERR;
         }
         else
@@ -880,7 +880,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
     if (sendSize == SOCKET_ERROR)
     {
-        vos_printf(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %d)\n",
+        vos_printLog(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %d)\n",
                    inet_ntoa(destAddr.sin_addr), port, err);
         return VOS_IO_ERR;
     }
@@ -971,13 +971,13 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
                 {
                     struct in_pktinfo *pPktInfo = (struct in_pktinfo *) WSA_CMSG_DATA(pCMsgHdr);
                     *pDstIPAddr = (UINT32) vos_ntohl(pPktInfo->ipi_addr.S_un.S_addr);
-                    /* vos_printf(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
+                    /* vos_printLog(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
                 }
             }
             if (pSrcIPAddr != NULL)
             {
                 *pSrcIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
-                /* vos_printf(VOS_LOG_INFO, "recvmsg found %d bytes from IP address %x to \n", rcvSize, *pSrcIPAddr); */
+                /* vos_printLog(VOS_LOG_INFO, "recvmsg found %d bytes from IP address %x to \n", rcvSize, *pSrcIPAddr); */
             }
             if (NULL != pSrcIPPort)
             {
@@ -1000,7 +1000,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
     if (retVal == SOCKET_ERROR)
     {
-        vos_printf(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     else if (rcvSize == 0)
@@ -1055,7 +1055,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     srcAddress.sin_addr.s_addr  = vos_htonl(ipAddress);
     srcAddress.sin_port         = vos_htons(port);
 
-    vos_printf(VOS_LOG_INFO, "binding to: %s:%hu\n",
+    vos_printLog(VOS_LOG_INFO, "binding to: %s:%hu\n",
                inet_ntoa(srcAddress.sin_addr), port);
 
     /*  Try to bind the socket to the PD port.    */
@@ -1064,7 +1064,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
         int err = WSAGetLastError();
 
         err = err; /* for lint */
-        vos_printf(VOS_LOG_ERROR, "bind() failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "bind() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
     return VOS_NO_ERR;
@@ -1095,7 +1095,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
         int err = WSAGetLastError();
 
         err = err; /* for lint */
-        vos_printf(VOS_LOG_ERROR, "listen() failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "listen() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -1161,7 +1161,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
 #endif
                 default:
                 {
-                    vos_printf(VOS_LOG_ERROR, "accept() failed (socket: %d, err: %d)", *pSock, err);
+                    vos_printLog(VOS_LOG_ERROR, "accept() failed (socket: %d, err: %d)", *pSock, err);
                     return VOS_UNKNOWN_ERR;
                 }
             }
@@ -1221,7 +1221,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
         }
         else if (err != WSAEISCONN)
         {
-            vos_printf(VOS_LOG_WARNING, "connect() failed (Err: %d)\n", err);
+            vos_printLog(VOS_LOG_WARNING, "connect() failed (Err: %d)\n", err);
             return VOS_IO_ERR;
         }
     }
@@ -1239,6 +1239,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
+ *  @retval         VOS_NOCONN_ERR  no TCP connection
  *  @retval         VOS_BLOCK_ERR   Call would have blocked in blocking mode
  */
 
@@ -1283,8 +1284,16 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
 
     if (sendSize == -1)
     {
-        vos_printf(VOS_LOG_WARNING, "send() failed (Err: %d)\n", err);
-        return VOS_IO_ERR;
+        vos_printLog(VOS_LOG_WARNING, "send() failed (Err: %d)\n", err);
+
+        if (err == WSAENOTCONN)
+        {
+            return VOS_NOCONN_ERR;
+        }
+        else
+        {
+            return VOS_IO_ERR;
+        }
     }
     return VOS_NO_ERR;
 }
@@ -1353,7 +1362,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 
     if ((rcvSize == SOCKET_ERROR) && !(err == WSAEMSGSIZE))
     {
-        vos_printf(VOS_LOG_WARNING, "receive() failed (Err: %d)\n", err);
+        vos_printLog(VOS_LOG_WARNING, "receive() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     else if (*pSize == 0)
@@ -1401,7 +1410,7 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
             int err = WSAGetLastError();
 
             err = err; /* for lint */
-            vos_printf(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed (Err: %d)\n", err);
+            vos_printLog(VOS_LOG_WARNING, "setsockopt IP_MULTICAST_IF failed (Err: %d)\n", err);
             result = VOS_SOCK_ERR;
         }
         else

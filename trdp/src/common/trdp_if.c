@@ -110,7 +110,7 @@ BOOL    trdp_isValidSession (
 
     if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
     }
 
     return found;
@@ -152,7 +152,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
 
         if (ret != TRDP_NO_ERR)
         {
-            vos_printf(VOS_LOG_ERROR, "vos_init() failed (Err: %d)\n", ret);
+            vos_printLog(VOS_LOG_ERROR, "vos_init() failed (Err: %d)\n", ret);
         }
         else
         {
@@ -167,7 +167,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
 
             if (ret != TRDP_NO_ERR)
             {
-                vos_printf(VOS_LOG_ERROR, "vos_memInit() failed (Err: %d)\n", ret);
+                vos_printLog(VOS_LOG_ERROR, "vos_memInit() failed (Err: %d)\n", ret);
             }
             else
             {
@@ -175,7 +175,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
 
                 if (ret != TRDP_NO_ERR)
                 {
-                    vos_printf(VOS_LOG_ERROR, "vos_mutexCreate() failed (Err: %d)\n", ret);
+                    vos_printLog(VOS_LOG_ERROR, "vos_mutexCreate() failed (Err: %d)\n", ret);
                 }
             }
         }
@@ -187,13 +187,13 @@ EXT_DECL TRDP_ERR_T tlc_init (
         if (ret == TRDP_NO_ERR)
         {
             sInited = TRUE;
-            vos_printf(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", tlc_getVersionString());
+            vos_printLog(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", tlc_getVersionString());
         }
         return ret;
     }
     else
     {
-        vos_printf(VOS_LOG_ERROR, "TRDP already initalised\n");
+        vos_printLog(VOS_LOG_ERROR, "TRDP already initalised\n");
 
         return TRDP_INIT_ERR;
     }
@@ -235,14 +235,14 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     if (pAppHandle == NULL)
     {
-        vos_printf(VOS_LOG_ERROR, "tlc_openSession() failed\n");
+        vos_printLog(VOS_LOG_ERROR, "tlc_openSession() failed\n");
         return TRDP_PARAM_ERR;
     }
 
     /*    Check if we were inited */
     if (sInited == FALSE)
     {
-        vos_printf(VOS_LOG_ERROR, "tlc_openSession() called uninitialized\n");
+        vos_printLog(VOS_LOG_ERROR, "tlc_openSession() called uninitialized\n");
         return TRDP_INIT_ERR;
     }
 
@@ -250,7 +250,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     if (pSession == NULL)
     {
         /* vos_memDelete(NULL); */
-        vos_printf(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
         return TRDP_MEM_ERR;
     }
 
@@ -394,7 +394,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     if (ret != TRDP_NO_ERR)
     {
         vos_memFree(pSession);
-        vos_printf(VOS_LOG_ERROR, "vos_mutexCreate() failed (Err: %d)\n", ret);
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexCreate() failed (Err: %d)\n", ret);
         return ret;
     }
 
@@ -417,7 +417,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     if (ret != TRDP_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_mutexLock() failed (Err: %d)\n", ret);
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() failed (Err: %d)\n", ret);
     }
     else
     {
@@ -439,13 +439,13 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           NULL,                         /*    initial data                  */
                           sizeof(TRDP_STATISTICS_T));
 
-        vos_printf(VOS_LOG_INFO,
+        vos_printLog(VOS_LOG_INFO,
                    "TRDP Stack Version %s: session opened successfully\n",
                    tlc_getVersionString());
 
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -480,7 +480,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 
     if (ret != TRDP_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_mutexLock() failed (Err: %d)\n", ret);
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() failed (Err: %d)\n", ret);
     }
     else
     {
@@ -515,7 +515,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 
             if (ret != TRDP_NO_ERR)
             {
-                vos_printf(VOS_LOG_ERROR, "vos_mutexLock() failed (Err: %d)\n", ret);
+                vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() failed (Err: %d)\n", ret);
             }
             else
             {
@@ -583,7 +583,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 #endif
                 if (vos_mutexUnlock(pSession->mutex) != VOS_NO_ERR)
                 {
-                    vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+                    vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
                 }
 
                 vos_mutexDelete(pSession->mutex);
@@ -592,7 +592,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
         }
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -624,7 +624,7 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
             {
                 /* save the error code in case of an error */
                 ret = err;
-                vos_printf(VOS_LOG_ERROR, "tlc_closeSession() failed (Err: %d)\n", ret);
+                vos_printLog(VOS_LOG_ERROR, "tlc_closeSession() failed (Err: %d)\n", ret);
             }
         }
 
@@ -676,7 +676,7 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
 
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
-                vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+                vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
             }
         }
     }
@@ -761,13 +761,13 @@ TRDP_ERR_T tlp_setRedundant (
              redID, it would never be set... */
             if (FALSE == found)
             {
-                vos_printf(VOS_LOG_ERROR, "Redundant ID not found\n");
+                vos_printLog(VOS_LOG_ERROR, "Redundant ID not found\n");
                 ret = TRDP_PARAM_ERR;
             }
 
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
-                vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+                vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
             }
         }
     }
@@ -824,7 +824,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
 
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
-                vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+                vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
             }
         }
     }
@@ -859,7 +859,7 @@ EXT_DECL TRDP_ERR_T tlc_setTopoCount (
 
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
-                vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+                vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
             }
         }
     }
@@ -1072,7 +1072,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -1126,7 +1126,7 @@ TRDP_ERR_T  tlp_unpublish (
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -1189,7 +1189,7 @@ TRDP_ERR_T tlp_put (
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -1259,7 +1259,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 
                 if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
                 {
-                    vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+                    vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
                 }
             }
         }
@@ -1311,7 +1311,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
         {
             /*  We do not break here, only report error */
             result = err;
-            vos_printf(VOS_LOG_ERROR, "trdp_pdSendQueued failed (Err: %d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "trdp_pdSendQueued failed (Err: %d)\n", err);
         }
 
         /******************************************************
@@ -1326,13 +1326,13 @@ EXT_DECL TRDP_ERR_T tlc_process (
         {
             if (err == TRDP_IO_ERR)
             {
-                vos_printf(VOS_LOG_INFO, "trdp_mdSend() incomplete \n");
+                vos_printLog(VOS_LOG_INFO, "trdp_mdSend() incomplete \n");
 
             }
             else
             {
                 result = err;
-                vos_printf(VOS_LOG_ERROR, "trdp_mdSend() failed (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_ERROR, "trdp_mdSend() failed (Err: %d)\n", err);
             }
         }
 
@@ -1358,7 +1358,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -1531,7 +1531,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -1722,7 +1722,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
     }
 
     return ret;
@@ -1774,7 +1774,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
         ret = TRDP_NO_ERR;
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -1882,7 +1882,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -2161,7 +2161,7 @@ TRDP_ERR_T tlm_addListener (
     /* Release mutex */
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
     }
 
     /* return listener reference to caller */
@@ -2256,7 +2256,7 @@ TRDP_ERR_T tlm_delListener (
     /* Release mutex */
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
     }
 
     return errv;
@@ -2574,7 +2574,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
     /* Release mutex */
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
     }
 
     return err;

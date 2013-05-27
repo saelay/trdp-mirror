@@ -490,6 +490,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   sock descriptor unknown, parameter error
  *  @retval         VOS_IO_ERR      data could not be sent
+ *  @retval         VOS_NOCONN_ERR  no TCP connection
  *  @retval         VOS_BLOCK_ERR   call would have blocked in blocking mode, data partially sent
  */
 

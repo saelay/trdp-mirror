@@ -393,7 +393,7 @@ static TRDP_ERR_T do_marshall (
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
                 {
-                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
+                    vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
                     return TRDP_COMID_ERR;
                 }
 
@@ -605,7 +605,7 @@ static TRDP_ERR_T do_unmarshall (
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
                 {
-                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
+                    vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
                     return TRDP_COMID_ERR;
                 }
 
@@ -821,7 +821,7 @@ static TRDP_ERR_T size_marshall (
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
                 {
-                    vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
+                    vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
                     return TRDP_COMID_ERR;
                 }
 
@@ -1050,7 +1050,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 
     if (NULL == pDataset)   /* Not in our DB    */
     {
-        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
+        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
         return TRDP_COMID_ERR;
     }
 
@@ -1117,7 +1117,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 
     if (NULL == pDataset)   /* Not in our DB    */
     {
-        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
+        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
         return TRDP_COMID_ERR;
     }
 
@@ -1186,7 +1186,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
 
     if (NULL == pDataset)   /* Not in our DB    */
     {
-        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
+        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
         return TRDP_COMID_ERR;
     }
 
@@ -1253,7 +1253,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
 
     if (NULL == pDataset)   /* Not in our DB    */
     {
-        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
+        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
         return TRDP_COMID_ERR;
     }
 
@@ -1318,7 +1318,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
 
     if (NULL == pDataset)   /* Not in our DB    */
     {
-        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
+        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
         return TRDP_COMID_ERR;
     }
 
@@ -1381,7 +1381,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
 
     if (NULL == pDataset)   /* Not in our DB    */
     {
-        vos_printf(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
+        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
         return TRDP_COMID_ERR;
     }
 

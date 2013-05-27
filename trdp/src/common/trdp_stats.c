@@ -369,7 +369,7 @@ void    trdp_UpdateStats (
                        appHandle->stats.mem.usedBlockSize);
     if (ret != VOS_NO_ERR)
     {
-        vos_printf(VOS_LOG_ERROR, "vos_memCount() failed (Err: %d)\n", ret);
+        vos_printLog(VOS_LOG_ERROR, "vos_memCount() failed (Err: %d)\n", ret);
     }
 
     /*  Count our subscriptions */
