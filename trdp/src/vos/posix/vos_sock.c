@@ -1275,7 +1275,8 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
         vos_printLog(VOS_LOG_WARNING, "send() failed (Err: %s)\n", buff);
 
         if ((errno == ENOTCONN)
-            || (errno == ECONNREFUSED))
+            || (errno == ECONNREFUSED)
+            || (errno == EHOSTUNREACH))
         {
             return VOS_NOCONN_ERR;
         }
