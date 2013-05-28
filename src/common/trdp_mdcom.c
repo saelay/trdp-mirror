@@ -429,8 +429,16 @@ TRDP_ERR_T  trdp_mdSendPacket (
 
     if (err != VOS_NO_ERR)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_sockSend failed (Err: %d)\n", err);
-        return TRDP_IO_ERR;
+        if(err == VOS_NOCONN_ERR)
+        {
+            vos_printLog(VOS_LOG_ERROR, "vos_sockSend no connection error (Err: %d)\n", err);
+            return TRDP_NOCONN_ERR;
+
+        }else
+        {
+            vos_printLog(VOS_LOG_ERROR, "vos_sockSend failed (Err: %d)\n", err);
+            return TRDP_BLOCK_ERR;
+        }
     }
 
     if ((pElement->sendSize) != pElement->grossSize)
@@ -1331,9 +1339,6 @@ TRDP_ERR_T  trdp_mdSend (
                         err = vos_sockConnect(appHandle->iface[iterMD->socketIdx].sock,
                                               iterMD->addr.destIpAddr, appHandle->mdDefault.tcpPort);
 
-                        /* Add the socket in the file descriptor*/
-                        appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc = TRUE;
-
                         if (err == VOS_NO_ERR)
                         {
                             iterMD->tcpParameters.doConnect = FALSE;
@@ -1404,6 +1409,9 @@ TRDP_ERR_T  trdp_mdSend (
                             appHandle->iface[iterMD->socketIdx].tcpParams.notSend = FALSE;
                             iterMD->tcpParameters.msgUncomplete = FALSE;
                             appHandle->iface[iterMD->socketIdx].tcpParams.sendNotOk = FALSE;
+
+                            /* Add the socket in the file descriptor*/
+                            appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc = TRUE;
                         }
 
                         if (nextstate == TRDP_ST_RX_REPLY_SENT ||
@@ -1471,26 +1479,83 @@ TRDP_ERR_T  trdp_mdSend (
                         }
                         else
                         {
-                            if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
+                            TRDP_ERR_T err;
+                            MD_ELE_T *iterMD_find = NULL;
+
+                            vos_printLog(VOS_LOG_INFO, "The socket (Index_Num = %d) failed\n", iterMD->socketIdx);
+
+                            /* search for existing session */
+                            for (iterMD_find = appHandle->pMDSndQueue; iterMD_find != NULL; iterMD_find = iterMD_find->pNext)
                             {
-                                if (appHandle->iface[iterMD->socketIdx].tcpParams.sendNotOk == FALSE)
+                                if (iterMD_find->socketIdx == iterMD->socketIdx)
                                 {
-                                    /*  Start the Sending Timeout */
-                                    TRDP_TIME_T tmpt_interval, tmpt_now;
+                                    iterMD_find->morituri = TRUE;
 
-                                    tmpt_interval.tv_sec    = appHandle->mdDefault.sendingTimeout / 1000000;
-                                    tmpt_interval.tv_usec   = appHandle->mdDefault.sendingTimeout % 1000000;
+                                    /* Execute callback for each session */
+                                    if (appHandle->mdDefault.pfCbFunction != NULL)
+                                    {
+                                        TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
-                                    vos_getTime(&tmpt_now);
-                                    vos_addTime(&tmpt_now, &tmpt_interval);
+                                        theMessage.srcIpAddr    = 0;
+                                        theMessage.destIpAddr   = iterMD_find->addr.destIpAddr;
+                                        theMessage.seqCount     = vos_ntohs(iterMD_find->pPacket->frameHead.sequenceCounter);
+                                        theMessage.protVersion  = vos_ntohs(iterMD_find->pPacket->frameHead.protocolVersion);
+                                        theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterMD_find->pPacket->frameHead.msgType);
+                                        theMessage.comId        = iterMD_find->addr.comId;
+                                        theMessage.topoCount    = iterMD_find->addr.topoCount;
+                                        theMessage.userStatus   = 0;
+                                        theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD_find->pPacket->frameHead.replyStatus);
+                                        memcpy(theMessage.sessionId, iterMD_find->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
+                                        theMessage.replyTimeout = vos_ntohl(iterMD_find->pPacket->frameHead.replyTimeout);
+                                        memcpy(theMessage.destURI, iterMD_find->destURI, 32);
+                                        memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, 32);
+                                        theMessage.numExpReplies    = iterMD_find->noOfRepliers;
+                                        theMessage.pUserRef         = iterMD_find->pUserRef;
 
-                                    memcpy(&appHandle->iface[iterMD->socketIdx].tcpParams.sendingTimeout,
-                                           &tmpt_now,
-                                           sizeof(TRDP_TIME_T));
+                                        theMessage.numReplies           = iterMD_find->numReplies;
+                                        theMessage.numRetriesMax        = iterMD_find->numRetriesMax;
+                                        theMessage.numRetries           = iterMD_find->numRetries;
+                                        theMessage.aboutToDie           = iterMD_find->morituri;
+                                        theMessage.numRepliesQuery      = iterMD_find->numRepliesQuery;
+                                        theMessage.numConfirmSent       = iterMD_find->numConfirmSent;
+                                        theMessage.numConfirmTimeout    = iterMD_find->numConfirmTimeout;
 
-                                    appHandle->iface[iterMD->socketIdx].tcpParams.sendNotOk = TRUE;
+                                        /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
+                                        theMessage.resultCode = TRDP_TIMEOUT_ERR;
+
+                                        appHandle->mdDefault.pfCbFunction(
+                                            appHandle->mdDefault.pRefCon,
+                                            appHandle,
+                                            &theMessage,
+                                            (UINT8 *)0, 0);
+                                    }
                                 }
                             }
+
+                            /* Close the socket */
+                            err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[iterMD->socketIdx].sock);
+                            if (err != TRDP_NO_ERR)
+                            {
+                                vos_printLog(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
+                            }
+
+                            /* Delete the socket from the iface */
+                            vos_printLog(VOS_LOG_INFO,
+                                       "Deleting socket (Num = %d) from the iface\n",
+                                       appHandle->iface[iterMD->socketIdx].sock);
+                            vos_printLog(VOS_LOG_INFO, "Close socket iface lIndex=%d\n", iterMD->socketIdx);
+                            appHandle->iface[iterMD->socketIdx].sock = -1;
+                            appHandle->iface[iterMD->socketIdx].sendParam.qos  = 0;
+                            appHandle->iface[iterMD->socketIdx].sendParam.ttl  = 0;
+                            appHandle->iface[iterMD->socketIdx].usage          = 0;
+                            appHandle->iface[iterMD->socketIdx].bindAddr       = 0;
+                            appHandle->iface[iterMD->socketIdx].type       = (TRDP_SOCK_TYPE_T) 0;
+                            appHandle->iface[iterMD->socketIdx].rcvMostly  = FALSE;
+                            appHandle->iface[iterMD->socketIdx].tcpParams.cornerIp = 0;
+                            appHandle->iface[iterMD->socketIdx].tcpParams.connectionTimeout.tv_sec     = 0;
+                            appHandle->iface[iterMD->socketIdx].tcpParams.connectionTimeout.tv_usec    = 0;
+                            appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc = FALSE;
+
                         }
                     }
                 }
@@ -2361,22 +2426,56 @@ void  trdp_mdCheckTimeouts (
                 if (0 > vos_cmpTime(&appHandle->iface[lIndex].tcpParams.sendingTimeout, &now))
                 {
                     TRDP_ERR_T err;
+                    MD_ELE_T *iterMD_find = NULL;
 
                     vos_printLog(VOS_LOG_INFO, "The socket (Num = %d) Sending TIMEOUT\n", appHandle->iface[lIndex].sock);
 
-                    /* Execute callback */
-                    if (appHandle->mdDefault.pfCbFunction != NULL)
+                    /* search for existing session */
+                    for (iterMD_find = appHandle->pMDSndQueue; iterMD_find != NULL; iterMD_find = iterMD_find->pNext)
                     {
-                        TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
+                        if (iterMD_find->socketIdx == lIndex)
+                        {
+                            iterMD_find->morituri = TRUE;
 
-                        theMessage.destIpAddr   = appHandle->iface[lIndex].tcpParams.cornerIp;
-                        theMessage.resultCode   = TRDP_TIMEOUT_ERR;
-                        memset(theMessage.sessionId, 0, TRDP_SESS_ID_SIZE);
+                            /* Execute callback for each session */
+                            if (appHandle->mdDefault.pfCbFunction != NULL)
+                            {
+                                TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
-                        appHandle->mdDefault.pfCbFunction(
-                            appHandle->mdDefault.pRefCon,
-                            appHandle,
-                            &theMessage, NULL, 0);
+                                theMessage.srcIpAddr    = 0;
+                                theMessage.destIpAddr   = iterMD_find->addr.destIpAddr;
+                                theMessage.seqCount     = vos_ntohs(iterMD_find->pPacket->frameHead.sequenceCounter);
+                                theMessage.protVersion  = vos_ntohs(iterMD_find->pPacket->frameHead.protocolVersion);
+                                theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterMD_find->pPacket->frameHead.msgType);
+                                theMessage.comId        = iterMD_find->addr.comId;
+                                theMessage.topoCount    = iterMD_find->addr.topoCount;
+                                theMessage.userStatus   = 0;
+                                theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD_find->pPacket->frameHead.replyStatus);
+                                memcpy(theMessage.sessionId, iterMD_find->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
+                                theMessage.replyTimeout = vos_ntohl(iterMD_find->pPacket->frameHead.replyTimeout);
+                                memcpy(theMessage.destURI, iterMD_find->destURI, 32);
+                                memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, 32);
+                                theMessage.numExpReplies    = iterMD_find->noOfRepliers;
+                                theMessage.pUserRef         = iterMD_find->pUserRef;
+
+                                theMessage.numReplies           = iterMD_find->numReplies;
+                                theMessage.numRetriesMax        = iterMD_find->numRetriesMax;
+                                theMessage.numRetries           = iterMD_find->numRetries;
+                                theMessage.aboutToDie           = iterMD_find->morituri;
+                                theMessage.numRepliesQuery      = iterMD_find->numRepliesQuery;
+                                theMessage.numConfirmSent       = iterMD_find->numConfirmSent;
+                                theMessage.numConfirmTimeout    = iterMD_find->numConfirmTimeout;
+
+                                /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
+                                theMessage.resultCode = TRDP_TIMEOUT_ERR;
+
+                                appHandle->mdDefault.pfCbFunction(
+                                    appHandle->mdDefault.pRefCon,
+                                    appHandle,
+                                    &theMessage,
+                                    (UINT8 *)0, 0);
+                            }
+                        }
                     }
 
                     /* Close the socket */
@@ -2388,8 +2487,8 @@ void  trdp_mdCheckTimeouts (
 
                     /* Delete the socket from the iface */
                     vos_printLog(VOS_LOG_INFO,
-                                 "Deleting socket (Num = %d) from the iface\n",
-                                 appHandle->iface[lIndex].sock);
+                               "Deleting socket (Num = %d) from the iface\n",
+                               appHandle->iface[lIndex].sock);
                     vos_printLog(VOS_LOG_INFO, "Close socket iface lIndex=%d\n", lIndex);
                     appHandle->iface[lIndex].sock = -1;
                     appHandle->iface[lIndex].sendParam.qos  = 0;
@@ -2777,6 +2876,7 @@ TRDP_ERR_T trdp_mdCommonSend (
         /* Add the pUserRef */
         switch (msgType)
         {
+            case TRDP_MSG_MN:
             case TRDP_MSG_MR:
             case TRDP_MSG_MC:
                 pSenderElement->pUserRef = pUserRef;
