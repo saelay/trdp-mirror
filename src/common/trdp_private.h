@@ -245,7 +245,7 @@ typedef struct MD_ELE
     UINT16              replyPort;              /**< replies are sent to the requesters source port         */
     TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                        */
     UINT8               sessionID[16];          /**< UUID as a byte stream                                  */
-    UINT32              noOfRepliers;           /**< number of expected repliers, 0 if unknown              */
+    UINT32              numExpReplies;          /**< number of expected repliers, 0 if unknown              */
     UINT32              numReplies;             /**< actual number of replies for the request               */
     UINT32              numRetriesMax;          /**< maximun number of retries for request to a know dev    */
     UINT32              numRetries;             /**< actual number of retries for request to a know dev     */
