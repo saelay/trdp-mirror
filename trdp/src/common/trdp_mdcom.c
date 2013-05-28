@@ -434,7 +434,8 @@ TRDP_ERR_T  trdp_mdSendPacket (
             vos_printLog(VOS_LOG_ERROR, "vos_sockSend no connection error (Err: %d)\n", err);
             return TRDP_NOCONN_ERR;
 
-        }else
+        }
+        else
         {
             vos_printLog(VOS_LOG_ERROR, "vos_sockSend failed (Err: %d)\n", err);
             return TRDP_BLOCK_ERR;
@@ -1183,8 +1184,8 @@ TRDP_ERR_T  trdp_mdRecv (
 
                         /* Handle multiple replies
                          Close session if number of expected replies reached */
-                        if (iterMD->noOfRepliers != 0 &&
-                            (iterMD->noOfRepliers == 1 || iterMD->noOfRepliers == iterMD->numReplies))
+                        if (iterMD->numExpReplies != 0 &&
+                            (iterMD->numExpReplies == 1 || iterMD->numExpReplies == iterMD->numReplies))
                         {
                             /* Prepare for session fin, Reply/ReplyQuery reception only one expected */
                             iterMD->morituri = TRUE;
@@ -1237,7 +1238,7 @@ TRDP_ERR_T  trdp_mdRecv (
         memcpy(theMessage.sessionId, iterMD->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
         memcpy(theMessage.destURI, iterMD->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
         memcpy(theMessage.srcURI, iterMD->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
-        theMessage.numExpReplies        = iterMD->noOfRepliers;
+        theMessage.numExpReplies        = iterMD->numExpReplies;
         theMessage.numReplies           = iterMD->numReplies;
         theMessage.numRetriesMax        = iterMD->numRetriesMax;
         theMessage.numRetries           = iterMD->numRetries;
@@ -1509,7 +1510,7 @@ TRDP_ERR_T  trdp_mdSend (
                                         theMessage.replyTimeout = vos_ntohl(iterMD_find->pPacket->frameHead.replyTimeout);
                                         memcpy(theMessage.destURI, iterMD_find->destURI, 32);
                                         memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, 32);
-                                        theMessage.numExpReplies    = iterMD_find->noOfRepliers;
+                                        theMessage.numExpReplies    = iterMD_find->numReplies;
                                         theMessage.pUserRef         = iterMD_find->pUserRef;
 
                                         theMessage.numReplies           = iterMD_find->numReplies;
@@ -2098,12 +2099,9 @@ void  trdp_mdCheckTimeouts (
 
     /*  Find the sessions which needs action
      Note: We must also check the receive queue for pending replies! */
-
     do
     {
         TRDP_ERR_T  resultCode          = TRDP_UNKNOWN_ERR;
-        INT32       sndReplyTimeout     = 0;
-        INT32       sndConfirmTimeout   = 0;
 
         /* Update the current time always inside loop in case of application delays  */
         vos_getTime(&now);
@@ -2122,7 +2120,6 @@ void  trdp_mdCheckTimeouts (
         }
 
         /* timeToGo is timeout value! */
-
         if (0 > vos_cmpTime(&iterMD->timeToGo, &now))     /* timeout overflow */
         {
             /* timeout on queue ? */
@@ -2182,7 +2179,7 @@ void  trdp_mdCheckTimeouts (
                         iterMD->numRetries++;
 
                         /* Handle UDP retries for single reply expected */
-                        if (iterMD->noOfRepliers == 1 &&                   /* Single reply expected */
+                        if (iterMD->numExpReplies == 1 &&                   /* Single reply expected */
                             iterMD->numRetriesMax > 0 &&                   /* Retries allowed */
                             iterMD->numRetries <= iterMD->numRetriesMax)   /* Retries below maximum allowed */
                         {
@@ -2206,12 +2203,11 @@ void  trdp_mdCheckTimeouts (
                         }
 
                         /* Callback execution required to indicate this event */
-                        sndReplyTimeout = 1;
+                        timeOut         = TRUE;
                         resultCode      = TRDP_REPLYTO_ERR;
 
                         /* Statistics */
                         appHandle->stats.udpMd.numReplyTimeout++;
-
                     }
 
                     /* Manage send Confirm */
@@ -2234,18 +2230,12 @@ void  trdp_mdCheckTimeouts (
                                 /* Callback execution require to indicate send done with some Confirm Timeout */
                                 /* vos_printLog(VOS_LOG_INFO, "DEBUG tlc_process(): MD send done, Confirm timeout\n");
                                   */
-                                sndConfirmTimeout   = 1;
+                                timeOut             = TRUE;
                                 resultCode          = TRDP_REQCONFIRMTO_ERR;
                                 iterMD->morituri    = TRUE;
                             }
                         }
                     }
-
-                    if (sndReplyTimeout == 1 || sndConfirmTimeout == 1)
-                    {
-                        timeOut = TRUE;
-                    }
-
                 }
                 break;
                 case TRDP_ST_RX_REPLYQUERY_W4C:
@@ -2293,7 +2283,7 @@ void  trdp_mdCheckTimeouts (
                         break;
                     }
 
-                    if (iterMD->noOfRepliers == 0)
+                    if (iterMD->numExpReplies == 0)
                     {
                         resultCode          = TRDP_REPLYTO_ERR;
                         timeOut             = TRUE;
@@ -2302,7 +2292,7 @@ void  trdp_mdCheckTimeouts (
                     else
                     {
                         /* kill session if number of repliers have been received  */
-                        if (iterMD->noOfRepliers == iterMD->numReplies)
+                        if (iterMD->numExpReplies == iterMD->numReplies)
                         {
                             iterMD->morituri = TRUE;
                         }
@@ -2312,6 +2302,7 @@ void  trdp_mdCheckTimeouts (
                     break;
             }
         }
+
         if (TRUE == timeOut)    /* Notify user  */
         {
             /* Execute callback */
@@ -2332,7 +2323,7 @@ void  trdp_mdCheckTimeouts (
                 theMessage.replyTimeout = vos_ntohl(iterMD->pPacket->frameHead.replyTimeout);
                 memcpy(theMessage.destURI, iterMD->destURI, 32);
                 memcpy(theMessage.srcURI, iterMD->pPacket->frameHead.sourceURI, 32);
-                theMessage.numExpReplies    = iterMD->noOfRepliers;
+                theMessage.numExpReplies    = iterMD->numExpReplies;
                 theMessage.pUserRef         = iterMD->pUserRef;
 
                 theMessage.numReplies           = iterMD->numReplies;
@@ -2396,17 +2387,17 @@ void  trdp_mdCheckTimeouts (
                                  "Deleting socket (Num = %d) from the iface\n",
                                  appHandle->iface[lIndex].sock);
                     vos_printLog(VOS_LOG_INFO, "Close socket iface lIndex=%d\n", lIndex);
-                    appHandle->iface[lIndex].sock = -1;
+                    appHandle->iface[lIndex].sock           = -1;
                     appHandle->iface[lIndex].sendParam.qos  = 0;
                     appHandle->iface[lIndex].sendParam.ttl  = 0;
                     appHandle->iface[lIndex].usage          = 0;
                     appHandle->iface[lIndex].bindAddr       = 0;
-                    appHandle->iface[lIndex].type       = (TRDP_SOCK_TYPE_T) 0;
-                    appHandle->iface[lIndex].rcvMostly  = FALSE;
-                    appHandle->iface[lIndex].tcpParams.cornerIp = 0;
-                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec     = 0;
-                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec    = 0;
-                    appHandle->iface[lIndex].tcpParams.addFileDesc = FALSE;
+                    appHandle->iface[lIndex].type           = (TRDP_SOCK_TYPE_T) 0;
+                    appHandle->iface[lIndex].rcvMostly      = FALSE;
+                    appHandle->iface[lIndex].tcpParams.cornerIp                  = 0;
+                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec  = 0;
+                    appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec = 0;
+                    appHandle->iface[lIndex].tcpParams.addFileDesc               = FALSE;
                 }
             }
         }
@@ -2455,8 +2446,8 @@ void  trdp_mdCheckTimeouts (
                                 theMessage.replyTimeout = vos_ntohl(iterMD_find->pPacket->frameHead.replyTimeout);
                                 memcpy(theMessage.destURI, iterMD_find->destURI, 32);
                                 memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, 32);
-                                theMessage.numExpReplies    = iterMD_find->noOfRepliers;
-                                theMessage.pUserRef         = iterMD_find->pUserRef;
+                                theMessage.numExpReplies = iterMD_find->numReplies;
+                                theMessage.pUserRef      = iterMD_find->pUserRef;
 
                                 theMessage.numReplies           = iterMD_find->numReplies;
                                 theMessage.numRetriesMax        = iterMD_find->numRetriesMax;
@@ -2495,16 +2486,15 @@ void  trdp_mdCheckTimeouts (
                     appHandle->iface[lIndex].sendParam.ttl  = 0;
                     appHandle->iface[lIndex].usage          = 0;
                     appHandle->iface[lIndex].bindAddr       = 0;
-                    appHandle->iface[lIndex].type       = (TRDP_SOCK_TYPE_T) 0;
-                    appHandle->iface[lIndex].rcvMostly  = FALSE;
-                    appHandle->iface[lIndex].tcpParams.cornerIp = 0;
+                    appHandle->iface[lIndex].type           = (TRDP_SOCK_TYPE_T) 0;
+                    appHandle->iface[lIndex].rcvMostly      = FALSE;
+                    appHandle->iface[lIndex].tcpParams.cornerIp                     = 0;
                     appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec     = 0;
                     appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec    = 0;
-                    appHandle->iface[lIndex].tcpParams.addFileDesc = FALSE;
+                    appHandle->iface[lIndex].tcpParams.addFileDesc                  = FALSE;
                 }
             }
         }
-
     }
 
     trdp_closeMDSessions(appHandle);
@@ -2524,7 +2514,7 @@ TRDP_ERR_T trdp_mdCommonSend (
     TRDP_FLAGS_T            pktFlags,
     UINT16                  userStatus,
     UINT32                  confirmTimeout,
-    UINT32                  noOfRepliers,
+    UINT32                  numExpReplies,
     UINT32                  replyTimeout,
     TRDP_REPLY_STATUS_T     replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
@@ -2736,7 +2726,7 @@ TRDP_ERR_T trdp_mdCommonSend (
         if ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0)
         {
             /* No multiple replies expected for TCP */
-            pSenderElement->noOfRepliers = 1;
+            pSenderElement->numExpReplies = 1;
 
             /* No retries on TCP */
             pSenderElement->numRetriesMax = 0;
@@ -2744,9 +2734,9 @@ TRDP_ERR_T trdp_mdCommonSend (
         else if (vos_isMulticast(destIpAddr))
         {
             /* Multiple replies expected only for multicast */
-            pSenderElement->noOfRepliers = noOfRepliers;
+            pSenderElement->numExpReplies = numExpReplies;
 
-            if (noOfRepliers != 1)
+            if (numExpReplies != 1)
             {
                 /* No retries on UDP multicast with expected repliers =1 */
                 pSenderElement->numRetriesMax = 0;
@@ -2755,7 +2745,7 @@ TRDP_ERR_T trdp_mdCommonSend (
         else
         {
             /* No multiple response expected for unicast IP address */
-            pSenderElement->noOfRepliers = 1;
+            pSenderElement->numExpReplies = 1;
         }
 
         if ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0)
@@ -2870,7 +2860,6 @@ TRDP_ERR_T trdp_mdCommonSend (
                          pSenderElement->sessionID[2], pSenderElement->sessionID[3],
                          pSenderElement->sessionID[4], pSenderElement->sessionID[5],
                          pSenderElement->sessionID[6], pSenderElement->sessionID[7]);
-
         }
 
         /* Add the pUserRef */
