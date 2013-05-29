@@ -68,7 +68,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 	if (appThreadSessionHandle.pMdAppThreadListener == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
 		return 0;
 	}
 	else
@@ -83,7 +83,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	appThreadSessionHandle2.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 	if (appThreadSessionHandle2.pMdAppThreadListener == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle2.pMdAppThreadListener malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle2.pMdAppThreadListener malloc Err\n");
 		return 0;
 	}
 	else
@@ -94,7 +94,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	pListenerHandle = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
 	if (pListenerHandle == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle malloc Err\n");
 		return 0;
 	}
 	else
@@ -105,7 +105,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	pListenerHandle2 = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
 	if (pListenerHandle2 == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle2 malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle2 malloc Err\n");
 		return 0;
 	}
 	else
@@ -132,7 +132,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	/* Check tlm_addListener Return Code */
 	if (err != TRDP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n",
+		vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n",
 				(pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK, err);
 		return 0;
 	}
@@ -143,7 +143,7 @@ VOS_THREAD_FUNC_T MDCaller (
 		pListenerHandle->pTrdpListenerHandle = pTrdpListenerHandle;
 		if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+			vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 		}
 		/* Set Subnet1 appThreadListener */
 		appThreadSessionHandle.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
@@ -167,7 +167,7 @@ VOS_THREAD_FUNC_T MDCaller (
 		/* Check tlm_addListener Return Code */
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n",
+			vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n",
 					(pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK, err);
 			return 0;
 		}
@@ -178,7 +178,7 @@ VOS_THREAD_FUNC_T MDCaller (
 			pListenerHandle2->pTrdpListenerHandle = pTrdpListenerHandle2;
 			if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+				vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 			}
 			/* Set Subnet2 appThreadListener */
 			appThreadSessionHandle2.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
@@ -191,7 +191,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	err = queue_initialize(pCallerThreadParameter->mqName, &callerMqDescriptor);
 	if (err != MD_APP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Caller Message Queue Open error\n");
+		vos_printLog(VOS_LOG_ERROR, "Caller Message Queue Open error\n");
 		return 0;
 	}
 	else
@@ -200,7 +200,7 @@ VOS_THREAD_FUNC_T MDCaller (
 		err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle, callerMqDescriptor);
 		if (err != MD_APP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Subnet1 setAppSessionIdMessageQueueDescriptor error\n");
+			vos_printLog(VOS_LOG_ERROR, "Subnet1 setAppSessionIdMessageQueueDescriptor error\n");
 			return 0;
 		}
 		/* Is this Ladder Topology ? */
@@ -210,7 +210,7 @@ VOS_THREAD_FUNC_T MDCaller (
 			err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle2, callerMqDescriptor);
 			if (err != MD_APP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
+				vos_printLog(VOS_LOG_ERROR, "Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
 				return 0;
 			}
 		}
@@ -431,7 +431,7 @@ VOS_THREAD_FUNC_T MDCaller (
 					pCallerCreateIncrementMdData = (UINT8 *)malloc(pCallerThreadParameter->pCommandValue->mdMessageSize);
 					if (pCallerCreateIncrementMdData == NULL)
 					{
-						vos_printf(VOS_LOG_ERROR, "Caller createMdIncrement DataERROR. malloc Err\n");
+						vos_printLog(VOS_LOG_ERROR, "Caller createMdIncrement DataERROR. malloc Err\n");
 					}
 					memset(pCallerCreateIncrementMdData, 0, pCallerThreadParameter->pCommandValue->mdMessageSize);
 				}
@@ -498,7 +498,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						/* MD Send Failure Count */
 						pCallerThreadParameter->pCommandValue->callerMdSendFailureCounter++;
 						/* Error : Send Notification */
-						vos_printf(VOS_LOG_ERROR, "Send Notification ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Send Notification ERROR\n");
 					}
 					else
 					{
@@ -565,7 +565,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						/* MD Send Failure Count */
 						pCallerThreadParameter->pCommandValue->callerMdSendFailureCounter++;
 						/* Error : Send Request */
-						vos_printf(VOS_LOG_ERROR, "Send Request ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Send Request ERROR\n");
 					}
 					else
 					{
@@ -577,7 +577,7 @@ VOS_THREAD_FUNC_T MDCaller (
 					pRequestSessionHandle = (APP_THREAD_SESSION_HANDLE *)malloc(sizeof(APP_THREAD_SESSION_HANDLE));
 					if (pRequestSessionHandle == NULL)
 					{
-						vos_printf(VOS_LOG_ERROR, "Create Reply Receive Session Area ERROR. malloc Err\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Reply Receive Session Area ERROR. malloc Err\n");
 						return 0;
 					}
 					else
@@ -598,7 +598,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						callerThreadRequestTimeoutListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 						if (callerThreadRequestTimeoutListener == NULL)
 						{
-							vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. callerThreadRequestTimeoutListener malloc Err\n");
+							vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. callerThreadRequestTimeoutListener malloc Err\n");
 							return 0;
 						}
 						else
@@ -615,7 +615,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						err = setAppThreadSessionMessageQueueDescriptor(pRequestSessionHandle, callerMqDescriptor);
 						if (err != MD_APP_NO_ERR)
 						{
-							vos_printf(VOS_LOG_ERROR, "Reply Receive Session setAppSessionIdMessageQueueDescriptor error\n");
+							vos_printLog(VOS_LOG_ERROR, "Reply Receive Session setAppSessionIdMessageQueueDescriptor error\n");
 						}
 						else
 						{
@@ -666,7 +666,7 @@ VOS_THREAD_FUNC_T MDCaller (
 				break;
 				default:
 					/* Other than Caller and Replier */
-					vos_printf(VOS_LOG_ERROR, "Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCallerThreadParameter->pCommandValue->mdCallerReplierType);
+					vos_printLog(VOS_LOG_ERROR, "Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCallerThreadParameter->pCommandValue->mdCallerReplierType);
 				break;
 			}
 
@@ -779,7 +779,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						&& (receiveMqMsg.Msg.comId != pCallerThreadParameter->pCommandValue->mdSendComId))
 					{
 						/* ComId Err*/
-						vos_printf(VOS_LOG_ERROR, "Receive ComId ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Receive ComId ERROR\n");
 					}
 					else
 					{
@@ -814,11 +814,10 @@ VOS_THREAD_FUNC_T MDCaller (
 									}
 									else
 									{
-										vos_printf(VOS_LOG_ERROR, "Receive Session ERROR\n");
+										vos_printLog(VOS_LOG_ERROR, "Receive Session ERROR\n");
 									}
 									/* Decide MD Transmission Result */
 									err = decideMdTransmissionResult(
-											receiveMqMsg.Msg.comId,
 											receiveMqMsg.pData,
 											&receiveMqMsg.dataSize,
 											logString);
@@ -864,18 +863,30 @@ VOS_THREAD_FUNC_T MDCaller (
 								break;
 								case TRDP_MSG_ME:
 										/* Error : Receive Me */
-									vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR. Receive Me\n");
+									vos_printLog(VOS_LOG_ERROR, "Receive Message Type ERROR. Receive Me\n");
 								break;
 								default:
 									/* Other than Mq and Me */
-									vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR\n");
+									vos_printLog(VOS_LOG_ERROR, "Receive Message Type ERROR\n");
 								break;
 							}
 						}
 						else
 						{
 							/* Result Code Err */
-							vos_printf(VOS_LOG_ERROR, "Receive Message Result Code ERROR\n");
+							vos_printLog(VOS_LOG_ERROR, "Receive Message Result Code ERROR\n");
+							/* Change MD Send Subnet */
+							if (pCallerThreadParameter->pCommandValue->mdSendSubnet == MD_SEND_USE_SUBNET2)
+							{
+								/* Set MD Send Subnet : Subnet1 */
+								pCallerThreadParameter->pCommandValue->mdSendSubnet = MD_SEND_USE_SUBNET1;
+							}
+							else
+							{
+								/* Set MD Send Subnet : Subnet2 */
+								pCallerThreadParameter->pCommandValue->mdSendSubnet = MD_SEND_USE_SUBNET2;
+							}
+
 							/* Set Receive Reply Result Table */
 							setReceiveReplyResultTable(
 									receiveReplyResultTable,
@@ -979,7 +990,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	/* Dump Caller Receive Result */
 	if (printCallerResult(pTrdpInitializeParameter, pCallerThreadParameter->pCommandValue->commandValueId) != MD_APP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Caller Receive Count Dump Err\n");
+		vos_printLog(VOS_LOG_ERROR, "Caller Receive Count Dump Err\n");
 	}
 
 	/* Delete Listener */
@@ -1001,7 +1012,7 @@ VOS_THREAD_FUNC_T MDCaller (
 				err = tlm_delListener(appHandle, pTrdpListenerHandle);
 				if(err != TRDP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+					vos_printLog(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
 				}
 				else
 				{
@@ -1011,7 +1022,7 @@ VOS_THREAD_FUNC_T MDCaller (
 				/* Delete Listener Handle List */
 				if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
+					vos_printLog(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
 				}
 				break;
 			}
@@ -1035,7 +1046,7 @@ VOS_THREAD_FUNC_T MDCaller (
 					err = tlm_delListener(appHandle2, pTrdpListenerHandle2);
 					if(err != TRDP_NO_ERR)
 					{
-						vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+						vos_printLog(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
 					}
 					else
 					{
@@ -1045,7 +1056,7 @@ VOS_THREAD_FUNC_T MDCaller (
 					/* Delete Listener Handle List */
 					if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
 					{
-						vos_printf(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
+						vos_printLog(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
 					}
 					break;
 				}
@@ -1056,21 +1067,21 @@ VOS_THREAD_FUNC_T MDCaller (
 	/* Delete AppThereadSession Message Queue Descriptor */
 	if (deleteAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle,	callerMqDescriptor) != MD_APP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Caller Subnet1 AppThread Session Message Queue Descriptor delete Err\n");
+		vos_printLog(VOS_LOG_ERROR, "Caller Subnet1 AppThread Session Message Queue Descriptor delete Err\n");
 	}
 	/* Is this Ladder Topology ? */
 	if (pCallerThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
 	{
 		if (deleteAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle2, callerMqDescriptor) != MD_APP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Caller Subnet2 AppThread Session Message Queue Descriptor delete Err\n");
+			vos_printLog(VOS_LOG_ERROR, "Caller Subnet2 AppThread Session Message Queue Descriptor delete Err\n");
 		}
 	}
 
 	/* Delete command Value form COMMAND VALUE LIST */
 	if (deleteCommandValueList(&pTrdpInitializeParameter, pCallerThreadParameter->pCommandValue) != MD_APP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Caller COMMAND_VALUE delete Err\n");
+		vos_printLog(VOS_LOG_ERROR, "Caller COMMAND_VALUE delete Err\n");
 	}
 	/* Delete pCallerThreadParameter */
 	free(pCallerThreadParameter);
@@ -1106,7 +1117,7 @@ MD_APP_ERR_TYPE setReceiveReplyResultTable(
 	/* Parameter Check */
 	if (pReceiveReplyResultTable == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "setReceiveReplyResultTable() parameter err. Mp Receive Session Table err.\n");
+		vos_printLog(VOS_LOG_ERROR, "setReceiveReplyResultTable() parameter err. Mp Receive Session Table err.\n");
 		return MD_APP_PARAM_ERR;
 	}
 
@@ -1121,7 +1132,7 @@ MD_APP_ERR_TYPE setReceiveReplyResultTable(
 			return MD_APP_NO_ERR;
 		}
 	}
-	vos_printf(VOS_LOG_ERROR, "Don't Set Receive Reply Result Table.\n");
+	vos_printLog(VOS_LOG_ERROR, "Don't Set Receive Reply Result Table.\n");
 	return MD_APP_ERR;
 }
 
@@ -1144,7 +1155,7 @@ MD_APP_ERR_TYPE deleteReceiveReplyResultTable(
 	/* Parameter Check */
 	if ((pReceiveReplyResultTable == NULL) || (deleteReceiveReplySessionId == NULL))
 	{
-//		vos_printf(VOS_LOG_ERROR, "deleteReceiveReplyResultTable() parameter err. Mp Receive Session Table err.\n");
+//		vos_printLog(VOS_LOG_ERROR, "deleteReceiveReplyResultTable() parameter err. Mp Receive Session Table err.\n");
 		return MD_APP_PARAM_ERR;
 	}
 
@@ -1188,7 +1199,7 @@ MD_APP_ERR_TYPE deleteMrSendSessionTable(
 	/* Parameter Check */
 	if ((ppMrSendSessionTable == NULL) || (ppMrSendSessionTable == NULL))
 	{
-		vos_printf(VOS_LOG_ERROR, "deleteMrSendSessionTable() parameter err. Mr Send Session Table err.\n");
+		vos_printLog(VOS_LOG_ERROR, "deleteMrSendSessionTable() parameter err. Mr Send Session Table err.\n");
 		return MD_APP_PARAM_ERR;
 	}
 
@@ -1246,7 +1257,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 	/* Parameter Check */
 	if ((ppMrSendSessionTable == NULL) || (pReceiveReplyResultTable == NULL))
 	{
-		vos_printf(VOS_LOG_ERROR, "decideRequestReplyResult() parameter err. Mr Send Session Table or Mp Receive Session Table err.\n");
+		vos_printLog(VOS_LOG_ERROR, "decideRequestReplyResult() parameter err. Mr Send Session Table or Mp Receive Session Table err.\n");
 		return MD_APP_PARAM_ERR;
 	}
 

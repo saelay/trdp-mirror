@@ -207,7 +207,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	/* Get I/F address */
 	if (getifaddrs(&ifa_list) != 0)
 	{
-		vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
+		vos_printLog(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
        return 1;
 	}
 
@@ -224,7 +224,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 							&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr,
 							addrStr,
 							sizeof(addrStr));
-				vos_printf(VOS_LOG_INFO, "ip:%s\n", addrStr);
+				vos_printLog(VOS_LOG_INFO, "ip:%s\n", addrStr);
 				subnetId1Address = inet_network(addrStr);
 				break;
 			}
@@ -241,7 +241,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 
 	if (errv != TRDP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "tlc_init() error = %d\n",errv);
+		vos_printLog(VOS_LOG_ERROR, "tlc_init() error = %d\n",errv);
 		return MD_APP_ERR;
 	}
 
@@ -257,7 +257,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	);
 	if (errv != TRDP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Subnet1 tlc_openSession() error = %d\n",errv);
+		vos_printLog(VOS_LOG_ERROR, "Subnet1 tlc_openSession() error = %d\n",errv);
 	    return MD_APP_ERR;;
 	}
 
@@ -286,7 +286,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 		);
 		if (errv != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Subnet2 tlc_openSession() error = %d\n",errv);
+			vos_printLog(VOS_LOG_ERROR, "Subnet2 tlc_openSession() error = %d\n",errv);
 		    return MD_APP_ERR;
 		}
 
@@ -313,7 +313,7 @@ void md_indication(
 	/* Get TimeStamp when call md_indication() */
 	sprintf(timeStamp, "%s md_indication()", vos_getTimeStamp());
 
-	vos_printf(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%d)\n",
+	vos_printLog(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%d)\n",
 			pRefCon,
 			pMsg,
 			pData,
@@ -359,7 +359,7 @@ void md_indication(
     	fwd.pData = (UINT8 *)malloc(dataSize);
 		if (fwd.pData == NULL)
 		{
-			vos_printf(VOS_LOG_ERROR, "md_indicate Error. malloc Err\n");
+			vos_printLog(VOS_LOG_ERROR, "md_indicate Error. malloc Err\n");
 		}
 		memset(fwd.pData, 0, dataSize);
 		memcpy(fwd.pData, pData, dataSize);
@@ -377,7 +377,7 @@ void md_indication(
 		appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T )malloc(sizeof(TRDP_ADDRESSES_T));
 		if (appThreadSessionHandle.pMdAppThreadListener == NULL)
 		{
-			vos_printf(VOS_LOG_ERROR, "md_indication ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
+			vos_printLog(VOS_LOG_ERROR, "md_indication ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
 		}
 		/* Clear AppThreadListener Area */
 		memset(appThreadSessionHandle.pMdAppThreadListener, 0, sizeof(TRDP_ADDRESSES_T));
@@ -399,7 +399,7 @@ void md_indication(
 					&appThreadSessionHandle);
 			if(sendMessageQueueDescriptor <= 0)
 			{
-/*				vos_printf(VOS_LOG_ERROR, "Message Queue Descriptor Error. Don't Send Message Queue.\n"); */
+/*				vos_printLog(VOS_LOG_ERROR, "Message Queue Descriptor Error. Don't Send Message Queue.\n"); */
 			}
 			else
 			{

@@ -137,11 +137,13 @@ UINT32	subscriberAppCycle = 120000;				/* Subscriber Application cycle in us */
 UINT32 TS_SUBNET =1;
 /* PD return NG counter */
 UINT32 PD_RETURN_NG_COUNTER = 0;
+/* PD return Cycle Number */
+UINT32 PD_RETURN_CYCLE_NUMBER = 0;
 
 INT32	rv2 = 0;
 CHAR8 	firstPutData[PD_DATA_SIZE_MAX] = "First Put";
 
-UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printf. for dbgOut */
+UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printLog. for dbgOut */
 
 /* PD DATASET */
 TRDP_DATASET_T DATASET1_TYPE =
@@ -335,18 +337,18 @@ INT8 comparePdDataset (
 	/* Compare Size */
 	if (sendPdDatasetSize != receivePdDatasetSize)
 	{
-		vos_printf(VOS_LOG_DBG, "<NG> Compare Send PD with receive PD error. The size of is different.\n");
+		vos_printLog(VOS_LOG_DBG, "<NG> Compare Send PD with receive PD error. The size of is different.\n");
 		return 1;
 	}
 
 	/* Compare Contents */
 	if (memcmp(pSendPdDataset, pReceivePdDataset, sendPdDatasetSize) != 0)
 	{
-		vos_printf(VOS_LOG_DBG, "<NG> Compare Send PD with receive PD error. Contents is different.\n");
+		vos_printLog(VOS_LOG_DBG, "<NG> Compare Send PD with receive PD error. Contents is different.\n");
 		return 1;
 	}
 
-	vos_printf(VOS_LOG_DBG, "<OK> Compare Send PD with receive PD OK!\n");
+	vos_printLog(VOS_LOG_DBG, "<OK> Compare Send PD with receive PD OK!\n");
 	return 0;
 }
 
@@ -419,7 +421,8 @@ int main (int argc, char *argv[])
 	UINT32 pdDataset2CreateCount = 0;							/* Create PD DATASET2 Counter */
 	UINT32 pdDataset1ReturnFailureCount = 0;					/* PD DATASET1 Return NG Counter */
 	UINT32 pdDataset2ReturnFailureCount = 0;					/* PD DATASET2 Return NG Counter */
-	UINT16	i = 0;													/* Loop Counter for leading putDataSetBuffer*/
+	UINT16	putDataSetBufferIndex = 0;							/* Loop Counter for leading putDataSetBuffer */
+	UINT32	pdReturnLoopCounter = 0;								/* PD Return Loop Counter */
 
 	DATASET1 putDataSet1 = {0};									/* put DataSet1 */
 	DATASET2 putDataSet2;										/* put DataSet2 */
@@ -478,12 +481,10 @@ int main (int argc, char *argv[])
 			{"timeout-comid2",		    required_argument,	NULL, 'O'},
 			{"send-comid1-cycle",	    required_argument,	NULL, 'd'},
 			{"send-comid2-cycle",	    required_argument,	NULL, 'e'},
+			{"return-cycle-number",	    required_argument,	NULL, 'k'},
 			{"traffic-store-subnet",	required_argument,	NULL, 'T'},
 			{"pd-return-ng-counter",	required_argument,	NULL, 'r'},
-
-			{"log-type-onoff",	required_argument,	NULL, 'l'},
-
-
+			{"log-type-onoff",	required_argument,	NULL, 'L'},
 			{"help",					no_argument,		NULL, 'h'},
 			{0, 0, 0, 0}
 	};
@@ -495,7 +496,7 @@ int main (int argc, char *argv[])
 	INT32 ip[4];					/* use variable number in order to get IP address value */
 
 	while((option = getopt_long(argc, argv,
-									"t:1:2:3:4:p:m:E:c:C:a:b:A:B:f:F:o:O:d:e:T:r:l:h",
+									"t:1:2:3:4:p:m:E:c:C:a:b:A:B:f:F:o:O:d:e:k:T:r:L:h",
 									long_options,
 									&option_index)) != -1){
 		switch(option)
@@ -824,6 +825,18 @@ int main (int argc, char *argv[])
 					}
 				}
 			break;
+			case 'k':
+				if (optarg != NULL)
+				{
+					/* Get PD Return Cycle Number from an option argument */
+					if (strncmp(optarg, "-", 1) != 0)
+					{
+						sscanf(optarg, "%u", &uint32_value);
+						/* Set PD Return Cycle Number */
+						PD_RETURN_CYCLE_NUMBER = uint32_value;
+					}
+				}
+			break;
 			case 'T':
 				if (optarg != NULL)
 				{
@@ -848,7 +861,7 @@ int main (int argc, char *argv[])
 					}
 				}
 			break;
-			case 'l':
+			case 'L':
 				if (optarg != NULL)
 				{
 					/* Get Log Category OnOff Type from an option argument */
@@ -868,7 +881,7 @@ int main (int argc, char *argv[])
 						"[-a subscribeComid1SorceIP] [-b subscribeComid1DestinationIP] [-A subscribeComid2SourceIP] [-B subscribeComid2DestinationIP] \n"
 						"[-f publishComid1DestinationIP] [-F publishComid2DestinationIP] [-o subscribeComid1Timeout] [-O subscribeComid2Timeout] \n"
 						"[-d publishComid1CycleTime] [-e publishComid2CycleTime] [-T writeTrafficStoreSubnetType00] [-r ngLimit]\n"
-						"[-l logCategoryOnOffType] [-h] \n");
+						"[-L logCategoryOnOffType] [-h] \n");
 				printf("-t,	--topo			Ladder:1, not Lader:0\n");
 				printf("-1,	--offset1		OFFSET1 for Publish val hex: 0xXXXX\n");
 				printf("-2,	--offset2		OFFSET2 for Publish val hex: 0xXXXX\n");
@@ -891,9 +904,10 @@ int main (int argc, char *argv[])
 				printf("-O,	--timeout-comid2	Subscribe TImeout: micro sec\n");
 				printf("-d,	--send-comid1-cycle	Publish Cycle TIme: micro sec\n");
 				printf("-e,	--send-comid2-cycle	Publish Cycle TIme: micro sec\n");
+				printf("-k,	--return-cycle-number	Publisher PD Send Cycle Number\n");
 				printf("-T,	--traffic-store-subnet	Write Traffic Store Receive Subnet1:1,subnet2:2\n");
 				printf("-r,	--pd-return-ng-counter	PD Return NG = Continuation compare NG\n");
-				printf("-l,	--log-type-onoff	LOG Category OnOff Type Log On:1, Log Off:0, 0bit:ERROR, 1bit:WARNING, 2bit:INFO, 3bit:DBG\n");
+				printf("-L,	--log-type-onoff	LOG Category OnOff Type Log On:1, Log Off:0, 0bit:ERROR, 1bit:WARNING, 2bit:INFO, 3bit:DBG\n");
 				printf("-h,	--help\n");
 				return 1;
 			break;
@@ -912,7 +926,7 @@ int main (int argc, char *argv[])
 		err = tau_initMarshall((void *)&pRefConMarshallDataset, usingComIdNumber, gComIdMap, usingDatasetNumber, gDataSets); /* 2nd argument:using ComId Number=2, 4th argument:using DATASET Number=2 */
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "tau_initMarshall returns error = %d\n", err);
+			vos_printLog(VOS_LOG_ERROR, "tau_initMarshall returns error = %d\n", err);
 		   return 1;
 		}
 	}
@@ -1007,7 +1021,7 @@ int main (int argc, char *argv[])
 	/* Get I/F address */
 	if (getifaddrs(&ifa_list) != VOS_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
+		vos_printLog(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
        return 1;
 	}
 	/* Get All I/F List */
@@ -1023,7 +1037,7 @@ int main (int argc, char *argv[])
 							&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr,
 							addrStr,
 							sizeof(addrStr));
-				vos_printf(VOS_LOG_INFO, "ip:%s\n", addrStr);
+				vos_printLog(VOS_LOG_INFO, "ip:%s\n", addrStr);
 				subnetId1Address = inet_network(addrStr);
 				break;
 			}
@@ -1037,7 +1051,7 @@ int main (int argc, char *argv[])
 				 &dynamicConfig						/* Use application supplied memory	*/
 				) != TRDP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Sub-network Initialization error (tlc_init)\n");
+		vos_printLog(VOS_LOG_ERROR, "Sub-network Initialization error (tlc_init)\n");
 		return 1;
 	}
 
@@ -1053,14 +1067,14 @@ int main (int argc, char *argv[])
 							&pdConfiguration, NULL,					/* system defaults for PD and MD		*/
 							&processConfig) != TRDP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Sub-network Id1 Initialization error (tlc_openSession)\n");
+		vos_printLog(VOS_LOG_ERROR, "Sub-network Id1 Initialization error (tlc_openSession)\n");
 		return 1;
 	}
 
 	/* TRDP Ladder support initialize */
 	if (tau_ladder_init() != TRDP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "TRDP Ladder Support Initialize failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Ladder Support Initialize failed\n");
 		return 1;
 	}
 
@@ -1077,7 +1091,7 @@ int main (int argc, char *argv[])
 								&pdConfiguration2, NULL,				/* system defaults for PD and MD		*/
 								&processConfig2) != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Sub-network Id2 Initialization error (tlc_openSession)\n");
+			vos_printLog(VOS_LOG_ERROR, "Sub-network Id2 Initialization error (tlc_openSession)\n");
 			return 1;
 		}
 	}
@@ -1100,7 +1114,7 @@ int main (int argc, char *argv[])
 	                         dataSet1Size);         	/* net data size */
 	    if (err != TRDP_NO_ERR)
 	    {
-	    	 vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
+	    	 vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
 	        tlc_terminate();
 	        return 1;
 	    }
@@ -1124,7 +1138,7 @@ int main (int argc, char *argv[])
 							 dataSet2Size);       	  	/* net data size */
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
+			vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
 			tlc_terminate();
 			tau_ladder_terminate();
 			return 1;
@@ -1155,7 +1169,7 @@ int main (int argc, char *argv[])
 								 dataSet1Size);        		/* net data size */
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
+				vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
 				tlc_terminate();
 				tau_ladder_terminate();
 				return 1;
@@ -1179,7 +1193,7 @@ int main (int argc, char *argv[])
 								 dataSet2Size);     		/* net data size */
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
+				vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
 				tlc_terminate();
 				tau_ladder_terminate();
 				return 1;
@@ -1205,7 +1219,7 @@ int main (int argc, char *argv[])
 							dataSet1Size);					/* data size */
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
+			vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
 			tlc_terminate();
 			tau_ladder_terminate();
 			return 1;
@@ -1230,7 +1244,7 @@ int main (int argc, char *argv[])
 							dataSet2Size);					/* data size */
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
+			vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
 			tlc_terminate();
 			tau_ladder_terminate();
 			return 1;
@@ -1258,7 +1272,7 @@ int main (int argc, char *argv[])
 								dataSet1Size);				/* data size */
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
 				tlc_terminate();
 				tau_ladder_terminate();
 				return 1;
@@ -1283,7 +1297,7 @@ int main (int argc, char *argv[])
 								dataSet2Size);				/* data size */
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
 				tlc_terminate();
 				tau_ladder_terminate();
 				return 1;
@@ -1302,13 +1316,13 @@ int main (int argc, char *argv[])
 	}
 	else
 	{
-		vos_printf(VOS_LOG_ERROR, "prep Sub-network error\n");
+		vos_printLog(VOS_LOG_ERROR, "prep Sub-network error\n");
         return 1;
 	}
     err = tau_setNetworkContext(TS_SUBNET);
     if (err != TRDP_NO_ERR)
     {
-    	vos_printf(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+    	vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
         return 1;
     }
 
@@ -1316,15 +1330,17 @@ int main (int argc, char *argv[])
 	vos_threadDelay(PDCOM_MULTICAST_GROUPING_DELAY_TIME);
 
 	/* Display PD Application Version */
-	vos_printf(VOS_LOG_INFO,
+	vos_printLog(VOS_LOG_INFO,
            "PD Application Version %s: TRDP Setting successfully\n",
            PD_APP_VERSION);
-
+	/* Display RD Return Test Start Time */
+	printf("%s PD Return Test start.\n", vos_getTimeStamp());
     /*
         Enter the main processing loop.
      */
-    while (1)
-/*DEBUG    for(i=0; i>=1; i++) */
+//	while(pdReturnLoopCounter <= PD_RETURN_CYCLE_NUMBER - 1)
+	while((pdReturnLoopCounter <= PD_RETURN_CYCLE_NUMBER - 1)
+		|| ((pdDataset1CreateCount <= PD_RETURN_CYCLE_NUMBER - 1) && (pdDataset2CreateCount <= PD_RETURN_CYCLE_NUMBER - 1)))
     {
     	/* Enable Comid1 ? */
     	if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
@@ -1433,12 +1449,12 @@ int main (int argc, char *argv[])
 			err = tau_unlockTrafficStore();
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
+				vos_printLog(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
 			}
 		}
 		else
 		{
-			vos_printf(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
+			vos_printLog(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
 			/* Waits for a next to Traffic Store put/get cycle */
 			vos_threadDelay(publisherAppCycle);
 			continue;
@@ -1467,7 +1483,7 @@ int main (int argc, char *argv[])
 					pubHandleNet1ComId1,
 					(void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1),
 					dataSet1Size);
-			vos_printf(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet1\n", DATASET_NO_1);
+			vos_printLog(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet1\n", DATASET_NO_1);
 		}
 		/* Enable Comid2 ? */
 		if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
@@ -1477,7 +1493,7 @@ int main (int argc, char *argv[])
 					pubHandleNet1ComId2,
 					(void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS2),
 					dataSet2Size);
-			vos_printf(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet1\n", DATASET_NO_2);
+			vos_printLog(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet1\n", DATASET_NO_2);
 		}
 		/* Is this Ladder Topology ? */
 		if (ladderTopologyFlag == TRUE)
@@ -1490,7 +1506,7 @@ int main (int argc, char *argv[])
 						pubHandleNet2ComId1,
 						(void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1),
 						dataSet1Size);
-				vos_printf(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet2\n", DATASET_NO_1);
+				vos_printLog(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet2\n", DATASET_NO_1);
 			}
 			/* Enable Comid2 ? */
 			if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
@@ -1500,7 +1516,7 @@ int main (int argc, char *argv[])
 						pubHandleNet2ComId2,
 						(void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS2),
 						dataSet2Size);
-				vos_printf(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet2\n", DATASET_NO_2);
+				vos_printLog(VOS_LOG_DBG, "Ran tlp_put PD DATASET%d subnet2\n", DATASET_NO_2);
 			}
 		}
 
@@ -1510,13 +1526,13 @@ int main (int argc, char *argv[])
 		if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 		{
 			/* Display tlp_put PD DATASET */
-			vos_printf(VOS_LOG_INFO, "tlp_put PD DATASET1\n");
+			vos_printLog(VOS_LOG_INFO, "tlp_put PD DATASET1\n");
 			dumpMemory(&putDataSet1, dataSet1Size);
 		}
 		/* Enable Comid2 ? */
 		if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 		{
-			vos_printf(VOS_LOG_INFO, "tlp_put PD DATASET2\n");
+			vos_printLog(VOS_LOG_INFO, "tlp_put PD DATASET2\n");
 			dumpMemory(&putDataSet2, dataSet2Size);
 		}
 #endif /* if 0 */
@@ -1527,9 +1543,9 @@ int main (int argc, char *argv[])
 		/* Get Receive PD DataSet from Traffic Store */
 /*
 		memcpy(&getDataSet1, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS3), dataSet1Size);
-		vos_printf(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
+		vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
 		memcpy(&getDataSet2, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS4), dataSet2Size);
-		vos_printf(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
+		vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
 */
 		if (marshallingFlag == TRUE)
 		{
@@ -1547,10 +1563,10 @@ int main (int argc, char *argv[])
 											(UINT8 *) &getDataSet1,
 											&dataSet1Size,
 											NULL);
-					vos_printf(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
 					if (err != TRDP_NO_ERR)
 					{
-						vos_printf(VOS_LOG_ERROR, "tau_unmarshall PD DATASET%d returns error %d\n", DATASET_NO_1, err);
+						vos_printLog(VOS_LOG_ERROR, "tau_unmarshall PD DATASET%d returns error %d\n", DATASET_NO_1, err);
 						return 1;
 					}
 				}
@@ -1564,10 +1580,10 @@ int main (int argc, char *argv[])
 											(UINT8 *) &getDataSet2,
 											&dataSet2Size,
 											NULL);
-					vos_printf(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
 					if (err != TRDP_NO_ERR)
 					{
-						vos_printf(VOS_LOG_ERROR, "tau_unmarshall PD DATASET%d returns error %d\n", DATASET_NO_2, err);
+						vos_printLog(VOS_LOG_ERROR, "tau_unmarshall PD DATASET%d returns error %d\n", DATASET_NO_2, err);
 						return 1;
 					}
 				}
@@ -1576,12 +1592,12 @@ int main (int argc, char *argv[])
 				err = tau_unlockTrafficStore();
 				if (err != TRDP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
+					vos_printLog(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
 				}
 			}
 			else
 			{
-				vos_printf(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
+				vos_printLog(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
 			}
 		}
 		else
@@ -1595,26 +1611,26 @@ int main (int argc, char *argv[])
 				{
 					/* Get ComId1 from Traffic Store */
 					memcpy(&getDataSet1, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS3), dataSet1Size);
-					vos_printf(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
 				}
 				/* Enable Comid2 ? */
 				if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 				{
 					/* Get ComId2 from Traffic Store */
 					memcpy(&getDataSet2, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS4), dataSet2Size);
-					vos_printf(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
 				}
 
 				/* Release access right to Traffic Store*/
 				err = tau_unlockTrafficStore();
 				if (err != TRDP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
+					vos_printLog(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
 				}
 			}
 			else
 			{
-				vos_printf(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
+				vos_printLog(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
 			}
 		}
 
@@ -1624,35 +1640,35 @@ int main (int argc, char *argv[])
 		if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 		{
 			/* Display Get Receive PD DATASET1 from Traffic Store*/
-			vos_printf(VOS_LOG_DBG, "Receive PD DATASET1\n");
+			vos_printLog(VOS_LOG_DBG, "Receive PD DATASET1\n");
 			dumpMemory(&getDataSet1, dataSet1Size);
 		}
 		/* Enable Comid2 ? */
 		if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 		{
 			/* Display Get Receive PD DATASET2 from Traffic Store*/
-			vos_printf(VOS_LOG_DBG, "Receive PD DATASET2\n");
+			vos_printLog(VOS_LOG_DBG, "Receive PD DATASET2\n");
 			dumpMemory(&getDataSet2, dataSet2Size);
 		}
 #endif /* if 0 */
 
-		for(i=0; i <= PUT_DATASET_BUFFER_SIZE - 1; i++)
+		for(putDataSetBufferIndex = 0; putDataSetBufferIndex <= PUT_DATASET_BUFFER_SIZE - 1; putDataSetBufferIndex++)
 		{
 			/* Enable Comid1 ? */
 			if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 			{
 				/* Compare dataset1 Send PD with receive PD */
-				if (comparePdDataset(&putDataSet1Buffer[i], &getDataSet1, dataSet1Size, dataSet1Size) ==1)
+				if (comparePdDataset(&putDataSet1Buffer[putDataSetBufferIndex], &getDataSet1, dataSet1Size, dataSet1Size) ==1)
 				{
 					if (pdDataset1ReturnNgCounter <= 0)
 					{
 						/* PD DATASET1 Return NG */
-						vos_printf(VOS_LOG_DBG, "*** NG *** PD DATASET1 Return Error.\n");
+						vos_printLog(VOS_LOG_DBG, "*** NG *** PD DATASET1 Return Error.\n");
 						/* Set Criterion of the failure PD Return */
 						pdDataset1ReturnNgCounter = PD_RETURN_NG_COUNTER;
 						pdDataset1ReturnFailureCount++;
-						vos_printf(VOS_LOG_DBG, "PD DATASET1 Create Count = %d\n", pdDataset1CreateCount);
-						vos_printf(VOS_LOG_DBG, "PD DATASET1 RETURN NG Count = %d\n", pdDataset1ReturnFailureCount);
+						vos_printLog(VOS_LOG_DBG, "PD DATASET1 Create Count = %d\n", pdDataset1CreateCount);
+						vos_printLog(VOS_LOG_DBG, "PD DATASET1 RETURN NG Count = %d\n", pdDataset1ReturnFailureCount);
 					}
 					else
 					{
@@ -1665,8 +1681,8 @@ int main (int argc, char *argv[])
 					/* PD DATASET1 Return OK */
 					/* Set Criterion of the failure PD DATASET1 Return */
 					pdDataset1ReturnNgCounter = PD_RETURN_NG_COUNTER;
-					vos_printf(VOS_LOG_DBG, "PD DATASET1 Create Count = %d\n", pdDataset1CreateCount);
-					vos_printf(VOS_LOG_DBG, "PD DATASET1 RETURN NG Count = %d\n", pdDataset1ReturnFailureCount);
+					vos_printLog(VOS_LOG_DBG, "PD DATASET1 Create Count = %d\n", pdDataset1CreateCount);
+					vos_printLog(VOS_LOG_DBG, "PD DATASET1 RETURN NG Count = %d\n", pdDataset1ReturnFailureCount);
 				}
 			}
 
@@ -1674,17 +1690,17 @@ int main (int argc, char *argv[])
 			if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 			{
 				/* Compare dataset2 Send PD with receive PD */
-				if (comparePdDataset(&putDataSet2Buffer[i], &getDataSet2, dataSet2Size, dataSet2Size) == 1)
+				if (comparePdDataset(&putDataSet2Buffer[putDataSetBufferIndex], &getDataSet2, dataSet2Size, dataSet2Size) == 1)
 				{
 					if (pdDataset2ReturnNgCounter <= 0)
 					{
 						/* PD DATASET2 Return NG */
-						vos_printf(VOS_LOG_DBG, "*** NG *** PD DATASET2 Return Error.\n");
+						vos_printLog(VOS_LOG_DBG, "*** NG *** PD DATASET2 Return Error.\n");
 						/* Set Criterion of the failure PD DATASET2 Return */
 						pdDataset2ReturnNgCounter = PD_RETURN_NG_COUNTER;
 						pdDataset2ReturnFailureCount++;
-						vos_printf(VOS_LOG_DBG, "PD DATASET2 Create Count = %d\n", pdDataset2CreateCount);
-						vos_printf(VOS_LOG_DBG, "PD DATASET2 RETURN NG Count = %d\n", pdDataset2ReturnFailureCount);
+						vos_printLog(VOS_LOG_DBG, "PD DATASET2 Create Count = %d\n", pdDataset2CreateCount);
+						vos_printLog(VOS_LOG_DBG, "PD DATASET2 RETURN NG Count = %d\n", pdDataset2ReturnFailureCount);
 					}
 					else
 					{
@@ -1697,10 +1713,15 @@ int main (int argc, char *argv[])
 					/* PD DATASET2 Return OK */
 					/* Set Criterion of the failure PD DATASET2 Return */
 					pdDataset2ReturnNgCounter = PD_RETURN_NG_COUNTER;
-					vos_printf(VOS_LOG_DBG, "PD DATASET2 Create Count = %d\n", pdDataset2CreateCount);
-					vos_printf(VOS_LOG_DBG, "PD DATASET2 RETURN NG Count = %d\n", pdDataset2ReturnFailureCount);
+					vos_printLog(VOS_LOG_DBG, "PD DATASET2 Create Count = %d\n", pdDataset2CreateCount);
+					vos_printLog(VOS_LOG_DBG, "PD DATASET2 RETURN NG Count = %d\n", pdDataset2ReturnFailureCount);
 				}
 			}
+		}
+		/* PD Return Loop Counter Count Up */
+		if (PD_RETURN_CYCLE_NUMBER != 0)
+		{
+			pdReturnLoopCounter++;
 		}
     }   /*	Bottom of while-loop	*/
 
@@ -1709,27 +1730,57 @@ int main (int argc, char *argv[])
      *	We always clean up behind us!
      */
 
-    tlp_unpublish(appHandle, pubHandleNet1ComId1);
-    tlp_unsubscribe(appHandle, subHandleNet1ComId1);
-	/* Is this Ladder Topology ? */
-	if (ladderTopologyFlag == TRUE)
+	/* Display RD Return Result */
+	printf("%s PD Return Test finish.\n", vos_getTimeStamp());
+	printf("PD DATASET1 Create Count = %d\n", pdDataset1CreateCount);
+	printf("PD DATASET1 RETURN NG Count = %d\n", pdDataset1ReturnFailureCount);
+	printf("PD DATASET2 Create Count = %d\n", pdDataset2CreateCount);
+	printf("PD DATASET2 RETURN NG Count = %d\n", pdDataset2ReturnFailureCount);
+
+	/* unPublish and unSubscribe */
+	if (appHandle != NULL)
 	{
+		/* comId1 */
+		tlp_unpublish(appHandle, pubHandleNet1ComId1);
+		tlp_unsubscribe(appHandle, subHandleNet1ComId1);
+		/* comId2 */
+		tlp_unpublish(appHandle, pubHandleNet1ComId2);
+		tlp_unsubscribe(appHandle, subHandleNet1ComId2);
+	}
+	/* Is this Ladder Topology ? */
+	if ((ladderTopologyFlag == TRUE) && (appHandle != NULL))
+	{
+		/* comId1 */
 		tlp_unpublish(appHandle2, pubHandleNet2ComId1);
 		tlp_unsubscribe(appHandle2, subHandleNet2ComId1);
-	}
-    tlc_terminate();
-    tau_ladder_terminate();
-
-    tlp_unpublish(appHandle, pubHandleNet1ComId2);
-    tlp_unsubscribe(appHandle, subHandleNet1ComId2);
-	/* Is this Ladder Topology ? */
-	if (ladderTopologyFlag == TRUE)
-	{
+		/* comId2 */
 		tlp_unpublish(appHandle2, pubHandleNet2ComId2);
 		tlp_unsubscribe(appHandle2, subHandleNet2ComId2);
 	}
-    tlc_terminate();
+	/* Display TimeStamp when close Session time */
+	printf("%s All unPublish, All unSubscribe.\n", vos_getTimeStamp());
 
-    return rv;
+	/* Ladder Terminate */
+	if(tau_ladder_terminate() != TRDP_NO_ERR)
+	{
+		vos_printLog(VOS_LOG_ERROR, "tau_ladder_terminate() error = %d\n",err);
+	}
+	else
+	{
+		/* Display TimeStamp when tau_ladder_terminate time */
+		printf("%s TRDP Ladder Termiinate.\n", vos_getTimeStamp());
+	}
+
+	/* TRDP Terminate */
+	if(tlc_terminate() != TRDP_NO_ERR)
+	{
+		vos_printLog(VOS_LOG_ERROR, "tlc_terminate() error = %d\n",err);
+	}
+	else
+	{
+		/* Display TimeStamp when tlc_terminate time */
+		printf("%s TRDP Termiinate.\n", vos_getTimeStamp());
+	}
+	return rv;
 }
 #endif /* TRDP_OPTION_LADDER */

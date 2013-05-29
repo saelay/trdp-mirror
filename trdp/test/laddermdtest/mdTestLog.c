@@ -69,7 +69,7 @@ VOS_THREAD_FUNC_T MDLog(void)
 		if (errno != EEXIST)
 		{
 			/* Error : mkfifo() */
-			vos_printf(VOS_LOG_ERROR, "mkfifo() ERROR\n");
+			vos_printLog(VOS_LOG_ERROR, "mkfifo() ERROR\n");
 		}
 	}
 	/* LOG proc Start */
@@ -94,7 +94,7 @@ int l2fFlash(char *logMsg, const char *logFilePath, int dumpOnOff)
 	    FILE *flog = fopen(logFilePath, "a");
 	    if (flog == NULL)
 	    {
-	    	vos_printf(VOS_LOG_ERROR, "Log File Open Err\n");
+	    	vos_printLog(VOS_LOG_ERROR, "Log File Open Err\n");
 			return MD_APP_ERR;
 	    }
 	    // Append string to file
@@ -140,7 +140,7 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
 	if (logFifoFd == -1)
 	{
 		/* Log FIFO(named pipe) Open Error */
-		vos_printf(VOS_LOG_ERROR, "Log FIFO Open ERROR\n");
+		vos_printLog(VOS_LOG_ERROR, "Log FIFO Open ERROR\n");
 		return MD_APP_ERR;
 	}
 
@@ -155,7 +155,7 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
     	if (readSize == -1)
     	{
     		/* Log FIFO(named pipe) Open Error */
-/*    		vos_printf(VOS_LOG_ERROR, "Log FIFO Read ERROR\n"); */
+/*    		vos_printLog(VOS_LOG_ERROR, "Log FIFO Read ERROR\n"); */
     	}
     	else if(readSize == 0)
     	{
