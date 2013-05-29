@@ -46,18 +46,18 @@
 
 /* global vars */
 static APP_THREAD_SESSION_HANDLE_MQ_DESCRIPTOR appThreadSessionHandleMqDescriptorTable[APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX] = {{{{0}}}};
-static COMID_MD_DATA_FILE_NAME comIdMdDataFileNameTable[] =
+static DATASETID_MD_DATA_FILE_NAME dataSetIdMdDataFileNameTable[] =
 {
-		{COMID_FIXED_DATA1, "mdLiteral1"},		/* Single Packet DATA */
-		{COMID_FIXED_DATA2, "mdLiteral2"},		/* 3 Packet DATA */
-		{COMID_FIXED_DATA3, "mdLiteral3"},		/* UDP MAX DATA */
-		{COMID_FIXED_DATA4, "mdLiteral4"},		/* 128K Octet DATA */
-		{COMID_FIXED_DATA5, "mdLiteral5"},		/* TCP MAX DATA */
-		{COMID_FIXED_DATA6, "mdLiteral6"},		/* 512 Octet DATA */
-		{COMID_ERROR_DATA_1, "mdErrMode1"},	/* For ErrMode1 : Transmission Error */
-		{COMID_ERROR_DATA_2, "mdErrMode2"},	/* For ErrMode2 : Not Listener */
-		{COMID_ERROR_DATA_3, "mdErrMode3"},	/* For ErrMode3 : ComId Error */
-		{COMID_ERROR_DATA_4, "mdErrMode4"}		/* For ErrMode4 : Reply retry */
+		{DATASETID_FIXED_DATA1, "mdLiteral1"},		/* Single Packet DATA */
+		{DATASETID_FIXED_DATA2, "mdLiteral2"},		/* 3 Packet DATA */
+		{DATASETID_FIXED_DATA3, "mdLiteral3"},		/* UDP MAX DATA */
+		{DATASETID_FIXED_DATA4, "mdLiteral4"},		/* 128K Octet DATA */
+		{DATASETID_FIXED_DATA5, "mdLiteral5"},		/* TCP MAX DATA */
+		{DATASETID_FIXED_DATA6, "mdLiteral6"},		/* 512 Octet DATA */
+		{DATASETID_ERROR_DATA_1, "mdErrMode1"},	/* For ErrMode1 : Transmission Error */
+		{DATASETID_ERROR_DATA_2, "mdErrMode2"},	/* For ErrMode2 : Not Listener */
+		{DATASETID_ERROR_DATA_3, "mdErrMode3"},	/* For ErrMode3 : ComId Error */
+		{DATASETID_ERROR_DATA_4, "mdErrMode4"}		/* For ErrMode4 : Reply retry */
 };
 
 VOS_MUTEX_T pMdApplicationThreadMutex = NULL;					/* pointer to Mutex for MD Application Thread */
@@ -77,7 +77,7 @@ MD_APP_ERR_TYPE  lockMdApplicationThread (
 	/* Lock MD Application Thread by Mutex */
 	if ((vos_mutexTryLock(pMdApplicationThreadMutex)) != VOS_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "MD Application Thread Mutex Lock failed\n");
+		vos_printLog(VOS_LOG_ERROR, "MD Application Thread Mutex Lock failed\n");
 		return MD_APP_MUTEX_ERR;
 	}
     return MD_APP_NO_ERR;
@@ -130,14 +130,14 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	trdp_mq = mq_open(pMqName, O_RDWR | O_CREAT, S_IWUSR|S_IRUSR, pma);
 	if ((mqd_t)-1 == trdp_mq)
 	{
-		vos_printf(VOS_LOG_ERROR, "mq_open() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_open() Error");
 		return MD_APP_ERR;
 	}
 	/* get attributes */
 	rc = mq_getattr(trdp_mq,&old_ma);
 	if (-1 == rc)
 	{
-		vos_printf(VOS_LOG_ERROR, "mq_getattr() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error");
 		return MD_APP_ERR;
 	}
 
@@ -149,7 +149,7 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	rc = mq_setattr(trdp_mq,&new_ma,&old_ma);
 	if (-1 == rc)
 	{
-		vos_printf(VOS_LOG_ERROR, "mq_setattr() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_setattr() Error");
 		return MD_APP_ERR;
 	}
 
@@ -157,7 +157,7 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	rc = mq_getattr(trdp_mq,&old_ma);
 	if (-1 == rc)
 	{
-		vos_printf(VOS_LOG_ERROR, "mq_getattr() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error");
 		return MD_APP_ERR;
 	}
 
@@ -176,7 +176,7 @@ MD_APP_ERR_TYPE queue_sendMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 	rc = mq_send(mqDescriptor,p_bf,l_bf,0);
 	if (-1 == rc)
 	{
-		vos_printf(VOS_LOG_ERROR, "mq_send() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_send() Error");
 		return MD_APP_ERR;
 	}
 	else
@@ -203,16 +203,16 @@ MD_APP_ERR_TYPE queue_receiveMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 			/* Message Queue Empty */
 			return MD_APP_EMPTY_MESSAGE_ERR;
 		}
-		vos_printf(VOS_LOG_ERROR, "mq_receive() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_receive() Error");
 		return MD_APP_ERR;
 	}
 	/* Receive Message Size err ? */
 	if (rc != l_bf)
 	{
-		vos_printf(VOS_LOG_ERROR, "mq_receive() expected %d bytes, not %d\n",l_bf,(int)rc);
+		vos_printLog(VOS_LOG_ERROR, "mq_receive() expected %d bytes, not %d\n",l_bf,(int)rc);
 		return MD_APP_ERR;
 	}
-	vos_printf(VOS_LOG_INFO, "Received Message Queue in datasize %d bytes\n", msg->dataSize);
+	vos_printLog(VOS_LOG_INFO, "Received Message Queue in datasize %d bytes\n", msg->dataSize);
 	return MD_APP_NO_ERR;
 }
 
@@ -239,7 +239,7 @@ MD_APP_ERR_TYPE setAppThreadSessionMessageQueueDescriptor(
 			return MD_APP_NO_ERR;
 		}
 	}
-	vos_printf(VOS_LOG_ERROR, "Don't Set MQ Descriptor.\n");
+	vos_printLog(VOS_LOG_ERROR, "Don't Set MQ Descriptor.\n");
 	return MD_APP_ERR;
 }
 
@@ -506,7 +506,7 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 		**pppMdData = (UINT8 *)realloc(**pppMdData, mdDataSize);
 		if (**pppMdData == NULL)
 		{
-			vos_printf(VOS_LOG_ERROR, "createMdIncrement DataERROR. malloc Err\n");
+			vos_printLog(VOS_LOG_ERROR, "createMdIncrement DataERROR. malloc Err\n");
 			return MD_APP_MEM_ERR;
 		}
 		else
@@ -519,11 +519,15 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 			sprintf((char *)**pppMdData, "%4u", mdDataSize);
 			**pppMdData = **pppMdData + 4;
 #endif
+			/* Set DataSetId */
+			sprintf((char *)**pppMdData, "%4u", DATASETID_INCREMENT_DATA);
+			**pppMdData = **pppMdData + 4;
+
 			/* Create Top Character */
 			firstCharacter = (char)(mdSendCount % MD_DATA_INCREMENT_CYCLE);
 			/* Create MD Increment Data */
-//			for(i=0; i <= mdDataSize - 4; i++)
-			for(i=0; i < mdDataSize; i++)
+			for(i=0; i <= mdDataSize - 4; i++)
+//			for(i=0; i < mdDataSize; i++)
 			{
 				***pppMdData = (char)((firstCharacter + i) % MD_DATA_INCREMENT_CYCLE);
 				**pppMdData = **pppMdData + 1;
@@ -534,7 +538,7 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 	}
 	else
 	{
-		vos_printf(VOS_LOG_ERROR, "createMdIncrementData ERROR. parameter Err\n");
+		vos_printLog(VOS_LOG_ERROR, "createMdIncrementData ERROR. parameter Err\n");
 		return MD_APP_PARAM_ERR;
 	}
 	return MD_APP_NO_ERR;
@@ -543,7 +547,7 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 /**********************************************************************************************************************/
 /** Create MD Fixed DATA
  *
- *  @param[in]		comId						Create Message ComId
+ *  @param[in]		dataSetId						Create Message ComId
  *  @param[out]		pMdData					pointer to Created Message Data
  *  @param[out]		pMdDataSize				pointer to Created Message Data Size
  *
@@ -553,7 +557,7 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
  *  @retval         MD_APP_MEM_ERR				Memory error
  *
  */
-MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMdDataSize)
+MD_APP_ERR_TYPE createMdFixedData (UINT32 dataSetId, UINT8 ***pppMdData, UINT32 *pMdDataSize)
 {
 	MD_APP_ERR_TYPE err = MD_APP_NO_ERR;
 	char mdDataFileName[MD_DATA_FILE_NAME_MAX_SIZE] = {0};
@@ -565,16 +569,16 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 	if ((pppMdData == NULL)
 			&& (pMdDataSize == NULL))
 	{
-		vos_printf(VOS_LOG_ERROR, "createMdFixedDataERROR. parameter Err\n");
+		vos_printLog(VOS_LOG_ERROR, "createMdFixedDataERROR. parameter Err\n");
 		return MD_APP_PARAM_ERR;
 	}
 	else
 	{
 		/* Get ComId-MD DATA File Name */
-		err = getMdDataFileNameFromComId(comId, mdDataFileName);
+		err = getMdDataFileNameFromDataSetId(dataSetId, mdDataFileName);
 		if (err != MD_APP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. comId:%d Err\n", comId);
+			vos_printLog(VOS_LOG_ERROR, "createMdFixedData ERROR. dataSetId:%d Err\n", dataSetId);
 			return MD_APP_PARAM_ERR;
 		}
 		else
@@ -584,7 +588,7 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 			fpMdDataFile = fopen(mdDataFileName, "rb");
 			if (fpMdDataFile == NULL)
 			{
-				vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Open Err\n");
+				vos_printLog(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Open Err\n");
 				return MD_APP_PARAM_ERR;
 			}
 			/* Get MdDataFile Size */
@@ -595,7 +599,7 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 */
 			if ((fstat(fileno(fpMdDataFile), &fileStat)) == -1)
 			{
-				vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Stat Err\n");
+				vos_printLog(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Stat Err\n");
 				return MD_APP_PARAM_ERR;
 			}
 			mdDataFileSize = fileStat.st_size;
@@ -610,7 +614,7 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 			**pppMdData = (UINT8 *)malloc(mdDataFileSize);
 			if (**pppMdData == NULL)
 			{
-				vos_printf(VOS_LOG_ERROR, "createMdFixedData ERROR. malloc Err\n");
+				vos_printLog(VOS_LOG_ERROR, "createMdFixedData ERROR. malloc Err\n");
 				return MD_APP_MEM_ERR;
 			}
 			else
@@ -620,6 +624,8 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 				fread(**pppMdData, sizeof(char), mdDataFileSize, fpMdDataFile);
 				/* Close MdDataFile */
 				fclose(fpMdDataFile);
+				/* Set DataSetId */
+				memcpy(**pppMdData, &dataSetId, sizeof(UINT32));
 			}
 		}
 	}
@@ -627,9 +633,9 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
 }
 
 /**********************************************************************************************************************/
-/** Get MD DATA File Name from ComId
+/** Get MD DATA File Name from DataSetId
  *
- *  @param[in]		comId						Create Message ComId
+ *  @param[in]		dataSetId					Create Message ComId
  *  @param[out]		pMdDataFileName			pointer to MD DATA FILE NAME
  *
  *  @retval         MD_APP_NO_ERR				no error
@@ -638,33 +644,33 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 comId, UINT8 ***pppMdData, UINT32 *pMd
  *  @retval         MD_APP_MEM_ERR				Memory error
  *
  */
-MD_APP_ERR_TYPE getMdDataFileNameFromComId (UINT32 comId, CHAR8 *pMdDataFileName)
+MD_APP_ERR_TYPE getMdDataFileNameFromDataSetId (UINT32 dataSetId, CHAR8 *pMdDataFileName)
 {
 	int i = 0;										/* loop counter */
-	int comIdMdDataFileNameTableNumber = 0;	/* ComId-MdDataFileName Table Number */
+	int dataSetIdMdDataFileNameTableNumber = 0;	/* ComId-MdDataFileName Table Number */
 
 	/* Parameter Check */
 	if (pMdDataFileName == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "getMdDataFileNameFromComIdERROR. parameter Err\n");
+		vos_printLog(VOS_LOG_ERROR, "getMdDataFileNameFromDataSetId ERROR. parameter Err\n");
 		return MD_APP_PARAM_ERR;
 	}
 	else
 	{
-		/* Get Number of comIdMdDataFileNameTable Member */
-		comIdMdDataFileNameTableNumber = (sizeof(comIdMdDataFileNameTable)) / (sizeof(comIdMdDataFileNameTable[0]));
+		/* Get Number of dataSetIdMdDataFileNameTable Member */
+		dataSetIdMdDataFileNameTableNumber = (sizeof(dataSetIdMdDataFileNameTable)) / (sizeof(dataSetIdMdDataFileNameTable[0]));
 		/* Search ComId to MdDataFileName */
-		for(i=0; i < comIdMdDataFileNameTableNumber; i++)
+		for(i=0; i < dataSetIdMdDataFileNameTableNumber; i++)
 		{
-			if (comId == comIdMdDataFileNameTable[i].comId)
+			if (dataSetId == dataSetIdMdDataFileNameTable[i].dataSetId)
 			{
 				/* Set MD DATA FILE NAME */
-				strncpy(pMdDataFileName, comIdMdDataFileNameTable[i].mdDataFileName, sizeof(comIdMdDataFileNameTable[i].mdDataFileName));
+				strncpy(pMdDataFileName, dataSetIdMdDataFileNameTable[i].mdDataFileName, sizeof(dataSetIdMdDataFileNameTable[i].mdDataFileName));
 				return MD_APP_NO_ERR;
 			}
 		}
 	}
-	vos_printf(VOS_LOG_ERROR, "getMdDataFileNameFromComId ERROR. Unmatch ComId:%d Err\n", comId);
+	vos_printLog(VOS_LOG_ERROR, "getMdDataFileNameFromDataSetId ERROR. Unmatch DataSetId:%d Err\n", dataSetId);
 	return MD_APP_PARAM_ERR;
 }
 
@@ -705,7 +711,7 @@ int l2fLog(char *logString, int logKind, int dumpOnOff)
 		if (writeLogFifoFd == -1)
 		{
 			/* Log FIFO(named pipe) Open Error */
-			vos_printf(VOS_LOG_ERROR, "Write Log FIFO Open ERROR\n");
+			vos_printLog(VOS_LOG_ERROR, "Write Log FIFO Open ERROR\n");
 			return MD_APP_ERR;
 		}
 	}
@@ -714,7 +720,7 @@ int l2fLog(char *logString, int logKind, int dumpOnOff)
 	writeFifoSize = write(writeLogFifoFd, writeFifoBuffer, writeFifoBufferSize);
 	if (writeFifoSize == -1)
 	{
-		vos_printf(VOS_LOG_ERROR, "l2fLogERROR. write FIFO Err\n");
+		vos_printLog(VOS_LOG_ERROR, "l2fLogERROR. write FIFO Err\n");
 		return MD_APP_ERR;
 	}
 	return MD_APP_NO_ERR;
@@ -768,7 +774,7 @@ MD_APP_ERR_TYPE miscMemory2String (
 	strTmp = (char *)malloc(PIPE_BUFFER_SIZE);
 	if (strTmp == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "miscMemory2String(): Could not allocate memory.\n");
+		vos_printLog(VOS_LOG_ERROR, "miscMemory2String(): Could not allocate memory.\n");
 		return MD_APP_MEM_ERR;
 	}
 	else
@@ -863,9 +869,9 @@ MD_APP_ERR_TYPE miscMemory2String (
 }
 
 /**********************************************************************************************************************/
-/** Get MD DATA from ComId
+/** Get MD DATA from DataSetId
  *
- *  @param[in]		receiveComId				Receive ComId
+ *  @param[in]		receiveDataSetId			Receive DataSetId
  *  @param[in]		pReceiveMdData			pointer to Receive MD DATA
  *  @param[in]		pReceiveMdDataSize		pointer to Receive MD DATA Size
  *  @param[out]		pCheckMdData				pointer to Create for Check MD DATA
@@ -877,8 +883,8 @@ MD_APP_ERR_TYPE miscMemory2String (
  *  @retval         MD_APP_MEM_ERR				Memory error
  *
  */
-MD_APP_ERR_TYPE getMdDataFromComId(
-		const UINT32 receiveComId,
+MD_APP_ERR_TYPE getMdDataFromDataSetId(
+		const UINT32 receiveDataSetId,
 		const UINT8 *pReceiveMdData,
 		const UINT32 *pReceiveMdDataSize,
 		UINT8 **ppCheckMdData,
@@ -896,7 +902,7 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 	*ppCheckMdDataSize = (UINT32 *)malloc(sizeof(UINT32));
 	if (*ppCheckMdDataSize == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "getMdDataFromId ERROR. malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "getMdDataFromId ERROR. malloc Err\n");
 		return MD_APP_MEM_ERR;
 	}
 	else
@@ -905,10 +911,9 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 	}
 
 	/* Decide MD DATA Type*/
-	switch(receiveComId)
+	switch(receiveDataSetId)
 	{
-		case COMID_INCREMENT_DATA:
-		case COMID_INCREMENT_DATA_REPLY:
+		case DATASETID_INCREMENT_DATA:
 			/* Get Increment Start Byte of Receive MD DATA */
 //			memcpy(&startCharacter, pReceiveMdData + 4, sizeof(char));
 			memcpy(&startCharacter, pReceiveMdData, sizeof(char));
@@ -917,116 +922,34 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 			if (err != MD_APP_NO_ERR)
 			{
 				/* Error : Create Increment DATA */
-				vos_printf(VOS_LOG_ERROR, "Create Increment DATA ERROR\n");
+				vos_printLog(VOS_LOG_ERROR, "Create Increment DATA ERROR\n");
 			}
 			else
 			{
 				**ppCheckMdDataSize = *pReceiveMdDataSize;
 			}
 		break;
-		case COMID_FIXED_DATA1:
-		case COMID_FIXED_DATA1_REPLY:
-			/* Create Fixed DATA1 */
-			err = createMdFixedData(COMID_FIXED_DATA1, &ppCheckMdData, *ppCheckMdDataSize);
+		case DATASETID_FIXED_DATA1:
+		case DATASETID_FIXED_DATA2:
+		case DATASETID_FIXED_DATA3:
+		case DATASETID_FIXED_DATA4:
+		case DATASETID_FIXED_DATA5:
+		case DATASETID_FIXED_DATA6:
+		case DATASETID_ERROR_DATA_1:
+		case DATASETID_ERROR_DATA_2:
+		case DATASETID_ERROR_DATA_3:
+		case DATASETID_ERROR_DATA_4:
+			/* Create Fixed DATA */
+			err = createMdFixedData(receiveDataSetId, &ppCheckMdData, *ppCheckMdDataSize);
 			if (err != MD_APP_NO_ERR)
 			{
-				/* Error : Create Fixed DATA1 */
-				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA1 ERROR\n");
-			}
-		break;
-		case COMID_FIXED_DATA2:
-		case COMID_FIXED_DATA2_REPLY:
-			/* Create Fixed DATA2 */
-			err = createMdFixedData(COMID_FIXED_DATA2, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Fixed DATA2 */
-				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA2 ERROR\n");
-			}
-		break;
-		case COMID_FIXED_DATA3:
-		case COMID_FIXED_DATA3_REPLY:
-			/* Create Fixed DATA3 */
-			err = createMdFixedData(COMID_FIXED_DATA3, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Fixed DATA3 */
-				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA3 ERROR\n");
-			}
-		break;
-		case COMID_FIXED_DATA4:
-		case COMID_FIXED_DATA4_REPLY:
-			/* Create Fixed DATA4 */
-			err = createMdFixedData(COMID_FIXED_DATA4, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Fixed DATA4 */
-				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA4 ERROR\n");
-			}
-		break;
-		case COMID_FIXED_DATA5:
-		case COMID_FIXED_DATA5_REPLY:
-			/* Create Fixed DATA5 */
-			err = createMdFixedData(COMID_FIXED_DATA5, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Fixed DATA5 */
-				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA5 ERROR\n");
-			}
-		break;
-		case COMID_FIXED_DATA6:
-		case COMID_FIXED_DATA6_REPLY:
-			/* Create Fixed DATA6 */
-			err = createMdFixedData(COMID_FIXED_DATA6, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Fixed DATA6 */
-				vos_printf(VOS_LOG_ERROR, "Create Fixed DATA6 ERROR\n");
-			}
-		break;
-		case COMID_ERROR_DATA_1:
-		case COMID_ERROR_DATA_1_REPLY:
-			/* Create Error DATA1 */
-			err = createMdFixedData(COMID_ERROR_DATA_1, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Error DATA1 */
-				vos_printf(VOS_LOG_ERROR, "Create Error DATA1 ERROR\n");
-			}
-		break;
-		case COMID_ERROR_DATA_2:
-		case COMID_ERROR_DATA_2_REPLY:
-			/* Create Error DATA2 */
-			err = createMdFixedData(COMID_ERROR_DATA_2, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Error DATA2 */
-				vos_printf(VOS_LOG_ERROR, "Create Error DATA2 ERROR\n");
-			}
-		break;
-		case COMID_ERROR_DATA_3:
-		case COMID_ERROR_DATA_3_REPLY:
-			/* Create Error DATA3 */
-			err = createMdFixedData(COMID_ERROR_DATA_3, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Error DATA3 */
-				vos_printf(VOS_LOG_ERROR, "Create Error DATA3 ERROR\n");
-			}
-		break;
-		case COMID_ERROR_DATA_4:
-		case COMID_ERROR_DATA_4_REPLY:
-			/* Create Error DATA4 */
-			err = createMdFixedData(COMID_ERROR_DATA_4, &ppCheckMdData, *ppCheckMdDataSize);
-			if (err != MD_APP_NO_ERR)
-			{
-				/* Error : Create Error DATA4 */
-				vos_printf(VOS_LOG_ERROR, "Create Error DATA4 ERROR\n");
+				/* Error : Create Fixed DATA */
+				vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA ERROR DataSetId:0x%x\n", receiveDataSetId);
 			}
 		break;
 		default:
 				/* MD DATA TYPE NOTHING */
-			vos_printf(VOS_LOG_ERROR, "Receive ComId ERROR. receiveComId = %d\n", receiveComId);
+			vos_printLog(VOS_LOG_ERROR, "Receive DataSetId ERROR. receiveDataSetId = %d\n", receiveDataSetId);
 				err = MD_APP_ERR;
 		break;
 	}
@@ -1036,7 +959,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
 /**********************************************************************************************************************/
 /** Decide MD Transmission Success or Failure
  *
- *  @param[in]		receiveComId				Receive ComId
  *  @param[in]		pReceiveMdData			pointer to Receive MD DATA
  *  @param[in]		pReceiveMdDataSize		pointer to Receive MD DATA Size
  *  @param[in,out]	pLogString					pointer to Log String
@@ -1046,7 +968,6 @@ MD_APP_ERR_TYPE getMdDataFromComId(
  *
  */
 MD_APP_ERR_TYPE decideMdTransmissionResult(
-		const UINT32 receiveComId,
 		const UINT8 *pReceiveMdData,
 		const UINT32 *pReceiveMdDataSize,
 		CHAR8 *pLogString)
@@ -1058,13 +979,17 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 	UINT8 *pCheckMdData = NULL;
 	UINT32 *pCheckMdDataSize = NULL;
 	UINT32 receiveMdDataSetSize = 0;
+	UINT32 receiveMdDataSetId = 0;
 
 	/* Get MD DATASET Size */
 	memcpy(&receiveMdDataSetSize, pReceiveMdDataSize, sizeof(UINT32));
 
+	/* Get DataSetId */
+	memcpy(&receiveMdDataSetId, pReceiveMdData, sizeof(UINT32));
+
 	/* Create for check MD DATA */
-	err = getMdDataFromComId(
-			receiveComId,
+	err = getMdDataFromDataSetId(
+			receiveMdDataSetId,
 			pReceiveMdData,
 			&receiveMdDataSetSize,
 			&pCheckMdData,
@@ -1151,7 +1076,7 @@ MD_APP_ERR_TYPE decideResultCode(
 		   break;
 
 		default:
-			vos_printf(VOS_LOG_ERROR, "Error on packet err = %d\n",mdResultCode);
+			vos_printLog(VOS_LOG_ERROR, "Error on packet err = %d\n",mdResultCode);
 		   return mdResultCode;
 		   break;
 	}

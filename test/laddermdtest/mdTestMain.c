@@ -69,7 +69,7 @@ CHAR8 replierThreadName[] ="/replier_mq";			/* Replier Message Queue Name Base *
 //COMMAND_VALUE				trdpInitializeParameter = {0};		/* Use to trdp_initialize for MDReceiveManager Thread */
 COMMAND_VALUE *pTrdpInitializeParameter = NULL;		/* First MD Command Value */
 
-UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printf. for dbgOut */
+UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printLog. for dbgOut */
 
 LISTENER_HANDLE_T *pHeadListenerHandleList = NULL;		/* Head Listener Handle List */
 
@@ -123,7 +123,7 @@ int main (int argc, char *argv[])
 	pTrdpInitializeParameter = (COMMAND_VALUE *)malloc(sizeof(COMMAND_VALUE));
 	if (pTrdpInitializeParameter == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
 		return MD_APP_MEM_ERR;
 	}
 	else
@@ -219,6 +219,15 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 					sscanf(argv[i+1], "%2u", &int32_value);
 					/* Set MD Telegram Type */
 					getCommandValue.mdTelegramType = int32_value;
+				}
+				break;
+			case 'E':
+				if (argv[i+1] != NULL)
+				{
+					/* Get Caller Send Request/Notify ComId from an option argument */
+					sscanf(argv[i+1], "%x", &uint32_value);
+					/* Set Caller Send Request/Notify ComId */
+					getCommandValue.mdCallerSendComId = uint32_value;
 				}
 				break;
 			case 'f':
@@ -357,15 +366,9 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				break;
 			case 'Q':
 				/* -u : Display Caller Result */
-				if (printCallerResult(pTrdpInitializeParameter, DUMP_ALL_COMMAND_VALUE) != MD_APP_NO_ERR)
-				{
-					printf("Caller Receive Count Dump Err\n");
-				}
+				printCallerResult(pTrdpInitializeParameter, DUMP_ALL_COMMAND_VALUE);
 				/* -U : Display Replier Result */
-				if (printReplierResult(pTrdpInitializeParameter, DUMP_ALL_COMMAND_VALUE) != MD_APP_NO_ERR)
-				{
-					printf("Replier Receive Count Dump Err\n");
-				}
+				printReplierResult(pTrdpInitializeParameter, DUMP_ALL_COMMAND_VALUE);
 				/* Trdp Terminate */
 				if (mdTerminate() != MD_APP_NO_ERR)
 				{
@@ -441,31 +444,36 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 						"[-d messegeKind] "
 						"\n"
 						"[-e telegramType] "
+						"[-E callerSendComid] "
 						"[-f incrementDataSize] "
-						"[-g callerMdDestination] "
 						"\n"
+						"[-g callerMdDestination] "
 						"[-i dumpType] "
 						"[-j callerKnownReplierNumber] "
-						"[-J replierSessionMaxNumber] "
 						"\n"
+						"[-J replierSessionMaxNumber] "
 						"[-k callerSendCycleNumber] "
 						"[-l logType] "
-						"[-L logCategoryOnOffType] "
 						"\n"
+						"[-L logCategoryOnOffType] "
 						"[-m callerMdSendCycleTime] "
 						"[-m sendingTimeout] "
-						"[-n topologyType] "
 						"\n"
+						"[-n topologyType] "
 						"[-o replierReplyErrType] "
 						"[-p marshallingTYpe] "
+						"\n"
 						"[-q replierListenerComid] "
-						"\n"
-						"[-Q mdTestQuit] "
+						"[-Q] "
 						"[-r replyTimeout] "
+						"\n"
 						"[-R connectTimeout] "
-						"\n"
 						"[-t callerSendUsingSubnetType] "
+						"[-s] "
 						"\n"
+						"[-S] "
+						"[-u] "
+						"[-U] "
 						"[-h] "
 						"\n");
 				printf("long option(--) Not Support \n");
@@ -473,6 +481,7 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("-c,	--md-transport-type			Transport Type UDP:0, TCP:1\n");
 				printf("-d,	--md-message-kind			Caller Request Message Type Mn:0, Mr-Mp:1\n");
 				printf("-e,	--md-telegram-type			Caller Send MD DATASET Telegram Type Increment:0, Fixed:1-6, Error:7-10 (Fixed:4 not support)\n");
+				printf("-E,	--md-send-comid			Callder Send Request/Notify ComId val\n");
 				printf("-f,	--md-message-size			MD Increment Message Size Byte\n");
 				printf("-g,	--md-destination-address		Caller MD Send Destination IP Address, Replier MD Receive Destination IP Address xxx.xxx.xxx.xxx\n");
 				printf("-i,	--md-dump				Dump Type DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
@@ -497,7 +506,7 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("-Q,	--md-test-quit	MD TEST Quit\n");
 				printf("-h,	--help\n");
 				printf("Caller example\n"
-						"-b 0 -c 0 -d 1 -e 1 -g 239.255.1.1 -i 0 -j 0 -k 10 -l 0 -m 100000 -n 1 -p 0 -r 1000000 -t 1\n");
+						"-b 0 -c 0 -d 1 -e 1 -e 200011 -g 239.255.1.1 -i 0 -j 0 -k 10 -l 0 -m 100000 -n 1 -p 0 -r 1000000 -t 1\n");
 				printf("Replier example\n"
 						"-b 1 -c 0 -g 239.255.1.1 -i 0 -k 10 -l 0 -n 1 -o 0 -p 0 -q 200001 -r 1000000\n");
 				return MD_APP_COMMAND_ERR;
@@ -551,7 +560,7 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 			*ppMdDataSize = (UINT32 *)malloc(sizeof(UINT32));
 			if (*ppMdDataSize == NULL)
 			{
-				vos_printf(VOS_LOG_ERROR, "createMdIncrement DataERROR. malloc Err\n");
+				vos_printLog(VOS_LOG_ERROR, "createMdIncrement DataERROR. malloc Err\n");
 				return MD_APP_MEM_ERR;
 			}
 			memset(*ppMdDataSize, 0, sizeof(UINT32));
@@ -564,7 +573,7 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Increment DATA */
-						vos_printf(VOS_LOG_ERROR, "Create Increment DATA ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Increment DATA ERROR\n");
 					}
 					else
 					{
@@ -578,11 +587,11 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				case FIXED_DATA_1:
 					/* Create Fixed DATA1 */
-					err = createMdFixedData(COMID_FIXED_DATA1, &ppMdData, *ppMdDataSize);
+					err = createMdFixedData(DATASETID_FIXED_DATA1, &ppMdData, *ppMdDataSize);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Fixed DATA1 */
-						vos_printf(VOS_LOG_ERROR, "Create Fixed DATA1 ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA1 ERROR\n");
 					}
 					else
 					{
@@ -592,11 +601,11 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				case FIXED_DATA_2:
 					/* Create Fixed DATA2 */
-					err = createMdFixedData(COMID_FIXED_DATA2, &ppMdData, *ppMdDataSize);
+					err = createMdFixedData(DATASETID_FIXED_DATA2, &ppMdData, *ppMdDataSize);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Fixed DATA2 */
-						vos_printf(VOS_LOG_ERROR, "Create Fixed DATA2 ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA2 ERROR\n");
 					}
 					else
 					{
@@ -609,18 +618,18 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 					if (pCommandValue->mdTransportType == MD_TRANSPORT_UDP)
 					{
 						/* Create Fixed DATA3 */
-						err = createMdFixedData(COMID_FIXED_DATA3, &ppMdData, *ppMdDataSize);
+						err = createMdFixedData(DATASETID_FIXED_DATA3, &ppMdData, *ppMdDataSize);
 						if (err != MD_APP_NO_ERR)
 						{
 							/* Error : Create Fixed DATA3 */
-							vos_printf(VOS_LOG_ERROR, "Create Fixed DATA3 ERROR\n");
+							vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA3 ERROR\n");
 							break;
 						}
 					}
 					else
 					{
 						/* Error : Transport  */
-						vos_printf(VOS_LOG_ERROR, "Create Fixed DATA3 ERROR. Because Transport is not UDP.\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA3 ERROR. Because Transport is not UDP.\n");
 						break;
 					}
 					/* Set send comId */
@@ -635,18 +644,18 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 					if (pCommandValue->mdTransportType == MD_TRANSPORT_TCP)
 					{
 						/* Create Fixed DATA4 */
-						err = createMdFixedData(COMID_FIXED_DATA4, &ppMdData, *ppMdDataSize);
+						err = createMdFixedData(DATASETID_FIXED_DATA4, &ppMdData, *ppMdDataSize);
 						if (err != MD_APP_NO_ERR)
 						{
 							/* Error : Create Fixed DATA4 */
-							vos_printf(VOS_LOG_ERROR, "Create Fixed DATA4 ERROR\n");
+							vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA4 ERROR\n");
 							break;
 						}
 					}
 					else
 					{
 						/* Error : Transport  */
-						vos_printf(VOS_LOG_ERROR, "Create Fixed DATA4 ERROR. Because Transport is not TCP.\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA4 ERROR. Because Transport is not TCP.\n");
 						break;
 					}
 					/* Set send comId */
@@ -658,18 +667,18 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 					if (pCommandValue->mdTransportType == MD_TRANSPORT_TCP)
 					{
 						/* Create Fixed DATA5 */
-						err = createMdFixedData(COMID_FIXED_DATA5, &ppMdData, *ppMdDataSize);
+						err = createMdFixedData(DATASETID_FIXED_DATA5, &ppMdData, *ppMdDataSize);
 						if (err != MD_APP_NO_ERR)
 						{
 							/* Error : Create Fixed DATA5 */
-							vos_printf(VOS_LOG_ERROR, "Create Fixed DATA5 ERROR\n");
+							vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA5 ERROR\n");
 							break;
 						}
 					}
 					else
 					{
 						/* Error : Transport  */
-						vos_printf(VOS_LOG_ERROR, "Create Fixed DATA5 ERROR. Because Transport is not TCP.\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA5 ERROR. Because Transport is not TCP.\n");
 						break;
 					}
 					/* Set send comId */
@@ -677,11 +686,11 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				case FIXED_DATA_6:
 					/* Create Fixed DATA6 */
-					err = createMdFixedData(COMID_FIXED_DATA6, &ppMdData, *ppMdDataSize);
+					err = createMdFixedData(DATASETID_FIXED_DATA6, &ppMdData, *ppMdDataSize);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Fixed DATA6 */
-						vos_printf(VOS_LOG_ERROR, "Create Fixed DATA6 ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Fixed DATA6 ERROR\n");
 						break;
 					}
 					/* Set send comId */
@@ -689,11 +698,11 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				case ERROR_DATA_1:
 					/* Create Error DATA1 */
-					err = createMdFixedData(COMID_ERROR_DATA_1, &ppMdData, *ppMdDataSize);
+					err = createMdFixedData(DATASETID_ERROR_DATA_1, &ppMdData, *ppMdDataSize);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Error DATA1 */
-						vos_printf(VOS_LOG_ERROR, "Create Error DATA1 ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Error DATA1 ERROR\n");
 						break;
 					}
 					/* Set send comId */
@@ -701,11 +710,11 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				case ERROR_DATA_2:
 					/* Create Error DATA2 */
-					err = createMdFixedData(COMID_ERROR_DATA_2, &ppMdData, *ppMdDataSize);
+					err = createMdFixedData(DATASETID_ERROR_DATA_2, &ppMdData, *ppMdDataSize);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Error DATA2 */
-						vos_printf(VOS_LOG_ERROR, "Create Error DATA2 ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Error DATA2 ERROR\n");
 						break;
 					}
 					/* Set send comId */
@@ -713,11 +722,11 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				case ERROR_DATA_3:
 					/* Create Error DATA3 */
-					err = createMdFixedData(COMID_ERROR_DATA_3, &ppMdData, *ppMdDataSize);
+					err = createMdFixedData(DATASETID_ERROR_DATA_3, &ppMdData, *ppMdDataSize);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Error DATA3 */
-						vos_printf(VOS_LOG_ERROR, "Create Error DATA3 ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Error DATA3 ERROR\n");
 						break;
 					}
 					/* Set send comId */
@@ -725,11 +734,11 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				case ERROR_DATA_4:
 					/* Create Error DATA4 */
-					err = createMdFixedData(COMID_ERROR_DATA_4, &ppMdData, *ppMdDataSize);
+					err = createMdFixedData(DATASETID_ERROR_DATA_4, &ppMdData, *ppMdDataSize);
 					if (err != MD_APP_NO_ERR)
 					{
 						/* Error : Create Error DATA4 */
-						vos_printf(VOS_LOG_ERROR, "Create Error DATA4 ERROR\n");
+						vos_printLog(VOS_LOG_ERROR, "Create Error DATA4 ERROR\n");
 						break;
 					}
 					/* Set send comId */
@@ -737,7 +746,7 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				break;
 				default:
 						/* MD DATA TYPE NOTHING */
-					vos_printf(VOS_LOG_ERROR, "MD DATA Telegram Type ERROR. mdTelegramType = %d\n", pCommandValue->mdTelegramType);
+					vos_printLog(VOS_LOG_ERROR, "MD DATA Telegram Type ERROR. mdTelegramType = %d\n", pCommandValue->mdTelegramType);
 				break;
 			}
 		break;
@@ -751,13 +760,20 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 			else
 			{
 				/* MD Reply Error Type Error*/
-				vos_printf(VOS_LOG_ERROR, "MD Reply Error Type ERROR. mdReplyErr = %d\n", pCommandValue->mdReplyErr);
+				vos_printLog(VOS_LOG_ERROR, "MD Reply Error Type ERROR. mdReplyErr = %d\n", pCommandValue->mdReplyErr);
 			}
 		break;
 		default:
 			/* Other than Caller and Replier */
-			vos_printf(VOS_LOG_ERROR, "Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCommandValue->mdCallerReplierType);
+			vos_printLog(VOS_LOG_ERROR, "Caller Replier Type ERROR. mdCallerReplierType = %d\n", pCommandValue->mdCallerReplierType);
 		break;
+	}
+
+	/* Check Caller Send Request Notify ComId */
+	if (pCommandValue->mdCallerSendComId != 0)
+	{
+		/* Set send comId */
+		pCommandValue->mdSendComId = pCommandValue->mdCallerSendComId;
 	}
 
 	/* Check TCP - Multicast */
@@ -848,7 +864,7 @@ MD_APP_ERR_TYPE command_main_proc(void)
 		pCommandValue = (COMMAND_VALUE *)malloc(sizeof(COMMAND_VALUE));
 		if (pCommandValue == NULL)
 		{
-			vos_printf(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
+			vos_printLog(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
 			return MD_APP_MEM_ERR;
 		}
 		else
@@ -872,7 +888,7 @@ MD_APP_ERR_TYPE command_main_proc(void)
 				else
 				{
 					/* command err */
-					vos_printf(VOS_LOG_ERROR, "Decide Create Thread Err\n");
+					vos_printLog(VOS_LOG_ERROR, "Decide Create Thread Err\n");
 				}
 				free(pCommandValue);
 				pCommandValue = NULL;
@@ -916,7 +932,7 @@ MD_APP_ERR_TYPE createMdLogThread(void)
 	}
 	else
 	{
-		vos_printf(VOS_LOG_ERROR, "MDLog Thread Create Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDLog Thread Create Err\n");
 		return MD_APP_THREAD_ERR;
 	}
 }
@@ -949,7 +965,7 @@ MD_APP_ERR_TYPE createMdReceiveManagerThread(MD_RECEIVE_MANAGER_THREAD_PARAMETER
 	}
 	else
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReceiveManager Thread Create Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReceiveManager Thread Create Err\n");
 		return MD_APP_THREAD_ERR;
 	}
 }
@@ -998,7 +1014,7 @@ MD_APP_ERR_TYPE createMdCallerThread(
 	{
 		/* Caller Thread Number Count down */
 		callerThreadNoCount--;
-		vos_printf(VOS_LOG_ERROR, "Caller Thread Create Err\n");
+		vos_printLog(VOS_LOG_ERROR, "Caller Thread Create Err\n");
 		return MD_APP_THREAD_ERR;
 	}
 }
@@ -1045,7 +1061,7 @@ MD_APP_ERR_TYPE createMdReplierThread(
 	}
 	else
 	{
-		vos_printf(VOS_LOG_ERROR, "Replier Thread Create Err\n");
+		vos_printLog(VOS_LOG_ERROR, "Replier Thread Create Err\n");
 		/* Replier Thread Number Count down */
 		replierThreadNoCount--;
 		return MD_APP_THREAD_ERR;
@@ -1336,19 +1352,28 @@ MD_APP_ERR_TYPE mdTerminate(
 		}
 	}
 #endif
-	/* Delete Listener */
-	for (iterListenerHandle = pHeadListenerHandleList;
-		  iterListenerHandle->pNextListenerHandle != NULL;
-	   	  iterListenerHandle = iterListenerHandle->pNextListenerHandle)
+
+	/* Check Listener Handle List*/
+	if (pHeadListenerHandleList != NULL)
 	{
-		err = tlm_delListener(iterListenerHandle->appHandle, iterListenerHandle->pTrdpListenerHandle);
-        if(err != TRDP_NO_ERR)
-        {
-        	vos_printf(VOS_LOG_ERROR, "tlm_delListener() error = %d\n",err);
-        }
+		/* Delete Listener */
+		for (iterListenerHandle = pHeadListenerHandleList;
+			  iterListenerHandle->pNextListenerHandle != NULL;
+			  iterListenerHandle = iterListenerHandle->pNextListenerHandle)
+		{
+			err = tlm_delListener(iterListenerHandle->appHandle, iterListenerHandle->pTrdpListenerHandle);
+			if(err != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "tlm_delListener() error = %d\n",err);
+			}
+		}
+		/* Display TimeStamp when close Session time */
+		printf("%s All Listener Delete.\n", vos_getTimeStamp());
 	}
-	/* Display TimeStamp when close Session time */
-	printf("%s All Listener Delete.\n", vos_getTimeStamp());
+	else
+	{
+		/* Don't tlm_delListener() */
+	}
 
 	/*	Close a session  */
 	if (appHandle != NULL)
@@ -1356,7 +1381,7 @@ MD_APP_ERR_TYPE mdTerminate(
 		err = tlc_closeSession(appHandle);
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Subnet1 tlc_closeSession() error = %d\n",err);
+			vos_printLog(VOS_LOG_ERROR, "Subnet1 tlc_closeSession() error = %d\n",err);
 		}
 		else
 		{
@@ -1370,7 +1395,7 @@ MD_APP_ERR_TYPE mdTerminate(
 		err = tlc_closeSession(appHandle2);
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Subnet2 tlc_closeSession() error = %d\n",err);
+			vos_printLog(VOS_LOG_ERROR, "Subnet2 tlc_closeSession() error = %d\n",err);
 		}
 		else
 		{
@@ -1380,15 +1405,18 @@ MD_APP_ERR_TYPE mdTerminate(
 	}
 
 	/* TRDP Terminate */
-    err = tlc_terminate();
-    if(err != TRDP_NO_ERR)
-    {
-    	vos_printf(VOS_LOG_ERROR, "tlc_terminate() error = %d\n",err);
-    }
-	else
+	if (appHandle != NULL)
 	{
-		/* Display TimeStamp when tlc_terminate time */
-		printf("%s TRDP Termiinate.\n", vos_getTimeStamp());
+		err = tlc_terminate();
+		if(err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tlc_terminate() error = %d\n",err);
+		}
+		else
+		{
+			/* Display TimeStamp when tlc_terminate time */
+			printf("%s TRDP Termiinate.\n", vos_getTimeStamp());
+		}
 	}
     return err;
 }

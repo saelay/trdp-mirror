@@ -65,7 +65,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	appThreadSessionHandle.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 	if (appThreadSessionHandle.pMdAppThreadListener == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
 		return 0;
 	}
 	else
@@ -80,7 +80,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	appThreadSessionHandle2.pMdAppThreadListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 	if (appThreadSessionHandle2.pMdAppThreadListener == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle2.pMdAppThreadListener malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle2.pMdAppThreadListener malloc Err\n");
 		return 0;
 	}
 	else
@@ -91,7 +91,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	pListenerHandle = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
 	if (pListenerHandle == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle malloc Err\n");
 		return 0;
 	}
 	else
@@ -102,7 +102,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	pListenerHandle2 = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
 	if (pListenerHandle2 == NULL)
 	{
-		vos_printf(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle2 malloc Err\n");
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle2 malloc Err\n");
 		return 0;
 	}
 	else
@@ -154,7 +154,7 @@ VOS_THREAD_FUNC_T MDReplier (
 		/* Check tlm_addListener Return Code */
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+			vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
 			return 0;
 		}
 		else
@@ -164,7 +164,7 @@ VOS_THREAD_FUNC_T MDReplier (
 			pListenerHandle->pTrdpListenerHandle = pTrdpListenerHandle;
 			if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+				vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 			}
 			/* Set Subnet1 appThreadListener */
 			appThreadSessionHandle.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
@@ -209,7 +209,7 @@ VOS_THREAD_FUNC_T MDReplier (
 			/* Check tlm_addListener Return Code */
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+				vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
 				return 0;
 			}
 			else
@@ -219,7 +219,7 @@ VOS_THREAD_FUNC_T MDReplier (
 				pListenerHandle2->pTrdpListenerHandle = pTrdpListenerHandle2;
 				if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+					vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 				}
 				/* Set Subnet2 appThreadListener */
 				appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
@@ -238,7 +238,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	err = queue_initialize(pReplierThreadParameter->mqName, &replierMqDescriptor);
 	if (err != MD_APP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Replier Message Queue Open error\n");
+		vos_printLog(VOS_LOG_ERROR, "Replier Message Queue Open error\n");
 		return 0;
 	}
 	else
@@ -247,7 +247,7 @@ VOS_THREAD_FUNC_T MDReplier (
 		err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle, replierMqDescriptor);
 		if (err != MD_APP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Subnet1 setAppThreadSessionMessageQueueDescriptor error\n");
+			vos_printLog(VOS_LOG_ERROR, "Subnet1 setAppThreadSessionMessageQueueDescriptor error\n");
 			return 0;
 		}
 		/* Is this Ladder Topology ? */
@@ -257,7 +257,7 @@ VOS_THREAD_FUNC_T MDReplier (
 			err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle2, replierMqDescriptor);
 			if (err != MD_APP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
+				vos_printLog(VOS_LOG_ERROR, "Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
 				return 0;
 			}
 		}
@@ -287,7 +287,7 @@ VOS_THREAD_FUNC_T MDReplier (
 				err = tlm_delListener(appHandle, pTrdpListenerHandle);
 				if(err != TRDP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
+					vos_printLog(VOS_LOG_ERROR, "Error deleting the Subnet 1 listener\n");
 				}
 				else
 				{
@@ -297,7 +297,7 @@ VOS_THREAD_FUNC_T MDReplier (
 				/* Delete Listener Handle List */
 				if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
+					vos_printLog(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
 				}
 				break;
 			}
@@ -320,7 +320,7 @@ VOS_THREAD_FUNC_T MDReplier (
 					err = tlm_delListener(appHandle2, pTrdpListenerHandle2);
 					if(err != TRDP_NO_ERR)
 					{
-						vos_printf(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
+						vos_printLog(VOS_LOG_ERROR, "Error deleting the Subnet 2 listener\n");
 					}
 					else
 					{
@@ -330,7 +330,7 @@ VOS_THREAD_FUNC_T MDReplier (
 					/* Delete Listener Handle List */
 					if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
 					{
-						vos_printf(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
+						vos_printLog(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
 					}
 					break;
 				}
@@ -341,21 +341,21 @@ VOS_THREAD_FUNC_T MDReplier (
 	/* Delete AppThereadSession Message Queue Descriptor */
 	if (deleteAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle,	replierMqDescriptor) != MD_APP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Replier Subnet1 AppThread Session Message Queue Descriptor delete Err\n");
+		vos_printLog(VOS_LOG_ERROR, "Replier Subnet1 AppThread Session Message Queue Descriptor delete Err\n");
 	}
 	/* Is this Ladder Topology ? */
 	if (pReplierThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
 	{
 		if (deleteAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle2, replierMqDescriptor) != MD_APP_NO_ERR)
 		{
-			vos_printf(VOS_LOG_ERROR, "Replier Subnet2 AppThread Session Message Queue Descriptor delete Err\n");
+			vos_printLog(VOS_LOG_ERROR, "Replier Subnet2 AppThread Session Message Queue Descriptor delete Err\n");
 		}
 	}
 
 	/* Delete command Value form COMMAND VALUE LIST */
 	if (deleteCommandValueList(&pTrdpInitializeParameter, pReplierThreadParameter->pCommandValue) != MD_APP_NO_ERR)
 	{
-		vos_printf(VOS_LOG_ERROR, "Replier COMMAND_VALUE delete Err\n");
+		vos_printLog(VOS_LOG_ERROR, "Replier COMMAND_VALUE delete Err\n");
 	}
 	/* Delete pReplierThreadParameter */
 	free(pReplierThreadParameter);
@@ -561,7 +561,7 @@ MD_APP_ERR_TYPE replier_main_proc (
 			err = decideReceiveMdDataToReplier(&receiveMqMsg, pReplierThreadParameter);
 			if (err != MD_APP_NO_ERR)
 			{
-				vos_printf(VOS_LOG_ERROR, "decideReceiveMdDataToReplier ERROR.\n");
+				vos_printLog(VOS_LOG_ERROR, "decideReceiveMdDataToReplier ERROR.\n");
 			}
 			replierReceiveCount++;
 			/* Check Replier Receive Count */
@@ -573,7 +573,7 @@ MD_APP_ERR_TYPE replier_main_proc (
 				/* Dump Replier Receive Result */
 				if (printReplierResult(pTrdpInitializeParameter, pReplierThreadParameter->pCommandValue->commandValueId) != MD_APP_NO_ERR)
 				{
-					vos_printf(VOS_LOG_ERROR, "Replier Receive Count Dump Err\n");
+					vos_printLog(VOS_LOG_ERROR, "Replier Receive Count Dump Err\n");
 				}
 				break;
 			}
@@ -612,7 +612,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 	if (pReceiveMsg->Msg.comId != pReplierThreadParameter->pCommandValue->mdAddListenerComId)
 	{
 		/* ComId Err*/
-		vos_printf(VOS_LOG_ERROR, "Receive ComId ERROR\n");
+		vos_printLog(VOS_LOG_ERROR, "Receive ComId ERROR\n");
 	}
 	else
 	{
@@ -625,7 +625,6 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 				case TRDP_MSG_MN:
 					/* Decide MD Transmission Result */
 					err = decideMdTransmissionResult(
-							pReceiveMsg->Msg.comId,
 							pReceiveMsg->pData,
 							&(pReceiveMsg->dataSize),
 							replierLogString);
@@ -719,7 +718,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -764,7 +763,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -803,7 +802,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -842,7 +841,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								/* MD Send Failure Count */
 								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 								/* Error : Send Reply */
-								vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 							}
 							else
 							{
@@ -897,7 +896,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -935,7 +934,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -968,7 +967,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -1005,7 +1004,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
 							/* Error : Send Reply */
-							vos_printf(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
 						}
 						else
 						{
@@ -1048,7 +1047,6 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 
 					/* Decide MD Transmission Result */
 					err = decideMdTransmissionResult(
-							pReceiveMsg->Msg.comId,
 							pReceiveMsg->pData,
 							&(pReceiveMsg->dataSize),
 							replierLogString);
@@ -1098,11 +1096,11 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 				case TRDP_MSG_MC:
 				case TRDP_MSG_ME:
 						/* Error : msgType Other than Mn,Mr */
-					vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR. Other than Mn,Mr\n");
+					vos_printLog(VOS_LOG_ERROR, "Receive Message Type ERROR. Other than Mn,Mr\n");
 				break;
 				default:
 					/* Not TRDP msgType */
-					vos_printf(VOS_LOG_ERROR, "Receive Message Type ERROR. Not TRDP Message Type\n");
+					vos_printLog(VOS_LOG_ERROR, "Receive Message Type ERROR. Not TRDP Message Type\n");
 				break;
 			}
 			/* Release Send Relpy MD DATA SET */

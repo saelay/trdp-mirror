@@ -120,7 +120,7 @@ void tau_recvPdDs (
 	if (((pData == NULL)	|| (dataSize == 0) || (pPDInfo->pUserRef == 0))
 		&&	(pPDInfo->resultCode != TRDP_TIMEOUT_ERR))
 	{
-//       vos_printLog(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
+       vos_printLog(VOS_LOG_ERROR, "There is no data which save at Traffic Store\n");
 		return;
 	}
 
@@ -142,6 +142,22 @@ void tau_recvPdDs (
 				memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
 				memset((void *)((int)pTrafficStoreAddr + (int)offset), 0, pSubscriberElement->dataSize);
 				tau_unlockTrafficStore();
+				/* Change Write Traffic Store Receive Subnet */
+				if( subnetId == SUBNET1)
+				{
+					/* Write Traffic Store Receive Subnet : Subnet2 */
+					subnetId = SUBNET2;
+				}
+				else
+				{
+					/* Write Traffic Store Receive Subnet : Subnet1 */
+					subnetId = SUBNET1;
+				}
+				/* Set Write Traffic Store Receive Subnet */
+				if (tau_setNetworkContext(subnetId) != TRDP_NO_ERR)
+			    {
+			    	vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+			    }
 			}
 		}
 		else

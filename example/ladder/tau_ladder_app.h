@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.14"
+#define PD_APP_VERSION	"V0.19"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.14"
+#define PD_APP_VERSION	"V0.19"
 #else
-#define PD_APP_VERSION	"V0.14"
+#define PD_APP_VERSION	"V0.19"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
@@ -80,9 +80,9 @@ extern "C" {
 #define ENABLE_COMDID1				0x1				/* comId1 Enable */
 #define ENABLE_COMDID2				0x2				/* comid2 Enable */
 
-/* DATASET of COMID */
-#define DATASET1_COMID				10001			/* DATASET1 of ComId : 10001 */
-#define DATASET2_COMID				10002			/* DATASET2 of ComId : 10002 */
+/* DATASET Type */
+#define DATASET_TYPE1				1			/* DATASET Type1 */
+#define DATASET_TYPE2				2			/* DATASET Type2 */
 
 /* LOG CATEGORY */
 #define LOG_CATEGORY_ERROR			0x1				/**< This is a critical error                 */
@@ -103,7 +103,7 @@ typedef enum
     PD_APP_THREAD_ERR	= -4,			/**< PD Application Thread Error */
     PD_APP_MUTEX_ERR		= -5,			/**< PD Application Thread Mutex Error */
     PD_APP_COMMAND_ERR	= -6,			/**< PD Application Command Error */
-    PD_APP_QUIT_ERR	= -7				/**< PD Application Quit Command */
+    PD_APP_QUIT_ERR		= -7			/**< PD Application Quit Command */
 } PD_APP_ERR_TYPE;
 
 /* Command Value */
@@ -119,6 +119,8 @@ typedef struct PD_COMMAND_VALUE
 //	UINT32 PD_PUB_COMID2;						/* Publish ComId2 */
 	UINT32 PD_SUB_COMID1;						/* Subscribe ComId1 */
 //	UINT32 PD_SUB_COMID2;						/* Subscribe ComId2 */
+	UINT32 PD_PUB_DATASET_TYPE;					/* Publish DataSet Type */
+	UINT32 PD_SUB_DATASET_TYPE;					/* Subscribe DataSet Type */
 	TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP1;		/* Subscribe ComId1 Source IP1 */
 	TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP2;		/* Subscribe ComId1 Source IP2 */
 	TRDP_IP_ADDR_T PD_COMID1_SUB_DST_IP1;		/* Subscribe ComId1 Destination IP1 */
@@ -135,6 +137,8 @@ typedef struct PD_COMMAND_VALUE
 //	UINT32 PD_COMID2_TIMEOUT;				    /* Subscribe ComId2 Timeout : Macro second */
 	UINT32 PD_COMID1_CYCLE;						/* Publish ComID1 Cycle TIme */
 //	UINT32 PD_COMID2_CYCLE;						/* Publish ComID2 Cycle TIme */
+	UINT32 PD_SEND_CYCLE_NUMBER;				/* Publish Send Cycle Number */
+	UINT32 PD_RECEIVE_CYCLE_NUMBER;				/* Subscribe Receive Cycle Number */
 	UINT32 TS_SUBNET;								/* Traffic Store Using Subnet */
 	UINT32 subnet1ReceiveCount;					/* Subscribe subnet1 receive Count */
 	UINT32 subnet2ReceiveCount;					/* Subscribe subnet2 receive Count */
@@ -144,7 +148,7 @@ typedef struct PD_COMMAND_VALUE
 } PD_COMMAND_VALUE;
 
 /* PD Thread Parameter */
-typedef struct
+typedef struct PD_THREAD_PARAMETER
 {
 	PD_COMMAND_VALUE	*pPdCommandValue;
 	TRDP_SUB_T			subHandleNet1ComId1;		/*	Sub-network Id1 ComID1 identifier to the subscription	*/
@@ -152,6 +156,7 @@ typedef struct
 	TRDP_SUB_T			subHandleNet2ComId1;		/*	Sub-network Id2 ComID1 identifier to the subscription	*/
 	TRDP_PUB_T			pubHandleNet2ComId1;		/*	Sub-network Id2 ComID2 identifier to the publication	*/
 	UINT32				subPubValidFlag;			/* Subscribe Publish valid flag */
+	struct PD_THREAD_PARAMETER *pNextPdThreadParameter;	/* pointer to next PD_THREAD_PARAMETER or NULL */
 } PD_THREAD_PARAMETER;
 
 /**	DataSet definition	*/
@@ -339,6 +344,16 @@ PD_APP_ERR_TYPE  unlockPdApplicationThread (
     void);
 
 /**********************************************************************************************************************/
+/** Create PD Receive Count Check Thread
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_THREAD_ERR				Thread error
+ *
+ */
+PD_APP_ERR_TYPE createPDReceiveCountCheckThread (
+		void);
+
+/**********************************************************************************************************************/
 /** Create PD Thread
  *
  *  @param[in]		pPdThreadParameter			pointer to PDThread Parameter
@@ -395,6 +410,16 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (
 		PD_THREAD_PARAMETER *pPdThreadParameter);
 
 /**********************************************************************************************************************/
+/** PD Receive Count Check Thread main
+ *
+ *
+ *  @retval         PD_APP_NO_ERR		no error
+ *  @retval         PD_APP_ERR			some error
+ */
+PD_APP_ERR_TYPE PDReceiveCountCheck (
+		void);
+
+/**********************************************************************************************************************/
 /** PD Application main
  *
  *  @param[in]		pPDThreadParameter			pointer to PDThread Parameter
@@ -414,9 +439,23 @@ PD_APP_ERR_TYPE PDApplication (
  *  @retval         PD_APP_NO_ERR			no error
  *  @retval         PD_APP_ERR				error
  */
-PD_APP_ERR_TYPE appendPdComamndValueList(
+PD_APP_ERR_TYPE appendPdCommandValueList(
 		PD_COMMAND_VALUE    * *ppHeadPdCommandValue,
 		PD_COMMAND_VALUE    *pNewPdCommandValue);
+
+/**********************************************************************************************************************/
+/** Delete an PD Command Value List
+ *
+ *  @param[in]      ppHeadPdCommandValue          pointer to pointer to head of queue
+ *  @param[in]      pDeletePdCommandValue         pointer to element to delete
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ *
+ */
+PD_APP_ERR_TYPE deletePdCommandValueList (
+		PD_COMMAND_VALUE    * *ppHeadPdCommandValue,
+		PD_COMMAND_VALUE    *pDeletePdCommandValue);
 
 /**********************************************************************************************************************/
 /** Return the PdCommandValue with same comId and IP addresses
@@ -481,6 +520,19 @@ PD_APP_ERR_TYPE printPdSubscribeResult (
 		PD_COMMAND_VALUE	*pHeadPdCommandValue);
 
 /**********************************************************************************************************************/
+/** Display Specific PD Subscriber Receive Count / Receive Timeout Count
+ *
+ *  @param[in]      pHeadPdCommandValue	pointer to head of queue
+ *  @param[in]      addr						Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *
+ */
+PD_APP_ERR_TYPE printSpecificPdSubscribeResult (
+		PD_COMMAND_VALUE	*pPdCommandValue);
+
+/**********************************************************************************************************************/
 /** Create PD DataSet1
  *
  *  @param[in]		firstCreateFlag			First : TRUE, Not First : FALSE
@@ -507,6 +559,43 @@ PD_APP_ERR_TYPE createPdDataSet1 (
 PD_APP_ERR_TYPE createPdDataSet2 (
 		BOOL firstCreateFlag,
 		DATASET2 *pPdDataSet2);
+
+/**********************************************************************************************************************/
+/** Append an PD Thread Parameter at end of List
+ *
+ *  @param[in]      ppHeadPdThreadParameter			pointer to pointer to head of List
+ *  @param[in]      pNewPdThreadParameter				pointer to Listener Handle to append
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE appendPdThreadParameterList(
+		PD_THREAD_PARAMETER    * *ppHeadPdThreadParameter,
+		PD_THREAD_PARAMETER    *pNewPdThreadParameter);
+
+/**********************************************************************************************************************/
+/** Delete an PD Thread Parameter
+ *
+ *  @param[in]      ppHeadPdThreadParameter          pointer to pointer to head of queue
+ *  @param[in]      pDeletePdThreadParameter         pointer to element to delete
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ *
+ */
+PD_APP_ERR_TYPE deletePdThreadParameterList (
+		PD_THREAD_PARAMETER    * *ppHeadPdThreadParameter,
+		PD_THREAD_PARAMETER    *pDeletePdThreadParameter);
+
+/**********************************************************************************************************************/
+/** TRDP PD Terminate
+ *
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE pdTerminate(
+		void);
 
 // Convert an IP address to string
 char * miscIpToString(

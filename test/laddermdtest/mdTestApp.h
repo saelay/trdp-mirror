@@ -69,17 +69,17 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.24"
+#define MD_APP_VERSION	"V0.25"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.24"
+#define MD_APP_VERSION	"V0.25"
 #else
-#define MD_APP_VERSION	"V0.24"
+#define MD_APP_VERSION	"V0.25"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
 #define APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX		1000
 
-/* Caller Receive Reply Resutl Table Size Max */
+/* Caller Receive Reply Result Table Size Max */
 #define RECEIVE_REPLY_RESULT_TABLE_MAX				1000
 
 /* MD Request (Mr) sessionId(UUID) Table Size Max */
@@ -120,6 +120,19 @@ extern "C" {
 #define COMID_REPLY_MASK					0xA0000
 /* MD Request ComId Mask */
 #define COMID_REQUEST_MASK				0xFFF0FFFF
+
+/* MD Transfer DATASET ID */
+#define DATASETID_INCREMENT_DATA		0x2006
+#define DATASETID_FIXED_DATA1			0x2001		/* Single Packet */
+#define DATASETID_FIXED_DATA2			0x2002		/* Multi Packet */
+#define DATASETID_FIXED_DATA3			0x2003		/* UDP Max Packet */
+#define DATASETID_FIXED_DATA4			0x2004		/* TCP Packet (128K Octet) */
+#define DATASETID_FIXED_DATA5			0x2005		/* TCP Max Packet */
+#define DATASETID_FIXED_DATA6			0x3001		/* 512 Octet Packet */
+#define DATASETID_ERROR_DATA_1			0x4001
+#define DATASETID_ERROR_DATA_2			0x4002
+#define DATASETID_ERROR_DATA_3			0x4003
+#define DATASETID_ERROR_DATA_4			0x4004
 
 /* MD DATA SIZE */
 #define MD_INCREMENT_DATA_MIN_SIZE	0				/* MD Increment DATA Minimum Size : 4B */
@@ -281,6 +294,7 @@ typedef struct COMMAND_VALUE
 	UINT8 mdTransportType;						/* -c --md-transport-type Value */
 	UINT8 mdMessageKind;							/* -d --md-message-kind Value */
 	UINT8 mdTelegramType;						/* -e --md-telegram-type Value */
+	UINT32 mdCallerSendComId;					/* -E --md-send-comid Value */
 	UINT32 mdMessageSize;						/* -f --md-message-size Value */
 	TRDP_IP_ADDR_T mdDestinationAddress;		/* -g --md-destination-address Value */
 	UINT8 mdDump;									/* -i --md-dump Value */
@@ -326,9 +340,9 @@ typedef struct COMMAND_VALUE
 /* ComId - MD Data File Name */
 typedef struct
 {
-	UINT32 comId;
+	UINT32 dataSetId;
 	CHAR8 mdDataFileName[MD_DATA_FIXED_FILE_NAME_SIZE];
-} COMID_MD_DATA_FILE_NAME;
+} DATASETID_MD_DATA_FILE_NAME;
 
 /* MDReceiveManager Thread Parameter */
 typedef struct
@@ -523,7 +537,6 @@ mqd_t getAppThreadSessionMessageQueueDescriptor (
 /**********************************************************************************************************************/
 /** Decide MD Transmission Success or Failure
  *
- *  @param[in]		receiveComId				Receive ComId
  *  @param[in]		pReceiveMdData			pointer to Receive MD DATA
  *  @param[in]		pReceiveMdDataSize		pointer to Receive MD DATA Size
  *  @param[in,out]	pLogString					pointer to Log String
@@ -533,7 +546,6 @@ mqd_t getAppThreadSessionMessageQueueDescriptor (
  *
  */
 MD_APP_ERR_TYPE decideMdTransmissionResult(
-		const UINT32 receiveComId,
 		const UINT8 *pReceiveMdData,
 		const UINT32 *pReceiveMdDataSize,
 		CHAR8 *pLogString);
@@ -575,9 +587,9 @@ MD_APP_ERR_TYPE createMdFixedData (
 		UINT32 *pMdDataSize);
 
 /**********************************************************************************************************************/
-/** Get MD DATA File Name from ComId
+/** Get MD DATA File Name from DataSetId
  *
- *  @param[in]		comId						Create Message ComId
+ *  @param[in]		dataSetId					Create Message DataSetId
  *  @param[out]		pMdDataFileName			pointer to MD DATA FILE NAME
  *
  *  @retval         MD_APP_NO_ERR				no error
@@ -586,14 +598,14 @@ MD_APP_ERR_TYPE createMdFixedData (
  *  @retval         MD_APP_MEM_ERR				Memory error
  *
  */
-MD_APP_ERR_TYPE getMdDataFileNameFromComId (
-		UINT32 comId,
+MD_APP_ERR_TYPE getMdDataFileNameFromDataSetId (
+		UINT32 dataSetId,
 		char *pMdDataFileName);
 
 /**********************************************************************************************************************/
-/** Get MD DATA from ComId
+/** Get MD DATA from DataSetId
  *
- *  @param[in]		receiveComId				Receive ComId
+ *  @param[in]		receiveDataSetId				Receive ComId
  *  @param[in]		pReceiveMdData			pointer to Receive MD DATA
  *  @param[in]		pReceiveMdDataSize		pointer to Receive MD DATA Size
  *  @param[out]		pCheckMdData				pointer to Create for Check MD DATA
@@ -605,8 +617,8 @@ MD_APP_ERR_TYPE getMdDataFileNameFromComId (
  *  @retval         MD_APP_MEM_ERR				Memory error
  *
  */
-MD_APP_ERR_TYPE getMdDataFromComId(
-		const UINT32 receiveComId,
+MD_APP_ERR_TYPE getMdDataFromDataSetId(
+		const UINT32 receiveDataSetId,
 		const UINT8 *pReceiveMdData,
 		const UINT32 *pReceiveMdDataSize,
 		UINT8 **ppCheckMdData,
