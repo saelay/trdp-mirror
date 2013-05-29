@@ -231,17 +231,26 @@ const char * get_msg_type_str(TRDP_MSG_T type)
 }
 
 // --- debug log ---------------------------------------------------------------
+static FILE *pLogFile;
 
 void print_log(void * pRefCon, VOS_LOG_T category, const CHAR8 * pTime,
     const CHAR8 * pFile, UINT16 line, const CHAR8 * pMsgStr)
 {
     static const char * cat[] = { "ERR", "WAR", "INF", "DBG" };
 #ifdef _WIN32
-    char buf[1024];
-    const char * file = strrchr(pFile, '\\');
-    _snprintf(buf, sizeof(buf), "%s %s:%d %s",
-        cat[category], file ? file + 1 : pFile, line, pMsgStr);
-    OutputDebugString(buf);
+    if (pLogFile == NULL)
+    {
+        char buf[1024];
+        const char * file = strrchr(pFile, '\\');
+        _snprintf(buf, sizeof(buf), "%s %s:%d %s",
+            cat[category], file ? file + 1 : pFile, line, pMsgStr);
+        OutputDebugString(buf);
+    }
+    else
+    {
+        fprintf(pLogFile, "%s File: %s Line: %d %s\n", cat[category], pFile, (int) line, pMsgStr);
+        fflush(pLogFile);
+    }
 #else
     const char * file = strrchr(pFile, '/');
     fprintf(stderr, "%s %s:%d %s",
@@ -557,6 +566,8 @@ int main(int argc, char * argv[])
         printf("  <localip>  .. own IP address (ie. 10.2.24.1)\n");
         printf("  <remoteip> .. remote peer IP address (ie. 10.2.24.2)\n");
         printf("  <mcast>    .. multicast group address (ie. 239.2.24.1)\n");
+        printf("  <logfile>  .. file name for logging (ie. test.txt)\n");
+
         return 1;
     }
 
@@ -588,6 +599,15 @@ int main(int argc, char * argv[])
     {
         printf("invalid input arguments\n");
         return 1;
+    }
+
+    if (argc >= 6)
+    {
+        pLogFile = fopen(argv[5], "w");
+    }
+    else
+    {
+        pLogFile = NULL;
     }
 
     // initialize request queue
@@ -1179,5 +1199,3 @@ void recv_msg(const TRDP_MD_INFO_T * msg, UINT8 * data, UINT32 size)
     default:;
     }
 }
-
-// -----------------------------------------------------------------------------
