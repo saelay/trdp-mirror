@@ -1130,9 +1130,9 @@ TRDP_ERR_T  trdp_mdRecv (
                         vos_memFree(iterMD->pPacket);
                     }
                     /* and get the newly received data  */
-                    iterMD->pPacket     = appHandle->pMDRcvEle->pPacket;
-                    iterMD->dataSize    = vos_ntohl(pH->datasetLength);
-                    iterMD->grossSize   = appHandle->pMDRcvEle->grossSize;
+                    iterMD->pPacket         = appHandle->pMDRcvEle->pPacket;
+                    iterMD->dataSize        = vos_ntohl(pH->datasetLength);
+                    iterMD->grossSize       = appHandle->pMDRcvEle->grossSize;
 
                     appHandle->pMDRcvEle->pPacket = NULL;
 
@@ -1142,8 +1142,8 @@ TRDP_ERR_T  trdp_mdRecv (
                     iterMD->addr.srcIpAddr  = appHandle->pMDRcvEle->addr.srcIpAddr;
                     iterMD->addr.destIpAddr = appHandle->pMDRcvEle->addr.destIpAddr;
                     memcpy(iterMD->destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
-                    iterMD->stateEle    = TRDP_ST_RX_CONF_RECEIVED;
-                    iterMD->morituri    = TRUE;
+                    iterMD->stateEle        = TRDP_ST_RX_CONF_RECEIVED;
+                    iterMD->morituri        = TRUE;
                     vos_printLog(VOS_LOG_INFO, "Received Confirmation, session will be closed!\n");
                     break;
                 }
@@ -1185,7 +1185,7 @@ TRDP_ERR_T  trdp_mdRecv (
                         /* Handle multiple replies
                          Close session if number of expected replies reached */
                         if (iterMD->numExpReplies != 0 &&
-                            (iterMD->numExpReplies == 1 || iterMD->numExpReplies == iterMD->numReplies))
+                            (iterMD->numExpReplies == 1 || iterMD->numExpReplies >= iterMD->numReplies))
                         {
                             /* Prepare for session fin, Reply/ReplyQuery reception only one expected */
                             iterMD->morituri = TRUE;
@@ -1225,28 +1225,28 @@ TRDP_ERR_T  trdp_mdRecv (
     {
         TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
-        theMessage.srcIpAddr    = iterMD->addr.srcIpAddr;
-        theMessage.destIpAddr   = iterMD->addr.destIpAddr;
-        theMessage.seqCount     = vos_ntohl(iterMD->pPacket->frameHead.sequenceCounter);
-        theMessage.protVersion  = vos_ntohs(iterMD->pPacket->frameHead.protocolVersion);
-        theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterMD->pPacket->frameHead.msgType);
-        theMessage.comId        = vos_ntohl(iterMD->pPacket->frameHead.comId);
-        theMessage.topoCount    = vos_ntohl(iterMD->pPacket->frameHead.topoCount);
-        theMessage.userStatus   = 0;
-        theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->pPacket->frameHead.replyStatus);
-        theMessage.replyTimeout = vos_ntohl(iterMD->pPacket->frameHead.replyTimeout);
+        theMessage.srcIpAddr         = iterMD->addr.srcIpAddr;
+        theMessage.destIpAddr        = iterMD->addr.destIpAddr;
+        theMessage.seqCount          = vos_ntohl(iterMD->pPacket->frameHead.sequenceCounter);
+        theMessage.protVersion       = vos_ntohs(iterMD->pPacket->frameHead.protocolVersion);
+        theMessage.msgType           = (TRDP_MSG_T) vos_ntohs(iterMD->pPacket->frameHead.msgType);
+        theMessage.comId             = vos_ntohl(iterMD->pPacket->frameHead.comId);
+        theMessage.topoCount         = vos_ntohl(iterMD->pPacket->frameHead.topoCount);
+        theMessage.userStatus        = 0;
+        theMessage.replyStatus       = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->pPacket->frameHead.replyStatus);
+        theMessage.replyTimeout      = vos_ntohl(iterMD->pPacket->frameHead.replyTimeout);
         memcpy(theMessage.sessionId, iterMD->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
         memcpy(theMessage.destURI, iterMD->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
         memcpy(theMessage.srcURI, iterMD->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
-        theMessage.numExpReplies        = iterMD->numExpReplies;
-        theMessage.numReplies           = iterMD->numReplies;
-        theMessage.numRetriesMax        = iterMD->numRetriesMax;
-        theMessage.numRetries           = iterMD->numRetries;
-        theMessage.aboutToDie           = iterMD->morituri;
-        theMessage.numRepliesQuery      = iterMD->numRepliesQuery;
-        theMessage.numConfirmSent       = iterMD->numConfirmSent;
-        theMessage.numConfirmTimeout    = iterMD->numConfirmTimeout;
-        theMessage.resultCode           = TRDP_NO_ERR;
+        theMessage.numExpReplies     = iterMD->numExpReplies;
+        theMessage.numReplies        = iterMD->numReplies;
+        theMessage.numRetriesMax     = iterMD->numRetriesMax;
+        theMessage.numRetries        = iterMD->numRetries;
+        theMessage.aboutToDie        = iterMD->morituri;
+        theMessage.numRepliesQuery   = iterMD->numRepliesQuery;
+        theMessage.numConfirmSent    = iterMD->numConfirmSent;
+        theMessage.numConfirmTimeout = iterMD->numConfirmTimeout;
+        theMessage.resultCode        = TRDP_NO_ERR;
         theMessage.pUserRef = iterMD->pUserRef;
 
         appHandle->mdDefault.pfCbFunction(
@@ -1304,7 +1304,7 @@ TRDP_ERR_T  trdp_mdSend (
         switch (iterMD->stateEle)
         {
             case TRDP_ST_TX_NOTIFY_ARM:
-                dotx = 1;
+                dotx        = 1;
                 break;
             case TRDP_ST_TX_REQUEST_ARM:
                 dotx        = 1;
@@ -1375,7 +1375,7 @@ TRDP_ERR_T  trdp_mdSend (
                             }
 
                             iterMD->morituri = TRUE;
-                            iterMD = iterMD->pNext;
+                            iterMD           = iterMD->pNext;
                             continue;
                         }
                     }
@@ -1426,28 +1426,35 @@ TRDP_ERR_T  trdp_mdSend (
 
                         appHandle->stats.udpMd.numSend++;
 
-                        if (nextstate == TRDP_ST_NONE)
+                        if (iterMD->stateEle == TRDP_ST_TX_CONFIRM_ARM)
                         {
-
-                            /* Notify, Reply, Reply Error or Confirm messsage */
-                            if (iterMD->stateEle == TRDP_ST_TX_CONFIRM_ARM)
+                            iterMD->numConfirmSent++;
+                            if (
+                                     (iterMD->numExpReplies != 0)
+                                  && (iterMD->numExpReplies  >= iterMD->numRepliesQuery + iterMD->numReplies)
+                                  && (iterMD->numConfirmSent >= iterMD->numRepliesQuery))
                             {
-                                iterMD->numConfirmSent++;
-                                if (iterMD->numConfirmSent == iterMD->numRepliesQuery)
+                                iterMD->morituri = TRUE;
+                            }
+                            else
+                            {
+                                /* not yet all replies received OR not yet all confirmations sent */
+                                if (iterMD->numConfirmSent < iterMD->numRepliesQuery)
                                 {
-                                    iterMD->morituri = TRUE;
+                                    nextstate   = TRDP_ST_TX_REQ_W4AP_CONFIRM;
+                                }
+                                else
+                                {
+                                    nextstate   = TRDP_ST_TX_REQUEST_W4REPLY;
                                 }
                             }
-                            else if (iterMD->stateEle == TRDP_ST_TX_NOTIFY_ARM)
-                            {
-                                iterMD->stateEle    = nextstate;
-                                iterMD->morituri    = TRUE;
-                            }
                         }
-                        else
+                        else if (iterMD->stateEle == TRDP_ST_TX_NOTIFY_ARM)
                         {
-                            iterMD->stateEle = nextstate;
+                            iterMD->morituri    = TRUE;
                         }
+
+                        iterMD->stateEle = nextstate;
                     }
                     else
                     {
@@ -2153,7 +2160,6 @@ void  trdp_mdCheckTimeouts (
                 /* Waiting for Reply/ReplyQuery reception and Confirm sent */
                 case TRDP_ST_TX_REQUEST_W4REPLY:
                 {
-
                     if ((iterMD->pktFlags & TRDP_FLAGS_TCP) != 0)
                     {
                         vos_printLog(VOS_LOG_INFO, "MD reply timeout.\n");
@@ -2172,17 +2178,16 @@ void  trdp_mdCheckTimeouts (
                         /* Session is in reception phase */
 
                         /* Check for Reply timeout */
-
                         vos_printLog(VOS_LOG_INFO, "MD reply timeout.\n");
 
-                        /* Increment number of reties */
-                        iterMD->numRetries++;
-
                         /* Handle UDP retries for single reply expected */
-                        if (iterMD->numExpReplies == 1 &&                   /* Single reply expected */
+                        if (iterMD->numExpReplies == 1 &&                  /* Single reply expected */
                             iterMD->numRetriesMax > 0 &&                   /* Retries allowed */
                             iterMD->numRetries <= iterMD->numRetriesMax)   /* Retries below maximum allowed */
                         {
+                            /* Increment number of reties */
+                            iterMD->numRetries++;
+
                             /* Update timeout */
                             vos_getTime(&iterMD->timeToGo);
                             vos_addTime(&iterMD->timeToGo, &iterMD->interval);
@@ -2674,9 +2679,21 @@ TRDP_ERR_T trdp_mdCommonSend (
             }
         }
 
-        /**/
-        /* evaluate start time and timeout. For notify I use replyTimeout as sendTimeout */
+        /* Prepare element data */
+        pSenderElement->addr.comId      = comId;
+        pSenderElement->addr.srcIpAddr  = srcIpAddr;
+        pSenderElement->addr.destIpAddr = destIpAddr;
+        pSenderElement->addr.mcGroup    = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0;
+        pSenderElement->privFlags       = TRDP_PRIV_NONE;
+        pSenderElement->dataSize        = dataSize;
+        pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
+        pSenderElement->sendSize        = 0;
+        pSenderElement->numReplies      = 0;
+        pSenderElement->numRetries      = 0;
+        pSenderElement->pCachedDS       = NULL;
+        pSenderElement->numRetriesMax   = 0;        /* Default */
 
+        /* evaluate start time and timeout. For notify I use replyTimeout as sendTimeout */
         switch (msgType)
         {
             case TRDP_MSG_MN:     /* notify (no reply)*/
@@ -2688,6 +2705,15 @@ TRDP_ERR_T trdp_mdCommonSend (
                 /* timeout has been set by received MD request */
                 break;
             case TRDP_MSG_MR:     /* request with reply */
+                /* Multiple replies expected only for multicast */
+                if (vos_isMulticast(destIpAddr))
+                {
+                    pSenderElement->numExpReplies = numExpReplies;
+                }
+                else
+                {
+                    pSenderElement->numExpReplies = 1;
+                }
             case TRDP_MSG_ME:     /* reply error */
                 tmo = replyTimeout ? replyTimeout : appHandle->mdDefault.replyTimeout;     /* min time for delivery */
                 pSenderElement->interval.tv_sec     = tmo / 1000000;
@@ -2704,48 +2730,12 @@ TRDP_ERR_T trdp_mdCommonSend (
                 break;
         }
 
-
-        /* Prepare element data */
-        pSenderElement->addr.comId      = comId;
-        pSenderElement->addr.srcIpAddr  = srcIpAddr;
-        pSenderElement->addr.destIpAddr = destIpAddr;
-        pSenderElement->addr.mcGroup    = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0;
-        pSenderElement->privFlags       = TRDP_PRIV_NONE;
-        pSenderElement->dataSize        = dataSize;
-        pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
-        pSenderElement->sendSize        = 0;
-        pSenderElement->numReplies      = 0;
-        pSenderElement->numRetries      = 0;
-        pSenderElement->pCachedDS       = NULL;
-        pSenderElement->numRetriesMax   =
+        /* retries only for UDP and if only one expected reply */
+        if (    ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) == 0)
+             && numExpReplies == 1)
+        {
+            pSenderElement->numRetriesMax   =
             (pSendParam != NULL) ? pSendParam->retries : (appHandle->mdDefault.sendParam.retries);
-
-        /* vos_printLog(VOS_LOG_ERROR, "numRetriesMax: %u, %u, %u, \n", pSenderElement->numRetriesMax, (pSendParam !=
-         NULL) ? pSendParam->retries : 100000,  appHandle->mdDefault.sendParam.retries); */
-
-        if ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0)
-        {
-            /* No multiple replies expected for TCP */
-            pSenderElement->numExpReplies = 1;
-
-            /* No retries on TCP */
-            pSenderElement->numRetriesMax = 0;
-        }
-        else if (vos_isMulticast(destIpAddr))
-        {
-            /* Multiple replies expected only for multicast */
-            pSenderElement->numExpReplies = numExpReplies;
-
-            if (numExpReplies != 1)
-            {
-                /* No retries on UDP multicast with expected repliers =1 */
-                pSenderElement->numRetriesMax = 0;
-            }
-        }
-        else
-        {
-            /* No multiple response expected for unicast IP address */
-            pSenderElement->numExpReplies = 1;
         }
 
         if ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0)
