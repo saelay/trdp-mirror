@@ -2677,6 +2677,12 @@ TRDP_ERR_T trdp_mdCommonSend (
                 {
                     pSenderElement->numExpReplies = 1;
                 }
+
+                tmo = replyTimeout ? replyTimeout : appHandle->mdDefault.replyTimeout;     /* min time for delivery */
+                pSenderElement->interval.tv_sec     = tmo / 1000000;
+                pSenderElement->interval.tv_usec    = tmo % 1000000;
+                trdp_mdSetSessionTimeout(pSenderElement, tmo);
+                break;
             case TRDP_MSG_ME:     /* reply error */
                 tmo = replyTimeout ? replyTimeout : appHandle->mdDefault.replyTimeout;     /* min time for delivery */
                 pSenderElement->interval.tv_sec     = tmo / 1000000;

@@ -81,8 +81,6 @@
 #define CMSG_FIRSTHDR   WSA_CMSG_FIRSTHDR
 #define CMSGSize        64       /* size of buffer for destination address */
 
-#define cmsghdr         WSACMSGHDR
-
 /***********************************************************************************************************************
  *  LOCALS
  */
