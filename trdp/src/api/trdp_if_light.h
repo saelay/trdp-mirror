@@ -499,7 +499,7 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
- *  @param[in]      noOfRepliers        number of expected repliers, 0 if unknown
+ *  @param[in]      numReplies          number of expected replies, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
@@ -521,7 +521,7 @@ EXT_DECL TRDP_ERR_T tlm_request (
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
-    UINT32                  noOfRepliers,
+    UINT32                  numReplies,
     UINT32                  replyTimeout,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
