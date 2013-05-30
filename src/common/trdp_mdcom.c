@@ -458,25 +458,19 @@ TRDP_ERR_T  trdp_mdSendPacket (
  *  @param[in]      appHandle       session pointer
  *  @param[in]      mdSock          socket descriptor
  *  @param[in]      pElement        pointer to received packet
- *  @retval         != NULL         error
+ *  @retval         != TRDP_NO_ERR  error
  */
 TRDP_ERR_T  trdp_mdRecvPacket (
     TRDP_SESSION_PT appHandle,
     INT32           mdSock,
     MD_ELE_T        *pElement)
 {
-    TRDP_ERR_T  err = TRDP_NO_ERR;
-
-    /* Size of the all data read until now */
-    UINT32      size = 0;
-    /* The pending data to read */
-    UINT32      dataSize    = 0;
-    UINT32      socketIndex = 0;
-    /* All the data read in this cycle (Header + Data) */
-    UINT32      readSize = 0;
-    /* All the data part read in this cycle (Data) */
-    UINT32      readDataSize = 0;
-
+    TRDP_ERR_T  err             = TRDP_NO_ERR;
+    UINT32      size            = 0;            /* Size of the all data read until now */
+    UINT32      dataSize        = 0;            /* The pending data to read */
+    UINT32      socketIndex     = 0;
+    UINT32      readSize        = 0;            /* All the data read in this cycle (Header + Data) */
+    UINT32      readDataSize    = 0;            /* All the data part read in this cycle (Data) */
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
@@ -507,11 +501,9 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             || ((appHandle->uncompletedTCP[socketIndex] != NULL)
                 && (appHandle->uncompletedTCP[socketIndex]->grossSize < sizeof(MD_HEADER_T))))
         {
-
             if (appHandle->uncompletedTCP[socketIndex] == NULL)
             {
                 readSize = sizeof(MD_HEADER_T);
-
             }
             else
             {
@@ -523,30 +515,28 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock,
                                                   ((UINT8 *)&pElement->pPacket->frameHead) + storedHeader,
                                                   &readSize);
-            vos_printLog(VOS_LOG_INFO, "Read Header Size = %d\n", readSize);
+
+            vos_printLog(VOS_LOG_INFO, "Read Header: %d bytes from socket %d\n", readSize, mdSock);
 
             /* Add the read data size to the size read before */
             size = storedHeader + readSize;
 
             if ((appHandle->uncompletedTCP[socketIndex] != NULL)
-                && (size == sizeof(MD_HEADER_T)))
+                && (size >= sizeof(MD_HEADER_T)))
             {
                 /* Uncompleted Header, completed. Save some parameters in the uncompletedTCP structure */
                 appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength =
                     pElement->pPacket->frameHead.datasetLength;
                 appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum =
                     pElement->pPacket->frameHead.frameCheckSum;
-
             }
-
         }
 
         /* Read Data */
-        if ((size >= sizeof(MD_HEADER_T)) || ((appHandle->uncompletedTCP[socketIndex] != NULL)
-                                              && (appHandle->uncompletedTCP[socketIndex]->grossSize >=
-                                                  sizeof(MD_HEADER_T))))
+        if (    (size >= sizeof(MD_HEADER_T)) 
+             || (      (appHandle->uncompletedTCP[socketIndex] != NULL)
+                    && (appHandle->uncompletedTCP[socketIndex]->grossSize >= sizeof(MD_HEADER_T))))
         {
-
             if (appHandle->uncompletedTCP[socketIndex] == NULL)
             {
                 /* Get the rest of the message length */
@@ -555,7 +545,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
                 readDataSize        = dataSize;
                 pElement->dataSize  = dataSize;
-
             }
             else
             {
@@ -565,15 +554,13 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                     sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum);
 
                 pElement->dataSize = dataSize;
-                dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
-                readDataSize    = dataSize;
+                dataSize           = dataSize - (size - sizeof(MD_HEADER_T));
+                readDataSize       = dataSize;
             }
-
 
             /* If all the Header is read, check if more memory is needed */
             if (size >= sizeof(MD_HEADER_T))
             {
-
                 if (trdp_packetSizeMD(pElement->dataSize) > cMinimumMDSize)
                 {
                     /* we have to allocate a bigger buffer */
@@ -595,14 +582,13 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock,
                                                   ((UINT8 *)&pElement->pPacket->frameHead) + size,
                                                   &readDataSize);
-            vos_printLog(VOS_LOG_INFO, "Read Data Size = %d\n", readDataSize);
+            vos_printLog(VOS_LOG_INFO, "Read Data: %d bytes from socket %d\n", readDataSize, mdSock);
 
             /* Add the read data size */
             size = size + readDataSize;
 
             /* Add the read Data size to the size read during this cycle */
             readSize = readSize + readDataSize;
-
         }
         pElement->grossSize = size;
     }
@@ -666,9 +652,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                         FALSE);
             }
         }
-
     }
-
 
     /* If the Header is incomplete, the data size will be "0". Otherwise it will be calculated. */
 
@@ -678,7 +662,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         case TRDP_NODATA_ERR:
             if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
             {
-                vos_printLog(VOS_LOG_INFO, "vos_sockReceiveTCP - The socket = %u has been closed \n", mdSock);
+                vos_printLog(VOS_LOG_INFO, "vos_sockReceiveTCP - No data at socket %u\n", mdSock);
                 return TRDP_NODATA_ERR;
             }
             /* no data -> rx timeout */
@@ -705,7 +689,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         BOOL    noDataToRead = FALSE;
         /* All the data (Header + Data) stored in the uncompletedTCP[] array */
         UINT32  storedDataSize = 0;
-
 
         /* Check if it's necessary to read some data */
         if (pElement->grossSize == sizeof(MD_HEADER_T))
@@ -739,7 +722,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 {
                     /* Allocate the cMinimumMDSize memory at least for now*/
                     appHandle->uncompletedTCP[socketIndex]->pPacket = (MD_PACKET_T *) vos_memAlloc(cMinimumMDSize);
-
                 }
                 else
                 {
@@ -755,7 +737,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 }
 
                 storedDataSize = 0;
-
             }
             else
             {
@@ -793,7 +774,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                        ((UINT8 *)&pElement->pPacket->frameHead) + storedDataSize, readSize);
                 appHandle->uncompletedTCP[socketIndex]->grossSize   = pElement->grossSize;
                 appHandle->uncompletedTCP[socketIndex]->dataSize    = readDataSize;
-
             }
             else
             {
@@ -801,7 +781,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             }
 
             return TRDP_PACKET_ERR;
-
         }
         else
         {
@@ -827,16 +806,13 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                     /* Disallocate the memory */
                     vos_memFree(appHandle->uncompletedTCP[socketIndex]);
                     appHandle->uncompletedTCP[socketIndex] = NULL;
-
                 }
                 else
                 {
                     return TRDP_PARAM_ERR;
                 }
             }
-
         }
-
     }
 
     /* received data */
@@ -849,12 +825,10 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
             {
                 appHandle->stats.tcpMd.numRcv++;
-                ;
             }
             else
             {
                 appHandle->stats.udpMd.numRcv++;
-                ;
             }
             break;
         case TRDP_CRC_ERR:
@@ -964,7 +938,6 @@ TRDP_ERR_T  trdp_mdRecv (
             return TRDP_MEM_ERR;
         }
     }
-
 
     /* get packet: */
     result = trdp_mdRecvPacket(appHandle, appHandle->iface[sockIndex].sock, appHandle->pMDRcvEle);
@@ -1990,7 +1963,6 @@ void  trdp_mdCheckListenSocks (
     /* Check Receive Data (UDP & TCP) */
     /*  Loop through the socket list and check readiness
         (but only while there are ready descriptors left) */
-
     for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
         if (appHandle->iface[lIndex].sock != -1 &&
