@@ -156,11 +156,10 @@ EXT_DECL void vos_memFree (
  *  @param[out]     pNumAllocBlocks     Pointer to number of allocated memory blocks
  *  @param[out]     pNumAllocErr        Pointer to number of allocation errors
  *  @param[out]     pNumFreeErr         Pointer to number of free errors
- *  @param[out]     allocBlockSize      Pointer to list of allocated memory blocks
+ *  @param[out]     blockSize           Pointer to list of memory block sizes
  *  @param[out]     usedBlockSize       Pointer to list of used memoryblocks
  *  @retval         VOS_NO_ERR          no error
  *  @retval         VOS_INIT_ERR        module not initialised
- *  @retval         VOS_PARAM_ERR       parameter out of range/invalid
  */
 
 EXT_DECL VOS_ERR_T vos_memCount(
@@ -170,7 +169,7 @@ EXT_DECL VOS_ERR_T vos_memCount(
     UINT32  * pNumAllocBlocks,
     UINT32  * pNumAllocErr,
     UINT32  * pNumFreeErr,
-    UINT32 allocBlockSize[VOS_MEM_NBLOCKSIZES],
+    UINT32 blockSize[VOS_MEM_NBLOCKSIZES],
     UINT32 usedBlockSize[VOS_MEM_NBLOCKSIZES]);
 
 /**********************************************************************************************************************/
