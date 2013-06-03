@@ -432,7 +432,8 @@ TRDP_ERR_T  trdp_mdSendPacket (
 
     if (err != VOS_NO_ERR)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_sockSendUDP error (Err: %d, Sock: %d, Port: %d)\n", err, pdSock, port);
+        vos_printLog(VOS_LOG_ERROR, "vos_sockSend%s error (Err: %d, Sock: %d, Port: %d)\n", 
+            (pElement->pktFlags & TRDP_FLAGS_TCP)?"TCP":"UDP", err, pdSock, port);
 
         if(err == VOS_NOCONN_ERR)
         {
@@ -446,7 +447,8 @@ TRDP_ERR_T  trdp_mdSendPacket (
 
     if ((pElement->sendSize) != pElement->grossSize)
     {
-        vos_printLog(VOS_LOG_INFO, "vos_sockSendUDP incomplete (Sock: %d, Port: %d)\n", pdSock, port);
+        vos_printLog(VOS_LOG_INFO, "vos_sockSend%s incomplete (Sock: %d, Port: %d)\n", 
+            (pElement->pktFlags & TRDP_FLAGS_TCP)?"TCP":"UDP", pdSock, port);
         return TRDP_IO_ERR;
     }
 
@@ -2172,21 +2174,25 @@ void  trdp_mdCheckTimeouts (
                         appHandle->stats.udpMd.numReplyTimeout++;
                     }
 
-                    /* Manage send Confirm */
-                    if ((iterMD->numRepliesQuery == 0) || (iterMD->numRepliesQuery == iterMD->numConfirmSent))
+                    /* Manage send Confirm if no repetition */
+                    if (iterMD->stateEle != TRDP_ST_TX_REQUEST_ARM)
                     {
-                        /* All Confirm required by received ReplyQuery are sent */
-                        iterMD->morituri = TRUE;
-                    }
-                    else
-                    {
-                        /* Check for pending Confirm timeout (handled in each single listener) */
-                        if (iterMD->numRepliesQuery <= (iterMD->numConfirmSent + iterMD->numConfirmTimeout))
+                        if (    (iterMD->numRepliesQuery == 0) 
+                             || (iterMD->numRepliesQuery <= iterMD->numConfirmSent))
                         {
-                            /* Callback execution require to indicate send done with some Confirm Timeout */
-                            iterMD->morituri    = TRUE;
-                            timeOut             = TRUE;
-                            resultCode          = TRDP_REQCONFIRMTO_ERR;
+                            /* All Confirm required by received ReplyQuery are sent */
+                            iterMD->morituri = TRUE;
+                        }
+                        else
+                        {
+                            /* Check for pending Confirm timeout (handled in each single listener) */
+                            if (iterMD->numRepliesQuery <= (iterMD->numConfirmSent + iterMD->numConfirmTimeout))
+                            {
+                                /* Callback execution require to indicate send done with some Confirm Timeout */
+                                iterMD->morituri    = TRUE;
+                                timeOut             = TRUE;
+                                resultCode          = TRDP_REQCONFIRMTO_ERR;
+                            }
                         }
                     }
                 }
