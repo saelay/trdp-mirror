@@ -1055,7 +1055,7 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
  *  Try to get (decrease) a semaphore.
  *
  *  @param[in]      sema            semaphore handle
- *  @param[in]      timeout         Max. time in us to wait, 0 means forever
+ *  @param[in]      timeout         Max. time in us to wait, 0 means no wait
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_INIT_ERR    module not initialised
  *  @retval         VOS_NOINIT_ERR  invalid handle
@@ -1078,7 +1078,17 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         /* retVal = VOS_PARAM_ERR;  BL: will never be used! */
     }
-    else if (timeout != 0)
+    else if (timeout == (UINT32) NULL)
+    {
+        /* Take Semaphore, return ERROR if Semaphore cannot be taken immediately instead of blocking */
+        rc = sem_trywait((sem_t *)sema);
+    }
+    else if (timeout == VOS_SEMA_WAIT_FOREVER)
+    {
+        /* Take Semaphore, block until Semaphore becomes available */
+        rc = sem_wait((sem_t *)sema);
+    }
+    else
     {
         /* Get time since 01/01/1970 and convert it to timespec format */
         vos_getTime(&waitTimeVos);
@@ -1115,11 +1125,6 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 #else
         rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
 #endif
-    }
-    else
-    {
-        /* take semaphore without timeout */
-        rc = sem_wait((sem_t *)sema);
     }
     if (0 != rc)
     {

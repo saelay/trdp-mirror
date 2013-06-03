@@ -43,6 +43,9 @@ extern "C" {
 /** The maximum number of concurrent usable threads  */
 #define VOS_MAX_THREAD_CNT  100
 
+/** Timeout value to wait forever for a semaphore */
+#define VOS_SEMA_WAIT_FOREVER 0xFFFFFFFF
+
 #ifdef WIN32
 #include <winsock2.h>
 #else
@@ -432,7 +435,7 @@ EXT_DECL void vos_semaDelete (
  *  Try to get (decrease) a semaphore.
  *
  *  @param[in]      sema            semaphore handle
- *  @param[in]      timeout         Max. time in us to wait, 0 means forever
+ *  @param[in]      timeout         Max. time in us to wait, 0 means no wait
  *
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_INIT_ERR    module not initialised
