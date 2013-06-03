@@ -509,11 +509,13 @@ void print_status()
 void md_callback(void * ref, TRDP_APP_SESSION_T apph,
     const TRDP_MD_INFO_T * msg, UINT8 * data, UINT32 size)
 {
+    int test;
+
     print(0, "md_callback(%p, %p, %p, %p, %u) - ref %p",
         ref, apph, msg, data, size, msg ? msg->pUserRef : 0);
 
     // test number is encoded into user reference
-    int test = (int) (msg ? msg->pUserRef : 0);
+    test = (int) (msg ? msg->pUserRef : 0);
     // verify the callback is related to currently executed test
     if (opts.mode == MODE_CALLER && test != sts.test)
     {
@@ -739,7 +741,7 @@ void exec_next_test()
         }
         ++sts.test;
         // fall through
-    case TST_NOTIFY_UCAST:
+/*    case TST_NOTIFY_UCAST:
         // notification - unicast
         if ((opts.groups & TST_UCAST) && (opts.groups & TST_NOTIFY))
         {
@@ -764,7 +766,7 @@ void exec_next_test()
             break;
         }
         ++sts.test;
-        // fall through
+*/        // fall through
     case TST_REQREP_TCP:
         // request/reply - TCP
         if ((opts.groups & TST_TCP) && (opts.groups & TST_REQREP))
@@ -778,7 +780,7 @@ void exec_next_test()
             break;
         }
         ++sts.test;
-        // fall through
+/*        // fall through
     case TST_REQREP_UCAST:
         // request/reply - unicast
         if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREP))
@@ -819,7 +821,7 @@ void exec_next_test()
             break;
         }
         ++sts.test;
-        // fall through
+*/        // fall through
     case TST_REQREPCFM_TCP:
         // request/reply/confirm - TCP
         if ((opts.groups & TST_TCP) && (opts.groups & TST_REQREPCFM))
@@ -834,7 +836,7 @@ void exec_next_test()
         }
         ++sts.test;
         // fall through
-    case TST_REQREPCFM_UCAST:
+/*    case TST_REQREPCFM_UCAST:
         // request/reply/confirm - unicast
         if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREPCFM))
         {
@@ -873,7 +875,7 @@ void exec_next_test()
             msg.numExpReplies = 0;
             break;
         }
-        // fall through
+*/        // fall through
     default:
         exec_next_test();
         return;
