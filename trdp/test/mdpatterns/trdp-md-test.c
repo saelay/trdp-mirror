@@ -1191,7 +1191,10 @@ void recv_msg(const TRDP_MD_INFO_T * msg, UINT8 * data, UINT32 size)
 
     case TRDP_MSG_MQ:
         // reply, confirm required
-        confirm(msg, TRDP_FLAGS_CALLBACK);
+        if (sts.test == TST_REQREPCFM_TCP)
+            confirm(msg, TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP);
+        else
+            confirm(msg, TRDP_FLAGS_CALLBACK);
         switch (sts.test)
         {
         case TST_REQREPCFM_TCP:
