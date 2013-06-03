@@ -780,7 +780,7 @@ void exec_next_test()
             break;
         }
         ++sts.test;
-/*        // fall through
+        // fall through
     case TST_REQREP_UCAST:
         // request/reply - unicast
         if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREP))
@@ -821,7 +821,7 @@ void exec_next_test()
             break;
         }
         ++sts.test;
-*/        // fall through
+       // fall through
     case TST_REQREPCFM_TCP:
         // request/reply/confirm - TCP
         if ((opts.groups & TST_TCP) && (opts.groups & TST_REQREPCFM))
@@ -836,7 +836,7 @@ void exec_next_test()
         }
         ++sts.test;
         // fall through
-/*    case TST_REQREPCFM_UCAST:
+    case TST_REQREPCFM_UCAST:
         // request/reply/confirm - unicast
         if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREPCFM))
         {
@@ -875,7 +875,7 @@ void exec_next_test()
             msg.numExpReplies = 0;
             break;
         }
-*/        // fall through
+        // fall through
     default:
         exec_next_test();
         return;
