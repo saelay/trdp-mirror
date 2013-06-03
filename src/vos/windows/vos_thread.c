@@ -1059,7 +1059,7 @@ EXT_DECL void vos_semaDelete (
  *  Try to get (decrease) a semaphore.
  *
  *  @param[in]      sema            semaphore handle
- *  @param[in]      timeout         Max. time in us to wait, 0 means forever
+ *  @param[in]      timeout         Max. time in us to wait, 0 means no wait
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_INIT_ERR    module not initialised
  *  @retval         VOS_NOINIT_ERR  invalid handle
@@ -1082,8 +1082,20 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
-    else if (timeout != (UINT32) NULL)
+    else if (timeout == (UINT32) NULL)
     {
+        /* Take Semaphore, return ERROR if Semaphore cannot be taken immediately instead of blocking */
+        err = sem_trywait((sem_t *)sema);
+    }
+    else if (timeout == VOS_SEMA_WAIT_FOREVER)
+    {
+        /* Take Semaphore, block until Semaphore becomes available */
+         err = sem_wait((sem_t *)sema);
+    }
+    else
+    {
+        /* Take Semaphore with specified wait time, block until timeout expires */
+
         /* Get time since 01/01/1970 and convert it to timespec format */
         vos_getTime(&waitTimeVos);
         waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
@@ -1115,11 +1127,6 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 
         /* take semaphore with specified timeout */
         err = sem_timedwait((sem_t *)sema, &waitTimeSpec);
-    }
-    else
-    {
-        /* take semaphore without timeout */
-        err = sem_wait((sem_t *)sema);
     }
     if (err != (INT32) NULL)
     {
