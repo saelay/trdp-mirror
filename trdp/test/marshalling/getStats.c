@@ -64,9 +64,15 @@ void print_stats (
     TRDP_STATISTICS_T *pData)
 {
     int i;
+    TRDP_VERSION_T trdp;
+    
+    trdp.ver = (UINT8) pData->version;
+    trdp.rel = (UINT8) pData->version << 8;
+    trdp.upd = (UINT8) pData->version << 16;
+    trdp.evo = (UINT8) pData->version << 24;
 
     printf("\n--------------------\n");
-    printf("version:        %u\n", vos_ntohl(pData->version));
+    printf("version:        %d.%d.%d.%d\n", (UINT32) trdp.ver, (UINT32) trdp.rel, (UINT32) trdp.upd, (UINT32) trdp.evo);
     printf("timestamp:      %u:%u\n", vos_ntohl(pData->timeStamp.tv_sec), vos_ntohl(pData->timeStamp.tv_usec));
     printf("upTime:         %u\n", vos_ntohl(pData->upTime));
     printf("statisticTime:  %u\n", vos_ntohl(pData->statisticTime));
@@ -431,10 +437,10 @@ int main (int argc, char * *argv)
             UINT32  numAllocBlocks;
             UINT32  numAllocErr;
             UINT32  numFreeErr;
-            UINT32  allocBlockSize[VOS_MEM_NBLOCKSIZES];
+            UINT32  blockSize[VOS_MEM_NBLOCKSIZES];
             UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];
             vos_memCount(&allocatedMemory, &freeMemory, &minFree, &numAllocBlocks, &numAllocErr, &numFreeErr,
-                         allocBlockSize, usedBlockSize);
+                         blockSize, usedBlockSize);
             printf("Memory usage:\n");
             printf(" allocatedMemory:    %u\n", allocatedMemory);
             printf(" freeMemory:        %u\n", freeMemory);
@@ -442,10 +448,10 @@ int main (int argc, char * *argv)
             printf(" numAllocBlocks:    %u\n", numAllocBlocks);
             printf(" numAllocErr:        %u\n", numAllocErr);
             printf(" numFreeErr:        %u\n", numFreeErr);
-            printf(" allocBlockSize:    ");
+            printf(" BlockSizes:    ");
             for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
             {
-                printf("%08u ", allocBlockSize[i]);
+                printf("%d * %08u ", usedBlockSize[i], blockSize[i]);
             }
             printf("\n\n");
             count = 0;
