@@ -233,7 +233,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
         {
             gMem.memCnt.preAlloc[i] = 0;
         }
-        vos_printLog(VOS_LOG_INFO, "vos_memInit Pre-Allocation disabled\n");
+        vos_printLog(VOS_LOG_INFO, "vos_memInit() Pre-Allocation disabled\n");
     }
 
     minSize = 0;
@@ -260,7 +260,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
             p[j] = vos_memAlloc(blockSize[i]);
             if (p[j] == NULL)
             {
-                vos_printLog(VOS_LOG_ERROR, "vos_memInit Pre-Allocation size exceeds overall memory size!!! (%u > %u)\n",
+                vos_printLog(VOS_LOG_ERROR, "vos_memInit() Pre-Allocation size exceeds overall memory size!!! (%u > %u)\n",
                            minSize, size);
                 break;
             }
@@ -326,8 +326,6 @@ EXT_DECL UINT8 *vos_memAlloc (
         return NULL;
     }
 
-    vos_printLog(VOS_LOG_DBG, "vos_memAlloc: Requested size = 0x%x (%u)\n", size, size);
-
     /*    Use standard heap memory    */
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
@@ -336,6 +334,8 @@ EXT_DECL UINT8 *vos_memAlloc (
         {
             memset(p, 0, size);
         }
+        vos_printLog(VOS_LOG_DBG, "vos_memAlloc() %p, size %u\n", p, size);
+
         return p;
     }
 
@@ -403,7 +403,7 @@ EXT_DECL UINT8 *vos_memAlloc (
                     {
                         vos_printLog(
                             VOS_LOG_ERROR,
-                            "IPTVosMalloc Used a bigger buffer size=%d asked size=%d\n",
+                            "vos_memAlloc() Used a bigger buffer size=%d asked size=%d\n",
                             gMem.freeBlock[i].size,
                             size);
                         /* There is, get it. */
@@ -412,11 +412,6 @@ EXT_DECL UINT8 *vos_memAlloc (
 
                         blockSize = gMem.freeBlock[i].size;
                     }
-                }
-                if (pBlock == NULL)
-                {
-                    /* Not enough memory */
-                    vos_printLog(VOS_LOG_ERROR, "IPTVosMalloc Not enough memory\n");
                 }
             }
         }
@@ -442,10 +437,13 @@ EXT_DECL UINT8 *vos_memAlloc (
             memset((UINT8 *) pBlock + sizeof(MEM_BLOCK_T), 0, blockSize);
 
             /* Return pointer to data area, not the memory block itself */
+            vos_printLog(VOS_LOG_DBG, "vos_memAlloc() %p, size %u\n", ((UINT8 *) pBlock + sizeof(MEM_BLOCK_T)), size);
             return (UINT8 *) pBlock + sizeof(MEM_BLOCK_T);
         }
         else
         {
+            /* Not enough memory */
+            vos_printLog(VOS_LOG_ERROR, "vos_memAlloc() Not enough memory, size %u\n", size);
             gMem.memCnt.allocErrCnt++;
             return NULL;
         }
