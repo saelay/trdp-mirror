@@ -7,7 +7,7 @@
     <ClCompile Include="..\..\test\marshalling\trdp_reserved.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\marshalling\getStatsMarshall.c">
+    <ClCompile Include="..\..\test\marshalling\getStats.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
