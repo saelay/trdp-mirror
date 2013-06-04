@@ -294,7 +294,7 @@ TRDP_ERR_T trdp_mdCheck (
     /*    Check protocol type    */
     if (TRDP_NO_ERR == err)
     {
-        TRDP_MSG_T l_msgType = vos_ntohs(pPacket->msgType);
+        TRDP_MSG_T l_msgType = (TRDP_MSG_T) vos_ntohs(pPacket->msgType);
         switch (l_msgType)
         {
             /* valid message type ident */
@@ -1993,34 +1993,46 @@ void  trdp_mdCheckListenSocks (
                 MD_ELE_T *iterMD_find;
 
                 /* Delete the sessions that are opened in this socket */
-                for (iterMD_find = appHandle->pMDSndQueue;
-                     iterMD_find != NULL;
-                     iterMD_find = iterMD_find->pNext)
-                {
-                    if (iterMD_find->socketIdx == lIndex)
-                    {
-                        /* Remove element from queue */
-                        trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD_find);
+                iterMD_find = appHandle->pMDSndQueue; 
 
-                        /* free element */
-                        trdp_mdFreeSession(iterMD_find);
-                    }
-                }
+                while (NULL != iterMD_find) 
+                { 
+                    if (iterMD_find->socketIdx == lIndex) 
+                    { 
+                        trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD_find); 
+                        vos_printLog(VOS_LOG_INFO, "Freeing %s replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                            (iterMD_find->pktFlags & TRDP_FLAGS_TCP)?"TCP":"UDP",
+                            iterMD_find->sessionID[0], iterMD_find->sessionID[1], iterMD_find->sessionID[2], iterMD_find->sessionID[3], 
+                            iterMD_find->sessionID[4], iterMD_find->sessionID[5], iterMD_find->sessionID[6], iterMD_find->sessionID[7]) 
+                            trdp_mdFreeSession(iterMD_find); 
+                        iterMD_find = appHandle->pMDSndQueue; 
+                    } 
+                    else 
+                    { 
+                        iterMD_find = iterMD_find->pNext; 
+                    } 
+                } 
 
                 /* Clean the session in the listener */
-                for (iterMD_find = appHandle->pMDRcvQueue;
-                     iterMD_find != NULL;
-                     iterMD_find = iterMD_find->pNext)
-                {
-                    if (iterMD_find->socketIdx == lIndex)
-                    {
-                        /* Remove element from queue */
-                        trdp_MDqueueDelElement(&appHandle->pMDRcvQueue, iterMD_find);
+                iterMD_find = appHandle->pMDRcvQueue; 
 
-                        /* free element */
-                        trdp_mdFreeSession(iterMD_find);
-                    }
-                }
+                while (NULL != iterMD_find) 
+                { 
+                    if (iterMD_find->socketIdx == lIndex) 
+                    { 
+                        trdp_MDqueueDelElement(&appHandle->pMDRcvQueue, iterMD_find); 
+                        vos_printLog(VOS_LOG_INFO, "Freeing %s replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                            (iterMD_find->pktFlags & TRDP_FLAGS_TCP)?"TCP":"UDP",
+                            iterMD_find->sessionID[0], iterMD_find->sessionID[1], iterMD_find->sessionID[2], iterMD_find->sessionID[3], 
+                            iterMD_find->sessionID[4], iterMD_find->sessionID[5], iterMD_find->sessionID[6], iterMD_find->sessionID[7]) 
+                            trdp_mdFreeSession(iterMD_find); 
+                        iterMD_find = appHandle->pMDRcvQueue; 
+                    } 
+                    else 
+                    { 
+                        iterMD_find = iterMD_find->pNext; 
+                    } 
+                } 
 
                 /* Close the socket */
                 err = (TRDP_ERR_T) vos_sockClose(appHandle->iface[lIndex].sock);
@@ -2321,7 +2333,7 @@ void  trdp_mdCheckTimeouts (
                     vos_printLog(VOS_LOG_INFO,
                                  "Deleting socket from the iface (Sock: %d, Index: %d)\n",
                                  appHandle->iface[lIndex].sock, lIndex);
-                   appHandle->iface[lIndex].sock           = -1;
+                    appHandle->iface[lIndex].sock           = -1;
                     appHandle->iface[lIndex].sendParam.qos  = 0;
                     appHandle->iface[lIndex].sendParam.ttl  = 0;
                     appHandle->iface[lIndex].usage          = 0;
