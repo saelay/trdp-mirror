@@ -180,23 +180,20 @@ EXT_DECL TRDP_ERR_T tlc_init (
             }
         }
 
-#if MD_SUPPORT
-        /* Init MD  here... */
-#endif
-
         if (ret == TRDP_NO_ERR)
         {
             sInited = TRUE;
             vos_printLog(VOS_LOG_INFO, "TRDP Stack Version %s: successfully initiated\n", tlc_getVersionString());
         }
-        return ret;
     }
     else
     {
         vos_printLog(VOS_LOG_ERROR, "TRDP already initalised\n");
 
-        return TRDP_INIT_ERR;
+        ret = TRDP_INIT_ERR;
     }
+
+    return ret;
 }
 
 /**********************************************************************************************************************/
@@ -439,10 +436,10 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           NULL,                         /*    initial data                  */
                           sizeof(TRDP_STATISTICS_T));
 
-        vos_printLog(VOS_LOG_INFO,
-                   "TRDP Stack Version %s: session opened successfully\n",
-                   tlc_getVersionString());
-
+        if (ret == TRDP_NO_ERR)
+        {
+        	vos_printLog(VOS_LOG_INFO, "TRDP session opened successfully\n");
+		}
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
         {
             vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
