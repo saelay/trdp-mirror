@@ -44,8 +44,8 @@
 #define MD_COMID1_TIMEOUT   1000000            /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY  2000000
-#define MAX_IF           10
+#define RESERVED_MEMORY     2000000
+#define MAX_IF              10
 
 typedef struct testData
 {
@@ -68,32 +68,32 @@ typedef struct sSessionData
     TRDP_LIS_T          listenHandle1;       /*    Our identifier to the publication         */
     TRDP_LIS_T          listenHandle2;       /*    Our identifier to the publication         */
     int                 sBlockingMode;      /*    TRUE if select shall be used              */
-    UINT32                sDataSize;
+    UINT32              sDataSize;
 } SESSION_DATA_T;
 
 SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE, 0};
 
 UINT32          ownIP = 0;
 
-const UINT8 cDemoData[] = " "
-"Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
-"This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
-"And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
-"Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
-"And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
-"Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
-"This is not her story.\n"
-"But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
-"It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
-"Nevertheless, a wholly remarkable book.\n"
-"In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
-"Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
-"In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
-"First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
-"But the story of this terrible, stupid Thursday, the story of its extraordinary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
-"It begins with a house.\n";
+const UINT8     cDemoData[] = " "
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordinary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n";
 
-UINT8    gBuffer[64*1024];
+UINT8 gBuffer[64 * 1024];
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -160,7 +160,7 @@ void mdCallback (void                   *pRefCon,
                     if (sSessionData.sConfirmRequested)
                     {
                         printf("-> sending reply with query\n");
-                        err = tlm_replyQuery(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
+                        err = tlm_replyQuery(myGlobals->appHandle, pRefCon, &pMsg->sessionId,
                                              pMsg->topoCount, pMsg->comId, ownIP,
                                              pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, 10000000, NULL,
                                              (UINT8 *) "I'm fine, how are you?", 23, NULL, NULL);
@@ -168,7 +168,7 @@ void mdCallback (void                   *pRefCon,
                     else
                     {
                         printf("-> sending reply\n");
-                        err = tlm_reply(myGlobals->appHandle, pRefCon, (TRDP_UUID_T *) &pMsg->sessionId,
+                        err = tlm_reply(myGlobals->appHandle, pRefCon, &pMsg->sessionId,
                                         pMsg->topoCount, pMsg->comId, ownIP,
                                         pMsg->srcIpAddr, TRDP_FLAGS_CALLBACK, 0, NULL,
                                         (UINT8 *) "I'm fine, thanx!", 17, NULL, NULL);
@@ -287,11 +287,11 @@ int main (int argc, char *argv[])
 {
     int ip[4];
     TRDP_MD_CONFIG_T        mdConfiguration =
-                {mdCallback, &sSessionData, {0, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
+    {mdCallback, &sSessionData, {0, 64, 0}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 20550, 20550};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     VOS_IF_REC_T            interfaces[MAX_IF];
-    BOOL                    lastRun = FALSE;
+    BOOL            lastRun = FALSE;
 
     int             rv          = 0;
     UINT32          destIP      = 0;
@@ -404,11 +404,11 @@ int main (int argc, char *argv[])
                     return 1;
                 }
                 if (sSessionData.sBlockingMode == FALSE)
-                {   
+                {
                     processConfig.options &= ~TRDP_OPTION_BLOCK;
                 }
                 else
-                {   
+                {
                     processConfig.options |= TRDP_OPTION_BLOCK;
                 }
                 break;
@@ -495,10 +495,10 @@ int main (int argc, char *argv[])
      */
     while (sSessionData.sLoop)
     {
-        fd_set  rfds;
-        INT32   noDesc = 0;
-        TRDP_TIME_T  tv = {0, 0};
-        TRDP_TIME_T  max_tv = {1, 0};           /* 1 second  */
+        fd_set      rfds;
+        INT32       noDesc  = 0;
+        TRDP_TIME_T tv      = {0, 0};
+        TRDP_TIME_T max_tv  = {1, 0};           /* 1 second  */
 
         if (sSessionData.sBlockingMode == TRUE)
         {
@@ -506,14 +506,14 @@ int main (int argc, char *argv[])
                 Prepare the file descriptor set for the select call.
                 Additional descriptors can be added here.
              */
-             FD_ZERO(&rfds);
+            FD_ZERO(&rfds);
 
             /*
                 Compute the min. timeout value for select.
                 This way we can guarantee that PDs are sent in time
                 with minimum CPU load and minimum jitter.
              */
-             tlc_getInterval(sSessionData.appHandle, &tv, (TRDP_FDS_T *) &rfds, &noDesc);
+            tlc_getInterval(sSessionData.appHandle, &tv, (TRDP_FDS_T *) &rfds, &noDesc);
         }
         /*
             The wait time for select must consider cycle times and timeouts of
@@ -537,7 +537,7 @@ int main (int argc, char *argv[])
         }
         else
         {
-            vos_threadDelay (tv.tv_sec * 1000000 + tv.tv_usec);
+            vos_threadDelay(tv.tv_sec * 1000000 + tv.tv_usec);
             rv = 0;
 
 
@@ -576,8 +576,8 @@ int main (int argc, char *argv[])
         if (sSessionData.sResponder == FALSE && sSessionData.sExitAfterReply == FALSE)
         {
             TRDP_UUID_T sessionId;
-            int i, j;
-            
+            int         i, j;
+
             printf("\n");
             if (sSessionData.sNotifyOnly)
             {
@@ -630,8 +630,21 @@ int main (int argc, char *argv[])
                             j = 0;
                         }
                     }
-                    tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, ownIP,
-                               destIP, flags, expReplies, 0, NULL, (const UINT8 *) gBuffer, sSessionData.sDataSize, 0, 0);
+                    tlm_request(sSessionData.appHandle,
+                                &sSessionData,
+                                &sessionId,
+                                sSessionData.sComID,
+                                0,
+                                ownIP,
+                                destIP,
+                                flags,
+                                expReplies,
+                                0,
+                                NULL,
+                                (const UINT8 *) gBuffer,
+                                sSessionData.sDataSize,
+                                0,
+                                0);
 
                 }
                 else
@@ -640,12 +653,12 @@ int main (int argc, char *argv[])
                                 destIP, flags, expReplies, 0, NULL, (const UINT8 *) "How are you?", 13, 0, 0);
                 }
             }
-            
+
             if (sSessionData.sOnlyOnce == TRUE)
             {
                 lastRun = TRUE;
             }
-            
+
             printf("\n");
 
             /* additional delay */
