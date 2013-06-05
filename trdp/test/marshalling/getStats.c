@@ -15,7 +15,7 @@
  *          Copyright Bombardier Transportation GmbH, Germany, 2012.
  *
  *
- * $Id: $
+ * $Id$
  *
  */
 
@@ -52,7 +52,7 @@
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY     64000
+#define RESERVED_MEMORY     20000
 #define PREALLOCATE         {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
 #define APP_VERSION         "0.0.0.3"
@@ -120,7 +120,7 @@ void print_stats (
     printf("pd.numNoPub:        %u\n", vos_ntohl(pData->pd.numNoPub));
     printf("pd.numTimeout:      %u\n", vos_ntohl(pData->pd.numTimeout));
     printf("pd.numSend:         %u\n", vos_ntohl(pData->pd.numSend));
-    printf("--------------------\n");
+    printf("----------------------------------------------------------------------------------------------------\n\n");
 }
 
 /* Print a sensible usage message */
@@ -324,18 +324,18 @@ int main (int argc, char * *argv)
 
     memset(&gBuffer, 0, sizeof(gBuffer));
 
-    err = tlp_subscribe( appHandle,                     /*    our application identifier            */
+    err = tlp_subscribe( appHandle,                     /*    our application identifier             */
                          &subHandle,                    /*    our subscription identifier            */
                          NULL,
-                         TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                */
-                         0,                             /*    topocount: local consist only        */
-                         0,                             /*    Source IP filter                    */
+                         TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                  */
+                         0,                             /*    topocount: local consist only          */
+                         0,                             /*    Source IP filter                       */
                          0,
                          replyIP,                       /*    Default destination    (or MC Group)   */
-                         TRDP_FLAGS_DEFAULT,            /* packet flags */
-                         PD_COMID1_TIMEOUT,             /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,           /*  delete invalid data    on timeout      */
-                         sizeof(gBuffer));              /*    net data size                        */
+                         TRDP_FLAGS_DEFAULT,            /*    packet flags */
+                         PD_COMID1_TIMEOUT,             /*    Time out in us                         */
+                         TRDP_TO_SET_TO_ZERO,           /*    delete invalid data    on timeout      */
+                         sizeof(gBuffer));              /*    net data size                          */
 
     if (err != TRDP_NO_ERR)
     {
@@ -447,7 +447,7 @@ int main (int argc, char * *argv)
             UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];
             vos_memCount(&allocatedMemory, &freeMemory, &minFree, &numAllocBlocks, &numAllocErr, &numFreeErr,
                          blockSize, usedBlockSize);
-            printf("\nMemory usage (%s):\n");
+            printf("\nMemory usage (%s):\n", argv[0]);
             printf("    allocatedMemory:    %u\n", allocatedMemory);
             printf("    freeMemory:         %u\n", freeMemory);
             printf("    minFree:            %u\n", minFree);
