@@ -30,6 +30,8 @@
 #include "trdp_if_light.h"
 #include "trdp_if.h"
 #include "trdp_pdcom.h"
+#include "vos_mem.h"
+#include "vos_thread.h"
 
 /*******************************************************************************
  * DEFINES
@@ -69,6 +71,40 @@ void trdp_initStats (
 
     pVersion = tlc_getVersion();
     appHandle->stats.version = pVersion->ver << 24 | pVersion->rel << 16 | pVersion->upd << 8 | pVersion->evo;
+
+    if (appHandle->stats.hostName[0] == 0)
+    {
+        vos_strncpy(appHandle->stats.hostName, "unknown", TRDP_MAX_LABEL_LEN);      /**< host name */
+    }
+    if (appHandle->stats.leaderName[0] == 0)
+    {
+        vos_strncpy(appHandle->stats.leaderName, "unknown", TRDP_MAX_LABEL_LEN);    /**< leader host name */
+    }
+}
+
+/**********************************************************************************************************************/
+/** Reset statistics.
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ */
+EXT_DECL TRDP_ERR_T tlc_resetStatistics (
+    TRDP_APP_SESSION_T appHandle)
+{
+    TIMEDATE32 tempTime;
+
+    if (!trdp_isValidSession(appHandle))
+    {
+        return TRDP_NOINIT_ERR;
+    }
+
+    tempTime = appHandle->stats.upTime;
+    memset(&appHandle->stats, 0, sizeof(TRDP_STATISTICS_T));
+    appHandle->stats.upTime = tempTime;
+
+    return TRDP_NO_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -323,27 +359,6 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 }
 
 /**********************************************************************************************************************/
-/** Reset statistics.
- *
- *  @param[in]      appHandle           the handle returned by tlc_openSession
- *  @retval         TRDP_NO_ERR            no error
- *  @retval         TRDP_NOINIT_ERR     handle invalid
- *  @retval         TRDP_PARAM_ERR      parameter error
- */
-EXT_DECL TRDP_ERR_T tlc_resetStatistics (
-    TRDP_APP_SESSION_T appHandle)
-{
-    if (!trdp_isValidSession(appHandle))
-    {
-        return TRDP_NOINIT_ERR;
-    }
-
-    trdp_initStats(appHandle);
-
-    return TRDP_NO_ERR;
-}
-
-/**********************************************************************************************************************/
 /** Update the statistics
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
@@ -354,9 +369,21 @@ void    trdp_UpdateStats (
     PD_ELE_T    *iter;
     UINT16      lIndex;
     VOS_ERR_T   ret;
+    VOS_TIME_T  temp;
+    TIMEDATE32  diff;
 
     /*  Get a new time stamp    */
     vos_getTime(&appHandle->stats.timeStamp);
+
+    /*  Compute uptime */
+    temp = appHandle->stats.timeStamp;
+    vos_subTime(&temp, &appHandle->initTime);
+
+    /*  Compute statistics from old uptime and old statistics values by maintaining the offset */
+    diff = appHandle->stats.upTime - appHandle->stats.statisticTime;
+    appHandle->stats.upTime         = temp.tv_sec;              /* round down */
+    appHandle->stats.statisticTime  = temp.tv_sec - diff;       /* round down */
+
 
     /*  Update memory statsp    */
     ret = vos_memCount(&appHandle->stats.mem.total,
@@ -423,6 +450,8 @@ void    trdp_pdPrepareStats (
     pData->leaderIpAddr     = vos_htonl(appHandle->stats.leaderIpAddr);
     pData->processPrio      = vos_htonl(appHandle->stats.processPrio);
     pData->processCycle     = vos_htonl(appHandle->stats.processCycle);
+    vos_strncpy(pData->hostName, appHandle->stats.hostName, TRDP_MAX_LABEL_LEN);
+    vos_strncpy(pData->leaderName, appHandle->stats.leaderName, TRDP_MAX_LABEL_LEN);
 
     /*  Memory  */
     pData->mem.total            = vos_htonl(appHandle->stats.mem.total);
