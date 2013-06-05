@@ -904,8 +904,6 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 EXT_DECL TRDP_ERR_T tlc_resetStatistics (
     TRDP_APP_SESSION_T appHandle);
 
-/* tbd */
-
 #ifdef __cplusplus
 }
 #endif

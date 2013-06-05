@@ -65,21 +65,27 @@ void print_stats (
 {
     int i;
     TRDP_VERSION_T trdp;
-    
-    trdp.ver = (UINT8) pData->version;
-    trdp.rel = (UINT8) pData->version << 8;
-    trdp.upd = (UINT8) pData->version << 16;
-    trdp.evo = (UINT8) pData->version << 24;
 
-    printf("\n--------------------\n");
-    printf("version:        %d.%d.%d.%d\n", (UINT32) trdp.ver, (UINT32) trdp.rel, (UINT32) trdp.upd, (UINT32) trdp.evo);
-    printf("timestamp:      %u:%u\n", vos_ntohl(pData->timeStamp.tv_sec), vos_ntohl(pData->timeStamp.tv_usec));
-    printf("upTime:         %u\n", vos_ntohl(pData->upTime));
-    printf("statisticTime:  %u\n", vos_ntohl(pData->statisticTime));
-    printf("ownIpAddr:      %u\n", vos_ntohl(pData->ownIpAddr));
-    printf("leaderIpAddr:   %u\n", vos_ntohl(pData->leaderIpAddr));
-    printf("processPrio:    %u\n", vos_ntohl(pData->processPrio));
-    printf("processCycle:   %u\n", vos_ntohl(pData->processCycle));
+    trdp.ver    = (UINT8) pData->version;
+    trdp.rel    = (UINT8) pData->version << 8;
+    trdp.upd    = (UINT8) pData->version << 16;
+    trdp.evo    = (UINT8) pData->version << 24;
+
+    printf("\n----------------------------------------------------------------------------------------------------\n");
+    printf("version:            %d.%d.%d.%d\n",
+           (UINT32) trdp.ver,
+           (UINT32) trdp.rel,
+           (UINT32) trdp.upd,
+           (UINT32) trdp.evo);
+    printf("timestamp:          %u:%u\n", vos_ntohl(pData->timeStamp.tv_sec), vos_ntohl(pData->timeStamp.tv_usec));
+    printf("upTime:             %u\n", vos_ntohl(pData->upTime));
+    printf("lastStatReset:      %u\n", vos_ntohl(pData->statisticTime));
+    printf("hostName:           %s\n", pData->hostName);
+    printf("leaderName:         %s\n", pData->leaderName);
+    printf("ownIpAddr:          %s\n", vos_ipDotted(vos_ntohl(pData->ownIpAddr)));
+    printf("leaderIpAddr:       %s\n", vos_ipDotted(vos_ntohl(pData->leaderIpAddr)));
+    printf("processPrio:        %u\n", vos_ntohl(pData->processPrio));
+    printf("processCycle:       %u\n", vos_ntohl(pData->processCycle));
 
     printf("mem.total:          %u\n", vos_ntohl(pData->mem.total));
     printf("mem.free:           %u\n", vos_ntohl(pData->mem.free));
@@ -88,32 +94,32 @@ void print_stats (
     printf("mem.numAllocErr:    %u\n", vos_ntohl(pData->mem.numAllocErr));
     printf("mem.numFreeErr:     %u\n", vos_ntohl(pData->mem.numFreeErr));
 
-    printf("mem.blockSize: ");
+    printf("mem.blockSize:      ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
         printf("%u, ", vos_ntohl(pData->mem.blockSize[i]));
     }
 
-    printf("\nmem.usedBlockSize:   ");
+    printf("\nmem.usedBlockSize:  ");
     for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
     {
         printf("%u, ", vos_ntohl(pData->mem.usedBlockSize[i]));
     }
 
     /* Process data */
-    printf("\npd.defQos:      %u\n", vos_ntohl(pData->pd.defQos));
-    printf("pd.defTtl:      %u\n", vos_ntohl(pData->pd.defTtl));
-    printf("pd.defTimeout:  %u\n", vos_ntohl(pData->pd.defTimeout));
-    printf("pd.numSubs:     %u\n", vos_ntohl(pData->pd.numSubs));
-    printf("pd.numPub:      %u\n", vos_ntohl(pData->pd.numPub));
-    printf("pd.numRcv :     %u\n", vos_ntohl(pData->pd.numRcv));
-    printf("pd.numCrcErr:   %u\n", vos_ntohl(pData->pd.numCrcErr));
-    printf("pd.numProtErr:  %u\n", vos_ntohl(pData->pd.numProtErr));
-    printf("pd.numTopoErr:  %u\n", vos_ntohl(pData->pd.numTopoErr));
-    printf("pd.numNoSubs:   %u\n", vos_ntohl(pData->pd.numNoSubs));
-    printf("pd.numNoPub:    %u\n", vos_ntohl(pData->pd.numNoPub));
-    printf("pd.numTimeout:  %u\n", vos_ntohl(pData->pd.numTimeout));
-    printf("pd.numSend:     %u\n", vos_ntohl(pData->pd.numSend));
+    printf("\npd.defQos:          %u\n", vos_ntohl(pData->pd.defQos));
+    printf("pd.defTtl:          %u\n", vos_ntohl(pData->pd.defTtl));
+    printf("pd.defTimeout:      %u\n", vos_ntohl(pData->pd.defTimeout));
+    printf("pd.numSubs:         %u\n", vos_ntohl(pData->pd.numSubs));
+    printf("pd.numPub:          %u\n", vos_ntohl(pData->pd.numPub));
+    printf("pd.numRcv :         %u\n", vos_ntohl(pData->pd.numRcv));
+    printf("pd.numCrcErr:       %u\n", vos_ntohl(pData->pd.numCrcErr));
+    printf("pd.numProtErr:      %u\n", vos_ntohl(pData->pd.numProtErr));
+    printf("pd.numTopoErr:      %u\n", vos_ntohl(pData->pd.numTopoErr));
+    printf("pd.numNoSubs:       %u\n", vos_ntohl(pData->pd.numNoSubs));
+    printf("pd.numNoPub:        %u\n", vos_ntohl(pData->pd.numNoPub));
+    printf("pd.numTimeout:      %u\n", vos_ntohl(pData->pd.numTimeout));
+    printf("pd.numSend:         %u\n", vos_ntohl(pData->pd.numSend));
     printf("--------------------\n");
 }
 
@@ -232,7 +238,7 @@ int main (int argc, char * *argv)
     UINT32  destIP  = 0;
     UINT32  replyIP = 0;
     UINT32  ownIP   = 0;
-    int     count   = 0, i;
+    int     count   = 1000, i;
     int     ch;
 
     if (argc <= 1)
@@ -429,7 +435,7 @@ int main (int argc, char * *argv)
             fflush(stdout);
         }
 
-        if (count++ > 10)
+        if (count++ > 1000)
         {
             UINT32  allocatedMemory;
             UINT32  freeMemory;
@@ -441,17 +447,17 @@ int main (int argc, char * *argv)
             UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];
             vos_memCount(&allocatedMemory, &freeMemory, &minFree, &numAllocBlocks, &numAllocErr, &numFreeErr,
                          blockSize, usedBlockSize);
-            printf("Memory usage:\n");
-            printf(" allocatedMemory:    %u\n", allocatedMemory);
-            printf(" freeMemory:        %u\n", freeMemory);
-            printf(" minFree:            %u\n", minFree);
-            printf(" numAllocBlocks:    %u\n", numAllocBlocks);
-            printf(" numAllocErr:        %u\n", numAllocErr);
-            printf(" numFreeErr:        %u\n", numFreeErr);
-            printf(" BlockSizes:    ");
+            printf("\nMemory usage (%s):\n");
+            printf("    allocatedMemory:    %u\n", allocatedMemory);
+            printf("    freeMemory:         %u\n", freeMemory);
+            printf("    minFree:            %u\n", minFree);
+            printf("    numAllocBlocks:     %u\n", numAllocBlocks);
+            printf("    numAllocErr:        %u\n", numAllocErr);
+            printf("    numFreeErr:         %u\n", numFreeErr);
+            printf("    BlockSizes:         ");
             for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
             {
-                printf("%d * %08u ", usedBlockSize[i], blockSize[i]);
+                printf("%d x %u, ", usedBlockSize[i], blockSize[i]);
             }
             printf("\n\n");
             count = 0;

@@ -257,12 +257,13 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     pSession->realIP    = ownIpAddr;
     pSession->virtualIP = leaderIpAddr;
 
-    pSession->stats.ownIpAddr    = ownIpAddr;
-    pSession->stats.leaderIpAddr = leaderIpAddr;
-
     if (pProcessConfig != NULL)
     {
         pSession->option = pProcessConfig->options;
+        pSession->stats.processCycle    = pProcessConfig->cycleTime;
+        pSession->stats.processPrio     = pProcessConfig->priority;
+        vos_strncpy(pSession->stats.hostName, pProcessConfig->hostName, TRDP_MAX_LABEL_LEN);
+        vos_strncpy(pSession->stats.leaderName, pProcessConfig->leaderName, TRDP_MAX_LABEL_LEN);
     }
 
     if (pMarshall != NULL)
@@ -372,11 +373,11 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
-        pSession->mdDefault.pfCbFunction        = NULL;
-        pSession->mdDefault.pRefCon             = NULL;
-        pSession->mdDefault.confirmTimeout      = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
-        pSession->mdDefault.connectTimeout      = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
-        pSession->mdDefault.replyTimeout        = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+        pSession->mdDefault.pfCbFunction    = NULL;
+        pSession->mdDefault.pRefCon         = NULL;
+        pSession->mdDefault.confirmTimeout  = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+        pSession->mdDefault.connectTimeout  = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+        pSession->mdDefault.replyTimeout    = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
         pSession->mdDefault.flags               = TRDP_FLAGS_NONE;
         pSession->mdDefault.udpPort             = TRDP_MD_UDP_PORT;
         pSession->mdDefault.tcpPort             = TRDP_MD_TCP_PORT;
@@ -401,6 +402,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     vos_clearTime(&pSession->interval);
     vos_clearTime(&pSession->nextJob);
+    vos_getTime(&pSession->initTime);
 
     /*    Clear the socket pool    */
     trdp_initSockets(pSession->iface);
@@ -412,6 +414,10 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     /*    Clear the statistics for this session */
     trdp_initStats(pSession);
+
+    pSession->stats.ownIpAddr       = ownIpAddr;
+    pSession->stats.leaderIpAddr    = leaderIpAddr;
+
 
     /*    Queue the session in    */
     ret = (TRDP_ERR_T) vos_mutexLock(sSessionMutex);
@@ -1045,7 +1051,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             }
 
             /*    Update the internal data */
-            pNewElement->addr = pubHandle;
+            pNewElement->addr           = pubHandle;
             pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
@@ -1428,7 +1434,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     UINT32                  replyComId,
     TRDP_IP_ADDR_T          replyIpAddr)
 {
-    TRDP_ERR_T  ret = TRDP_NO_ERR;
+    TRDP_ERR_T  ret             = TRDP_NO_ERR;
     PD_ELE_T    *pSubPD         = (PD_ELE_T *) subHandle;
     PD_ELE_T    *pReqElement    = NULL;
 
@@ -1599,11 +1605,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T    *newPD = NULL;
+    PD_ELE_T            *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
-    INT32       lIndex;
+    INT32 lIndex;
 
     /*    Check params    */
     if (comId == 0 || pSubHandle == NULL)
@@ -1889,7 +1895,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL && pElement != NULL)
         {
-            pPdInfo->comId = pElement->addr.comId;
+            pPdInfo->comId          = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
@@ -2070,8 +2076,8 @@ TRDP_ERR_T tlm_addListener (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T      errv = TRDP_NO_ERR;
-    MD_LIS_ELE_T    *pNewElement = NULL;
+    TRDP_ERR_T      errv            = TRDP_NO_ERR;
+    MD_LIS_ELE_T    *pNewElement    = NULL;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -2107,7 +2113,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->pNext = NULL;
 
                 /* caller parameters saved into instance */
-                pNewElement->pUserRef = pUserRef;
+                pNewElement->pUserRef           = pUserRef;
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.topoCount     = topoCount;
                 pNewElement->addr.destIpAddr    = 0;
@@ -2157,8 +2163,8 @@ TRDP_ERR_T tlm_addListener (
                 else
                 {
                     /* Insert into list */
-                    pNewElement->pNext = appHandle->pMDListenQueue;
-                    appHandle->pMDListenQueue = pNewElement;
+                    pNewElement->pNext          = appHandle->pMDListenQueue;
+                    appHandle->pMDListenQueue   = pNewElement;
 
                     /* Statistics */
                     if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) != 0)
