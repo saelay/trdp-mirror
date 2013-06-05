@@ -4,10 +4,7 @@
     <ClCompile Include="..\..\resources\windows\getopt\getopt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\marshalling\trdp_reserved.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\marshalling\getStats.c">
+    <ClCompile Include="..\..\test\diverse\getStats.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

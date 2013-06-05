@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WIN32TRDP_Tests", "Win32TRDP_Tests\Win32TRDP_Tests.vcxproj", "{8238C177-25D0-42E3-AD8E-3A4E61CFA079}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4E059552-03FF-4EE4-A868-C2253289E9F6} = {4E059552-03FF-4EE4-A868-C2253289E9F6}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32TRDP_PDTest", "Win32TRDP_PDTest\Win32TRDP_PDTest.vcxproj", "{EF516E67-31DF-402D-8910-813FDF55965C}"
 EndProject
