@@ -397,8 +397,8 @@ TRDP_ERR_T  trdp_pdReceive (
     {
         appHandle->stats.pd.numTopoErr++;
         vos_printLog(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
-                   vos_ntohl(pNewFrame->frameHead.comId),
-                   vos_ntohl(pNewFrame->frameHead.topoCount));
+                     vos_ntohl(pNewFrame->frameHead.comId),
+                     vos_ntohl(pNewFrame->frameHead.topoCount));
         return TRDP_TOPO_ERR;
     }
 
@@ -480,7 +480,7 @@ TRDP_ERR_T  trdp_pdReceive (
                 vos_ntohl(pNewFrame->frameHead.sequenceCounter))
             {
                 vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
-                               subAddresses.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
+                                 subAddresses.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
                 return TRDP_NO_ERR;
             }
         }
@@ -582,8 +582,7 @@ void trdp_pdCheckPending (
 
             /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
             if (iterPD->socketIdx != -1 &&
-                appHandle->iface[iterPD->socketIdx].sock != -1 &&
-                appHandle->option & TRDP_OPTION_BLOCK)
+                appHandle->iface[iterPD->socketIdx].sock != -1)
             {
                 if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573
                                                                                                 signed/unsigned division
@@ -784,8 +783,8 @@ TRDP_ERR_T trdp_pdCheck (
              vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
     {
         vos_printLog(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
-                   vos_ntohs(pPacket->protocolVersion),
-                   TRDP_PROTO_VER);
+                     vos_ntohs(pPacket->protocolVersion),
+                     TRDP_PROTO_VER);
         err = TRDP_WIRE_ERR;
     }
     /*  Check type  */
@@ -961,14 +960,14 @@ TRDP_ERR_T  trdp_pdDistribute (
             if (vos_cmpTime(&temp, &pPacket->interval) > 0)
             {
                 vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: packet [%d] with interval %u.%06u could timeout...\n",
-                           packetIndex, temp.tv_sec, temp.tv_usec);
+                             packetIndex, temp.tv_sec, temp.tv_usec);
                 vos_printLog(VOS_LOG_INFO, "...no change in send time!\n");
             }
             else
             {
                 pPacket->timeToGo = nextTime2Go;
                 vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: nextTime2Go[%d] = %u.%06u\n",
-                           packetIndex, nextTime2Go.tv_sec, nextTime2Go.tv_usec);
+                             packetIndex, nextTime2Go.tv_sec, nextTime2Go.tv_usec);
 
             }
             packetIndex++;
