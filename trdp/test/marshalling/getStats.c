@@ -52,7 +52,7 @@
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY     20000
+#define RESERVED_MEMORY     24000
 #define PREALLOCATE         {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 
 #define APP_VERSION         "0.0.0.3"
