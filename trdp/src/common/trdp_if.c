@@ -229,6 +229,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     TRDP_ERR_T      ret         = TRDP_NO_ERR;
     TRDP_SESSION_PT pSession    = NULL;
     TRDP_PUB_T      dummyPubHndl;
+    TRDP_SUB_T      dummySubHandle;
 
     if (pAppHandle == NULL)
     {
@@ -255,6 +256,9 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     pSession->realIP    = ownIpAddr;
     pSession->virtualIP = leaderIpAddr;
+
+    pSession->stats.ownIpAddr    = ownIpAddr;
+    pSession->stats.leaderIpAddr = leaderIpAddr;
 
     if (pProcessConfig != NULL)
     {
@@ -436,10 +440,26 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           NULL,                         /*    initial data                  */
                           sizeof(TRDP_STATISTICS_T));
 
+        /*  Subscribe our request packet   */
         if (ret == TRDP_NO_ERR)
         {
-        	vos_printLog(VOS_LOG_INFO, "TRDP session opened successfully\n");
-		}
+            ret = tlp_subscribe(pSession,               /*    our application identifier    */
+                                &dummySubHandle,        /*    our subscription identifier   */
+                                NULL,
+                                TRDP_STATISTICS_REQUEST_COMID, /*    ComID                         */
+                                0,                      /*    topocount: local consist only */
+                                0,                      /*    Source IP filter              */
+                                0,
+                                0,                      /*    Default destination (or MC Group)   */
+                                TRDP_FLAGS_NONE,        /*    packet flags                  */
+                                0,                      /*    Time out in us                */
+                                TRDP_TO_DEFAULT,        /*    delete invalid data on timeout  */
+                                0);                     /*    net data size                 */
+        }
+        if (ret == TRDP_NO_ERR)
+        {
+            vos_printLog(VOS_LOG_INFO, "TRDP session opened successfully\n");
+        }
         if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
         {
             vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
@@ -694,7 +714,13 @@ const char *tlc_getVersionString (void)
 {
     static CHAR8 version[16];
 
-    (void) vos_snprintf(version, sizeof(version), "%d.%d.%d.%d", TRDP_VERSION, TRDP_RELEASE, TRDP_UPDATE, TRDP_EVOLUTION);
+    (void) vos_snprintf(version,
+                        sizeof(version),
+                        "%d.%d.%d.%d",
+                        TRDP_VERSION,
+                        TRDP_RELEASE,
+                        TRDP_UPDATE,
+                        TRDP_EVOLUTION);
 
     return version;
 }
@@ -1019,7 +1045,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             }
 
             /*    Update the internal data */
-            pNewElement->addr           = pubHandle;
+            pNewElement->addr = pubHandle;
             pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
@@ -1402,7 +1428,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     UINT32                  replyComId,
     TRDP_IP_ADDR_T          replyIpAddr)
 {
-    TRDP_ERR_T  ret             = TRDP_NO_ERR;
+    TRDP_ERR_T  ret = TRDP_NO_ERR;
     PD_ELE_T    *pSubPD         = (PD_ELE_T *) subHandle;
     PD_ELE_T    *pReqElement    = NULL;
 
@@ -1573,11 +1599,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T            *newPD = NULL;
+    PD_ELE_T    *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
-    INT32 lIndex;
+    INT32       lIndex;
 
     /*    Check params    */
     if (comId == 0 || pSubHandle == NULL)
@@ -1863,7 +1889,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL && pElement != NULL)
         {
-            pPdInfo->comId          = pElement->addr.comId;
+            pPdInfo->comId = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
@@ -2044,8 +2070,8 @@ TRDP_ERR_T tlm_addListener (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T      errv            = TRDP_NO_ERR;
-    MD_LIS_ELE_T    *pNewElement    = NULL;
+    TRDP_ERR_T      errv = TRDP_NO_ERR;
+    MD_LIS_ELE_T    *pNewElement = NULL;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -2081,7 +2107,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->pNext = NULL;
 
                 /* caller parameters saved into instance */
-                pNewElement->pUserRef           = pUserRef;
+                pNewElement->pUserRef = pUserRef;
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.topoCount     = topoCount;
                 pNewElement->addr.destIpAddr    = 0;
@@ -2131,8 +2157,8 @@ TRDP_ERR_T tlm_addListener (
                 else
                 {
                     /* Insert into list */
-                    pNewElement->pNext          = appHandle->pMDListenQueue;
-                    appHandle->pMDListenQueue   = pNewElement;
+                    pNewElement->pNext = appHandle->pMDListenQueue;
+                    appHandle->pMDListenQueue = pNewElement;
 
                     /* Statistics */
                     if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) != 0)
@@ -2288,7 +2314,7 @@ TRDP_ERR_T tlm_delListener (
 TRDP_ERR_T tlm_reply (
     TRDP_APP_SESSION_T      appHandle,
     void                    *pUserRef,
-    TRDP_UUID_T             *pSessionId,
+    const TRDP_UUID_T       *pSessionId,
     UINT32                  topoCount,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
@@ -2305,7 +2331,7 @@ TRDP_ERR_T tlm_reply (
                TRDP_MSG_MP,                            /* reply without confirm */
                appHandle,
                pUserRef,
-               pSessionId,
+               (TRDP_UUID_T *)pSessionId,
                comId,
                topoCount,
                srcIpAddr,
@@ -2353,7 +2379,7 @@ TRDP_ERR_T tlm_reply (
 TRDP_ERR_T tlm_replyQuery (
     TRDP_APP_SESSION_T      appHandle,
     void                    *pUserRef,
-    TRDP_UUID_T             *pSessionId,
+    const TRDP_UUID_T       *pSessionId,
     UINT32                  topoCount,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
@@ -2371,7 +2397,7 @@ TRDP_ERR_T tlm_replyQuery (
                TRDP_MSG_MQ,                            /* reply with confirm request */
                appHandle,
                pUserRef,
-               pSessionId,
+               (TRDP_UUID_T *)pSessionId,
                comId,
                topoCount,
                srcIpAddr,
@@ -2413,7 +2439,7 @@ TRDP_ERR_T tlm_replyQuery (
  */
 TRDP_ERR_T tlm_replyErr (
     TRDP_APP_SESSION_T      appHandle,
-    TRDP_UUID_T             *pSessionId,
+    const TRDP_UUID_T       *pSessionId,
     UINT32                  topoCount,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
@@ -2427,7 +2453,7 @@ TRDP_ERR_T tlm_replyErr (
                TRDP_MSG_ME,                             /* reply with error */
                appHandle,
                NULL,                                    /* user ref */
-               pSessionId,
+               (TRDP_UUID_T *)pSessionId,
                comId,
                topoCount,
                srcIpAddr,
@@ -2511,10 +2537,10 @@ TRDP_ERR_T tlm_confirm (
 
 /**********************************************************************************************************************/
 /** Cancel an open session.
- *  Abort an open session; any pending messages will be dropped; session id set to zero
+ *  Abort an open session; any pending messages will be dropped
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in,out]  pSessionId          Session ID returned by request
+ *  @param[in]      pSessionId          Session ID returned by request
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOSESSION_ERR no such session
@@ -2522,7 +2548,7 @@ TRDP_ERR_T tlm_confirm (
  */
 EXT_DECL TRDP_ERR_T tlm_abortSession (
     TRDP_APP_SESSION_T  appHandle,
-    TRDP_UUID_T         *pSessionId)
+    const TRDP_UUID_T   *pSessionId)
 {
     MD_ELE_T    *iterMD     = appHandle->pMDSndQueue;
     BOOL        firstLoop   = TRUE;
