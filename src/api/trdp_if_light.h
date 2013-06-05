@@ -572,10 +572,10 @@ EXT_DECL TRDP_ERR_T tlm_confirm (
 
 /**********************************************************************************************************************/
 /** Cancel an open session.
- *  Abort an open session; any pending messages will be dropped; session id set to zero
+ *  Abort an open session; any pending messages will be dropped
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in,out]  pSessionId          Session ID returned by request
+ *  @param[in]      pSessionId          Session ID returned by request
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NO_SESSION_ERR no such session
@@ -583,7 +583,7 @@ EXT_DECL TRDP_ERR_T tlm_confirm (
  */
 EXT_DECL TRDP_ERR_T tlm_abortSession (
     TRDP_APP_SESSION_T  appHandle,
-    TRDP_UUID_T         *pSessionId);
+    const TRDP_UUID_T   *pSessionId);
 
 
 /**********************************************************************************************************************/
@@ -659,7 +659,7 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
 EXT_DECL TRDP_ERR_T tlm_reply (
     TRDP_APP_SESSION_T      appHandle,
     void                    *pUserRef,
-    TRDP_UUID_T             *pSessionId,
+    const TRDP_UUID_T       *pSessionId,
     UINT32                  topoCount,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
@@ -702,7 +702,7 @@ EXT_DECL TRDP_ERR_T tlm_reply (
 EXT_DECL TRDP_ERR_T tlm_replyQuery (
     TRDP_APP_SESSION_T      appHandle,
     void                    *pUserRef,
-    TRDP_UUID_T             *pSessionId,
+    const TRDP_UUID_T       *pSessionId,
     UINT32                  topoCount,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
@@ -740,7 +740,7 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
  */
 EXT_DECL TRDP_ERR_T tlm_replyErr (
     TRDP_APP_SESSION_T      appHandle,
-    TRDP_UUID_T             *pSessionId,
+    const TRDP_UUID_T       *pSessionId,
     UINT32                  topoCount,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
