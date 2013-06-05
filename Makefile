@@ -140,9 +140,9 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/getStats:   marshalling/getStats.c  $(OUTDIR)/libtrdp.a
+$(OUTDIR)/getStats:   diverse/getStats.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building statistics commandline tool $(@F)'
-			$(CC) test/marshalling/getStats.c \
+			$(CC) test/diverse/getStats.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
