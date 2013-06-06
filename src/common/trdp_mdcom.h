@@ -46,7 +46,10 @@ TRDP_ERR_T  trdp_getTCPSocket (
     TRDP_SESSION_PT pSession);
 
 void        trdp_closeMDSessions (
-    TRDP_SESSION_PT appHandle);
+    TRDP_SESSION_PT appHandle,
+    INT32 socketIndex,
+    INT32 newSocket,
+    BOOL checkAllSockets);
 
 void        trdp_mdFreeSession (
     MD_ELE_T *pMDSession);

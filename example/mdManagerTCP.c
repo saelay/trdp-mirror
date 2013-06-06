@@ -1079,7 +1079,7 @@ TRDP_ERR_T reply_msgs()
             case 0:
                 err = tlm_reply(appHandle,
                             (void *)0x12345678,
-                            &(APP_SESSION_TEST[(session_num)].pSessionId),
+                            (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
                             0,
                             APP_SESSION_TEST[(session_num)].comId,
                             MD_COMID1_SRC_IP,
@@ -1097,7 +1097,7 @@ TRDP_ERR_T reply_msgs()
             case 1:
                 err = tlm_replyQuery(appHandle,
                             (void *)0x12345678,
-                            &(APP_SESSION_TEST[(session_num)].pSessionId),
+                            (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
                             0,
                             APP_SESSION_TEST[(session_num)].comId,
                             MD_COMID1_SRC_IP,
@@ -1115,7 +1115,7 @@ TRDP_ERR_T reply_msgs()
 
             case 2:
                 err = tlm_replyErr(appHandle,
-                            &(APP_SESSION_TEST[(session_num)].pSessionId),
+                            (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
                             0,
                             APP_SESSION_TEST[(session_num)].comId,
                             MD_COMID1_SRC_IP,
