@@ -704,7 +704,7 @@ TRDP_ERR_T  trdp_requestSocket (
         if (useSocket != -1)
         {
             iface[lIndex].sock  = useSocket;
-            iface[lIndex].usage = 1;         /* Mark as used */
+            iface[lIndex].usage = 0;         /* Mark as used */
             *pIndex = lIndex;
             return err;
         }
@@ -832,60 +832,103 @@ TRDP_ERR_T  trdp_requestSocket (
 void  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
     INT32           lIndex,
-    UINT32          connectTimeout)
+    UINT32          connectTimeout,
+    BOOL            checkAll)
 {
     TRDP_ERR_T err = TRDP_PARAM_ERR;
+    INT32 index;
 
-    if (iface != NULL)
+
+    if(checkAll == TRUE)
     {
-        if (iface[lIndex].type == TRDP_SOCK_MD_UDP)
+        /* Check all the sockets */
+        /* Close the morituri = TRUE sockets */
+        for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
         {
-            vos_printLog(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[lIndex].sock, iface[lIndex].usage);
-            if (iface[lIndex].sock > -1)
+            if(iface[index].tcpParams.morituri == TRUE)
             {
-                if (--iface[lIndex].usage == 0)
+                vos_printLog(VOS_LOG_INFO, "The socket (Num = %d) will be closed\n", iface[index].sock);
+
+                err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
+                if (err != TRDP_NO_ERR)
                 {
-                    /* Close that socket, nobody uses it anymore */
-                    err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
-                    iface[lIndex].sock = -1;
-                    if (err != TRDP_NO_ERR)
+                    vos_printLog(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
+                }
+
+                /* Delete the socket from the iface */
+                vos_printLog(VOS_LOG_INFO,
+                             "Deleting socket from the iface (Sock: %d, Index: %d)\n",
+                             iface[index].sock, index);
+                iface[index].sock           = -1;
+                iface[index].sendParam.qos  = 0;
+                iface[index].sendParam.ttl  = 0;
+                iface[index].usage          = 0;
+                iface[index].bindAddr       = 0;
+                iface[index].type           = (TRDP_SOCK_TYPE_T) 0;
+                iface[index].rcvMostly      = FALSE;
+                iface[index].tcpParams.cornerIp                  = 0;
+                iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
+                iface[index].tcpParams.connectionTimeout.tv_usec = 0;
+                iface[index].tcpParams.addFileDesc               = FALSE;
+                iface[index].tcpParams.morituri                  = FALSE;
+            }
+        }
+
+    }else if(checkAll == FALSE)
+    {
+        /* Handle a specified socket */
+        if (iface != NULL)
+        {
+            if (iface[lIndex].type == TRDP_SOCK_MD_UDP)
+            {
+                vos_printLog(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[lIndex].sock, iface[lIndex].usage);
+                if (iface[lIndex].sock > -1)
+                {
+                    if (--iface[lIndex].usage == 0)
                     {
-                        vos_printLog(VOS_LOG_DBG, "Trying to close socket again?\n");
+                        /* Close that socket, nobody uses it anymore */
+                        err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
+                        iface[lIndex].sock = -1;
+                        if (err != TRDP_NO_ERR)
+                        {
+                            vos_printLog(VOS_LOG_DBG, "Trying to close socket again?\n");
+                        }
                     }
                 }
+
             }
-
-        }
-        else
-        {
-            if ((iface[lIndex].sock > -1) && (iface[lIndex].rcvMostly == FALSE))
+            else
             {
-                vos_printLog(VOS_LOG_DBG, "Decrement the socket %d usage = %d\n", iface[lIndex].sock, iface[lIndex].usage);
-                iface[lIndex].usage--;
-
-                if (iface[lIndex].usage == 0)
+                if ((iface[lIndex].sock > -1) && (iface[lIndex].rcvMostly == FALSE))
                 {
-                    /* Start the socket connection timeout */
-                    TRDP_TIME_T tmpt_interval, tmpt_now;
+                    vos_printLog(VOS_LOG_DBG, "Decrement the socket %d usage = %d\n", iface[lIndex].sock, iface[lIndex].usage);
+                    iface[lIndex].usage--;
 
-                    vos_printLog(VOS_LOG_INFO,
-                               "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                               iface[lIndex].sock);
+                    if (iface[lIndex].usage == 0)
+                    {
+                        /* Start the socket connection timeout */
+                        TRDP_TIME_T tmpt_interval, tmpt_now;
 
-                    tmpt_interval.tv_sec    = connectTimeout / 1000000;
-                    tmpt_interval.tv_usec   = connectTimeout % 1000000;
+                        vos_printLog(VOS_LOG_INFO,
+                                   "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
+                                   iface[lIndex].sock);
 
-                    vos_getTime(&tmpt_now);
-                    vos_addTime(&tmpt_now, &tmpt_interval);
+                        tmpt_interval.tv_sec    = connectTimeout / 1000000;
+                        tmpt_interval.tv_usec   = connectTimeout % 1000000;
 
-                    memcpy(&iface[lIndex].tcpParams.connectionTimeout,
-                           &tmpt_now,
-                           sizeof(TRDP_TIME_T));
+                        vos_getTime(&tmpt_now);
+                        vos_addTime(&tmpt_now, &tmpt_interval);
+
+                        memcpy(&iface[lIndex].tcpParams.connectionTimeout,
+                               &tmpt_now,
+                               sizeof(TRDP_TIME_T));
+                    }
                 }
             }
         }
     }
 }
+
 
 
 /**********************************************************************************************************************/

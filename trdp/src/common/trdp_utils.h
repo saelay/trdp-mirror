@@ -159,7 +159,8 @@ TRDP_ERR_T trdp_requestSocket(
 void trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
     INT32 lIndex,
-    UINT32 connectTimeout);
+    UINT32 connectTimeout,
+    BOOL checkAll);
 
 
 /*********************************************************************************************************************/
