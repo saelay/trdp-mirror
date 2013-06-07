@@ -748,7 +748,7 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 					/* Get Subscribe DataSet Type from an option argument */
 					sscanf(argv[i+1], "%1u", &uint32_value);
 					/* Set Subscribe DataSet Type(DataSet1 or DataSet2) */
-					getPdCommandValue.PD_PUB_DATASET_TYPE = uint32_value;
+					getPdCommandValue.PD_SUB_DATASET_TYPE = uint32_value;
 				}
 			break;
 			case 'a':
@@ -1209,6 +1209,11 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 			vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
 			return PD_APP_ERR;
 		}
+		else
+		{
+			/* Display TimeStamp when subscribe time */
+			printf("%s Subnet1 subscribe.\n", vos_getTimeStamp());
+		}
 
 		/*	Sub-network Id2 Subscribe */
 		err = tlp_subscribe( appHandle2,															/* our application identifier */
@@ -1228,6 +1233,11 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 		{
 			vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
 			return PD_APP_ERR;
+		}
+		else
+		{
+			/* Display TimeStamp when subscribe time */
+			printf("%s Subnet2 subscribe.\n", vos_getTimeStamp());
 		}
 		/* Display TimeStamp when caller test start time */
 		printf("%s Subscriber test start.\n", vos_getTimeStamp());
@@ -1303,7 +1313,11 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 			vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
 			return PD_APP_ERR;
 		}
-
+		else
+		{
+			/* Display TimeStamp when publish time */
+			printf("%s Subnet1 publish.\n", vos_getTimeStamp());
+		}
 		/* Set PD Data in Traffic Store */
 		memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), pPdDataSet, pdDataSetSize);
 
@@ -1324,6 +1338,11 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 		{
 			vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
 			return PD_APP_ERR;
+		}
+		else
+		{
+			/* Display TimeStamp when publish time */
+			printf("%s Subnet2 publish.\n", vos_getTimeStamp());
 		}
 	}
 
@@ -1401,10 +1420,20 @@ PD_APP_ERR_TYPE PDReceiveCountCheck (void)
 				{
 					vos_printLog(VOS_LOG_ERROR, "tlp_unsubscribe() error = %d\n",err);
 				}
+				else
+				{
+					/* Display TimeStamp when unSubscribe time */
+					printf("%s Subnet1 unSubscribe.\n", vos_getTimeStamp());
+				}
 				/* Subnet2 unSubscribe */
 				if (tlp_unsubscribe(appHandle2, iterPdThreadParameter->subHandleNet2ComId1) != TRDP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "tlp_unsubscribe() error = %d\n",err);
+				}
+				else
+				{
+					/* Display TimeStamp when unSubscribe time */
+					printf("%s Subnet2 unSubscribe.\n", vos_getTimeStamp());
 				}
 				/* Delete this CommandValue for Command Value List */
 				if (deletePdCommandValueList(&pFirstPdCommandValue, iterPdThreadParameter->pPdCommandValue) != PD_APP_NO_ERR)
@@ -1437,6 +1466,8 @@ PD_APP_ERR_TYPE PDReceiveCountCheck (void)
 PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 {
 	INT32 putCounter = 0;							/* put counter */
+	BOOL linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
+	UINT32 TS_SUBNET_NOW = SUBNET1;
 
 	/* Wait for multicast grouping */
 	vos_threadDelay(PDCOM_MULTICAST_GROUPING_DELAY_TIME);
@@ -1447,6 +1478,40 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
     while (((putCounter < pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER)
     	|| (pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER == 0)))
     {
+		/* Get Write Traffic Store Receive SubnetId */
+		if (tau_getNetworkContext(&TS_SUBNET_NOW) != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
+		}
+		/* Check Subnet for Write Traffic Store Receive Subnet */
+		tau_checkLinkUpDown(TS_SUBNET_NOW, &linkUpDown);
+		/* Link Down */
+		if (linkUpDown == FALSE)
+		{
+			/* Change Write Traffic Store Receive Subnet */
+			if( TS_SUBNET_NOW == SUBNET1)
+			{
+				vos_printLog(VOS_LOG_ERROR, "Subnet1 Link Down. Change Receive Subnet\n");
+				/* Write Traffic Store Receive Subnet : Subnet2 */
+				TS_SUBNET_NOW = SUBNET2;
+			}
+			else
+			{
+				vos_printLog(VOS_LOG_ERROR, "Subnet2 Link Down. Change Receive Subnet\n");
+				/* Write Traffic Store Receive Subnet : Subnet1 */
+				TS_SUBNET_NOW = SUBNET1;
+			}
+			/* Set Write Traffic Store Receive Subnet */
+			if (tau_setNetworkContext(TS_SUBNET_NOW) != TRDP_NO_ERR)
+		    {
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+		    }
+			else
+			{
+				vos_printLog(VOS_LOG_DBG, "tau_setNetworkContext() set subnet:0x%x\n", TS_SUBNET_NOW);
+			}
+		}
+
       	/* Get access right to Traffic Store*/
     	err = tau_lockTrafficStore();
     	if (err == TRDP_NO_ERR)
@@ -1538,11 +1603,21 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 	{
 		vos_printLog(VOS_LOG_ERROR, "tlp_unpublish() error = %d\n",err);
 	}
+	else
+	{
+		/* Display TimeStamp when unPublish time */
+		printf("%s Subnet1 unPublish.\n", vos_getTimeStamp());
+	}
 	/* Subnet2 unPublish */
 	err = tlp_unpublish(appHandle2, pPdThreadParameter->pubHandleNet2ComId1);
 	if (err != TRDP_NO_ERR)
 	{
 		vos_printLog(VOS_LOG_ERROR, "tlp_unpublish() error = %d\n",err);
+	}
+	else
+	{
+		/* Display TimeStamp when unSubscribe time */
+		printf("%s Subnet2 unPublish.\n", vos_getTimeStamp());
 	}
 	/* Delete this CommandValue for Command Value List */
 	if (deletePdCommandValueList(&pFirstPdCommandValue, pPdThreadParameter->pPdCommandValue) != PD_APP_NO_ERR)
@@ -1746,6 +1821,8 @@ PD_APP_ERR_TYPE printPdCommandValue (
 		printf("-p,	Publisher tlp_put cycle time: %u micro sec\n", iterPdCommandValue->LADDER_APP_CYCLE);
 		printf("-c,	Publish ComId1: %u\n", iterPdCommandValue->PD_PUB_COMID1);
 		printf("-g,	Subscribe ComId1: %u\n", iterPdCommandValue->PD_SUB_COMID1);
+		printf("-i,	Publish DataSetId: %u\n", iterPdCommandValue->PD_PUB_DATASET_TYPE);
+		printf("-I,	Subscribe DataSetId: %u\n", iterPdCommandValue->PD_SUB_DATASET_TYPE);
 		miscIpToString(iterPdCommandValue->PD_COMID1_SUB_SRC_IP1, strIp);
 		printf("-a,	Subscribe ComId1 Source IP Address: %s\n", strIp);
 		miscIpToString(iterPdCommandValue->PD_COMID1_SUB_DST_IP1, strIp);
@@ -2227,43 +2304,97 @@ PD_APP_ERR_TYPE pdTerminate(
 {
 	TRDP_ERR_T err = TRDP_NO_ERR;
 	PD_THREAD_PARAMETER *iterPdThreadParameter;
+	BOOL firstPdThreadParameter = TRUE;
 
 	if (pHeadPdThreadParameterList != NULL)
 	{
 		/* unPublish, unSubscribe Loop */
-		for (iterPdThreadParameter = pHeadPdThreadParameterList;
-			  iterPdThreadParameter->pNextPdThreadParameter != NULL;
-			  iterPdThreadParameter = iterPdThreadParameter->pNextPdThreadParameter)
+//		for (iterPdThreadParameter = pHeadPdThreadParameterList;
+//			  iterPdThreadParameter->pNextPdThreadParameter != NULL;
+//			  iterPdThreadParameter = iterPdThreadParameter->pNextPdThreadParameter)
+		/* First Thread */
+		iterPdThreadParameter = pHeadPdThreadParameterList;
+		do
 		{
-			/* Subnet1 unPublish */
-			err = tlp_unpublish(appHandle, iterPdThreadParameter->pubHandleNet1ComId1);
-			if(err != TRDP_NO_ERR)
+			/* First PD Thread Parameter ? */
+			if (firstPdThreadParameter == TRUE)
 			{
-				vos_printLog(VOS_LOG_ERROR, "tlp_unpublish() error = %d\n",err);
+				firstPdThreadParameter = FALSE;
 			}
-			/* Subnet1 unSubscribe */
-			err = tlp_unsubscribe(appHandle, iterPdThreadParameter->subHandleNet1ComId1);
-			if(err != TRDP_NO_ERR)
+			else
 			{
-				vos_printLog(VOS_LOG_ERROR, "tlp_unsubscribe() error = %d\n",err);
+				iterPdThreadParameter = iterPdThreadParameter->pNextPdThreadParameter;
+			}
+			/* Check Subnet1 Valid */
+			if (appHandle != NULL)
+			{
+				/* Check Publish comId Valid */
+				if (iterPdThreadParameter->pubHandleNet1ComId1 > 0)
+				{
+					/* Subnet1 unPublish */
+					err = tlp_unpublish(appHandle, iterPdThreadParameter->pubHandleNet1ComId1);
+					if(err != TRDP_NO_ERR)
+					{
+						vos_printLog(VOS_LOG_ERROR, "tlp_unpublish() error = %d\n",err);
+					}
+					else
+					{
+						/* Display TimeStamp when unPublish time */
+						printf("%s Subnet1 unPublish.\n", vos_getTimeStamp());
+					}
+				}
+				/* Check Subscribe comId Valid */
+				if (iterPdThreadParameter->subHandleNet1ComId1 > 0)
+				{
+					/* Subnet1 unSubscribe */
+					err = tlp_unsubscribe(appHandle, iterPdThreadParameter->subHandleNet1ComId1);
+					if(err != TRDP_NO_ERR)
+					{
+						vos_printLog(VOS_LOG_ERROR, "tlp_unsubscribe() error = %d\n",err);
+					}
+					else
+					{
+						/* Display TimeStamp when unSubscribe time */
+						printf("%s Subnet1 unSubscribe.\n", vos_getTimeStamp());
+					}
+				}
 			}
 
+			/* Check Subnet2 Valid */
 			if (appHandle2 != NULL)
 			{
-				/* Subnet2 unPublish */
-				err = tlp_unpublish(appHandle2, iterPdThreadParameter->pubHandleNet2ComId1);
-				if(err != TRDP_NO_ERR)
+				/* Check Publish comId Valid */
+				if (iterPdThreadParameter->pubHandleNet2ComId1 > 0)
 				{
-					vos_printLog(VOS_LOG_ERROR, "tlp_unpublish() error = %d\n",err);
+					/* Subnet2 unPublish */
+					err = tlp_unpublish(appHandle2, iterPdThreadParameter->pubHandleNet2ComId1);
+					if(err != TRDP_NO_ERR)
+					{
+						vos_printLog(VOS_LOG_ERROR, "tlp_unpublish() error = %d\n",err);
+					}
+					else
+					{
+						/* Display TimeStamp when unPublish time */
+						printf("%s Subnet2 unPublish.\n", vos_getTimeStamp());
+					}
 				}
-				/* Subnet2 unSubscribe */
-				err = tlp_unsubscribe(appHandle2, iterPdThreadParameter->subHandleNet2ComId1);
-				if(err != TRDP_NO_ERR)
+				/* Check Subscribe comId Valid */
+				if (iterPdThreadParameter->subHandleNet2ComId1 > 0)
 				{
-					vos_printLog(VOS_LOG_ERROR, "tlp_unsubscribe() error = %d\n",err);
+					/* Subnet2 unSubscribe */
+					err = tlp_unsubscribe(appHandle2, iterPdThreadParameter->subHandleNet2ComId1);
+					if(err != TRDP_NO_ERR)
+					{
+						vos_printLog(VOS_LOG_ERROR, "tlp_unsubscribe() error = %d\n",err);
+					}
+					else
+					{
+						/* Display TimeStamp when unSubscribe time */
+						printf("%s Subnet2 unSubscribe.\n", vos_getTimeStamp());
+					}
 				}
 			}
-		}
+		} while(iterPdThreadParameter->pNextPdThreadParameter != NULL);
 		/* Display TimeStamp when close Session time */
 		printf("%s All unPublish, All unSubscribe.\n", vos_getTimeStamp());
 	}
@@ -2281,7 +2412,7 @@ PD_APP_ERR_TYPE pdTerminate(
 	else
 	{
 		/* Display TimeStamp when tau_ladder_terminate time */
-		printf("%s TRDP Ladder Termiinate.\n", vos_getTimeStamp());
+		printf("%s TRDP Ladder Terminate.\n", vos_getTimeStamp());
 	}
 
 	/* TRDP Terminate */
@@ -2293,7 +2424,7 @@ PD_APP_ERR_TYPE pdTerminate(
 	else
 	{
 		/* Display TimeStamp when tlc_terminate time */
-		printf("%s TRDP Termiinate.\n", vos_getTimeStamp());
+		printf("%s TRDP Terminate.\n", vos_getTimeStamp());
 	}
 	return PD_APP_NO_ERR;
 }

@@ -137,6 +137,9 @@ int main (void)
 {
     CHAR8 putData[PD_DATA_SIZE_MAX];				/* put DATA */
     INT32 putCounter = 0;							/* put counter */
+    BOOL linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
+    /* Using Receive Subnet in order to Wirte PD in Traffic Store  */
+    UINT32 TS_SUBNET = 1;
 
     /* Traffic Store */
 	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
@@ -325,7 +328,41 @@ int main (void)
     		/* Set PD Data in Traffic Store */
     		memcpy((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1), putData, sizeof(putData));
 
-			/* First TRDP instance in TRDP publish buffer */
+    		/* Get Write Traffic Store Receive SubnetId */
+    		if (tau_getNetworkContext(&TS_SUBNET) != TRDP_NO_ERR)
+    		{
+    			vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
+    		}
+    		/* Check Subnet for Write Traffic Store Receive Subnet */
+    		tau_checkLinkUpDown(TS_SUBNET, &linkUpDown);
+    		/* Link Down */
+    		if (linkUpDown == FALSE)
+    		{
+    			/* Change Write Traffic Store Receive Subnet */
+    			if( TS_SUBNET == SUBNET1)
+    			{
+    				vos_printLog(VOS_LOG_ERROR, "Subnet1 Link Down. Change Receive Subnet\n");
+    				/* Write Traffic Store Receive Subnet : Subnet2 */
+    				TS_SUBNET = SUBNET2;
+    			}
+    			else
+    			{
+    				vos_printLog(VOS_LOG_ERROR, "Subnet2 Link Down. Change Receive Subnet\n");
+    				/* Write Traffic Store Receive Subnet : Subnet1 */
+    				TS_SUBNET = SUBNET1;
+    			}
+    			/* Set Write Traffic Store Receive Subnet */
+    			if (tau_setNetworkContext(TS_SUBNET) != TRDP_NO_ERR)
+    		    {
+    				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+    		    }
+    			else
+    			{
+    				vos_printLog(VOS_LOG_DBG, "tau_setNetworkContext() set subnet:0x%x\n", TS_SUBNET);
+    			}
+    		}
+
+    		/* First TRDP instance in TRDP publish buffer */
 			tlp_put(appHandle,
 					pubHandleNet1ComId1,
 					(void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1),

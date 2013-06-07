@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.19"
+#define PD_APP_VERSION	"V0.22"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.19"
+#define PD_APP_VERSION	"V0.22"
 #else
-#define PD_APP_VERSION	"V0.19"
+#define PD_APP_VERSION	"V0.22"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
@@ -84,11 +84,17 @@ extern "C" {
 #define DATASET_TYPE1				1			/* DATASET Type1 */
 #define DATASET_TYPE2				2			/* DATASET Type2 */
 
+/* SubnetId Type */
+#define SUBNETID_TYPE1				1			/* SUBNETID Type1 */
+#define SUBNETID_TYPE2				2			/* SUBNETID Type2 */
+
 /* LOG CATEGORY */
 #define LOG_CATEGORY_ERROR			0x1				/**< This is a critical error                 */
 #define LOG_CATEGORY_WARNING		0x2				/**< This is a warning                        */
 #define LOG_CATEGORY_INFO			0x4				/**< This is an info                          */
 #define LOG_CATEGORY_DEBUG			0x8				/**< This is a debug info                     */
+
+#define KERNEL_MESSAGE_BUFFER_SIZE	4096			/* for Receive netlink message */
 
 /***********************************************************************************************************************
  * TYPEDEFS

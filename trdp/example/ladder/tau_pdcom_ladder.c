@@ -52,7 +52,9 @@ void tau_recvPdDs (
     UINT32 dataSize)
 {
 	UINT32 subnetId;											/* Using Sub-network Id */
+	UINT32 displaySubnetId = SUBNETID_TYPE1;				/* Using Sub-network Id for Display log */
 	UINT16 offset = 0;										/* Traffic Store Offset Address */
+	BOOL linkUpDown = TRUE;									/* Link Up Down information TRUE:Up FALSE:Down */
 	extern UINT8 *pTrafficStoreAddr;						/* pointer to pointer to Traffic Store Address */
 	PD_COMMAND_VALUE *subscriberPdCommandValue = NULL;	/* Subscriber PD Command Value */
 	TRDP_ADDRESSES_T addr = {0};
@@ -142,22 +144,47 @@ void tau_recvPdDs (
 				memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
 				memset((void *)((int)pTrafficStoreAddr + (int)offset), 0, pSubscriberElement->dataSize);
 				tau_unlockTrafficStore();
-				/* Change Write Traffic Store Receive Subnet */
+				/* Set sunbetId for display log */
 				if( subnetId == SUBNET1)
 				{
-					/* Write Traffic Store Receive Subnet : Subnet2 */
-					subnetId = SUBNET2;
+					/* Set Subnet1 */
+					displaySubnetId = SUBNETID_TYPE1;
 				}
 				else
 				{
-					/* Write Traffic Store Receive Subnet : Subnet1 */
-					subnetId = SUBNET1;
+					/* Set Subnet2 */
+					displaySubnetId = SUBNETID_TYPE2;
 				}
-				/* Set Write Traffic Store Receive Subnet */
-				if (tau_setNetworkContext(subnetId) != TRDP_NO_ERR)
-			    {
-			    	vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
-			    }
+				vos_printLog(VOS_LOG_ERROR, "SubnetId:%d comId:%d Timeout. Traffic Store Clear.\n", displaySubnetId, pPDInfo->comId);
+
+				/* Check Subnet for Write Traffic Store Receive Subnet */
+				tau_checkLinkUpDown(subnetId, &linkUpDown);
+				/* Link Down */
+				if (linkUpDown == FALSE)
+				{
+					/* Change Write Traffic Store Receive Subnet */
+					if( subnetId == SUBNET1)
+					{
+						vos_printLog(VOS_LOG_ERROR, "Subnet1 Link Down. Change Receive Subnet\n");
+						/* Write Traffic Store Receive Subnet : Subnet2 */
+						subnetId = SUBNET2;
+					}
+					else
+					{
+						vos_printLog(VOS_LOG_ERROR, "Subnet2 Link Down. Change Receive Subnet\n");
+						/* Write Traffic Store Receive Subnet : Subnet1 */
+						subnetId = SUBNET1;
+					}
+					/* Set Write Traffic Store Receive Subnet */
+					if (tau_setNetworkContext(subnetId) != TRDP_NO_ERR)
+				    {
+						vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+				    }
+					else
+					{
+						vos_printLog(VOS_LOG_DBG, "tau_setNetworkContext() set subnet:0x%x\n", subnetId);
+					}
+				}
 			}
 		}
 		else
@@ -166,6 +193,9 @@ void tau_recvPdDs (
 /*			memcpy(&offset, pRefCon, sizeof(offset)); */
 			memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
 			memcpy((void *)((int)pTrafficStoreAddr + (int)offset), pData, dataSize);
+
+vos_printLog(VOS_LOG_DBG, "*** Traffic Store Write TIme *** comId:%d subnetId:%d character:%d seqCount:%d\n",
+		addr.comId, displaySubnetId, *(pData+1), pPDInfo->seqCount);
 			tau_unlockTrafficStore();
 		}
 	}
