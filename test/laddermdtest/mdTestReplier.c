@@ -785,7 +785,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							err = tlm_reply (
 								replierAppHandle,						/* the handle returned by tlc_init */
 								NULL,									/* user supplied value returned with reply */
-								&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
 								pReceiveMsg->Msg.topoCount,			/* topocount to use */
 								0,										/* comId of packet to be sent */
 								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
@@ -824,7 +824,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							err = tlm_reply (
 								replierAppHandle,						/* the handle returned by tlc_init */
 								NULL,									/* user supplied value returned with reply */
-								&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
 								pReceiveMsg->Msg.topoCount,			/* topocount to use */
 								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
 								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
@@ -879,7 +879,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						err = tlm_reply (
 							replierAppHandle,						/* the handle returned by tlc_init */
 							NULL,									/* user supplied value returned with reply */
-							&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
 							pReceiveMsg->Msg.topoCount,			/* topocount to use */
 							0,										/* comId of packet to be sent */
 							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
@@ -917,7 +917,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						err = tlm_reply (
 							replierAppHandle,						/* the handle returned by tlc_init */
 							NULL,									/* user supplied value returned with reply */
-							&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
 							pReceiveMsg->Msg.topoCount,			/* topocount to use */
 							(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
 							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
@@ -950,7 +950,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						err = tlm_reply (
 							replierAppHandle,						/* the handle returned by tlc_init */
 							NULL,									/* user supplied value returned with reply */
-							&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
 							pReceiveMsg->Msg.topoCount,			/* topocount to use */
 							(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
 							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
@@ -987,7 +987,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						err = tlm_reply (
 							replierAppHandle,						/* the handle returned by tlc_init */
 							NULL,									/* user supplied value returned with reply */
-							&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
 							pReceiveMsg->Msg.topoCount,			/* topocount to use */
 							(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
 							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */

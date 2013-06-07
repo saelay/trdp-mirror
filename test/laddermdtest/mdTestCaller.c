@@ -275,6 +275,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	TRDP_SEND_PARAM_T *pMdSendParam = NULL;
 	TRDP_URI_USER_T mdSourceURI = {0};
 	TRDP_URI_USER_T mdDestURI = {0};
+	UINT32 mdIncrementMessageSize = 0;
 
 	/* Output Log of Caller Thread Parameter */
 	if ((((pCallerThreadParameter->pCommandValue->mdLog) && MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)
@@ -410,8 +411,34 @@ VOS_THREAD_FUNC_T MDCaller (
 					pFirstCallerCreateMdData = pCallerCreateIncrementMdData;
 					/* Create Top Character */
 					firstCharacter = (char)(incrementMdSendCounter % MD_DATA_INCREMENT_CYCLE);
+
+					/* Data Size Check over DataSetId Size */
+					if (pCallerThreadParameter->pCommandValue->mdMessageSize >= MD_DATASETID_SIZE)
+					{
+						/* Set DataSetId */
+//						sprintf((char *)pCallerCreateIncrementMdData, "%4u", DATASETID_INCREMENT_DATA);
+
+						UINT32 incrementDataSetId =0;
+						incrementDataSetId = DATASETID_INCREMENT_DATA;
+						memcpy(pCallerCreateIncrementMdData, &incrementDataSetId, sizeof(UINT32));
+
+
+
+						pCallerCreateIncrementMdData = pCallerCreateIncrementMdData + MD_DATASETID_SIZE;
+						/* Set increment MD DATA SIZE */
+						mdIncrementMessageSize = pCallerThreadParameter->pCommandValue->mdMessageSize - MD_DATASETID_SIZE;
+					}
+					/* Data Size under DataSetId Size */
+					else
+					{
+						/* Don't Set DataSetId */
+						/* Set increment MD DATA SIZE */
+						mdIncrementMessageSize = pCallerThreadParameter->pCommandValue->mdMessageSize;
+					}
+
 					/* Create MD Increment Data */
-					for(i=0; i < pCallerThreadParameter->pCommandValue->mdMessageSize; i++)
+//					for(i=0; i < pCallerThreadParameter->pCommandValue->mdMessageSize; i++)
+					for(i=0; i < mdIncrementMessageSize; i++)
 					{
 						*pCallerCreateIncrementMdData = (char)((firstCharacter + i) % MD_DATA_INCREMENT_CYCLE);
 						pCallerCreateIncrementMdData = pCallerCreateIncrementMdData + 1;

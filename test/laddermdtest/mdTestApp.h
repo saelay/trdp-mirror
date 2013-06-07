@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.25"
+#define MD_APP_VERSION	"V0.28"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.25"
+#define MD_APP_VERSION	"V0.28"
 #else
-#define MD_APP_VERSION	"V0.25"
+#define MD_APP_VERSION	"V0.28"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -141,6 +141,7 @@ extern "C" {
 #define MD_DATA_TCP_MAX_SIZE		65388			/* TCP MD DATA Max Size : 64KB */
 #define MD_HEADER_SIZE				112				/* MD Header */
 #define MD_FCS_SIZE					4				/* MD FCS Size */
+#define MD_DATASETID_SIZE			4				/* MD Data Set Id Size */
 
 /* MD DATA */
 #define MD_DATA_INCREMENT_CYCLE			10			/* MD Increment DATA Cycle */

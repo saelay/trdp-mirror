@@ -148,6 +148,22 @@ TRDP_ERR_T  tau_lockTrafficStore (
 TRDP_ERR_T  tau_unlockTrafficStore (
     void);
 
+/**********************************************************************************************************************/
+/** Check Link up/down
+ *
+ *  @param[in]		checkSubnetId			check Sub-network Id
+ *  @param[out]		pLinkUpDown          pointer to check Sub-network Id Link Up Down TRUE:Up, FALSE:Down
+ *
+ *  @retval         TRDP_NO_ERR				no error
+ *  @retval         TRDP_PARAM_ERR			parameter err
+ *  @retval         TRDP_SOCK_ERR			socket err
+ *
+ *
+ */
+TRDP_ERR_T  tau_checkLinkUpDown (
+	UINT32 checkSubnetId,
+	BOOL *pLinkUpDown);
+
 #endif	/* TRDP_OPTION_LADDER */
 
 #ifdef __cplusplus

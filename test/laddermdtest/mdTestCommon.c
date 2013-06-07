@@ -519,15 +519,29 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 			sprintf((char *)**pppMdData, "%4u", mdDataSize);
 			**pppMdData = **pppMdData + 4;
 #endif
-			/* Set DataSetId */
-			sprintf((char *)**pppMdData, "%4u", DATASETID_INCREMENT_DATA);
-			**pppMdData = **pppMdData + 4;
+			/* Data Size Check over DataSetId Size */
+			if (mdDataSize >= MD_DATASETID_SIZE)
+			{
+				/* Set DataSetId */
+//				sprintf((char *)**pppMdData, "%4u", DATASETID_INCREMENT_DATA);
+				UINT32 incrementDataSetId =0;
+				incrementDataSetId = DATASETID_INCREMENT_DATA;
+				memcpy(**pppMdData, &incrementDataSetId, sizeof(UINT32));
+
+				**pppMdData = **pppMdData + MD_DATASETID_SIZE;
+				mdDataSize = mdDataSize - MD_DATASETID_SIZE;
+			}
+			/* Data Size under DataSetId Size */
+			else
+			{
+				/* Don't Set DataSetId */
+			}
 
 			/* Create Top Character */
 			firstCharacter = (char)(mdSendCount % MD_DATA_INCREMENT_CYCLE);
 			/* Create MD Increment Data */
-			for(i=0; i <= mdDataSize - 4; i++)
-//			for(i=0; i < mdDataSize; i++)
+//			for(i=0; i <= mdDataSize - 4; i++)
+			for(i=0; i < mdDataSize; i++)
 			{
 				***pppMdData = (char)((firstCharacter + i) % MD_DATA_INCREMENT_CYCLE);
 				**pppMdData = **pppMdData + 1;
@@ -915,8 +929,8 @@ MD_APP_ERR_TYPE getMdDataFromDataSetId(
 	{
 		case DATASETID_INCREMENT_DATA:
 			/* Get Increment Start Byte of Receive MD DATA */
-//			memcpy(&startCharacter, pReceiveMdData + 4, sizeof(char));
-			memcpy(&startCharacter, pReceiveMdData, sizeof(char));
+			memcpy(&startCharacter, pReceiveMdData + 4, sizeof(char));
+//			memcpy(&startCharacter, pReceiveMdData, sizeof(char));
 			/* Create Increment DATA */
 			err = createMdIncrementData(startCharacter, *pReceiveMdDataSize, &ppCheckMdData);
 			if (err != MD_APP_NO_ERR)
@@ -983,6 +997,14 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 
 	/* Get MD DATASET Size */
 	memcpy(&receiveMdDataSetSize, pReceiveMdDataSize, sizeof(UINT32));
+
+	/* Check MD DATASET Size */
+	if (receiveMdDataSetSize < MD_DATASETID_SIZE)
+	{
+		/* DataSetId nothing : increment Data size under 3 byte */
+		/* not Check compare */
+		return MD_APP_NO_ERR;
+	}
 
 	/* Get DataSetId */
 	memcpy(&receiveMdDataSetId, pReceiveMdData, sizeof(UINT32));

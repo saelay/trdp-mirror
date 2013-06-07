@@ -129,8 +129,8 @@ UINT16 OFFSET_ADDRESS3 = 0x1300;					/* offsetAddress comId1 subscribe */
 UINT16 OFFSET_ADDRESS4 = 0x1380;					/* offsetAddress comId2 subscribe */
 /* Marshalling enable/disable */
 BOOL marshallingFlag = FALSE;						/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
-UINT32	publisherAppCycle = 120000;				/* Publisher Application cycle in us */
-UINT32	subscriberAppCycle = 150000;				/* Subscriber Application cycle in us */
+//UINT32	publisherAppCycle = 120000;				/* Publisher Application cycle in us */
+UINT32	subscriberAppCycle = 10000;				/* Subscriber Application cycle in us */
 /* Using Receive Subnet in order to Wirte PD in Traffic Store  */
 UINT32 TS_SUBNET =1;
 /* PD return Cycle Number */
@@ -373,6 +373,7 @@ int main (int argc, char *argv[])
 	UINT32	pdReturnLoopCounter = 0;								/* PD Return Loop Counter */
 	PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;	/* Sender's IP: 10.4.33.17 (default) */
 	PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;	/* Sender's IP: 10.4.33.17 (default) */
+	BOOL linkUpDown = TRUE;													/* Link Up Down information TRUE:Up FALSE:Down */
 
 	DATASET1 getDataSet1 = {0};								/* get DataSet1 from Traffic Store */
 	DATASET2 getDataSet2;									/* get DataSet2 from Traffic Store */
@@ -965,6 +966,11 @@ int main (int argc, char *argv[])
 			tau_ladder_terminate();
 			return 1;
 		}
+		else
+		{
+			/* Display TimeStamp when subscribe time */
+			printf("%s Subnet1 ComId1 subscribe.\n", vos_getTimeStamp());
+		}
 	}
 	/* Enable Comid2 ? */
 	if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
@@ -990,6 +996,11 @@ int main (int argc, char *argv[])
 			tlc_terminate();
 			tau_ladder_terminate();
 			return 1;
+		}
+		else
+		{
+			/* Display TimeStamp when subscribe time */
+			printf("%s Subnet1 ComId2 subscribe.\n", vos_getTimeStamp());
 		}
 	}
 
@@ -1024,6 +1035,11 @@ int main (int argc, char *argv[])
 				tau_ladder_terminate();
 				return 1;
 			}
+			else
+			{
+				/* Display TimeStamp when subscribe time */
+				printf("%s Subnet2 ComId1 subscribe.\n", vos_getTimeStamp());
+			}
 		}
 		/* Enable Comid2 ? */
 		if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
@@ -1049,6 +1065,11 @@ int main (int argc, char *argv[])
 				tlc_terminate();
 				tau_ladder_terminate();
 				return 1;
+			}
+			else
+			{
+				/* Display TimeStamp when subscribe time */
+				printf("%s Subnet2 ComId2 subscribe.\n", vos_getTimeStamp());
 			}
 		}
 	}
@@ -1077,6 +1098,11 @@ int main (int argc, char *argv[])
 			tau_ladder_terminate();
 			return 1;
 		}
+		else
+		{
+			/* Display TimeStamp when publish time */
+			printf("%s Subnet1 ComId1 publish.\n", vos_getTimeStamp());
+		}
 	}
 	/* Enable Comid2 ? */
 	if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
@@ -1101,6 +1127,11 @@ int main (int argc, char *argv[])
 			tlc_terminate();
 			tau_ladder_terminate();
 			return 1;
+		}
+		else
+		{
+			/* Display TimeStamp when publish time */
+			printf("%s Subnet1 ComId2 publish.\n", vos_getTimeStamp());
 		}
 	}
 
@@ -1131,6 +1162,11 @@ int main (int argc, char *argv[])
 				tau_ladder_terminate();
 				return 1;
 			}
+			else
+			{
+				/* Display TimeStamp when publish time */
+				printf("%s Subnet2 ComId1 publish.\n", vos_getTimeStamp());
+			}
 		}
 		/* Enable Comid2 ? */
 		if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
@@ -1155,6 +1191,11 @@ int main (int argc, char *argv[])
 				tlc_terminate();
 				tau_ladder_terminate();
 				return 1;
+			}
+			else
+			{
+				/* Display TimeStamp when publish time */
+				printf("%s Subnet2 ComId2 publish.\n", vos_getTimeStamp());
 			}
 		}
 	}
@@ -1204,14 +1245,16 @@ int main (int argc, char *argv[])
     		{
 				/* Get Receive PD DataSet1 from Traffic Store */
 				memcpy(&getDataSet1, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS3), dataSet1Size);
-				vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
+//				vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
+vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATASET_NO_1, getDataSet1.character);
     		}
     		/* Enable Comid2 ? */
     		if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
     		{
 				/* Get Receive PD DataSet1 from Traffic Store */
 				memcpy(&getDataSet2, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS4), dataSet2Size);
-				vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
+//				vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
+vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATASET_NO_2, getDataSet2.dataset1[0].character);
     		}
 
 #if 0
@@ -1250,6 +1293,40 @@ int main (int argc, char *argv[])
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
+			}
+
+			/* Get Write Traffic Store Receive SubnetId */
+			if (tau_getNetworkContext(&TS_SUBNET) != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
+			}
+			/* Check Subnet for Write Traffic Store Receive Subnet */
+			tau_checkLinkUpDown(TS_SUBNET, &linkUpDown);
+			/* Link Down */
+			if (linkUpDown == FALSE)
+			{
+				/* Change Write Traffic Store Receive Subnet */
+				if( TS_SUBNET == SUBNET1)
+				{
+					vos_printLog(VOS_LOG_ERROR, "Subnet1 Link Down. Change Receive Subnet\n");
+					/* Write Traffic Store Receive Subnet : Subnet2 */
+					TS_SUBNET = SUBNET2;
+				}
+				else
+				{
+					vos_printLog(VOS_LOG_ERROR, "Subnet2 Link Down. Change Receive Subnet\n");
+					/* Write Traffic Store Receive Subnet : Subnet1 */
+					TS_SUBNET = SUBNET1;
+				}
+				/* Set Write Traffic Store Receive Subnet */
+				if (tau_setNetworkContext(TS_SUBNET) != TRDP_NO_ERR)
+			    {
+					vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+			    }
+				else
+				{
+					vos_printLog(VOS_LOG_DBG, "tau_setNetworkContext() set subnet:0x%x\n", TS_SUBNET);
+				}
 			}
 
     		/* Enable Comid1 ? */
@@ -1366,7 +1443,7 @@ int main (int argc, char *argv[])
 	else
 	{
 		/* Display TimeStamp when tau_ladder_terminate time */
-		printf("%s TRDP Ladder Termiinate.\n", vos_getTimeStamp());
+		printf("%s TRDP Ladder Terminate.\n", vos_getTimeStamp());
 	}
 
 	/* TRDP Terminate */
@@ -1377,7 +1454,7 @@ int main (int argc, char *argv[])
 	else
 	{
 		/* Display TimeStamp when tlc_terminate time */
-		printf("%s TRDP Termiinate.\n", vos_getTimeStamp());
+		printf("%s TRDP Terminate.\n", vos_getTimeStamp());
     }
 
 	return rv;

@@ -24,6 +24,15 @@
  */
 #include <string.h>
 
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#ifdef __linux
+#   include <linux/if.h>
+#else
+#include <net/if.h>
+#endif
+#include <unistd.h>
+
 #include "trdp_utils.h"
 #include "trdp_if.h"
 
@@ -333,6 +342,89 @@ TRDP_ERR_T  tau_unlockTrafficStore (
 	}
 */
 		return TRDP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Check Link up/down
+ *
+ *  @param[in]		checkSubnetId			check Sub-network Id
+ *  @param[out]		pLinkUpDown          pointer to check Sub-network Id Link Up Down TRUE:Up, FALSE:Down
+ *
+ *  @retval         TRDP_NO_ERR				no error
+ *  @retval         TRDP_PARAM_ERR			parameter err
+ *  @retval         TRDP_SOCK_ERR			socket err
+ *
+ *
+ */
+TRDP_ERR_T  tau_checkLinkUpDown (
+	UINT32 checkSubnetId,
+	BOOL *pLinkUpDown)
+{
+	static int ifGetSocket = 0;
+	struct ifreq ifRead;
+	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
+	CHAR8 SUBNETWORK_ID2_IF_NAME[] = "eth1";
+
+	/* Parameter Check */
+	if (pLinkUpDown == NULL)
+	{
+        vos_printLog(VOS_LOG_ERROR, "tau_checkLinkUpDown pLinkUpDown parameter err\n");
+        return TRDP_PARAM_ERR;
+	}
+
+	memset(&ifRead, 0, sizeof(ifRead));
+
+	/* Check I/F setting */
+	if (checkSubnetId == SUBNET1)
+	{
+		/* Set I/F subnet1 */
+		strncpy(ifRead.ifr_name, SUBNETWORK_ID1_IF_NAME, IFNAMSIZ-1);
+	}
+	else if (checkSubnetId == SUBNET2)
+	{
+		/* Set I/F subnet2 */
+		strncpy(ifRead.ifr_name, SUBNETWORK_ID2_IF_NAME, IFNAMSIZ-1);
+	}
+	else
+	{
+        vos_printLog(VOS_LOG_ERROR, "tau_checkLinkUpDown Check SubnetId failed\n");
+        return TRDP_PARAM_ERR;
+	}
+
+	if (ifGetSocket <= 0)
+	{
+		/* Create Get I/F Socket */
+		ifGetSocket = socket(AF_INET, SOCK_DGRAM, 0);
+		if (ifGetSocket == -1)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_checkLinkUpDown socket descriptor err.\n");
+			return TRDP_SOCK_ERR;
+		}
+	}
+
+	/* Get I/F information */
+	if (ioctl(ifGetSocket, SIOCGIFFLAGS, &ifRead) != 0)
+	{
+        vos_printLog(VOS_LOG_ERROR, "Get I/F Information failed\n");
+        return TRDP_SOCK_ERR;
+	}
+
+	/* Check I/F Information Link UP or DOWN */
+	if (((ifRead.ifr_ifru.ifru_flags & IFF_UP) == IFF_UP)
+		&& ((ifRead.ifr_ifru.ifru_flags & IFF_RUNNING) == IFF_RUNNING))
+	{
+		/* Link Up */
+		*pLinkUpDown = TRUE;
+	}
+	else
+	{
+		/* Link Down */
+		*pLinkUpDown = FALSE;
+	}
+
+//	close(ifGetSocket);
+
+	return TRDP_NO_ERR;
 }
 
 #endif /* TRDP_OPTION_LADDER */

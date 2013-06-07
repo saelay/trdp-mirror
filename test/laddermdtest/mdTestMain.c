@@ -1415,7 +1415,7 @@ MD_APP_ERR_TYPE mdTerminate(
 		else
 		{
 			/* Display TimeStamp when tlc_terminate time */
-			printf("%s TRDP Termiinate.\n", vos_getTimeStamp());
+			printf("%s TRDP Terminate.\n", vos_getTimeStamp());
 		}
 	}
     return err;
