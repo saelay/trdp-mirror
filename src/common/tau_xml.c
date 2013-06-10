@@ -583,7 +583,9 @@ static void setDefaultInterfaceValues (
         pPdConfig->port                 = TRDP_PD_UDP_PORT;
         pPdConfig->sendParam.qos        = TRDP_PD_DEFAULT_QOS;
         pPdConfig->sendParam.ttl        = TRDP_PD_DEFAULT_TTL;
+#ifdef TRDP_RETRIES
         pPdConfig->sendParam.retries    = 0;
+#endif
         pPdConfig->timeout              = TRDP_PD_DEFAULT_TIMEOUT;
         pPdConfig->toBehavior           = TRDP_TO_SET_TO_ZERO;
     }
@@ -598,7 +600,9 @@ static void setDefaultInterfaceValues (
         pMdConfig->flags                = TRDP_FLAGS_NONE;
         pMdConfig->replyTimeout         = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
         pMdConfig->sendParam.qos        = TRDP_MD_DEFAULT_QOS;
+#ifdef TRDP_RETRIES
         pMdConfig->sendParam.retries    = TRDP_MD_DEFAULT_RETRIES;
+#endif
         pMdConfig->sendParam.ttl        = TRDP_MD_DEFAULT_TTL;
         pMdConfig->tcpPort              = TRDP_MD_TCP_PORT;
         pMdConfig->udpPort              = TRDP_MD_UDP_PORT;
@@ -718,7 +722,9 @@ static void parseMDDefaultParams (xmlNodePtr pMDParElem, TRDP_MD_CONFIG_T *pMdCo
     parseUINT32(pMDParElem, "connect-timeout", &pMdConfig->connectTimeout);
     parseUINT8(pMDParElem, "ttl", &pMdConfig->sendParam.ttl);
     parseUINT8(pMDParElem, "qos", &pMdConfig->sendParam.qos);
+#ifdef TRDP_RETRIES
     parseUINT8(pMDParElem, "retries", &pMdConfig->sendParam.retries);
+#endif
     if (checkAttrValue(pMDParElem, "protocol", "TCP"))
     {
         pMdConfig->flags |= TRDP_FLAGS_TCP;
@@ -881,9 +887,10 @@ static void parseComParameters (
         parseUINT8(pChildElement, "qos", &(*ppComPar)[lIndex].sendParam.qos);
         (*ppComPar)[lIndex].sendParam.ttl = 64;
         parseUINT8(pChildElement, "ttl", &(*ppComPar)[lIndex].sendParam.ttl);
+#ifdef TDRP_RETRIES
         (*ppComPar)[lIndex].sendParam.retries = 0;
         parseUINT8(pChildElement, "retries", &(*ppComPar)[lIndex].sendParam.retries);
-
+#endif
         pChildElement = xmlNextElementSibling(pChildElement);
         lIndex++;
     }

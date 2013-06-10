@@ -316,7 +316,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         pSession->pdDefault.port                = TRDP_PD_UDP_PORT;
         pSession->pdDefault.sendParam.qos       = TRDP_PD_DEFAULT_QOS;
         pSession->pdDefault.sendParam.ttl       = TRDP_PD_DEFAULT_TTL;
-        pSession->pdDefault.sendParam.retries   = 0;
+ //       pSession->pdDefault.sendParam.retries   = 0;
     }
 
 #if MD_SUPPORT
@@ -383,7 +383,9 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         pSession->mdDefault.tcpPort             = TRDP_MD_TCP_PORT;
         pSession->mdDefault.sendParam.qos       = TRDP_MD_DEFAULT_QOS;
         pSession->mdDefault.sendParam.ttl       = TRDP_MD_DEFAULT_TTL;
+#ifdef TRDP_RETRIES
         pSession->mdDefault.sendParam.retries   = TRDP_MD_DEFAULT_RETRIES;
+#endif
     }
 
     /* zero is a valid file/socket descriptor! */

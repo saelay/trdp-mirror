@@ -59,8 +59,8 @@ static void printDefaultPDandMD(
     const char * strtrdpFlags[5] = {"TRDP_FLAGS_DEFAULT", "TRDP_FLAGS_NONE", "TRDP_FLAGS_MARSHALL", "TRDP_FLAGS_CALLBACK", "TRDP_FLAGS_TCP"};
     UINT32  i;
     printf("  Default PD configuration\n");
-    printf("    QoS: %u, TTL: %u, Retries: %u\n", 
-        pPdConfig->sendParam.qos, pPdConfig->sendParam.ttl, pPdConfig->sendParam.retries);
+    printf("    QoS: %u, TTL: %u\n", 
+        pPdConfig->sendParam.qos, pPdConfig->sendParam.ttl);
     printf("    Port: %u, Timeout: %u, Behavior: %s\n", 
         pPdConfig->port, pPdConfig->timeout, 
         pPdConfig->toBehavior==1 ? "TRDP_TO_SET_TO_ZERO" : "TRDP_TO_KEEP_LAST_VALUE");
@@ -71,8 +71,8 @@ static void printDefaultPDandMD(
     printf("\n");
 
     printf("  Default MD configuration\n");
-    printf("    QoS: %u, TTL: %u, Retries: %u\n", 
-        pMdConfig->sendParam.qos, pMdConfig->sendParam.ttl, pMdConfig->sendParam.retries);
+    printf("    QoS: %u, TTL: %u\n", 
+        pMdConfig->sendParam.qos, pMdConfig->sendParam.ttl);
     printf("    Reply tmo: %u, Confirm tmo: %u, Connect tmo: %u\n", 
         pMdConfig->replyTimeout, pMdConfig->confirmTimeout, pMdConfig->connectTimeout);
     printf("    UDP port: %u, TCP port: %u\n", 
@@ -92,9 +92,8 @@ static void printCommParams(
     UINT32  i;
     printf("Communication parameters\n");
     for (i = 0; i < numComPar; i++)
-        printf("  ID: %u, QoS: %u, TTL: %u, Retries: %u\n", 
-            pComPar[i].id, pComPar[i].sendParam.qos, pComPar[i].sendParam.ttl, 
-            pComPar[i].sendParam.retries);
+        printf("  ID: %u, QoS: %u, TTL: %u\n", 
+            pComPar[i].id, pComPar[i].sendParam.qos, pComPar[i].sendParam.ttl);
 }
 
 static void printIfCfg(
