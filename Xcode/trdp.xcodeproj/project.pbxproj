@@ -64,6 +64,8 @@
 		733613A7165A58F200A70D3D /* vos_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 7327CA871656AB080020536A /* vos_private.h */; };
 		73361451165BBF7B00A70D3D /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73361454165BBFCD00A70D3D /* test_trafficShaping.c in Sources */ = {isa = PBXBuildFile; fileRef = 73361446165BBF4500A70D3D /* test_trafficShaping.c */; };
+		734091B51765D8A100CFCE5B /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		734091BD1765D8C600CFCE5B /* subTest.c in Sources */ = {isa = PBXBuildFile; fileRef = 7340919E1765CD2000CFCE5B /* subTest.c */; };
 		73517C4B16BBFDA800DB5208 /* receiveHello.c in Sources */ = {isa = PBXBuildFile; fileRef = 73517C4A16BBFDA800DB5208 /* receiveHello.c */; };
 		73517C5616BBFFAB00DB5208 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		735BACDE172E67CD00837D0E /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
@@ -222,6 +224,13 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = "trdp Posix";
 		};
+		734091B01765D8A100CFCE5B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
 		734B6CE815669BF90021D206 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -254,7 +263,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 73603CE7175CBE79004608BD /* md-test */;
+			remoteGlobalIDString = 73603CE7175CBE79004608BD;
 			remoteInfo = "md-test";
 		};
 		7366AD9F16B7CC800068A893 /* PBXContainerItemProxy */ = {
@@ -499,6 +508,8 @@
 		7336144C165BBF5B00A70D3D /* test_traffic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_traffic; sourceTree = BUILT_PRODUCTS_DIR; };
 		733615AA165BF91200A70D3D /* mdTest4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTest4.c; sourceTree = "<group>"; };
 		733615AB165BF91200A70D3D /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
+		7340919E1765CD2000CFCE5B /* subTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = subTest.c; path = ../test/diverse/subTest.c; sourceTree = SOURCE_ROOT; };
+		734091B91765D8A100CFCE5B /* testSub */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testSub; sourceTree = BUILT_PRODUCTS_DIR; };
 		734721F7169C272E00EC18C6 /* ladderApplication_publisher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_publisher.c; path = ../test/ladderpdtest/ladderApplication_publisher.c; sourceTree = "<group>"; };
 		734721F8169C272E00EC18C6 /* ladderApplication_subscriber.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_subscriber.c; path = ../test/ladderpdtest/ladderApplication_subscriber.c; sourceTree = "<group>"; };
 		7349B3D4173D23E300EC7AEF /* TCN-TRDP1-A-BOM-008-07 - TRDP Coding Rules.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP1-A-BOM-008-07 - TRDP Coding Rules.pdf"; sourceTree = "<group>"; };
@@ -827,6 +838,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		734091B41765D8A100CFCE5B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				734091B51765D8A100CFCE5B /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		73517C4016BBFD5300DB5208 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1047,6 +1066,7 @@
 				7384E6BA172952D300830413 /* test_memSizes */,
 				73C2028C174BC9CF003C5A0E /* Index */,
 				73603CF2175CBE79004608BD /* md-test */,
+				734091B91765D8A100CFCE5B /* testSub */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1598,6 +1618,7 @@
 			isa = PBXGroup;
 			children = (
 				7322487F16A97E7900148295 /* crc-test.c */,
+				7340919E1765CD2000CFCE5B /* subTest.c */,
 				732D2792162DBD84009D7857 /* getStats.c */,
 				73F5F9A0171C33970087C6B7 /* pdPull.c */,
 				73361446165BBF4500A70D3D /* test_trafficShaping.c */,
@@ -2082,6 +2103,23 @@
 			productReference = 7336144C165BBF5B00A70D3D /* test_traffic */;
 			productType = "com.apple.product-type.tool";
 		};
+		734091AE1765D8A100CFCE5B /* testSubscribe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 734091B61765D8A100CFCE5B /* Build configuration list for PBXNativeTarget "testSubscribe" */;
+			buildPhases = (
+				734091B11765D8A100CFCE5B /* Sources */,
+				734091B41765D8A100CFCE5B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				734091AF1765D8A100CFCE5B /* PBXTargetDependency */,
+			);
+			name = testSubscribe;
+			productName = receiveHello;
+			productReference = 734091B91765D8A100CFCE5B /* testSub */;
+			productType = "com.apple.product-type.tool";
+		};
 		73517C4116BBFD5300DB5208 /* receiveHello */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 73517C4816BBFDA100DB5208 /* Build configuration list for PBXNativeTarget "receiveHello" */;
@@ -2412,6 +2450,7 @@
 				73C20288174BC9CF003C5A0E /* Make */,
 				73C20289174BC9CF003C5A0E /* Fast */,
 				73C2028B174BC9CF003C5A0E /* Index */,
+				734091AE1765D8A100CFCE5B /* testSubscribe */,
 			);
 		};
 /* End PBXProject section */
@@ -2482,6 +2521,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				73361454165BBFCD00A70D3D /* test_trafficShaping.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		734091B11765D8A100CFCE5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				734091BD1765D8C600CFCE5B /* subTest.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2692,6 +2739,11 @@
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
 			targetProxy = 73361452165BBF7E00A70D3D /* PBXContainerItemProxy */;
+		};
+		734091AF1765D8A100CFCE5B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 734091B01765D8A100CFCE5B /* PBXContainerItemProxy */;
 		};
 		734B6CE915669BF90021D206 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3111,6 +3163,37 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = Untitled;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		734091B71765D8A100CFCE5B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = "-DPOSIX";
+				PREBINDING = NO;
+				PRODUCT_NAME = testSub;
+			};
+			name = Debug;
+		};
+		734091B81765D8A100CFCE5B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = receiveHello;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -4033,6 +4116,15 @@
 			buildConfigurations = (
 				7336144E165BBF5C00A70D3D /* Debug */,
 				7336144F165BBF5C00A70D3D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		734091B61765D8A100CFCE5B /* Build configuration list for PBXNativeTarget "testSubscribe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				734091B71765D8A100CFCE5B /* Debug */,
+				734091B81765D8A100CFCE5B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
