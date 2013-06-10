@@ -255,7 +255,6 @@ typedef struct
 {
     UINT8   qos;       /**< Quality of service (default should be 5 for PD and 3 for MD)  */
     UINT8   ttl;       /**< Time to live (default should be 64)  */
-    UINT8   retries;   /**< Maximum number of retries for UDP MD if one reply is expected, default should be 2   */
 } TRDP_SEND_PARAM_T;
 
 
