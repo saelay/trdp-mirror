@@ -1256,8 +1256,10 @@ TRDP_ERR_T  trdp_mdRecv (
         memcpy(theMessage.srcURI, iterMD->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
         theMessage.numExpReplies        = iterMD->numExpReplies;
         theMessage.numReplies           = iterMD->numReplies;
+#ifdef TRDP_RETRIES
         theMessage.numRetriesMax        = iterMD->numRetriesMax;
         theMessage.numRetries           = iterMD->numRetries;
+#endif
         theMessage.aboutToDie           = iterMD->morituri;
         theMessage.numRepliesQuery      = iterMD->numRepliesQuery;
         theMessage.numConfirmSent       = iterMD->numConfirmSent;
@@ -1328,7 +1330,6 @@ TRDP_ERR_T  trdp_mdSend (
                 break;
             case TRDP_ST_TX_REPLY_ARM:
                 dotx        = 1;
-                nextstate   = TRDP_ST_RX_REPLY_SENT;
                 break;
             case TRDP_ST_TX_REPLYQUERY_ARM:
                 dotx        = 1;
@@ -1447,34 +1448,41 @@ TRDP_ERR_T  trdp_mdSend (
 
                         appHandle->stats.udpMd.numSend++;
 
-                        if (iterMD->stateEle == TRDP_ST_TX_CONFIRM_ARM)
+                        switch (iterMD->stateEle)
                         {
-                            iterMD->numConfirmSent++;
-                            if (
-                                (iterMD->numExpReplies != 0)
-                                && ((iterMD->numRepliesQuery + iterMD->numReplies) >= iterMD->numExpReplies)
-                                && (iterMD->numConfirmSent >= iterMD->numRepliesQuery))
+                            case TRDP_ST_TX_CONFIRM_ARM:
                             {
-                                iterMD->morituri = TRUE;
-                            }
-                            else
-                            {
-                                /* not yet all replies received OR not yet all confirmations sent */
-                                if (iterMD->numConfirmSent < iterMD->numRepliesQuery)
+                                iterMD->numConfirmSent++;
+                                if (
+                                       (iterMD->numExpReplies != 0)
+                                    && ((iterMD->numRepliesQuery + iterMD->numReplies) >= iterMD->numExpReplies)
+                                    && (iterMD->numConfirmSent >= iterMD->numRepliesQuery))
                                 {
-                                    nextstate = TRDP_ST_TX_REQ_W4AP_CONFIRM;
+                                    iterMD->morituri = TRUE;
                                 }
                                 else
                                 {
-                                    nextstate = TRDP_ST_TX_REQUEST_W4REPLY;
+                                    /* not yet all replies received OR not yet all confirmations sent */
+                                    if (iterMD->numConfirmSent < iterMD->numRepliesQuery)
+                                    {
+                                        nextstate = TRDP_ST_TX_REQ_W4AP_CONFIRM;
+                                    }
+                                    else
+                                    {
+                                        nextstate = TRDP_ST_TX_REQUEST_W4REPLY;
+                                    }
                                 }
                             }
+                            break;
+                            case TRDP_ST_TX_NOTIFY_ARM:
+                            case TRDP_ST_TX_REPLY_ARM:
+                            {
+                                iterMD->morituri = TRUE;
+                            }
+                            break;
+                            default:
+                                ;
                         }
-                        else if (iterMD->stateEle == TRDP_ST_TX_NOTIFY_ARM)
-                        {
-                            iterMD->morituri = TRUE;
-                        }
-
                         iterMD->stateEle = nextstate;
                     }
                     else
@@ -1538,8 +1546,10 @@ TRDP_ERR_T  trdp_mdSend (
                                         theMessage.numExpReplies     = iterMD_find->numReplies;
                                         theMessage.pUserRef          = iterMD_find->pUserRef;
                                         theMessage.numReplies        = iterMD_find->numReplies;
+#ifdef TRDP_RETRIES
                                         theMessage.numRetriesMax     = iterMD_find->numRetriesMax;
                                         theMessage.numRetries        = iterMD_find->numRetries;
+#endif
                                         theMessage.aboutToDie        = iterMD_find->morituri;
                                         theMessage.numRepliesQuery   = iterMD_find->numRepliesQuery;
                                         theMessage.numConfirmSent    = iterMD_find->numConfirmSent;
@@ -2072,7 +2082,7 @@ void  trdp_mdCheckTimeouts (
 
                         /* Check for Reply timeout */
                         vos_printLog(VOS_LOG_INFO, "UDP MD reply/confirm timeout\n");
-
+#ifdef TRDP_RETRIES
                         /* Handle UDP retries for single reply expected */
                         if ((iterMD->numExpReplies == 1)                      /* Single reply expected */
                             && (iterMD->numRetries < iterMD->numRetriesMax))  /* Retries below maximum allowed */
@@ -2092,6 +2102,7 @@ void  trdp_mdCheckTimeouts (
                                 vos_htonl(vos_ntohl(iterMD->pPacket->frameHead.sequenceCounter) + 1);
                         }
                         else
+#endif
                         {
                             /* Reply timeout, stop Reply/ReplyQuery reception, notify application */
                             iterMD->morituri = TRUE;
@@ -2198,8 +2209,10 @@ void  trdp_mdCheckTimeouts (
                 theMessage.numExpReplies        = iterMD->numExpReplies;
                 theMessage.pUserRef             = iterMD->pUserRef;
                 theMessage.numReplies           = iterMD->numReplies;
+#ifdef TRDP_RETRIES
                 theMessage.numRetriesMax        = iterMD->numRetriesMax;
                 theMessage.numRetries           = iterMD->numRetries;
+#endif
                 theMessage.aboutToDie           = iterMD->morituri;
                 theMessage.numRepliesQuery      = iterMD->numRepliesQuery;
                 theMessage.numConfirmSent       = iterMD->numConfirmSent;
@@ -2293,8 +2306,10 @@ void  trdp_mdCheckTimeouts (
                                 theMessage.pUserRef         = iterMD_find->pUserRef;
 
                                 theMessage.numReplies           = iterMD_find->numReplies;
+#ifdef TRDP_RETRIES
                                 theMessage.numRetriesMax        = iterMD_find->numRetriesMax;
                                 theMessage.numRetries           = iterMD_find->numRetries;
+#endif
                                 theMessage.aboutToDie           = iterMD_find->morituri;
                                 theMessage.numRepliesQuery      = iterMD_find->numRepliesQuery;
                                 theMessage.numConfirmSent       = iterMD_find->numConfirmSent;
@@ -2504,9 +2519,11 @@ TRDP_ERR_T trdp_mdCommonSend (
         pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
         pSenderElement->sendSize        = 0;
         pSenderElement->numReplies      = 0;
+#ifdef TRDP_RETRIES
         pSenderElement->numRetries      = 0;
-        pSenderElement->pCachedDS       = NULL;
         pSenderElement->numRetriesMax   = 0;        /* Default */
+#endif
+        pSenderElement->pCachedDS       = NULL;
         pSenderElement->morituri        = FALSE;
 
         /* evaluate start time and timeout. For notify I use replyTimeout as sendTimeout */
@@ -2552,6 +2569,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                 break;
         }
 
+#ifdef TRDP_RETRIES
         /* retries only for UDP and if only one expected reply */
         if (((pSenderElement->pktFlags & TRDP_FLAGS_TCP) == 0)
             && numExpReplies == 1)
@@ -2559,7 +2577,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             pSenderElement->numRetriesMax =
                 (pSendParam != NULL) ? pSendParam->retries : (appHandle->mdDefault.sendParam.retries);
         }
-
+#endif
         if ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0)
         {
             if (pSenderElement->socketIdx == -1)

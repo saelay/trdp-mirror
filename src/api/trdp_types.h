@@ -233,8 +233,6 @@ typedef struct
     TRDP_MSG_T          msgType;            /**< Protocol ('PD', 'MD', ...)                 */
     UINT32              comId;              /**< ComID                                      */
     UINT32              topoCount;          /**< received topocount                         */
-    UINT8               numRetries;         /**< actual number of retries                   */
-    UINT8               numRetriesMax;      /**< maximun number of retries for request to a know dev*/
     BOOL                aboutToDie;         /**< session is about to die                    */
     UINT32              numRepliesQuery;    /**< number of ReplyQuery received              */
     UINT32              numConfirmSent;     /**< number of Confirm sent                     */
