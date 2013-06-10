@@ -671,7 +671,6 @@ int main (int argc, char *argv[])
     mdcfg.pRefCon           = NULL;
     mdcfg.sendParam.qos     = 3;
     mdcfg.sendParam.ttl     = 64;
-    mdcfg.sendParam.retries = 2;
     mdcfg.flags             = (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP);
     mdcfg.replyTimeout      = 1000 * opts.tmo;
     mdcfg.confirmTimeout    = 1000 * opts.tmo;

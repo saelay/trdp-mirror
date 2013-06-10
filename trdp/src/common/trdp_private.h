@@ -51,8 +51,7 @@
 #define TRDP_MD_DEFAULT_SENDING_TIMEOUT     5000000                      /**< Socket sending time out 5s            */
 #define TRDP_MD_DEFAULT_QOS                 3
 #define TRDP_MD_DEFAULT_TTL                 64
-#define TRDP_MD_DEFAULT_RETRIES             2
-#define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
+#define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL}
 #define TRDP_MD_MAX_NUM_SESSIONS            1000
 
 /*  Default PD communication parameters   */

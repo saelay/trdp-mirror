@@ -778,7 +778,6 @@ int main(int argc, char * argv[])
     pdcfg.pRefCon = NULL;
     pdcfg.sendParam.qos = 5;
     pdcfg.sendParam.ttl = 64;
-    pdcfg.sendParam.retries = 2;
     pdcfg.flags = TRDP_FLAGS_NONE;
     pdcfg.timeout = 10000000;
     pdcfg.toBehavior = TRDP_TO_SET_TO_ZERO;
