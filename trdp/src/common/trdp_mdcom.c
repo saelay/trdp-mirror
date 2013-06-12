@@ -68,7 +68,7 @@ TRDP_ERR_T trdp_getTCPSocket (
     VOS_SOCK_OPT_T  trdp_sock_opt;
     UINT32          backlog = 10; /* Backlog = maximum connection atempts if system is busy. */
 
-    if (pSession->tcpFd.listen_sd == -1)     /* First time TCP is used */
+    if (pSession->tcpFd.listen_sd == VOS_INVALID_SOCKET)     /* First time TCP is used */
     {
         /* Define the common TCP socket options */
         trdp_sock_opt.qos   = pSession->mdDefault.sendParam.qos;  /* (default should be 5 for PD and 3 for MD) */
@@ -200,7 +200,7 @@ void trdp_closeMDSessions (
     }
 
     /* Save the new socket in the old socket position */
-    if ((socketIndex > -1) && (newSocket > -1))
+    if ((socketIndex > -1) && (newSocket > VOS_INVALID_SOCKET))
     {
         /* Replace the old socket by the new one */
         vos_printLog(VOS_LOG_INFO,
@@ -216,9 +216,7 @@ void trdp_closeMDSessions (
         appHandle->iface[socketIndex].tcpParams.addFileDesc = TRUE;
         appHandle->iface[socketIndex].tcpParams.connectionTimeout.tv_sec    = 0;
         appHandle->iface[socketIndex].tcpParams.connectionTimeout.tv_usec   = 0;
-
     }
-
 }
 
 
@@ -1586,7 +1584,7 @@ TRDP_ERR_T  trdp_mdSend (
     }
     while (TRUE); /*lint !e506 */
 
-    trdp_closeMDSessions(appHandle, -1, -1, TRUE);
+    trdp_closeMDSessions(appHandle, VOS_INVALID_SOCKET, VOS_INVALID_SOCKET, TRUE);
 
     return result;
 }
@@ -1610,7 +1608,7 @@ void trdp_mdCheckPending (
     MD_LIS_ELE_T    *iterListener;
 
     /*    Add the socket to the pFileDesc    */
-    if (appHandle->tcpFd.listen_sd != -1)
+    if (appHandle->tcpFd.listen_sd != VOS_INVALID_SOCKET)
     {
         FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned division in macro */
         if (appHandle->tcpFd.listen_sd > *pNoDesc)
@@ -1621,7 +1619,7 @@ void trdp_mdCheckPending (
 
     for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
-        if ((appHandle->iface[lIndex].sock != -1)
+        if ((appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET)
             && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
             && (appHandle->iface[lIndex].tcpParams.addFileDesc == TRUE))
         {
@@ -1641,7 +1639,7 @@ void trdp_mdCheckPending (
     {
         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
         if (iterListener->socketIdx != -1 &&
-            (appHandle->iface[iterListener->socketIdx].sock != -1)
+            (appHandle->iface[iterListener->socketIdx].sock != VOS_INVALID_SOCKET)
             && ((appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP)
                 || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
@@ -1666,7 +1664,7 @@ void trdp_mdCheckPending (
     {
         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
         if (iterMD->socketIdx != -1 &&
-            (appHandle->iface[iterMD->socketIdx].sock != -1)
+            (appHandle->iface[iterMD->socketIdx].sock != VOS_INVALID_SOCKET)
             && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
@@ -1688,7 +1686,7 @@ void trdp_mdCheckPending (
     {
         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
         if (iterMD->socketIdx != -1 &&
-            (appHandle->iface[iterMD->socketIdx].sock != -1)
+            (appHandle->iface[iterMD->socketIdx].sock != VOS_INVALID_SOCKET)
             && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
@@ -1723,10 +1721,10 @@ void  trdp_mdCheckListenSocks (
 {
     TRDP_FDS_T  rfds;
     INT32       noOfDesc;
-    INT32       highDesc = -1;
+    INT32       highDesc = VOS_INVALID_SOCKET;
     INT32       lIndex;
     TRDP_ERR_T  err;
-    INT32       new_sd  = -1;
+    INT32       new_sd  = VOS_INVALID_SOCKET;
 
     if (appHandle == NULL)
     {
@@ -1742,7 +1740,7 @@ void  trdp_mdCheckListenSocks (
         FD_ZERO((fd_set *)&rfds);
 
         /* Add the listen_sd in the file descriptor */
-        if (appHandle->tcpFd.listen_sd != -1)
+        if (appHandle->tcpFd.listen_sd != VOS_INVALID_SOCKET)
         {
             FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)&rfds); /*lint !e573 signed/unsigned division in macro */
             if (appHandle->tcpFd.listen_sd > highDesc)
@@ -1754,7 +1752,7 @@ void  trdp_mdCheckListenSocks (
         /* scan for sockets */
         for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
         {
-            if (appHandle->iface[lIndex].sock != -1 &&
+            if (appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET &&
                 appHandle->iface[lIndex].type != TRDP_SOCK_PD
                 && ((appHandle->iface[lIndex].type != TRDP_SOCK_MD_TCP)
                     || ((appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
@@ -1768,7 +1766,7 @@ void  trdp_mdCheckListenSocks (
                 }
             }
         }
-        if (highDesc == -1)
+        if (highDesc == VOS_INVALID_SOCKET)
         {
             return;
         }
@@ -1796,7 +1794,7 @@ void  trdp_mdCheckListenSocks (
         /****************************************************/
 
         /* vos_printLog(VOS_LOG_INFO, " ----- CHECKING READY DESCRIPTORS -----\n"); */
-        if (appHandle->tcpFd.listen_sd != -1 &&
+        if (appHandle->tcpFd.listen_sd != VOS_INVALID_SOCKET &&
             FD_ISSET(appHandle->tcpFd.listen_sd, (fd_set *)pRfds)) /*lint !e573 signed/unsigned division in macro */
         {
             /****************************************************/
@@ -1879,7 +1877,7 @@ void  trdp_mdCheckListenSocks (
 
                     for (socketIndex = 0; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++)
                     {
-                        if ((appHandle->iface[socketIndex].sock != -1)
+                        if ((appHandle->iface[socketIndex].sock != VOS_INVALID_SOCKET)
                             && (appHandle->iface[socketIndex].type == TRDP_SOCK_MD_TCP)
                             && (appHandle->iface[socketIndex].tcpParams.cornerIp == newIp)
                             && (appHandle->iface[socketIndex].rcvMostly == TRUE))
@@ -1951,7 +1949,7 @@ void  trdp_mdCheckListenSocks (
                 /* connection                                 */
                 /**********************************************/
             }
-            while (new_sd != -1);
+            while (new_sd != VOS_INVALID_SOCKET);
         }
     }
 
@@ -1960,7 +1958,7 @@ void  trdp_mdCheckListenSocks (
         (but only while there are ready descriptors left) */
     for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
-        if (appHandle->iface[lIndex].sock != -1 &&
+        if (appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET &&
             appHandle->iface[lIndex].type != TRDP_SOCK_PD &&
             FD_ISSET(appHandle->iface[lIndex].sock, (fd_set *)pRfds) != 0) /*lint !e573 signed/unsigned division in
                                                                              macro */
@@ -1991,7 +1989,7 @@ void  trdp_mdCheckListenSocks (
 
                 appHandle->iface[lIndex].tcpParams.morituri = TRUE;
 
-                trdp_closeMDSessions(appHandle, -1, -1, TRUE);
+                trdp_closeMDSessions(appHandle, VOS_INVALID_SOCKET, VOS_INVALID_SOCKET, TRUE);
             }
         }
     }
@@ -2248,7 +2246,7 @@ void  trdp_mdCheckTimeouts (
 
         for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
         {
-            if ((appHandle->iface[lIndex].sock != -1)
+            if ((appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET)
                 && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
                 && (appHandle->iface[lIndex].usage == 0)
                 && (appHandle->iface[lIndex].rcvMostly == FALSE)
@@ -2270,7 +2268,7 @@ void  trdp_mdCheckTimeouts (
 
         for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
         {
-            if ((appHandle->iface[lIndex].sock != -1)
+            if ((appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET)
                 && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
                 && (appHandle->iface[lIndex].rcvMostly == FALSE)
                 && (appHandle->iface[lIndex].tcpParams.sendNotOk == TRUE))
@@ -2342,7 +2340,7 @@ void  trdp_mdCheckTimeouts (
         }
     }
 
-    trdp_closeMDSessions(appHandle, -1, -1, TRUE);
+    trdp_closeMDSessions(appHandle, VOS_INVALID_SOCKET, VOS_INVALID_SOCKET, TRUE);
 }
 
 /**********************************************************************************************************************/
@@ -2600,7 +2598,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                         TRDP_SOCK_MD_TCP,
                         TRDP_OPTION_NONE,
                         FALSE,
-                        -1,
+                        VOS_INVALID_SOCKET,
                         &pSenderElement->socketIdx,
                         destIpAddr);
 
@@ -2636,7 +2634,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                     TRDP_SOCK_MD_UDP,
                     appHandle->option,
                     FALSE,
-                    -1,
+                    VOS_INVALID_SOCKET,
                     &pSenderElement->socketIdx,
                     0);
 

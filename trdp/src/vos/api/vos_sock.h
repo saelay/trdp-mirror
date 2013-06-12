@@ -76,6 +76,7 @@ extern "C" {
 #ifndef VOS_MAC_SIZE
 #define VOS_MAC_SIZE  6             /**< The MAC size supported by VOS */
 #endif
+#define VOS_INVALID_SOCKET -1       /**< Invalid socket number */
 
 /***********************************************************************************************************************
  * TYPEDEFS
