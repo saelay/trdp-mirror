@@ -968,6 +968,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     msg.msg_control     = &control_un.cm;
     msg.msg_controllen  = sizeof(control_un);
 
+    *pSize = 0;
+
     do
     {
         rcvSize = recvmsg(sock, &msg, (peek != 0) ? MSG_PEEK : 0);
@@ -1015,8 +1017,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         }
     }
     while (rcvSize == -1 && errno == EINTR);
-
-    *pSize = 0;
 
     if (rcvSize == -1)
     {
