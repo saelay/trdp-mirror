@@ -923,8 +923,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     struct sockaddr_in  srcAddr;
     INT32           rcvSize = 0;
     int             err     = 0;
-    int             retVal  = 0;
-
     char            controlBuffer[64];       /* buffer for destination address record */
     struct iovec    wsabuf;
     struct msghdr   Msg;
@@ -949,6 +947,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     Msg.msg_controllen  = sizeof (controlBuffer);
     Msg.msg_flags       = 0;
 
+    *pSize = 0;
     memset(&srcAddr, 0, sizeof(srcAddr));
 
     /* fill the msg block for recvmsg */
@@ -994,9 +993,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     while (rcvSize < 0 && err == WSAEINTR);
 
-    *pSize = 0;
-
-    if (retVal == SOCKET_ERROR)
+    if (rcvSize == SOCKET_ERROR)
     {
         vos_printLog(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
         return VOS_IO_ERR;

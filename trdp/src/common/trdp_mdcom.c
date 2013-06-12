@@ -680,10 +680,11 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                                                           &pElement->replyPort,
                                                           &pElement->addr.destIpAddr,
                                                           FALSE);
+                vos_printLog(VOS_LOG_INFO, "Read UDP MD Data: %d bytes from socket %d\n", size, mdSock);
             }
             else
             {
-                /* throw packet away */
+                /* header information can't be read - throw the packet away */
                 err = (TRDP_ERR_T) vos_sockReceiveUDP(
                         mdSock,
                         (UINT8 *)pElement->pPacket,
@@ -691,6 +692,9 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                         &pElement->addr.srcIpAddr,
                         &pElement->replyPort, &pElement->addr.destIpAddr,
                         FALSE);
+                
+                vos_printLog(VOS_LOG_INFO, "UDP MD header check failed. %d bytes from socket %d thrown away\n", size, mdSock);
+                return TRDP_NODATA_ERR;
             }
         }
     }
