@@ -881,7 +881,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             {
                 appHandle->stats.udpMd.numCrcErr++;
             }
-            return err;
         case TRDP_WIRE_ERR:
             if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
             {
@@ -891,15 +890,14 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             {
                 appHandle->stats.udpMd.numProtErr++;
             }
-            return err;
         default:
-            return err;
+            ;
     }
 
     if (err != TRDP_NO_ERR)
     {
-        vos_printLog(VOS_LOG_ERROR, "trdp_mdCheck failed (Err: %d)\n", err);
-        return TRDP_IO_ERR;
+        vos_printLog(VOS_LOG_ERROR, "trdp_mdCheck %s failed (Err: %d)\n", 
+            (pElement->pktFlags & TRDP_FLAGS_TCP)?"TCP":"UDP", err);
     }
 
     return err;
@@ -1028,6 +1026,11 @@ TRDP_ERR_T  trdp_mdRecv (
                 numOfReceivers++;
                 if (0 == memcmp(iterMD->pPacket->frameHead.sessionID, pH->sessionID, TRDP_SESS_ID_SIZE))
                 {
+#ifndef TRDP_RETRIES
+                    /* request already received - discard message */
+                    vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Repeated request discarded!\n");
+                    return TRDP_NO_ERR;
+#else
                     if (TRDP_ST_RX_REQ_W4AP_REPLY == iterMD->stateEle)
                     {
                         /* Discard message  */
@@ -1048,6 +1051,7 @@ TRDP_ERR_T  trdp_mdRecv (
                         /* TODO? repeatReply(); */
                         return TRDP_NO_ERR;
                     }
+#endif
                 }
             }
 
