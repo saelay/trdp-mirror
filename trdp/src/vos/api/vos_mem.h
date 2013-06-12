@@ -88,6 +88,7 @@ typedef enum
 
 /** Opaque queue define  */
 typedef struct VOS_QUEUE *VOS_QUEUE_T;
+typedef struct VOS_QUEUE_ELEM *VOS_QUEUE_ELEM_T;
 
 /***********************************************************************************************************************
  * PROTOTYPES
