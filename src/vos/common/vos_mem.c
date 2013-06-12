@@ -105,17 +105,31 @@ typedef struct
     UINT32  queuReadErrCnt;      /* No of queue read errors */
 } VOS_STATISTIC;
 
+/* Queue header struct */
 struct VOS_QUEUE
 {
-    struct VOS_QUEUE    *pNext;
-    void                *pData;
-    size_t              size;
+    UINT32                  magicNumber;
+    UINT32                  firstElem;
+    UINT32                  lastElem;
+    VOS_QUEUE_POLICY_T      queueType;
+    UINT32                  maxNoOfMsg;
+    VOS_SEMA_T              semaphore;
+    VOS_MUTEX_T             mutex;
+    struct VOS_QUEUE_ELEM   *pQueue;
+};
+
+/* Queue element struct */
+struct VOS_QUEUE_ELEM
+{
+    UINT8   *pData;
+    UINT32  size;
 };
 
 /* Forward declaration, Mutex size is target dependant! */
 VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
 void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 
+const UINT32    cQueueMagic = 0xE5E1E5E1;
 /***********************************************************************************************************************
  *  LOCALS
  */
@@ -717,7 +731,88 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
     UINT32              maxNoOfMsg,
     VOS_QUEUE_T         *pQueueHandle )
 {
-    return VOS_UNKNOWN_ERR;
+    VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
+    VOS_QUEUE_T queueHandle = NULL;
+    UINT32 cnt = (UINT32) NULL;
+
+    /* Check parameters */
+    if ((queueType < VOS_QUEUE_POLICY_OTHER)
+        || (queueType > VOS_QUEUE_POLICY_LIFO)
+        || (pQueueHandle == (VOS_QUEUE_T*) NULL)
+        || (maxNoOfMsg == (UINT32) NULL))
+    {
+        vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR invalid parameter\n");
+        retVal = VOS_PARAM_ERR;
+    }
+    else
+    {
+        (*pQueueHandle) = (VOS_QUEUE_T) vos_memAlloc (sizeof(struct VOS_QUEUE));
+        if (*pQueueHandle == NULL)
+        {
+            vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
+            retVal = VOS_MEM_ERR;
+        }
+        else
+        {
+            retVal = vos_semaCreate(&((*pQueueHandle)->semaphore),VOS_SEMA_EMPTY);
+            if (retVal != VOS_NO_ERR)
+            {
+                vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not create semaphore\n");
+                retVal = VOS_SEMA_ERR;
+            }
+            else
+            {
+                retVal = vos_mutexCreate(&((*pQueueHandle)->mutex));
+                if (retVal != VOS_NO_ERR)
+                {
+                    vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not create mutex\n");
+                    retVal = VOS_MUTEX_ERR;
+                }
+                else
+                {
+                    retVal = vos_mutexLock((*pQueueHandle)->mutex);
+                    if (retVal != VOS_NO_ERR)
+                    {
+                        vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not lock mutex\n");
+                        retVal = VOS_MUTEX_ERR;
+                    }
+                    else
+                    {
+                        /* init header */
+                        (*pQueueHandle)->firstElem = (UINT32) NULL;
+                        (*pQueueHandle)->lastElem = (UINT32) NULL;
+                        (*pQueueHandle)->queueType = queueType;
+                        (*pQueueHandle)->maxNoOfMsg = maxNoOfMsg;
+                        (*pQueueHandle)->magicNumber = cQueueMagic;
+                        /* alloc queue memory */
+                        printf("size: %u\n",maxNoOfMsg * sizeof(struct VOS_QUEUE_ELEM));
+                        (*pQueueHandle)->pQueue = (struct VOS_QUEUE_ELEM*)vos_memAlloc(maxNoOfMsg * sizeof(struct VOS_QUEUE_ELEM));
+                        if ((*pQueueHandle)->pQueue == NULL)
+                        {
+                            vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
+                            retVal = VOS_MEM_ERR;
+                        }
+                        else
+                        {
+                            (*pQueueHandle)->pQueue->pData = NULL;
+                            (*pQueueHandle)->pQueue->size = (UINT32) NULL;
+                            retVal = vos_mutexUnlock((*pQueueHandle)->mutex);
+                            if (retVal != VOS_NO_ERR)
+                            {
+                                vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not lock mutex\n");
+                                retVal = VOS_MUTEX_ERR;
+                            }
+                            else
+                            {
+                                /* do nothing here */
+                            }
+                        }                    
+                    }
+                }
+            }
+        }
+    }
+    return retVal;
 }
 
 /**********************************************************************************************************************/
@@ -740,7 +835,97 @@ EXT_DECL VOS_ERR_T vos_queueSend (
     UINT8       *pData,
     UINT32      size)
 {
-    return VOS_UNKNOWN_ERR;
+    VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
+    VOS_ERR_T err = VOS_UNKNOWN_ERR;
+    BOOL giveSemaphore = FALSE;
+
+    if ((queueHandle == (VOS_QUEUE_T) NULL)
+        || (pData == (UINT32) NULL)
+        || (size == (UINT32) NULL)
+        || (queueHandle->magicNumber != cQueueMagic))
+    {
+        vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR invalid parameter\n");
+        retVal = VOS_PARAM_ERR;
+    }
+    else
+    {
+        err = vos_mutexLock(queueHandle->mutex);
+        if (err != VOS_NO_ERR)
+        {
+            vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR could not lock mutex\n");
+            retVal = VOS_MUTEX_ERR;
+        }
+        else
+        {
+            /* Check if queue is full */
+            if ((queueHandle->lastElem + 1 == queueHandle->firstElem)
+                || ((queueHandle->lastElem == queueHandle->maxNoOfMsg - 1) && (queueHandle->firstElem == 0)))
+            {
+                vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR Queue is full\n");
+                retVal = VOS_QUEUE_FULL_ERR;
+            }
+            else
+            {
+                /* Check if there are already elements in queue */
+                if (queueHandle->pQueue[queueHandle->firstElem].pData != NULL)
+                {
+                    /* Determine queue type */
+                    if ((queueHandle->queueType == VOS_QUEUE_POLICY_FIFO)
+                        || (queueHandle->queueType == VOS_QUEUE_POLICY_OTHER))
+                    {
+                        /* FIFO, append to end */
+                        if (queueHandle->lastElem == queueHandle->maxNoOfMsg -1)
+                        {
+                            queueHandle->lastElem = 0;
+                        }
+                        else
+                        {
+                            queueHandle->lastElem++;
+                        }
+                        queueHandle->pQueue[queueHandle->lastElem].pData = pData;
+                        queueHandle->pQueue[queueHandle->lastElem].size = size;
+                    }
+                    else
+                    {
+                        /* LIFO, append to beginning */
+                        if (queueHandle->firstElem == 0)
+                        {
+                            queueHandle->firstElem = queueHandle->maxNoOfMsg - 1;
+                        }
+                        else
+                        {
+                            queueHandle->firstElem--;
+                        }
+                        queueHandle->pQueue[queueHandle->firstElem].pData = pData;
+                        queueHandle->pQueue[queueHandle->firstElem].size = size;
+                    }
+                }
+                else
+                {
+                    /* queue is empty, don't need to update first / last element indicators */
+                    queueHandle->pQueue[queueHandle->firstElem].pData = pData;
+                    queueHandle->pQueue[queueHandle->firstElem].size = size;
+                }
+                giveSemaphore = TRUE;
+            }
+            err = vos_mutexUnlock(queueHandle->mutex);
+            if (err != VOS_NO_ERR)
+            {
+                vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR could not unlock mutex\n");
+                retVal = VOS_MUTEX_ERR;
+            }
+            else if (giveSemaphore == TRUE)
+            {
+                vos_semaGive(queueHandle->semaphore);
+                retVal = VOS_NO_ERR;
+            }
+            else
+            {
+                /* do nothing here */
+            }
+        }
+    }
+    return retVal;
 }
 
 /**********************************************************************************************************************/
@@ -760,11 +945,74 @@ EXT_DECL VOS_ERR_T vos_queueSend (
 
 EXT_DECL VOS_ERR_T vos_queueReceive (
     VOS_QUEUE_T queueHandle,
-    UINT8       * *ppData,
+    UINT8       **ppData,
     UINT32      *pSize,
     UINT32      usTimeout )
 {
-    return VOS_UNKNOWN_ERR;
+    VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
+    VOS_ERR_T err = VOS_UNKNOWN_ERR;
+
+    if ((queueHandle == (VOS_QUEUE_T) NULL)
+        || (queueHandle->magicNumber != cQueueMagic))
+    {
+        vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR invalid parameter\n");
+        retVal = VOS_PARAM_ERR;
+    }
+    else
+    {      
+        /* wait for semaphore indicating new message in queue */
+        err = vos_semaTake(queueHandle->semaphore,usTimeout);
+        if (err != VOS_NO_ERR)
+        {
+            vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not take semaphore\n");
+            *ppData = NULL;
+            *pSize = (UINT32) NULL;
+            retVal = VOS_QUEUE_ERR;
+        }
+        else
+        {
+            err = vos_mutexLock(queueHandle->mutex);
+            if (err != VOS_NO_ERR)
+            {
+                vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not lock mutex\n");
+                retVal = VOS_MUTEX_ERR;
+            }
+            else
+            {
+                *ppData = queueHandle->pQueue[queueHandle->firstElem].pData;
+                *pSize = queueHandle->pQueue[queueHandle->firstElem].size;
+                queueHandle->pQueue[queueHandle->firstElem].pData = NULL;
+                queueHandle->pQueue[queueHandle->firstElem].size = (UINT32) NULL;
+                if (queueHandle->firstElem != queueHandle->lastElem)
+                {
+                    if (queueHandle->firstElem < queueHandle->maxNoOfMsg - 1)
+                    {
+                        queueHandle->firstElem++;
+                    }
+                    else
+                    {
+                        queueHandle->firstElem = 0;
+                    }
+                }
+                else
+                {
+                    /* do nothing here, queue is now empty again */
+                }
+                err = vos_mutexUnlock(queueHandle->mutex);
+                if (err != VOS_NO_ERR)
+                {
+                    vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not unlock mutex\n");
+                    retVal = VOS_MUTEX_ERR;
+                }
+                else
+                {
+                    /* Element received successfully */
+                    retVal = VOS_NO_ERR;
+                }
+            }
+        }
+    }
+    return retVal;
 }
 
 /**********************************************************************************************************************/
@@ -782,5 +1030,42 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
 EXT_DECL VOS_ERR_T vos_queueDestroy (
     VOS_QUEUE_T queueHandle)
 {
-    return VOS_UNKNOWN_ERR;
+    VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
+    VOS_ERR_T err = VOS_UNKNOWN_ERR;
+
+    if ((queueHandle == (VOS_QUEUE_T) NULL)
+        || (queueHandle->magicNumber != cQueueMagic))
+    {
+        vos_printLog(VOS_LOG_ERROR, "vos_queueDestroy() ERROR invalid parameter\n");
+        retVal = VOS_PARAM_ERR;
+    }
+    else
+    {
+        err = vos_mutexLock(queueHandle->mutex);
+        if (err != VOS_NO_ERR)
+        {
+            vos_printLog(VOS_LOG_ERROR, "vos_queueDestroy() ERROR could not lock mutex\n");
+            retVal = VOS_MUTEX_ERR;
+        }
+        else
+        {
+            queueHandle->magicNumber = (UINT32) NULL;
+            vos_memFree(queueHandle->pQueue);
+            queueHandle->pQueue = NULL;
+        }
+        vos_semaDelete(queueHandle->semaphore);
+        err = vos_mutexUnlock(queueHandle->mutex);
+        if (err != VOS_NO_ERR)
+        {
+            vos_printLog(VOS_LOG_ERROR, "vos_queueDestroy() ERROR could not unlock mutex\n");
+            retVal = VOS_MUTEX_ERR;
+        }
+        else
+        {
+            vos_mutexDelete(queueHandle->mutex);
+            vos_memFree(queueHandle);
+            retVal = VOS_NO_ERR;
+        }
+    }
+    return retVal;
 }
