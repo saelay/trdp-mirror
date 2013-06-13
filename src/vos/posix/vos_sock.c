@@ -1020,7 +1020,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
     if (rcvSize == -1)
     {
-        if (err == ECONNRESET)
+        if (errno == ECONNRESET)
         {
             /* ICMP port unreachable received (result of previous send), treat this as no error */
             return VOS_NO_ERR;
