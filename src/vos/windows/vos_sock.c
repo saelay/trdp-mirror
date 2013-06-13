@@ -995,8 +995,16 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
     if (rcvSize == SOCKET_ERROR)
     {
-        vos_printLog(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
-        return VOS_IO_ERR;
+        if (err == WSAECONNRESET)
+        {
+            /* ICMP port unreachable received (result of previous send), treat this as no error */
+            return VOS_NO_ERR;
+        }
+        else
+        {
+            vos_printLog(VOS_LOG_ERROR, "recvfrom() failed (Err: %d)\n", err);
+            return VOS_IO_ERR;
+        }
     }
     else if (rcvSize == 0)
     {
