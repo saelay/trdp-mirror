@@ -43,6 +43,8 @@
                                  ((0x000000FF & (UINT32)val) << 24))
 #define MAKE_LE(a)      ((am_big_endian()) ? Swap32(a) : (a))
 
+#define TRDP_INVALID_SOCKET_INDEX  -1
+
 /*******************************************************************************
  * TYPEDEFS
  */
