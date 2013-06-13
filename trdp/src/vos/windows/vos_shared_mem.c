@@ -24,10 +24,6 @@
  * INCLUDES
  */
 
-#ifndef POSIX
-#error \
-    "You are trying to compile the POSIX implementation of vos_sock.c - adapt the file to WIN32 or exclude this file!"
-#endif
 #ifndef WIN32
 #error \
     "You are trying to compile the WIN32 implementation of vos_sock.c - either define WIN32 or exclude this file!"
