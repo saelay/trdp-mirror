@@ -78,6 +78,10 @@ extern "C" {
 #endif
 #define VOS_INVALID_SOCKET -1       /**< Invalid socket number */
 
+#define VOS_DEFAULT_IFACE	cDefaultIface
+
+extern const CHAR8  *cDefaultIface;
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */
