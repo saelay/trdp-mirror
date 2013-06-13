@@ -423,7 +423,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_PARAM_ERR;
     }
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+    if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         STRING_ERR(buff);
@@ -497,7 +497,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         return VOS_PARAM_ERR;
     }
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         STRING_ERR(buff);
