@@ -61,12 +61,10 @@
  * DEFINITIONS
  */
 
-#ifndef VOS_DEFAULT_IFACE
-#   if defined(__APPLE__) || defined(__QNXNTO__)
-#       define VOS_DEFAULT_IFACE    "en0"
-#   else
-#       define VOS_DEFAULT_IFACE    "eth0"
-#   endif
+#if defined(__APPLE__) || defined(__QNXNTO__)
+const CHAR8 *cDefaultIface = "en0";
+#else
+const CHAR8 *cDefaultIface = "eth0";
 #endif
 
 /***********************************************************************************************************************
@@ -101,7 +99,7 @@ BOOL vos_getMacAddress (
 
     if (pIfName == NULL)
     {
-        strcpy(ifinfo.ifr_name, VOS_DEFAULT_IFACE);
+        strcpy(ifinfo.ifr_name, cDefaultIface);
     }
     else
     {
@@ -128,7 +126,7 @@ BOOL vos_getMacAddress (
 
     struct ifaddrs  *pIfList;
     BOOL found = FALSE;
-    const char      *pName = VOS_DEFAULT_IFACE;
+    const char      *pName = cDefaultIface;
 
     if (pIfName != NULL)
     {
@@ -386,7 +384,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
         return VOS_PARAM_ERR;
     }
 
-    if (vos_getMacAddress(pMAC, VOS_DEFAULT_IFACE) == TRUE)
+    if (vos_getMacAddress(pMAC, cDefaultIface) == TRUE)
     {
         return VOS_NO_ERR;
     }
