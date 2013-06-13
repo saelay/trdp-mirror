@@ -819,11 +819,9 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         {
             /* Complete message */
             /* All data is read. Save all the data and copy to the pElement to continue */
-
             if (appHandle->uncompletedTCP[socketIndex] != NULL)
             {
                 /* Add the received information and copy all the data to the pElement */
-
                 storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
 
                 if ((readSize > 0))
@@ -1171,10 +1169,13 @@ TRDP_ERR_T  trdp_mdRecv (
                         iterMD->numReplies++;
 
                         /* Handle multiple replies
-                         Close session now if number of expected replies reached
-                         or later by timeout if unknown number of replies expected */
-                        if (iterMD->numExpReplies != 0 &&
-                            (iterMD->numExpReplies == 1 || (iterMD->numReplies >= iterMD->numExpReplies)))
+                         Close session now if number of expected replies reached and confirmed as far as requested
+                         or close session later by timeout if unknown number of replies expected */
+ 
+                        if (    (iterMD->numExpReplies == 1)
+                             || (    (iterMD->numExpReplies != 0)   
+                                  && (iterMD->numReplies + iterMD->numRepliesQuery >= iterMD->numExpReplies)
+                                  && (iterMD->numConfirmSent + iterMD->numConfirmTimeout >= iterMD->numRepliesQuery)))
                         {
                             /* Prepare for session fin, Reply/ReplyQuery reception only one expected */
                             iterMD->morituri = TRUE;
