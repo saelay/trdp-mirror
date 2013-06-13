@@ -630,9 +630,10 @@ void trdp_pdHandleTimeOuts (
     for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
         if (timerisset(&iterPD->interval) &&
-            timerisset(&iterPD->timeToGo) &&                    /*  Prevent timing out of PULLed data too early */
-            !timercmp(&iterPD->timeToGo, &now, >) &&            /*  late?   */
-            !(iterPD->privFlags & TRDP_TIMED_OUT))              /*  and not already flagged ?   */
+            timerisset(&iterPD->timeToGo) &&                        /*  Prevent timing out of PULLed data too early */
+            !timercmp(&iterPD->timeToGo, &now, >) &&                /*  late?   */
+            !(iterPD->privFlags & TRDP_TIMED_OUT) &&                /*  and not already flagged ?   */
+            !(iterPD->addr.comId == TRDP_STATISTICS_REQUEST_COMID)) /*  Do not bother user with statistics timeout */
         {
             /*  Update some statistics  */
             appHandle->stats.pd.numTimeout++;
