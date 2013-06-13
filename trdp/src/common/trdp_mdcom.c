@@ -654,8 +654,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         /* does the announced data fit into our (small) allocated buffer?   */
         if (err == TRDP_NO_ERR)
         {
-            if (size == sizeof(MD_HEADER_T) &&
-                trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, size, CHECK_HEADER_ONLY) == TRDP_NO_ERR)
+            if (   (size == sizeof(MD_HEADER_T)) 
+                && (trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, size, CHECK_HEADER_ONLY) == TRDP_NO_ERR))
             {
                 pElement->dataSize  = vos_ntohl(pElement->pPacket->frameHead.datasetLength);
                 pElement->grossSize = trdp_packetSizeMD(pElement->dataSize);
@@ -695,7 +695,11 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                         &pElement->replyPort, &pElement->addr.destIpAddr,
                         FALSE);
                 
-                vos_printLog(VOS_LOG_INFO, "UDP MD header check failed. %d bytes from socket %d thrown away\n", size, mdSock);
+                /* No complain in case of size==0 - ICMP port unreachable received (result of previous send) */
+                if (size != 0)
+                {
+                    vos_printLog(VOS_LOG_INFO, "UDP MD header check failed. %d bytes from socket %d thrown away\n", size, mdSock);
+                }
                 return TRDP_NODATA_ERR;
             }
         }
