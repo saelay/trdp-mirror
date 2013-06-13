@@ -1020,10 +1020,18 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
 
     if (rcvSize == -1)
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        STRING_ERR(buff);
-        vos_printLog(VOS_LOG_ERROR, "recvmsg() failed (Err: %s)\n", buff);
-        return VOS_IO_ERR;
+        if (err == ECONNRESET)
+        {
+            /* ICMP port unreachable received (result of previous send), treat this as no error */
+            return VOS_NO_ERR;
+        }
+        else
+        {
+            char buff[VOS_MAX_ERR_STR_SIZE];
+            STRING_ERR(buff);
+            vos_printLog(VOS_LOG_ERROR, "recvmsg() failed (Err: %s)\n", buff);
+            return VOS_IO_ERR;
+        }
     }
     else if (rcvSize == 0)
     {
