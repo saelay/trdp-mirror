@@ -561,11 +561,19 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             if ((appHandle->uncompletedTCP[socketIndex] != NULL)
                 && (size >= sizeof(MD_HEADER_T)))
             {
-                /* Uncompleted Header, completed. Save some parameters in the uncompletedTCP structure */
-                appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength =
-                    pElement->pPacket->frameHead.datasetLength;
-                appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum =
-                    pElement->pPacket->frameHead.frameCheckSum;
+                if (trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, size, CHECK_HEADER_ONLY) == TRDP_NO_ERR)
+                {
+                    /* Uncompleted Header, completed. Save some parameters in the uncompletedTCP structure */
+                    appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength =
+                        pElement->pPacket->frameHead.datasetLength;
+                    appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum =
+                        pElement->pPacket->frameHead.frameCheckSum;
+                }
+                else
+                {
+                    vos_printLog(VOS_LOG_INFO, "TCP MD header check failed\n");
+                    return TRDP_NODATA_ERR;
+                }
             }
         }
 
@@ -694,8 +702,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     }
 
     /* If the Header is incomplete, the data size will be "0". Otherwise it will be calculated. */
-
-    /* preliminary: this all has to be changed! */
     switch (err)
     {
         case TRDP_NODATA_ERR:
@@ -1332,7 +1338,7 @@ TRDP_ERR_T  trdp_mdSend (
 
                                 vos_getTime(&tmpt_now);
                                 vos_addTime(&tmpt_now, &tmpt_interval);
-
+        
                                 memcpy(&appHandle->iface[iterMD->socketIdx].tcpParams.sendingTimeout,
                                        &tmpt_now,
                                        sizeof(TRDP_TIME_T));
