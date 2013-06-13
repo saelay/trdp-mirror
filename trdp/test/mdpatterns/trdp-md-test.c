@@ -619,7 +619,7 @@ int main (int argc, char *argv[])
     /* initialize test options */
     opts.groups = TST_ALL;                                  /* run all test groups */
     opts.once   = 0;                                        /* endless test */
-    opts.msgsz  = 64;                                       /* message size [bytes] */
+    opts.msgsz  = 64 * 1024 - 200;                          /* message size [bytes] */
     opts.tmo    = 3000;                                     /* timeout [msec] */
     strncpy(opts.uri, "message.test", sizeof(opts.uri));    /* test URI */
     opts.srcip  = vos_dottedIP(argv[2]);                    /* source (local) IP address */
