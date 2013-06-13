@@ -149,7 +149,7 @@ void trdp_closeMDSessions (
     /* Check all the sockets */
     if (checkAllSockets == TRUE)
     {
-        trdp_releaseSocket(appHandle->iface, -1, 0, checkAllSockets);
+        trdp_releaseSocket(appHandle->iface, TRDP_INVALID_SOCKET_INDEX, 0, checkAllSockets);
 
     }
 
@@ -200,7 +200,7 @@ void trdp_closeMDSessions (
     }
 
     /* Save the new socket in the old socket position */
-    if ((socketIndex > -1) && (newSocket > VOS_INVALID_SOCKET))
+    if ((socketIndex > TRDP_INVALID_SOCKET_INDEX) && (newSocket > VOS_INVALID_SOCKET))
     {
         /* Replace the old socket by the new one */
         vos_printLog(VOS_LOG_INFO,
@@ -853,33 +853,14 @@ TRDP_ERR_T  trdp_mdRecvPacket (
     switch (err)
     {
         case TRDP_NO_ERR:
-            if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
-            {
-                appHandle->stats.tcpMd.numRcv++;
-            }
-            else
-            {
-                appHandle->stats.udpMd.numRcv++;
-            }
+            appHandle->stats.udpMd.numRcv++;
             break;
         case TRDP_CRC_ERR:
-            if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
-            {
-                appHandle->stats.tcpMd.numCrcErr++;
-            }
-            else
-            {
-                appHandle->stats.udpMd.numCrcErr++;
-            }
+            appHandle->stats.udpMd.numCrcErr++;
+            break;
         case TRDP_WIRE_ERR:
-            if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
-            {
-                appHandle->stats.tcpMd.numProtErr++;
-            }
-            else
-            {
-                appHandle->stats.udpMd.numProtErr++;
-            }
+            appHandle->stats.udpMd.numProtErr++;
+            break;
         default:
             ;
     }
@@ -1032,7 +1013,7 @@ TRDP_ERR_T  trdp_mdRecv (
             /* search for existing listener */
             for (iterListener = appHandle->pMDListenQueue; iterListener != NULL; iterListener = iterListener->pNext)
             {
-                if (iterListener->socketIdx != -1 && isTCP == TRUE)
+                if (iterListener->socketIdx != TRDP_INVALID_SOCKET_INDEX && isTCP == TRUE)
                 {
                     continue;
                 }
@@ -1054,7 +1035,7 @@ TRDP_ERR_T  trdp_mdRecv (
                     iterMD->pUserRef    = iterListener->pUserRef;
                     iterMD->stateEle    = state;
 
-                    if (iterListener->socketIdx == -1)    /* On TCP, listeners have no socket assigned  */
+                    if (iterListener->socketIdx == TRDP_INVALID_SOCKET_INDEX)    /* On TCP, listeners have no socket assigned  */
                     {
                         iterMD->socketIdx = sockIndex;
                     }
@@ -1263,7 +1244,6 @@ TRDP_ERR_T  trdp_mdSend (
 
     /*  Find the packet which has to be sent next:
      Note: We must also check the receive queue for pending replies! */
-
     do
     {
         int dotx = 0;
@@ -1306,7 +1286,8 @@ TRDP_ERR_T  trdp_mdSend (
         if (dotx)
         {
             /*    Send the packet if it is not redundant    */
-            if (iterMD->socketIdx != -1 && (!appHandle->beQuiet || (iterMD->privFlags & TRDP_REDUNDANT)))
+            if (   (iterMD->socketIdx != TRDP_INVALID_SOCKET_INDEX)
+                && (!appHandle->beQuiet || (iterMD->privFlags & TRDP_REDUNDANT)))
             {
                 trdp_mdUpdatePacket(iterMD);
 
@@ -1536,7 +1517,7 @@ TRDP_ERR_T  trdp_mdSend (
     }
     while (TRUE); /*lint !e506 */
 
-    trdp_closeMDSessions(appHandle, VOS_INVALID_SOCKET, VOS_INVALID_SOCKET, TRUE);
+    trdp_closeMDSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
 
     return result;
 }
@@ -1590,8 +1571,8 @@ void trdp_mdCheckPending (
          iterListener = iterListener->pNext)
     {
         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-        if (iterListener->socketIdx != -1 &&
-            (appHandle->iface[iterListener->socketIdx].sock != VOS_INVALID_SOCKET)
+        if (   (iterListener->socketIdx != TRDP_INVALID_SOCKET_INDEX)
+            && (appHandle->iface[iterListener->socketIdx].sock != VOS_INVALID_SOCKET)
             && ((appHandle->iface[iterListener->socketIdx].type != TRDP_SOCK_MD_TCP)
                 || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
@@ -1615,8 +1596,8 @@ void trdp_mdCheckPending (
     for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
     {
         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-        if (iterMD->socketIdx != -1 &&
-            (appHandle->iface[iterMD->socketIdx].sock != VOS_INVALID_SOCKET)
+        if (   (iterMD->socketIdx != TRDP_INVALID_SOCKET_INDEX)
+            && (appHandle->iface[iterMD->socketIdx].sock != VOS_INVALID_SOCKET)
             && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
@@ -1637,8 +1618,8 @@ void trdp_mdCheckPending (
     for (iterMD = appHandle->pMDSndQueue; iterMD != NULL; iterMD = iterMD->pNext)
     {
         /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-        if (iterMD->socketIdx != -1 &&
-            (appHandle->iface[iterMD->socketIdx].sock != VOS_INVALID_SOCKET)
+        if (   (iterMD->socketIdx != TRDP_INVALID_SOCKET_INDEX)
+            && (appHandle->iface[iterMD->socketIdx].sock != VOS_INVALID_SOCKET)
             && ((appHandle->iface[iterMD->socketIdx].type != TRDP_SOCK_MD_TCP)
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
@@ -1723,7 +1704,7 @@ void  trdp_mdCheckListenSocks (
             return;
         }
         noOfDesc = vos_select(highDesc + 1, &rfds, NULL, NULL, &timeOut);
-        if (noOfDesc == -1)
+        if (noOfDesc == VOS_INVALID_SOCKET)
         {
             vos_printLog(VOS_LOG_ERROR, "select() failed\n");
             return;
@@ -1941,7 +1922,7 @@ void  trdp_mdCheckListenSocks (
 
                 appHandle->iface[lIndex].tcpParams.morituri = TRUE;
 
-                trdp_closeMDSessions(appHandle, VOS_INVALID_SOCKET, VOS_INVALID_SOCKET, TRUE);
+                trdp_closeMDSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
             }
         }
     }
@@ -2261,7 +2242,7 @@ void  trdp_mdCheckTimeouts (
         }
     }
 
-    trdp_closeMDSessions(appHandle, VOS_INVALID_SOCKET, VOS_INVALID_SOCKET, TRUE);
+    trdp_closeMDSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
 }
 
 /**********************************************************************************************************************/
@@ -2390,7 +2371,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                     memset(pSenderElement, 0, sizeof(MD_ELE_T));
                     pSenderElement->dataSize    = dataSize;
                     pSenderElement->grossSize   = trdp_packetSizeMD(dataSize);
-                    pSenderElement->socketIdx   = -1;
+                    pSenderElement->socketIdx   = TRDP_INVALID_SOCKET_INDEX;
                     pSenderElement->pktFlags    =
                         (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
                     newSession = TRUE;
@@ -2494,7 +2475,7 @@ TRDP_ERR_T trdp_mdCommonSend (
 
         if ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0)
         {
-            if (pSenderElement->socketIdx == -1)
+            if (pSenderElement->socketIdx == TRDP_INVALID_SOCKET_INDEX)
             {
                 /* socket to send TCP MD for request or notify only */
                 errv = trdp_requestSocket(
@@ -2530,7 +2511,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             }
 
         }
-        else if (TRUE == newSession && -1 == pSenderElement->socketIdx)
+        else if (TRUE == newSession && TRDP_INVALID_SOCKET_INDEX == pSenderElement->socketIdx)
         {
             /* socket to send UDP MD */
             errv = trdp_requestSocket(
