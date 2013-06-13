@@ -686,7 +686,15 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             }
             else
             {
-                /* header information can't be read - throw the packet away */
+                /* No complain in case of size==0 and TRDP_NO_ERR for reading the header 
+                   - ICMP port unreachable received (result of previous send) */
+                if (size != 0)
+                {
+                    vos_printLog(VOS_LOG_INFO, "UDP MD header check failed. Packet from socket %d thrown away\n", mdSock);
+                }
+
+                /* header information can't be read - throw the packet away reading some bytes */
+                size = sizeof(MD_HEADER_T);
                 err = (TRDP_ERR_T) vos_sockReceiveUDP(
                         mdSock,
                         (UINT8 *)pElement->pPacket,
@@ -695,11 +703,6 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                         &pElement->replyPort, &pElement->addr.destIpAddr,
                         FALSE);
                 
-                /* No complain in case of size==0 - ICMP port unreachable received (result of previous send) */
-                if (size != 0)
-                {
-                    vos_printLog(VOS_LOG_INFO, "UDP MD header check failed. %d bytes from socket %d thrown away\n", size, mdSock);
-                }
                 return TRDP_NODATA_ERR;
             }
         }
