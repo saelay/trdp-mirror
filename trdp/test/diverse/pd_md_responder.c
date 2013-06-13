@@ -91,7 +91,8 @@ void initPacketList (
     UINT32  pubBaseComId,
     UINT32  subBaseComId)
 {
-    for (int i = 0; i < MAX_NO_OF_PKTS; i++)
+    int i;
+    for (i = 0; i < MAX_NO_OF_PKTS; i++)
     {
         gPubPackets[i].pubHandle    = 0;
         gPubPackets[i].subHandle    = 0;
@@ -210,7 +211,7 @@ int main (int argc, char * *argv)
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int     rv = 0;
     int     ip[4];
-    int     ch;
+    int     ch,i;
     UINT32  comId_In = SUBSCRIBE_COMID_BASE, comId_Out = PUBLISH_COMID_BASE;
 
     /****** Parsing the command line arguments */
@@ -310,7 +311,7 @@ int main (int argc, char * *argv)
 
     initPacketList(comId_Out, comId_In);
 
-    for (int i = 0; i < MAX_NO_OF_PKTS; i++)
+    for (i = 0; i < MAX_NO_OF_PKTS; i++)
     {
         err = tlp_subscribe(appHandle,                  /*    our application identifier           */
                             &gSubPackets[i].subHandle,  /*    our subscription identifier          */
@@ -454,7 +455,7 @@ int main (int argc, char * *argv)
     /*
      *    We always clean up behind us!
      */
-    for (int i = 0; i < MAX_NO_OF_PKTS; i++)
+    for (i = 0; i < MAX_NO_OF_PKTS; i++)
     {
         tlp_unpublish(appHandle, gPubPackets[i].pubHandle);
         tlp_unsubscribe(appHandle, gSubPackets[i].subHandle);

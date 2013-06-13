@@ -89,7 +89,7 @@ demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receiveP
 example:	outdir $(OUTDIR)/mdManager
 test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle
 
-pdtest:		outdir $(OUTDIR)/trdp-pd-test
+pdtest:		outdir $(OUTDIR)/trdp-pd-test $(OUTDIR)/pd_md_responder
 mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest4
 
 doc:		doc/latex/refman.pdf
@@ -215,6 +215,13 @@ $(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
+$(OUTDIR)/pd_md_responder: $(OUTDIR)/libtrdp.a pd_md_responder.c
+			@echo ' ### Building PD test application $(@F)'
+			$(CC) test/diverse/pd_md_responder.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
 
 outdir:
 	mkdir -p $(OUTDIR)
