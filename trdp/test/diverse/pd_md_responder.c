@@ -162,7 +162,7 @@ void myPDcallBack (
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
-            printf("> ComID %d received\n", pMsg->comId);
+            printf("> ComID %d received, URef: %d\n", pMsg->comId, pMsg->pUserRef);
             break;
 
         case TRDP_TIMEOUT_ERR:
@@ -207,7 +207,7 @@ int main (int argc, char * *argv)
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
                                                10000000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
+    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int     rv = 0;
     int     ip[4];
@@ -308,14 +308,13 @@ int main (int argc, char * *argv)
     }
 
     /*    Subscribe to PDs        */
-
     initPacketList(comId_Out, comId_In);
 
     for (i = 0; i < MAX_NO_OF_PKTS; i++)
     {
         err = tlp_subscribe(appHandle,                  /*    our application identifier           */
                             &gSubPackets[i].subHandle,  /*    our subscription identifier          */
-                            NULL,
+                            (const void *) i,           /*    user reference                       */
                             gSubPackets[i].comID,       /*    ComID                                */
                             0,                          /*    topocount: local consist only        */
                             0,                          /*    Source to expect packets from        */
