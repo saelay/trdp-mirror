@@ -153,8 +153,9 @@ TRDP_ERR_T trdp_requestSocket(
 /** Handle the socket pool: Release a socket from our socket pool
  *
  *  @param[in,out]  iface           socket pool
- *  @param[in]      lIndex           index of socket to release
+ *  @param[in]      lIndex          index of socket to release
  *  @param[in]      connectTimeout  timeout value
+ *  @param[in]      checkAll        release all TCP pending sockets
  *
  */
 
