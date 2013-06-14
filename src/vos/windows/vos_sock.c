@@ -1365,8 +1365,15 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 
     if ((rcvSize == SOCKET_ERROR) && !(err == WSAEMSGSIZE))
     {
-        vos_printLog(VOS_LOG_WARNING, "receive() failed (Err: %d)\n", err);
-        return VOS_IO_ERR;
+        if (err == WSAECONNRESET)
+        {
+            return VOS_NODATA_ERR;
+        }
+        else
+        {
+            vos_printLog(VOS_LOG_WARNING, "receive() failed (Err: %d)\n", err);
+            return VOS_IO_ERR;
+        }
     }
     else if (*pSize == 0)
     {

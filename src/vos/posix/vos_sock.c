@@ -1355,7 +1355,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 
     do
     {
-
         rcvSize = read(sock, pBuffer, bufferSize);
         if (rcvSize > 0)
         {
@@ -1380,10 +1379,17 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
 
     if ((rcvSize == -1) && !(errno == EMSGSIZE))
     {
-        char buff[VOS_MAX_ERR_STR_SIZE];
-        STRING_ERR(buff);
-        vos_printLog(VOS_LOG_WARNING, "receive() failed (Err: %s)\n", buff);
-        return VOS_IO_ERR;
+        if (errno == ECONNRESET)
+        {
+            return VOS_NODATA_ERR;
+        }
+        else
+        {
+            char buff[VOS_MAX_ERR_STR_SIZE];
+            STRING_ERR(buff);
+            vos_printLog(VOS_LOG_WARNING, "receive() failed (Err: %s)\n", buff);
+            return VOS_IO_ERR;
+        }
     }
     else if (*pSize == 0)
     {
