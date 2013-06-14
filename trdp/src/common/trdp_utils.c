@@ -245,7 +245,7 @@ PD_ELE_T *trdp_queueFindPubAddr (
     for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
         /*  We match if src/dst/mc address is zero or matches */
-        if (   (iterPD->addr.comId == addr->comId)
+        if ((iterPD->addr.comId == addr->comId)
             && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr))
             && ((iterPD->addr.destIpAddr == 0) || (iterPD->addr.destIpAddr == addr->destIpAddr))
             && ((iterPD->addr.mcGroup == 0) || (iterPD->addr.mcGroup == addr->mcGroup)))
@@ -280,7 +280,7 @@ PD_ELE_T *trdp_queueFindSubAddr (
     for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
         /*  We match if src/dst/mc address is zero or matches */
-        if (   (iterPD->addr.comId == addr->comId)
+        if ((iterPD->addr.comId == addr->comId)
             && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr)))
         {
             return iterPD;
@@ -313,7 +313,7 @@ MD_ELE_T *trdp_MDqueueFindAddr (
     for (iterMD = pHead; iterMD != NULL; iterMD = iterMD->pNext)
     {
         /*  We match if src/dst address is zero or found */
-        if (   (iterMD->addr.comId == addr->comId)
+        if ((iterMD->addr.comId == addr->comId)
             && ((addr->srcIpAddr == 0) || (iterMD->addr.srcIpAddr == addr->srcIpAddr))
             && ((addr->destIpAddr == 0) || (iterMD->addr.destIpAddr == addr->destIpAddr)))
         {
@@ -602,13 +602,13 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[lIndex].usage++;
             return TRDP_NO_ERR;
         }
-        else if (   (iface[lIndex].sock != VOS_INVALID_SOCKET)
+        else if ((iface[lIndex].sock != VOS_INVALID_SOCKET)
                  && (iface[lIndex].bindAddr == bindAddr)
                  && (iface[lIndex].type == usage)
                  && (iface[lIndex].sendParam.qos == params->qos)
                  && (iface[lIndex].sendParam.ttl == params->ttl)
                  && (iface[lIndex].rcvMostly == rcvMostly)
-                 && (   (usage != TRDP_SOCK_MD_TCP)
+                 && ((usage != TRDP_SOCK_MD_TCP)
                      || ((usage == TRDP_SOCK_MD_TCP) && (iface[lIndex].tcpParams.cornerIp == cornerIp))))
         {
             /*  Did this socket join the required multicast group?  */
@@ -633,7 +633,7 @@ TRDP_ERR_T  trdp_requestSocket (
             }
 
 /* add_start TOSHIBA 0306 */
-            if (   (usage != TRDP_SOCK_MD_TCP)
+            if ((usage != TRDP_SOCK_MD_TCP)
                 && (iface[lIndex].bindAddr != 0))
             {
                 err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
@@ -647,7 +647,7 @@ TRDP_ERR_T  trdp_requestSocket (
             /* Use that socket */
             *pIndex = lIndex;
 
-            if (   (usage != TRDP_SOCK_MD_TCP) 
+            if ((usage != TRDP_SOCK_MD_TCP)
                 || ((usage == TRDP_SOCK_MD_TCP) && (iface[lIndex].usage > -1)))
             {
                 iface[lIndex].usage++;
@@ -665,7 +665,7 @@ TRDP_ERR_T  trdp_requestSocket (
     /* Not found, create a new socket entry */
     if (lIndex < VOS_MAX_SOCKET_CNT)
     {
-        if (   (emptySock != VOS_INVALID_SOCKET)
+        if ((emptySock != VOS_INVALID_SOCKET)
             && (lIndex != emptySock))
         {
             lIndex = emptySock;
@@ -675,7 +675,7 @@ TRDP_ERR_T  trdp_requestSocket (
             sCurrentMaxSocketCnt = lIndex + 1;
         }
 
-        iface[lIndex].sock          = VOS_INVALID_SOCKET;
+        iface[lIndex].sock = VOS_INVALID_SOCKET;
         iface[lIndex].bindAddr      = srcIP;
         iface[lIndex].type          = usage;
         iface[lIndex].sendParam.qos = params->qos;
@@ -823,8 +823,9 @@ TRDP_ERR_T  trdp_requestSocket (
 /** Handle the socket pool: if a received TCP socket is unused, the socket connection timeout is started.
  *  In Udp, Release a socket from our socket pool
  *  @param[in,out]  iface           socket pool
- *  @param[in]      lIndex           index of socket to release
+ *  @param[in]      lIndex          index of socket to release
  *  @param[in]      connectTimeout  time out
+ *  @param[in]      checkAll        release all TCP pending sockets
  *
  */
 void  trdp_releaseSocket (
@@ -833,17 +834,17 @@ void  trdp_releaseSocket (
     UINT32          connectTimeout,
     BOOL            checkAll)
 {
-    TRDP_ERR_T err = TRDP_PARAM_ERR;
-    INT32 index;
+    TRDP_ERR_T  err = TRDP_PARAM_ERR;
+    INT32       index;
 
 
-    if(checkAll == TRUE)
+    if (checkAll == TRUE)
     {
         /* Check all the sockets */
         /* Close the morituri = TRUE sockets */
         for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
         {
-            if(iface[index].tcpParams.morituri == TRUE)
+            if (iface[index].tcpParams.morituri == TRUE)
             {
                 vos_printLog(VOS_LOG_INFO, "The socket (Num = %d) will be closed\n", iface[index].sock);
 
@@ -857,29 +858,33 @@ void  trdp_releaseSocket (
                 vos_printLog(VOS_LOG_INFO,
                              "Deleting socket from the iface (Sock: %d, Index: %d)\n",
                              iface[index].sock, index);
-                iface[index].sock           = TRDP_INVALID_SOCKET_INDEX;
-                iface[index].sendParam.qos  = 0;
-                iface[index].sendParam.ttl  = 0;
-                iface[index].usage          = 0;
-                iface[index].bindAddr       = 0;
-                iface[index].type           = (TRDP_SOCK_TYPE_T) 0;
-                iface[index].rcvMostly      = FALSE;
-                iface[index].tcpParams.cornerIp                  = 0;
-                iface[index].tcpParams.connectionTimeout.tv_sec  = 0;
-                iface[index].tcpParams.connectionTimeout.tv_usec = 0;
-                iface[index].tcpParams.addFileDesc               = FALSE;
-                iface[index].tcpParams.morituri                  = FALSE;
+                iface[index].sock = TRDP_INVALID_SOCKET_INDEX;
+                iface[index].sendParam.qos      = 0;
+                iface[index].sendParam.ttl      = 0;
+                iface[index].usage              = 0;
+                iface[index].bindAddr           = 0;
+                iface[index].type               = (TRDP_SOCK_TYPE_T) 0;
+                iface[index].rcvMostly          = FALSE;
+                iface[index].tcpParams.cornerIp = 0;
+                iface[index].tcpParams.connectionTimeout.tv_sec     = 0;
+                iface[index].tcpParams.connectionTimeout.tv_usec    = 0;
+                iface[index].tcpParams.addFileDesc  = FALSE;
+                iface[index].tcpParams.morituri     = FALSE;
             }
         }
 
-    }else if(checkAll == FALSE)
+    }
+    else if (checkAll == FALSE)
     {
         /* Handle a specified socket */
         if (iface != NULL)
         {
             if (iface[lIndex].type == TRDP_SOCK_MD_UDP)
             {
-                vos_printLog(VOS_LOG_DBG, "Trying to close socket %d (usage = %d)\n", iface[lIndex].sock, iface[lIndex].usage);
+                vos_printLog(VOS_LOG_DBG,
+                             "Trying to close socket %d (usage = %d)\n",
+                             iface[lIndex].sock,
+                             iface[lIndex].usage);
                 if (iface[lIndex].sock > VOS_INVALID_SOCKET)
                 {
                     if (--iface[lIndex].usage == 0)
@@ -899,7 +904,10 @@ void  trdp_releaseSocket (
             {
                 if ((iface[lIndex].sock > VOS_INVALID_SOCKET) && (iface[lIndex].rcvMostly == FALSE))
                 {
-                    vos_printLog(VOS_LOG_DBG, "Decrement the socket %d usage = %d\n", iface[lIndex].sock, iface[lIndex].usage);
+                    vos_printLog(VOS_LOG_DBG,
+                                 "Decrement the socket %d usage = %d\n",
+                                 iface[lIndex].sock,
+                                 iface[lIndex].usage);
                     iface[lIndex].usage--;
 
                     if (iface[lIndex].usage == 0)
@@ -908,8 +916,8 @@ void  trdp_releaseSocket (
                         TRDP_TIME_T tmpt_interval, tmpt_now;
 
                         vos_printLog(VOS_LOG_INFO,
-                                   "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                                   iface[lIndex].sock);
+                                     "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
+                                     iface[lIndex].sock);
 
                         tmpt_interval.tv_sec    = connectTimeout / 1000000;
                         tmpt_interval.tv_usec   = connectTimeout % 1000000;
@@ -1019,7 +1027,7 @@ BOOL  trdp_isRcvSeqCnt (
     }
 
     /*    For process data look at the PD recv queue only    */
-    if (   (TRDP_MSG_PD == msgType)
+    if ((TRDP_MSG_PD == msgType)
         || (TRDP_MSG_PP == msgType)
         || (TRDP_MSG_PR == msgType)
         || (TRDP_MSG_PE == msgType))
