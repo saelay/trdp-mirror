@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.28"
+#define MD_APP_VERSION	"V0.29"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.28"
+#define MD_APP_VERSION	"V0.29"
 #else
-#define MD_APP_VERSION	"V0.28"
+#define MD_APP_VERSION	"V0.29"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -177,6 +177,8 @@ extern "C" {
 
 #define TLC_PROCESS_CYCLE_TIME		10000			/* default MD tlc_process cycle time for tlm_delListener wait */
 
+#define REPLIERS_UNKNOWN				0				/* Repliiers unknown kind */
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */
@@ -189,6 +191,7 @@ typedef struct
 	UINT32					sendRequestNumExpReplies;
 	UINT32					decidedSessionSuccessCount;
 	UINT32					decidedSessionFailureCount;
+	BOOL					decideUnKnownSuccessFlag;
 } APP_THREAD_SESSION_HANDLE;
 
 /* Application Thread Session Handle - Message Queue Descriptor Table */
@@ -258,7 +261,8 @@ typedef enum
     MD_APP_MUTEX_ERR				= -5,			/**< MD Application Thread Mutex Error */
     MD_APP_COMMAND_ERR			= -6,			/**< MD Application Command Error */
     MD_APP_QUIT_ERR				= -7,			/**< MD Application Quit Command */
-    MD_APP_EMPTY_MESSAGE_ERR	= -8			/**< MD Application Command Error */
+    MD_APP_EMPTY_MESSAGE_ERR	= -8,			/**< MD Application Command Error */
+    MD_APP_MRMP_ONE_CYCLE_ERR	= -9			/**< MD Application Repliers unknown Mr-Mp One Cycle End (Receive Reply Timeout) */
 } MD_APP_ERR_TYPE;
 
 /* MD Reply Error Type definition */

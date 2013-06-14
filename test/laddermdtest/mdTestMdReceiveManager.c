@@ -175,7 +175,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	md_config.pRefCon = &useMdSendSubnet1;
 	md_config.sendParam.qos = TRDP_MD_DEFAULT_QOS;
 	md_config.sendParam.ttl = TRDP_MD_DEFAULT_TTL;
-	md_config.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
+//	md_config.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
 	md_config.flags = 0
 		| TRDP_FLAGS_NONE      * 0
 		| TRDP_FLAGS_MARSHALL  * pTrdpInitializeParameter->mdMarshallingFlag
@@ -313,11 +313,18 @@ void md_indication(
 	/* Get TimeStamp when call md_indication() */
 	sprintf(timeStamp, "%s md_indication()", vos_getTimeStamp());
 
-	vos_printLog(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%d)\n",
+	vos_printLog(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%d"
+			" sessionId=%02x%02x%02x%02x%02x%02x%02x%02x,"
+			" numExpReplies=%d numReplies=%d resuletCode=%d)\n",
 			pRefCon,
 			pMsg,
 			pData,
-			dataSize,pMsg->comId);
+			dataSize,pMsg->comId,
+			pMsg->sessionId[0], pMsg->sessionId[1], pMsg->sessionId[2], pMsg->sessionId[3],
+			pMsg->sessionId[4], pMsg->sessionId[5], pMsg->sessionId[6], pMsg->sessionId[7],
+			pMsg->numExpReplies,
+			pMsg->numReplies,
+			pMsg->resultCode);
 
     #if 0
 
@@ -330,22 +337,22 @@ void md_indication(
     printf("topoCount         = %d\n"   ,pMsg->topoCount);
     printf("userStatus        = %d\n"   ,pMsg->userStatus);
     printf("replyStatus       = %d\n"   ,pMsg->replyStatus);
-    printf("sessionId         = ");      print_session(pMsg->sessionId);
+//    printf("sessionId         = ");      print_session(pMsg->sessionId);
     printf("replyTimeout      = %d\n"   ,pMsg->replyTimeout);
-    printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
-    printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
-    printf("noOfReplies       = %d\n"   ,pMsg->noOfReplies);
+//    printf("destURI           = ");      print_uri(pMsg->destURI); printf("\n");
+//    printf("srcURI            = ");      print_uri(pMsg->srcURI); printf("\n");
+    printf("numExpReplies       = %d\n"   ,pMsg->numExpReplies);
 	printf("numReplies        = %d\n"   ,pMsg->numReplies);
-	printf("numRetriesMax     = %d\n"   ,pMsg->numRetriesMax);
-	printf("numRetries        = %d\n"   ,pMsg->numRetries);
-	printf("disableReplyRx    = %d\n"   ,pMsg->disableReplyRx);
+//	printf("numRetriesMax     = %d\n"   ,pMsg->numRetriesMax);
+//	printf("numRetries        = %d\n"   ,pMsg->numRetries);
+//	printf("disableReplyRx    = %d\n"   ,pMsg->disableReplyRx);
 	printf("numRepliesQuery   = %d\n"   ,pMsg->numRepliesQuery);
 	printf("numConfirmSent    = %d\n"   ,pMsg->numConfirmSent);
 	printf("numConfirmTimeout = %d\n"   ,pMsg->numConfirmTimeout);
     printf("pUserRef          = %p\n"   ,pMsg->pUserRef);
     printf("resultCode        = %d\n"   ,pMsg->resultCode);
 
-    print_memory(pData,dataSize);
+//    print_memory(pData,dataSize);
 
     #endif
 
@@ -404,6 +411,7 @@ void md_indication(
 			else
 			{
 				queue_sendMessage(&fwd, sendMessageQueueDescriptor);
+				vos_printLog(VOS_LOG_DBG, "Send Message Queue. MessageQueueDescriptor:%d\n", sendMessageQueueDescriptor);
 				break;
 			}
 		}
