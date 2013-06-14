@@ -401,8 +401,8 @@ int main (int argc, char *argv[])
     /*
      *    We always clean up behind us!
      */
-    tlp_unpublish(appHandle, subHandle1);
-    tlp_unpublish(appHandle, subHandle2);
+    tlp_unsubscribe(appHandle, subHandle1);
+    tlp_unsubscribe(appHandle, subHandle2);
 
     tlc_closeSession(appHandle);
     tlc_terminate();
