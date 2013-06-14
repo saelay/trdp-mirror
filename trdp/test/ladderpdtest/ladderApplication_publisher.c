@@ -1529,13 +1529,13 @@ int main (int argc, char *argv[])
 			/* Change Write Traffic Store Receive Subnet */
 			if( TS_SUBNET == SUBNET1)
 			{
-				vos_printLog(VOS_LOG_ERROR, "Subnet1 Link Down. Cheage Receive Subnet\n");
+				vos_printLog(VOS_LOG_INFO, "Subnet1 Link Down. Change Receive Subnet\n");
 				/* Write Traffic Store Receive Subnet : Subnet2 */
 				TS_SUBNET = SUBNET2;
 			}
 			else
 			{
-				vos_printLog(VOS_LOG_ERROR, "Subnet2 Link Down. Change Receive Subnet\n");
+				vos_printLog(VOS_LOG_INFO, "Subnet2 Link Down. Change Receive Subnet\n");
 				/* Write Traffic Store Receive Subnet : Subnet1 */
 				TS_SUBNET = SUBNET1;
 			}

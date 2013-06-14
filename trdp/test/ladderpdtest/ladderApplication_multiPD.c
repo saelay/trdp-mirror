@@ -1038,8 +1038,8 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 //				printf("-O,	--timeout-comid2	Subscribe TImeout: micro sec\n");
 				printf("-d,	--send-comid1-cycle	Publish Cycle TIme: micro sec\n");
 //				printf("-e,	--send-comid2-cycle	Publish Cycle TIme: micro sec\n");
-				printf("-k,	--send-cycle-number	Publisher Thread Send Cycle Number\n");
-				printf("-K,	--receive-cycle-number	Subscriber Thread Receive Cycle Number\n");
+				printf("-k,	--send-cycle-number	Publisher Thread Send Cycle Number(counter of tlp_put)\n");
+				printf("-K,	--receive-cycle-number	Subscriber Thread Receive Cycle Number(counter of PD receive)\n");
 				printf("-T,	--traffic-store-subnet	Write Traffic Store Receive Subnet1:1,subnet2:2\n");
 				printf("-L,	--log-type-onoff	LOG Category OnOff Type Log On:1, Log Off:0, 0bit:ERROR, 1bit:WARNING, 2bit:INFO, 3bit:DBG\n");
 				printf("-s,	--show-set-command	Display Setup Command until now\n");
@@ -1445,7 +1445,6 @@ PD_APP_ERR_TYPE PDReceiveCountCheck (void)
 				{
 					printf("Test Finish Subscriber Command Value Delete Err\n");
 				}
-
 			}
 			else
 			{
@@ -1491,13 +1490,13 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 			/* Change Write Traffic Store Receive Subnet */
 			if( TS_SUBNET_NOW == SUBNET1)
 			{
-				vos_printLog(VOS_LOG_ERROR, "Subnet1 Link Down. Change Receive Subnet\n");
+				vos_printLog(VOS_LOG_INFO, "Subnet1 Link Down. Change Receive Subnet\n");
 				/* Write Traffic Store Receive Subnet : Subnet2 */
 				TS_SUBNET_NOW = SUBNET2;
 			}
 			else
 			{
-				vos_printLog(VOS_LOG_ERROR, "Subnet2 Link Down. Change Receive Subnet\n");
+				vos_printLog(VOS_LOG_INFO, "Subnet2 Link Down. Change Receive Subnet\n");
 				/* Write Traffic Store Receive Subnet : Subnet1 */
 				TS_SUBNET_NOW = SUBNET1;
 			}

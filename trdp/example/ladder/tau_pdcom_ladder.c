@@ -54,7 +54,9 @@ void tau_recvPdDs (
 	UINT32 subnetId;											/* Using Sub-network Id */
 	UINT32 displaySubnetId = SUBNETID_TYPE1;				/* Using Sub-network Id for Display log */
 	UINT16 offset = 0;										/* Traffic Store Offset Address */
+#if 0
 	BOOL linkUpDown = TRUE;									/* Link Up Down information TRUE:Up FALSE:Down */
+#endif
 	extern UINT8 *pTrafficStoreAddr;						/* pointer to pointer to Traffic Store Address */
 	PD_COMMAND_VALUE *subscriberPdCommandValue = NULL;	/* Subscriber PD Command Value */
 	TRDP_ADDRESSES_T addr = {0};
@@ -140,6 +142,12 @@ void tau_recvPdDs (
 			/* Check toBechavior */
 			if (pSubscriberElement->toBehavior == TRDP_TO_SET_TO_ZERO)
 			{
+				if (pPDInfo->pUserRef == NULL)
+				{
+				       vos_printLog(VOS_LOG_INFO, "There is no offset Address\n");
+						tau_unlockTrafficStore();
+						return;
+				}
 				/* Clear Traffic Store */
 				memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
 				memset((void *)((int)pTrafficStoreAddr + (int)offset), 0, pSubscriberElement->dataSize);
@@ -157,6 +165,7 @@ void tau_recvPdDs (
 				}
 				vos_printLog(VOS_LOG_ERROR, "SubnetId:%d comId:%d Timeout. Traffic Store Clear.\n", displaySubnetId, pPDInfo->comId);
 
+#if 0
 				/* Check Subnet for Write Traffic Store Receive Subnet */
 				tau_checkLinkUpDown(subnetId, &linkUpDown);
 				/* Link Down */
@@ -165,13 +174,13 @@ void tau_recvPdDs (
 					/* Change Write Traffic Store Receive Subnet */
 					if( subnetId == SUBNET1)
 					{
-						vos_printLog(VOS_LOG_ERROR, "Subnet1 Link Down. Change Receive Subnet\n");
+						vos_printLog(VOS_LOG_INFO, "Subnet1 Link Down. Change Receive Subnet\n");
 						/* Write Traffic Store Receive Subnet : Subnet2 */
 						subnetId = SUBNET2;
 					}
 					else
 					{
-						vos_printLog(VOS_LOG_ERROR, "Subnet2 Link Down. Change Receive Subnet\n");
+						vos_printLog(VOS_LOG_INFO, "Subnet2 Link Down. Change Receive Subnet\n");
 						/* Write Traffic Store Receive Subnet : Subnet1 */
 						subnetId = SUBNET1;
 					}
@@ -185,10 +194,17 @@ void tau_recvPdDs (
 						vos_printLog(VOS_LOG_DBG, "tau_setNetworkContext() set subnet:0x%x\n", subnetId);
 					}
 				}
+#endif /* if 0 */
 			}
 		}
 		else
 		{
+			if (pPDInfo->pUserRef == NULL)
+			{
+			       vos_printLog(VOS_LOG_INFO, "There is no offset Address\n");
+					tau_unlockTrafficStore();
+					return;
+			}
 			/* Set received PD Data in Traffic Store */
 /*			memcpy(&offset, pRefCon, sizeof(offset)); */
 			memcpy(&offset, (void *)pPDInfo->pUserRef, sizeof(offset));
@@ -245,6 +261,8 @@ VOS_THREAD_FUNC_T PDComLadder (void)
 
 		INT32   noOfDesc2 = 0;
 		struct timeval  tv2;
+		BOOL linkUpDown = TRUE;						/* Link Up Down information TRUE:Up FALSE:Down */
+		UINT32 writeSubnetId;						/* Using Traffic Store Write Sub-network Id */
 
 		/*
 		Prepare the file descriptor set for the select call.
@@ -321,6 +339,44 @@ VOS_THREAD_FUNC_T PDComLadder (void)
 		The callback function will be called from within the trdp_work
 		function (in it's context and thread)!
 		*/
+
+		/* Don't Receive ? */
+		if (rv <= 0)
+		{
+			/* Get Write Traffic Store Receive SubnetId */
+			if (tau_getNetworkContext(&writeSubnetId) != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
+			}
+			/* Check Subnet for Write Traffic Store Receive Subnet */
+			tau_checkLinkUpDown(writeSubnetId, &linkUpDown);
+			/* Link Down */
+			if (linkUpDown == FALSE)
+			{
+				/* Change Write Traffic Store Receive Subnet */
+				if( writeSubnetId == SUBNET1)
+				{
+					vos_printLog(VOS_LOG_INFO, "Subnet1 Link Down. Change Receive Subnet\n");
+					/* Write Traffic Store Receive Subnet : Subnet2 */
+					writeSubnetId = SUBNET2;
+				}
+				else
+				{
+					vos_printLog(VOS_LOG_INFO, "Subnet2 Link Down. Change Receive Subnet\n");
+					/* Write Traffic Store Receive Subnet : Subnet1 */
+					writeSubnetId = SUBNET1;
+				}
+				/* Set Write Traffic Store Receive Subnet */
+				if (tau_setNetworkContext(writeSubnetId) != TRDP_NO_ERR)
+				{
+					vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+				}
+				else
+				{
+					vos_printLog(VOS_LOG_DBG, "tau_setNetworkContext() set subnet:0x%x\n", writeSubnetId);
+				}
+			}
+		}
 
 		/* First TRDP instance, calls the call back function to handle1 received data
 		* and copy them into the Traffic Store using offset address from configuration. */
