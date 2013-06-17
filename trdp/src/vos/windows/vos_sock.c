@@ -477,6 +477,30 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_SOCK_ERR;
     }
 
+    /* enlarge send and receive buffers for UDP to 64k */
+    {
+        int   optval      = 64 * 1024;
+        int   option_len  = sizeof(optval);
+        if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (const char *)&optval, option_len) == -1)
+        {
+            (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &option_len);
+            vos_printLog(VOS_LOG_WARNING, "vos_sockOpenUDP: UDP send message size out of limit (max: %u)\n", optval);
+            return VOS_SOCK_ERR;
+        }
+
+        optval = 64 * 1024;
+        if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (const char *)&optval, option_len) == -1)
+        {
+            (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &option_len);
+            vos_printLog(VOS_LOG_WARNING, "vos_sockOpenUDP: UDP recv message size out of limit (max: %u)\n", optval);
+            return VOS_SOCK_ERR;
+        }
+        (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &option_len);
+        vos_printLog(VOS_LOG_INFO, "vos_sockOpenUDP: UDP send message limit = %u\n", optval);
+        (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &option_len);
+        vos_printLog(VOS_LOG_INFO, "vos_sockOpenUDP: UDP recv message limit = %u\n", optval);
+    }
+
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
     return VOS_NO_ERR;
@@ -526,6 +550,31 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         (void) closesocket(sock);
         return VOS_SOCK_ERR;
     }
+
+    /* enlarge send and receive buffers for TCP to 64k */
+    {
+        int   optval      = 64 * 1024;
+        int   option_len  = sizeof(optval);
+        if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (const char *)&optval, option_len) == -1)
+        {
+            (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &option_len);
+            vos_printLog(VOS_LOG_WARNING, "vos_sockOpenTCP: TCP send message size out of limit (max: %u)\n", optval);
+            return VOS_SOCK_ERR;
+        }
+
+        optval = 64 * 1024;
+        if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (const char *)&optval, option_len) == -1)
+        {
+            (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &option_len);
+            vos_printLog(VOS_LOG_WARNING, "vos_sockOpenTCP: TCP recv message size out of limit (max: %u)\n", optval);
+            return VOS_SOCK_ERR;
+        }
+        (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &option_len);
+        vos_printLog(VOS_LOG_INFO, "vos_sockOpenTCP: TCP send message limit = %u\n", optval);
+        (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&optval, &option_len);
+        vos_printLog(VOS_LOG_INFO, "vos_sockOpenTCP: TCP recv message limit = %u\n", optval);
+    }
+
     *pSock = (INT32) sock;
     gNumberOfOpenSockets++;
     return VOS_NO_ERR;
