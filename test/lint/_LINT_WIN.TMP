@@ -27,17 +27,17 @@
 
 During Specific Walk:
   File ..\..\src\common\trdp_pdcom.c line 376: trdp_pdCheck([1], ?)
-  File ..\..\src\common\trdp_pdcom.c line 803: vos_crc32(4294967295, [0], ?)
+  File ..\..\src\common\trdp_pdcom.c line 804: vos_crc32(4294967295, [0], ?)
 ..\..\src\vos\common\vos_utils.c(295) : Warning 661: Possible access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
     file ..\..\src\vos\common\vos_utils.c: lines 293, 295; file
-    ..\..\src\common\trdp_pdcom.c: lines 376, 803]
+    ..\..\src\common\trdp_pdcom.c: lines 376, 804]
 ..\..\src\vos\common\vos_utils.c(293) : Info 831: Reference cited in prior
     message
 ..\..\src\vos\common\vos_utils.c(295) : Info 831: Reference cited in prior
     message
 ..\..\src\common\trdp_pdcom.c(376) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_pdcom.c(803) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_pdcom.c(804) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
 
@@ -46,59 +46,59 @@ During Specific Walk:
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 621: vos_sockReceiveTCP(?, [0]?, [1])
-..\..\src\vos\windows\vos_sock.c(1340) : Warning 662: Possible creation of
+  File ..\..\src\common\trdp_mdcom.c line 629: vos_sockReceiveTCP(?, [0]?, [1])
+..\..\src\vos\windows\vos_sock.c(1413) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1337, 1340; file
-    ..\..\src\common\trdp_mdcom.c: lines 599, 620]
-..\..\src\vos\windows\vos_sock.c(1337) : Info 831: Reference cited in prior
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1410, 1413; file
+    ..\..\src\common\trdp_mdcom.c: lines 607, 628]
+..\..\src\vos\windows\vos_sock.c(1410) : Info 831: Reference cited in prior
     message
-..\..\src\vos\windows\vos_sock.c(1340) : Info 831: Reference cited in prior
+..\..\src\vos\windows\vos_sock.c(1413) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(599) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(620) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(607) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(628) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\common\trdp_if.c (C)
 
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 850: trdp_mdCheck(?, [1], ?, 0)
+  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
 ..\..\src\common\trdp_mdcom.c(303) : Warning 662: Possible creation of
     out-of-bounds pointer (65418 beyond end of data) by operator 'ptr+int'
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 850]
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 863]
 ..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(850) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 850: trdp_mdCheck(?, [1], ?, 0)
+  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
 ..\..\src\common\trdp_mdcom.c(303) : Warning 662: Possible creation of
     out-of-bounds pointer (65414 beyond end of data) by operator 'ptr-int'
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 850]
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 863]
 ..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(850) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 850: trdp_mdCheck(?, [1], ?, 0)
+  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
 ..\..\src\common\trdp_mdcom.c(304) : Warning 662: Possible creation of
     out-of-bounds pointer (16354 beyond end of data) by operator '['
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 304, 850]
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 304, 863]
 ..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(304) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(850) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 850: trdp_mdCheck(?, [1], ?, 0)
+  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
 ..\..\src\common\trdp_mdcom.c(304) : Warning 661: Possible access of
     out-of-bounds pointer (16354 beyond end of data) by operator '['
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 304, 850]
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 304, 863]
 ..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(304) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(850) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\common\trdp_pdcom.c (C)
 
