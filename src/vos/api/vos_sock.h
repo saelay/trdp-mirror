@@ -76,6 +76,9 @@ extern "C" {
 #ifndef VOS_MAC_SIZE
 #define VOS_MAC_SIZE  6             /**< The MAC size supported by VOS */
 #endif
+#ifndef TRDP_SOCKBUF_SIZE
+#define TRDP_SOCKBUF_SIZE  (64 * 1024)  /**< Size of socket send and receive buffer */
+#endif
 #define VOS_INVALID_SOCKET -1       /**< Invalid socket number */
 
 #define VOS_DEFAULT_IFACE	cDefaultIface
