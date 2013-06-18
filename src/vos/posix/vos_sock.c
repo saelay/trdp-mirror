@@ -87,7 +87,6 @@ struct ifreq gIfr;
  *
  *  @retval             TRUE if successfull
  */
-
 BOOL vos_getMacAddress (
     UINT8       *pMacAddr,
     const char  *pIfName)
@@ -162,7 +161,14 @@ BOOL vos_getMacAddress (
 #endif
 }
 
-/* enlarge send and receive buffers to TRDP_SOCKBUF_SIZE */
+/**********************************************************************************************************************/
+/** Enlarge send and receive buffers to TRDP_SOCKBUF_SIZE if necessary.
+ *
+ *  @param[in]      sock            socket descriptor
+ *
+ *  @retval         VOS_NO_ERR       no error
+ *  @retval         VOS_SOCK_ERR     buffer size can't be set
+ */
 VOS_ERR_T vos_sockSetBuffer(INT32 sock)
 {
     int         optval      = 0;
