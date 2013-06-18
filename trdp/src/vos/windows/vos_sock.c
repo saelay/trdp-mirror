@@ -94,27 +94,43 @@ UINT8   mac[VOS_MAC_SIZE];
  * LOCAL FUNCTIONS
  */
 
-INT32 recvmsg (int sock_id, struct msghdr *message, int flags)
+/**********************************************************************************************************************/
+/** Receive a message including sender address information.
+ *
+ *  @param[in]      sock            socket descriptor
+ *  @param[in]      message         Pointer to message header
+ *  @param[in]      flags           Receive flags
+ *
+ *  @retval         number of received bytes, -1 for error
+ */
+INT32 recvmsg (int sock, struct msghdr *pMessage, int flags)
 {
     GUID    WSARecvMsg_GUID = WSAID_WSARECVMSG;
     LPFN_WSARECVMSG WSARecvMsg;
-    DWORD   number_of_bytes = 0;
-    int     res = WSAIoctl(sock_id, SIO_GET_EXTENSION_FUNCTION_POINTER,
-                           &WSARecvMsg_GUID, sizeof (WSARecvMsg_GUID), &WSARecvMsg,
-                           sizeof WSARecvMsg, &number_of_bytes, NULL, NULL);
+    DWORD   numBytes = 0;
+    int     res = WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                           &WSARecvMsg_GUID, sizeof(WSARecvMsg_GUID), &WSARecvMsg,
+                           sizeof(WSARecvMsg), &numBytes, NULL, NULL);
 
-    message->dwFlags = flags;
-    res = WSARecvMsg(sock_id, message, &number_of_bytes, NULL, NULL);
+    pMessage->dwFlags = flags;
+    res = WSARecvMsg(sock, pMessage, &numBytes, NULL, NULL);
     if (0 != res)
     {
         DWORD err = WSAGetLastError();
         if (err != WSAEMSGSIZE)
             return -1;
     }
-    return number_of_bytes;
+    return numBytes;
 }
 
-/* enlarge send and receive buffers to TRDP_SOCKBUF_SIZE */
+/**********************************************************************************************************************/
+/** Enlarge send and receive buffers to TRDP_SOCKBUF_SIZE if necessary.
+ *
+ *  @param[in]      sock            socket descriptor
+ *
+ *  @retval         VOS_NO_ERR       no error
+ *  @retval         VOS_SOCK_ERR     buffer size can't be set
+ */
 VOS_ERR_T vos_sockSetBuffer(INT32 sock)
 {
     int   optval      = 0;

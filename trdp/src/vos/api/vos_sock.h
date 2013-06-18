@@ -64,20 +64,24 @@ extern "C" {
 #endif
 
 #define VOS_TTL_MULTICAST       64  /**< The maximum number of hops a multicast packet can take    */
-#ifndef VOS_MAX_IF_NAME_SIZE
-#define VOS_MAX_IF_NAME_SIZE    16  /**< The maximum size for the interface name                   */
+#ifndef VOS_MAX_IF_NAME_SIZE        /**< The maximum size for the interface name                   */
+#define VOS_MAX_IF_NAME_SIZE    16
 #endif
-#ifndef VOS_MAX_NUM_IF
-#define VOS_MAX_NUM_IF  4           /**< The maximum number of IP interface adapters that can be handled by VOS */
+#ifndef VOS_MAX_NUM_IF              /**< The maximum number of IP interface adapters that can be handled by VOS */
+#define VOS_MAX_NUM_IF           4
 #endif
-#ifndef VOS_MAX_NUM_UNICAST
-#define VOS_MAX_NUM_UNICAST  10     /**< The maximum number of unicast addresses that can be handled by VOS    */
+#ifndef VOS_MAX_NUM_UNICAST         /**< The maximum number of unicast addresses that can be handled by VOS    */
+#define VOS_MAX_NUM_UNICAST      10
 #endif
-#ifndef VOS_MAC_SIZE
-#define VOS_MAC_SIZE  6             /**< The MAC size supported by VOS */
+#ifndef VOS_MAC_SIZE                /**< The MAC size supported by VOS */
+#define VOS_MAC_SIZE  6 
 #endif
-#ifndef TRDP_SOCKBUF_SIZE
-#define TRDP_SOCKBUF_SIZE  (64 * 1024)  /**< Size of socket send and receive buffer */
+#ifndef TRDP_SOCKBUF_SIZE           /**< Size of socket send and receive buffer */
+#if MD_SUPPORT   
+#define TRDP_SOCKBUF_SIZE  (64 * 1024)
+#else
+#define TRDP_SOCKBUF_SIZE  (8 * 1024)  
+#endif
 #endif
 #define VOS_INVALID_SOCKET -1       /**< Invalid socket number */
 
