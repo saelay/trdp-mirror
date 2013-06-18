@@ -972,7 +972,7 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         }
         else if ((!strcmp(trdp_spy_string,"Mn")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Notificatoin");
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Notificatoin (Request without reply)");
         }
         else if ((!strcmp(trdp_spy_string,"Mr")))
         {
@@ -980,11 +980,11 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         }
         else if ((!strcmp(trdp_spy_string,"Mp")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (without notification)");
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (without confirmation)");
         }
 		else if ((!strcmp(trdp_spy_string,"Mq")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (with notification)");
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (with confirmation)");
         }
 		else if ((!strcmp(trdp_spy_string,"Mc")))
         {
