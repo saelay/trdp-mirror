@@ -1,3 +1,4 @@
+#!/bin/sh  
 #//
 #// $Id$
 #//
@@ -9,7 +10,6 @@
 #// to third parties without express authority is forbidden.
 #// Copyright Bombardier Transportation GmbH, Germany, 2013.
 #//
-#!/bin/sh  
 export WIND_HOME="/opt/cross/vxworks-6.6"
 export WIND_BASE=$WIND_HOME"/vxworks-6.6"
 export WIND_LIC_PROXY=$WIND_HOME"/setup/x86-linux2/bin"

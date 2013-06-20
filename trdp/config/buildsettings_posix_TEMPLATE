@@ -1,3 +1,4 @@
+#!/bin/sh
 #//
 #// $Id$
 #//
@@ -9,6 +10,5 @@
 #// to third parties without express authority is forbidden.
 #// Copyright Bombardier Transportation GmbH, Germany, 2013.
 #//
-#!/bin/sh
 export DOXYPATH="/usr/local/bin/"
 unset INCPATH
