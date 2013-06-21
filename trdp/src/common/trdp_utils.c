@@ -42,6 +42,30 @@
 static INT32 sCurrentMaxSocketCnt = 0;
 
 /**********************************************************************************************************************/
+/** Debug socket usage output
+ *
+ *  @param[in]      iface[]            List of sockets
+ */
+void printSocketUsage (
+    TRDP_SOCKETS_T iface[])
+{
+    UINT32 lIndex;
+    for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
+    {
+        if (iface[lIndex].sock == -1)
+        {
+            continue;
+        }
+        vos_printLog(VOS_LOG_DBG, "iface[%u].sock = %u\n", lIndex, iface[lIndex].sock);
+        vos_printLog(VOS_LOG_DBG, "iface[%u].bindAddr = %u\n", lIndex, iface[lIndex].bindAddr);
+        vos_printLog(VOS_LOG_DBG, "iface[%u].type = %u \n", lIndex, iface[lIndex].type);
+        vos_printLog(VOS_LOG_DBG, "iface[%u].sendParam.qos = %u\n", lIndex, iface[lIndex].sendParam.qos);
+        vos_printLog(VOS_LOG_DBG, "iface[%u].sendParam.ttl = %u\n", lIndex, iface[lIndex].sendParam.ttl);
+        vos_printLog(VOS_LOG_DBG, "iface[%u].rcvMostly = %u\n", lIndex, iface[lIndex].rcvMostly);
+    }
+}
+
+/**********************************************************************************************************************/
 /** Check if a mc group is in the list
  *
  *  @param[in]      mcList[]            List of multicast groups
@@ -675,8 +699,8 @@ TRDP_ERR_T  trdp_requestSocket (
             sCurrentMaxSocketCnt = lIndex + 1;
         }
 
-        iface[lIndex].sock = VOS_INVALID_SOCKET;
-        iface[lIndex].bindAddr      = srcIP;
+        iface[lIndex].sock          = VOS_INVALID_SOCKET;
+        iface[lIndex].bindAddr      = bindAddr /* was srcIP (ID #125) */;
         iface[lIndex].type          = usage;
         iface[lIndex].sendParam.qos = params->qos;
         iface[lIndex].sendParam.ttl = params->ttl;
@@ -815,6 +839,8 @@ TRDP_ERR_T  trdp_requestSocket (
         err = TRDP_MEM_ERR;
     }
 
+    printSocketUsage(iface);
+
     return err;
 }
 
@@ -859,12 +885,12 @@ void  trdp_releaseSocket (
                              "Deleting socket from the iface (Sock: %d, Index: %d)\n",
                              iface[index].sock, index);
                 iface[index].sock = TRDP_INVALID_SOCKET_INDEX;
-                iface[index].sendParam.qos      = 0;
-                iface[index].sendParam.ttl      = 0;
-                iface[index].usage              = 0;
-                iface[index].bindAddr           = 0;
-                iface[index].type               = (TRDP_SOCK_TYPE_T) 0;
-                iface[index].rcvMostly          = FALSE;
+                iface[index].sendParam.qos  = 0;
+                iface[index].sendParam.ttl  = 0;
+                iface[index].usage          = 0;
+                iface[index].bindAddr       = 0;
+                iface[index].type       = (TRDP_SOCK_TYPE_T) 0;
+                iface[index].rcvMostly  = FALSE;
                 iface[index].tcpParams.cornerIp = 0;
                 iface[index].tcpParams.connectionTimeout.tv_sec     = 0;
                 iface[index].tcpParams.connectionTimeout.tv_usec    = 0;
