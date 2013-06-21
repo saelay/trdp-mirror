@@ -39,11 +39,11 @@ TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o $(VOS_OBJS)
 LDFLAGS = -L $(OUTDIR)
 
 # Enable / disable MD Support
-ifeq ($(MD_SUPPORT),1)
+ifeq ($(MD_SUPPORT),0)
+CFLAGS += -DMD_SUPPORT=0
+else
 TRDP_OBJS += trdp_mdcom.o
 CFLAGS += -DMD_SUPPORT=1
-else
-CFLAGS += -DMD_SUPPORT=0
 endif
 
 # adapt for operating system
@@ -80,16 +80,15 @@ ifeq ($(TARGET_FLAG),VXWORKS)
 CC = $(TCPREFIX)cc$(TCPOSTFIX)
 endif
 
-all:	outdir libtrdp demo
+all:	outdir libtrdp demo example test pdtest mdtest
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
-libtrdppd:	outdir $(OUTDIR)/libtrdppd.a 
 
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
 example:	outdir $(OUTDIR)/mdManager
 test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle
 
-pdtest:		outdir $(OUTDIR)/trdp-pd-test $(OUTDIR)/pd_md_responder
+pdtest:		outdir $(OUTDIR)/trdp-pd-test $(OUTDIR)/pd_md_responder $(OUTDIR)/testSub
 mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest4
 
 doc:		doc/latex/refman.pdf
@@ -223,6 +222,14 @@ $(OUTDIR)/pd_md_responder: $(OUTDIR)/libtrdp.a pd_md_responder.c
 			    -o $@
 			$(STRIP) $@
 
+$(OUTDIR)/testSub: $(OUTDIR)/libtrdp.a subTest.c
+			@echo ' ### Building subscribe PD test application $(@F)'
+			$(CC) test/diverse/subTest.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
 outdir:
 	mkdir -p $(OUTDIR)
 
@@ -244,6 +251,7 @@ help:
 	@echo "Other builds:" >&2
 	@echo "  * make demo      - build the sample applications" >&2
 	@echo "  * make test      - build the test server application" >&2
+	@echo "  * make pdtest    - build the PDCom test applications" >&2
 	@echo "  * make mdtest    - build the UDPMDcom test application" >&2
 	@echo "  * make example   - build the example for MD communication, but needs libuuid!" >&2
 	@echo "  * make clean     - remove all binaries and objects of the current target" >&2
