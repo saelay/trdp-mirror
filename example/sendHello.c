@@ -32,7 +32,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.0"
+#define APP_VERSION     "1.1"
 
 #define DATA_MAX        1000
 
@@ -79,6 +79,7 @@ void usage (const char *appName)
            "-o <own IP address> (default INADDR_ANY)\n"
            "-t <target IP address>\n"
            "-c <comId> (default 1000)\n"
+           "-s <cycle time> (default 1000000 [us])\n"
            "-e send empty request\n"
            "-d <custom string to send> (default: 'Hello World')\n"
            "-v print version and quit\n"
@@ -99,6 +100,7 @@ int main (int argc, char *argv[])
     TRDP_APP_SESSION_T      appHandle; /*    Our identifier to the library instance    */
     TRDP_PUB_T              pubHandle; /*    Our identifier to the publication         */
     UINT32                  comId = PD_COMID;
+    UINT32                  cycleTime = PD_COMID_CYCLE;
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
@@ -126,7 +128,7 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    while ((ch = getopt(argc, argv, "t:o:d:h?vec:")) != -1)
+    while ((ch = getopt(argc, argv, "t:o:d:s:h?vec:")) != -1)
     {
         switch (ch)
         {
@@ -145,6 +147,16 @@ int main (int argc, char *argv[])
             {   /*  read comId    */
                 if (sscanf(optarg, "%u",
                            &comId) < 1)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                break;
+            }
+            case 's':
+            {   /*  read cycle time    */
+                if (sscanf(optarg, "%u",
+                           &cycleTime) < 1)
                 {
                     usage(argv[0]);
                     exit(1);
@@ -236,7 +248,7 @@ int main (int argc, char *argv[])
                         0,                          /*    local consist only            */
                         ownIP,                      /*    default source IP             */
                         destIP,                     /*    where to send to              */
-                        PD_COMID_CYCLE,             /*    Cycle time in us              */
+                        cycleTime,                  /*    Cycle time in us              */
                         0,                          /*    not redundant                 */
                         TRDP_FLAGS_NONE,            /*    Use callback for errors       */
                         NULL,                       /*    default qos and ttl           */
