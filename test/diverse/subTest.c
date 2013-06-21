@@ -32,7 +32,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.0"
+#define APP_VERSION     "1.1"
 
 #define DATA_MAX         1000
 
@@ -42,6 +42,7 @@
 #define PD_COMID2        10002
 #define PD_COMID2_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 #define PD_COMID1_SRC_IP2 "10.64.12.135"
+#define PD_COMID_MC		 "239.0.0.1"
 
 /* We use dynamic memory    */
 #define RESERVED_MEMORY  100000
@@ -263,7 +264,7 @@ int main (int argc, char *argv[])
                          0,                         /*    topocount: local consist only        */
                          vos_dottedIP(PD_COMID1_SRC_IP1),   /*    Source IP filter             */
                          0,                         /*    2nd Source IP filter                 */
-                         vos_dottedIP("239.0.0.1"),                         /*    Default destination    (or MC Group) */
+                         vos_dottedIP(PD_COMID_MC), /*    Default destination    (or MC Group) */
                          0,
                          PD_COMID1_CYCLE * 3,       /*    Time out in us                       */
                          TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
@@ -283,7 +284,7 @@ int main (int argc, char *argv[])
                          0,                         /*    topocount: local consist only          */
                          vos_dottedIP(PD_COMID1_SRC_IP2),   /* Source IP filter                  */
                          0,                         /*    2nd Source IP filter                   */
-                         vos_dottedIP("239.0.0.1"),   /* Default destination (or MC Group) */
+                         vos_dottedIP(PD_COMID_MC), /* Default destination (or MC Group)         */
                          0,
                          PD_COMID2_CYCLE * 3,       /*    Time out in us                       */
                          TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
