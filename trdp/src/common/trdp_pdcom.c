@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
  *      BL 2013-04-09: ID 92: Pull request led to reset of push message type
  *      BL 2013-01-25: ID 20: Redundancy handling fixed
  */
@@ -234,7 +235,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
     TRDP_TIME_T now;
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
-    vos_clearTime(&appHandle->interval);
+    vos_clearTime(&appHandle->nextJob);
 
     /*    Find the packet which has to be sent next:    */
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
@@ -571,43 +572,40 @@ void trdp_pdCheckPending (
     PD_ELE_T *iterPD;
 
     /*    Walk over the registered PDs, find pending packets */
+
     /*    Find the packet which has to be received next:    */
     for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
-            (!timerisset(&appHandle->interval) ||
-             !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
+        if (timerisset(&iterPD->interval) &&                        /* not PD PULL?    */
+            timercmp(&iterPD->timeToGo, &appHandle->nextJob, <))    /* earlier than current time-out? */
         {
-            appHandle->interval = iterPD->timeToGo;
+            appHandle->nextJob = iterPD->timeToGo;                  /* set new next time value from queue element */
+        }
 
-            /*    There can be several sockets depending on TRDP_PD_CONFIG_T    */
-            if (iterPD->socketIdx != -1 &&
-                appHandle->iface[iterPD->socketIdx].sock != -1)
+        /*    Check and set the socket file descriptor, if not already done    */
+        if (iterPD->socketIdx != -1 &&
+            appHandle->iface[iterPD->socketIdx].sock != -1 &&
+            !FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))     /*lint !e573
+                                                                                            signed/unsigned division
+                                                                                            in macro */
+        {
+            FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);   /*lint !e573
+                                                                                       signed/unsigned division
+                                                                                       in macro */
+            if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
             {
-                if (!FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573
-                                                                                                signed/unsigned division
-                                                                                                in macro */
-                {
-                    FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);   /*lint !e573
-                                                                                               signed/unsigned division
-                                                                                               in macro */
-                    if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
-                    {
-                        *pNoDesc = appHandle->iface[iterPD->socketIdx].sock;
-                    }
-                }
+                *pNoDesc = appHandle->iface[iterPD->socketIdx].sock;
             }
         }
     }
 
-    /*    Find the packet which has to be sent even earlier:    */
+    /*    Find packet in send queue which evntually has to be sent earlier:    */
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if (timerisset(&iterPD->interval) &&            /* not PD PULL?    */
-            (!timerisset(&appHandle->interval) ||
-             !timercmp(&iterPD->timeToGo, &appHandle->interval, >)))
+        if (timerisset(&iterPD->interval) &&                        /* has a time out value?    */
+            timercmp(&iterPD->timeToGo, &appHandle->nextJob, <))    /* earlier than current time-out? */
         {
-            appHandle->interval = iterPD->timeToGo;
+            appHandle->nextJob = iterPD->timeToGo;                  /* set new next time value from queue element */
         }
     }
 }
