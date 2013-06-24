@@ -302,10 +302,11 @@ int main (int argc, char *argv[])
      */
     while (1)
     {
-        fd_set  rfds;
+        TRDP_FDS_T  rfds;
         INT32   noDesc;
-        struct timeval  tv;
-        struct timeval  max_tv = {0, 1000000};
+        TRDP_TIME_T  tv;
+        TRDP_TIME_T  max_tv = {0, 1000000};
+        TRDP_TIME_T  min_tv = {0, 10000};
 
         /*
          Prepare the file descriptor set for the select call.
@@ -318,7 +319,7 @@ int main (int argc, char *argv[])
          This way we can guarantee that PDs are sent in time
          with minimum CPU load and minimum jitter.
          */
-        tlc_getInterval(appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
+        tlc_getInterval(appHandle, &tv, (TRDP_FDS_T *) &rfds, &noDesc);
 
         /*
          The wait time for select must consider cycle times and timeouts of
@@ -326,16 +327,22 @@ int main (int argc, char *argv[])
          If we need to poll something faster than the lowest PD cycle,
          we need to set the maximum time out our self.
          */
-        if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
+        if (vos_cmpTime(&tv, &max_tv) > 0)
         {
             tv = max_tv;
+            printf("setting max time\n");
         }
 
+        if (vos_cmpTime(&tv, &min_tv) < 0)
+        {
+            tv = min_tv;
+            printf("setting min time\n");
+        }
         /*
          Select() will wait for ready descriptors or time out,
          what ever comes first.
          */
-        rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+        rv = vos_select(noDesc + 1, &rfds, NULL, NULL, &tv);
 
         /*
          Check for overdue PDs (sending and receiving)
@@ -346,7 +353,7 @@ int main (int argc, char *argv[])
          The callback function will be called from within the tlc_process
          function (in it's context and thread)!
          */
-        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        tlc_process(appHandle, &rfds, &rv);
 
         /* Handle other ready descriptors... */
         if (rv > 0)
