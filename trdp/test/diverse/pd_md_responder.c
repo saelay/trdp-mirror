@@ -162,7 +162,7 @@ void myPDcallBack (
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
-            printf("> ComID %d received, URef: %d\n", pMsg->comId, pMsg->pUserRef);
+            printf("> ComID %d received, URef: %p\n", pMsg->comId, pMsg->pUserRef);
             break;
 
         case TRDP_TIMEOUT_ERR:
@@ -379,7 +379,7 @@ int main (int argc, char * *argv)
          Compute the min. timeout value for select and return descriptors to wait for.
          This way we can guarantee that PDs are sent in time...
          */
-        err = tlc_getInterval(appHandle,
+        (void) tlc_getInterval(appHandle,
                               (TRDP_TIME_T *) &tv,
                               (TRDP_FDS_T *) &rfds,
                               &noOfDesc);
