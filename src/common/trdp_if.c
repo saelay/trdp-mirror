@@ -17,6 +17,8 @@
  *
  * $Id$
  *
+ *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
+ *
  *      BL 2013-02-01: ID 53: Zero datset size fixed for PD
  *
  *      BL 2013-01-25: ID 20: Redundancy handling fixed
@@ -308,15 +310,15 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
-        pSession->pdDefault.pfCbFunction        = NULL;
-        pSession->pdDefault.pRefCon             = NULL;
-        pSession->pdDefault.flags               = TRDP_FLAGS_NONE;
-        pSession->pdDefault.timeout             = TRDP_PD_DEFAULT_TIMEOUT;
-        pSession->pdDefault.toBehavior          = TRDP_TO_SET_TO_ZERO;
-        pSession->pdDefault.port                = TRDP_PD_UDP_PORT;
-        pSession->pdDefault.sendParam.qos       = TRDP_PD_DEFAULT_QOS;
-        pSession->pdDefault.sendParam.ttl       = TRDP_PD_DEFAULT_TTL;
- //       pSession->pdDefault.sendParam.retries   = 0;
+        pSession->pdDefault.pfCbFunction    = NULL;
+        pSession->pdDefault.pRefCon         = NULL;
+        pSession->pdDefault.flags           = TRDP_FLAGS_NONE;
+        pSession->pdDefault.timeout         = TRDP_PD_DEFAULT_TIMEOUT;
+        pSession->pdDefault.toBehavior      = TRDP_TO_SET_TO_ZERO;
+        pSession->pdDefault.port            = TRDP_PD_UDP_PORT;
+        pSession->pdDefault.sendParam.qos   = TRDP_PD_DEFAULT_QOS;
+        pSession->pdDefault.sendParam.ttl   = TRDP_PD_DEFAULT_TTL;
+        /*       pSession->pdDefault.sendParam.retries   = 0; */
     }
 
 #if MD_SUPPORT
@@ -378,13 +380,13 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         pSession->mdDefault.confirmTimeout  = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
         pSession->mdDefault.connectTimeout  = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
         pSession->mdDefault.replyTimeout    = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
-        pSession->mdDefault.flags               = TRDP_FLAGS_NONE;
-        pSession->mdDefault.udpPort             = TRDP_MD_UDP_PORT;
-        pSession->mdDefault.tcpPort             = TRDP_MD_TCP_PORT;
-        pSession->mdDefault.sendParam.qos       = TRDP_MD_DEFAULT_QOS;
-        pSession->mdDefault.sendParam.ttl       = TRDP_MD_DEFAULT_TTL;
+        pSession->mdDefault.flags           = TRDP_FLAGS_NONE;
+        pSession->mdDefault.udpPort         = TRDP_MD_UDP_PORT;
+        pSession->mdDefault.tcpPort         = TRDP_MD_TCP_PORT;
+        pSession->mdDefault.sendParam.qos   = TRDP_MD_DEFAULT_QOS;
+        pSession->mdDefault.sendParam.ttl   = TRDP_MD_DEFAULT_TTL;
 #ifdef TRDP_RETRIES
-        pSession->mdDefault.sendParam.retries   = TRDP_MD_DEFAULT_RETRIES;
+        pSession->mdDefault.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
 #endif
     }
 
@@ -402,7 +404,6 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         return ret;
     }
 
-    vos_clearTime(&pSession->interval);
     vos_clearTime(&pSession->nextJob);
     vos_getTime(&pSession->initTime);
 
@@ -1269,7 +1270,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
             {
                 /*    Get the current time    */
                 vos_getTime(&now);
-                vos_clearTime(&appHandle->interval);
+                vos_clearTime(&appHandle->nextJob);
 
                 trdp_pdCheckPending(appHandle, pFileDesc, pNoDesc);
 
@@ -1277,15 +1278,15 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 trdp_mdCheckPending(appHandle, pFileDesc, pNoDesc);
 #endif
 
-                /*    if lowest time is not zero   */
-                if (timerisset(&appHandle->interval) &&
-                    !timercmp(&now, &appHandle->interval, >))
+                /*    if next job time is known, return the time-out value to the caller   */
+                if (timerisset(&appHandle->nextJob) &&
+                    timercmp(&now, &appHandle->nextJob, <))
                 {
-                    vos_subTime(&appHandle->interval, &now);
-                    *pInterval = appHandle->interval;
+                    vos_subTime(&appHandle->nextJob, &now);
+                    *pInterval = appHandle->nextJob;
 
                 }
-                else    /*    Default minimum time is 10ms    */
+                else    /* if unknown, set minimum poll time to 10ms   */
                 {
                     pInterval->tv_sec   = 0;
                     pInterval->tv_usec  = TRDP_PROCESS_DEFAULT_CYCLE_TIME;      /* Minimum poll time 10ms    */
@@ -1333,7 +1334,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
     }
     else
     {
-        vos_clearTime(&appHandle->interval);
+        vos_clearTime(&appHandle->nextJob);
 
         /******************************************************
          Find and send the packets which have to be sent next:

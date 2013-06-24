@@ -279,8 +279,7 @@ typedef struct TRDP_SESSION
     BOOL                    beQuiet;            /**< if set, only react on ownIP requests                   */
     UINT32                  redID;              /**< redundant comId                                        */
     UINT32                  topoCount;          /**< current valid topocount or zero                        */
-    TRDP_TIME_T             interval;           /**< Store for next select interval                         */
-    TRDP_TIME_T             nextJob;
+    TRDP_TIME_T             nextJob;            /**< Store for next select interval                         */
     TRDP_PRINT_DBG_T        pPrintDebugString;
     TRDP_MARSHALL_CONFIG_T  marshall;
     TRDP_PD_CONFIG_T        pdDefault;          /**< Default configuration for process data                 */
