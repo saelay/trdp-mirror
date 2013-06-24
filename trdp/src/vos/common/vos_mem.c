@@ -1043,7 +1043,7 @@ EXT_DECL VOS_ERR_T vos_queueDestroy (
         if (err != VOS_NO_ERR)
         {
             vos_printLog(VOS_LOG_ERROR, "vos_queueDestroy() ERROR could not lock mutex\n");
-            retVal = VOS_MUTEX_ERR;
+            /* retVal = VOS_MUTEX_ERR; BL: never read */
         }
         else
         {
