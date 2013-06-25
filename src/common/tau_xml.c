@@ -671,6 +671,10 @@ static void parseProcessConfig (xmlNodePtr pProcCfgElem, TRDP_PROCESS_CONFIG_T *
     {
         pProcessConfig->options |= TRDP_OPTION_BLOCK;
     }
+    if (checkAttrValue(pProcCfgElem, "no-reuse-addr", "yes"))
+    {
+        pProcessConfig->options |= TRDP_OPTION_NO_REUSE_ADDR;
+    }
     if (checkAttrValue(pProcCfgElem, "traffic-shaping", "off"))
     {
         pProcessConfig->options &= (TRDP_OPTION_T)(~TRDP_OPTION_TRAFFIC_SHAPING);
