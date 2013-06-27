@@ -457,6 +457,8 @@ int main (int argc, char *argv[])
 	UINT32 usingDatasetNumber =2;							/* 2 = DATASET1,DATASET2 */
 	TRDP_MARSHALL_CONFIG_T	*pMarshallConfigPtr = NULL;	    /* Marshaling/unMarshalling configuration Pointer	*/
 
+	/* Display TRDP Version */
+	printf("TRDP Stack Version %s\n", tlc_getVersionString());
 	/* Display PD Application Version */
 	printf("PD Application Version %s: ladderApplication_publisher Start \n", PD_APP_VERSION);
 

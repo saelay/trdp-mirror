@@ -111,6 +111,8 @@ int main (int argc, char *argv[])
 {
 	MD_APP_ERR_TYPE err = 0;						/* result */
 
+	/* Display TRDP Version */
+	printf("TRDP Stack Version %s\n", tlc_getVersionString());
 	/* Display MD Application Version */
 	printf("MD Application Version %s: mdTestLadder Start \n", MD_APP_VERSION);
 

@@ -392,6 +392,8 @@ int main (int argc, char *argv[])
 /*	void *pRefConMarshallDataset1;
 	void *pRefConMarshallDataset2;
 */
+	/* Display TRDP Version */
+	printf("TRDP Stack Version %s\n", tlc_getVersionString());
 	/* Display PD Application Version */
 	printf("PD Application Version %s: ladderApplication_subscriber Start \n", PD_APP_VERSION);
 
