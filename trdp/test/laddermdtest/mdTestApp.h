@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.29"
+#define MD_APP_VERSION	"V0.30"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.29"
+#define MD_APP_VERSION	"V0.30"
 #else
-#define MD_APP_VERSION	"V0.29"
+#define MD_APP_VERSION	"V0.30"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -182,16 +182,27 @@ extern "C" {
 /***********************************************************************************************************************
  * TYPEDEFS
  */
+
+/* MD Reply Error Type definition */
+typedef enum
+{
+	MD_REPLIERS_UNKNOWN_INITIAL		= 0,	/**< Repliers unknown Default status: initial */
+	MD_REPLIERS_UNKNOWN_SUCCESS		= 1,	/**< Repliers unknown decide result : Success processiong */
+	MD_REPLIERS_UNKNOWN_FAILURE		= 2,	/**< Repliers unknown decide result : Failure processiong */
+} MD_REPLIERS_UNKNOWN_DECIDE_STATUS;
+
+
 /* Application Thread SessionId Handle */
 typedef struct
 {
-	TRDP_UUID_T			mdAppThreadSessionId;
-	TRDP_LIS_T				pMdAppThreadListener;
-	TRDP_LIS_T				pMdAppThreadTimeoutListener;
-	UINT32					sendRequestNumExpReplies;
-	UINT32					decidedSessionSuccessCount;
-	UINT32					decidedSessionFailureCount;
-	BOOL					decideUnKnownSuccessFlag;
+	TRDP_UUID_T								mdAppThreadSessionId;
+	TRDP_LIS_T								pMdAppThreadListener;
+	TRDP_LIS_T								pMdAppThreadTimeoutListener;
+	UINT32									sendRequestNumExpReplies;
+	UINT32									decidedSessionSuccessCount;
+	UINT32									decidedSessionFailureCount;
+	BOOL									decideRepliersUnKnownReceiveTimeoutFlag;	/* Receive Timeout : TRUE */
+	MD_REPLIERS_UNKNOWN_DECIDE_STATUS		decideRepliersUnKnownStatus;
 } APP_THREAD_SESSION_HANDLE;
 
 /* Application Thread Session Handle - Message Queue Descriptor Table */

@@ -1356,11 +1356,15 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				/* Receive Timeout (Mr-Mp One Cycle End) */
 				else if (pReceiveReplyResultTable[receiveTableLoopCounter].callerDecideMdTranssmissionResultCode == MD_APP_MRMP_ONE_CYCLE_ERR)
 				{
+					/* Set decideRepliersUnKnownReceiveTimeout : True */
+					ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownReceiveTimeoutFlag = TRUE;
 					/* No Repliers ? */
 					if (pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies <= 0)
 					{
 						/* Failure Count Up */
-						ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionFailureCount++;
+//						ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionFailureCount++;
+						/* Set decideReliersUnKnownStatus : Falier Finish*/
+						ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownStatus = MD_REPLIERS_UNKNOWN_FAILURE;
 					}
 				}
 				else
@@ -1371,7 +1375,6 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				/* Receive Table Delete */
 				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
 												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
-
 			}
 		}
 
@@ -1439,10 +1442,12 @@ deleteAppThreadSessionMessageQueueDescriptor(
 				/* and Receive Reply */
 				if ((ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount == 1)
 					&& (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
-					&& (ppMrSendSessionTable[sendTableLoopCounter]->decideUnKnownSuccessFlag == FALSE))
+					&& (ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownStatus == MD_REPLIERS_UNKNOWN_INITIAL))
 				{
-					pCallerCommandValue->callerMdRequestReplySuccessCounter++;
-					ppMrSendSessionTable[sendTableLoopCounter]->decideUnKnownSuccessFlag = TRUE;
+					/* Increment Success Counter */
+//					pCallerCommandValue->callerMdRequestReplySuccessCounter++;
+					/* Set decideRepliersUnKnownStatus : success during */
+					ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownStatus = MD_REPLIERS_UNKNOWN_SUCCESS;
 				}
 /* Delete AppThereadSession Message Queue Descriptor */
 //deleteAppThreadSessionMessageQueueDescriptor(
@@ -1464,10 +1469,12 @@ deleteAppThreadSessionMessageQueueDescriptor(
 					if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
 					{
 						/* Decrement Success Counter */
-						pCallerCommandValue->callerMdRequestReplySuccessCounter--;
+//						pCallerCommandValue->callerMdRequestReplySuccessCounter--;
 						/* Request - Reply Failure */
 						err = MD_APP_ERR;
-						pCallerCommandValue->callerMdRequestReplyFailureCounter++;
+//						pCallerCommandValue->callerMdRequestReplyFailureCounter++;
+						/* Set decideRepliersUnKnownStatus : failure during */
+						ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownStatus = MD_REPLIERS_UNKNOWN_FAILURE;
 					}
 				}
 				else
@@ -1475,16 +1482,18 @@ deleteAppThreadSessionMessageQueueDescriptor(
 					/* Request - Reply Failure */
 					err = MD_APP_ERR;
 					pCallerCommandValue->callerMdRequestReplyFailureCounter++;
+					/* Set decideRepliersUnKnownStatus : failure during */
+					ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownStatus = MD_REPLIERS_UNKNOWN_FAILURE;
 					/* Delete AppThereadSession Message Queue Descriptor */
-					deleteAppThreadSessionMessageQueueDescriptor(
-							ppMrSendSessionTable[sendTableLoopCounter],
-							callerMqDescriptor);
+//					deleteAppThreadSessionMessageQueueDescriptor(
+//							ppMrSendSessionTable[sendTableLoopCounter],
+//							callerMqDescriptor);
 					/* Receive Table Delete */
-					deleteReceiveReplyResultTable(pReceiveReplyResultTable,
-													ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
+//					deleteReceiveReplyResultTable(pReceiveReplyResultTable,
+//													ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 					/* Send Table Delete */
-					deleteMrSendSessionTable(ppMrSendSessionTable,
-												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
+//					deleteMrSendSessionTable(ppMrSendSessionTable,
+//												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				}
 /* Delete AppThereadSession Message Queue Descriptor */
 //deleteAppThreadSessionMessageQueueDescriptor(
@@ -1497,24 +1506,36 @@ deleteAppThreadSessionMessageQueueDescriptor(
 //				deleteMrSendSessionTable(ppMrSendSessionTable,
 //											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
-			/* Receive Reply Timeout (Mr-Mp One Cycle end) ? */
-			else if (pReceiveReplyResultTable[receiveTableLoopCounter].callerDecideMdTranssmissionResultCode == MD_APP_MRMP_ONE_CYCLE_ERR)
+			else
 			{
+
+			}
+			/* Receive Reply Timeout (Mr-Mp One Cycle end) ? */
+			if (ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownReceiveTimeoutFlag == TRUE)
+			{
+				/* Check decideReplierUnKnownStatus is Success During (Mr-Mp Success) */
+				if (ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownStatus == MD_REPLIERS_UNKNOWN_SUCCESS)
+				{
+					/* Increment Success Counter */
+					pCallerCommandValue->callerMdRequestReplySuccessCounter++;
+				}
+				else
+				{
+					/* Increment Failure Counter */
+					pCallerCommandValue->callerMdRequestReplyFailureCounter++;
+				}
 				/* Delete AppThereadSession Message Queue Descriptor */
 				deleteAppThreadSessionMessageQueueDescriptor(
 						ppMrSendSessionTable[sendTableLoopCounter],
 						callerMqDescriptor);
 				/* Receive Table Delete */
-				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
-												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
+//				deleteReceiveReplyResultTable(pReceiveReplyResultTable,
+//												ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 				/* Send Table Delete */
 				deleteMrSendSessionTable(ppMrSendSessionTable,
 											ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId);
 			}
-			else
-			{
 
-			}
 #if 0 /* 0613 */
 //#if 0
 			/* Check Caller Send Request Session Alive */

@@ -11,9 +11,11 @@
 #//
 
 # Preliminary: Currently, posix support only
-
-TARGET_VOS = posix
-TARGET_FLAG = POSIX
+# Check if configuration is present
+ifeq (config/config.mk,$(wildcard config/config.mk)) 
+# load target specific configuration
+include config/config.mk
+endif
 
 # --------------------------------------------------------------------
 

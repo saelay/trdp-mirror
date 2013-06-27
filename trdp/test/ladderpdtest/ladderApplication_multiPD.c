@@ -196,6 +196,8 @@ int main (int argc, char *argv[])
 {
 //	PD_COMMAND_VALUE *pPdCommandValue = NULL;		/* PD Command Value */
 
+	/* Display TRDP Version */
+	printf("TRDP Stack Version %s\n", tlc_getVersionString());
 	/* Display PD Application Version */
 	printf("PD Application Version %s: ladderApplication_multiPD Start \n", PD_APP_VERSION);
 
