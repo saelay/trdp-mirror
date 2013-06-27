@@ -166,12 +166,14 @@ typedef struct
     UINT8       data[TRDP_MAX_PD_PACKET_SIZE];  /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED PD_PACKET_T;
 
+#if MD_SUPPORT
 /** TRDP MD packet    */
 typedef struct
 {
     MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
     UINT8       data[TRDP_MAX_MD_PACKET_SIZE];  /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED MD_PACKET_T;
+#endif
 
 #ifdef WIN32
 #pragma pack(pop)
@@ -206,6 +208,7 @@ typedef struct PD_ELE
     PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                               */
 } PD_ELE_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
+#if MD_SUPPORT
 /** Queue element for MD listeners (UDP and TCP)   */
 typedef struct MD_LIS_ELE
 {
@@ -267,7 +270,7 @@ typedef struct
     INT32   max_sd;             /**< Maximum socket number in the file descriptor   */
     /* fd_set  master_set;         / **< Local file descriptor   * / */
 } TRDP_TCP_FD_T;
-
+#endif
 
 /** Session/application variables store */
 typedef struct TRDP_SESSION

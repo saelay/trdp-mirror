@@ -316,40 +316,6 @@ PD_ELE_T *trdp_queueFindSubAddr (
 
 
 /**********************************************************************************************************************/
-/** Return the element with same comId from MD queue
- *
- *  @param[in]      pHead           pointer to head of queue
- *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
- *
- *  @retval         != NULL         pointer to PD element
- *  @retval         NULL            No PD element found
- */
-MD_ELE_T *trdp_MDqueueFindAddr (
-    MD_ELE_T            *pHead,
-    TRDP_ADDRESSES_T    *addr)
-{
-    MD_ELE_T *iterMD;
-
-    if (pHead == NULL || addr == NULL)
-    {
-        return NULL;
-    }
-
-    for (iterMD = pHead; iterMD != NULL; iterMD = iterMD->pNext)
-    {
-        /*  We match if src/dst address is zero or found */
-        if ((iterMD->addr.comId == addr->comId)
-            && ((addr->srcIpAddr == 0) || (iterMD->addr.srcIpAddr == addr->srcIpAddr))
-            && ((addr->destIpAddr == 0) || (iterMD->addr.destIpAddr == addr->destIpAddr)))
-        {
-            return iterMD;
-        }
-    }
-    return NULL;
-}
-
-
-/**********************************************************************************************************************/
 /** Delete an element
  *
  *  @param[in]      ppHead          pointer to pointer to head of queue
@@ -383,6 +349,39 @@ void    trdp_queueDelElement (
     }
 }
 
+#if MD_SUPPORT
+/**********************************************************************************************************************/
+/** Return the element with same comId from MD queue
+ *
+ *  @param[in]      pHead           pointer to head of queue
+ *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         pointer to PD element
+ *  @retval         NULL            No PD element found
+ */
+MD_ELE_T *trdp_MDqueueFindAddr (
+    MD_ELE_T            *pHead,
+    TRDP_ADDRESSES_T    *addr)
+{
+    MD_ELE_T *iterMD;
+
+    if (pHead == NULL || addr == NULL)
+    {
+        return NULL;
+    }
+
+    for (iterMD = pHead; iterMD != NULL; iterMD = iterMD->pNext)
+    {
+        /*  We match if src/dst address is zero or found */
+        if ((iterMD->addr.comId == addr->comId)
+            && ((addr->srcIpAddr == 0) || (iterMD->addr.srcIpAddr == addr->srcIpAddr))
+            && ((addr->destIpAddr == 0) || (iterMD->addr.destIpAddr == addr->destIpAddr)))
+        {
+            return iterMD;
+        }
+    }
+    return NULL;
+}
 
 /**********************************************************************************************************************/
 /** Delete an element from MD queue
@@ -418,6 +417,73 @@ void    trdp_MDqueueDelElement (
     }
 }
 
+/**********************************************************************************************************************/
+/** Append an element at end of queue
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pNew            pointer to element to append
+ */
+void    trdp_MDqueueAppLast (
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pNew)
+{
+    MD_ELE_T *iterMD;
+
+    if (ppHead == NULL || pNew == NULL)
+    {
+        return;
+    }
+
+    /* Ensure this element is last! */
+    pNew->pNext = NULL;
+
+    if (*ppHead == NULL)
+    {
+        *ppHead = pNew;
+        return;
+    }
+
+    for (iterMD = *ppHead; iterMD->pNext != NULL; iterMD = iterMD->pNext)
+    {
+        ;
+    }
+    iterMD->pNext = pNew;
+}
+
+/**********************************************************************************************************************/
+/** Insert an element at front of MD queue
+ *
+ *  @param[in]      ppHead          pointer to pointer to head of queue
+ *  @param[in]      pNew            pointer to element to insert
+ */
+void    trdp_MDqueueInsFirst (
+    MD_ELE_T    * *ppHead,
+    MD_ELE_T    *pNew)
+{
+    if (ppHead == NULL || pNew == NULL)
+    {
+        return;
+    }
+
+    pNew->pNext = *ppHead;
+    *ppHead     = pNew;
+}
+
+/**********************************************************************************************************************/
+/** Initialize the UncompletedTCP pointers to null
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ */
+void trdp_initUncompletedTCP (TRDP_APP_SESSION_T appHandle)
+{
+    int lIndex;
+    /* Initialize the pointers to Null */
+    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+    {
+        appHandle->uncompletedTCP[lIndex] = NULL;
+    }
+}
+#endif
 
 /**********************************************************************************************************************/
 /** Append an element at end of queue
@@ -452,41 +518,6 @@ void    trdp_queueAppLast (
     iterPD->pNext = pNew;
 }
 
-
-/**********************************************************************************************************************/
-/** Append an element at end of queue
- *
- *  @param[in]      ppHead          pointer to pointer to head of queue
- *  @param[in]      pNew            pointer to element to append
- */
-void    trdp_MDqueueAppLast (
-    MD_ELE_T    * *ppHead,
-    MD_ELE_T    *pNew)
-{
-    MD_ELE_T *iterMD;
-
-    if (ppHead == NULL || pNew == NULL)
-    {
-        return;
-    }
-
-    /* Ensure this element is last! */
-    pNew->pNext = NULL;
-
-    if (*ppHead == NULL)
-    {
-        *ppHead = pNew;
-        return;
-    }
-
-    for (iterMD = *ppHead; iterMD->pNext != NULL; iterMD = iterMD->pNext)
-    {
-        ;
-    }
-    iterMD->pNext = pNew;
-}
-
-
 /**********************************************************************************************************************/
 /** Insert an element at front of queue
  *
@@ -506,27 +537,6 @@ void    trdp_queueInsFirst (
     *ppHead     = pNew;
 }
 
-
-/**********************************************************************************************************************/
-/** Insert an element at front of MD queue
- *
- *  @param[in]      ppHead          pointer to pointer to head of queue
- *  @param[in]      pNew            pointer to element to insert
- */
-void    trdp_MDqueueInsFirst (
-    MD_ELE_T    * *ppHead,
-    MD_ELE_T    *pNew)
-{
-    if (ppHead == NULL || pNew == NULL)
-    {
-        return;
-    }
-
-    pNew->pNext = *ppHead;
-    *ppHead     = pNew;
-}
-
-
 /**********************************************************************************************************************/
 /** Handle the socket pool: Initialize it
  *
@@ -541,23 +551,6 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
         iface[lIndex].sock = VOS_INVALID_SOCKET;
     }
 }
-
-#if MD_SUPPORT
-/**********************************************************************************************************************/
-/** Initialize the UncompletedTCP pointers to null
- *
- *  @param[in]      appHandle           the handle returned by tlc_openSession
- */
-void trdp_initUncompletedTCP (TRDP_APP_SESSION_T appHandle)
-{
-    int lIndex;
-    /* Initialize the pointers to Null */
-    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
-    {
-        appHandle->uncompletedTCP[lIndex] = NULL;
-    }
-}
-#endif
 
 /**********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
