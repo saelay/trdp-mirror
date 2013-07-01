@@ -45,7 +45,9 @@
 #include <pthread.h>
 #endif
 
-#include <fcntl.h>
+#ifndef PTHREAD_MUTEX_INITIALIZER
+#define PTHREAD_MUTEX_INITIALIZER 0	/* Dummy */
+#endif
 
 #include "vos_types.h"
 #include "vos_utils.h"
@@ -736,8 +738,8 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
     /* Check parameters */
     if ((queueType < VOS_QUEUE_POLICY_OTHER)
         || (queueType > VOS_QUEUE_POLICY_LIFO)
-        || (pQueueHandle == (VOS_QUEUE_T*) NULL)
-        || (maxNoOfMsg == (UINT32) NULL))
+        || (pQueueHandle == NULL)
+        || (maxNoOfMsg == 0))
     {
         vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR invalid parameter\n");
         retVal = VOS_PARAM_ERR;
@@ -777,8 +779,8 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                     else
                     {
                         /* init header */
-                        (*pQueueHandle)->firstElem = (UINT32) NULL;
-                        (*pQueueHandle)->lastElem = (UINT32) NULL;
+                        (*pQueueHandle)->firstElem = 0;
+                        (*pQueueHandle)->lastElem = 0;
                         (*pQueueHandle)->queueType = queueType;
                         (*pQueueHandle)->maxNoOfMsg = maxNoOfMsg;
                         (*pQueueHandle)->magicNumber = cQueueMagic;
@@ -793,7 +795,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                         else
                         {
                             (*pQueueHandle)->pQueue->pData = NULL;
-                            (*pQueueHandle)->pQueue->size = (UINT32) NULL;
+                            (*pQueueHandle)->pQueue->size = 0;
                             retVal = vos_mutexUnlock((*pQueueHandle)->mutex);
                             if (retVal != VOS_NO_ERR)
                             {
@@ -964,7 +966,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
         {
             vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not take semaphore\n");
             *ppData = NULL;
-            *pSize = (UINT32) NULL;
+            *pSize = 0;
             retVal = VOS_QUEUE_ERR;
         }
         else
@@ -980,7 +982,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
                 *ppData = queueHandle->pQueue[queueHandle->firstElem].pData;
                 *pSize = queueHandle->pQueue[queueHandle->firstElem].size;
                 queueHandle->pQueue[queueHandle->firstElem].pData = NULL;
-                queueHandle->pQueue[queueHandle->firstElem].size = (UINT32) NULL;
+                queueHandle->pQueue[queueHandle->firstElem].size = 0;
                 if (queueHandle->firstElem != queueHandle->lastElem)
                 {
                     if (queueHandle->firstElem < queueHandle->maxNoOfMsg - 1)
@@ -1047,7 +1049,7 @@ EXT_DECL VOS_ERR_T vos_queueDestroy (
         }
         else
         {
-            queueHandle->magicNumber = (UINT32) NULL;
+            queueHandle->magicNumber = 0;
             vos_memFree(queueHandle->pQueue);
             queueHandle->pQueue = NULL;
         }
