@@ -48,38 +48,38 @@ extern void *gRefCon;
 
 /** Safe printf function */
 #ifdef WIN32
-    #define vos_snprintf(str, size, format, ...)              \
-        _snprintf_s(str, size, _TRUNCATE, format, __VA_ARGS__)
+    #define vos_snprintf(str, size, format, ...) \
+    _snprintf_s(str, size, _TRUNCATE, format, __VA_ARGS__)
 #else
-    #define vos_snprintf(str, size, format, args ...)  \
-        snprintf(str, size, format, ## args)
+    #define vos_snprintf(str, size, format, args ...) \
+    snprintf(str, size, format, ## args)
 #endif
 
 /** Debug output macro without formatting options */
-#define vos_printLogStr(level, string)  {if(gPDebugFunction != NULL)          \
-                                   {gPDebugFunction(gRefCon,            \
-                                                    (level),            \
-                                                    vos_getTimeStamp(), \
-                                                    (__FILE__),         \
-                                                    (UINT16)(__LINE__), \
-                                                    (string)); }}
+#define vos_printLogStr(level, string)  {if (gPDebugFunction != NULL)         \
+                                         {gPDebugFunction(gRefCon,            \
+                                                          (level),            \
+                                                          vos_getTimeStamp(), \
+                                                          (__FILE__),         \
+                                                          (UINT16)(__LINE__), \
+                                                          (string)); }}
 
 /** Debug output macro with formatting options */
 #ifdef WIN32
-    #define vos_printLog(level, format, ...)                              \
-    {if (gPDebugFunction != NULL)                                       \
-     {   char str[VOS_MAX_PRNT_STR_SIZE];                               \
+    #define vos_printLog(level, format, ...)                                   \
+    {if (gPDebugFunction != NULL)                                              \
+     {   char str[VOS_MAX_PRNT_STR_SIZE];                                      \
          (void) _snprintf_s(str, sizeof(str), _TRUNCATE, format, __VA_ARGS__); \
-         vos_printLogStr(level, str);                                         \
-     }                                                                  \
+         vos_printLogStr(level, str);                                          \
+     }                                                                         \
     }
 #else
-    #define vos_printLog(level, format, args ...)       \
-    {if (gPDebugFunction != NULL)                     \
-     {   char str[VOS_MAX_PRNT_STR_SIZE];             \
+    #define vos_printLog(level, format, args ...)            \
+    {if (gPDebugFunction != NULL)                            \
+     {   char str[VOS_MAX_PRNT_STR_SIZE];                    \
          (void) snprintf(str, sizeof(str), format, ## args); \
-         vos_printLogStr(level, str);                       \
-     }                                                \
+         vos_printLogStr(level, str);                        \
+     }                                                       \
     }
 #endif
 
@@ -117,6 +117,31 @@ EXT_DECL UINT32 vos_crc32 (
     UINT32      crc,
     const UINT8 *pData,
     UINT32      dataLen);
+
+/**********************************************************************************************************************/
+/** Initialize the vos library.
+ *  This is used to set the output function for all VOS error and debug output.
+ *
+ *  @param[in]        *pRefCon            user context
+ *  @param[in]        *pDebugOutput       pointer to debug output function
+ *  @retval           VOS_NO_ERR          no error
+ *  @retval           VOS_INIT_ERR        unsupported
+ */
+
+EXT_DECL VOS_ERR_T vos_init (
+    void            *pRefCon,
+    VOS_PRINT_DBG_T pDebugOutput);
+
+/**********************************************************************************************************************/
+/** DeInitialize the vos library.
+ *  Should be called last after TRDP stack/application does not use any VOS function anymore.
+ *
+ *  @param[in]        *pRefCon            user context
+ *  @retval           VOS_NO_ERR          no error
+ *  @retval           VOS_INIT_ERR        not inited
+ */
+
+EXT_DECL void vos_terminate ();
 
 
 #ifdef __cplusplus
