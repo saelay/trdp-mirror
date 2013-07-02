@@ -29,9 +29,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#ifdef VXWORKS
-#include <types/vxTypesOld.h>
-#endif
 
 /***********************************************************************************************************************
  * DEFINES
@@ -75,13 +72,33 @@ typedef double REAL64;
 
 #elif defined(VXWORKS)
 
+#include <types/vxTypesOld.h>
+
 typedef char CHAR8;
 typedef short UTF16;
 typedef float REAL32;
 typedef double REAL64;
 
 #else
-    #error "Standard types must be defined for each target!"
+
+#warning "Using default standard types - target not defined!"
+
+#include <stdint.h>
+
+typedef uint8_t UINT8;
+typedef uint16_t UINT16;
+typedef uint32_t UINT32;
+typedef uint64_t UINT64;
+typedef int8_t INT8;
+typedef int16_t INT16;
+typedef int32_t INT32;
+typedef int64_t INT64;
+typedef signed char BOOL;
+typedef char CHAR8;
+typedef uint16_t UTF16;
+typedef float REAL32;
+typedef double REAL64;
+
 #endif
 
 /*    Special handling for Windows DLLs    */
@@ -226,20 +243,6 @@ typedef void (*VOS_PRINT_DBG_T)(
     const CHAR8 *pFile,
     UINT16      LineNumber,
     const CHAR8 *pMsgStr);
-
-/**********************************************************************************************************************/
-/** Initialize the vos library.
- *  This is used to set the output function for all VOS error and debug output.
- *
- *  @param[in]        *pRefCon            user context
- *  @param[in]        *pDebugOutput       pointer to debug output function
- *  @retval           VOS_NO_ERR          no error
- *  @retval           VOS_INIT_ERR        unsupported
- */
-
-EXT_DECL VOS_ERR_T vos_init (
-    void            *pRefCon,
-    VOS_PRINT_DBG_T pDebugOutput);
 
 
 #ifdef __cplusplus
