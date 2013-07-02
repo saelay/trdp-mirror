@@ -70,7 +70,8 @@ void trdp_initStats (
     memset(&appHandle->stats, 0, sizeof(TRDP_STATISTICS_T));
 
     pVersion = tlc_getVersion();
-    appHandle->stats.version = pVersion->ver << 24 | pVersion->rel << 16 | pVersion->upd << 8 | pVersion->evo;
+    appHandle->stats.version = (UINT32) pVersion->ver << 24 | (UINT32) pVersion->rel << 16 |
+        (UINT32) pVersion->upd << 8  | pVersion->evo;
 
     if (appHandle->stats.hostName[0] == 0)
     {
@@ -172,23 +173,16 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
     for (lIndex = 0, iter = appHandle->pRcvQueue; lIndex < *pNumSubs && iter != NULL; lIndex++, iter = iter->pNext)
     {
-        pStatistics[lIndex].comId       = iter->addr.comId;      /* Subscribed ComId
-                                                                                                     */
-        pStatistics[lIndex].joinedAddr  = iter->addr.mcGroup;    /* Joined IP address
-                                                                                                    */
-        pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr;  /* Filter IP address
-                                                                                                    */
+        pStatistics[lIndex].comId       = iter->addr.comId;      /* Subscribed ComId     */
+        pStatistics[lIndex].joinedAddr  = iter->addr.mcGroup;    /* Joined IP address         */
+        pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr;  /* Filter IP address         */
         pStatistics[lIndex].callBack    = (void *) iter->userRef;  /* Reference for call back function if used
                                                                              */
         pStatistics[lIndex].timeout     = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */
-        pStatistics[lIndex].toBehav = iter->toBehavior;          /* Behaviour at time-out
-                                                                                                */
-        pStatistics[lIndex].numRecv = iter->numRxTx;             /* Number of packets received for this subscription.
-                                                                    */
-        pStatistics[lIndex].status  = iter->lastErr;             /* Receive status information
-                                                                                           */
-
+        pStatistics[lIndex].toBehav = iter->toBehavior;          /* Behaviour at time-out    */
+        pStatistics[lIndex].numRecv = iter->numRxTx;             /* Number of packets received for this subscription. */
+        pStatistics[lIndex].status  = iter->lastErr;             /* Receive status information  */
     }
     if (lIndex >= *pNumSubs && iter != NULL)
     {
@@ -230,26 +224,19 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     }
 
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
-    for (lIndex = 0, iter = appHandle->pRcvQueue; lIndex < *pNumPub && iter != NULL; lIndex++, iter = iter->pNext)
+    for (lIndex = 0, iter = appHandle->pSndQueue; lIndex < *pNumPub && iter != NULL; lIndex++, iter = iter->pNext)
     {
-        pStatistics[lIndex].comId       = iter->addr.comId;      /* Published ComId
-                                                                                                      */
-        pStatistics[lIndex].destAddr    = iter->addr.destIpAddr; /* IP address of destination for this publishing.
-                                                                       */
-
-        /* TBD: */
-        pStatistics[lIndex].redId       = appHandle->redID;      /* Redundancy group id
-                                                                                                  */
-        pStatistics[lIndex].redState    = 0;                     /* Redundancy state
-                                                                                                     */
+        pStatistics[lIndex].comId       = iter->addr.comId;   /* Published ComId                                   */
+        pStatistics[lIndex].destAddr    = iter->addr.destIpAddr; /* IP address of destination for this publishing.    */
+        pStatistics[lIndex].redId       = appHandle->redID;   /* Redundancy group id                               */
+        pStatistics[lIndex].redState    = (iter->privFlags & TRDP_REDUNDANT) ? 1 : 0; /* Redundancy state:
+                                                                                        1 = Follower
+                                                                                        0 = Leader                 */
 
         pStatistics[lIndex].cycle = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
-        /* Interval/cycle in us. 0 = No time-out supervision  */
-        pStatistics[lIndex].numSend = iter->numRxTx;             /* Number of packets sent for this publisher.
-                                                                           */
-        pStatistics[lIndex].numPut  = iter->updPkts;             /* Updated packets (via put)
-                                                                                            */
-
+        /* Interval/cycle in us. 0 = No time-out supervision */
+        pStatistics[lIndex].numSend = iter->numRxTx;          /* Number of packets sent for this publisher.        */
+        pStatistics[lIndex].numPut  = iter->updPkts;          /* Updated packets (via put)                         */
     }
     if (lIndex >= *pNumPub && iter != NULL)
     {
