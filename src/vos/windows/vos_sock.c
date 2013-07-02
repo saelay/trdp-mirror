@@ -386,6 +386,17 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
     return VOS_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** De-Initialize the socket library.
+ *  Must be called after last socket call
+ *
+ */
+
+EXT_DECL void vos_sockTerm (void)
+{
+    vosSockInitialised = FALSE;
+}
+
 
 /**********************************************************************************************************************/
 /** Return the MAC address of the default adapter.
