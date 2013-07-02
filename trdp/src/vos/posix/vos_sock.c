@@ -169,7 +169,7 @@ BOOL vos_getMacAddress (
  *  @retval         VOS_NO_ERR       no error
  *  @retval         VOS_SOCK_ERR     buffer size can't be set
  */
-VOS_ERR_T vos_sockSetBuffer(INT32 sock)
+VOS_ERR_T vos_sockSetBuffer (INT32 sock)
 {
     int         optval      = 0;
     socklen_t   option_len  = sizeof(optval);
@@ -189,7 +189,7 @@ VOS_ERR_T vos_sockSetBuffer(INT32 sock)
 
     (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
     if (optval < TRDP_SOCKBUF_SIZE)
-    {        
+    {
         optval = TRDP_SOCKBUF_SIZE;
         if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, option_len) == -1)
         {
@@ -199,7 +199,7 @@ VOS_ERR_T vos_sockSetBuffer(INT32 sock)
         }
     }
     vos_printLog(VOS_LOG_INFO, "Recv buffer limit = %u\n", optval);
-    
+
     return VOS_NO_ERR;
 }
 
@@ -407,6 +407,17 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 }
 
 /**********************************************************************************************************************/
+/** De-Initialize the socket library.
+ *  Must be called after last socket call
+ *
+ */
+
+EXT_DECL void vos_sockTerm (void)
+{
+    vosSockInitialised = FALSE;
+}
+
+/**********************************************************************************************************************/
 /** Return the MAC address of the default adapter.
  *
  *  @param[out]     pMAC            return MAC address.
@@ -472,7 +483,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_SOCK_ERR;
     }
 
-    if (   (vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
+    if ((vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
         || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         close(sock);
@@ -523,7 +534,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         return VOS_SOCK_ERR;
     }
 
-    if (   (vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
+    if ((vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
         || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         close(sock);
