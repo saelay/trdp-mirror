@@ -113,6 +113,17 @@ EXT_DECL VOS_ERR_T vos_threadInit (
     return VOS_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** De-Initialize the thread library.
+ *  Must be called after last thread/timer call
+ *
+ */
+
+EXT_DECL void vos_threadTerm (void)
+{
+    vosThreadInitialised = FALSE;
+}
+
 
 /**********************************************************************************************************************/
 /** Search a free Handle place in the thread handle list.

@@ -44,7 +44,7 @@ extern "C" {
 #define VOS_MAX_THREAD_CNT  100
 
 /** Timeout value to wait forever for a semaphore */
-#define VOS_SEMA_WAIT_FOREVER 0xFFFFFFFF
+#define VOS_SEMA_WAIT_FOREVER  0xFFFFFFFF
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -74,16 +74,16 @@ extern "C" {
     } while (0)
 #endif
 #ifndef timersub
-# define timersub(a, b, result)                            \
-    do {                                                   \
-        INT32 usec;                                        \
-        (result)->tv_sec    = (a)->tv_sec - (b)->tv_sec;   \
-        usec   = (a)->tv_usec - (b)->tv_usec;              \
-        if (usec < 0) {                                    \
-            --(result)->tv_sec;                            \
-            usec += 1000000;                               \
-        }                                                  \
-        (result)->tv_usec = usec;                          \
+# define timersub(a, b, result)                       \
+    do {                                              \
+        INT32 usec;                                   \
+        (result)->tv_sec = (a)->tv_sec - (b)->tv_sec; \
+        usec = (a)->tv_usec - (b)->tv_usec;           \
+        if (usec < 0) {                               \
+            --(result)->tv_sec;                       \
+            usec += 1000000;                          \
+        }                                             \
+        (result)->tv_usec = usec;                     \
     } while (0)
 #endif
 #endif
@@ -116,7 +116,7 @@ typedef enum
 
 
 /** Hidden mutex handle definition    */
-typedef struct VOS_MUTEX  *VOS_MUTEX_T;
+typedef struct VOS_MUTEX *VOS_MUTEX_T;
 
 /** Hidden semaphore handle definition    */
 typedef struct VOS_SEMA *VOS_SEMA_T;
@@ -144,6 +144,15 @@ typedef void *VOS_THREAD_T;
  */
 
 EXT_DECL VOS_ERR_T vos_threadInit (
+    void);
+
+/**********************************************************************************************************************/
+/** De-Initialize the thread library.
+ *  Must be called after last thread/timer call
+ *
+ */
+
+EXT_DECL void vos_threadTerm (
     void);
 
 /**********************************************************************************************************************/
