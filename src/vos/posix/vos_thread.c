@@ -148,6 +148,17 @@ EXT_DECL VOS_ERR_T vos_threadInit (
     return VOS_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** De-Initialize the thread library.
+ *  Must be called after last thread/timer call
+ *
+ */
+
+EXT_DECL void vos_threadTerm (void)
+{
+    vosThreadInitialised = FALSE;
+}
+
 
 /**********************************************************************************************************************/
 /** Create a thread.
@@ -192,8 +203,8 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (interval > 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "%s cyclic threads not implemented yet\n",
-                   pName);
+                     "%s cyclic threads not implemented yet\n",
+                     pName);
         return VOS_INIT_ERR;
     }
 
@@ -202,9 +213,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (retCode != 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "%s pthread_attr_init() failed (Err:%d)\n",
-                   pName,
-                   retCode );
+                     "%s pthread_attr_init() failed (Err:%d)\n",
+                     pName,
+                     retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -286,9 +297,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (retCode != 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "%s pthread_create() failed (Err:%d)\n",
-                   pName,
-                   retCode );
+                     "%s pthread_create() failed (Err:%d)\n",
+                     pName,
+                     retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -329,8 +340,8 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
     if (retCode != 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "pthread_cancel() failed (Err:%d)\n",
-                   retCode );
+                     "pthread_cancel() failed (Err:%d)\n",
+                     retCode );
         return VOS_THREAD_ERR;
     }
     return VOS_NO_ERR;
@@ -1078,7 +1089,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         /* retVal = VOS_PARAM_ERR;  BL: will never be used! */
     }
-    else if (timeout == (UINT32) NULL)
+    else if (timeout == 0)
     {
         /* Take Semaphore, return ERROR if Semaphore cannot be taken immediately instead of blocking */
         rc = sem_trywait((sem_t *)sema);
