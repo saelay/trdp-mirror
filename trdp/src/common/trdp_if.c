@@ -657,8 +657,8 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
             }
         }
 
-        /* Release memory?  */
-        vos_memDelete(NULL);
+        /* Close stop timers, release memory  */
+        vos_terminate();
         sInited = FALSE;
     }
     else
