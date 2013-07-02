@@ -31,8 +31,10 @@
 #ifdef WIN32
 #include <winsock2.h>
 #elif defined(VXWORKS)
-#else
+#elif defined(POSIX)
 #include <sys/select.h>
+#else
+#include "vos_private.h"
 #endif
 
 #ifdef __cplusplus
@@ -68,26 +70,26 @@ extern "C" {
 #define VOS_MAX_IF_NAME_SIZE    16
 #endif
 #ifndef VOS_MAX_NUM_IF              /**< The maximum number of IP interface adapters that can be handled by VOS */
-#define VOS_MAX_NUM_IF           4
+#define VOS_MAX_NUM_IF  4
 #endif
 #ifndef VOS_MAX_NUM_UNICAST         /**< The maximum number of unicast addresses that can be handled by VOS    */
-#define VOS_MAX_NUM_UNICAST      10
+#define VOS_MAX_NUM_UNICAST  10
 #endif
 #ifndef VOS_MAC_SIZE                /**< The MAC size supported by VOS */
-#define VOS_MAC_SIZE  6 
+#define VOS_MAC_SIZE  6
 #endif
 #ifndef TRDP_SOCKBUF_SIZE           /**< Size of socket send and receive buffer */
-#if MD_SUPPORT   
-#define TRDP_SOCKBUF_SIZE  (64 * 1024)
+#if MD_SUPPORT
+#define TRDP_SOCKBUF_SIZE   (64 * 1024)
 #else
-#define TRDP_SOCKBUF_SIZE  (8 * 1024)  
+#define TRDP_SOCKBUF_SIZE   (8 * 1024)
 #endif
 #endif
-#define VOS_INVALID_SOCKET -1       /**< Invalid socket number */
+#define VOS_INVALID_SOCKET  -1      /**< Invalid socket number */
 
-#define VOS_DEFAULT_IFACE	cDefaultIface
+#define VOS_DEFAULT_IFACE   cDefaultIface
 
-extern const CHAR8  *cDefaultIface;
+extern const CHAR8 *cDefaultIface;
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -245,6 +247,14 @@ EXT_DECL INT32 vos_select (
 
 EXT_DECL VOS_ERR_T vos_sockInit (
     void);
+
+/**********************************************************************************************************************/
+/** De-Initialize the socket library.
+ *  Must be called after last socket call
+ *
+ */
+
+EXT_DECL void vos_sockTerm (void);
 
 /**********************************************************************************************************************/
 /** Return the MAC address of the default adapter.
