@@ -283,6 +283,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
                     if (result == TRDP_NO_ERR)
                     {
                         appHandle->stats.pd.numSend++;
+                        iterPD->numRxTx++;
                     }
                     else
                     {
