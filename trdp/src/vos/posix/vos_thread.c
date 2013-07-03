@@ -34,6 +34,7 @@
  */
 
 #include <stdint.h>
+#include <unistd.h>
 #include <errno.h>
 #include <sys/time.h>
 #include <pthread.h>
@@ -435,7 +436,7 @@ EXT_DECL void vos_getTime (
     }
     else
     {
-#ifndef _POSIX_TIMERS
+#ifndef CLOCK_MONOTONIC
 
         /*    On systems without monotonic clock support,
             changing the system clock during operation
