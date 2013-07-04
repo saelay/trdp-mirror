@@ -22,7 +22,7 @@
 
 #ifndef POSIX
 #error \
-    "You are trying to compile the POSIX implementation of vos_sock.c - either define POSIX or exclude this file!"
+    "You are trying to compile the POSIX implementation of vos_shared_mem.c - either define POSIX or exclude this file!"
 #endif
 
 /***********************************************************************************************************************
