@@ -58,7 +58,9 @@ extern "C" {
 
 #else
 
+#ifndef VOS_MAX_SOCKET_CNT
 #define VOS_MAX_SOCKET_CNT      4   /**< The maximum number of concurrent usable sockets per application session */
+#endif
 #ifndef VOS_MAX_MULTICAST_CNT
 #define VOS_MAX_MULTICAST_CNT   5   /**< The maximum number of multicast groups one socket can join              */
 #endif
