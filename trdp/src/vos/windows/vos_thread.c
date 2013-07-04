@@ -54,7 +54,7 @@ const size_t    cDefaultStackSize   = 16 * 1024;
 const UINT32    cMutextMagic        = 0x1234FEDC;
 
 UINT16          uuidCycle = 0;
-BOOL            vosTreadInitialised = FALSE;
+BOOL            vosThreadInitialised = FALSE;
 pthread_t       threadHandle[VOS_MAX_THREAD_CNT];
 
 /***********************************************************************************************************************
@@ -108,7 +108,7 @@ EXT_DECL VOS_ERR_T vos_threadInit (
     void)
 {
     memset(threadHandle, 0, sizeof(threadHandle));
-    vosTreadInitialised = TRUE;
+    vosThreadInitialised = TRUE;
 
     return VOS_NO_ERR;
 }
@@ -135,7 +135,7 @@ pthread_t *vos_getFreeThreadHandle (void)
 {
     pthread_t *pHandle = NULL;
 
-    if (vosTreadInitialised)
+    if (vosThreadInitialised)
     {
         UINT32 i;
 
@@ -188,7 +188,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     struct sched_param  schedParam;  /* scheduling priority */
     int retCode;
 
-    if (!vosTreadInitialised)
+    if (!vosThreadInitialised)
     {
         return VOS_INIT_ERR;
     }
@@ -335,7 +335,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
 {
     int retCode;
 
-    if (!vosTreadInitialised)
+    if (!vosThreadInitialised)
     {
         return VOS_INIT_ERR;
     }
@@ -373,7 +373,7 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
     int policy;
     struct sched_param param;
 
-    if (!vosTreadInitialised)
+    if (!vosThreadInitialised)
     {
         return VOS_INIT_ERR;
     }
