@@ -50,6 +50,12 @@ struct VOS_SEMA
     struct sem_t_ *semaphore;
 };
 
+struct VOS_SHRD
+{
+    HANDLE  fd;                     /* File descriptor */
+    CHAR8   *sharedMemoryName;      /* shared memory Name */
+};
+
 VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
 void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 

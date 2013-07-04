@@ -63,7 +63,7 @@ typedef struct VOS_SHRD *VOS_SHRD_T;
 /**********************************************************************************************************************/
 /** Create a shared memory area or attach to existing one.
  *  The first call with the a specified key will create a shared memory area with the supplied size and will return
- *  a handle and a pointer to that area. If the area already exists, the area will be attached.
+ *  a handle and a pointer to that area. If the area already exists, the area will be opened.
  *    This function is not available in each target implementation.
  *
  *  @param[in]      pKey            Unique identifier (file name)
@@ -77,7 +77,7 @@ typedef struct VOS_SHRD *VOS_SHRD_T;
 EXT_DECL VOS_ERR_T vos_sharedOpen (
     const CHAR8 *pKey,
     VOS_SHRD_T  *pHandle,
-    UINT8       * *ppMemoryArea,
+    UINT8       **ppMemoryArea,
     UINT32      *pSize);
 
 
