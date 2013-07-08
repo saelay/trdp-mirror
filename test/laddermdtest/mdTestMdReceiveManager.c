@@ -54,7 +54,7 @@
 
 #include "mdTestApp.h"
 
-#define HEAP_MEMORY_SIZE (1*1024*1024)
+#define HEAP_MEMORY_SIZE (10*1024*1024)
 
 
 /***********************************************************************************************************************
@@ -162,12 +162,18 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	TRDP_ERR_T errv;
 	static INT8 useMdSendSubnet1 = MD_SEND_USE_SUBNET1;				/* Use MD send of Sub-network Number */
 	static INT8 useMdSendSubnet2 = MD_SEND_USE_SUBNET2;				/* Use MD send of Sub-network Number */
+	UINT32 preAlloc[VOS_MEM_NBLOCKSIZES] = {0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 1, 0, 0, 0, 0};
+	int i = 0;
 
 	memset(&mem_config,0,sizeof(mem_config));
 
 	/* Memory allocator config */
 	mem_config.p    = NULL;
 	mem_config.size = HEAP_MEMORY_SIZE;
+	for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+	{
+		mem_config.prealloc[i] = preAlloc[i];
+	}
 
 	/*	MD config1 */
 	memset(&md_config,0,sizeof(md_config));

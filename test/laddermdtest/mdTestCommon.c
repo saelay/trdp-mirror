@@ -130,14 +130,14 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	trdp_mq = mq_open(pMqName, O_RDWR | O_CREAT, S_IWUSR|S_IRUSR, pma);
 	if ((mqd_t)-1 == trdp_mq)
 	{
-		vos_printLog(VOS_LOG_ERROR, "mq_open() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_open() Error\n");
 		return MD_APP_ERR;
 	}
 	/* get attributes */
 	rc = mq_getattr(trdp_mq,&old_ma);
 	if (-1 == rc)
 	{
-		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error\n");
 		return MD_APP_ERR;
 	}
 
@@ -149,7 +149,7 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	rc = mq_setattr(trdp_mq,&new_ma,&old_ma);
 	if (-1 == rc)
 	{
-		vos_printLog(VOS_LOG_ERROR, "mq_setattr() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_setattr() Error\n");
 		return MD_APP_ERR;
 	}
 
@@ -157,7 +157,7 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	rc = mq_getattr(trdp_mq,&old_ma);
 	if (-1 == rc)
 	{
-		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error\n");
 		return MD_APP_ERR;
 	}
 
@@ -176,12 +176,12 @@ MD_APP_ERR_TYPE queue_sendMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 	rc = mq_send(mqDescriptor,p_bf,l_bf,0);
 	if (-1 == rc)
 	{
-		vos_printLog(VOS_LOG_ERROR, "mq_send() Error");
+		vos_printLog(VOS_LOG_ERROR, "mq_send() Error:%d\n", errno);
 		return MD_APP_ERR;
 	}
 	else
 	{
-		return 0;
+		return MD_APP_NO_ERR;
 	}
 }
 
@@ -1275,7 +1275,7 @@ MD_APP_ERR_TYPE printCallerResult (
 				printf("-k,	Caller MD Request Send Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
 	//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
 				printf("-m,	Caller MD Request Send Cycle Time: %u micro sec\n", iterCommandValue->mdCycleTime);
-				printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+				printf("-n,	Topology Type (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
 				printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
 				printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
 				printf("-t,	Caller Using Network I/F (Subnet1:1,subnet2:2): %u\n", iterCommandValue->mdSendSubnet);
@@ -1366,6 +1366,94 @@ MD_APP_ERR_TYPE printReplierResult (
     }
 
     return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Display Join Address Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printJoinStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	TRDP_ERR_T err;
+	TRDP_STATISTICS_T   mdStatistics;
+	UINT32 *pMdJoinAddressStatistics = NULL;
+	UINT16 numberOfJoin = 0;
+	char ipAddress[16] = {0};
+    UINT16      lIndex;
+
+	if (appHandle == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+	err = tlc_getStatistics(appHandle, &mdStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+		/* Set Number Of Joins */
+		numberOfJoin = mdStatistics.numJoin;
+		/* Get pPdSubscribeStatistics Area */
+		pMdJoinAddressStatistics = (UINT32 *)malloc(numberOfJoin * sizeof(UINT32));
+	}
+	else
+	{
+		return MD_APP_ERR;
+	}
+
+	/* Get MD Statistics */
+	err = tlc_getJoinStatistics (appHandle, &numberOfJoin, pMdJoinAddressStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+	    /*  Display Subscriber Information */
+	    for (lIndex = 0; lIndex < numberOfJoin; lIndex++)
+	    {
+			/*  Dump MD Join Address Statistics */
+			printf("===   Join Address#%u Statistics   ===\n", lIndex+1);
+			miscIpToString(pMdJoinAddressStatistics[lIndex], ipAddress);
+			printf("Joined IP Address: %s\n", ipAddress);
+	    }
+	    free(pMdJoinAddressStatistics);
+	    pMdJoinAddressStatistics = NULL;
+	}
+	else
+	{
+		free(pMdJoinAddressStatistics);
+		pMdJoinAddressStatistics = NULL;
+		return MD_APP_ERR;
+	}
+
+	return MD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Clear Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE clearStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	if (appHandle == NULL)
+    {
+        return MD_APP_PARAM_ERR;
+    }
+
+	err = tlc_resetStatistics(appHandle);
+	if (err != TRDP_NO_ERR)
+	{
+		return MD_APP_ERR;
+	}
+
+	return MD_APP_NO_ERR;
 }
 
 /**********************************************************************************************************************/

@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.26"
+#define PD_APP_VERSION	"V0.29"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.26"
+#define PD_APP_VERSION	"V0.29"
 #else
-#define PD_APP_VERSION	"V0.26"
+#define PD_APP_VERSION	"V0.29"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
@@ -510,6 +510,54 @@ PD_APP_ERR_TYPE printPdCommandValue (
  *  @retval         PD_APP_ERR						error
  */
 PD_APP_ERR_TYPE printPdStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+/**********************************************************************************************************************/
+/** Display PD Subscribe Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdSubscribeStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+/**********************************************************************************************************************/
+/** Display PD Publish Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdPublishStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+/**********************************************************************************************************************/
+/** Display PD Join Address Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdJoinStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+/**********************************************************************************************************************/
+/** Clear Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE clearPdStatistics (
 		TRDP_APP_SESSION_T  appHandle);
 
 /**********************************************************************************************************************/

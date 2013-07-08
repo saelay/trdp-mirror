@@ -948,6 +948,58 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 				}
 				return PD_APP_COMMAND_ERR;
 			break;
+			case 'v':
+				printf("===   Application Handle1 PD Subscribe Statistics   ===\n");
+				if (printPdSubscribeStatistics(appHandle) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle1 PD Subscribe Statistics Dump Err\n");
+				}
+				printf("===   Application Handle2 PD Subscribe Statistics   ===\n");
+				if (printPdSubscribeStatistics(appHandle2) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle2 PD Subscribe Statistics Dump Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
+			case 'V':
+				printf("===   Application Handle1 PD Publish Statistics   ===\n");
+				if (printPdPublishStatistics(appHandle) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle1 PD Publish Statistics Dump Err\n");
+				}
+				printf("===   Application Handle2 PD Publish Statistics   ===\n");
+				if (printPdPublishStatistics(appHandle2) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle2 PD Publish Statistics Dump Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
+			case 'w':
+				printf("===   Application Handle1 PD Join Address Statistics   ===\n");
+				if (printPdJoinStatistics(appHandle) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle1 PD Join Address Statistics Dump Err\n");
+				}
+				printf("===   Application Handle2 PD Join Address Statistics   ===\n");
+				if (printPdJoinStatistics(appHandle2) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle2 PD Join Address Statistics Dump Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
+			case 'Z':
+				printf("===   Application Handle1 PD Statistics Clear   ===\n");
+				if (clearPdStatistics(appHandle) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle1 PD Statistics Clear Err\n");
+				}
+				printf("===   Application Handle2 PD Statistics Clear   ===\n");
+				if (clearPdStatistics(appHandle2) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle2 PD Statistics Clear Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
 			case 'D':
 				if (printPdSubscribeResult(pFirstPdCommandValue) != PD_APP_NO_ERR)
 				{
@@ -1012,6 +1064,10 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 						"\n"
 						"[-s] "
 						"[-S] "
+						"[-v] "
+						"[-V] "
+						"[-w] "
+						"[-Z] "
 						"[-D] "
 						"\n"
 						"[-Q] "
@@ -1046,6 +1102,10 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 				printf("-L,	--log-type-onoff	LOG Category OnOff Type Log On:1, Log Off:0, 0bit:ERROR, 1bit:WARNING, 2bit:INFO, 3bit:DBG\n");
 				printf("-s,	--show-set-command	Display Setup Command until now\n");
 				printf("-S,	--show-pd-statistics	Display PD Statistics\n");
+				printf("-v,	--show-subscribe-statistics	Display PD subscribe Statistics\n");
+				printf("-V,	--show-publish-statistics	Display PD publishe Statistics\n");
+				printf("-w,	--show-join-statistics	Display PD Join Statistics\n");
+				printf("-Z,	--clear-pd-statistics	Clear PD Statistics\n");
 				printf("-D,	--show-subscribe-result	Display subscribe-result\n");
 				printf("-Q,	--pd-test-quit	PD TEST Quit\n");
 				printf("-h,	--help\n");
@@ -1886,6 +1946,233 @@ PD_APP_ERR_TYPE printPdStatistics (
 	{
 		return PD_APP_ERR;
 	}
+	return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Display PD Subscribe Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdSubscribeStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	TRDP_ERR_T err;
+	TRDP_STATISTICS_T   pdStatistics;
+	TRDP_SUBS_STATISTICS_T *pPdSubscribeStatistics = NULL;
+	UINT16 numberOfSubscriber = 0;
+	char ipAddress[16] = {0};
+    UINT16      lIndex;
+
+	if (appHandle == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+	err = tlc_getStatistics(appHandle, &pdStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+		/* Set Number Of Subscribers */
+		numberOfSubscriber = pdStatistics.pd.numSubs;
+		/* Get pPdSubscribeStatistics Area */
+		pPdSubscribeStatistics = (TRDP_SUBS_STATISTICS_T *)malloc(numberOfSubscriber * sizeof(TRDP_SUBS_STATISTICS_T));
+	}
+	else
+	{
+		return PD_APP_ERR;
+	}
+
+	/* Get PD Statistics */
+	err = tlc_getSubsStatistics (appHandle, &numberOfSubscriber, pPdSubscribeStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+	    /*  Display Subscriber Information */
+	    for (lIndex = 0; lIndex < numberOfSubscriber; lIndex++)
+	    {
+			/*  Dump PD Statistics */
+			printf("===   PD Subscribe#%u Statistics   ===\n", lIndex+1);
+			printf("Subscribed ComId: %u\n",  pPdSubscribeStatistics[lIndex].comId);
+			miscIpToString(pPdSubscribeStatistics[lIndex].joinedAddr, ipAddress);
+			printf("Joined IP Address: %s\n", ipAddress);
+			memset(ipAddress, 0, sizeof(ipAddress));
+			miscIpToString(pPdSubscribeStatistics[lIndex].filterAddr, ipAddress);
+			printf("Filter Sorce IP address: %s\n", ipAddress);
+			printf("Reference for call back function: 0x%x\n", pPdSubscribeStatistics[lIndex].callBack);
+			printf("Time-out value in us: %u\n", pPdSubscribeStatistics[lIndex].timeout);
+			printf("Behaviour at time-out: %u\n", pPdSubscribeStatistics[lIndex].toBehav);
+			printf("Number of packets received for this subscription: %u\n", pPdSubscribeStatistics[lIndex].numRecv);
+			printf("Receive status information: %d\n", pPdSubscribeStatistics[lIndex].status);
+	    }
+	    free(pPdSubscribeStatistics);
+	    pPdSubscribeStatistics = NULL;
+	}
+	else
+	{
+	    free(pPdSubscribeStatistics);
+	    pPdSubscribeStatistics = NULL;
+	    return PD_APP_ERR;
+	}
+
+	return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Display PD Publish Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdPublishStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	TRDP_ERR_T err;
+	TRDP_STATISTICS_T   pdStatistics;
+	TRDP_PUB_STATISTICS_T *pPdPublisherStatistics = NULL;
+	UINT16 numberOfPublisher = 0;
+	char ipAddress[16] = {0};
+    UINT16      lIndex;
+
+	if (appHandle == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+	err = tlc_getStatistics(appHandle, &pdStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+		/* Set Number Of Subscribers */
+		numberOfPublisher = pdStatistics.pd.numPub;
+		/* Get pPdSubscribeStatistics Area */
+		pPdPublisherStatistics = (TRDP_PUB_STATISTICS_T *)malloc(numberOfPublisher * sizeof(TRDP_PUB_STATISTICS_T));
+	}
+	else
+	{
+		return PD_APP_ERR;
+	}
+
+	/* Get PD Statistics */
+	err = tlc_getPubStatistics (appHandle, &numberOfPublisher, pPdPublisherStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+	    /*  Display Subscriber Information */
+	    for (lIndex = 0; lIndex < numberOfPublisher; lIndex++)
+	    {
+			/*  Dump PD Statistics */
+			printf("===   PD Publisher#%u Statistics   ===\n", lIndex+1);
+			printf("Published ComId: %u\n",  pPdPublisherStatistics[lIndex].comId);
+			miscIpToString(pPdPublisherStatistics[lIndex].destAddr, ipAddress);
+			printf("Destination IP Address: %s\n", ipAddress);
+			printf("Redundancy group id: %u\n", pPdPublisherStatistics[lIndex].redId);
+			printf("Redundancy state: %u\n", pPdPublisherStatistics[lIndex].redState);
+			printf("Interval/cycle in us: %u\n", pPdPublisherStatistics[lIndex].cycle);
+			printf("Number of packets sent for this publisher: %u\n", pPdPublisherStatistics[lIndex].numSend);
+			printf("Updated packets (via put): %u\n", pPdPublisherStatistics[lIndex].numPut);
+	    }
+	    free(pPdPublisherStatistics);
+	    pPdPublisherStatistics = NULL;
+	}
+	else
+	{
+		free(pPdPublisherStatistics);
+		pPdPublisherStatistics = NULL;
+		return PD_APP_ERR;
+	}
+
+	return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Display PD Join Address Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printPdJoinStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	TRDP_ERR_T err;
+	TRDP_STATISTICS_T   pdStatistics;
+	UINT32 *pPdJoinAddressStatistics = NULL;
+	UINT16 numberOfJoin = 0;
+	char ipAddress[16] = {0};
+    UINT16      lIndex;
+
+	if (appHandle == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+	err = tlc_getStatistics(appHandle, &pdStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+		/* Set Number Of Joins */
+		numberOfJoin = pdStatistics.numJoin;
+		/* Get pPdSubscribeStatistics Area */
+		pPdJoinAddressStatistics = (UINT32 *)malloc(numberOfJoin * sizeof(UINT32));
+	}
+	else
+	{
+		return PD_APP_ERR;
+	}
+
+	/* Get PD Statistics */
+	err = tlc_getJoinStatistics (appHandle, &numberOfJoin, pPdJoinAddressStatistics);
+	if (err == TRDP_NO_ERR)
+	{
+	    /*  Display Subscriber Information */
+	    for (lIndex = 0; lIndex < numberOfJoin; lIndex++)
+	    {
+			/*  Dump PD Join Address Statistics */
+			printf("===   PD Join Address#%u Statistics   ===\n", lIndex+1);
+			miscIpToString(pPdJoinAddressStatistics[lIndex], ipAddress);
+			printf("Joined IP Address: %s\n", ipAddress);
+	    }
+	    free(pPdJoinAddressStatistics);
+	    pPdJoinAddressStatistics = NULL;
+	}
+	else
+	{
+		free(pPdJoinAddressStatistics);
+		pPdJoinAddressStatistics = NULL;
+		return PD_APP_ERR;
+	}
+
+	return PD_APP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Clear Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE clearPdStatistics (
+		TRDP_APP_SESSION_T  appHandle)
+{
+	if (appHandle == NULL)
+    {
+        return PD_APP_PARAM_ERR;
+    }
+
+	err = tlc_resetStatistics(appHandle);
+	if (err != TRDP_NO_ERR)
+	{
+		return PD_APP_ERR;
+	}
+
 	return PD_APP_NO_ERR;
 }
 

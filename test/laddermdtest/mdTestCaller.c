@@ -421,9 +421,6 @@ VOS_THREAD_FUNC_T MDCaller (
 						UINT32 incrementDataSetId =0;
 						incrementDataSetId = DATASETID_INCREMENT_DATA;
 						memcpy(pCallerCreateIncrementMdData, &incrementDataSetId, sizeof(UINT32));
-
-
-
 						pCallerCreateIncrementMdData = pCallerCreateIncrementMdData + MD_DATASETID_SIZE;
 						/* Set increment MD DATA SIZE */
 						mdIncrementMessageSize = pCallerThreadParameter->pCommandValue->mdMessageSize - MD_DATASETID_SIZE;
@@ -706,17 +703,38 @@ VOS_THREAD_FUNC_T MDCaller (
 		}
 
 		/* Get Next MD Transmission Send timing */
-		vos_getTime(&nextSendTime);
-		nextReplyTimeoutTime = nextSendTime;
-		tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdCycleTime / 1000000;
-		tv_interval.tv_usec     = pCallerThreadParameter->pCommandValue->mdCycleTime % 1000000;
-		trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
-		trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
-		vos_addTime(&nextSendTime, &trdp_time_tv_interval);
+		/* Caller Send Interval Type:Request-Request ? */
+		if (pCallerThreadParameter->pCommandValue->mdSendIntervalType == REQUEST_REQUEST)
+		{
+			vos_getTime(&nextSendTime);
+			nextReplyTimeoutTime = nextSendTime;
+			tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdCycleTime / 1000000;
+			tv_interval.tv_usec     = pCallerThreadParameter->pCommandValue->mdCycleTime % 1000000;
+			trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
+			trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
+			vos_addTime(&nextSendTime, &trdp_time_tv_interval);
 
-		/* Receive Wait */
-		/* Last Time send ? */
-		if (sendMdTransferRequestCounter >= pCallerThreadParameter->pCommandValue->mdCycleNumber)
+			/* Receive Wait */
+			/* Last Time send ? */
+			if (sendMdTransferRequestCounter >= pCallerThreadParameter->pCommandValue->mdCycleNumber)
+			{
+				/* Get Reply time out of day */
+				tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdTimeoutReply / 1000000;
+				tv_interval.tv_usec     = pCallerThreadParameter->pCommandValue->mdTimeoutReply % 1000000;
+				trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
+				trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
+				vos_addTime(&nextReplyTimeoutTime, &trdp_time_tv_interval);
+				/* Set Wait Time: Reply Time Out for Last Time Request receive all Reply*/
+				receiveWaitTime = nextReplyTimeoutTime;
+			}
+			else
+			{
+				/* Set Wait Time: Wait Next MD Transmission Send Timing for receive all Reply */
+				receiveWaitTime = nextSendTime;
+			}
+		}
+		/* Caller Send Interval Type:Reply-Request */
+		else
 		{
 			/* Get Reply time out of day */
 			tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdTimeoutReply / 1000000;
@@ -727,32 +745,43 @@ VOS_THREAD_FUNC_T MDCaller (
 			/* Set Wait Time: Reply Time Out for Last Time Request receive all Reply*/
 			receiveWaitTime = nextReplyTimeoutTime;
 		}
-		else
-		{
-			/* Set Wait Time: Wait Next MD Transmission Send Timing for receive all Reply */
-			receiveWaitTime = nextSendTime;
-		}
 
-		/* Receive Message Queue Loop */
-		while(1)
+		/* Receive Request Reply */
+		if (pCallerThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MR_MP)
 		{
-			/* Check Receive Finish */
-			if ((pCallerThreadParameter->pCommandValue->mdCycleNumber != 0)
-			&& ((pCallerThreadParameter->pCommandValue->callerMdRequestReplySuccessCounter) + (pCallerThreadParameter->pCommandValue->callerMdRequestReplyFailureCounter)	 >= pCallerThreadParameter->pCommandValue->mdCycleNumber))
+			/* Receive Message Queue Loop */
+			while(1)
 			{
-				/* Break MD Reply Receive loop */
-				break;
-			}
+				/* Check Receive Finish */
+				if ((pCallerThreadParameter->pCommandValue->mdCycleNumber != 0)
+				&& ((pCallerThreadParameter->pCommandValue->callerMdRequestReplySuccessCounter) + (pCallerThreadParameter->pCommandValue->callerMdRequestReplyFailureCounter)	 >= pCallerThreadParameter->pCommandValue->mdCycleNumber))
+				{
+					/* Break MD Reply Receive loop */
+					break;
+				}
 
-			vos_getTime(&nowTime);
-			/* Check receive Wait Time */
-			if (vos_cmpTime((TRDP_TIME_T *) &receiveWaitTime, (TRDP_TIME_T *) &nowTime) < 0)
-			{
-				/* Break Receive Message Queue because Receive Wait Timer */
-				break;
-			}
-			else
-			{
+				/* Caller Send Interval Type:Reply-Request ? */
+				if (pCallerThreadParameter->pCommandValue->mdSendIntervalType == REPLY_REQUEST)
+				{
+					/* Check 1Mr-Mp sequence Finish */
+					if (pCallerThreadParameter->pCommandValue->callerMdSendCounter == pCallerThreadParameter->pCommandValue->callerMdRequestReplySuccessCounter + pCallerThreadParameter->pCommandValue->callerMdRequestReplyFailureCounter)
+					{
+						/* Break MD Reply Receive loop */
+						break;
+					}
+				}
+				/* Caller Send Interval Type:Request-Request ? */
+				if (pCallerThreadParameter->pCommandValue->mdSendIntervalType == REQUEST_REQUEST)
+				{
+					vos_getTime(&nowTime);
+					/* Check receive Wait Time */
+					if (vos_cmpTime((TRDP_TIME_T *) &receiveWaitTime, (TRDP_TIME_T *) &nowTime) < 0)
+					{
+						/* Break Receive Message Queue because Receive Wait Timer */
+						break;
+					}
+				}
+
 				/* Receive All Message in Message Queue Loop */
 				while(1)
 				{
@@ -1026,6 +1055,19 @@ VOS_THREAD_FUNC_T MDCaller (
 					break;
 				}
 			}
+		}
+
+		/* Get Next MD Transmission Send timing */
+		/* Caller Send Interval Type:Reply-Request ? */
+		if (pCallerThreadParameter->pCommandValue->mdSendIntervalType == REPLY_REQUEST)
+		{
+			vos_getTime(&nextSendTime);
+			nextReplyTimeoutTime = nextSendTime;
+			tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdCycleTime / 1000000;
+			tv_interval.tv_usec     = pCallerThreadParameter->pCommandValue->mdCycleTime % 1000000;
+			trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
+			trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
+			vos_addTime(&nextSendTime, &trdp_time_tv_interval);
 		}
 
 		/* Wait Next MD Transmission Send Timing */

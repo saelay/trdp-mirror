@@ -261,6 +261,15 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 					getCommandValue.mdDump = int32_value;
 				}
 				break;
+			case 'I':
+				if (argv[i+1] != NULL)
+				{
+					/* Get Caller Send Interval Type from an option argument */
+					sscanf(argv[i+1], "%1u", &int32_value);
+					/* Set MD Message Kind */
+					getCommandValue.mdSendIntervalType = int32_value;
+				}
+				break;
 			case 'j':
 				if (argv[i+1] != NULL)
 				{
@@ -437,6 +446,32 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				}
 				return MD_APP_COMMAND_ERR;
 				break;
+			case 'w':
+				printf("===   Application Handle1 Join Address Statistics   ===\n");
+				if (printJoinStatistics(appHandle) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle1 Join Address Statistics Dump Err\n");
+				}
+				printf("===   Application Handle2 Join Address Statistics   ===\n");
+				if (printJoinStatistics(appHandle2) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle2 Join Address Statistics Dump Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
+			case 'Z':
+				printf("===   Application Handle1 Statistics Clear   ===\n");
+				if (clearStatistics(appHandle) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle1 Statistics Clear Err\n");
+				}
+				printf("===   Application Handle2 Statistics Clear   ===\n");
+				if (clearStatistics(appHandle2) != PD_APP_NO_ERR)
+				{
+					printf("Application Handle2 Statistics Clear Err\n");
+				}
+				return PD_APP_COMMAND_ERR;
+			break;
 			case 'h':
 			case '?':
 				printf("Unknown or required argument option -%c\n", optopt);
@@ -451,31 +486,35 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 						"\n"
 						"[-g callerMdDestination] "
 						"[-i dumpType] "
-						"[-j callerKnownReplierNumber] "
+						"[-I sendIntervalType] "
 						"\n"
+						"[-j callerKnownReplierNumber] "
 						"[-J replierSessionMaxNumber] "
 						"[-k callerSendCycleNumber] "
-						"[-l logType] "
 						"\n"
+						"[-l logType] "
 						"[-L logCategoryOnOffType] "
 						"[-m callerMdSendCycleTime] "
-						"[-m sendingTimeout] "
 						"\n"
+						"[-m sendingTimeout] "
 						"[-n topologyType] "
 						"[-o replierReplyErrType] "
-						"[-p marshallingTYpe] "
 						"\n"
+						"[-p marshallingTYpe] "
 						"[-q replierListenerComid] "
 						"[-Q] "
-						"[-r replyTimeout] "
 						"\n"
+						"[-r replyTimeout] "
 						"[-R connectTimeout] "
 						"[-t callerSendUsingSubnetType] "
-						"[-s] "
 						"\n"
+						"[-s] "
 						"[-S] "
 						"[-u] "
 						"[-U] "
+						"[-w] "
+						"[-Z] "
+						"[-Q] "
 						"[-h] "
 						"\n");
 				printf("long option(--) Not Support \n");
@@ -487,6 +526,7 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("-f,	--md-message-size			MD Increment Message Size Byte\n");
 				printf("-g,	--md-destination-address		Caller MD Send Destination IP Address, Replier MD Receive Destination IP Address xxx.xxx.xxx.xxx\n");
 				printf("-i,	--md-dump				Dump Type DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log\n");
+				printf("-I,	--md-send-interval-type			Caller Send Request Interval Type Request-Request:0, Reply-Request:1\n");
 				printf("-j,	--md-replier-number			Caller known MD Replier Number\n");
 				printf("-J,	--md-max-session			Max Replier Session Number\n");
 				printf("-k,	--md-cycle-number			Caller MD Request Send Cycle Number, Replier MD Request Receive Cycle Number\n");
@@ -505,6 +545,8 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("-S,	--show-md-statistics	Display MD Statistics\n");
 				printf("-u,	--show-caller-result	Display caller-result\n");
 				printf("-U,	--show-replier-result	Display replier-result\n");
+				printf("-w,	--show-join-statistics	Display MD Join Statistics\n");
+				printf("-Z,	--clear-md-statistics	Clear MD Statistics\n");
 				printf("-Q,	--md-test-quit	MD TEST Quit\n");
 				printf("-h,	--help\n");
 				printf("Caller example\n"
@@ -566,6 +608,14 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 				return MD_APP_MEM_ERR;
 			}
 			memset(*ppMdDataSize, 0, sizeof(UINT32));
+
+			/* Check Caller Send Interval Type */
+			if ((pCommandValue->mdSendIntervalType == REPLY_REQUEST)
+			 && (pCommandValue->mdMessageKind != MD_MESSAGE_MR_MP))
+			{
+				err = MD_APP_ERR;
+			}
+
 			/* Decide MD DATA Type*/
 			switch(pCommandValue->mdTelegramType)
 			{
