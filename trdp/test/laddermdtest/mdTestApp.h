@@ -69,11 +69,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.30"
+#define MD_APP_VERSION	"V0.35"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.30"
+#define MD_APP_VERSION	"V0.35"
 #else
-#define MD_APP_VERSION	"V0.30"
+#define MD_APP_VERSION	"V0.35"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -157,7 +157,7 @@ extern "C" {
 #define MESSAGE_QUEUE_NAME_SIZE				24			/* Message Queue Name Size */
 #define THREAD_COUNTER_CHARACTER_SIZE		10			/* Thread Counter Character Size */
 #define TRDP_QUEUE_MAX_SIZE					(sizeof(trdp_apl_cbenv_t)-2)
-#define TRDP_QUEUE_MAX_MESG 				10
+#define TRDP_QUEUE_MAX_MESG 				128
 
 /* LOG */
 #define CALLER_LOG_BUFFER_SIZE		1024			/* Caller Log String Buffer Size : 1KB */
@@ -225,6 +225,13 @@ typedef enum
     MD_MESSAGE_MN			= 0,	/**< Mn 		Message */
     MD_MESSAGE_MR_MP		= 1		/**< Mr-Mp		Message */
 } MD_MESSAGE_KIND;
+
+/* MD Caller Send Interval Type definition */
+typedef enum
+{
+    REQUEST_REQUEST		= 0,	/**< Request-Request Interval */
+    REPLY_REQUEST			= 1		/**< Reply-Request Interval */
+} MD_CALLER_SEND_INTERVAL_TYPE;
 
 /* MD Telegram Type definition */
 typedef enum
@@ -314,6 +321,7 @@ typedef struct COMMAND_VALUE
 	UINT32 mdMessageSize;						/* -f --md-message-size Value */
 	TRDP_IP_ADDR_T mdDestinationAddress;		/* -g --md-destination-address Value */
 	UINT8 mdDump;									/* -i --md-dump Value */
+	UINT8 mdSendIntervalType;					/* -I --md-send-interval-type value */
 	UINT8 mdReplierNumber;						/* -j --md-replier-number Value */
 	UINT32 mdMaxSessionNumber;					/* -J --md-max-session Value */
 	UINT32 mdCycleNumber;						/* -k --md-cycle-number Value */
@@ -740,6 +748,31 @@ MD_APP_ERR_TYPE printCallerResult (
 MD_APP_ERR_TYPE printReplierResult (
 		COMMAND_VALUE	*pHeadCommandValue,
 		UINT32 commandValueId);
+
+/**********************************************************************************************************************/
+/** Display Join Address Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE printJoinStatistics (
+		TRDP_APP_SESSION_T  appHandle);
+
+
+/**********************************************************************************************************************/
+/** Clear Statistics
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_PARAM_ERR					parameter	error
+ *  @retval         PD_APP_ERR						error
+ */
+PD_APP_ERR_TYPE clearStatistics (
+		TRDP_APP_SESSION_T  appHandle);
 
 /**********************************************************************************************************************/
 /** Delete an element
