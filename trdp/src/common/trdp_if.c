@@ -952,7 +952,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     /*    Check params    */
     if ((comId == 0)
         || (pData != NULL && dataSize == 0)
-        || (dataSize > TRDP_MAX_PD_PACKET_SIZE)
+        || (dataSize > TRDP_MAX_PD_DATA_SIZE)
         || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
         || (pPubHandle == NULL))
     {
@@ -1192,7 +1192,8 @@ TRDP_ERR_T tlp_put (
     PD_ELE_T    *pElement   = (PD_ELE_T *)pubHandle;
     TRDP_ERR_T  ret         = TRDP_NO_ERR;
 
-    if (pElement == NULL)
+    if (pElement == NULL ||
+        dataSize > TRDP_MAX_PD_DATA_SIZE )
     {
         return TRDP_PARAM_ERR;
     }
@@ -1629,7 +1630,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     }
 
     /*    Check params    */
-    if (comId == 0 || maxDataSize > TRDP_MAX_PD_PACKET_SIZE)
+    if (comId == 0 || maxDataSize > TRDP_MAX_PD_DATA_SIZE)
     {
         return TRDP_PARAM_ERR;
     }
