@@ -36,7 +36,7 @@ VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o vos_shared_mem.o
 TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_if.o trdp_stats.o $(VOS_OBJS)
 
 # Set LDFLAGS
-LDFLAGS = -L $(OUTDIR)
+LDFLAGS += -L $(OUTDIR)
 
 # Enable / disable MD Support
 ifeq ($(MD_SUPPORT),0)
@@ -112,7 +112,6 @@ $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			$(CC) example/echoSelect.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
-				-lrt \
 			    $(LDFLAGS)
 			$(STRIP) $@
 
@@ -121,7 +120,6 @@ $(OUTDIR)/cmdlineSelect:  echoSelectcmdline.c  $(OUTDIR)/libtrdp.a
 			$(CC) example/echoSelectcmdline.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
-				-lrt \
 			    $(LDFLAGS) 
 			$(STRIP) $@
 
@@ -130,7 +128,6 @@ $(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a
 			$(CC) example/echoPolling.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
-				-lrt \
 			    $(LDFLAGS)
 			$(STRIP) $@
 
@@ -138,7 +135,6 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
 			$(CC) example/sendHello.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -147,7 +143,6 @@ $(OUTDIR)/getStats:   diverse/getStats.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building statistics commandline tool $(@F)'
 			$(CC) test/diverse/getStats.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -156,7 +151,7 @@ $(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building example MD application $(@F)'
 			$(CC) example/mdManager.c \
 			    -ltrdp \
-			    -luuid -lrt \
+			    -luuid \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -165,7 +160,7 @@ $(OUTDIR)/mdTest4: mdTest4.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building UDPMDCom test application $(@F)'
 			$(CC) test/udpmdcom/mdTest4.c \
 			    -ltrdp \
-			    -luuid -lrt \
+			    -luuid \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -174,7 +169,6 @@ $(OUTDIR)/test_mdSingle: test_mdSingle.c $(OUTDIR)/libtrdp.a
 			@echo ' ### Building MD single test application $(@F)'
 			$(CC) test/diverse/test_mdSingle.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -183,7 +177,7 @@ $(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building TCPMDCom Siemens test application $(@F)'
 			$(CC) example/mdManagerTCP_Siemens.c \
 			    -ltrdp \
-			    -luuid -lrt \
+			    -luuid \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -192,7 +186,7 @@ $(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building TCPMDCom test application $(@F)'
 			$(CC) example/mdManagerTCP.c \
 			    -ltrdp \
-			    -luuid -lrt \
+			    -luuid \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -201,7 +195,6 @@ $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building PD test application $(@F)'
 			$(CC) test/pdpatterns/trdp-pd-test.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -210,7 +203,6 @@ $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building MD test application $(@F)'
 			$(CC) test/mdpatterns/trdp-md-test.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -219,7 +211,6 @@ $(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building VOS test application $(@F)'
 			$(CC) test/diverse/LibraryTests.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -228,7 +219,6 @@ $(OUTDIR)/pd_md_responder: $(OUTDIR)/libtrdp.a pd_md_responder.c
 			@echo ' ### Building PD test application $(@F)'
 			$(CC) test/diverse/pd_md_responder.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -237,7 +227,6 @@ $(OUTDIR)/testSub: $(OUTDIR)/libtrdp.a subTest.c
 			@echo ' ### Building subscribe PD test application $(@F)'
 			$(CC) test/diverse/subTest.c \
 			    -ltrdp \
-			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
