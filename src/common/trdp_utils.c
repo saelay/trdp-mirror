@@ -49,7 +49,7 @@ static INT32 sCurrentMaxSocketCnt = 0;
 void printSocketUsage (
     TRDP_SOCKETS_T iface[])
 {
-    UINT32 lIndex;
+    INT32 lIndex = 0;
     vos_printLog(VOS_LOG_DBG, "\n");
     for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
     {
