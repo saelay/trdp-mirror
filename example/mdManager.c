@@ -299,7 +299,7 @@ static void queue_procricz()
                 TRDP_ERR_T errv = tlm_reply(
                     appHandle,
                     (void *) 0x2000CAFE,
-                    &msg.Msg.sessionId,
+                    (const TRDP_UUID_T*) &(msg.Msg.sessionId),
                     msg.Msg.topoCount,
                     msg.Msg.comId,
                     msg.Msg.destIpAddr,
@@ -323,7 +323,7 @@ static void queue_procricz()
                 TRDP_ERR_T errv = tlm_replyQuery(
                     appHandle,
                     (void *) 0x2000CAFE,
-                    &msg.Msg.sessionId,
+                    (const TRDP_UUID_T*)&(msg.Msg.sessionId),
                     msg.Msg.topoCount,
                     msg.Msg.comId,
                     msg.Msg.destIpAddr,

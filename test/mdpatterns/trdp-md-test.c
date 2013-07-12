@@ -181,6 +181,8 @@ const char *get_result_string (TRDP_ERR_T err)
             return "TRDP_BLOCK_ERR (system call would have blocked in blocking mode)";
         case TRDP_INTEGRATION_ERR:
             return "TRDP_INTEGRATION_ERR (alignment or endianess for selected target wrong)";
+        case TRDP_NOCONN_ERR:
+            return "TRDP_NOCONN:ERR (No TCP connection)";
         case TRDP_NOSESSION_ERR:
             return "TRDP_NOSESSION_ERR (no such session)";
         case TRDP_SESSION_ABORT_ERR:
@@ -213,6 +215,8 @@ const char *get_result_string (TRDP_ERR_T err)
             return "TRDP_CONFIRMTO_ERR (protocol confirm timeout)";
         case TRDP_REQCONFIRMTO_ERR:
             return "TRDP_REQCONFIRMTO_ERR (protocol confirm timeout (request sender)";
+        case TRDP_PACKET_ERR:
+            return "TRDP_PACKET_ERR (Incomplete message data packet)";
         case TRDP_UNKNOWN_ERR:
             return "TRDP_UNKNOWN_ERR (unspecified error)";
     }

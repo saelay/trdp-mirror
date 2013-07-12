@@ -647,7 +647,7 @@ static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
     errv = tlm_reply(
         appHandle,
         (void *) 0x2000CAFE,
-        &msg.Msg.sessionId,
+        (const TRDP_UUID_T*)&(msg.Msg.sessionId),
         msg.Msg.topoCount,
         msg.Msg.comId,
         0,    /* own IP address from trdp stack */
@@ -684,7 +684,7 @@ static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData
     errv = tlm_replyQuery(
         appHandle,
         (void *) 0x2000CAFE,
-        &msg.Msg.sessionId,
+        (const TRDP_UUID_T*)&(msg.Msg.sessionId),
         msg.Msg.topoCount,
         msg.Msg.comId,
         0,    /* own IP address from trdp stack */
@@ -745,8 +745,10 @@ static void queue_procricz()
         printf( "replyTimeout      = %d\n", msg.Msg.replyTimeout);
         printf( "destURI           = ");      print_uri(msg.Msg.destURI); printf( "\n");
         printf( "srcURI            = ");      print_uri(msg.Msg.srcURI); printf( "\n");
-        printf( "numRetriesMax     = %d\n", msg.Msg.numRetriesMax);
-        printf( "numRetries        = %d\n", msg.Msg.numRetries);
+        /* CS 20130712: Struct members used here do not exist since trdp_types #854
+         * printf( "numRetriesMax     = %d\n", msg.Msg.numRetriesMax);
+         * printf( "numRetries        = %d\n", msg.Msg.numRetries);
+         * */
         printf( "numExpReplies     = %d\n", msg.Msg.numExpReplies);
         printf( "numReplies        = %d\n", msg.Msg.numReplies);
         printf( "numRepliesQuery   = %d\n", msg.Msg.numRepliesQuery);
@@ -2001,7 +2003,9 @@ static int test_initialize()
     md_config.pRefCon           = (void *) 0x12345678;
     md_config.sendParam.qos     = TRDP_MD_DEFAULT_QOS;
     md_config.sendParam.ttl     = TRDP_MD_DEFAULT_TTL;
-    md_config.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
+    /* CS 20130712: Struct members used here do not exist since trdp_types #854
+     * md_config.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
+     */
     md_config.flags             = 0
                                   | TRDP_FLAGS_NONE * 0
                                   | TRDP_FLAGS_MARSHALL * 0
@@ -2377,7 +2381,8 @@ static int test_main_proc()
         //usleep(x_period * 1000);
     }
 
-    errv = errv;     // avoid cc warning!
+    /* CS 20130712 ??
+    errv = errv;     // avoid cc warning!*/
 
     return(0);
 }
