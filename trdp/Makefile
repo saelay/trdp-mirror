@@ -112,6 +112,7 @@ $(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
 			$(CC) example/echoSelect.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
+				-lrt \
 			    $(LDFLAGS)
 			$(STRIP) $@
 
@@ -120,6 +121,7 @@ $(OUTDIR)/cmdlineSelect:  echoSelectcmdline.c  $(OUTDIR)/libtrdp.a
 			$(CC) example/echoSelectcmdline.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
+				-lrt \
 			    $(LDFLAGS) 
 			$(STRIP) $@
 
@@ -128,6 +130,7 @@ $(OUTDIR)/receivePolling:  echoPolling.c  $(OUTDIR)/libtrdp.a
 			$(CC) example/echoPolling.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
+				-lrt \
 			    $(LDFLAGS)
 			$(STRIP) $@
 
@@ -135,6 +138,7 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
 			$(CC) example/sendHello.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -143,6 +147,7 @@ $(OUTDIR)/getStats:   diverse/getStats.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building statistics commandline tool $(@F)'
 			$(CC) test/diverse/getStats.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -166,8 +171,10 @@ $(OUTDIR)/mdTest4: mdTest4.c  $(OUTDIR)/libtrdp.a
 			$(STRIP) $@
 
 $(OUTDIR)/test_mdSingle: test_mdSingle.c $(OUTDIR)/libtrdp.a
+			@echo ' ### Building MD single test application $(@F)'
 			$(CC) test/diverse/test_mdSingle.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -194,6 +201,7 @@ $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building PD test application $(@F)'
 			$(CC) test/pdpatterns/trdp-pd-test.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -202,6 +210,7 @@ $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building MD test application $(@F)'
 			$(CC) test/mdpatterns/trdp-md-test.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -210,6 +219,7 @@ $(OUTDIR)/vostest: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building VOS test application $(@F)'
 			$(CC) test/diverse/LibraryTests.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -218,6 +228,7 @@ $(OUTDIR)/pd_md_responder: $(OUTDIR)/libtrdp.a pd_md_responder.c
 			@echo ' ### Building PD test application $(@F)'
 			$(CC) test/diverse/pd_md_responder.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
@@ -226,6 +237,7 @@ $(OUTDIR)/testSub: $(OUTDIR)/libtrdp.a subTest.c
 			@echo ' ### Building subscribe PD test application $(@F)'
 			$(CC) test/diverse/subTest.c \
 			    -ltrdp \
+			    -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
