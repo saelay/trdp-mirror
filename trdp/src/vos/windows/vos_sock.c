@@ -98,7 +98,7 @@ UINT8   mac[VOS_MAC_SIZE];
 /** Receive a message including sender address information.
  *
  *  @param[in]      sock            socket descriptor
- *  @param[in]      message         Pointer to message header
+ *  @param[in]      pMessage        Pointer to message header
  *  @param[in]      flags           Receive flags
  *
  *  @retval         number of received bytes, -1 for error
