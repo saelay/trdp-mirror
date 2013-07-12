@@ -30,6 +30,12 @@
 #include "vos_sock.h"
 #include "vos_thread.h"
 #include "vos_mem.h"
+#include "vos_private.h"
+
+#ifndef PROGMEM
+#define PROGMEM
+#define pgm_read_dword(a) (*(a))
+#endif
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -52,7 +58,7 @@ void *gRefCon = NULL;
  *        + x**22 + x**23 + x**26 + x**32.
  */
 
-static const UINT32 crc_table[256] =
+static const UINT32 crc_table[256] PROGMEM =
 {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
     0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -121,15 +127,6 @@ static const UINT32 crc_table[256] =
 };
 
 static BOOL         sIsBigEndian            = FALSE;
-static UINT32       sAlignINT8              = 1;
-static UINT32       sAlignINT16             = 2;
-static UINT32       sAlignINT32             = 4;
-static UINT32       sAlignREAL32            = 4;
-static UINT32       sAlignTIMEDATE48        = 6;
-static UINT32       sAlignINT64             = 8;
-static UINT32       sAlignREAL64            = 8;
-static UINT32       sAlignTIMEDATE48Array1  = 4;
-static UINT32       sAlignTIMEDATE48Array2  = 4;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -143,7 +140,18 @@ static UINT32       sAlignTIMEDATE48Array2  = 4;
 
 VOS_ERR_T vos_initRuntimeConsts (void)
 {
+#if MD_SUPPORT
     VOS_ERR_T   err = VOS_INTEGRATION_ERR;
+	UINT32       sAlignINT8              = 1;
+	UINT32       sAlignINT16             = 2;
+	UINT32       sAlignINT32             = 4;
+	UINT32       sAlignREAL32            = 4;
+	UINT32       sAlignTIMEDATE48        = 6;
+	UINT32       sAlignINT64             = 8;
+	UINT32       sAlignREAL64            = 8;
+	UINT32       sAlignTIMEDATE48Array1  = 4;
+	UINT32       sAlignTIMEDATE48Array2  = 4;
+
 
     /*  Compute endianess  */
     long        one = 1;
@@ -252,6 +260,9 @@ VOS_ERR_T vos_initRuntimeConsts (void)
     }
 
     return err;
+#else
+	return VOS_NO_ERR;
+#endif
 }
 
 /***********************************************************************************************************************
@@ -318,7 +329,7 @@ UINT32 vos_crc32 (
     UINT32 i;
     for (i = 0; i < dataLen; i++)
     {
-        crc = (crc >> 8) ^ crc_table[(crc ^ pData[i]) & 0xff];
+        crc = (crc >> 8) ^ pgm_read_dword(&crc_table[(crc ^ pData[i]) & 0xff]);
     }
     return crc;
 }
