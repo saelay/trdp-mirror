@@ -195,7 +195,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     vos_memFree(shMemName);
     if (retVal != VOS_NO_ERR)
     {
-        *pSize = NULL;
+        *pSize = (UINT32)NULL;
     }
     else
     {
