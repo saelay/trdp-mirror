@@ -97,6 +97,10 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
         vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
+    else
+    {
+        /* do nothing here */
+    }
     shMemName = (TCHAR*) vos_memAlloc((strlen(pKey) + 1) * sizeof(TCHAR));
     if (shMemName == NULL)
     {
