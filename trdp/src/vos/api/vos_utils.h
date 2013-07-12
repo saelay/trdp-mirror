@@ -136,9 +136,6 @@ EXT_DECL VOS_ERR_T vos_init (
 /** DeInitialize the vos library.
  *  Should be called last after TRDP stack/application does not use any VOS function anymore.
  *
- *  @param[in]        *pRefCon            user context
- *  @retval           VOS_NO_ERR          no error
- *  @retval           VOS_INIT_ERR        not inited
  */
 
 EXT_DECL void vos_terminate ();
