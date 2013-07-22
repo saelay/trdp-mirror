@@ -604,6 +604,7 @@ TRDP_ERR_T  trdp_requestSocket (
      and possibly add that group, if everything else fits.
      We remember already closed sockets on the way to be able to fill up gaps  */
 
+	/* On Linux, binding to an interface address will prevent receiving of MCs! It'll work on Windows, though	*/ 
     if (vos_isMulticast(mcGroup) && rcvMostly)
     {
         bindAddr = 0;
@@ -905,20 +906,24 @@ void  trdp_releaseSocket (
                              "Trying to close socket %d (usage = %d)\n",
                              iface[lIndex].sock,
                              iface[lIndex].usage);
-                if (iface[lIndex].sock > VOS_INVALID_SOCKET)
+                if (iface[lIndex].sock > VOS_INVALID_SOCKET &&
+                	iface[lIndex].usage > 0)
                 {
                     if (--iface[lIndex].usage == 0)
                     {
                         /* Close that socket, nobody uses it anymore */
                         err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
-                        iface[lIndex].sock = VOS_INVALID_SOCKET;
                         if (err != TRDP_NO_ERR)
                         {
                             vos_printLog(VOS_LOG_DBG, "Trying to close socket again?\n");
                         }
+                        else
+                        {
+                            vos_printLog(VOS_LOG_DBG, "Closed socket %d\n", iface[lIndex].sock);
+                        }
+                        iface[lIndex].sock = VOS_INVALID_SOCKET;
                     }
                 }
-
             }
             else
             {
