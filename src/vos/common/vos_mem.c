@@ -785,7 +785,6 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                         (*pQueueHandle)->maxNoOfMsg = maxNoOfMsg;
                         (*pQueueHandle)->magicNumber = cQueueMagic;
                         /* alloc queue memory */
-                        printf("size: %lu\n",maxNoOfMsg * sizeof(struct VOS_QUEUE_ELEM));
                         (*pQueueHandle)->pQueue = (struct VOS_QUEUE_ELEM*)vos_memAlloc(maxNoOfMsg * sizeof(struct VOS_QUEUE_ELEM));
                         if ((*pQueueHandle)->pQueue == NULL)
                         {
