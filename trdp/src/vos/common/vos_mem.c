@@ -45,6 +45,10 @@
 #include <pthread.h>
 #endif
 
+#ifdef WIN32
+#include <pthread.h>
+#endif
+
 #ifndef PTHREAD_MUTEX_INITIALIZER
 #define PTHREAD_MUTEX_INITIALIZER 0	/* Dummy */
 #endif
