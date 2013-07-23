@@ -258,103 +258,71 @@ MD_APP_ERR_TYPE deleteAppThreadSessionMessageQueueDescriptor(
 		mqd_t mqDescriptor)
 {
 	UINT32 i = 0;
+	MD_APP_ERR_TYPE err = MD_APP_NO_ERR;
+
 	for(i = 0; i < APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX; i++)
 	{
-		/* Check appThreadSessionHadle.pMdAppThreadListener */
-		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener == NULL)
+		/* Matching sessionId and message Queue Descriptor */
+		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == NULL)
 		{
-			/* pMdAppThereaListener Noting */
-//			break;
-			continue;
-		}
-		else
-		{
-			/* Matching ComId : equal */
-			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+			/* Check appThreadSessionHadle.pMdAppThreadListener */
+			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener == NULL)
 			{
-				/* Matching Source IP Address : equal or nothing */
-				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+				/* pMdAppThereaListener Noting */
+				continue;
+			}
+			else
+			{
+				/* Matching ComId : equal */
+				if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
 				{
-					/* Matching Destination IP Address : equal */
-					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+					/* Matching Source IP Address : equal or nothing */
+					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
 					{
-						/* Matching sessionId : equal */
-	//					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == pAppThreadSessionHandle->mdAppThreadSessionId)
-						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == NULL)
+						/* Matching Destination IP Address : equal */
+						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
 						{
-							continue;
-						}
-						else
-						{
-							if (strncmp((char *)appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
-										(char *)pAppThreadSessionHandle->mdAppThreadSessionId,
-										sizeof(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId)) == 0)
+							/* Check Message Queue Descriptor : equal*/
+							if (appThreadSessionHandleMqDescriptorTable[i].mqDescriptor == mqDescriptor)
 							{
 								/* Clear mqDescriptor */
 								appThreadSessionHandleMqDescriptorTable[i].mqDescriptor = 0;
 								/* Clear appThreadSessionHandle */
 								memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
 								/* Free Request Thread Session Handle Area */
-	//							free(pAppThreadSessionHandle->pMdAppThreadListener);
 								free(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener);
-	//							pAppThreadSessionHandle->pMdAppThreadListener = NULL;
 								appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener = NULL;
-								return MD_APP_NO_ERR;
+								err = MD_APP_NO_ERR;
 							}
 						}
 					}
 				}
 			}
 		}
-
-		/* Check appThreadSessionHadle.pMdAppThreadTimeoutListener */
-		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener == NULL)
-		{
-			/* pMdAppThereaListener Noting */
-//			break;
-			continue;
-		}
 		else
 		{
-			/* Matching ComId : equal */
-			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+			/* Check sessionId : equal */
+			if (strncmp((char *)appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
+						(char *)pAppThreadSessionHandle->mdAppThreadSessionId,
+						sizeof(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId)) == 0)
 			{
-				/* Matching Source IP Address : equal or nothing */
-				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == IP_ADDRESS_NOTHING))
+				/* Check Message Queue Descriptor : equal*/
+				if (appThreadSessionHandleMqDescriptorTable[i].mqDescriptor == mqDescriptor)
 				{
-					/* Matching Destination IP Address : equal */
-					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
-					{
-						/* Matching sessionId : equal */
-	//					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == pAppThreadSessionHandle->mdAppThreadSessionId)
-						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId == NULL)
-						{
-							continue;
-						}
-						else
-						{
-							if (strncmp((char *)appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
-										(char *)pAppThreadSessionHandle->mdAppThreadSessionId,
-										sizeof(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId)) == 0)
-							{
-								/* Clear mqDescriptor */
-								appThreadSessionHandleMqDescriptorTable[i].mqDescriptor = 0;
-								/* Clear appThreadSessionHandle */
-								memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
-								/* Free Request Thread Session Handle Area */
-								free(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener);
-								appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener = NULL;
-								return MD_APP_NO_ERR;
-							}
-						}
-					}
+					/* Clear mqDescriptor */
+					appThreadSessionHandleMqDescriptorTable[i].mqDescriptor = 0;
+					/* Clear appThreadSessionHandle */
+					memset(&(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle), 0, sizeof(APP_THREAD_SESSION_HANDLE));
+					/* Free Request Thread Session Handle Area */
+					free(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener);
+					appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener = NULL;
+					err = MD_APP_NO_ERR;
 				}
 			}
 		}
 	}
-	return MD_APP_ERR;
+	return err;
 }
 
 /**********************************************************************************************************************/
@@ -375,98 +343,43 @@ mqd_t getAppThreadSessionMessageQueueDescriptor(
 	UINT32 i = 0;
 	for(i = *pLoopStartNumber; i < APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX; i++)
 	{
-		/* Check Table Listener == NULL*/
-		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener != NULL)
+		/* Check SessionId */
+		/* Matching sessionId : equal */
+		if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
+				pAppThreadSessionHandle->mdAppThreadSessionId,
+				sizeof(TRDP_UUID_T)) == 0)
 		{
-			/* Check Listener */
-			/* Matching ComId : equal */
-			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
-			{
-				/* Matching Source IP Address : equal or nothing */
-				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
-				{
-					/* Matching Destination IP Address : equal */
-					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
-						||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
-					{
-						/* Matching mcGroup Address : equal */
-	/*					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.comId == pAppThreadSessionHandle->comId)
-						{ */
-							/* Check msgType */
-							switch (mdMsgType)
-							{
-								case TRDP_MSG_MP:
-									/* Matching sessionId : equal */
-									if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
-											pAppThreadSessionHandle->mdAppThreadSessionId,
-											sizeof(TRDP_UUID_T)) == 0)
-									{
-										*pLoopStartNumber = i;
-										return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
-									}
-								break;
-								case TRDP_MSG_MN:
-								case TRDP_MSG_MR:
-									*pLoopStartNumber = i;
-									return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
-								break;
-								default:
-								break;
-							}
-	/*					} */
-					}
-				}
-			}
-		}
-		/* Check Timeout Listener */
-		/* Check Table Listener == NULL*/
-		if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener != NULL)
-		{
-			/* Matching ComId : equal */
-			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
-			{
-				/* Matching Source IP Address : equal or nothing */
-				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-					||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->srcIpAddr == IP_ADDRESS_NOTHING))
-				{
-					/* Matching Destination IP Address : equal */
-					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadTimeoutListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
-						||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
-					{
-						/* Matching mcGroup Address : equal */
-	/*					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.comId == pAppThreadSessionHandle->comId)
-						{ */
-							/* Check msgType */
-							switch (mdMsgType)
-							{
-								case TRDP_MSG_MP:
-								case TRDP_MSG_MN:
-										*pLoopStartNumber = i;
-										return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
-								break;
-								case TRDP_MSG_MR:
-									/* Matching sessionId : equal */
-									if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
-											pAppThreadSessionHandle->mdAppThreadSessionId,
-											sizeof(TRDP_UUID_T)) == 0)
-									{
-										*pLoopStartNumber = i;
-										return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
-									}
-								break;
-								default:
-								break;
-							}
-	/*					} */
-					}
-				}
-			}
+			*pLoopStartNumber = i;
+			return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
 		}
 		else
 		{
-			/* Not Maching */
-			continue;
+
+			/* Check Table Listener == NULL*/
+			if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener != NULL)
+			{
+				/* Check Listener */
+				/* Matching ComId : equal */
+				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+					|| ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId | COMID_CONFIRM_MASK) == pAppThreadSessionHandle->pMdAppThreadListener->comId))
+				{
+					/* Matching Source IP Address : equal or nothing */
+					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+					{
+						/* Matching Destination IP Address : equal */
+						if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+							||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
+						{
+							/* Matching mcGroup Address : equal */
+		/*					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.comId == pAppThreadSessionHandle->comId)
+							{ */
+								*pLoopStartNumber = i;
+								return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
+						}
+					}
+				}
+			}
 		}
 	}
 	return -1;
@@ -1142,7 +1055,7 @@ MD_APP_ERR_TYPE printCommandValue (
 		printf("MD Command Value Thread No.%u\n", commnadValueNumber);
 		printf("-b,	Application Type (Caller:0, Replier:1): %u\n", iterCommandValue->mdCallerReplierType);
 		printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
-		printf("-d,	Caller Request Message Type (Mn:0, Mr-Mp:1): %u\n", iterCommandValue->mdMessageKind);
+		printf("-d,	Caller Request Message Type (Mn:0, Mr:1) or Replier Reply Message Type (Mp:0, Mq:1): %u\n", iterCommandValue->mdMessageKind);
 		printf("-e,	Caller Send MD DATASET Telegram Type (Increment:0, Fixed:1-6, Error:7-10): %u\n", iterCommandValue->mdTelegramType);
 		printf("-f,	MD Increment Message Size Byte: %u\n", iterCommandValue->mdMessageSize);
 		miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
@@ -1153,6 +1066,7 @@ MD_APP_ERR_TYPE printCommandValue (
 		printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
 		printf("-m,	Caller MD Request Send Cycle Time: %u micro sec\n", iterCommandValue->mdCycleTime);
 		printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+		printf("-N,	Confirm TImeout: micro sec: %u\n", iterCommandValue->mdTimeoutConfirm);
 		printf("-o,	Replier MD Reply Error Type(1-6): %u\n", iterCommandValue->mdReplyErr);
 		printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
 		printf("-q,	Replier Add Listener ComId: %u\n", iterCommandValue->mdReplierNumber);
@@ -1283,7 +1197,10 @@ MD_APP_ERR_TYPE printCallerResult (
 				printf("Caller Receive MD Success Count: %u\n", iterCommandValue->callerMdReceiveSuccessCounter);
 				printf("Caller Receive MD Failure Count: %u\n", iterCommandValue->callerMdReceiveFailureCounter);
 				printf("Caller Retry Count: %u\n", iterCommandValue->callerMdRetryCounter);
-				printf("Caller Send MD Count: %u\n", iterCommandValue->callerMdSendCounter);
+//				printf("Caller Send MD Count: %u\n", iterCommandValue->callerMdSendCounter);
+				printf("Caller Send MD Count: %u\n", iterCommandValue->callerMdRequestSendCounter + iterCommandValue->callerMdConfirmSendCounter);
+				printf("Caller Send MD Request(Mn,Mr) Count: %u\n", iterCommandValue->callerMdRequestSendCounter);
+				printf("Caller Send MD Confirm(Mc) Count: %u\n", iterCommandValue->callerMdConfirmSendCounter);
 				printf("Caller Send MD Success Count: %u\n", iterCommandValue->callerMdSendSuccessCounter);
 				printf("Caller Send MD Failure Count: %u\n", iterCommandValue->callerMdSendFailureCounter);
 				printf("Caller Send Request Receive Reply Success Count: %u\n", iterCommandValue->callerMdRequestReplySuccessCounter);
@@ -1338,17 +1255,22 @@ MD_APP_ERR_TYPE printReplierResult (
 				/*  Dump CommandValue */
 				printf("Replier No.%u\n", commnadValueNumber);
 				printf("-c,	Transport Type (UDP:0, TCP:1): %u\n", iterCommandValue->mdTransportType);
+				printf("-d,	Replier Reply Message Type (Mp:0, Mq:1): %u\n", iterCommandValue->mdMessageKind);
 				miscIpToString(iterCommandValue->mdDestinationAddress, strIp);
 				printf("-g,	Replier MD Receive Destination IP Address: %s\n", strIp);
 	//			printf("-i,	Dump Type (DumpOn:1, DumpOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdDump);
 				printf("-k,	Replier MD Request Receive Cycle Number: %u\n", iterCommandValue->mdCycleNumber);
 	//			printf("-l,	Log Type (LogFileOn:1, LogFileOff:0, 0bit:Operation Log, 1bit:Send Log, 2bit:Receive Log): %u\n", iterCommandValue->mdLog);
 				printf("-n,	Topology TYpe (Ladder:1, not Lader:0): %u\n", iterCommandValue->mdLadderTopologyFlag);
+				printf("-N,	Confirm TImeout: micro sec: %u\n", iterCommandValue->mdTimeoutConfirm);
 				printf("-o,	Replier MD Reply Error Type(1-6): %u\n", iterCommandValue->mdReplyErr);
 				printf("-p,	Marshalling Type (Marshall:1, not Marshall:0): %u\n", iterCommandValue->mdMarshallingFlag);
 				printf("-q,	Replier Add Listener ComId: %u\n", iterCommandValue->mdReplierNumber);
 	//			printf("-r,	Reply TImeout: %u micro sec\n", iterCommandValue->mdTimeoutReply);
-				printf("Replier Receive MD Count: %u\n", iterCommandValue->replierMdReceiveCounter);
+//				printf("Replier Receive MD Count: %u\n", iterCommandValue->replierMdReceiveCounter);
+				printf("Replier Receive MD Count: %u\n", iterCommandValue->replierMdRequestReceiveCounter + iterCommandValue->replierMdConfrimReceiveCounter);
+				printf("Replier Receive MD Request(Mn,Mr) Count: %u\n", iterCommandValue->replierMdRequestReceiveCounter);
+				printf("Replier Receive MD Confirm(Mc) Count: %u\n", iterCommandValue->replierMdConfrimReceiveCounter);
 				printf("Replier Receive MD Success Count: %u\n", iterCommandValue->replierMdReceiveSuccessCounter);
 				printf("Replier Receive MD Failure Count: %u\n", iterCommandValue->replierMdReceiveFailureCounter);
 				printf("Replier Retry Count: %u\n", iterCommandValue->replierMdRetryCounter);

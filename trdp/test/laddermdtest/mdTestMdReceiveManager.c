@@ -164,6 +164,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	static INT8 useMdSendSubnet2 = MD_SEND_USE_SUBNET2;				/* Use MD send of Sub-network Number */
 	UINT32 preAlloc[VOS_MEM_NBLOCKSIZES] = {0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 1, 0, 0, 0, 0};
 	int i = 0;
+	TRDP_MARSHALL_CONFIG_T	*pMarshallConfigPtr = NULL;	   			 /* Marshaling/unMarshalling configuration Pointer	*/
 
 	memset(&mem_config,0,sizeof(mem_config));
 
@@ -189,8 +190,8 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 		| TRDP_FLAGS_TCP       * pTrdpInitializeParameter->mdTransportType /* 1=TCP, 0=UDP */
 		;
 	md_config.replyTimeout   = pTrdpInitializeParameter->mdTimeoutReply;
-	md_config.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
-/*	md_config.confirmTimeout = pTrdpInitializeParameter->mdTimeoutConfirm; */	/* Not Command Support */
+//	md_config.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+	md_config.confirmTimeout = pTrdpInitializeParameter->mdTimeoutConfirm;
 	md_config.connectTimeout = pTrdpInitializeParameter->mdConnectTimeout;
 	md_config.sendingTimeout = pTrdpInitializeParameter->mdSendingTimeout;
 	md_config.udpPort        = TRDP_MD_UDP_PORT;
@@ -202,6 +203,13 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	{
 		processConfig.options = TRDP_OPTION_NONE;
 		processConfig2.options = TRDP_OPTION_NONE;
+	}
+
+	/* Set MarshallConfig */
+	if (pTrdpInitializeParameter->mdMarshallingFlag == TRUE)
+	{
+		/* Set MarshallConfig */
+		pMarshallConfigPtr = &marshallConfig;
 	}
 
 	/* Get IP Address */
@@ -256,7 +264,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 		&appHandle,			// TRDP_APP_SESSION_T			*pAppHandle
 		subnetId1Address,		// TRDP_IP_ADDR_T					ownIpAddr
 		subnetId1Address,		// TRDP_IP_ADDR_T					leaderIpAddr
-		NULL,           		// TRDP_MARSHALL_CONFIG_T		*pMarshall
+		pMarshallConfigPtr,  // TRDP_MARSHALL_CONFIG_T		*pMarshall
        NULL,					// const TRDP_PD_CONFIG_T		*pPdDefault
 		&md_config,			// const TRDP_MD_CONFIG_T		*pMdDefault
        &processConfig		// const TRDP_PROCESS_CONFIG_T	*pProcessConfig
@@ -285,7 +293,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 			&appHandle2,			// TRDP_APP_SESSION_T			*pAppHandle
 			subnetId2Address,		// TRDP_IP_ADDR_T					ownIpAddr
 			subnetId2Address,		// TRDP_IP_ADDR_T					leaderIpAddr
-			NULL,           		// TRDP_MARSHALL_CONFIG_T		*pMarshall
+			pMarshallConfigPtr,  // TRDP_MARSHALL_CONFIG_T		*pMarshall
 	       NULL,					// const TRDP_PD_CONFIG_T		*pPdDefault
 			&md_config2,			// const TRDP_MD_CONFIG_T		*pMdDefault
 	       &processConfig2		// const TRDP_PROCESS_CONFIG_T	*pProcessConfig
@@ -319,17 +327,19 @@ void md_indication(
 	/* Get TimeStamp when call md_indication() */
 	sprintf(timeStamp, "%s md_indication()", vos_getTimeStamp());
 
-	vos_printLog(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%d"
+	vos_printLog(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%u msgType=0x%x"
 			" sessionId=%02x%02x%02x%02x%02x%02x%02x%02x,"
-			" numExpReplies=%d numReplies=%d resuletCode=%d)\n",
+			" numExpReplies=%u numReplies=%u numRepliesQuery=%u resuletCode=%d)\n",
 			pRefCon,
 			pMsg,
 			pData,
 			dataSize,pMsg->comId,
+			pMsg->msgType,
 			pMsg->sessionId[0], pMsg->sessionId[1], pMsg->sessionId[2], pMsg->sessionId[3],
 			pMsg->sessionId[4], pMsg->sessionId[5], pMsg->sessionId[6], pMsg->sessionId[7],
 			pMsg->numExpReplies,
 			pMsg->numReplies,
+			pMsg->numRepliesQuery,
 			pMsg->resultCode);
 
     #if 0

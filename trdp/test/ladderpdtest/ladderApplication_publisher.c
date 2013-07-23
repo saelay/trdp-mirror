@@ -154,43 +154,53 @@ TRDP_DATASET_T DATASET1_TYPE =
 	{			/* TRDP_DATASET_ELEMENT_T [] */
 			{
 					TRDP_BOOLEAN, 	/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_CHAR8, 		/* data type < char, can be used also as UTF8  */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_UTF16,   	    /* data type < Unicode UTF-16 character  */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_INT8,   		/* data type < Signed integer, 8 bit  */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_INT16,		    /* data type < Signed integer, 16 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_INT32,		    /* data type < Signed integer, 32 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_INT64,		    /* data type < Signed integer, 64 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_UINT8,		    /* data type < Unsigned integer, 8 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_UINT16,		/* data type < Unsigned integer, 16 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_UINT32,		/* data type < Unsigned integer, 32 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_UINT64,		/* data type < Unsigned integer, 64 bit */
@@ -198,40 +208,47 @@ TRDP_DATASET_T DATASET1_TYPE =
 			},
 			{
 					TRDP_REAL32,		/* data type < Floating point real, 32 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_REAL64,		/* data type < Floating point real, 64 bit */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_TIMEDATE32,	/* data type < 32 bit UNIX time  */
-					1					/* No of elements */
+					1,				/* No of elements */
+					NULL
 			},
 			{
 					TRDP_TIMEDATE48,	/* data type *< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_TIMEDATE64,	/* data type *< 32 bit UNIX time + 32 bit miliseconds  */
-					1					/* No of elements */
+					1,					/* No of elements */
+					NULL
 			}
 	}
 };
 
 TRDP_DATASET_T DATASET2_TYPE =
 {
-	1002,		/* datasetID */
+	1002,		/* dataset/com ID */
 	0,			/* reserved */
 	2,			/* No of elements */
-	{
+	{			/* TRDP_DATASET_ELEMENT_T [] */
 			{
 					1001,		 		/* data type < dataset 1001  */
-					2					/* No of elements */
+					2,					/* No of elements */
+					NULL
 			},
 			{
 					TRDP_INT16,		    /* data type < Signed integer, 16 bit */
-					64					/* No of elements */
+					64,					/* No of elements */
+					NULL
 			}
 	}
 };
@@ -242,12 +259,7 @@ TRDP_DATASET_T *gDataSets[] =
 	&DATASET1_TYPE,
 	&DATASET2_TYPE,
 };
-/* ComId DATASETID Mapping */
-TRDP_COMID_DSID_MAP_T gComIdMap[] =
-{
-	{10001, 1001},
-	{10002, 1002}
-};
+
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -414,8 +426,15 @@ int main (int argc, char *argv[])
 //	CHAR8 stringMaxData[16] = "STRING MAX SIZE";
 	PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;	    /* Sender's IP: 10.4.33.17 (default) */
 	PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;	    /* Sender's IP: 10.4.33.17 (default) */
-	BOOL linkUpDown = TRUE;													/* Link Up Down information TRUE:Up FALSE:Down */
+	BOOL linkUpDown = TRUE;											/* Link Up Down information TRUE:Up FALSE:Down */
+	TRDP_FLAGS_T optionFlag = TRDP_FLAGS_NONE;					/* Option Flag for tlp_publish */
 
+	/* ComId DATASETID Mapping */
+	TRDP_COMID_DSID_MAP_T gComIdMap[] =
+	{
+		{10001, 1001},
+		{10002, 1002}
+	};
 	UINT32 pdDataset1ReturnNgCounter = 0;						/* Criterion of the failure PD DATASET1 Return */
 	UINT32 pdDataset2ReturnNgCounter = 0;						/* Criterion of the failure PD DATASET2 Return */
 	UINT32 pdDataset1CreateCount = 0;							/* Create PD DATASET1 Counter */
@@ -433,7 +452,7 @@ int main (int argc, char *argv[])
 	memset(&getDataSet2, 0, sizeof(getDataSet2));
 
 	DATASET1 dataSet1 = {0};									/* publish Dataset1 */
-	DATASET2 dataSet2;											/* publish Dataset2 */
+	DATASET2 dataSet2;										/* publish Dataset2 */
 	size_t dataSet1Size = 0;									/* publish Dataset1 SIZE */
 	size_t dataSet2Size = 0;									/* publish Dataset2 SIZE */
 	UINT16 inputPosition = 0;									/* putDataSetBuffer position */
@@ -452,9 +471,9 @@ int main (int argc, char *argv[])
 	dataSet1Size = sizeof(dataSet1);
 	dataSet2Size = sizeof(dataSet2);
 
-	void *pRefConMarshallDataset;
+	UINT32 *pRefConMarshallDataset;
 	UINT32 usingComIdNumber = 2;							/* 2 = ComId:10001,10002 */
-	UINT32 usingDatasetNumber =2;							/* 2 = DATASET1,DATASET2 */
+	UINT32 usingDatasetNumber = 2;							/* 2 = DATASET1,DATASET2 */
 	TRDP_MARSHALL_CONFIG_T	*pMarshallConfigPtr = NULL;	    /* Marshaling/unMarshalling configuration Pointer	*/
 
 	/* Display TRDP Version */
@@ -923,8 +942,19 @@ int main (int argc, char *argv[])
 	/* marshall setting */
 	if (marshallingFlag == TRUE)
 	{
-		pRefConMarshallDataset = vos_memAlloc(sizeof(UINT32));
-
+		/* Set TRDP_FLAG_S : Marshall for tlp_publish() */
+		optionFlag = TRDP_FLAGS_MARSHALL;
+		/* Get Marshall Dataset reference Area */
+//		pRefConMarshallDataset = vos_memAlloc(sizeof(UINT32));
+		/* Set gComIdMap */
+		if (PD_COMID1 > 0)
+		{
+			gComIdMap[0].comId = PD_COMID1;
+		}
+		if (PD_COMID2 > 0)
+		{
+			gComIdMap[1].comId = PD_COMID2;
+		}
 		/* Set dataSet in marshall table */
 		err = tau_initMarshall((void *)&pRefConMarshallDataset, usingComIdNumber, gComIdMap, usingDatasetNumber, gDataSets); /* 2nd argument:using ComId Number=2, 4th argument:using DATASET Number=2 */
 		if (err != TRDP_NO_ERR)
@@ -932,6 +962,37 @@ int main (int argc, char *argv[])
 			vos_printLog(VOS_LOG_ERROR, "tau_initMarshall returns error = %d\n", err);
 		   return 1;
 		}
+#if 0
+		/* Compute size of marshalled dataset1 */
+		err = tau_calcDatasetSizeByComId(pRefConMarshallDataset, PD_COMID1, (UINT8 *) &dataSet1, &dataSet1Size, NULL);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID1, DATASET_NO_1, err);
+			return 1;
+		}
+		/* Compute size of marshalled dataset2 */
+		err = tau_calcDatasetSizeByComId(pRefConMarshallDataset, PD_COMID2, (UINT8 *) &dataSet2, &dataSet2Size, NULL);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID2, DATASET_NO_2, err);
+			return 1;
+		}
+
+		/* Compute size of marshalled dataset1 */
+		err = tau_calcDatasetSize(pRefConMarshallDataset, 1001, (UINT8 *) &dataSet1, &dataSet1Size, NULL);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID1, DATASET_NO_1, err);
+			return 1;
+		}
+		/* Compute size of marshalled dataset2 */
+		err = tau_calcDatasetSize(pRefConMarshallDataset, 1002, (UINT8 *) &dataSet2, &dataSet2Size, NULL);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID2, DATASET_NO_2, err);
+			return 1;
+		}
+#endif
 	}
 
 	/* Enable Comid1 ? */
@@ -1058,12 +1119,17 @@ int main (int argc, char *argv[])
 		return 1;
 	}
 
-	/*	Sub-network Id1 Open a session for callback operation	(PD only) */
+	/* Set Config for marshall */
 	if (marshallingFlag == TRUE)
 	{
+		/* Set MarshallConfig */
 		pMarshallConfigPtr = &marshallConfig;
+		/* Set PDConfig option : MARSHALL enable */
+		pdConfiguration.flags = (pdConfiguration.flags | TRDP_FLAGS_MARSHALL);
+		/* Set PDConfig option : MARSHALL enable */
+		pdConfiguration2.flags = (pdConfiguration2.flags | TRDP_FLAGS_MARSHALL);
 	}
-
+	/*	Sub-network Id1 Open a session for callback operation	(PD only) */
 	if (tlc_openSession(&appHandle,
 							subnetId1Address, subnetId1Address, 	/* Sub-net Id1 IP address/interface	*/
 							pMarshallConfigPtr,                   	/* Marshalling or no Marshalling		*/
@@ -1111,7 +1177,7 @@ int main (int argc, char *argv[])
 	                         PD_COMID1_SUB_SRC_IP1,     	/* Source IP filter */
 	                         0,                        	/* Source IP filter2 : no used */
 	                         PD_COMID1_SUB_DST_IP1,     	/* Default destination	(or MC Group) */
-	                         0,								/* Option */
+	                         TRDP_FLAGS_DEFAULT,			/* Option */
 	                         PD_COMID1_TIMEOUT,         /* Time out in us	*/
 	                         TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
 	                         dataSet1Size);         	/* net data size */
@@ -1137,10 +1203,10 @@ int main (int argc, char *argv[])
 							 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
 							 PD_COMID2,                	/* ComID */
 							 0,                        	/* topocount: local consist only */
-							 PD_COMID2_SUB_SRC_IP1,         	/* Source IP filter */
+							 PD_COMID2_SUB_SRC_IP1,     /* Source IP filter */
 							 0,                        	/* Source IP filter2 : no used */
-							 PD_COMID2_SUB_DST_IP1,        	/* Default destination	(or MC Group) */
-							 0,								/* Option */
+							 PD_COMID2_SUB_DST_IP1,     /* Default destination	(or MC Group) */
+							 TRDP_FLAGS_DEFAULT,			/* Option */
 							 PD_COMID2_TIMEOUT,         /* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
 							 dataSet2Size);       	  	/* net data size */
@@ -1173,10 +1239,10 @@ int main (int argc, char *argv[])
 								 &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
 								 PD_COMID1,                	/* ComID */
 								 0,                        	/* topocount: local consist only */
-								 PD_COMID1_SUB_SRC_IP2,        	/* Source IP filter */
+								 PD_COMID1_SUB_SRC_IP2,    	/* Source IP filter */
 								 0,                        	/* Source IP filter2 : no used */
-								 PD_COMID1_SUB_DST_IP2,        	/* Default destination	(or MC Group) */
-								 0,								/* Option */
+								 PD_COMID1_SUB_DST_IP2,    	/* Default destination	(or MC Group) */
+								 TRDP_FLAGS_DEFAULT,			/* Option */
 								 PD_COMID1_TIMEOUT,        	/* Time out in us	*/
 								 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
 								 dataSet1Size);        		/* net data size */
@@ -1202,13 +1268,13 @@ int main (int argc, char *argv[])
 								 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
 								 PD_COMID2,                	/* ComID */
 								 0,                        	/* topocount: local consist only */
-								 PD_COMID2_SUB_SRC_IP2,        	/* Source IP filter */
+								 PD_COMID2_SUB_SRC_IP2,    	/* Source IP filter */
 								 0,                        	/* Source IP filter2 : no used */
-								 PD_COMID2_SUB_DST_IP2,        	/* Default destination	(or MC Group) */
-								 0,								/* Option */
+								 PD_COMID2_SUB_DST_IP2,    	/* Default destination	(or MC Group) */
+								 TRDP_FLAGS_DEFAULT,			/* Option */
 								 PD_COMID2_TIMEOUT,        	/* Time out in us	*/
 								 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
-								 dataSet2Size);     		/* net data size */
+								 dataSet2Size);     			/* net data size */
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
@@ -1236,7 +1302,7 @@ int main (int argc, char *argv[])
 							PD_COMID1_PUB_DST_IP1,				/* where to send to */
 							PD_COMID1_CYCLE,				/* Cycle time in ms */
 							0,								/* not redundant */
-							TRDP_FLAGS_NONE,				/* Don't use callback for errors */
+							optionFlag,				/* Don't use callback for errors */
 							NULL,							/* default qos and ttl */
 							(UINT8*)&dataSet1,			    /* initial data */
 							dataSet1Size);					/* data size */
@@ -1266,7 +1332,7 @@ int main (int argc, char *argv[])
 							PD_COMID2_PUB_DST_IP1,				/* where to send to */
 							PD_COMID2_CYCLE,				/* Cycle time in ms */
 							0,								/* not redundant */
-							TRDP_FLAGS_NONE,				/* Don't use callback for errors */
+							optionFlag,				/* Don't use callback for errors */
 							NULL,							/* default qos and ttl */
 							(UINT8*)&dataSet2,			    /* initial data */
 							dataSet2Size);					/* data size */
@@ -1299,7 +1365,7 @@ int main (int argc, char *argv[])
 								PD_COMID1_PUB_DST_IP2,			/* where to send to */
 								PD_COMID1_CYCLE,			/* Cycle time in ms */
 								0,							/* not redundant */
-								TRDP_FLAGS_NONE,			/* Don't use callback for errors */
+								optionFlag,			/* Don't use callback for errors */
 								NULL,						/* default qos and ttl */
 								(UINT8*)&dataSet1,			/* initial data */
 								dataSet1Size);				/* data size */
@@ -1329,7 +1395,7 @@ int main (int argc, char *argv[])
 								PD_COMID2_PUB_DST_IP2,			/* where to send to */
 								PD_COMID2_CYCLE,			/* Cycle time in ms */
 								0,							/* not redundant */
-								TRDP_FLAGS_NONE,			/* Don't use callback for errors */
+								optionFlag,			/* Don't use callback for errors */
 								NULL,						/* default qos and ttl */
 								 (UINT8*)&dataSet2,			/* initial data */
 								dataSet2Size);				/* data size */
@@ -1640,7 +1706,7 @@ int main (int argc, char *argv[])
 											(UINT8 *) &getDataSet1,
 											&dataSet1Size,
 											NULL);
-					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d datasetSize:%d\n", DATASET_NO_1, dataSet1Size);
 					if (err != TRDP_NO_ERR)
 					{
 						vos_printLog(VOS_LOG_ERROR, "tau_unmarshall PD DATASET%d returns error %d\n", DATASET_NO_1, err);
@@ -1657,7 +1723,7 @@ int main (int argc, char *argv[])
 											(UINT8 *) &getDataSet2,
 											&dataSet2Size,
 											NULL);
-					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d datasetSize:%d\n", DATASET_NO_2, dataSet2Size);
 					if (err != TRDP_NO_ERR)
 					{
 						vos_printLog(VOS_LOG_ERROR, "tau_unmarshall PD DATASET%d returns error %d\n", DATASET_NO_2, err);
@@ -1688,17 +1754,14 @@ int main (int argc, char *argv[])
 				{
 					/* Get ComId1 from Traffic Store */
 					memcpy(&getDataSet1, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS3), dataSet1Size);
-//					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_1);
-vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATASET_NO_1, getDataSet1.character);
-
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATASET_NO_1, getDataSet1.character);
 				}
 				/* Enable Comid2 ? */
 				if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 				{
-					/* Get ComId2 from Traffic Store */
+	    			/* Get ComId2 from Traffic Store */
 					memcpy(&getDataSet2, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS4), dataSet2Size);
-//					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
-vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATASET_NO_2, getDataSet2.dataset1[0].character);
+					vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATASET_NO_2, getDataSet2.dataset1[0].character);
 				}
 
 				/* Release access right to Traffic Store*/
@@ -1737,6 +1800,8 @@ vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATAS
 			/* Enable Comid1 ? */
 			if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 			{
+				/* Get DataSet1Size */
+				dataSet1Size = sizeof(dataSet1);
 				/* Compare dataset1 Send PD with receive PD */
 				if (comparePdDataset(&putDataSet1Buffer[putDataSetBufferIndex], &getDataSet1, dataSet1Size, dataSet1Size) ==1)
 				{
@@ -1769,6 +1834,8 @@ vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d character:%u\n", DATAS
 			/* Enable Comid2 ? */
 			if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 			{
+				/* Get DataSet2Size */
+				dataSet2Size = sizeof(dataSet2);
 				/* Compare dataset2 Send PD with receive PD */
 				if (comparePdDataset(&putDataSet2Buffer[putDataSetBufferIndex], &getDataSet2, dataSet2Size, dataSet2Size) == 1)
 				{

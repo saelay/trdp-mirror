@@ -50,10 +50,14 @@ VOS_THREAD_FUNC_T MDReplier (
 	TRDP_FLAGS_T pktFlags = 0;			/* OPTION FLAG */
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle ={{0}};		/* appThreadSessionHandle for Subnet1 */
 	APP_THREAD_SESSION_HANDLE appThreadSessionHandle2 ={{0}};		/* appThreadSessionHandle for Subnet2 */
-	TRDP_LIS_T pTrdpListenerHandle = NULL;		/* TRDP Listener Handle for Subnet1 by tlm_addListener */
-	TRDP_LIS_T pTrdpListenerHandle2 = NULL;	/* TRDP Listener Handle for Subnet2 by tlm_addListener */
+	TRDP_LIS_T pTrdpListenerHandle = NULL;		/* TRDP Listener Handle for Subnet1 reply receive by tlm_addListener */
+	TRDP_LIS_T pTrdpListenerHandle2 = NULL;	/* TRDP Listener Handle for Subnet2 reply receive by tlm_addListener */
+	TRDP_LIS_T pTrdpListenerHandle3 = NULL;	/* TRDP Listener Handle for Subnet1 confirm receive by tlm_addListener */
+	TRDP_LIS_T pTrdpListenerHandle4 = NULL;	/* TRDP Listener Handle for Subnet2 confirm receive by tlm_addListener */
 	LISTENER_HANDLE_T *pListenerHandle = NULL;	/* Listener Handle for All Listener Delete */
 	LISTENER_HANDLE_T *pListenerHandle2 = NULL;	/* Listener Handle2 for All Listener Delete */
+	LISTENER_HANDLE_T *pListenerHandle3 = NULL;	/* Listener Handle3 for All Listener Delete */
+	LISTENER_HANDLE_T *pListenerHandle4 = NULL;	/* Listener Handle4 for All Listener Delete */
 	/* Session Valid */
 	BOOL aliveSession = TRUE;
 
@@ -109,17 +113,47 @@ VOS_THREAD_FUNC_T MDReplier (
 	{
 		memset(pListenerHandle2, 0, sizeof(LISTENER_HANDLE_T));
 	}
+	/* Listener Handle3 Area */
+	pListenerHandle3 = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
+	if (pListenerHandle3 == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle3 malloc Err\n");
+		return 0;
+	}
+	else
+	{
+		memset(pListenerHandle3, 0, sizeof(LISTENER_HANDLE_T));
+	}
+	/* Listener Handle4 Area */
+	pListenerHandle4 = (LISTENER_HANDLE_T *)malloc(sizeof(LISTENER_HANDLE_T));
+	if (pListenerHandle4 == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle4 malloc Err\n");
+		return 0;
+	}
+	else
+	{
+		memset(pListenerHandle4, 0, sizeof(LISTENER_HANDLE_T));
+	}
 
 	/*	Set OPTION FLAG for TCP */
 	if (pReplierThreadParameter->pCommandValue->mdTransportType == MD_TRANSPORT_TCP)
 	{
-		pktFlags = TRDP_FLAGS_TCP;
+		/* Set TCP Flag */
+		pktFlags = pktFlags | TRDP_FLAGS_TCP;
+	}
+	/*	Set OPTION FLAG for Marshall */
+	if (pReplierThreadParameter->pCommandValue->mdMarshallingFlag == TRUE)
+	{
+		/* Set Marshall Flag */
+		pktFlags = pktFlags | TRDP_FLAGS_MARSHALL;
 	}
 
 	/* Check Reply Error Type */
 	/* Other than MD_REPLY_ERROR_TYPE_6 */
 	if (pReplierThreadParameter->pCommandValue->mdReplyErr != MD_REPLY_ERROR_TYPE_6)
 	{
+		/* Add Reply Listener */
 		/* Multicast I/F ? */
 		if (vos_isMulticast(pReplierThreadParameter->pCommandValue->mdDestinationAddress))
 		{
@@ -171,6 +205,41 @@ VOS_THREAD_FUNC_T MDReplier (
 			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
 //			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
 		}
+		/* Add Confirm Listener */
+		if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+		{
+			/* Add Confirm Listener for Subnet1 */
+			err = tlm_addListener(
+					appHandle,
+					&pTrdpListenerHandle3,
+					0,						/* user supplied value returned with reply */
+					pReplierThreadParameter->pCommandValue->mdAddListenerComId | COMID_CONFIRM_MASK,		/* comId to be observed */
+					0,							/* topocount to use */
+					subnetId1Address,			/* destination Address */
+					pktFlags,					/* OPTION FLAG */
+					NULL);			/* destination URI */
+			/* Set Subnet1 appThreadListener destIP : Unicast */
+			//appThreadSessionHandle3.pMdAppThreadListener->destIpAddr = subnetId1Address;
+		}
+		/* Check tlm_addListener Return Code */
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+			return 0;
+		}
+		else
+		{
+			/* Set Listener Handle List */
+			pListenerHandle3->appHandle = appHandle;
+			pListenerHandle3->pTrdpListenerHandle = pTrdpListenerHandle;
+			if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle3) != MD_APP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+			}
+			/* Set Subnet1 appThreadListener */
+//			appThreadSessionHandle3.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+//			appThreadSessionHandle3.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+		}
 
 		/* Is this Ladder Topology ? */
 		if (pReplierThreadParameter->pCommandValue->mdLadderTopologyFlag == TRUE)
@@ -185,7 +254,7 @@ VOS_THREAD_FUNC_T MDReplier (
 							0,						/* user supplied value returned with reply */
 							pReplierThreadParameter->pCommandValue->mdAddListenerComId,		/* comId to be observed */
 							0,							/* topocount to use */
-							subnetId2Address,			/* destination Address */
+							pReplierThreadParameter->pCommandValue->mdDestinationAddress,			/* destination Address */
 							pktFlags,					/* OPTION FLAG */
 							NULL);			/* destination URI */
 				/* Set Subnet2 appThreadListener destIP : Multicast */
@@ -225,6 +294,41 @@ VOS_THREAD_FUNC_T MDReplier (
 				appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
 				appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
 //				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
+			}
+			/* Add Confirm Listener */
+			if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+			{
+				/* Add Listener for Subnet2 */
+				err = tlm_addListener(
+							appHandle2,
+							&pTrdpListenerHandle4,
+							0,						/* user supplied value returned with reply */
+							pReplierThreadParameter->pCommandValue->mdAddListenerComId | COMID_CONFIRM_MASK,		/* comId to be observed */
+							0,							/* topocount to use */
+							subnetId2Address,			/* destination Address */
+							pktFlags,					/* OPTION FLAG */
+							NULL);			/* destination URI */
+				/* Set Subnet2 appThreadListener destIp : Unicast */
+//				appThreadSessionHandle4.pMdAppThreadListener->destIpAddr = subnetId2Address;
+			}
+			/* Check tlm_addListener Return Code */
+			if (err != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+				return 0;
+			}
+			else
+			{
+				/* Set Listener Handle List */
+				pListenerHandle4->appHandle = appHandle2;
+				pListenerHandle4->pTrdpListenerHandle = pTrdpListenerHandle4;
+				if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle4) != MD_APP_NO_ERR)
+				{
+					vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
+				}
+				/* Set Subnet2 appThreadListener */
+//				appThreadSessionHandle4.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+//				appThreadSessionHandle4.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
 			}
 		}
 	}
@@ -558,15 +662,20 @@ MD_APP_ERR_TYPE replier_main_proc (
 			}
 
 			/* Decide MD Message */
-			err = decideReceiveMdDataToReplier(&receiveMqMsg, pReplierThreadParameter);
+			err = decideReceiveMdDataToReplier(&receiveMqMsg, pReplierThreadParameter, mqDescriptor);
 			if (err != MD_APP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "decideReceiveMdDataToReplier ERROR.\n");
 			}
+			/* Receive Count up */
 			replierReceiveCount++;
-			/* Check Replier Receive Count */
+
+			/* Check Replier Receive Count : Receive finish ? */
+			/* Message Kind:Mp receive Count >=CycleNumber */
+			/* Message Kind:Mq confirm receive Count >= CycleNumber */
 			if ((pReplierThreadParameter->pCommandValue->mdCycleNumber != 0)
-			&& (replierReceiveCount >= pReplierThreadParameter->pCommandValue->mdCycleNumber))
+			&& (((pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP) && (replierReceiveCount >= pReplierThreadParameter->pCommandValue->mdCycleNumber))
+				|| ((pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ) && (pReplierThreadParameter->pCommandValue->replierMdConfrimReceiveCounter >= pReplierThreadParameter->pCommandValue->mdCycleNumber))))
 			{
 				/* Display TimeStamp when Replier test finish time */
 				printf("%s Replier test finish.\n", vos_getTimeStamp());
@@ -588,6 +697,7 @@ MD_APP_ERR_TYPE replier_main_proc (
  *
  *  @param[in]		pReceiveMsg						pointer to Receive MD Message
  *  @param[in]		pReplierThreadParameter			pointer to Replier Thread parameter
+ *  @param[in]		mqDescriptor						Message Queue Descriptor
  *
  *  @retval         0					no error
  *  @retval         1					error
@@ -595,10 +705,12 @@ MD_APP_ERR_TYPE replier_main_proc (
  */
 MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 		trdp_apl_cbenv_t *pReceiveMsg,
-		REPLIER_THREAD_PARAMETER *pReplierThreadParameter)
+		REPLIER_THREAD_PARAMETER *pReplierThreadParameter,
+		mqd_t mqDescriptor)
 {
 	MD_APP_ERR_TYPE err = 0;
 	TRDP_APP_SESSION_T replierAppHandle = appHandle;
+	APP_THREAD_SESSION_HANDLE *pReplyQuerySessionHandle = NULL;
 	UINT32 useSubnet = 0;
 	UINT32 receiveMdDataSetSize = 0;
 	/* LOG */
@@ -609,7 +721,9 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 	receiveMdDataSetSize = pReceiveMsg->dataSize;
 
 	/* Check ComId */
-	if (pReceiveMsg->Msg.comId != pReplierThreadParameter->pCommandValue->mdAddListenerComId)
+	if ((pReceiveMsg->Msg.comId != pReplierThreadParameter->pCommandValue->mdAddListenerComId)
+		&& (pReceiveMsg->Msg.comId != (pReplierThreadParameter->pCommandValue->mdAddListenerComId | COMID_REPLY_MASK))
+		&& (pReceiveMsg->Msg.comId != (pReplierThreadParameter->pCommandValue->mdAddListenerComId | COMID_CONFIRM_MASK)))
 	{
 		/* ComId Err*/
 		vos_printLog(VOS_LOG_ERROR, "Receive ComId ERROR\n");
@@ -638,16 +752,16 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						/* MD Receive NG Count */
 						pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter++;
 					}
-					/* MD Receive Count */
-					pReplierThreadParameter->pCommandValue->replierMdReceiveCounter++;
+					/* MD Request Receive Count */
+					pReplierThreadParameter->pCommandValue->replierMdRequestReceiveCounter++;
 
 					/* Output LOG : Operation Log */
 					if ((((pReplierThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)
 						|| (((pReplierThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG))
 					{
 						replierLogStringLength = strlen(replierLogString);
-						sprintf((char *)(replierLogString + replierLogStringLength), "MD Receive Count = %u\nMD Receive OK Count = %u\nMD Receive NG Count = %u\nMD Retry Count = %u\n",
-								pReplierThreadParameter->pCommandValue->replierMdReceiveCounter,
+						sprintf((char *)(replierLogString + replierLogStringLength), "MD Request Receive Count = %u\nMD Receive OK Count = %u\nMD Receive NG Count = %u\nMD Retry Count = %u\n",
+								pReplierThreadParameter->pCommandValue->replierMdRequestReceiveCounter,
 								pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter,
 								pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter,
 								pReplierThreadParameter->pCommandValue->replierMdRetryCounter);
@@ -685,102 +799,389 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						/* MD_REPLY_ERROR_TYPE_1 */
 						if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_1)
 						{
-							/* Get TimeStamp when call tlm_reply() */
-							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
-
 							/* MD Send Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
-							/* Set Reply Status = 1 (trdp_mdCommonSend 13 argument) */
-							/* Send MD Reply */
-							trdp_mdCommonSend(
-									TRDP_MSG_MP,							/* reply without confirm */
-									replierAppHandle,						/* the handle returned by tlc_init */
-									NULL,									/* user supplied value returned with reply */
-									&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
-									(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
-									pReceiveMsg->Msg.topoCount,			/* topocount to use */
-									pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
-									pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-									0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
-									0, 										/* userStatus */
-									0,             						 /* confirm timeout */
-									0,             						 /* noOfRepliers */
-									0,              						/* replyTimeout */
-									MD_REPLY_STATUS_ERR,  			/* reply state (MD_REPLY_STATUS_ERR = 1) */
-									NULL, 									/* send param */
-									(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
-									receiveMdDataSetSize,			/* size of packet data */
-									pReceiveMsg->Msg.destURI,			/* source URI */
-									pReceiveMsg->Msg.srcURI);			/* destination URI */
-							if (err != TRDP_NO_ERR)
+							/* Check Reply Type : Mp(Relpy) or Mq(ReplyQuery) */
+							if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP)
 							{
-								/* MD Send Failure Count */
-								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
-								/* Error : Send Reply */
-								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								/* Get TimeStamp when call tlm_reply() */
+								sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+								/* Set Reply Status = 1 (trdp_mdCommonSend 14 argument) */
+								/* Send MD Reply */
+								trdp_mdCommonSend(
+										TRDP_MSG_MP,							/* reply without confirm */
+										replierAppHandle,						/* the handle returned by tlc_init */
+										NULL,									/* user supplied value returned with reply */
+										&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+										(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+										pReceiveMsg->Msg.topoCount,			/* topocount to use */
+										pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+										pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+										TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+										0, 										/* userStatus */
+										0,             						 /* confirm timeout */
+										0,             						 /* noOfRepliers */
+										0,              						/* replyTimeout */
+										MD_REPLY_STATUS_ERR,  			/* reply state (MD_REPLY_STATUS_ERR = 1) */
+										NULL, 									/* send param */
+										(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+										receiveMdDataSetSize,			/* size of packet data */
+										pReceiveMsg->Msg.destURI,			/* source URI */
+										pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send Reply */
+									vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Success Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
+							}
+							else if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+							{
+								/* Get TimeStamp when call tlm_replyQuery() */
+								sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+								/* Set Reply Status = 1 (trdp_mdCommonSend 14 argument) */
+								/* Send MD ReplyQuery */
+								trdp_mdCommonSend(
+										TRDP_MSG_MQ,							/* reply without confirm */
+										replierAppHandle,						/* the handle returned by tlc_init */
+										NULL,									/* user supplied value returned with reply */
+										&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+										(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+										pReceiveMsg->Msg.topoCount,			/* topocount to use */
+										pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+										pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+										TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+										0, 										/* userStatus */
+										pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
+										0,             						 /* noOfRepliers */
+										0,              						/* replyTimeout */
+										MD_REPLY_STATUS_ERR,  			/* reply state (MD_REPLY_STATUS_ERR = 1) */
+										NULL, 									/* send param */
+										(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+										receiveMdDataSetSize,			/* size of packet data */
+										pReceiveMsg->Msg.destURI,			/* source URI */
+										pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send ReplyQuery */
+									vos_printLog(VOS_LOG_ERROR, "Send ReplyQuery ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Success Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
 							}
 							else
 							{
-								/* MD Send Success Count */
-								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Not Reply Type */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
 							}
 						}
 						/* MD_REPLY_ERROR_TYPE_2 */
 						else if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_2)
 						{
 							/* Resource Error */
-							/* Get TimeStamp when call tlm_reply() */
-							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
-
 							/* MD Send Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
-							/* Set Reply Status = no memory (trdp_mdCommonSend 13 argument) */
-							/* Send MD Reply */
-							trdp_mdCommonSend(
-									TRDP_MSG_MP,							/* reply without confirm */
-									replierAppHandle,						/* the handle returned by tlc_init */
-									NULL,									/* user supplied value returned with reply */
-									&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
-									(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
-									pReceiveMsg->Msg.topoCount,			/* topocount to use */
-									pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
-									pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-									0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
-									0, 										/* userStatus */
-									0,             						 /* confirm timeout */
-									0,             						 /* noOfRepliers */
-									0,              						/* replyTimeout */
-									MD_REPLY_MEMORY_ERR,  			/* reply state (MD_REPLY_MEMORY_ERR = 2) */
-									NULL, 									/* send param */
-									(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
-									receiveMdDataSetSize,			/* size of packet data */
-									pReceiveMsg->Msg.destURI,			/* source URI */
-									pReceiveMsg->Msg.srcURI);			/* destination URI */
-							if (err != TRDP_NO_ERR)
+							/* Check Reply Type : Mp(Relpy) or Mq(ReplyQuery) */
+							if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP)
 							{
-								/* MD Send Failure Count */
-								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
-								/* Error : Send Reply */
-								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								/* Get TimeStamp when call tlm_reply() */
+								sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+								/* Set Reply Status = no memory (trdp_mdCommonSend 14 argument) */
+								/* Send MD Reply */
+								trdp_mdCommonSend(
+										TRDP_MSG_MP,							/* reply without confirm */
+										replierAppHandle,						/* the handle returned by tlc_init */
+										NULL,									/* user supplied value returned with reply */
+										&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+										(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+										pReceiveMsg->Msg.topoCount,			/* topocount to use */
+										pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+										pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+										TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+										0, 										/* userStatus */
+										0,             						 /* confirm timeout */
+										0,             						 /* noOfRepliers */
+										0,              						/* replyTimeout */
+										MD_REPLY_MEMORY_ERR,  			/* reply state (MD_REPLY_MEMORY_ERR = 2) */
+										NULL, 									/* send param */
+										(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+										receiveMdDataSetSize,			/* size of packet data */
+										pReceiveMsg->Msg.destURI,			/* source URI */
+										pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send Reply */
+									vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
+							}
+							else if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+							{
+								/* Get TimeStamp when call tlm_replyQuery() */
+								sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+								/* Set Reply Status = no memory (trdp_mdCommonSend 14 argument) */
+								/* Send MD ReplyQuery */
+								trdp_mdCommonSend(
+										TRDP_MSG_MP,							/* reply without confirm */
+										replierAppHandle,						/* the handle returned by tlc_init */
+										NULL,									/* user supplied value returned with reply */
+										&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+										(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+										pReceiveMsg->Msg.topoCount,			/* topocount to use */
+										pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+										pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+										TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+										0, 										/* userStatus */
+										pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
+										0,             						 /* noOfRepliers */
+										0,              						/* replyTimeout */
+										MD_REPLY_MEMORY_ERR,  			/* reply state (MD_REPLY_MEMORY_ERR = 2) */
+										NULL, 									/* send param */
+										(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+										receiveMdDataSetSize,			/* size of packet data */
+										pReceiveMsg->Msg.destURI,			/* source URI */
+										pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send ReplyQuery */
+									vos_printLog(VOS_LOG_ERROR, "Send ReplyQuery ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
 							}
 							else
 							{
-								/* MD Send Count */
-								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Not Reply Type */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
 							}
 						}
 						/* MD_REPLY_ERROR_TYPE_3 */
 						else if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_3)
 						{
-							/* Get TimeStamp when call tlm_reply() */
-							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
 							/* MD Send Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
+							/* Check Reply Type : Mp(Relpy) or Mq(ReplyQuery) */
+							if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP)
+							{
+								/* Get TimeStamp when call tlm_reply() */
+								sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+								/* ComId Error */
+								/* Set ComId = 0 (tlm_reply 5 argument) */
+								/* Send MD Reply */
+								err = tlm_reply (
+									replierAppHandle,						/* the handle returned by tlc_init */
+									NULL,									/* user supplied value returned with reply */
+									(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+									pReceiveMsg->Msg.topoCount,			/* topocount to use */
+									0,										/* comId of packet to be sent */
+									pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+									pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+									TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+									0, 										/* userStatus */
+									NULL, 									/* send param */
+									(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+									receiveMdDataSetSize,				/* size of packet data */
+									pReceiveMsg->Msg.destURI,			/* source URI */
+									pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send Reply */
+									vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Success Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
+							}
+							if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+							{
+								/* Get TimeStamp when call tlm_replyQuery() */
+								sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+								/* ComId Error */
+								/* Set ComId = 0 (tlm_reply 5 argument) */
+								/* Send MD ReplyQuery */
+								err = tlm_replyQuery (
+									replierAppHandle,						/* the handle returned by tlc_init */
+									NULL,									/* user supplied value returned with reply */
+									(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+									pReceiveMsg->Msg.topoCount,			/* topocount to use */
+									0,										/* comId of packet to be sent */
+									pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+									pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+									TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+									0, 										/* userStatus */
+									pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
+									NULL, 									/* send param */
+									(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+									receiveMdDataSetSize,				/* size of packet data */
+									pReceiveMsg->Msg.destURI,			/* source URI */
+									pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send ReplyQuery */
+									vos_printLog(VOS_LOG_ERROR, "Send ReplyQuery ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Success Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
+							}
+							else
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Not Reply Type */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
+							}
+						}
+						/* MD_REPLY_ERROR_TYPE_4 */
+						else if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_4)
+						{
+							/* MD Send Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
+							/* Check Reply Type : Mp(Relpy) or Mq(ReplyQuery) */
+							if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP)
+							{
+								/* Get TimeStamp when call tlm_reply() */
+								sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+								/* Set DataSize Error (return TRDP_PARAM_ERR) */
+								/* Set DataSize != -1 (tlm_reply 12 argument) */
+								/* Send MD Reply */
+								err = tlm_reply (
+									replierAppHandle,						/* the handle returned by tlc_init */
+									NULL,									/* user supplied value returned with reply */
+									(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+									pReceiveMsg->Msg.topoCount,			/* topocount to use */
+									(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+									pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+									pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+									TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+									0, 										/* userStatus */
+									NULL, 									/* send param */
+									(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* DATASET Nothing */
+									-1,										/* size of packet data */
+									pReceiveMsg->Msg.destURI,			/* source URI */
+									pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send Reply */
+									vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Success Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
+							}
+							if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+							{
+								/* Get TimeStamp when call tlm_replyQuery() */
+								sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+								/* Set DataSize Error (return TRDP_PARAM_ERR) */
+								/* Set DataSize != -1 (tlm_reply 13 argument) */
+								/* Send MD ReplyQuery */
+								err = tlm_replyQuery (
+									replierAppHandle,						/* the handle returned by tlc_init */
+									NULL,									/* user supplied value returned with reply */
+									(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+									pReceiveMsg->Msg.topoCount,			/* topocount to use */
+									(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+									pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+									pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+									TRDP_FLAGS_DEFAULT,					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+									0, 										/* userStatus */
+									pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
+									NULL, 									/* send param */
+									(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* DATASET Nothing */
+									-1,										/* size of packet data */
+									pReceiveMsg->Msg.destURI,			/* source URI */
+									pReceiveMsg->Msg.srcURI);			/* destination URI */
+								if (err != TRDP_NO_ERR)
+								{
+									/* MD Send Failure Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+									/* Error : Send Reply */
+									vos_printLog(VOS_LOG_ERROR, "Send ReplyQuery ERROR. Error Code : %d\n", err);
+								}
+								else
+								{
+									/* MD Send Success Count */
+									pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+								}
+							}
+							else
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Not Reply Type */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
+							}
+						}
+						/* MD_REPLY_ERROR_TYPE_5 */
+						else if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_5)
+						{
+							/* not Call tlm_reply and tlm_replyQuery*/
+
+						}
+						else
+						{
+
+						}
+					}
+					/* COMID_ERROR_DATA_2 */
+					else if (pReceiveMsg->Msg.comId == COMID_ERROR_DATA_2)
+					{
+						/* Not Listener */
+					}
+					/* COMID_ERROR_DATA_3 */
+					else if (pReceiveMsg->Msg.comId == COMID_ERROR_DATA_3)
+					{
+						/* MD Send Count */
+						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
+						/* Check Reply Type : Mp(Relpy) or Mq(ReplyQuery) */
+						if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP)
+						{
+							/* Get TimeStamp when call tlm_reply() */
+							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
 							/* ComId Error */
-							/* Set ComId = 0 (tlm_reply 5 argument) */
+							/* Set ComId = 0 (tlm_common_send 5 argument) */
 							/* Send MD Reply */
 							err = tlm_reply (
 								replierAppHandle,						/* the handle returned by tlc_init */
@@ -790,10 +1191,10 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								0,										/* comId of packet to be sent */
 								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
 								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-								0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
 								0, 										/* userStatus */
 								NULL, 									/* send param */
-								(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* pointer to packet data or dataset */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
 								receiveMdDataSetSize,				/* size of packet data */
 								pReceiveMsg->Msg.destURI,			/* source URI */
 								pReceiveMsg->Msg.srcURI);			/* destination URI */
@@ -810,30 +1211,27 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 							}
 						}
-						/* MD_REPLY_ERROR_TYPE_4 */
-						else if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_4)
+						if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
 						{
-							/* Get TimeStamp when call tlm_reply() */
-							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
-							/* MD Send Count */
-							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
-
-							/* Set DataSize Error (return TRDP_PARAM_ERR) */
-							/* Set DataSize != -1 (tlm_reply 12 argument) */
-							/* Send MD Reply */
-							err = tlm_reply (
+							/* Get TimeStamp when call tlm_replyQuery() */
+							sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+							/* ComId Error */
+							/* Set ComId = 0 (tlm_common_send 5 argument) */
+							/* Send MD ReplyQuery */
+							err = tlm_replyQuery (
 								replierAppHandle,						/* the handle returned by tlc_init */
 								NULL,									/* user supplied value returned with reply */
 								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
 								pReceiveMsg->Msg.topoCount,			/* topocount to use */
-								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+								0,										/* comId of packet to be sent */
 								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
 								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-								0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
 								0, 										/* userStatus */
+								pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
 								NULL, 									/* send param */
-								(UINT8 *)(pReceiveMsg->pData + MD_HEADER_SIZE),	/* DATASET Nothing */
-								-1,										/* size of packet data */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+								receiveMdDataSetSize,				/* size of packet data */
 								pReceiveMsg->Msg.destURI,			/* source URI */
 								pReceiveMsg->Msg.srcURI);			/* destination URI */
 							if (err != TRDP_NO_ERR)
@@ -849,167 +1247,271 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 							}
 						}
-						/* MD_REPLY_ERROR_TYPE_5 */
-						else if (pReplierThreadParameter->pCommandValue->mdReplyErr == MD_REPLY_ERROR_TYPE_5)
-						{
-							/* not Call tlm_reply */
-
-						}
 						else
-						{
-
-						}
-					}
-					/* COMID_ERROR_DATA_2 */
-					else if (pReceiveMsg->Msg.comId == COMID_ERROR_DATA_2)
-					{
-						/* Not Listener */
-					}
-					/* COMID_ERROR_DATA_3 */
-					else if (pReceiveMsg->Msg.comId == COMID_ERROR_DATA_3)
-					{
-						/* Get TimeStamp when call tlm_reply() */
-						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
-						/* MD Send Count */
-						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
-
-						/* ComId Error */
-						/* Set ComId = 0 (tlm_common_send 5 argument) */
-						/* Send MD Reply */
-						err = tlm_reply (
-							replierAppHandle,						/* the handle returned by tlc_init */
-							NULL,									/* user supplied value returned with reply */
-							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
-							pReceiveMsg->Msg.topoCount,			/* topocount to use */
-							0,										/* comId of packet to be sent */
-							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
-							pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
-							0, 										/* userStatus */
-							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
-							receiveMdDataSetSize,				/* size of packet data */
-							pReceiveMsg->Msg.destURI,			/* source URI */
-							pReceiveMsg->Msg.srcURI);			/* destination URI */
-						if (err != TRDP_NO_ERR)
 						{
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
-							/* Error : Send Reply */
-							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
-						}
-						else
-						{
-							/* MD Send Success Count */
-							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							/* Error : Not Reply Type */
+							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
 						}
 					}
 					/* COMID_ERROR_DATA_4 */
 					else if (pReceiveMsg->Msg.comId == COMID_ERROR_DATA_4)
 					{
-						/* Get TimeStamp when call tlm_reply() */
-						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
 						/* MD Send Count */
 						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
-
-						/* Retry Reply */
-						/* Send MD Reply */
-						err = tlm_reply (
-							replierAppHandle,						/* the handle returned by tlc_init */
-							NULL,									/* user supplied value returned with reply */
-							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
-							pReceiveMsg->Msg.topoCount,			/* topocount to use */
-							(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
-							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
-							pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
-							0, 										/* userStatus */
-							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
-							receiveMdDataSetSize,			/* size of packet data */
-							pReceiveMsg->Msg.destURI,			/* source URI */
-							pReceiveMsg->Msg.srcURI);			/* destination URI */
-						if (err != TRDP_NO_ERR)
+						/* Check Reply Type : Mp(Relpy) or Mq(ReplyQuery) */
+						if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP)
 						{
-							/* MD Send Failure Count */
-							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
-							/* Error : Send Reply */
-							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							/* Get TimeStamp when call tlm_reply() */
+							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+							/* Retry Reply */
+							/* Send MD Reply */
+							err = tlm_reply (
+								replierAppHandle,						/* the handle returned by tlc_init */
+								NULL,									/* user supplied value returned with reply */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								pReceiveMsg->Msg.topoCount,			/* topocount to use */
+								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+								TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								0, 										/* userStatus */
+								NULL, 									/* send param */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+								receiveMdDataSetSize,			/* size of packet data */
+								pReceiveMsg->Msg.destURI,			/* source URI */
+								pReceiveMsg->Msg.srcURI);			/* destination URI */
+							if (err != TRDP_NO_ERR)
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Send Reply */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							}
+							/* Get TimeStamp when call tlm_reply() */
+							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+							/* MD Send Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
+
+							/* Retry Send MD Reply */
+							err = tlm_reply (
+								replierAppHandle,						/* the handle returned by tlc_init */
+								NULL,									/* user supplied value returned with reply */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								pReceiveMsg->Msg.topoCount,			/* topocount to use */
+								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+								TRDP_FLAGS_DEFAULT,					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								0, 										/* userStatus */
+								NULL, 									/* send param */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+								receiveMdDataSetSize,				/* size of packet data */
+								pReceiveMsg->Msg.destURI,			/* source URI */
+								pReceiveMsg->Msg.srcURI);			/* destination URI */
+							if (err != TRDP_NO_ERR)
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Send Reply */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							}
+						}
+						if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+						{
+							/* Get TimeStamp when call tlm_replyQuery() */
+							sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+							/* Retry ReplyQuery */
+							/* Send MD ReplyQuery */
+							err = tlm_replyQuery (
+								replierAppHandle,						/* the handle returned by tlc_init */
+								NULL,									/* user supplied value returned with reply */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								pReceiveMsg->Msg.topoCount,			/* topocount to use */
+								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+								TRDP_FLAGS_DEFAULT,					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								0, 										/* userStatus */
+								pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
+								NULL, 									/* send param */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+								receiveMdDataSetSize,			/* size of packet data */
+								pReceiveMsg->Msg.destURI,			/* source URI */
+								pReceiveMsg->Msg.srcURI);			/* destination URI */
+							if (err != TRDP_NO_ERR)
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Send Reply */
+								vos_printLog(VOS_LOG_ERROR, "Send ReplyQuery ERROR. Error Code : %d\n", err);
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							}
+							/* Get TimeStamp when call tlm_replyQuery() */
+							sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+							/* MD Send Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
+
+							/* Retry Send MD ReplyQuery */
+							err = tlm_replyQuery (
+								replierAppHandle,						/* the handle returned by tlc_init */
+								NULL,									/* user supplied value returned with reply */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								pReceiveMsg->Msg.topoCount,			/* topocount to use */
+								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+								TRDP_FLAGS_DEFAULT,					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								0, 										/* userStatus */
+								pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
+								NULL, 									/* send param */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+								receiveMdDataSetSize,				/* size of packet data */
+								pReceiveMsg->Msg.destURI,			/* source URI */
+								pReceiveMsg->Msg.srcURI);			/* destination URI */
+							if (err != TRDP_NO_ERR)
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Send Reply */
+								vos_printLog(VOS_LOG_ERROR, "Send ReplyQuery ERROR. Error Code : %d\n", err);
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							}
 						}
 						else
 						{
-							/* MD Send Success Count */
-							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
-						}
-						/* Get TimeStamp when call tlm_reply() */
-						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
-						/* MD Send Count */
-						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
-
-						/* Retry Send MD Reply */
-						err = tlm_reply (
-							replierAppHandle,						/* the handle returned by tlc_init */
-							NULL,									/* user supplied value returned with reply */
-							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
-							pReceiveMsg->Msg.topoCount,			/* topocount to use */
-							(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
-							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
-							pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
-							0, 										/* userStatus */
-							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
-							receiveMdDataSetSize,				/* size of packet data */
-							pReceiveMsg->Msg.destURI,			/* source URI */
-							pReceiveMsg->Msg.srcURI);			/* destination URI */
-						if (err != TRDP_NO_ERR)
-						{
 							/* MD Send Failure Count */
 							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
-							/* Error : Send Reply */
-							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
-						}
-						else
-						{
-							/* MD Send Success Count */
-							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							/* Error : Not Reply Type */
+							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
 						}
 					}
 					/* Normal ComId */
 					else
 					{
-						/* Get TimeStamp when call tlm_reply() */
-						sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
 						/* MD Send Count */
 						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
-						/* Send MD Reply */
-						err = tlm_reply (
-							replierAppHandle,						/* the handle returned by tlc_init */
-							NULL,									/* user supplied value returned with reply */
-							(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
-							pReceiveMsg->Msg.topoCount,			/* topocount to use */
-							(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
-							pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
-							pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
-							0, 										/* pktFlags 0 = Default = appHandle->mdDefault.flag */
-							0, 										/* userStatus */
-							NULL, 									/* send param */
-							(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
-							receiveMdDataSetSize,			/* size of packet data */
-							pReceiveMsg->Msg.destURI,			/* source URI */
-							pReceiveMsg->Msg.srcURI);			/* destination URI */
-						if (err != TRDP_NO_ERR)
+						/* Check Reply Type : Mp(Relpy) or Mq(ReplyQuery) */
+						if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MP)
 						{
-							/* MD Send Failure Count */
-							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
-							/* Error : Send Reply */
-							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							/* Get TimeStamp when call tlm_reply() */
+							sprintf(replierLogString, "%s tlm_reply()", vos_getTimeStamp());
+							/* Send MD Reply */
+							err = tlm_reply (
+								replierAppHandle,						/* the handle returned by tlc_init */
+								NULL,									/* user supplied value returned with reply */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								pReceiveMsg->Msg.topoCount,			/* topocount to use */
+								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+								TRDP_FLAGS_DEFAULT,					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								0, 										/* userStatus */
+								NULL, 									/* send param */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+								receiveMdDataSetSize,			/* size of packet data */
+								pReceiveMsg->Msg.destURI,			/* source URI */
+								pReceiveMsg->Msg.srcURI);			/* destination URI */
+							if (err != TRDP_NO_ERR)
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Send Reply */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							}
+						}
+						if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+						{
+							/* Get TimeStamp when call tlm_replyQuery() */
+							sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());
+							/* Send MD ReplyQuery */
+							err = tlm_replyQuery (
+								replierAppHandle,						/* the handle returned by tlc_init */
+								NULL,									/* user supplied value returned with reply */
+								(const TRDP_UUID_T *)&(pReceiveMsg->Msg.sessionId),			/* Session ID returned by indication */
+								pReceiveMsg->Msg.topoCount,			/* topocount to use */
+								(pReceiveMsg->Msg.comId) | COMID_REPLY_MASK,		/* comId of packet to be sent */
+								pReceiveMsg->Msg.destIpAddr,		/* srcIP Address */
+								pReceiveMsg->Msg.srcIpAddr,			/* where to send the packet to */
+								TRDP_FLAGS_DEFAULT, 					/* pktFlags 0 = Default = appHandle->mdDefault.flag */
+								0, 										/* userStatus */
+								pReplierThreadParameter->pCommandValue->mdTimeoutConfirm,		/* confirm timeout */
+								NULL, 									/* send param */
+								(UINT8 *)(pReceiveMsg->pData),	/* pointer to packet data or dataset */
+								receiveMdDataSetSize,			/* size of packet data */
+								pReceiveMsg->Msg.destURI,			/* source URI */
+								pReceiveMsg->Msg.srcURI);			/* destination URI */
+							if (err != TRDP_NO_ERR)
+							{
+								/* MD Send Failure Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+								/* Error : Send Reply */
+								vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Error Code : %d\n", err);
+							}
+							else
+							{
+								/* MD Send Success Count */
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							}
 						}
 						else
 						{
-							/* MD Send Success Count */
-							pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
+							/* MD Send Failure Count */
+							pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter++;
+							/* Error : Not Reply Type */
+							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
+						}
+					}
+
+					/* Set Reply Receive Session Handle Message Queue Descriptor */
+					/* Check Reply Type : Mq(ReplyQuery) ? */
+					if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+					{
+						/* Get Request Thread Reply Receive Session Handle Area */
+						pReplyQuerySessionHandle = (APP_THREAD_SESSION_HANDLE *)malloc(sizeof(APP_THREAD_SESSION_HANDLE));
+						if (pReplyQuerySessionHandle == NULL)
+						{
+							vos_printLog(VOS_LOG_ERROR, "Create ReplyQuery Receive Session Area ERROR. malloc Err\n");
+							return 0;
+						}
+						else
+						{
+							memset(pReplyQuerySessionHandle, 0, sizeof(APP_THREAD_SESSION_HANDLE));
+							/* Set ReplyQuery Receive Session Handle */
+							pReplyQuerySessionHandle->pMdAppThreadListener = NULL;
+							memcpy(pReplyQuerySessionHandle->mdAppThreadSessionId, &(pReceiveMsg->Msg.sessionId), sizeof(pReceiveMsg->Msg.sessionId));
+
+							/* Set Reply Receive Session Handle Message Queue Descriptor */
+							err = setAppThreadSessionMessageQueueDescriptor(pReplyQuerySessionHandle, mqDescriptor);
+							if (err != MD_APP_NO_ERR)
+							{
+								vos_printLog(VOS_LOG_ERROR, "Reply Receive Session setAppSessionIdMessageQueueDescriptor error\n");
+							}
 						}
 					}
 
@@ -1060,8 +1562,8 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						/* MD Receive NG Count */
 						pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter++;
 					}
-					/* MD Receive Count */
-					pReplierThreadParameter->pCommandValue->replierMdReceiveCounter++;
+					/* MD Request Receive Count */
+					pReplierThreadParameter->pCommandValue->replierMdRequestReceiveCounter++;
 					/* MD Retry Count */
 
 					/* Output LOG */
@@ -1070,14 +1572,14 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					{
 						replierLogStringLength = strlen(replierLogString);
 						sprintf((char *)(replierLogString + replierLogStringLength),
-								"MD Receive Count = %u\n"
+								"MD Request Receive Count = %u\n"
 								"MD Receive OK Count = %u\n"
 								"MD Receive NG Count = %u\n"
 								"MD Retry Count = %u\n"
 								"MD Send Count = %u\n"
 								"MD Send OK Count = %u\n"
 								"MD Send NG Count = %u\n",
-								pReplierThreadParameter->pCommandValue->replierMdReceiveCounter,
+								pReplierThreadParameter->pCommandValue->replierMdRequestReceiveCounter,
 								pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter,
 								pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter,
 								pReplierThreadParameter->pCommandValue->replierMdRetryCounter,
@@ -1093,10 +1595,40 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 				break;
 				case TRDP_MSG_MP:
 				case TRDP_MSG_MQ:
-				case TRDP_MSG_MC:
 				case TRDP_MSG_ME:
 						/* Error : msgType Other than Mn,Mr */
 					vos_printLog(VOS_LOG_ERROR, "Receive Message Type ERROR. Other than Mn,Mr\n");
+				break;
+				case TRDP_MSG_MC:
+					/* MD Confirm Receive Count */
+					pReplierThreadParameter->pCommandValue->replierMdConfrimReceiveCounter++;
+
+					/* Output LOG */
+					if ((((pReplierThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)
+						|| (((pReplierThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG))
+					{
+						replierLogStringLength = strlen(replierLogString);
+						sprintf((char *)(replierLogString + replierLogStringLength),
+								"MD Request Receive Count = %u\n"
+								"MD Confirm Receive Count = %u\n"
+								"MD Receive OK Count = %u\n"
+								"MD Receive NG Count = %u\n"
+								"MD Retry Count = %u\n"
+								"MD Send Count = %u\n"
+								"MD Send OK Count = %u\n"
+								"MD Send NG Count = %u\n",
+								pReplierThreadParameter->pCommandValue->replierMdRequestReceiveCounter,
+								pReplierThreadParameter->pCommandValue->replierMdConfrimReceiveCounter,
+								pReplierThreadParameter->pCommandValue->replierMdReceiveSuccessCounter,
+								pReplierThreadParameter->pCommandValue->replierMdReceiveFailureCounter,
+								pReplierThreadParameter->pCommandValue->replierMdRetryCounter,
+								pReplierThreadParameter->pCommandValue->replierMdSendCounter,
+								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter,
+								pReplierThreadParameter->pCommandValue->replierMdSendFailureCounter);
+						l2fLog(replierLogString,
+								((pReplierThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG),
+								((pReplierThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG));
+					}
 				break;
 				default:
 					/* Not TRDP msgType */

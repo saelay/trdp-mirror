@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.29"
+#define PD_APP_VERSION	"V0.30"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.29"
+#define PD_APP_VERSION	"V0.30"
 #else
-#define PD_APP_VERSION	"V0.29"
+#define PD_APP_VERSION	"V0.30"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
@@ -125,6 +125,7 @@ typedef struct PD_COMMAND_VALUE
 //	UINT32 PD_PUB_COMID2;						/* Publish ComId2 */
 	UINT32 PD_SUB_COMID1;						/* Subscribe ComId1 */
 //	UINT32 PD_SUB_COMID2;						/* Subscribe ComId2 */
+	UINT32 PD_REPLY_COMID;						/* Reply ComId */
 	UINT32 PD_PUB_DATASET_TYPE;					/* Publish DataSet Type */
 	UINT32 PD_SUB_DATASET_TYPE;					/* Subscribe DataSet Type */
 	TRDP_IP_ADDR_T PD_COMID1_SUB_SRC_IP1;		/* Subscribe ComId1 Source IP1 */
@@ -139,6 +140,8 @@ typedef struct PD_COMMAND_VALUE
 	TRDP_IP_ADDR_T PD_COMID1_PUB_DST_IP2;		/* Publish ComID1 Destination IP2 */
 //	TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP1;		/* Publish ComID2 Destination IP1 */
 //	TRDP_IP_ADDR_T PD_COMID2_PUB_DST_IP2;		/* Publish ComID2 Destination IP2 */
+	TRDP_IP_ADDR_T PD_COMID1_REPLY_DST_IP1;	/* Reply ComID Destination IP1 */
+	TRDP_IP_ADDR_T PD_COMID1_REPLY_DST_IP2;	/* Reply ComID Destination IP2 */
 	UINT32 PD_COMID1_TIMEOUT;				    /* Subscribe ComId1 Timeout : Macro second */
 //	UINT32 PD_COMID2_TIMEOUT;				    /* Subscribe ComId2 Timeout : Macro second */
 	UINT32 PD_COMID1_CYCLE;						/* Publish ComID1 Cycle TIme */
@@ -146,6 +149,7 @@ typedef struct PD_COMMAND_VALUE
 	UINT32 PD_SEND_CYCLE_NUMBER;				/* Publish Send Cycle Number */
 	UINT32 PD_RECEIVE_CYCLE_NUMBER;				/* Subscribe Receive Cycle Number */
 	UINT32 TS_SUBNET;								/* Traffic Store Using Subnet */
+	UINT32 sendDataSetSize;						/* Send DataSet Size for Request */
 	UINT32 subnet1ReceiveCount;					/* Subscribe subnet1 receive Count */
 	UINT32 subnet2ReceiveCount;					/* Subscribe subnet2 receive Count */
 	UINT32 subnet1TimeoutReceiveCount;			/* Subscribe subnet1 timeout receive Count */
@@ -372,6 +376,17 @@ PD_APP_ERR_TYPE createPdThread (
 		PD_THREAD_PARAMETER *pPdThreadParameter);
 
 /**********************************************************************************************************************/
+/** Create PD Pull Requester Thread
+ *
+ *  @param[in]		pPdThreadParameter			pointer to PDThread Parameter
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_THREAD_ERR				Thread error
+ *
+ */
+PD_APP_ERR_TYPE createPdPullRequesterThread (PD_THREAD_PARAMETER *pPdThreadParameter);
+
+/**********************************************************************************************************************/
 /** main thread main loop process
  *
  *  @param[in]		void
@@ -435,6 +450,16 @@ PD_APP_ERR_TYPE PDReceiveCountCheck (
  */
 PD_APP_ERR_TYPE PDApplication (
 		PD_THREAD_PARAMETER *pPdThreadParameter);
+
+/**********************************************************************************************************************/
+/** PD Pull Requester main
+ *
+ *  @param[in]		pPDThreadParameter			pointer to PDThread Parameter
+ *
+ *  @retval         PD_APP_NO_ERR		no error
+ *  @retval         PD_APP_ERR			some error
+ */
+PD_APP_ERR_TYPE PDPullRequester (PD_THREAD_PARAMETER *pPdThreadParameter);
 
 /**********************************************************************************************************************/
 /** Append an pdCommandValue at end of List

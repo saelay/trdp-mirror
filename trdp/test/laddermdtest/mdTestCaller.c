@@ -116,7 +116,14 @@ VOS_THREAD_FUNC_T MDCaller (
 	/*	Set OPTION FLAG for TCP */
 	if (pCallerThreadParameter->pCommandValue->mdTransportType == MD_TRANSPORT_TCP)
 	{
-		pktFlags = TRDP_FLAGS_TCP;
+		/* Set TCP Flag */
+		pktFlags = pktFlags | TRDP_FLAGS_TCP;
+	}
+	/*	Set OPTION FLAG for Marshall */
+	if (pCallerThreadParameter->pCommandValue->mdMarshallingFlag == TRUE)
+	{
+		/* Set Marshall Flag */
+		pktFlags = pktFlags | TRDP_FLAGS_MARSHALL;
 	}
 
 	/* Add Listener for Subnet1 */
@@ -200,7 +207,7 @@ VOS_THREAD_FUNC_T MDCaller (
 		err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle, callerMqDescriptor);
 		if (err != MD_APP_NO_ERR)
 		{
-			vos_printLog(VOS_LOG_ERROR, "Subnet1 setAppSessionIdMessageQueueDescriptor error\n");
+			vos_printLog(VOS_LOG_ERROR, "Subnet1 setAppThreadSessionIdMessageQueueDescriptor error\n");
 			return 0;
 		}
 		/* Is this Ladder Topology ? */
@@ -264,6 +271,7 @@ VOS_THREAD_FUNC_T MDCaller (
 
 	/* Parameter for MD Send */
 	TRDP_APP_SESSION_T mdAppHandle = {0};
+	UINT32 useSubnet = 0;
 	void *pMdUserRef = NULL;
 	TRDP_UUID_T mdSessionId = {0};
 	UINT32 mdTopocount = 0;
@@ -500,8 +508,8 @@ VOS_THREAD_FUNC_T MDCaller (
 				case MD_MESSAGE_MN:
 					/* Get TimeStamp when call tlm_notify() */
 					sprintf(logString, "%s tlm_notify()", vos_getTimeStamp());
-					/* MD Send Count */
-					pCallerThreadParameter->pCommandValue->callerMdSendCounter++;
+					/* MD Send Request Count */
+					pCallerThreadParameter->pCommandValue->callerMdRequestSendCounter++;
 
 					/* Notification */
 					err = tlm_notify(
@@ -561,11 +569,11 @@ VOS_THREAD_FUNC_T MDCaller (
 					memset(logString, 0, sizeof(logString));
 					logStringLength = 0;
 				break;
-				case MD_MESSAGE_MR_MP:
+				case MD_MESSAGE_MR:
 					/* Get TimeStamp when call tlm_request() */
 					sprintf(logString, "%s tlm_request()", vos_getTimeStamp());
-					/* MD Send Count */
-					pCallerThreadParameter->pCommandValue->callerMdSendCounter++;
+					/* MD Send Request Count */
+					pCallerThreadParameter->pCommandValue->callerMdRequestSendCounter++;
 
 					/* Request */
 					err = tlm_request(
@@ -622,7 +630,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						callerThreadRequestTimeoutListener = (TRDP_LIS_T)malloc(sizeof(TRDP_ADDRESSES_T));
 						if (callerThreadRequestTimeoutListener == NULL)
 						{
-							vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. callerThreadRequestTimeoutListener malloc Err\n");
+							vos_printLog(VOS_LOG_ERROR, "MDCaller ERROR. callerThreadRequestTimeoutListener malloc Err\n");
 							return 0;
 						}
 						else
@@ -633,7 +641,7 @@ VOS_THREAD_FUNC_T MDCaller (
 						callerThreadRequestTimeoutListener->comId =  pCallerThreadParameter->pCommandValue->mdSendComId;
 						callerThreadRequestTimeoutListener->destIpAddr =  mdDestIpAddr;
 						callerThreadRequestTimeoutListener->srcIpAddr =  IP_ADDRESS_NOTHING;
-						pRequestSessionHandle->pMdAppThreadTimeoutListener = callerThreadRequestTimeoutListener;
+//						pRequestSessionHandle->pMdAppThreadTimeoutListener = callerThreadRequestTimeoutListener;
 
 						/* Set Reply Receive Session Handle Message Queue Descriptor */
 						err = setAppThreadSessionMessageQueueDescriptor(pRequestSessionHandle, callerMqDescriptor);
@@ -747,7 +755,7 @@ VOS_THREAD_FUNC_T MDCaller (
 		}
 
 		/* Receive Request Reply */
-		if (pCallerThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MR_MP)
+		if (pCallerThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MR)
 		{
 			/* Receive Message Queue Loop */
 			while(1)
@@ -764,7 +772,7 @@ VOS_THREAD_FUNC_T MDCaller (
 				if (pCallerThreadParameter->pCommandValue->mdSendIntervalType == REPLY_REQUEST)
 				{
 					/* Check 1Mr-Mp sequence Finish */
-					if (pCallerThreadParameter->pCommandValue->callerMdSendCounter == pCallerThreadParameter->pCommandValue->callerMdRequestReplySuccessCounter + pCallerThreadParameter->pCommandValue->callerMdRequestReplyFailureCounter)
+					if (pCallerThreadParameter->pCommandValue->callerMdRequestSendCounter == pCallerThreadParameter->pCommandValue->callerMdRequestReplySuccessCounter + pCallerThreadParameter->pCommandValue->callerMdRequestReplyFailureCounter)
 					{
 						/* Break MD Reply Receive loop */
 						break;
@@ -830,8 +838,9 @@ VOS_THREAD_FUNC_T MDCaller (
 					logStringLength = 0;
 
 					/* Check ComId */
-					/* Request comID and Reply comId */
+					/* Request comID and Reply comId and Confirm(Timeout) comid*/
 					if ((receiveMqMsg.Msg.comId != ((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK))
+						&& (receiveMqMsg.Msg.comId != ((pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_CONFIRM_MASK))
 						&& (receiveMqMsg.Msg.comId != pCallerThreadParameter->pCommandValue->mdSendComId))
 					{
 						/* ComId Err*/
@@ -845,6 +854,81 @@ VOS_THREAD_FUNC_T MDCaller (
 							/* Check msgType */
 							switch(receiveMqMsg.Msg.msgType)
 							{
+								case TRDP_MSG_MQ:
+									/* Get TimeStamp when call tlm_confirm() */
+									sprintf(logString, "%s tlm_confirm()", vos_getTimeStamp());
+									/* MD Send Confirm Count */
+									pCallerThreadParameter->pCommandValue->callerMdConfirmSendCounter++;
+
+									/* Set Receive appHandle */
+									memcpy(&useSubnet, (void *)receiveMqMsg.pRefCon, sizeof(INT8));
+									if (useSubnet == MD_SEND_USE_SUBNET1)
+									{
+										/* Receive to Subnet1 */
+										mdAppHandle = appHandle;
+									}
+									else
+									{
+										/* Receive to Subnet2 */
+										mdAppHandle = appHandle2;
+									}
+									/* Send Confirm */
+									err = tlm_confirm (
+											mdAppHandle,												/* the handle returned by tlc_init */
+										    NULL,														/* user supplied value returned with reply */
+										    (const TRDP_UUID_T *)&(receiveMqMsg.Msg.sessionId),	/* Session ID returned by request */
+										    (receiveMqMsg.Msg.comId) | COMID_CONFIRM_MASK,		/* comId of packet to be sent */
+										    receiveMqMsg.Msg.topoCount,								/* topocount to use */
+										    receiveMqMsg.Msg.destIpAddr,							/* own IP address, 0 - srcIP will be set by the stack */
+										    receiveMqMsg.Msg.srcIpAddr,								/* where to send the packet to */
+										    TRDP_FLAGS_DEFAULT,										/* OPTION: TRDP_FLAGS_CALLBACK */
+										    0,															/* Info for requester about application errors */
+										    TRDP_REPLY_OK,											/* Info for requester about stack errors */
+										    NULL,														/* Pointer to send parameters, NULL to use default send parameters */
+										    receiveMqMsg.Msg.destURI,								/* only functional group of source URI */
+										    receiveMqMsg.Msg.srcURI);								/* only functional group of destination URI */
+									if (err != TRDP_NO_ERR)
+									{
+										/* MD Send Failure Count */
+										pCallerThreadParameter->pCommandValue->callerMdSendFailureCounter++;
+										/* Error : Send Request */
+										vos_printLog(VOS_LOG_ERROR, "Send Confirm ERROR:%d\n", err);
+									}
+									else
+									{
+										/* MD Send Success Count */
+										pCallerThreadParameter->pCommandValue->callerMdSendSuccessCounter++;
+									}
+									/* Output LOG : MD Operation Result Log ? */
+									if ((((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)
+										|| (((pCallerThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG))
+									{
+										/* Output MD Operation Result Log */
+										l2fLog(logString,
+												((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG),
+												((pCallerThreadParameter->pCommandValue->mdDump) & MD_OPERARTION_RESULT_LOG));
+									}
+									/* Output LOG : Send Log ? */
+									if ((((pCallerThreadParameter->pCommandValue->mdLog) & MD_SEND_LOG) == MD_SEND_LOG)
+										|| (((pCallerThreadParameter->pCommandValue->mdDump) & MD_SEND_LOG) == MD_SEND_LOG))
+									{
+										/* Send MD DATA String */
+										logStringLength = strlen(logString);
+										sprintf((char *)(logString + logStringLength), "Send MD DATA\n");
+										/* Output Send Log : MD DATA Title */
+										l2fLog(logString,
+												((pCallerThreadParameter->pCommandValue->mdLog) & MD_SEND_LOG),
+												((pCallerThreadParameter->pCommandValue->mdDump) & MD_SEND_LOG));
+										/* Output Send Log : MD DATASET */
+										miscMemory2String(pCallerThreadParameter->pMdData,
+												pCallerThreadParameter->mdDataSize,
+												((pCallerThreadParameter->pCommandValue->mdLog) & MD_SEND_LOG),
+												((pCallerThreadParameter->pCommandValue->mdDump) & MD_SEND_LOG),
+												RECURSIVE_CALL_NOTHING);
+									}
+									/* Clear Log String */
+									memset(logString, 0, sizeof(logString));
+									logStringLength = 0;
 								case TRDP_MSG_MP:
 									for(i=0; i < REQUEST_SESSIONID_TABLE_MAX; i++)
 									{
@@ -896,6 +980,7 @@ VOS_THREAD_FUNC_T MDCaller (
 											receiveReplyResultTable,
 											receiveMqMsg.Msg.sessionId,
 											receiveMqMsg.Msg.numReplies,
+											receiveMqMsg.Msg.numRepliesQuery,
 											err);
 
 									/* Output LOG : Operation Log */
@@ -928,6 +1013,7 @@ VOS_THREAD_FUNC_T MDCaller (
 							}
 						}
 						/* Reply Timeout ? and repliers unknown (One Mr-Mp Cycle End) */
+						/* And Confirm TImeout (One Mr-Mq-Mc Cycle End) */
 						else if((receiveMqMsg.Msg.resultCode == TRDP_REPLYTO_ERR) && (receiveMqMsg.Msg.numExpReplies == REPLIERS_UNKNOWN))
 						{
 							/* Set Receive Reply Result Table */
@@ -935,9 +1021,11 @@ VOS_THREAD_FUNC_T MDCaller (
 									receiveReplyResultTable,
 									receiveMqMsg.Msg.sessionId,
 									receiveMqMsg.Msg.numReplies,
+									receiveMqMsg.Msg.numRepliesQuery,
 									MD_APP_MRMP_ONE_CYCLE_ERR);
-							/* No Repliers ? */
-							if (receiveMqMsg.Msg.numReplies <= 0)
+							/* Receive Mp and No Repliers ? */
+							if ((receiveMqMsg.Msg.msgType == TRDP_MSG_MP)
+								&& (receiveMqMsg.Msg.numReplies <= 0))
 							{
 								/* MD Receive NG Count */
 								mdReceiveFailureCounter++;
@@ -983,6 +1071,7 @@ VOS_THREAD_FUNC_T MDCaller (
 									receiveReplyResultTable,
 									receiveMqMsg.Msg.sessionId,
 									receiveMqMsg.Msg.numReplies,
+									receiveMqMsg.Msg.numRepliesQuery,
 									MD_APP_ERR);
 							/* MD Receive NG Count */
 							mdReceiveFailureCounter++;
@@ -1203,6 +1292,7 @@ VOS_THREAD_FUNC_T MDCaller (
  *  @param[in]		pReceiveReplyResultTable				pointer to Receive Reply Result Table
  *  @param[in]		receiveReplySessionId				Receive Reply SessionId
  *  @param[in]		receiveReplyNumReplies				Receive Reply Number of Repliers
+ *  @param[in]		receiveReplyQueryNumRepliesQuery	Receive ReplyQuery Number of Repliers Query
  *  @param[in]		decideMdTranssmissionResultcode		Receive Reply deceideMdTranssimision() ResultCode
  *
  *  @retval         MD_APP_NO_ERR				no error
@@ -1214,6 +1304,7 @@ MD_APP_ERR_TYPE setReceiveReplyResultTable(
 		RECEIVE_REPLY_RESULT_TABLE_T *pReceiveReplyResultTable,
 		TRDP_UUID_T receiveReplySessionId,
 		UINT32 receiveReplyNumReplies,
+		UINT32 receiveReplyQueryNumRepliesQuery,
 		MD_APP_ERR_TYPE decideMdTranssmissionResutlCode)
 {
 	UINT32 i = 0;
@@ -1227,11 +1318,13 @@ MD_APP_ERR_TYPE setReceiveReplyResultTable(
 
 	for(i=0; i < RECEIVE_REPLY_RESULT_TABLE_MAX; i++)
 	{
-		if(pReceiveReplyResultTable[i].callerReceiveReplyNumReplies == 0)
+		if((pReceiveReplyResultTable[i].callerReceiveReplyNumReplies == 0)
+			&& (pReceiveReplyResultTable[i].callerReceiveReplyQueryNumRepliesQuery == 0))
 		{
 //			memcpy(pReceiveReplyResultTable[i].callerReceiveReplySessionId, receiveReplySessionId, sizeof(receiveReplySessionId));
 			memcpy(pReceiveReplyResultTable[i].callerReceiveReplySessionId, receiveReplySessionId, sizeof(TRDP_UUID_T));
 			pReceiveReplyResultTable[i].callerReceiveReplyNumReplies = receiveReplyNumReplies;
+			pReceiveReplyResultTable[i].callerReceiveReplyQueryNumRepliesQuery = receiveReplyQueryNumRepliesQuery;
 			pReceiveReplyResultTable[i].callerDecideMdTranssmissionResultCode = decideMdTranssmissionResutlCode;
 			return MD_APP_NO_ERR;
 		}
@@ -1275,10 +1368,15 @@ MD_APP_ERR_TYPE deleteReceiveReplyResultTable(
 					  (char *)deleteReceiveReplySessionId,
 					  sizeof(pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplySessionId)) == 0)
 		{
+			/* delete ReceiveReplyResultTable element */
+			memset(&pReceiveReplyResultTable[receiveTableLoopCounter], 0, sizeof(RECEIVE_REPLY_RESULT_TABLE_T));
+#if 0
 			/* delete Reply Session Handle */
 			memset(pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplySessionId, 0, sizeof(pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplySessionId));
 			pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies = 0;
+			pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyQueryNumRepliesQuery = 0;
 			pReceiveReplyResultTable[receiveTableLoopCounter].callerDecideMdTranssmissionResultCode = 0;
+#endif
 		}
 	}
 	return MD_APP_NO_ERR;
@@ -1319,12 +1417,16 @@ MD_APP_ERR_TYPE deleteMrSendSessionTable(
 					  (char *)deleteSendRequestSessionId,
 					  sizeof(ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId)) == 0)
 		{
+			/* delete MrSendSessionTable element */
+			memset(ppMrSendSessionTable[sendTableLoopCounter], 0, sizeof(APP_THREAD_SESSION_HANDLE));
+#if 0
 			/* delete Request Session Handle */
 			ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener = 0;
 			memset(ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId, 0, sizeof(ppMrSendSessionTable[sendTableLoopCounter]->mdAppThreadSessionId));
 			ppMrSendSessionTable[sendTableLoopCounter]->sendRequestNumExpReplies = 0;
 			ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount = 0;
 			ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionFailureCount = 0;
+#endif
 			/* Free Mr Send Session Handle Area */
 			free(ppMrSendSessionTable[sendTableLoopCounter]);
 			ppMrSendSessionTable[sendTableLoopCounter] = NULL;
@@ -1378,6 +1480,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 		{
 //			if (&pReceiveReplyResultTable[receiveTableLoopCounter] == NULL)
 			if ((pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies == 0)
+				&& (pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyQueryNumRepliesQuery == 0)
 				&& (pReceiveReplyResultTable[receiveTableLoopCounter].callerDecideMdTranssmissionResultCode == MD_APP_NO_ERR))
 			{
 				continue;
@@ -1392,8 +1495,16 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 				if (pReceiveReplyResultTable[receiveTableLoopCounter].callerDecideMdTranssmissionResultCode == MD_APP_NO_ERR)
 				{
 					/* Success Count Up */
-//					ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount++;
-					ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount = pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies;
+					if (pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies > 0)
+					{
+						/* Receive Reply Number of Repliers */
+						ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount = pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies;
+					}
+					else
+					{
+						/* Receive ReplyQuery Number of RepliersQuery */
+						ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount = pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyQueryNumRepliesQuery;
+					}
 				}
 				/* Receive Timeout (Mr-Mp One Cycle End) */
 				else if (pReceiveReplyResultTable[receiveTableLoopCounter].callerDecideMdTranssmissionResultCode == MD_APP_MRMP_ONE_CYCLE_ERR)
@@ -1401,7 +1512,8 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 					/* Set decideRepliersUnKnownReceiveTimeout : True */
 					ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownReceiveTimeoutFlag = TRUE;
 					/* No Repliers ? */
-					if (pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies <= 0)
+					if ((pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyNumReplies <= 0)
+						&& (pReceiveReplyResultTable[receiveTableLoopCounter].callerReceiveReplyQueryNumRepliesQuery <= 0))
 					{
 						/* Failure Count Up */
 //						ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionFailureCount++;
