@@ -82,6 +82,7 @@ TRDP_APP_SESSION_T		appHandle;					/*	Sub-network Id1 identifier to the library 
 TRDP_MD_CONFIG_T			md_config;
 TRDP_MEM_CONFIG_T			mem_config;
 TRDP_PROCESS_CONFIG_T	processConfig = {"Subnet1", "", 0, 0, TRDP_OPTION_BLOCK};
+TRDP_MARSHALL_CONFIG_T	marshallConfig = {tau_marshall, tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
 
 /* Subnet2 */
 TRDP_APP_SESSION_T		appHandle2;				/*	Sub-network Id2 identifier to the library instance	*/
@@ -103,7 +104,7 @@ const size_t    threadStackSize   = 256 * 1024;
 
 /**********************************************************************************************************************/
 /** main entry
- *
+ *NULL
  *  @retval         0		no error
  *  @retval         1		some error
  */
@@ -345,6 +346,15 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 					}
 				}
 				break;
+			case 'N':
+				if (argv[i+1] != NULL)
+				{
+					/* Get MD Confirm Timeout from an option argument */
+					sscanf(argv[i+1], "%u", &uint32_value);
+					/* Set MD Confirm Timeout */
+					getCommandValue.mdTimeoutConfirm = uint32_value;
+				}
+				break;
 			case 'o':
 				if (argv[i+1] != NULL)
 				{
@@ -498,11 +508,11 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 						"\n"
 						"[-m sendingTimeout] "
 						"[-n topologyType] "
-						"[-o replierReplyErrType] "
+						"[-N mdTimeoutConfirm] "
 						"\n"
+						"[-o replierReplyErrType] "
 						"[-p marshallingTYpe] "
 						"[-q replierListenerComid] "
-						"[-Q] "
 						"\n"
 						"[-r replyTimeout] "
 						"[-R connectTimeout] "
@@ -520,7 +530,7 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("long option(--) Not Support \n");
 				printf("-b,	--md-caller-replier-type		Application Type Caller:0, Replier:1\n");
 				printf("-c,	--md-transport-type			Transport Type UDP:0, TCP:1\n");
-				printf("-d,	--md-message-kind			Caller Request Message Type Mn:0, Mr-Mp:1\n");
+				printf("-d,	--md-message-kind			Caller Request Message Type Mn:0, Mr:1 or Replier Reply Message Type Mp:0, Mq:1\n");
 				printf("-e,	--md-telegram-type			Caller Send MD DATASET Telegram Type Increment:0, Fixed:1-6, Error:7-10 (Fixed:4 not support)\n");
 				printf("-E,	--md-send-comid			Callder Send Request/Notify ComId val\n");
 				printf("-f,	--md-message-size			MD Increment Message Size Byte\n");
@@ -535,6 +545,7 @@ MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandVa
 				printf("-m,	--md-cycle-time				Caller MD Request Send Cycle Time micro sec\n");
 				printf("-M,	--md-timeout-sending				Sending Timeout: micro sec\n");
 				printf("-n,	--md-topo				Topology TYpe Ladder:1, not Lader:0\n");
+				printf("-N,	--md-timeout-confirm 		Confirm TImeout: micro sec\n");
 				printf("-o,	--md-reply-err				Replier MD Reply Error Type(1-6)\n");
 				printf("-p,	--md-marshall				Marshalling Type Marshall:1, not Marshall:0\n");
 				printf("-q,	--md-listener-comid			Replier Add Listener ComId val\n");
@@ -611,7 +622,7 @@ MD_APP_ERR_TYPE decideMdPattern(COMMAND_VALUE *pCommandValue, UINT8 **ppMdData, 
 
 			/* Check Caller Send Interval Type */
 			if ((pCommandValue->mdSendIntervalType == REPLY_REQUEST)
-			 && (pCommandValue->mdMessageKind != MD_MESSAGE_MR_MP))
+			 && (pCommandValue->mdMessageKind != MD_MESSAGE_MR))
 			{
 				err = MD_APP_ERR;
 			}

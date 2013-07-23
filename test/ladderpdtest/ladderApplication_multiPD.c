@@ -46,6 +46,7 @@
 /* Thread Name */
 CHAR8 pdThreadName[] ="PDThread";											/* Thread name is PD Thread. */
 CHAR8 pdReceiveCountCheckThreadName[] ="PDReceiveCountCheckThread";	/* Thread name is PD Receive Count Check Thread. */
+CHAR8 pdRullRequesterThreadName[] ="PDPullRequesterThread";				/* Thread name is PD Pull Requester Thread. */
 /* Thread Stack Size */
 const size_t    pdThreadStackSize   = 256 * 1024;
 VOS_MUTEX_T pPdApplicationThreadMutex = NULL;					/* pointer to Mutex for PD Application Thread */
@@ -371,6 +372,20 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 			/* not publisher */
 			return PD_APP_NO_ERR;
 		}
+		/* PD Pull Requester ? */
+		else if ((pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE == 0)
+			&& (pPdThreadParameter->pPdCommandValue->PD_REPLY_COMID > 0)
+			&& (pPdThreadParameter->pPdCommandValue->PD_COMID1_REPLY_DST_IP1 > 0))
+		{
+			/* Create PD Thread for Requester */
+			err = createPdPullRequesterThread(pPdThreadParameter);
+			if (err != PD_APP_NO_ERR)
+			{
+				printf("Create PD Requester Thread Err\n");
+				return PD_APP_THREAD_ERR;
+			}
+		}
+		/* PD Push Publisher */
 		else
 		{
 			/* Create PD Thread for publisher */
@@ -488,6 +503,39 @@ PD_APP_ERR_TYPE createPdThread (PD_THREAD_PARAMETER *pPdThreadParameter)
 	else
 	{
 		vos_printLog(VOS_LOG_ERROR, "PD Thread Create Err\n");
+		return PD_APP_THREAD_ERR;
+	}
+}
+
+/**********************************************************************************************************************/
+/** Create PD Pull Requester Thread
+ *
+ *  @param[in]		pPdThreadParameter			pointer to PDThread Parameter
+ *
+ *  @retval         PD_APP_NO_ERR					no error
+ *  @retval         PD_APP_THREAD_ERR				Thread error
+ *
+ */
+PD_APP_ERR_TYPE createPdPullRequesterThread (PD_THREAD_PARAMETER *pPdThreadParameter)
+{
+	/* Thread Handle */
+	VOS_THREAD_T pdThreadHandle = NULL;			/* PD Thread handle */
+
+	/*  Create MdReceiveManager Thread */
+	if (vos_threadCreate(&pdThreadHandle,
+							pdRullRequesterThreadName,
+							VOS_THREAD_POLICY_OTHER,
+							0,
+							0,
+							pdThreadStackSize,
+							(void *)PDPullRequester,
+							(void *)pPdThreadParameter) == VOS_NO_ERR)
+	{
+		return PD_APP_NO_ERR;
+	}
+	else
+	{
+		vos_printLog(VOS_LOG_ERROR, "PD Pull Requester Thread Create Err\n");
 		return PD_APP_THREAD_ERR;
 	}
 }
@@ -751,6 +799,38 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 					sscanf(argv[i+1], "%1u", &uint32_value);
 					/* Set Subscribe DataSet Type(DataSet1 or DataSet2) */
 					getPdCommandValue.PD_SUB_DATASET_TYPE = uint32_value;
+				}
+			break;
+			case 'j':
+				if (argv[i+1] != NULL)
+				{
+					/* Get PD Reply ComId1 from an option argument */
+					sscanf(argv[i+1], "%u", &uint32_value);
+					/* Set PD ComId1 */
+					getPdCommandValue.PD_REPLY_COMID = uint32_value;
+				}
+			break;
+			case 'J':
+				if (argv[i+1] != NULL)
+				{
+					/* Get Reply Destination IP address comId subnet1 from an option argument */
+					if (sscanf(argv[i+1], "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]) == 4)
+					{
+						/* Set Reply Destination IP address comId subnet1 */
+						getPdCommandValue.PD_COMID1_REPLY_DST_IP1 = TRDP_IP4_ADDR(ip[0],ip[1],ip[2],ip[3]);
+
+						/* Set Reply Destination IP address comId subnet2 */
+						if (vos_isMulticast(getPdCommandValue.PD_COMID1_REPLY_DST_IP1))
+						{
+							/* Multicast Group */
+							getPdCommandValue.PD_COMID1_REPLY_DST_IP2 = getPdCommandValue.PD_COMID1_REPLY_DST_IP1;
+						}
+						else
+						{
+							/* Unicast IP Address */
+							getPdCommandValue.PD_COMID1_REPLY_DST_IP2 = getPdCommandValue.PD_COMID1_REPLY_DST_IP1 | SUBNET2_NETMASK;
+						}
+					}
 				}
 			break;
 			case 'a':
@@ -1050,15 +1130,18 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 						"[-i publishDataSetType] "
 						"[-I subscribeDataSetType] "
 						"\n"
+						"[-j replyComId] "
+						"[-J replyComIdDestinationIP] "
 						"[-a subscribeComid1SorceIP] "
+						"\n"
 						"[-b subscribeComid1DestinationIP] "
 						"[-f publishComid1DestinationIP] "
-						"\n"
 						"[-o subscribeComid1Timeout] "
+						"\n"
 						"[-d publishComid1CycleTime] "
 						"[-k send-cycle-number] "
-						"\n"
 						"[-K receive-cycle-number] "
+						"\n"
 						"[-T writeTrafficStoreSubnetType] "
 						"[-L logCategoryOnOffType] "
 						"\n"
@@ -1086,6 +1169,8 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 //				printf("-G,	--subscribe-comid2	Subscribe ComId2 val\n");
 				printf("-i,	--publish-datasetid	Publish DataSetId val\n");
 				printf("-I,	--subscribe-datasetid	Subscribe DataSetId val\n");
+				printf("-j,	--reply-comid	Reply comId val\n");
+				printf("-J,	--reply-comid-dst-ip	Reply comId Destination IP Address: xxx.xxx.xxx.xxx\n");
 				printf("-a,	--comid1-sub-src-ip1	Subscribe ComId1 Source IP Address: xxx.xxx.xxx.xxx\n");
 				printf("-b,	--comid1-sub-dst-ip1	Subscribe ComId1 Destination IP Address: xxx.xxx.xxx.xxx\n");
 //				printf("-A,	--comid2-sub-src-ip1	Subscribe ComId2 Source IP Address: xxx.xxx.xxx.xxx\n");
@@ -1337,7 +1422,7 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 		}
 		else
 		{
-			/* DATASET1 Size */
+			/* DATASET2 Size */
 			pdDataSetSize = sizeof(DATASET2);
 			/* Get PD DATASET2 Area */
 			pPdDataSet = (UINT8 *)malloc(pdDataSetSize);
@@ -1348,7 +1433,7 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 			}
 			else
 			{
-				/* Initialize PD DTASET1 */
+				/* Initialize PD DTASET2 */
 				if ((createPdDataSet2(TRUE, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET2 ERROR. Initialize Err\n");
@@ -1356,55 +1441,60 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 				}
 			}
 		}
-
-		/*	Sub-network Id1 Publish */
-		err = tlp_publish(  appHandle,															/* our application identifier */
-							&pPdThreadParameter->pubHandleNet1ComId1,												/* our pulication identifier */
-							pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
-							0,																	/* local consist only */
-							subnetId1Address,													/* default source IP */
-							pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP1,	/* where to send to */
-							pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
-							0,																	/* not redundant */
-							TRDP_FLAGS_NONE,													/* Don't use callback for errors */
-							NULL,																/* default qos and ttl */
-							pPdDataSet,														/* initial data */
-							pdDataSetSize);													/* data size */
-		if (err != TRDP_NO_ERR)
-		{
-			vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
-			return PD_APP_ERR;
-		}
-		else
-		{
-			/* Display TimeStamp when publish time */
-			printf("%s Subnet1 publish.\n", vos_getTimeStamp());
-		}
 		/* Set PD Data in Traffic Store */
 		memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), pPdDataSet, pdDataSetSize);
+		/* Set PD DataSet size in Thread Parameter */
+		pPdThreadParameter->pPdCommandValue->sendDataSetSize = pdDataSetSize;
 
-		/*	Sub-network Id2 Publish */
-		err = tlp_publish(  appHandle2,					    								/* our application identifier */
-							&pPdThreadParameter->pubHandleNet2ComId1,												/* our pulication identifier */
-							pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
-							0,																	/* local consist only */
-							subnetId2Address,			    									/* default source IP */
-							pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP2,	/* where to send to */
-							pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
-							0,																	/* not redundant */
-							TRDP_FLAGS_NONE,													/* Don't use callback for errors */
-							NULL,																/* default qos and ttl */
-							pPdDataSet,														/* initial data */
-							pdDataSetSize);														/* data size */
-		if (err != TRDP_NO_ERR)
+		/* PD Pull ? Pull does not tlp_publish */
+		if (pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE != 0)
 		{
-			vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
-			return PD_APP_ERR;
-		}
-		else
-		{
-			/* Display TimeStamp when publish time */
-			printf("%s Subnet2 publish.\n", vos_getTimeStamp());
+			/*	Sub-network Id1 Publish */
+			err = tlp_publish(  appHandle,															/* our application identifier */
+								&pPdThreadParameter->pubHandleNet1ComId1,												/* our pulication identifier */
+								pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
+								0,																	/* local consist only */
+								subnetId1Address,													/* default source IP */
+								pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP1,	/* where to send to */
+								pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
+								0,																	/* not redundant */
+								TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+								NULL,																/* default qos and ttl */
+								pPdDataSet,														/* initial data */
+								pdDataSetSize);													/* data size */
+			if (err != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id1 pd publish error\n");
+				return PD_APP_ERR;
+			}
+			else
+			{
+				/* Display TimeStamp when publish time */
+				printf("%s Subnet1 publish.\n", vos_getTimeStamp());
+			}
+			/*	Sub-network Id2 Publish */
+			err = tlp_publish(  appHandle2,					    								/* our application identifier */
+								&pPdThreadParameter->pubHandleNet2ComId1,												/* our pulication identifier */
+								pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
+								0,																	/* local consist only */
+								subnetId2Address,			    									/* default source IP */
+								pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP2,	/* where to send to */
+								pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
+								0,																	/* not redundant */
+								TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+								NULL,																/* default qos and ttl */
+								pPdDataSet,														/* initial data */
+								pdDataSetSize);														/* data size */
+			if (err != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network Id2 pd publish error\n");
+				return PD_APP_ERR;
+			}
+			else
+			{
+				/* Display TimeStamp when publish time */
+				printf("%s Subnet2 publish.\n", vos_getTimeStamp());
+			}
 		}
 	}
 
@@ -1516,6 +1606,7 @@ PD_APP_ERR_TYPE PDReceiveCountCheck (void)
 	}
     return PD_APP_NO_ERR;
 }
+
 /**********************************************************************************************************************/
 /** PD Application main
  *
@@ -1526,7 +1617,7 @@ PD_APP_ERR_TYPE PDReceiveCountCheck (void)
  */
 PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 {
-	INT32 putCounter = 0;							/* put counter */
+	INT32 requestCounter = 0;							/* put counter */
 	BOOL linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
 	UINT32 TS_SUBNET_NOW = SUBNET1;
 
@@ -1536,7 +1627,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 	/*
         Enter the main processing loop.
      */
-    while (((putCounter < pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER)
+    while (((requestCounter < pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER)
     	|| (pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER == 0)))
     {
 		/* Get Write Traffic Store Receive SubnetId */
@@ -1625,7 +1716,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 					(void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1),
 					appHandle2->pSndQueue->dataSize);
 			/* put count up */
-			putCounter++;
+			requestCounter++;
 
           	/* Release access right to Traffic Store*/
     		err = tau_unlockTrafficStore();
@@ -1689,6 +1780,189 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 	if (deletePdThreadParameterList(&pHeadPdThreadParameterList, pPdThreadParameter) != PD_APP_NO_ERR)
 	{
 		printf("Test Finish Subscriber Command Value Delete Err\n");
+	}
+    return rv;
+}
+
+/**********************************************************************************************************************/
+/** PD Pull Requester main
+ *
+ *  @param[in]		pPDThreadParameter			pointer to PDThread Parameter
+ *
+ *  @retval         PD_APP_NO_ERR		no error
+ *  @retval         PD_APP_ERR			some error
+ */
+PD_APP_ERR_TYPE PDPullRequester (PD_THREAD_PARAMETER *pPdThreadParameter)
+{
+	INT32 requestCounter = 0;						/* request counter */
+	BOOL linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
+	UINT32 TS_SUBNET_NOW = SUBNET1;
+	TRDP_ERR_T err = TRDP_NO_ERR;
+
+	/* Wait for multicast grouping */
+	vos_threadDelay(PDCOM_MULTICAST_GROUPING_DELAY_TIME);
+
+	/* Display TimeStamp when Pull Requester test Start time */
+	printf("%s PD Pull Requester Start.\n", vos_getTimeStamp());
+
+	/*
+        Enter the main processing loop.
+     */
+    while (((requestCounter < pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER)
+    	|| (pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER == 0)))
+    {
+		/* Get Write Traffic Store Receive SubnetId */
+		if (tau_getNetworkContext(&TS_SUBNET_NOW) != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
+		}
+		/* Check Subnet for Write Traffic Store Receive Subnet */
+		tau_checkLinkUpDown(TS_SUBNET_NOW, &linkUpDown);
+		/* Link Down */
+		if (linkUpDown == FALSE)
+		{
+			/* Change Write Traffic Store Receive Subnet */
+			if( TS_SUBNET_NOW == SUBNET1)
+			{
+				vos_printLog(VOS_LOG_INFO, "Subnet1 Link Down. Change Receive Subnet\n");
+				/* Write Traffic Store Receive Subnet : Subnet2 */
+				TS_SUBNET_NOW = SUBNET2;
+			}
+			else
+			{
+				vos_printLog(VOS_LOG_INFO, "Subnet2 Link Down. Change Receive Subnet\n");
+				/* Write Traffic Store Receive Subnet : Subnet1 */
+				TS_SUBNET_NOW = SUBNET1;
+			}
+			/* Set Write Traffic Store Receive Subnet */
+			if (tau_setNetworkContext(TS_SUBNET_NOW) != TRDP_NO_ERR)
+		    {
+				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
+		    }
+			else
+			{
+				vos_printLog(VOS_LOG_DBG, "tau_setNetworkContext() set subnet:0x%x\n", TS_SUBNET_NOW);
+			}
+		}
+
+      	/* Get access right to Traffic Store*/
+    	err = tau_lockTrafficStore();
+    	if (err == TRDP_NO_ERR)
+    	{
+
+#if 0
+/* Don't Update PD DATASET for Literal Data */
+    		/* Create Publish PD DATASET */
+    		if (pPdThreadParameter->pPdCommandValue->PD_PUB_DATASET_TYPE == DATASET_TYPE1)
+    		{
+				/* Update PD DTASET1 */
+				if ((createPdDataSet1(FALSE, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
+				{
+					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET1 ERROR. Update Err\n");
+					return PD_APP_ERR;
+				}
+				else
+				{
+					/* Set DATASET1 Size */
+					pdDataSetSize = sizeof(DATASET1);
+				}
+    		}
+    		else
+    		{
+				/* Update PD DTASET1 */
+				if ((createPdDataSet2(FALSE, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
+				{
+					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET2 ERROR. Update Err\n");
+					return PD_APP_ERR;
+				}
+				else
+				{
+					/* Set DATASET2 Size */
+					pdDataSetSize = sizeof(DATASET2);
+				}
+    		}
+
+    		/* Set PD Data in Traffic Store */
+    		memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), pPdDataSet, pdDataSetSize);
+#endif /* if 0 */
+
+			/* First TRDP instance in TRDP PD Pull Request */
+			err = tlp_request(appHandle,
+						pPdThreadParameter->subHandleNet1ComId1,
+						pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,
+						0,
+						subnetId1Address,
+						pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP1,
+						0,
+						TRDP_FLAGS_NONE,
+						NULL,
+						(void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1),
+//						appHandle->pSndQueue->dataSize,
+						pPdThreadParameter->pPdCommandValue->sendDataSetSize,
+						pPdThreadParameter->pPdCommandValue->PD_REPLY_COMID,
+						pPdThreadParameter->pPdCommandValue->PD_COMID1_REPLY_DST_IP1);
+			if (err != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "Sub-network Id1 pull request error\n");
+			}
+
+			/* Second TRDP instance in TRDP PD Pull Request */
+			tlp_request(appHandle2,
+						pPdThreadParameter->subHandleNet2ComId1,
+						pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,
+						0,
+						subnetId2Address,
+						pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP2,
+						0,
+						TRDP_FLAGS_NONE,
+						NULL,
+						(void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1),
+//						appHandle2->pSndQueue->dataSize,
+						pPdThreadParameter->pPdCommandValue->sendDataSetSize,
+						pPdThreadParameter->pPdCommandValue->PD_REPLY_COMID,
+						pPdThreadParameter->pPdCommandValue->PD_COMID1_REPLY_DST_IP2);
+			if (err != TRDP_NO_ERR)
+			{
+				vos_printLog(VOS_LOG_ERROR, "Sub-network Id2 pull request error\n");
+			}
+			/* request count up */
+			requestCounter++;
+
+          	/* Release access right to Traffic Store*/
+    		err = tau_unlockTrafficStore();
+    		if (err != TRDP_NO_ERR)
+    		{
+    			vos_printLog(VOS_LOG_ERROR, "Release Traffic Store accessibility Failed\n");
+    		}
+    	}
+    	else
+    	{
+    		vos_printLog(VOS_LOG_ERROR, "Get Traffic Store accessibility Failed\n");
+    	}
+
+    	/* Waits for a next creation cycle */
+		vos_threadDelay(pPdThreadParameter->pPdCommandValue->LADDER_APP_CYCLE);
+
+    }   /*	Bottom of while-loop	*/
+
+    /*
+     *	We always clean up behind us!
+     */
+
+	/* Display TimeStamp when Pull Requester test end time */
+	printf("%s PD Pull Requester end.\n", vos_getTimeStamp());
+#if 0
+	/* Display this CommandValue subscribe Result */
+	if (printSpecificPdSubscribeResult(iterPdThreadParameter->pPdCommandValue) != PD_APP_NO_ERR)
+	{
+		printf("Test Finish Subscriber Receive Count Dump Err\n");
+	}
+#endif /* if 0 */
+
+	/* Delete this PD Thread Parameter for PD Thread Parameter List */
+	if (deletePdThreadParameterList(&pHeadPdThreadParameterList, pPdThreadParameter) != PD_APP_NO_ERR)
+	{
+		printf("Test Finish Requester Command Value Delete Err\n");
 	}
     return rv;
 }

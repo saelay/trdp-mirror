@@ -62,6 +62,7 @@ extern "C" {
 #include "trdp_utils.h"
 #include "tau_ladder_app.h"
 #include "trdp_mdcom.h"
+#include "tau_marshall.h"
 
 /***********************************************************************************************************************
  * DEFINES
@@ -69,11 +70,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.35"
+#define MD_APP_VERSION	"V0.37"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.35"
+#define MD_APP_VERSION	"V0.37"
 #else
-#define MD_APP_VERSION	"V0.35"
+#define MD_APP_VERSION	"V0.37"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -118,6 +119,8 @@ extern "C" {
 
 /* MD Reply ComId Mask */
 #define COMID_REPLY_MASK					0xA0000
+/* MD Confirm ComId Mask */
+#define COMID_CONFIRM_MASK				0xB0000
 /* MD Request ComId Mask */
 #define COMID_REQUEST_MASK				0xFFF0FFFF
 
@@ -196,12 +199,12 @@ typedef enum
 typedef struct
 {
 	TRDP_UUID_T								mdAppThreadSessionId;
-	TRDP_LIS_T								pMdAppThreadListener;
-	TRDP_LIS_T								pMdAppThreadTimeoutListener;
-	UINT32									sendRequestNumExpReplies;
-	UINT32									decidedSessionSuccessCount;
-	UINT32									decidedSessionFailureCount;
-	BOOL									decideRepliersUnKnownReceiveTimeoutFlag;	/* Receive Timeout : TRUE */
+	TRDP_LIS_T									pMdAppThreadListener;
+//	TRDP_LIS_T									pMdAppThreadTimeoutListener;
+	UINT32										sendRequestNumExpReplies;
+	UINT32										decidedSessionSuccessCount;
+	UINT32										decidedSessionFailureCount;
+	BOOL										decideRepliersUnKnownReceiveTimeoutFlag;	/* Receive Timeout : TRUE */
 	MD_REPLIERS_UNKNOWN_DECIDE_STATUS		decideRepliersUnKnownStatus;
 } APP_THREAD_SESSION_HANDLE;
 
@@ -219,12 +222,19 @@ typedef enum
     REPLIER         = 1    /**< Replier */
 } CALLER_REPLIER_TYPE;
 
-/* MD Message Kind definition */
+/* MD Request Message Kind definition for Caller */
 typedef enum
 {
-    MD_MESSAGE_MN			= 0,	/**< Mn 		Message */
-    MD_MESSAGE_MR_MP		= 1		/**< Mr-Mp		Message */
-} MD_MESSAGE_KIND;
+    MD_MESSAGE_MN		= 0,	/**< Mn 		Message */
+    MD_MESSAGE_MR		= 1		/**< Mr		Message */
+} MD_REQUEST_MESSAGE_KIND;
+
+/* MD Reply Message Kind definition for Replier */
+typedef enum
+{
+    MD_MESSAGE_MP		= 0,	/**< Mp 		Message */
+    MD_MESSAGE_MQ		= 1		/**< Mq		Message */
+} MD_REPLY_MESSAGE_KIND;
 
 /* MD Caller Send Interval Type definition */
 typedef enum
@@ -329,27 +339,31 @@ typedef struct COMMAND_VALUE
 	UINT32 mdCycleTime;							/* -m --md-cycle-time Value */
 	UINT32 mdSendingTimeout;						/* -M --md-timeout-sending */
 	BOOL mdLadderTopologyFlag;					/* -n --md-topo Value */
+	UINT32 mdTimeoutConfirm;						/* -N --md-timeout-confirm Value */
 	UINT8 mdReplyErr;								/* -o --md-reply-err Value */
 	BOOL mdMarshallingFlag;						/* -p --md-marshall Value*/
 	UINT32 mdAddListenerComId;					/* -q --md-listener-comid Value */
 	UINT32 mdSendComId;							/* Caller Send comId */
 	MD_DATA_CREATE_FLAG createMdDataFlag;		/* Caller use for a decision of MD create */
 	UINT32 mdTimeoutReply;						/* -r --md-timeout-reply Value */
-	UINT32 mdConnectTimeout;						/* -R -md-timeout-connect */
-/*	UINT32 mdTimeoutConfirm;	*/					/* -s --md-timeout-confirm Value */
+	UINT32 mdConnectTimeout;						/* -R --md-timeout-connect */
 	UINT8 mdSendSubnet;							/* -t --md-send-subnet Value */
 	/* Caller Result */
 	UINT32 callerMdReceiveCounter;				/* Caller Receive Count */
 	UINT32 callerMdReceiveSuccessCounter;		/* Caller Success Receive Count */
 	UINT32 callerMdReceiveFailureCounter;		/* Caller Failure Receive Count */
 	UINT32 callerMdRetryCounter;				/* Caller Retry Count */
-	UINT32 callerMdSendCounter;					/* Caller Send Count */
+//	UINT32 callerMdSendCounter;					/* Caller Send Count */
+	UINT32 callerMdRequestSendCounter;			/* Caller Request(Mn,Mr) Send Count */
+	UINT32 callerMdConfirmSendCounter;			/* Caller Confirm Send Count */
 	UINT32 callerMdSendSuccessCounter;			/* Caller Success Send Count */
 	UINT32 callerMdSendFailureCounter;			/* Caller Failure Send Count */
 	UINT32 callerMdRequestReplySuccessCounter;/* Caller Success Send Request Receive Reply Count */
 	UINT32 callerMdRequestReplyFailureCounter;/* Caller Failure Send Request Receive Reply Count */
 	/* Replier Result */
-	UINT32 replierMdReceiveCounter;				/* Replier Receive Count */
+//	UINT32 replierMdReceiveCounter;				/* Replier Receive Count */
+	UINT32 replierMdRequestReceiveCounter;		/* Replier Request(Mn,Mr) Receive Count */
+	UINT32 replierMdConfrimReceiveCounter;		/* Replier Confirm Receive Count */
 	UINT32 replierMdReceiveSuccessCounter;		/* Replier Success Receive Count */
 	UINT32 replierMdReceiveFailureCounter;		/* Replier Failure Receive Count */
 	UINT32 replierMdRetryCounter;				/* Replier Retry Count */
@@ -407,6 +421,7 @@ typedef struct RECEIVE_REPLY_RESULT_TABLE
 {
 	TRDP_UUID_T callerReceiveReplySessionId;
 	UINT32 callerReceiveReplyNumReplies;
+	UINT32 callerReceiveReplyQueryNumRepliesQuery;
 	MD_APP_ERR_TYPE callerDecideMdTranssmissionResultCode;
 } RECEIVE_REPLY_RESULT_TABLE_T;
 
@@ -427,6 +442,7 @@ extern TRDP_APP_SESSION_T		appHandle;					/*	Sub-network Id1 identifier to the l
 extern TRDP_MD_CONFIG_T			md_config;
 extern TRDP_MEM_CONFIG_T			mem_config;
 extern TRDP_PROCESS_CONFIG_T	processConfig;
+extern TRDP_MARSHALL_CONFIG_T	marshallConfig;
 extern COMMAND_VALUE				*pTrdpInitializeParameter;	/* Use to trdp_initialize */
 
 /* Subnet2 */
@@ -996,13 +1012,19 @@ MD_APP_ERR_TYPE mdReceive_main_proc (
  *  @param[in]		pReceiveReplyResultTable				pointer to Receive Reply Result Table
  *  @param[in]		receiveReplySessionId				Receive Reply SessionId
  *  @param[in]		receiveReplyNumReplies				Receive Reply Number of Repliers
+ *  @param[in]		receiveReplyQueryNumRepliesQuery	Receive ReplyQuery Number of Repliers Query
  *  @param[in]		decideMdTranssmissionResultcode		Receive Reply deceideMdTranssimision() ResultCode
+ *
+ *  @retval         MD_APP_NO_ERR				no error
+ *  @retval         MD_APP_ERR					error
+ *  @retval         MD_APP_PARAM_ERR			Parameter error
  *
  */
 MD_APP_ERR_TYPE setReceiveReplyResultTable(
 		RECEIVE_REPLY_RESULT_TABLE_T *pReceiveReplyResultTable,
 		TRDP_UUID_T receiveReplySessionId,
 		UINT32 receiveReplyNumReplies,
+		UINT32 receiveReplyQueryNumRepliesQuery,
 		MD_APP_ERR_TYPE decideMdTranssmissionResutlCode);
 
 /**********************************************************************************************************************/
@@ -1100,6 +1122,7 @@ MD_APP_ERR_TYPE replier_main_proc (
  *
  *  @param[in]		pReceiveMsg						pointer to Receive MD Message
  *  @param[in]		pReplierThreadParameter			pointer to Replier Thread parameter
+ *  @param[in]		mqDescriptor						Message Queue Descriptor
  *
  *  @retval         0					no error
  *  @retval         1					error
@@ -1107,7 +1130,8 @@ MD_APP_ERR_TYPE replier_main_proc (
  */
 MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 		trdp_apl_cbenv_t *pReceiveMsg,
-		REPLIER_THREAD_PARAMETER *pReplierThreadParameter);
+		REPLIER_THREAD_PARAMETER *pReplierThreadParameter,
+		mqd_t mqDescriptor);
 
 /**********************************************************************************************************************/
 /** Check Replier Send Reply SessionId is alive or release
