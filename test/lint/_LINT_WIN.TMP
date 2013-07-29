@@ -26,18 +26,18 @@
 --- Module:   ..\..\src\vos\common\vos_utils.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_pdcom.c line 376: trdp_pdCheck([1], ?)
-  File ..\..\src\common\trdp_pdcom.c line 804: vos_crc32(4294967295, [0], ?)
-..\..\src\vos\common\vos_utils.c(295) : Warning 661: Possible access of
+  File ..\..\src\common\trdp_pdcom.c line 378: trdp_pdCheck([1], ?)
+  File ..\..\src\common\trdp_pdcom.c line 803: vos_crc32(4294967295, [0], ?)
+..\..\src\vos\common\vos_utils.c(332) : Warning 661: Possible access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_utils.c: lines 293, 295; file
-    ..\..\src\common\trdp_pdcom.c: lines 376, 804]
-..\..\src\vos\common\vos_utils.c(293) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_utils.c: lines 330, 332; file
+    ..\..\src\common\trdp_pdcom.c: lines 378, 803]
+..\..\src\vos\common\vos_utils.c(330) : Info 831: Reference cited in prior
     message
-..\..\src\vos\common\vos_utils.c(295) : Info 831: Reference cited in prior
+..\..\src\vos\common\vos_utils.c(332) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_pdcom.c(376) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_pdcom.c(804) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_pdcom.c(378) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_pdcom.c(803) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
 
