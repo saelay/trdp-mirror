@@ -455,6 +455,8 @@ int main (int argc, char *argv[])
 	DATASET2 dataSet2;										/* publish Dataset2 */
 	size_t dataSet1Size = 0;									/* publish Dataset1 SIZE */
 	size_t dataSet2Size = 0;									/* publish Dataset2 SIZE */
+	UINT32 dataSet1MarshallSize = 0;						/* publish Dataset1 Marshall SIZE */
+	UINT32 dataSet2MarshallSize = 0;						/* publish Dataset2 Marshall SIZE */
 	UINT16 inputPosition = 0;									/* putDataSetBuffer position */
 	DATASET1 putDataSet1Buffer[PUT_DATASET_BUFFER_SIZE];		/* putDataSet1Buffer for PD compare */
 	DATASET2 putDataSet2Buffer[PUT_DATASET_BUFFER_SIZE];		/* putDataSet2Buffer for PD compare */
@@ -962,31 +964,42 @@ int main (int argc, char *argv[])
 			vos_printLog(VOS_LOG_ERROR, "tau_initMarshall returns error = %d\n", err);
 		   return 1;
 		}
-#if 0
+//#if 0
 		/* Compute size of marshalled dataset1 */
-		err = tau_calcDatasetSizeByComId(pRefConMarshallDataset, PD_COMID1, (UINT8 *) &dataSet1, &dataSet1Size, NULL);
+		err = tau_calcDatasetSizeByComId(pRefConMarshallDataset, PD_COMID1, (UINT8 *) &dataSet1, &dataSet1MarshallSize, NULL);
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID1, DATASET_NO_1, err);
 			return 1;
 		}
+		else
+		{
+			/* Set Dataset1 Size for tlp_publish, tlp_subscribe */
+			dataSet1Size = dataSet1MarshallSize;
+		}
 		/* Compute size of marshalled dataset2 */
-		err = tau_calcDatasetSizeByComId(pRefConMarshallDataset, PD_COMID2, (UINT8 *) &dataSet2, &dataSet2Size, NULL);
+		err = tau_calcDatasetSizeByComId(pRefConMarshallDataset, PD_COMID2, (UINT8 *) &dataSet2, &dataSet2MarshallSize, NULL);
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID2, DATASET_NO_2, err);
 			return 1;
 		}
-
+		else
+		{
+			/* Set Dataset2 Size for tlp_publish, tlp_subscribe */
+			dataSet2Size = dataSet2MarshallSize;
+		}
+//#endif
+#if 0
 		/* Compute size of marshalled dataset1 */
-		err = tau_calcDatasetSize(pRefConMarshallDataset, 1001, (UINT8 *) &dataSet1, &dataSet1Size, NULL);
+		err = tau_calcDatasetSize(pRefConMarshallDataset, 1001, (UINT8 *) &dataSet1, &dataSet1MarshallSize, NULL);
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID1, DATASET_NO_1, err);
 			return 1;
 		}
 		/* Compute size of marshalled dataset2 */
-		err = tau_calcDatasetSize(pRefConMarshallDataset, 1002, (UINT8 *) &dataSet2, &dataSet2Size, NULL);
+		err = tau_calcDatasetSize(pRefConMarshallDataset, 1002, (UINT8 *) &dataSet2, &dataSet2MarshallSize, NULL);
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID2, DATASET_NO_2, err);
@@ -1621,6 +1634,12 @@ int main (int argc, char *argv[])
 		/* Enable Comid1 ? */
 		if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 		{
+			/* Marshalling ? */
+			if (marshallingFlag == TRUE)
+			{
+				/* Set Dataset1 Size for tlp_put */
+				dataSet1Size = dataSet1MarshallSize;
+			}
 			/* First TRDP instance in TRDP publish buffer (put DataSet1) */
 			tlp_put(appHandle,
 					pubHandleNet1ComId1,
@@ -1631,6 +1650,12 @@ int main (int argc, char *argv[])
 		/* Enable Comid2 ? */
 		if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 		{
+			/* Marshalling ? */
+			if (marshallingFlag == TRUE)
+			{
+				/* Set Dataset1 Size for tlp_put */
+				dataSet2Size = dataSet2MarshallSize;
+			}
 			/* First TRDP instance in TRDP publish buffer (put DataSet2) */
 			tlp_put(appHandle,
 					pubHandleNet1ComId2,
@@ -1690,6 +1715,7 @@ int main (int argc, char *argv[])
 		memcpy(&getDataSet2, (void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS4), dataSet2Size);
 		vos_printLog(VOS_LOG_DBG, "Get Traffic Store PD DATASET%d\n", DATASET_NO_2);
 */
+		/* UnMarshalling ? */
 		if (marshallingFlag == TRUE)
 		{
 			/* Get access right to Traffic Store*/
@@ -1699,6 +1725,7 @@ int main (int argc, char *argv[])
 				/* Enable Comid1 ? */
 				if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 				{
+					dataSet1Size = sizeof(dataSet1);
 					/* unmarshalling ComId1 */
 					err = tau_unmarshall (pRefConMarshallDataset,
 											PD_COMID1,
@@ -1716,6 +1743,7 @@ int main (int argc, char *argv[])
 				/* Enable Comid2 ? */
 				if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 				{
+					dataSet2Size = sizeof(dataSet2);
 					/* unmarshalling ComId2 */
 					err = tau_unmarshall (pRefConMarshallDataset,
 											PD_COMID2,

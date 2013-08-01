@@ -2390,9 +2390,10 @@ PD_APP_ERR_TYPE printPdJoinStatistics (
 	if (err == TRDP_NO_ERR)
 	{
 		/* Set Number Of Joins */
-		numberOfJoin = pdStatistics.numJoin;
+		numberOfJoin = pdStatistics.numJoin + 1 ;
 		/* Get pPdSubscribeStatistics Area */
-		pPdJoinAddressStatistics = (UINT32 *)malloc(numberOfJoin * sizeof(UINT32));
+		pPdJoinAddressStatistics = (UINT32 *)malloc(sizeof(UINT32) * numberOfJoin);
+		memset(pPdJoinAddressStatistics, 0, sizeof(UINT32) * numberOfJoin);
 	}
 	else
 	{
