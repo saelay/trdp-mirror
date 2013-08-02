@@ -20,7 +20,7 @@ TRDP_DATASET_T  gDataSet1990 =
 {
     1990,       /*    dataset/com ID  */
     0,          /*    reserved        */
-    2,         /*    No of elements, var size    */
+    2,          /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
@@ -39,7 +39,7 @@ TRDP_DATASET_T  gDataSet1991 =
 {
     1991,       /*    dataset/com ID  */
     0,          /*    reserved        */
-    2,         /*    No of elements, var size    */
+    2,          /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
@@ -58,7 +58,7 @@ TRDP_DATASET_T  gDataSet1992 =
 {
     1992,       /*    dataset/com ID  */
     0,          /*    reserved        */
-    2,         /*    No of elements, var size    */
+    2,          /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
@@ -77,7 +77,7 @@ TRDP_DATASET_T  gDataSet1993 =
 {
     1993,       /*    dataset/com ID  */
     0,          /*    reserved        */
-    2,         /*    No of elements, var size    */
+    2,          /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_UINT8,
@@ -94,180 +94,180 @@ TRDP_DATASET_T  gDataSet1993 =
 
 TRDP_DATASET_T  gDataSet1000 =
 {
-    1000,        /*    dataset/com ID  */
+    1000,       /*    dataset/com ID  */
     0,          /*    reserved        */
     65,         /*    No of elements    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_BOOLEAN,  /*    data type        */
-            1,               /*    no of elements    */
-            NULL
-        },
+            TRDP_BOOLEAN,       /*    data type         */
+            1,                  /*    no of elements    */
+            NULL                /*    cache             */
+        },                      /* size = 1 */
         {
             TRDP_CHAR8,
             1,
             NULL
-        },
+        },                      /* size = 2 */
         {
             TRDP_UTF16,
             1,
             NULL
-        },
+        },                      /* size = 4 */
         {
             TRDP_INT8,
             1,
             NULL
-        },
+        },                      /* size = 5 */
         {
             TRDP_INT16,
             1,
             NULL
-        },
+        },                      /* size = 7 */
         {
             TRDP_INT32,
             1,
             NULL
-        },
+        },                      /* size = 11 */
         {
             TRDP_INT64,
             1,
             NULL
-        },
+        },                      /* size = 19 */
         {
             TRDP_UINT8,
             1,
             NULL
-        },
+        },                      /* size = 20 */
         {
             TRDP_UINT16,
             1,
             NULL
-        },
+        },                      /* size = 22 */
         {
             TRDP_UINT32,
             1,
             NULL
-        },
+        },                      /* size = 26 */
         {
             TRDP_UINT64,    /* 10    */
             1,
             NULL
-        },
+        },                      /* size = 34 */
         {
             TRDP_REAL32,
             1,
             NULL
-        },
+        },                      /* size = 38 */
         {
             TRDP_REAL64,
             1,
             NULL
-        },
+        },                      /* size = 46 */
         {
             TRDP_TIMEDATE32,
             1,
             NULL
-        },
+        },                      /* size = 50 */
         {
             TRDP_TIMEDATE48,
             1,
             NULL
-        },
+        },                      /* size = 56 */
         {
             TRDP_TIMEDATE64,        /* 15    */
             1,
             NULL
-        },
+        },                      /* size = 64 */
         {    /* 16    */
-            TRDP_BOOLEAN,  /*    data type        */
-            4,
-            NULL               /*    no of elements    */
-        },
+            TRDP_BOOLEAN,       /*    data type        */
+            4,                  /*    no of elements    */
+            NULL
+        },                      /* size = 68 */
         {
             TRDP_CHAR8,
             16,
             NULL
-        },
+        },                      /* size = 84 */
         {
             TRDP_UTF16,
             16,
             NULL
-        },
+        },                      /* size = 116 */
         {
             TRDP_INT8,
             4,
             NULL
-        },
+        },                      /* size = 120 */
         {
             TRDP_INT16,    /* 20    */
             4,
             NULL
-        },
+        },                      /* size = 128 */
         {
             TRDP_INT32,
             4,
             NULL
-        },
+        },                      /* size = 144 */
         {
             TRDP_INT64,
             4,
             NULL
-        },
+        },                      /* size = 176 */
         {
             TRDP_UINT8,
             4,
             NULL
-        },
+        },                      /* size = 180 */
         {
             TRDP_UINT16,
             4,
             NULL
-        },
+        },                      /* size = 188 */
         {
             TRDP_UINT32,        /* 25    */
             4,
             NULL
-        },
+        },                      /* size = 204 */
         {
             TRDP_UINT64,
             4,
             NULL
-        },
+        },                      /* size = 236 */
         {
             TRDP_REAL32,
             4,
             NULL
-        },
+        },                      /* size = 252 */
         {
             TRDP_REAL64,
             4,
             NULL
-        },
+        },                      /* size = 284 */
         {
             TRDP_TIMEDATE32,
             4,
             NULL
-        },
+        },                      /* size = 300 */
         {
             TRDP_TIMEDATE48,    /* 30    */
             4,
             NULL
-        },
+        },                      /* size = 324 */
         {
             TRDP_TIMEDATE64,
             4,
             NULL
-        },
+        },                      /* size = 356 */
         {
             TRDP_UINT16,    /* 32    */
             1,
             NULL
-        },
+        },                      /* size = 358 */
         {
             TRDP_BOOLEAN,  /*    data type        */
             0,               /*    no of elements    */
             NULL
-        },
+        },                      /* size = 362 for current test! */
         {
             TRDP_UINT16,
             1,
@@ -654,7 +654,8 @@ int main ()
     /*INT32       index;*/
     UINT32      *refCon;
     TRDP_ERR_T  err;
-    UINT32      bufSize = 0;
+    UINT32      compSize    = 0;
+    UINT32      bufSize     = 0;
 
     err = tau_initMarshall((void *)&refCon, 2, gComIdMap, 6, gDataSets);
 
@@ -665,7 +666,7 @@ int main ()
     }
 
     /*    Compute size of marshalled data */
-    err = tau_calcDatasetSizeByComId(refCon, 1000, (UINT8 *) &gMyDataSet1000, &bufSize, NULL);
+    err = tau_calcDatasetSizeByComId(refCon, 1000, (UINT8 *) &gMyDataSet1000, &compSize, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -673,18 +674,18 @@ int main ()
         return 1;
     }
 
-    printf("Precomputed size of marshalled dataset for ComId %d is %u...\n", 1000, bufSize);
+    printf("Precomputed size of marshalled dataset for ComId %d is %u...\n", 1000, compSize);
 
-    if (bufSize == 680)
+    if (compSize <= sizeof(gMyDataSet1000))
     {
         printf("...seems OK!\n");
     }
     else
     {
-        printf("...### Precomputed size is different!\n");
+        printf("...### Precomputed size is wrong (> %u which is sizeof(ds) )!\n", sizeof(gMyDataSet1000));
     }
 
-    bufSize = sizeof(gDstDataBuffer);
+    bufSize = compSize;
     memset(gDstDataBuffer, 0, bufSize);
 
     err = tau_marshall(refCon, 1000, (UINT8 *) &gMyDataSet1000, gDstDataBuffer, &bufSize, NULL);
@@ -697,7 +698,7 @@ int main ()
 
     printf("Marshalled size of dataset for ComId %d is %u\n", 1000, bufSize);
 
-    if (bufSize == 680)
+    if (compSize <= sizeof(gMyDataSet1000))
     {
         printf("...seems OK!\n");
     }
@@ -727,37 +728,6 @@ int main ()
     {
         printf("Marshalling and Unmarshalling data matched!\n");
     }
-
-    /*
-    printf("ComID: 0x%0X\n", gDataSet1000.id);
-    printf("  INT8 0x%02hhx,  INT16 0x%04hx,  INT32 0x%04x,  INT64 0x%08llx\n",
-           gMyDataSet1000.int8_1,
-           gMyDataSet1000.int16_1,
-           gMyDataSet1000.int32_1,
-           gMyDataSet1000.int64_1);
-    printf(" UINT8 0x%02hhx, UINT16 0x%04hx, UINT32 0x%04x, UINT64 0x%08llx\n",
-           gMyDataSet1000.uint8_1,
-           gMyDataSet1000.uint16_1,
-           gMyDataSet1000.uint32_1,
-           gMyDataSet1000.uint64_1);
-    printf(" float %f, double %lf\n",
-           gMyDataSet1000.float32_1,
-           gMyDataSet1000.float64_1);
-
-    for (index = 0; index < 8; index++)
-    {
-        printf("%02hhx, %02hhx, %02hhx, %02hhx, %02hhx, %02hhx, %02hhx, %02hhx, \n",
-               gDstDataBuffer[index * 8 + 0],
-               gDstDataBuffer[index * 8 + 1],
-               gDstDataBuffer[index * 8 + 2],
-               gDstDataBuffer[index * 8 + 3],
-               gDstDataBuffer[index * 8 + 4],
-               gDstDataBuffer[index * 8 + 5],
-               gDstDataBuffer[index * 8 + 6],
-               gDstDataBuffer[index * 8 + 7]
-               );
-    }
-    */
 
     return 0;
 }

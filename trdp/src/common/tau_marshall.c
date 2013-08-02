@@ -402,6 +402,8 @@ static TRDP_ERR_T do_marshall (
                 {
                     return err;
                 }
+                pDst    = pInfo->pDst;
+                pSrc    = pInfo->pSrc;
             }
         }
         else
@@ -542,9 +544,10 @@ static TRDP_ERR_T do_marshall (
                 default:
                     break;
             }
+            /* Update info structure if we need to! (was issue #137) */
+            pInfo->pDst = pDst;
+            pInfo->pSrc = pSrc;
         }
-        pInfo->pDst = pDst;
-        pInfo->pSrc = pSrc;
     }
 
 
@@ -614,10 +617,9 @@ static TRDP_ERR_T do_unmarshall (
                 {
                     return err;
                 }
-                pDst    = pInfo->pDst;
-                pSrc    = pInfo->pSrc;
-
             }
+            pDst    = pInfo->pDst;
+            pSrc    = pInfo->pSrc;
         }
         else
         {
@@ -754,9 +756,9 @@ static TRDP_ERR_T do_unmarshall (
                 default:
                     break;
             }
+            pInfo->pDst = pDst;
+            pInfo->pSrc = pSrc;
         }
-        pInfo->pDst = pDst;
-        pInfo->pSrc = pSrc;
     }
 
     return TRDP_NO_ERR;
@@ -830,6 +832,8 @@ static TRDP_ERR_T size_marshall (
                 {
                     return err;
                 }
+                pDst    = pInfo->pDst;
+                pSrc    = pInfo->pSrc;
             }
         }
         else
@@ -929,11 +933,12 @@ static TRDP_ERR_T size_marshall (
                 default:
                     break;
             }
-        }
-        pInfo->pDst = pDst;
-        pInfo->pSrc = pSrc;
-    }
 
+            /* Update info structure if we need to! (was issue #137) */
+            pInfo->pDst = pDst;
+            pInfo->pSrc = pSrc;
+        }
+    }
 
     return TRDP_NO_ERR;
 }
@@ -1025,7 +1030,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1092,7 +1097,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1161,7 +1166,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1228,7 +1233,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1293,7 +1298,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
@@ -1356,7 +1361,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
-    TRDP_ERR_T err;
+    TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
