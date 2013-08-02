@@ -66,7 +66,7 @@ typedef int32_t INT32;
 typedef int64_t INT64;
 typedef signed char BOOL;
 typedef char CHAR8;
-typedef wchar_t UTF16;
+typedef uint16_t UTF16;
 typedef float REAL32;
 typedef double REAL64;
 
