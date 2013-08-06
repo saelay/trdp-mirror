@@ -42,10 +42,10 @@
  * GLOBAL FUNCTIONS
  */
 
-TRDP_ERR_T  trdp_getTCPSocket (
+TRDP_ERR_T  trdp_mdGetTCPSocket (
     TRDP_SESSION_PT pSession);
 
-void        trdp_closeMDSessions (
+void        trdp_mdCloseSessions (
     TRDP_SESSION_PT appHandle,
     INT32 socketIndex,
     INT32 newSocket,

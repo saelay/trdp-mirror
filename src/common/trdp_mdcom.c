@@ -61,7 +61,7 @@ static const TRDP_MD_INFO_T cTrdp_md_info_default;
  *  @retval         TRDP_NO_ERR           no error
  *  @retval         TRDP_PARAM_ERR        initialization error
  */
-TRDP_ERR_T trdp_getTCPSocket (
+TRDP_ERR_T trdp_mdGetTCPSocket (
     TRDP_SESSION_PT pSession)
 {
     TRDP_ERR_T      result = TRDP_NO_ERR;
@@ -137,7 +137,7 @@ void trdp_mdFreeSession (
  *  @param[in]      newSocket       the new socket
  *  @param[in]      checkAllSockets check all the sockets that are waiting to be closed
  */
-void trdp_closeMDSessions (
+void trdp_mdCloseSessions (
     TRDP_SESSION_PT appHandle,
     INT32 socketIndex,
     INT32 newSocket,
@@ -1530,7 +1530,7 @@ TRDP_ERR_T  trdp_mdSend (
     }
     while (TRUE); /*lint !e506 */
 
-    trdp_closeMDSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
+    trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
 
     return result;
 }
@@ -1856,7 +1856,7 @@ void  trdp_mdCheckListenSocks (
                             appHandle->iface[socketIndex].tcpParams.morituri = TRUE;
 
                             /* Manage the socket pool (update the socket) */
-                            trdp_closeMDSessions(appHandle, socketIndex, new_sd, TRUE);
+                            trdp_mdCloseSessions(appHandle, socketIndex, new_sd, TRUE);
 
                             socketFound = TRUE;
                             break;
@@ -1935,7 +1935,7 @@ void  trdp_mdCheckListenSocks (
 
                 appHandle->iface[lIndex].tcpParams.morituri = TRUE;
 
-                trdp_closeMDSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
+                trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
             }
         }
     }
@@ -2255,7 +2255,7 @@ void  trdp_mdCheckTimeouts (
         }
     }
 
-    trdp_closeMDSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
+    trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
 }
 
 /**********************************************************************************************************************/

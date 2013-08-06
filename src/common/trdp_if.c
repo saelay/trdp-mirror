@@ -2106,7 +2106,7 @@ TRDP_ERR_T tlm_addListener (
         /* Make sure that there is a TCP listener socket */
         if ((pktFlags & TRDP_FLAGS_TCP) != 0)
         {
-            errv = trdp_getTCPSocket(appHandle);
+            errv = trdp_mdGetTCPSocket(appHandle);
         }
 
         /* no error... */
