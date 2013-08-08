@@ -10,10 +10,10 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright Bombardier Transportation GmbH, Germany, 2012.
- *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *      
  *
  * $Id$
  *
@@ -283,11 +283,11 @@ typedef struct TRDP_SESSION
     UINT32                  redID;              /**< redundant comId                                        */
     UINT32                  topoCount;          /**< current valid topocount or zero                        */
     TRDP_TIME_T             nextJob;            /**< Store for next select interval                         */
-    TRDP_PRINT_DBG_T        pPrintDebugString;
-    TRDP_MARSHALL_CONFIG_T  marshall;
+    TRDP_PRINT_DBG_T        pPrintDebugString;  /**< Pointer to function to print debug information         */
+    TRDP_MARSHALL_CONFIG_T  marshall;           /**< Marshalling(unMarshalling configuration                */
     TRDP_PD_CONFIG_T        pdDefault;          /**< Default configuration for process data                 */
-    TRDP_MEM_CONFIG_T       memConfig;
-    TRDP_OPTION_T           option;
+    TRDP_MEM_CONFIG_T       memConfig;          /**< Internal memory handling configuration                 */
+    TRDP_OPTION_T           option;             /**< Stack behaviour options                                */
     TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use                   */
     PD_ELE_T                *pSndQueue;         /**< pointer to first element of send queue                 */
     PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue                  */
@@ -295,7 +295,7 @@ typedef struct TRDP_SESSION
     TRDP_STATISTICS_T       stats;              /**< statistics of this session                             */
 #if MD_SUPPORT
     TRDP_TCP_FD_T           tcpFd;              /**< TCP file descriptor parameters   */
-    TRDP_MD_CONFIG_T        mdDefault;
+    TRDP_MD_CONFIG_T        mdDefault;          /**< Default configuration for message data                 */
     MD_LIS_ELE_T            *pMDListenQueue;    /**< pointer to first element of listeners queue            */
     MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue (caller)     */
     MD_ELE_T                *pMDRcvQueue;       /**< pointer to first element of recv MD queue (replier)    */
