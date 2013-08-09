@@ -1445,7 +1445,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 								pReplierThreadParameter->pCommandValue->replierMdSendSuccessCounter++;
 							}
 						}
-						if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
+						else if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
 						{
 							/* Get TimeStamp when call tlm_replyQuery() */
 							sprintf(replierLogString, "%s tlm_replyQuery()", vos_getTimeStamp());

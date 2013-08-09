@@ -1023,14 +1023,30 @@ VOS_THREAD_FUNC_T MDCaller (
 									receiveMqMsg.Msg.numReplies,
 									receiveMqMsg.Msg.numRepliesQuery,
 									MD_APP_MRMP_ONE_CYCLE_ERR);
-							/* Receive Mp and No Repliers ? */
-							if ((receiveMqMsg.Msg.msgType == TRDP_MSG_MP)
-								&& (receiveMqMsg.Msg.numReplies <= 0))
+							/* Receive Mp and No Repliers */
+							/* or Receive Mr (Mr Timeout) */
+//							if ((receiveMqMsg.Msg.msgType == TRDP_MSG_MP)
+//								&& (receiveMqMsg.Msg.numReplies <= 0))
+							if (((receiveMqMsg.Msg.msgType == TRDP_MSG_MP) && (receiveMqMsg.Msg.numReplies <= 0))
+								|| ((receiveMqMsg.Msg.msgType == TRDP_MSG_MR) && (receiveMqMsg.Msg.aboutToDie > 0)))
 							{
 								/* MD Receive NG Count */
 								mdReceiveFailureCounter++;
 								/* MD Receive Count */
 								mdReceiveCounter++;
+								/* Result Code Err */
+								vos_printLog(VOS_LOG_ERROR, "Receive Message Result Code ERROR. result code:%d\n", receiveMqMsg.Msg.resultCode);
+								/* Change MD Send Subnet */
+								if (pCallerThreadParameter->pCommandValue->mdSendSubnet == MD_SEND_USE_SUBNET2)
+								{
+									/* Set MD Send Subnet : Subnet1 */
+									pCallerThreadParameter->pCommandValue->mdSendSubnet = MD_SEND_USE_SUBNET1;
+								}
+								else
+								{
+									/* Set MD Send Subnet : Subnet2 */
+									pCallerThreadParameter->pCommandValue->mdSendSubnet = MD_SEND_USE_SUBNET2;
+								}
 							}
 							/* Output LOG : Operation Log */
 							if ((((pCallerThreadParameter->pCommandValue->mdLog) & MD_OPERARTION_RESULT_LOG) == MD_OPERARTION_RESULT_LOG)

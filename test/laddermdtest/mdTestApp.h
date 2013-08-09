@@ -70,11 +70,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.37"
+#define MD_APP_VERSION	"V0.38"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.37"
+#define MD_APP_VERSION	"V0.38"
 #else
-#define MD_APP_VERSION	"V0.37"
+#define MD_APP_VERSION	"V0.38"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */

@@ -1058,7 +1058,7 @@ int main (int argc, char *argv[])
 		dataSet2.dataset1[0].timeDate64.tv_usec = 17;
 		dataSet2.dataset1[1].boolean = 1;
 		dataSet2.dataset1[1].character = 127-1;
-		dataSet2.dataset1[1].utf16 = 0xFFFFFFFF-1;
+		dataSet2.dataset1[1].utf16 = 0xFFFF-1;
 		dataSet2.dataset1[1].integer8 = 127-1;
 		dataSet2.dataset1[1].integer16 = 32767-1;
 		dataSet2.dataset1[1].integer32 = 2147483647-1;
