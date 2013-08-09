@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.32"
+#define PD_APP_VERSION	"V0.33"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.32"
+#define PD_APP_VERSION	"V0.33"
 #else
-#define PD_APP_VERSION	"V0.32"
+#define PD_APP_VERSION	"V0.33"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
