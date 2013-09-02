@@ -211,32 +211,19 @@
       <xs:attribute name="level" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
-            <xs:enumeration value="E"/>
-            <xs:enumeration value="e"/>
-            <xs:enumeration value="W"/>
-            <xs:enumeration value="w"/>
+              <xs:pattern value="([EeIiWw ]{3})|()" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="info" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
-            <xs:enumeration value="A"/>
-            <xs:enumeration value="a"/>
-            <xs:enumeration value="D"/>
-            <xs:enumeration value="d"/>
-            <xs:enumeration value="T"/>
-            <xs:enumeration value="t"/>
-            <xs:enumeration value="C"/>
-            <xs:enumeration value="c"/>
-            <xs:enumeration value="F"/>
-            <xs:enumeration value="f"/>
+            <xs:pattern value="([DTdtFfCc ]{4})|()" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
     </xs:complexType>
   </xs:element>
-
 
  <xs:element name="mapped-pd-parameter">
               <xs:complexType>
@@ -699,7 +686,7 @@ keep = keep the last value</xs:documentation>
   
   <xs:element name="element">
     <xs:complexType>
-      <xs:attribute name="name" type="name30" use="optional">
+      <xs:attribute name="name" type="xs:string" use="optional">
         <xs:annotation>
           <xs:documentation>Name of  the data set element. Not used by IPTCom but required when importing the file into the MTPE. Also displayed in the IPT-Spy.</xs:documentation>
         </xs:annotation>
@@ -733,7 +720,7 @@ keep = keep the last value</xs:documentation>
  1= single value &gt;1 Number of elements in array</xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="unit" type="name30" use="optional">
+      <xs:attribute name="unit" type="xs:string" use="optional">
         <xs:annotation>
           <xs:documentation>Unit text for visualisation purposes.</xs:documentation>
         </xs:annotation>
