@@ -3,14 +3,14 @@
 	<device-configuration memory-size="65535">
 		<mem-block-list>
 			<mem-block size="32" preallocate="0" />
-		</mem-block-list>		
-		<trdp-process />
-		<pd-com-parameter />
-		<md-com-parameter udp-port="20550" tcp-port="20550" />
+		</mem-block-list>
 	</device-configuration>
 	
    <bus-interface-list>
       <bus-interface network-id="1" name="eth0">
+		<trdp-process />
+		<pd-com-parameter />
+		<md-com-parameter udp-port="20550" tcp-port="20550" />
          <telegram name="compelte_telegram" com-id="999" data-set-id="999" >
              <!-- inside "md-parameter" or "pd-parameter" with optional stuff -->
          </telegram>
@@ -116,7 +116,7 @@
       </data-set>
 	  <data-set name="father_dataset" id="992">
 		<element name="UINT8" type="8" array-size="1" />
-		<element name="the_only_child" tqype="991" array-size="1" />
+		<element name="the_only_child" type="991" array-size="1" />
       </data-set>
 	  <data-set name="child_dataset" id="991">
 		<element name="UINT8" type="8" array-size="1" />
