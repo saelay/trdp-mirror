@@ -1,13 +1,22 @@
-/*
- *  test_marshalling.c
- *  trdp
+/**********************************************************************************************************************/
+/**
+ * @file            test_marshalling.c
  *
- *  Created by Bernd Lhr on 13.08.12.
- *  Copyright 2012 NewTec GmbH. All rights reserved.
+ * @brief           Test application for TRDP marshalling
  *
- *    $ID:$
+ * @details         Send PD Pull request for statistics and display them by unmarshalling them
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Bernd Loehr, NewTec GmbH
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *
+ * $Id$
+ *
  */
-
 #include <stdio.h>
 #include <string.h>
 #include "tau_marshall.h"

@@ -9,8 +9,28 @@
  *
  *  Created by Tomas Svoboda on 17.12.12.
  *  Copyright 2012 UniControls,a.s. All rights reserved.
+/**********************************************************************************************************************/
+/**
+ * @file            trdp-xmlprint-test.c
  *
- *    $ID:$
+ * @brief           Test of XML configuration file parsing
+ *
+ * @details         Reads data from provided TRDP XML configuration file using all three api functions:
+ *                  tau_readXmlConfig
+ *                  tau_readXmlDatasetConfig
+ *                  tau_readXmlInterfaceConfig
+ *                  Prints all parsed data to stdout.
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Tomas Svoboda, UniControls
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright UniControls, a.s., 2013. All rights reserved.
+ *
+ * $Id$
+ *
  */
 
 #include <stdio.h>

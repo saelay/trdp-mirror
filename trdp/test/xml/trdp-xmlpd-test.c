@@ -1,11 +1,21 @@
-/*
- *  trdp-xmlpd-test.c
- *  Test of PD comunication based on XML configuration file
+/**********************************************************************************************************************/
+/**
+ * @file            trdp-xmlpd-test.c
  *
- *  Created by Tomas Svoboda on 17.12.12.
- *  Copyright 2012 UniControls,a.s. All rights reserved.
+ * @brief           Test application for TRDP XMLPD
  *
- *    $ID:$
+ * @details
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Tomas Svoboda, UniControls
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright UniControls, 2013. All rights reserved.
+ *
+ * $Id$
+ *
  */
 
 #include <stdio.h>

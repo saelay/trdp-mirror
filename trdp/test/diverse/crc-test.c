@@ -1,9 +1,18 @@
-/*
- *  crc-test.c
- *  trdp
+/**********************************************************************************************************************/
+/**
+ * @file            crc-test.c
  *
- *  Created by Bernd Löhr on 18.01.13.
- *  Copyright 2013 NewTec GmbH. All rights reserved.
+ * @brief           Test application for crc
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Bernd Loehr, NewTec GmbH
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *
+ * $Id$
  *
  */
 
@@ -73,3 +82,4 @@ int main()
         printf(" = Wrong!!\n");
     }
 }
+
