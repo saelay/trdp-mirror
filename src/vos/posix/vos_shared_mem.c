@@ -10,11 +10,9 @@
  *
  * @author          Kazumasa Aiba, TOSHIBA
  *
- *
- * @remarks         All rights reserved. Reproduction, modification, use or disclosure
- *                  to third parties without express authority is forbidden,
- *                  Copyright TOSHIBA, Japan, 2013.
- *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright TOSHIBA, Japan, 2013.
  *
  * $Id: vos_mem.h 282 2013-01-11 07:08:44Z 97029 $
  *

@@ -1,6 +1,6 @@
 /**********************************************************************************************************************/
 /**
- * @file	mdTest0003.c
+ * @file	mdTest4.c
  *
  * @brief	UDPMDCom teat application
  *
@@ -18,9 +18,9 @@
  *
  * @author	Simone Pachera  (FAR Systems)
  *
- * @remarks	All rights reserved. Reproduction, modification, use or disclosure
- *		to third parties without express authority is forbidden,
- *		FAR Systems spa, Italy, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          FAR Systems spa, Italy, 2013.
  *
  * $Id: mdTest0002.c 178 2012-11-28 09:56:41Z spachera $
  *
