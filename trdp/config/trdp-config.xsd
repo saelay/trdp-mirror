@@ -4,7 +4,9 @@
   <xs:annotation>
     <xs:documentation>
 #=====================================================================================================
-#  COPYRIGHT     : (c) 2013 Bombardier Inc. or its subsidiaries
+#         This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+#         If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#         Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved..  
 #=====================================================================================================
 #
 #  PRODUCT       : TRDP
@@ -13,7 +15,7 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.2.0.0
+#  VERSION       : 1.4.0.0
 #
 #   HISTORY      :
 #                            1.4.0.0   type of dataset must be a number, not a textual description
