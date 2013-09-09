@@ -98,7 +98,7 @@ processNodes(xmlNodeSetPtr nodes)
 
     size = (nodes) ? nodes->nodeNr : 0;
 	id = 0;
-	
+
     /* handle each result separatly */
     for(i = 0; i < size; ++i)
     {
@@ -138,7 +138,9 @@ processNodes(xmlNodeSetPtr nodes)
             pWorkingDataset->datasetId=id;
             text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_DATASET_NAME));
             if (text > 0)
-                strncpy(pWorkingDataset->name, text, sizeof(pWorkingDataset->name));
+            {
+                pWorkingDataset->name = g_string_new(text);
+            }
             g_hash_table_insert(gTableDataset, GINT_TO_POINTER(pWorkingDataset->datasetId), pWorkingDataset);
         }
         else if (xmlStrEqual(cur->name, xmlCharStrdup(TAG_ELEMENT)))
@@ -158,7 +160,9 @@ processNodes(xmlNodeSetPtr nodes)
                     el->array_size = atoi( text );
                 text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_UNIT));
                 if (text > 0)
-                    strncpy(el->unit, text, sizeof(el->unit) );
+                {
+                    el->unit = g_string_new(text);
+                }
                 //FIXME add further attributes
                 text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_SCALE));
                 if (text > 0)
@@ -168,7 +172,9 @@ processNodes(xmlNodeSetPtr nodes)
                     el->offset = atoi( text );
                 text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_NAME));
                 if (text > 0)
-                    strncpy(el->name, text, sizeof(el->name) );
+                {
+                    el->name = g_string_new(text);
+                }
                 pWorkingDataset->listOfElements = g_slist_append (pWorkingDataset->listOfElements, el);
             }
         }
@@ -247,14 +253,20 @@ static void visit_list_item(gpointer data, gpointer user_data)
     if (data > 0)
     {
         struct Element* pData = (struct Element*) data;
-        printf("Element: type=%2d\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", pData->type, pData->name, pData->array_size, pData->unit, pData->scale, pData->offset);
+        printf("Element: type=%2d\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", pData->type, pData->name->str, pData->array_size, pData->unit->str, pData->scale, pData->offset);
     }
 }
 
 static void visit_list_free(gpointer data, gpointer user_data)
 {
+    struct Element* pItem = (struct Dataset*) data;
     if (data > 0)
     {
+        if (pItem->name > 0)
+            g_string_free(pItem->name, TRUE);
+        if (pItem->unit > 0)
+            g_string_free(pItem->unit, TRUE);
+
         free(data);
     }
 }
@@ -268,6 +280,10 @@ void visit_map_free(gpointer       key,
     if (value > 0)
     {
         pElement = (struct Dataset*) value;
+        if (pElement->name > 0)
+        {
+            g_string_free(pElement->name, TRUE);
+        }
         if (pElement->listOfElements > 0)
         {
             g_slist_foreach(pElement->listOfElements, visit_list_free, NULL);

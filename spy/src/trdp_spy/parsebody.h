@@ -57,7 +57,7 @@ struct ComId {
  */
 struct Dataset {
     guint datasetId;
-	gchar 	name[255];
+	GString *name;
 	GSList *listOfElements;
 };
 
@@ -77,10 +77,10 @@ struct Dataset {
  *  Offset that is added to the values. displayed value = scale * raw value + offset
  */
 struct Element {
-	gchar 	name[255]; //FIXME here would be a string better
+	GString* 	name;
 	guint32 	type;
 	guint32 array_size;
-	gchar 	unit[255];
+	GString* 	unit;
 	gfloat 	scale;
 	gint32 offset;
 };
