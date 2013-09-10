@@ -40,4 +40,5 @@ DISSECTOR_INCLUDES =	\
 # directory, but they're not dissectors themselves, i.e. they're not
 # used to generate "register.c").
 DISSECTOR_SUPPORT_SRC =	\
-	parsebody.c
+	parsebody.c \
+    lookuptype.c
