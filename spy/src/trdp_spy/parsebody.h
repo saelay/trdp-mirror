@@ -79,6 +79,7 @@ struct Dataset {
 struct Element {
 	GString* 	name;
 	guint32 	type;
+	GString* 	typeName;
 	guint32 array_size;
 	GString* 	unit;
 	gfloat 	scale;
