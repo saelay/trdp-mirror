@@ -1,34 +1,26 @@
-﻿/* parsebody.c
- * Routines for Train Real Time Data Protocol
- * Copyright 2012, Florian Weispfenning <florian.weispfenning@de.transport.bombardier.com>
+﻿/******************************************************************************/
+/**
+ * @file            parsebody.c
+ *
+ * @brief           Loading of the XML description
+ *
+ * @details
+ *
+ * @note            Project: TRDP SPY
+ *
+ * @author          Florian Weispfenning, Bombardier Transportation
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
- * Ethereal - Network traffic analyzer
- * By Gerald Combs <gerald@ethereal.com>
- * Copyright 1998 Gerald Combs
- *
- * Copied from WHATEVER_FILE_YOU_USED (where "WHATEVER_FILE_YOU_USED"
- * is a dissector file; if you just copied this from README.developer,
- * don't bother with the "Copied from" - you don't even need to put
- * in a "Copied from" if you copied an existing dissector, especially
- * if the bulk of the code in the new dissector is your code)
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+ 
+/*******************************************************************************
+ * INCLUDES
+ */
 #include "parsebody.h"
 
 #include <libxml/tree.h>
@@ -43,6 +35,9 @@
 
 #include "lookuptype.h"
 
+/*******************************************************************************
+ * DEFINES
+ */
 #define XPATH_EXPR			"//telegram | //element | //data-set"
 #define TAG_ELEMENT			"element"
 #define TAG_DATA_SET		"data-set"
@@ -59,6 +54,9 @@
 #define ATTR_SCALE			"scale"
 #define ATTR_OFFSET			"offset"
 
+/******************************************************************************
+ *   Locals
+ */
 static GHashTable *gTableComId = NULL;
 static GHashTable *gTableDataset = NULL;
 
@@ -67,6 +65,10 @@ struct SearchDataset
     guint32* pSearchdatasetId;
     struct Dataset* pdatasetId;
 };
+
+/******************************************************************************
+ *   Locals
+ */
 
 #if defined(LIBXML_XPATH_ENABLED) && defined(LIBXML_SAX1_ENABLED)
 
@@ -181,9 +183,11 @@ processNodes(xmlNodeSetPtr nodes)
 }
 
 /**
- * streamFile:
- * @filename: the file name to parse
  * Parse and store the necessary information from the XML file.
+ *  @param[in]   filename: the file name to parse
+ *  @return TRDP_PARSEBODY_ERR_FILE_NOT_FOUND
+  * @return TRDP_PARSEBODY_ERR_PARSE_XML
+  * @return TRDP_PARSEBODY_OK
  */
 TRDP_RET_t loadXML(const char *filename)
 {
@@ -244,8 +248,13 @@ TRDP_RET_t loadXML(const char *filename)
 
 #endif
 
-/********************* public accessable functions **********************************/
-
+/******************************************************************************/
+/** Iterate over the dataset elements.
+ *  For each item, clean its allocated memory and the item itself.
+ *
+ *  @param[in]      value                 actual element in the list
+ *  @param[in]      user_data       pointer to aditional parameters
+ */
 static void visit_list_free(gpointer data, gpointer user_data)
 {
     struct Element* pItem = (struct Element*) data;
@@ -262,7 +271,16 @@ static void visit_list_free(gpointer data, gpointer user_data)
     }
 }
 
-void visit_map_free(gpointer       key,
+/******************************************************************************/
+/** Iterate over the given hashTable containing all dataset elements.
+ *  Each elements memory is freed by calling  @see visit_list_free, 
+  * and the item itself is also removed from the memory.
+ *
+ *  @param[in]      key                     of the actual item
+ *  @param[in]      value                 stored information of the key
+ *  @param[in]      user_data       pointer to aditional parameters
+ */
+static void visit_map_free(gpointer       key,
                     gpointer       value,
                     gpointer       user_data)
 {
@@ -283,11 +301,13 @@ void visit_map_free(gpointer       key,
     }
 }
 
-int trdp_parsebody_isinited( void )
-{
-    return (gTableComId > 0);
-}
-
+/******************************************************************************/
+/** Iterate over the dataset elements.
+ *  For each item, that has no numeric type look this up by using the function @see  trdp_lookupType
+ *
+ *  @param[in]      value                 actual element in the list
+ *  @param[in]      user_data       pointer to aditional parameters
+ */
 static void visit_convert2number_element(gpointer value, gpointer userdata)
 {
     guint id;
@@ -302,7 +322,15 @@ static void visit_convert2number_element(gpointer value, gpointer userdata)
     }
 }
 
-void visit_convert2number(gpointer       key,
+/******************************************************************************/
+/** Iterate over the given hashTable containing all dataset elements.
+ *  For each element list iterate over the items by using @see  visit_convert2number_element
+ *
+ *  @param[in]      key                     of the actual item
+ *  @param[in]      value                 stored information of the key
+ *  @param[in]      user_data       pointer to aditional parameters
+ */
+static void visit_convert2number(gpointer       key,
                             gpointer       value,
                             gpointer       user_data)
 {
@@ -317,6 +345,13 @@ void visit_convert2number(gpointer       key,
     }
 }
 
+/******************************************************************************/
+/** insert a new dataset identified by its unique id.
+ * Next to the identifier, also a textual description is stored in the name attribute.
+ *
+ *  @param[in]      id                  unique identifier
+ *  @param[in]      textdescr   textual descrption
+ */
 static void insertStandardType(guint id, char* textdescr)
 {
     // create the memory to store the custom datatype
@@ -332,8 +367,23 @@ static void insertStandardType(guint id, char* textdescr)
     g_hash_table_insert(gTableDataset, GINT_TO_POINTER(pWorkingDataset->datasetId), pWorkingDataset);
 }
 
+/********************* public accessable functions **********************************/
+
+/******************************************************************************/
+/** insert a new dataset identified by its unique id.
+ * Next to the identifier, also a textual description is stored in the name attribute.
+ *
+ *  @param[in]      id                  unique identifier
+ *  @param[in]      textdescr   textual descrption
+ */
+int trdp_parsebody_isinited( void )
+{
+    return (gTableComId > 0);
+}
+
 /**
  * Create the module and extract all the needed information from the configuration file.
+  * @param[in]  xmlconfigFile   path to the file containing the XML description of the TRDP packets.
  * @return TRDP_PARSEBODY_OK when no errors occured
  */
 TRDP_RET_t trdp_parsebody_init(const char ** xmlconfigFile)
@@ -389,6 +439,7 @@ TRDP_RET_t trdp_parsebody_init(const char ** xmlconfigFile)
 
 /**
  * Looks up the dataset for a given ComId.
+  * @param[in] comId    to search for.
  * @return NULL, when nothing was found.
  */
 struct Dataset * trdp_parsebody_lookup(guint32 comId)
@@ -415,7 +466,7 @@ struct Dataset * trdp_parsebody_lookup(guint32 comId)
 
 /**
  * Uses the second hashmap to find the struct Dataset for a given datasetid
- * @param datasetId the dataset we are searching for
+ * @param[in]   datasetId       the dataset we are searching for
  * @return NULL, when nothing was found.
  */
 struct Dataset* trdp_parsebody_search(guint32 datasetId)
@@ -442,13 +493,14 @@ struct Dataset* trdp_parsebody_search(guint32 datasetId)
  */
 void trdp_parsebody_clean(void)
 {
-    if (gTableComId > 0)
+    /* Clean lookuptable for the comIds */
+     if (gTableComId > 0)
     {
         g_hash_table_destroy(gTableComId);
         gTableComId = NULL;
     }
 
-
+    /* Clean lookuptable for the datasets */
     if (gTableDataset > 0)
     {
         g_hash_table_foreach(gTableDataset, visit_map_free, NULL);
