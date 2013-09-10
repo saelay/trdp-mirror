@@ -10,14 +10,14 @@
  *
  * @author          Florian Weispfenning, Bombardier Transportation
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
  */
- 
+
 /*******************************************************************************
  * INCLUDES
  */
@@ -59,12 +59,6 @@
  */
 static GHashTable *gTableComId = NULL;
 static GHashTable *gTableDataset = NULL;
-
-struct SearchDataset
-{
-    guint32* pSearchdatasetId;
-    struct Dataset* pdatasetId;
-};
 
 /******************************************************************************
  *   Locals
@@ -273,7 +267,7 @@ static void visit_list_free(gpointer data, gpointer user_data)
 
 /******************************************************************************/
 /** Iterate over the given hashTable containing all dataset elements.
- *  Each elements memory is freed by calling  @see visit_list_free, 
+ *  Each elements memory is freed by calling  @see visit_list_free,
   * and the item itself is also removed from the memory.
  *
  *  @param[in]      key                     of the actual item
