@@ -15,9 +15,10 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.4.0.0
+#  VERSION       : 1.5.0.0
 #
 #   HISTORY      :
+#                            1.5.0.0   type of dataset can be again a number or a textual description of the standard types or the name of another dataset
 #                            1.4.0.0   type of dataset must be a number, not a textual description
 #                            1.3.0.0   trdp-process, md-com-parameter, pd-com-parameter moved from device-configuration to bus-interface
 #                            1.2.0.0   Support of optional attribute "callback" for md/pd-com-parameter, md/pd-parameter
@@ -213,14 +214,14 @@
       <xs:attribute name="level" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
-              <xs:pattern value="([EeIiWw ]{3})|()" />
+              <xs:pattern value="([EeIiWw ]{1,3})|()" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="info" use="optional">
         <xs:simpleType>
           <xs:restriction base="xs:string">
-            <xs:pattern value="([DTdtFfCc ]{4})|()" />
+            <xs:pattern value="([DTdtFfCc ]{1,4})|()" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
@@ -693,9 +694,9 @@ keep = keep the last value</xs:documentation>
           <xs:documentation>Name of  the data set element. Not used by IPTCom but required when importing the file into the MTPE. Also displayed in the IPT-Spy.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="type" type="int32"  use="required">
+      <xs:attribute name="type" use="required">
         <xs:annotation>
-          <xs:documentation>A numerical data-set ID for nested data types.
+          <xs:documentation>Either the name of a type like "INT8" or "UINT32" or a numerical data-set ID for nested data types.
           The following datatypes are predefined:
             BOOLEAN8	    1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
             CHAR8		            2       char, can be used also as UTF8 
@@ -715,6 +716,9 @@ keep = keep the last value</xs:documentation>
             TIMEDATE64	16	 32 bit seconds and 32 bit microseconds
           </xs:documentation>
         </xs:annotation>
+        <xs:simpleType>
+          <xs:union memberTypes="name30 uint32"/>
+        </xs:simpleType>
       </xs:attribute>
       <xs:attribute name="array-size" default="1" type="uint32" use="optional">
         <xs:annotation>
