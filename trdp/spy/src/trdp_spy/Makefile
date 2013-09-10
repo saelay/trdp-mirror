@@ -1,7 +1,7 @@
 # Modify to point to your Wireshark and glib include directories
 INCS = -I../../ -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/libxml2 
 
-SRCS     = plugin.c packet-trdp_spy.c parsebody.c
+SRCS     = plugin.c packet-trdp_spy.c parsebody.c lookuptype.c
 
 CC   = gcc
 

@@ -41,6 +41,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "lookuptype.h"
 
 #define XPATH_EXPR			"//telegram | //element | //data-set"
 #define TAG_ELEMENT			"element"
@@ -57,6 +58,7 @@
 #define ATTR_UNIT			"unit"
 #define ATTR_SCALE			"scale"
 #define ATTR_OFFSET			"offset"
+
 static GHashTable *gTableComId = NULL;
 static GHashTable *gTableDataset = NULL;
 
@@ -67,17 +69,6 @@ struct SearchDataset
 };
 
 #if defined(LIBXML_XPATH_ENABLED) && defined(LIBXML_SAX1_ENABLED)
-
-void datasetId_iterator(gpointer key, gpointer value, gpointer user_data)
-{
-    struct SearchDataset* pSD = (struct SearchDataset *) user_data;
-    struct Dataset *pElement = (struct Dataset *) value;
-    if (pElement->datasetId == *(pSD->pSearchdatasetId))
-    {
-        pSD->pdatasetId = pElement;
-        //printf("found: comId=%d (%s) datasetId=%d \t against %d\n", pElement->comId, pElement->name, pElement->datasetId, *(pSD->pSearchdatasetId));
-    }
-}
 
 /**
  * processNode:
@@ -134,8 +125,11 @@ processNodes(xmlNodeSetPtr nodes)
             pWorkingDataset = (struct Dataset *) g_malloc(sizeof *pWorkingDataset);
             memset(pWorkingDataset, 0, sizeof *pWorkingDataset);
 
-            id = atoi((const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_DATASET_ID)));
-            pWorkingDataset->datasetId=id;
+            text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_DATASET_ID));
+            id = atoi(text);
+            /* the stored information is a number */
+            pWorkingDataset->datasetId = id;
+
             text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_DATASET_NAME));
             if (text > 0)
             {
@@ -153,8 +147,12 @@ processNodes(xmlNodeSetPtr nodes)
 
                 /******* check if tags are present before trying to store them *************/
                 text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_TYPE));
-                if (text > 0)
-                    el->type = atoi( text );
+                el->type = atoi( text ); /* try to stored information as a number */
+                if (text > 0 && el->type == 0)
+                {
+                    el->typeName = g_string_new(text); /* store information as text */
+                }
+
                 text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_ARRAYSIZE));
                 if (text > 0)
                     el->array_size = atoi( text );
@@ -246,22 +244,15 @@ TRDP_RET_t loadXML(const char *filename)
 
 #endif
 
-/********************* public access able functions **********************************/
-
-static void visit_list_item(gpointer data, gpointer user_data)
-{
-    if (data > 0)
-    {
-        struct Element* pData = (struct Element*) data;
-        printf("Element: type=%2d\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", pData->type, pData->name->str, pData->array_size, pData->unit->str, pData->scale, pData->offset);
-    }
-}
+/********************* public accessable functions **********************************/
 
 static void visit_list_free(gpointer data, gpointer user_data)
 {
-    struct Element* pItem = (struct Dataset*) data;
+    struct Element* pItem = (struct Element*) data;
     if (data > 0)
     {
+        if (pItem->typeName > 0)
+            g_string_free(pItem->typeName, TRUE);
         if (pItem->name > 0)
             g_string_free(pItem->name, TRUE);
         if (pItem->unit > 0)
@@ -297,6 +288,50 @@ int trdp_parsebody_isinited( void )
     return (gTableComId > 0);
 }
 
+static void visit_convert2number_element(gpointer value, gpointer userdata)
+{
+    guint id;
+    struct Element* pItem = (struct Element*) value;
+    if (value > 0 && pItem->type == 0 && pItem->typeName != 0)
+    {
+        id = trdp_lookupType(gTableDataset, pItem->typeName);
+#ifdef PRINT_DEBUG
+        printf("Replaced %s by %d (original %d)\n", pItem->typeName->str, id, pItem->type);
+#endif
+        pItem->type = id;
+    }
+}
+
+void visit_convert2number(gpointer       key,
+                            gpointer       value,
+                            gpointer       user_data)
+{
+    struct Dataset* pElement;
+    if (value > 0)
+    {
+        pElement = (struct Dataset*) value;
+        if (pElement->listOfElements > 0)
+        {
+            g_slist_foreach(pElement->listOfElements, visit_convert2number_element, NULL);
+        }
+    }
+}
+
+static void insertStandardType(guint id, char* textdescr)
+{
+    // create the memory to store the custom datatype
+    struct Dataset * pWorkingDataset = (struct Dataset *) g_malloc(sizeof (struct Dataset));
+    memset(pWorkingDataset, 0, sizeof *pWorkingDataset);
+
+    pWorkingDataset->datasetId = id;
+    pWorkingDataset->name = g_string_new(textdescr);
+
+#ifdef PRINT_DEBUG
+    printf("%s -> %d\n", textdescr, id);
+#endif
+    g_hash_table_insert(gTableDataset, GINT_TO_POINTER(pWorkingDataset->datasetId), pWorkingDataset);
+}
+
 /**
  * Create the module and extract all the needed information from the configuration file.
  * @return TRDP_PARSEBODY_OK when no errors occured
@@ -316,6 +351,39 @@ TRDP_RET_t trdp_parsebody_init(const char ** xmlconfigFile)
     ret = loadXML(*xmlconfigFile);
     if (ret != TRDP_PARSEBODY_OK)
         trdp_parsebody_clean(); // there were problems -> clean the internal structure
+
+#ifdef PRINT_DEBUG
+        printf("================ Insert default types ================\n");
+#endif
+
+    /* Insert all default types */
+    insertStandardType(1,  "BOOLEAN8");
+    insertStandardType(2,  "CHAR8");
+    insertStandardType(3,  "UTF16");
+    insertStandardType(4,  "INT8");
+    insertStandardType(5,  "INT16");
+    insertStandardType(6,  "INT32");
+    insertStandardType(7,  "INT64");
+    insertStandardType(8,  "UINT8");
+    insertStandardType(9,  "UINT16");
+    insertStandardType(10, "UINT32");
+    insertStandardType(11, "UINT64");
+    insertStandardType(12, "REAL32");
+    insertStandardType(13, "REAL64");
+    insertStandardType(14, "TIMEDATE32");
+    insertStandardType(15, "TIMEDATE48");
+    insertStandardType(16, "TIMEDATE64");
+
+#ifdef PRINT_DEBUG
+        printf("================ Convert textual identifier with the correct numerical one ================\n");
+#endif
+
+    /* convert all textual mapping of elements to numbers (to increase the performance) */
+    if (gTableDataset > 0)
+    {
+        g_hash_table_foreach(gTableDataset, visit_convert2number, NULL);
+    }
+
     return ret;
 }
 
@@ -363,12 +431,6 @@ struct Dataset* trdp_parsebody_search(guint32 datasetId)
     if (mempos_found > 0)
     {
         pFound = (struct Dataset *) mempos_found;
-        //FIXME DEBUG printf("%s datasetId=%d %s\n", pFound->name, pFound->datasetId, (pFound->listOfElements > 0) ? " and a list" : "");
-
-//        if (pFound->listOfElements > 0)
-//        {
-//            g_slist_foreach(pFound->listOfElements, visit_list_item, NULL);
-//        }
     }
 
 

@@ -446,8 +446,13 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 		}
 		return offset;
 	}
-
-	ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "%s (dataset %d)", pFound->name->str, pFound->datasetId);
+    if (pFound > 0)
+    {
+        PRNT(printf("%s aka %d\n", (pFound->name) ? pFound->name->str : "", pFound->datasetId));
+    } else {
+        PRNT(printf("Could not find something %s : %d\n", (flag_dataset) ? "DATASET" : "COMID", trdp_spy_comid ));
+    }
+	ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "%s (dataset %d)", (pFound->name) ? pFound->name->str : "", pFound->datasetId);
 	trdp_spy_userdata = proto_item_add_subtree(ti, ett_trdp_spy_userdata);
 
 	if (pFound->listOfElements <= 0)
@@ -463,8 +468,8 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
     {
 		el = (struct Element *) gActualNode->data;
 
-        PRNT(printf("[%d, %5x] Offset %5d ----> Element: type=%2d\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level, gActualNode /* FIXME debug has to be removed */,
-                     offset, el->type, el->name->str, el->array_size, el->unit, el->scale, el->offset));
+        PRNT(printf("[%d, %5x] Offset %5d ----> Element: type=%2d %s\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level, gActualNode /* FIXME debug has to be removed */,
+                     offset, el->type, (el->typeName) ? el->typeName->str : "", el->name->str, el->array_size, el->unit, el->scale, el->offset));
 
         value8u = 0; // flag, if there was a dynamic list found
 
