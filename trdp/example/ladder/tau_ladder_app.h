@@ -115,7 +115,7 @@ typedef enum
 /* Command Value */
 typedef struct PD_COMMAND_VALUE
 {
-//	BOOL ladderTopologyFlag;						/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
+//	BOOL8 ladderTopologyFlag;						/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
 	UINT16 OFFSET_ADDRESS1;						/* offsetAddress comId1 publish */
 //	UINT16 OFFSET_ADDRESS2;						/* offsetAddress comId2 publish */
 	UINT16 OFFSET_ADDRESS3;						/* offsetAddress comId1 subscribe */
@@ -172,7 +172,7 @@ typedef struct PD_THREAD_PARAMETER
 /**	DataSet definition	*/
 typedef struct
 {
-	BOOL			boolean;		/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+	BOOL8			boolean;		/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
 	CHAR8			character;		/**< char, can be used also as UTF8 */
 	UTF16			utf16;			/**< Unicode UTF-16 character */
 	INT8			integer8;		/**< Signed integer, 8 bit */
@@ -257,14 +257,14 @@ extern TRDP_IP_ADDR_T PD_COMID2_SRC_IP2;
 extern UINT32 PD_COMID1_CYCLE;
 extern UINT32 PD_COMID2_CYCLE;
 /* Ladder Topolpgy enable/disable */
-extern BOOL ladderTopologyFlag;			/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
+extern BOOL8 ladderTopologyFlag;			/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
 /* OFFSET ADDRESS */
 extern UINT16 OFFSET_ADDRESS1;				/* offsetAddress comId1 publish */
 extern UINT16 OFFSET_ADDRESS2;				/* offsetAddress comId2 publish */
 extern UINT16 OFFSET_ADDRESS3;				/* offsetAddress comId1 subscribe */
 extern UINT16 OFFSET_ADDRESS4;				/* offsetAddress comId2 subscribe */
 /* Marshalling enable/disable */
-extern BOOL marshallingFlag;				/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
+extern BOOL8 marshallingFlag;				/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
 /* publisher Application Cycle Time */
 extern UINT32	publisherAppCycle;			/* Publisher Application cycle in us */
 
@@ -622,7 +622,7 @@ PD_APP_ERR_TYPE printSpecificPdSubscribeResult (
  *
  */
 PD_APP_ERR_TYPE createPdDataSet1 (
-		BOOL firstCreateFlag,
+		BOOL8 firstCreateFlag,
 		DATASET1 *pPdDataSet1);
 
 /**********************************************************************************************************************/
@@ -636,7 +636,7 @@ PD_APP_ERR_TYPE createPdDataSet1 (
  *
  */
 PD_APP_ERR_TYPE createPdDataSet2 (
-		BOOL firstCreateFlag,
+		BOOL8 firstCreateFlag,
 		DATASET2 *pPdDataSet2);
 
 /**********************************************************************************************************************/

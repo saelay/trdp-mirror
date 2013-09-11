@@ -52,8 +52,8 @@ extern UINT16 TRAFFIC_STORE_MUTEX_VALUE_AREA;		/* Traffic Store mutex ID Area */
 
 /* PDComLadderThread */
 extern CHAR8 pdComLadderThreadName[];		/* Thread name is PDComLadder Thread. */
-extern BOOL pdComLadderThreadActiveFlag;	/* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
-extern BOOL pdComLadderThreadStartFlag;	/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
+extern BOOL8 pdComLadderThreadActiveFlag;	/* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
+extern BOOL8 pdComLadderThreadStartFlag;	/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
 
 /* Sub-net */
 extern UINT32 usingSubnetId;				/* Using SubnetId */
@@ -94,7 +94,7 @@ TRDP_ERR_T tau_ladder_terminate (
  *  @retval         TRDP_NO_ERR			no error
  */
 TRDP_ERR_T  tau_setPdComLadderThreadStartFlag (
-    BOOL startFlag);
+    BOOL8 startFlag);
 
 /**********************************************************************************************************************/
 /** Set SubNetwork Context.
@@ -162,7 +162,7 @@ TRDP_ERR_T  tau_unlockTrafficStore (
  */
 TRDP_ERR_T  tau_checkLinkUpDown (
 	UINT32 checkSubnetId,
-	BOOL *pLinkUpDown);
+	BOOL8 *pLinkUpDown);
 
 #endif	/* TRDP_OPTION_LADDER */
 

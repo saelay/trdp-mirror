@@ -71,8 +71,8 @@ UINT16 TRAFFIC_STORE_MUTEX_VALUE_AREA = 0xFF00;		/* Traffic Store mutex ID Area 
 
 /* PDComLadderThread */
 CHAR8 pdComLadderThreadName[] ="PDComLadderThread";		/* Thread name is PDComLadder Thread. */
-BOOL pdComLadderThreadActiveFlag = FALSE;				/* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
-BOOL pdComLadderThreadStartFlag = FALSE;				/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
+BOOL8 pdComLadderThreadActiveFlag = FALSE;				/* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
+BOOL8 pdComLadderThreadStartFlag = FALSE;				/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
 
 /* Sub-net */
 UINT32 usingSubnetId;									/* Using SubnetId */
@@ -99,7 +99,7 @@ TRDP_ERR_T tau_ladder_init (void)
 
 	/* PDComLadderThread */
 	extern CHAR8 pdComLadderThreadName[];			/* Thread name is PDComLadder Thread. */
-	extern BOOL pdComLadderThreadActiveFlag;		/* PDComLaader Thread active/non-active Flag :active=TRUE, nonActive=FALSE */
+	extern BOOL8 pdComLadderThreadActiveFlag;		/* PDComLaader Thread active/non-active Flag :active=TRUE, nonActive=FALSE */
 	VOS_THREAD_T pdComLadderThread = NULL;			/* Thread handle */
 
 	/* Traffic Store Mutex */
@@ -239,9 +239,9 @@ TRDP_ERR_T tau_ladder_terminate (void)
  *  @retval         TRDP_NO_ERR			no error
  */
 TRDP_ERR_T  tau_setPdComLadderThreadStartFlag (
-    BOOL startFlag)
+    BOOL8 startFlag)
 {
-	extern BOOL pdComLadderThreadStartFlag; /* PDComLadder Thread instruction start up Flag
+	extern BOOL8 pdComLadderThreadStartFlag; /* PDComLadder Thread instruction start up Flag
 													:start=TRUE, stop=FALSE */
 
 	pdComLadderThreadStartFlag = startFlag;
@@ -358,7 +358,7 @@ TRDP_ERR_T  tau_unlockTrafficStore (
  */
 TRDP_ERR_T  tau_checkLinkUpDown (
 	UINT32 checkSubnetId,
-	BOOL *pLinkUpDown)
+	BOOL8 *pLinkUpDown)
 {
 	static int ifGetSocket = 0;
 	struct ifreq ifRead;
