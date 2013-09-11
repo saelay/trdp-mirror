@@ -401,7 +401,7 @@ TRDP_RET_t trdp_parsebody_init(const char ** xmlconfigFile)
 #endif
 
     /* Insert all default types */
-    insertStandardType(1,  "BOOLEAN8");
+    insertStandardType(1,  "BOOL8");
     insertStandardType(2,  "CHAR8");
     insertStandardType(3,  "UTF16");
     insertStandardType(4,  "INT8");
