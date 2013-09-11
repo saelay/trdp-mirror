@@ -156,7 +156,7 @@ void pd_updateSubscriber (int index)
 
 
 /******************************************************************************/
-void pd_stop (BOOL redundant)
+void pd_stop (int redundant)
 {
     tlp_setRedundant(gAppHandle, 0, redundant);
 }
@@ -236,7 +236,7 @@ void pd_deinit ()
 }
 
 /******************************************************************************/
-void pd_updatePublisher (BOOL stop)
+void pd_updatePublisher (int stop)
 {
     TRDP_ERR_T err;
     err = tlp_unpublish(gAppHandle, gPubHandle);

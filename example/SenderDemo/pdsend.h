@@ -46,9 +46,9 @@ int pd_init(
 
 void pd_deinit();
 
-void pd_stop(BOOL redundant);
+void pd_stop(int redundant);
 
-void pd_updatePublisher(BOOL stop);
+void pd_updatePublisher(int stop);
 void pd_updateSubscriber(int index);
 void pd_updateData(
 	uint8_t	*pData,

@@ -584,7 +584,7 @@ TRDP_DATASET_T          dsTest =
     65,         /*    No of elements    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
-            TRDP_BOOLEAN,  /*    data type        */
+            TRDP_BOOL8,     /*    data type        */
             1               /*    no of elements    */
         },
         {
@@ -648,7 +648,7 @@ TRDP_DATASET_T          dsTest =
             1
         },
         {
-            TRDP_BOOLEAN,  /*    data type        */
+            TRDP_BOOL8,     /*    data type        */
             4               /*    no of elements    */
         },
         {
@@ -716,7 +716,7 @@ TRDP_DATASET_T          dsTest =
             1
         },
         {
-            TRDP_BOOLEAN,   /*    data type        */
+            TRDP_BOOL8,     /*    data type        */
             0               /*    no of elements    */
         },
         {
