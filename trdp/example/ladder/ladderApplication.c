@@ -137,7 +137,7 @@ int main (void)
 {
     CHAR8 putData[PD_DATA_SIZE_MAX];				/* put DATA */
     INT32 putCounter = 0;							/* put counter */
-    BOOL linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
+    BOOL8 linkUpDown = TRUE;		                /* Link Up Down information TRUE:Up FALSE:Down */
     /* Using Receive Subnet in order to Wirte PD in Traffic Store  */
     UINT32 TS_SUBNET = 1;
 

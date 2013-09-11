@@ -303,7 +303,7 @@ EXT_DECL TRDP_ERR_T tlp_put (
 EXT_DECL TRDP_ERR_T tlp_setRedundant (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              redId,
-    BOOL                leader
+    BOOL8               leader
     );
 
 /**********************************************************************************************************************/
@@ -320,7 +320,7 @@ EXT_DECL TRDP_ERR_T tlp_setRedundant (
 EXT_DECL TRDP_ERR_T tlp_getRedundant (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              redId,
-    BOOL                *pLeader
+    BOOL8               *pLeader
     );
 
 

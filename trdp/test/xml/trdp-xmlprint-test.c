@@ -156,7 +156,7 @@ static void printDatasets(
     )
 {
     const char * strtrdpTypes[17] = {
-        "UNKNOWN", "BOOLEAN", "CHAR8", "UTF16", 
+        "UNKNOWN", "BOOL8", "CHAR8", "UTF16", 
         "INT8", "INT16", "INT32", "INT64", 
         "UINT8", "UINT16", "UINT32", "UINT64", 
         "REAL32","REAL64", "TIMEDATE32", "TIMEDATE48", "TIMEDATE64"};

@@ -317,7 +317,7 @@ static void parseIPADDR (xmlNodePtr pXmlElem, const char *pAttrName, UINT32 *pVa
 * Checks if value of given attribute equals to supplied value, ignore case.
 * Returns true if values are equal, false otherwise.
 */
-static BOOL checkAttrValue (xmlNodePtr pXmlElem, const char *pAttrName, const char *pValue)
+static BOOL8 checkAttrValue (xmlNodePtr pXmlElem, const char *pAttrName, const char *pValue)
 {
     xmlChar *pAttr;
 
@@ -437,9 +437,9 @@ static void parseDSElemType (xmlNodePtr pXmlElem, const char *pAttrName, UINT32 
         *pElemType = tmpType;
     }
     /*  Try to convert string data type name    */
-    else if (!xmlStrcmp(pAttr, BAD_CAST "BOOLEAN"))
+    else if (!xmlStrcmp(pAttr, BAD_CAST "BOOL8"))
     {
-        *pElemType = TRDP_BOOLEAN;
+        *pElemType = TRDP_BOOL8;
     }
     else if (!xmlStrcmp(pAttr, BAD_CAST "CHAR8"))
     {

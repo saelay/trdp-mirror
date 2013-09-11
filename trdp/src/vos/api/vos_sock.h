@@ -102,8 +102,8 @@ typedef struct
     UINT8   qos;            /**< quality/type of service 0...7                     */
     UINT8   ttl;            /**< time to live for unicast (default 64)             */
     UINT8   ttl_multicast;  /**< time to live for multicast                        */
-    BOOL    reuseAddrPort;  /**< allow reuse of address and port                   */
-    BOOL    nonBlocking;    /**< use non blocking calls                            */
+    BOOL8   reuseAddrPort;  /**< allow reuse of address and port                   */
+    BOOL8   nonBlocking;    /**< use non blocking calls                            */
 } VOS_SOCK_OPT_T;
 
 typedef fd_set VOS_FDS_T;
@@ -195,7 +195,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
  *  @retval             FALSE          address is not a multicast address
  */
 
-EXT_DECL BOOL vos_isMulticast (
+EXT_DECL BOOL8 vos_isMulticast (
     UINT32 ipAddress);
 
 /**********************************************************************************************************************/
@@ -425,7 +425,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT32  *pSrcIPAddr,
     UINT16  *pSrcIPPort,
     UINT32  *pDstIPAddr,
-    BOOL    peek);
+    BOOL8    peek);
 
 /**********************************************************************************************************************/
 /** Bind a socket to an address and port.

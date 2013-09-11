@@ -52,7 +52,7 @@ const size_t    cDefaultStackSize   = 16 * 1024;
 const UINT32    cMutextMagic        = 0x1234FEDC;
 
 UINT16          uuidCycle = 0;
-BOOL            vosThreadInitialised = FALSE;
+BOOL8           vosThreadInitialised = FALSE;
 pthread_t       threadHandle[VOS_MAX_THREAD_CNT];
 
 /***********************************************************************************************************************

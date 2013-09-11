@@ -232,7 +232,7 @@ typedef struct
     TRDP_MSG_T          msgType;            /**< Protocol ('PD', 'MD', ...)                 */
     UINT32              comId;              /**< ComID                                      */
     UINT32              topoCount;          /**< received topocount                         */
-    BOOL                aboutToDie;         /**< session is about to die                    */
+    BOOL8               aboutToDie;         /**< session is about to die                    */
     UINT32              numRepliesQuery;    /**< number of ReplyQuery received              */
     UINT32              numConfirmSent;     /**< number of Confirm sent                     */
     UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners */
@@ -264,7 +264,7 @@ typedef struct
 /**    Dataset element definition    */
 typedef enum
 {
-    TRDP_BOOLEAN    = 1,   /**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+    TRDP_BOOL8      = 1,   /**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
     TRDP_CHAR8      = 2,   /**< char, can be used also as UTF8    */
     TRDP_UTF16      = 3,   /**< Unicode UTF-16 character          */
     TRDP_INT8       = 4,   /**< Signed integer, 8 bit             */

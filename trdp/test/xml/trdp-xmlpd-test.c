@@ -425,7 +425,7 @@ static TRDP_ERR_T printDatasetElem(UINT8 * pBuff, UINT32 * pOffset, UINT32 elemT
         switch (elemType)
         {
 
-        case TRDP_BOOLEAN:
+        case TRDP_BOOL8:
             printf("B[%u]: %u, ", i, *(UINT8 *)pData);
             break;
         case TRDP_CHAR8:
@@ -917,7 +917,7 @@ void processData()
     TRDP_ERR_T result;
     UINT32 i;
     VOS_TIME_T now, delay, nextData, nextCycle, dataPeriod, cyclePeriod;
-    BOOL bDataPeriod = FALSE;
+    BOOL8 bDataPeriod = FALSE;
     UINT32 dataSize;
 
     /*  Cycle period  */

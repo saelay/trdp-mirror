@@ -132,12 +132,12 @@ typedef struct TRDP_HANDLE
 typedef struct TRDP_SOCKET_TCP
 {
     TRDP_IP_ADDR_T  cornerIp;                           /**< The other TCP corner Ip                      */
-    BOOL            notSend;                            /**< If the message has been sent uncompleted     */
+    BOOL8           notSend;                            /**< If the message has been sent uncompleted     */
     TRDP_TIME_T     connectionTimeout;                  /**< TCP socket connection Timeout                */
-    BOOL            sendNotOk;                          /**< The sending timeout will be start            */
+    BOOL8           sendNotOk;                          /**< The sending timeout will be start            */
     TRDP_TIME_T     sendingTimeout;                     /**< The timeout sending the message              */
-    BOOL            addFileDesc;                        /**< Ready to add the socket in the fd            */
-    BOOL            morituri;                           /**< about to die                                 */
+    BOOL8           addFileDesc;                        /**< Ready to add the socket in the fd            */
+    BOOL8           morituri;                           /**< about to die                                 */
 }TRDP_SOCKET_TCP_T;
 
 
@@ -148,7 +148,7 @@ typedef struct TRDP_SOCKETS
     TRDP_IP_ADDR_T      bindAddr;                        /**< Defines the interface to use                */
     TRDP_SEND_PARAM_T   sendParam;                       /**< Send parameters                             */
     TRDP_SOCK_TYPE_T    type;                            /**< Usage of this socket                        */
-    BOOL                rcvMostly;                       /**< Used for receiving                          */
+    BOOL8               rcvMostly;                       /**< Used for receiving                          */
     INT16               usage;                           /**< No. of current users of this socket         */
     TRDP_SOCKET_TCP_T   tcpParams;                       /**< Params used for TCP                         */
     TRDP_IP_ADDR_T      mcGroups[VOS_MAX_MULTICAST_CNT]; /**< List of multicast addresses for this socket */
@@ -223,8 +223,8 @@ typedef struct MD_LIS_ELE
 /** Tcp connection parameters    */
 typedef struct TRDP_MD_TCP
 {
-    BOOL    doConnect;                          /**< TCP connection state                                   */
-    BOOL    msgUncomplete;                      /**< The receive message is uncomplete                   */
+    BOOL8   doConnect;                          /**< TCP connection state                                   */
+    BOOL8   msgUncomplete;                      /**< The receive message is uncomplete                   */
 } TRDP_MD_TCP_T;
 
 /** Session queue element for MD (UDP and TCP)  */
@@ -235,7 +235,7 @@ typedef struct MD_ELE
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter             */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
-    BOOL                morituri;               /**< about to die                                           */
+    BOOL8               morituri;               /**< about to die                                           */
     TRDP_TIME_T         interval;               /**< time out value for received packets or
                                                      interval for packets to send (set from ms)             */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
@@ -278,7 +278,7 @@ typedef struct TRDP_SESSION
     VOS_MUTEX_T             mutex;              /**< protect this session                                   */
     TRDP_IP_ADDR_T          realIP;             /**< Real IP address                                        */
     TRDP_IP_ADDR_T          virtualIP;          /**< Virtual IP address                                     */
-    BOOL                    beQuiet;            /**< if set, only react on ownIP requests                   */
+    BOOL8                   beQuiet;            /**< if set, only react on ownIP requests                   */
     UINT32                  redID;              /**< redundant comId                                        */
     UINT32                  topoCount;          /**< current valid topocount or zero                        */
     TRDP_TIME_T             nextJob;            /**< Store for next select interval                         */

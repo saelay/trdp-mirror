@@ -409,7 +409,7 @@ static TRDP_ERR_T do_marshall (
         {
             switch (pDataset->pElement[lIndex].type)
             {
-                case TRDP_BOOLEAN:
+                case TRDP_BOOL8:
                 case TRDP_CHAR8:
                 case TRDP_INT8:
                 case TRDP_UINT8:
@@ -624,7 +624,7 @@ static TRDP_ERR_T do_unmarshall (
         {
             switch (pDataset->pElement[lIndex].type)
             {
-                case TRDP_BOOLEAN:
+                case TRDP_BOOL8:
                 case TRDP_CHAR8:
                 case TRDP_INT8:
                 case TRDP_UINT8:
@@ -839,7 +839,7 @@ static TRDP_ERR_T size_marshall (
         {
             switch (pDataset->pElement[lIndex].type)
             {
-                case TRDP_BOOLEAN:
+                case TRDP_BOOL8:
                 case TRDP_CHAR8:
                 case TRDP_INT8:
                 case TRDP_UINT8:

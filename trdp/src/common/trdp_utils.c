@@ -74,7 +74,7 @@ void printSocketUsage (
  *  @retval         1           if found
  *                  0           if not found
  */
-BOOL trdp_SockIsJoined (
+BOOL8 trdp_SockIsJoined (
     const TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T          mcGroup)
 {
@@ -97,7 +97,7 @@ BOOL trdp_SockIsJoined (
  *  @retval         1           if added
  *                  0           if list is full
  */
-BOOL trdp_SockAddJoin (
+BOOL8 trdp_SockAddJoin (
     TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T  mcGroup)
 {
@@ -124,7 +124,7 @@ BOOL trdp_SockAddJoin (
  *  @retval         1           if deleted
  *                  0           was not in list
  */
-BOOL trdp_SockDelJoin (
+BOOL8 trdp_SockDelJoin (
     TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T  mcGroup)
 {
@@ -582,7 +582,7 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_IP_ADDR_T          mcGroup,
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
-    BOOL                    rcvMostly,
+    BOOL8                   rcvMostly,
     INT32                   useSocket,
     INT32                   *pIndex,
     TRDP_IP_ADDR_T          cornerIp)
@@ -852,7 +852,7 @@ void  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
     INT32           lIndex,
     UINT32          connectTimeout,
-    BOOL            checkAll)
+    BOOL8           checkAll)
 {
     TRDP_ERR_T  err = TRDP_PARAM_ERR;
     INT32       index;
@@ -1036,7 +1036,7 @@ UINT32  trdp_getSeqCnt (
  *  @retval         return the sequence number
  */
 
-BOOL  trdp_isRcvSeqCnt (
+BOOL8  trdp_isRcvSeqCnt (
     UINT32          seqCnt,
     UINT32          comId,
     TRDP_MSG_T      msgType,
@@ -1101,7 +1101,7 @@ BOOL  trdp_isRcvSeqCnt (
  *  @retval         TRUE  - listener URI is in addressing range of destination URI
  */
 
-BOOL trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T destUri)
+BOOL8 trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T destUri)
 {
     return (vos_strnicmp(listUri, destUri, TRDP_DEST_URI_SIZE) == 0);
 }
