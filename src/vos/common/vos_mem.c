@@ -89,7 +89,7 @@ typedef struct
     UINT32              memSize;        /* Size of memory area */
     UINT32              allocSize;      /* Size of allocated area */
     UINT32              noOfBlocks;     /* No of blocks */
-    BOOL                wasMalloced;    /* needs to be freed in the end */
+    BOOL8               wasMalloced;    /* needs to be freed in the end */
 
     /* Free block header array, one entry for each possible free block size */
     struct
@@ -839,7 +839,7 @@ EXT_DECL VOS_ERR_T vos_queueSend (
 {
     VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
     VOS_ERR_T err = VOS_UNKNOWN_ERR;
-    BOOL giveSemaphore = FALSE;
+    BOOL8     giveSemaphore = FALSE;
 
     if ((queueHandle == (VOS_QUEUE_T) NULL)
         || (pData == NULL)

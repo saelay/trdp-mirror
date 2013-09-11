@@ -145,7 +145,7 @@ TRDP_ERR_T trdp_requestSocket(
     TRDP_IP_ADDR_T mcGroup,
     TRDP_SOCK_TYPE_T usage,
     TRDP_OPTION_T options,
-    BOOL rcvMostly,
+    BOOL8 rcvMostly,
     INT32 useSocket,
     INT32                   * pIndex,
     TRDP_IP_ADDR_T cornerIp);
@@ -164,7 +164,7 @@ void trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
     INT32 lIndex,
     UINT32 connectTimeout,
-    BOOL checkAll);
+    BOOL8 checkAll);
 
 
 /*********************************************************************************************************************/
@@ -227,7 +227,7 @@ UINT32 trdp_getSeqCnt (
  *  @retval         return the sequence number
  */
 
-BOOL trdp_isRcvSeqCnt (
+BOOL8 trdp_isRcvSeqCnt (
     UINT32          seqCnt,
     UINT32          comId,
     TRDP_MSG_T      msgType,
@@ -244,7 +244,7 @@ BOOL trdp_isRcvSeqCnt (
  *  @retval         TRUE  - listener URI is in addressing range of destination URI
  */
 
-BOOL trdp_isAddressed (
+BOOL8 trdp_isAddressed (
     const TRDP_URI_USER_T   listUri,
     const TRDP_URI_USER_T   destUri);
 

@@ -52,7 +52,7 @@ extern "C" {
  *  @retval         TRUE              is valid
  *  @retval         FALSE             is invalid
  */
-BOOL trdp_isValidSession (TRDP_APP_SESSION_T pSessionHandle);
+BOOL8 trdp_isValidSession (TRDP_APP_SESSION_T pSessionHandle);
 
 /**********************************************************************************************************************/
 /** Get the session queue head pointer

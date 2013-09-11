@@ -48,7 +48,7 @@ void        trdp_mdCloseSessions (
     TRDP_SESSION_PT appHandle,
     INT32 socketIndex,
     INT32 newSocket,
-    BOOL checkAllSockets);
+    BOOL8 checkAllSockets);
 
 void        trdp_mdFreeSession (
     MD_ELE_T *pMDSession);

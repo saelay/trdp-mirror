@@ -125,7 +125,7 @@ static const UINT32 crc_table[256] PROGMEM =
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-static BOOL         sIsBigEndian            = FALSE;
+static BOOL8        sIsBigEndian            = FALSE;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -338,7 +338,7 @@ UINT32 vos_crc32 (
  *
  *  @retval             TRUE if big endian
  */
-INLINE BOOL vos_isBigEndian (void)
+INLINE BOOL8 vos_isBigEndian (void)
 {
     return sIsBigEndian;
 }

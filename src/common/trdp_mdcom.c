@@ -140,7 +140,7 @@ void trdp_mdCloseSessions (
     TRDP_SESSION_PT appHandle,
     INT32 socketIndex,
     INT32 newSocket,
-    BOOL checkAllSockets)
+    BOOL8 checkAllSockets)
 {
 
     MD_ELE_T *iterMD;
@@ -257,7 +257,7 @@ TRDP_ERR_T trdp_mdCheck (
     TRDP_SESSION_PT appHandle,
     MD_HEADER_T     *pPacket,
     UINT32          packetSize,
-    BOOL            checkHeaderOnly)
+    BOOL8           checkHeaderOnly)
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
     UINT32      l_datasetLength = vos_ntohl(pPacket->datasetLength);
@@ -731,7 +731,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
     if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0)
     {
-        BOOL    noDataToRead = FALSE;
+        BOOL8    noDataToRead = FALSE;
         /* All the data (Header + Data) stored in the uncompletedTCP[] array */
         UINT32  storedDataSize = 0;
 
@@ -912,8 +912,8 @@ TRDP_ERR_T  trdp_mdRecv (
     MD_ELE_T            *iterMD         = NULL;
     MD_LIS_ELE_T        *iterListener   = NULL;
     TRDP_MD_ELE_ST_T    state;
-    BOOL    isTCP = FALSE;
-    UINT32  numOfReceivers = 0;
+    BOOL8               isTCP           = FALSE;
+    UINT32              numOfReceivers  = 0;
 
     if (appHandle == NULL)
     {
@@ -1252,7 +1252,7 @@ TRDP_ERR_T  trdp_mdSend (
 {
     TRDP_ERR_T  result      = TRDP_NO_ERR;
     MD_ELE_T    *iterMD     = appHandle->pMDSndQueue;
-    BOOL        firstLoop   = TRUE;
+    BOOL8       firstLoop   = TRUE;
 
     /*  Find the packet which has to be sent next:
      Note: We must also check the receive queue for pending replies! */
@@ -1818,7 +1818,7 @@ void  trdp_mdCheckListenSocks (
                 /* Compare with the sockets stored in the socket list */
                 {
                     INT32   socketIndex;
-                    BOOL    socketFound = FALSE;
+                    BOOL8   socketFound = FALSE;
 
                     for (socketIndex = 0; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++)
                     {
@@ -1950,8 +1950,8 @@ void  trdp_mdCheckTimeouts (
     TRDP_SESSION_PT appHandle)
 {
     MD_ELE_T    *iterMD     = appHandle->pMDSndQueue;
-    BOOL        firstLoop   = TRUE;
-    BOOL        timeOut     = FALSE;
+    BOOL8       firstLoop   = TRUE;
+    BOOL8       timeOut     = FALSE;
     TRDP_TIME_T now;
 
     if (appHandle == NULL)
@@ -2283,7 +2283,7 @@ TRDP_ERR_T trdp_mdCommonSend (
     TRDP_ERR_T  errv = TRDP_NO_ERR;
     MD_ELE_T    *pSenderElement = NULL;
     UINT32      sequenceCounter = 0;
-    BOOL        newSession      = FALSE;
+    BOOL8       newSession      = FALSE;
 
     if (!trdp_isValidSession(appHandle))
     {
