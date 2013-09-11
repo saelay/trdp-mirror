@@ -109,7 +109,7 @@ EXT_DECL UINT32 vos_ntohl (
  *  @retval             FALSE       address is not a multicast address
  */
 
-EXT_DECL BOOL vos_isMulticast (
+EXT_DECL BOOL8 vos_isMulticast (
     UINT32 ipAddress)
 {
     return IN_MULTICAST(ipAddress);
