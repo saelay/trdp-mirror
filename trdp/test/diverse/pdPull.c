@@ -46,7 +46,7 @@
 #define APP_VERSION         "0.0.1.0"
 
 UINT32  gComID          = 1000;
-BOOL    gKeepOnRunning  = TRUE;
+int     gKeepOnRunning  = TRUE;
 
 /**********************************************************************************************************************/
 void print_data (UINT8 *pData, UINT32 len)

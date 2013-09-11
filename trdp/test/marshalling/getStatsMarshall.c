@@ -58,7 +58,7 @@
 #define APP_VERSION         "0.0.0.3"
 
 TRDP_STATISTICS_T gBuffer;
-BOOL gKeepOnRunning = TRUE;
+int gKeepOnRunning = TRUE;
 
 /**********************************************************************************************************************/
 /*

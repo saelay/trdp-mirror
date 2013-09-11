@@ -58,7 +58,7 @@
 const size_t    cDefaultStackSize   = 16 * 1024;
 const UINT32    cMutextMagic        = 0x1234FEDC;
 
-BOOL            vosThreadInitialised = FALSE;
+int             vosThreadInitialised = FALSE;
 
 /***********************************************************************************************************************
  *  LOCALS
