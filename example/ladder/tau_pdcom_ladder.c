@@ -55,7 +55,7 @@ void tau_recvPdDs (
 	UINT32 displaySubnetId = SUBNETID_TYPE1;				/* Using Sub-network Id for Display log */
 	UINT16 offset = 0;										/* Traffic Store Offset Address */
 #if 0
-	BOOL linkUpDown = TRUE;									/* Link Up Down information TRUE:Up FALSE:Down */
+	BOOL8 linkUpDown = TRUE;									/* Link Up Down information TRUE:Up FALSE:Down */
 #endif
 	extern UINT8 *pTrafficStoreAddr;						/* pointer to pointer to Traffic Store Address */
 	PD_COMMAND_VALUE *subscriberPdCommandValue = NULL;	/* Subscriber PD Command Value */
@@ -261,7 +261,7 @@ VOS_THREAD_FUNC_T PDComLadder (void)
 
 		INT32   noOfDesc2 = 0;
 		struct timeval  tv2;
-		BOOL linkUpDown = TRUE;						/* Link Up Down information TRUE:Up FALSE:Down */
+		BOOL8 linkUpDown = TRUE;						/* Link Up Down information TRUE:Up FALSE:Down */
 		UINT32 writeSubnetId;						/* Using Traffic Store Write Sub-network Id */
 
 		/*
