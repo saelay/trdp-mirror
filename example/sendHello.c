@@ -22,11 +22,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined (POSIX)
 #include <unistd.h>
 #include <sys/select.h>
+#elif defined (WIN32)
+#include "getopt.h"
+#endif
 
 #include "trdp_if_light.h"
 #include "vos_thread.h"
+
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -102,13 +108,10 @@ int main (int argc, char *argv[])
     UINT32                  cycleTime = PD_COMID_CYCLE;
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 20548};
-    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
+    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     UINT32                  ownIP = 0;
-
     int                     rv = 0;
-
-
     UINT32                  destIP = 0;
 
     /*    Generate some data, that we want to send, when nothing was specified. */
