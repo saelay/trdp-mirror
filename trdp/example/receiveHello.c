@@ -22,11 +22,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if defined (POSIX)
 #include <unistd.h>
 #include <sys/select.h>
+#elif defined (WIN32)
+#include "getopt.h"
+#endif
 
 #include "trdp_if_light.h"
-#include "vos_thread.h"
+#include "tau_marshall.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -106,11 +111,9 @@ int main (int argc, char *argv[])
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     UINT32                  ownIP = 0;
-
     int                     rv = 0;
-
-
     UINT32                  destIP = 0;
+    UINT32                  lastSequCount = 0;
 
     /*    Generate some data, that we want to send, when nothing was specified. */
     UINT8                   *outputBuffer;
@@ -297,9 +300,12 @@ int main (int argc, char *argv[])
                       &myPDInfo,
                       (UINT8 *) gBuffer,
                       &receivedSize);
-        if (TRDP_NO_ERR == err && receivedSize > 0)
+        if (    (TRDP_NO_ERR == err)
+             && (receivedSize > 0)
+             && (myPDInfo.seqCount != lastSeqCount)  /* only treat new telegrams */
+           )
         {
-
+            lastSeqCount = myPDInfo.seqCount;
             printf("\nMessage reveived:\n");
             printf("Type = %c%c, ", myPDInfo.msgType >> 8, myPDInfo.msgType & 0xFF);
             printf("Seq  = %u, ", myPDInfo.seqCount);
