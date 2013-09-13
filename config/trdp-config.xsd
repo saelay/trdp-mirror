@@ -15,9 +15,10 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.5.0.0
+#  VERSION       : 1.6.0.0
 #
 #   HISTORY      :
+#                            1.6.0.0   pre-defined data types updated
 #                            1.5.0.0   type of dataset can be again a number or a textual description of the standard types or the name of another dataset
 #                            1.4.0.0   type of dataset must be a number, not a textual description
 #                            1.3.0.0   trdp-process, md-com-parameter, pd-com-parameter moved from device-configuration to bus-interface
@@ -698,22 +699,22 @@ keep = keep the last value</xs:documentation>
         <xs:annotation>
           <xs:documentation>Either the name of a type like "INT8" or "UINT32" or a numerical data-set ID for nested data types.
           The following datatypes are predefined:
-            BOOLEAN8	    1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
-            CHAR8		            2       char, can be used also as UTF8 
-            UTF16		            3	      Unicode UTF-16 character
-            INT8		                4       Signed integer, 8 bit
-            INT16		            5       Signed integer, 16 bit
-            INT32		            6       Signed integer, 32 bit
-            INT64		            7       Signed integer, 64 bit
-            UINT8		            8       Unsigned integer, 8 bit
-            UINT16		        9       Unsigned integer, 16 bit
-            UINT32		        10    Unsigned integer, 32 bit
-            UINT64		        11	 Unsigned integer, 64 bit
-            REAL32		        12	 Floating point real, 32 bit
-            REAL64		        13	 Floating point real, 64 bit
-            TIMEDATE32	14	 32 bit UNIX time
-            TIMEDATE48	15	 48 bit TCN time (32 bit seconds and 16 bit ticks)
-            TIMEDATE64	16	 32 bit seconds and 32 bit microseconds
+            BOOL8               1    =UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
+            CHAR8               2    char, can be used also as UTF8 
+            UTF16                3    Unicode UTF-16 character
+            INT8                    4    Signed integer, 8 bit
+            INT16                  5    Signed integer, 16 bit
+            INT32                  6    Signed integer, 32 bit
+            INT64                  7    Signed integer, 64 bit
+            UINT8                 8    Unsigned integer, 8 bit
+            UINT16               9    Unsigned integer, 16 bit
+            UINT32             10    Unsigned integer, 32 bit
+            UINT64             11   Unsigned integer, 64 bit
+            REAL32            12   Floating point real, 32 bit
+            REAL64            13   Floating point real, 64 bit
+            TIMEDATE32   14   32 bit UNIX time
+            TIMEDATE48   15   48 bit TCN time (32 bit seconds and 16 bit ticks)
+            TIMEDATE64   16   32 bit seconds and 32 bit microseconds
           </xs:documentation>
         </xs:annotation>
         <xs:simpleType>

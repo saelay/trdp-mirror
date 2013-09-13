@@ -1,28 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <device host-name="examplehost" leader-name="leaderhost" type="dummy">
-	<device-configuration memory-size="65535">
-		<mem-block-list>
-			<mem-block size="32" preallocate="0" />
-		</mem-block-list>
-	</device-configuration>
+   <device-configuration memory-size="65535">
+      <mem-block-list>
+         <mem-block size="32" preallocate="0" />
+      </mem-block-list>
+   </device-configuration>
 	
    <bus-interface-list>
-      <bus-interface network-id="1" name="eth0">
-		  <pd-com-parameter />
-		  <md-com-parameter udp-port="20550" tcp-port="20550" />
-		  <telegram name="send_hello" com-id="1000" data-set-id="1000">
-			<!-- inside "md-parameter" or "pd-parameter" with optional stuff -->
+      <bus-interface network-id="1" name="eth0" host-ip="10.0.0.221">
+         <trdp-process blocking="yes" traffic-shaping="on" />
+         <pd-com-parameter port="20548"  marshall="on" validity-behavior="zero"/>
+         <md-com-parameter udp-port="20550" tcp-port="20550" />
+         <telegram name="send_hello" com-id="1000" data-set-id="1000">
+            <pd-parameter cycle="1000000" />
          </telegram>
-         <telegram name="telgr1" com-id="1001" data-set-id="1" >
-             <!-- inside "md-parameter" or "pd-parameter" with optional stuff -->
+         <telegram name="telegram1" com-id="1001" data-set-id="1" >
+            <pd-parameter cycle="1000000" />
          </telegram>
-         <telegram name="telgr2" com-id="1002" data-set-id="2" >
-           <source id="1" uri1="dev1.car1.consist1.lTrain" uri2="dev2.car1.conist1.lTrain" name="test_connection_1">
-               <sdt-parameter smi1="1234" udv="56" rx-period="500" tx-period="2000" />
+         <telegram name="telegram2" com-id="1002" data-set-id="2" >
+           <pd-parameter cycle="1000000" />
+           <source id="1" uri1="dev01.car01.cst01.lTrain" uri2="dev02.car01.cst01" name="test_connection_1">
+               <sdt-parameter smi1="1234" udv="56" rx-period="100" tx-period="1000" />
            </source>
-           <destination id="10" uri="dev3.car1.conist1.lTrain" name="Another_connection">
+           <destination id="10" uri="dev03.car01.cst01.lTrain" name="Another_connection">
 	<sdt-parameter smi1="2345" udv="67" rx-period="100" tx-period="500" />
            </destination>
+         </telegram>
+         <telegram name="demo" com-id="40010" data-set-id="40010" >
+           <pd-parameter cycle="1000000" />
+           <source id="1" uri1="dev01.car01.cst01" uri2="dev02.car01.cst01" name="test_connection_2" />
+           <destination id="10" uri="grpAll.aCar.aCst" name="broadcast" />
          </telegram>
       </bus-interface>
    </bus-interface-list>
@@ -41,7 +48,7 @@
    </com-parameter-list>
    
    <!--
-BOOLEAN8	1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
+BOOL8		1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
 CHAR8		2	char, can be used also as UTF8 
 UTF16		3	Unicode UTF-16 character
 INT8		4	Signed integer, 8 bit
@@ -52,8 +59,8 @@ UINT8		8	Unsigned integer, 8 bit
 UINT16		9	Unsigned integer, 16 bit
 UINT32		10	Unsigned integer, 32 bit
 UINT64		11	Unsigned integer, 64 bit
-REAL32		12	Floating point real, 32 bit
-REAL64		13	Floating point real, 64 bit
+REAL32	12	Floating point real, 32 bit
+REAL64	13	Floating point real, 64 bit
 TIMEDATE32	14	32 bit UNIX time
 TIMEDATE48	15	48 bit TCN time (32 bit seconds and 16 bit ticks)
 TIMEDATE64	16	32 bit seconds and 32 bit microseconds
@@ -83,8 +90,15 @@ TIMEDATE64	16	32 bit seconds and 32 bit microseconds
         <element name="UINT64" type="11" />
         <element name="REAL32" type="12" />
         <element name="REAL64" type="13" />
-        <element name="STRING" type="14" />
       </data-set>
+      <data-set name="demo" id="40010">
+        <element name="cpu_temp" type="10" />
+        <element name="rx_bytes" type="10" />
+        <element name="rx_frames" type="10" />
+        <element name="tx_bytes" type="10" />
+        <element name="tx_frames" type="10" />
+        <element name="user_value" type="10" />
+        </data-set>
    </data-set-list>
    
    <debug  />
