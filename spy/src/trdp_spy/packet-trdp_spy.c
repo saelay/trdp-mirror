@@ -434,15 +434,15 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 	if (pFound == NULL)
 	{
-		ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, -1, "The userdata could not be unmarshalled.");
-		PRNT(printf("The userdata could for comId %d could not be unmarshalled.\n", trdp_spy_comid));
+		PRNT(printf("No Configuration for this ComId available"));
 		/* Jump to the last 4 byte and check the crc */
 		value32u = tvb_length_remaining(tvb, offset);
-		PRNT(printf("The remaining is %d (startoffset=%d)\n", value32u, start_offset));
-		if (value32u > FCS_LENGTH && value32u >= length)
+		PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", value32u, start_offset,
+				(value32u % 4)));
+		if (value32u > FCS_LENGTH && value32u >= length) /* check if there is space for the header */
 		{
 			offset += length;
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u, start_offset, offset, "Body");
+			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u - FCS_LENGTH, start_offset, offset, "Body");
 		}
 		return offset;
 	}
