@@ -14,10 +14,10 @@
          <telegram name="send_hello" com-id="1000" data-set-id="1000">
             <pd-parameter cycle="1000000" />
          </telegram>
-         <telegram name="telegram1" com-id="1001" data-set-id="1" >
+         <telegram name="telegram1" com-id="1001" data-set-id="1001" >
             <pd-parameter cycle="1000000" />
          </telegram>
-         <telegram name="telegram2" com-id="1002" data-set-id="2" >
+         <telegram name="telegram2" com-id="1002" data-set-id="1002" >
            <pd-parameter cycle="1000000" />
            <source id="1" uri1="dev01.car01.cst01.lTrain" uri2="dev02.car01.cst01" name="test_connection_1">
                <sdt-parameter smi1="1234" udv="56" rx-period="100" tx-period="1000" />
@@ -66,11 +66,11 @@ TIMEDATE48	15	48 bit TCN time (32 bit seconds and 16 bit ticks)
 TIMEDATE64	16	32 bit seconds and 32 bit microseconds
    -->
    <data-set-list>
-      <data-set name="hello_world_dataset" id="1">
+      <data-set name="hello_world_dataset" id="1001">
 		<element name="index" type="5" />
 		<element name="name" type="14" array-size="0" /><!-- dynamic size, so until the end -->
       </data-set>
-      <data-set name="dummy_service_status" id="2">
+      <data-set name="dummy_service_status" id="1002">
         <element name="alive" type="1" />
         <element name="ip" type="8" array-size="4" />
         <element name="load" type="5" unit="load-unit" scale="0.01"  offset="-1" />
@@ -79,7 +79,7 @@ TIMEDATE64	16	32 bit seconds and 32 bit microseconds
         <element name="string"  type="2" array-size="0" />
 		<element name="string2" type="2" array-size="0" />
       </data-set>
-      <data-set name="marshall_test" id="3">
+      <data-set name="marshall_test" id="1003">
         <element name="INT8" type="4" />
         <element name="INT16" type="5" />
         <element name="INT32" type="6" />
