@@ -15,9 +15,10 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.6.0.0
+#  VERSION       : 1.7.0.0
 #
 #   HISTORY      :
+#                            1.7.0.0   id of data-set must start at 1000
 #                            1.6.0.0   pre-defined data types updated
 #                            1.5.0.0   type of dataset can be again a number or a textual description of the standard types or the name of another dataset
 #                            1.4.0.0   type of dataset must be a number, not a textual description
@@ -78,6 +79,12 @@
       <xs:pattern
         value="(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])"
       />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="datasetid-type">
+    <xs:restriction base="xs:int">
+      <xs:minInclusive value="1000" />
     </xs:restriction>
   </xs:simpleType>
   
@@ -200,7 +207,7 @@
           <xs:documentation/>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="id" type="uint32" use="required">
+      <xs:attribute name="id" type="datasetid-type" use="required">
         <xs:annotation>
           <xs:documentation>ID for dataset</xs:documentation>
         </xs:annotation>
