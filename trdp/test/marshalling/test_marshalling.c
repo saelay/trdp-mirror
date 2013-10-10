@@ -691,7 +691,7 @@ int main ()
     }
     else
     {
-        printf("...### Precomputed size is wrong (> %u which is sizeof(ds) )!\n", sizeof(gMyDataSet1000));
+        printf("...### Precomputed size is wrong (> %lu which is sizeof(ds) )!\n", sizeof(gMyDataSet1000));
     }
 
     bufSize = compSize;
