@@ -1,20 +1,19 @@
+/*
+ * $Id$
+ */
 /******************************************************************************/
 /**
  * @file            pdsend.c
  *
- * @brief           SenderDemo for Cocoa
+ * @brief           Demo application for TRDP
  *
- * @details
+ * @note            Project: Sending Demo application for TRDP
  *
- * @note            Project: TCNOpen TRDP prototype stack
+ * @author          Bernd Lhr on 11.11.11, 2011 NewTec GmbH.
  *
- * @author          Bernd Loehr, NewTec GmbH
- *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
- *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright NewTec GmbH System-Entwicklung und Beratung, 2013. All rights reserved.
- *
- * $Id$
+ * @remarks All rights reserved. Reproduction, modification, use or disclosure
+ *          to third parties without express authority is forbidden,
+ *          Copyright Bombardier Transportation GmbH, Germany, 2011.
  *
  */
 
