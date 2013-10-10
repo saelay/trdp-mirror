@@ -1,10 +1,22 @@
-//
-//  Controller.m
-//  SenderDemo
-//
-//  Created by Bernd Löhr on 15.11.11.
-//  Copyright 2011 NewTec GmbH. All rights reserved.
-//
+/******************************************************************************/
+/**
+ * @file            Controller.m
+ *
+ * @brief           SenderDemo for Cocoa
+ *
+ * @details
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Bernd Loehr, NewTec GmbH
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright NewTec GmbH System-Entwicklung und Beratung, 2013. All rights reserved.
+ *
+ * $Id$
+ *
+ */
 
 #import "Controller.h"
 #include "pdsend.h"
@@ -54,24 +66,30 @@ extern int gIsActive;
 - (IBAction) ipChanged:(id)sender
 {
 	setIP((char*)[[ipAddress stringValue] UTF8String]);
-	dataChanged = true;
-    pd_updatePublisher(false);
-	pd_updateData((uint8_t*)dataArray, sizeof(dataArray));
+	//dataChanged = true;
+    //pd_updatePublisher(false);
+	//pd_updateData((uint8_t*)dataArray, sizeof(dataArray));
 }
 
 - (IBAction) enable1:(id)sender
 {
 	if ([sender isSelectedForSegment:0])
 	{
-		printf("enable\n");
-		isActive = true;
-		gIsActive = 1;
+		printf("disabled (off)\n");
+        [ipAddress setEnabled:true];
+        [comID setEnabled:true];
+        [interval setEnabled:true];
+		isActive = false;
+		gIsActive = 0;
 	}
 	else
 	{
-		printf("disable\n");
-		isActive = false;
-		gIsActive = 0;
+		printf("enabled (on)\n");
+		isActive = true;
+		gIsActive = 1;
+        [ipAddress setEnabled:false];
+        [comID setEnabled:false];
+        [interval setEnabled:false];
 	}
 	dataChanged = true;
     pd_updatePublisher(gIsActive);
@@ -80,12 +98,12 @@ extern int gIsActive;
 - (IBAction) comIDChanged:(id)sender
 {
 	setComID((uint32_t)[sender intValue]);
-    pd_updatePublisher(false);
+    //pd_updatePublisher(false);
 }
 - (IBAction) intervalChanged:(id)sender
 {
 	setInterval((uint32_t)[sender intValue]);
-    pd_updatePublisher(false);
+    //pd_updatePublisher(false);
 }
 
 - (IBAction) ipChangedRec1:(id)sender
@@ -148,6 +166,35 @@ extern int gIsActive;
     pd_updateSubscriber(4);
 }
 
+//  MD field handler
+IBOutlet	id	MDOutMessage;
+IBOutlet	id	MDcomID;
+IBOutlet	id	MDipAddress;
+IBOutlet	id	MDrecColor;
+IBOutlet	id	MRcomID;
+IBOutlet	id	MRinMessage;
+
+//  Called if send button is depressed 
+- (IBAction) MDRequest:(id)sender
+{
+    // set the color to blue (waiting for reply)
+    [MDrecColor setColor:[NSColor blueColor]];
+    
+    if (md_request((char*)[[MDipAddress stringValue]UTF8String], [MDcomID intValue], (char*) [[MDOutMessage stringValue] UTF8String]) != 0)
+    {
+        // set the color to blue (error while sending)
+        [MDrecColor setColor:[NSColor orangeColor]];
+    }
+}
+
+//  Called if comID or IP changed
+- (IBAction) MDComIDChanged:(id)sender
+{
+}
+
+- (IBAction) MDIPChanged:(id)sender
+{
+}
 
 - (void)doIt
 {
@@ -169,7 +216,7 @@ extern int gIsActive;
 
 - (void)timerFired:(NSTimer *)timer
 {
-    pd_receive_packet_t*    current = NULL;
+    PD_RECEIVE_PACKET_T*    current = NULL;
     
     // Animate view for now
 	if (dataChanged)
@@ -249,7 +296,6 @@ extern int gIsActive;
         if (current->invalid)
         {
             [rec5Color setColor:[NSColor redColor]];
-            //[rec5Bar setColor:[NSColor grayColor]];
         }
         else
         {
@@ -258,6 +304,25 @@ extern int gIsActive;
         [rec5Bar setIntValue:current->counter];
         current->changed = 0;
     }
+    
+    MD_RECEIVE_PACKET_T* mdCurrent = md_get();
+    if (mdCurrent != NULL && mdCurrent->changed)
+    {
+        if (mdCurrent->invalid)
+        {
+            [MDrecColor setColor:[NSColor redColor]];
+        	[MRcomID setIntValue:0];
+        	[MRinMessage setStringValue:[NSString stringWithUTF8String:(const char*)"invalid"]];
+        }
+        else
+        {
+            [MDrecColor setColor:[NSColor greenColor]];
+        	[MRcomID setIntValue:mdCurrent->comID];
+        	[MRinMessage setStringValue:[NSString stringWithUTF8String:(const char*)mdCurrent->message]];
+        }
+        mdCurrent->changed = 0;
+    }
+
 }
 
 #if 1

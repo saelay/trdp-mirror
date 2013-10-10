@@ -1,9 +1,20 @@
-/*
- *  pdsend.h
- *  SenderDemo
+/******************************************************************************/
+/**
+ * @file            pdsend.h
  *
- *  Created by Bernd Löhr on 22.11.11.
- *  Copyright 2011 LB Electronics. All rights reserved.
+ * @brief           SenderDemo for Cocoa
+ *
+ * @details
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Bernd Loehr, NewTec GmbH
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright NewTec GmbH System-Entwicklung und Beratung, 2013. All rights reserved.
+ *
+ * $Id$
  *
  */
 
@@ -36,32 +47,50 @@ typedef struct pd_receive_packet {
     uint8_t     message[64];
     int         changed;
     int         invalid;
-} pd_receive_packet_t;
+} PD_RECEIVE_PACKET_T;
+
+typedef struct md_receive_packet {
+    TRDP_LIS_T  lisHandle;
+    TRDP_UUID_T sessionId;
+    uint32_t	comID;
+	uint32_t	timeout;
+    char        srcIP[16];
+    uint8_t     message[64];
+    uint32_t    msgsize;
+    uint32_t    replies;
+    int         changed;
+    int         invalid;
+} MD_RECEIVE_PACKET_T;
 
 
-int pd_init(
+int pd_init (
 	const char*	pDestAddress,
 	uint32_t	comID,
 	uint32_t	interval);
 
-void pd_deinit();
+void pd_deinit ();
 
-void pd_stop(int redundant);
+void pd_stop (int redundant);
 
-void pd_updatePublisher(int stop);
-void pd_updateSubscriber(int index);
-void pd_updateData(
-	uint8_t	*pData,
-	size_t	dataSize);
-void pd_sub(pd_receive_packet_t*    recPacket);
-pd_receive_packet_t* pd_get(int index);
+void pd_updatePublisher (int stop);
+void pd_updateSubscriber (int index);
+void pd_updateData (uint8_t	*pData,	size_t	dataSize);
+void pd_sub (PD_RECEIVE_PACKET_T* recPacket);
+PD_RECEIVE_PACKET_T* pd_get(int index);
 
-void setIP(const char* ipAddr);
-void setComID(uint32_t comID);
-void setInterval(uint32_t interval);
+void setIP (const char* ipAddr);
+void setComID (uint32_t comID);
+void setInterval (uint32_t interval);
 
-void setIPRec(int index, const char* ipAddr);
-void setComIDRec(int index, uint32_t comID);
+void setIPRec (int index, const char* ipAddr);
+void setComIDRec (int index, uint32_t comID);
 
-//int pd_loop();
-int pd_loop2();
+int pd_loop2 ();
+
+// MD requester
+//void md_changeListener(uint32_t, uint32_t);
+void md_listen(MD_RECEIVE_PACKET_T*);
+int md_request (const char* ipAddr, uint32_t, char*);
+MD_RECEIVE_PACKET_T* md_get ();
+
+

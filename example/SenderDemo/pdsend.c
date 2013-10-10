@@ -1,19 +1,20 @@
-/*
- * $Id: $
- */
 /******************************************************************************/
 /**
  * @file            pdsend.c
  *
- * @brief           Demo application for TRDP
+ * @brief           SenderDemo for Cocoa
  *
- * @note            Project: Sending Demo application for TRDP
+ * @details
  *
- * @author          Bernd Lhr on 11.11.11, 2011 NewTec GmbH.
+ * @note            Project: TCNOpen TRDP prototype stack
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright Bombardier Transportation GmbH, Germany, 2011.
+ * @author          Bernd Loehr, NewTec GmbH
+ *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright NewTec GmbH System-Entwicklung und Beratung, 2013. All rights reserved.
+ *
+ * $Id$
  *
  */
 
@@ -51,7 +52,7 @@
  * GLOBALS
  */
 
-pd_receive_packet_t gRec[] =
+PD_RECEIVE_PACKET_T gRec[] =
 {
     {0, PD_COMID1, PD_COMID1_TIMEOUT, "10.0.0.200", 0, "", 0, 1},
     {0, PD_COMID1, PD_COMID1_TIMEOUT, "10.0.0.201", 0, "", 0, 1},
@@ -69,7 +70,7 @@ UINT8       gDataBuffer[MAX_PAYLOAD_SIZE] =
     0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
 };      /*	Buffer for our PD data	*/
 
-size_t      gDataSize   = 32;       /* Size of test data			*/
+size_t      gDataSize   = 20;       /* Size of test data			*/
 uint32_t    gComID      = PD_COMID0;
 uint32_t    gInterval   = PD_COMID0_CYCLE;
 char        gTargetIP[16];
@@ -77,17 +78,26 @@ int         gDataChanged    = 1;
 int         gIsActive       = 1;
 int32_t     gRecFD          = 0;
 
-TRDP_APP_SESSION_T gAppHandle;   /*	Our identifier to the library instance	*/
-TRDP_PUB_T  gPubHandle;          /*	Our identifier to the publication	*/
+TRDP_APP_SESSION_T  gAppHandle;             /*	Our identifier to the library instance	*/
+TRDP_PUB_T          gPubHandle;             /*	Our identifier to the publication	*/
+
+MD_RECEIVE_PACKET_T gMessageData;
 
 /*******************************************************************************
  * LOCAL
  */
-static void callBack (void                  *pRefCon,
+static void pdCallBack (void                  *pRefCon,
                       TRDP_APP_SESSION_T    appHandle,
                       const TRDP_PD_INFO_T  *pMsg,
                       UINT8                 *pData,
                       UINT32                dataSize);
+
+static  void mdCallback(
+                        void                    *pRefCon,
+                        TRDP_APP_SESSION_T      appHandle,
+                        const TRDP_MD_INFO_T    *pMsg,
+                        UINT8                   *pData,
+                        UINT32                  dataSize);
 
 /*******************************************************************************/
 
@@ -161,6 +171,7 @@ void pd_stop (int redundant)
     tlp_setRedundant(gAppHandle, 0, redundant);
 }
 
+
 /******************************************************************************/
 /** pd_init
  *
@@ -172,8 +183,10 @@ int pd_init (
     uint32_t    comID,
     uint32_t    interval)
 {
-    TRDP_PD_CONFIG_T        pdConfiguration = {callBack, NULL, {0, 0},
+    TRDP_PD_CONFIG_T        pdConfiguration = {pdCallBack, NULL, {0, 0},
                                                TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+    TRDP_MD_CONFIG_T        mdConfiguration = {mdCallback, NULL, {0, 0},
+                                                TRDP_FLAGS_CALLBACK, 5000000, 5000000, 5000000, 20550, 20550, 2};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, 100000, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
@@ -198,7 +211,7 @@ int pd_init (
     if (tlc_openSession(&gAppHandle,
                         0, 0,                              /* use default IP addresses */
                         NULL,                              /* no Marshalling	*/
-                        &pdConfiguration, NULL,            /* system defaults for PD and MD	*/
+                        &pdConfiguration, &mdConfiguration,            /* system defaults for PD and MD	*/
                         &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
@@ -213,12 +226,28 @@ int pd_init (
     pd_sub(&gRec[3]);
     pd_sub(&gRec[4]);
 
-    if (tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
+/*    if (tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
                     TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize) != TRDP_NO_ERR)
     {
         printf("Publish error\n");
         return 1;
     }
+ */   
+    /* Set up listener */
+
+    gMessageData.lisHandle = NULL;
+    memset(gMessageData.sessionId, 0, 16);
+    gMessageData.comID = 2000;
+	gMessageData.timeout;
+    gMessageData.srcIP[0] = 0;
+    gMessageData.message[0] = 0;
+    gMessageData.msgsize = 64;
+    gMessageData.replies = 0;
+    gMessageData.changed = FALSE;
+    gMessageData.invalid = TRUE;
+
+    md_listen(&gMessageData);
+    
     return 0;
 }
 
@@ -236,16 +265,19 @@ void pd_deinit ()
 }
 
 /******************************************************************************/
-void pd_updatePublisher (int stop)
+void pd_updatePublisher (int active)
 {
     TRDP_ERR_T err;
-    err = tlp_unpublish(gAppHandle, gPubHandle);
-    if (err != TRDP_NO_ERR)
+    if (gPubHandle != NULL)
     {
-        printf("tlp_unpublish error %d\n", err);
+        err = tlp_unpublish(gAppHandle, gPubHandle);
+        if (err != TRDP_NO_ERR)
+        {
+            printf("tlp_unpublish error %d\n", err);
+        }
+        gPubHandle = NULL;
     }
-    gPubHandle = NULL;
-    if (stop == FALSE)
+    if (active)
     {
         err = tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
                           TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize);
@@ -264,7 +296,7 @@ void pd_updateData (
     memcpy(gDataBuffer, pData, dataSize);
     gDataSize = dataSize;
     gDataChanged++;
-    tlp_setRedundant(gAppHandle, 0, !gIsActive);
+    tlp_setRedundant(gAppHandle, 0, gIsActive);
 }
 
 /******************************************************************************/
@@ -291,7 +323,7 @@ uint32_t  gray2hex (uint32_t in)
 
 /******************************************************************************/
 void pd_sub (
-    pd_receive_packet_t *recPacket)
+    PD_RECEIVE_PACKET_T *recPacket)
 {
     if (recPacket->subHandle != 0)
     {
@@ -320,10 +352,10 @@ void pd_sub (
 }
 
 /******************************************************************************/
-pd_receive_packet_t *pd_get (
+PD_RECEIVE_PACKET_T *pd_get (
     int index)
 {
-    if (index < 0 || index >= sizeof(gRec) / sizeof(pd_receive_packet_t))
+    if (index < 0 || index >= sizeof(gRec) / sizeof(PD_RECEIVE_PACKET_T))
     {
         return NULL;
     }
@@ -351,13 +383,65 @@ void pd_getData (int index, uint8_t *data, int invalid)
 }
 
 /******************************************************************************/
+void md_listen (
+    MD_RECEIVE_PACKET_T *recPacket)
+{
+    if (recPacket->lisHandle != NULL)
+    {
+        tlm_delListener(gAppHandle, recPacket->lisHandle);
+        recPacket->lisHandle = NULL;
+    }
+
+    TRDP_ERR_T err = tlm_addListener(
+            gAppHandle,                                 /*	our application identifier			*/
+    		&recPacket->lisHandle,                      /*	listener handle          			*/
+    		NULL,										/*  user ref                            */
+    		recPacket->comID,							/*	ComID								*/
+    		0,             								/*	topocount: local consist only		*/
+    		0,											/*  any source address                  */
+    		TRDP_FLAGS_CALLBACK,                        /*  use callbacks                       */
+    		NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("trdp_subscribe error\n");
+    }
+}
+
+/******************************************************************************/
+int md_request(const char* targetIP, uint32_t comID, char* pMessage)
+{
+    TRDP_ERR_T err;
+    // Send a message to a device and expect an answer
+    err = tlm_request(gAppHandle,
+                NULL,           // user ref
+                &gMessageData.sessionId, comID,
+                0,              // topocount
+                0,              // source IP
+                vos_dottedIP(targetIP), TRDP_FLAGS_CALLBACK,
+                1,              //  Expected replies
+                0,              //  reply timeout
+                NULL,           //  send parameters
+                (const UINT8*) pMessage, strlen(pMessage),
+                NULL,           //  source URI
+                NULL);          //  destination URI
+    return (err != TRDP_NO_ERR);
+}
+
+MD_RECEIVE_PACKET_T* md_get()
+{
+    return &gMessageData;
+}
+
+
+/******************************************************************************/
 /** callback routine for receiving TRDP traffic
  *
  *  @param[in]      pCallerRef		user supplied context pointer
  *  @param[in]      pMsg			pointer to message block
  *  @retval         none
  */
-void callBack (
+void pdCallBack (
     void                    *pCallerRef,
     TRDP_APP_SESSION_T      appHandle,
     const TRDP_PD_INFO_T    *pMsg,
@@ -467,6 +551,93 @@ void callBack (
 }
 
 /******************************************************************************/
+ void mdCallback(
+    void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
+    const TRDP_MD_INFO_T    *pMsg,
+    UINT8                   *pData,
+    UINT32                  dataSize)
+{
+	TRDP_ERR_T	err;
+    /*	Check why we have been called	*/
+    switch (pMsg->resultCode)
+    {
+        case TRDP_NO_ERR:
+            printf("ComID %d received (%d Bytes)\n", pMsg->comId, dataSize);
+            
+            if (pMsg->msgType == TRDP_MSG_MR)
+            {
+            	/* Send reply	*/
+                err = tlm_reply (appHandle, pRefCon, &pMsg->sessionId, 0, gMessageData.comID, pMsg->srcIpAddr, pMsg->srcIpAddr,
+    						TRDP_FLAGS_CALLBACK, 0, NULL, "Maleikum Salam", 16, NULL, NULL);
+                if (err != TRDP_NO_ERR)
+                {
+                    printf("Error repling data (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
+                }
+                else
+                {
+                    gMessageData.invalid = 0;
+                    gMessageData.changed = 1;
+				}
+            }
+            else if (pMsg->msgType == TRDP_MSG_MP &&
+            		pData && dataSize > 0 && dataSize <= 64)
+            {
+                gMessageData.comID = pMsg->comId;
+                memcpy(gMessageData.message, pData, dataSize);
+                gMessageData.msgsize = dataSize;
+                gMessageData.replies++;
+                gMessageData.changed = 1;
+
+                if (memcmp(gMessageData.sessionId, pMsg->sessionId, sizeof(gMessageData.sessionId)) != 0)
+                {
+                    printf("Unexpected data! (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
+                    gMessageData.invalid = 1;
+                }
+                else
+                {
+                    gMessageData.invalid = 0;
+                }
+            }
+            break;
+        case TRDP_REPLYTO_ERR:
+        case TRDP_TIMEOUT_ERR:
+            if (memcmp(gMessageData.sessionId, pMsg->sessionId, sizeof(gMessageData.sessionId)) == 0)
+            {
+                printf("Session timed out (UUID: %02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n",
+                		pMsg->sessionId[0],
+                		pMsg->sessionId[1],
+                		pMsg->sessionId[2],
+                		pMsg->sessionId[3],
+                		pMsg->sessionId[4],
+                		pMsg->sessionId[5],
+                		pMsg->sessionId[6],
+                		pMsg->sessionId[7],
+                		pMsg->sessionId[8],
+                		pMsg->sessionId[9],
+                		pMsg->sessionId[10],
+                		pMsg->sessionId[11],
+                		pMsg->sessionId[12],
+                		pMsg->sessionId[13],
+                		pMsg->sessionId[14],
+                		pMsg->sessionId[15]
+                        );
+ 				gMessageData.message[0] = 0;
+                gMessageData.msgsize = 0;
+                gMessageData.replies = 0;
+                gMessageData.changed = 1;
+				gMessageData.invalid = 1;
+            }
+            /* The application can decide here if old data shall be invalidated or kept	*/
+            printf("Packet timed out (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
+
+        default:
+            break;
+    }
+}
+
+
+/******************************************************************************/
 int pd_loop2 ()
 {
     /* INT32           pd_fd = 0; */
@@ -482,10 +653,10 @@ int pd_loop2 ()
     {
         fd_set  rfds;
         INT32   noDesc;
-        struct timeval  tv;
-        struct timeval  max_tv = {0, 100000};
+        TRDP_TIME_T  tv;
+        TRDP_TIME_T  max_tv = {0, 100000};
 
-        if (gDataChanged)
+        if (gDataChanged && gPubHandle != NULL)
         {
             /*	Copy the packet into the internal send queue, prepare for sending.
                 If we change the data, just re-publish it	*/
@@ -496,10 +667,6 @@ int pd_loop2 ()
             if (err != TRDP_NO_ERR)
             {
                 printf("put pd error\n");
-                /*
-                   tlc_terminate();
-                   return 1;
-                 */
             }
             gDataChanged = 0;
         }
@@ -518,24 +685,24 @@ int pd_loop2 ()
              (A requirement of the TRDP Protocol)
          */
 
-        tlc_getInterval(gAppHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
+        tlc_getInterval(gAppHandle, &tv, (TRDP_FDS_T *) &rfds, &noDesc);
 
         /*
-         The wait time for select must consider cycle times and timeouts of
-         the PD packets received or sent.
-         If we need to poll something faster than the lowest PD cycle,
-         we need to set the maximum time out our self.
+         	The wait time for select must consider cycle times and timeouts of
+         	the PD packets received or sent.
+         	If we need to poll something faster than the lowest PD cycle,
+         	we need to set the maximum time out our self.
          */
-        if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
+        if (vos_cmpTime(&tv, &max_tv) > 0)
         {
             tv = max_tv;
         }
 
         /*
-         Select() will wait for ready descriptors or time out,
-         what ever comes first.
+         	Select() will wait for ready descriptors or time out,
+         	what ever comes first.
          */
-        rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+        rv = vos_select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
 
         /*
              Check for overdue PDs (sending and receiving)
@@ -565,108 +732,3 @@ int pd_loop2 ()
     return rv;
 }
 
-#if 0
-int pd_loop ()
-{
-    INT32       pd_fd = 0;
-    TRDP_ERR_T  err;
-    int         rv = 0;
-
-    printf("pd_init\n");
-
-    if (gDataChanged)
-    {
-
-        /*	Copy the packet into the internal send queue, prepare for sending.
-            If we change the data, just re-publish it	*/
-
-        err = trdp_publish(gComID,                  /*	ComID				*/
-                           gTargetIP,                /*	Destination IP		*/
-                           gInterval,               /*	Cycle time in ms	*/
-                           TRDP_NONE,               /*	Is redundant		*/
-                           gDataBuffer,             /*	pointer to data		*/
-                           gDataSize);              /*	net data size		*/
-
-
-        if (err != TRDP_NO_ERR)
-        {
-            printf("prep pd error\n");
-            trdp_terminate();
-            return 1;
-        }
-        gDataChanged = 0;
-    }
-
-    /*
-     Enter the main processing loop.
-     */
-    if (1)
-    {
-        fd_set  rfds;
-        struct timeval tv;
-        struct timeval max_tv   = {0, 100};
-        UINT8   sentPackages    = 0;
-
-        /*
-             Prepare the file descriptor set for the select call.
-             Additional descriptors can be added here.
-         */
-
-        FD_ZERO(&rfds);
-        FD_SET(pd_fd, &rfds);
-
-        /*
-             Compute the min. timeout value for select.
-             This way we can guarantee that PDs are sent in time...
-             (A requirement of the TRDP Protocol)
-         */
-
-        trdp_getInterval(&tv);
-
-        /*
-             The wait time for select must consider cycle times and timeouts of
-             the PD packets received or sent.
-             If we need to poll something faster than the lowest PD cycle,
-             we need to set the maximum time out ourself
-         */
-
-        if (timercmp(&tv, &max_tv, >))
-        {
-            tv = max_tv;
-        }
-
-        /*
-             Select() will wait for ready descriptors or time out,
-             what ever comes first.
-         */
-
-        rv = select(pd_fd + 1, &rfds, NULL, NULL, &tv);
-
-        /*
-             Check for overdue PDs (sending and receiving)
-             Send any PDs if it's time...
-             Detect missing PDs...
-             'rv' will be updated to show the handled events, if there are
-             more than one...
-             The callback function will be called from within the trdp_work
-             function (in it's context and thread)!
-         */
-
-        trdp_process(&rfds, &rv, &sentPackages);
-
-        /* Handle other ready descriptors... */
-
-        if (rv > 0)
-        {
-            printf("%sother descriptors were ready\n", trdp_getTimeStamp());
-        }
-        else
-        {
-            printf("%slooping...\n", trdp_getTimeStamp());
-        }
-
-    }
-
-    return rv;
-}
-#endif
