@@ -70,6 +70,25 @@
 #define API_TRACE PRNT(printf("%s:%d : %s\n",__FILE__, __LINE__, __FUNCTION__))
 
 
+
+#define TRDP_BOOL8      1   /* =UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true) */
+#define TRDP_CHAR8		2	/* char, can be used also as UTF8 */
+#define TRDP_UTF16		3	/* Unicode UTF-16 character */
+#define TRDP_INT8		4	/* Signed integer, 8 bit */
+#define TRDP_INT16		5	/* Signed integer, 16 bit */
+#define TRDP_INT32		6	/* Signed integer, 32 bit */
+#define TRDP_INT64		7	/* Signed integer, 64 bit */
+#define TRDP_UINT8		8	/* Unsigned integer, 8 bit */
+#define TRDP_UINT16		9	/* Unsigned integer, 16 bit */
+#define TRDP_UINT32		10	/* Unsigned integer, 32 bit */
+#define TRDP_UINT64		11	/* Unsigned integer, 64 bit */
+#define TRDP_REAL32		12	/* Floating point real, 32 bit */
+#define TRDP_REAL64		13	/* Floating point real, 64 bit */
+#define TRDP_TIMEDATE32	14	/* 32 bit UNIX time */
+#define TRDP_TIMEDATE48	15	/* 48 bit TCN time (32 bit seconds and 16 bit ticks) */
+#define TRDP_TIMEDATE64	16	/* 32 bit seconds and 32 bit microseconds */
+
+
 /**
  * Prototyp, implementation see below.
  * Needed to set default values
@@ -396,7 +415,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 	if (strcmp(gbl_trdpDictionary_1,"") == 0  )
 	{
-		proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "No Configuration available");
+		PRNT(printf( "No Configuration available"));
 		/* Jump to the last 4 byte and check the crc */
 		value32u = tvb_length_remaining(tvb, offset);
 		PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", value32u, start_offset,
@@ -432,7 +451,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
         pFound = trdp_parsebody_lookup(trdp_spy_comid);
 	}
 
-	if (pFound == NULL)
+	if (pFound == NULL) /* No Configuration for this ComId available */
 	{
 		PRNT(printf("No Configuration for this ComId available"));
 		/* Jump to the last 4 byte and check the crc */
@@ -446,6 +465,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 		}
 		return offset;
 	}
+
     if (pFound > 0)
     {
         PRNT(printf("%s aka %d\n", (pFound->name) ? pFound->name->str : "", pFound->datasetId));
@@ -477,7 +497,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 		if (array_id == 0)
 		{
 			value32 = 0; // Use this value to fetch the width in bytes of one element
-			//calculate the size of one element in bytes
+			// calculate the size of one element in bytes
 			value32 = dissect_trdp_width(el->type);
 
 			element_amount = el->array_size;
@@ -485,37 +505,65 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			if (element_amount == 0) // handle dynamic amount of content
 			{
                 value8u = 1;
-			    //Extract the amount of element from the first two bytes
-                element_amount = tvb_get_ntohs(tvb, offset);
-                offset += 2;
 
-                // check if the specified amount could be found in the package
-                value64 = tvb_length_remaining(tvb, offset + element_amount * value32);
-                if (value64 > 0 && value64 < FCS_LENGTH /*There will be always kept space for the FCS*/)
+                /* handle the special elements CHAR8 and UTF16: */
+                if (el->type == TRDP_CHAR8 || el->type == TRDP_UTF16)
                 {
-                    element_amount = 0;
+                    value8u = 2;
+
+                    /* Store the maximum possible length for the dynamic datastructure */
+                    value64 = tvb_length_remaining(tvb, offset) - FCS_LENGTH;
+
+                    /* Search for a zero to determine the end of the dynamic length field */
+                    for(value32u = 0; value32u < value64; value32u++)
+                    {
+                        if (tvb_get_guint8(tvb, offset + value32u) == 0)
+                        {
+                            break; /* found the end -> quit the search */
+                        }
+                    }
+                    element_amount = value32u + 1; /* include the padding into the element */
+                    value32u = 0; /* clear the borrowed variable */
+
+                    ti = proto_tree_add_text(trdp_spy_userdata, tvb, offset, element_amount, "%s [%d]", el->name->str, element_amount);
+                    userdata_actual = proto_item_add_subtree(ti, ett_trdp_spy_userdata);
                 }
+                else
+                {
+                    //Extract the amount of element from the first two bytes (standard way */
+                    element_amount = tvb_get_ntohs(tvb, offset);
+                    offset += 2;
+
+                    // check if the specified amount could be found in the package
+                    value64 = tvb_length_remaining(tvb, offset + element_amount * value32);
+                    if (value64 > 0 && value64 < FCS_LENGTH /* There will be always kept space for the FCS */)
+                    {
+                        element_amount = 0;
+                    }
+
+                    value16u = value32 * element_amount; // length in byte of the element
+                    if (value8u)
+                    {
+                        offset -= 2; // jump before the number of element.
+                        value16u += 2;
+                    }
+                }
+
 			}
 
-
-            value16u = value32 * element_amount; // length in byte of the element
-            if (value8u)
-            {
-                offset -= 2; // jump before the number of element.
-                value16u += 2;
-            }
-
             // Appand a new node in the graphical dissector, tree (also the extracted dynamic information, see above are added)
-            if (element_amount > 1  || element_amount == 0)
+            if ((element_amount > 1  || element_amount == 0) && value8u != 2)
             {
 
                 ti = proto_tree_add_text(trdp_spy_userdata, tvb, offset, value16u, "%s [%d]", el->name->str, element_amount);
                 userdata_actual = proto_item_add_subtree(ti, ett_trdp_spy_userdata);
-            } else {
+            }
+            else if (value8u != 2) /* check, that the dissector tree was not already modified handling dynamic datatypes */
+            {
                 userdata_actual = trdp_spy_userdata;
             }
 
-            if (value8u)
+            if (value8u == 1)
             {
                 proto_tree_add_text(userdata_actual, tvb, offset, 2, "%d elements", element_amount);
                 offset += 2;
@@ -540,18 +588,18 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 		switch(el->type)
 		{
-		case 1: //BOOL8	   1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
+		case TRDP_BOOL8: //	   1
 			value32 = tvb_get_guint8(tvb, offset);
 			proto_tree_add_text(userdata_actual, tvb, offset, 1, "%s : %s", el->name->str, (value32 == 0) ? "false" : "true");
 			offset += 1;
 			break;
-		case 2: //CHAR8		2	char, can be used also as UTF8
+		case TRDP_CHAR8:
 			text = tvb_get_ephemeral_string(tvb, offset, element_amount);
 			proto_tree_add_text(userdata_actual, tvb, offset, element_amount, "%s : %s %s", el->name->str, text, (el->unit != 0) ? el->unit->str : "");
 			offset += element_amount;
             array_id = element_amount - 1; // Jump to the next element (remove one, because this will be added automatically later)
 			break;
-		case 3: //UTF16		3	Unicode UTF-16 character
+		case TRDP_UTF16:
 			text = NULL;
 			text = tvb_get_unicode_string(tvb, offset, element_amount * 2, 0);
 			if (text != NULL)
@@ -566,7 +614,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			offset +=(element_amount * 2);
 			array_id = element_amount - 1; // Jump to the next element (remove one, because this will be added automatically later)
 			break;
-		case 4: //INT8		4	Signed integer, 8 bit
+		case TRDP_INT8:
 			value8 = (gint8) tvb_get_guint8(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -576,7 +624,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 1;
 			break;
-		case 5: //INT16		5	Signed integer, 16 bit
+		case TRDP_INT16:
 			value16 = (gint16) tvb_get_ntohs(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -586,7 +634,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 2;
 			break;
-		case 6: //INT32		6	Signed integer, 32 bit
+		case TRDP_INT32:
 			value32 = (gint32) tvb_get_ntohl(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -596,7 +644,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 4;
 			break;
-		case 7: //INT64		7	Signed integer, 64 bit
+		case TRDP_INT64:
 			value64 = (gint64) tvb_get_ntoh64(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -606,7 +654,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 8;
 			break;
-		case 8: //UINT8		8	Unsigned integer, 8 bit
+		case TRDP_UINT8:
 			value8u = tvb_get_guint8(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -616,7 +664,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 1;
 			break;
-		case 9: //UINT16		9	Unsigned integer, 16 bit
+		case TRDP_UINT16:
 			value16u = tvb_get_ntohs(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -626,7 +674,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 2;
 			break;
-		case 10: //UINT32		10	Unsigned integer, 32 bit
+		case TRDP_UINT32:
 			value32u = tvb_get_ntohl(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -636,7 +684,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 4;
 			break;
-		case 11: //UINT64		11	Unsigned integer, 64 bit
+		case TRDP_UINT64:
 			value64u = tvb_get_ntoh64(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -646,7 +694,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 8;
 			break;
-		case 12: //REAL32		12	Floating point real, 32 bit
+		case TRDP_REAL32:
 			real32 = tvb_get_ntohieee_float(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -656,7 +704,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 4;
 			break;
-		case 13: //REAL64		13	Floating point real, 64 bit
+		case TRDP_REAL64:
 			real64 = tvb_get_ntohieee_double(tvb, offset);
 			if (el->scale == 0)
 			{
@@ -668,14 +716,14 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			}
 			offset += 8;
 			break;
-		case 14: //TIMEDATE32	15	32 bit UNIX time
+		case TRDP_TIMEDATE32:
 			memset(&time, 0, sizeof(time) );
 			value32u = tvb_get_ntohl(tvb, offset);
 			time.tv_sec = value32u;
 			proto_tree_add_text(userdata_actual, tvb, offset, 4, "%s : %s %s", el->name->str, g_time_val_to_iso8601(&time), (el->unit != 0) ? el->unit->str : "");
 			offset += 4;
 			break;
-		case 15: //TIMEDATE48	16	48 bit TCN time (32 bit seconds and 16 bit ticks)
+		case TRDP_TIMEDATE48:
 			memset(&time, 0, sizeof(time) );
 			value32u = tvb_get_ntohl(tvb, offset);
 			value16u = tvb_get_ntohs(tvb, offset + 4);
@@ -684,7 +732,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 			proto_tree_add_text(userdata_actual, tvb, offset, 6, "%s : %s %s", el->name->str, g_time_val_to_iso8601(&time), (el->unit != 0) ? el->unit->str : "");
 			offset += 6;
 			break;
-		case 16: //TIMEDATE64	17	32 bit seconds and 32 bit microseconds
+		case TRDP_TIMEDATE64:
 			memset(&time, 0, sizeof(time) );
 			value32u = tvb_get_ntohl(tvb, offset);
 			time.tv_sec = value32u;

@@ -1,5 +1,12 @@
+# Makefle to build the plugin on Linux
+#
 # Modify to point to your Wireshark and glib include directories
-INCS = -I../../ -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/libxml2 
+# Set the variable WIRESHAR_SRC in thie Makefile, of modify our environment:
+# export WIRESHARK_SRC=$HOME/src/wireshark-1.8.3
+
+INCS = -I $(WIRESHARK_SRC) -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/libxml2 
+# Debugging:
+#INCS += -DPRINT_DEBUG
 
 SRCS     = plugin.c packet-trdp_spy.c parsebody.c lookuptype.c
 

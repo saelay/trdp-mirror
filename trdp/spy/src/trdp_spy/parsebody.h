@@ -10,7 +10,7 @@
  *
  * @author          Florian Weispfenning, Bombardier Transportation
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
@@ -31,11 +31,11 @@
  * DEFINES
  */
 
- 
+
 /*******************************************************************************
  * TYPEDEFS
  */
- 
+
 /** @struct ComId
  *  @brief This struct makes a mapping between one comId and one dataset.
  *  This is a separate structure, because there could be mappings from a dataset to another one.
@@ -100,12 +100,12 @@ typedef enum TRDP_RET TRDP_RET_t;
 /*******************************************************************************
  * GLOBAL FUNCTIONS
  */
- 
+
 TRDP_RET_t trdp_parsebody_init(const char ** xmlconfigFile);
 void trdp_parsebody_clean(void);
 int trdp_parsebody_isinited( void );
 
 struct Dataset* trdp_parsebody_lookup(guint32 comId);
-struct Dataset* trdp_parsebody_search(guint32 ComId);
+struct Dataset* trdp_parsebody_search(guint32 datasetId);
 
 #endif
