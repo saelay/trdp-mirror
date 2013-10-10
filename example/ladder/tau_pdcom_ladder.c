@@ -328,7 +328,9 @@ VOS_THREAD_FUNC_T PDComLadder (void)
 			tv.tv_usec = tv2.tv_usec;
 		}
 
-		rv = select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
+//		rv = select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
+		rv = vos_select((int)noOfDesc + 1, &rfds, NULL, NULL, (VOS_TIME_T *)&tv);
+
 
 		/*
 		Check for overdue PDs (sending and receiving)

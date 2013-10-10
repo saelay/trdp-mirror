@@ -85,10 +85,12 @@ UINT8   firstPutData[PD_DATA_SIZE_MAX] = "First Put";
 #define PD_COMID1_TIMEOUT		1200000
 #define PD_COMID2_TIMEOUT		1200000
 #define PD_COMID1_DATA_SIZE		32
-#define PD_COMID1_SRC_IP        0x0A040111		/* Source IP: 10.4.1.17 */
-#define PD_COMID2_SRC_IP        0x0A040111		/* Source IP: 10.4.1.17 */
-#define PD_COMID1_DST_IP        0xe60000C0		/* Destination IP: 230.0.0.192 */
-#define PD_COMID2_DST_IP        0xe60000C0		/* Destination IP: 230.0.0.192 */
+#define PD_COMID1_SRC_IP        0x0A000111		/* Source IP: 10.0.1.17 */
+#define PD_COMID2_SRC_IP        0x0A000111		/* Source IP: 10.0.1.17 */
+//#define PD_COMID1_DST_IP        0xefff0101		/* Destination IP: 239.255.1.1 */
+//#define PD_COMID2_DST_IP        0xefff0101		/* Destination IP: 239.255.1.1 */
+#define PD_COMID1_DST_IP        0x0A000111		/* Destination IP: 239.255.1.1 */
+#define PD_COMID2_DST_IP        0x0A002111		/* Destination IP: 239.255.1.1 */
 
 /* Subscribe for Sub-network Id2 */
 #define PD_COMID1_SRC_IP2       PD_COMID1_SRC_IP | SUBNET2_NETMASK      /*	Sender's IP: 10.4.33.17		*/
@@ -144,6 +146,7 @@ int main (void)
     /* Traffic Store */
 	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
 
+#if 0
 	/* Get IP Address */
 	struct ifaddrs *ifa_list;
 	struct ifaddrs *ifa;
@@ -173,6 +176,35 @@ int main (void)
 	}
 	/* Release memory */
 	freeifaddrs(ifa_list);
+#else
+	UINT32			noOfIfaces = 10;
+	VOS_IF_REC_T   	ifAddressTable[noOfIfaces];
+    UINT32			index;
+	TRDP_IP_ADDR_T 	subnetId1Address = 0;
+	TRDP_IP_ADDR_T 	subnetId2Address = 0;
+	#ifdef __linux 
+	CHAR8 			SUBNETWORK_ID1_IF_NAME[] = "eth0";
+	#elif defined(__APPLE__)
+	CHAR8 			SUBNETWORK_ID1_IF_NAME[] = "en0";
+	#endif
+
+	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
+    {
+    	printf("getifaddrs error. errno=%d\n", errno);
+       return 1;
+	}
+	/* Get All I/F List */
+	for (index = 0; index < noOfIfaces; index++)
+	{
+		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
+		{
+				/* Get Sub-net Id1 Address */
+            subnetId1Address = (TRDP_IP_ADDR_T)(ifAddressTable[index].ipAddr);
+            break;
+		}
+	}
+	
+#endif
 
 	/* Sub-net Id2 Address */
 	subnetId2Address = subnetId1Address | SUBNET2_NETMASK;
@@ -268,7 +300,7 @@ int main (void)
                         &pubHandleNet1ComId1,			/* our pulication identifier */
                         PD_COMID1,						/* ComID to send */
                         0,								/* local consist only */
-                        PD_COMID1_SRC_IP,				/* default source IP */
+                        subnetId1Address,				/* default source IP */
                         PD_COMID1_DST_IP,				/* where to send to */
                         PD_COMID1_CYCLE,				/* Cycle time in ms */
                         0,								/* not redundant */
@@ -289,7 +321,7 @@ int main (void)
                         &pubHandleNet2ComId1,			/* our pulication identifier */
                         PD_COMID1,						/* ComID to send */
                         0,								/* local consist only */
-                        PD_COMID1_SRC_IP2,			    /* default source IP */
+                        subnetId2Address,			    /* default source IP */
                         PD_COMID1_DST_IP,				/* where to send to */
                         PD_COMID1_CYCLE,				/* Cycle time in ms */
                         0,								/* not redundant */

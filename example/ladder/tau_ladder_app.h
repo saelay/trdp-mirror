@@ -38,11 +38,11 @@ extern "C" {
 
 /* PD Application Version */
 #ifdef LITTLE_ENDIAN
-#define PD_APP_VERSION	"V0.33"
+#define PD_APP_VERSION	"V0.37"
 #elif BIG_ENDIAN
-#define PD_APP_VERSION	"V0.33"
+#define PD_APP_VERSION	"V0.37"
 #else
-#define PD_APP_VERSION	"V0.33"
+#define PD_APP_VERSION	"V0.37"
 #endif
 
 #define SUBNET2_NETMASK								0x00002000			/* The netmask for Subnet2 */
@@ -149,6 +149,7 @@ typedef struct PD_COMMAND_VALUE
 	UINT32 PD_SEND_CYCLE_NUMBER;				/* Publish Send Cycle Number */
 	UINT32 PD_RECEIVE_CYCLE_NUMBER;				/* Subscribe Receive Cycle Number */
 	UINT32 TS_SUBNET;								/* Traffic Store Using Subnet */
+	BOOL8 marshallingFlag;						/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
 	UINT32 sendDataSetSize;						/* Send DataSet Size for Request */
 	UINT32 subnet1ReceiveCount;					/* Subscribe subnet1 receive Count */
 	UINT32 subnet2ReceiveCount;					/* Subscribe subnet2 receive Count */
@@ -417,7 +418,7 @@ PD_APP_ERR_TYPE analyzePdCommand(
  *  @retval         PD_APP_ERR			some error
  */
 PD_APP_ERR_TYPE trdp_pdInitialize (
-		void);
+		PD_COMMAND_VALUE *pPdCommandValue);
 
 /**********************************************************************************************************************/
 /** TRDP PD Application initialization
@@ -615,6 +616,7 @@ PD_APP_ERR_TYPE printSpecificPdSubscribeResult (
 /** Create PD DataSet1
  *
  *  @param[in]		firstCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[in]		marshallingFlag			Enable Marshalling : TRUE, Disable Marshalling : FALSE
  *  @param[out]		pPdDataSet1				pointer to Created PD DATASET1
  *
  *  @retval         MD_APP_NO_ERR				no error
@@ -623,12 +625,15 @@ PD_APP_ERR_TYPE printSpecificPdSubscribeResult (
  */
 PD_APP_ERR_TYPE createPdDataSet1 (
 		BOOL8 firstCreateFlag,
+		BOOL8 marshallingFlag,
 		DATASET1 *pPdDataSet1);
 
 /**********************************************************************************************************************/
 /** Create PD DataSet2
  *
  *  @param[in]		fristCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[in]		marshallingFlag			Enable Marshalling : TRUE, Disable Marshalling : FALSE
+ *
  *  @param[out]		pPdDataSet2				pointer to Created PD DATASET2
  *
  *  @retval         MD_APP_NO_ERR				no error
@@ -637,6 +642,7 @@ PD_APP_ERR_TYPE createPdDataSet1 (
  */
 PD_APP_ERR_TYPE createPdDataSet2 (
 		BOOL8 firstCreateFlag,
+		BOOL8 marshallingFlag,
 		DATASET2 *pPdDataSet2);
 
 /**********************************************************************************************************************/
