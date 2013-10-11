@@ -1159,6 +1159,12 @@ TRDP_ERR_T  tlp_unpublish (
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
 
+        /* Re-compute distribution times */
+        if (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING)
+        {
+            ret = trdp_pdDistribute(appHandle->pSndQueue);
+        }
+
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
             vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
