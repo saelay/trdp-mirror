@@ -7,6 +7,8 @@
 
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
+--- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)
+
 --- Module:   ..\..\src\common\trdp_if.c (C)
 
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
@@ -26,18 +28,18 @@
 --- Module:   ..\..\src\vos\common\vos_utils.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_pdcom.c line 378: trdp_pdCheck([1], ?)
-  File ..\..\src\common\trdp_pdcom.c line 803: vos_crc32(4294967295, [0], ?)
-..\..\src\vos\common\vos_utils.c(332) : Warning 661: Possible access of
+  File ..\..\src\common\trdp_pdcom.c line 377: trdp_pdCheck([1], ?)
+  File ..\..\src\common\trdp_pdcom.c line 802: vos_crc32(4294967295, [0], ?)
+..\..\src\vos\common\vos_utils.c(331) : Warning 661: Possible access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_utils.c: lines 330, 332; file
-    ..\..\src\common\trdp_pdcom.c: lines 378, 803]
-..\..\src\vos\common\vos_utils.c(330) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_utils.c: lines 329, 331; file
+    ..\..\src\common\trdp_pdcom.c: lines 377, 802]
+..\..\src\vos\common\vos_utils.c(329) : Info 831: Reference cited in prior
     message
-..\..\src\vos\common\vos_utils.c(332) : Info 831: Reference cited in prior
+..\..\src\vos\common\vos_utils.c(331) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_pdcom.c(378) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_pdcom.c(803) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_pdcom.c(377) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_pdcom.c(802) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
 
@@ -46,59 +48,61 @@ During Specific Walk:
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 629: vos_sockReceiveTCP(?, [0]?, [1])
-..\..\src\vos\windows\vos_sock.c(1413) : Warning 662: Possible creation of
+  File ..\..\src\common\trdp_mdcom.c line 628: vos_sockReceiveTCP(?, [0]?, [1])
+..\..\src\vos\windows\vos_sock.c(1412) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1410, 1413; file
-    ..\..\src\common\trdp_mdcom.c: lines 607, 628]
-..\..\src\vos\windows\vos_sock.c(1410) : Info 831: Reference cited in prior
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1409, 1412; file
+    ..\..\src\common\trdp_mdcom.c: lines 606, 627]
+..\..\src\vos\windows\vos_sock.c(1409) : Info 831: Reference cited in prior
     message
-..\..\src\vos\windows\vos_sock.c(1413) : Info 831: Reference cited in prior
+..\..\src\vos\windows\vos_sock.c(1412) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(607) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(628) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(606) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(627) : Info 831: Reference cited in prior message
+
+--- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)
 
 --- Module:   ..\..\src\common\trdp_if.c (C)
 
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(303) : Warning 662: Possible creation of
+  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
+..\..\src\common\trdp_mdcom.c(302) : Warning 662: Possible creation of
     out-of-bounds pointer (65418 beyond end of data) by operator 'ptr+int'
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 863]
-..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 862]
+..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(303) : Warning 662: Possible creation of
+  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
+..\..\src\common\trdp_mdcom.c(302) : Warning 662: Possible creation of
     out-of-bounds pointer (65414 beyond end of data) by operator 'ptr-int'
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 863]
-..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 862]
+..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(304) : Warning 662: Possible creation of
+  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
+..\..\src\common\trdp_mdcom.c(303) : Warning 662: Possible creation of
     out-of-bounds pointer (16354 beyond end of data) by operator '['
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 304, 863]
-..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 303, 862]
+..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(304) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 863: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(304) : Warning 661: Possible access of
+  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
+..\..\src\common\trdp_mdcom.c(303) : Warning 661: Possible access of
     out-of-bounds pointer (16354 beyond end of data) by operator '['
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 271, 303, 304, 863]
-..\..\src\common\trdp_mdcom.c(271) : Info 831: Reference cited in prior message
+    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 303, 862]
+..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
 ..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(304) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(863) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\common\trdp_pdcom.c (C)
 
@@ -112,17 +116,17 @@ During Specific Walk:
 
 --- Global Wrap-up
 
-Warning 552: Symbol 'gNumberOfOpenSockets' (line 89, file ..\..\src\vos\windows\vos_sock.c)
+Warning 552: Symbol 'gNumberOfOpenSockets' (line 88, file ..\..\src\vos\windows\vos_sock.c)
     not accessed
-..\..\src\vos\windows\vos_sock.c(89) : Info 830: Location cited in prior
+..\..\src\vos\windows\vos_sock.c(88) : Info 830: Location cited in prior
     message
-Warning 526: Symbol '__alignof()' (line 121, file ..\..\src\common\tau_marshall.c)
+Warning 526: Symbol '__alignof()' (line 120, file ..\..\src\common\tau_marshall.c)
     not defined
-..\..\src\common\tau_marshall.c(121) : Info 830: Location cited in prior
+..\..\src\common\tau_marshall.c(120) : Info 830: Location cited in prior
     message
 Warning 628: no argument information provided for function '__alignof()' (line
-    121, file ..\..\src\common\tau_marshall.c)
-..\..\src\common\tau_marshall.c(121) : Info 830: Location cited in prior
+    120, file ..\..\src\common\tau_marshall.c)
+..\..\src\common\tau_marshall.c(120) : Info 830: Location cited in prior
     message
 Warning 628: no argument information provided for function 'NetWkstaTransportEnum()'
     (line 102, file C:\Program Files\Microsoft SDKs\Windows\v7.0A\Include\lmwksta.h,
