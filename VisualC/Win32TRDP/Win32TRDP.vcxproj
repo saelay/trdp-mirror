@@ -100,6 +100,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\trdp_utils.c" />
     <ClCompile Include="..\..\src\vos\common\vos_mem.c" />
+    <ClCompile Include="..\..\src\vos\windows\vos_shared_mem.c" />
     <ClCompile Include="..\..\src\vos\windows\vos_sock.c" />
     <ClCompile Include="..\..\src\vos\windows\vos_thread.c" />
     <ClCompile Include="..\..\src\vos\common\vos_utils.c" />
