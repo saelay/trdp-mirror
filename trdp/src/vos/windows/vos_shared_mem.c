@@ -98,107 +98,106 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     }
     else
     {
-        /* do nothing here */
-    }
-    shMemName = (TCHAR*) vos_memAlloc((strlen(pKey) + 1) * sizeof(TCHAR));
-    if (shMemName == NULL)
-    {
-        vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
-        retVal = VOS_MEM_ERR;
-    }
-    else
-    {
-        /* CHAR8 to TCHAR (Unicode) */
-        err = mbstowcs_s(&convertedChars, shMemName, strlen(pKey) + 1, pKey, _TRUNCATE);
-        if (err != (errno_t)NULL)
+        shMemName = (TCHAR*) vos_memAlloc((strlen(pKey) + 1) * sizeof(TCHAR));
+        if (shMemName == NULL)
         {
-            vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not convert CHAR8 to TCHAR\n");
-            retVal = VOS_UNKNOWN_ERR;
+            vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
+            retVal = VOS_MEM_ERR;
         }
         else
         {
-            (*pHandle) = (VOS_SHRD_T) vos_memAlloc(sizeof(struct VOS_SHRD));
-            if (*pHandle == NULL)
+            /* CHAR8 to TCHAR (Unicode) */
+            err = mbstowcs_s(&convertedChars, shMemName, strlen(pKey) + 1, pKey, _TRUNCATE);
+            if (err != (errno_t)NULL)
             {
-                vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
-                retVal = VOS_MEM_ERR;
+                vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not convert CHAR8 to TCHAR\n");
+                retVal = VOS_UNKNOWN_ERR;
             }
             else
             {
-                /* try to open existing file mapping */
-                (*pHandle)->fd = OpenFileMapping(
-                    FILE_MAP_ALL_ACCESS,            /* read / write access */
-                    FALSE,                          /* do not inherit the name */
-                    shMemName);                     /* name of mapping object */
-                if ((*pHandle)->fd == NULL)
+                (*pHandle) = (VOS_SHRD_T) vos_memAlloc(sizeof(struct VOS_SHRD));
+                if (*pHandle == NULL)
                 {
-                    /* can not open file mapping, assume that it does not yet exist */
-                    /* so create a new one */
-                    (*pHandle)->fd = CreateFileMapping(
-                        INVALID_HANDLE_VALUE,       /* use paging file */
-                        NULL,                       /* default security */
-                        PAGE_READWRITE,             /* read/write access */
-                        0,                          /* maximum object size (high-order DWORD) */
-                        *pSize,                     /* maximum object size (low-order DWORD) */
-                        shMemName);                 /* name of mapping object */
+                    vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
+                    retVal = VOS_MEM_ERR;
+                }
+                else
+                {
+                    /* try to open existing file mapping */
+                    (*pHandle)->fd = OpenFileMapping(
+                        FILE_MAP_ALL_ACCESS,            /* read / write access */
+                        FALSE,                          /* do not inherit the name */
+                        shMemName);                     /* name of mapping object */
                     if ((*pHandle)->fd == NULL)
                     {
-                        vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not create file mapping object (%d).\n",GetLastError());
-                        retVal = VOS_MEM_ERR;
+                        /* can not open file mapping, assume that it does not yet exist */
+                        /* so create a new one */
+                        (*pHandle)->fd = CreateFileMapping(
+                            INVALID_HANDLE_VALUE,       /* use paging file */
+                            NULL,                       /* default security */
+                            PAGE_READWRITE,             /* read/write access */
+                            0,                          /* maximum object size (high-order DWORD) */
+                            *pSize,                     /* maximum object size (low-order DWORD) */
+                            shMemName);                 /* name of mapping object */
+                        if ((*pHandle)->fd == NULL)
+                        {
+                            vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not create file mapping object (%d).\n",GetLastError());
+                            retVal = VOS_MEM_ERR;
+                        }
+                        else
+                        {
+                            /* do nothing here */
+                        }
                     }
                     else
                     {
                         /* do nothing here */
                     }
-                }
-                else
-                {
-                    /* do nothing here */
-                }
-                if ((*pHandle)->fd != NULL)
-                {
-                    *ppMemoryArea = (UINT8*) MapViewOfFile(
-                        (*pHandle)->fd,             /* handle to map object */
-                        FILE_MAP_ALL_ACCESS,        /* read/write permission */
-                        0,                          /* no offset */
-                        0,                          /* no offset */
-                        *pSize);                    /* size to map */
-                    if (*ppMemoryArea == NULL)
+                    if ((*pHandle)->fd != NULL)
                     {
-                        vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not map view of file (%d).\n", GetLastError());
-                        CloseHandle((*pHandle)->fd);
-                        retVal = VOS_MEM_ERR;
-                    }
-                    else
-                    {
-                        (*pHandle)->sharedMemoryName = (CHAR8*)vos_memAlloc((strlen(pKey)+1)*sizeof(CHAR8));
-                        if ((*pHandle)->sharedMemoryName == NULL)
+                        *ppMemoryArea = (UINT8*) MapViewOfFile(
+                            (*pHandle)->fd,             /* handle to map object */
+                            FILE_MAP_ALL_ACCESS,        /* read/write permission */
+                            0,                          /* no offset */
+                            0,                          /* no offset */
+                            *pSize);                    /* size to map */
+                        if (*ppMemoryArea == NULL)
                         {
-                            vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not alloc memory\n");
+                            vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not map view of file (%d).\n", GetLastError());
+                            (void) CloseHandle((*pHandle)->fd);
                             retVal = VOS_MEM_ERR;
                         }
                         else
                         {
-                            vos_strncpy((*pHandle)->sharedMemoryName,pKey,strlen(pKey)+1);
-                            retVal = VOS_NO_ERR;
+                            (*pHandle)->sharedMemoryName = (CHAR8*)vos_memAlloc((strlen(pKey)+1)*sizeof(CHAR8));
+                            if ((*pHandle)->sharedMemoryName == NULL)
+                            {
+                                vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not alloc memory\n");
+                                retVal = VOS_MEM_ERR;
+                            }
+                            else
+                            {
+                                vos_strncpy((*pHandle)->sharedMemoryName,pKey,strlen(pKey)+1);
+                                retVal = VOS_NO_ERR;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    retVal = VOS_MEM_ERR;
+                    else
+                    {
+                        retVal = VOS_MEM_ERR;
+                    }
                 }
             }
         }
-    }
-    vos_memFree(shMemName);
-    if (retVal != VOS_NO_ERR)
-    {
-        *pSize = (UINT32)NULL;
-    }
-    else
-    {
-        /* do nothing here */
+        vos_memFree(shMemName);
+        if (retVal != VOS_NO_ERR)
+        {
+            *pSize = (UINT32)NULL;
+        }
+        else
+        {
+            /* do nothing here */
+        }
     }
     return retVal;
 }
@@ -229,8 +228,8 @@ EXT_DECL VOS_ERR_T vos_sharedClose (
     else
     {
         vos_memFree(handle->sharedMemoryName);
-        UnmapViewOfFile(pMemoryArea);
-        CloseHandle(handle->fd);
+        (void) UnmapViewOfFile(pMemoryArea);
+        (void) CloseHandle(handle->fd);
         vos_memFree(handle);
         retVal = VOS_NO_ERR;
     }
