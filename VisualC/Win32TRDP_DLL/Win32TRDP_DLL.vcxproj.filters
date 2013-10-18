@@ -54,6 +54,9 @@
     <ClCompile Include="..\..\src\vos\windows\vos_thread.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\vos\windows\vos_shared_mem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\common\trdp_if.h">
