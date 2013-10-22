@@ -31,7 +31,7 @@
 
 #include <mqueue.h>
 #include <errno.h>
-
+13:31 22.10.2013
 #include "trdp_if_light.h"
 //#include "vos_thread.h"
 #include "trdp_private.h"
@@ -116,7 +116,7 @@ static mqd_t trdp_mq;
 static TRDP_IP_ADDR_T    MD_COMID1_SRC_IP;
 static TRDP_IP_ADDR_T    MD_COMID1_DST_IP;
 
-BOOL app_queue_used;
+BOOL8 app_queue_used;
 CHAR8 gBuffer[32];
 
 
@@ -693,7 +693,7 @@ static void md_indication(
 
 
 /* Check if there is any received message that is waiting the response */
-BOOL prep_toSend(TRDP_MSG_T type)
+BOOL8 prep_toSend(TRDP_MSG_T type)
 {
     INT32 index;
 
@@ -753,7 +753,7 @@ void dbgOut (
 }
 
 
-TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set*  rfds, BOOL *tcpStatistics)
+TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set*  rfds, BOOL8 *tcpStatistics)
 {
     UINT32 read_data = 1;
     UINT32 MD_listen_COMID[TRDP_QUEUE_MAX_MESG];
@@ -1017,7 +1017,7 @@ TRDP_ERR_T notifies_requests()
 
 TRDP_ERR_T reply_msgs()
 {
-    BOOL to_reply;
+    BOOL8 to_reply;
     UINT32 replies_count=0;
     UINT32 read_data = 1;
     UINT32 found_index;
@@ -1191,7 +1191,7 @@ TRDP_ERR_T reply_msgs()
 
 TRDP_ERR_T confirm_msgs()
 {
-    BOOL to_reply;
+    BOOL8 to_reply;
     UINT32 read_data = 1;
     UINT32 found_index;
     UINT32 confirms_count=0;
@@ -1355,7 +1355,7 @@ int main (int argc, char * *argv)
     UINT32 continue_looping = 1;
     struct timeval  tv;
     struct timeval  max_tv = {0, 100000};
-    BOOL tcpStatistics = FALSE;
+    BOOL8 tcpStatistics = FALSE;
 
 
     INT32 count;
