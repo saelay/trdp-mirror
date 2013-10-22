@@ -29,7 +29,7 @@
 /**********************************************************************************************************************/
 typedef struct
 {
-    BOOL        boolean;
+    BOOL8       boolean;
     CHAR8       character;
     UTF16       utf16;
     INT8        integer8;
@@ -47,7 +47,7 @@ typedef struct
     TIMEDATE64  timeDate64;
 } DATASET1_T;
 
-#define DATASET1_PACKED_SIZE  (sizeof(BOOL) +           \
+#define DATASET1_PACKED_SIZE  (sizeof(BOOL8) +           \
                                sizeof(CHAR8) +          \
                                sizeof(UTF16) +          \
                                sizeof(INT8) +           \
@@ -71,7 +71,7 @@ TRDP_DATASET_T gDataSet2001 =
     0,          /*    reserved        */
     16,         /*    No of TRDP_DATASET_ELEMENT_T    */
     { /* data type,  no of elements, reserved pointer */
-        { TRDP_BOOLEAN, 1, NULL},
+        { TRDP_BOOL8, 1, NULL},
         { TRDP_CHAR8, 1, NULL},
         { TRDP_UTF16, 1, NULL },
         { TRDP_INT8, 1, NULL },
@@ -236,7 +236,7 @@ int main ()
         printf("...### Precomputed size is different (expected %lu)!\n", DATASET2_PACKED_SIZE);
 
         printf("DATASET1_PACKED_SIZE = %lu\n", DATASET1_PACKED_SIZE);
-        printf("BOOL = %lu\n", sizeof(BOOL));
+        printf("BOOL8 = %lu\n", sizeof(BOOL8));
         printf("TIMEDATE32 = %lu\n", sizeof(TIMEDATE32));
         printf("TIMEDATE48 = %lu\n", sizeof(TIMEDATE48));
         printf("TIMEDATE64 = %lu\n", sizeof(TIMEDATE64));
