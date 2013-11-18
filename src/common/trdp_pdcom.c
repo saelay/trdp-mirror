@@ -302,8 +302,14 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 /*  Set timer if interval was set.
                     In case of a requested cyclically PD packet, this will lead to one time jump (jitter) in the interval
                 */
-                iterPD->timeToGo = iterPD->interval;
-                vos_addTime(&iterPD->timeToGo, &now);
+                vos_addTime(&iterPD->timeToGo, &iterPD->interval);
+
+                if (vos_cmpTime(&iterPD->timeToGo, &now) <= 0)
+                {
+                    /* in case of a delay of more than one interval - avoid sending it in the next cycle again */ 
+                    iterPD->timeToGo = now;
+                    vos_addTime(&iterPD->timeToGo, &iterPD->interval);
+                }
             }
 
             /* Reset "immediate" flag for request or requested packet */
