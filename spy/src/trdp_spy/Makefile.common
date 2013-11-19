@@ -41,4 +41,5 @@ DISSECTOR_INCLUDES =	\
 # used to generate "register.c").
 DISSECTOR_SUPPORT_SRC =	\
 	parsebody.c \
+	trdp_env.c \
     lookuptype.c
