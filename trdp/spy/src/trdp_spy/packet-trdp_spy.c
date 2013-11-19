@@ -80,36 +80,36 @@ void proto_reg_handoff_trdp(void);
 static int proto_trdp_spy = -1;
 
 /*For All*/
-static int hf_trdp_spy_sequencecounter = -1;    				/*uint32*/
-static int hf_trdp_spy_protocolversion = -1;      		/*uint16*/
-static int hf_trdp_spy_type = -1;   						/*uint16*/
-static int hf_trdp_spy_topocount = -1;      				/*uint32*/
-static int hf_trdp_spy_comid = -1;   					/*uint32*/
-static int hf_trdp_spy_datasetlength = -1;    			/*uint16*/
+static int hf_trdp_spy_sequencecounter = -1;    /*uint32*/
+static int hf_trdp_spy_protocolversion = -1;    /*uint16*/
+static int hf_trdp_spy_type = -1;               /*uint16*/
+static int hf_trdp_spy_topocount = -1;          /*uint32*/
+static int hf_trdp_spy_comid = -1;              /*uint32*/
+static int hf_trdp_spy_datasetlength = -1;      /*uint16*/
 
 /*For All (user data)*/
-static int hf_trdp_spy_fcs_head = -1;							/*uint32*/
-static int hf_trdp_spy_fcs_head_calc = -1;							/*uint32*/
-static int hf_trdp_spy_fcs_head_data = -1;					/*uint32*/
-static int hf_trdp_spy_userdata = -1;					/* userdata */
+static int hf_trdp_spy_fcs_head = -1;           /*uint32*/
+static int hf_trdp_spy_fcs_head_calc = -1;      /*uint32*/
+static int hf_trdp_spy_fcs_head_data = -1;      /*uint32*/
+static int hf_trdp_spy_userdata = -1;           /* userdata */
 
 /*needed only for PD messages*/
-static int hf_trdp_spy_reply_comid = -1;					/*uint16*/   /*for MD-family only*/
-static int hf_trdp_spy_reply_ipaddress = -1; 				/*uint16*/
-static int hf_trdp_spy_fcs_body = -1;					/*uint8*/
-static int hf_trdp_spy_fcs_body_calc = -1;				/*uint8*/
-static int hf_trdp_spy_isPD = -1;				/* flag */
+static int hf_trdp_spy_reply_comid = -1;        /*uint16*/   /*for MD-family only*/
+static int hf_trdp_spy_reply_ipaddress = -1;    /*uint16*/
+static int hf_trdp_spy_fcs_body = -1;           /*uint8*/
+static int hf_trdp_spy_fcs_body_calc = -1;      /*uint8*/
+static int hf_trdp_spy_isPD = -1;               /* flag */
 
 /* needed only for MD messages*/
-static int hf_trdp_spy_replystatus = -1;	/*uint32*/
-static int hf_trdp_spy_sessionid0 = -1;		/*uint32*/
-static int hf_trdp_spy_sessionid1 = -1;		/*uint32*/
-static int hf_trdp_spy_sessionid2 = -1;		/*uint32*/
-static int hf_trdp_spy_sessionid3 = -1;		/*uint32*/
-static int hf_trdp_spy_replytimeout = -1;	/*uint32*/
-static int hf_trdp_spy_sourceURI = -1;		/*string*/
-static int hf_trdp_spy_destinationURI = -1; /*string*/
-static int hf_trdp_spy_isMD 	= -1;				/* flag*/
+static int hf_trdp_spy_replystatus = -1;        /*uint32*/
+static int hf_trdp_spy_sessionid0 = -1;         /*uint32*/
+static int hf_trdp_spy_sessionid1 = -1;         /*uint32*/
+static int hf_trdp_spy_sessionid2 = -1;         /*uint32*/
+static int hf_trdp_spy_sessionid3 = -1;         /*uint32*/
+static int hf_trdp_spy_replytimeout = -1;       /*uint32*/
+static int hf_trdp_spy_sourceURI = -1;          /*string*/
+static int hf_trdp_spy_destinationURI = -1;     /*string*/
+static int hf_trdp_spy_isMD 	= -1;           /*flag*/
 
 static gboolean preference_changed = FALSE;
 
