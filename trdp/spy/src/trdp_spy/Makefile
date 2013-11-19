@@ -8,7 +8,7 @@ INCS = -I $(WIRESHARK_SRC) -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/gli
 # Debugging:
 #INCS += -DPRINT_DEBUG
 
-SRCS     = plugin.c packet-trdp_spy.c parsebody.c lookuptype.c
+SRCS     = plugin.c packet-trdp_spy.c parsebody.c lookuptype.c trdp_env.c
 
 CC   = gcc
 
