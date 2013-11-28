@@ -704,7 +704,9 @@ EXT_DECL void vos_strncpy (
     UINT32      count )
 {
 #ifdef WIN32
-    (void) strncpy_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc, (size_t) count);
+    CHAR8 character = pStrDst[count];
+    (void) strncpy_s((char *)pStrDst, (size_t)(count+1), (const char *)pStrSrc, (size_t) count);
+    pStrDst[count] = character;
 #else
     (void) strncpy((char *)pStrDst, (const char *)pStrSrc, (size_t) count);
 #endif
