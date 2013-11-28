@@ -15,6 +15,7 @@
  *                  to third parties without express authority is forbidden,
  *                  Copyright Bombardier Transportation GmbH, Germany, 2013.
  *
+ * $Id$
  */
 /**************************/
 /* error flags definition */
