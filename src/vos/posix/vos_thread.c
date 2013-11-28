@@ -1098,7 +1098,15 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     else
     {
         /* Get time and convert it to timespec format */
-        clock_gettime(CLOCK_REALTIME,&waitTimeSpec);
+#ifdef __APPLE__
+		VOS_TIME_T      waitTimeVos     = {0, 0};
+        vos_getTime(&waitTimeVos);
+        waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
+        waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * NSECS_PER_USEC;
+#else
+        clock_gettime(CLOCK_REALTIME, &waitTimeSpec);
+#endif
+
         /* add offset */
         if (timeout >= (USECS_PER_MSEC * MSECS_PER_SEC))
         {
@@ -1128,6 +1136,11 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 #ifdef __QNXNTO__
         rc = sem_timedwait_monotonic((sem_t *)sema, &waitTimeSpec);
 #else
+        /* BL 2013-11-28:
+           Currently, under Linux, there is no semaphore call which will work with CLOCK_MONOTONIC; the semaphore
+           will fail if the clock was changed by the system (NTP, adjtime etc.).
+           See also http://sourceware.org/bugzilla/show_bug.cgi?id=14717
+        */
         rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
 #endif
     }
