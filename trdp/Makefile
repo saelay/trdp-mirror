@@ -57,16 +57,6 @@ ifeq ($(UNAME), Darwin)
 CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE
 endif
 
-# Enable / disable Debug
-ifeq ($(DEBUG),1)
-CFLAGS += -g -O -DDEBUG
-LDFLAGS += -g
-# Display the strip command and do not execute it
-STRIP = @echo "do NOT strip: "
-else
-CFLAGS += -Os  -DNO_DEBUG
-endif
-
 AS = $(TCPREFIX)as$(TCPOSTFIX)
 LD = $(TCPREFIX)ld$(TCPOSTFIX)
 CC = $(TCPREFIX)gcc$(TCPOSTFIX)
@@ -80,7 +70,17 @@ ifeq ($(TARGET_FLAG),VXWORKS)
 CC = $(TCPREFIX)cc$(TCPOSTFIX)
 endif
 
-all:	outdir libtrdp demo example test pdtest mdtest
+# Enable / disable Debug
+ifeq ($(DEBUG),1)
+CFLAGS += -g3 -O -DDEBUG
+LDFLAGS += -g3
+# Display the strip command and do not execute it
+STRIP = @echo "do NOT strip: "
+else
+CFLAGS += -Os  -DNO_DEBUG
+endif
+
+all:	outdir libtrdp demo example test pdtest mdtest vtests
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
@@ -90,6 +90,7 @@ test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test $(OUTDIR)/pd_md_responder $(OUTDIR)/testSub
 mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest4
+vtests:		outdir $(OUTDIR)/vtest
 
 doc:		doc/latex/refman.pdf
 
@@ -202,6 +203,14 @@ $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building MD test application $(@F)'
 			$(CC) test/mdpatterns/trdp-md-test.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/vtest: $(OUTDIR)/libtrdp.a
+			@echo ' ### Building vtest application $(@F)'
+			$(CC) test/diverse/vtest.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@

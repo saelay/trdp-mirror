@@ -31,7 +31,6 @@
 
 #include <mqueue.h>
 #include <errno.h>
-13:31 22.10.2013
 #include "trdp_if_light.h"
 //#include "vos_thread.h"
 #include "trdp_private.h"

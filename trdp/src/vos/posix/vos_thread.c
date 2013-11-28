@@ -315,10 +315,8 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             retCode );
         return VOS_THREAD_ERR;
     }
-
     return VOS_NO_ERR;
 }
-
 
 /**********************************************************************************************************************/
 /** Terminate a thread.
@@ -1079,7 +1077,6 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 {
     int             rc              = 0;
     VOS_ERR_T       retVal          = VOS_SEMA_ERR;
-    VOS_TIME_T      waitTimeVos     = {0, 0};
     struct timespec waitTimeSpec    = {0, 0};
 
     /* Check parameter */
@@ -1100,10 +1097,8 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     }
     else
     {
-        /* Get time since 01/01/1970 and convert it to timespec format */
-        vos_getTime(&waitTimeVos);
-        waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
-        waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * NSECS_PER_USEC;
+        /* Get time and convert it to timespec format */
+        clock_gettime(CLOCK_REALTIME,&waitTimeSpec);
         /* add offset */
         if (timeout >= (USECS_PER_MSEC * MSECS_PER_SEC))
         {
