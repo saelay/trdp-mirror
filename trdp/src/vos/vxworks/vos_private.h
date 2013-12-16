@@ -26,6 +26,7 @@
  */
 
 #include <pthread.h>
+#include "string.h"
 
 #include "vos_types.h"
 #include "vos_thread.h"
@@ -41,11 +42,27 @@ extern "C" {
 struct VOS_MUTEX
 {
     UINT32          magicNo;
-    pthread_mutex_t mutexId;
+    SEM_ID          mutexId;
 };
 
-//VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
-//void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
+struct VOS_SHRD
+{
+    INT32   fd;                     /* File Descriptor */
+    CHAR8   *sharedMemoryName;      /* shared Memory Name */
+};
+
+VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
+void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
+
+#if (((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE) || __APPLE__)
+#   define STRING_ERR(pStrBuf)  (void)strerror_r(errno, pStrBuf, VOS_MAX_ERR_STR_SIZE);
+#else
+#   define STRING_ERR(pStrBuf)                                      \
+    {                                                               \
+        strncpy(buff, strerror(errno), VOS_MAX_ERR_STR_SIZE - 1);   \
+        buff[VOS_MAX_ERR_STR_SIZE - 1] = '\0';                      \
+    }
+#endif
 
 #ifdef __cplusplus
 }
