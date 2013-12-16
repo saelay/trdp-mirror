@@ -32,10 +32,10 @@
 #define printOut(lvl,format, ...) {if (lvl <= OUTPUT_DETAILS) \
     {(void) printf(format, __VA_ARGS__);}};
 
-#define IF_IP "192.168.64.3"
-#define DEST_IP "192.168.64.117"
+#define IF_IP "192.168.64.2"
+#define DEST_IP "192.168.64.118"
 #define MC_IP "238.0.0.1"
-#define MC_IF "192.168.64.3"
+#define MC_IF "192.168.64.2"
 #define PORT_PD 20548
 #define PORT_MD 20550
 #ifdef WIN32
@@ -125,7 +125,7 @@ typedef enum
 
 const CHAR8 *cDefaultIface = "fec0";
 /* define communication test identity (Master / Slave) */
-const TEST_ROLE_T TEST_ROLE = ROLE_MASTER;
+const TEST_ROLE_T TEST_ROLE = ROLE_SLAVE;
 UINT32 gTestIP = 0;
 UINT16 gTestPort = 0;
 
@@ -137,6 +137,11 @@ typedef struct arg_struct_thread {
     struct timespec delay;
     VOS_ERR_T result;
 }TEST_ARGS_THREAD;
+
+typedef struct arg_struct_mutex{
+    VOS_MUTEX_T mutex;
+    VOS_ERR_T result;
+}TEST_ARGS_MUTEX;
 
 typedef struct arg_struct_shmem {
     UINT32 size;
