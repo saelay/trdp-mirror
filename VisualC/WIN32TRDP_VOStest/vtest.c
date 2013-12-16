@@ -67,9 +67,8 @@ MEM_ERR_T L3_test_mem_queue()
     VOS_ERR_T res = VOS_NO_ERR;
     UINT8 *pData;
     UINT32 size;
-    UINT32 timeout = 20000;
+    VOS_TIME_T timeout = {0,20000};
     VOS_TIME_T startTime, endTime;
-    INT32 helpa = 0;
 
     printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] start...\n");
     res = vos_queueCreate(VOS_QUEUE_POLICY_FIFO,3,&qHandle);
@@ -102,35 +101,40 @@ MEM_ERR_T L3_test_mem_queue()
         printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] 4.queueSend() ERROR\n");
         retVal = MEM_QUEUE_ERR;
     }
-    res = vos_queueReceive(qHandle,&pData,&size,timeout);
+    res = vos_queueReceive(qHandle,&pData,&size,timeout.tv_usec);
     if ((res != VOS_NO_ERR) || (pData != (UINT8*)0x0123) || (size != 0x12))
     {
         printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] 1.queueReceive() ERROR\n");
         retVal = MEM_QUEUE_ERR;
     }
-    res = vos_queueReceive(qHandle,&pData,&size,timeout);
+    res = vos_queueReceive(qHandle,&pData,&size,timeout.tv_usec);
     if ((res != VOS_NO_ERR) || (pData != (UINT8*)0x4567) || (size != 0x34))
     {
         printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] 2.queueReceive() ERROR\n");
         retVal = MEM_QUEUE_ERR;
     }
-    res = vos_queueReceive(qHandle,&pData,&size,timeout);
+    res = vos_queueReceive(qHandle,&pData,&size,timeout.tv_usec);
     if ((res != VOS_NO_ERR) || (pData != (UINT8*)0x89AB) || (size != 0x56))
     {
         printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] 3.queueReceive() ERROR\n");
         retVal = MEM_QUEUE_ERR;
     }
     vos_getTime(&startTime);
-    res = vos_queueReceive(qHandle,&pData,&size,timeout);
+    res = vos_queueReceive(qHandle,&pData,&size,timeout.tv_usec);
     vos_getTime(&endTime);
-    helpa = vos_cmpTime(&endTime,&startTime);
+    vos_subTime(&endTime,&timeout);
     printOut(OUTPUT_FULL,"[MEM_QUEUE] Start: %i:%i; End %i:%i\n",startTime.tv_sec,startTime.tv_usec,endTime.tv_sec,endTime.tv_usec);
-    if ((res == VOS_NO_ERR) || (pData != (UINT8*)0x0) || (size != 0x0) || (!vos_cmpTime(&endTime,&startTime)))
+    if ((res == VOS_NO_ERR) || (pData != (UINT8*)0x0) || (size != 0x0) || (vos_cmpTime(&endTime,&startTime) <= 0))
     {
         printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] 4.queueReceive() ERROR\n");
         retVal = MEM_QUEUE_ERR;
     }
     res = vos_queueDestroy(qHandle);
+    if(res != VOS_NO_ERR)
+    {
+        printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] vos_queueDestroy() ERROR\n");
+        retVal = MEM_QUEUE_ERR;
+    }
     printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] finished with errcnt = %i\n",res);
     return retVal;
 }
@@ -1164,12 +1168,26 @@ THREAD_ERR_T L3_test_thread_getUUID()
     return retVal;
 }
 
+VOS_THREAD_FUNC_T L3_test_thread_mutex_lock(void* arguments)
+{
+    VOS_ERR_T res = VOS_MUTEX_ERR;
+    TEST_ARGS_MUTEX *arg1 = (TEST_ARGS_MUTEX*) arguments;
+    VOS_MUTEX_T mutex = arg1->mutex;
+    res = vos_mutexLock(mutex); /*if res == 0 mutex could be locked from here; this should not be!*/
+    res = vos_mutexLock(mutex);
+    res = vos_mutexLock(mutex);
+    arg1->result = res;
+    return arguments;
+}
+
 THREAD_ERR_T L3_test_thread_mutex()
 {
     /* create lock trylock unlock delete */
     VOS_MUTEX_T mutex;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
     VOS_ERR_T res = VOS_NO_ERR;
+    TEST_ARGS_MUTEX arg1;
+    VOS_THREAD_T testLock;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] start...\n");
     res = vos_mutexCreate(&mutex);
@@ -1181,25 +1199,30 @@ THREAD_ERR_T L3_test_thread_mutex()
     res = vos_mutexTryLock(mutex);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexCreate Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexTryLock Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
     res = vos_mutexUnlock(mutex);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexCreate Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexUnlock Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
     res = vos_mutexLock(mutex);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexCreate Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexLock Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
-    res = vos_mutexTryLock(mutex);
-    /*retVal = vos_mutexLock(mutex); This would cause a deadlock!
-    if (retVal != 0)
-        return THREAD_MUTEX_ERR;*/
+    res = vos_mutexLock(mutex);
+    res = vos_mutexLock(mutex);
+    res = vos_mutexLock(mutex);
+    res = vos_threadCreate(&testLock,"testLock",THREAD_POLICY,0,0,0,(void*)L3_test_thread_mutex_lock,(void*)&arg1);
+    if (arg1.result != VOS_NO_ERR)
+    {
+        retVal = THREAD_MUTEX_ERR;
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] Not a recursive mutex! Could take mutex from other thread!\n");
+    }
     vos_mutexDelete(mutex);
     printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] finished\n");
     return retVal;
@@ -1212,7 +1235,7 @@ THREAD_ERR_T L3_test_thread_sema()
     VOS_TIME_T startTime, endTime;
     VOS_ERR_T res = VOS_NO_ERR;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
-    UINT32 timeout = 20000;
+    VOS_TIME_T timeout = {0,20000};
     INT32 ret = 0;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_SEMA] start...\n");
@@ -1235,15 +1258,17 @@ THREAD_ERR_T L3_test_thread_sema()
         printOut(OUTPUT_ADVANCED,"[THREAD_SEMA] semaTake[2] Error\n");
         retVal = THREAD_SEMA_ERR;
     }
-    vos_getTime(&startTime);
-    res = vos_semaTake(sema,timeout);
-    vos_getTime(&endTime);
+    res = vos_semaTake(sema,timeout.tv_usec);
     if (res == VOS_NO_ERR)
     {
         printOut(OUTPUT_ADVANCED,"[THREAD_SEMA] semaTake[3] Error\n");
         retVal = THREAD_SEMA_ERR;
     }
     /*check if endTime > startTime */
+    vos_getTime(&startTime);
+    res = vos_semaTake(sema,timeout.tv_usec);
+    vos_getTime(&endTime);
+    vos_subTime(&endTime,&timeout);
     ret = vos_cmpTime(&endTime,&startTime);
     if (ret < 0)
     {
@@ -1370,8 +1395,6 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
         printOut(OUTPUT_ADVANCED,"[SOCK_UDPMC] vos_sockSetOptions() ERROR!\n");
         retVal = SOCK_UDP_MC_ERR;
     }
-   /* getsockopt(sockDesc,IPPROTO_IP,IP_MULTICAST_TTL,&value,(int*)&valueSize);
-    printOut(OUTPUT_FULL,"[SOCK_UDPMC] vos_getsockopt() returned ip multicast ttl = %u\n",value);*/
     /********/
     /* bind */
     /********/
@@ -1418,7 +1441,6 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
         /* receive UDP Multicast */
         /*************************/
         /*ok here we first (re-)receive our own mc udp that was sent just above */
-        /*TODO add check for own source ip and port to make sure */
         printOut(OUTPUT_FULL,"[SOCK_UDPMC] vos_sockReceive() retVal bisher = %u\n",retVal);
         res = vos_sockReceiveUDP(sockDesc,&rcvBuf,&bufSize,&gTestIP,&gTestPort,&destIP,FALSE);
         if (res != VOS_NO_ERR)
@@ -1559,8 +1581,6 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         printOut(OUTPUT_ADVANCED,"[SOCK_UDP] vos_sockSetOptions() ERROR\n");
         retVal = SOCK_UDP_ERR;
     }
-    /*getsockopt(sockDesc,IPPROTO_IP,IP_MULTICAST_TTL,&value,(int*)&valueSize);
-    printOut(OUTPUT_FULL,"[SOCK_UDP] vos_getsockopt() returned ip multicast ttl = %u\n",value);*/
     /********/
     /* bind */
     /********/
@@ -1578,7 +1598,6 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         /************/
         printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockSendUDP() to %s:%u\n",vos_ipDotted(gTestIP),gTestPort);
         vos_threadDelay(500000);
-        /* send with counter = 3 */
         res = vos_sockSendUDP(sockDesc,&sndBuf,&bufSize,gTestIP,gTestPort);
         if (res != VOS_NO_ERR)
         {
@@ -1589,7 +1608,6 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         /* receive UDP */
         /***************/
         printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockReceiveUDP()\n");
-        /* expected received counter = 4*/
         res = vos_sockReceiveUDP(sockDesc,&rcvBuf,&bufSize,&srcIP,&srcPort,&destIP,FALSE);
         if (res != VOS_NO_ERR)
         {
@@ -1791,11 +1809,6 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         if (res == VOS_NO_ERR)
         {
             printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] accepted from: %s : %u\n",vos_ipDotted(srcIP),srcPort);
-            /*if((srcIP != gTestIP) || (srcPort != gTestPort))
-            {
-                printOut(OUTPUT_ADVANCED,"[SOCK_TCPCLIENT] vos_sockAccept() Error accepted from invalid source\n");
-                retVal = SOCK_TCP_CLIENT_ERR;
-            }*/
         }
         else
         {
@@ -1818,7 +1831,6 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
             }
             printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] vos_sockReceiveTCP() received:%u\n",rcvBuf);
         }
-
         /************/
         /* send tcp */
         /************/
@@ -2640,7 +2652,7 @@ UINT32 L1_test_basic(UINT32 testCnt)
 {
     BOOL8 mem                = TRUE;
     BOOL8 thread             = TRUE;
-    BOOL8 sock               = FALSE;
+    BOOL8 sock               = TRUE;
     BOOL8 shMem              = TRUE;
     BOOL8 utils              = TRUE;
     MEM_ERR_T memErr        = MEM_ALL_ERR;
