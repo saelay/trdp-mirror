@@ -37,12 +37,27 @@
  */
 
 /** @struct ComId
+ *
+ @dot
+digraph Reference {
+node [shape=record, fontname=Helvetica, fontsize=10];
+c [ label="ComId" ];
+d [ label="Dataset" ];
+e [ label="Element" ];
+c -> d [ ];
+d -> d [ ];
+d -> e [ ];
+}
+@enddot
+ *
+ *
  *  @brief This struct makes a mapping between one comId and one dataset.
  *  This is a separate structure, because there could be mappings from a dataset to another one.
  *  @var ComId::comId
  *  Communication Id
  *  @var ComId::datasetId
  *  Id for a dataset (see struct ComId)
+ *
  */
 struct ComId {
 	guint32 comId;		// used as key
@@ -51,10 +66,12 @@ struct ComId {
 
 /** @struct Dataset
  *  @brief Description of one dataset.
- *  @var Dataset:datsetId
+ *  @var Dataset::datasetId
  *  Unique identification of one dataset
  *  @var Dataset::name
  *  Description of the dataset
+ *  @var Dataset::listOfElements
+ *  All elements, this dataset consists of.
  */
 struct Dataset {
     guint datasetId;
@@ -64,7 +81,7 @@ struct Dataset {
 
 /** @struct Element
  *  @brief description of one element, with a variable that is stored
- *  @var Element:name
+ *  @var Element::name
  *  Name of the variable, that is stored
  *  @var Element::type
  *  Numeric type of the variable (see Usermanual, chapter 4.2)
