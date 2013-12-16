@@ -113,11 +113,6 @@ static int hf_trdp_spy_isMD 	= -1;           /*flag*/
 
 static gboolean preference_changed = FALSE;
 
-/* A value larger than zero, indicates the need to reassemble the telegram out of multiple packets. */
-static guint32 gHugeTelegramSizeLeft = 0;
-/* Next to the length of the telegram, also the ComId */
-static guint32 gHugeTelegramComId = 0;
-
 //possible PD - Substution transmission
 static const value_string trdp_spy_subs_code_vals[] =
 {
@@ -250,18 +245,6 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
     /* make the userdata accessable for wireshark */
     ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_userdata, tvb, offset, tvb_length_remaining(tvb, offset), FALSE);
-
-    if (length > tvb_length_remaining(tvb, offset) ) /* verify the expected package size, with the actual one */
-    {
-        gHugeTelegramSizeLeft   = length - tvb_length_remaining(tvb, offset);
-        gHugeTelegramComId  = trdp_spy_comid;
-    }
-    else if (gHugeTelegramSizeLeft > 0) /* Reached the end of the big package -> no reassembling necessary */
-    {
-        gHugeTelegramSizeLeft = 0;
-        gHugeTelegramComId = 0;
-    }
-
 
 	if (strcmp(gbl_trdpDictionary_1,"") == 0  )
 	{
@@ -657,12 +640,12 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 		offset += value32u;
 	}
 
-	if (gHugeTelegramSizeLeft == 0 && tvb_length_remaining(tvb, offset) == TRDP_FCS_LENGTH)
+	if (tvb_length_remaining(tvb, offset) == TRDP_FCS_LENGTH)
 	{
 	    ti = add_crc2tree(tvb,trdp_spy_userdata, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, offset, start_offset,
                         offset - value32u /* do NOT calculate the CRC over the padding */, "Body");
 	}
-	else if (gHugeTelegramSizeLeft == 0 /* and the space after the Userdata is not fitting*/)
+	else /* the space after the Userdata is not fitting*/
 	{
 		expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN,
                          "Error at FCS for userdata, expect %d bytes and have %d",
@@ -784,75 +767,61 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         col_clear(pinfo->cinfo, COL_INFO);
     }
 
-    if (gHugeTelegramSizeLeft > 0 && gHugeTelegramComId > 0)
+    // Read required values from the package:
+    trdp_spy_string = tvb_get_ephemeral_string(tvb, 6, 2);
+    trdp_spy_comid = tvb_get_ntohl(tvb, 8);
+
+    /* Telegram that fits into one packet, or the header of huge telegram, that will be reassembled */
+    if (tree != NULL)
     {
-        col_set_str(pinfo->cinfo, COL_INFO, "Fragment");
-        /* Jump direct to the body part, as we are reassembling a huge telegram out of serveral packets */
-        if (tree != NULL)
-        {
-            dissect_trdp_generic_body(tvb, pinfo, tree,
-                                      gHugeTelegramComId, 0, gHugeTelegramSizeLeft,
-                                      0, 0/* level of cascaded datasets*/);
-        }
+        build_trdp_tree(tvb,pinfo,tree,trdp_spy_comid, trdp_spy_string);
     }
-    else
+
+
+    // Display a info line
+    if (check_col(pinfo->cinfo, COL_INFO))
     {
-        // Read required values from the package:
-        trdp_spy_string = tvb_get_ephemeral_string(tvb, 6, 2);
-        trdp_spy_comid = tvb_get_ntohl(tvb, 8);
-
-        /* Telegram that fits into one packet, or the header of huge telegram, that will be reassembled */
-        if (tree != NULL)
+        if ((!strcmp(trdp_spy_string,"Pr")))
         {
-            build_trdp_tree(tvb,pinfo,tree,trdp_spy_comid, trdp_spy_string);
+            col_set_str(pinfo->cinfo, COL_INFO, "PD Request");
         }
-
-
-        // Display a info line
-        if (check_col(pinfo->cinfo, COL_INFO))
+        else if ((!strcmp(trdp_spy_string,"Pp")))
         {
-            if ((!strcmp(trdp_spy_string,"Pr")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "PD Request");
-            }
-            else if ((!strcmp(trdp_spy_string,"Pp")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "PD Reply");
-            }
-            else if ((!strcmp(trdp_spy_string,"Pd")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "PD Data");
-            }
-            else if ((!strcmp(trdp_spy_string,"Mn")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "MD Notification (Request without reply)");
-            }
-            else if ((!strcmp(trdp_spy_string,"Mr")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "MD Request with reply");
-            }
-            else if ((!strcmp(trdp_spy_string,"Mp")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (without confirmation)");
-            }
-            else if ((!strcmp(trdp_spy_string,"Mq")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (with confirmation)");
-            }
-            else if ((!strcmp(trdp_spy_string,"Mc")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "MD Confirm");
-            }
-            else if ((!strcmp(trdp_spy_string,"Me")))
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "MD error");
-            }
-            else
-            {
-                col_set_str(pinfo->cinfo, COL_INFO, "Unknown TRDP Type");
-            }
-            col_append_fstr(pinfo->cinfo, COL_INFO, "\tComid: %d",trdp_spy_comid);
+            col_set_str(pinfo->cinfo, COL_INFO, "PD Reply");
         }
+        else if ((!strcmp(trdp_spy_string,"Pd")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "PD Data");
+        }
+        else if ((!strcmp(trdp_spy_string,"Mn")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Notification (Request without reply)");
+        }
+        else if ((!strcmp(trdp_spy_string,"Mr")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Request with reply");
+        }
+        else if ((!strcmp(trdp_spy_string,"Mp")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (without confirmation)");
+        }
+        else if ((!strcmp(trdp_spy_string,"Mq")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (with confirmation)");
+        }
+        else if ((!strcmp(trdp_spy_string,"Mc")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "MD Confirm");
+        }
+        else if ((!strcmp(trdp_spy_string,"Me")))
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "MD error");
+        }
+        else
+        {
+            col_set_str(pinfo->cinfo, COL_INFO, "Unknown TRDP Type");
+        }
+        col_append_fstr(pinfo->cinfo, COL_INFO, "\tComid: %d",trdp_spy_comid);
     }
 }
 
@@ -962,12 +931,12 @@ void proto_reg_handoff_trdp(void)
     }
     else
     {
-        dissector_delete("udp.port", g_md_port, trdp_spy_handle);
         dissector_delete("udp.port", g_pd_port, trdp_spy_handle);
+        dissector_delete("udp.port", g_md_port, trdp_spy_handle);
 		dissector_delete("tcp.port", g_md_port, trdp_spy_handle);
     }
 
-    dissector_add("udp.port", g_md_port, trdp_spy_handle);
     dissector_add("udp.port", g_pd_port, trdp_spy_handle);
+    dissector_add("udp.port", g_md_port, trdp_spy_handle);
 	dissector_add("tcp.port", g_md_port, trdp_spy_handle);
 }
