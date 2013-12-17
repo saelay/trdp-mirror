@@ -42,7 +42,8 @@ extern "C" {
 struct VOS_MUTEX
 {
     UINT32          magicNo;
-    SEM_ID          mutexId;
+    /*SEM_ID          mutexId;*/
+    pthread_mutex_t mutexId;
 };
 
 struct VOS_SHRD

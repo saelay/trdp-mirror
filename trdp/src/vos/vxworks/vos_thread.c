@@ -22,7 +22,8 @@
 /***********************************************************************************************************************
  * INCLUDES
  */
- #include <private/semPxLibP.h>
+
+#include <private/semPxLibP.h>
 #include "vos_thread.h"
 #include "vos_sock.h"
 #include "vos_mem.h"
@@ -642,6 +643,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
     VOS_MUTEX_T *pMutex)
 {
     int err = 0;
+    pthread_mutexattr_t attr;
 
     if (pMutex == NULL)
     {
@@ -654,8 +656,21 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
     {
         return VOS_MEM_ERR;
     }
-    (*pMutex)->mutexId = semMCreate(SEM_Q_FIFO);
-    if ((*pMutex)->mutexId != 0)
+    
+    err = pthread_mutexattr_init(&attr);
+    if (err == 0)
+    {
+        /* TODO: with given vxworks libs, a recursive mutex can not be created, only non-recursive mutexes which does not seem to be wanted here*/
+        /*err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);*/
+        if (err == 0)
+        {
+            err = pthread_mutex_init((pthread_mutex_t *)&(*pMutex)->mutexId, &attr);
+        }
+        pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
+    }
+        
+    /*(*pMutex)->mutexId = semMCreate(SEM_Q_FIFO);*/
+    if (err == 0)
     {
         (*pMutex)->magicNo = cMutextMagic;
     }
@@ -684,13 +699,25 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
     struct VOS_MUTEX *pMutex)
 {
     int err = 0;
+    pthread_mutexattr_t attr;
 
     if (pMutex == NULL)
     {
         return VOS_PARAM_ERR;
     }
-    pMutex->mutexId = semMCreate(SEM_Q_FIFO);
-    if (pMutex->mutexId != 0)
+    /*pMutex->mutexId = semMCreate(SEM_Q_FIFO);*/
+    err = pthread_mutexattr_init(&attr);
+        if (err == 0)
+        {
+            /* ToDo: unknown routine / mutex type */
+            /*err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);*/
+            if (err == 0)
+            {
+                err = pthread_mutex_init((pthread_mutex_t *)&pMutex->mutexId, &attr);
+            }
+            pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
+        }
+    if (err == 0)
     {
         pMutex->magicNo = cMutextMagic;
     }
@@ -722,7 +749,8 @@ EXT_DECL void vos_mutexDelete (
     {
         int err;
 
-        err = semDelete(pMutex->mutexId);
+        /*err = semDelete(pMutex->mutexId);*/
+        err = pthread_mutex_destroy((pthread_mutex_t *)&pMutex->mutexId);
         if (err == 0)
         {
             pMutex->magicNo = 0;
@@ -754,7 +782,8 @@ EXT_DECL void vos_mutexLocalDelete (
     {
         int err;
         
-        err = semDelete(pMutex->mutexId);
+        /*err = semDelete(pMutex->mutexId);*/
+        err = pthread_mutex_destroy((pthread_mutex_t *)&pMutex->mutexId);
         if (err == 0)
         {
             pMutex->magicNo = 0;
@@ -786,8 +815,8 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     {
         return VOS_PARAM_ERR;
     }
-
-    err = semTake(pMutex->mutexId,WAIT_FOREVER);
+    err = pthread_mutex_lock((pthread_mutex_t *)&pMutex->mutexId);
+    /*err = semTake(pMutex->mutexId,WAIT_FOREVER);*/
     if (err != 0)
     {
         vos_printLog(VOS_LOG_ERROR, "Unable to lock Mutex (pthread err=%d)\n", err);
@@ -817,8 +846,8 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     {
         return VOS_PARAM_ERR;
     }
-
-    err = semTake(pMutex->mutexId,WAIT_FOREVER);
+    err = pthread_mutex_trylock((pthread_mutex_t *)&pMutex->mutexId);
+    /*err = semTake(pMutex->mutexId,WAIT_FOREVER);*/
     if (err == EBUSY)
     {
         return VOS_MUTEX_ERR;
@@ -853,7 +882,8 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
     {
         int err;
 
-        err = semGive(pMutex->mutexId);
+        /*err = semGive(pMutex->mutexId);*/
+        err = pthread_mutex_unlock((pthread_mutex_t *)&pMutex->mutexId);
         if (err != 0)
         {
             vos_printLog(VOS_LOG_ERROR, "Unable to unlock Mutex (pthread err=%d)\n", err);
