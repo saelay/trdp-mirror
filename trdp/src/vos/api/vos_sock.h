@@ -30,6 +30,17 @@
 #ifdef WIN32
 #include <winsock2.h>
 #elif defined(VXWORKS)
+#include "netinet/in.h"
+#include "sys/socket.h"
+#include "sockLib.h"
+#include "inetLib.h"
+#include "selectLib.h"
+#include "net/ifaddrs.h"
+#include "net/if.h"
+#include "string.h"
+#include "ioLib.h"
+#include "stdio.h"
+#include "vos_private.h"
 #elif defined(POSIX)
 #include <sys/select.h>
 #else
