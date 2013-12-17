@@ -43,7 +43,7 @@
 /***********************************************************************************************************************
  *  LOCALS
  */
-BOOL vosSockInitialised = FALSE;
+BOOL8 vosSockInitialised = FALSE;
 
 struct ifreq gIfr;
 
@@ -238,7 +238,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
  *  @retval             FALSE       address is not a multicast address
  */
 
-EXT_DECL BOOL vos_isMulticast (
+EXT_DECL BOOL8 vos_isMulticast (
     UINT32 ipAddress)
 {
     return IN_MULTICAST(ipAddress);
@@ -891,7 +891,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT32  *pSrcIPAddr,
     UINT16  *pSrcIPPort,
     UINT32  *pDstIPAddr,
-    BOOL    peek)
+    BOOL8    peek)
 {
     union
     {

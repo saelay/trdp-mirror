@@ -26,6 +26,11 @@
  */
 
 #include "vos_types.h"
+#ifdef VXWORKS
+#include "vos_private.h"
+#include "time.h"
+#include "semaphore.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {

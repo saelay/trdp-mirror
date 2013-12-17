@@ -77,6 +77,7 @@ typedef char CHAR8;
 typedef short UTF16;
 typedef float REAL32;
 typedef double REAL64;
+typedef unsigned char BOOL8;
 
 #else
 
@@ -119,6 +120,8 @@ typedef double REAL64;
 /** inline macros  */
 #ifdef WIN32
     #define INLINE  _inline
+#elif defined (VXWORKS)
+    #define INLINE __inline__
 #elif defined(__GNUC__)
     #define INLINE  inline
 #else
