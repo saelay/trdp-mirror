@@ -55,7 +55,32 @@
 #define PROTO_NAME_TRDP         "Train Real Time Data Protocol"
 #define PROTO_FILTERNAME_TRDP   "trdp"
 
-#define TRDP_MD_HEADERLENGTH    108 /**< Length of the TRDP header of an MD message */
+#define TRDP_HEADER_OFFSET_SEQCNT           0
+#define TRDP_HEADER_OFFSET_PROTOVER         4
+#define TRDP_HEADER_OFFSET_TYPE             6
+#define TRDP_HEADER_OFFSET_COMID            8
+#define TRDP_HEADER_OFFSET_TOPOCNT          12
+#define TRDP_HEADER_OFFSET_DATASETLENGTH    16
+
+#define TRDP_HEADER_PD_OFFSET_RESERVED      20
+#define TRDP_HEADER_PD_OFFSET_REPLY_COMID   24
+#define TRDP_HEADER_PD_OFFSET_REPLY_IPADDR  28
+#define TRDP_HEADER_PD_OFFSET_FCSHEAD       32
+#define TRDP_HEADER_PD_OFFSET_DATA          36
+
+#define TRDP_HEADER_MD_OFFSET_REPLY_STATUS  20
+#define TRDP_HEADER_MD_SESSIONID0           24
+#define TRDP_HEADER_MD_SESSIONID1           28
+#define TRDP_HEADER_MD_SESSIONID2           32
+#define TRDP_HEADER_MD_SESSIONID3           36
+#define TRDP_HEADER_MD_REPLY_TIMEOUT        40
+#define TRDP_HEADER_MD_SRC_URI              44
+#define TRDP_HEADER_MD_DEST_URI             76
+#define TRDP_HEADER_MD_OFFSET_FCSHEAD       108
+#define TRDP_HEADER_MD_OFFSET_DATA          112
+
+
+#define TRDP_MD_HEADERLENGTH    TRDP_HEADER_MD_OFFSET_DATA /**< Length of the TRDP header of an MD message */
 
 #define TRDP_FCS_LENGTH 4   /**< The CRC calculation resluts in a 32bit result so 4 bytes are necessary */
 
