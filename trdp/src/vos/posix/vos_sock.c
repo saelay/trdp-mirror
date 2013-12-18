@@ -38,6 +38,10 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 
+#ifdef INTEGRITY
+#   include <sys/uio.h>
+#endif
+
 #ifdef __linux
 #   include <linux/if.h>
 #else
@@ -151,6 +155,35 @@ BOOL8 vos_getMacAddress (
     }
 
     return found;
+
+#elif defined(INTEGRITY)
+    struct ifreq    ifinfo;
+    int             sd;
+    int             result = -1;
+
+    if (pIfName == NULL)
+    {
+        strcpy(ifinfo.ifr_name, cDefaultIface);
+    }
+    else
+    {
+        strcpy(ifinfo.ifr_name, pIfName);
+    }
+    sd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sd != -1)
+    {
+        result = ioctl(sd, SIOCGIFHWADDR, &ifinfo);
+        close(sd);
+    }
+    if ((result == 0) && (ifinfo.ifr_hwaddr.sa_family == 1))
+    {
+        memcpy(pMacAddr, ifinfo.ifr_hwaddr.sa_data, ifinfo.ifr_hwaddr.sa_len);
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
 
 #elif defined(__QNXNTO__)
 #   warning "no definition for get_mac_address() on this platform!"
