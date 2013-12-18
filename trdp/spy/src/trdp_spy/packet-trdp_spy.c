@@ -54,7 +54,7 @@
 #include <libxml/tree.h>
 #include <libxml/xmlreader.h>
 #include <locale.h>
-//#include "packet-trdp_spy.h"
+#include "packet-trdp_spy.h"
 #include "parsebody.h"
 #include "trdp_env.h"
 
@@ -67,15 +67,22 @@
 
 #define API_TRACE PRNT(printf("%s:%d : %s\n",__FILE__, __LINE__, __FUNCTION__))
 
-/**
- * Prototyp, implementation see below.
- * Needed to set default values
- * @param dataset_level is set to 0 for the beginning
+
+/** @fn static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint32 length,guint8 flag_dataset, guint8 dataset_level)
+ * @internal
+ * Extract all information from the userdata (uses the parsebody module for unmarshalling)
+ *
+ * @param tvb               buffer
+ * @param packet            info for the packet
+ * @param tree              to which the information are added
+ * @param trdp_spy_comid    the already extracted comId
+ * @param offset            where the userdata starts in the TRDP package
+ * @param flag_dataset      on 0, the comId will be searched, on > 0 trdp_spy_comid will be interpreted as a dataset id
+ * @param dataset_level     is set to 0 for the beginning
+ *
+ * @return the actual offset in the package
  */
 static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint32 length,guint8 flag_dataset, guint8 dataset_level);
-
-/* Forward declaration we need below */
-void proto_reg_handoff_trdp(void);
 
 /* Initialize the protocol and registered fields */
 static int proto_trdp_spy = -1;
@@ -200,18 +207,9 @@ static void dissect_trdp_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trd
     dissect_trdp_generic_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, offset, length, 0, 0/* level of cascaded datasets*/);
 }
 
+
 /**
- * @internal
- * Extract all information from the userdata (uses the parsebody module for unmarshalling)
- *
- * @param tvb				buffer
- * @param packet			info for tht packet
- * @param tree				to which the information are added
- * @param trdp_spy_comid	the already extracted comId
- * @param offset			where the userdata starts in the TRDP package
- * @param flag_dataset		on 0, the comId will be searched, on > 0 trdp_spy_comid will be interpreted as a dataset id
- *
- * @return the actual offset in the package
+ * Explanation in its prototype @see dissect_trdp_generic_body
  */
 static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
 {
@@ -253,8 +251,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 		PRNT(printf( "No Configuration available\n"));
 		/* Jump to the last 4 byte and check the crc */
 		value32u = tvb_length_remaining(tvb, offset);
-		PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", value32u, start_offset,
-				(value32u % 4)));
+		PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", value32u, start_offset, (value32u % 4)));
 		if (value32u > TRDP_FCS_LENGTH && value32u >= length) /* check if there is space for the header */
 		{
 			offset += length;
@@ -856,10 +853,6 @@ static void dissect_trdp_tcp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree
                      get_trdp_tcp_message_len, dissect_trdp);
 }
 
-/** Register the protocol with Wireshark
- * this format is require because a script is used to build the C function
- *  that calls all the protocol registration.
- */
 void proto_register_trdp(void)
 {
     module_t *trdp_spy_module;
@@ -867,47 +860,46 @@ void proto_register_trdp(void)
     /* Setup list of header fields  See Section 1.6.1 for details*/
     static hf_register_info hf[] =
     {
-	// All the general fields for the header
-        { &hf_trdp_spy_sequencecounter,      { "Sequence Counter",			"trdp.sequencecounter",		FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
-        { &hf_trdp_spy_protocolversion,      { "Protocol Version",           "trdp.protocolversion",    FT_UINT16, BASE_HEX, NULL,   0x0, "", HFILL } },
-        { &hf_trdp_spy_type,                 { "Type",                       "trdp.type",               FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
-        { &hf_trdp_spy_comid,                { "Com ID",                     "trdp.comid",              FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
-        { &hf_trdp_spy_topocount,            { "Topo Count",                 "trdp.topocount",          FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
-        { &hf_trdp_spy_datasetlength,        { "Dataset Length",             "trdp.datasetlength",      FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+        /* All the general fields for the header */
+        { &hf_trdp_spy_sequencecounter,      { "Sequence Counter",      "trdp.sequencecounter",     FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
+        { &hf_trdp_spy_protocolversion,      { "Protocol Version",      "trdp.protocolversion",    FT_UINT16, BASE_HEX, NULL,   0x0, "", HFILL } },
+        { &hf_trdp_spy_type,                 { "Type",                  "trdp.type",               FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_comid,                { "Com ID",                "trdp.comid",              FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_topocount,            { "Topo Count",            "trdp.topocount",          FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
+        { &hf_trdp_spy_datasetlength,        { "Dataset Length",        "trdp.datasetlength",      FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
 
-	// PD specific stuff
-        { &hf_trdp_spy_reply_comid,         { "Requested ComId",             "trdp.replycomid",         FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } }, /* only used in a PD request */
-        { &hf_trdp_spy_reply_ipaddress,     { "Reply IP address",            "trdp.replyip",			FT_IPv4, BASE_NONE, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_isPD,      	    { "Process data",  "trdp.pd",    FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
+        /* PD specific stuff */
+        { &hf_trdp_spy_reply_comid,         { "Requested ComId",        "trdp.replycomid",  FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } }, /* only used in a PD request */
+        { &hf_trdp_spy_reply_ipaddress,     { "Reply IP address",       "trdp.replyip",     FT_IPv4, BASE_NONE, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_isPD,                    { "Process data",           "trdp.pd",          FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
 
-        //MD specific stuff
-	{ &hf_trdp_spy_replystatus,     { "Reply Status",  "trdp.replystatus",			FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_sessionid0,		{ "Session Id UINT0",  "trdp.sessionid0",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_sessionid1,		{ "Session Id UINT1",  "trdp.sessionid1",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_sessionid2,		{ "Session Id UINT2",  "trdp.sessionid2",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_sessionid3,		{ "Session Id UINT3",  "trdp.sessionid3",				FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_replytimeout,    { "Reply timeout",  "trdp.replytimeout",		FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_sourceURI,		{ "Source URI",  "trdp.sourceURI",				FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_destinationURI,  { "Destination URI",  "trdp.destinationURI",    FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_isMD,      	    { "Message data",  "trdp.md",    FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
+        /* MD specific stuff */
+        { &hf_trdp_spy_replystatus,     { "Reply Status",  "trdp.replystatus",      FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_sessionid0,		{ "Session Id UINT0",  "trdp.sessionid0",   FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_sessionid1,		{ "Session Id UINT1",  "trdp.sessionid1",   FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_sessionid2,		{ "Session Id UINT2",  "trdp.sessionid2",   FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_sessionid3,		{ "Session Id UINT3",  "trdp.sessionid3",   FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_replytimeout,    { "Reply timeout",  "trdp.replytimeout",    FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_sourceURI,		{ "Source URI",  "trdp.sourceURI",          FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_destinationURI,  { "Destination URI",  "trdp.destinationURI",    FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_isMD,      	    { "Message data",  "trdp.md",               FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
+        { &hf_trdp_spy_userdata,             { "Dataset",   "trdp.rawdata",         FT_BYTES, BASE_NONE, NULL, 0x0,     "", HFILL } },
 
-	{ &hf_trdp_spy_userdata,             { "Dataset",                 "trdp.rawdata",		FT_BYTES, BASE_NONE, NULL, 0x0,     "", HFILL } },
+        /* The checksum for the header (the trdp.fcsheadcalc is only set, if the calculated FCS differs) */
+        { &hf_trdp_spy_fcs_head,             { "header FCS",                "trdp.fcshead",     FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_fcs_head_calc,        { "calculated header FCS",     "trdp.fcsheadcalc", FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_fcs_head_data,        { "FCS (DATA)",                "trdp.fcsheaddata", FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
 
-	// The checksum for the header (the trdp.fcsheadcalc is ony set, if the calculated FCS differs)
-	{ &hf_trdp_spy_fcs_head,             { "header FCS",                 "trdp.fcshead",		FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_fcs_head_calc,        { "calculated header FCS",      "trdp.fcsheadcalc",	FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_fcs_head_data,             { "FCS (DATA)",        "trdp.fcsheaddata",            FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-
-	// The checksum for the body (the trdp.fcsbodycalc is only set, if calcuated FCS differs)
-	{ &hf_trdp_spy_fcs_body,            { "body FCS",          "trdp.fcsbody",					FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-	{ &hf_trdp_spy_fcs_body_calc,       { "body FCS",          "trdp.fcsbodycalc",					FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        /* The checksum for the body (the trdp.fcsbodycalc is only set, if calculated FCS differs) */
+        { &hf_trdp_spy_fcs_body,            { "body FCS",          "trdp.fcsbody",                  FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_fcs_body_calc,       { "body FCS",          "trdp.fcsbodycalc",              FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
     };
     /* Setup protocol subtree array */
     static gint *ett[] = {
         &ett_trdp_spy,
-		&ett_trdp_spy_userdata,
+        &ett_trdp_spy_userdata,
         &ett_trdp_spy_app_data_fcs,
-		&ett_trdp_proto_ver,
+        &ett_trdp_proto_ver,
     };
 
     PRNT(printf("\n\n"));
@@ -938,14 +930,6 @@ void proto_register_trdp(void)
                                    "UDP and TCP port for MD messages (Default port is 20550)", 10 /*base */,  &g_md_port);
 }
 
-/** If this dissector uses sub-dissector registration add a registration routine.
- *  This exact format is required because a script is used to find these routines
- *  and create the code that calls these routines.
- *
- *  This function is also called by preferences whenever "Apply" is pressed
- *  (see prefs_register_protocol above) so it should accommodate being called
- *  more than once.
- */
 void proto_reg_handoff_trdp(void)
 {
     static gboolean inited = FALSE;
