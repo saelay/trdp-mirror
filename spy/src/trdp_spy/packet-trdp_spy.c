@@ -688,14 +688,14 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 		ti = proto_tree_add_item(tree, proto_trdp_spy, tvb, 0, -1, FALSE);
 		trdp_spy_tree = proto_item_add_subtree(ti, ett_trdp_spy);
 
-		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sequencecounter, tvb, 0, 4, FALSE);
-		ti = proto_tree_add_text(trdp_spy_tree, tvb, 4, 2, "Protocol Version %d.%d", tvb_get_guint8(tvb, 4), tvb_get_guint8(tvb, 5));
+		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sequencecounter, tvb, TRDP_HEADER_OFFSET_SEQCNT, 4, FALSE);
+		ti = proto_tree_add_text(trdp_spy_tree, tvb, 4, 2, "Protocol Version %d.%d", tvb_get_guint8(tvb, TRDP_HEADER_OFFSET_PROTOVER), tvb_get_guint8(tvb, TRDP_HEADER_OFFSET_PROTOVER + 1));
 		proto_ver_tree = proto_item_add_subtree(ti, ett_trdp_proto_ver);
-		ti = proto_tree_add_item(proto_ver_tree, hf_trdp_spy_protocolversion, tvb, 4, 2, FALSE); /* add the raw version of the protocol version in a subtree */
-		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_type, tvb, 6, 2, FALSE);
-		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_comid, tvb, 8, 4, FALSE);
-		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_topocount, tvb, 12, 4, FALSE);
-		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_datasetlength, tvb, 16, 4, FALSE);
+		ti = proto_tree_add_item(proto_ver_tree, hf_trdp_spy_protocolversion, tvb, TRDP_HEADER_OFFSET_PROTOVER, 2, FALSE); /* add the raw version of the protocol version in a subtree */
+		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_type, tvb, TRDP_HEADER_OFFSET_TYPE, 2, FALSE);
+		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_comid, tvb, TRDP_HEADER_OFFSET_COMID, 4, FALSE);
+		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_topocount, tvb, TRDP_HEADER_OFFSET_TOPOCNT, 4, FALSE);
+		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_datasetlength, tvb, TRDP_HEADER_OFFSET_DATASETLENGTH, 4, FALSE);
 		datasetlength = tvb_get_ntohl(tvb, 16);
 	}
 	else
@@ -709,26 +709,26 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 		{
 		case 'P':
 			//PD specific stuff
-			ti = proto_tree_add_text(trdp_spy_tree, tvb, 20, 4, "Reserved");
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_comid, tvb, 24, 4, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_ipaddress, tvb, 28, 4, FALSE);
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, 32, 0, 32, "Header");
-			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, 36, datasetlength);
-            ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isPD, tvb, 6, 2, FALSE);
+			ti = proto_tree_add_text(trdp_spy_tree, tvb, TRDP_HEADER_PD_OFFSET_RESERVED, 4, "Reserved");
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_comid, tvb, TRDP_HEADER_PD_OFFSET_REPLY_COMID, 4, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_ipaddress, tvb, TRDP_HEADER_PD_OFFSET_REPLY_IPADDR, 4, FALSE);
+			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, TRDP_HEADER_PD_OFFSET_FCSHEAD , 0, TRDP_HEADER_PD_OFFSET_FCSHEAD, "Header");
+			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, TRDP_HEADER_PD_OFFSET_DATA, datasetlength);
+            ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isPD, tvb, TRDP_HEADER_OFFSET_TYPE, 2, FALSE);
 			break;
 		case 'M':
 			//MD specific stuff
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_replystatus, tvb, 20, 4, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid0, tvb, 24, 4, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid1, tvb, 28, 4, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid2, tvb, 32, 4, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid3, tvb, 36, 4, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_replytimeout, tvb, 40, 4, FALSE);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sourceURI, tvb, 44, 32, ENC_ASCII);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_destinationURI, tvb, 76, 32, ENC_ASCII);
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, 108, 0, 108, "Header");
-			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, 108 + TRDP_FCS_LENGTH, datasetlength);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isMD, tvb, 6, 2, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_replystatus, tvb, TRDP_HEADER_MD_OFFSET_REPLY_STATUS, 4, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid0, tvb, TRDP_HEADER_MD_SESSIONID0, 4, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid1, tvb, TRDP_HEADER_MD_SESSIONID1, 4, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid2, tvb, TRDP_HEADER_MD_SESSIONID2, 4, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid3, tvb, TRDP_HEADER_MD_SESSIONID3, 4, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_replytimeout, tvb, TRDP_HEADER_MD_REPLY_TIMEOUT, 4, FALSE);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sourceURI, tvb, TRDP_HEADER_MD_SRC_URI, 32, ENC_ASCII);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_destinationURI, tvb, TRDP_HEADER_MD_DEST_URI, 32, ENC_ASCII);
+			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, TRDP_HEADER_MD_OFFSET_FCSHEAD, 0, TRDP_HEADER_MD_OFFSET_FCSHEAD, "Header");
+			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, TRDP_HEADER_MD_OFFSET_DATA, datasetlength);
+			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isMD, tvb, TRDP_HEADER_OFFSET_TYPE, 2, FALSE);
 			break;
 		default:
 			expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN, "Unkown package format");
