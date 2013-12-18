@@ -47,6 +47,7 @@
 #include <epan/ipproto.h>
 #include <epan/dissectors/packet-ip.h>
 #include <epan/dissectors/packet-udp.h>
+#include <epan/dissectors/packet-tcp.h>
 #include <epan/strutil.h>
 #include <epan/tvbuff-int.h>
 #include <libxml/parser.h>
@@ -78,6 +79,7 @@ void proto_reg_handoff_trdp(void);
 
 /* Initialize the protocol and registered fields */
 static int proto_trdp_spy = -1;
+static int proto_trdp_spy_TCP = -1;
 
 /*For All*/
 static int hf_trdp_spy_sequencecounter = -1;    /*uint32*/
@@ -740,10 +742,10 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 
 /**
  * @internal
- * Code to actually dissect the packets
+ * Code to analyze the actual TRDP packet
  *
  * @param tvb				buffer
- * @param pinfo				info for tht packet
+ * @param pinfo				info for the packet
  * @param tree				to which the information are added
  *
  * @return nothing
@@ -823,6 +825,35 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
         }
         col_append_fstr(pinfo->cinfo, COL_INFO, "\tComid: %d",trdp_spy_comid);
     }
+}
+
+/* determine PDU length of protocol foo */
+
+/** @fn static guint get_trdp_tcp_message_len(packet_info *pinfo, tvbuff_t *tvb, int offset)
+ * @internal
+ * @brief retrieve the expected size of the transmitted packet.
+ */
+static guint get_trdp_tcp_message_len(packet_info *pinfo, tvbuff_t *tvb, int offset)
+{
+    guint datasetlength = (guint) tvb_get_ntohl(tvb, offset+16);
+    return datasetlength + TRDP_MD_HEADERLENGTH + TRDP_FCS_LENGTH /* add padding, FIXME must be calculated */;
+}
+
+/**
+ * @internal
+ * Code to analyze the actual TRDP packet, transmitted via TCP
+ *
+ * @param tvb       buffer
+ * @param pinfo     info for the packet
+ * @param tree      to which the information are added
+ * @param data      Collected information
+ *
+ * @return nothing
+ */
+static void dissect_trdp_tcp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
+{
+    tcp_dissect_pdus(tvb, pinfo, tree, TRUE, TRDP_MD_HEADERLENGTH,
+                     get_trdp_tcp_message_len, dissect_trdp);
 }
 
 /** Register the protocol with Wireshark
@@ -919,6 +950,7 @@ void proto_reg_handoff_trdp(void)
 {
     static gboolean inited = FALSE;
     static dissector_handle_t trdp_spy_handle;
+    static dissector_handle_t trdp_spy_TCP_handle;
 
     preference_changed = TRUE;
 
@@ -926,17 +958,18 @@ void proto_reg_handoff_trdp(void)
 
     if(!inited )
     {
-        trdp_spy_handle = create_dissector_handle(dissect_trdp, proto_trdp_spy);
+        trdp_spy_handle     = create_dissector_handle(dissect_trdp, proto_trdp_spy);
+        trdp_spy_TCP_handle = create_dissector_handle(dissect_trdp_tcp, proto_trdp_spy_TCP);
         inited = TRUE;
     }
     else
     {
         dissector_delete("udp.port", g_pd_port, trdp_spy_handle);
         dissector_delete("udp.port", g_md_port, trdp_spy_handle);
-		dissector_delete("tcp.port", g_md_port, trdp_spy_handle);
+		dissector_delete("tcp.port", g_md_port, trdp_spy_TCP_handle);
     }
 
     dissector_add("udp.port", g_pd_port, trdp_spy_handle);
     dissector_add("udp.port", g_md_port, trdp_spy_handle);
-	dissector_add("tcp.port", g_md_port, trdp_spy_handle);
+	dissector_add("tcp.port", g_md_port, trdp_spy_TCP_handle);
 }
