@@ -56,6 +56,15 @@ void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 
 #if (((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE) || __APPLE__)
 #   define STRING_ERR(pStrBuf)  (void)strerror_r(errno, pStrBuf, VOS_MAX_ERR_STR_SIZE);
+#elif INTEGRITY
+#   define STRING_ERR(pStrBuf)                                 \
+    {                                                          \
+        char *pStr = strerror(errno);                          \
+        if (pStr != NULL)                                      \
+        {                                                      \
+            strncpy(pStrBuf, pStr, VOS_MAX_ERR_STR_SIZE);      \
+        }                                                      \
+    }
 #else
 #   define STRING_ERR(pStrBuf)                                         \
     {                                                                  \
