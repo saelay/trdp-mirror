@@ -110,14 +110,12 @@ typedef double REAL64;
     #else
         #define EXT_DECL
     #endif
-
 #else
-
     #define EXT_DECL
-
 #endif
 
 /** inline macros  */
+#ifndef INLINE
 #ifdef WIN32
     #define INLINE  _inline
 #elif defined (VXWORKS)
@@ -127,7 +125,7 @@ typedef double REAL64;
 #else
     #define INLINE  inline
 #endif
-
+#endif
 
 #ifndef TRUE
     #define TRUE    (1)
