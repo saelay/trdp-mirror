@@ -190,6 +190,70 @@ static proto_item* add_crc2tree(tvbuff_t *tvb, proto_tree *trdp_spy_tree, int re
 	return ti;
 }
 
+/* @fn *static void checkPaddingAndOffset(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, guint32 start_offset, guint32 offset)
+ *
+ * @brief Check for correct padding and the calculate the CRC checksum
+ *
+ * @param[in]   tvb     Buffer with the captured data
+ * @param[in]   pinfo   Necessary to mark status of this packet
+ * @param[in]   tree    The information is appended
+ * @param[in]   start_offset    Beginning of the user data, that is secured by the CRC
+ * @param[in]   offset  Actual offset where the padding starts
+ *
+ * @return position in the buffer after the body CRC
+ */
+static gint32 checkPaddingAndOffset(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, guint32 start_offset, guint32 offset)
+{
+    gint32 offsetBodyCRC;
+    gint32 isPaddingZero;
+    gint32 i;
+
+    /* Display the padding and the body CRC */
+
+    /* Jump to the last 4 byte and check the crc */
+    offsetBodyCRC = tvb_length_remaining(tvb, offset) - TRDP_FCS_LENGTH;
+    PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", offsetBodyCRC, start_offset, (offsetBodyCRC % 4)));
+
+    if (offsetBodyCRC <= 0) /* There is no space for user data */
+    {
+        return offset;
+    }
+    else /* offsetBodyCRC > 0 */
+    {
+        isPaddingZero = 0; // flag, if all padding bytes are zero
+        for(i = 0; i < offsetBodyCRC; i++)
+        {
+            if (tvb_get_guint8(tvb, offset + i) != 0)
+            {
+                isPaddingZero = 1;
+                break;
+            }
+        }
+        proto_tree_add_text(tree, tvb, offset, offsetBodyCRC, ( (isPaddingZero == 0) ? "padding" : "padding not zero") );
+        offset += offsetBodyCRC;
+
+        /* Mark this packet in the statistics also as "not perfect" */
+        if (isPaddingZero != 0)
+        {
+            expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN, "Padding not zero");
+        }
+    }
+
+    if (tvb_length_remaining(tvb, offset) == TRDP_FCS_LENGTH)
+    {
+        add_crc2tree(tvb, tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, offset, start_offset,
+                        offset - offsetBodyCRC /* do NOT calculate the CRC over the padding */, "Body");
+    }
+    else /* the space after the Userdata is not fitting*/
+    {
+        expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN,
+                         "Error at FCS for userdata, expect %d bytes and have %d",
+                         TRDP_FCS_LENGTH, tvb_length_remaining(tvb, offset) );
+    }
+
+    return offsetBodyCRC + TRDP_FCS_LENGTH;
+}
+
 /**
  * @internal
  * Extract all information from the userdata (uses the parsebody module for unmarshalling)
@@ -225,20 +289,28 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	gdouble formated_value;
 	GSList *gActualNode;
 
-	gint8 value8;
-	gint16 value16;
-	gint32 value32;
-	gint64 value64;
-	guint8 value8u;
-	guint16 value16u;
-	guint32 value32u;
-	guint64 value64u;
-	gfloat real32;
-	gdouble real64;
-	gchar  *text;
+	static proto_tree *trdpRootNode = NULL; /* Root node of the view of an TRDP packet */
+
+	gint8 value8 = 0;
+	gint16 value16 = 0;
+	gint32 value32 = 0;
+	gint64 value64 = 0;
+	guint8 value8u = 0;
+	guint16 value16u = 0;
+	guint32 value32u = 0;
+	guint64 value64u = 0;
+	gfloat real32 = 0;
+	gdouble real64 = 0;
+	gchar  *text = NULL;
 	GTimeVal time;
 
 	start_offset = offset; /* mark the beginning of the userdata in the package */
+
+    /* initialize the root node, entering the first level */
+    if (dataset_level == 0)
+    {
+        trdpRootNode = trdp_spy_tree;
+    }
 
 	/* set the local environment to a "minimum version", so the separator in numbers is always a dot. */
 	setlocale(LC_ALL,"C");
@@ -246,18 +318,10 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
     /* make the userdata accessable for wireshark */
     ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_userdata, tvb, offset, tvb_length_remaining(tvb, offset), FALSE);
 
-	if (strcmp(gbl_trdpDictionary_1,"") == 0  )
+	if (strcmp(gbl_trdpDictionary_1,"") == 0  ) /* No configuration file was set */
 	{
-		PRNT(printf( "No Configuration available\n"));
-		/* Jump to the last 4 byte and check the crc */
-		value32u = tvb_length_remaining(tvb, offset);
-		PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", value32u, start_offset, (value32u % 4)));
-		if (value32u > TRDP_FCS_LENGTH && value32u >= length) /* check if there is space for the header */
-		{
-			offset += length;
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u - TRDP_FCS_LENGTH, start_offset, offset, "Body");
-		}
-		return offset;
+	    offset += length + (value32u % 4);
+	    return checkPaddingAndOffset(tvb, pinfo, trdp_spy_tree, start_offset, offset);
 	}
 
 	if ( preference_changed || !trdp_parsebody_isinited())
@@ -285,17 +349,9 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 	if (pFound == NULL) /* No Configuration for this ComId available */
 	{
-		PRNT(printf("No Configuration for this ComId available\n"));
-		/* Jump to the last 4 byte and check the crc */
-		value32u = tvb_length_remaining(tvb, offset);
-		PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", value32u, start_offset,
-				(value32u % 4)));
-		if (value32u > TRDP_FCS_LENGTH && value32u >= length) /* check if there is space for the header */
-		{
-			offset += length;
-			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, start_offset + value32u - TRDP_FCS_LENGTH, start_offset, offset, "Body");
-		}
-		return offset;
+	    /* Move position in front of CRC (padding included) */
+        offset += length + (value32u % 4);
+		return checkPaddingAndOffset(tvb, pinfo, trdp_spy_tree, start_offset, offset);
 	}
 
     if (pFound > 0)
@@ -304,7 +360,8 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
     } else {
         PRNT(printf("Could not find something %s : %d\n", (flag_dataset) ? "DATASET" : "COMID", trdp_spy_comid ));
     }
-	ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "%s (dataset %d)", (pFound->name) ? pFound->name->str : "", pFound->datasetId);
+
+	ti = proto_tree_add_text(trdp_spy_tree, tvb, offset, length, "Dataset id : %d (%s)", pFound->datasetId, (pFound->name) ? pFound->name->str : "");
 	trdp_spy_userdata = proto_item_add_subtree(ti, ett_trdp_spy_userdata);
 
 	if (pFound->listOfElements <= 0)
@@ -320,7 +377,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
     {
 		el = (struct Element *) gActualNode->data;
 
-        PRNT(printf("[%d, %5x] Offset %5d ----> Element: type=%2d %s\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level, gActualNode /* FIXME debug has to be removed */,
+        PRNT(printf("[%d, %5x] Offset %5d ----> Element: type=%2d %s\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level, (unsigned int) gActualNode /* FIXME debug has to be removed */,
                      offset, el->type, (el->typeName) ? el->typeName->str : "", el->name->str, el->array_size, el->unit, el->scale, el->offset));
 
         value8u = 0; // flag, if there was a dynamic list found
@@ -622,34 +679,14 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
         return offset;
     }
 
-	/* display the padding: */
-	value32u = tvb_length_remaining(tvb, offset) - TRDP_FCS_LENGTH;// number of padding bytes
-	if (value32u > 0)
-	{
-		value8u = 0; // flag, if all padding bytes are zero
-		for(value16u = 0; value16u < value32u; value16u++)
-		{
-			if (tvb_get_guint8(tvb, offset + value16u) != 0)
-			{
-				value8u = 1;
-				break;
-			}
-		}
-		proto_tree_add_text(trdp_spy_userdata, tvb, offset, value32u, ( (value8u == 0) ? "padding" : "padding not zero") );
-		offset += value32u;
-	}
+    /* Insert these settings directly into the root node of TRDP, if available */
+    if (trdpRootNode)
+    {
+        trdp_spy_userdata = trdpRootNode;
+    }
 
-	if (tvb_length_remaining(tvb, offset) == TRDP_FCS_LENGTH)
-	{
-	    ti = add_crc2tree(tvb,trdp_spy_userdata, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, offset, start_offset,
-                        offset - value32u /* do NOT calculate the CRC over the padding */, "Body");
-	}
-	else /* the space after the Userdata is not fitting*/
-	{
-		expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN,
-                         "Error at FCS for userdata, expect %d bytes and have %d",
-                         TRDP_FCS_LENGTH, tvb_length_remaining(tvb, offset) );
-	}
+    /* Check padding and CRC of the body */
+    offset = checkPaddingAndOffset(tvb, pinfo, trdp_spy_userdata, start_offset, offset);
 
     PRNT(printf("##### Display ComId END found (level %d) #######\n", dataset_level));
 	return offset;
@@ -682,7 +719,7 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 	API_TRACE;
 
 	// when the package is big enough exract some data.
-	if (tvb_length_remaining(tvb, 0) > 20)
+	if (tvb_length_remaining(tvb, 0) > TRDP_HEADER_PD_OFFSET_RESERVED)
 	{
 		// Fill the structure in the detail tree
 		ti = proto_tree_add_item(tree, proto_trdp_spy, tvb, 0, -1, FALSE);
@@ -708,16 +745,15 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 		switch (trdp_spy_string[0])
 		{
 		case 'P':
-			//PD specific stuff
+			/* PD specific stuff */
 			ti = proto_tree_add_text(trdp_spy_tree, tvb, TRDP_HEADER_PD_OFFSET_RESERVED, 4, "Reserved");
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_comid, tvb, TRDP_HEADER_PD_OFFSET_REPLY_COMID, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_ipaddress, tvb, TRDP_HEADER_PD_OFFSET_REPLY_IPADDR, 4, FALSE);
 			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, TRDP_HEADER_PD_OFFSET_FCSHEAD , 0, TRDP_HEADER_PD_OFFSET_FCSHEAD, "Header");
 			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, TRDP_HEADER_PD_OFFSET_DATA, datasetlength);
-            ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isPD, tvb, TRDP_HEADER_OFFSET_TYPE, 2, FALSE);
 			break;
 		case 'M':
-			//MD specific stuff
+			/* MD specific stuff */
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_replystatus, tvb, TRDP_HEADER_MD_OFFSET_REPLY_STATUS, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid0, tvb, TRDP_HEADER_MD_SESSIONID0, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_sessionid1, tvb, TRDP_HEADER_MD_SESSIONID1, 4, FALSE);
@@ -728,7 +764,6 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_destinationURI, tvb, TRDP_HEADER_MD_DEST_URI, 32, ENC_ASCII);
 			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, TRDP_HEADER_MD_OFFSET_FCSHEAD, 0, TRDP_HEADER_MD_OFFSET_FCSHEAD, "Header");
 			dissect_trdp_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, TRDP_HEADER_MD_OFFSET_DATA, datasetlength);
-			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_isMD, tvb, TRDP_HEADER_OFFSET_TYPE, 2, FALSE);
 			break;
 		default:
 			expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN, "Unkown package format");
@@ -770,57 +805,59 @@ static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
     trdp_spy_string = tvb_get_ephemeral_string(tvb, 6, 2);
     trdp_spy_comid = tvb_get_ntohl(tvb, 8);
 
-    /* Telegram that fits into one packet, or the header of huge telegram, that will be reassembled */
+    /* Telegram that fits into one packet, or the header of huge telegram, that was reassembled */
     if (tree != NULL)
     {
         build_trdp_tree(tvb,pinfo,tree,trdp_spy_comid, trdp_spy_string);
     }
 
-
-    // Display a info line
+    /* Display a info line */
+    col_set_str(pinfo->cinfo, COL_INFO, "");
+    col_append_fstr(pinfo->cinfo, COL_INFO, "Com id: %10d ",trdp_spy_comid);
+    /* Append the packet type into the information description */
     if (check_col(pinfo->cinfo, COL_INFO))
     {
         if ((!strcmp(trdp_spy_string,"Pr")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "PD Request");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(PD Request)");
         }
         else if ((!strcmp(trdp_spy_string,"Pp")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "PD Reply");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(PD Reply)");
         }
         else if ((!strcmp(trdp_spy_string,"Pd")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "PD Data");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(PD Data)");
         }
         else if ((!strcmp(trdp_spy_string,"Mn")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Notification (Request without reply)");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(MD Notification (Request without reply))");
         }
         else if ((!strcmp(trdp_spy_string,"Mr")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Request with reply");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(MD Request with reply)");
         }
         else if ((!strcmp(trdp_spy_string,"Mp")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (without confirmation)");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(MD Reply (without confirmation))");
         }
         else if ((!strcmp(trdp_spy_string,"Mq")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Reply (with confirmation)");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(MD Reply (with confirmation))");
         }
         else if ((!strcmp(trdp_spy_string,"Mc")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD Confirm");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(MD Confirm)");
         }
         else if ((!strcmp(trdp_spy_string,"Me")))
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "MD error");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "(MD error)");
         }
         else
         {
-            col_set_str(pinfo->cinfo, COL_INFO, "Unknown TRDP Type");
+            col_append_fstr(pinfo->cinfo, COL_INFO, "Unknown TRDP Type");
+            expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN, "Unknown TRDP Type");
         }
-        col_append_fstr(pinfo->cinfo, COL_INFO, "\tComid: %d",trdp_spy_comid);
     }
 }
 
