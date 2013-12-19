@@ -75,6 +75,7 @@
  * @param tvb               buffer
  * @param packet            info for the packet
  * @param tree              to which the information are added
+ * @param trdpRootNode      Root node of the view of an TRDP packet (Necessary, as this function will be called recursively)
  * @param trdp_spy_comid    the already extracted comId
  * @param offset            where the userdata starts in the TRDP package
  * @param flag_dataset      on 0, the comId will be searched, on > 0 trdp_spy_comid will be interpreted as a dataset id
@@ -82,7 +83,7 @@
  *
  * @return the actual offset in the package
  */
-static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint32 length,guint8 flag_dataset, guint8 dataset_level);
+static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level);
 
 /* Initialize the protocol and registered fields */
 static int proto_trdp_spy = -1;
@@ -214,11 +215,11 @@ static gint32 checkPaddingAndOffset(tvbuff_t *tvb, packet_info *pinfo, proto_tre
     offsetBodyCRC = tvb_length_remaining(tvb, offset) - TRDP_FCS_LENGTH;
     PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", offsetBodyCRC, start_offset, (offsetBodyCRC % 4)));
 
-    if (offsetBodyCRC <= 0) /* There is no space for user data */
+    if (offsetBodyCRC < 0) /* There is no space for user data */
     {
         return offset;
     }
-    else /* offsetBodyCRC > 0 */
+    else if (offsetBodyCRC > 0)
     {
         isPaddingZero = 0; // flag, if all padding bytes are zero
         for(i = 0; i < offsetBodyCRC; i++)
@@ -268,14 +269,14 @@ static gint32 checkPaddingAndOffset(tvbuff_t *tvb, packet_info *pinfo, proto_tre
  */
 static void dissect_trdp_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint32 length)
 {
-    dissect_trdp_generic_body(tvb, pinfo, trdp_spy_tree, trdp_spy_comid, offset, length, 0, 0/* level of cascaded datasets*/);
+    dissect_trdp_generic_body(tvb, pinfo, trdp_spy_tree, trdp_spy_tree, trdp_spy_comid, offset, length, 0, 0/* level of cascaded datasets*/);
 }
 
 
 /**
  * Explanation in its prototype @see dissect_trdp_generic_body
  */
-static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
+static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
 {
 	guint32 start_offset;
 	struct Dataset* pFound;
@@ -288,8 +289,6 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	guint32 element_amount;
 	gdouble formated_value;
 	GSList *gActualNode;
-
-	static proto_tree *trdpRootNode = NULL; /* Root node of the view of an TRDP packet */
 
 	gint8 value8 = 0;
 	gint16 value16 = 0;
@@ -306,12 +305,6 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 	start_offset = offset; /* mark the beginning of the userdata in the package */
 
-    /* initialize the root node, entering the first level */
-    if (dataset_level == 0)
-    {
-        trdpRootNode = trdp_spy_tree;
-    }
-
 	/* set the local environment to a "minimum version", so the separator in numbers is always a dot. */
 	setlocale(LC_ALL,"C");
 
@@ -321,6 +314,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	if (strcmp(gbl_trdpDictionary_1,"") == 0  ) /* No configuration file was set */
 	{
 	    offset += length + (value32u % 4);
+        PRNT(printf("No Configuration, %d byte of userdata -> end offset is %d\n", length, offset));
 	    return checkPaddingAndOffset(tvb, pinfo, trdp_spy_tree, start_offset, offset);
 	}
 
@@ -351,6 +345,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 	{
 	    /* Move position in front of CRC (padding included) */
         offset += length + (value32u % 4);
+        PRNT(printf("No Dataset, %d byte of userdata -> end offset is %d\n", length, offset));
 		return checkPaddingAndOffset(tvb, pinfo, trdp_spy_tree, start_offset, offset);
 	}
 
@@ -636,7 +631,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 			//FIXME check the dataset_level (maximum is 5!)
 
-			offset = dissect_trdp_generic_body(tvb, pinfo, userdata_actual, el->type, offset, length, 1, dataset_level + 1);
+			offset = dissect_trdp_generic_body(tvb, pinfo, userdata_actual, trdpRootNode, el->type, offset, length, 1, dataset_level + 1);
 			element_amount = 0;
 			array_id = 0;
 			break;
@@ -679,14 +674,8 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
         return offset;
     }
 
-    /* Insert these settings directly into the root node of TRDP, if available */
-    if (trdpRootNode)
-    {
-        trdp_spy_userdata = trdpRootNode;
-    }
-
     /* Check padding and CRC of the body */
-    offset = checkPaddingAndOffset(tvb, pinfo, trdp_spy_userdata, start_offset, offset);
+    offset = checkPaddingAndOffset(tvb, pinfo, trdpRootNode, start_offset, offset);
 
     PRNT(printf("##### Display ComId END found (level %d) #######\n", dataset_level));
 	return offset;
