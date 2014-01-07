@@ -21,7 +21,7 @@
 /*******************************************************************************
  * INCLUDES
  */
-
+#ifndef VXWORKS /*XML does not work yet on vxworks */
 #include <string.h>
 #include <stdio.h>
 
@@ -1838,3 +1838,4 @@ EXT_DECL void tau_freeTelegrams (
     /*  Free array of TRDP_EXCHG_PAR_T structures   */
     vos_memFree(pExchgPar);
 }
+#endif
