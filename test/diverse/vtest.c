@@ -123,12 +123,18 @@ MEM_ERR_T L3_test_mem_queue()
     res = vos_queueReceive(qHandle,&pData,&size,timeout.tv_usec);
     vos_getTime(&endTime);
     vos_subTime(&endTime,&timeout);
-    if ((res == VOS_NO_ERR) || (pData != (UINT8*)0x0) || (size != 0x0) || (!vos_cmpTime(&endTime,&startTime)))
+    printOut(OUTPUT_FULL,"[MEM_QUEUE] Start: %i:%i; End %i:%i\n",startTime.tv_sec,startTime.tv_usec,endTime.tv_sec,endTime.tv_usec);
+    if ((res == VOS_NO_ERR) || (pData != (UINT8*)0x0) || (size != 0x0) || (vos_cmpTime(&endTime,&startTime) <= 0))
     {
         printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] 4.queueReceive() ERROR\n");
         retVal = MEM_QUEUE_ERR;
     }
     res = vos_queueDestroy(qHandle);
+    if(res != VOS_NO_ERR)
+    {
+        printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] vos_queueDestroy() ERROR\n");
+        retVal = MEM_QUEUE_ERR;
+    }
     printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] finished with errcnt = %i\n",res);
     return retVal;
 }
@@ -375,14 +381,14 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
     res = vos_semaTake(queueSema,0xffffffff);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_FULL,"[SEND THREAD] Could not take queueSema in time\n");
+        printOut(OUTPUT_FULL,"[RECV THREAD] Could not take queueSema in time\n");
         retVal = VOS_SEMA_ERR;
     }
     vos_semaGive(helpSema);
     res = vos_semaTake(printSema,0xffffffff);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_FULL,"[SEND THREAD] Could not take printSema in time\n");
+        printOut(OUTPUT_FULL,"[RECV THREAD] Could not take printSema in time\n");
         retVal = VOS_SEMA_ERR;
     }
     printOut(OUTPUT_FULL,"[RECV THREAD] gave print, got queue, gave help, got print, give queue, give print\n");
@@ -391,13 +397,13 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
     vos_semaTake(helpSema,0xffffffff);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_FULL,"[SEND THREAD] Could not take helpSema in time\n");
+        printOut(OUTPUT_FULL,"[RECV THREAD] Could not take helpSema in time\n");
         retVal = VOS_SEMA_ERR;
     }
     vos_semaTake(queueSema,0xffffffff);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_FULL,"[SEND THREAD] Could not take queueSema in time\n");
+        printOut(OUTPUT_FULL,"[RECV THREAD] Could not take queueSema in time\n");
         retVal = VOS_SEMA_ERR;
     }
     res = vos_queueReceive(qHeader,&pData,&size,2000000);
@@ -415,14 +421,13 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
     vos_semaTake(printSema,0xffffff);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_FULL,"[SEND THREAD] Could not take printSema in time\n");
+        printOut(OUTPUT_FULL,"[RECV THREAD] Could not take printSema in time\n");
         retVal = VOS_SEMA_ERR;
     }
-#ifdef VXWORKS
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)pthreadID);
-#endif
 #ifdef WIN32
     printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)pthreadID.p);
+#else
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)pthreadID);
 #endif
     vos_semaGive(printSema);
     vos_semaGive(helpSema);
@@ -1163,12 +1168,26 @@ THREAD_ERR_T L3_test_thread_getUUID()
     return retVal;
 }
 
+VOS_THREAD_FUNC_T L3_test_thread_mutex_lock(void* arguments)
+{
+    VOS_ERR_T res = VOS_MUTEX_ERR;
+    TEST_ARGS_MUTEX *arg1 = (TEST_ARGS_MUTEX*) arguments;
+    VOS_MUTEX_T mutex = arg1->mutex;
+    res = vos_mutexLock(mutex); /*if res == 0 mutex could be locked from here; this should not be!*/
+    res = vos_mutexLock(mutex);
+    res = vos_mutexLock(mutex);
+    arg1->result = res;
+    return arguments;
+}
+
 THREAD_ERR_T L3_test_thread_mutex()
 {
     /* create lock trylock unlock delete */
     VOS_MUTEX_T mutex;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
     VOS_ERR_T res = VOS_NO_ERR;
+    TEST_ARGS_MUTEX arg1;
+    VOS_THREAD_T testLock;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] start...\n");
     res = vos_mutexCreate(&mutex);
@@ -1180,25 +1199,36 @@ THREAD_ERR_T L3_test_thread_mutex()
     res = vos_mutexTryLock(mutex);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexCreate Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexTryLock Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
     res = vos_mutexUnlock(mutex);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexCreate Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexUnlock Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
     res = vos_mutexLock(mutex);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexCreate Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexLock Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
+    /* res = vos_mutexLock(mutex);
+    res = vos_mutexLock(mutex);
+    res = vos_mutexLock(mutex);
+    res = vos_threadCreate(&testLock,"testLock",THREAD_POLICY,0,0,0,(void*)L3_test_thread_mutex_lock,(void*)&arg1);
+    if (arg1.result != VOS_NO_ERR)
+    {
+        retVal = THREAD_MUTEX_ERR;
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] Not a recursive mutex! Could take mutex from other thread!\n");
+    }*/
     res = vos_mutexTryLock(mutex);
-    /*retVal = vos_mutexLock(mutex); This would cause a deadlock!
-    if (retVal != 0)
-        return THREAD_MUTEX_ERR;*/
+    if (res == VOS_NO_ERR)
+    {
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexTryLock Error\n");
+        retVal = THREAD_MUTEX_ERR;
+    }
     vos_mutexDelete(mutex);
     printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] finished\n");
     return retVal;
@@ -1234,17 +1264,19 @@ THREAD_ERR_T L3_test_thread_sema()
         printOut(OUTPUT_ADVANCED,"[THREAD_SEMA] semaTake[2] Error\n");
         retVal = THREAD_SEMA_ERR;
     }
-    vos_getTime(&startTime);
     res = vos_semaTake(sema,timeout.tv_usec);
-    vos_getTime(&endTime);
     if (res == VOS_NO_ERR)
     {
         printOut(OUTPUT_ADVANCED,"[THREAD_SEMA] semaTake[3] Error\n");
         retVal = THREAD_SEMA_ERR;
     }
+    /*check if endTime > startTime */
+    vos_getTime(&startTime);
+    res = vos_semaTake(sema,timeout.tv_usec);
+    vos_getTime(&endTime);
     vos_subTime(&endTime,&timeout);
     ret = vos_cmpTime(&endTime,&startTime);
-    if (ret <= 0)
+    if (ret < 0)
     {
         printOut(OUTPUT_ADVANCED,"[THREAD_SEMA] semaTake Timeout ERROR\n");
         retVal = THREAD_SEMA_ERR;
@@ -1369,15 +1401,12 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
         printOut(OUTPUT_ADVANCED,"[SOCK_UDPMC] vos_sockSetOptions() ERROR!\n");
         retVal = SOCK_UDP_MC_ERR;
     }
-   /* getsockopt(sockDesc,IPPROTO_IP,IP_MULTICAST_TTL,&value,(int*)&valueSize);
-    printOut(OUTPUT_FULL,"[SOCK_UDPMC] vos_getsockopt() returned ip multicast ttl = %u\n",value);*/
     /********/
     /* bind */
     /********/
     res = vos_sockBind(sockDesc,mcIP,portPD);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[SOCK_UDPMC] vos_sockBind() ERROR!\n");
         retVal = SOCK_UDP_MC_ERR;
     }
     /***********/
@@ -1397,9 +1426,9 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
     res = vos_sockSetMulticastIf(sockDesc,mcIF);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[SOCK_UDPMC] vos_sockSetMulticastIf() ERROR!\n");
         retVal = SOCK_UDP_MC_ERR;
     }
+
     if (role == ROLE_MASTER)
     {
         /**********************/
@@ -1417,7 +1446,6 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
         /* receive UDP Multicast */
         /*************************/
         /*ok here we first (re-)receive our own mc udp that was sent just above */
-        /*TODO add check for own source ip and port to make sure */
         printOut(OUTPUT_FULL,"[SOCK_UDPMC] vos_sockReceive() retVal bisher = %u\n",retVal);
         res = vos_sockReceiveUDP(sockDesc,&rcvBuf,&bufSize,&gTestIP,&gTestPort,&destIP,FALSE);
         if (res != VOS_NO_ERR)
@@ -1540,7 +1568,7 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
     res = vos_sockOpenUDP(&sockDesc,NULL);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[SOCK_UDPMC] vos_sockOpenUDP() ERROR!\n");
+        printOut(OUTPUT_ADVANCED,"[SOCK_UDP] vos_sockOpenUDP() ERROR!\n");
         retVal = SOCK_UDP_ERR;
     }
     printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockOpenUDP() Open socket %i\n",sockDesc);
@@ -1558,8 +1586,6 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         printOut(OUTPUT_ADVANCED,"[SOCK_UDP] vos_sockSetOptions() ERROR\n");
         retVal = SOCK_UDP_ERR;
     }
-    /*getsockopt(sockDesc,IPPROTO_IP,IP_MULTICAST_TTL,&value,(int*)&valueSize);
-    printOut(OUTPUT_FULL,"[SOCK_UDP] vos_getsockopt() returned ip multicast ttl = %u\n",value);*/
     /********/
     /* bind */
     /********/
@@ -1577,7 +1603,6 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         /************/
         printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockSendUDP() to %s:%u\n",vos_ipDotted(gTestIP),gTestPort);
         vos_threadDelay(500000);
-        /* send with counter = 3 */
         res = vos_sockSendUDP(sockDesc,&sndBuf,&bufSize,gTestIP,gTestPort);
         if (res != VOS_NO_ERR)
         {
@@ -1588,7 +1613,6 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         /* receive UDP */
         /***************/
         printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockReceiveUDP()\n");
-        /* expected received counter = 4*/
         res = vos_sockReceiveUDP(sockDesc,&rcvBuf,&bufSize,&srcIP,&srcPort,&destIP,FALSE);
         if (res != VOS_NO_ERR)
         {
@@ -1776,7 +1800,7 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         /* listen  */
         /***********/
         printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] vos_sockListen()\n");
-        res = vos_sockListen(sockDesc,1000);
+        res = vos_sockListen(sockDesc,10);
         if (res != VOS_NO_ERR)
         {
             retVal = SOCK_TCP_CLIENT_ERR;
@@ -1790,11 +1814,6 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         if (res == VOS_NO_ERR)
         {
             printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] accepted from: %s : %u\n",vos_ipDotted(srcIP),srcPort);
-            /*if((srcIP != gTestIP) || (srcPort != gTestPort))
-            {
-                printOut(OUTPUT_ADVANCED,"[SOCK_TCPCLIENT] vos_sockAccept() Error accepted from invalid source\n");
-                retVal = SOCK_TCP_CLIENT_ERR;
-            }*/
         }
         else
         {
@@ -1817,7 +1836,6 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
             }
             printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] vos_sockReceiveTCP() received:%u\n",rcvBuf);
         }
-
         /************/
         /* send tcp */
         /************/
@@ -1873,7 +1891,7 @@ SOCK_ERR_T L3_test_sock_TCPserver(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
     printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] start...\n");
     /*******************/
     /* open tcp socket */
-   /*******************/
+    /*******************/
     printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockOpenTCP()\n");
     res = vos_sockOpenTCP(&sockDesc,NULL);
      if (res != VOS_NO_ERR)
@@ -1913,7 +1931,7 @@ SOCK_ERR_T L3_test_sock_TCPserver(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         /* listen */
         /**********/
         printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockListen()\n");
-        res = vos_sockListen(sockDesc,1000);
+        res = vos_sockListen(sockDesc,10);
         if (res != VOS_NO_ERR)
         {
             retVal = SOCK_TCP_SERVER_ERR;
@@ -1972,9 +1990,9 @@ SOCK_ERR_T L3_test_sock_TCPserver(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
     }
     if (role == ROLE_SLAVE)
     {
-       /***********/
-       /* connect */
-       /***********/
+        /***********/
+        /* connect */
+        /***********/
         connected = FALSE;
         while (!connected)
         {
@@ -1991,35 +2009,35 @@ SOCK_ERR_T L3_test_sock_TCPserver(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
                 connected = TRUE;
             }
         }
-       /************/
-       /* send tcp */
-       /************/
-       printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockSendTCP()\n");
-       res = vos_sockSendTCP(sockDesc,&sndBuf,&bufSize);
-       if (res != VOS_NO_ERR)
-       {
-           retVal = SOCK_TCP_SERVER_ERR;
-           printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] vos_sockSendTCP() ERROR res = %i\n",res);
-       }
-       /***************/
-       /* receive tcp */
-       /***************/
-       printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockReceiveTCP()\n");
-       res = vos_sockReceiveTCP(sockDesc,&rcvBuf,&bufSize);
-       if (res != VOS_NO_ERR)
-       {
-           retVal = SOCK_TCP_SERVER_ERR;
-           printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] vos_sockReceiveTCP() ERROR res = %i\n",res);
-       }
-       else
-       {
-           if (rcvBuf != rcvBufExpVal)
-           {
-               retVal = SOCK_TCP_SERVER_ERR;
-               printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] vos_sockReceiveTCP() ERROR res = %i\n",res);
-           }
-           printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockReceiveTCP() received: %u\n",rcvBuf);
-       }
+        /************/
+        /* send tcp */
+        /************/
+        printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockSendTCP()\n");
+        res = vos_sockSendTCP(sockDesc,&sndBuf,&bufSize);
+        if (res != VOS_NO_ERR)
+        {
+            retVal = SOCK_TCP_SERVER_ERR;
+            printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] vos_sockSendTCP() ERROR res = %i\n",res);
+        }
+        /***************/
+        /* receive tcp */
+        /***************/
+        printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockReceiveTCP()\n");
+        res = vos_sockReceiveTCP(sockDesc,&rcvBuf,&bufSize);
+        if (res != VOS_NO_ERR)
+        {
+            retVal = SOCK_TCP_SERVER_ERR;
+            printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] vos_sockReceiveTCP() ERROR res = %i\n",res);
+        }
+        else
+        {
+            if (rcvBuf != rcvBufExpVal)
+            {
+                retVal = SOCK_TCP_SERVER_ERR;
+                printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] vos_sockReceiveTCP() ERROR res = %i\n",res);
+            }
+            printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockReceiveTCP() received: %u\n",rcvBuf);
+        }
     }
     printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockClose() sockDesc\n");
     res = vos_sockClose(sockDesc);
@@ -2050,7 +2068,6 @@ VOS_THREAD_FUNC_T L3_test_sharedMem_write(void* arguments)
         retVal = VOS_UNKNOWN_ERR;
         printOut(OUTPUT_ADVANCED,"[SHMEM Write] vos_sharedOpen() ERROR\n");
     }
-    handle->sharedMemoryName = arg->key;
     printOut(OUTPUT_FULL,"handle->fd = %i\n",handle->fd);
     printOut(OUTPUT_FULL,"pMemArea = %x\n",(unsigned int)pMemArea);
     memcpy(pMemArea,&content,4);
@@ -2087,7 +2104,6 @@ VOS_THREAD_FUNC_T L3_test_sharedMem_read(void* arguments)
         retVal = VOS_UNKNOWN_ERR;
         printOut(OUTPUT_ADVANCED,"[SHMEM Read] vos_sharedOpen() ERROR\n");
     }
-    handle->sharedMemoryName = arg->key;
     memcpy(&content,pMemArea,4);
     printOut(OUTPUT_FULL,"pMemArea = %x\n",(unsigned int)pMemArea);
     printOut(OUTPUT_FULL,"*pMemArea = %x\n",*pMemArea);
@@ -2123,12 +2139,7 @@ SHMEM_ERR_T L3_test_sharedMem()/*--> improve / check test!*/
     vos_strncpy(arg1.key,"shmem1452",20);
     vos_strncpy(arg2.key,"shmem1452",20);
 
-    ret = vos_semaCreate(&sema,VOS_SEMA_EMPTY);
-    if (ret != VOS_NO_ERR)
-    {
-        printOut(OUTPUT_ADVANCED,"[SHMEM] vos_semaCreate() ERROR\n");
-        retVal = SHMEM_ALL_ERR;
-    }
+    vos_semaCreate(&sema,VOS_SEMA_EMPTY);
     printOut(OUTPUT_ADVANCED,"[SHMEM] start...\n");
     ret = vos_threadInit();
     if (ret != VOS_NO_ERR)
@@ -2142,10 +2153,8 @@ SHMEM_ERR_T L3_test_sharedMem()/*--> improve / check test!*/
         printOut(OUTPUT_ADVANCED,"[SHMEM] vos_sharedOpen() ERROR\n");
         retVal = SHMEM_ALL_ERR;
     }
-    handle->sharedMemoryName = arg1.key;
     arg1.sema = sema;
     arg2.sema = sema;
-    /*vos thread error*/
     ret = vos_threadCreate(&writeThread,"writeThread",THREAD_POLICY,0,0,0,(void*)L3_test_sharedMem_write,(void*)&arg1);
     ret2 = vos_semaTake(sema,0xffffffff);
     if (ret2 != VOS_NO_ERR)
@@ -2159,7 +2168,7 @@ SHMEM_ERR_T L3_test_sharedMem()/*--> improve / check test!*/
         retVal = SHMEM_ALL_ERR;
     }
     vos_semaGive(sema);
-    ret = vos_threadCreate(&readThread,"readThread",THREAD_POLICY,0,0,0,(void*)L3_test_sharedMem_read,(void*)&arg1);
+    ret = vos_threadCreate(&readThread,"readThread",THREAD_POLICY,0,0,0,(void*)L3_test_sharedMem_read,(void*)&arg2);
     vos_threadDelay(50000);
     ret2 = vos_semaTake(sema,0xffffffff);
     if (ret2 != VOS_NO_ERR)
@@ -2648,7 +2657,7 @@ UINT32 L1_test_basic(UINT32 testCnt)
 {
     BOOL8 mem                = TRUE;
     BOOL8 thread             = TRUE;
-    BOOL8 sock               = FALSE;
+    BOOL8 sock               = TRUE;
     BOOL8 shMem              = FALSE;
     BOOL8 utils              = TRUE;
     MEM_ERR_T memErr        = MEM_ALL_ERR;
@@ -2707,7 +2716,11 @@ UINT32 L1_test_basic(UINT32 testCnt)
     return errcnt;
 }
 
+#ifdef VXWORKS
+int mainvx()
+#else
 int main()
+#endif
 {
     UINT32 testCnt = 0;
     UINT32 totalErrors = 0;
@@ -2718,3 +2731,4 @@ int main()
     printf("\n\nTOTAL ERRORS = %i\n",totalErrors);
     return 0;
 }
+

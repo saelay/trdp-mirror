@@ -20,9 +20,6 @@
 /**************************/
 /* error flags definition */
 /**************************/
-#ifndef POSIX
-    #define POSIX
-#endif
 /* We use dynamic memory    */
 #define RESERVED_MEMORY  200000
 #define MAXKEYSIZE 25
@@ -131,7 +128,7 @@ typedef enum
 
 /* TODO comment in const CHAR8 *cDefaultIface = "fec0";*/
 /* define communication test identity (Master / Slave) */
-const TEST_ROLE_T TEST_ROLE = ROLE_SLAVE;
+const TEST_ROLE_T TEST_ROLE = ROLE_MASTER;
 UINT32 gTestIP = 0;
 UINT16 gTestPort = 0;
 
@@ -144,6 +141,11 @@ typedef struct arg_struct_thread {
     VOS_ERR_T result;
 }TEST_ARGS_THREAD;
 
+typedef struct arg_struct_mutex{
+    VOS_MUTEX_T mutex;
+    VOS_ERR_T result;
+}TEST_ARGS_MUTEX;
+
 typedef struct arg_struct_shmem {
     UINT32 size;
     UINT32 content;
@@ -151,6 +153,7 @@ typedef struct arg_struct_shmem {
     VOS_SEMA_T sema;
     VOS_ERR_T result;
 }TEST_ARGS_SHMEM;
+
 
 /*
 void dbgOut (
