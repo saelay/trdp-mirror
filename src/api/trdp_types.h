@@ -87,6 +87,11 @@ typedef struct
     UINT8   evo;    /**< Evolution  - incremented for build                */
 } TRDP_VERSION_T;
 
+typedef struct
+{
+    UINT8   ver;    /**< Version    - incremented for incompatible changes */
+    UINT8   rel;    /**< Release    - incremented for compatible changes   */
+} TRDP_SHORT_VERSION_T;
 
 /** Return codes for all API functions, -1..-29 taken over from vos */
 typedef enum
@@ -264,7 +269,7 @@ typedef struct
 /**    Dataset element definition    */
 typedef enum
 {
-    TRDP_BOOL8      = 1,   /**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+    TRDP_BITSET8    = 1,   /**< =UINT8                            */
     TRDP_CHAR8      = 2,   /**< char, can be used also as UTF8    */
     TRDP_UTF16      = 3,   /**< Unicode UTF-16 character          */
     TRDP_INT8       = 4,   /**< Signed integer, 8 bit             */
@@ -282,6 +287,11 @@ typedef enum
     TRDP_TIMEDATE64 = 16,  /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
     TRDP_TYPE_MAX   = 30   /**< Values greater are considered nested datasets */
 } TRDP_DATA_TYPE_T;
+
+#define TRDP_BOOL8         TRDP_BITSET8  /**< 1 bit relevant 
+                                              (equal to zero = false, not equal to zero = true) */
+#define TRDP_ANTIVALENT8   TRDP_BITSET8  /**< 2 bit relevant 
+                                              (0x0 = errror, 0x01 = false, 0x02 = true, 0x03 undefined) */
 
 struct TRDP_DATASET;
 
