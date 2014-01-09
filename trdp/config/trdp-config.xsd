@@ -15,9 +15,10 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.7.0.0
+#  VERSION       : 1.8.0.0
 #
 #   HISTORY      :
+#                            1.8.0.0   BITSET8, ANTIVALENT8 added
 #                            1.7.0.0   id of data-set must start at 1000
 #                            1.6.0.0   pre-defined data types updated
 #                            1.5.0.0   type of dataset can be again a number or a textual description of the standard types or the name of another dataset
@@ -706,7 +707,9 @@ keep = keep the last value</xs:documentation>
         <xs:annotation>
           <xs:documentation>Either the name of a type like "INT8" or "UINT32" or a numerical data-set ID for nested data types.
           The following datatypes are predefined:
+            BITSET8            1    =UINT8, 8 bit relevant
             BOOL8               1    =UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
+            ANTIVALENT8   1     =UINT8, 2 bit relevant ('01'B -> false, '10'B -> true)
             CHAR8               2    char, can be used also as UTF8 
             UTF16                3    Unicode UTF-16 character
             INT8                    4    Signed integer, 8 bit
