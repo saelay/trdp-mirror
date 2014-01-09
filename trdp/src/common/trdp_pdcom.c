@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2014-01-09: Ticket #14: Wrong error return in trdp_pdDistribute()
  *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
  *      BL 2013-04-09: ID 92: Pull request led to reset of push message type
  *      BL 2013-01-25: ID 20: Redundancy handling fixed
@@ -938,8 +939,8 @@ TRDP_ERR_T  trdp_pdDistribute (
     if (vos_cmpTime(&deltaTmax, &temp) == 0 ||
         noOfPackets == 0)
     {
-        vos_printLog(VOS_LOG_ERROR, "trdp_pdDistribute: no minimal interval in %d packets found!\n", noOfPackets);
-        return TRDP_PARAM_ERR;
+        vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: no minimal interval in %d packets found!\n", noOfPackets);
+        return TRDP_NO_ERR;     /* Ticket #14: Nothing to shape is not an error */
     }
 
     /*  This is the delta time we can jitter...   */
