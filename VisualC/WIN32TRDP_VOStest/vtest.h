@@ -123,7 +123,7 @@ typedef enum
     ROLE_SLAVE      = 1,
 } TEST_ROLE_T;
 
-const CHAR8 *cDefaultIface = "fec0";
+/*const CHAR8 *cDefaultIface = "fec0";*/
 /* define communication test identity (Master / Slave) */
 const TEST_ROLE_T TEST_ROLE = ROLE_SLAVE;
 UINT32 gTestIP = 0;

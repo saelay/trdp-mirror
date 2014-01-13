@@ -1320,6 +1320,15 @@ SOCK_ERR_T L3_test_sock_helpFunctions()
         printOut(OUTPUT_FULL,"[SOCK_HELP] MAC:\t%x-%x-%x-%x-%x-%x\n",ifAddrs[i].mac[0],ifAddrs[i].mac[1],ifAddrs[i].mac[2],ifAddrs[i].mac[3],ifAddrs[i].mac[4],ifAddrs[i].mac[5]);
         printOut(OUTPUT_FULL,"[SOCK_HELP] Mask:\t%u = %s\n",ifAddrs[i].netMask,vos_ipDotted(ifAddrs[i].netMask));
         printOut(OUTPUT_FULL,"[SOCK_HELP] Name:\t%s\n",ifAddrs[i].name);
+        if (ifAddrs[i].linkState)
+        {
+            printOut(OUTPUT_FULL,"[SOCK_HELP] Link State:\t%UP \n");
+        }
+        else
+        {
+            printOut(OUTPUT_FULL,"[SOCK_HELP] Link State:\tDOWN \n");
+        }
+        printOut(OUTPUT_FULL,"\n");
     }
     if (res != VOS_NO_ERR)
     {
@@ -2320,7 +2329,7 @@ SOCK_ERR_T L2_test_sock(TEST_ROLE_T role)
     errcnt += L3_test_sock_TCPclient(sndBufStartVal,rcvBufExpVal,role);  /* 4,5 */
     sndBufStartVal = 0x78;
     rcvBufExpVal = 0x78;
-    errcnt += L3_test_sock_TCPserver(sndBufStartVal,rcvBufExpVal,role);  /* 7,6 */
+    errcnt += L3_test_sock_TCPserver(sndBufStartVal,rcvBufExpVal,role);  /* 7,6 */ 
     printOut(OUTPUT_ADVANCED,"\n*********************************************************************\n");
     printOut(OUTPUT_ADVANCED,"*   [SOCK] Test finished with errcnt = %i\n",errcnt);
     printOut(OUTPUT_ADVANCED,"*********************************************************************\n");
