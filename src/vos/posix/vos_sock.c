@@ -391,7 +391,6 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                              (ifAddrs[count].ipAddr >> 16) & 0xFF,
                              (ifAddrs[count].ipAddr >> 8)  & 0xFF,
                              ifAddrs[count].ipAddr        & 0xFF);
-
                 if (vos_getMacAddress(ifAddrs[count].mac, ifAddrs[count].name) == TRUE)
                 {
                     vos_printLog(VOS_LOG_INFO, "Mac-Addr for '%s': %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -402,6 +401,14 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                                  ifAddrs[count].mac[3],
                                  ifAddrs[count].mac[4],
                                  ifAddrs[count].mac[5]);
+                }
+                if (cursor->ifa_flags & IFF_RUNNING)
+                {
+                    ifAddrs[count].linkState = TRUE;
+                }
+                else
+                {
+                    ifAddrs[count].linkState = FALSE;
                 }
                 count++;
             }
