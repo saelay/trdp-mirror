@@ -40,7 +40,7 @@
  *
  @dot
 digraph Reference {
-node [shape=record, fontname=Helvetica, fontsize=10];
+node [shape=record, fontname=Helvetica, fontsize=8];
 c [ label="ComId" ];
 d [ label="Dataset" ];
 e [ label="Element" ];
@@ -118,11 +118,41 @@ typedef enum TRDP_RET TRDP_RET_t;
  * GLOBAL FUNCTIONS
  */
 
+
+/** @fn TRDP_RET_t trdp_parsebody_init(const char ** xmlconfigFile)
+ * @brief Create the module and extract all the needed information from the configuration file.
+ * @param[in]  xmlconfigFile   path to the file containing the XML description of the TRDP packets.
+ * @return TRDP_PARSEBODY_OK when no errors occured
+ */
 TRDP_RET_t trdp_parsebody_init(const char ** xmlconfigFile);
+
+
+/** @fn void trdp_parsebody_clean(void)
+ * @brief Clean used memory
+ *
+ * Release all the allocated memory, needed to store the given information.
+ * @return nothing
+ */
 void trdp_parsebody_clean(void);
+
+/** @fn int trdp_parsebody_isinited( void )
+ * Show the status, if the library is ready to use.
+ * @return > 0 if the library is initialized, 0 if uninitialized
+ */
 int trdp_parsebody_isinited( void );
 
+/** @fn struct Dataset* trdp_parsebody_lookup(guint32 comId)
+ * Looks up the dataset for a given ComId.
+ * @param[in] comId    to search for.
+ * @return NULL, when nothing was found.
+ */
 struct Dataset* trdp_parsebody_lookup(guint32 comId);
+
+/** @fn struct Dataset* trdp_parsebody_search(guint32 datasetId)
+ * Uses the second hashmap to find the struct Dataset for a given datasetid
+ * @param[in]   datasetId       the dataset we are searching for
+ * @return NULL, when nothing was found.
+ */
 struct Dataset* trdp_parsebody_search(guint32 datasetId);
 
 #endif

@@ -48,8 +48,8 @@
 #define TRDP_TIMEDATE48	15	/**< 48 bit TCN time (32 bit seconds and 16 bit ticks) */
 #define TRDP_TIMEDATE64	16	/**< 32 bit seconds and 32 bit microseconds */
 
-#define TRDP_DEFAULT_UDPTCP_MD_PORT 20550
-#define TRDP_DEFAULT_UDP_PD_PORT    20548
+#define TRDP_DEFAULT_UDPTCP_MD_PORT 20550   /*< Default port address for Message data (MD) communication */
+#define TRDP_DEFAULT_UDP_PD_PORT    20548   /*< Default port address for Process data (PD) communication */
 
 #define PROTO_TAG_TRDP          "TRDP"
 #define PROTO_NAME_TRDP         "Train Real Time Data Protocol"
@@ -82,7 +82,7 @@
 
 #define TRDP_MD_HEADERLENGTH    TRDP_HEADER_MD_OFFSET_DATA /**< Length of the TRDP header of an MD message */
 
-#define TRDP_FCS_LENGTH 4   /**< The CRC calculation resluts in a 32bit result so 4 bytes are necessary */
+#define TRDP_FCS_LENGTH 4   /**< The CRC calculation results in a 32bit result so 4 bytes are necessary */
 
 /*******************************************************************************
  * TYPEDEFS
@@ -98,9 +98,9 @@
  *
  * @brief Calculates and returns a 32-bit FCS.
  *
- * @param buf   Input buffer
- * @param len   Length of input buffer
- * @param fcs   Initial (seed) value for the FCS calculation
+ * @param[in] buf   Input buffer
+ * @param[in] len   Length of input buffer
+ * @param[in] fcs   Initial (seed) value for the FCS calculation
  *
  * @return Calculated fcs value
  */
@@ -111,7 +111,7 @@ guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs);
  * The width of an element in bytes.
  * Extracted from table3 at TCN-TRDP2-D-BOM-011-19.
  *
- * @param type			the numeric representation of a type
+ * @param[in] type			the numeric representation of a type
  *
  * @return the width in byte of one element of the given type
  */
