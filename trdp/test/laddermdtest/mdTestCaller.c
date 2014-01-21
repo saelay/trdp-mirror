@@ -1,18 +1,18 @@
 /**********************************************************************************************************************/
 /**
- * @file	mdTestCaller.c
+ * @file		mdTestCaller.c
  *
- * @brief	Demo MD ladder application for TRDP
+ * @brief		Demo MD ladder application for TRDP
  *
- * @details	TRDP Ladder Topology Support MD Transmission Caller
+ * @details		TRDP Ladder Topology Support MD Transmission Caller
  *
- * @note	Project: TCNOpen TRDP prototype stack
+ * @note		Project: TCNOpen TRDP prototype stack
  *
- * @author	Kazumasa Aiba, TOSHIBA
+ * @author		Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks	All rights reserved. Reproduction, modification, use or disclosure
- *		to third parties without express authority is forbidden,
- *		Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 
@@ -154,7 +154,8 @@ VOS_THREAD_FUNC_T MDCaller (
 		}
 		/* Set Subnet1 appThreadListener */
 		appThreadSessionHandle.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
-		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+//		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
 		appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
 	}
 
@@ -189,7 +190,8 @@ VOS_THREAD_FUNC_T MDCaller (
 			}
 			/* Set Subnet2 appThreadListener */
 			appThreadSessionHandle2.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
-			appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+//			appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
 			appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
 		}
 	}
@@ -207,7 +209,7 @@ VOS_THREAD_FUNC_T MDCaller (
 		err = setAppThreadSessionMessageQueueDescriptor(&appThreadSessionHandle, callerMqDescriptor);
 		if (err != MD_APP_NO_ERR)
 		{
-			vos_printLog(VOS_LOG_ERROR, "Subnet1 setAppThreadSessionIdMessageQueueDescriptor error\n");
+			vos_printLog(VOS_LOG_ERROR, "Subnet1 setAppThreadSessionMessageQueueDescriptor error\n");
 			return 0;
 		}
 		/* Is this Ladder Topology ? */
@@ -228,7 +230,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	UINT32	sendMdTransferRequestCounter = 0;				/* Send MD Transfer Request Count */
 
 	/* Session Valid */
-	BOOL aliveSession = TRUE;
+	BOOL8 aliveSession = TRUE;
 
 	/* Timer */
 	struct timeval  tv_interval = {0};								/* interval Time :timeval type */
@@ -245,7 +247,7 @@ VOS_THREAD_FUNC_T MDCaller (
 	TRDP_LIS_T callerThreadRequestTimeoutListener = {0};		/* callerThreadRequestTimeoutListener */
 	APP_THREAD_SESSION_HANDLE *pRequestSessionHandle = NULL;	/* in the case of send Request(MR) */
 	APP_THREAD_SESSION_HANDLE *pMrSendSessionTable[REQUEST_SESSIONID_TABLE_MAX] = {0};		/* MD Request(Mr) Session Table */
-	BOOL mrSendSessionFlag = FALSE;									/* for Check reply session */
+	BOOL8 mrSendSessionFlag = FALSE;									/* for Check reply session */
 	RECEIVE_REPLY_RESULT_TABLE_T receiveReplyResultTable[RECEIVE_REPLY_RESULT_TABLE_MAX] = {{{0}}};
 
 	/* MD DATA */
@@ -723,9 +725,17 @@ VOS_THREAD_FUNC_T MDCaller (
 			vos_addTime(&nextSendTime, &trdp_time_tv_interval);
 
 			/* Receive Wait */
-			/* Last Time send ? */
-			if (sendMdTransferRequestCounter >= pCallerThreadParameter->pCommandValue->mdCycleNumber)
+			/* Not Last Time send */
+			/* or send Cycle Number:0 */
+			if ((sendMdTransferRequestCounter < pCallerThreadParameter->pCommandValue->mdCycleNumber)
+				|| (pCallerThreadParameter->pCommandValue->mdCycleNumber == 0))
 			{
+				/* Set Wait Time: Wait Next MD Transmission Send Timing for receive all Reply */
+				receiveWaitTime = nextSendTime;
+			}
+			else
+			{
+				/* Last Time Send */
 				/* Get Reply time out of day */
 				tv_interval.tv_sec      = pCallerThreadParameter->pCommandValue->mdTimeoutReply / 1000000;
 				tv_interval.tv_usec     = pCallerThreadParameter->pCommandValue->mdTimeoutReply % 1000000;
@@ -734,11 +744,6 @@ VOS_THREAD_FUNC_T MDCaller (
 				vos_addTime(&nextReplyTimeoutTime, &trdp_time_tv_interval);
 				/* Set Wait Time: Reply Time Out for Last Time Request receive all Reply*/
 				receiveWaitTime = nextReplyTimeoutTime;
-			}
-			else
-			{
-				/* Set Wait Time: Wait Next MD Transmission Send Timing for receive all Reply */
-				receiveWaitTime = nextSendTime;
 			}
 		}
 		/* Caller Send Interval Type:Reply-Request */
@@ -1472,7 +1477,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 		mqd_t callerMqDescriptor)
 {
 	MD_APP_ERR_TYPE err = MD_APP_ERR;
-//	BOOL aliveSession = TRUE;
+//	BOOL8 aliveSession = TRUE;
 	UINT32 sendTableLoopCounter = 0;			/* Send Table Loop Counter */
 	UINT32 receiveTableLoopCounter = 0;		/* Receive Table Loop Counter */
 
@@ -1856,7 +1861,7 @@ deleteAppThreadSessionMessageQueueDescriptor(
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidCallerSendRequestSession (
+BOOL8 isValidCallerSendRequestSession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pCallerSendRequestSessionId)
 {
@@ -1894,7 +1899,7 @@ BOOL isValidCallerSendRequestSession (
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidCallerReceiveReplySession (
+BOOL8 isValidCallerReceiveReplySession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pCallerReceiveReplySessionId)
 {

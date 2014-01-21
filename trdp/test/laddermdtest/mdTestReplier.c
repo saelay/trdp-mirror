@@ -1,18 +1,18 @@
 /**********************************************************************************************************************/
 /**
- * @file	mdTestReplier.c
+ * @file		mdTestReplier.c
  *
- * @brief	Demo MD ladder application for TRDP
+ * @brief		Demo MD ladder application for TRDP
  *
- * @details	TRDP Ladder Topology Support MD Transmission Replier
+ * @details		TRDP Ladder Topology Support MD Transmission Replier
  *
- * @note	Project: TCNOpen TRDP prototype stack
+ * @note		Project: TCNOpen TRDP prototype stack
  *
- * @author	Kazumasa Aiba, TOSHIBA
+ * @author		Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks	All rights reserved. Reproduction, modification, use or disclosure
- *		to third parties without express authority is forbidden,
- *		Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 
@@ -59,7 +59,7 @@ VOS_THREAD_FUNC_T MDReplier (
 	LISTENER_HANDLE_T *pListenerHandle3 = NULL;	/* Listener Handle3 for All Listener Delete */
 	LISTENER_HANDLE_T *pListenerHandle4 = NULL;	/* Listener Handle4 for All Listener Delete */
 	/* Session Valid */
-	BOOL aliveSession = TRUE;
+	BOOL8 aliveSession = TRUE;
 
 	/* AppHandle  AppThreadListener Area */
 	if (appThreadSessionHandle.pMdAppThreadListener != NULL)
@@ -777,23 +777,46 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 					memcpy(&useSubnet, (void *)pReceiveMsg->pRefCon, sizeof(INT8));
 					if (useSubnet == MD_SEND_USE_SUBNET1)
 					{
-						/* Receive to Subnet1 */
-						replierAppHandle = appHandle;
-						/* Set tlp_reply(srcIpAddr = subnet1) */
-						pReceiveMsg->Msg.destIpAddr = subnetId1Address;
+						/* UseSubnet is subnet1 */
+						if (pReplierThreadParameter->pCommandValue->mdSendSubnet == MD_SEND_USE_SUBNET2)
+						{
+							break;
+						}
+						else
+						{
+							/* Receive to Subnet1 */
+							replierAppHandle = appHandle;
+							/* Set tlp_reply(srcIpAddr = subnet1) */
+							pReceiveMsg->Msg.destIpAddr = subnetId1Address;
+						}
 					}
 					else
 					{
-						/* Receive to Subnet2 */
-						replierAppHandle = appHandle2;
-						/* Set tlp_reply(srcIpAddr = subnet2) */
-						pReceiveMsg->Msg.destIpAddr = subnetId2Address;
+						/* UseSubnet is subnet2 ? */
+						if ((UINT8)useSubnet != pReplierThreadParameter->pCommandValue->mdSendSubnet)
+						{
+							break;
+						}
+						else
+						{
+							/* Receive to Subnet2 */
+							replierAppHandle = appHandle2;
+							/* Set tlp_reply(srcIpAddr = subnet2) */
+							pReceiveMsg->Msg.destIpAddr = subnetId2Address;
+						}
 					}
 
 					/* Check ComId */
 					/* Decide Reply Err Mode */
 					/* COMID_ERROR_DATA_1 */
+//#if 0
 					if (pReceiveMsg->Msg.comId == COMID_ERROR_DATA_1)
+//#endif
+#if 0
+/* For interoperability test */
+					if ((pReceiveMsg->Msg.comId == COMID_ERROR_DATA_1) || (pReceiveMsg->Msg.comId == 0x200001))
+#endif
+
 					{
 						/* Check Reply Error Type */
 						/* MD_REPLY_ERROR_TYPE_1 */
@@ -1406,8 +1429,16 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 						}
 					}
 					/* Normal ComId */
+//#if 0
 					else
 					{
+//#endif
+#if 0
+					/* For interoperability test */
+					/* NOT MD_REPLY_ERROR_TYPE */
+					if (pReplierThreadParameter->pCommandValue->mdReplyErr == 0)
+					{
+#endif
 						/* MD Send Count */
 						pReplierThreadParameter->pCommandValue->replierMdSendCounter++;
 
@@ -1487,7 +1518,6 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 							vos_printLog(VOS_LOG_ERROR, "Send Reply ERROR. Reply type err : %u\n", pReplierThreadParameter->pCommandValue->mdMessageKind);
 						}
 					}
-
 					/* Set Reply Receive Session Handle Message Queue Descriptor */
 					/* Check Reply Type : Mq(ReplyQuery) ? */
 					if (pReplierThreadParameter->pCommandValue->mdMessageKind == MD_MESSAGE_MQ)
@@ -1660,7 +1690,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidReplierSendReplySession (
+BOOL8 isValidReplierSendReplySession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pReplierSendReplySessionId)
 {
@@ -1698,7 +1728,7 @@ BOOL isValidReplierSendReplySession (
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidReplierReceiveRequestNotifySession (
+BOOL8 isValidReplierReceiveRequestNotifySession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pReplierReceiveRequestNotifySessionId)
 {

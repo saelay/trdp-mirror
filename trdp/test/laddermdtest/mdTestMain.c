@@ -1,22 +1,22 @@
 /**********************************************************************************************************************/
 /**
- * @file	mdTestMain.c
+ * @file		mdTestMain.c
  *
- * @brief	Demo MD ladder application for TRDP
+ * @brief		Demo MD ladder application for TRDP
  *
- * @details	TRDP Ladder Topology Support MD Transmission Main
+ * @details		TRDP Ladder Topology Support MD Transmission Main
  *
- * @note	Project: TCNOpen TRDP prototype stack
+ * @note		Project: TCNOpen TRDP prototype stack
  *
- * @author	Kazumasa Aiba, TOSHIBA
+ * @author		Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks	All rights reserved. Reproduction, modification, use or disclosure
- *		to third parties without express authority is forbidden,
- *		Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 
- /* check if the needed functionality is present */
+/* check if the needed functionality is present */
 #if (MD_SUPPORT == 1)
 /* the needed MD_SUPPORT was granted */
 #else
@@ -111,6 +111,19 @@ const size_t    threadStackSize   = 256 * 1024;
 int main (int argc, char *argv[])
 {
 	MD_APP_ERR_TYPE err = 0;						/* result */
+	CHAR8 commandFileName[100] = {0};			/* Command File Name */
+	FILE *fpCommandFile = NULL;					/* pointer to command file */
+	UINT16 getCommandLength = 0;				/* Input Command Length */
+	UINT32 i = 0;									/* loop counter */
+	UINT8 operand = 0;							/* Input Command Operand Number */
+	CHAR8 commandLine[GET_COMMAND_MAX];		/* 1 command */
+	CHAR8 getCommand[GET_COMMAND_MAX];			/* Input Command */
+	CHAR8 argvGetCommand[GET_COMMAND_MAX];		/* Input Command for argv */
+	static CHAR8 *argvCommand[100];				/* Command argv */
+	UINT32 startPoint;							/* Copy Start Point */
+	UINT32 endPoint;								/* Copy End Point */
+	UINT16 commandNumber = 0;					/* Number of Command */
+	COMMAND_VALUE *pCommandValue = NULL;		/* Command Value */
 
 	/* Display TRDP Version */
 	printf("TRDP Stack Version %s\n", tlc_getVersionString());
@@ -131,33 +144,150 @@ int main (int argc, char *argv[])
 	}
 	else
 	{
-		memset(pTrdpInitializeParameter, 0, sizeof(COMMAND_VALUE));
-		/* Decide Create Thread */
-		err = decideCreateThread(argc, argv, pTrdpInitializeParameter);
-		if (err !=  MD_APP_NO_ERR)
+		/* Input File Command analysis */
+		for(i=1; i < argc ; i++)
 		{
-			/* command -h = MD_APP_COMMAND_ERR */
-			if (err == MD_APP_COMMAND_ERR)
+			if (argv[i][0] == '-')
 			{
-				/* Get Command, Create Application Thread Loop */
-				command_main_proc();
+				switch(argv[i][1])
+				{
+				case 'F':
+					if (argv[i+1] != NULL)
+					{
+						/* Get CallerReplierType(Caller or Replier) from an option argument */
+						sscanf(argv[i+1], "%s", &commandFileName);
+						/* Open Command File */
+						fpCommandFile = fopen(commandFileName, "rb");
+						if (fpCommandFile == NULL)
+						{
+							vos_printLog(VOS_LOG_ERROR, "Command File Open Err\n");
+							return MD_APP_PARAM_ERR;
+						}
+						/* Get Command */
+						while(fgets(commandLine, GET_COMMAND_MAX, fpCommandFile) != NULL)
+						{
+							/* Count Number of command */
+							commandNumber++;
+							/* Get command Length */
+							getCommandLength = strlen(commandLine);
+							/* Initialize */
+							memset(getCommand, 0, sizeof(getCommand));
+							memset(argvGetCommand, 0, sizeof(argvGetCommand));
+							memset(argvCommand, 0, sizeof(argvCommand));
+							operand = 0;
+							startPoint = 0;
+							endPoint = 0;
+
+							/* Create argvCommand and Operand Number */
+							for(i=0; i < getCommandLength; i++)
+							{
+								/* Check SPACE */
+								if(commandLine[i] == SPACE )
+								{
+									/* Get argvCommand */
+									strncpy(&argvGetCommand[startPoint], &commandLine[startPoint], i-startPoint);
+									argvCommand[operand] = &argvGetCommand[startPoint];
+									startPoint = i+1;
+									operand++;
+								}
+							}
+							/* Copy Last Operand */
+							strncpy(&argvGetCommand[startPoint], &commandLine[startPoint], getCommandLength-startPoint-1);
+							argvCommand[operand] = &argvGetCommand[startPoint];
+
+							/* First Command ? */
+							if (commandNumber == 1)
+							{
+								/* Initialize command Value */
+								memset(pTrdpInitializeParameter, 0, sizeof(COMMAND_VALUE));
+								pCommandValue = pTrdpInitializeParameter;
+							}
+							else
+							{
+								pCommandValue = (COMMAND_VALUE *)malloc(sizeof(COMMAND_VALUE));
+								if (pCommandValue == NULL)
+								{
+									vos_printLog(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
+									return MD_APP_MEM_ERR;
+								}
+								else
+								{
+									memset(pCommandValue, 0, sizeof(COMMAND_VALUE));
+								}
+							}
+							/* Decide Create Thread */
+							err = decideCreateThread(operand+1, argvCommand, pCommandValue);
+							if (err !=  MD_APP_NO_ERR)
+							{
+								/* command -h = MD_APP_COMMAND_ERR */
+								if (err == MD_APP_COMMAND_ERR)
+								{
+									continue;
+								}
+								/* command -Q : Quit */
+								else if(err == MD_APP_QUIT_ERR)
+								{
+									/* Quit Command */
+									return MD_APP_QUIT_ERR;
+								}
+								else
+								{
+									/* command err */
+									vos_printLog(VOS_LOG_ERROR, "Decide Create Thread Err\n");
+								}
+								free(pCommandValue);
+								pCommandValue = NULL;
+							}
+							else
+							{
+								/* Set pCommandValue List */
+								appendComamndValueList(&pTrdpInitializeParameter, pCommandValue);
+							}
+						}
+					}
+					break;
+				default:
+					break;
+				}
 			}
-			/* command -Q : Quit */
-			else if(err == MD_APP_QUIT_ERR)
+		}
+		/* Not Input File Command */
+		if (commandNumber == 0)
+		{
+			memset(pTrdpInitializeParameter, 0, sizeof(COMMAND_VALUE));
+			/* Decide Create Thread */
+			err = decideCreateThread(argc, argv, pTrdpInitializeParameter);
+			if (err !=  MD_APP_NO_ERR)
 			{
-				/* Quit Command */
-				return 0;
+				/* command -h = MD_APP_COMMAND_ERR */
+				if (err == MD_APP_COMMAND_ERR)
+				{
+					/* Get Command, Create Application Thread Loop */
+					command_main_proc();
+				}
+				/* command -Q : Quit */
+				else if(err == MD_APP_QUIT_ERR)
+				{
+					/* Quit Command */
+					return 0;
+				}
+				else
+				{
+					/* command err */
+					/* Get Command, Create Application Thread Loop */
+					command_main_proc();
+				}
 			}
 			else
 			{
-				/* command err */
+				/* command OK */
 				/* Get Command, Create Application Thread Loop */
 				command_main_proc();
 			}
 		}
+		/* Input File Command */
 		else
 		{
-			/* command OK */
 			/* Get Command, Create Application Thread Loop */
 			command_main_proc();
 		}
@@ -168,7 +298,7 @@ int main (int argc, char *argv[])
 /* Command analysis */
 MD_APP_ERR_TYPE analyzeCommand(int argc, char *argv[], COMMAND_VALUE *pCommandValue)
 {
-	static BOOL firstAnalyzeCommand = TRUE;
+	static BOOL8 firstAnalyzeCommand = TRUE;
 	INT32 int32_value =0;					/* use variable number in order to get 32bit value */
 	UINT32 uint32_value = 0;					/* use variable number in order to get 32bit value */
 	INT32 ip[4] = {0};						/* use variable number in order to get IP address value */
@@ -1146,7 +1276,7 @@ MD_APP_ERR_TYPE createMdReplierThread(
  */
 MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pCommandValue)
 {
-	static BOOL firstTimeFlag = TRUE;
+	static BOOL8 firstTimeFlag = TRUE;
 	MD_APP_ERR_TYPE err = MD_APP_NO_ERR;
 	extern VOS_MUTEX_T pMdApplicationThreadMutex;
 
@@ -1387,7 +1517,7 @@ MD_APP_ERR_TYPE mdTerminate(
 	TRDP_ERR_T err = TRDP_NO_ERR;
 	LISTENER_HANDLE_T *iterListenerHandle;
 #if 0
-	BOOL aliveSession = TRUE;					/* Session Valid */
+	BOOL8 aliveSession = TRUE;					/* Session Valid */
 
 	/* Check Session Close */
 	while(1)

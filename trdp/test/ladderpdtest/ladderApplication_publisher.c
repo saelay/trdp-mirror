@@ -1,18 +1,18 @@
 /**********************************************************************************************************************/
 /**
- * @file            ladderApplication_publisher.c
+ * @file			ladderApplication_publisher.c
  *
- * @brief           Demo ladder application for TRDP
+ * @brief			Demo ladder application for TRDP
  *
  * @details			TRDP Ladder Topology Support PD Transmission Publisher
  *
- * @note            Project: TCNOpen TRDP prototype stack
+ * @note			Project: TCNOpen TRDP prototype stack
  *
- * @author          Kazumasa Aiba, TOSHIBA
+ * @author			Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 #ifdef TRDP_OPTION_LADDER
@@ -123,14 +123,14 @@ TRDP_IP_ADDR_T PD_COMID2_SRC_IP2 = 0;
 UINT32 PD_COMID1_CYCLE = 100000;					/* ComID1 Publish Cycle TIme */
 UINT32 PD_COMID2_CYCLE = 100000;					/* ComID2 Publish Cycle TIme */
 /* Ladder Topolpgy enable/disable */
-BOOL ladderTopologyFlag = TRUE;						/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
+BOOL8 ladderTopologyFlag = TRUE;						/* Ladder Topology : TURE, Not Ladder Topology : FALSE */
 /* OFFSET ADDRESS */
 UINT16 OFFSET_ADDRESS1 = 0x1100;					/* offsetAddress comId1 publish */
 UINT16 OFFSET_ADDRESS2 = 0x1180;					/* offsetAddress comId2 publish */
 UINT16 OFFSET_ADDRESS3 = 0x1300;					/* offsetAddress comId1 subscribe */
 UINT16 OFFSET_ADDRESS4 = 0x1380;					/* offsetAddress comId2 subscribe */
 /* Marshalling enable/disable */
-BOOL marshallingFlag = FALSE;						/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
+BOOL8 marshallingFlag = FALSE;						/* Marshalling Enable : TURE, Marshalling Disable : FALSE */
 UINT32	publisherAppCycle = 200000;					/* Publisher Application cycle in us */
 //UINT32	subscriberAppCycle = 120000;				/* Subscriber Application cycle in us */
 /* Using Receive Subnet in order to Wirte PD in Traffic Store  */
@@ -153,7 +153,7 @@ TRDP_DATASET_T DATASET1_TYPE =
 	16,			/* No of elements */
 	{			/* TRDP_DATASET_ELEMENT_T [] */
 			{
-					TRDP_BOOLEAN, 	/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+					TRDP_BOOL8, 	/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
 					1,					/* No of elements */
 					NULL
 			},
@@ -257,7 +257,7 @@ TRDP_DATASET_T DATASET2_TYPE =
 TRDP_DATASET_T *gDataSets[] =
 {
 	&DATASET1_TYPE,
-	&DATASET2_TYPE,
+	&DATASET2_TYPE
 };
 
 
@@ -281,7 +281,7 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    BOOL logPrintOnFlag = FALSE;	/* FALSE is not print */
+    BOOL8 logPrintOnFlag = FALSE;	/* FALSE is not print */
 
     switch(category)
     {
@@ -426,7 +426,7 @@ int main (int argc, char *argv[])
 //	CHAR8 stringMaxData[16] = "STRING MAX SIZE";
 	PD_COMID1_SRC_IP2 = PD_COMID1_SRC_IP | SUBNET2_NETMASK;	    /* Sender's IP: 10.4.33.17 (default) */
 	PD_COMID2_SRC_IP2 = PD_COMID2_SRC_IP | SUBNET2_NETMASK;	    /* Sender's IP: 10.4.33.17 (default) */
-	BOOL linkUpDown = TRUE;											/* Link Up Down information TRUE:Up FALSE:Down */
+	BOOL8 linkUpDown = TRUE;											/* Link Up Down information TRUE:Up FALSE:Down */
 	TRDP_FLAGS_T optionFlag = TRDP_FLAGS_NONE;					/* Option Flag for tlp_publish */
 
 	/* ComId DATASETID Mapping */
@@ -995,14 +995,14 @@ int main (int argc, char *argv[])
 		err = tau_calcDatasetSize(pRefConMarshallDataset, 1001, (UINT8 *) &dataSet1, &dataSet1MarshallSize, NULL);
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID1, DATASET_NO_1, err);
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSize PD DATASET%d returns error = %d\n", DATASET_NO_1, err);
 			return 1;
 		}
 		/* Compute size of marshalled dataset2 */
 		err = tau_calcDatasetSize(pRefConMarshallDataset, 1002, (UINT8 *) &dataSet2, &dataSet2MarshallSize, NULL);
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSizeByComId comId:%d PD DATASET%d returns error = %d\n", PD_COMID2, DATASET_NO_2, err);
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSize PD DATASET%d returns error = %d\n", DATASET_NO_2, err);
 			return 1;
 		}
 #endif
@@ -1088,40 +1088,33 @@ int main (int argc, char *argv[])
 	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
 
 	/* Get IP Address */
-	struct ifaddrs *ifa_list;
-	struct ifaddrs *ifa;
 	TRDP_IP_ADDR_T subnetId1Address = 0;
 	TRDP_IP_ADDR_T subnetId2Address = 0;
+	UINT32 noOfIfaces = 10;
+	VOS_IF_REC_T ifAddressTable[noOfIfaces];
+	UINT32 index;
+#ifdef __linux
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
-	CHAR8 addrStr[256] = {0};
+#elif defined(__APPLE__)
+	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
+#endif
 
 	/* Get I/F address */
-	if (getifaddrs(&ifa_list) != VOS_NO_ERR)
-	{
-		vos_printLog(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
+	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
+    {
+		vos_printLog(VOS_LOG_ERROR, "vos_getInterfaces() error. errno=%d\n", errno);
        return 1;
 	}
 	/* Get All I/F List */
-	for(ifa = ifa_list; ifa != NULL; ifa = ifa->ifa_next)
+	for (index = 0; index < noOfIfaces; index++)
 	{
-		if (strncmp(ifa->ifa_name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
+		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
 		{
-			/* IPv4 */
-			if (ifa->ifa_addr->sa_family == AF_INET)
-			{
 				/* Get Sub-net Id1 Address */
-				inet_ntop(AF_INET,
-							&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr,
-							addrStr,
-							sizeof(addrStr));
-				vos_printLog(VOS_LOG_INFO, "ip:%s\n", addrStr);
-				subnetId1Address = inet_network(addrStr);
-				break;
-			}
+            subnetId1Address = (TRDP_IP_ADDR_T)(ifAddressTable[index].ipAddr);
+            break;
 		}
 	}
-	/* Release memory */
-	freeifaddrs(ifa_list);
 
 	/* Sub-network Id1 Init the library for callback operation	(PD only) */
 	if (tlc_init(dbgOut,							/* actually printf	*/
