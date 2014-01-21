@@ -16,6 +16,8 @@
  *
  * $Id: $
  *
+ * @addtogroup Definitions
+ * @{
  */
 
 #ifndef TRDP_ENVIRONMENT_H
@@ -118,3 +120,5 @@ guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs);
 guint8 trdp_dissect_width(guint32 type);
 
 #endif
+
+/** @} */

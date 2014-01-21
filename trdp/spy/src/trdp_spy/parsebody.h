@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ * @addtogroup Parsing
+ * @{
  */
 
 #ifndef TRDP_PARESEBODY_H
@@ -146,3 +148,5 @@ struct Dataset* trdp_parsebody_lookup(guint32 comId);
 struct Dataset* trdp_parsebody_search(guint32 datasetId);
 
 #endif
+
+/** @} */
