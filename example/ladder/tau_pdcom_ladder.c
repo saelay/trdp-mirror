@@ -1,19 +1,19 @@
 /**********************************************************************************************************************/
 /**
- * @file            tau_pdcom_Ladder.c
+ * @file				tau_pdcom_Ladder.c
  *
- * @brief           Functions for TRDP Ladder Topology PD communication (PDComLadder Thread)
+ * @brief				Functions for TRDP Ladder Topology PD communication (PDComLadder Thread)
  *
- * @details			Receive, send and wirte Traffic Store process data at a fixed cycle
+ * @details				Receive, send and wirte Traffic Store process data at a fixed cycle
  *
- * @note            Project: TCNOpen TRDP prototype stack
+ * @note				Project: TCNOpen TRDP prototype stack
  *
- * @author          Kazumasa Aiba, TOSHIBA
+ * @author				Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2013.
- *
+ * @remarks This source code corresponds to TRDP_PDCOM_LADDER open source software.
+ *          This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 

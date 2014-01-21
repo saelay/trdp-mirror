@@ -2,17 +2,17 @@
 /**
  * @file        	ladderApplication.c
  *
- * @brief           Demo ladder application for TRDP
+ * @brief			Demo ladder application for TRDP
  *
  * @details			TRDP Ladder Topology Support initialize and initial setting, write Traffic Store process data at a fixed cycle
  *
- * @note            Project: TCNOpen TRDP prototype stack
+ * @note			Project: TCNOpen TRDP prototype stack
  *
- * @author          Kazumasa Aiba, TOSHIBA
+ * @author			Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 #ifdef TRDP_OPTION_LADDER

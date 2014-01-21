@@ -2,17 +2,17 @@
 /**
  * @file        	ladderApplication_multiPD.c
  *
- * @brief           Demo ladder application for TRDP
+ * @brief			Demo ladder application for TRDP
  *
  * @details			TRDP Ladder Topology Support initialize and initial setting, write Traffic Store process data at a fixed cycle
  *
- * @note            Project: TCNOpen TRDP prototype stack
+ * @note			Project: TCNOpen TRDP prototype stack
  *
- * @author          Kazumasa Aiba, TOSHIBA
+ * @author			Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 #ifdef TRDP_OPTION_LADDER
@@ -26,6 +26,7 @@
 #include <getopt.h>
 #include <errno.h>
 #include <ifaddrs.h>
+#include <byteswap.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -38,6 +39,7 @@
 #include "trdp_if_light.h"
 #include "tau_ladder.h"
 #include "tau_ladder_app.h"
+#include "tau_marshall.h"
 
 /***********************************************************************************************************************
  * GLOBAL VARIABLES
@@ -72,6 +74,7 @@ TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_C
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};	    /* Sub-network Id2 PDconfiguration */
 TRDP_MEM_CONFIG_T   dynamicConfig2 = {NULL, RESERVED_MEMORY, {}};					/* Sub-network Id2 Structure describing memory */
 TRDP_PROCESS_CONFIG_T   processConfig2   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+TRDP_MARSHALL_CONFIG_T	marshallConfig = {tau_marshall, tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
 
 TRDP_IP_ADDR_T subnetId1Address = 0;
 TRDP_IP_ADDR_T subnetId2Address = 0;
@@ -87,6 +90,140 @@ PD_THREAD_PARAMETER *pHeadPdThreadParameterList = NULL;		/* Head PD Thread Param
 
 UINT32 logCategoryOnOffType = 0x0;						/* 0x0 is disable TRDP vos_printLog. for dbgOut */
 
+/* For Marshalling */
+TRDP_FLAGS_T optionFlag = TRDP_FLAGS_NONE;				/* Option Flag for tlp_publish */
+UINT32 dataSet1MarshallSize = 0;							/* publish Dataset1 Marshall SIZE */
+UINT32 dataSet2MarshallSize = 0;							/* publish Dataset2 Marshall SIZE */
+
+/* PD DATASET */
+TRDP_DATASET_T DATASET1_TYPE =
+{
+	1001,		/* datasetID */
+	0,			/* reserved */
+	16,			/* No of elements */
+	{			/* TRDP_DATASET_ELEMENT_T [] */
+			{
+					TRDP_BOOL8, 	/**< =UINT8, 1 bit relevant (equal to zero = false, not equal to zero = true) */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_CHAR8, 		/* data type < char, can be used also as UTF8  */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_UTF16,   	    /* data type < Unicode UTF-16 character  */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_INT8,   		/* data type < Signed integer, 8 bit  */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_INT16,		    /* data type < Signed integer, 16 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_INT32,		    /* data type < Signed integer, 32 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_INT64,		    /* data type < Signed integer, 64 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_UINT8,		    /* data type < Unsigned integer, 8 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_UINT16,		/* data type < Unsigned integer, 16 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_UINT32,		/* data type < Unsigned integer, 32 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_UINT64,		/* data type < Unsigned integer, 64 bit */
+					1					/* No of elements */
+			},
+			{
+					TRDP_REAL32,		/* data type < Floating point real, 32 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_REAL64,		/* data type < Floating point real, 64 bit */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_TIMEDATE32,	/* data type < 32 bit UNIX time  */
+					1,				/* No of elements */
+					NULL
+			},
+			{
+					TRDP_TIMEDATE48,	/* data type *< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
+					1,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_TIMEDATE64,	/* data type *< 32 bit UNIX time + 32 bit miliseconds  */
+					1,					/* No of elements */
+					NULL
+			}
+	}
+};
+
+TRDP_DATASET_T DATASET2_TYPE =
+{
+	1002,		/* dataset/com ID */
+	0,			/* reserved */
+	2,			/* No of elements */
+	{			/* TRDP_DATASET_ELEMENT_T [] */
+			{
+					1001,		 		/* data type < dataset 1001  */
+					2,					/* No of elements */
+					NULL
+			},
+			{
+					TRDP_INT16,		    /* data type < Signed integer, 16 bit */
+					64,					/* No of elements */
+					NULL
+			}
+	}
+};
+
+/* Will be sorted by tau_initMarshall */
+TRDP_DATASET_T *gDataSets[] =
+{
+	&DATASET1_TYPE,
+	&DATASET2_TYPE,
+};
+
+/* ComId DATASETID Mapping */
+TRDP_COMID_DSID_MAP_T gComIdMap[] =
+{
+	{10001, 1001},
+	{10002, 1002},
+	{10003, 1001},
+	{10004, 1002},
+	{10005, 1001},
+	{10006, 1002},
+	{10007, 1001},
+	{10008, 1002},
+	{10009, 1001},
+	{10010, 1002}
+};
 
 /***********************************************************************************************************************
  * DEFINES
@@ -139,7 +276,7 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    BOOL logPrintOnFlag = FALSE;	/* FALSE is not print */
+    BOOL8 logPrintOnFlag = FALSE;	/* FALSE is not print */
 
     switch(category)
     {
@@ -195,7 +332,19 @@ void dbgOut (
  */
 int main (int argc, char *argv[])
 {
-//	PD_COMMAND_VALUE *pPdCommandValue = NULL;		/* PD Command Value */
+	PD_COMMAND_VALUE *pPdCommandValue = NULL;	/* PD Command Value */
+	CHAR8 commandFileName[100] = {0};			/* Command File Name */
+	FILE *fpCommandFile = NULL;					/* pointer to command file */
+	UINT16 getCommandLength = 0;				/* Input Command Length */
+	UINT32 i = 0;									/* loop counter */
+	UINT8 operand = 0;							/* Input Command Operand Number */
+	CHAR8 commandLine[GET_COMMAND_MAX];		/* 1 command */
+	CHAR8 getCommand[GET_COMMAND_MAX];			/* Input Command */
+	CHAR8 argvGetCommand[GET_COMMAND_MAX];		/* Input Command for argv */
+	static CHAR8 *argvCommand[100];				/* Command argv */
+	UINT32 startPoint;							/* Copy Start Point */
+	UINT32 endPoint;								/* Copy End Point */
+	UINT16 commandNumber = 0;					/* Number of Command */
 
 	/* Display TRDP Version */
 	printf("TRDP Stack Version %s\n", tlc_getVersionString());
@@ -211,26 +360,144 @@ int main (int argc, char *argv[])
 	}
 	else
 	{
-		/* Decide Create Thread */
-		err = decideCreatePdThread(argc, argv, pFirstPdCommandValue);
-		if (err !=  PD_APP_NO_ERR)
+		/* Input File Command analysis */
+		for(i=1; i < argc ; i++)
 		{
-			/* command -h = PD_APP_COMMAND_ERR */
-			if (err == PD_APP_COMMAND_ERR)
+			if (argv[i][0] == '-')
 			{
-				/* Get Command, Create Application Thread Loop */
-				pdCommand_main_proc();
+				switch(argv[i][1])
+				{
+				case 'F':
+					if (argv[i+1] != NULL)
+					{
+						/* Get CallerReplierType(Caller or Replier) from an option argument */
+						sscanf(argv[i+1], "%s", &commandFileName);
+						/* Open Command File */
+						fpCommandFile = fopen(commandFileName, "rb");
+						if (fpCommandFile == NULL)
+						{
+							vos_printLog(VOS_LOG_ERROR, "Command File Open Err\n");
+							return PD_APP_PARAM_ERR;
+						}
+						/* Get Command */
+						while(fgets(commandLine, GET_COMMAND_MAX, fpCommandFile) != NULL)
+						{
+							/* Count Number of command */
+							commandNumber++;
+							/* Get command Length */
+							getCommandLength = strlen(commandLine);
+							/* Initialize */
+							memset(getCommand, 0, sizeof(getCommand));
+							memset(argvGetCommand, 0, sizeof(argvGetCommand));
+							memset(argvCommand, 0, sizeof(argvCommand));
+							operand = 0;
+							startPoint = 0;
+							endPoint = 0;
+
+							/* Create argvCommand and Operand Number */
+							for(i=0; i < getCommandLength; i++)
+							{
+								/* Check SPACE */
+								if(commandLine[i] == SPACE )
+								{
+									/* Get argvCommand */
+									strncpy(&argvGetCommand[startPoint], &commandLine[startPoint], i-startPoint);
+									argvCommand[operand] = &argvGetCommand[startPoint];
+									startPoint = i+1;
+									operand++;
+								}
+							}
+							/* Copy Last Operand */
+							strncpy(&argvGetCommand[startPoint], &commandLine[startPoint], getCommandLength-startPoint-1);
+							argvCommand[operand] = &argvGetCommand[startPoint];
+
+							/* First Command ? */
+							if (commandNumber == 1)
+							{
+								/* Initialize command Value */
+								memset(pFirstPdCommandValue, 0, sizeof(PD_COMMAND_VALUE));
+								pPdCommandValue = pFirstPdCommandValue;
+							}
+							else
+							{
+								pPdCommandValue = (PD_COMMAND_VALUE *)malloc(sizeof(PD_COMMAND_VALUE));
+								if (pPdCommandValue == NULL)
+								{
+									vos_printLog(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
+									return PD_APP_MEM_ERR;
+								}
+								else
+								{
+									memset(pPdCommandValue, 0, sizeof(PD_COMMAND_VALUE));
+								}
+							}
+							/* Decide Create Thread */
+							err = decideCreatePdThread(operand+1, argvCommand, pPdCommandValue);
+							if (err !=  PD_APP_NO_ERR)
+							{
+								/* command -h = PD_APP_COMMAND_ERR */
+								if (err == PD_APP_COMMAND_ERR)
+								{
+									continue;
+								}
+								/* command -Q : Quit */
+								else if(err == PD_APP_QUIT_ERR)
+								{
+									/* Quit Command */
+									return PD_APP_QUIT_ERR;
+								}
+								else
+								{
+									/* command err */
+									vos_printLog(VOS_LOG_ERROR, "Decide Create Thread Err\n");
+								}
+								free(pPdCommandValue);
+								pPdCommandValue = NULL;
+							}
+							else
+							{
+								/* Set pPdCommandValue List */
+								appendPdCommandValueList(&pFirstPdCommandValue, pPdCommandValue);
+							}
+						}
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		/* Not Input File Command */
+		if (commandNumber == 0)
+		{
+			memset(pFirstPdCommandValue, 0, sizeof(PD_COMMAND_VALUE));
+			/* Decide Create Thread */
+			err = decideCreatePdThread(argc, argv, pFirstPdCommandValue);
+			if (err !=  PD_APP_NO_ERR)
+			{
+				/* command -h = PD_APP_COMMAND_ERR */
+				if (err == PD_APP_COMMAND_ERR)
+				{
+					/* Get Command, Create Application Thread Loop */
+					pdCommand_main_proc();
+				}
+				else
+				{
+					/* command err */
+					/* Get Command, Create Application Thread Loop */
+					pdCommand_main_proc();
+				}
 			}
 			else
 			{
-				/* command err */
+				/* command OK */
 				/* Get Command, Create Application Thread Loop */
 				pdCommand_main_proc();
 			}
 		}
+		/* Input File Command */
 		else
 		{
-			/* command OK */
 			/* Get Command, Create Application Thread Loop */
 			pdCommand_main_proc();
 		}
@@ -252,7 +519,7 @@ int main (int argc, char *argv[])
  */
 PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *pPdCommandValue)
 {
-	static BOOL firstTimeFlag = TRUE;
+	static BOOL8 firstTimeFlag = TRUE;
 	PD_APP_ERR_TYPE err = PD_APP_NO_ERR;
 	extern VOS_MUTEX_T pPdApplicationThreadMutex;
 
@@ -287,7 +554,7 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 	if (firstTimeFlag == TRUE)
 	{
 		/* TRDP Initialize */
-		err = trdp_pdInitialize();
+		err = trdp_pdInitialize(pPdCommandValue);
 		if (err != PD_APP_NO_ERR)
 		{
 			printf("TRDP PD Initialize Err\n");
@@ -735,17 +1002,17 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 					getPdCommandValue.LADDER_APP_CYCLE = uint32_value;
 				}
 			break;
-//			case 'm':
-//				if (argv[i+1] != NULL)
-//				{
+			case 'm':
+				if (argv[i+1] != NULL)
+				{
 					/* Get marshallingFlag from an option argument */
-	//				sscanf(argv[i+1], "%1d", &int32_value);
-	//				if ((int32_value == TRUE) || (int32_value == FALSE))
-	//				{
+					sscanf(argv[i+1], "%1d", &uint32_value);
+					if ((uint32_value == TRUE) || (uint32_value == FALSE))
+					{
 					/* Set marshallingFlag */
-	//					getPdCommandValue.marshallingFlag = int32_value;
-	//				}
-//			}
+						getPdCommandValue.marshallingFlag = uint32_value;
+					}
+			}
 			break;
 			case 'c':
 				if (argv[i+1] != NULL)
@@ -1124,6 +1391,7 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 				printf("Usage: COMMAND "
 						"[-1 offset1] [-3 offset3] "
 						"[-p publisherCycleTiem] "
+						"[-m marshallingTYpe] "
 						"[-c publishComid1Number] "
 						"\n"
 						"[-g subscribeComid1] "
@@ -1162,7 +1430,7 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 				printf("-3,	--offset3		OFFSET3 for Subscribe val hex: 0xXXXX\n");
 //				printf("-4,	--offset4		OFFSET4 for Subscribe val hex: 0xXXXX\n");
 				printf("-p,	--pub-app-cycle		Publisher tlp_put cycle time: micro sec\n");
-//				printf("-m,	--marshall		Marshall:1, not Marshall:0\n");
+				printf("-m,	--marshall		Marshall:1, not Marshall:0\n");
 				printf("-c,	--publish-comid1	Publish ComId1 val\n");
 //				printf("-C,	--publish-comid2	Publish ComId2 val\n");
 				printf("-g,	--subscribe-comid1	Subscribe ComId1 val\n");
@@ -1219,44 +1487,80 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
  *  @retval         PD_APP_NO_ERR		no error
  *  @retval         PD_APP_ERR			some error
  */
-PD_APP_ERR_TYPE trdp_pdInitialize (void)
+PD_APP_ERR_TYPE trdp_pdInitialize (PD_COMMAND_VALUE *pPdCommandValue)
 {
 	/* Get IP Address */
-	struct ifaddrs *ifa_list;
-	struct ifaddrs *ifa;
-//	TRDP_IP_ADDR_T subnetId1Address = 0;
-//	TRDP_IP_ADDR_T subnetId2Address = 0;
+	UINT32 noOfIfaces = 10;
+	VOS_IF_REC_T ifAddressTable[noOfIfaces];
+	UINT32 index;
+#ifdef __linux
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
-	CHAR8 addrStr[256] = {0};
+#elif defined(__APPLE__)
+	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
+#endif
 
-	/* Get I/F address */
-	if (getifaddrs(&ifa_list) != VOS_NO_ERR)
+	UINT32 *pRefConMarshallDataset;
+	UINT32 usingComIdNumber = 10;								/* 10 = ComId:10001 ~ 10010 */
+	UINT32 usingDatasetNumber = 2;								/* 2 = DATASET1,DATASET2 */
+	TRDP_MARSHALL_CONFIG_T	*pMarshallConfigPtr = NULL;		/* Marshaling/unMarshalling configuration Pointer	*/
+
+	DATASET1 dataSet1 = {0};										/* publish Dataset1 */
+	DATASET2 dataSet2;											/* publish Dataset2 */
+
+//#if 0
+/* Marshalling Setting for interoperability */
+	/* Set Config for marshall */
+	if (pPdCommandValue->marshallingFlag == TRUE)
 	{
-		vos_printLog(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
-	   return 1;
-	}
-	/* Get All I/F List */
-	for(ifa = ifa_list; ifa != NULL; ifa = ifa->ifa_next)
-	{
-		if (strncmp(ifa->ifa_name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
+		/* Set TRDP_FLAG_S : Marshall for tlp_publish() */
+		optionFlag = TRDP_FLAGS_MARSHALL;
+		/* Set MarshallConfig */
+		pMarshallConfigPtr = &marshallConfig;
+		/* Set PDConfig option : MARSHALL enable */
+		pdConfiguration.flags = (pdConfiguration.flags | TRDP_FLAGS_MARSHALL);
+		/* Set PDConfig option : MARSHALL enable */
+		pdConfiguration2.flags = (pdConfiguration2.flags | TRDP_FLAGS_MARSHALL);
+
+		/* Set dataSet in marshall table */
+		err = tau_initMarshall((void *)&pRefConMarshallDataset, usingComIdNumber, gComIdMap, usingDatasetNumber, gDataSets); /* 2nd argument:using ComId Number=10, 4th argument:using DATASET Number=2 */
+		if (err != TRDP_NO_ERR)
 		{
-			/* IPv4 */
-			if (ifa->ifa_addr->sa_family == AF_INET)
-			{
-				/* Get Sub-net Id1 Address */
-				inet_ntop(AF_INET,
-							&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr,
-							addrStr,
-							sizeof(addrStr));
-				vos_printLog(VOS_LOG_INFO, "ip:%s\n", addrStr);
-				subnetId1Address = inet_network(addrStr);
-				break;
-			}
+			vos_printLog(VOS_LOG_ERROR, "tau_initMarshall returns error = %d\n", err);
+		   return 1;
+		}
+
+		/* Compute size of marshalled dataset1 */
+		err = tau_calcDatasetSize(pRefConMarshallDataset, 1001, (UINT8 *) &dataSet1, &dataSet1MarshallSize, NULL);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSize PD DATASET%d returns error = %d\n", DATASET_NO_1, err);
+			return 1;
+		}
+		/* Compute size of marshalled dataset2 */
+		err = tau_calcDatasetSize(pRefConMarshallDataset, 1002, (UINT8 *) &dataSet2, &dataSet2MarshallSize, NULL);
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_calcDatasetSize PD DATASET%d returns error = %d\n", DATASET_NO_2, err);
+			return 1;
 		}
 	}
-	/* Release memory */
-	freeifaddrs(ifa_list);
-
+//#endif
+	/* Get I/F address */
+	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
+    {
+		vos_printLog(VOS_LOG_ERROR, "vos_getInterfaces() error. errno=%d\n", errno);
+       return 1;
+	}
+	/* Get All I/F List */
+	for (index = 0; index < noOfIfaces; index++)
+	{
+		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
+		{
+				/* Get Sub-net Id1 Address */
+            subnetId1Address = (TRDP_IP_ADDR_T)(ifAddressTable[index].ipAddr);
+            break;
+		}
+	}
 	/* Sub-net Id2 Address */
 	subnetId2Address = subnetId1Address | SUBNET2_NETMASK;
 
@@ -1272,7 +1576,8 @@ PD_APP_ERR_TYPE trdp_pdInitialize (void)
 	/*	Sub-network Id1 Open a session for callback operation	(PD only) */
 	if (tlc_openSession(&appHandle,
 							subnetId1Address, subnetId1Address,	    /* Sub-net Id1 IP address/interface	*/
-							NULL,                   				/* no Marshalling		*/
+//							NULL,                   				/* no Marshalling		*/
+							pMarshallConfigPtr,                   	/* Marshalling or no Marshalling		*/
 							&pdConfiguration, NULL,					/* system defaults for PD and MD		*/
 							&processConfig) != TRDP_NO_ERR)
 	{
@@ -1290,7 +1595,8 @@ PD_APP_ERR_TYPE trdp_pdInitialize (void)
         /*	Sub-network Id2 Open a session for callback operation	(PD only) */
 	if (tlc_openSession(&appHandle2,
 							subnetId2Address, subnetId2Address,	    /* Sub-net Id2 IP address/interface	*/
-							NULL,				                   	/* no Marshalling		*/
+//							NULL,				                   	/* no Marshalling		*/
+							pMarshallConfigPtr,                   	/* Marshalling or no Marshalling		*/
 							&pdConfiguration2, NULL,				/* system defaults for PD and MD		*/
 							&processConfig2) != TRDP_NO_ERR)
 	{
@@ -1317,6 +1623,13 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 
 	UINT8 *pPdDataSet = NULL;						/* pointer to PD DATASET */
 	size_t pdDataSetSize = 0;						/* subscirbe or publish DATASET SIZE */
+	DATASET1 *pDataSet1 = NULL;						/* pointer to PD DATASET1 */
+	DATASET2 *pDataSet2 = NULL;						/* pointer to PD DATASET2 */
+	size_t dataset1MemberSize = 0;					/* publish DATASET1 member size */
+	size_t dataset2MemberSize = 0;					/* publish DATASET2 member size */
+	UINT16 dataset1MemberNextWriteOffset = 0;		/* DATASET1 member copy offset for write Traffic Store*/
+	UINT16 dataset2MemberNextWriteOffset = 0;		/* DATASET2 member copy offset for write Traffic Store*/
+	UINT16 arrayNumberIndex = 0;					/* Number of Array Index */
 
 	/*	Sub-network Id1 Subscribe */
 	/* Check Subscribe ComId */
@@ -1330,13 +1643,31 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 		/* Get Subscribe PD DATASET */
 		if (pPdThreadParameter->pPdCommandValue->PD_SUB_DATASET_TYPE == DATASET_TYPE1)
 		{
-			/* DATASET1 Size */
-			pdDataSetSize = sizeof(DATASET1);
+			/* Check MarshallingFlag */
+			if (pPdThreadParameter->pPdCommandValue->marshallingFlag == TRUE)
+			{
+				/* DATASET1 Size: Marshalling Size*/
+				pdDataSetSize = dataSet1MarshallSize;
+			}
+			else
+			{
+				/* DATASET1 Size */
+				pdDataSetSize = sizeof(DATASET1);
+			}
 		}
 		else
 		{
-			/* DATASET2 Size */
-			pdDataSetSize = sizeof(DATASET2);
+			/* Check MarshallingFlag */
+			if (pPdThreadParameter->pPdCommandValue->marshallingFlag == TRUE)
+			{
+				/* DATASET2 Size: Marshalling Size*/
+				pdDataSetSize = dataSet2MarshallSize;
+			}
+			else
+			{
+				/* DATASET2 Size */
+				pdDataSetSize = sizeof(DATASET2);
+			}
 		}
 
 		err = tlp_subscribe( appHandle,															/* our application identifier */
@@ -1413,11 +1744,19 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 			else
 			{
 				/* Initialize PD DTASET1 */
-				if ((createPdDataSet1(TRUE, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
+				if ((createPdDataSet1(TRUE, pPdThreadParameter->pPdCommandValue->marshallingFlag, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET1 ERROR. Initialize Err\n");
 					return PD_APP_ERR;
 				}
+				/* Check MarshallingFlag */
+				if (pPdThreadParameter->pPdCommandValue->marshallingFlag == TRUE)
+				{
+					/* DATASET1 Size: Marshalling Size*/
+					pdDataSetSize = dataSet1MarshallSize;
+				}
+				/* Set DATASET1 pointer */
+				pDataSet1 = (DATASET1 *)pPdDataSet;
 			}
 		}
 		else
@@ -1434,15 +1773,170 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 			else
 			{
 				/* Initialize PD DTASET2 */
-				if ((createPdDataSet2(TRUE, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
+				if ((createPdDataSet2(TRUE, pPdThreadParameter->pPdCommandValue->marshallingFlag, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET2 ERROR. Initialize Err\n");
 					return PD_APP_ERR;
 				}
+				/* Check MarshallingFlag */
+				if (pPdThreadParameter->pPdCommandValue->marshallingFlag == TRUE)
+				{
+					/* DATASET2 Size: Marshalling Size*/
+					pdDataSetSize = dataSet2MarshallSize;
+				}
+				/* Set DATASET2 pointer */
+				pDataSet2 = (DATASET2 *)pPdDataSet;
 			}
 		}
 		/* Set PD Data in Traffic Store */
-		memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), pPdDataSet, pdDataSetSize);
+		/* Check MarshallingFlag */
+		if (pPdThreadParameter->pPdCommandValue->marshallingFlag == TRUE)
+		{
+			/* copy DATASET in Traffic Store */
+			memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), pPdDataSet, pdDataSetSize);
+		}
+		else
+		{
+			/* Check Publish PD DATASET Type */
+			if (pPdThreadParameter->pPdCommandValue->PD_PUB_DATASET_TYPE == DATASET_TYPE1)
+			{
+				/* DATASET1 */
+				/* copy DATASET member in Traffic Store */
+				dataset1MemberSize = sizeof(pDataSet1->boolean);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1), &pDataSet1->boolean, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->character);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->character, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->utf16);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->utf16, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->integer8);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->integer8, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->integer16);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->integer16, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->integer32);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->integer32, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->integer64);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->integer64, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->uInteger8);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->uInteger8, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->uInteger16);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->uInteger16, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->uInteger32);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->uInteger32, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->uInteger64);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->uInteger64, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->real32);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->real32, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->real64);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->real64, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->timeDate32);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->timeDate32, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->timeDate48.sec);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->timeDate48.sec, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->timeDate48.ticks);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->timeDate48.ticks, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->timeDate64.tv_sec);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->timeDate64.tv_sec, dataset1MemberSize);
+				dataset1MemberNextWriteOffset = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				dataset1MemberSize = sizeof(pDataSet1->timeDate64.tv_usec);
+				memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset1MemberNextWriteOffset), &pDataSet1->timeDate64.tv_usec, dataset1MemberSize);
+				/* Set DATASET1 Size in Traffic Store */
+//				pPdThreadParameter->pPdCommandValue->dataSet1SizeInTS = dataset1MemberNextWriteOffset + dataset1MemberSize;
+				/* Set tlp_publish dataSetSize */
+//				pdDataSetSize = pPdThreadParameter->pPdCommandValue->dataSet1SizeInTS;
+				pdDataSetSize = dataset1MemberNextWriteOffset + dataset1MemberSize;
+			}
+			else
+			{
+				/* DATASET2 */
+				/* copy DATASET member in Traffic Store */
+				/* Dataset1[] Loop */
+				for (arrayNumberIndex = 0; arrayNumberIndex < 2; arrayNumberIndex++)
+				{
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].boolean);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].boolean, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].character);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].character, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].utf16);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].utf16, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].integer8);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].integer8, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].integer16);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].integer16, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].integer32);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].integer32, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].integer64);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].integer64, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].uInteger8);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].uInteger8, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].uInteger16);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].uInteger16, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].uInteger32);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].uInteger32, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].uInteger64);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].uInteger64, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].real32);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].real32, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].real64);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].real64, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].timeDate32);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].timeDate32, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].timeDate48.sec);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].timeDate48.sec, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].timeDate48.ticks);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].timeDate48.ticks, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].timeDate64.tv_sec);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].timeDate64.tv_sec, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+					dataset2MemberSize = sizeof(pDataSet2->dataset1[arrayNumberIndex].timeDate64.tv_usec);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->dataset1[arrayNumberIndex].timeDate64.tv_usec, dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+				}
+				/* int16 array */
+				for(arrayNumberIndex = 0; arrayNumberIndex < 64; arrayNumberIndex++)
+				{
+					dataset2MemberSize = sizeof(pDataSet2->int16[arrayNumberIndex]);
+					memcpy((void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1 + dataset2MemberNextWriteOffset), &pDataSet2->int16[arrayNumberIndex], dataset2MemberSize);
+					dataset2MemberNextWriteOffset = dataset2MemberNextWriteOffset + dataset2MemberSize;
+				}
+				/* Set DATASET1 Size in Traffic Store */
+//				pPdThreadParameter->pPdCommandValue->dataSet2SizeInTS = dataset2MemberNextWriteOffset;
+				/* Set tlp_publish dataSetSize */
+//				pdDataSetSize = pPdThreadParameter->pPdCommandValue->dataSet2SizeInTS;
+				pdDataSetSize = dataset2MemberNextWriteOffset;
+			}
+		}
 		/* Set PD DataSet size in Thread Parameter */
 		pPdThreadParameter->pPdCommandValue->sendDataSetSize = pdDataSetSize;
 
@@ -1458,7 +1952,8 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 								pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP1,	/* where to send to */
 								pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
 								0,																	/* not redundant */
-								TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+//								TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+								optionFlag,														/* Don't use callback for errors */
 								NULL,																/* default qos and ttl */
 								pPdDataSet,														/* initial data */
 								pdDataSetSize);													/* data size */
@@ -1481,7 +1976,8 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 								pPdThreadParameter->pPdCommandValue->PD_COMID1_PUB_DST_IP2,	/* where to send to */
 								pPdThreadParameter->pPdCommandValue->PD_COMID1_CYCLE,			/* Cycle time in ms */
 								0,																	/* not redundant */
-								TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+//								TRDP_FLAGS_NONE,													/* Don't use callback for errors */
+								optionFlag,														/* Don't use callback for errors */
 								NULL,																/* default qos and ttl */
 								pPdDataSet,														/* initial data */
 								pdDataSetSize);														/* data size */
@@ -1617,9 +2113,11 @@ PD_APP_ERR_TYPE PDReceiveCountCheck (void)
  */
 PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 {
-	INT32 requestCounter = 0;							/* put counter */
-	BOOL linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
+	INT32 requestCounter = 0;						/* put counter */
+	BOOL8 linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
 	UINT32 TS_SUBNET_NOW = SUBNET1;
+	UINT32 putDatasetSize = 0;						/* tlp_put Dataset Size in Traffic Store */
+
 
 	/* Wait for multicast grouping */
 	vos_threadDelay(PDCOM_MULTICAST_GROUPING_DELAY_TIME);
@@ -1675,7 +2173,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
     		if (pPdThreadParameter->pPdCommandValue->PD_PUB_DATASET_TYPE == DATASET_TYPE1)
     		{
 				/* Update PD DTASET1 */
-				if ((createPdDataSet1(FALSE, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
+				if ((createPdDataSet1(FALSE, pPdThreadParameter->pPdCommandValue->marshallingFlag, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET1 ERROR. Update Err\n");
 					return PD_APP_ERR;
@@ -1689,7 +2187,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
     		else
     		{
 				/* Update PD DTASET1 */
-				if ((createPdDataSet2(FALSE, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
+				if ((createPdDataSet2(FALSE, pPdThreadParameter->pPdCommandValue->marshallingFlag, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET2 ERROR. Update Err\n");
 					return PD_APP_ERR;
@@ -1706,15 +2204,26 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 #endif /* if 0 */
 
 			/* First TRDP instance in TRDP publish buffer */
+    		/* Check MarshallingFlag */
+    		if (pPdThreadParameter->pPdCommandValue->marshallingFlag == TRUE)
+    		{
+    			/* Set tlp_put Size */
+    			putDatasetSize = appHandle->pSndQueue->dataSize;
+    		}
+    		else
+    		{
+    			/* Set tlp_put Size */
+    			putDatasetSize = pPdThreadParameter->pPdCommandValue->sendDataSetSize;
+    		}
 			tlp_put(appHandle,
 					pPdThreadParameter->pubHandleNet1ComId1,
 					(void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1),
-					appHandle->pSndQueue->dataSize);
+					putDatasetSize);
 			/* Second TRDP instance in TRDP publish buffer */
 			tlp_put(appHandle2,
 					pPdThreadParameter->pubHandleNet2ComId1,
 					(void *)((int)pTrafficStoreAddr + pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS1),
-					appHandle2->pSndQueue->dataSize);
+					putDatasetSize);
 			/* put count up */
 			requestCounter++;
 
@@ -1795,7 +2304,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 PD_APP_ERR_TYPE PDPullRequester (PD_THREAD_PARAMETER *pPdThreadParameter)
 {
 	INT32 requestCounter = 0;						/* request counter */
-	BOOL linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
+	BOOL8 linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
 	UINT32 TS_SUBNET_NOW = SUBNET1;
 	TRDP_ERR_T err = TRDP_NO_ERR;
 
@@ -1856,7 +2365,7 @@ PD_APP_ERR_TYPE PDPullRequester (PD_THREAD_PARAMETER *pPdThreadParameter)
     		if (pPdThreadParameter->pPdCommandValue->PD_PUB_DATASET_TYPE == DATASET_TYPE1)
     		{
 				/* Update PD DTASET1 */
-				if ((createPdDataSet1(FALSE, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
+				if ((createPdDataSet1(FALSE, pPdThreadParameter->pPdCommandValue->marshallingFlag, (DATASET1 *)pPdDataSet)) != PD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET1 ERROR. Update Err\n");
 					return PD_APP_ERR;
@@ -1870,7 +2379,7 @@ PD_APP_ERR_TYPE PDPullRequester (PD_THREAD_PARAMETER *pPdThreadParameter)
     		else
     		{
 				/* Update PD DTASET1 */
-				if ((createPdDataSet2(FALSE, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
+				if ((createPdDataSet2(FALSE, pPdThreadParameter->pPdCommandValue->marshallingFlag, (DATASET2 *)pPdDataSet)) != PD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Create PD DATASET2 ERROR. Update Err\n");
 					return PD_APP_ERR;
@@ -2555,6 +3064,7 @@ PD_APP_ERR_TYPE printSpecificPdSubscribeResult (
 /** Create PD DataSet1
  *
  *  @param[in]		firstCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[in]		marshallingFlag			Enable Marshalling : TRUE, Disable Marshalling : FALSE
  *  @param[out]		pPdDataSet1				pointer to Created PD DATASET1
  *
  *  @retval         PD_APP_NO_ERR				no error
@@ -2562,7 +3072,8 @@ PD_APP_ERR_TYPE printSpecificPdSubscribeResult (
  *
  */
 PD_APP_ERR_TYPE createPdDataSet1 (
-		BOOL firstCreateFlag,
+		BOOL8 firstCreateFlag,
+		BOOL8 marshallingFlag,
 		DATASET1 *pPdDataSet1)
 {
 	/* Parameter Check */
@@ -2618,6 +3129,54 @@ PD_APP_ERR_TYPE createPdDataSet1 (
 		pPdDataSet1->timeDate64.tv_sec++;
 		pPdDataSet1->timeDate64.tv_usec++;
 	}
+
+	/* Check MarshallingFlag : FALSE */
+	if (marshallingFlag == FALSE)
+	{
+		/* Exchange Endian : host byte order To network byte order */
+//		pPdDataSet1->boolean;
+//		pPdDataSet1->character;
+//		pPdDataSet1->utf16;
+//		pPdDataSet1->integer8;
+		pPdDataSet1->integer16 = vos_htons(pPdDataSet1->integer16);
+		pPdDataSet1->integer32 = vos_htonl(pPdDataSet1->integer32);
+		pPdDataSet1->integer64 = bswap_64(pPdDataSet1->integer64);
+//		pPdDataSet1->uInteger8;
+		pPdDataSet1->uInteger16 = vos_htons(pPdDataSet1->uInteger16);
+		pPdDataSet1->uInteger32 = vos_htonl(pPdDataSet1->uInteger32);
+		pPdDataSet1->uInteger64 = bswap_64(pPdDataSet1->uInteger64);
+//		pPdDataSet1->real32 = vos_htonl(pPdDataSet1->real32);
+//		pPdDataSet1->real64 = bswap_64(pPdDataSet1->real64);
+
+		REAL32 dst32 = 0;
+		UINT8 *pDst = (UINT8*)&dst32;
+		UINT32 *pSrc32 = (UINT32 *) &pPdDataSet1->real32;
+		*pDst++ = (UINT8) (*pSrc32 >> 24);
+		*pDst++ = (UINT8) (*pSrc32 >> 16);
+		*pDst++ = (UINT8) (*pSrc32 >> 8);
+		*pDst++ = (UINT8) (*pSrc32 & 0xFF);
+		pPdDataSet1->real32 = dst32;
+
+		REAL64 dst64 = 0;
+		UINT8 *pDst64 = (UINT8*)&dst64;
+		UINT64 *pSrc64 = (UINT64 *) &pPdDataSet1->real64;
+		*pDst64++ = (UINT8) (*pSrc64 >> 56);
+		*pDst64++ = (UINT8) (*pSrc64 >> 48);
+		*pDst64++ = (UINT8) (*pSrc64 >> 40);
+		*pDst64++ = (UINT8) (*pSrc64 >> 32);
+		*pDst64++ = (UINT8) (*pSrc64 >> 24);
+		*pDst64++ = (UINT8) (*pSrc64 >> 16);
+		*pDst64++ = (UINT8) (*pSrc64 >> 8);
+		*pDst64++ = (UINT8) (*pSrc64 & 0xFF);
+		pPdDataSet1->real64 = dst64;
+
+		pPdDataSet1->timeDate32 = vos_htonl(pPdDataSet1->timeDate32);
+		pPdDataSet1->timeDate48.sec = vos_htonl(pPdDataSet1->timeDate48.sec);
+		pPdDataSet1->timeDate48.ticks = vos_htons(pPdDataSet1->timeDate48.ticks);
+		pPdDataSet1->timeDate64.tv_sec = vos_htonl(pPdDataSet1->timeDate64.tv_sec);
+		pPdDataSet1->timeDate64.tv_usec = vos_htonl(pPdDataSet1->timeDate64.tv_usec);
+	}
+
 	return PD_APP_NO_ERR;
 }
 
@@ -2625,6 +3184,8 @@ PD_APP_ERR_TYPE createPdDataSet1 (
 /** Create PD DataSet2
  *
  *  @param[in]		fristCreateFlag			First : TRUE, Not First : FALSE
+ *  @param[in]		marshallingFlag			Enable Marshalling : TRUE, Disable Marshalling : FALSE
+ *
  *  @param[out]		pPdDataSet2				pointer to Created PD DATASET2
  *
  *  @retval         PD_APP_NO_ERR				no error
@@ -2632,7 +3193,8 @@ PD_APP_ERR_TYPE createPdDataSet1 (
  *
  */
 PD_APP_ERR_TYPE createPdDataSet2 (
-		BOOL firstCreateFlag,
+		BOOL8 firstCreateFlag,
+		BOOL8 marshallingFlag,
 		DATASET2 *pPdDataSet2)
 {
 	int i = 0;
@@ -2757,6 +3319,60 @@ PD_APP_ERR_TYPE createPdDataSet2 (
 			pPdDataSet2->int16[i]++;
 		}
 	}
+
+	/* Check MarshallingFlag : FALSE */
+	if (marshallingFlag == FALSE)
+	{
+		/* Exchange Endian : host byte order To network byte order */
+		/* Dataset1[] Loop */
+		for (i = 0; i < 2; i++)
+		{
+//			pPdDataSet2->dataset1[i].boolean;
+//			pPdDataSet2->dataset1[i].character;
+//			pPdDataSet2->dataset1[i].utf16;
+//			pPdDataSet2->dataset1[i].integer8;
+			pPdDataSet2->dataset1[i].integer16 = vos_htons(pPdDataSet2->dataset1[i].integer16);
+			pPdDataSet2->dataset1[i].integer32 = vos_htonl(pPdDataSet2->dataset1[i].integer32);
+			pPdDataSet2->dataset1[i].integer64 = bswap_64(pPdDataSet2->dataset1[i].integer64);
+//			pPdDataSet2->dataset1[i].uInteger8;
+			pPdDataSet2->dataset1[i].uInteger16 = vos_htons(pPdDataSet2->dataset1[i].uInteger16);
+			pPdDataSet2->dataset1[i].uInteger32 = vos_htonl(pPdDataSet2->dataset1[i].uInteger32);
+			pPdDataSet2->dataset1[i].uInteger64 = bswap_64(pPdDataSet2->dataset1[i].uInteger64);
+//			pPdDataSet2->dataset1[i].real32;
+//			pPdDataSet2->dataset1[i].real64;
+			REAL32 dst32 = 0;
+			UINT8 *pDst = (UINT8*)&dst32;
+			UINT32 *pSrc32 = (UINT32 *) &pPdDataSet2->dataset1[i].real32;
+			*pDst++ = (UINT8) (*pSrc32 >> 24);
+			*pDst++ = (UINT8) (*pSrc32 >> 16);
+			*pDst++ = (UINT8) (*pSrc32 >> 8);
+			*pDst++ = (UINT8) (*pSrc32 & 0xFF);
+			pPdDataSet2->dataset1[i].real32 = dst32;
+			REAL64 dst64 = 0;
+			UINT8 *pDst64 = (UINT8*)&dst64;
+			UINT64 *pSrc64 = (UINT64 *) &pPdDataSet2->dataset1[i].real64;
+			*pDst64++ = (UINT8) (*pSrc64 >> 56);
+			*pDst64++ = (UINT8) (*pSrc64 >> 48);
+			*pDst64++ = (UINT8) (*pSrc64 >> 40);
+			*pDst64++ = (UINT8) (*pSrc64 >> 32);
+			*pDst64++ = (UINT8) (*pSrc64 >> 24);
+			*pDst64++ = (UINT8) (*pSrc64 >> 16);
+			*pDst64++ = (UINT8) (*pSrc64 >> 8);
+			*pDst64++ = (UINT8) (*pSrc64 & 0xFF);
+			pPdDataSet2->dataset1[i].real64 = dst64;
+
+			pPdDataSet2->dataset1[i].timeDate32 = vos_htonl(pPdDataSet2->dataset1[i].timeDate32);
+			pPdDataSet2->dataset1[i].timeDate48.sec = vos_htonl(pPdDataSet2->dataset1[i].timeDate48.sec);
+			pPdDataSet2->dataset1[i].timeDate48.ticks = vos_htons(pPdDataSet2->dataset1[i].timeDate48.ticks);
+			pPdDataSet2->dataset1[i].timeDate64.tv_sec = vos_htonl(pPdDataSet2->dataset1[i].timeDate64.tv_sec);
+			pPdDataSet2->dataset1[i].timeDate64.tv_usec = vos_htonl(pPdDataSet2->dataset1[i].timeDate64.tv_usec);
+		}
+		/* int16 array */
+		for(i = 0; i < 64; i++)
+		{
+			pPdDataSet2->int16[i] = vos_htons(pPdDataSet2->int16[i]);
+		}
+	}
 	return PD_APP_NO_ERR;
 }
 
@@ -2867,7 +3483,7 @@ PD_APP_ERR_TYPE pdTerminate(
 {
 	TRDP_ERR_T err = TRDP_NO_ERR;
 	PD_THREAD_PARAMETER *iterPdThreadParameter;
-	BOOL firstPdThreadParameter = TRUE;
+	BOOL8 firstPdThreadParameter = TRUE;
 
 	if (pHeadPdThreadParameterList != NULL)
 	{

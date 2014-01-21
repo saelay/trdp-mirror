@@ -1,20 +1,18 @@
 //**********************************************************************************************************************/
 /**
- * @file            mdTestApp.h
+ * @file				mdTestApp.h
  *
- * @brief           Define, Global Variables, ProtoType  for TRDP Ladder Topology Support
+ * @brief				Define, Global Variables, ProtoType  for TRDP Ladder Topology Support
  *
  * @details
  *
- * @note            Project: TCNOpen TRDP prototype stack
+ * @note				Project: TCNOpen TRDP prototype stack
  *
- * @author          Kazumasa Aiba, TOSHIBA
+ * @author				Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2013.
- *
- *
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 #ifndef MDTESTAPP_H_
@@ -70,11 +68,11 @@ extern "C" {
 
 /* MD Application Version */
 #ifdef LITTLE_ENDIAN
-#define MD_APP_VERSION	"V0.38"
+#define MD_APP_VERSION	"V0.42"
 #elif BIG_ENDIAN
-#define MD_APP_VERSION	"V0.38"
+#define MD_APP_VERSION	"V0.42"
 #else
-#define MD_APP_VERSION	"V0.38"
+#define MD_APP_VERSION	"V0.42"
 #endif
 
 /* Application Session Handle - Message Queue Descriptor Table Size Max */
@@ -204,7 +202,7 @@ typedef struct
 	UINT32										sendRequestNumExpReplies;
 	UINT32										decidedSessionSuccessCount;
 	UINT32										decidedSessionFailureCount;
-	BOOL										decideRepliersUnKnownReceiveTimeoutFlag;	/* Receive Timeout : TRUE */
+	BOOL8										decideRepliersUnKnownReceiveTimeoutFlag;	/* Receive Timeout : TRUE */
 	MD_REPLIERS_UNKNOWN_DECIDE_STATUS		decideRepliersUnKnownStatus;
 } APP_THREAD_SESSION_HANDLE;
 
@@ -338,10 +336,10 @@ typedef struct COMMAND_VALUE
 	UINT8 mdLog;									/* -l --md-log Value */
 	UINT32 mdCycleTime;							/* -m --md-cycle-time Value */
 	UINT32 mdSendingTimeout;						/* -M --md-timeout-sending */
-	BOOL mdLadderTopologyFlag;					/* -n --md-topo Value */
+	BOOL8 mdLadderTopologyFlag;					/* -n --md-topo Value */
 	UINT32 mdTimeoutConfirm;						/* -N --md-timeout-confirm Value */
 	UINT8 mdReplyErr;								/* -o --md-reply-err Value */
-	BOOL mdMarshallingFlag;						/* -p --md-marshall Value*/
+	BOOL8 mdMarshallingFlag;						/* -p --md-marshall Value*/
 	UINT32 mdAddListenerComId;					/* -q --md-listener-comid Value */
 	UINT32 mdSendComId;							/* Caller Send comId */
 	MD_DATA_CREATE_FLAG createMdDataFlag;		/* Caller use for a decision of MD create */
@@ -1082,7 +1080,7 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidCallerSendRequestSession (
+BOOL8 isValidCallerSendRequestSession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pCallerSendRequestSessionId);
 
@@ -1096,7 +1094,7 @@ BOOL isValidCallerSendRequestSession (
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidCallerReceiveReplySession (
+BOOL8 isValidCallerReceiveReplySession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pCallerReceiveReplySessionId);
 
@@ -1143,7 +1141,7 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidReplierSendReplySession (
+BOOL8 isValidReplierSendReplySession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pReplierSendReplySessionId);
 
@@ -1157,7 +1155,7 @@ BOOL isValidReplierSendReplySession (
  *  @retval         FALSE             is invalid		session release
  *
  */
-BOOL isValidReplierReceiveRequestNotifySession (
+BOOL8 isValidReplierReceiveRequestNotifySession (
 		TRDP_SESSION_PT appHandle,
 		UINT8 *pReplierReceiveRequestNotifySessionId);
 

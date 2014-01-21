@@ -8,13 +8,12 @@
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
- * @author          Kazumasa Aiba, TOSHIBA
+ * @author          Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks All rights reserved. Reproduction, modification, use or disclosure
- *          to third parties without express authority is forbidden,
- *          Copyright TOSHIBA, Japan, 2013.
- *
- *
+ * @remarks This source code corresponds to TRDP_LADDER open source software.
+ *          This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 
@@ -97,10 +96,13 @@ TRDP_ERR_T tau_ladder_init (void)
 	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
 	UINT32 trafficStoreSize = TRAFFIC_STORE_SIZE;	/* Traffic Store Size : 64KB */
 
+#if 0
 	/* PDComLadderThread */
 	extern CHAR8 pdComLadderThreadName[];			/* Thread name is PDComLadder Thread. */
 	extern BOOL8 pdComLadderThreadActiveFlag;		/* PDComLaader Thread active/non-active Flag :active=TRUE, nonActive=FALSE */
+#endif
 	VOS_THREAD_T pdComLadderThread = NULL;			/* Thread handle */
+
 
 	/* Traffic Store Mutex */
 	extern VOS_MUTEX_T pTrafficStoreMutex;			/* Pointer to Mutex for Traffic Store */
@@ -172,6 +174,7 @@ TRDP_ERR_T tau_ladder_init (void)
 			&pTrafficStoreMutex->mutexId,
 			sizeof(pTrafficStoreMutex->mutexId));
 
+#if 0
 	/*	PDComLadder Thread Create */
 	if (pdComLadderThreadActiveFlag == FALSE)
 	{
@@ -198,7 +201,7 @@ TRDP_ERR_T tau_ladder_init (void)
 	{
 		ret = TRDP_NO_ERR;
 	}
-
+#endif
 	return ret;	/* TRDP_NO_ERR */
 }
 

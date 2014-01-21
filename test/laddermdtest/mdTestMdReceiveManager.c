@@ -1,18 +1,18 @@
 /**********************************************************************************************************************/
 /**
- * @file	mdTestMdReceiveManager.c
+ * @file		mdTestMdReceiveManager.c
  *
- * @brief	Demo MD ladder application for TRDP
+ * @brief		Demo MD ladder application for TRDP
  *
- * @details	TRDP Ladder Topology Support MD Transmission Receive Manager
+ * @details		TRDP Ladder Topology Support MD Transmission Receive Manager
  *
- * @note	Project: TCNOpen TRDP prototype stack
+ * @note		Project: TCNOpen TRDP prototype stack
  *
- * @author	Kazumasa Aiba, TOSHIBA
+ * @author		Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks	All rights reserved. Reproduction, modification, use or disclosure
- *		to third parties without express authority is forbidden,
- *		Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 
@@ -84,7 +84,7 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    BOOL logPrintOnFlag = FALSE;	/* FALSE is not print */
+    BOOL8 logPrintOnFlag = FALSE;	/* FALSE is not print */
 
     switch(category)
     {
@@ -213,39 +213,32 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	}
 
 	/* Get IP Address */
-	struct ifaddrs *ifa_list;
-	struct ifaddrs *ifa;
+	UINT32 noOfIfaces = 10;
+	VOS_IF_REC_T ifAddressTable[noOfIfaces];
+	UINT32 index;
+#ifdef __linux
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
-	CHAR8 addrStr[256] = {0};
+#elif defined(__APPLE__)
+	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
+#endif
 
 	/* Get I/F address */
-	if (getifaddrs(&ifa_list) != 0)
+	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
 	{
-		vos_printLog(VOS_LOG_ERROR, "getifaddrs error. errno=%d\n", errno);
-       return 1;
+		vos_printLog(VOS_LOG_ERROR, "vos_getInterfaces() error. errno=%d\n", errno);
+	   return 1;
 	}
 
 	/* Get All I/F List */
-	for(ifa = ifa_list; ifa != NULL; ifa = ifa->ifa_next)
+	for (index = 0; index < noOfIfaces; index++)
 	{
-		if (strncmp(ifa->ifa_name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
+		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
 		{
-			/* IPv4 */
-			if (ifa->ifa_addr->sa_family == AF_INET)
-			{
 				/* Get Sub-net Id1 Address */
-				inet_ntop(AF_INET,
-							&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr,
-							addrStr,
-							sizeof(addrStr));
-				vos_printLog(VOS_LOG_INFO, "ip:%s\n", addrStr);
-				subnetId1Address = inet_network(addrStr);
-				break;
-			}
+            subnetId1Address = (TRDP_IP_ADDR_T)(ifAddressTable[index].ipAddr);
+            break;
 		}
 	}
-	/* Release memory */
-	freeifaddrs(ifa_list);
 
 	/*	Init the library  */
 	errv = tlc_init(
@@ -522,7 +515,8 @@ MD_APP_ERR_TYPE mdReceive_main_proc(void)
 			tv.tv_usec = tv2.tv_usec;
 		}
 
-		receive = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
+//		receive = select((int)noOfDesc, &rfds, NULL, NULL, &tv);
+		receive = vos_select((int)noOfDesc, &rfds, NULL, NULL, (VOS_TIME_T *)&tv);
 
 		/*
 		Check for overdue PDs (sending and receiving)

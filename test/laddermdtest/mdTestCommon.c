@@ -1,18 +1,18 @@
 /**********************************************************************************************************************/
 /**
- * @file	mdTestCommon.c
+ * @file		mdTestCommon.c
  *
- * @brief	Demo MD ladder application for TRDP
+ * @brief		Demo MD ladder application for TRDP
  *
- * @details	TRDP Ladder Topology Support MD Transmission Common
+ * @details		TRDP Ladder Topology Support MD Transmission Common
  *
- * @note	Project: TCNOpen TRDP prototype stack
+ * @note		Project: TCNOpen TRDP prototype stack
  *
- * @author	Kazumasa Aiba, TOSHIBA
+ * @author		Kazumasa Aiba, Toshiba Corporation
  *
- * @remarks	All rights reserved. Reproduction, modification, use or disclosure
- *		to third parties without express authority is forbidden,
- *		Copyright TOSHIBA, Japan, 2013.
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+ *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
  */
 
@@ -172,11 +172,23 @@ MD_APP_ERR_TYPE queue_sendMessage(trdp_apl_cbenv_t * msg, mqd_t mqDescriptor)
 	int rc;
 	char * p_bf = (char *)msg;
 	int    l_bf = sizeof(*msg) - sizeof(msg->dummy);
+	struct mq_attr now_ma;
 
 	rc = mq_send(mqDescriptor,p_bf,l_bf,0);
 	if (-1 == rc)
 	{
 		vos_printLog(VOS_LOG_ERROR, "mq_send() Error:%d\n", errno);
+		/* get attributes */
+		memset(&now_ma, 0, sizeof(now_ma));
+		rc = mq_getattr(mqDescriptor, &now_ma);
+		if (-1 == rc)
+		{
+			vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error\n");
+		}
+		else
+		{
+			vos_printLog(VOS_LOG_ERROR, "mq_getattr() Descriptor: %d, mg_flags: %ld, mq_maxmsg: %ld, mq_msgsize: %ld, mq_curmsgs: %ld\n", mqDescriptor,now_ma.mq_flags, now_ma.mq_maxmsg, now_ma.mq_msgsize, now_ma.mq_curmsgs);
+		}
 		return MD_APP_ERR;
 	}
 	else
@@ -552,6 +564,8 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 dataSetId, UINT8 ***pppMdData, UINT32 
 				/* Close MdDataFile */
 				fclose(fpMdDataFile);
 				/* Set DataSetId */
+//				memcpy(**pppMdData, &dataSetId, sizeof(UINT32));
+				dataSetId = vos_htonl(dataSetId);
 				memcpy(**pppMdData, &dataSetId, sizeof(UINT32));
 			}
 		}
@@ -921,6 +935,8 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 
 	/* Get DataSetId */
 	memcpy(&receiveMdDataSetId, pReceiveMdData, sizeof(UINT32));
+	/* unmarsahralling DataSetId */
+	receiveMdDataSetId = vos_ntohl(receiveMdDataSetId);
 
 	/* Create for check MD DATA */
 	err = getMdDataFromDataSetId(
