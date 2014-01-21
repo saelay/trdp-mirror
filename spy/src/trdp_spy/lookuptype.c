@@ -67,13 +67,7 @@ static void visit_lookupNamedType(gpointer       key,
 /*******************************************************************************
  * GLOBAL FUNCTIONS
  */
- 
- /** Search in the given table at the names and return the found id.
- *
- *  @param[in]      pTableDataset             table containing all types
- *  @param[in]      nameOfType                 textual description of a type, searching for
- *  @return     found identifier, or zero on errors
- */
+
 gint trdp_lookupType(GHashTable *pTableDataset, GString* nameOfType)
 {
     /* Check, that no search is in progress */
