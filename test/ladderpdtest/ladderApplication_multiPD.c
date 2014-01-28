@@ -58,7 +58,7 @@ TRDP_APP_SESSION_T  appHandle;					/*	Sub-network Id1 identifier to the library 
 //TRDP_SUB_T          subHandleNet1ComId1;		/*	Sub-network Id1 ComID1 identifier to the subscription	*/
 //TRDP_PUB_T          pubHandleNet1ComId1;		/*	Sub-network Id1 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err;
-TRDP_PD_CONFIG_T    pdConfiguration = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+TRDP_PD_CONFIG_T    pdConfiguration = {&tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};
 TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
 TRDP_PROCESS_CONFIG_T	processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -70,11 +70,11 @@ TRDP_APP_SESSION_T  appHandle2;					/*	Sub-network Id2 identifier to the library
 //TRDP_SUB_T          subHandleNet2ComId1;		/*	Sub-network Id2 ComID1 identifier to the subscription	*/
 //TRDP_PUB_T          pubHandleNet2ComId1;		/*	Sub-network Id2 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err2;
-TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+TRDP_PD_CONFIG_T    pdConfiguration2 = {&tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};	    /* Sub-network Id2 PDconfiguration */
 TRDP_MEM_CONFIG_T   dynamicConfig2 = {NULL, RESERVED_MEMORY, {}};					/* Sub-network Id2 Structure describing memory */
 TRDP_PROCESS_CONFIG_T   processConfig2   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-TRDP_MARSHALL_CONFIG_T	marshallConfig = {tau_marshall, tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
+TRDP_MARSHALL_CONFIG_T	marshallConfig = {&tau_marshall, &tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
 
 TRDP_IP_ADDR_T subnetId1Address = 0;
 TRDP_IP_ADDR_T subnetId2Address = 0;
@@ -424,6 +424,8 @@ int main (int argc, char *argv[])
 								if (pPdCommandValue == NULL)
 								{
 									vos_printLog(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
+									/* Close Command File */
+									fclose(fpCommandFile);
 									return PD_APP_MEM_ERR;
 								}
 								else
@@ -444,6 +446,8 @@ int main (int argc, char *argv[])
 								else if(err == PD_APP_QUIT_ERR)
 								{
 									/* Quit Command */
+									/* Close Command File */
+									fclose(fpCommandFile);
 									return PD_APP_QUIT_ERR;
 								}
 								else
@@ -460,6 +464,8 @@ int main (int argc, char *argv[])
 								appendPdCommandValueList(&pFirstPdCommandValue, pPdCommandValue);
 							}
 						}
+						/* Close Command File */
+						fclose(fpCommandFile);
 					}
 					break;
 				default:
@@ -627,12 +633,15 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 		if (err != PD_APP_NO_ERR)
 		{
 			printf("decideCreatePdThread Err. trdp_pdApplicationInitialize Err\n");
+			/* Free PD Thread Parameter */
+			free(pPdThreadParameter);
 			return PD_APP_ERR;
 		}
 		if(pPdThreadParameter->subPubValidFlag == PD_APP_THREAD_NOT_PUBLISH)
 		{
 			/* Set PD Thread Parameter List */
-			if (appendPdThreadParameterList(&pHeadPdThreadParameterList, pPdThreadParameter) != PD_APP_NO_ERR)
+			err = appendPdThreadParameterList(&pHeadPdThreadParameterList, pPdThreadParameter);
+			if (err != PD_APP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "Set PD Thread Parameter List error\n");
 			}
@@ -665,7 +674,8 @@ PD_APP_ERR_TYPE decideCreatePdThread(int argc, char *argv[], PD_COMMAND_VALUE *p
 		}
 	}
 	/* Set PD Thread Parameter List */
-	if (appendPdThreadParameterList(&pHeadPdThreadParameterList, pPdThreadParameter) != PD_APP_NO_ERR)
+	err = appendPdThreadParameterList(&pHeadPdThreadParameterList, pPdThreadParameter);
+	if (err != PD_APP_NO_ERR)
 	{
 		vos_printLog(VOS_LOG_ERROR, "Set PD Thread Parameter List error\n");
 	}
@@ -962,7 +972,7 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 //				{
 				/* Get OFFSET2 from an option argument */
 	//				sscanf(argv[i+1], "%hx", &uint16_value);
-	//				if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+	//				if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
 	//				{
 						/* Set OFFSET2 */
 	//					getPdCommandValue.OFFSET_ADDRESS2 = uint16_value;
@@ -974,7 +984,7 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 				{
 					/* Get OFFSET3 from an option argument */
 					sscanf(argv[i+1], "%hx", &uint16_value);
-					if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+					if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
 					{
 						/* Set OFFSET3 */
 						getPdCommandValue.OFFSET_ADDRESS3 = uint16_value;
@@ -986,7 +996,7 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 //				{
 					/* Get OFFSET4 from an option argument */
 	//				sscanf(argv[i+1], "%hx", &uint16_value);
-	//				if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+	//				if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
 	//				{
 						/* Set OFFSET4 */
 	//					getPdCommandValue.OFFSET_ADDRESS4 = uint16_value;
@@ -2006,25 +2016,33 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 	else
 	{
 		vos_printLog(VOS_LOG_ERROR, "prep Sub-network error\n");
-        return 1;
+		/* Free Dataset */
+		free(pPdDataSet);
+        return PD_APP_ERR;
 	}
     /* Set Using Sub-Network */
     err = tau_setNetworkContext(TS_SUBNET_TYPE);
     if (err != TRDP_NO_ERR)
     {
     	vos_printLog(VOS_LOG_ERROR, "prep Sub-network error\n");
+		/* Free Dataset */
+		free(pPdDataSet);
         return PD_APP_ERR;
     }
 
 	/* Check Not tlp_subscribe and Not tlp_publish */
 	if (pPdThreadParameter->subPubValidFlag == (PD_APP_THREAD_NOT_SUB_PUB))
 	{
+		/* Free Dataset */
+		free(pPdDataSet);
     	return PD_APP_THREAD_ERR;
 	}
 
 	/* Start PdComLadderThread */
 	tau_setPdComLadderThreadStartFlag(TRUE);
 
+	/* Free Dataset */
+	free(pPdDataSet);
 	return PD_APP_NO_ERR;
 }
 
@@ -2117,7 +2135,7 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 	BOOL8 linkUpDown = TRUE;							/* Link Up Down information TRUE:Up FALSE:Down */
 	UINT32 TS_SUBNET_NOW = SUBNET1;
 	UINT32 putDatasetSize = 0;						/* tlp_put Dataset Size in Traffic Store */
-
+	TRDP_ERR_T err = TRDP_NO_ERR;
 
 	/* Wait for multicast grouping */
 	vos_threadDelay(PDCOM_MULTICAST_GROUPING_DELAY_TIME);
@@ -2129,7 +2147,8 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
     	|| (pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER == 0)))
     {
 		/* Get Write Traffic Store Receive SubnetId */
-		if (tau_getNetworkContext(&TS_SUBNET_NOW) != TRDP_NO_ERR)
+    	err = tau_getNetworkContext(&TS_SUBNET_NOW);
+		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
 		}
@@ -2152,7 +2171,8 @@ PD_APP_ERR_TYPE PDApplication (PD_THREAD_PARAMETER *pPdThreadParameter)
 				TS_SUBNET_NOW = SUBNET1;
 			}
 			/* Set Write Traffic Store Receive Subnet */
-			if (tau_setNetworkContext(TS_SUBNET_NOW) != TRDP_NO_ERR)
+			err = tau_setNetworkContext(TS_SUBNET_NOW);
+			if (err != TRDP_NO_ERR)
 		    {
 				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
 		    }
@@ -2321,7 +2341,8 @@ PD_APP_ERR_TYPE PDPullRequester (PD_THREAD_PARAMETER *pPdThreadParameter)
     	|| (pPdThreadParameter->pPdCommandValue->PD_SEND_CYCLE_NUMBER == 0)))
     {
 		/* Get Write Traffic Store Receive SubnetId */
-		if (tau_getNetworkContext(&TS_SUBNET_NOW) != TRDP_NO_ERR)
+    	err = tau_getNetworkContext(&TS_SUBNET_NOW);
+		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
 		}
@@ -2344,7 +2365,8 @@ PD_APP_ERR_TYPE PDPullRequester (PD_THREAD_PARAMETER *pPdThreadParameter)
 				TS_SUBNET_NOW = SUBNET1;
 			}
 			/* Set Write Traffic Store Receive Subnet */
-			if (tau_setNetworkContext(TS_SUBNET_NOW) != TRDP_NO_ERR)
+			err = tau_setNetworkContext(TS_SUBNET_NOW);
+			if (err != TRDP_NO_ERR)
 		    {
 				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
 		    }
@@ -3148,7 +3170,7 @@ PD_APP_ERR_TYPE createPdDataSet1 (
 //		pPdDataSet1->real32 = vos_htonl(pPdDataSet1->real32);
 //		pPdDataSet1->real64 = bswap_64(pPdDataSet1->real64);
 
-		REAL32 dst32 = 0;
+		REAL32 dst32 = 0.0;
 		UINT8 *pDst = (UINT8*)&dst32;
 		UINT32 *pSrc32 = (UINT32 *) &pPdDataSet1->real32;
 		*pDst++ = (UINT8) (*pSrc32 >> 24);
@@ -3340,7 +3362,7 @@ PD_APP_ERR_TYPE createPdDataSet2 (
 			pPdDataSet2->dataset1[i].uInteger64 = bswap_64(pPdDataSet2->dataset1[i].uInteger64);
 //			pPdDataSet2->dataset1[i].real32;
 //			pPdDataSet2->dataset1[i].real64;
-			REAL32 dst32 = 0;
+			REAL32 dst32 = 0.0;
 			UINT8 *pDst = (UINT8*)&dst32;
 			UINT32 *pSrc32 = (UINT32 *) &pPdDataSet2->dataset1[i].real32;
 			*pDst++ = (UINT8) (*pSrc32 >> 24);

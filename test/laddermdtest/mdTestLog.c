@@ -117,11 +117,11 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
 	char *pStartFifoBuffer = NULL;
 
 	/* Get Log FIFO Buffer */
-	if (pFifoBuffer != NULL)
-	{
-		free(pFifoBuffer);
-		pFifoBuffer = NULL;
-	}
+//	if (pFifoBuffer != NULL)
+//	{
+//		free(pFifoBuffer);
+//		pFifoBuffer = NULL;
+//	}
 	pFifoBuffer = (char *)malloc(PIPE_BUFFER_SIZE);
 	if (pFifoBuffer == NULL)
 	{
@@ -141,6 +141,8 @@ MD_APP_ERR_TYPE l2fWriterServer(void)
 	{
 		/* Log FIFO(named pipe) Open Error */
 		vos_printLog(VOS_LOG_ERROR, "Log FIFO Open ERROR\n");
+		/* Free FIFO Buffer */
+		free(pFifoBuffer);
 		return MD_APP_ERR;
 	}
 

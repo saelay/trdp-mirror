@@ -69,8 +69,8 @@ VOS_SHRD_T  pTrafficStoreHandle;						/* Pointer to Traffic Store Handle */
 UINT16 TRAFFIC_STORE_MUTEX_VALUE_AREA = 0xFF00;		/* Traffic Store mutex ID Area */
 
 /* PDComLadderThread */
-CHAR8 pdComLadderThreadName[] ="PDComLadderThread";		/* Thread name is PDComLadder Thread. */
-BOOL8 pdComLadderThreadActiveFlag = FALSE;				/* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
+//CHAR8 pdComLadderThreadName[] ="PDComLadderThread";		/* Thread name is PDComLadder Thread. */
+//BOOL8 pdComLadderThreadActiveFlag = FALSE;				/* PDComLaader Thread active/noactive Flag :active=TRUE, nonActive=FALSE */
 BOOL8 pdComLadderThreadStartFlag = FALSE;				/* PDComLadder Thread instruction start up Flag :start=TRUE, stop=FALSE */
 
 /* Sub-net */
@@ -81,7 +81,7 @@ PD_COMMAND_VALUE *pFirstPdCommandValue = NULL;		/* First PD Command Value */
 
 /******************************************************************************/
 /** Initialize TRDP Ladder Support
- *  Create Traffic Store mutex, Traffic Store, PDComLadderThread.
+ *  Create Traffic Store mutex, Traffic Store.
  *
  *	Note:
  *
@@ -96,28 +96,33 @@ TRDP_ERR_T tau_ladder_init (void)
 	extern UINT8 *pTrafficStoreAddr;				/* pointer to pointer to Traffic Store Address */
 	UINT32 trafficStoreSize = TRAFFIC_STORE_SIZE;	/* Traffic Store Size : 64KB */
 
+#if 0
 	/* PDComLadderThread */
 	extern CHAR8 pdComLadderThreadName[];			/* Thread name is PDComLadder Thread. */
 	extern BOOL8 pdComLadderThreadActiveFlag;		/* PDComLaader Thread active/non-active Flag :active=TRUE, nonActive=FALSE */
-
 	VOS_THREAD_T pdComLadderThread = NULL;			/* Thread handle */
-
+#endif
 
 	/* Traffic Store Mutex */
 	extern VOS_MUTEX_T pTrafficStoreMutex;			/* Pointer to Mutex for Traffic Store */
 
 	/* Traffic Store Create */
 	/* Traffic Store Mutex Create */
-	TRDP_ERR_T ret = TRDP_NO_ERR;
+	TRDP_ERR_T ret = TRDP_MUTEX_ERR;
+	VOS_ERR_T vosErr = VOS_NO_ERR;
 
+#if 0
 	/*	PDComLadder Thread Active ? */
 	if (pdComLadderThreadActiveFlag == TRUE)
 	{
 		return TRDP_NO_ERR;
 	}
+#endif
 
-	if (vos_mutexCreate(&pTrafficStoreMutex) != VOS_NO_ERR)
+	vosErr = vos_mutexCreate(&pTrafficStoreMutex);
+	if (vosErr != VOS_NO_ERR)
 	{
+#if 0
 		if (pdComLadderThreadActiveFlag == FALSE)
 		{
 			vos_threadInit();
@@ -139,19 +144,24 @@ TRDP_ERR_T tau_ladder_init (void)
 				return ret;
 			}
 		}
+#endif
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Create failed. VOS Error: %d\n", vosErr);
+		return ret;
 	}
 
 	/* Lock Traffic Store Mutex */
-	if ((vos_mutexTryLock(pTrafficStoreMutex)) != VOS_NO_ERR)
+	vosErr = vos_mutexTryLock(pTrafficStoreMutex);
+	if (vosErr != VOS_NO_ERR)
 	{
-		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Lock failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Mutex Lock failed. VOS Error: %d\n", vosErr);
 		return ret;
 	}
 
 	/* Create the Traffic Store */
-    if ((vos_sharedOpen(TRAFFIC_STORE, &pTrafficStoreHandle, &pTrafficStoreAddr, &trafficStoreSize)) != VOS_NO_ERR)
+	vosErr = vos_sharedOpen(TRAFFIC_STORE, &pTrafficStoreHandle, &pTrafficStoreAddr, &trafficStoreSize);
+    if (vosErr != VOS_NO_ERR)
     {
-		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Creat failed\n");
+		vos_printLog(VOS_LOG_ERROR, "TRDP Traffic Store Create failed. VOS Error: %d\n", vosErr);
 		ret = TRDP_MEM_ERR;
 		return ret;
     }
@@ -173,6 +183,8 @@ TRDP_ERR_T tau_ladder_init (void)
 			&pTrafficStoreMutex->mutexId,
 			sizeof(pTrafficStoreMutex->mutexId));
 
+#if 0
+/* Delete proc for TAUL */
 	/*	PDComLadder Thread Create */
 	if (pdComLadderThreadActiveFlag == FALSE)
 	{
@@ -199,8 +211,9 @@ TRDP_ERR_T tau_ladder_init (void)
 	{
 		ret = TRDP_NO_ERR;
 	}
+#endif
 
-	return ret;	/* TRDP_NO_ERR */
+	return TRDP_NO_ERR;	/* TRDP_NO_ERR */
 }
 
 /******************************************************************************/

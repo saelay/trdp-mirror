@@ -82,7 +82,7 @@ TRDP_APP_SESSION_T		appHandle;					/*	Sub-network Id1 identifier to the library 
 TRDP_MD_CONFIG_T			md_config;
 TRDP_MEM_CONFIG_T			mem_config;
 TRDP_PROCESS_CONFIG_T	processConfig = {"Subnet1", "", 0, 0, TRDP_OPTION_BLOCK};
-TRDP_MARSHALL_CONFIG_T	marshallConfig = {tau_marshall, tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
+TRDP_MARSHALL_CONFIG_T	marshallConfig = {&tau_marshall, &tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
 
 /* Subnet2 */
 TRDP_APP_SESSION_T		appHandle2;				/*	Sub-network Id2 identifier to the library instance	*/
@@ -208,6 +208,8 @@ int main (int argc, char *argv[])
 								if (pCommandValue == NULL)
 								{
 									vos_printLog(VOS_LOG_ERROR, "COMMAND_VALUE malloc Err\n");
+									/* Close Command File */
+									fclose(fpCommandFile);
 									return MD_APP_MEM_ERR;
 								}
 								else
@@ -227,6 +229,8 @@ int main (int argc, char *argv[])
 								/* command -Q : Quit */
 								else if(err == MD_APP_QUIT_ERR)
 								{
+									/* Close Command File */
+									fclose(fpCommandFile);
 									/* Quit Command */
 									return MD_APP_QUIT_ERR;
 								}
@@ -1314,6 +1318,8 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 	if (err != MD_APP_NO_ERR)
 	{
 		printf("MD Transmission Pattern Err\n");
+		/* Free First Create MD Data */
+		free(pFirstCreateMdData);
 		return MD_APP_ERR;
 	}
 
@@ -1372,11 +1378,11 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 	if (pCommandValue->mdCallerReplierType == CALLER)
 	{
 		/* Get Thread Parameter Area */
-		if (pCallerThreadParameter != NULL)
-		{
-			free(pCallerThreadParameter);
-			pCallerThreadParameter = NULL;
-		}
+//		if (pCallerThreadParameter != NULL)
+//		{
+//			free(pCallerThreadParameter);
+//			pCallerThreadParameter = NULL;
+//		}
 		pCallerThreadParameter = (CALLER_THREAD_PARAMETER *)malloc(sizeof(CALLER_THREAD_PARAMETER));
 		if (pCallerThreadParameter == NULL)
 		{
@@ -1410,11 +1416,11 @@ MD_APP_ERR_TYPE decideCreateThread(int argc, char *argv[], COMMAND_VALUE *pComma
 	else if (pCommandValue->mdCallerReplierType == REPLIER)
 	{
 		/* Get Thread Parameter Area */
-		if (pReplierThreadParameter != NULL)
-		{
-			free(pReplierThreadParameter);
-			pReplierThreadParameter = NULL;
-		}
+//		if (pReplierThreadParameter != NULL)
+//		{
+//			free(pReplierThreadParameter);
+//			pReplierThreadParameter = NULL;
+//		}
 		pReplierThreadParameter = (REPLIER_THREAD_PARAMETER *)malloc(sizeof(REPLIER_THREAD_PARAMETER));
 		if (pReplierThreadParameter == NULL)
 		{
