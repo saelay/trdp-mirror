@@ -1,14 +1,14 @@
 /**********************************************************************************************************************/
 /**
- * @file				tau_pdcom_Ladder.c
+ * @file			tau_pdcom_Ladder.c
  *
- * @brief				Functions for TRDP Ladder Topology PD communication (PDComLadder Thread)
+ * @brief			Functions for TRDP Ladder Topology PD communication (PDComLadder Thread)
  *
- * @details				Receive, send and wirte Traffic Store process data at a fixed cycle
+ * @details		Receive, send and wirte Traffic Store process data at a fixed cycle
  *
- * @note				Project: TCNOpen TRDP prototype stack
+ * @note			Project: TCNOpen TRDP prototype stack
  *
- * @author				Kazumasa Aiba, Toshiba Corporation
+ * @author			Kazumasa Aiba, Toshiba Corporation
  *
  * @remarks This source code corresponds to TRDP_PDCOM_LADDER open source software.
  *          This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
@@ -228,7 +228,7 @@ vos_printLog(VOS_LOG_DBG, "*** Traffic Store Write TIme *** comId:%d subnetId:%d
  */
 VOS_THREAD_FUNC_T PDComLadder (void)
 {
-	TRDP_ERR_T err = TRDP_NO_ERR;
+	TRDP_ERR_T		err = TRDP_NO_ERR;
 
 	/* Wait for multicast grouping */
 	vos_threadDelay(PDCOM_MULTICAST_GROUPING_DELAY_TIME);

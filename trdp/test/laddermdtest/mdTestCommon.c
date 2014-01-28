@@ -138,6 +138,8 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	if (-1 == rc)
 	{
 		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error\n");
+		/* delete a queue for remained queue */
+		mq_unlink(pMqName);
 		return MD_APP_ERR;
 	}
 
@@ -150,6 +152,8 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	if (-1 == rc)
 	{
 		vos_printLog(VOS_LOG_ERROR, "mq_setattr() Error\n");
+		/* delete a queue for remained queue */
+		mq_unlink(pMqName);
 		return MD_APP_ERR;
 	}
 
@@ -158,6 +162,8 @@ MD_APP_ERR_TYPE queue_initialize(const char *pMqName, mqd_t *pMpDescriptor)
 	if (-1 == rc)
 	{
 		vos_printLog(VOS_LOG_ERROR, "mq_getattr() Error\n");
+		/* delete a queue for remained queue */
+		mq_unlink(pMqName);
 		return MD_APP_ERR;
 	}
 
@@ -353,13 +359,16 @@ mqd_t getAppThreadSessionMessageQueueDescriptor(
 		APP_THREAD_SESSION_HANDLE *pAppThreadSessionHandle)
 {
 	UINT32 i = 0;
+	const TRDP_UUID_T sessionIdNothing = {0};		/* SessionId Nothing */
+
 	for(i = *pLoopStartNumber; i < APP_SESSION_HANDLE_MQ_DESC_TABLE_MAX; i++)
 	{
 		/* Check SessionId */
 		/* Matching sessionId : equal */
-		if(memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
+		if ((memcmp(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.mdAppThreadSessionId,
 				pAppThreadSessionHandle->mdAppThreadSessionId,
 				sizeof(TRDP_UUID_T)) == 0)
+			&& (memcmp(pAppThreadSessionHandle->mdAppThreadSessionId, sessionIdNothing, sizeof(TRDP_UUID_T)) != 0))
 		{
 			*pLoopStartNumber = i;
 			return appThreadSessionHandleMqDescriptorTable[i].mqDescriptor;
@@ -478,6 +487,9 @@ MD_APP_ERR_TYPE createMdIncrementData (UINT32 mdSendCount, UINT32 mdDataSize, UI
 	else
 	{
 		vos_printLog(VOS_LOG_ERROR, "createMdIncrementData ERROR. parameter Err\n");
+		/* Free MD Data */
+		free(**pppMdData);
+		**pppMdData = NULL;
 		return MD_APP_PARAM_ERR;
 	}
 	return MD_APP_NO_ERR;
@@ -518,6 +530,9 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 dataSetId, UINT8 ***pppMdData, UINT32 
 		if (err != MD_APP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "createMdFixedData ERROR. dataSetId:%d Err\n", dataSetId);
+			/* Free MD Data */
+			free(**pppMdData);
+			**pppMdData = NULL;
 			return MD_APP_PARAM_ERR;
 		}
 		else
@@ -528,6 +543,9 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 dataSetId, UINT8 ***pppMdData, UINT32 
 			if (fpMdDataFile == NULL)
 			{
 				vos_printLog(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Open Err\n");
+				/* Free MD Data */
+				free(**pppMdData);
+				**pppMdData = NULL;
 				return MD_APP_PARAM_ERR;
 			}
 			/* Get MdDataFile Size */
@@ -539,6 +557,11 @@ MD_APP_ERR_TYPE createMdFixedData (UINT32 dataSetId, UINT8 ***pppMdData, UINT32 
 			if ((fstat(fileno(fpMdDataFile), &fileStat)) == -1)
 			{
 				vos_printLog(VOS_LOG_ERROR, "createMdFixedData ERROR. MdDataFile Stat Err\n");
+				/* Close MdDataFile */
+				fclose(fpMdDataFile);
+				/* Free MD Data */
+				free(**pppMdData);
+				**pppMdData = NULL;
 				return MD_APP_PARAM_ERR;
 			}
 			mdDataFileSize = fileStat.st_size;
@@ -707,11 +730,11 @@ MD_APP_ERR_TYPE miscMemory2String (
 	int recursiveCallCount = 0;
 
 	/* Get String Area */
-	if (strTmp)
-	{
-		free(strTmp);
-		strTmp = NULL;
-	}
+//	if (strTmp)
+//	{
+//		free(strTmp);
+//		strTmp = NULL;
+//	}
 	strTmp = (char *)malloc(PIPE_BUFFER_SIZE);
 	if (strTmp == NULL)
 	{
@@ -956,6 +979,8 @@ MD_APP_ERR_TYPE decideMdTransmissionResult(
 		if (receiveMdDataSetSize != *pCheckMdDataSize)
 		{
 			sprintf(pLogString, "<NG> Receive MD DATA error. The size of is different.\n");
+			/* Free Check MD Data Size */
+			free(pCheckMdDataSize);
 			err = MD_APP_ERR;
 		}
 		else

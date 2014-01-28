@@ -44,7 +44,7 @@ TRDP_APP_SESSION_T  appHandle;					/*	Sub-network Id1 identifier to the library 
 TRDP_SUB_T          subHandleNet1ComId1;		/*	Sub-network Id1 ComID1 identifier to the subscription	*/
 TRDP_PUB_T          pubHandleNet1ComId1;		/*	Sub-network Id1 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err;
-TRDP_PD_CONFIG_T    pdConfiguration = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
+TRDP_PD_CONFIG_T    pdConfiguration = {&tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};
 TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
 TRDP_PROCESS_CONFIG_T	processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -56,7 +56,7 @@ TRDP_APP_SESSION_T  appHandle2;					/*	Sub-network Id2 identifier to the library
 TRDP_SUB_T          subHandleNet2ComId1;		/*	Sub-network Id2 ComID1 identifier to the subscription	*/
 TRDP_PUB_T          pubHandleNet2ComId1;		/*	Sub-network Id2 ComID2 identifier to the publication	*/
 TRDP_ERR_T          err2;
-TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
+TRDP_PD_CONFIG_T    pdConfiguration2 = {&tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};	    /* Sub-network Id2 PDconfiguration */
 TRDP_MEM_CONFIG_T   dynamicConfig2 = {NULL, RESERVED_MEMORY, {}};					/* Sub-network Id2 Structure describing memory */
 TRDP_PROCESS_CONFIG_T   processConfig2   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -361,7 +361,8 @@ int main (void)
     		memcpy((void *)((int)pTrafficStoreAddr + OFFSET_ADDRESS1), putData, sizeof(putData));
 
     		/* Get Write Traffic Store Receive SubnetId */
-    		if (tau_getNetworkContext(&TS_SUBNET) != TRDP_NO_ERR)
+    		err = tau_getNetworkContext(&TS_SUBNET);
+    		if (err != TRDP_NO_ERR)
     		{
     			vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_getNetworkContext error\n");
     		}
@@ -384,7 +385,8 @@ int main (void)
     				TS_SUBNET = SUBNET1;
     			}
     			/* Set Write Traffic Store Receive Subnet */
-    			if (tau_setNetworkContext(TS_SUBNET) != TRDP_NO_ERR)
+    			err = tau_setNetworkContext(TS_SUBNET);
+    			if (err != TRDP_NO_ERR)
     		    {
     				vos_printLog(VOS_LOG_ERROR, "prep Sub-network tau_setNetworkContext error\n");
     		    }

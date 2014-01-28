@@ -70,6 +70,9 @@ VOS_THREAD_FUNC_T MDReplier (
 	if (appThreadSessionHandle.pMdAppThreadListener == NULL)
 	{
 		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle.pMdAppThreadListener malloc Err\n");
+		/* Delete pReplierThreadParameter */
+		free(pReplierThreadParameter);
+		pReplierThreadParameter = NULL;
 		return 0;
 	}
 	else
@@ -85,6 +88,11 @@ VOS_THREAD_FUNC_T MDReplier (
 	if (appThreadSessionHandle2.pMdAppThreadListener == NULL)
 	{
 		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. appThreadSessionHandle2.pMdAppThreadListener malloc Err\n");
+		/* Free Application Handle 1 MD Application Thread Listener */
+		free(appThreadSessionHandle.pMdAppThreadListener);
+		/* Delete pReplierThreadParameter */
+		free(pReplierThreadParameter);
+		pReplierThreadParameter = NULL;
 		return 0;
 	}
 	else
@@ -96,6 +104,13 @@ VOS_THREAD_FUNC_T MDReplier (
 	if (pListenerHandle == NULL)
 	{
 		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle malloc Err\n");
+		/* Free Application Handle1 MD Application Thread Listener */
+		free(appThreadSessionHandle.pMdAppThreadListener);
+		/* Free Application Hanlde 2 MD Application Thread Listener */
+		free(appThreadSessionHandle2.pMdAppThreadListener);
+		/* Delete pReplierThreadParameter */
+		free(pReplierThreadParameter);
+		pReplierThreadParameter = NULL;
 		return 0;
 	}
 	else
@@ -107,6 +122,15 @@ VOS_THREAD_FUNC_T MDReplier (
 	if (pListenerHandle2 == NULL)
 	{
 		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle2 malloc Err\n");
+		/* Free Application Handle1 MD Application Thread Listener */
+		free(appThreadSessionHandle.pMdAppThreadListener);
+		/* Free Application Hanlde 2 MD Application Thread Listener */
+		free(appThreadSessionHandle2.pMdAppThreadListener);
+		/* Listener Handle1 */
+		free(pListenerHandle);
+		/* Delete pReplierThreadParameter */
+		free(pReplierThreadParameter);
+		pReplierThreadParameter = NULL;
 		return 0;
 	}
 	else
@@ -118,6 +142,17 @@ VOS_THREAD_FUNC_T MDReplier (
 	if (pListenerHandle3 == NULL)
 	{
 		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle3 malloc Err\n");
+		/* Free Application Handle1 MD Application Thread Listener */
+		free(appThreadSessionHandle.pMdAppThreadListener);
+		/* Free Application Hanlde 2 MD Application Thread Listener */
+		free(appThreadSessionHandle2.pMdAppThreadListener);
+		/* Listener Handle1 */
+		free(pListenerHandle);
+		/* Listener Handle2 */
+		free(pListenerHandle2);
+		/* Delete pReplierThreadParameter */
+		free(pReplierThreadParameter);
+		pReplierThreadParameter = NULL;
 		return 0;
 	}
 	else
@@ -129,6 +164,19 @@ VOS_THREAD_FUNC_T MDReplier (
 	if (pListenerHandle4 == NULL)
 	{
 		vos_printLog(VOS_LOG_ERROR, "MDReplier ERROR. pListenerHandle4 malloc Err\n");
+		/* Free Application Handle1 MD Application Thread Listener */
+		free(appThreadSessionHandle.pMdAppThreadListener);
+		/* Free Application Hanlde 2 MD Application Thread Listener */
+		free(appThreadSessionHandle2.pMdAppThreadListener);
+		/* Listener Handle1 */
+		free(pListenerHandle);
+		/* Listener Handle2 */
+		free(pListenerHandle2);
+		/* Listener Handle3 */
+		free(pListenerHandle3);
+		/* Delete pReplierThreadParameter */
+		free(pReplierThreadParameter);
+		pReplierThreadParameter = NULL;
 		return 0;
 	}
 	else
@@ -189,6 +237,21 @@ VOS_THREAD_FUNC_T MDReplier (
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+			/* Free Application Handle1 MD Application Thread Listener */
+			free(appThreadSessionHandle.pMdAppThreadListener);
+			/* Free Application Hanlde 2 MD Application Thread Listener */
+			free(appThreadSessionHandle2.pMdAppThreadListener);
+			/* Listener Handle1 */
+			free(pListenerHandle);
+			/* Listener Handle2 */
+			free(pListenerHandle2);
+			/* Listener Handle3 */
+			free(pListenerHandle3);
+			/* Listener Handle3 */
+			free(pListenerHandle4);
+			/* Delete pReplierThreadParameter */
+			free(pReplierThreadParameter);
+			pReplierThreadParameter = NULL;
 			return 0;
 		}
 		else
@@ -225,6 +288,21 @@ VOS_THREAD_FUNC_T MDReplier (
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+			/* Free Application Handle1 MD Application Thread Listener */
+			free(appThreadSessionHandle.pMdAppThreadListener);
+			/* Free Application Hanlde 2 MD Application Thread Listener */
+			free(appThreadSessionHandle2.pMdAppThreadListener);
+			/* Listener Handle1 */
+			free(pListenerHandle);
+			/* Listener Handle2 */
+			free(pListenerHandle2);
+			/* Listener Handle3 */
+			free(pListenerHandle3);
+			/* Listener Handle3 */
+			free(pListenerHandle4);
+			/* Delete pReplierThreadParameter */
+			free(pReplierThreadParameter);
+			pReplierThreadParameter = NULL;
 			return 0;
 		}
 		else
@@ -279,6 +357,21 @@ VOS_THREAD_FUNC_T MDReplier (
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+				/* Free Application Handle1 MD Application Thread Listener */
+				free(appThreadSessionHandle.pMdAppThreadListener);
+				/* Free Application Hanlde 2 MD Application Thread Listener */
+				free(appThreadSessionHandle2.pMdAppThreadListener);
+				/* Listener Handle1 */
+				free(pListenerHandle);
+				/* Listener Handle2 */
+				free(pListenerHandle2);
+				/* Listener Handle3 */
+				free(pListenerHandle3);
+				/* Listener Handle3 */
+				free(pListenerHandle4);
+				/* Delete pReplierThreadParameter */
+				free(pReplierThreadParameter);
+				pReplierThreadParameter = NULL;
 				return 0;
 			}
 			else
@@ -315,6 +408,21 @@ VOS_THREAD_FUNC_T MDReplier (
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "AddListener comID = 0x%x error = %d\n", pReplierThreadParameter->pCommandValue->mdAddListenerComId, err);
+				/* Free Application Handle1 MD Application Thread Listener */
+				free(appThreadSessionHandle.pMdAppThreadListener);
+				/* Free Application Hanlde 2 MD Application Thread Listener */
+				free(appThreadSessionHandle2.pMdAppThreadListener);
+				/* Listener Handle1 */
+				free(pListenerHandle);
+				/* Listener Handle2 */
+				free(pListenerHandle2);
+				/* Listener Handle3 */
+				free(pListenerHandle3);
+				/* Listener Handle3 */
+				free(pListenerHandle4);
+				/* Delete pReplierThreadParameter */
+				free(pReplierThreadParameter);
+				pReplierThreadParameter = NULL;
 				return 0;
 			}
 			else
@@ -343,6 +451,21 @@ VOS_THREAD_FUNC_T MDReplier (
 	if (err != MD_APP_NO_ERR)
 	{
 		vos_printLog(VOS_LOG_ERROR, "Replier Message Queue Open error\n");
+		/* Free Application Handle1 MD Application Thread Listener */
+		free(appThreadSessionHandle.pMdAppThreadListener);
+		/* Free Application Hanlde 2 MD Application Thread Listener */
+		free(appThreadSessionHandle2.pMdAppThreadListener);
+		/* Listener Handle1 */
+		free(pListenerHandle);
+		/* Listener Handle2 */
+		free(pListenerHandle2);
+		/* Listener Handle3 */
+		free(pListenerHandle3);
+		/* Listener Handle3 */
+		free(pListenerHandle4);
+		/* Delete pReplierThreadParameter */
+		free(pReplierThreadParameter);
+		pReplierThreadParameter = NULL;
 		return 0;
 	}
 	else
@@ -352,6 +475,21 @@ VOS_THREAD_FUNC_T MDReplier (
 		if (err != MD_APP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "Subnet1 setAppThreadSessionMessageQueueDescriptor error\n");
+			/* Free Application Handle1 MD Application Thread Listener */
+			free(appThreadSessionHandle.pMdAppThreadListener);
+			/* Free Application Hanlde 2 MD Application Thread Listener */
+			free(appThreadSessionHandle2.pMdAppThreadListener);
+			/* Listener Handle1 */
+			free(pListenerHandle);
+			/* Listener Handle2 */
+			free(pListenerHandle2);
+			/* Listener Handle3 */
+			free(pListenerHandle3);
+			/* Listener Handle3 */
+			free(pListenerHandle4);
+			/* Delete pReplierThreadParameter */
+			free(pReplierThreadParameter);
+			pReplierThreadParameter = NULL;
 			return 0;
 		}
 		/* Is this Ladder Topology ? */
@@ -362,6 +500,21 @@ VOS_THREAD_FUNC_T MDReplier (
 			if (err != MD_APP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "Subnet2 setAppThreadSessionMessageQueueDescriptor error\n");
+				/* Free Application Handle1 MD Application Thread Listener */
+				free(appThreadSessionHandle.pMdAppThreadListener);
+				/* Free Application Hanlde 2 MD Application Thread Listener */
+				free(appThreadSessionHandle2.pMdAppThreadListener);
+				/* Listener Handle1 */
+				free(pListenerHandle);
+				/* Listener Handle2 */
+				free(pListenerHandle2);
+				/* Listener Handle3 */
+				free(pListenerHandle3);
+				/* Listener Handle3 */
+				free(pListenerHandle4);
+				/* Delete pReplierThreadParameter */
+				free(pReplierThreadParameter);
+				pReplierThreadParameter = NULL;
 				return 0;
 			}
 		}
@@ -399,7 +552,7 @@ VOS_THREAD_FUNC_T MDReplier (
 					printf("%s Subnet1 Listener Delete.\n", vos_getTimeStamp());
 				}
 				/* Delete Listener Handle List */
-				if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
+				if (deleteListenerHandleList(&pHeadListenerHandleList, pListenerHandle) != MD_APP_NO_ERR)
 				{
 					vos_printLog(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
 				}
@@ -432,7 +585,7 @@ VOS_THREAD_FUNC_T MDReplier (
 						printf("%s Subnet2 Listener Delete.\n", vos_getTimeStamp());
 					}
 					/* Delete Listener Handle List */
-					if (appendListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
+					if (deleteListenerHandleList(&pHeadListenerHandleList, pListenerHandle2) != MD_APP_NO_ERR)
 					{
 						vos_printLog(VOS_LOG_ERROR, "Delete Listener Handle List error\n");
 					}
@@ -689,6 +842,8 @@ MD_APP_ERR_TYPE replier_main_proc (
 		}
 	}
 
+	/* Free LOG String */
+	free(logString);
 	return MD_APP_NO_ERR;
 }
 
@@ -1677,6 +1832,8 @@ MD_APP_ERR_TYPE decideReceiveMdDataToReplier (
 			/* Result Code Err */
 		}
 	}
+	/* Free ReplyQuery Session Handle */
+	free(pReplyQuerySessionHandle);
 	return 0;
 }
 

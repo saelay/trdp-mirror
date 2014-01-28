@@ -178,7 +178,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 
 	/*	MD config1 */
 	memset(&md_config,0,sizeof(md_config));
-	md_config.pfCbFunction = md_indication;
+	md_config.pfCbFunction = &md_indication;
 	md_config.pRefCon = &useMdSendSubnet1;
 	md_config.sendParam.qos = TRDP_MD_DEFAULT_QOS;
 	md_config.sendParam.ttl = TRDP_MD_DEFAULT_TTL;
@@ -424,7 +424,6 @@ void md_indication(
 				break;
 			}
 		}
-
     }
 }
 
@@ -553,6 +552,6 @@ MD_APP_ERR_TYPE mdReceive_main_proc(void)
 #endif /* if 0 */
 	}   /*	Bottom of while-loop	*/
 
-	tlc_terminate();
+//	tlc_terminate();
 	return 0;
 }

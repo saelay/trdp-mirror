@@ -54,11 +54,11 @@ TRDP_PUB_T          pubHandleNet1ComId2;		/*	Sub-network Id1 ComID2 identifier t
 TRDP_ERR_T          err = TRDP_NO_ERR;
 /* TRDP_PD_CONFIG_T    pdConfiguration = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548}; */
-TRDP_PD_CONFIG_T    pdConfiguration = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+TRDP_PD_CONFIG_T    pdConfiguration = {&tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};
 TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {}};
 TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-TRDP_MARSHALL_CONFIG_T	marshallConfig = {tau_marshall, tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
+TRDP_MARSHALL_CONFIG_T	marshallConfig = {&tau_marshall, &tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
 
 INT32     rv = 0;
 
@@ -71,7 +71,7 @@ TRDP_PUB_T          pubHandleNet2ComId2;		/*	Sub-network Id2 ComID2 identifier t
 TRDP_ERR_T          err2;
 /* TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_NONE,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};*/	/* Sub-network Id2 PDconfiguration */
-TRDP_PD_CONFIG_T    pdConfiguration2 = {tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+TRDP_PD_CONFIG_T    pdConfiguration2 = {&tau_recvPdDs, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
                                        10000000, TRDP_TO_SET_TO_ZERO, 20548};
 TRDP_MEM_CONFIG_T   dynamicConfig2 = {NULL, RESERVED_MEMORY, {}};					/* Sub-network Id2 Structure describing memory */
 TRDP_PROCESS_CONFIG_T   processConfig2   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
@@ -511,7 +511,7 @@ int main (int argc, char *argv[])
 					if (strncmp(optarg, "-", 1) != 0)
 					{
 						sscanf(optarg, "%hx", &uint16_value);
-						if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+						if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
 						{
 							/* Set OFFSET2 */
 							OFFSET_ADDRESS2 = uint16_value;
@@ -526,7 +526,7 @@ int main (int argc, char *argv[])
 					if (strncmp(optarg, "-", 1) != 0)
 					{
 						sscanf(optarg, "%hx", &uint16_value);
-						if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+						if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
 						{
 							/* Set OFFSET3 */
 							OFFSET_ADDRESS3 = uint16_value;
@@ -541,7 +541,7 @@ int main (int argc, char *argv[])
 					if (strncmp(optarg, "-", 1) != 0)
 					{
 						sscanf(optarg, "%hx", &uint16_value);
-						if ((uint16_value >= 0) || (uint16_value <= TRAFFIC_STORE_SIZE))
+						if ((uint16_value >= 0) && (uint16_value <= TRAFFIC_STORE_SIZE))
 						{
 							/* Set OFFSET4 */
 							OFFSET_ADDRESS4 = uint16_value;
