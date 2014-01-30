@@ -682,6 +682,8 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
     TRDP_APP_SESSION_T appHandle)
 {
     PD_ELE_T    *iterPD;
+    MD_ELE_T    *iterMD;
+
     TRDP_ERR_T  ret;
 
     if (trdp_isValidSession(appHandle))
@@ -698,6 +700,19 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
                     /*    Join the MC group again    */
                     ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[iterPD->socketIdx].sock,
                                                       iterPD->addr.mcGroup,
+                                                      appHandle->realIP);
+                }
+            }
+
+            /*    Walk over the registered MDs */
+            for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext )
+            {
+                if (iterMD->privFlags & TRDP_MC_JOINT &&
+                    iterMD->socketIdx != -1)
+                {
+                    /*    Join the MC group again    */
+                    ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[iterMD->socketIdx].sock,
+                                                      iterMD->addr.mcGroup,
                                                       appHandle->realIP);
                 }
             }
