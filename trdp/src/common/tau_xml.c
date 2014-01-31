@@ -808,19 +808,19 @@ static void parseDebugConfiguration (
         }
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "e"))
         {
-            pDbgConfig->option |= TRDP_DBG_ERR;
+            pDbgConfig->option = TRDP_DBG_ERR;
         }
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "w"))
         {
-            pDbgConfig->option |= TRDP_DBG_WARN;
+            pDbgConfig->option = TRDP_DBG_WARN;
         }
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "i"))
         {
-            pDbgConfig->option |= TRDP_DBG_INFO;
+            pDbgConfig->option = TRDP_DBG_INFO;
         }
         else if (!xmlStrcasecmp(pAttr, BAD_CAST "d"))
         {
-            pDbgConfig->option |= TRDP_DBG_DBG;
+            pDbgConfig->option = TRDP_DBG_DBG;
         }
         xmlFree(pAttr);
     }
@@ -832,21 +832,24 @@ static void parseDebugConfiguration (
         {
             pDbgConfig->option &= (TRDP_DBG_OPTION_T) ~(TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT);
         }
-        else if (!xmlStrcasecmp(pAttr, BAD_CAST "a"))
+        else
         {
-            pDbgConfig->option |= TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT;
-        }
-        else if (!xmlStrcasecmp(pAttr, BAD_CAST "d") || !xmlStrcasecmp(pAttr, BAD_CAST "t"))
-        {
-            pDbgConfig->option |= TRDP_DBG_TIME;
-        }
-        else if (!xmlStrcasecmp(pAttr, BAD_CAST "f"))
-        {
-            pDbgConfig->option |= TRDP_DBG_LOC;
-        }
-        else if (!xmlStrcasecmp(pAttr, BAD_CAST "c"))
-        {
-            pDbgConfig->option |= TRDP_DBG_CAT;
+            if (xmlStrcasestr(pAttr, BAD_CAST "a"))
+            {
+                pDbgConfig->option |= TRDP_DBG_TIME | TRDP_DBG_LOC | TRDP_DBG_CAT;
+            }
+            if (xmlStrcasestr(pAttr, BAD_CAST "d") || xmlStrcasestr(pAttr, BAD_CAST "t"))
+            {
+                pDbgConfig->option |= TRDP_DBG_TIME;
+            }
+            if (xmlStrcasestr(pAttr, BAD_CAST "f"))
+            {
+                pDbgConfig->option |= TRDP_DBG_LOC;
+            }
+            if (xmlStrcasestr(pAttr, BAD_CAST "c"))
+            {
+                pDbgConfig->option |= TRDP_DBG_CAT;
+            }
         }
         xmlFree(pAttr);
     }
