@@ -10,7 +10,7 @@
         </mem-block-list>
     </device-configuration>
 	<!-- Debug Config -->
-    <debug file-name="trdp.log" file-size="1000000" info="DTFC" level="W" />
+    <debug file-name="trdp.log" file-size="1000000" info="A" level="D" />
 	<!-- Communication Parameter -->
     <com-parameter-list>
         <!--Default PD communication parameters-->
@@ -107,7 +107,7 @@
             <element name="u8" type="UINT8"/>
             <element name="i8" type="INT8"/>
             <element name="c" type="CHAR8"/>
-            <element name="b" type="BOOLEAN8"/>
+            <element name="b" type="BOOL8"/>
         </data-set>
         <data-set name="testDS2002" id="2002">
             <element name="aDS1003" type="1003" array-size ="2"/>

@@ -52,6 +52,10 @@ extern "C" {
 #define BROADCAST_ADDRESS		0xffffffff		/* Broadcat IP Address */
 #define SUBNET_NO_1				0				/* Subnet Index Number: Sunbent1 */
 #define SUBNET_NO_2				1				/* Subnet Index Number: Sunbent2 */
+#define SUBNET_ID_1				1				/* Subnet ID1: Sunbent1 */
+#define SUBNET_ID_2				2				/* Subnet ID2: Sunbent2 */
+#define RECEIVE_SUBNET1_MASK	0x7FFFFFFF		/* Receive MD Packet by Sunbnet1 */
+#define RECEIVE_SUBNET2_MASK	0x80000000		/* Receive MD Packet by Sunbnet2 */
 #define MAX_SESSIONS				16				/* Maximum number of sessions (interfaces) supported */
 #define SUBNET_AUTO				0xFFFFFFFF		/* Sub-network Auto Setting */
 #define SEND_REFERENCE			0x80000000		/* Send Code for TAUL Reference */
@@ -168,6 +172,7 @@ typedef struct SUBSCRIBE_TELEGRAM
 	TRDP_APP_SESSION_T				appHandle;						/* the handle returned by tlc_openSession */
 	TRDP_SUB_T							subHandle;						/* return a handle for these messages */
 	DATASET_T							dataset;						/* dataset (size, buffer) */
+	UINT32								datasetNetworkByteSize;		/* dataset size by networkByteOrder */
 	pTRDP_DATASET_T					pDatasetDescriptor;			/* Dataset Descriptor */
 	TRDP_IF_CONFIG_T					*pIfConfig;					/* pointer to I/F Config */
 	TRDP_PD_PAR_T						*pPdParameter;				/* pointer to PD Parameter */
@@ -208,6 +213,7 @@ typedef struct CALLER_TELEGRAM
 	TRDP_LIS_T							listenerHandle;				/* handle from related subscribe tlm_addListener()*/
 	TRDP_LIS_T							listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
 	DATASET_T							dataset;						/* dataset (size, buffer) */
+	UINT32								datasetNetworkByteSize;		/* dataset size by networkByteOrder */
 	pTRDP_DATASET_T					pDatasetDescriptor;			/* Dataset Descriptor */
 	TRDP_IF_CONFIG_T					*pIfConfig;					/* pointer to I/F Config */
 	TRDP_MD_PAR_T						*pMdParameter;				/* pointer to MD Parameter */
@@ -231,6 +237,7 @@ typedef struct REPLIER_TELEGRAM
 	TRDP_LIS_T							listenerHandle;				/* handle from related subscribe tlm_addListener()*/
 	TRDP_LIS_T							listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
 	DATASET_T							dataset;						/* dataset (size, buffer) */
+	UINT32								datasetNetworkByteSize;		/* dataset size by networkByteOrder */
 	pTRDP_DATASET_T					pDatasetDescriptor;			/* Dataset Descriptor */
 	TRDP_IF_CONFIG_T					*pIfConfig;					/* pointer to I/F Config */
 	TRDP_MD_PAR_T						*pMdParameter;				/* pointer to MD Parameter */
@@ -315,6 +322,7 @@ extern CALLER_TELEGRAM_T				*pHeadCallerTelegram;						/* Top Address of Subscri
 extern REPLIER_TELEGRAM_T			*pHeadReplierTelegram;						/* Top Address of Replier Telegram List */
 /* XML Config */
 extern UINT32 						numExchgPar;									/* Number Of Exchange Parameter */
+extern TRDP_DBG_CONFIG_T				debugConfig;									/* Debug Config */
 /* Thread */
 VOS_THREAD_T 							taulPdMainThreadHandle;				/* TAUL Main Thread handle */
 

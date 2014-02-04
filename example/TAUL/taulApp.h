@@ -64,13 +64,14 @@ extern "C" {
 #define REPLIERS_UNKNOWN								0				/* Repliiers unknown kind */
 
 /* LOG CATEGORY */
-#define LOG_CATEGORY_ERROR							0x1				/**< This is a critical error                 */
-#define LOG_CATEGORY_WARNING						0x2				/**< This is a warning                        */
-#define LOG_CATEGORY_INFO							0x4				/**< This is an info                          */
-#define LOG_CATEGORY_DEBUG							0x8				/**< This is a debug info                     */
+#define LOG_CATEGORY_ERROR							0x02				/**< This is a critical error                 */
+#define LOG_CATEGORY_WARNING						0x04				/**< This is a warning                        */
+#define LOG_CATEGORY_INFO							0x08				/**< This is an info                          */
+#define LOG_CATEGORY_DEBUG							0x10				/**< This is a debug info                     */
 
 /* Default PD Application Parameter */
 #define DEFAULT_PD_APP_CYCLE_TIME					500000			/* Ladder Application cycle in us */
+//#define DEFAULT_PD_APP_CYCLE_TIME					5000			/* Ladder Application cycle in us */
 #define DEFAULT_PD_SEND_CYCLE_NUMBER				0				/* Publish Send Cycle Number */
 #define DEFAULT_PD_RECEIVE_CYCLE_NUMBER			0				/* Subscribe Receive Cycle Number */
 #define DEFAULT_WRITE_TRAFFIC_STORE_SUBNET		0				/* Traffic Store Using Subnet */
