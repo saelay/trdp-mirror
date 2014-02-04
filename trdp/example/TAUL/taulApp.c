@@ -89,9 +89,6 @@ const size_t    threadStackSize   = 256 * 1024;
 
 UINT32	sequenceCounter = 0;										/* MD Send Sequence Counter */
 
-//UINT32 logCategoryOnOffType = LOG_CATEGORY_ERROR | LOG_CATEGORY_WARNING | LOG_CATEGORY_INFO | LOG_CATEGORY_DEBUG;								/* 0x0 is disable TRDP vos_printLog. for dbgOut */
-UINT32 logCategoryOnOffType = LOG_CATEGORY_ERROR | LOG_CATEGORY_WARNING | LOG_CATEGORY_INFO;								/* 0x0 is disable TRDP vos_printLog. for dbgOut */
-
 
 /******************************************************************************
  *   Function
@@ -354,34 +351,43 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    BOOL8 logPrintOnFlag = FALSE;	/* FALSE is not print */
+    BOOL8 logPrintOnFlag = FALSE;							/* FALSE is not print */
+    FILE *fpOutputLog = NULL;								/* pointer to Output Log */
+    const TRDP_FILE_NAME_T logFileNameNothing = {0};		/* Log File Name Nothing */
 
+    /* Check Output Log Enable from Debug Config */
     switch(category)
     {
     	case VOS_LOG_ERROR:
-			/* logCategoryOnOffType : ERROR */
-			if ((logCategoryOnOffType & LOG_CATEGORY_ERROR) == LOG_CATEGORY_ERROR)
+			/* Debug Config Option : ERROR or WARNING or INFO or DEBUG */
+			if (((debugConfig.option & TRDP_DBG_ERR) == TRDP_DBG_ERR)
+				|| ((debugConfig.option & TRDP_DBG_WARN) == TRDP_DBG_WARN)
+				|| ((debugConfig.option & TRDP_DBG_INFO) == TRDP_DBG_INFO)
+				|| ((debugConfig.option & TRDP_DBG_DBG) == TRDP_DBG_DBG))
 			{
 				logPrintOnFlag = TRUE;
 			}
 		break;
     	case VOS_LOG_WARNING:
-			/* logCategoryOnOffType : WARNING */
-    		if((logCategoryOnOffType & LOG_CATEGORY_WARNING) == LOG_CATEGORY_WARNING)
+			/* Debug Config Option : WARNING or INFO or DEBUG */
+    		if (((debugConfig.option & TRDP_DBG_WARN) == TRDP_DBG_WARN)
+    			|| ((debugConfig.option & TRDP_DBG_INFO) == TRDP_DBG_INFO)
+				|| ((debugConfig.option & TRDP_DBG_DBG) == TRDP_DBG_DBG))
 			{
 				logPrintOnFlag = TRUE;
 			}
     	break;
     	case VOS_LOG_INFO:
-			/* logCategoryOnOffType : INFO */
-    		if((logCategoryOnOffType & LOG_CATEGORY_INFO) == LOG_CATEGORY_INFO)
+			/* Debug Config Option : INFO or DBUG */
+    		if (((debugConfig.option & TRDP_DBG_INFO) == TRDP_DBG_INFO)
+    			|| ((debugConfig.option & TRDP_DBG_DBG) == TRDP_DBG_DBG))
 			{
 				logPrintOnFlag = TRUE;
 			}
     	break;
     	case VOS_LOG_DBG:
-			/* logCategoryOnOffType : DEBUG */
-			if((logCategoryOnOffType & LOG_CATEGORY_DEBUG) == LOG_CATEGORY_DEBUG)
+			/* Debug Config Option : DEBUG */
+			if((debugConfig.option & TRDP_DBG_DBG) == TRDP_DBG_DBG)
 			{
 				logPrintOnFlag = TRUE;
 			}
@@ -393,12 +399,40 @@ void dbgOut (
     /* Check log Print */
     if (logPrintOnFlag == TRUE)
     {
-		printf("%s %s %s:%d %s",
-			   pTime,
-			   catStr[category],
-			   pFile,
-			   LineNumber,
-			   pMsgStr);
+    	/* Check output place of Log */
+    	if (memcmp(debugConfig.fileName, logFileNameNothing,sizeof(TRDP_FILE_NAME_T)) != 0)
+    	{
+    	    /* Open file in append mode */
+    		fpOutputLog = fopen(debugConfig.fileName, "a");
+    	    if (fpOutputLog == NULL)
+    	    {
+    	    	vos_printLog(VOS_LOG_ERROR, "dbgOut() Log File Open Err\n");
+    			return;
+    	    }
+    	}
+    	else
+    	{
+    		/* Set Output place to Display */
+    		fpOutputLog = stdout;
+    	}
+    	/* Output Log Information */
+		/*  Log Date and Time */
+		if (debugConfig.option & TRDP_DBG_TIME)
+			fprintf(fpOutputLog, "%s ", pTime);
+		/*  Log category */
+		if (debugConfig.option & TRDP_DBG_CAT)
+			fprintf(fpOutputLog, "%s ", catStr[category]);
+		/*  Log Source File Name and Line */
+		if (debugConfig.option & TRDP_DBG_LOC)
+			fprintf(fpOutputLog, "%s:%d ", pFile, LineNumber);
+		/*  Log message */
+		fprintf(fpOutputLog, "%s", pMsgStr);
+
+		if (fpOutputLog != stdout)
+		{
+			/* Close Log File */
+			fclose(fpOutputLog);
+		}
     }
 }
 
@@ -1439,11 +1473,24 @@ memcpy(pDstEnd, &workEndAddr, sizeof(UINT32));
 						/* Set pDstEnd Address */
 						dstEndAddress = (UINT32)pWorkEndAddr;
 						/* Adjust alignment */
-						mod = dstEndAddress % 8;
+#if 0
+						/* Adjust alignment */
+						mod = dstEndAddress %
+								8;
 						if (mod != 0)
 						{
 							/* Set Alignment Size */
 							alignment = 8 - mod;
+							/* Set Alignment */
+							pWorkEndAddr = pWorkEndAddr + alignment;
+						}
+#endif
+						/* Adjust alignment */
+						mod = dstEndAddress % 4;
+						if (mod != 0)
+						{
+							/* Set Alignment Size */
+							alignment = 4 - mod;
 							/* Set Alignment */
 							pWorkEndAddr = pWorkEndAddr + alignment;
 						}
@@ -1633,11 +1680,56 @@ TAUL_APP_ERR_TYPE PublisherApplication (PUBLISHER_THREAD_PARAMETER_T *pPublisher
 	TRDP_ERR_T		err = TRDP_NO_ERR;
 	APPLICATION_THREAD_HANDLE_T				*pOwnApplicationThreadHandle = NULL;
 	/* Traffic Store */
-	extern UINT8 *pTrafficStoreAddr;						/* pointer to pointer to Traffic Store Address */
-	UINT32 dstEnd = 0;
+	extern			UINT8 *pTrafficStoreAddr;						/* pointer to pointer to Traffic Store Address */
+	UINT32			dstEnd = 0;
+	UINT32			trafficStoreWriteStartAddress = 0;
+	UINT32			workingWriteTrafficStoreStartAddress = 0;
+	UINT8			modTrafficStore = 0;
+	UINT8			modWorkingWriteTrafficStore = 0;
+	UINT8			alignmentWorkingWriteTrafficStore = 0;
+	UINT8			*pWorkingWirteTrafficStore = NULL;
 
 	/* Display TimeStamp when Publisher test Start time */
 	vos_printLog(VOS_LOG_DBG, "%s PD Publisher Start.\n", vos_getTimeStamp());
+
+	/* Get Write start Address in Traffic Store */
+	trafficStoreWriteStartAddress = (UINT32)(pTrafficStoreAddr + pPublisherThreadParameter->pPublishTelegram->pPdParameter->offset);
+	/* Get alignment */
+	modTrafficStore = trafficStoreWriteStartAddress % 16;
+	/* Get write Traffic store working memory area for alignment */
+	pWorkingWirteTrafficStore = (UINT8*)vos_memAlloc(pPublisherThreadParameter->pPublishTelegram->dataset.size + 16);
+	if (pWorkingWirteTrafficStore == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR,"PublishApplication() Failed. Working Write Traffic Store vos_memAlloc() Err\n");
+		return TAUL_APP_MEM_ERR;
+	}
+	else
+	{
+		/* Initialize Working Write Traffic Store */
+		memset(pWorkingWirteTrafficStore, 0, pPublisherThreadParameter->pPublishTelegram->dataset.size + 16);
+	}
+	/* Get Working Write start Address in Traffic Store */
+	workingWriteTrafficStoreStartAddress = (UINT32)pWorkingWirteTrafficStore;
+	/* Get alignment */
+	modWorkingWriteTrafficStore = workingWriteTrafficStoreStartAddress % 16;
+	vos_printLog(VOS_LOG_DBG, "modTraffic: %u modWork: %u \n", modTrafficStore, modWorkingWriteTrafficStore);
+	/* Check alignment */
+	if (modTrafficStore >= modWorkingWriteTrafficStore)
+	{
+		/* Set alignment of Working Write Traffic Store */
+		alignmentWorkingWriteTrafficStore = modTrafficStore - modWorkingWriteTrafficStore;
+		vos_printLog(VOS_LOG_DBG, "alignment: %u \n", alignmentWorkingWriteTrafficStore);
+	}
+	else
+	{
+		/* Set alignment of Working Write Traffic Store */
+		alignmentWorkingWriteTrafficStore = (16 - modWorkingWriteTrafficStore) + modTrafficStore;
+		vos_printLog(VOS_LOG_DBG, "alignment: %u \n", alignmentWorkingWriteTrafficStore);
+	}
+	/* Free Dataset */
+	vos_memFree(pPublisherThreadParameter->pPublishTelegram->dataset.pDatasetStartAddr);
+	/* Set Dataset Start Address */
+	pPublisherThreadParameter->pPublishTelegram->dataset.pDatasetStartAddr = pWorkingWirteTrafficStore + alignmentWorkingWriteTrafficStore;
 
 	/*
 		Enter the main processing loop.
@@ -1668,6 +1760,7 @@ TAUL_APP_ERR_TYPE PublisherApplication (PUBLISHER_THREAD_PARAMETER_T *pPublisher
 
 		/* Set Dataset start Address */
 		dstEnd = (UINT32)pPublisherThreadParameter->pPublishTelegram->dataset.pDatasetStartAddr;
+
 		/* Create Dataset */
 		err = createDataset(
 				requestCounter,
@@ -3155,10 +3248,10 @@ TAUL_APP_ERR_TYPE ReplierApplication (REPLIER_THREAD_PARAMETER_T *pReplierThread
 	TRDP_IP_ADDR_T							networkByteSrcIpAddr = 0;			/* for convert URI to Source IP Address */
 	TRDP_IP_ADDR_T							networkByteDstIpAddr = 0;			/* for convert URI to Destination IP Address */
 	APPLICATION_THREAD_HANDLE_T				*pOwnApplicationThreadHandle = NULL;
-#if 0
 	TRDP_IP_ADDR_T							ownSubnet = 0;						/* own Applicatin using I/F subnet */
 	TRDP_IP_ADDR_T							receiveSubnet = 0;					/* receive MD message source IP Subnet */
-#endif
+	UINT32										sessionReferenceAddress = 0;
+	UINT32										receiveSubnetId = 0;
 
 	/* Message Queue Open */
 	vos_err = vos_queueCreate(VOS_QUEUE_POLICY_OTHER, TRDP_QUEUE_MAX_MESG, &queueHandle);
@@ -3398,10 +3491,10 @@ TAUL_APP_ERR_TYPE ReplierApplication (REPLIER_THREAD_PARAMETER_T *pReplierThread
 		return TRDP_PARAM_ERR;
 	}
 
-#if 0
 	/* Get own Subnet */
 	ownSubnet = pReplierThreadParameter->pReplierTelegram->appHandle->realIP & SUBNET_NO2_NETMASK;
-#endif
+	/* Display OwnSubnet */
+	vos_printLog(VOS_LOG_DBG, "OwnSubnet:%d\n", ownSubnet);
 
 	/* Replier main process */
 	/* Display TimeStamp when Replier test start time */
@@ -3460,14 +3553,11 @@ TAUL_APP_ERR_TYPE ReplierApplication (REPLIER_THREAD_PARAMETER_T *pReplierThread
 							/* Set Reply Telegram */
 							pReplyTelegram = pReplierThreadParameter->pReplierTelegram->pNextReplierTelegram;
 							/* Set Create Dataset Destination Address */
-//							datasetDstEnd = (UINT32)pReplierThreadParameter->pReplierTelegram->dataset.pDatasetStartAddr;
 							datasetDstEnd = (UINT32)pReplyTelegram->dataset.pDatasetStartAddr;
 							/* Create Dataset */
 							taulAppErr = createDataset (
 										datasetFirstElementNumber,
-										//pReplierThreadParameter->pReplierTelegram->pDatasetDescriptor,
 										pReplyTelegram->pDatasetDescriptor,
-										//&pReplierThreadParameter->pReplierTelegram->dataset,
 										&pReplyTelegram->dataset,
 										(UINT8*)&datasetDstEnd);
 							if (taulAppErr != TAUL_APP_NO_ERR)
@@ -3486,22 +3576,33 @@ TAUL_APP_ERR_TYPE ReplierApplication (REPLIER_THREAD_PARAMETER_T *pReplierThread
 							else
 							{
 								/* Get Session Reference */
-								UINT32 sessionReferenceAddress = 0;
 								memcpy(&sessionReferenceAddress, pReceiveMqMsg->pRefCon, sizeof(UINT32));
-#if 0
-								/* Get Subnet which Receive MD Message I/F */
-								receiveSubnet = pReceiveMqMsg->Msg.srcIpAddr & SUBNET_NO2_NETMASK;
+								/* Get SubnetId of Receive MD Packet */
+								memcpy(&receiveSubnetId, (void *)pReceiveMqMsg->pRefCon, sizeof(UINT32));
+								/* Display ReceiveSubnetID */
+								vos_printLog(VOS_LOG_DBG, "receiveSubnetID:%d\n", receiveSubnetId);
+								/* Check Receive MD Packet by SUbnet2 */
+								if ((receiveSubnetId & RECEIVE_SUBNET2_MASK) == RECEIVE_SUBNET2_MASK)
+								{
+									receiveSubnet = SUBNET_NO2_NETMASK;
+								}
+								else
+								{
+									receiveSubnet = 0;
+								}
+								/* Display ReceiveSubnet, OwnSubnet */
+								vos_printLog(VOS_LOG_DBG, "receiveSubnet:%u OwnSubnet:%d\n", receiveSubnet, ownSubnet);
 								/* Check Receive Subnet : receive Subnet equal own Subnet */
 								if (receiveSubnet == ownSubnet)
 								{
-#endif
+									/* Display ReceiveSubnet, OwnSubnet */
+									vos_printLog(VOS_LOG_DBG, "tau_ldReply() receiveSubnet:%u OwnSubnet:%d\n", receiveSubnet, ownSubnet);
+
 									/* Send MD Reply */
 									err = tau_ldReply (
 											pReplierReplyTelegram->comId,
 											replyUserStatus,
-											//pReplierThreadParameter->pReplierTelegram->dataset.pDatasetStartAddr,
 											pReplyTelegram->dataset.pDatasetStartAddr,
-											//pReplierThreadParameter->pReplierTelegram->dataset.size,
 											pReplyTelegram->dataset.size,
 											&sessionReferenceAddress);
 									if (err != TRDP_NO_ERR)
@@ -3516,9 +3617,7 @@ TAUL_APP_ERR_TYPE ReplierApplication (REPLIER_THREAD_PARAMETER_T *pReplierThread
 										/* MD Send Success Count */
 										pReplierThreadParameter->pMdAppParameter->replierMdSendSuccessCounter++;
 									}
-#if 0
 								}
-#endif
 							}
 						case TRDP_MSG_MN:
 							/* Decide MD Transmission Result */

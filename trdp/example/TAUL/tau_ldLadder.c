@@ -2759,7 +2759,6 @@ REPLIER_TELEGRAM_T *searchReplierTelegramList (
         /* Replier Telegram: We match if src/dst address is zero or matches, and comId */
     	if ((iterReplierTelegram->comId == comId)
         		&& ((networkByteSrcIpAddr == 0) || (networkByteSrcIpAddr == srcIpAddr))
-//        		&& ((networkByteDstIpAddr == 0) || (networkByteDstIpAddr == dstIpAddr)))
         		&& ((networkByteDstIpAddr == 0) || (networkByteDstIpAddr == dstIpAddr) || (dstIpAddr == 0)))
     	{
     		/* Check get Telegram Flag */
@@ -3945,7 +3944,8 @@ TRDP_ERR_T sizeWriteDatasetInTrafficStore (
 		}
 	}
 	/* Set Work Pointer */
-	pDstWorkEnd = pDstEnd;
+//	pDstWorkEnd = pDstEnd;
+	pDstWorkEnd = pDstEnd + firstAlignment;
 
 	/*    Loop over all datasets in the array    */
 	for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
@@ -4247,7 +4247,6 @@ TRDP_ERR_T publishTelegram (
 					marshallConfig.pRefCon,
 					pExchgPar->datasetId,
 					(UINT8 *) pPublishDataset,
-//					&pPublishTelegram->dataset.size,
 					&pPublishTelegram->datasetNetworkByteSize,
 					&pPublishTelegram->pDatasetDescriptor);
 			if (err != TRDP_NO_ERR)
@@ -4267,7 +4266,6 @@ TRDP_ERR_T publishTelegram (
 		pPublishTelegram->pPdParameter = pExchgPar->pPdPar;
 		/* Set Dataset Buffer */
 		pPublishTelegram->dataset.pDatasetStartAddr = (UINT8 *)pPublishDataset;
-//		pPublishTelegram->dataset.pDatasetStartAddr = (UINT8 *)(INT32)(pTrafficStoreAddr + pPublishTelegram->pPdParameter->offset);
 		/* Set comId */
 		pPublishTelegram->comId = pExchgPar->comId;
 		/* Set topoCount */
@@ -4320,7 +4318,6 @@ TRDP_ERR_T publishTelegram (
 			if (pExchgPar->pDest[0].pUriHost != NULL)
 			{
 				networkByteIpAddr = vos_dottedIP (*(pExchgPar->pDest[0].pUriHost));
-//				if ((networkByteIpAddr == 0) || (networkByteIpAddr == BROADCAST_ADDRESS))
 				if (networkByteIpAddr == BROADCAST_ADDRESS)
 				{
 					vos_printLog(VOS_LOG_ERROR,"publishTelegram() Failed. Destination IP Address Err. Destination URI Host: %s\n", (char *)pExchgPar->pDest[ifIndex].pUriHost);
@@ -4353,7 +4350,6 @@ TRDP_ERR_T publishTelegram (
 				pPublishTelegram->pPdParameter->flags,							/* flags */
 				pPublishTelegram->pSendParam,									/* send Paramter */
 				pPublishTelegram->dataset.pDatasetStartAddr,					/* initial data */
-//				pPublishTelegram->dataset.size);								/* data size */
 				pPublishTelegram->datasetNetworkByteSize);					/* data size */
 		if (err != TRDP_NO_ERR)
 		{
@@ -4589,7 +4585,7 @@ TRDP_ERR_T subscribeTelegram (
 						marshallConfig.pRefCon,
 						pExchgPar->datasetId,
 						(UINT8 *) pSubscribeDataset,
-						&pSubscribeTelegram->dataset.size,
+						&pSubscribeTelegram->datasetNetworkByteSize,
 						&pSubscribeTelegram->pDatasetDescriptor);
 				if (err != TRDP_NO_ERR)
 				{
@@ -4622,7 +4618,6 @@ TRDP_ERR_T subscribeTelegram (
 				{
 					networkByteIpAddr = vos_dottedIP (*(pExchgPar->pSrc[0].pUriHost1));
 					if ((networkByteIpAddr == 0)
-//						|| (networkByteIpAddr == BROADCAST_ADDRESS)
 						|| (vos_isMulticast(networkByteIpAddr)))
 					{
 						/* Free Subscribe Dataset */
@@ -4649,7 +4644,6 @@ TRDP_ERR_T subscribeTelegram (
 				{
 					networkByteIpAddr = vos_dottedIP (*(pExchgPar->pSrc[0].pUriHost2));
 					if ((networkByteIpAddr == 0)
-//						|| (networkByteIpAddr == BROADCAST_ADDRESS)
 						|| (vos_isMulticast(networkByteIpAddr)))
 					{
 						/* Free Subscribe Dataset */
@@ -4971,7 +4965,6 @@ TRDP_ERR_T pdRequestTelegram (
 						marshallConfig.pRefCon,
 						pExchgPar->datasetId,
 						(UINT8 *) pPdRequestTelegram,
-//						&pPdRequestTelegram->dataset.size,
 						&pPdRequestTelegram->datasetNetworkByteSize,
 						&pPdRequestTelegram->pDatasetDescriptor);
 				if (err != TRDP_NO_ERR)
@@ -4991,7 +4984,6 @@ TRDP_ERR_T pdRequestTelegram (
 			pPdRequestTelegram->pPdParameter = pExchgPar->pPdPar;
 			/* Set Dataset Buffer */
 			pPdRequestTelegram->dataset.pDatasetStartAddr = (UINT8 *)pPdRequestDataset;
-//			pPdRequestTelegram->dataset.pDatasetStartAddr = (UINT8 *)(INT32)(pTrafficStoreAddr + pPdRequestTelegram->pPdParameter->offset);
 			/* Set comId */
 			pPdRequestTelegram->comId = pExchgPar->comId;
 			/* Set topoCount */
@@ -5017,7 +5009,6 @@ TRDP_ERR_T pdRequestTelegram (
 				/* Set Reply ComId */
 				pPdRequestTelegram->replyComId = pTailSubscribeTelegram->comId;
 			}
-//#if 0
 			/* PD Request */
 			err = tlp_request(
 					pPdRequestTelegram->appHandle,						/* our application identifier */
@@ -5030,7 +5021,6 @@ TRDP_ERR_T pdRequestTelegram (
 					pPdRequestTelegram->pPdParameter->flags,			/* flags */
 					pPdRequestTelegram->pSendParam,						/* send Paramter */
 					pPdRequestTelegram->dataset.pDatasetStartAddr,	/* request data */
-//					pPdRequestTelegram->dataset.size,					/* data size */
 					pPdRequestTelegram->datasetNetworkByteSize,		/* data size */
 					pPdRequestTelegram->replyComId,						/* comId of reply */
 					pPdRequestTelegram->replyIpAddr);					/* IP for reply */
@@ -5045,7 +5035,6 @@ TRDP_ERR_T pdRequestTelegram (
 			}
 			else
 			{
-//#endif
 				/* Append PD Request Telegram */
 				err = appendPdRequestTelegramList(&pHeadPdRequestTelegram, pPdRequestTelegram);
 				if (err != TRDP_NO_ERR)
@@ -5311,7 +5300,7 @@ TRDP_ERR_T replierTelegram (
 				marshallConfig.pRefCon,
 				pExchgPar->datasetId,
 				(UINT8 *) pReplierDataset,
-				&pReplierTelegram->dataset.size,
+				&pReplierTelegram->datasetNetworkByteSize,
 				&pReplierTelegram->pDatasetDescriptor);
 		if (err != TRDP_NO_ERR)
 		{
@@ -5767,7 +5756,7 @@ TRDP_ERR_T callerTelegram (
 				marshallConfig.pRefCon,
 				pExchgPar->datasetId,
 				(UINT8 *) pCallerDataset,
-				&pCallerTelegram->dataset.size,
+				&pCallerTelegram->datasetNetworkByteSize,
 				&pCallerTelegram->pDatasetDescriptor);
 		if (err != TRDP_NO_ERR)
 		{
@@ -6151,7 +6140,6 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 									pUpdatePdRequestTelegram->pPdParameter->flags,
 									pUpdatePdRequestTelegram->pSendParam,
 									(void *)(INT32) pTrafficStoreAddr + pUpdatePdRequestTelegram->pPdParameter->offset,
-//									pUpdatePdRequestTelegram->dataset.size,
 									pUpdatePdRequestTelegram->datasetNetworkByteSize,
 									pUpdatePdRequestTelegram->replyComId,
 									pUpdatePdRequestTelegram->replyIpAddr);
@@ -6177,7 +6165,6 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 			else
 			{
 				/* Is Now Time send Timing ? */
-//				if (vos_cmpTime((TRDP_TIME_T *)&iterPD->timeToGo, (TRDP_TIME_T *)&nowTime) > 0)
 				if (vos_cmpTime((TRDP_TIME_T *)&iterPD->timeToGo, (TRDP_TIME_T *)&nowTime) < 0)
 				{
 					/* Check comId which Publish our statistics packet */
@@ -6199,8 +6186,7 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 							err = tlp_put(
 									appHandle,
 									pUpdatePublishTelegram->pubHandle,
-									(void *)(INT32)(pTrafficStoreAddr + pUpdatePublishTelegram->pPdParameter->offset),
-	//								pUpdatePublishTelegram->dataset.size);
+									(pTrafficStoreAddr + pUpdatePublishTelegram->pPdParameter->offset),
 									pUpdatePublishTelegram->datasetNetworkByteSize);
 							if (err != TRDP_NO_ERR)
 							{
@@ -6269,7 +6255,6 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 									pUpdatePdRequestTelegram->pPdParameter->flags,
 									pUpdatePdRequestTelegram->pSendParam,
 									(void *)(INT32) pTrafficStoreAddr + pUpdatePdRequestTelegram->pPdParameter->offset,
-//									pUpdatePdRequestTelegram->dataset.size,
 									pUpdatePdRequestTelegram->datasetNetworkByteSize,
 									pUpdatePdRequestTelegram->replyComId,
 									pUpdatePdRequestTelegram->replyIpAddr);
@@ -6295,7 +6280,6 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 			else
 			{
 				/* Is Now Time send Timing ? */
-//				if (vos_cmpTime((TRDP_TIME_T *)&iterPD->timeToGo, (TRDP_TIME_T *)&nowTime) > 0)
 				if (vos_cmpTime((TRDP_TIME_T *)&iterPD->timeToGo, (TRDP_TIME_T *)&nowTime) < 0)
 				{
 					/* Check comId which Publish our statistics packet */
@@ -6318,7 +6302,6 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 									appHandle2,
 									pUpdatePublishTelegram->pubHandle,
 									(void *)(INT32)(pTrafficStoreAddr + pUpdatePublishTelegram->pPdParameter->offset),
-	//								pUpdatePublishTelegram->dataset.size);
 									pUpdatePublishTelegram->datasetNetworkByteSize);
 							if (err != TRDP_NO_ERR)
 							{
@@ -7309,7 +7292,6 @@ TRDP_ERR_T tau_ldNotify (
 		if ((pNotifyCallerTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 		{
 			/* Get marshall Dataset area */
-//			pMarshallData = (UINT8 *)vos_memAlloc(pNotifyCallerTelegram->dataset.size);
 			pMarshallData = (UINT8 *)vos_memAlloc(dataSize);
 			if (pMarshallData == NULL)
 			{
@@ -7319,17 +7301,16 @@ TRDP_ERR_T tau_ldNotify (
 			else
 			{
 				/* Initialize Marshall Dataset */
-//				memset(pMarshallData, 0, pNotifyCallerTelegram->dataset.size);
 				memset(pMarshallData, 0, dataSize);
 			}
 			/* marshalling */
 			err = tau_marshall(
-					&marshallConfig.pRefCon,													/* pointer to user context*/
-					comId,																		/* comId */
-					(UINT8 *)pData,															/* source pointer to received original message */
-					pMarshallData,															/* destination pointer to a buffer for the treated message */
-					&pNotifyCallerTelegram->dataset.size,									/* destination Buffer Size */
-					&pNotifyCallerTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+					&marshallConfig.pRefCon,							/* pointer to user context*/
+					comId,												/* comId */
+					(UINT8 *)pData,									/* source pointer to received original message */
+					pMarshallData,									/* destination pointer to a buffer for the treated message */
+					&dataSize,											/* destination Buffer Size */
+					&pNotifyCallerTelegram->pDatasetDescriptor);	/* pointer to pointer of cached dataset */
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "tau_ldNotify() tau_unmarshall Failed. comId:%d returns error %d\n", comId, err);
@@ -7559,8 +7540,7 @@ TRDP_ERR_T tau_ldRequest (
 		if ((pRequestCallerTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 		{
 			/* Get marshall Dataset area */
-			pMarshallData = (UINT8 *)vos_memAlloc(pRequestCallerTelegram->dataset.size);
-//			pMarshallData = (UINT8 *)vos_memAlloc(dataSize);
+			pMarshallData = (UINT8 *)vos_memAlloc(dataSize);
 			if (pMarshallData == NULL)
 			{
 				vos_printLog(VOS_LOG_ERROR,"tau_ldRequest() Failed. Marshall Dataset vos_memAlloc() Err\n");
@@ -7573,8 +7553,7 @@ TRDP_ERR_T tau_ldRequest (
 			else
 			{
 				/* Initialize Marshall Dataset */
-				memset(pMarshallData, 0, pRequestCallerTelegram->dataset.size);
-//				memset(pMarshallData, 0, dataSize);
+				memset(pMarshallData, 0, dataSize);
 			}
 			/* marshalling */
 			err = tau_marshall(
@@ -7582,8 +7561,8 @@ TRDP_ERR_T tau_ldRequest (
 					comId,																		/* comId */
 					(UINT8 *)pData,															/* source pointer to received original message */
 					pMarshallData,															/* destination pointer to a buffer for the treated message */
-					&pRequestCallerTelegram->dataset.size,									/* destination Buffer Size */
-					&pRequestCallerTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+					&dataSize,																	/* destination Buffer Size */
+					&pRequestCallerTelegram->pDatasetDescriptor);							/* pointer to pointer of cached dataset */
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "tau_ldRequest() tau_unmarshall Failed. comId:%d returns error %d\n", comId, err);
@@ -7761,6 +7740,46 @@ TRDP_ERR_T tau_ldReply (
 		return TRDP_PARAM_ERR;
 	}
 
+	/* Check Marshalling Kind : Marshalling Enable */
+	if ((pReplyReplierTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
+	{
+		/* Get marshall Dataset area */
+		pMarshallData = (UINT8 *)vos_memAlloc(dataSize);
+		if (pMarshallData == NULL)
+		{
+			vos_printLog(VOS_LOG_ERROR,"tau_ldReply() Failed. Marshall Dataset vos_memAlloc() Err\n");
+			return TRDP_MEM_ERR;
+		}
+		else
+		{
+			/* Initialize Marshall Dataset */
+			memset(pMarshallData, 0, dataSize);
+		}
+		/* marshalling */
+		err = tau_marshall(
+				&marshallConfig.pRefCon,													/* pointer to user context*/
+				comId,																		/* comId */
+				(UINT8 *)pData,															/* source pointer to received original message */
+				pMarshallData,															/* destination pointer to a buffer for the treated message */
+				&dataSize,																	/* destination Buffer Size */
+				&pReplyReplierTelegram->pDatasetDescriptor);							/* pointer to pointer of cached dataset */
+		if (err != TRDP_NO_ERR)
+		{
+			vos_printLog(VOS_LOG_ERROR, "tau_ldReply() tau_unmarshall Failed. comId:%d returns error %d\n", comId, err);
+			return err;
+		}
+		else
+		{
+			/* Set pSendData pointer */
+			pSendData = pMarshallData;
+		}
+	}
+	else
+	{
+		/* Set pSendData pointer */
+		pSendData = (UINT8 *)pData;
+	}
+
 	/* Decide Send Reply Message Type */
 	if (pReplyReplierTelegram->pMdParameter->confirmTimeout == 0)
 	{
@@ -7768,48 +7787,6 @@ vos_printLog(VOS_LOG_INFO, "tlm_reply() session '%02x%02x%02x%02x%02x%02x%02x%02
 		pCheckWaitingSendReplyReference->pMdInfo->sessionId[0], pCheckWaitingSendReplyReference->pMdInfo->sessionId[1], pCheckWaitingSendReplyReference->pMdInfo->sessionId[2],
 		pCheckWaitingSendReplyReference->pMdInfo->sessionId[3],	pCheckWaitingSendReplyReference->pMdInfo->sessionId[4], pCheckWaitingSendReplyReference->pMdInfo->sessionId[5],
 		pCheckWaitingSendReplyReference->pMdInfo->sessionId[6], pCheckWaitingSendReplyReference->pMdInfo->sessionId[7])
-
-		/* Check Marshalling Kind : Marshalling Enable */
-		if ((pReplyReplierTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
-		{
-			/* Get marshall Dataset area */
-			pMarshallData = (UINT8 *)vos_memAlloc(pReplyReplierTelegram->dataset.size);
-//			pMarshallData = (UINT8 *)vos_memAlloc(dataSize);
-			if (pMarshallData == NULL)
-			{
-				vos_printLog(VOS_LOG_ERROR,"tau_ldReply() Failed. Marshall Dataset vos_memAlloc() Err\n");
-				return TRDP_MEM_ERR;
-			}
-			else
-			{
-				/* Initialize Marshall Dataset */
-				memset(pMarshallData, 0, pReplyReplierTelegram->dataset.size);
-//				memset(pMarshallData, 0, dataSize);
-			}
-			/* marshalling */
-			err = tau_marshall(
-					&marshallConfig.pRefCon,													/* pointer to user context*/
-					comId,																		/* comId */
-					(UINT8 *)pData,															/* source pointer to received original message */
-					pMarshallData,															/* destination pointer to a buffer for the treated message */
-					&pReplyReplierTelegram->dataset.size,									/* destination Buffer Size */
-					&pReplyReplierTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
-			if (err != TRDP_NO_ERR)
-			{
-				vos_printLog(VOS_LOG_ERROR, "tau_ldReply() tau_unmarshall Failed. comId:%d returns error %d\n", comId, err);
-				return err;
-			}
-			else
-			{
-				/* Set pSendData pointer */
-				pSendData = pMarshallData;
-			}
-		}
-		else
-		{
-			/* Set pSendData pointer */
-			pSendData = (UINT8 *)pData;
-		}
 
 		/* Send Reply */
 		err = tlm_reply (
@@ -8207,7 +8184,7 @@ void tau_ldRecvPdDs (
 								pData,																	/* source pointer to received original message */
 								(UINT8 *)((INT32)pTrafficStoreAddr + (INT32)offset),				/* destination pointer to a buffer for the treated message */
 								&pSubscribeTelegram->dataset.size,									/* destination Buffer Size */
-								&pSubscribeTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+								&pSubscribeTelegram->pDatasetDescriptor);							/* pointer to pointer of cached dataset */
 					if (err != TRDP_NO_ERR)
 					{
 						vos_printLog(VOS_LOG_ERROR, "tau_unmarshall PD DATASET%d returns error %d\n", DATASET_NO_1, err);
@@ -8270,7 +8247,9 @@ void md_indication(
 	TRDP_UUID_T					replySessionId = {0};
 	CALLER_TELEGRAM_T				*pCallerTelegram = NULL;
 	REPLIER_TELEGRAM_T			*pReplierTelegram = NULL;
-	UINT8							*pMarshallData = NULL;
+	UINT8							*pUnMarshallData = NULL;
+	UINT8							*pUnMarshallDataStartAddress = NULL;
+	UINT8 							receiveSubnetId = 0;
 
 	vos_printLog(VOS_LOG_INFO, "md_indication(r=%p m=%p d=%p l=%d comId=%u msgType=0x%x"
 			" sessionId=%02x%02x%02x%02x%02x%02x%02x%02x,"
@@ -8315,7 +8294,6 @@ void md_indication(
 	{
 		pMdData = pData;
 	}
-
 	/* Decide MD Message Type */
 	switch(pMsg->msgType)
 	{
@@ -8353,8 +8331,8 @@ void md_indication(
 						if ((pReplierTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 						{
 							/* Get marshall Dataset area */
-							pMarshallData = (UINT8 *)vos_memAlloc(pReplierTelegram->dataset.size);
-							if (pMarshallData == NULL)
+							pUnMarshallData = (UINT8 *)vos_memAlloc(pReplierTelegram->dataset.size);
+							if (pUnMarshallData == NULL)
 							{
 								vos_printLog(VOS_LOG_ERROR,"md_indication() Failed. Marshall Dataset vos_memAlloc() Err\n");
 								return;
@@ -8362,31 +8340,33 @@ void md_indication(
 							else
 							{
 								/* Initialize Marshall Dataset */
-								memset(pMarshallData, 0, pReplierTelegram->dataset.size);
+								memset(pUnMarshallData, 0, pReplierTelegram->dataset.size);
 							}
+							/* Set UnMarshalling Start Address */
+							pUnMarshallDataStartAddress = pUnMarshallData;
 							/* unmarshalling */
 							err = tau_unmarshall(
-										&marshallConfig.pRefCon,											/* pointer to user context*/
-										pMsg->comId,														/* comId */
-										pData,																/* source pointer to received original message */
-										pMarshallData,													/* destination pointer to a buffer for the treated message */
-										&pReplierTelegram->dataset.size,									/* destination Buffer Size */
-										&pReplierTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+										&marshallConfig.pRefCon,							/* pointer to user context*/
+										pMsg->comId,										/* comId */
+										pData,												/* source pointer to received original message */
+										pUnMarshallData,									/* destination pointer to a buffer for the treated message */
+										&pReplierTelegram->dataset.size,				/* destination Buffer Size */
+										&pReplierTelegram->pDatasetDescriptor);		/* pointer to pointer of cached dataset */
 							if (err != TRDP_NO_ERR)
 							{
 								vos_printLog(VOS_LOG_ERROR, "tau_unmarshall comId%d returns error %d\n", pMsg->comId, err);
 								/* Free Marshall Data */
-								vos_memFree(pMarshallData);
+								vos_memFree(pUnMarshallData);
 								return;
 							}
 							else
 							{
+								/* Set MD Data */
+								pMdData = pUnMarshallDataStartAddress;
 								/* Clear Receive MD Dataset */
 								memset(pData, 0, dataSize);
-								/* Set Marshall Data */
-								memcpy(pData, pMarshallData, pReplierTelegram->dataset.size);
 								/* Free Marshall Data */
-								vos_memFree(pMarshallData);
+								vos_memFree(pData);
 							}
 						}
 					}
@@ -8403,7 +8383,7 @@ void md_indication(
 					{
 						vos_printLog(VOS_LOG_ERROR, "md_indication() Failed. rcvConf() Not Setting CallBack Error.\n");
 						/* Free Marshall Data */
-						vos_memFree(pMarshallData);
+						vos_memFree(pUnMarshallData);
 						return;
 					}
 				}
@@ -8443,8 +8423,8 @@ void md_indication(
 						if ((pReplierTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 						{
 							/* Get marshall Dataset area */
-							pMarshallData = (UINT8 *)vos_memAlloc(pReplierTelegram->dataset.size);
-							if (pMarshallData == NULL)
+							pUnMarshallData = (UINT8 *)vos_memAlloc(pReplierTelegram->dataset.size);
+							if (pUnMarshallData == NULL)
 							{
 								vos_printLog(VOS_LOG_ERROR,"md_indication() Failed. Marshall Dataset vos_memAlloc() Err\n");
 								return;
@@ -8452,31 +8432,33 @@ void md_indication(
 							else
 							{
 								/* Initialize Marshall Dataset */
-								memset(pMarshallData, 0, pReplierTelegram->dataset.size);
+								memset(pUnMarshallData, 0, pReplierTelegram->dataset.size);
 							}
+							/* Set UnMarshalling Start Address */
+							pUnMarshallDataStartAddress = pUnMarshallData;
 							/* unmarshalling */
 							err = tau_unmarshall(
-										&marshallConfig.pRefCon,											/* pointer to user context*/
-										pMsg->comId,														/* comId */
-										pData,																/* source pointer to received original message */
-										pMarshallData,													/* destination pointer to a buffer for the treated message */
-										&pReplierTelegram->dataset.size,									/* destination Buffer Size */
-										&pReplierTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+										&marshallConfig.pRefCon,						/* pointer to user context*/
+										pMsg->comId,									/* comId */
+										pData,											/* source pointer to received original message */
+										pUnMarshallData,								/* destination pointer to a buffer for the treated message */
+										&pReplierTelegram->dataset.size,			/* destination Buffer Size */
+										&pReplierTelegram->pDatasetDescriptor);	/* pointer to pointer of cached dataset */
 							if (err != TRDP_NO_ERR)
 							{
 								vos_printLog(VOS_LOG_ERROR, "tau_unmarshall comId%d returns error %d\n", pMsg->comId, err);
 								/* Free Marshall Data */
-								vos_memFree(pMarshallData);
+								vos_memFree(pUnMarshallData);
 								return;
 							}
 							else
 							{
+								/* Set MD Data */
+								pMdData = pUnMarshallDataStartAddress;
 								/* Clear Receive MD Dataset */
 								memset(pData, 0, dataSize);
-								/* Set Marshall Data */
-								memcpy(pData, pMarshallData, pReplierTelegram->dataset.size);
 								/* Free Marshall Data */
-								vos_memFree(pMarshallData);
+								vos_memFree(pData);
 							}
 						}
 					}
@@ -8484,9 +8466,32 @@ void md_indication(
 					/* Check rcvConf Call Back Function */
 					if (taulConfig.rcvConf != NULL)
 					{
+						/* Get SubnetId of Receive MD Packet */
+						memcpy(&receiveSubnetId, pRefCon, sizeof(INT8));
+						/* Check Receive MD Packet by SUbnet1 */
+						if (receiveSubnetId == SUBNET_ID_1)
+						{
+							/* Set SessionRef */
+							sessionRef = sessionCounter & RECEIVE_SUBNET1_MASK;
+							sessionCounter++;
+						}
+						/* Check Receive MD Packet by SUbnet2 */
+						else if (receiveSubnetId == SUBNET_ID_2)
+						{
+							/* Set SessionRef */
+							sessionRef = sessionCounter | RECEIVE_SUBNET2_MASK;
+							sessionCounter++;
+						}
+						else
+						{
+							vos_printLog(VOS_LOG_ERROR,"md_indication() Failed. Receive Subnet Err\n");
+							return;
+						}
+#if 0
 						/* Set SessionRef */
 						sessionRef = sessionCounter;
 						sessionCounter++;
+#endif
 #if 0
 						/* Call Back rcvConf() */
 						taulConfig.rcvConf(&sessionRef, pMsg, pMdData, dataSize);
@@ -8630,8 +8635,8 @@ void md_indication(
 						if ((pCallerTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 						{
 							/* Get marshall Dataset area */
-							pMarshallData = (UINT8 *)vos_memAlloc(pCallerTelegram->dataset.size);
-							if (pMarshallData == NULL)
+							pUnMarshallData = (UINT8 *)vos_memAlloc(pCallerTelegram->dataset.size);
+							if (pUnMarshallData == NULL)
 							{
 								vos_printLog(VOS_LOG_ERROR,"md_indication() Failed. Marshall Dataset vos_memAlloc() Err\n");
 								return;
@@ -8639,31 +8644,33 @@ void md_indication(
 							else
 							{
 								/* Initialize Marshall Dataset */
-								memset(pMarshallData, 0, pCallerTelegram->dataset.size);
+								memset(pUnMarshallData, 0, pCallerTelegram->dataset.size);
 							}
+							/* Set UnMarshalling Start Address */
+							pUnMarshallDataStartAddress = pUnMarshallData;
 							/* unmarshalling */
 							err = tau_unmarshall(
-										&marshallConfig.pRefCon,											/* pointer to user context*/
-										pMsg->comId,														/* comId */
-										pData,																/* source pointer to received original message */
-										pMarshallData,													/* destination pointer to a buffer for the treated message */
-										&pCallerTelegram->dataset.size,									/* destination Buffer Size */
-										&pCallerTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+										&marshallConfig.pRefCon,						/* pointer to user context*/
+										pMsg->comId,									/* comId */
+										pData,											/* source pointer to received original message */
+										pUnMarshallData,								/* destination pointer to a buffer for the treated message */
+										&pCallerTelegram->dataset.size,				/* destination Buffer Size */
+										&pCallerTelegram->pDatasetDescriptor);		/* pointer to pointer of cached dataset */
 							if (err != TRDP_NO_ERR)
 							{
 								vos_printLog(VOS_LOG_ERROR, "tau_unmarshall comId%d returns error %d\n", pMsg->comId, err);
 								/* Free Marshall Data */
-								vos_memFree(pMarshallData);
+								vos_memFree(pUnMarshallData);
 								return;
 							}
 							else
 							{
+								/* Set MD Data */
+								pMdData = pUnMarshallDataStartAddress;
 								/* Clear Receive MD Dataset */
 								memset(pData, 0, dataSize);
-								/* Set Marshall Data */
-								memcpy(pData, pMarshallData, pCallerTelegram->dataset.size);
 								/* Free Marshall Data */
-								vos_memFree(pMarshallData);
+								vos_memFree(pData);
 							}
 						}
 					}
@@ -8678,8 +8685,6 @@ void md_indication(
 								pMdData,
 								dataSize);
 						/* Check Timeout or Expire Number of Receive Reply */
-//						if ((pMsg->resultCode == TRDP_REPLYTO_ERR)
-//							|| (pMsg->numReplies >= pMsg->numExpReplies))
 						if ((pMsg->resultCode == TRDP_REPLYTO_ERR)
 							&& ((pMsg->numExpReplies > 0) && (pMsg->numReplies >= pMsg->numExpReplies)))
 						{
@@ -8751,8 +8756,8 @@ vos_printLog(VOS_LOG_INFO, "call callConf() comId: %d destIP: %d\n", pMsg->comId
 							if ((pCallerTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 							{
 								/* Get marshall Dataset area */
-								pMarshallData = (UINT8 *)vos_memAlloc(pCallerTelegram->dataset.size);
-								if (pMarshallData == NULL)
+								pUnMarshallData = (UINT8 *)vos_memAlloc(pCallerTelegram->dataset.size);
+								if (pUnMarshallData == NULL)
 								{
 									vos_printLog(VOS_LOG_ERROR,"md_indication() Failed. Marshall Dataset vos_memAlloc() Err\n");
 									return;
@@ -8760,31 +8765,41 @@ vos_printLog(VOS_LOG_INFO, "call callConf() comId: %d destIP: %d\n", pMsg->comId
 								else
 								{
 									/* Initialize Marshall Dataset */
-									memset(pMarshallData, 0, pCallerTelegram->dataset.size);
+									memset(pUnMarshallData, 0, pCallerTelegram->dataset.size);
 								}
+								/* Set UnMarshalling Start Address */
+								pUnMarshallDataStartAddress = pUnMarshallData;
 								/* unmarshalling */
 								err = tau_unmarshall(
-											&marshallConfig.pRefCon,											/* pointer to user context*/
-											pMsg->comId,														/* comId */
-											pData,																/* source pointer to received original message */
-											pMarshallData,													/* destination pointer to a buffer for the treated message */
-											&pCallerTelegram->dataset.size,									/* destination Buffer Size */
-											&pCallerTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+											&marshallConfig.pRefCon,					/* pointer to user context*/
+											pMsg->comId,								/* comId */
+											pData,										/* source pointer to received original message */
+											pUnMarshallData,							/* destination pointer to a buffer for the treated message */
+											&pCallerTelegram->dataset.size,			/* destination Buffer Size */
+											&pCallerTelegram->pDatasetDescriptor);	/* pointer to pointer of cached dataset */
 								if (err != TRDP_NO_ERR)
 								{
 									vos_printLog(VOS_LOG_ERROR, "tau_unmarshall comId%d returns error %d\n", pMsg->comId, err);
 									/* Free Marshall Data */
-									vos_memFree(pMarshallData);
+									vos_memFree(pUnMarshallData);
 									return;
 								}
 								else
 								{
+#if 0
 									/* Clear Receive MD Dataset */
 									memset(pData, 0, dataSize);
 									/* Set Marshall Data */
-									memcpy(pData, pMarshallData, pCallerTelegram->dataset.size);
+									memcpy(pData, pUnMarshallData, pCallerTelegram->dataset.size);
 									/* Free Marshall Data */
-									vos_memFree(pMarshallData);
+									vos_memFree(pUnMarshallData);
+#endif
+									/* Set MD Data */
+									pMdData = pUnMarshallDataStartAddress;
+									/* Clear Receive MD Dataset */
+									memset(pData, 0, dataSize);
+									/* Free Marshall Data */
+									vos_memFree(pData);
 								}
 							}
 						}
@@ -8829,8 +8844,6 @@ vos_printLog(VOS_LOG_INFO, "call callConf() comId: %d destIP: %d\n", pMsg->comId
 						}
 						vos_printLog(VOS_LOG_INFO, "Send Confirm comId: %d destIP: %d\n", pConfirmCallerTelegram->comId, pMsg->srcIpAddr);
 						/* Check Timeout or Expire Number of Receive Reply */
-//						if ((pMsg->resultCode == TRDP_REPLYTO_ERR)
-//							|| (pMsg->numReplies >= pMsg->numExpReplies))
 						if ((pMsg->resultCode == TRDP_APP_CONFIRMTO_ERR)
 							&& ((pMsg->numExpReplies > 0) && (pMsg->numRepliesQuery >= pMsg->numExpReplies)))
 
@@ -8914,8 +8927,8 @@ vos_printLog(VOS_LOG_INFO, "call callConf() comId: %d destIP: %d\n", pMsg->comId
 							if ((pReplierTelegram->pMdParameter->flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 							{
 								/* Get marshall Dataset area */
-								pMarshallData = (UINT8 *)vos_memAlloc(pReplierTelegram->dataset.size);
-								if (pMarshallData == NULL)
+								pUnMarshallData = (UINT8 *)vos_memAlloc(pReplierTelegram->dataset.size);
+								if (pUnMarshallData == NULL)
 								{
 									vos_printLog(VOS_LOG_ERROR,"md_indication() Failed. Marshall Dataset vos_memAlloc() Err\n");
 									return;
@@ -8923,31 +8936,33 @@ vos_printLog(VOS_LOG_INFO, "call callConf() comId: %d destIP: %d\n", pMsg->comId
 								else
 								{
 									/* Initialize Marshall Dataset */
-									memset(pMarshallData, 0, pReplierTelegram->dataset.size);
+									memset(pUnMarshallData, 0, pReplierTelegram->dataset.size);
 								}
+								/* Set UnMarshalling Start Address */
+								pUnMarshallDataStartAddress = pUnMarshallData;
 								/* unmarshalling */
 								err = tau_unmarshall(
-											&marshallConfig.pRefCon,											/* pointer to user context*/
-											pMsg->comId,														/* comId */
-											pData,																/* source pointer to received original message */
-											pMarshallData,													/* destination pointer to a buffer for the treated message */
-											&pReplierTelegram->dataset.size,									/* destination Buffer Size */
-											&pReplierTelegram->pDatasetDescriptor->pElement->pCachedDS);	/* pointer to pointer of cached dataset */
+											&marshallConfig.pRefCon,						/* pointer to user context*/
+											pMsg->comId,									/* comId */
+											pData,											/* source pointer to received original message */
+											pUnMarshallData,								/* destination pointer to a buffer for the treated message */
+											&pReplierTelegram->dataset.size,			/* destination Buffer Size */
+											&pReplierTelegram->pDatasetDescriptor);	/* pointer to pointer of cached dataset */
 								if (err != TRDP_NO_ERR)
 								{
 									vos_printLog(VOS_LOG_ERROR, "tau_unmarshall comId%d returns error %d\n", pMsg->comId, err);
 									/* Free Marshall Data */
-									vos_memFree(pMarshallData);
+									vos_memFree(pUnMarshallData);
 									return;
 								}
 								else
 								{
+									/* Set MD Data */
+									pMdData = pUnMarshallDataStartAddress;
 									/* Clear Receive MD Dataset */
 									memset(pData, 0, dataSize);
-									/* Set Marshall Data */
-									memcpy(pData, pMarshallData, pReplierTelegram->dataset.size);
 									/* Free Marshall Data */
-									vos_memFree(pMarshallData);
+									vos_memFree(pData);
 								}
 							}
 						}
