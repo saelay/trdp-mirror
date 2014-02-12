@@ -227,7 +227,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
         }
     }
 
-    if (pMemoryArea == NULL && size == 0)       /* This means we will use standard malloc calls    */
+    if (pMemoryArea == NULL && size == 0)           /* This means we will use standard malloc calls    */
     {
         gMem.noOfBlocks = 0;
         gMem.memSize    = 0;
@@ -235,14 +235,25 @@ EXT_DECL VOS_ERR_T vos_memInit (
         return VOS_NO_ERR;
     }
 
-    if (pMemoryArea == NULL && size != 0)       /* We must allocate memory from the heap once   */
+    if (size != 0)
     {
-        gMem.pArea = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development */
-        if (gMem.pArea == NULL)
+        if (pMemoryArea == NULL)                    /* We must allocate memory from the heap once   */
         {
-            return VOS_MEM_ERR;
+            gMem.pArea = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development */
+            if (gMem.pArea == NULL)
+            {
+                return VOS_MEM_ERR;
+            }
+            gMem.wasMalloced = TRUE;
         }
-        gMem.wasMalloced = TRUE;
+        else                                        /* Use the memory provided from calling application */
+        {
+            gMem.pArea = pMemoryArea;
+        }
+    }
+    else
+    {
+        return VOS_PARAM_ERR;
     }
 
     /*  Can we pre-allocate the memory? If more than half of the memory would be occupied, we don't even try...  */
