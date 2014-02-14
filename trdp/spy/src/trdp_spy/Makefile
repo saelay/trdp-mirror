@@ -41,6 +41,6 @@ doc/latex: *.h* doc/custom/* Doxyfile
 	@echo Run doxygen
 	doxygen Doxyfile
 	@echo Generate the PDF
-	cd doc/latex; make
+	cd doc/latex; make >> /dev/null
 	cp doc/latex/refman.pdf $(REFMAN_PDF)
 
