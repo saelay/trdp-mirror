@@ -31,4 +31,14 @@ $(PLUGIN) : $(OBJS)
 
 clean:
 	rm -f $(PLUGIN) $(OBJS)
+	rm -rf doc/latex
+	rm -rf doc/html
+
+doc: doc/latex
+
+doc/latex: *.h* doc/custom/* Doxyfile
+	@echo Run doxygen
+	doxygen Doxyfile
+	@echo Generate the PDF
+	cd doc/latex; make
 
