@@ -18,6 +18,7 @@ PLUGIN_NAME = packet-trdp_spy
 #PLUGIN_DIR  = $(HOME)/.wireshark/plugins
 PLUGIN_DIR  = .
 PLUGIN      = $(PLUGIN_DIR)/$(PLUGIN_NAME).so
+REFMAN_PDF = "TCN-TRDP2- TRDP SPY Reference Manual.pdf"
 
 CFLAGS = -DHAVE_CONFIG_H $(INCS) -DINET6 -D_U_=__attribute__\(\(unused\)\) -Wall -Wpointer-arith -g -DXTHREADS -D_REENTRANT -DXUSE_MTSAFE_API -fPIC -DPIC
 
@@ -41,4 +42,5 @@ doc/latex: *.h* doc/custom/* Doxyfile
 	doxygen Doxyfile
 	@echo Generate the PDF
 	cd doc/latex; make
+	cp doc/latex/refman.pdf $(REFMAN_PDF)
 
