@@ -50,10 +50,16 @@
 \newcommand{\documentTitle}{TRDP SPY - Reference Manual}
 
 \graphicspath{{../custom/}}
-
 \fancyhead[LE,RO]{{\bfseries Page \thepage / \pageref*{lastpage}} \\ \documentTitle \\ \leftmark}
 \fancyhead[CE,CO]{}
 \fancyhead[RE,LO]{\fancyplain{}{\includegraphics[width=5cm]{TCNOpen}}}
+
+\fancypagestyle{plain}
+{
+    \fancyhead[LE,RO]{{\bfseries Page \thepage / \pageref*{lastpage}} \\ \documentTitle \\ \leftmark}
+    \fancyhead[CE,CO]{}
+    \fancyhead[RE,LO]{\fancyplain{}{\includegraphics[width=5cm]{TCNOpen}}}
+}
 
 \addtolength{\headheight}{20mm}
 
