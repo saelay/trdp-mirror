@@ -67,24 +67,6 @@
 
 #define API_TRACE PRNT(printf("%s:%d : %s\n",__FILE__, __LINE__, __FUNCTION__))
 
-
-/** @fn static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, guint32 trdp_spy_comid, guint32 offset, guint32 length,guint8 flag_dataset, guint8 dataset_level)
- * @internal
- * Extract all information from the userdata (uses the parsebody module for unmarshalling)
- *
- * @param tvb               buffer
- * @param packet            info for the packet
- * @param tree              to which the information are added
- * @param trdpRootNode      Root node of the view of an TRDP packet (Necessary, as this function will be called recursively)
- * @param trdp_spy_comid    the already extracted comId
- * @param offset            where the userdata starts in the TRDP package
- * @param flag_dataset      on 0, the comId will be searched, on > 0 trdp_spy_comid will be interpreted as a dataset id
- * @param dataset_level     is set to 0 for the beginning
- *
- * @return the actual offset in the package
- */
-static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level);
-
 /* Initialize the protocol and registered fields */
 static int proto_trdp_spy = -1;
 static int proto_trdp_spy_TCP = -1;
@@ -276,7 +258,7 @@ static void dissect_trdp_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trd
 /**
  * Explanation in its prototype @see dissect_trdp_generic_body
  */
-static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
+guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
 {
 	guint32 start_offset;
 	struct Dataset* pFound;
@@ -761,17 +743,7 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 	}
 }
 
-/**
- * @internal
- * Code to analyze the actual TRDP packet
- *
- * @param tvb				buffer
- * @param pinfo				info for the packet
- * @param tree				to which the information are added
- *
- * @return nothing
- */
-static void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
+void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
 {
 	guint32 trdp_spy_comid = 0;
 	gchar* trdp_spy_string = NULL;

@@ -114,6 +114,27 @@
  * <tt> $ make</tt><br />
  * Please refer <tt>wireshark-1.8.3/readme</tt> and <tt>wireshark-1.8.3/install</tt> for more reference.
  *
+ * @section TRDPinterface Interface
+ *
+ * The plug-in shall be delivered as a DLL i.e. TRDP_spy.dll for Windows platform and shared library @c packet-trdp_spy.so files for Linux platform.
+ * For Application Data decoding additional @c libxml2.dll for Windows and @c libxml2.a, @c libxml2.la and libxml2.so for Linux are required
+ * which functions to parse the @c TRDP_config.xml file that contains the details of the Data-sets corresponding to each frame that is captured or logged by Wireshark.
+ *
+ * Overall interface of the system can be explained as shown in the figure below:
+
+ * @image html interfaceDiagram.png "Interface Diagram" width=17cm*
+ * @image latex interfaceDiagram.png "Interface Diagram" width=17cm
+ *
+ * @section TRDPusecase Usecase
+ *
+ * The TRDP-SPY plugin is interated into @c Wireshark as described:
+ *
+ * @image html seqDiagram.png "Live Functionality Sequence Diagram" width=10cm
+ * @image latex seqDiagram.png "Live Functionality Sequence Diagram" width=10cm
+ *
+ * On startup the plugin is registered in Wireshark, so the corresponding TCP and UDP packets are sent to this plugin.
+ * Each fitting packet is analyzed by the @c trdp_dissect .
+ *
  */
 
 
@@ -147,5 +168,38 @@ void proto_register_trdp (void);
  *  more than once.
  */
 void proto_reg_handoff_trdp(void);
+
+
+
+/** @fn guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
+ *
+ * @brief
+ * Extract all information from the userdata (uses the parsebody module for unmarshalling)
+ *
+ * @param tvb               buffer
+ * @param packet            info for the packet
+ * @param tree              to which the information are added
+ * @param trdpRootNode      Root node of the view of an TRDP packet (Necessary, as this function will be called recursively)
+ * @param trdp_spy_comid    the already extracted comId
+ * @param offset            where the userdata starts in the TRDP package
+ * @param flag_dataset      on 0, the comId will be searched, on > 0 trdp_spy_comid will be interpreted as a dataset id
+ * @param dataset_level     is set to 0 for the beginning
+ *
+ * @return the actual offset in the package
+ */
+guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level);
+
+/**@fn void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
+ *
+ * @brief
+ * Code to analyze the actual TRDP packet
+ *
+ * @param tvb               buffer
+ * @param pinfo             info for the packet
+ * @param tree              to which the information are added
+ *
+ * @return nothing
+ */
+void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree);
 
 /** @} */
