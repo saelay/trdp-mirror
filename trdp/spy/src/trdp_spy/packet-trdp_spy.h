@@ -21,9 +21,9 @@
 /**
  * @mainpage TRDP-SPY
  *
- * @section Introduction
+ * @section TRDP_intro Introduction
  *
- * @subsection Purpose
+ * @subsection TRDP_purpose Purpose
  * As part of the IP-Train project, two new protocols namely TRDP-PD (Process Data) and
  * TRDP-MD (Message Data) are intended to be supported by the Wireshark tool. The support
  * is envisaged to be made available in the form of a plug-in.
@@ -32,18 +32,18 @@
  * shall be available as a DLL for Windows platform and shared library for TRDP-spy for Linux
  * platform.
  *
- * @subsection Intended Audience
+ * @subsection TRDP_audience Intended Audience
  * The TRDP-SPY will be used primarily by TRDP Engineers.
  *
  *
- * @section Design Description
+ * @section TRDP_design Design Description
  *
- * @subsection System
+ * @subsection TRDP_system System
  * TRDP Wire Protocol Analysis tool (TRDP-SPY) shall provide qualitative and quantitative
  * analysis of TRDP streams, in order to verify system behaviour during qualification tests (level
  * 2 and level 3) and provide help in problem analysis during train integration and debugging.
  *
- * @subsection Operational Environment
+ * @subsection TRDP_opEnv Operational Environment
  * The plug-in shall be compatible with Windows XP and Linux implementation of Wireshark.
  * Standard behavior of Wireshark for all other protocols than WP shall not be influenced in
  * any way by the TRDPWP analysis plug-in.
@@ -51,7 +51,7 @@
  * The plug-in shall be delivered as a DLL (Windows) along with the Wireshark-setup.exe and
  * shared Library (.la, .lai and .so files or Linux) along with the minimal source - Wireshark-1.8.3.
  *
- * @section Development Environment for Windows
+ * @section TRDP_devWin Development Environment for Windows
  *
  * Following specifications are used for development of the TRDP PD and TRDP MD plug-in for Wireshark.
  * @li Operating System: Windows XP
@@ -59,7 +59,7 @@
  * @li Programming Language: C
  * @li TRDP Wire Protocol
  *
- * @subsection Steps to compile for Windows
+ * @subsection TRDP_compileWin Steps to compile for Windows
  * Prerequisites:
  * @li Wireshark minimal source (wireshark-1.8.3.tar.bz2).
  * @li @c TRDP-SPY_src.zip source.
@@ -78,6 +78,41 @@
  *
  * The Wireshark version containing TRDP can be started with: \n
  * <tt>C:\\wireshark\\wireshark-gtk2\\wireshark.exe</tt>
+ *
+ *
+ * @section TRDP_devLinux Development Environment for Linux
+ * Following specifications are used for development of the TRDP PD and TRDP MD plug-in for Wireshark.
+ * @li Operating System: Ubuntu 12.04 LTS-Linux
+ * @li Tool : Wireshark v 1.8.3
+ * @li Programming Language: C
+ *
+ * @subsection TRDP_compLinux Steps to compile and install Wireshark on Linux:
+ * Prerequisites:
+ * @li Wireshark source ( @c wireshark-1.8.3.tar.bz ).
+ * @li @c TRDP-SPY_src.zip.
+ *
+ * Steps:
+ * Unzip wireshark-1.8.3.tar.bz with command on Console and not by using @c tar to unzip:
+ *
+ * <tt>$ tar xjvf Wireshark-1.8.3.tar.bz</tt>
+ *
+ * Now execute the following commands to compile and install Wireshark
+ *
+ * <tt> $ cd wireshark-1.8.3</tt><br />
+ * <tt> $ ./configure wireshark-prefix=/opt/local</tt><br />
+ * <tt> $ make</tt><br />
+ * <tt> $ make install</tt><br />
+ * <tt> $ /opt/local/bin/wireshark (to launch Wireshark)</tt><br />
+ *
+ * Integrate TRDP-SPY into this wireshark version.
+ *
+ * Unzip TRDP-SPY.zip.
+ * Now copy folder @c TRDP_spy location <tt>wireshark-1.8.3/plugins/</tt> and compile the plugin with the give following commands.
+ *
+ * <tt> $ cd ../wireshark-1.8.3/plugins/trdp_spy</tt><br />
+ * <tt> $ make clean</tt><br />
+ * <tt> $ make</tt><br />
+ * Please refer <tt>wireshark-1.8.3/readme</tt> and <tt>wireshark-1.8.3/install</tt> for more reference.
  *
  */
 
