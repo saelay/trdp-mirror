@@ -86,7 +86,10 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\common\tau_ctrl.c" />
+    <ClCompile Include="..\..\src\common\tau_dnr.c" />
     <ClCompile Include="..\..\src\common\tau_marshall.c" />
+    <ClCompile Include="..\..\src\common\tau_tti.c" />
     <ClCompile Include="..\..\src\common\tau_xml.c" />
     <ClCompile Include="..\..\src\common\trdp_if.c">
       <DeploymentContent>false</DeploymentContent>
@@ -109,6 +112,9 @@
     <ClInclude Include="..\..\resources\pthread\pthread.h" />
     <ClInclude Include="..\..\resources\pthread\sched.h" />
     <ClInclude Include="..\..\resources\pthread\semaphore.h" />
+    <ClInclude Include="..\..\src\api\tau_ctrl.h" />
+    <ClInclude Include="..\..\src\api\tau_dnr.h" />
+    <ClInclude Include="..\..\src\api\tau_tti.h" />
     <ClInclude Include="..\..\src\common\trdp_if.h" />
     <ClInclude Include="..\..\src\common\trdp_mdcom.h" />
     <ClInclude Include="..\..\src\common\trdp_pdcom.h" />
@@ -122,7 +128,6 @@
     <ClInclude Include="..\..\src\vos\api\vos_thread.h" />
     <ClInclude Include="..\..\src\vos\api\vos_types.h" />
     <ClInclude Include="..\..\src\vos\api\vos_utils.h" />
-    <ClInclude Include="..\..\src\api\tau_addr.h" />
     <ClInclude Include="..\..\src\api\tau_marshall.h" />
     <ClInclude Include="..\..\src\api\tau_xml.h" />
     <ClInclude Include="..\..\src\api\trdp_if_light.h" />
