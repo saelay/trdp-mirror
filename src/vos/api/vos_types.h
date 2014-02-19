@@ -44,6 +44,8 @@ typedef signed short INT16;
 typedef signed int INT32;
 typedef signed long long INT64;
 typedef unsigned char BOOL8;
+typedef unsigned char BITSET8;
+typedef unsigned char ANTIVALENT8;
 typedef char CHAR8;
 typedef short UTF16;
 typedef float REAL32;
@@ -64,6 +66,8 @@ typedef int16_t INT16;
 typedef int32_t INT32;
 typedef int64_t INT64;
 typedef unsigned char BOOL8;
+typedef unsigned char BITSET8;
+typedef unsigned char ANTIVALENT8;
 typedef char CHAR8;
 typedef uint16_t UTF16;
 typedef float REAL32;
@@ -78,6 +82,8 @@ typedef short UTF16;
 typedef float REAL32;
 typedef double REAL64;
 typedef unsigned char BOOL8;
+typedef unsigned char BITSET8;
+typedef unsigned char ANTIVALENT8;
 
 #else
 
@@ -94,6 +100,8 @@ typedef int16_t INT16;
 typedef int32_t INT32;
 typedef int64_t INT64;
 typedef unsigned char BOOL8;
+typedef unsigned char BITSET8;
+typedef unsigned char ANTIVALENT8;
 typedef char CHAR8;
 typedef uint16_t UTF16;
 typedef float REAL32;
