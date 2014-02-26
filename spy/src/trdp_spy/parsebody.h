@@ -40,22 +40,23 @@
 
 /** @struct ComId
  *
- @dot
-digraph Reference {
-node [shape=record];
-c [ label="ComId" ];
-d [ label="Dataset" ];
-e [ label="Element" ];
-c -> d [ ];
-d -> d [ ];
-d -> e [ ];
-}
-@enddot
- *
- *
  *  @brief This struct makes a mapping between one comId and one dataset.
  *
- *  This is a separate structure, because there could be mappings from a dataset to another one.
+ *
+ * The following relation between the comId and an element of a dataset is given:
+ * @dot
+ * digraph Reference {
+ *      size="2,2"; ranksep=0.3; nodesep=0.3;
+ *      node [shape=record];
+ *      c [ label="ComId" ];
+ *      d [ label="Dataset" ];
+ *      e [ label="Element" ];
+ *      c -> d [ ];
+ *      d -> d [ ];
+ *      d -> e [ ];
+ * }
+ * @enddot
+ * There is a separate structure for datasets necessary, because the dataset itself can be packed recursively into each other.
  */
 struct ComId {
 	guint32 comId;      /**< Communication Id, used as key*/
@@ -72,28 +73,17 @@ struct Dataset {
 };
 
 /** @struct Element
- *  @brief description of one element, with a variable that is stored
- *  @var Element::name
- *  Name of the variable, that is stored
- *  @var Element::type
- *  Numeric type of the variable (see Usermanual, chapter 4.2)
- *  @var Element::array_size
- *  Amount this value occurred. 1 is default; 0 indicates a dynamic list (the dynamic list starts with a 16bit value with the occurrence)
- *  @var Element::unit
- *  Unit to display
- *  @var Element::scale
- *  A factor the given value is scaled
- *  @var Element::offset
- *  Offset that is added to the values. displayed value = scale * raw value + offset
+ *  @brief description of one element
+ *
  */
 struct Element {
-	GString* 	name;
-	guint32 	type;
-	GString* 	typeName;
-	guint32 array_size;
-	GString* 	unit;
-	gfloat 	scale;
-	gint32 offset;
+	GString*    name; /**< Name of the variable, that is stored */
+	guint32     type; /**< Numeric type of the variable (see Usermanual, chapter 4.2) or defined at ::TRDP_BOOL8, ::TRDP_UINT8, ::TRDP_UINT16 and so on.*/
+	GString*    typeName;   /**< Textual representation of the type (necessary for own datasets, packed recursively) */
+	guint32     array_size; /**< Amount this value occurred. 1 is default; 0 indicates a dynamic list (the dynamic list starts with a 16bit value with the occurrence) */
+	GString*    unit;       /**< Unit to display */
+	gfloat      scale;      /**< A factor the given value is scaled */
+	gint32      offset;     /**< Offset that is added to the values. displayed value = scale * raw value + offset */
 };
 
 enum TRDP_RET {
