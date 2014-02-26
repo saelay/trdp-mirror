@@ -46,7 +46,7 @@
  * The following relation between the comId and an element of a dataset is given:
  * @dot
  * digraph Reference {
- *      size="2,2"; ranksep=0.3; nodesep=0.3;
+ *      rankdir=LR;
  *      node [shape=record];
  *      c [ label="ComId" ];
  *      d [ label="Dataset" ];
