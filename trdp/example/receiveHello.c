@@ -8,7 +8,7 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
@@ -36,7 +36,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.0"
+#define APP_VERSION     "1.1"
 
 #define DATA_MAX        1000
 
@@ -83,12 +83,7 @@ void usage (const char *appName)
     printf("This tool receives PD messages from an ED.\n"
            "Arguments are:\n"
            "-o <own IP address> (default INADDR_ANY)\n"
-/*           "-t <target IP address>\n" */
            "-c <comId> (default 1000)\n"
-/*
-             "-e send empty request\n"
-             "-d <custom string to send> (default: 'Hello World')\n"
- */
            "-v print version and quit\n"
            );
 }
@@ -110,10 +105,10 @@ int main (int argc, char *argv[])
     TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-    UINT32                  ownIP = 0;
-    int                     rv = 0;
-    UINT32                  destIP = 0;
-    UINT32                  lastSequCount = 0;
+    UINT32                  ownIP           = 0;
+    int                     rv              = 0;
+    UINT32                  destIP          = 0;
+    UINT32                  lastSeqCount    = 0;
 
     /*    Generate some data, that we want to send, when nothing was specified. */
     UINT8                   *outputBuffer;
@@ -125,7 +120,7 @@ int main (int argc, char *argv[])
 
     outputBuffer = exampleData;
 
-    while ((ch = getopt(argc, argv, "t:o:h?vec:")) != -1)
+    while ((ch = getopt(argc, argv, "o:h?vc:")) != -1)
     {
         switch (ch)
         {
@@ -150,18 +145,6 @@ int main (int argc, char *argv[])
                 }
                 break;
             }
-            case 't':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            break;
             case 'v':   /*  version */
                 printf("%s: Version %s\t(%s - %s)\n",
                        argv[0], APP_VERSION, __DATE__, __TIME__);
@@ -174,14 +157,6 @@ int main (int argc, char *argv[])
                 return 1;
         }
     }
-/*
-    if (destIP == 0)
-    {
-        fprintf(stderr, "No destination address given!\n");
-        usage(argv[0]);
-        return 1;
-    }
-*/
 
     /*    Init the library  */
     if (tlc_init(&dbgOut,                              /* no logging    */
@@ -231,10 +206,11 @@ int main (int argc, char *argv[])
      */
     while (1)
     {
-        fd_set  rfds;
-        INT32   noDesc;
-        struct timeval  tv;
-        struct timeval  max_tv = {0, 100000};
+        TRDP_FDS_T          rfds;
+        INT32               noDesc;
+        TRDP_TIME_T         tv;
+        const TRDP_TIME_T   max_tv  = {0, 200000};
+        const TRDP_TIME_T   min_tv  = {0, 100000};
 
         /*
          Prepare the file descriptor set for the select call.
@@ -247,7 +223,7 @@ int main (int argc, char *argv[])
          This way we can guarantee that PDs are sent in time
          with minimum CPU load and minimum jitter.
          */
-        tlc_getInterval(appHandle, (TRDP_TIME_T *) &tv, (TRDP_FDS_T *) &rfds, &noDesc);
+        tlc_getInterval(appHandle, &tv, &rfds, &noDesc);
 
         /*
          The wait time for select must consider cycle times and timeouts of
@@ -255,16 +231,32 @@ int main (int argc, char *argv[])
          If we need to poll something faster than the lowest PD cycle,
          we need to set the maximum time out our self.
          */
-        if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
+        if (vos_cmpTime(&tv, &max_tv) > 0)
         {
             tv = max_tv;
         }
 
         /*
+         Prevent from running too fast, if we're just waiting for packets (default min. time is 10ms).
+        */
+        if (vos_cmpTime(&tv, &min_tv) < 0)
+        {
+            tv = min_tv;
+        }
+
+        /*
+         Alternatively we could call select() with a NULL pointer - this would block this loop:
+            if (vos_cmpTime(&tv, &min_tv) < 0)
+            {
+                rv = vos_select(noDesc + 1, &rfds, NULL, NULL, NULL);
+            }
+        */
+
+        /*
          Select() will wait for ready descriptors or time out,
          what ever comes first.
          */
-        rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+        rv = vos_select(noDesc + 1, &rfds, NULL, NULL, &tv);
 
         /*
          Check for overdue PDs (sending and receiving)
@@ -275,7 +267,7 @@ int main (int argc, char *argv[])
          The callback function will be called from within the tlc_process
          function (in it's context and thread)!
          */
-        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        tlc_process(appHandle, &rfds, &rv);
 
         /* Handle other ready descriptors... */
         if (rv > 0)
@@ -300,10 +292,10 @@ int main (int argc, char *argv[])
                       &myPDInfo,
                       (UINT8 *) gBuffer,
                       &receivedSize);
-        if (    (TRDP_NO_ERR == err)
-             && (receivedSize > 0)
-             && (myPDInfo.seqCount != lastSeqCount)  /* only treat new telegrams */
-           )
+        if ((TRDP_NO_ERR == err)
+            && (receivedSize > 0)
+            && (myPDInfo.seqCount != lastSeqCount)   /* only treat new telegrams */
+            )
         {
             lastSeqCount = myPDInfo.seqCount;
             printf("\nMessage reveived:\n");
@@ -333,8 +325,8 @@ int main (int argc, char *argv[])
     /*
      *    We always clean up behind us!
      */
-    tlp_unpublish(appHandle, subHandle);
-
+    tlp_unsubscribe(appHandle, subHandle);
+    tlc_closeSession(appHandle);
     tlc_terminate();
     return rv;
 }
