@@ -464,7 +464,7 @@ typedef struct
 typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
 typedef struct PD_ELE *TRDP_PUB_T;
 typedef struct PD_ELE *TRDP_SUB_T;
-typedef struct PD_ELE *TRDP_LIS_T;
+typedef struct MD_LIS_ELE *TRDP_LIS_T;
 
 
 
