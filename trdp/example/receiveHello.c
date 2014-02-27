@@ -107,7 +107,6 @@ int main (int argc, char *argv[])
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     UINT32                  ownIP           = 0;
     int                     rv              = 0;
-    UINT32                  destIP          = 0;
     UINT32                  lastSeqCount    = 0;
 
     /*    Generate some data, that we want to send, when nothing was specified. */
