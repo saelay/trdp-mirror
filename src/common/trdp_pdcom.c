@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2014-02-27: Ticket #23: tlc_getInterval() always returning 10ms
  *      BL 2014-01-09: Ticket #14: Wrong error return in trdp_pdDistribute()
  *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
  *      BL 2013-04-09: ID 92: Pull request led to reset of push message type
@@ -307,7 +308,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
 
                 if (vos_cmpTime(&iterPD->timeToGo, &now) <= 0)
                 {
-                    /* in case of a delay of more than one interval - avoid sending it in the next cycle again */ 
+                    /* in case of a delay of more than one interval - avoid sending it in the next cycle again */
                     iterPD->timeToGo = now;
                     vos_addTime(&iterPD->timeToGo, &iterPD->interval);
                 }
@@ -583,8 +584,10 @@ void trdp_pdCheckPending (
     /*    Find the packet which has to be received next:    */
     for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if (timerisset(&iterPD->interval) &&                        /* not PD PULL?    */
-            timercmp(&iterPD->timeToGo, &appHandle->nextJob, <))    /* earlier than current time-out? */
+        if ((!iterPD->privFlags & TRDP_TIMED_OUT) &&                /* Exempt already timed-out packet */
+            timerisset(&iterPD->interval) &&                        /* not PD PULL?                    */
+            (timercmp(&iterPD->timeToGo, &appHandle->nextJob, <) || /* earlier than current time-out?  */
+             !timerisset(&appHandle->nextJob)))                     /* or not set at all?              */
         {
             appHandle->nextJob = iterPD->timeToGo;                  /* set new next time value from queue element */
         }
@@ -610,7 +613,8 @@ void trdp_pdCheckPending (
     for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
         if (timerisset(&iterPD->interval) &&                        /* has a time out value?    */
-            timercmp(&iterPD->timeToGo, &appHandle->nextJob, <))    /* earlier than current time-out? */
+            (timercmp(&iterPD->timeToGo, &appHandle->nextJob, <) ||  /* earlier than current time-out? */
+             !timerisset(&appHandle->nextJob)))
         {
             appHandle->nextJob = iterPD->timeToGo;                  /* set new next time value from queue element */
         }
