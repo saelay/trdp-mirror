@@ -10,11 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
+ *
+ *      BL 2014-02-27: Ticket #24: trdp_if.c won't compile without MD_SUPPORT
  *
  *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
  *
@@ -491,8 +493,8 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 EXT_DECL TRDP_ERR_T tlc_closeSession (
     TRDP_APP_SESSION_T appHandle)
 {
-    TRDP_SESSION_PT pSession = NULL;
-    BOOL8 found = FALSE;
+    TRDP_SESSION_PT pSession    = NULL;
+    BOOL8 found         = FALSE;
     TRDP_ERR_T      ret = TRDP_NOINIT_ERR;
 
     /*    Find the session    */
@@ -682,7 +684,6 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
     TRDP_APP_SESSION_T appHandle)
 {
     PD_ELE_T    *iterPD;
-    MD_ELE_T    *iterMD;
 
     TRDP_ERR_T  ret;
 
@@ -703,20 +704,23 @@ EXT_DECL TRDP_ERR_T tlc_reinitSession (
                                                       appHandle->realIP);
                 }
             }
-
-            /*    Walk over the registered MDs */
-            for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext )
+#if MD_SUPPORT
             {
-                if (iterMD->privFlags & TRDP_MC_JOINT &&
-                    iterMD->socketIdx != -1)
+                MD_ELE_T *iterMD;
+                /*    Walk over the registered MDs */
+                for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext )
                 {
-                    /*    Join the MC group again    */
-                    ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[iterMD->socketIdx].sock,
-                                                      iterMD->addr.mcGroup,
-                                                      appHandle->realIP);
+                    if (iterMD->privFlags & TRDP_MC_JOINT &&
+                        iterMD->socketIdx != -1)
+                    {
+                        /*    Join the MC group again    */
+                        ret = (TRDP_ERR_T) vos_sockJoinMC(appHandle->iface[iterMD->socketIdx].sock,
+                                                          iterMD->addr.mcGroup,
+                                                          appHandle->realIP);
+                    }
                 }
             }
-
+#endif
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
                 vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
@@ -780,7 +784,7 @@ TRDP_ERR_T tlp_setRedundant (
 {
     TRDP_ERR_T  ret = TRDP_NOINIT_ERR;
     PD_ELE_T    *iterPD;
-    BOOL8        found = FALSE;
+    BOOL8       found = FALSE;
 
     if (trdp_isValidSession(appHandle))
     {
@@ -1071,7 +1075,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             }
 
             /*    Update the internal data */
-            pNewElement->addr           = pubHandle;
+            pNewElement->addr = pubHandle;
             pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
             pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
@@ -1306,12 +1310,19 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 {
                     vos_subTime(&appHandle->nextJob, &now);
                     *pInterval = appHandle->nextJob;
-
+                    vos_printLog(VOS_LOG_INFO,
+                                 "pInterval from nextJob %02d:%02d\n",
+                                 pInterval->tv_sec,
+                                 pInterval->tv_usec / 1000);
                 }
-                else    /* if unknown, set minimum poll time to 10ms   */
+                else    /* if lower than 10ms, set minimum poll time to 10ms   */
                 {
                     pInterval->tv_sec   = 0;
                     pInterval->tv_usec  = TRDP_PROCESS_DEFAULT_CYCLE_TIME;      /* Minimum poll time 10ms    */
+                    vos_printLog(VOS_LOG_INFO,
+                                 "pInterval default %02d:%02d\n",
+                                 pInterval->tv_sec,
+                                 pInterval->tv_usec / 1000);
                 }
 
                 if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
@@ -1462,7 +1473,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     UINT32                  replyComId,
     TRDP_IP_ADDR_T          replyIpAddr)
 {
-    TRDP_ERR_T  ret             = TRDP_NO_ERR;
+    TRDP_ERR_T  ret = TRDP_NO_ERR;
     PD_ELE_T    *pSubPD         = (PD_ELE_T *) subHandle;
     PD_ELE_T    *pReqElement    = NULL;
 
@@ -1633,11 +1644,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T            *newPD = NULL;
+    PD_ELE_T    *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
-    INT32 lIndex;
+    INT32       lIndex;
 
     /*    Check params    */
     if (comId == 0 || pSubHandle == NULL)
@@ -1925,7 +1936,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL && pElement != NULL)
         {
-            pPdInfo->comId          = pElement->addr.comId;
+            pPdInfo->comId = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->topoCount      = vos_ntohl(pElement->pFrame->frameHead.topoCount);
@@ -2106,8 +2117,8 @@ TRDP_ERR_T tlm_addListener (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T      errv            = TRDP_NO_ERR;
-    MD_LIS_ELE_T    *pNewElement    = NULL;
+    TRDP_ERR_T      errv = TRDP_NO_ERR;
+    MD_LIS_ELE_T    *pNewElement = NULL;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -2143,7 +2154,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->pNext = NULL;
 
                 /* caller parameters saved into instance */
-                pNewElement->pUserRef           = pUserRef;
+                pNewElement->pUserRef = pUserRef;
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.topoCount     = topoCount;
                 pNewElement->addr.destIpAddr    = 0;
@@ -2193,8 +2204,8 @@ TRDP_ERR_T tlm_addListener (
                 else
                 {
                     /* Insert into list */
-                    pNewElement->pNext          = appHandle->pMDListenQueue;
-                    appHandle->pMDListenQueue   = pNewElement;
+                    pNewElement->pNext = appHandle->pMDListenQueue;
+                    appHandle->pMDListenQueue = pNewElement;
 
                     /* Statistics */
                     if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) != 0)
