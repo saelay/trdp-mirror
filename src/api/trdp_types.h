@@ -10,11 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
+ *
+ *      BL 2014-02-27: Ticket #17: tlp_subscribe() returns wrong *pSubHandle
  *
  */
 
@@ -288,9 +290,9 @@ typedef enum
     TRDP_TYPE_MAX   = 30   /**< Values greater are considered nested datasets */
 } TRDP_DATA_TYPE_T;
 
-#define TRDP_BOOL8         TRDP_BITSET8  /**< 1 bit relevant 
+#define TRDP_BOOL8          TRDP_BITSET8 /**< 1 bit relevant
                                               (equal to zero = false, not equal to zero = true) */
-#define TRDP_ANTIVALENT8   TRDP_BITSET8  /**< 2 bit relevant 
+#define TRDP_ANTIVALENT8    TRDP_BITSET8 /**< 2 bit relevant
                                               (0x0 = errror, 0x01 = false, 0x02 = true, 0x03 undefined) */
 
 struct TRDP_DATASET;
@@ -460,9 +462,9 @@ typedef struct
 
 
 typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
-typedef struct TRDP_HANDLE *TRDP_PUB_T;
-typedef struct TRDP_HANDLE *TRDP_SUB_T;
-typedef struct TRDP_HANDLE *TRDP_LIS_T;
+typedef struct PD_ELE *TRDP_PUB_T;
+typedef struct PD_ELE *TRDP_SUB_T;
+typedef struct PD_ELE *TRDP_LIS_T;
 
 
 
@@ -635,8 +637,8 @@ typedef struct
  */
 typedef enum
 {
-    TRDP_OPTION_NONE            = 0,
-    TRDP_OPTION_BLOCK           = 0x01,      /**< Default: Use nonblocking I/O calls, polling necessary
+    TRDP_OPTION_NONE    = 0,
+    TRDP_OPTION_BLOCK   = 0x01,              /**< Default: Use nonblocking I/O calls, polling necessary
                                                   Set: Read calls will block, use select()                */
     TRDP_OPTION_TRAFFIC_SHAPING = 0x02,      /**< Use traffic shaping - distribute packet sending
                                                   Default: OFF                                            */
