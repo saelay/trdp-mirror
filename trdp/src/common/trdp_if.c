@@ -1310,19 +1310,11 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 {
                     vos_subTime(&appHandle->nextJob, &now);
                     *pInterval = appHandle->nextJob;
-                    vos_printLog(VOS_LOG_INFO,
-                                 "pInterval from nextJob %02d:%02d\n",
-                                 pInterval->tv_sec,
-                                 pInterval->tv_usec / 1000);
                 }
                 else    /* if lower than 10ms, set minimum poll time to 10ms   */
                 {
                     pInterval->tv_sec   = 0;
                     pInterval->tv_usec  = TRDP_PROCESS_DEFAULT_CYCLE_TIME;      /* Minimum poll time 10ms    */
-                    vos_printLog(VOS_LOG_INFO,
-                                 "pInterval default %02d:%02d\n",
-                                 pInterval->tv_sec,
-                                 pInterval->tv_usec / 1000);
                 }
 
                 if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
