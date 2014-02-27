@@ -42,8 +42,7 @@
  *
  *  @brief This struct makes a mapping between one comId and one dataset.
  *
- *
- * The following relation between the comId and an element of a dataset is given:
+ * The following overview visualizes the relation between one comId and an element of a dataset:
  * @dot
  * digraph Reference {
  *      rankdir=LR;
@@ -51,9 +50,9 @@
  *      c [ label="ComId" ];
  *      d [ label="Dataset" ];
  *      e [ label="Element" ];
- *      c -> d [ ];
- *      d -> d [ ];
- *      d -> e [ ];
+ *      c -> d [ label="1..1" ];
+ *      d -> d [ label="0..*" ];
+ *      d -> e [ label="1..*" ];
  * }
  * @enddot
  * There is a separate structure for datasets necessary, because the dataset itself can be packed recursively into each other.
@@ -75,6 +74,40 @@ struct Dataset {
 /** @struct Element
  *  @brief description of one element
  *
+ * All persisted information can be seen in this diagram:
+ * @dot
+ * digraph ERdetails {
+ *      node [shape=record ];
+ *      c [ label="ComId" fontsize=18 ];
+ *      cdDatasetId [ label="datasetId" shape=diamond ];
+ *      cComID [ label="ComId" shape=ellipse ];
+ *      d [ label="Dataset" fontsize=18 ];
+ *      deList [ label="listOfElements" shape=diamond ];
+ *      dName [ label="name" shape=ellipse ];
+ *      e [ label="Element" fontsize=18 ];
+ *      eName [ label="name" shape=ellipse ];
+ *      eType [ label="type" shape=ellipse ];
+ *      eTypeName [ label="typeName" shape=ellipse ];
+ *      eArray [ label="array_size" shape=ellipse ];
+ *      eUnit [ label="unit" shape=ellipse ];
+ *      eScale [ label="scale" shape=ellipse ];
+ *      eOffset [ label="offset" shape=ellipse ];
+ *
+ *      c -> cComID [ arrowhead=none ];
+ *      c -> cdDatasetId [ arrowhead=none label="1" ];
+ *      cdDatasetId -> d [ arrowhead=none label="1" ];
+ *      d -> deList [ arrowhead=none label="1" ];
+ *      d -> dName [ arrowhead=none ];
+ *      deList -> e [ arrowhead=none label="N" ];
+ *      e -> eName  [ arrowhead=none ];
+ *      e -> eType [ arrowhead=none ];
+ *      e -> eTypeName [ arrowhead=none ];
+ *      e -> eArray [ arrowhead=none ];
+ *      e -> eUnit [ arrowhead=none ];
+ *      e -> eScale [ arrowhead=none ];
+ *      e -> eOffset [ arrowhead=none ];
+ * }
+ * @enddot
  */
 struct Element {
 	GString*    name; /**< Name of the variable, that is stored */
