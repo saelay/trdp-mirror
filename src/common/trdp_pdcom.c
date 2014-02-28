@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
  *      BL 2014-02-27: Ticket #23: tlc_getInterval() always returning 10ms
  *      BL 2014-01-09: Ticket #14: Wrong error return in trdp_pdDistribute()
  *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
@@ -141,8 +142,8 @@ TRDP_ERR_T trdp_pdPut (
 void trdp_pdDataUpdate (
     PD_ELE_T *pPacket)
 {
-    UINT32  myCRC   = vos_crc32(0xFFFFFFFF, NULL, 0);
-    UINT8   *pDest  = pPacket->pFrame->data + pPacket->dataSize;
+    UINT32  myCRC;
+    UINT8   *pDest = pPacket->pFrame->data + pPacket->dataSize;
 
     /* CRC exists only if data transmitted */
     if (pPacket->dataSize != 0)
@@ -159,7 +160,7 @@ void trdp_pdDataUpdate (
         }
 
         /*  Compute data checksum   */
-        myCRC = vos_crc32(myCRC, pPacket->pFrame->data, pPacket->dataSize);
+        myCRC = vos_crc32(INITFCS, pPacket->pFrame->data, pPacket->dataSize);
         *(UINT32 *)pDest = MAKE_LE(myCRC);
     }
 }
@@ -736,7 +737,7 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
 void    trdp_pdUpdate (
     PD_ELE_T *pPacket)
 {
-    UINT32 myCRC = vos_crc32(0xFFFFFFFF, NULL, 0);
+    UINT32 myCRC;
 
     /* increment counter with each telegram */
     if (pPacket->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PP))
@@ -751,7 +752,7 @@ void    trdp_pdUpdate (
     }
 
     /* Compute CRC32   */
-    myCRC = vos_crc32(myCRC, (UINT8 *)&pPacket->pFrame->frameHead, sizeof(PD_HEADER_T) - sizeof(UINT32));
+    myCRC = vos_crc32(INITFCS, (UINT8 *)&pPacket->pFrame->frameHead, sizeof(PD_HEADER_T) - SIZE_OF_FCS);
     pPacket->pFrame->frameHead.frameCheckSum = MAKE_LE(myCRC);
 }
 
@@ -768,8 +769,8 @@ TRDP_ERR_T trdp_pdCheck (
     PD_HEADER_T *pPacket,
     UINT32      packetSize)
 {
-    UINT32      myCRC       = vos_crc32(0xFFFFFFFF, NULL, 0);
-    UINT32      *pDataFCS   = (UINT32 *)((UINT8 *)pPacket + packetSize - 4);
+    UINT32      myCRC;
+    UINT32      *pDataFCS   = (UINT32 *)((UINT8 *)pPacket + packetSize - SIZE_OF_FCS);
     TRDP_ERR_T  err         = TRDP_NO_ERR;
 
     /*  Check size    */
@@ -781,7 +782,7 @@ TRDP_ERR_T trdp_pdCheck (
     }
 
     /*    Check Header CRC (FCS)  */
-    myCRC = vos_crc32(myCRC, (UINT8 *) pPacket, sizeof(PD_HEADER_T) - 4);
+    myCRC = vos_crc32(INITFCS, (UINT8 *) pPacket, sizeof(PD_HEADER_T) - SIZE_OF_FCS);
 
     if (pPacket->frameCheckSum != MAKE_LE(myCRC))
     {
@@ -809,8 +810,7 @@ TRDP_ERR_T trdp_pdCheck (
     /*  Check Data CRC (FCS)   */
     else if (pPacket->datasetLength > 0)
     {
-        myCRC   = 0xFFFFFFFF; /* reset the initialization value for the CRC */
-        myCRC   = vos_crc32(myCRC, (UINT8 *)pPacket + sizeof(PD_HEADER_T), vos_ntohl(pPacket->datasetLength));
+        myCRC = vos_crc32(INITFCS, (UINT8 *)pPacket + sizeof(PD_HEADER_T), vos_ntohl(pPacket->datasetLength));
 
         if (*pDataFCS != MAKE_LE(myCRC))
         {

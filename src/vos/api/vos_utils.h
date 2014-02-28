@@ -10,11 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
+ *
+ *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
  *
  */
 
@@ -93,6 +95,10 @@ extern void *gRefCon;
 #else
     #define ALIGNOF(type)  ((UINT32)offsetof(struct { char c; type member; }, member))
 #endif
+
+/** CRC/FCS constants */
+#define INITFCS         0xffffffff      /**< Initial FCS value */
+#define SIZE_OF_FCS     4               /**< for better understanding of address calculations */
 
 /***********************************************************************************************************************
  * TYPEDEFS
