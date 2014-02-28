@@ -11,11 +11,13 @@
  * @author          Bernd Loehr, NewTec GmbH
  *
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
+ *
+ *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
  *
  */
 
@@ -33,7 +35,7 @@
 
 #ifndef PROGMEM
 #define PROGMEM
-#define pgm_read_dword(a) (*(a))
+#define pgm_read_dword(a)  (*(a))
 #endif
 
 /***********************************************************************************************************************
@@ -125,7 +127,7 @@ static const UINT32 crc_table[256] PROGMEM =
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-static BOOL8        sIsBigEndian            = FALSE;
+static BOOL8        sIsBigEndian = FALSE;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -140,16 +142,16 @@ static BOOL8        sIsBigEndian            = FALSE;
 VOS_ERR_T vos_initRuntimeConsts (void)
 {
 #if MD_SUPPORT
-    VOS_ERR_T   err = VOS_INTEGRATION_ERR;
-	UINT32       sAlignINT8              = 1;
-	UINT32       sAlignINT16             = 2;
-	UINT32       sAlignINT32             = 4;
-	UINT32       sAlignREAL32            = 4;
-	UINT32       sAlignTIMEDATE48        = 6;
-	UINT32       sAlignINT64             = 8;
-	UINT32       sAlignREAL64            = 8;
-	UINT32       sAlignTIMEDATE48Array1  = 4;
-	UINT32       sAlignTIMEDATE48Array2  = 4;
+    VOS_ERR_T   err                     = VOS_INTEGRATION_ERR;
+    UINT32      sAlignINT8              = 1;
+    UINT32      sAlignINT16             = 2;
+    UINT32      sAlignINT32             = 4;
+    UINT32      sAlignREAL32            = 4;
+    UINT32      sAlignTIMEDATE48        = 6;
+    UINT32      sAlignINT64             = 8;
+    UINT32      sAlignREAL64            = 8;
+    UINT32      sAlignTIMEDATE48Array1  = 4;
+    UINT32      sAlignTIMEDATE48Array2  = 4;
 
 
     /*  Compute endianess  */
@@ -260,7 +262,7 @@ VOS_ERR_T vos_initRuntimeConsts (void)
 
     return err;
 #else
-	return VOS_NO_ERR;
+    return VOS_NO_ERR;
 #endif
 }
 
@@ -312,6 +314,7 @@ EXT_DECL void vos_terminate ()
 
 /**********************************************************************************************************************/
 /** Compute crc32 according to IEEE802.3.
+ *  Note: Returned CRC is inverted
  *
  *  @param[in]          crc         Initial value.
  *  @param[in,out]      pData       Pointer to data.
@@ -330,7 +333,7 @@ UINT32 vos_crc32 (
     {
         crc = (crc >> 8) ^ pgm_read_dword(&crc_table[(crc ^ pData[i]) & 0xff]);
     }
-    return crc;
+    return ~crc;
 }
 
 /**********************************************************************************************************************/
