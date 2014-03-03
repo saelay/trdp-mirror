@@ -274,7 +274,7 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
         const char  *file = strrchr(pFile, '\\');
         _snprintf(buf, sizeof(buf), "%s %s:%d %s",
                   cat[category], file ? file + 1 : pFile, line, pMsgStr);
-        OutputDebugString(buf);
+        OutputDebugString((LPCWSTR)buf);
     }
     else
     {
