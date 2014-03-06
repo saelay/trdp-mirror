@@ -113,7 +113,7 @@ guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs)
     {
         fcs = (fcs >> 8)^fcstab[(fcs ^ buf[i]) & 0xff];
     }
-   return fcs;
+   return ~fcs;
 }
 
 
