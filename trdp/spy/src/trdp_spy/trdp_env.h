@@ -98,7 +98,9 @@
 
 /** @fn guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs)
  *
- * @brief Calculates and returns a 32-bit FCS.
+ * @brief Compute crc32 according to IEEE802.3.
+ *
+ * @note Returned CRC is inverted
  *
  * @param[in] buf   Input buffer
  * @param[in] len   Length of input buffer
