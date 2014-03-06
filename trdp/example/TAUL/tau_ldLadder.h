@@ -15,6 +15,8 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
+ * $Id$
+ *
  */
 
 #ifndef TAU_LDLADDER_H_
@@ -206,12 +208,16 @@ typedef struct PD_REQUEST_TELEGRAM
 	struct PD_REQUEST_TELEGRAM	*pNextPdRequestTelegram;		/* pointer to next PD Request Telegram or NULL */
 } PD_REQUEST_TELEGRAM_T;
 
+/* comId-IP Address Handle */
+typedef struct TRDP_HANDLE	*COMID_IP_HANDLE_T;
+
 /* Caller Telegram */
 typedef struct CALLER_TELEGRAM
 {
 	TRDP_APP_SESSION_T				appHandle;						/* the handle returned by tlc_openSession */
 	TRDP_LIS_T							listenerHandle;				/* handle from related subscribe tlm_addListener()*/
-	TRDP_LIS_T							listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
+//	TRDP_LIS_T							listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
+	COMID_IP_HANDLE_T					listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
 	DATASET_T							dataset;						/* dataset (size, buffer) */
 	UINT32								datasetNetworkByteSize;		/* dataset size by networkByteOrder */
 	pTRDP_DATASET_T					pDatasetDescriptor;			/* Dataset Descriptor */
@@ -235,7 +241,8 @@ typedef struct REPLIER_TELEGRAM
 {
 	TRDP_APP_SESSION_T				appHandle;						/* the handle returned by tlc_openSession */
 	TRDP_LIS_T							listenerHandle;				/* handle from related subscribe tlm_addListener()*/
-	TRDP_LIS_T							listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
+//	TRDP_LIS_T							listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
+	COMID_IP_HANDLE_T					listenerHandleForTAUL;		/* handle for send Message Queue when MD Receive */
 	DATASET_T							dataset;						/* dataset (size, buffer) */
 	UINT32								datasetNetworkByteSize;		/* dataset size by networkByteOrder */
 	pTRDP_DATASET_T					pDatasetDescriptor;			/* Dataset Descriptor */
@@ -309,6 +316,14 @@ typedef struct LISTENER_HANDLE
 	struct LISTENER_HANDLE			*pNextListenerHandle;					/* pointer to next LISTENER HANDLE or NULL */
 } LISTENER_HANDLE_T;
 
+/* Dataset of Internal Config */
+typedef struct INTERNAL_CONFIG_DATASET
+{
+    UINT32                  id;           /**< dataset identifier > 1000 */
+    UINT16                  reserved1;    /**< Reserved for future use, must be zero */
+    UINT16                  numElement;   /**< Number of elements */
+    TRDP_DATASET_ELEMENT_T  *pElement;		/**< Pointer to a dataset element */
+} INTERNAL_CONFIG_DATASET_T;
 
 /***********************************************************************************************************************
  * GLOBAL VARIABLES
@@ -872,6 +887,15 @@ WAITING_RECEIVE_CONFIRM_T *searchWaitingReceiveConfirmReference (
 TRDP_ERR_T appendListenerHandleList(
 		LISTENER_HANDLE_T    * *ppHeadListenerHandle,
 		LISTENER_HANDLE_T    *pNewListenerHandle);
+
+/******************************************************************************/
+/** Set TRDP Config Parameter From internal config
+ *
+ *	@retval			TRDP_NO_ERR
+ *	@retval			TRDP_THREAD_ERR
+ */
+TRDP_ERR_T setConfigParameterFromInternalConfig (
+	void);
 
 /******************************************************************************/
 /** PD Main Process Init
