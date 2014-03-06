@@ -13,6 +13,8 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
+ * $Id$
+ *
  */
 
 #ifndef TAULAPP_H_
@@ -78,11 +80,11 @@ extern "C" {
 /* Default MD Application Parameter */
 /* for MD Notify/Request Destination Parameter */
 /* Point to Multi point */
-const TRDP_IP_ADDR_T		DEFAULT_CALLER_DEST_IP_ADDRESS	= 0xefff0101;		/* Destination IP Address for Caller Application 239.255.1.1 */
-const TRDP_URI_HOST_T	DEFAULT_CALLER_DEST_URI = "239.255.1.1";			/* Destination URI for Caller Application */
+//const TRDP_IP_ADDR_T		DEFAULT_CALLER_DEST_IP_ADDRESS	= 0xefff0101;		/* Destination IP Address for Caller Application 239.255.1.1 */
+//const TRDP_URI_HOST_T	DEFAULT_CALLER_DEST_URI = "239.255.1.1";			/* Destination URI for Caller Application */
 /* Point to Point */
-//const TRDP_IP_ADDR_T		DEFAULT_CALLER_DEST_IP_ADDRESS	= 0xa000111;		/* Destination IP Address for Caller Application 10.0.1.17 */
-//const TRDP_URI_HOST_T	DEFAULT_CALLER_DEST_URI = "10.0.1.17";				/* Destination URI for Caller Application */
+const TRDP_IP_ADDR_T		DEFAULT_CALLER_DEST_IP_ADDRESS	= 0xa000111;		/* Destination IP Address for Caller Application 10.0.1.17 */
+const TRDP_URI_HOST_T	DEFAULT_CALLER_DEST_URI = "10.0.1.17";				/* Destination URI for Caller Application */
 #define DEFAULT_MD_APP_CYCLE_NUMBER				0				/* Number of MD Application Cycle : Caller Send Number, Replier Receive Number */
 #define DEFAULT_MD_APP_CYCLE_TIME					5000000		/* Request Send Cycle Interval Time */
 /* for tau_ldRequest() numReplies Parameter */
@@ -165,7 +167,8 @@ typedef struct APPLICATION_THREAD_HANDLE
 /* Caller/Replier Application Thread Handle */
 typedef struct CALLER_REPLIER_APP_THREAD_HANDLE
 {
-	TRDP_LIS_T									pMdAppThreadListener;
+//	TRDP_LIS_T									pMdAppThreadListener;
+	COMID_IP_HANDLE_T							pMdAppThreadListener;
 	VOS_QUEUE_T								pTrdpMqDescriptor;
 } CALLER_REPLIER_APP_THREAD_HANDLE_T;
 
@@ -423,7 +426,8 @@ TAUL_APP_ERR_TYPE setReplierAppThreadMessageQueueDescriptor(
  */
 VOS_QUEUE_T getCallerAppThreadMessageQueueDescriptor(
 		UINT32 *pLoopStartNumber,
-		TRDP_LIS_T pMdAppThreadListener);
+//		TRDP_LIS_T pMdAppThreadListener);
+		COMID_IP_HANDLE_T pMdAppThreadListener);
 
 /**********************************************************************************************************************/
 /** Delete Caller Application Message Queue Descriptor
@@ -448,7 +452,8 @@ TAUL_APP_ERR_TYPE deleteCallerAppThreadMessageQueueDescriptor(
  */
 VOS_QUEUE_T getReplierAppThreadMessageQueueDescriptor(
 		UINT32 *pLoopStartNumber,
-		TRDP_LIS_T pMdAppThreadListener);
+//		TRDP_LIS_T pMdAppThreadListener);
+		COMID_IP_HANDLE_T pMdAppThreadListener);
 
 /**********************************************************************************************************************/
 /** Delete Replier Application Message Queue Descriptor

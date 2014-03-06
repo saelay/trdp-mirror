@@ -14,6 +14,8 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
+ * $Id$
+ *
  */
 
 #ifdef TRDP_OPTION_LADDER
@@ -708,7 +710,8 @@ TAUL_APP_ERR_TYPE deleteReplierAppThreadMessageQueueDescriptor(
  */
 VOS_QUEUE_T getCallerAppThreadMessageQueueDescriptor(
 		UINT32 *pLoopStartNumber,
-		TRDP_LIS_T pMdAppThreadListener)
+//		TRDP_LIS_T pMdAppThreadListener)
+		COMID_IP_HANDLE_T pMdAppThreadListener)
 {
 	UINT32 i = 0;
 
@@ -759,7 +762,8 @@ VOS_QUEUE_T getCallerAppThreadMessageQueueDescriptor(
  */
 VOS_QUEUE_T getReplierAppThreadMessageQueueDescriptor(
 		UINT32 *pLoopStartNumber,
-		TRDP_LIS_T pMdAppThreadListener)
+//		TRDP_LIS_T pMdAppThreadListener)
+		COMID_IP_HANDLE_T pMdAppThreadListener)
 {
 	UINT32 i = 0;
 

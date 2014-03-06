@@ -15,6 +15,8 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
+ * $Id$
+ *
  */
 
 #ifdef TRDP_OPTION_LADDER
@@ -42,8 +44,7 @@
 #include "tau_ladder.h"
 #include "tau_ladder_app.h"
 #include "tau_ldLadder.h"
-
-
+#include "tau_ldLadder_config.h"
 
 /**********************************************************************************************************************/
 /**
@@ -1427,46 +1428,12 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
  */
 
 /******************************************************************************
- *   Locals
+ * TRDP_OPTION_TRAFFIC_SHAPING  Locals
  */
 
 /******************************************************************************
  *   Globals
  */
-
-TRDP_XML_DOC_HANDLE_T	xmlConfigHandle;			/* XML Config Handle */
-TAU_LD_CONFIG_T			*pTaulConfig;				/* TAUL Config */
-TAU_LD_CONFIG_T			taulConfig = {0};			/* TAUL Config */
-
-/*  General parameters from xml configuration file */
-TRDP_MEM_CONFIG_T			memoryConfig;
-TRDP_DBG_CONFIG_T			debugConfig;
-UINT32						numComPar = 0;
-TRDP_COM_PAR_T			*pComPar = NULL;
-UINT32						numIfConfig = 0;
-TRDP_IF_CONFIG_T			*pIfConfig = NULL;
-
-/*  Dataset configuration from xml configuration file */
-UINT32                  numComId = 0;
-TRDP_COMID_DSID_MAP_T  *pComIdDsIdMap = NULL;
-UINT32                  numDataset = 0;
-apTRDP_DATASET_T        apDataset = NULL;
-
-TRDP_APP_SESSION_T		appHandle;					/*	Sub-network Id1 identifier to the library instance	*/
-TRDP_APP_SESSION_T		appHandle2;				/*	Sub-network Id2 identifier to the library instance	*/
-
-/*  Session configurations  */
-typedef struct
-{
-    TRDP_APP_SESSION_T      sessionHandle;
-    TRDP_PD_CONFIG_T        pdConfig;
-    TRDP_MD_CONFIG_T        mdConfig;
-    TRDP_PROCESS_CONFIG_T   processConfig;
-} sSESSION_CONFIG_T;
-/*  Array of session configurations - one for each interface, only numIfConfig elements actually used  */
-sSESSION_CONFIG_T          arraySessionConfig[MAX_SESSIONS];
-/* Array of Exchange Parameter */
-TRDP_EXCHG_PAR_T				*arrayExchgPar[LADDER_IF_NUMBER] = {0};
 
 /* Telegram List Pointer */
 PUBLISH_TELEGRAM_T			*pHeadPublishTelegram = NULL;						/* Top Address of Publish Telegram List */
@@ -1492,10 +1459,6 @@ VOS_MUTEX_T pWaitingSendReplyReferenceMutex = NULL;			/* pointer to Mutex for Wa
 VOS_MUTEX_T pWaitingReceiveRequestReferenceMutex = NULL;	/* pointer to Mutex for Waiting Receive Request Reference */
 VOS_MUTEX_T pWaitingReceiveConfirmReferenceMutex = NULL;	/* pointer to Mutex for Waiting Receive Confirm Reference */
 VOS_MUTEX_T pListenerHandleListMutex = NULL;					/* pointer to Mutex for Listener Handle List */
-
-/*  Exchange Parameter from xml configuration file */
-UINT32             			 numExchgPar = 0;			/* Number of Exchange Parameter */
-TRDP_EXCHG_PAR_T    			*pExchgPar = NULL;			/* Pointer to Exchange Parameter */
 
 /*  Marshalling configuration initialized from datasets defined in xml  */
 TRDP_MARSHALL_CONFIG_T		marshallConfig = {&tau_marshall, &tau_unmarshall, NULL};	/** Marshaling/unMarshalling configuration	*/
@@ -3787,6 +3750,194 @@ TRDP_ERR_T appendListenerHandleList(
 }
 
 /******************************************************************************/
+/** Set TRDP Config Parameter From internal config
+ *
+ *	@retval			TRDP_NO_ERR
+ *	@retval			TRDP_MEM_ERR
+ */
+TRDP_ERR_T setConfigParameterFromInternalConfig (
+	void)
+{
+	UINT32					i = 0;							/* Loop Counter */
+	UINT32					datasetIndex = 0;				/* Loop Counter of Dataset Index */
+	UINT32					elementIndex = 0;				/* Loop Counter of Dataset element Index */
+	UINT32					interfaceNumberIndex = 0;	/* Loop Counter of Interface Number Index */
+	UINT32					exchgParIndex = 0;			/* Loop Counter of Exchange Parameter Index */
+	pTRDP_DATASET_T		pDataset = NULL;				/* pointer to Dataset */
+
+	/* Set IF Config *****/
+	/* Get IF Config memory area */
+	pIfConfig = (TRDP_IF_CONFIG_T *)vos_memAlloc(sizeof(TRDP_IF_CONFIG_T) * NUM_IF_CONFIG);
+	if (pIfConfig == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR,"setConfigParameterFromInternalConfig() Failed. Array IF Config vos_memAlloc() Err\n");
+		return TRDP_MEM_ERR;
+	}
+	else
+	{
+		/* Initialize IF Config */
+		memset(pIfConfig, 0, (sizeof(TRDP_IF_CONFIG_T) * NUM_IF_CONFIG));
+	}
+	/* IF Config Loop */
+	for (i = 0; i < NUM_IF_CONFIG; i++)
+	{
+		/* Set Interface Name of Array IF Config */
+		memcpy(pIfConfig[i].ifName, arrayInternalIfConfig[i].ifName, sizeof(TRDP_LABEL_T));
+		/* Set Network Id of Array IF Config */
+		pIfConfig[i].networkId = arrayInternalIfConfig[i].networkId;
+		/* Convert Host IP Address, and Set Host IP Address of Array IF Config */
+		pIfConfig[i].hostIp = vos_dottedIP(arrayInternalIfConfig[i].dottedHostIp);
+		/* Convert Leader IP Address, and Set Leader IP Address of Array IF Config */
+		pIfConfig[i].leaderIp = vos_dottedIP(arrayInternalIfConfig[i].dottedLeaderIp);
+	}
+
+	/* Set ComIdDatasetIdMap Config */
+	pComIdDsIdMap = arrayComIdDsIdMapConfig;
+
+	/* Set Dataset Config *****/
+#if 0
+	/* Get Array Dataset Config memory area */
+    apDataset = (apTRDP_DATASET_T)vos_memAlloc(sizeof(TRDP_DATASET_T *) * NUM_DATASET);
+	if (apDataset == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR,"setConfigParameterFromInternalConfig() Failed. Array Dataset Config vos_memAlloc() Err\n");
+		return TRDP_MEM_ERR;
+	}
+	else
+	{
+		/* Initialize Array Dataset Config */
+		memset(apDataset, 0, (sizeof(TRDP_DATASET_T *) * NUM_DATASET));
+	}
+	/* Dataset Loop */
+	for(i = 0; i < numDataset; i++)
+	{
+		/* Get Dataset Config memory area */
+		pDataset = (TRDP_DATASET_T *)vos_memAlloc(sizeof(TRDP_DATASET_T) + (sizeof(TRDP_DATASET_ELEMENT_T) * arrayInternalDatasetConfig[i].numElement));
+		if (pDataset== NULL)
+		{
+			vos_printLog(VOS_LOG_ERROR,"setConfigParameterFromInternalConfig() Failed. Dataset Config vos_memAlloc() Err\n");
+			return TRDP_MEM_ERR;
+		}
+		else
+		{
+			/* Initialize Dataset Config */
+			memset(pDataset, 0, (sizeof(TRDP_DATASET_ELEMENT_T) * arrayInternalDatasetConfig[i].numElement));
+		}
+		/* Set Dataset Address in Array Dataset Config */
+		apDataset[i] = pDataset;
+	}
+#endif
+	/* Get Array Dataset Config memory area */
+    apDataset = (apTRDP_DATASET_T)vos_memAlloc(sizeof(TRDP_DATASET_T *) * NUM_DATASET);
+	if (apDataset == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR,"setConfigParameterFromInternalConfig() Failed. Array Dataset Config vos_memAlloc() Err\n");
+		return TRDP_MEM_ERR;
+	}
+	else
+	{
+		/* Initialize Array Dataset Config */
+		memset(apDataset, 0, (sizeof(TRDP_DATASET_T *) * NUM_DATASET));
+	}
+	/* Dataset Loop */
+	for(datasetIndex = 0; datasetIndex < numDataset; datasetIndex++)
+	{
+		/* Get Dataset Config memory area */
+		pDataset = (TRDP_DATASET_T *)vos_memAlloc(sizeof(TRDP_DATASET_T) + (sizeof(TRDP_DATASET_ELEMENT_T) * arrayInternalDatasetConfig[datasetIndex].numElement));
+		if (pDataset== NULL)
+		{
+			vos_printLog(VOS_LOG_ERROR,"setConfigParameterFromInternalConfig() Failed. Dataset Config vos_memAlloc() Err\n");
+			return TRDP_MEM_ERR;
+		}
+		else
+		{
+			/* Initialize Dataset Config */
+			memset(pDataset, 0, (sizeof(TRDP_DATASET_T) + sizeof(TRDP_DATASET_ELEMENT_T) * arrayInternalDatasetConfig[datasetIndex].numElement));
+		}
+		/* Set Dataset Address in Array Dataset Config */
+		apDataset[datasetIndex] = pDataset;
+		/* Set Id of Array Dataset */
+//		apDataset[datasetIndex].id = arrayInternalDatasetConfig[datasetIndex].id;
+		pDataset->id = arrayInternalDatasetConfig[datasetIndex].id;
+		/* Set Reserved of Array Dataset */
+		pDataset->reserved1 = arrayInternalDatasetConfig[datasetIndex].reserved1;
+		/* Set Number of Element of Array Dataset */
+		pDataset->numElement = arrayInternalDatasetConfig[datasetIndex].numElement;
+		/* Set Pointer to Element of Array Dataset */
+//		pDataset->pElement = arrayInternalDatasetConfig[datasetIndex].pElement;
+		/* Set Element Loop */
+		for(elementIndex = 0; elementIndex < pDataset->numElement; elementIndex++)
+		{
+			/* Set Element Type */
+			pDataset->pElement[elementIndex].type = arrayInternalDatasetConfig[datasetIndex].pElement[elementIndex].type;
+			/* Set Element Size */
+			pDataset->pElement[elementIndex].size = arrayInternalDatasetConfig[datasetIndex].pElement[elementIndex].size;
+			/* Set Element Pointer to Dataset cache */
+			pDataset->pElement[elementIndex].pCachedDS = arrayInternalDatasetConfig[datasetIndex].pElement[elementIndex].pCachedDS;
+		}
+	}
+
+	/* Set IF Config Parameter *****/
+#if 0
+	/* Get Exchange Parameter Config memory area */
+	*arrayExchgPar = (TRDP_EXCHG_PAR_T *)vos_memAlloc(numIfConfig * (sizeof(TRDP_EXCHG_PAR_T) * numExchgPar));
+	if (arrayExchgPar== NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR,"setConfigParameterFromInternalConfig() Failed. IF Config Parameter vos_memAlloc() Err\n");
+		return TRDP_MEM_ERR;
+	}
+	else
+	{
+		/* Initialize If Config Parameter */
+		memset(arrayExchgPar, 0, (numIfConfig * (sizeof(TRDP_EXCHG_PAR_T) * numExchgPar)));
+	}
+#endif
+	/* Subnet Loop */
+	for (interfaceNumberIndex = 0; interfaceNumberIndex < numIfConfig; interfaceNumberIndex++)
+	{
+
+		/* Get Exchange Parameter Config memory area */
+		arrayExchgPar[interfaceNumberIndex] = (TRDP_EXCHG_PAR_T *)vos_memAlloc((sizeof(TRDP_EXCHG_PAR_T) * numExchgPar));
+		if (arrayExchgPar[interfaceNumberIndex]== NULL)
+		{
+			vos_printLog(VOS_LOG_ERROR,"setConfigParameterFromInternalConfig() Failed. IF Config Parameter vos_memAlloc() Err\n");
+			return TRDP_MEM_ERR;
+		}
+		else
+		{
+			/* Initialize If Config Parameter */
+			memset(arrayExchgPar[interfaceNumberIndex], 0, (sizeof(TRDP_EXCHG_PAR_T) * numExchgPar));
+		}
+
+		/* Exchange Parameter Loop */
+		for (exchgParIndex = 0; exchgParIndex < numExchgPar; exchgParIndex++)
+		{
+
+			/* Set comId of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].comId = arrayInternalConfigExchgPar[interfaceNumberIndex][exchgParIndex].comId;
+			/* Set datasetId of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].datasetId = arrayInternalConfigExchgPar[interfaceNumberIndex][exchgParIndex].datasetId;
+			/* Set communication parameter Id of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].comParId = arrayInternalConfigExchgPar[interfaceNumberIndex][exchgParIndex].comParId;
+			/* Set Pointer to MD Parameter for this connection of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].pMdPar = arrayInternalConfigExchgPar[interfaceNumberIndex][exchgParIndex].pMdPar;
+			/* Set Pointer to PD Parameter for this connection of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].pPdPar = arrayInternalConfigExchgPar[interfaceNumberIndex][exchgParIndex].pPdPar;
+			/* Set number of destinations of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].destCnt = arrayInternalDestinationConfig[interfaceNumberIndex][exchgParIndex].destCnt;
+			/* Set Pointer to array of destination descriptors of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].pDest = arrayInternalDestinationConfig[interfaceNumberIndex][exchgParIndex].pDest;
+			/* Set number of sources of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].srcCnt = arrayInternalSourceConfig[interfaceNumberIndex][exchgParIndex].srcCnt;
+			/* Set Pointer to array of source descriptors of Array Exchange Parameter */
+			arrayExchgPar[interfaceNumberIndex][exchgParIndex].pSrc = arrayInternalSourceConfig[interfaceNumberIndex][exchgParIndex].pSrc;
+		}
+	}
+
+	return TRDP_NO_ERR;
+}
+
+/******************************************************************************/
 /** PD/MD Telegrams configured for one interface.
  * PD: Publisher, Subscriber, Requester
  * MD: Caller, Replier
@@ -5453,7 +5604,7 @@ TRDP_ERR_T replierTelegram (
 			}
 
 			/* Get Listener memory area for TAUL send Message Queue when MD Receive */
-			pReplierTelegram->listenerHandleForTAUL = (TRDP_LIS_T)vos_memAlloc(sizeof(TRDP_ADDRESSES_T));
+			pReplierTelegram->listenerHandleForTAUL = (COMID_IP_HANDLE_T)vos_memAlloc(sizeof(TRDP_ADDRESSES_T));
 			if (pReplierTelegram->listenerHandleForTAUL == NULL)
 			{
 				vos_printLog(VOS_LOG_ERROR,"replierTelegram() Failed. Listener vos_memAlloc() Err\n");
@@ -5909,7 +6060,7 @@ TRDP_ERR_T callerTelegram (
 	}
 
 	/* Get Listener memory area for TAUL send Message Queue when MD Receive */
-	pCallerTelegram->listenerHandleForTAUL = (TRDP_LIS_T)vos_memAlloc(sizeof(TRDP_ADDRESSES_T));
+	pCallerTelegram->listenerHandleForTAUL = (COMID_IP_HANDLE_T)vos_memAlloc(sizeof(TRDP_ADDRESSES_T));
 	if (pCallerTelegram->listenerHandleForTAUL == NULL)
 	{
 		vos_printLog(VOS_LOG_ERROR,"callerTelegram() Failed. Listener vos_memAlloc() Err\n");
@@ -6392,7 +6543,9 @@ TRDP_ERR_T tau_ldInit (
 	TRDP_PRINT_DBG_T			pPrintDebugString,
 	const TAU_LD_CONFIG_T	*pLdConfig)
 {
+#ifdef XML_CONFIG_ENABLE
 	CHAR8 xmlConfigFileName[FILE_NAME_MAX_SIZE] = "xmlconfig.xml";		/* XML Config File Name */
+#endif /* ifdef XML_CONFIG_ENABLE */
 	TRDP_ERR_T err = TRDP_NO_ERR;											/* Result */
 	UINT32 ifIndex = 0;														/* I/F get Loop Counter */
 	UINT32 index = 0;															/* Loop Counter */
@@ -6410,6 +6563,7 @@ TRDP_ERR_T tau_ldInit (
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
 #endif
 
+#ifdef XML_CONFIG_ENABLE
 	/* Read XML Config File */
 	err = tau_prepareXmlDoc(xmlConfigFileName, &xmlConfigHandle);
 	if (err != TRDP_NO_ERR)
@@ -6430,6 +6584,15 @@ TRDP_ERR_T tau_ldInit (
 		vos_printLog(VOS_LOG_ERROR, "tau_ldInit() failed. tau_readXmlDeviceConfig() error\n");
 		return err;
 	}
+#else
+	/* Set Config Parameter from Internal Config */
+	err = setConfigParameterFromInternalConfig();
+	if (err != TRDP_NO_ERR)
+	{
+		vos_printLog(VOS_LOG_ERROR, "tau_ldInit() failed. setConfigParameter() error\n");
+		return err;
+	}
+#endif /* ifdef XML_CONFIG_ENABLE */
 
 	/* Get I/F address */
 	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
@@ -6462,6 +6625,7 @@ TRDP_ERR_T tau_ldInit (
 		return err;
 	}
 
+#ifdef XML_CONFIG_ENABLE
 	/* Get Dataset Config */
 	err = tau_readXmlDatasetConfig(&xmlConfigHandle,
 										&numComId,
@@ -6473,6 +6637,7 @@ TRDP_ERR_T tau_ldInit (
 		vos_printLog(VOS_LOG_ERROR, "tau_ldInit() failed. tau_readXmlDatasetConfig() error = %d\n",err);
 		return err;
 	}
+#endif /* ifdef XML_CONFIG_ENABLE */
 
 	/* Set MD Call Back Function */
 	memcpy(&taulConfig, pLdConfig, sizeof(TAU_LD_CONFIG_T));
@@ -6487,6 +6652,7 @@ TRDP_ERR_T tau_ldInit (
 	/* Get I/F Config Loop */
 	for (ifIndex = 0; ifIndex < numIfConfig; ifIndex++)
 	{
+#ifdef XML_CONFIG_ENABLE
 		/* Get I/F Config Parameter */
 		err = tau_readXmlInterfaceConfig(&xmlConfigHandle,
 											pIfConfig[ifIndex].ifName,
@@ -6500,6 +6666,8 @@ TRDP_ERR_T tau_ldInit (
 			vos_printLog(VOS_LOG_ERROR, "tau_ldInit() failed. tau_readXmlInterfaceConfig() error = %d\n",err);
 			return err;
 		}
+#endif /* ifdef XML_CONFIG_ENABLE */
+
 		/* Enable Marshalling ? Check XML Config: pd-com-paramter marshall= "on" */
 		if ((arraySessionConfig[ifIndex].pdConfig.flags & TRDP_FLAGS_MARSHALL) == TRDP_FLAGS_MARSHALL)
 		{
@@ -6784,7 +6952,8 @@ TRDP_ERR_T tau_ldTerminate (
 			else
 			{
 				/* Display TimeStamp when unPublish time */
-				vos_printLog(VOS_LOG_DBG, "%s ComId:%d Destination IP Address:%d unPublish.\n", vos_getTimeStamp(), iterPublishTelegram->pubHandle->comId, iterPublishTelegram->pubHandle->destIpAddr);
+//				vos_printLog(VOS_LOG_DBG, "%s ComId:%d Destination IP Address:%d unPublish.\n", vos_getTimeStamp(), iterPublishTelegram->pubHandle->comId, iterPublishTelegram->pubHandle->destIpAddr);
+				vos_printLog(VOS_LOG_DBG, "%s ComId:%d Destination IP Address:%d unPublish.\n", vos_getTimeStamp(), iterPublishTelegram->pubHandle->addr.comId, iterPublishTelegram->pubHandle->addr.destIpAddr);
 			}
 		}
 		/* Free Publish Dataset */
@@ -6832,7 +7001,8 @@ TRDP_ERR_T tau_ldTerminate (
 			else
 			{
 				/* Display TimeStamp when unSubscribe time */
-				vos_printLog(VOS_LOG_DBG, "%s ComId:%d Destination IP Address:%d unSubscribe.\n", vos_getTimeStamp(), iterSubscribeTelegram->subHandle->comId, iterSubscribeTelegram->subHandle->destIpAddr);
+//				vos_printLog(VOS_LOG_DBG, "%s ComId:%d Destination IP Address:%d unSubscribe.\n", vos_getTimeStamp(), iterSubscribeTelegram->subHandle->comId, iterSubscribeTelegram->subHandle->destIpAddr);
+				vos_printLog(VOS_LOG_DBG, "%s ComId:%d Destination IP Address:%d unSubscribe.\n", vos_getTimeStamp(), iterSubscribeTelegram->subHandle->addr.comId, iterSubscribeTelegram->subHandle->addr.destIpAddr);
 			}
 		}
 		/* Free Subscribe Dataset */
