@@ -312,21 +312,24 @@ static TRDP_DATASET_T *find_DS_from_ComId (
  *  @retval         NULL if not found
  *  @retval         pointer to dataset
  */
-static TRDP_DATASET_T *find_DS (
+static TRDP_DATASET_T *tau_findDS (
     UINT32 datasetId)
 {
-    TRDP_DATASET_T  key2 = {0};
-    TRDP_DATASET_T  * *key3;
-
-    key2.id = datasetId;
-    key3    = (TRDP_DATASET_T * *) vos_bsearch(&key2,
-                                               sDataSets,
-                                               sNumEntries,
-                                               sizeof(TRDP_DATASET_T *),
-                                               dataset_compare_deref);
-    if (key3 != NULL)
+    if ((sDataSets != NULL) && (sNumEntries != 0))
     {
-        return *key3;
+        TRDP_DATASET_T  key2 = {0};
+        TRDP_DATASET_T  * *key3;
+
+        key2.id = datasetId;
+        key3    = (TRDP_DATASET_T * *) vos_bsearch(&key2,
+                                                   sDataSets,
+                                                   sNumEntries,
+                                                   sizeof(TRDP_DATASET_T *),
+                                                   dataset_compare_deref);
+        if (key3 != NULL)
+        {
+            return *key3;
+        }
     }
 
     return NULL;
@@ -387,7 +390,7 @@ static TRDP_ERR_T do_marshall (
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
+                    pDataset->pElement[lIndex].pCachedDS = tau_findDS(pDataset->pElement[lIndex].type);
                 }
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
@@ -602,7 +605,7 @@ static TRDP_ERR_T do_unmarshall (
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
+                    pDataset->pElement[lIndex].pCachedDS = tau_findDS(pDataset->pElement[lIndex].type);
                 }
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
@@ -677,9 +680,9 @@ static TRDP_ERR_T do_unmarshall (
 
                     while (noOfItems-- > 0)
                     {
-                        *pDst32     = *pSrc++ << 24;
-                        *pDst32     += *pSrc++ << 16;
-                        *pDst32     += *pSrc++ << 8;
+                        *pDst32     =  ((UINT32)(*pSrc++)) << 24;
+                        *pDst32     += ((UINT32)(*pSrc++)) << 16;
+                        *pDst32     += ((UINT32)(*pSrc++)) << 8;
                         *pDst32     += *pSrc++;
                         var_size    = *pDst32;
                         pDst32++;
@@ -700,10 +703,10 @@ static TRDP_ERR_T do_unmarshall (
 
                     while (noOfItems-- > 0)
                     {
-                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        *pDst32 = *pSrc++ << 24;
-                        *pDst32 += *pSrc++ << 16;
-                        *pDst32 += *pSrc++ << 8;
+                        pDst32  =  (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        *pDst32 =  ((UINT32)(*pSrc++)) << 24;
+                        *pDst32 += ((UINT32)(*pSrc++)) << 16;
+                        *pDst32 += ((UINT32)(*pSrc++)) << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
                         pDst16  = (UINT16 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT16));
@@ -726,15 +729,15 @@ static TRDP_ERR_T do_unmarshall (
 
                     while (noOfItems-- > 0)
                     {
-                        *pDst32 = *pSrc++ << 24;
-                        *pDst32 += *pSrc++ << 16;
-                        *pDst32 += *pSrc++ << 8;
+                        *pDst32 =  ((UINT32)(*pSrc++)) << 24;
+                        *pDst32 += ((UINT32)(*pSrc++)) << 16;
+                        *pDst32 += ((UINT32)(*pSrc++)) << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
-                        pDst32  = (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
-                        *pDst32 = *pSrc++ << 24;
-                        *pDst32 += *pSrc++ << 16;
-                        *pDst32 += *pSrc++ << 8;
+                        pDst32  =  (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
+                        *pDst32 =  ((UINT32)(*pSrc++)) << 24;
+                        *pDst32 += ((UINT32)(*pSrc++)) << 16;
+                        *pDst32 += ((UINT32)(*pSrc++)) << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
                     }
@@ -744,7 +747,7 @@ static TRDP_ERR_T do_unmarshall (
                 case TRDP_INT64:
                 case TRDP_UINT64:
                 case TRDP_REAL64:
-
+                {
                     if (pDst + noOfItems * 8 > pInfo->pDstEnd)
                     {
                         return TRDP_PARAM_ERR;
@@ -752,6 +755,7 @@ static TRDP_ERR_T do_unmarshall (
 
                     unpackedCopy64((UINT8 * *) &pSrc, &pDst, noOfItems);
                     break;
+                }
                 default:
                     break;
             }
@@ -817,7 +821,7 @@ static TRDP_ERR_T size_marshall (
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
+                    pDataset->pElement[lIndex].pCachedDS = tau_findDS(pDataset->pElement[lIndex].type);
                 }
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
@@ -1179,13 +1183,13 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = find_DS(dsId);
+            *ppDSPointer = tau_findDS(dsId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = find_DS(dsId);
+        pDataset = tau_findDS(dsId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
@@ -1246,13 +1250,13 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = find_DS(dsId);
+            *ppDSPointer = tau_findDS(dsId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = find_DS(dsId);
+        pDataset = tau_findDS(dsId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
@@ -1311,13 +1315,13 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = find_DS(dsId);
+            *ppDSPointer = tau_findDS(dsId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = find_DS(dsId);
+        pDataset = tau_findDS(dsId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
