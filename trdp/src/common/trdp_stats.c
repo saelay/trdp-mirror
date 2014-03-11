@@ -175,7 +175,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[lIndex].comId       = iter->addr.comId;      /* Subscribed ComId     */
         pStatistics[lIndex].joinedAddr  = iter->addr.mcGroup;    /* Joined IP address         */
         pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr;  /* Filter IP address         */
-        pStatistics[lIndex].callBack    = (void *) iter->userRef;  /* Reference for call back function if used
+        pStatistics[lIndex].callBack    = (void *) iter->pUserRef;  /* Reference for call back function if used
                                                                              */
         pStatistics[lIndex].timeout     = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */

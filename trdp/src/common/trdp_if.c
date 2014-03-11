@@ -1754,13 +1754,13 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       =
                         (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
-                    newPD->grossSize    = TRDP_MAX_PD_PACKET_SIZE;
-                    newPD->userRef      = pUserRef;
-                    newPD->socketIdx    = lIndex;
-                    newPD->privFlags    |= TRDP_INVALID_DATA;
-                    newPD->pktFlags     = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
-                    newPD->pCachedDS    = NULL;
-                    newPD->magic        = TRDP_MAGIC_SUB_HNDL_VALUE;
+                    newPD->grossSize        = TRDP_MAX_PD_PACKET_SIZE;
+                    newPD->pUserRef         = pUserRef;
+                    newPD->socketIdx        = lIndex;
+                    newPD->privFlags       |= TRDP_INVALID_DATA;
+                    newPD->pktFlags         = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    newPD->pCachedDS        = NULL;
+                    newPD->magic            = TRDP_MAGIC_SUB_HNDL_VALUE;
 
                     if (timeout == TRDP_TIMER_FOREVER)
                     {
@@ -1937,7 +1937,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
             pPdInfo->protVersion    = vos_ntohs(pElement->pFrame->frameHead.protocolVersion);
             pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
             pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
-            pPdInfo->pUserRef       = pElement->userRef;        /* TBD: User reference given with the local subscribe?
+            pPdInfo->pUserRef       = pElement->pUserRef;        /* TBD: User reference given with the local subscribe?
                                                                  */
             pPdInfo->resultCode     = TRDP_NO_ERR;
         }
@@ -2146,7 +2146,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->pNext = NULL;
 
                 /* caller parameters saved into instance */
-                pNewElement->pUserRef = pUserRef;
+                pNewElement->pUserRef           = pUserRef;
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.topoCount     = topoCount;
                 pNewElement->addr.destIpAddr    = 0;

@@ -553,7 +553,7 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.protVersion  = vos_ntohs(pExistingElement->pFrame->frameHead.protocolVersion);
             theMessage.replyComId   = vos_ntohl(pExistingElement->pFrame->frameHead.replyComId);
             theMessage.replyIpAddr  = vos_ntohl(pExistingElement->pFrame->frameHead.replyIpAddress);
-            theMessage.pUserRef     = pExistingElement->userRef; /* User reference given with the local subscribe? */
+            theMessage.pUserRef     = pExistingElement->pUserRef; /* User reference given with the local subscribe? */
             theMessage.resultCode   = resultCode;
 
             appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
@@ -662,7 +662,7 @@ void trdp_pdHandleTimeOuts (
                 theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
                 theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
                 theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
-                theMessage.pUserRef     = iterPD->userRef;
+                theMessage.pUserRef     = iterPD->pUserRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
                 appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0);

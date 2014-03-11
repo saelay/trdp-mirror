@@ -203,7 +203,7 @@ typedef struct PD_ELE
     UINT32              sendSize;               /**< data size sent out                                     */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
-    const void          *userRef;               /**< from subscribe()                                       */
+    const void          *pUserRef;               /**< from subscribe()                                       */
     PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                               */
 } PD_ELE_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 

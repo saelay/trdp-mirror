@@ -1048,7 +1048,7 @@ TRDP_ERR_T  trdp_mdRecv (
                     )
                 {
                     /* We found a listener, set some values for this new session  */
-                    iterMD = appHandle->pMDRcvEle;
+                    iterMD              = appHandle->pMDRcvEle;
                     iterMD->pUserRef    = iterListener->pUserRef;
                     iterMD->stateEle    = state;
 
@@ -1226,7 +1226,7 @@ TRDP_ERR_T  trdp_mdRecv (
         theMessage.numConfirmSent       = iterMD->numConfirmSent;
         theMessage.numConfirmTimeout    = iterMD->numConfirmTimeout;
         theMessage.resultCode           = TRDP_NO_ERR;
-        theMessage.pUserRef = iterMD->pUserRef;
+        theMessage.pUserRef             = iterMD->pUserRef;
 
         appHandle->mdDefault.pfCbFunction(
             appHandle->mdDefault.pRefCon,
