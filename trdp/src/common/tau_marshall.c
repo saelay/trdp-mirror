@@ -178,7 +178,7 @@ static INLINE void packedCopy64 (
  *  @retval          0 if arg1 == arg2
  *  @retval          1 if arg1 > arg2
  */
-static int dataset_compare (
+static int compareDataset (
     const void  *pArg1,
     const void  *pArg2)
 {
@@ -209,7 +209,7 @@ static int dataset_compare (
  *  @retval          0 if arg1 == arg2
  *  @retval          1 if arg1 > arg2
  */
-static int dataset_compare_deref (
+static int compareDatasetDeref (
     const void  *pArg1,
     const void  *pArg2)
 {
@@ -240,7 +240,7 @@ static int dataset_compare_deref (
  *  @retval          0 if arg1 == arg2
  *  @retval          1 if arg1 > arg2
  */
-static int comId_compare (
+static int compareComId (
     const void  *pArg1,
     const void  *pArg2)
 {
@@ -268,7 +268,7 @@ static int comId_compare (
  *  @retval         NULL if not found
  *  @retval         pointer to dataset
  */
-static TRDP_DATASET_T *find_DS_from_ComId (
+static TRDP_DATASET_T *findDSFromComId (
     UINT32 comId)
 {
     TRDP_COMID_DSID_MAP_T   key1;
@@ -282,7 +282,7 @@ static TRDP_DATASET_T *find_DS_from_ComId (
                                                  sComIdDsIdMap,
                                                  sNumComId,
                                                  sizeof(TRDP_COMID_DSID_MAP_T),
-                                                 comId_compare);
+                                                 compareComId);
 
     if (key2 != NULL)
     {
@@ -293,7 +293,7 @@ static TRDP_DATASET_T *find_DS_from_ComId (
                                                        sDataSets,
                                                        sNumEntries,
                                                        sizeof(TRDP_DATASET_T *),
-                                                       dataset_compare_deref);
+                                                       compareDatasetDeref);
         if (key3 != NULL)
         {
             return *key3;
@@ -312,7 +312,7 @@ static TRDP_DATASET_T *find_DS_from_ComId (
  *  @retval         NULL if not found
  *  @retval         pointer to dataset
  */
-static TRDP_DATASET_T *tau_findDS (
+static TRDP_DATASET_T *findDs (
     UINT32 datasetId)
 {
     if ((sDataSets != NULL) && (sNumEntries != 0))
@@ -325,7 +325,7 @@ static TRDP_DATASET_T *tau_findDS (
                                                    sDataSets,
                                                    sNumEntries,
                                                    sizeof(TRDP_DATASET_T *),
-                                                   dataset_compare_deref);
+                                                   compareDatasetDeref);
         if (key3 != NULL)
         {
             return *key3;
@@ -349,7 +349,7 @@ static TRDP_DATASET_T *tau_findDS (
  *
  */
 
-static TRDP_ERR_T do_marshall (
+static TRDP_ERR_T marshallDs (
     TAU_MARSHALL_INFO_T *pInfo,
     TRDP_DATASET_T      *pDataset)
 {
@@ -390,7 +390,7 @@ static TRDP_ERR_T do_marshall (
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = tau_findDS(pDataset->pElement[lIndex].type);
+                    pDataset->pElement[lIndex].pCachedDS = findDs(pDataset->pElement[lIndex].type);
                 }
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
@@ -399,7 +399,7 @@ static TRDP_ERR_T do_marshall (
                     return TRDP_COMID_ERR;
                 }
 
-                err = do_marshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
+                err = marshallDs(pInfo, pDataset->pElement[lIndex].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -569,7 +569,7 @@ static TRDP_ERR_T do_marshall (
  *
  */
 
-static TRDP_ERR_T do_unmarshall (
+static TRDP_ERR_T unmarshallDs (
     TAU_MARSHALL_INFO_T *pInfo,
     TRDP_DATASET_T      *pDataset)
 {
@@ -605,7 +605,7 @@ static TRDP_ERR_T do_unmarshall (
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = tau_findDS(pDataset->pElement[lIndex].type);
+                    pDataset->pElement[lIndex].pCachedDS = findDs(pDataset->pElement[lIndex].type);
                 }
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
@@ -614,7 +614,7 @@ static TRDP_ERR_T do_unmarshall (
                     return TRDP_COMID_ERR;
                 }
 
-                err = do_unmarshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
+                err = unmarshallDs(pInfo, pDataset->pElement[lIndex].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
                     return err;
@@ -821,7 +821,7 @@ static TRDP_ERR_T size_marshall (
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)
                 {
                     /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = tau_findDS(pDataset->pElement[lIndex].type);
+                    pDataset->pElement[lIndex].pCachedDS = findDs(pDataset->pElement[lIndex].type);
                 }
 
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
@@ -986,7 +986,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
     sNumComId       = numComId;
 
     /* sort the table    */
-    vos_qsort(pComIdDsIdMap, numComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
+    vos_qsort(pComIdDsIdMap, numComId, sizeof(TRDP_COMID_DSID_MAP_T), compareComId);
 
     /*    Save the pointer to the table    */
     sDataSets   = pDataset;
@@ -1001,7 +1001,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
         }
     }
     /* sort the table    */
-    vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T *), dataset_compare);
+    vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T *), compareDataset);
 
     return TRDP_NO_ERR;
 }
@@ -1047,13 +1047,13 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = find_DS_from_ComId(comId);
+            *ppDSPointer = findDSFromComId(comId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = find_DS_from_ComId(comId);
+        pDataset = findDSFromComId(comId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
@@ -1067,7 +1067,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = do_marshall(&info, pDataset);
+    err = marshallDs(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -1114,13 +1114,13 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = find_DS_from_ComId(comId);
+            *ppDSPointer = findDSFromComId(comId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = find_DS_from_ComId(comId);
+        pDataset = findDSFromComId(comId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
@@ -1134,7 +1134,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = do_unmarshall(&info, pDataset);
+    err = unmarshallDs(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -1183,13 +1183,13 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = tau_findDS(dsId);
+            *ppDSPointer = findDs(dsId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = tau_findDS(dsId);
+        pDataset = findDs(dsId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
@@ -1203,7 +1203,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = do_marshall(&info, pDataset);
+    err = marshallDs(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -1250,13 +1250,13 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = tau_findDS(dsId);
+            *ppDSPointer = findDs(dsId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = tau_findDS(dsId);
+        pDataset = findDs(dsId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
@@ -1270,7 +1270,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
-    err = do_unmarshall(&info, pDataset);
+    err = unmarshallDs(&info, pDataset);
 
     *pDestSize = info.pDst - pDest;
 
@@ -1315,13 +1315,13 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = tau_findDS(dsId);
+            *ppDSPointer = findDs(dsId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = tau_findDS(dsId);
+        pDataset = findDs(dsId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
@@ -1378,13 +1378,13 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
     {
         if (NULL == *ppDSPointer)
         {
-            *ppDSPointer = find_DS_from_ComId(comId);
+            *ppDSPointer = findDSFromComId(comId);
         }
         pDataset = *ppDSPointer;
     }
     else
     {
-        pDataset = find_DS_from_ComId(comId);
+        pDataset = findDSFromComId(comId);
     }
 
     if (NULL == pDataset)   /* Not in our DB    */
