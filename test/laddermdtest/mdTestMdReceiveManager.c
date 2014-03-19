@@ -215,24 +215,25 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	}
 
 	/* Get IP Address */
-	UINT32 noOfIfaces = 10;
-	VOS_IF_REC_T ifAddressTable[noOfIfaces];
+	UINT32 getNoOfIfaces = NUM_ED_INTERFACES;
+	VOS_IF_REC_T ifAddressTable[NUM_ED_INTERFACES];
 	UINT32 index;
 #ifdef __linux
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
-#elif defined(__APPLE__)
+//#elif defined(__APPLE__)
+#else
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
 #endif
 
 	/* Get I/F address */
-	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
+	if (vos_getInterfaces(&getNoOfIfaces, ifAddressTable) != VOS_NO_ERR)
 	{
 		vos_printLog(VOS_LOG_ERROR, "vos_getInterfaces() error. errno=%d\n", errno);
 	   return 1;
 	}
 
 	/* Get All I/F List */
-	for (index = 0; index < noOfIfaces; index++)
+	for (index = 0; index < getNoOfIfaces; index++)
 	{
 		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
 		{
@@ -400,11 +401,14 @@ void md_indication(
 		/* Clear AppThreadListener Area */
 		memset(appThreadSessionHandle.pMdAppThreadListener, 0, sizeof(TRDP_ADDRESSES_T));
 		/* Set AppThreadSessionHandle AppThreadListener comId */
-		appThreadSessionHandle.pMdAppThreadListener->comId = fwd.Msg.comId;
+//		appThreadSessionHandle.pMdAppThreadListener->comId = fwd.Msg.comId;
+		appThreadSessionHandle.pMdAppThreadListener->addr.comId = fwd.Msg.comId;
 		/* Set AppThreadSessionHandle AppThreadListener Source IP Address */
-		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = fwd.Msg.srcIpAddr;
+//		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = fwd.Msg.srcIpAddr;
+		appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr = fwd.Msg.srcIpAddr;
 		/* Set AppThreadSessionHandle AppThreadListener Destination IP Address */
-		appThreadSessionHandle.pMdAppThreadListener->destIpAddr = fwd.Msg.destIpAddr;
+//		appThreadSessionHandle.pMdAppThreadListener->destIpAddr = fwd.Msg.destIpAddr;
+		appThreadSessionHandle.pMdAppThreadListener->addr.destIpAddr = fwd.Msg.destIpAddr;
 		/* Set AppThreadSessionHandle AppThread SessionId */
 		memcpy(appThreadSessionHandle.mdAppThreadSessionId, fwd.Msg.sessionId, sizeof(TRDP_UUID_T));
 

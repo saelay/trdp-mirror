@@ -39,6 +39,7 @@ extern "C" {
 #define TRAFFIC_STORE_SIZE 65536			/* Traffic Store Size : 64KB */
 #define SUBNET1	0x00000000					/* Sub-network Id1 */
 #define SUBNET2	0x00002000					/* Sub-network Id2 */
+#define NUM_ED_INTERFACES	10				/* number of End Device Interfaces */
 
 /***********************************************************************************************************************
  * GLOBAL VARIABLES
@@ -58,7 +59,6 @@ extern BOOL8 pdComLadderThreadStartFlag;	/* PDComLadder Thread instruction start
 
 /* Sub-net */
 extern UINT32 usingSubnetId;				/* Using SubnetId */
-
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -165,9 +165,9 @@ TRDP_ERR_T  tau_checkLinkUpDown (
 	UINT32 checkSubnetId,
 	BOOL8 *pLinkUpDown);
 
-#endif	/* TRDP_OPTION_LADDER */
 
 #ifdef __cplusplus
 }
 #endif
+#endif	/* TRDP_OPTION_LADDER */
 #endif /* TAU_LADDER_H_ */

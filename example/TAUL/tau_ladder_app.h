@@ -687,10 +687,8 @@ char * miscIpToString(
 		int ipAdd,
 		char *strTmp);
 
-#endif	/* TRDP_OPTION_LADDER */
-
 #ifdef __cplusplus
 }
 #endif
-
+#endif	/* TRDP_OPTION_LADDER */
 #endif /* TAU_LADDER_APP_H_ */

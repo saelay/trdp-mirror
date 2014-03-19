@@ -155,10 +155,12 @@ VOS_THREAD_FUNC_T MDCaller (
 			vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 		}
 		/* Set Subnet1 appThreadListener */
-		appThreadSessionHandle.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
-//		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
-		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
-		appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
+//		appThreadSessionHandle.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
+		appThreadSessionHandle.pMdAppThreadListener->addr.comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
+//		appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
+		appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
+//		appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
+		appThreadSessionHandle.pMdAppThreadListener->addr.destIpAddr = subnetId1Address;
 	}
 
 	/* Is this Ladder Topology ? */
@@ -191,10 +193,12 @@ VOS_THREAD_FUNC_T MDCaller (
 				vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 			}
 			/* Set Subnet2 appThreadListener */
-			appThreadSessionHandle2.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
-//			appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
-			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
-			appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
+//			appThreadSessionHandle2.pMdAppThreadListener->comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
+			appThreadSessionHandle2.pMdAppThreadListener->addr.comId = (pCallerThreadParameter->pCommandValue->mdSendComId) | COMID_REPLY_MASK;
+//			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
+			appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr = pCallerThreadParameter->pCommandValue->mdDestinationAddress;
+//			appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
+			appThreadSessionHandle2.pMdAppThreadListener->addr.destIpAddr = subnetId2Address;
 		}
 	}
 
@@ -642,9 +646,12 @@ VOS_THREAD_FUNC_T MDCaller (
 							memset(callerThreadRequestTimeoutListener, 0, sizeof(TRDP_ADDRESSES_T));
 						}
 						/* Set Request Send Session Handle */
-						callerThreadRequestTimeoutListener->comId =  pCallerThreadParameter->pCommandValue->mdSendComId;
-						callerThreadRequestTimeoutListener->destIpAddr =  mdDestIpAddr;
-						callerThreadRequestTimeoutListener->srcIpAddr =  IP_ADDRESS_NOTHING;
+//						callerThreadRequestTimeoutListener->comId =  pCallerThreadParameter->pCommandValue->mdSendComId;
+						callerThreadRequestTimeoutListener->addr.comId =  pCallerThreadParameter->pCommandValue->mdSendComId;
+//						callerThreadRequestTimeoutListener->destIpAddr =  mdDestIpAddr;
+						callerThreadRequestTimeoutListener->addr.destIpAddr =  mdDestIpAddr;
+//						callerThreadRequestTimeoutListener->srcIpAddr =  IP_ADDRESS_NOTHING;
+						callerThreadRequestTimeoutListener->addr.srcIpAddr =  IP_ADDRESS_NOTHING;
 //						pRequestSessionHandle->pMdAppThreadTimeoutListener = callerThreadRequestTimeoutListener;
 
 						/* Set Reply Receive Session Handle Message Queue Descriptor */
@@ -1566,7 +1573,8 @@ MD_APP_ERR_TYPE decideRequestReplyResult (
 			{
 				/* Request - Reply Success */
 				err = MD_APP_NO_ERR;
-				if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+//				if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+				if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->addr.comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
 				{
 					pCallerCommandValue->callerMdRequestReplySuccessCounter++;
 				}
@@ -1618,7 +1626,8 @@ deleteAppThreadSessionMessageQueueDescriptor(
 				/* First Success */
 				/* and Receive Reply */
 				if ((ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount == 1)
-					&& (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+//					&& (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+					&& (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->addr.comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
 					&& (ppMrSendSessionTable[sendTableLoopCounter]->decideRepliersUnKnownStatus == MD_REPLIERS_UNKNOWN_INITIAL))
 				{
 					/* Increment Success Counter */
@@ -1643,7 +1652,8 @@ deleteAppThreadSessionMessageQueueDescriptor(
 				if (ppMrSendSessionTable[sendTableLoopCounter]->decidedSessionSuccessCount > 0)
 				{
 					/* Receive Reply */
-					if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+//					if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+					if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->addr.comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
 					{
 						/* Decrement Success Counter */
 //						pCallerCommandValue->callerMdRequestReplySuccessCounter--;
@@ -1785,7 +1795,8 @@ deleteAppThreadSessionMessageQueueDescriptor(
 			{
 				/* Request - Reply Success */
 				err = MD_APP_NO_ERR;
-				if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+//				if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
+				if (((ppMrSendSessionTable[sendTableLoopCounter]->pMdAppThreadListener->addr.comId) & COMID_REPLY_MASK )== COMID_REPLY_MASK)
 				{
 					pCallerCommandValue->callerMdRequestReplySuccessCounter++;
 				}

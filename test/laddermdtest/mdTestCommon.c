@@ -294,14 +294,18 @@ MD_APP_ERR_TYPE deleteAppThreadSessionMessageQueueDescriptor(
 			else
 			{
 				/* Matching ComId : equal */
-				if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+//				if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+				if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.comId == pAppThreadSessionHandle->pMdAppThreadListener->addr.comId)
 				{
 					/* Matching Source IP Address : equal or nothing */
-					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+//					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+//						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->addr.srcIpAddr)
+						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr == IP_ADDRESS_NOTHING))
 					{
 						/* Matching Destination IP Address : equal */
-						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+//						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+						if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->addr.destIpAddr)
 						{
 							/* Check Message Queue Descriptor : equal*/
 							if (appThreadSessionHandleMqDescriptorTable[i].mqDescriptor == mqDescriptor)
@@ -383,16 +387,24 @@ mqd_t getAppThreadSessionMessageQueueDescriptor(
 			{
 				/* Check Listener */
 				/* Matching ComId : equal */
-				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
-					|| ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId | COMID_CONFIRM_MASK) == pAppThreadSessionHandle->pMdAppThreadListener->comId))
+//				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId == pAppThreadSessionHandle->pMdAppThreadListener->comId)
+//					|| ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->comId | COMID_CONFIRM_MASK) == pAppThreadSessionHandle->pMdAppThreadListener->comId))
+				if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.comId == pAppThreadSessionHandle->pMdAppThreadListener->addr.comId)
+					|| ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.comId | COMID_CONFIRM_MASK) == pAppThreadSessionHandle->pMdAppThreadListener->addr.comId))
 				{
 					/* Matching Source IP Address : equal or nothing */
-					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
-						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+//					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->srcIpAddr)
+//						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->srcIpAddr == IP_ADDRESS_NOTHING))
+					if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->addr.srcIpAddr)
+						||(appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr == IP_ADDRESS_NOTHING))
+
 					{
 						/* Matching Destination IP Address : equal */
-						if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
-							||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
+//						if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr)
+//							||(pAppThreadSessionHandle->pMdAppThreadListener->destIpAddr == IP_ADDRESS_NOTHING))
+						if ((appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.pMdAppThreadListener->addr.destIpAddr == pAppThreadSessionHandle->pMdAppThreadListener->addr.destIpAddr)
+							||(pAppThreadSessionHandle->pMdAppThreadListener->addr.destIpAddr == IP_ADDRESS_NOTHING))
+
 						{
 							/* Matching mcGroup Address : equal */
 		/*					if (appThreadSessionHandleMqDescriptorTable[i].appThreadSessionHandle.comId == pAppThreadSessionHandle->comId)

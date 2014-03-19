@@ -1502,12 +1502,13 @@ PD_APP_ERR_TYPE analyzePdCommand(int argc, char *argv[], PD_COMMAND_VALUE *pPdCo
 PD_APP_ERR_TYPE trdp_pdInitialize (PD_COMMAND_VALUE *pPdCommandValue)
 {
 	/* Get IP Address */
-	UINT32 noOfIfaces = 10;
-	VOS_IF_REC_T ifAddressTable[noOfIfaces];
+	UINT32 getNoOfIfaces = NUM_ED_INTERFACES;
+	VOS_IF_REC_T ifAddressTable[NUM_ED_INTERFACES];
 	UINT32 index;
 #ifdef __linux
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
-#elif defined(__APPLE__)
+//#elif defined(__APPLE__)
+#else
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
 #endif
 
@@ -1558,13 +1559,13 @@ PD_APP_ERR_TYPE trdp_pdInitialize (PD_COMMAND_VALUE *pPdCommandValue)
 	}
 //#endif
 	/* Get I/F address */
-	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
+	if (vos_getInterfaces(&getNoOfIfaces, ifAddressTable) != VOS_NO_ERR)
     {
 		vos_printLog(VOS_LOG_ERROR, "vos_getInterfaces() error. errno=%d\n", errno);
        return 1;
 	}
 	/* Get All I/F List */
-	for (index = 0; index < noOfIfaces; index++)
+	for (index = 0; index < getNoOfIfaces; index++)
 	{
 		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
 		{

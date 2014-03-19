@@ -218,7 +218,8 @@ VOS_THREAD_FUNC_T MDReplier (
 					pktFlags,					/* OPTION FLAG */
 					NULL);						/* destination URI */
 			/* Set Subnet1 appThreadListener destIP : Multicast */
-			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
+//			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
+			appThreadSessionHandle.pMdAppThreadListener->addr.destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
 		}
 		else
 		{
@@ -233,7 +234,8 @@ VOS_THREAD_FUNC_T MDReplier (
 					pktFlags,					/* OPTION FLAG */
 					NULL);			/* destination URI */
 			/* Set Subnet1 appThreadListener destIP : Unicast */
-			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
+//			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
+			appThreadSessionHandle.pMdAppThreadListener->addr.destIpAddr = subnetId1Address;
 		}
 		/* Check tlm_addListener Return Code */
 		if (err != TRDP_NO_ERR)
@@ -266,8 +268,10 @@ VOS_THREAD_FUNC_T MDReplier (
 				vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 			}
 			/* Set Subnet1 appThreadListener */
-			appThreadSessionHandle.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
-			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+//			appThreadSessionHandle.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+			appThreadSessionHandle.pMdAppThreadListener->addr.comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+//			appThreadSessionHandle.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+			appThreadSessionHandle.pMdAppThreadListener->addr.srcIpAddr = IP_ADDRESS_NOTHING;
 //			appThreadSessionHandle.pMdAppThreadListener->destIpAddr = subnetId1Address;
 		}
 		/* Add Confirm Listener */
@@ -338,7 +342,8 @@ VOS_THREAD_FUNC_T MDReplier (
 							pktFlags,					/* OPTION FLAG */
 							NULL);			/* destination URI */
 				/* Set Subnet2 appThreadListener destIP : Multicast */
-				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
+//				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
+				appThreadSessionHandle2.pMdAppThreadListener->addr.destIpAddr = pReplierThreadParameter->pCommandValue->mdDestinationAddress;
 			}
 			else
 			{
@@ -353,7 +358,8 @@ VOS_THREAD_FUNC_T MDReplier (
 							pktFlags,					/* OPTION FLAG */
 							NULL);			/* destination URI */
 				/* Set Subnet2 appThreadListener destIp : Unicast */
-				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
+//				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
+				appThreadSessionHandle2.pMdAppThreadListener->addr.destIpAddr = subnetId2Address;
 			}
 			/* Check tlm_addListener Return Code */
 			if (err != TRDP_NO_ERR)
@@ -386,8 +392,10 @@ VOS_THREAD_FUNC_T MDReplier (
 					vos_printLog(VOS_LOG_ERROR, "Set Listener Handle List error\n");
 				}
 				/* Set Subnet2 appThreadListener */
-				appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
-				appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+//				appThreadSessionHandle2.pMdAppThreadListener->comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+				appThreadSessionHandle2.pMdAppThreadListener->addr.comId = pReplierThreadParameter->pCommandValue->mdAddListenerComId;
+//				appThreadSessionHandle2.pMdAppThreadListener->srcIpAddr = IP_ADDRESS_NOTHING;
+				appThreadSessionHandle2.pMdAppThreadListener->addr.srcIpAddr = IP_ADDRESS_NOTHING;
 //				appThreadSessionHandle2.pMdAppThreadListener->destIpAddr = subnetId2Address;
 			}
 			/* Add Confirm Listener */

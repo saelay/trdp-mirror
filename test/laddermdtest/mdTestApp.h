@@ -60,6 +60,7 @@ extern "C" {
 #include "trdp_if_light.h"
 #include "trdp_private.h"
 #include "trdp_utils.h"
+#include "tau_ladder.h"
 #include "tau_ladder_app.h"
 #include "trdp_mdcom.h"
 #include "tau_marshall.h"

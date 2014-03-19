@@ -339,7 +339,7 @@ extern REPLIER_TELEGRAM_T			*pHeadReplierTelegram;						/* Top Address of Replie
 extern UINT32 						numExchgPar;									/* Number Of Exchange Parameter */
 extern TRDP_DBG_CONFIG_T				debugConfig;									/* Debug Config */
 /* Thread */
-VOS_THREAD_T 							taulPdMainThreadHandle;				/* TAUL Main Thread handle */
+extern VOS_THREAD_T 					taulPdMainThreadHandle;						/* TAUL Main Thread handle */
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -366,6 +366,7 @@ TRDP_ERR_T configureTelegrams (
 		UINT32 			numExchgPar,
 		TRDP_EXCHG_PAR_T	*pExchgPar);
 
+#if 0
 /******************************************************************************/
 /** Size of Dataset writing in Traffic Store
  *
@@ -378,6 +379,20 @@ TRDP_ERR_T configureTelegrams (
  */
 TRDP_ERR_T sizeWriteDatasetInTrafficStore (
 		UINT8					*pDstEnd,
+		UINT32					*pDatasetSize,
+		TRDP_DATASET_T		*pDataset);
+#endif
+/******************************************************************************/
+/** Size of Dataset writing in Traffic Store
+ *
+ *  @param[out]     pDatasetSize    Pointer Host Byte order of dataset size
+ *  @param[in]      pDataset        Pointer to one dataset
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *
+ */
+TRDP_ERR_T sizeWriteDatasetInTrafficStore (
 		UINT32					*pDatasetSize,
 		TRDP_DATASET_T		*pDataset);
 
@@ -888,6 +903,7 @@ TRDP_ERR_T appendListenerHandleList(
 		LISTENER_HANDLE_T    * *ppHeadListenerHandle,
 		LISTENER_HANDLE_T    *pNewListenerHandle);
 
+#ifndef XML_CONFIG_ENABLE
 /******************************************************************************/
 /** Set TRDP Config Parameter From internal config
  *
@@ -896,6 +912,7 @@ TRDP_ERR_T appendListenerHandleList(
  */
 TRDP_ERR_T setConfigParameterFromInternalConfig (
 	void);
+#endif /* #ifdef XML_CONFIG_ENABLE */
 
 /******************************************************************************/
 /** PD Main Process Init
@@ -1134,6 +1151,7 @@ void md_indication(
 VOS_THREAD_FUNC_T TAULpdMainThread (
 	void);
 
+#if 0
 /**********************************************************************************************************************/
 /** Marshalling Function
  */
@@ -1148,12 +1166,11 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
  */
 TRDP_DATASET_T *find_DS (
     UINT32 datasetId);
+#endif
 
-
-
-#endif	/* TRDP_OPTION_LADDER */
 
 #ifdef __cplusplus
 }
 #endif
+#endif	/* TRDP_OPTION_LADDER */
 #endif /* TAU_LADDER_H_ */
