@@ -711,10 +711,9 @@ TAUL_APP_ERR_TYPE analyzeCommand(
 TAUL_APP_ERR_TYPE taulApplicationTerminate (
 		void);
 
-#endif	/* TRDP_OPTION_LADDER */
 
 #ifdef __cplusplus
 }
 #endif
-
+#endif	/* TRDP_OPTION_LADDER */
 #endif /* TAULAPP_H_ */

@@ -26,8 +26,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
-
-#include <mqueue.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -191,7 +189,8 @@ void callConf (
 		sendMessageQueueDescriptor = getCallerAppThreadMessageQueueDescriptor(
 				&sendMqLoopCounter,
 				&mdAppThreadListener);
-		if(sendMessageQueueDescriptor <= 0)
+//		if(sendMessageQueueDescriptor <= 0)
+		if(sendMessageQueueDescriptor == NULL)
 		{
 /*				vos_printLog(VOS_LOG_ERROR, "Message Queue Descriptor Error. Don't Send Message Queue.\n"); */
 		}
@@ -309,7 +308,8 @@ void rcvConf(
 		sendMessageQueueDescriptor = getReplierAppThreadMessageQueueDescriptor(
 				&sendMqLoopCounter,
 				&mdAppThreadListener);
-		if(sendMessageQueueDescriptor <= 0)
+//		if(sendMessageQueueDescriptor <= 0)
+		if(sendMessageQueueDescriptor == NULL)
 		{
 /*				vos_printLog(VOS_LOG_ERROR, "Message Queue Descriptor Error. Don't Send Message Queue.\n"); */
 		}
@@ -1314,7 +1314,7 @@ memcpy(pDstEnd, &workEndAddr, sizeof(UINT32));
 				if (NULL == pDatasetDesc->pElement[lIndex].pCachedDS)
 				{
 					/* Look for it   */
-					pDatasetDesc->pElement[lIndex].pCachedDS = find_DS(pDatasetDesc->pElement[lIndex].type);
+//					pDatasetDesc->pElement[lIndex].pCachedDS = find_DS(pDatasetDesc->pElement[lIndex].type);
 				}
 
 				if (NULL == pDatasetDesc->pElement[lIndex].pCachedDS)      /* Not in our DB    */
@@ -2285,6 +2285,7 @@ TAUL_APP_ERR_TYPE CallerApplication (CALLER_THREAD_PARAMETER_T *pCallerThreadPar
 	/* Reference Value */
 	UINT32										receiveMsgCallerRefAddress = 0;
 	UINT32 									receiveMsgCallerRefValue = 0;
+	UINT32										callerRefValue = 0;
 
 	/* Message Queue Open */
 	vos_err = vos_queueCreate(VOS_QUEUE_POLICY_OTHER, TRDP_QUEUE_MAX_MESG, &queueHandle);
@@ -2720,7 +2721,6 @@ TAUL_APP_ERR_TYPE CallerApplication (CALLER_THREAD_PARAMETER_T *pCallerThreadPar
 						memset(pMrsendHandle, 0, sizeof(SEND_REQUEST_HANDLE_T));
 						/* Set Reply Receive Session Handle */
 						/* Get CalelrRef Address */
-						UINT32 callerRefValue = 0;
 						memcpy(&callerRefValue, callerRef, sizeof(UINT32));
 						pMrsendHandle->callerRefValue = callerRefValue;
 						pMrsendHandle->sendRequestNumExpReplies = pCallerThreadParameter->pMdAppParameter->callerAppNumberOfReplier;
@@ -3978,24 +3978,25 @@ int main (INT32 argc, CHAR8 *argv[])
 	TAU_LD_CONFIG_T						ladderConfig = {0};
 	UINT32									index = 0;							/* Loop Counter */
 	/* For Get IP Address */
-	UINT32 noOfIfaces = 10;
-	VOS_IF_REC_T ifAddressTable[noOfIfaces];
+	UINT32 getNoOfIfaces = NUM_ED_INTERFACES;
+	VOS_IF_REC_T ifAddressTable[NUM_ED_INTERFACES];
 	TRDP_IP_ADDR_T ownIpAddress = 0;
 #ifdef __linux
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
-#elif defined(__APPLE__)
+//#elif defined(__APPLE__)
+#else
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
 #endif
 
 	/* Get I/F address */
-	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
+	if (vos_getInterfaces(&getNoOfIfaces, ifAddressTable) != VOS_NO_ERR)
 	{
 		printf("main() failed. vos_getInterfaces() error.\n");
 		return TRDP_SOCK_ERR;
 	}
 
 	/* Get All I/F List */
-	for (index = 0; index < noOfIfaces; index++)
+	for (index = 0; index < getNoOfIfaces; index++)
 	{
 		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
 		{

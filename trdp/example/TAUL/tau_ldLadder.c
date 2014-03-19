@@ -46,1379 +46,6 @@
 #include "tau_ldLadder.h"
 #include "tau_ldLadder_config.h"
 
-/**********************************************************************************************************************/
-/**
- * @file            tau_marshall.c
- */
-
-/***********************************************************************************************************************
- * TYPEDEFS
- */
-
-/** Marshalling info, used to and from wire */
-typedef struct
-{
-    INT32   level;          /**< track recursive level   */
-    UINT8   *pSrc;          /**< source pointer          */
-    UINT8   *pDst;          /**< destination pointer     */
-    UINT8   *pDstEnd;       /**< last destination        */
-} TAU_MARSHALL_INFO_T;
-
-/* structure type definitions for alignment calculation */
-typedef struct
-{
-    UINT8 a;
-} STRUCT_T;
-
-typedef struct
-{
-    TIMEDATE48 a;
-} TIMEDATE48_STRUCT_T;
-
-typedef struct
-{
-    TIMEDATE64 a;
-} TIMEDATE64_STRUCT_T;
-
-/***********************************************************************************************************************
- * LOCALS
- */
-
-static TRDP_COMID_DSID_MAP_T    *sComIdDsIdMap = NULL;
-static UINT32 sNumComId = 0;
-
-static TRDP_DATASET_T           * *sDataSets = NULL;
-static UINT32 sNumEntries = 0;
-
-/***********************************************************************************************************************
- * LOCAL FUNCTIONS
- */
-
-/**********************************************************************************************************************/
-/**    Align a pointer to the next natural address.
- *
- *
- *  @param[in]      pSrc            Pointer to align
- *
- *  @retval         aligned pointer
- */
-static INLINE UINT8 *alignePtr (
-    const UINT8 *pSrc,
-    UINT32      alignment)
-{
-    alignment--;
-
-    return (UINT8 *) (((UINT32) pSrc + alignment) & ~alignment);
-}
-
-/**********************************************************************************************************************/
-/**    Copy a variable to its natural address.
- *
- *
- *  @param[in,out]      ppSrc           Pointer to pointer to source variable
- *  @param[in,out]      ppDst           Pointer to pointer to destination variable
- *  @param[in]          noOfItems       Items to copy
- *
- *  @retval         none
- */
-static INLINE void unpackedCopy64 (
-    UINT8   * *ppSrc,
-    UINT8   * *ppDst,
-    UINT32  noOfItems)
-
-#if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
-{
-    UINT32  size    = noOfItems * sizeof(UINT64);
-    UINT8   *pDst8  = alignePtr(*ppDst, ALIGNOF(UINT64));
-    memcpy(pDst8, *ppSrc, size);
-    *ppSrc  = (UINT8 *) *ppSrc + size;
-    *ppDst  = (UINT8 *) pDst8 + size;
-}
-#else
-{
-    UINT8   *pDst8  = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
-    UINT8   *pSrc8  = *ppSrc;
-    while (noOfItems--)
-    {
-        *pDst8++    = *(pSrc8 + 7);
-        *pDst8++    = *(pSrc8 + 6);
-        *pDst8++    = *(pSrc8 + 5);
-        *pDst8++    = *(pSrc8 + 4);
-        *pDst8++    = *(pSrc8 + 3);
-        *pDst8++    = *(pSrc8 + 2);
-        *pDst8++    = *(pSrc8 + 1);
-        *pDst8++    = *pSrc8;
-        pSrc8       += 8;
-    }
-    *ppSrc  = (UINT8 *) pSrc8;
-    *ppDst  = (UINT8 *) pDst8;
-}
-#endif
-
-/**********************************************************************************************************************/
-/**    Copy a variable from its natural address.
- *
- *
- *  @param[in,out]      ppSrc           Pointer to pointer to source variable
- *  @param[in,out]      ppDst           Pointer to pointer to destination variable
- *  @param[in]          noOfItems       Items to copy
- *
- *  @retval             none
- */
-
-static INLINE void packedCopy64 (
-    UINT8   * *ppSrc,
-    UINT8   * *ppDst,
-    UINT32  noOfItems)
-{
-    UINT64 *pSrc64 = (UINT64 *) alignePtr(*ppSrc, ALIGNOF(UINT64));
-    while (noOfItems--)
-    {
-        *(*ppDst)++ = (UINT8) (*pSrc64 >> 56);
-        *(*ppDst)++ = (UINT8) (*pSrc64 >> 48);
-        *(*ppDst)++ = (UINT8) (*pSrc64 >> 40);
-        *(*ppDst)++ = (UINT8) (*pSrc64 >> 32);
-        *(*ppDst)++ = (UINT8) (*pSrc64 >> 24);
-        *(*ppDst)++ = (UINT8) (*pSrc64 >> 16);
-        *(*ppDst)++ = (UINT8) (*pSrc64 >> 8);
-        *(*ppDst)++ = (UINT8) (*pSrc64 & 0xFF);
-        pSrc64++;
-    }
-    *ppSrc = (UINT8 *) pSrc64;
-}
-
-/**********************************************************************************************************************/
-/**    Dataset compare function
- *
- *  @param[in]      pArg1        Pointer to first element
- *  @param[in]      pArg2        Pointer to second element
- *
- *  @retval         -1 if arg1 < arg2
- *  @retval          0 if arg1 == arg2
- *  @retval          1 if arg1 > arg2
- */
-static int dataset_compare (
-    const void  *pArg1,
-    const void  *pArg2)
-{
-    TRDP_DATASET_T  *p1 = *(TRDP_DATASET_T * *)pArg1;
-    TRDP_DATASET_T  *p2 = *(TRDP_DATASET_T * *)pArg2;
-
-    if (p1->id < p2->id)
-    {
-        return -1;
-    }
-    else if (p1->id > p2->id)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-/**********************************************************************************************************************/
-/**    Dataset compare function
- *
- *  @param[in]      pArg1        Pointer to key
- *  @param[in]      pArg2        Pointer to array element
- *
- *  @retval         -1 if arg1 < arg2
- *  @retval          0 if arg1 == arg2
- *  @retval          1 if arg1 > arg2
- */
-static int dataset_compare_deref (
-    const void  *pArg1,
-    const void  *pArg2)
-{
-    TRDP_DATASET_T  *p1 = (TRDP_DATASET_T *)pArg1;
-    TRDP_DATASET_T  *p2 = *(TRDP_DATASET_T * *)pArg2;
-
-    if (p1->id < p2->id)
-    {
-        return -1;
-    }
-    else if (p1->id > p2->id)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-/**********************************************************************************************************************/
-/**    ComId/dataset mapping compare function
- *
- *  @param[in]      pArg1        Pointer to first element
- *  @param[in]      pArg2        Pointer to second element
- *
- *  @retval         -1 if arg1 < arg2
- *  @retval          0 if arg1 == arg2
- *  @retval          1 if arg1 > arg2
- */
-static int comId_compare (
-    const void  *pArg1,
-    const void  *pArg2)
-{
-    if (((TRDP_COMID_DSID_MAP_T *)pArg1)->comId < ((TRDP_COMID_DSID_MAP_T *)pArg2)->comId)
-    {
-        return -1;
-    }
-    else if (((TRDP_COMID_DSID_MAP_T *)pArg1)->comId > ((TRDP_COMID_DSID_MAP_T *)pArg2)->comId)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
-/**********************************************************************************************************************/
-/**    Return the dataset for the comID
- *
- *
- *  @param[in]      comID
- *
- *  @retval         NULL if not found
- *  @retval         pointer to dataset
- */
-static TRDP_DATASET_T *find_DS_from_ComId (
-    UINT32 comId)
-{
-    TRDP_COMID_DSID_MAP_T   key1;
-    TRDP_DATASET_T          * *key3;
-    TRDP_COMID_DSID_MAP_T   *key2;
-
-    key1.comId      = comId;
-    key1.datasetId  = 0;
-
-    key2 = (TRDP_COMID_DSID_MAP_T *) vos_bsearch(&key1,
-                                                 sComIdDsIdMap,
-                                                 sNumComId,
-                                                 sizeof(TRDP_COMID_DSID_MAP_T),
-                                                 comId_compare);
-
-    if (key2 != NULL)
-    {
-        TRDP_DATASET_T key22 = {0};
-
-        key22.id    = key2->datasetId;
-        key3        = (TRDP_DATASET_T * *) vos_bsearch(&key22,
-                                                       sDataSets,
-                                                       sNumEntries,
-                                                       sizeof(TRDP_DATASET_T *),
-                                                       dataset_compare_deref);
-        if (key3 != NULL)
-        {
-            return *key3;
-        }
-    }
-
-    return NULL;
-}
-
-/**********************************************************************************************************************/
-/**    Return the dataset for the datasetID
- *
- *
- *  @param[in]      datasetID           dataset ID to find
- *
- *  @retval         NULL if not found
- *  @retval         pointer to dataset
- */
-TRDP_DATASET_T *find_DS (
-    UINT32 datasetId)
-{
-    TRDP_DATASET_T  key2 = {0};
-    TRDP_DATASET_T  * *key3;
-
-    key2.id = datasetId;
-    key3    = (TRDP_DATASET_T * *) vos_bsearch(&key2,
-                                               sDataSets,
-                                               sNumEntries,
-                                               sizeof(TRDP_DATASET_T *),
-                                               dataset_compare_deref);
-    if (key3 != NULL)
-    {
-        return *key3;
-    }
-
-    return NULL;
-}
-
-
-/**********************************************************************************************************************/
-/**    Marshall one dataset.
- *
- *  @param[in,out]  pInfo           Pointer with src & dest info
- *  @param[in]      pDataset        Pointer to one dataset
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *  @retval         TRDP_STATE_ERR  Too deep recursion
- *
- */
-
-static TRDP_ERR_T do_marshall (
-    TAU_MARSHALL_INFO_T *pInfo,
-    TRDP_DATASET_T      *pDataset)
-{
-    TRDP_ERR_T  err;
-    UINT16      lIndex;
-    UINT32      var_size = 0;
-    UINT8       *pSrc;
-    UINT8       *pDst = pInfo->pDst;
-
-    /* Restrict recursion */
-    pInfo->level++;
-    if (pInfo->level > TAU_MAX_DS_LEVEL)
-    {
-        return TRDP_STATE_ERR;
-    }
-
-    /*    Align on struct boundary first    */
-    pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
-
-    /*    Loop over all datasets in the array    */
-    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
-    {
-        UINT32 noOfItems = pDataset->pElement[lIndex].size;
-
-        if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
-        {
-            noOfItems = var_size;
-        }
-
-        /*    Is this a composite type?    */
-        if (pDataset->pElement[lIndex].type > (UINT32) TRDP_TYPE_MAX)
-        {
-            while (noOfItems-- > 0)
-            {
-                /* Dataset, call ourself recursively */
-
-                /* Never used before?  */
-                if (NULL == pDataset->pElement[lIndex].pCachedDS)
-                {
-                    /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
-                }
-
-                if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
-                {
-                    vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
-                    return TRDP_COMID_ERR;
-                }
-
-                err = do_marshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
-                if (err != TRDP_NO_ERR)
-                {
-                    return err;
-                }
-                pDst    = pInfo->pDst;
-                pSrc    = pInfo->pSrc;
-            }
-        }
-        else
-        {
-            switch (pDataset->pElement[lIndex].type)
-            {
-                case TRDP_BOOL8:
-                case TRDP_CHAR8:
-                case TRDP_INT8:
-                case TRDP_UINT8:
-                {
-                    /*    possible variable source size    */
-                    var_size = *pSrc;
-
-                    if (pDst + noOfItems > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst++ = *pSrc++;
-                    }
-                    break;
-                }
-                case TRDP_UTF16:
-                case TRDP_INT16:
-                case TRDP_UINT16:
-                {
-                    UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
-
-                    /*    possible variable source size    */
-                    var_size = *pSrc16;
-
-                    if (pDst + noOfItems * 2 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst++ = (UINT8) (*pSrc16 >> 8);
-                        *pDst++ = (UINT8) (*pSrc16 & 0xFF);
-                        pSrc16++;
-                    }
-                    pSrc = (UINT8 *) pSrc16;
-                    break;
-                }
-                case TRDP_INT32:
-                case TRDP_UINT32:
-                case TRDP_REAL32:
-                case TRDP_TIMEDATE32:
-                {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
-
-                    /*    possible variable source size    */
-                    var_size = *pSrc32;
-
-                    if (pDst + noOfItems * 4 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst++ = (UINT8) (*pSrc32 >> 24);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFF);
-                        pSrc32++;
-                    }
-                    pSrc = (UINT8 *) pSrc32;
-                    break;
-                }
-                case TRDP_TIMEDATE64:
-                {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
-
-                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst++ = (UINT8) (*pSrc32 >> 24);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFF);
-                        pSrc32++;
-                        *pDst++ = (UINT8) (*pSrc32 >> 24);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFF);
-                        pSrc32++;
-                    }
-                    pSrc = (UINT8 *) pSrc32;
-                    break;
-                }
-                case TRDP_TIMEDATE48:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT32  *pSrc32;
-                    UINT16  *pSrc16;
-
-                    if (pDst + noOfItems * 6 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        pSrc32 =
-                            (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        *pDst++ = (UINT8) (*pSrc32 >> 24);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFF);
-                        pSrc32++;
-                        pSrc16  = (UINT16 *) alignePtr((UINT8 *) pSrc32, ALIGNOF(UINT16));
-                        *pDst++ = (UINT8) (*pSrc16 >> 8);
-                        *pDst++ = (UINT8) (*pSrc16 & 0xFF);
-                        pSrc32++;
-                        pSrc = (UINT8 *) pSrc32;
-                    }
-                    break;
-                }
-                case TRDP_INT64:
-                case TRDP_UINT64:
-                case TRDP_REAL64:
-                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    packedCopy64( &pSrc, &pDst, noOfItems);
-                    break;
-                default:
-                    break;
-            }
-            /* Update info structure if we need to! (was issue #137) */
-            pInfo->pDst = pDst;
-            pInfo->pSrc = pSrc;
-        }
-    }
-
-
-    return TRDP_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/**    Unmarshall one dataset.
- *
- *  @param[in,out]  pInfo           Pointer with src & dest info
- *  @param[in]      pDataset        Pointer to one dataset
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *  @retval         TRDP_STATE_ERR  Too deep recursion
- *
- */
-
-static TRDP_ERR_T do_unmarshall (
-    TAU_MARSHALL_INFO_T *pInfo,
-    TRDP_DATASET_T      *pDataset)
-{
-    TRDP_ERR_T  err;
-    UINT16      lIndex;
-    UINT32      var_size    = 0;
-    UINT8       *pSrc       = pInfo->pSrc;
-    UINT8       *pDst       = pInfo->pDst;
-
-    /* Restrict recursion */
-    pInfo->level++;
-    if (pInfo->level > TAU_MAX_DS_LEVEL)
-    {
-        return TRDP_STATE_ERR;
-    }
-
-    /*    Loop over all datasets in the array    */
-    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
-    {
-        UINT32 noOfItems = pDataset->pElement[lIndex].size;
-
-        if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
-        {
-            noOfItems = var_size;
-        }
-        /*    Is this a composite type?    */
-        if (pDataset->pElement[lIndex].type > (UINT32) TRDP_TYPE_MAX)
-        {
-            while (noOfItems-- > 0)
-            {
-                /* Dataset, call ourself recursively */
-                /* Never used before?  */
-                if (NULL == pDataset->pElement[lIndex].pCachedDS)
-                {
-                    /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
-                }
-
-                if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
-                {
-                    vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
-                    return TRDP_COMID_ERR;
-                }
-
-                err = do_unmarshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
-                if (err != TRDP_NO_ERR)
-                {
-                    return err;
-                }
-            }
-            pDst    = pInfo->pDst;
-            pSrc    = pInfo->pSrc;
-        }
-        else
-        {
-            switch (pDataset->pElement[lIndex].type)
-            {
-                case TRDP_BOOL8:
-                case TRDP_CHAR8:
-                case TRDP_INT8:
-                case TRDP_UINT8:
-                {
-                    if (pDst + noOfItems > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        var_size    = *pSrc++;
-                        *pDst++     = var_size;
-                    }
-                    break;
-                }
-                case TRDP_UTF16:
-                case TRDP_INT16:
-                case TRDP_UINT16:
-                {
-                    UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
-
-                    if (pDst + noOfItems * 2 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst16 = *pSrc++ << 8;
-                        *pDst16 += *pSrc++;
-                        /*    possible variable source size    */
-                        var_size = *pDst16;
-                        pDst16++;
-                    }
-                    pDst = (UINT8 *) pDst16;
-                    break;
-                }
-                case TRDP_INT32:
-                case TRDP_UINT32:
-                case TRDP_REAL32:
-                case TRDP_TIMEDATE32:
-                {
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
-
-                    if (pDst + noOfItems * 4 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst32     = *pSrc++ << 24;
-                        *pDst32     += *pSrc++ << 16;
-                        *pDst32     += *pSrc++ << 8;
-                        *pDst32     += *pSrc++;
-                        var_size    = *pDst32;
-                        pDst32++;
-                    }
-                    pDst = (UINT8 *) pDst32;
-                    break;
-                }
-                case TRDP_TIMEDATE48:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT32  *pDst32;
-                    UINT16  *pDst16;
-
-                    if (pDst + noOfItems * 6 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        *pDst32 = *pSrc++ << 24;
-                        *pDst32 += *pSrc++ << 16;
-                        *pDst32 += *pSrc++ << 8;
-                        *pDst32 += *pSrc++;
-                        pDst32++;
-                        pDst16  = (UINT16 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT16));
-                        *pDst16 = *pSrc++ << 8;
-                        *pDst16 += *pSrc++;
-                        pDst32++;
-                        pDst = (UINT8 *) pDst32;
-                    }
-                    break;
-                }
-                case TRDP_TIMEDATE64:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
-
-                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst32 = *pSrc++ << 24;
-                        *pDst32 += *pSrc++ << 16;
-                        *pDst32 += *pSrc++ << 8;
-                        *pDst32 += *pSrc++;
-                        pDst32++;
-                        pDst32  = (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
-                        *pDst32 = *pSrc++ << 24;
-                        *pDst32 += *pSrc++ << 16;
-                        *pDst32 += *pSrc++ << 8;
-                        *pDst32 += *pSrc++;
-                        pDst32++;
-                    }
-                    pDst = (UINT8 *) pDst32;
-                    break;
-                }
-                case TRDP_INT64:
-                case TRDP_UINT64:
-                case TRDP_REAL64:
-
-                    if (pDst + noOfItems * 8 > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
-
-                    unpackedCopy64((UINT8 * *) &pSrc, &pDst, noOfItems);
-                    break;
-                default:
-                    break;
-            }
-            pInfo->pDst = pDst;
-            pInfo->pSrc = pSrc;
-        }
-    }
-
-    return TRDP_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/**    Compute marshalled size of one dataset.
- *
- *  @param[in,out]  pInfo           Pointer with src & dest info
- *  @param[in]      pDataset        Pointer to one dataset
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *  @retval         TRDP_STATE_ERR  Too deep recursion
- *
- */
-
-static TRDP_ERR_T size_marshall (
-    TAU_MARSHALL_INFO_T *pInfo,
-    TRDP_DATASET_T      *pDataset)
-{
-    TRDP_ERR_T  err;
-    UINT16      lIndex;
-    UINT32      var_size = 0;
-    UINT8       *pSrc;
-    UINT8       *pDst = pInfo->pDst;
-
-    /* Restrict recursion */
-    pInfo->level++;
-    if (pInfo->level > TAU_MAX_DS_LEVEL)
-    {
-        return TRDP_STATE_ERR;
-    }
-
-    /*    Align on struct boundary first    */
-    pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
-
-    /*    Loop over all datasets in the array    */
-    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
-    {
-        UINT32 noOfItems = pDataset->pElement[lIndex].size;
-
-        if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
-        {
-            noOfItems = var_size;
-        }
-
-        /*    Is this a composite type?    */
-        if (pDataset->pElement[lIndex].type > (UINT32) TRDP_TYPE_MAX)
-        {
-            while (noOfItems-- > 0)
-            {
-                /* Dataset, call ourself recursively */
-
-                /* Never used before?  */
-                if (NULL == pDataset->pElement[lIndex].pCachedDS)
-                {
-                    /* Look for it   */
-                    pDataset->pElement[lIndex].pCachedDS = find_DS(pDataset->pElement[lIndex].type);
-                }
-
-                if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
-                {
-                    vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
-                    return TRDP_COMID_ERR;
-                }
-
-                err = size_marshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
-                if (err != TRDP_NO_ERR)
-                {
-                    return err;
-                }
-                pDst    = pInfo->pDst;
-                pSrc    = pInfo->pSrc;
-            }
-        }
-        else
-        {
-            switch (pDataset->pElement[lIndex].type)
-            {
-                case TRDP_BOOL8:
-                case TRDP_CHAR8:
-                case TRDP_INT8:
-                case TRDP_UINT8:
-                {
-                    /*    possible variable source size    */
-                    var_size = *pSrc;
-
-                    while (noOfItems-- > 0)
-                    {
-                        pDst++;
-                        pSrc++;
-                    }
-                    break;
-                }
-                case TRDP_UTF16:
-                case TRDP_INT16:
-                case TRDP_UINT16:
-                {
-                    UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
-
-                    /*    possible variable source size    */
-                    var_size = *pSrc16;
-
-                    while (noOfItems-- > 0)
-                    {
-                        pDst += 2;
-                        pSrc16++;
-                    }
-                    pSrc = (UINT8 *) pSrc16;
-                    break;
-                }
-                case TRDP_INT32:
-                case TRDP_UINT32:
-                case TRDP_REAL32:
-                case TRDP_TIMEDATE32:
-                {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
-
-                    /*    possible variable source size    */
-                    var_size = *pSrc32;
-
-                    while (noOfItems-- > 0)
-                    {
-                        pDst += 4;
-                        pSrc32++;
-                    }
-                    pSrc = (UINT8 *) pSrc32;
-                    break;
-                }
-                case TRDP_TIMEDATE64:
-                {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
-
-                    while (noOfItems-- > 0)
-                    {
-                        pDst    += 8;
-                        pSrc32  += 2;
-                    }
-                    pSrc = (UINT8 *) pSrc32;
-                    break;
-                }
-                case TRDP_TIMEDATE48:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT32 *pSrc32;
-
-                    while (noOfItems-- > 0)
-                    {
-                        pSrc32  = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        pDst    += 6;
-                        pSrc32  += 2;
-                        pSrc    = (UINT8 *) pSrc32;
-                    }
-                    break;
-                }
-                case TRDP_INT64:
-                case TRDP_UINT64:
-                case TRDP_REAL64:
-                {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT64));
-
-                    while (noOfItems-- > 0)
-                    {
-                        pDst    += 8;
-                        pSrc32  += 2;
-                    }
-                    pSrc = (UINT8 *) pSrc32;
-                    break;
-                }
-                default:
-                    break;
-            }
-
-            /* Update info structure if we need to! (was issue #137) */
-            pInfo->pDst = pDst;
-            pInfo->pSrc = pSrc;
-        }
-    }
-
-    return TRDP_NO_ERR;
-}
-
-/**********************************************************************************************************************
- * GLOBAL FUNCTIONS
- */
-
-/**********************************************************************************************************************/
-/**    Function to initialise the marshalling/unmarshalling.
- *    The supplied array must be sorted by ComIds. The array must exist during the use of the marshalling
- *    functions (until tlc_terminate()).
- *
- *  @param[in,out]  ppRefCon         Returns a pointer to be used for the reference context of marshalling/unmarshalling
- *  @param[in]      numComId         Number of datasets found in the configuration
- *  @param[in]      pComIdDsIdMap    Pointer to an array of structures of type TRDP_DATASET_T
- *  @param[in]      numDataSet       Number of datasets found in the configuration
- *  @param[in]      pDataset         Pointer to an array of pointers to structures of type TRDP_DATASET_T
- *
- *  @retval         TRDP_NO_ERR      no error
- *  @retval         TRDP_MEM_ERR     provided buffer to small
- *  @retval         TRDP_PARAM_ERR   Parameter error
- *
- */
-
-EXT_DECL TRDP_ERR_T tau_initMarshall (
-    void                    * *ppRefCon,
-    UINT32                  numComId,
-    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,
-    UINT32                  numDataSet,
-    TRDP_DATASET_T          *pDataset[])
-{
-    UINT32 i, j;
-
-    if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    /*    Save the pointer to the comId mapping table    */
-    sComIdDsIdMap   = pComIdDsIdMap;
-    sNumComId       = numComId;
-
-    /* sort the table    */
-    vos_qsort(pComIdDsIdMap, numComId, sizeof(TRDP_COMID_DSID_MAP_T), comId_compare);
-
-    /*    Save the pointer to the table    */
-    sDataSets   = pDataset;
-    sNumEntries = numDataSet;
-
-    /* invalidate the cache */
-    for (i = 0; i < numDataSet; i++)
-    {
-        for (j = 0; j < pDataset[i]->numElement; j++)
-        {
-            pDataset[i]->pElement[j].pCachedDS = NULL;
-        }
-    }
-    /* sort the table    */
-    vos_qsort(pDataset, numDataSet, sizeof(TRDP_DATASET_T *), dataset_compare);
-
-    return TRDP_NO_ERR;
-}
-
-/**********************************************************************************************************************/
-/**    marshall function.
- *
- *  @param[in]      pRefCon         pointer to user context
- *  @param[in]      comId           ComId to identify the structure out of a configuration
- *  @param[in]      pSrc            pointer to received original message
- *  @param[in]      pDest           pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
- *                                  set NULL if not used, set content NULL if unknown
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *
- */
-
-EXT_DECL TRDP_ERR_T tau_marshall (
-    void            *pRefCon,
-    UINT32          comId,
-    UINT8           *pSrc,
-    UINT8           *pDest,
-    UINT32          *pDestSize,
-    TRDP_DATASET_T  * *ppDSPointer)
-{
-    TRDP_ERR_T          err;
-    TRDP_DATASET_T      *pDataset;
-    TAU_MARSHALL_INFO_T info;
-
-    if (0 == comId || NULL == pSrc || NULL == pDest || NULL == pDestSize || 0 == *pDestSize)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    /* Can we use the formerly cached value? */
-    if (NULL != ppDSPointer)
-    {
-        if (NULL == *ppDSPointer)
-        {
-            *ppDSPointer = find_DS_from_ComId(comId);
-        }
-        pDataset = *ppDSPointer;
-    }
-    else
-    {
-        pDataset = find_DS_from_ComId(comId);
-    }
-
-    if (NULL == pDataset)   /* Not in our DB    */
-    {
-        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
-        return TRDP_COMID_ERR;
-    }
-
-    info.level      = 0;
-    info.pSrc       = pSrc;
-    info.pDst       = pDest;
-    info.pDstEnd    = pDest + *pDestSize;
-
-    err = do_marshall(&info, pDataset);
-
-    *pDestSize = info.pDst - pDest;
-
-    return err;
-}
-
-/**********************************************************************************************************************/
-/**    unmarshall function.
- *
- *  @param[in]      pRefCon         pointer to user context
- *  @param[in]      comId           ComId to identify the structure out of a configuration
- *  @param[in]      pSrc            pointer to received original message
- *  @param[in]      pDest           pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
- *                                  set NULL if not used, set content NULL if unknown
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
- *
- */
-
-EXT_DECL TRDP_ERR_T tau_unmarshall (
-    void            *pRefCon,
-    UINT32          comId,
-    UINT8           *pSrc,
-    UINT8           *pDest,
-    UINT32          *pDestSize,
-    TRDP_DATASET_T  * *ppDSPointer)
-{
-    TRDP_ERR_T          err;
-    TRDP_DATASET_T      *pDataset;
-    TAU_MARSHALL_INFO_T info;
-
-    if (0 == comId || NULL == pSrc || NULL == pDest || NULL == pDestSize || 0 == *pDestSize)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    /* Can we use the formerly cached value? */
-    if (NULL != ppDSPointer)
-    {
-        if (NULL == *ppDSPointer)
-        {
-            *ppDSPointer = find_DS_from_ComId(comId);
-        }
-        pDataset = *ppDSPointer;
-    }
-    else
-    {
-        pDataset = find_DS_from_ComId(comId);
-    }
-
-    if (NULL == pDataset)   /* Not in our DB    */
-    {
-        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
-        return TRDP_COMID_ERR;
-    }
-
-    info.level      = 0;
-    info.pSrc       = pSrc;
-    info.pDst       = pDest;
-    info.pDstEnd    = pDest + *pDestSize;
-
-    err = do_unmarshall(&info, pDataset);
-
-    *pDestSize = info.pDst - pDest;
-
-    return err;
-}
-
-
-/**********************************************************************************************************************/
-/**    marshall data set function.
- *
- *  @param[in]      pRefCon         pointer to user context
- *  @param[in]      dsId            Data set id to identify the structure out of a configuration
- *  @param[in]      pSrc            pointer to received original message
- *  @param[in]      pDest           pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
- *                                  set NULL if not used, set content NULL if unknown
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *
- */
-
-EXT_DECL TRDP_ERR_T tau_marshallDs (
-    void            *pRefCon,
-    UINT32          dsId,
-    UINT8           *pSrc,
-    UINT8           *pDest,
-    UINT32          *pDestSize,
-    TRDP_DATASET_T  * *ppDSPointer)
-{
-    TRDP_ERR_T          err;
-    TRDP_DATASET_T      *pDataset;
-    TAU_MARSHALL_INFO_T info;
-
-    if (0 == dsId || NULL == pSrc || NULL == pDest || NULL == pDestSize || 0 == *pDestSize)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    /* Can we use the formerly cached value? */
-    if (NULL != ppDSPointer)
-    {
-        if (NULL == *ppDSPointer)
-        {
-            *ppDSPointer = find_DS(dsId);
-        }
-        pDataset = *ppDSPointer;
-    }
-    else
-    {
-        pDataset = find_DS(dsId);
-    }
-
-    if (NULL == pDataset)   /* Not in our DB    */
-    {
-        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
-        return TRDP_COMID_ERR;
-    }
-
-    info.level      = 0;
-    info.pSrc       = pSrc;
-    info.pDst       = pDest;
-    info.pDstEnd    = pDest + *pDestSize;
-
-    err = do_marshall(&info, pDataset);
-
-    *pDestSize = info.pDst - pDest;
-
-    return err;
-}
-
-/**********************************************************************************************************************/
-/**    unmarshall data set function.
- *
- *  @param[in]      pRefCon         pointer to user context
- *  @param[in]      dsId            Data set id to identify the structure out of a configuration
- *  @param[in]      pSrc            pointer to received original message
- *  @param[in]      pDest           pointer to a buffer for the treated message
- *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
- *                                  set NULL if not used, set content NULL if unknown
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
- *
- */
-
-EXT_DECL TRDP_ERR_T tau_unmarshallDs (
-    void            *pRefCon,
-    UINT32          dsId,
-    UINT8           *pSrc,
-    UINT8           *pDest,
-    UINT32          *pDestSize,
-    TRDP_DATASET_T  * *ppDSPointer)
-{
-    TRDP_ERR_T          err;
-    TRDP_DATASET_T      *pDataset;
-    TAU_MARSHALL_INFO_T info;
-
-    if (0 == dsId || NULL == pSrc || NULL == pDest || NULL == pDestSize || 0 == *pDestSize)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    /* Can we use the formerly cached value? */
-    if (NULL != ppDSPointer)
-    {
-        if (NULL == *ppDSPointer)
-        {
-            *ppDSPointer = find_DS(dsId);
-        }
-        pDataset = *ppDSPointer;
-    }
-    else
-    {
-        pDataset = find_DS(dsId);
-    }
-
-    if (NULL == pDataset)   /* Not in our DB    */
-    {
-        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
-        return TRDP_COMID_ERR;
-    }
-
-    info.level      = 0;
-    info.pSrc       = pSrc;
-    info.pDst       = pDest;
-    info.pDstEnd    = pDest + *pDestSize;
-
-    err = do_unmarshall(&info, pDataset);
-
-    *pDestSize = info.pDst - pDest;
-
-    return err;
-}
-
-
-/**********************************************************************************************************************/
-/**    Calculate data set size by given data set id.
- *
- *  @param[in]      pRefCon         Pointer to user context
- *  @param[in]      dsId            Dataset id to identify the structure out of a configuration
- *  @param[in]      pSrc            Pointer to received original message
- *  @param[out]     pDestSize       Pointer to the size of the data set
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
- *                                  set NULL if not used, set content NULL if unknown
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_PARAM_ERR  data set id not existing
- *
- */
-
-EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
-    void            *pRefCon,
-    UINT32          dsId,
-    UINT8           *pSrc,
-    UINT32          *pDestSize,
-    TRDP_DATASET_T  * *ppDSPointer)
-{
-    TRDP_ERR_T          err;
-    TRDP_DATASET_T      *pDataset;
-    TAU_MARSHALL_INFO_T info;
-
-    if (0 == dsId || NULL == pSrc || NULL == pDestSize)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    /* Can we use the formerly cached value? */
-    if (NULL != ppDSPointer)
-    {
-        if (NULL == *ppDSPointer)
-        {
-            *ppDSPointer = find_DS(dsId);
-        }
-        pDataset = *ppDSPointer;
-    }
-    else
-    {
-        pDataset = find_DS(dsId);
-    }
-
-    if (NULL == pDataset)   /* Not in our DB    */
-    {
-        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", dsId);
-        return TRDP_COMID_ERR;
-    }
-
-    info.level  = 0;
-    info.pSrc   = pSrc;
-    info.pDst   = 0;
-
-    err = size_marshall(&info, pDataset);
-
-    *pDestSize = (UINT32) info.pDst;
-
-    return err;
-}
-
-/**********************************************************************************************************************/
-/**    Calculate data set size by given ComId.
- *
- *  @param[in]      pRefCon         Pointer to user context
- *  @param[in]      comId           ComId id to identify the structure out of a configuration
- *  @param[in]      pSrc            Pointer to received original message
- *  @param[out]     pDestSize       Pointer to the size of the data set
- *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
- *                                  set NULL if not used, set content NULL if unknown
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_PARAM_ERR  data set id not existing
- *
- */
-
-EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
-    void            *pRefCon,
-    UINT32          comId,
-    UINT8           *pSrc,
-    UINT32          *pDestSize,
-    TRDP_DATASET_T  * *ppDSPointer)
-{
-    TRDP_ERR_T          err;
-    TRDP_DATASET_T      *pDataset;
-    TAU_MARSHALL_INFO_T info;
-
-    if (0 == comId || NULL == pSrc || NULL == pDestSize)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    /* Can we use the formerly cached value? */
-    if (NULL != ppDSPointer)
-    {
-        if (NULL == *ppDSPointer)
-        {
-            *ppDSPointer = find_DS_from_ComId(comId);
-        }
-        pDataset = *ppDSPointer;
-    }
-    else
-    {
-        pDataset = find_DS_from_ComId(comId);
-    }
-
-    if (NULL == pDataset)   /* Not in our DB    */
-    {
-        vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", comId);
-        return TRDP_COMID_ERR;
-    }
-
-    info.level  = 0;
-    info.pSrc   = pSrc;
-    info.pDst   = 0;
-
-    err = size_marshall(&info, pDataset);
-
-    *pDestSize = (UINT32) info.pDst;
-
-    return err;
-}
-
 /*******************************************************************************
  * DEFINES
  */
@@ -3749,6 +2376,7 @@ TRDP_ERR_T appendListenerHandleList(
 	return TRDP_NO_ERR;
 }
 
+#ifndef XML_CONFIG_ENABLE
 /******************************************************************************/
 /** Set TRDP Config Parameter From internal config
  *
@@ -3764,6 +2392,7 @@ TRDP_ERR_T setConfigParameterFromInternalConfig (
 	UINT32					interfaceNumberIndex = 0;	/* Loop Counter of Interface Number Index */
 	UINT32					exchgParIndex = 0;			/* Loop Counter of Exchange Parameter Index */
 	pTRDP_DATASET_T		pDataset = NULL;				/* pointer to Dataset */
+	const TRDP_CHAR_IP_ADDR_T DOTTED_IP_ADDRESS__NOTHING	 = "";		/* Dotted IP Address Nothing */
 
 	/* Set IF Config *****/
 	/* Get IF Config memory area */
@@ -3786,10 +2415,23 @@ TRDP_ERR_T setConfigParameterFromInternalConfig (
 		/* Set Network Id of Array IF Config */
 		pIfConfig[i].networkId = arrayInternalIfConfig[i].networkId;
 		/* Convert Host IP Address, and Set Host IP Address of Array IF Config */
-		pIfConfig[i].hostIp = vos_dottedIP(arrayInternalIfConfig[i].dottedHostIp);
+		if (memcmp(arrayInternalIfConfig[i].dottedHostIp,
+					DOTTED_IP_ADDRESS__NOTHING,
+					sizeof(TRDP_CHAR_IP_ADDR_T)) != 0)
+		{
+			pIfConfig[i].hostIp = vos_dottedIP(arrayInternalIfConfig[i].dottedHostIp);
+		}
 		/* Convert Leader IP Address, and Set Leader IP Address of Array IF Config */
-		pIfConfig[i].leaderIp = vos_dottedIP(arrayInternalIfConfig[i].dottedLeaderIp);
+		if (memcmp(arrayInternalIfConfig[i].dottedLeaderIp,
+					DOTTED_IP_ADDRESS__NOTHING,
+					sizeof(TRDP_CHAR_IP_ADDR_T)) != 0)
+		{
+			pIfConfig[i].leaderIp = vos_dottedIP(arrayInternalIfConfig[i].dottedLeaderIp);
+		}
 	}
+
+	/* Set Communication Parameter */
+	pComPar = arrayComParConfig;
 
 	/* Set ComIdDatasetIdMap Config */
 	pComIdDsIdMap = arrayComIdDsIdMapConfig;
@@ -3926,16 +2568,23 @@ TRDP_ERR_T setConfigParameterFromInternalConfig (
 			/* Set number of destinations of Array Exchange Parameter */
 			arrayExchgPar[interfaceNumberIndex][exchgParIndex].destCnt = arrayInternalDestinationConfig[interfaceNumberIndex][exchgParIndex].destCnt;
 			/* Set Pointer to array of destination descriptors of Array Exchange Parameter */
-			arrayExchgPar[interfaceNumberIndex][exchgParIndex].pDest = arrayInternalDestinationConfig[interfaceNumberIndex][exchgParIndex].pDest;
+			if (arrayInternalDestinationConfig[interfaceNumberIndex][exchgParIndex].pDest != NULL)
+			{
+				arrayExchgPar[interfaceNumberIndex][exchgParIndex].pDest = arrayInternalDestinationConfig[interfaceNumberIndex][exchgParIndex].pDest;
+			}
 			/* Set number of sources of Array Exchange Parameter */
 			arrayExchgPar[interfaceNumberIndex][exchgParIndex].srcCnt = arrayInternalSourceConfig[interfaceNumberIndex][exchgParIndex].srcCnt;
 			/* Set Pointer to array of source descriptors of Array Exchange Parameter */
-			arrayExchgPar[interfaceNumberIndex][exchgParIndex].pSrc = arrayInternalSourceConfig[interfaceNumberIndex][exchgParIndex].pSrc;
+			if (arrayInternalSourceConfig[interfaceNumberIndex][exchgParIndex].pSrc != NULL)
+			{
+				arrayExchgPar[interfaceNumberIndex][exchgParIndex].pSrc = arrayInternalSourceConfig[interfaceNumberIndex][exchgParIndex].pSrc;
+			}
 		}
 	}
 
 	return TRDP_NO_ERR;
 }
+#endif /* #ifndef XML_CONFIG_ENABLE */
 
 /******************************************************************************/
 /** PD/MD Telegrams configured for one interface.
@@ -4033,6 +2682,7 @@ TRDP_ERR_T configureTelegrams (
 	return TRDP_NO_ERR;
 }
 
+#if 0
 /******************************************************************************/
 /** Size of Dataset writing in Traffic Store
  *
@@ -4067,13 +2717,6 @@ TRDP_ERR_T sizeWriteDatasetInTrafficStore (
 		return TRDP_PARAM_ERR;
 	}
 
-#if 0
-	/* Set Work Pointer */
-	pDstWorkEnd = pDstEnd;
-
-	/* Get Size */
-	memcpy(&size, pDatasetSize, sizeof(UINT32));
-#endif
 	/* Get Size */
 	memcpy(&size, pDatasetSize, sizeof(UINT32));
 
@@ -4095,7 +2738,6 @@ TRDP_ERR_T sizeWriteDatasetInTrafficStore (
 		}
 	}
 	/* Set Work Pointer */
-//	pDstWorkEnd = pDstEnd;
 	pDstWorkEnd = pDstEnd + firstAlignment;
 
 	/*    Loop over all datasets in the array    */
@@ -4277,6 +2919,94 @@ TRDP_ERR_T sizeWriteDatasetInTrafficStore (
 
 	return TRDP_NO_ERR;
 }
+#endif
+/******************************************************************************/
+/** Size of Dataset writing in Traffic Store
+ *
+ *  @param[out]     pDatasetSize    Pointer Host Byte order of dataset size
+ *  @param[in]      pDataset        Pointer to one dataset
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *
+ */
+TRDP_ERR_T sizeWriteDatasetInTrafficStore (
+		UINT32					*pDatasetSize,
+		TRDP_DATASET_T		*pDataset)
+{
+	TRDP_ERR_T err = TRDP_NO_ERR;
+	UINT8 *pTempSrcDataset = NULL;
+	UINT8 *pTempDestDataset = NULL;
+	UINT32 datasetNetworkByteSize = 0;
+
+	/* Create Temporary Source Dataset */
+	pTempSrcDataset = (UINT8 *)vos_memAlloc(TRDP_MAX_MD_DATA_SIZE);
+	if (pTempSrcDataset == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR,"sizeWriteDatasetInTrafficStore() Failed. Temporary Source Dataset vos_memAlloc() Err\n");
+		/* Free Temporary Source Dataset */
+		vos_memFree(pTempSrcDataset);
+		return TRDP_MEM_ERR;
+	}
+	else
+	{
+		/* Initialize Temporary Source Dataset */
+		memset(pTempSrcDataset, 0, TRDP_MAX_MD_DATA_SIZE);
+	}
+	/* Create Temporary Destination Dataset */
+	pTempDestDataset = (UINT8 *)vos_memAlloc(TRDP_MAX_MD_DATA_SIZE);
+	if (pTempSrcDataset == NULL)
+	{
+		vos_printLog(VOS_LOG_ERROR,"sizeWriteDatasetInTrafficStore() Failed. Temporary Destination Dataset vos_memAlloc() Err\n");
+		/* Free Temporary Source Dataset */
+		vos_memFree(pTempDestDataset);
+		return TRDP_MEM_ERR;
+	}
+	else
+	{
+		/* Initialize Temporary Destination Dataset */
+		memset(pTempDestDataset, 0, TRDP_MAX_MD_DATA_SIZE);
+	}
+
+	/* Compute Network Byte order of Dataset (size of marshalled dataset) */
+	err = tau_calcDatasetSize(
+			marshallConfig.pRefCon,
+			pDataset->id,
+			pTempSrcDataset,
+			&datasetNetworkByteSize,
+			&pDataset);
+	if (err != TRDP_NO_ERR)
+	{
+		vos_printLog(VOS_LOG_ERROR, "sizeWriteDatasetInTrafficStore() Failed. tau_calcDatasetSize datasetId: %d returns error = %d\n", pDataset->id, err);
+		/* Free Temporary Source Dataset */
+		vos_memFree(pTempSrcDataset);
+		return TRDP_PARAM_ERR;
+	}
+	else
+	{
+		/* Set Network Byte order of Dataset */
+		*pDatasetSize = datasetNetworkByteSize;
+	}
+
+	/* Get Host Byte order of Dataset Size(size of unmarshall dataset) by tau_unmarshallDs() */
+	err = tau_unmarshallDs(
+				&marshallConfig.pRefCon,			/* pointer to user context */
+				pDataset->id,						/* datasetId */
+				pTempSrcDataset,					/* source pointer to received original message */
+				pTempDestDataset,					/* destination pointer to a buffer for the treated message */
+				pDatasetSize,						/* destination Buffer Size */
+				&pDataset);						/* pointer to pointer of cached dataset */
+	if (err != TRDP_NO_ERR)
+	{
+		vos_printLog(VOS_LOG_ERROR, "sizeWriteDatasetInTrafficStore() Failed. tau_unmarshallDs DatasetIdT%d returns error %d\n", pDataset->id, err);
+		/* Free Temporary Source Dataset */
+		vos_memFree(pTempDestDataset);
+		return err;
+	}
+	/* Free Temporary Source Dataset */
+	vos_memFree(pTempDestDataset);
+	return TRDP_NO_ERR;
+}
 
 /******************************************************************************/
 /** Publisher Telegrams configured for one interface.
@@ -4297,6 +3027,7 @@ TRDP_ERR_T publishTelegram (
 	PUBLISH_TELEGRAM_T	*pPublishTelegram = NULL;
 	UINT32					*pPublishDataset = NULL;
 	TRDP_ERR_T				err = TRDP_NO_ERR;
+//	UINT8					dstend = 0;
 
 	/* Get Publish Telegram memory area */
     pPublishTelegram = (PUBLISH_TELEGRAM_T *)vos_memAlloc(sizeof(PUBLISH_TELEGRAM_T));
@@ -4363,8 +3094,8 @@ TRDP_ERR_T publishTelegram (
 		}
 		/* Set Dataset */
 		/* Get Dataset Size */
-		UINT8 dstend = 0;
-		err = sizeWriteDatasetInTrafficStore(&dstend, &pPublishTelegram->dataset.size, pPublishTelegram->pDatasetDescriptor);
+//		err = sizeWriteDatasetInTrafficStore(&dstend, &pPublishTelegram->dataset.size, pPublishTelegram->pDatasetDescriptor);
+		err = sizeWriteDatasetInTrafficStore(&pPublishTelegram->dataset.size, pPublishTelegram->pDatasetDescriptor);
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "publishTelegram() Failed. sizeWriteDatasetInTrafficStore() returns error = %d\n", err);
@@ -4550,6 +3281,7 @@ TRDP_ERR_T subscribeTelegram (
 	SUBSCRIBE_TELEGRAM_T		*pSubscribeTelegram = NULL;
 	UINT32						*pSubscribeDataset = NULL;
 	TRDP_ERR_T					err = TRDP_NO_ERR;
+//	UINT8						dstend = 0;
 
 	/* Check srcCnt */
 	if (pExchgPar->srcCnt == 0)
@@ -4703,8 +3435,8 @@ TRDP_ERR_T subscribeTelegram (
 			}
 			/* Set Dataset */
 			/* Get Dataset Size */
-			UINT8 dstend = 0;
-			err = sizeWriteDatasetInTrafficStore(&dstend, &pSubscribeTelegram->dataset.size, pSubscribeTelegram->pDatasetDescriptor);
+//			err = sizeWriteDatasetInTrafficStore(&dstend, &pSubscribeTelegram->dataset.size, pSubscribeTelegram->pDatasetDescriptor);
+			err = sizeWriteDatasetInTrafficStore(&pSubscribeTelegram->dataset.size, pSubscribeTelegram->pDatasetDescriptor);
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "subscribeTelegram() Failed. sizeWriteDatasetInTrafficStore() returns error = %d\n", err);
@@ -4883,6 +3615,7 @@ TRDP_ERR_T pdRequestTelegram (
 	UINT32						*pPdRequestDataset = NULL;
 	TRDP_ERR_T					err = TRDP_NO_ERR;
 	SUBSCRIBE_TELEGRAM_T		*pTailSubscribeTelegram = NULL;
+//	UINT8						dstend = 0;
 
 	/* Check srcCnt */
 	if (pExchgPar->srcCnt == 0)
@@ -5081,8 +3814,8 @@ TRDP_ERR_T pdRequestTelegram (
 			}
 			/* Set Dataset */
 			/* Get Dataset Size */
-			UINT8 dstend = 0;
-			err = sizeWriteDatasetInTrafficStore(&dstend, &pPdRequestTelegram->dataset.size, pPdRequestTelegram->pDatasetDescriptor);
+//			err = sizeWriteDatasetInTrafficStore(&dstend, &pPdRequestTelegram->dataset.size, pPdRequestTelegram->pDatasetDescriptor);
+			err = sizeWriteDatasetInTrafficStore(&pPdRequestTelegram->dataset.size, pPdRequestTelegram->pDatasetDescriptor);
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "pdRequestTelegram() Failed. sizeWriteDatasetInTrafficStore() returns error = %d\n", err);
@@ -5314,6 +4047,7 @@ TRDP_ERR_T replierTelegram (
 	TRDP_DEST_T					defaultDestination = {0};				/* Destination Parameter (id, SDT, URI) */
 	LISTENER_HANDLE_T    		*pNewListenerHandle = NULL;
 	WAITING_RECEIVE_CONFIRM_T	*pNewWaitingReceiveConfirmReference = NULL;		/* Pointer to Waiting Receive Confirm Reference */
+//	UINT8							dstend = 0;
 
 	/* Check Parameter */
 	if (pGetTelegramStatusFlag == NULL)
@@ -5419,8 +4153,8 @@ TRDP_ERR_T replierTelegram (
 	}
 	/* Set Dataset */
 	/* Get Dataset Size */
-	UINT8 dstend = 0;
-	err = sizeWriteDatasetInTrafficStore(&dstend, &pReplierTelegram->dataset.size, pReplierTelegram->pDatasetDescriptor);
+//	err = sizeWriteDatasetInTrafficStore(&dstend, &pReplierTelegram->dataset.size, pReplierTelegram->pDatasetDescriptor);
+	err = sizeWriteDatasetInTrafficStore(&pReplierTelegram->dataset.size, pReplierTelegram->pDatasetDescriptor);
 	if (err != TRDP_NO_ERR)
 	{
 		vos_printLog(VOS_LOG_ERROR, "replierTelegram() Failed. sizeWriteDatasetInTrafficStore() returns error = %d\n", err);
@@ -5803,6 +4537,7 @@ TRDP_ERR_T callerTelegram (
 	TRDP_URI_USER_T   	destinationURI = {0};
 	TRDP_ERR_T				err = TRDP_NO_ERR;
 	LISTENER_HANDLE_T    *pNewListenerHandle = NULL;
+//	UINT8					dstend = 0;
 
 	/* Check Parameter */
 	if (pGetTelegramStatusFlag == NULL)
@@ -5875,8 +4610,8 @@ TRDP_ERR_T callerTelegram (
 	}
 	/* Set Dataset */
 	/* Get Dataset Size */
-	UINT8 dstend = 0;
-	err = sizeWriteDatasetInTrafficStore(&dstend, &pCallerTelegram->dataset.size, pCallerTelegram->pDatasetDescriptor);
+//	err = sizeWriteDatasetInTrafficStore(&dstend, &pCallerTelegram->dataset.size, pCallerTelegram->pDatasetDescriptor);
+	err = sizeWriteDatasetInTrafficStore(&pCallerTelegram->dataset.size, pCallerTelegram->pDatasetDescriptor);
 	if (err != TRDP_NO_ERR)
 	{
 		vos_printLog(VOS_LOG_ERROR, "callerTelegram() Failed. sizeWriteDatasetInTrafficStore() returns error = %d\n", err);
@@ -6148,9 +4883,17 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 	struct timeval			tv_interval = {0};								/* interval Time :timeval type */
 	TRDP_TIME_T				trdp_time_tv_interval = {0};					/* interval Time :TRDP_TIME_T type for TRDP function */
 
-	/* Set Application Handle */
+	/* Set Application Handle : Subnet1 */
 	appHandle = arraySessionConfig[IF_INDEX_SUBNET1].sessionHandle;
-	appHandle2 = arraySessionConfig[IF_INDEX_SUBNET2].sessionHandle;
+	/* Set Application Handle : Subnet2 */
+	if (NUM_IF_CONFIG >= LADDER_IF_NUMBER)
+	{
+		appHandle2 = arraySessionConfig[IF_INDEX_SUBNET2].sessionHandle;
+	}
+	else
+	{
+		appHandle2 = NULL;
+	}
 	/* Set Byet order Message Type:Pr */
 	msgTypePrNetworkByteOder = vos_htons(TRDP_MSG_PR);
 
@@ -6290,7 +5033,8 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 									pUpdatePdRequestTelegram->pPdParameter->redundant,
 									pUpdatePdRequestTelegram->pPdParameter->flags,
 									pUpdatePdRequestTelegram->pSendParam,
-									(void *)(INT32) pTrafficStoreAddr + pUpdatePdRequestTelegram->pPdParameter->offset,
+//									(void *)(INT32) pTrafficStoreAddr + pUpdatePdRequestTelegram->pPdParameter->offset,
+									(UINT8 *)((INT32) pTrafficStoreAddr + (UINT8)pUpdatePdRequestTelegram->pPdParameter->offset),
 									pUpdatePdRequestTelegram->datasetNetworkByteSize,
 									pUpdatePdRequestTelegram->replyComId,
 									pUpdatePdRequestTelegram->replyIpAddr);
@@ -6349,114 +5093,119 @@ VOS_THREAD_FUNC_T TAULpdMainThread (
 			}
 		}
 
-		/* Check PD Send Queue of appHandle2 */
-		for (iterPD = appHandle2->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
+		/* Check Ladder Topology ? */
+		if (appHandle2 != NULL)
 		{
-			/* Get Now Time */
-			vos_getTime(&nowTime);
-			/* PD Request Telegram ? */
-			if (iterPD->pFrame->frameHead.msgType == msgTypePrNetworkByteOder)
+			/* Check PD Send Queue of appHandle2 */
+			for (iterPD = appHandle2->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
 			{
-				/* PD Pull (request) ? */
-				if (iterPD->addr.comId != TRDP_GLOBAL_STATISTICS_COMID)
+				/* Get Now Time */
+				vos_getTime(&nowTime);
+				/* PD Request Telegram ? */
+				if (iterPD->pFrame->frameHead.msgType == msgTypePrNetworkByteOder)
 				{
-					/* Change Byet Order */
-					replyComIdHostByetOrder = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
-					replyIpAddrHostByteOrder = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
-					/* Get PD Request Telegram */
-					pUpdatePdRequestTelegram = searchPdRequestTelegramList(
-							pHeadPdRequestTelegram,
-							iterPD->addr.comId,
-							replyComIdHostByetOrder,
-							iterPD->addr.srcIpAddr,
-							iterPD->addr.destIpAddr,
-							replyIpAddrHostByteOrder);
-					if (pUpdatePdRequestTelegram == NULL)
-					{
-						vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. Get PD Request Telegram Err.\n");
-					}
-					else
-					{
-						/* First Request Send ? */
-						if ((pUpdatePdRequestTelegram->requestSendTime.tv_sec == 0)
-							&& (pUpdatePdRequestTelegram->requestSendTime.tv_usec == 0))
-						{
-							/* Set now Time */
-							vos_addTime(&pUpdatePdRequestTelegram->requestSendTime, &nowTime);
-							/* Convert Request Send cycle time */
-							tv_interval.tv_sec = pUpdatePdRequestTelegram->pPdParameter->cycle / 1000000;
-							tv_interval.tv_usec = pUpdatePdRequestTelegram->pPdParameter->cycle % 1000000;
-							trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
-							trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
-							/* Set Request Send Time */
-							vos_addTime(&pUpdatePdRequestTelegram->requestSendTime, &trdp_time_tv_interval);
-						}
-						/* Is Now Time send Timing ? */
-						if (vos_cmpTime((TRDP_TIME_T *)&pUpdatePdRequestTelegram->requestSendTime, (TRDP_TIME_T *)&nowTime) < 0)
-						{
-							/* PD Request */
-							err = tlp_request(
-									appHandle2,
-									pUpdatePdRequestTelegram->subHandle,
-									iterPD->addr.comId,
-									pUpdatePdRequestTelegram->topoCount,
-									pUpdatePdRequestTelegram->srcIpAddr,
-									pUpdatePdRequestTelegram->dstIpAddr,
-									pUpdatePdRequestTelegram->pPdParameter->redundant,
-									pUpdatePdRequestTelegram->pPdParameter->flags,
-									pUpdatePdRequestTelegram->pSendParam,
-									(void *)(INT32) pTrafficStoreAddr + pUpdatePdRequestTelegram->pPdParameter->offset,
-									pUpdatePdRequestTelegram->datasetNetworkByteSize,
-									pUpdatePdRequestTelegram->replyComId,
-									pUpdatePdRequestTelegram->replyIpAddr);
-							if (err != TRDP_NO_ERR)
-							{
-								vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. tlp_request() Err: %d\n", err);
-							}
-							vos_printLog(VOS_LOG_DBG, "Subnet2 tlp_request()\n");
-							/* Get Now Time */
-							vos_getTime(&pUpdatePdRequestTelegram->requestSendTime);
-							/* Convert Request Send cycle time */
-							tv_interval.tv_sec = pUpdatePdRequestTelegram->pPdParameter->cycle / 1000000;
-							tv_interval.tv_usec = pUpdatePdRequestTelegram->pPdParameter->cycle % 1000000;
-							trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
-							trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
-							/* Set Request Send Time */
-							vos_addTime(&pUpdatePdRequestTelegram->requestSendTime, &trdp_time_tv_interval);
-						}
-					}
-				}
-			}
-			/* Publish Telegram */
-			else
-			{
-				/* Is Now Time send Timing ? */
-				if (vos_cmpTime((TRDP_TIME_T *)&iterPD->timeToGo, (TRDP_TIME_T *)&nowTime) < 0)
-				{
-					/* Check comId which Publish our statistics packet */
+					/* PD Pull (request) ? */
 					if (iterPD->addr.comId != TRDP_GLOBAL_STATISTICS_COMID)
 					{
-						/* Get Publish Telegram */
-						pUpdatePublishTelegram = searchPublishTelegramList(
-														pHeadPublishTelegram,
-														iterPD->addr.comId,
-														iterPD->addr.srcIpAddr,
-														iterPD->addr.destIpAddr);
-						if (pUpdatePublishTelegram == NULL)
+						/* Change Byet Order */
+						replyComIdHostByetOrder = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
+						replyIpAddrHostByteOrder = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
+						/* Get PD Request Telegram */
+						pUpdatePdRequestTelegram = searchPdRequestTelegramList(
+								pHeadPdRequestTelegram,
+								iterPD->addr.comId,
+								replyComIdHostByetOrder,
+								iterPD->addr.srcIpAddr,
+								iterPD->addr.destIpAddr,
+								replyIpAddrHostByteOrder);
+						if (pUpdatePdRequestTelegram == NULL)
 						{
-							vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. Get Publish Telegram Err.\n");
+							vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. Get PD Request Telegram Err.\n");
 						}
 						else
 						{
-							/* Update Publish Dataset */
-							err = tlp_put(
-									appHandle2,
-									pUpdatePublishTelegram->pubHandle,
-									(void *)(INT32)(pTrafficStoreAddr + pUpdatePublishTelegram->pPdParameter->offset),
-									pUpdatePublishTelegram->datasetNetworkByteSize);
-							if (err != TRDP_NO_ERR)
+							/* First Request Send ? */
+							if ((pUpdatePdRequestTelegram->requestSendTime.tv_sec == 0)
+								&& (pUpdatePdRequestTelegram->requestSendTime.tv_usec == 0))
 							{
-								vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. tlp_put() Err: %d\n", err);
+								/* Set now Time */
+								vos_addTime(&pUpdatePdRequestTelegram->requestSendTime, &nowTime);
+								/* Convert Request Send cycle time */
+								tv_interval.tv_sec = pUpdatePdRequestTelegram->pPdParameter->cycle / 1000000;
+								tv_interval.tv_usec = pUpdatePdRequestTelegram->pPdParameter->cycle % 1000000;
+								trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
+								trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
+								/* Set Request Send Time */
+								vos_addTime(&pUpdatePdRequestTelegram->requestSendTime, &trdp_time_tv_interval);
+							}
+							/* Is Now Time send Timing ? */
+							if (vos_cmpTime((TRDP_TIME_T *)&pUpdatePdRequestTelegram->requestSendTime, (TRDP_TIME_T *)&nowTime) < 0)
+							{
+								/* PD Request */
+								err = tlp_request(
+										appHandle2,
+										pUpdatePdRequestTelegram->subHandle,
+										iterPD->addr.comId,
+										pUpdatePdRequestTelegram->topoCount,
+										pUpdatePdRequestTelegram->srcIpAddr,
+										pUpdatePdRequestTelegram->dstIpAddr,
+										pUpdatePdRequestTelegram->pPdParameter->redundant,
+										pUpdatePdRequestTelegram->pPdParameter->flags,
+										pUpdatePdRequestTelegram->pSendParam,
+	//									(void *)(INT32) pTrafficStoreAddr + pUpdatePdRequestTelegram->pPdParameter->offset,
+										(UINT8 *)((INT32) pTrafficStoreAddr + (UINT32)pUpdatePdRequestTelegram->pPdParameter->offset),
+										pUpdatePdRequestTelegram->datasetNetworkByteSize,
+										pUpdatePdRequestTelegram->replyComId,
+										pUpdatePdRequestTelegram->replyIpAddr);
+								if (err != TRDP_NO_ERR)
+								{
+									vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. tlp_request() Err: %d\n", err);
+								}
+								vos_printLog(VOS_LOG_DBG, "Subnet2 tlp_request()\n");
+								/* Get Now Time */
+								vos_getTime(&pUpdatePdRequestTelegram->requestSendTime);
+								/* Convert Request Send cycle time */
+								tv_interval.tv_sec = pUpdatePdRequestTelegram->pPdParameter->cycle / 1000000;
+								tv_interval.tv_usec = pUpdatePdRequestTelegram->pPdParameter->cycle % 1000000;
+								trdp_time_tv_interval.tv_sec = tv_interval.tv_sec;
+								trdp_time_tv_interval.tv_usec = tv_interval.tv_usec;
+								/* Set Request Send Time */
+								vos_addTime(&pUpdatePdRequestTelegram->requestSendTime, &trdp_time_tv_interval);
+							}
+						}
+					}
+				}
+				/* Publish Telegram */
+				else
+				{
+					/* Is Now Time send Timing ? */
+					if (vos_cmpTime((TRDP_TIME_T *)&iterPD->timeToGo, (TRDP_TIME_T *)&nowTime) < 0)
+					{
+						/* Check comId which Publish our statistics packet */
+						if (iterPD->addr.comId != TRDP_GLOBAL_STATISTICS_COMID)
+						{
+							/* Get Publish Telegram */
+							pUpdatePublishTelegram = searchPublishTelegramList(
+															pHeadPublishTelegram,
+															iterPD->addr.comId,
+															iterPD->addr.srcIpAddr,
+															iterPD->addr.destIpAddr);
+							if (pUpdatePublishTelegram == NULL)
+							{
+								vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. Get Publish Telegram Err.\n");
+							}
+							else
+							{
+								/* Update Publish Dataset */
+								err = tlp_put(
+										appHandle2,
+										pUpdatePublishTelegram->pubHandle,
+										(void *)(INT32)(pTrafficStoreAddr + pUpdatePublishTelegram->pPdParameter->offset),
+										pUpdatePublishTelegram->datasetNetworkByteSize);
+								if (err != TRDP_NO_ERR)
+								{
+									vos_printLog(VOS_LOG_ERROR, "TAULpdMainThread() Failed. tlp_put() Err: %d\n", err);
+								}
 							}
 						}
 					}
@@ -6554,12 +5303,13 @@ TRDP_ERR_T tau_ldInit (
 	extern UINT32					numExchgPar;
 	INT8							*pUseMdSendSubnetId = NULL;
 	/* For Get IP Address */
-	UINT32 noOfIfaces = 10;
-	VOS_IF_REC_T ifAddressTable[noOfIfaces];
+	UINT32 getNoOfIfaces = NUM_ED_INTERFACES;
+	VOS_IF_REC_T ifAddressTable[NUM_ED_INTERFACES];
 	TRDP_IP_ADDR_T ownIpAddress = 0;
 #ifdef __linux
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "eth0";
-#elif defined(__APPLE__)
+//#elif defined(__APPLE__)
+#else
 	CHAR8 SUBNETWORK_ID1_IF_NAME[] = "en0";
 #endif
 
@@ -6595,14 +5345,14 @@ TRDP_ERR_T tau_ldInit (
 #endif /* ifdef XML_CONFIG_ENABLE */
 
 	/* Get I/F address */
-	if (vos_getInterfaces(&noOfIfaces, ifAddressTable) != VOS_NO_ERR)
+	if (vos_getInterfaces(&getNoOfIfaces, ifAddressTable) != VOS_NO_ERR)
 	{
 		vos_printLog(VOS_LOG_ERROR, "tau_ldInit() failed. vos_getInterfaces() error.\n");
 	   return TRDP_SOCK_ERR;
 	}
 
 	/* Get All I/F List */
-	for (index = 0; index < noOfIfaces; index++)
+	for (index = 0; index < getNoOfIfaces; index++)
 	{
 		if (strncmp(ifAddressTable[index].name, SUBNETWORK_ID1_IF_NAME, sizeof(SUBNETWORK_ID1_IF_NAME)) == 0)
 		{
@@ -7483,7 +6233,7 @@ TRDP_ERR_T tau_ldNotify (
 					&pNotifyCallerTelegram->pDatasetDescriptor);	/* pointer to pointer of cached dataset */
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printLog(VOS_LOG_ERROR, "tau_ldNotify() tau_unmarshall Failed. comId:%d returns error %d\n", comId, err);
+				vos_printLog(VOS_LOG_ERROR, "tau_ldNotify() tau_marshall Failed. comId:%d returns error %d\n", comId, err);
 				return err;
 			}
 			else
@@ -7735,7 +6485,7 @@ TRDP_ERR_T tau_ldRequest (
 					&pRequestCallerTelegram->pDatasetDescriptor);							/* pointer to pointer of cached dataset */
 			if (err != TRDP_NO_ERR)
 			{
-				vos_printLog(VOS_LOG_ERROR, "tau_ldRequest() tau_unmarshall Failed. comId:%d returns error %d\n", comId, err);
+				vos_printLog(VOS_LOG_ERROR, "tau_ldRequest() tau_marshall Failed. comId:%d returns error %d\n", comId, err);
 				/* Free Waiting Receive Reply Reference */
 				vos_memFree(pNewWaitingReceiveReplyReference);
 				/* Free WaitingReceiveReplyReference TAUL Reference */
@@ -7935,7 +6685,7 @@ TRDP_ERR_T tau_ldReply (
 				&pReplyReplierTelegram->pDatasetDescriptor);							/* pointer to pointer of cached dataset */
 		if (err != TRDP_NO_ERR)
 		{
-			vos_printLog(VOS_LOG_ERROR, "tau_ldReply() tau_unmarshall Failed. comId:%d returns error %d\n", comId, err);
+			vos_printLog(VOS_LOG_ERROR, "tau_ldReply() tau_marshall Failed. comId:%d returns error %d\n", comId, err);
 			return err;
 		}
 		else
