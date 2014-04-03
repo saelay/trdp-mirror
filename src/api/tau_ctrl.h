@@ -165,6 +165,16 @@ typedef struct
 /*    Train switch control                                                                                            */
 /**********************************************************************************************************************/
 
+/**********************************************************************************************************************/
+/**    Function to init  ECSP control interface
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_INIT_ERR   initialisation error
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_initEcspCtrl (void);
+
+
 
 /**********************************************************************************************************************/
 /**    Function to set ECSP control information
