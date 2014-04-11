@@ -14,9 +14,9 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  *
- * $Id: tau_tti.h 274 2013-01-10 11:00:43Z aweiss $
+ * $Id$
  *
  */
 
@@ -57,16 +57,18 @@ typedef struct
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
 } TRDP_ETB_INFO_T;
 
-/** Closed train information */
+/** Closed train consists information */
 typedef struct
 {
-    UINT8                   cstUUID[16];    /**< consist UUID */
-    UINT8                   cstOrient;      /**< consist orientation
-                                                 ´01`B = same as train direction
-                                                 ´10`B = inverse to train direction */
-    UINT8                   reserved01;     /**< reserved for future use (= 0) */
-    UINT16                  reserved02;     /**< reserved for future use (= 0) */
-} TRDP_CLTR_INFO_T;
+    UINT8                   cltrCstUUID[16];    /**< closed train consist UUID */
+    UINT8                   cltrCstOrient;      /**< closed train consist orientation
+                                                     ´01`B = same as closed train direction
+                                                     ´10`B = inverse to closed train direction */
+    UINT8                   cltrCstNo;          /**< sequence number of the consist within the
+                                                     closed train, value range 1..32 */
+    UINT16                  reserved01;         /**< reserved for future use (= 0) */
+} TRDP_CLTRCST_INFO_T;
+
 
 /** Application defined properties */
 typedef struct
@@ -79,10 +81,11 @@ typedef struct
     UINT8                  *pProp;          /**< properties, application defined */
 } TRDP_PROP_T;
 
+
 /** function/device information structure */
 typedef struct
 {
-    TRDP_LABEL_T            fctName;        /**< function device or group label as defined in 5.4.4.6.2 */
+    TRDP_LABEL_T            fctName;        /**< function device or group label */
     UINT16                  fctId;          /**< unique host identification of the function
                                                  device or group in the consist as defined in
                                                  IEC 61375-2-5, application defined. Value range: 1..16383 */
@@ -147,9 +150,9 @@ typedef struct
                                                  value range 0..1024 */
     TRDP_FUNCTION_INFO_T   *pFctInfoList;   /**< function info list for the functions in consist */
     UINT16                  reserved06;     /**< reserved for future use (= 0) */
-    UINT16                  clTrCnt;        /**< number of original consists in closed train 
+    UINT16                  cltrCstCnt;     /**< number of original consists in closed train 
                                                  value range: 0..32, 0 = consist is no closed train */
-    TRDP_CLTR_INFO_T       *pClTrInfoList;  /**< info on closed train composition */
+    TRDP_CLTRCST_INFO_T    *pCltrCstInfoList;  /**< info on closed train composition */
     UINT32                 cstTopoCnt;      /**< sc-32 computed over record, seed value: 'FFFFFFFF'H */
 } TRDP_CONSIST_INFO_T;
 
@@ -199,16 +202,20 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectoryState data structure version  
                                                   parameter ‘mainVersion’ shall be set to 1. */
+    UINT16                  reserved01;     /**< reserved for future use (= 0) */
     BITSET8                 etbId;          /**< identification of the ETB the TTDB is computed for
                                                  bit0: ETB0 (operational network)
                                                  bit1: ETB1 (multimedia network)
                                                  bit2: ETB2 (other network)
                                                  bit3: ETB3 (other network) */
-    UINT8                   trDirState;     /**< TTDB status: ´01`B == unconfirmed, ´10`B == confirmed */
-    TRDP_LABEL_T            trId;           /**< train identifier, application defined
+    UINT8                   trnDirState;    /**< TTDB status: ´01`B == unconfirmed, ´10`B == confirmed */
+    UINT8                   opTrnDirState;  /**< TTDB status: ´01`B == inalid, ´10`B == valid */
+    UINT8                   reserved02;     /**< reserved for future use (= 0) */
+    TRDP_LABEL_T            trnId;          /**< train identifier, application defined
                                                  (e.g. “ICE75”, “IC346”), informal */
-    TRDP_LABEL_T            trOperator;     /**< train operator, e.g. “trenitalia.it”, informal */
-    UINT32                  opTrTopoCnt;    /**< operational train topology counter  */
+    TRDP_LABEL_T            trnOperator;    /**< train operator, e.g. “trenitalia.it”, informal */
+    UINT32                  opTrnTopoCnt;   /**< operational train topology counter
+                                                 set to 0 if opTrnDirState == invalid */
     UINT32                  crc;            /**< sc-32 computed over record (seed value: ‘FFFFFFFF’H) */
 } TRDP_OP_TRAIN_DIRECTORY_STATE_T;
 
@@ -253,7 +260,8 @@ typedef struct
                                                  bit1: ETB1 (multimedia network)
                                                  bit2: ETB2 (other network)
                                                  bit3: ETB3 (other network) */
-    UINT8                   opTrOrient;     /**< operational train orientation  
+    UINT8                   opTrnOrient;    /**< operational train orientation
+                                                 ‘00’B = unknown
                                                  ´01`B = same as train direction
                                                  ´10`B = inverse to train direction */
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
@@ -262,7 +270,7 @@ typedef struct
     UINT16                  reserved02;     /**< reserved for future use (= 0) */
     UINT16                  opVehCnt;       /**< number of vehicles in train (1..63) */
     TRDP_OP_VEHICLE_T      *pOpVehList;     /**< Pointer to operational vehicle list starting with op. vehicle #1 */
-    UINT32                  opTrTopoCnt;    /**< operational train topology counter 
+    UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
                                                  SC-32 computed over record (seed value : trnTopoCnt) */
 } TRDP_OP_TRAIN_DIRECTORY_T;
 
