@@ -1,0 +1,22 @@
+#//
+#// $Id$
+#//
+#// DESCRIPTION    Config file to make TRDP for POSIX_X86 target
+#//
+#// AUTHOR         Bombardier Transportation GmbH
+#//
+#// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0 
+#// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+#// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
+#//
+
+ARCH = linux-x86-gnu
+TARGET_VOS = posix
+TARGET_OS = LINUX
+TCPREFIX = 
+TCPOSTFIX = 
+
+# the _GNU_SOURCE is needed to get the extended poll feature for the POSIX socket
+
+CFLAGS += -Wall -fstrength-reduce -fno-builtin -fsigned-char -pthread -fPIC -D_GNU_SOURCE -DPOSIX
+LDFLAGS += -lrt
