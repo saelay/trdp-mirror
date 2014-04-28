@@ -18,9 +18,14 @@
  *
  */
 
+#ifndef VXWORKS
+#error \
+    "You are trying to compile the VXWORKS implementation of vos_sock.c - either define VXWORKS or exclude this file!"
+#endif
 /***********************************************************************************************************************
  * INCLUDES
  */
+#include "vxWorks.h"
 #include "vos_sock.h"
 #include "vos_types.h"
 #include "vos_utils.h"
@@ -29,16 +34,13 @@
 #include "ctype.h"
 #include "muxLib.h"
 #include "ioLib.h"
-#include "ioCtl.h"
+#include "ioctl.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
  */
  
- #ifndef VXWORKS
-#error \
-    "You are trying to compile the VXWORKS implementation of vos_sock.c - either define VXWORKS or exclude this file!"
-#endif
+
 
 /***********************************************************************************************************************
  *  LOCALS

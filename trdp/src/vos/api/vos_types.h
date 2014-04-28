@@ -75,6 +75,7 @@ typedef double REAL64;
 
 #elif defined(VXWORKS)
 
+#include "sys/types.h"
 #include <types/vxTypesOld.h>
 
 typedef char CHAR8;
