@@ -38,4 +38,4 @@ TARGET_OS = VXWORKS
 TCPREFIX = $(TCPATH)
 TCPOSTFIX = ppc
 
-CFLAGS += -ansi -Wall -fstrength-reduce -fno-builtin -mlongcall -fsigned-char -DCPU=$(CPU) -I$(WIND_BASE)/target/h  -I$(WIND_BASE)/target/h/wrn/coreip -DPOSIX
+CFLAGS += -ansi -Wall -fstrength-reduce -fno-builtin -mlongcall -fsigned-char -DCPU=$(CPU) -I$(WIND_BASE)/target/h  -I$(WIND_BASE)/target/h/wrn/coreip
