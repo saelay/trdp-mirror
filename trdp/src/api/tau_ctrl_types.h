@@ -53,13 +53,34 @@ extern "C" {
 
 typedef struct
 {
+    UINT8                   trnVehNo;       /**< vehicle sequence number within the train
+ 	                                             with vehicle 01 being the first vehicle
+                                                 in ETB reference direction 1 as defined in IEC61375-2-5
+                                                 value range: 0..63
+                                                 a value of 0 indicates that this vehicle
+                                                 has been inserted by correction */
+    ANTIVALENT8             isLead;         /**< vehicle is leading */
+    UINT8                   leadDir;        /**< vehicle leading direction
+                                                 0 = not relevant
+                                                 1 = leading direction 1
+                                                 2 = leading direction 2 */
+    UINT8                   vehOrient;      /**< vehicle orientation
+                                                 0 = not known (corrected vehicle)
+                                                 1 = same as operational train direction
+                                                 2 = inverse to operational train direction */
+    
+} TRDP_CONF_VEHICLE_T;
+
+typedef struct
+{
     TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter ‘mainVersion’ shall be set to 1. */ 
     UINT16                  reserved01;     /**< reserved (=0) */
-    UINT8                   tcnCstNo;       /**< own TCN consist number (= 1..32) */
-    UINT8                   tcnClTrNo;      /**< own TCN closed train sequence number (= 1..32) */
+    UINT8                   trnCstNo;       /**< own TCN consist number (= 1..32) */
+    UINT8                   trnClTrNo;      /**< own TCN closed train sequence number (= 1..32) */
     UINT8                   ownOpCstNo;     /**< own operational address (= 1..32) = 0 if unknown (e.g. after Inauguration) */
     UINT8                   reserved02;     /**< reserved (=0) */
-    UINT32                  tcnTopoCount;   /**< Train directory topology counter */
+    UINT32                  cstTopoCount;   /**< Consist topology counter */
+    UINT32                  trnTopoCount;   /**< Train directory topology counter */
     UINT32                  opTopoCount;    /**< Operational Train directory topology counter */
     ANTIVALENT8             wasLead;        /**< consist was leading, 
                                                  ‘01’B = false, ‘10’B = true */
@@ -85,12 +106,12 @@ typedef struct
                                                  ‘01’B = false, ‘10’B = true */
     UINT8                   leadVehOfCst;   /**< position of leading vehicle in consist, 
                                                  0..31 (0: first vehicle in consist in Direction 1, 1: second vehicle, etc.) */
-    UINT8                   reserved03;     /**< reserved (=0) */
-    UINT16                  reserved04;     /**< reserved (=0) */
-    UINT8                   noOfVeh;        /**< number of confirmed vehicles in train (1..32) */
-    TRDP_OP_VEHICLE_T      *pConfVehList;   /**< dynamic ordered list of confirmed vehicles in train,
+    UINT8                   reqCstInfo;     /**< rCi: request CSTINFO telegram exchange */
+    UINT16                  reserved03;     /**< reserved (=0) */
+    UINT16                  confVehCnt;     /**< number of confirmed vehicles in train (1..32) */
+    TRDP_CONF_VEHICLE_T    *pConfVehList;   /**< dynamic ordered list of confirmed vehicles in train,
                                                  starting with vehicle at train head, see sub-clause 5.3.3.2.6 */
-} TRDP_ECSP_CTRL_T;
+} TRDP_ETBCTRL_TELEGRAM_T;
 
 
 typedef struct
