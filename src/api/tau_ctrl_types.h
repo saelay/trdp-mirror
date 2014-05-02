@@ -39,15 +39,13 @@ extern "C" {
  * DEFINES
  */
 
-#ifndef __cdecl
-#define __cdecl
-#endif
-
-
 /***********************************************************************************************************************
  * TYPEDEFS
  */
 
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
 
 /** Types for ETB control */
 
@@ -69,11 +67,11 @@ typedef struct
                                                  1 = same as operational train direction
                                                  2 = inverse to operational train direction */
     
-} TRDP_CONF_VEHICLE_T;
+}  GNU_PACKED TRDP_CONF_VEHICLE_T;
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter ‘mainVersion’ shall be set to 1. */ 
+    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
     UINT16                  reserved01;     /**< reserved (=0) */
     UINT8                   trnCstNo;       /**< own TCN consist number (= 1..32) */
     UINT8                   trnClTrNo;      /**< own TCN closed train sequence number (= 1..32) */
@@ -83,27 +81,27 @@ typedef struct
     UINT32                  trnTopoCount;   /**< Train directory topology counter */
     UINT32                  opTopoCount;    /**< Operational Train directory topology counter */
     ANTIVALENT8             wasLead;        /**< consist was leading, 
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     ANTIVALENT8             reqLead;        /**< leading request,
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     UINT8                   reqLeadDir;     /**< (request) leading direction, 
-                                                 ‘01’B = consist direction 1,
-                                                 ‘10’B = consist direction 2 */
+                                                 '01'B = consist direction 1,
+                                                 '10'B = consist direction 2 */
     ANTIVALENT8             accLead;        /**< accept remote leading request,
-                                                 ‘01’B = false/not accepted,
-                                                 ‘10’B = true/accepted */
+                                                 '01'B = false/not accepted,
+                                                 '10'B = true/accepted */
     ANTIVALENT8             isLead;         /**< consist contains leading vehicle, 
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     ANTIVALENT8             clearConfComp;  /**< clear confirmed composition,
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     ANTIVALENT8             compUnknown;    /**< request confirmation,
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     ANTIVALENT8             corrInfoSet;    /**< correction info set,
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     ANTIVALENT8             compStored;     /**< corrected composition stored,
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     ANTIVALENT8             sleepRequest;   /**< request sleep mode,
-                                                 ‘01’B = false, ‘10’B = true */
+                                                 '01'B = false, '10'B = true */
     UINT8                   leadVehOfCst;   /**< position of leading vehicle in consist, 
                                                  0..31 (0: first vehicle in consist in Direction 1, 1: second vehicle, etc.) */
     UINT8                   reqCstInfo;     /**< rCi: request CSTINFO telegram exchange */
@@ -111,12 +109,12 @@ typedef struct
     UINT16                  confVehCnt;     /**< number of confirmed vehicles in train (1..32) */
     TRDP_CONF_VEHICLE_T    *pConfVehList;   /**< dynamic ordered list of confirmed vehicles in train,
                                                  starting with vehicle at train head, see sub-clause 5.3.3.2.6 */
-} TRDP_ETBCTRL_TELEGRAM_T;
+}  GNU_PACKED TRDP_ECSP_CTRL_T;
 
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter ‘mainVersion’ shall be set to 1. */ 
+    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */
     UINT16                  reserved01;     /**< reserved (=0) */
     UINT16                  lifesign;       /**<  wrap-around counter, incremented with each produced datagram. */
     UINT8                   ecspState;      /**<  ECSP state indication
@@ -174,8 +172,11 @@ typedef struct
                                                   other values are not allowed */
     UINT16                  reserved03;     /**<  reserved (= 0)  */
     UINT32                  opTrTopoCnt;    /**<  operational train topology counter */
-} TRDP_ECSP_STAT_T;
+} GNU_PACKED TRDP_ECSP_STAT_T;
 
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 #ifdef __cplusplus
 }
