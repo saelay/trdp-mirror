@@ -118,6 +118,10 @@
 		7387F3631575072600DBAB73 /* echoPolling.c in Sources */ = {isa = PBXBuildFile; fileRef = 738220021508E3710046E0AC /* echoPolling.c */; };
 		7387F507157795FE00DBAB73 /* trdp_stats.h in Headers */ = {isa = PBXBuildFile; fileRef = 7387F505157795FE00DBAB73 /* trdp_stats.h */; };
 		7387F508157795FE00DBAB73 /* trdp_stats.c in Sources */ = {isa = PBXBuildFile; fileRef = 7387F506157795FE00DBAB73 /* trdp_stats.c */; };
+		73A00E5D1913CCA20020A6EA /* tau_ctrl_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E5C1913CCA20020A6EA /* tau_ctrl_types.h */; };
+		73A00E5F1913CCAF0020A6EA /* tau_tti_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E5E1913CCAF0020A6EA /* tau_tti_types.h */; };
+		73A00E621913CCC50020A6EA /* tau_ctrl.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E601913CCC50020A6EA /* tau_ctrl.h */; };
+		73A00E631913CCC50020A6EA /* tau_dnr.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E611913CCC50020A6EA /* tau_dnr.h */; };
 		73A9BE2116EE2A1700FE87C8 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73A9BE2216EE2A2100FE87C8 /* mdManagerTCP.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */; };
 		73B68FBF15443B79004968FA /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 731291FE15341A58006B3A88 /* vos_mem.c */; };
@@ -720,6 +724,10 @@
 		73890F401746744B004C0F75 /* Lint_win.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Lint_win.bat; sourceTree = "<group>"; };
 		73890F421746748D004C0F75 /* _LINT_WIN.TMP */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _LINT_WIN.TMP; sourceTree = "<group>"; };
 		739F99F7179FBF96006238E7 /* LibraryTests.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LibraryTests.c; path = ../test/diverse/LibraryTests.c; sourceTree = SOURCE_ROOT; };
+		73A00E5C1913CCA20020A6EA /* tau_ctrl_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_ctrl_types.h; sourceTree = "<group>"; };
+		73A00E5E1913CCAF0020A6EA /* tau_tti_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_tti_types.h; sourceTree = "<group>"; };
+		73A00E601913CCC50020A6EA /* tau_ctrl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_ctrl.h; sourceTree = "<group>"; };
+		73A00E611913CCC50020A6EA /* tau_dnr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_dnr.h; sourceTree = "<group>"; };
 		73A9BE1616EE29CC00FE87C8 /* mdManagerTCP_Siemens.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManagerTCP_Siemens.c; sourceTree = "<group>"; };
 		73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManagerTCP.c; sourceTree = "<group>"; };
 		73A9BE1D16EE2A0000FE87C8 /* mdManagerTCP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mdManagerTCP; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1599,7 +1607,6 @@
 		73EC8F06178C68DC00209B98 /* libscanf_flt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libscanf_flt.a; sourceTree = "<group>"; };
 		73EC8F07178C68DC00209B98 /* libscanf_min.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libscanf_min.a; sourceTree = "<group>"; };
 		73F2D2351518C6F200BA962A /* sendHello */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sendHello; sourceTree = BUILT_PRODUCTS_DIR; };
-		73F457C8152DE1FE00D1C522 /* tau_addr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_addr.h; sourceTree = "<group>"; };
 		73F457C9152DE1FE00D1C522 /* tau_marshall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_marshall.h; sourceTree = "<group>"; };
 		73F457CB152DE1FE00D1C522 /* tau_xml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_xml.h; sourceTree = "<group>"; };
 		73F5A50B16A408CE00335006 /* vos_shared_mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vos_shared_mem.c; sourceTree = "<group>"; };
@@ -2298,7 +2305,10 @@
 		73821F28150777B00046E0AC /* api */ = {
 			isa = PBXGroup;
 			children = (
-				73F457C8152DE1FE00D1C522 /* tau_addr.h */,
+				73A00E601913CCC50020A6EA /* tau_ctrl.h */,
+				73A00E611913CCC50020A6EA /* tau_dnr.h */,
+				73A00E5C1913CCA20020A6EA /* tau_ctrl_types.h */,
+				73A00E5E1913CCAF0020A6EA /* tau_tti_types.h */,
 				7367954617202D5D003C68ED /* tau_tti.h */,
 				73F457CB152DE1FE00D1C522 /* tau_xml.h */,
 				73F457C9152DE1FE00D1C522 /* tau_marshall.h */,
@@ -3782,10 +3792,12 @@
 				73821FB61508DC790046E0AC /* trdp_if_light.h in Headers */,
 				73E0526C151352CF0058D590 /* vos_mem.h in Headers */,
 				73E0526D151352CF0058D590 /* vos_sock.h in Headers */,
+				73A00E5D1913CCA20020A6EA /* tau_ctrl_types.h in Headers */,
 				73E0526E151352CF0058D590 /* vos_thread.h in Headers */,
 				73E0526F151352CF0058D590 /* vos_types.h in Headers */,
 				73E0536015136BF60058D590 /* vos_utils.h in Headers */,
 				73F458BE152F332600D1C522 /* trdp_private.h in Headers */,
+				73A00E5F1913CCAF0020A6EA /* tau_tti_types.h in Headers */,
 				73B6907915446B8C004968FA /* trdp_utils.h in Headers */,
 				7387F507157795FE00DBAB73 /* trdp_stats.h in Headers */,
 				7373E4B0157CE42C0084966B /* trdp_if.h in Headers */,
@@ -3794,7 +3806,9 @@
 				7327CA6016555BEA0020536A /* tau_marshall.h in Headers */,
 				733613A7165A58F200A70D3D /* vos_private.h in Headers */,
 				73F5A53B16A41A2000335006 /* vos_shared_mem.h in Headers */,
+				73A00E621913CCC50020A6EA /* tau_ctrl.h in Headers */,
 				735BAD16172EC38900837D0E /* trdp_proto.h in Headers */,
+				73A00E631913CCC50020A6EA /* tau_dnr.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4992,10 +5006,7 @@
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					"$(ARCHS_STANDARD_32_64_BIT)",
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -5009,10 +5020,7 @@
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					"$(ARCHS_STANDARD_32_64_BIT)",
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
