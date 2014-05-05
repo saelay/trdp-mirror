@@ -25,7 +25,7 @@
  * INCLUDES
  */
 
-#include <pthread.h>
+#include <semLib.h>
 #include "string.h"
 
 #include "vos_types.h"
@@ -42,8 +42,12 @@ extern "C" {
 struct VOS_MUTEX
 {
     UINT32          magicNo;
-    /*SEM_ID          mutexId;*/
-    pthread_mutex_t mutexId;
+    SEM_ID          mutexId;
+};
+
+struct VOS_SEMA
+{
+    SEM_ID          semaphore;
 };
 
 struct VOS_SHRD
