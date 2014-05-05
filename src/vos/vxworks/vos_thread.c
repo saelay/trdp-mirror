@@ -12,7 +12,7 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  *
  * $Id$*
  *
@@ -22,8 +22,11 @@
 /***********************************************************************************************************************
  * INCLUDES
  */
+#include <vxWorks.h>
+#include <semLib.h>
+#include <taskLib.h>
+#include <string.h>
 
-#include <private/semPxLibP.h>
 #include "vos_thread.h"
 #include "vos_sock.h"
 #include "vos_mem.h"
@@ -43,10 +46,10 @@
 #define VOS_USECS_PER_MSEC  1000
 #define VOS_MSECS_PER_SEC   1000
 
-const size_t    cDefaultStackSize   = 16 * 1024;
-const UINT32    cMutextMagic        = 0x1234FEDC;
+const size_t    cDefaultStackSize   = (size_t)(16U * 1024U);
+const UINT32    cMutextMagic        = (UINT32)0x1234FEDC;
 
-BOOL            vosThreadInitialised = FALSE;
+INT32           vosThreadInitialised = FALSE;
 
 /***********************************************************************************************************************
  *  LOCALS
@@ -70,7 +73,7 @@ void cyclicThread (
     {
         (void) vos_threadDelay(interval);
         pFunction(pArguments);
-        pthread_testcancel();
+        /*pthread_testcancel(); deactivated - no POSIX any longer*/
     }
 }
 
@@ -85,7 +88,7 @@ void cyclicThread (
 
 /**********************************************************************************************************************/
 /** Initialize the thread library.
- *  Must be called once before any other call
+ *  Must be called once before any other call (why?)
  *
  *  @retval         VOS_NO_ERR             no error
  *  @retval         VOS_INIT_ERR           threading not supported
@@ -117,8 +120,8 @@ EXT_DECL void vos_threadTerm (void)
  *
  *  @param[out]     pThread         Pointer to returned thread handle
  *  @param[in]      pName           Pointer to name of the thread (optional)
- *  @param[in]      policy          Scheduling policy (FIFO, Round Robin or other)
- *  @param[in]      priority        Scheduling priority (1...255 (highest), default 0)
+ *  @param[in]      policy          UNUSED in VxWorks
+ *  @param[in]      priority        Scheduling priority (0...255 (lowest), default 0)
  *  @param[in]      interval        Interval for cyclic threads in us (optional)
  *  @param[in]      stackSize       Minimum stacksize, default 0: 16kB
  *  @param[in]      pFunction       Pointer to the thread function
@@ -139,135 +142,54 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     VOS_THREAD_FUNC_T       pFunction,
     void                    *pArguments)
 {
-    pthread_t           hThread;
-    pthread_attr_t      threadAttrib;
-    struct sched_param  schedParam;  /* scheduling priority */
-    int retCode;
+    int taskID = ERROR; /* intentionally int accd. vxworks doc. no hiding behind C99 types, keep OS API always pure*/
+    UINT32 taskStackSize = (UINT32)cDefaultStackSize; /* init the task stack size to the default of 16kB */
+    char errBuf[80];
+    VOS_ERR_T result;
     
-    if (!vosThreadInitialised)
+    if (vosThreadInitialised != TRUE)
     {
-        return VOS_INIT_ERR;
+        result = VOS_INIT_ERR;
     }
-
-    if (interval > 0)
+    else if (interval > 0U)
     {
         vos_printLog(VOS_LOG_ERROR,
                      "%s cyclic threads not implemented yet\n",
                      pName);
-        return VOS_INIT_ERR;
-    }
-
-    /* Initialize thread attributes to default values */
-    retCode = pthread_attr_init(&threadAttrib);
-    if (retCode != 0)
-    {
-        vos_printLog(VOS_LOG_ERROR,
-                     "%s pthread_attr_init() failed (Err:%d)\n",
-                     pName,
-                     retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    /* Set the stack size */
-    if (stackSize > 0)
-    {
-        retCode = pthread_attr_setstacksize(&threadAttrib, (size_t) stackSize);
+        result = VOS_INIT_ERR;
     }
     else
-    {
-        retCode = pthread_attr_setstacksize(&threadAttrib, cDefaultStackSize);
+    { 
+        /* Set the stack size, if caller chose not to use the default of 16kB*/
+        if (stackSize > 0)
+        {
+            taskStackSize = stackSize;
+        }
+        /* Now create a detached free running vxWorks task - remember that there is no policy */
+        /* attribute in VxWorks */
+        taskID = taskSpawn(pName,               /* name of new task (stored at pStackBase) */ 
+                           priority,            /* priority of new task 0 (highest).. 255 (lowest)*/
+                           VX_FP_TASK,          /* most universal task option */
+                           taskStackSize,       /* size (bytes) of stack needed plus name */
+                           (FUNCPTR) pFunction, /* entry point of new task */
+                           (int) pArguments,    /* supply the void* as int within the optional int filed */
+                           0, 0, 0, 0, 0, 0, 0, 0, 0); /* these 9 remaining args are not used by OS, free for individual implementation */
+        /* vxWorks returns an int handle rather than a pointer */
+        if ( taskID == ERROR )
+        {
+            /* serious problem - no task created */
+            (void)strerror_r(errno, errBuf);
+            vos_printLog(VOS_LOG_ERROR,
+                   "%s taskSpawn() failed VxWorks errno=%#x %s\n",errno, errBuf);
+
+            result = VOS_THREAD_ERR;
+        }
+        /* this type cast is highly anti MISRA and shall be reworked */
+        *pThread = (VOS_THREAD_T) taskID;
+
+        result = VOS_NO_ERR;
     }
-
-    if (retCode != 0)
-    {
-        vos_printLog(
-            VOS_LOG_ERROR,
-            "%s pthread_attr_setstacksize() failed (Err:%d)\n",
-            pName,
-            retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    /* Detached thread */
-    retCode = pthread_attr_setdetachstate(&threadAttrib,
-                                          PTHREAD_CREATE_DETACHED);
-    if (retCode != 0)
-    {
-        vos_printLog(
-            VOS_LOG_ERROR,
-            "%s pthread_attr_setdetachstate() failed (Err:%d)\n",
-            pName,
-            retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    /* Set the policy of the thread */
-    retCode = pthread_attr_setschedpolicy(&threadAttrib, policy);
-    if (retCode != 0)
-    {
-        vos_printLog(
-            VOS_LOG_ERROR,
-            "%s pthread_attr_setschedpolicy() failed (Err:%d)\n",
-            pName,
-            retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    /* Set the scheduling priority of the thread */
-    schedParam.sched_priority = priority;
-    retCode = pthread_attr_setschedparam(&threadAttrib, &schedParam);
-    if (retCode != 0)
-    {
-        vos_printLog(
-            VOS_LOG_ERROR,
-            "%s pthread_attr_setschedparam() failed (Err:%d)\n",
-            pName,
-            retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    /* Set inheritsched attribute of the thread */
-    /* argument must NOT be PTHREAD_EXPLICIT_SCHED otherwise thread will not be scheduled correctly */
-    retCode = pthread_attr_setinheritsched(&threadAttrib,
-                                           PTHREAD_INHERIT_SCHED);
-    if (retCode != 0)
-    {
-        vos_printLog(
-            VOS_LOG_ERROR,
-            "%s pthread_attr_setinheritsched() failed (Err:%d)\n",
-            pName,
-            retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    /* Create the thread */
-    retCode = pthread_create(&hThread, &threadAttrib, (void *(*)(
-                                                           void *))pFunction,
-                             pArguments);
-    if (retCode != 0)
-    {
-        vos_printLog(VOS_LOG_ERROR,
-                     "%s pthread_create() failed (Err:%d)\n",
-                     pName,
-                     retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    *pThread = (VOS_THREAD_T) hThread;
-
-    /* Destroy thread attributes */
-    retCode = pthread_attr_destroy(&threadAttrib);
-    if (retCode != 0)
-    {
-        vos_printLog(
-            VOS_LOG_ERROR,
-            "%s pthread_attr_destroy() failed (Err:%d)\n",
-            pName,
-            retCode );
-        return VOS_THREAD_ERR;
-    }
-
-    return VOS_NO_ERR;
+    return result;
 }
 
 
@@ -284,17 +206,22 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
 EXT_DECL VOS_ERR_T vos_threadTerminate (
     VOS_THREAD_T thread)
 {
-    int retCode;
+    VOS_ERR_T result = VOS_THREAD_ERR;
+    STATUS errVal;
 
-    retCode = pthread_cancel((pthread_t)thread);
-    if (retCode != 0)
+    errVal = taskDelete((int)thread);
+    if (errVal != OK)
     {
         vos_printLog(VOS_LOG_ERROR,
                      "pthread_cancel() failed (Err:%d)\n",
-                     retCode );
-        return VOS_THREAD_ERR;
+                     errVal );
     }
-    return VOS_NO_ERR;
+    else
+    {
+        /* task deletion succeeded */
+        result = VOS_NO_ERR;
+    }
+    return result;
 }
 
 
@@ -310,13 +237,11 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
 EXT_DECL VOS_ERR_T vos_threadIsActive (
     VOS_THREAD_T thread)
 {
-    int retValue;
-    int policy;
-    struct sched_param param;
+    STATUS errVal;
 
-    retValue = pthread_getschedparam((pthread_t)thread, &policy, &param);
+    errVal = taskIdVerify((int) thread);
 
-    return (retValue == 0 ? VOS_NO_ERR : VOS_PARAM_ERR);
+    return (errVal == OK ? VOS_NO_ERR : VOS_PARAM_ERR);
 }
 
 
@@ -331,39 +256,38 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
  *
  *  @param[in]      delay           Delay in us
  *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_THREAD_ERR  interruption/error during delay
  */
 
 EXT_DECL VOS_ERR_T vos_threadDelay (
     UINT32 delay)
 {
-    struct timespec wanted_delay;
-    struct timespec remaining_delay;
-    int ret;
+    STATUS errVal;
+    VOS_ERR_T result;
+    INT32 clock_rate;
+    INT32 noTicks;
 
-    if (delay == 0)
+    /* convert ms -> ticks */
+    clock_rate = sysClkRateGet();
+    /*                       convert us in ms          */
+    /*                       |                         */
+    noTicks = (clock_rate * (delay * 1000) + 999) / 1000;
+
+    errVal = taskDelay(noTicks);
+
+    if (errVal != OK)
     {
-        /*    yield cpu to other processes   */
-        if (sched_yield() != 0)
-        {
-            return VOS_PARAM_ERR;
-        }
-        return VOS_NO_ERR;
+        /* this result ocurs "if called from interrupt level */
+        /* or if the calling task receives a signal that is  */
+        /* not blocked or ignored" */
+        result = VOS_THREAD_ERR;
+    }
+    else
+    {
+        result = VOS_NO_ERR;
     }
 
-    wanted_delay.tv_sec     = delay / 1000000;
-    wanted_delay.tv_nsec    = (delay % 1000000) * 1000;
-    do
-    {
-        ret = nanosleep(&wanted_delay, &remaining_delay);
-        if (ret == -1 && errno == EINTR)
-        {
-            wanted_delay = remaining_delay;
-        }
-    }
-    while (errno == EINTR);
-
-    return VOS_NO_ERR;
+    return result;
 }
 
 
@@ -458,7 +382,7 @@ EXT_DECL void vos_addTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pAdd)
 {
-    if (pTime == NULL || pAdd == NULL)
+    if ( (pTime == NULL) || (pAdd == NULL) )
     {
         vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
@@ -483,7 +407,7 @@ EXT_DECL void vos_subTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pSub)
 {
-    if (pTime == NULL || pSub == NULL)
+    if ( (pTime == NULL) || (pSub == NULL) )
     {
         vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
@@ -508,7 +432,7 @@ EXT_DECL void vos_divTime (
     VOS_TIME_T  *pTime,
     UINT32      divisor)
 {
-    if (pTime == NULL || divisor == 0)
+    if ( (pTime == NULL) || (divisor == 0) )
     {
         vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
@@ -634,7 +558,6 @@ EXT_DECL void vos_getUuid (
  *
  *  @param[out]     pMutex          Pointer to mutex handle
  *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_INIT_ERR    module not initialised
  *  @retval         VOS_PARAM_ERR   pMutex == NULL
  *  @retval         VOS_MUTEX_ERR   no mutex available
  */
@@ -642,46 +565,33 @@ EXT_DECL void vos_getUuid (
 EXT_DECL VOS_ERR_T vos_mutexCreate (
     VOS_MUTEX_T *pMutex)
 {
-    int err = 0;
-    pthread_mutexattr_t attr;
-
+    VOS_ERR_T result; /* no init needed, all branches assign values */
     if (pMutex == NULL)
     {
-        return VOS_PARAM_ERR;
-    }
-    
-    *pMutex = (VOS_MUTEX_T) vos_memAlloc(sizeof (struct VOS_MUTEX));
-
-    if (*pMutex == NULL)
-    {
-        return VOS_MEM_ERR;
-    }
-    
-    err = pthread_mutexattr_init(&attr);
-    if (err == 0)
-    {
-        /* TODO: with given vxworks libs, a recursive mutex can not be created, only non-recursive mutexes which does not seem to be wanted here*/
-        /*err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);*/
-        if (err == 0)
-        {
-            err = pthread_mutex_init((pthread_mutex_t *)&(*pMutex)->mutexId, &attr);
-        }
-        pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
-    }
-        
-    /*(*pMutex)->mutexId = semMCreate(SEM_Q_FIFO);*/
-    if (err == 0)
-    {
-        (*pMutex)->magicNo = cMutextMagic;
+        result = VOS_PARAM_ERR;
     }
     else
     {
-        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
-        vos_memFree(*pMutex);
-        *pMutex = NULL;
-        return VOS_MUTEX_ERR;
+        *pMutex = (VOS_MUTEX_T) vos_memAlloc(sizeof (struct VOS_MUTEX));
+
+        /* get actual mutex object from OS, settings insure proper priority */
+        /* handling. vxworks creates always recursive mutexes  */
+        (*pMutex)->mutexId = semMCreate(SEM_Q_PRIORITY | SEM_INVERSION_SAFE);
+
+        if ((*pMutex)->mutexId != NULL)
+        {
+            /* mark mutex object as valid */
+            (*pMutex)->magicNo = cMutextMagic;
+            result = VOS_NO_ERR;
+        }
+        else
+        {  
+            vos_printLog(VOS_LOG_ERROR, "Can not create Mutex\n");
+            vos_memFree(*pMutex);
+            result = VOS_MUTEX_ERR;
+        }
     }
-    return VOS_NO_ERR;
+    return result;
 }
 
 /**********************************************************************************************************************/
@@ -690,7 +600,6 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
  *
  *  @param[out]     pMutex          Pointer to mutex handle
  *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_INIT_ERR    module not initialised
  *  @retval         VOS_PARAM_ERR   pMutex == NULL
  *  @retval         VOS_MUTEX_ERR   no mutex available
  */
@@ -698,36 +607,30 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
 EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
     struct VOS_MUTEX *pMutex)
 {
-    int err = 0;
-    pthread_mutexattr_t attr;
-
+    VOS_ERR_T result; /* no init needed, all branches assign values */
     if (pMutex == NULL)
     {
-        return VOS_PARAM_ERR;
-    }
-    /*pMutex->mutexId = semMCreate(SEM_Q_FIFO);*/
-    err = pthread_mutexattr_init(&attr);
-        if (err == 0)
-        {
-            /* ToDo: unknown routine / mutex type */
-            /*err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);*/
-            if (err == 0)
-            {
-                err = pthread_mutex_init((pthread_mutex_t *)&pMutex->mutexId, &attr);
-            }
-            pthread_mutexattr_destroy(&attr); /*lint !e534 ignore return value */
-        }
-    if (err == 0)
-    {
-        pMutex->magicNo = cMutextMagic;
+        result = VOS_PARAM_ERR;
     }
     else
     {
-        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
-        return VOS_MUTEX_ERR;
-    }
+        /* get actual mutex object from OS, settings insure proper priority */
+        /* handling. vxworks creates always recursive mutexes  */
+        (*pMutex).mutexId = semMCreate(SEM_Q_PRIORITY | SEM_INVERSION_SAFE);
 
-    return VOS_NO_ERR;
+        if ((*pMutex).mutexId != NULL)
+        {
+            /* mark mutex object as valid */
+            (*pMutex).magicNo = cMutextMagic;
+            result = VOS_NO_ERR;
+        }
+        else
+        {  
+            vos_printLog(VOS_LOG_ERROR, "Can not create Mutex\n");
+            result = VOS_MUTEX_ERR;
+        }
+    }
+    return result;
 }
 
 
@@ -741,24 +644,23 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
 EXT_DECL void vos_mutexDelete (
     VOS_MUTEX_T pMutex)
 {
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
     {
         vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
     }
     else
     {
-        int err;
-
-        /*err = semDelete(pMutex->mutexId);*/
-        err = pthread_mutex_destroy((pthread_mutex_t *)&pMutex->mutexId);
-        if (err == 0)
+        STATUS errVal;
+        errVal = semDelete(pMutex->mutexId);
+        if (errVal == OK)
         {
+            /* mark mutex object as invalid/empty */
             pMutex->magicNo = 0;
             vos_memFree(pMutex);
         }
         else
         {
-            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex err=%d\n", errVal);
         }
     }
 }
@@ -774,23 +676,22 @@ EXT_DECL void vos_mutexDelete (
 EXT_DECL void vos_mutexLocalDelete (
     struct VOS_MUTEX *pMutex)
 {
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
     {
         vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
     }
     else
     {
-        int err;
-        
-        /*err = semDelete(pMutex->mutexId);*/
-        err = pthread_mutex_destroy((pthread_mutex_t *)&pMutex->mutexId);
-        if (err == 0)
+        STATUS errVal;
+        errVal = semDelete(pMutex->mutexId); 
+        if (errVal == OK)
         {
+            /* mark mutex object as invalid/empty */
             pMutex->magicNo = 0;
         }
         else
         {
-            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex err=%d\n", errVal);
         }
     }
 }
@@ -809,21 +710,23 @@ EXT_DECL void vos_mutexLocalDelete (
 EXT_DECL VOS_ERR_T vos_mutexLock (
     VOS_MUTEX_T pMutex)
 {
-    int err;
+    VOS_ERR_T result = VOS_NO_ERR; 
+    STATUS errVal; /* no init needed, all branches assign values */
 
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
     {
-        return VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
-    err = pthread_mutex_lock((pthread_mutex_t *)&pMutex->mutexId);
-    /*err = semTake(pMutex->mutexId,WAIT_FOREVER);*/
-    if (err != 0)
+    else
     {
-        vos_printLog(VOS_LOG_ERROR, "Unable to lock Mutex (pthread err=%d)\n", err);
-        return VOS_MUTEX_ERR;
+        errVal = semTake(pMutex->mutexId,WAIT_FOREVER);
+        if (errVal != OK)
+        {
+            vos_printLog(VOS_LOG_ERROR, "Unable to lock Mutex err=%d\n", errVal);
+            result = VOS_MUTEX_ERR;
+        }
     }
-
-    return VOS_NO_ERR;
+    return result;
 }
 
 
@@ -840,25 +743,27 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
 EXT_DECL VOS_ERR_T vos_mutexTryLock (
     VOS_MUTEX_T pMutex)
 {
-    int err;
+    VOS_ERR_T result = VOS_NO_ERR;
+    STATUS errVal; /* no init needed, all branches assign values */
 
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
     {
-        return VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
-    err = pthread_mutex_trylock((pthread_mutex_t *)&pMutex->mutexId);
-    /*err = semTake(pMutex->mutexId,WAIT_FOREVER);*/
-    if (err == EBUSY)
+    else
     {
-        return VOS_MUTEX_ERR;
+        /* the POSIX trylock is essentially a lock attempt */
+        /* without wait (locking the calling thread) - so  */
+        /* the best is to use vxworks semTale without any  */
+        /* wait - should be sufficient at first glance     */
+        errVal = semTake(pMutex->mutexId, NO_WAIT);
+        if (errVal == ERROR)
+        {
+            result = VOS_MUTEX_ERR;
+        }
+        /* potentially a check of errno may be needed here */
     }
-    if (err == EINVAL)
-    {
-        vos_printLog(VOS_LOG_ERROR, "Unable to trylock Mutex (pthread err=%d)\n", err);
-        return VOS_MUTEX_ERR;
-    }
-
-    return VOS_NO_ERR;
+    return result;
 }
 
 
@@ -872,26 +777,24 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
 EXT_DECL VOS_ERR_T vos_mutexUnlock (
     VOS_MUTEX_T pMutex)
 {
-
+    VOS_ERR_T result = VOS_NO_ERR;
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
         vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
-        return VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     else
     {
-        int err;
+        STATUS errVal;
 
-        /*err = semGive(pMutex->mutexId);*/
-        err = pthread_mutex_unlock((pthread_mutex_t *)&pMutex->mutexId);
-        if (err != 0)
+        errVal = semGive(pMutex->mutexId);
+        if (errVal != OK)
         {
-            vos_printLog(VOS_LOG_ERROR, "Unable to unlock Mutex (pthread err=%d)\n", err);
-            return VOS_MUTEX_ERR;
+            vos_printLog(VOS_LOG_ERROR, "Unable to unlock Mutex err=%d\n", errVal);
+            result = VOS_MUTEX_ERR;
         }
-    }
-
-    return VOS_NO_ERR;
+    }            
+    return result;
 }
 
 
@@ -903,7 +806,6 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
  *  @param[out]     pSema           Pointer to semaphore handle
  *  @param[in]      initialState    The initial state of the sempahore
  *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_INIT_ERR    module not initialised
  *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
  *  @retval         VOS_SEMA_ERR    no semaphore available
  */
@@ -912,46 +814,33 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     VOS_SEMA_T          *pSema,
     VOS_SEMA_STATE_T    initialState)
 {
-    VOS_ERR_T   retVal  = VOS_SEMA_ERR;
-    int         rc      = 0;
+    VOS_ERR_T   result  = VOS_NO_ERR;
 
-    semPxLibInit();
     /*Check parameters*/
     if (pSema == NULL)
     {
         vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
-        retVal = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
     {
         vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
-        retVal = VOS_PARAM_ERR;
+        result = VOS_PARAM_ERR;
     }
     else
     {
-        /*Parameters are OK*/
-        *pSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
+        /* it remains to be discussed, if SEM_Q_PRIORITY or SEM_Q_FIFO */
+        /* up to be determined */
+        *pSema = (VOS_SEMA_T) semCCreate( SEM_Q_PRIORITY, initialState);
 
         if (*pSema == NULL)
         {
-            return VOS_MEM_ERR;
-        }
-
-        /*pThread Semaphore init*/
-        rc = sem_init((sem_t *)*pSema, (int) 0, (unsigned int)initialState);
-        if (0 != rc)
-        {
             /*Semaphore init failed*/
             vos_printLog(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
-            retVal = VOS_SEMA_ERR;
-        }
-        else
-        {
-            /*Semaphore init successful*/
-            retVal = VOS_NO_ERR;
+            result = VOS_SEMA_ERR;
         }
     }
-    return retVal;
+    return result;
 }
 
 
@@ -964,9 +853,6 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 
 EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
 {
-    int rc      = 0;
-    int sval    = 0;
-
     /* Check parameter */
     if (sema == NULL)
     {
@@ -974,21 +860,14 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
     }
     else
     {
-        /* Check if this is a valid semaphore handle*/
-        rc = sem_getvalue((sem_t *)sema, &sval);
-        if (0 == rc)
+        STATUS errVal;
+        /* the function semDelete deallocates the semaphore  */
+        /* no need for calling subsequent free like in POSIX */
+        errVal = semDelete((SEM_ID)sema);
+        if (errVal == ERROR)
         {
-            rc = sem_destroy((sem_t *)sema);
-            if (0 != rc)
-            {
-                /* Error destroying Semaphore */
-                vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
-            }
-            else
-            {
-                /* Semaphore deleted successfully, free allocated memory */
-                vos_memFree(sema);
-            }
+            /* Error destroying Semaphore */
+            vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
         }
     }
     return;
@@ -1002,8 +881,6 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
  *  @param[in]      sema            semaphore handle
  *  @param[in]      timeout         Max. time in us to wait, 0 means no wait
  *  @retval         VOS_NO_ERR      no error
- *  @retval         VOS_INIT_ERR    module not initialised
- *  @retval         VOS_NOINIT_ERR  invalid handle
  *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
  *  @retval         VOS_SEMA_ERR    could not get semaphore in time
  */
@@ -1011,68 +888,42 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     VOS_SEMA_T  sema,
     UINT32      timeout)
 {
-    int             rc              = 0;
-    VOS_ERR_T       retVal          = VOS_SEMA_ERR;
-    struct timespec waitTimeSpec    = {0, 0};
+    VOS_ERR_T result = VOS_NO_ERR;
+    INT32     noTicks = NO_WAIT; /* assign value to fulfill MISRA */
 
     /* Check parameter */
     if (sema == NULL)
     {
         vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
-        /* retVal = VOS_PARAM_ERR;  BL: will never be used! */
+        result = VOS_PARAM_ERR;
     }
-    else if (timeout == 0)
+    else 
     {
-        /* Take Semaphore, return ERROR if Semaphore cannot be taken immediately instead of blocking */
-         rc = sem_trywait((sem_t *)sema); 
-        
-        
-    }
-    else if (timeout == VOS_SEMA_WAIT_FOREVER)
-    {
-        /* Take Semaphore, block until Semaphore becomes available */
-        rc = sem_wait((sem_t *)sema);
-    }
-    else
-    {
-        /* Get time since system startup */
-        clock_gettime(CLOCK_MONOTONIC, &waitTimeSpec);
-        /* add offset */
-        if (timeout >= (VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC))
+        if (timeout == 0)
         {
-            /* Timeout longer than 1 sec, add sec and nsec seperately */
-            waitTimeSpec.tv_sec     += timeout / (VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC);
-            waitTimeSpec.tv_nsec    += (timeout % (VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC)) * VOS_NSECS_PER_USEC;
+            /* non blocking one shot, use vxworks constant */
+            noTicks = NO_WAIT;
+        }
+        else if (timeout == VOS_SEMA_WAIT_FOREVER)
+        {
+            /* perform blocking semTake, use vxworks constant */
+            noTicks = WAIT_FOREVER;
         }
         else
         {
-            /* Timeout shorter than 1 sec, only add nsecs */
-            waitTimeSpec.tv_nsec += timeout * VOS_NSECS_PER_USEC;
+            STATUS errVal;
+            INT32 clock_rate;
+            /* convert ms -> ticks */
+            clock_rate = sysClkRateGet();
+            noTicks = (clock_rate * timeout + 999) / 1000;
+            errVal = semTake (((SEM_ID)sema), noTicks);
+            if ( errVal != OK)
+            {
+                result = VOS_SEMA_ERR;
+            }
         }
-        /* Carry if tv_nsec > 1.000.000.000 */
-        if (waitTimeSpec.tv_nsec >= VOS_NSECS_PER_USEC * VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC)
-        {
-            waitTimeSpec.tv_sec++;
-            waitTimeSpec.tv_nsec -= VOS_NSECS_PER_USEC * VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC;
-        }
-        else
-        {
-            /* carry not necessary */
-        }
-        /* take semaphore with specified timeout */
-        rc = sem_timedwait((sem_t *)sema, &waitTimeSpec);
     }
-    if (0 != rc)
-    {
-        /* Could not take Semaphore in time */
-        retVal = VOS_SEMA_ERR;
-    }
-    else
-    {
-        /* Semaphore take success */
-        retVal = VOS_NO_ERR;
-    }
-    return retVal;
+    return result;
 }
 
 
@@ -1087,9 +938,6 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 EXT_DECL void vos_semaGive (
     VOS_SEMA_T sema)
 {
-    int rc = 0;
-    int sVal = 0;
-    
     /* Check parameter */
     if (sema == NULL)
     {
@@ -1097,17 +945,15 @@ EXT_DECL void vos_semaGive (
     }
     else
     {
+        STATUS errVal;
+        char errBuf[80];
+
         /* release semaphore */
-        rc = sem_getvalue((sem_t*)sema,&sVal);
-        rc = sem_post((sem_t*)sema);
-        if (0 == rc)
+        errVal = semGive((SEM_ID)sema);
+        if (errVal == ERROR)
         {
-            /* Semaphore released */
-        }
-        else
-        {
-            /* Could not release Semaphore */
-            vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
+            (void)strerror_r(errno, errBuf);
+            vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore errno=%#x %s\n",errno, errBuf);
         }
     }
     return;
