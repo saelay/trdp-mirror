@@ -107,7 +107,7 @@ typedef struct
     UINT8                   reqCstInfo;     /**< rCi: request CSTINFO telegram exchange */
     UINT16                  reserved03;     /**< reserved (=0) */
     UINT16                  confVehCnt;     /**< number of confirmed vehicles in train (1..32) */
-    TRDP_CONF_VEHICLE_T    *pConfVehList;   /**< dynamic ordered list of confirmed vehicles in train,
+    TRDP_CONF_VEHICLE_T     confVehList[32];   /**< dynamic ordered list of confirmed vehicles in train,
                                                  starting with vehicle at train head, see sub-clause 5.3.3.2.6 */
 }  GNU_PACKED TRDP_ECSP_CTRL_T;
 
