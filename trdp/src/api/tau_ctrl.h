@@ -80,7 +80,7 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl (void);
  *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
-EXT_DECL TRDP_ERR_T tau_setEcspCtrl (TRDP_ETBCTRL_TELEGRAM_T  *pEcspCtrl);
+EXT_DECL TRDP_ERR_T tau_setEcspCtrl (TRDP_ECSP_CTRL_T  *pEcspCtrl);
 
 
 /**********************************************************************************************************************/
