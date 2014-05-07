@@ -41,10 +41,13 @@
  */
  
 
-
+  
 /***********************************************************************************************************************
  *  LOCALS
  */
+
+const CHAR8 *cDefaultIface = "fec";
+
 BOOL8 vosSockInitialised = FALSE;
 
 struct ifreq gIfr;
