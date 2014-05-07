@@ -211,7 +211,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
     if (errVal != OK)
     {
         vos_printLog(VOS_LOG_ERROR,
-                     "pthread_cancel() failed (Err:%d)\n",
+                     "taskDelete() failed (Err:%d)\n",
                      errVal );
     }
     else
@@ -312,7 +312,7 @@ EXT_DECL void vos_getTime (
         pTime->tv_usec  = (INT32) (myTime.tv_nsec / VOS_NSECS_PER_USEC);
     }
 }
-struct timespec fer;
+
 /**********************************************************************************************************************/
 /** Get a time-stamp string.
  *  Get a time-stamp string for debugging in the form "yyyymmdd-hh:mm:ss.ms"
@@ -957,7 +957,8 @@ EXT_DECL VOS_ERR_T vos_semaTake (
             INT32 clock_rate;
             /* convert ms -> ticks */
             clock_rate = sysClkRateGet();
-            noTicks = (clock_rate * timeout + 999) / 1000;
+            /*noTicks = (clock_rate * timeout + 999) / 1000;*/
+            noTicks = ( (clock_rate * timeout)  + (( VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC ) - 1 )) / ( VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC );
             errVal = semTake (((SEM_ID)sema), noTicks);
             if ( errVal != OK)
             {
