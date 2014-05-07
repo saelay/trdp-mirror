@@ -91,7 +91,6 @@ void cyclicThread (
  *  Must be called once before any other call (why?)
  *
  *  @retval         VOS_NO_ERR             no error
- *  @retval         VOS_INIT_ERR           threading not supported
  */
 
 EXT_DECL VOS_ERR_T vos_threadInit (
@@ -128,7 +127,6 @@ EXT_DECL void vos_threadTerm (void)
  *  @param[in]      pArguments      Pointer to the thread function parameters
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_INIT_ERR    module not initialised
- *  @retval         VOS_NOINIT_ERR  invalid handle
  *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
  *  @retval         VOS_THREAD_ERR  thread creation error
  */
@@ -226,7 +224,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
 
 
 /**********************************************************************************************************************/
-/** Is the thread still active?
+/** Is the thread (task) still active?
  *  This call will return VOS_NO_ERR if the thread is still active, VOS_PARAM_ERR in case it ran out.
  *
  *  @param[in]      thread          Thread handle
@@ -251,7 +249,7 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
-/** Delay the execution of the current thread by the given delay in us.
+/** Delay the execution of the current thread (task) by the given delay in us.
  *
  *
  *  @param[in]      delay           Delay in us
@@ -268,10 +266,9 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
     INT32 noTicks;
 
     /* convert ms -> ticks */
+    /* clock_rate holds ticks per second */
     clock_rate = sysClkRateGet();
-    /*                       convert us in ms          */
-    /*                       |                         */
-    noTicks = (clock_rate * (delay * 1000) + 999) / 1000;
+    noTicks = ( (clock_rate * delay)  + (( VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC ) - 1 )) / ( VOS_USECS_PER_MSEC * VOS_MSECS_PER_SEC );
 
     errVal = taskDelay(noTicks);
 
@@ -638,18 +635,26 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
 /** Delete a mutex.
  *  Release the resources taken by the mutex.
  *
- *  @param[in]      pMutex          mutex handle
+ *  @param[in]      pMutex          Pointer to mutex struct
  */
 
 EXT_DECL void vos_mutexDelete (
     VOS_MUTEX_T pMutex)
 {
-    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
+    if (pMutex == NULL) 
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
+        /* NULL pointer indicates a problem from the caller side, or a severe */
+        /* issue in overall pointer handling - can not get discriminated here */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR NULL pointer");
+    }
+    else if (pMutex->magicNo != cMutextMagic)
+    {
+        /* no magic number indicates a problem within the mutex handling */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR no magic");
     }
     else
-    {
+    {  
+        /* VxWorks standard code, currently without regarding errno */
         STATUS errVal;
         errVal = semDelete(pMutex->mutexId);
         if (errVal == OK)
@@ -676,12 +681,20 @@ EXT_DECL void vos_mutexDelete (
 EXT_DECL void vos_mutexLocalDelete (
     struct VOS_MUTEX *pMutex)
 {
-    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
+    if (pMutex == NULL) 
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
+        /* NULL pointer indicates a problem from the caller side, or a severe */
+        /* issue in overall pointer handling - can not get discriminated here */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR NULL pointer");
+    }
+    else if (pMutex->magicNo != cMutextMagic)
+    {
+        /* no magic number indicates a problem within the mutex handling */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR no magic");
     }
     else
-    {
+    { 
+        /* VxWorks standard code, currently without regarding errno */
         STATUS errVal;
         errVal = semDelete(pMutex->mutexId); 
         if (errVal == OK)
@@ -699,9 +712,9 @@ EXT_DECL void vos_mutexLocalDelete (
 
 /**********************************************************************************************************************/
 /** Take a mutex.
- *  Wait for the mutex to become available (lock).
+ *  Wait for the mutex to become available (lock) - infinite timeout.
  *
- *  @param[in]      pMutex          mutex handle
+ *  @param[in]      pMutex          Pointer to mutex struct
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pMutex == NULL or wrong type
  *  @retval         VOS_MUTEX_ERR   no such mutex
@@ -711,14 +724,25 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     VOS_MUTEX_T pMutex)
 {
     VOS_ERR_T result = VOS_NO_ERR; 
-    STATUS errVal; /* no init needed, all branches assign values */
+    
 
-    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
+    if (pMutex == NULL) 
     {
+        /* NULL pointer indicates a problem from the caller side, or a severe */
+        /* issue in overall pointer handling - can not get discriminated here */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() ERROR NULL pointer");
+        result = VOS_PARAM_ERR;
+    }
+    else if (pMutex->magicNo != cMutextMagic)
+    {
+        /* no magic number indicates a problem within the mutex handling */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() ERROR no magic");
         result = VOS_PARAM_ERR;
     }
     else
     {
+        /* VxWorks standard code, currently without regarding errno */
+        STATUS errVal;
         errVal = semTake(pMutex->mutexId,WAIT_FOREVER);
         if (errVal != OK)
         {
@@ -731,10 +755,10 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
 
 
 /**********************************************************************************************************************/
-/** Try to take a mutex.
+/** Try to take a mutex immediately - timout zero.
  *  If mutex is can't be taken VOS_MUTEX_ERR is returned.
  *
- *  @param[in]      pMutex          mutex handle
+ *  @param[in]      pMutex          Pointer to mutex struct
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_PARAM_ERR   pMutex == NULL or wrong type
  *  @retval         VOS_MUTEX_ERR   mutex not locked
@@ -744,14 +768,24 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     VOS_MUTEX_T pMutex)
 {
     VOS_ERR_T result = VOS_NO_ERR;
-    STATUS errVal; /* no init needed, all branches assign values */
+    
 
-    if ( (pMutex == NULL) || (pMutex->magicNo != cMutextMagic) )
+    if (pMutex == NULL) 
     {
+        /* NULL pointer indicates a problem from the caller side, or a severe */
+        /* issue in overall pointer handling - can not get discriminated here */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexTryLock() ERROR NULL pointer");
+        result = VOS_PARAM_ERR;
+    }
+    else if (pMutex->magicNo != cMutextMagic)
+    {
+        /* no magic number indicates a problem within the mutex handling */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexTryLock() ERROR no magic");
         result = VOS_PARAM_ERR;
     }
     else
     {
+        STATUS errVal;
         /* the POSIX trylock is essentially a lock attempt */
         /* without wait (locking the calling thread) - so  */
         /* the best is to use vxworks semTale without any  */
@@ -771,22 +805,30 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
 /** Release a mutex.
  *  Unlock the mutex.
  *
- *  @param[in]      pMutex          mutex handle
+ *  @param[in]      pMutex          Pointer to mutex struct
  */
 
 EXT_DECL VOS_ERR_T vos_mutexUnlock (
     VOS_MUTEX_T pMutex)
 {
     VOS_ERR_T result = VOS_NO_ERR;
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if (pMutex == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
+        /* NULL pointer indicates a problem from the caller side, or a severe */
+        /* issue in overall pointer handling - can not get discriminated here */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR NULL pointer");
         result = VOS_PARAM_ERR;
+    }
+    else if (pMutex->magicNo != cMutextMagic)
+    {
+        /* no magic number indicates a problem within the mutex handling */
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR no magic");
+        result = VOS_PARAM_ERR;       
     }
     else
     {
-        STATUS errVal;
-
+        /* VxWorks standard code, currently without regarding errno */
+        STATUS errVal; 
         errVal = semGive(pMutex->mutexId);
         if (errVal != OK)
         {
