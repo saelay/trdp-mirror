@@ -317,7 +317,7 @@ loutdir:
 	@$(MD) $(LINT_OUTDIR)
 
 LINTFLAGS = +v -i ./src/api -i ./src/vos/api -i ./src/common -D$(TARGET_OS) $(LINT_SYSINCLUDE_DIRECTIVES)\
-	-DMD_SUPPORT=1 ./test/lint/au-misra2.lnt ./test/lint/co-gnu3.lnt
+	-DMD_SUPPORT=1 -summary -u ./test/lint/au-misra2.lnt ./test/lint/co-gnu3.lnt
 
 # VxWorks will be the single non POSIX OS right now, MS Win uses proprietary build
 # framework, so this condition will most likely fit also BSD/Unix targets     
