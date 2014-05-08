@@ -12,7 +12,7 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  *
  * $Id$
  *
@@ -48,7 +48,7 @@ extern "C" {
 #define VOS_MAX_THREAD_CNT  100
 
 /** Timeout value to wait forever for a semaphore */
-#define VOS_SEMA_WAIT_FOREVER  0xFFFFFFFF
+#define VOS_SEMA_WAIT_FOREVER  0xFFFFFFFFU
 
 #ifdef WIN32
 #include <winsock2.h>
