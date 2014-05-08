@@ -31,24 +31,24 @@
 #include <time.h>
 #endif
 
-// --- globals -----------------------------------------------------------------
+/* --- globals ---------------------------------------------------------------*/
 
 TRDP_MEM_CONFIG_T memcfg;
 TRDP_APP_SESSION_T apph;
 TRDP_PD_CONFIG_T pdcfg;
 TRDP_PROCESS_CONFIG_T proccfg;
 
-// default addresses - overriden from command line
+/* default addresses - overriden from command line */
 TRDP_IP_ADDR_T srcip;
 TRDP_IP_ADDR_T dstip;
 TRDP_IP_ADDR_T mcast;
 
 typedef enum
 {
-    PORT_PUSH,                      // outgoing port ('Pd'/push)
-    PORT_PULL,                      // outgoing port ('Pp'/pull)
-    PORT_REQUEST,                   // outgoing port ('Pr'/request)
-    PORT_SINK,                      // incoming port
+    PORT_PUSH,                      /* outgoing port ('Pd'/push)   */
+    PORT_PULL,                      /* outgoing port ('Pp'/pull)   */
+    PORT_REQUEST,                   /* outgoing port ('Pr'/request)*/
+    PORT_SINK,                      /* incoming port               */
 } Type;
 
 static const char * types[] =
@@ -56,30 +56,30 @@ static const char * types[] =
 
 typedef struct
 {
-    Type type;                      // port type
-    TRDP_ERR_T err;                 // put/get status
-    TRDP_PUB_T ph;                  // publish handle
-    TRDP_SUB_T sh;                  // subscribe handle
-    UINT32 comid;                   // comid
-    UINT32 repid;                   // reply comid (for PULL requests)
-    UINT32 size;                    // size
-    TRDP_IP_ADDR_T src;             // source ip address
-    TRDP_IP_ADDR_T dst;             // destination ip address
-    TRDP_IP_ADDR_T rep;             // reply ip address (for PULL requests)
-    UINT32 cycle;                   // cycle
-    UINT32 timeout;                 // timeout (for SINK ports)
-    unsigned char data[1432];       // data buffer
-    int link;                       // index of linked port (echo or subscribe)
+    Type type;                      /* port type */
+    TRDP_ERR_T err;                 /* put/get status */
+    TRDP_PUB_T ph;                  /* publish handle */
+    TRDP_SUB_T sh;                  /* subscribe handle */
+    UINT32 comid;                   /* comid            */
+    UINT32 repid;                   /* reply comid (for PULL requests) */
+    UINT32 size;                    /* size                            */
+    TRDP_IP_ADDR_T src;             /* source ip address               */
+    TRDP_IP_ADDR_T dst;             /* destination ip address          */
+    TRDP_IP_ADDR_T rep;             /* reply ip address (for PULL requests) */
+    UINT32 cycle;                   /* cycle                                */
+    UINT32 timeout;                 /* timeout (for SINK ports)             */
+    unsigned char data[1432];       /* data buffer                          */
+    int link;                       /* index of linked port (echo or subscribe) */
 } Port;
 
-int size[3] = { 0, 256, 1432 };     // small/medium/big dataset
-int period[2]  = { 100, 250 };      // fast/slow cycle
+int size[3] = { 0, 256, 1432 };     /* small/medium/big dataset */
+int period[2]  = { 100, 250 };      /* fast/slow cycle          */
 unsigned cycle = 0;
 
-Port ports[64];                     // array of ports
-int nports = 0;                     // number of ports
+Port ports[64];                     /* array of ports          */
+int nports = 0;                     /* number of ports         */
 
-// --- generate PUSH ports -----------------------------------------------------
+/* --- generate PUSH ports ---------------------------------------------------*/
 
 void gen_push_ports_master(UINT32 comid, UINT32 echoid)
 {
@@ -94,35 +94,35 @@ void gen_push_ports_master(UINT32 comid, UINT32 echoid)
 
     src.type = PORT_PUSH;
     snk.type = PORT_SINK;
-    snk.timeout = 4000000;         // 4 secs timeout
+    snk.timeout = 4000000;         /* 4 secs timeout*/
 
-    // for unicast/multicast address
+    /* for unicast/multicast address */
     for (a = 0; a < 2; ++a)
-    {   // for all dataset sizes
+    {   /* for all dataset sizes */
         for (sz = 1; sz < 3; ++sz)
-        {   // for all cycle periods
+        {   /* for all cycle periods */
             for (per = 0; per < 2; ++per)
-            {   // comid
+            {   /* comid  */
                 src.comid = comid + 100*a+40*(per+1)+3*(sz+1);
                 snk.comid = echoid + 100*a+40*(per+1)+3*(sz+1);
-                // dataset size
+                /* dataset size */
                 src.size = snk.size = size[sz];
-                // period [usec]
+                /* period [usec] */
                 src.cycle = 1000 * period[per];
-                // addresses
+                /* addresses */
                 if (!a)
-                {   // unicast address
+                {   /* unicast address */
                     src.dst = snk.src = dstip;
                     src.src = snk.dst = srcip;
                 }
                 else
-                {   // multicast address
+                {   /* multicast address */
                     src.dst = snk.dst = mcast;
                     src.src = srcip;
                     snk.src = dstip;
                 }
                 src.link = -1;
-                // add ports to config
+                /* add ports to config */
                 ports[nports++] = src;
                 ports[nports++] = snk;
             }
@@ -145,34 +145,34 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
 
     src.type = PORT_PUSH;
     snk.type = PORT_SINK;
-    snk.timeout = 4000000;         // 4 secs timeout
+    snk.timeout = 4000000;         /* 4 secs timeout */
 
-    // for unicast/multicast address
+    /* for unicast/multicast address */
     for (a = 0; a < 2; ++a)
-    {   // for all dataset sizes
+    {   /* for all dataset sizes */
         for (sz = 1; sz < 3; ++sz)
-        {   // for all cycle periods
+        {   /* for all cycle periods */
             for (per = 0; per < 2; ++per)
-            {   // comid
+            {   /* comid  */
                 src.comid = echoid + 100*a+40*(per+1)+3*(sz+1);
                 snk.comid = comid + 100*a+40*(per+1)+3*(sz+1);
-                // dataset size
+                /* dataset size */
                 src.size = snk.size = size[sz];
-                // period [usec]
+                /* period [usec] */
                 src.cycle = 1000 * period[per];
-                // addresses
+                /* addresses */
                 if (!a)
-                {   // unicast address
+                {   /* unicast address */
                     src.dst = snk.src =  dstip;
                     src.src = snk.dst =  srcip;
                 }
                 else
-                {   // multicast address
+                {   /* multicast address */
                     src.dst = snk.dst = mcast;
                     src.src = srcip;
                     snk.src = dstip;
                 }
-                // add ports to config
+                /* add ports to config */
                 ports[nports++] = snk;
                 src.link = nports - 1;
                 ports[nports++] = src;
@@ -183,7 +183,7 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
     printf("%u ports created\n", nports - num);
 }
 
-// --- generate PULL ports -----------------------------------------------------
+/* --- generate PULL ports ---------------------------------------------------*/
 
 void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
 {
@@ -199,19 +199,19 @@ void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
     req.type = PORT_REQUEST;
     rep.type = PORT_SINK;
 
-    // for unicast/multicast address
+    /* for unicast/multicast address */
     for (a = 0; a < 2; ++a)
-    {   // for all dataset sizes
+    {   /* for all dataset sizes */
         for (sz = 0; sz < 2; ++sz)
-        {   // comid
+        {   /* comid */
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
-            // dataset size
+            /* dataset size */
             req.size = size[sz];
             rep.size = size[sz + 1];
-            // addresses
+            /* addresses */
             if (!a)
-            {   // unicast address
+            {   /* unicast address */
                 req.dst = dstip;
                 req.src = srcip;
                 req.rep = srcip;
@@ -220,7 +220,7 @@ void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
                 rep.dst = srcip;
             }
             else
-            {   // multicast address
+            {   /* multicast address */
                 req.dst = mcast;
                 req.src = srcip;
                 req.rep = mcast;
@@ -228,7 +228,7 @@ void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
                 rep.dst = mcast;
                 rep.src = dstip;
             }
-            // add ports to config
+            /* add ports to config */
             ports[nports++] = rep;
             req.link = nports - 1;
             ports[nports++] = req;
@@ -251,34 +251,34 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
 
     req.type = PORT_SINK;
     rep.type = PORT_PULL;
-    req.timeout = 4000000;      // 4 secs timeout
+    req.timeout = 4000000;      /* 4 secs timeout */
 
-    // for unicast/multicast address
+    /* for unicast/multicast address */
     for (a = 0; a < 2; ++a)
-    {   // for all dataset sizes
+    {   /* for all dataset sizes */
         for (sz = 0; sz < 2; ++sz)
-        {   // comid
+        {   /* comid */
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
-            // dataset size
+            /* dataset size */
             req.size = size[sz];
             rep.size = size[sz + 1];
-            // addresses
+            /* addresses */
             if (!a)
-            {   // unicast address
+            {   /* unicast address */
                 req.dst = srcip;
                 req.src = dstip;
                 rep.src = srcip;
                 rep.dst = 0;
             }
             else
-            {   // multicast address
+            {   /* multicast address */
                 req.dst = mcast;
                 req.src = dstip;
                 rep.src = srcip;
                 rep.dst = 0;
             }
-            // add ports to config
+            /* add ports to config */
             ports[nports++] = req;
             rep.link = nports - 1;
             ports[nports++] = rep;
@@ -288,13 +288,13 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
     printf("%u ports created\n", nports - num);
 }
 
-// --- setup ports -------------------------------------------------------------
+/* --- setup ports -----------------------------------------------------------*/
 
 void setup_ports()
 {
     int i;
     printf("- setup ports:\n");
-    // setup ports one-by-one
+    /* setup ports one-by-one */
     for (i = 0; i < nports; ++i)
     {
         Port * p = &ports[i];
@@ -302,24 +302,24 @@ void setup_ports()
         printf("  %3d: <%d> / %s / %4d / %3d ... ",
             i, p->comid, types[p->type], p->size, p->cycle / 1000);
 
-        // depending on port type
+        /* depending on port type */
         switch (p->type)
         {
         case PORT_PUSH:
         case PORT_PULL:
             p->err = tlp_publish(
-                apph,               // session handle
-                &p->ph,             // publish handle
-                p->comid,           // comid
-                0,                  // topo counter
-                p->src,             // source address
-                p->dst,             // destination address
-                p->cycle,           // cycle period
-                0,                  // redundancy
-                TRDP_FLAGS_NONE,    // flags
-                NULL,               // default send parameters
-                p->data,            // data
-                p->size);           // data size
+                apph,               /* session handle */
+                &p->ph,             /* publish handle */
+                p->comid,           /* comid          */
+                0,                  /* topo counter   */
+                p->src,             /* source address */
+                p->dst,             /* destination address */
+                p->cycle,           /* cycle period   */
+                0,                  /* redundancy     */
+                TRDP_FLAGS_NONE,    /* flags          */
+                NULL,               /* default send parameters */
+                p->data,            /* data           */
+                p->size);           /* data size      */
 
             if (p->err != TRDP_NO_ERR)
                 printf("tlp_publish() failed, err: %d\n", p->err);
@@ -329,19 +329,19 @@ void setup_ports()
 
         case PORT_REQUEST:
             p->err = tlp_request(
-                apph,               // session handle
-                ports[p->link].sh,  // related subscribe handle
-                p->comid,           // comid
-                0,                  // topo counter
-                p->src,             // source address
-                p->dst,             // destination address
-                0,                  // redundancy
-                TRDP_FLAGS_NONE,    // flags
-                NULL,               // default send parameters
-                p->data,            // data
-                p->size,            // data size
-                p->repid,           // reply comid
-                p->rep);            // reply ip address
+                apph,               /* session handle */
+                ports[p->link].sh,  /* related subscribe handle */
+                p->comid,           /* comid          */
+                0,                  /* topo counter   */
+                p->src,             /* source address */
+                p->dst,             /* destination address */
+                0,                  /* redundancy     */
+                TRDP_FLAGS_NONE,    /* flags          */
+                NULL,               /* default send parameters */
+                p->data,            /* data           */
+                p->size,            /* data size      */
+                p->repid,           /* reply comid    */
+                p->rep);            /* reply ip address  */
 
             if (p->err != TRDP_NO_ERR)
                 printf("tlp_request() failed, err: %d\n", p->err);
@@ -351,18 +351,18 @@ void setup_ports()
 
         case PORT_SINK:
             p->err = tlp_subscribe(
-                apph,               // session handle
-                &p->sh,             // subscribe handle
-                NULL,               // user ref
-                p->comid,           // comid
-                0,                  // topo counter
-                p->src,             // source address
-                0,                  // second source address
-                p->dst,             // destination address
-                TRDP_FLAGS_NONE,    // No flags set
-                p->timeout,         // timeout [usec]
-                TRDP_TO_SET_TO_ZERO,// timeout behavior
-                p->size);           // maximum size
+                apph,               /* session handle   */
+                &p->sh,             /* subscribe handle */
+                NULL,               /* user ref         */
+                p->comid,           /* comid            */
+                0,                  /* topo counter     */
+                p->src,             /* source address   */
+                0,                  /* second source address  */
+                p->dst,             /* destination address    */
+                TRDP_FLAGS_NONE,    /* No flags set     */
+                p->timeout,         /* timeout [usec]   */
+                TRDP_TO_SET_TO_ZERO,/* timeout behavior */
+                p->size);           /* maximum size     */
 
             if (p->err != TRDP_NO_ERR)
                 printf("tlp_subscribe() failed, err: %d\n", p->err);
@@ -373,7 +373,7 @@ void setup_ports()
     }
 }
 
-// --- convert trdp error code to string ---------------------------------------
+/* --- convert trdp error code to string -------------------------------------*/
 
 const char * get_result_string(int ret)
 {
@@ -436,7 +436,7 @@ const char * get_result_string(int ret)
     return buf;
 }
 
-// --- platform helper functions -----------------------------------------------
+/* --- platform helper functions ---------------------------------------------*/
 
 #if defined (WIN32)
 
@@ -582,20 +582,68 @@ void _sleep_msec(int msec)
     nanosleep(&ts, NULL);
 }
 
+#elif defined (VXWORKS)
+void cursor_home()
+{
+    printf("\033" "[H");
+}
+
+void clear_screen()
+{
+    printf("\033" "[H" "\033" "[2J");
+}
+
+int _get_term_size(int * w, int * h)
+{
+    /* assume a terminal 100 cols, 60 rows fix */
+    *w = 100;
+    *h = 60;
+    return 0;
+}
+
+void _set_color_red()
+{
+    printf("\033" "[0;1;31m");
+}
+
+void _set_color_green()
+{
+    printf("\033" "[0;1;32m");
+}
+
+void _set_color_blue()
+{
+    printf("\033" "[0;1;34m");
+}
+
+void _set_color_default()
+{
+    printf("\033" "[0m");
+}
+
+void _sleep_msec(int msec)
+{
+    struct timespec ts;
+    ts.tv_sec = msec / 1000;
+    ts.tv_nsec = (msec % 1000) * 1000000L;
+    /* sleep specified time*/
+    nanosleep(&ts, NULL);
+}
+
 #else
 #error "Target not defined!"
 #endif
 
-// --- test data processing ----------------------------------------------------
+/* --- test data processing --------------------------------------------------*/
 
 void process_data()
 {
     static int w = 80, h = 24;
     int _w, _h;
     int i, n;
-    // get terminal size
+    /* get terminal size */
     if (_get_term_size(&_w, &_h) == 0)
-    {   // changed width?
+    {   /* changed width? */
         if (_w != w || !cycle)
             clear_screen();
         else
@@ -611,15 +659,15 @@ void process_data()
             cursor_home();
     }
 
-    // go through ports one-by-one
+    /* go through ports one-by-one */
     for (i = 0; i < nports; ++i)
     {
         Port * p = &ports[i];
-        // write port data
+        /* write port data */
         if (p->type == PORT_PUSH || p->type == PORT_PULL)
         {
             if (p->link == -1)
-            {   // data generator
+            {   /* data generator */
                 unsigned o = cycle % 128;
                 memset(p->data, '_', p->size);
                 if (o < p->size)
@@ -635,7 +683,7 @@ void process_data()
                 }
             }
             else
-            {   // echo data from incoming port, replace all '_' by '~'
+            {   /* echo data from incoming port, replace all '_' by '~' */
                 unsigned char * src = ports[p->link].data;
                 unsigned char * dst = p->data;
                 for (n = p->size; n; --n, ++src, ++dst)
@@ -664,7 +712,7 @@ void process_data()
                 p->repid, p->rep);
         }
 
-        // print port data
+        /* print port data */
         fflush(stdout);
         if (vos_isMulticast(p->dst) || vos_isMulticast(p->src))
             _set_color_blue();
@@ -704,23 +752,23 @@ void process_data()
         printf(" %3d\n", p->err);
         _set_color_default();
     }
-    // increment cycle counter
+    /* increment cycle counter  */
     ++cycle;
 }
 
-// --- poll received data ------------------------------------------------------
+/* --- poll received data ----------------------------------------------------*/
 
 void poll_data()
 {
     TRDP_PD_INFO_T pdi;
     int i;
-    // go through ports one-by-one
+    /* go through ports one-by-one */
     for (i = 0; i < nports; ++i)
     {
         Port * p = &ports[i];
         UINT32 size = p->size;
         if (p->type != PORT_SINK)
-            // poll only sink ports
+            /* poll only sink ports  */
             continue;
 
         p->err = tlp_get(apph, p->sh, &pdi, p->data, &size);
@@ -745,14 +793,14 @@ void printLog(
     }
 }
 
-// --- main --------------------------------------------------------------------
+/* --- main ------------------------------------------------------------------*/
 int main(int argc, char * argv[])
 {
     TRDP_ERR_T err;
     unsigned tick = 0;
 
     printf("TRDP process data test program, version r178\n");
-
+#if defined (POSIX)
     if (argc < 4)
     {
         printf("usage: %s <localip> <remoteip> <mcast> <logfile>\n", argv[0]);
@@ -763,11 +811,12 @@ int main(int argc, char * argv[])
 
         return 1;
     }
-
-    srcip = vos_dottedIP(argv[1]);
-    dstip = vos_dottedIP(argv[2]);
-    mcast = vos_dottedIP(argv[3]);
-
+#else
+    /* fix settings for vxworks, as program is right now only callable via tshell */
+    srcip = vos_dottedIP("53.191.121.40"/*argv[1]*/);
+    dstip = vos_dottedIP("53.191.121.73"/*argv[2]*/);
+    mcast = vos_dottedIP("239.0.0.1"    /*argv[3]*/);
+#endif
     if (!srcip || !dstip || (mcast >> 28) != 0xE)
     {
         printf("invalid input arguments\n");
@@ -786,7 +835,7 @@ int main(int argc, char * argv[])
         pLogFile = NULL;
     }
 
-    // initialize TRDP protocol library
+    /* initialize TRDP protocol library */
     err = tlc_init(printLog, &memcfg);
     if (err != TRDP_NO_ERR)
     {
@@ -803,7 +852,7 @@ int main(int argc, char * argv[])
     pdcfg.toBehavior = TRDP_TO_SET_TO_ZERO;
     pdcfg.port = 20548;
 
-    // open session
+    /* open session */
     err = tlc_openSession(&apph, srcip, 0, NULL, &pdcfg, NULL, &proccfg);
     if (err != TRDP_NO_ERR)
     {
@@ -811,27 +860,27 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    // generate ports configuration
+    /* generate ports configuration */
     gen_push_ports_master(10000, 20000);
     gen_push_ports_slave(10000, 20000);
     gen_pull_ports_master(30000, 40000);
     gen_pull_ports_slave(30000, 40000);
     setup_ports();
     _sleep_msec(2000);
-    // main test loop
+    /* main test loop */
     while (1)
-    {   // drive TRDP communications
+    {   /* drive TRDP communications */
         tlc_process(apph, NULL, NULL);
-        // poll (receive) data
+        /* poll (receive) data */
         poll_data();
-        // process data every 500 msec
+        /* process data every 500 msec */
         if (!(++tick % 50))
             process_data();
-        // wait 10 msec
+        /* wait 10 msec  */
         _sleep_msec(10);
     }
 
     return 0;
 }
 
-// -----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------*/
