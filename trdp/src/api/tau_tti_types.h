@@ -106,7 +106,8 @@ typedef struct
 typedef struct
 {
     TRDP_LABEL_T            vehId;          /**< vehicle identifier label,application defined
-                                                 (e.g. UIC vehicle identification number) */
+                                                 (e.g. UIC vehicle identification number) 
+                                                 vehId of vehicle with vehNo==1 is used also as cstId */
     TRDP_LABEL_T            vehType;        /**< vehicle type,application defined */
     UINT8                   vehOrient;      /**< vehicle orientation
                                                  '01'B = same as consist direction
@@ -130,9 +131,6 @@ typedef struct
                                                  1 = closed train
                                                  2 = closed train consist */
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
-    TRDP_LABEL_T            cstId;          /**< consist identifier label, application defined
-                                                 (e.g. UIC vehicle identification number
-                                                 of the vehicle at extremity 1 of the consist) */
     TRDP_LABEL_T            cstType;        /**< consist type, application defined */
     TRDP_LABEL_T            cstOwner;       /**< consist owner, e.g. "trenitalia.it", "sncf.fr", "db.de" */
     TRDP_UUID_T             cstUuid;        /**< consist UUID  */
@@ -179,7 +177,7 @@ typedef struct
     UINT8                   cstOrient;      /**< consist orientation
                                                  '01'B = same as train direction
                                                  '10'B = inverse to train direction */
-    UINT8                   reserved01;     /**< reserved for future use (= 0) */
+    UINT16                  reserved01;     /**< reserved for future use (= 0) */
 } TRDP_CONSIST_T;
 
 
@@ -212,7 +210,8 @@ typedef struct
                                                  bit2: ETB2 (other network)
                                                  bit3: ETB3 (other network) */
     UINT8                   trnDirState;    /**< TTDB status: '01'B == unconfirmed, '10'B == confirmed */
-    UINT8                   opTrnDirState;  /**< TTDB status: '01'B == inalid, '10'B == valid */
+    UINT8                   opTrnDirState;  /**< Operatiobal train directory status:
+                                                 '01'B == inalid, '10'B == valid */
     UINT8                   reserved02;     /**< reserved for future use (= 0) */
     TRDP_LABEL_T            trnId;          /**< train identifier, application defined
                                                  (e.g. ICE75, IC346), informal */
@@ -242,7 +241,7 @@ typedef struct
     UINT8                   vehOrient;      /**< vehicle orientation, 
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
-    UINT8                   ownCstNo;       /**< operational consist number the vehicle belongs to */
+    UINT8                   ownOpCstNo;     /**< operational consist number the vehicle belongs to */
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_VEHICLE_T;
 
@@ -255,13 +254,11 @@ typedef struct
 {
     TRDP_UUID_T             cstUuid;        /**< Reference to static consist attributes, 
                                                  0 if not available (e.g. correction) */
-    UINT8                   cstIndex;       /**< Index of consist in consist info list, only for performance reason
-                                                 in any case cstUUID needs to be checked in parallel */
     UINT8                   opCstNo;        /**< operational consist number in train (1..63) */
     UINT8                   opCstOrient;    /**< consist orientation
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
-    UINT8                   reserved01;     /*< reserved for future use (= 0) */
+    UINT16                  reserved01;     /*< reserved for future use (= 0) */
 } TRDP_OP_CONSIST_T;
 
 
