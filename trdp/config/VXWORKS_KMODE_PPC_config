@@ -39,3 +39,7 @@ TCPREFIX = $(TCPATH)
 TCPOSTFIX = ppc
 
 CFLAGS += -ansi -Wall -fstrength-reduce -fno-builtin -mlongcall -fsigned-char -DCPU=$(CPU) -I$(WIND_BASE)/target/h  -I$(WIND_BASE)/target/h/wrn/coreip
+
+
+#LINT section  
+LINT_SYSINCLUDE_DIRECTIVES =  -D_WRS_KERNEL -D_POSIX_C_SOURCE -DCPU=$(CPU) -I./src/vos/vxworks -I$(WIND_BASE)/target/usr/h -I$(WIND_BASE)/target/h  -I$(WIND_BASE)/target/h/wrn/coreip +libdir $(WIND_BASE)/target/usr/h,$(WIND_BASE)/target/h,$(WIND_BASE)/target/h/wrn/coreip -wlib 0 
