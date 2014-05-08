@@ -31,10 +31,10 @@
 #define printOut(lvl,format, args...) {if (lvl <= OUTPUT_DETAILS) \
     {(void) printf(format, ## args);}};
 
-#define IF_IP "192.168.64.117"
-#define DEST_IP "192.168.64.3"
+#define IF_IP "53.191.121.40"
+#define DEST_IP "53.191.121.73"
 #define MC_IP "238.0.0.1"
-#define MC_IF "192.168.64.117"
+#define MC_IF "53.191.121.40"
 #define PORT_PD 20548
 #define PORT_MD 20550
 #ifdef WIN32

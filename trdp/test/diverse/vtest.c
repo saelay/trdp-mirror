@@ -292,7 +292,7 @@ VOS_THREAD_FUNC_T testSend(void* arguments)
     VOS_SEMA_T queueSema = arg1->queueSema;
     VOS_SEMA_T printSema = arg1->printSema;
     VOS_SEMA_T helpSema = arg1->helpSema;
-    pthread_t pthreadID = pthread_self();
+    int threadID = taskIdSelf();
     VOS_ERR_T res = VOS_UNKNOWN_ERR;
     VOS_ERR_T retVal = VOS_NO_ERR;
 
@@ -304,9 +304,9 @@ VOS_THREAD_FUNC_T testSend(void* arguments)
     }
 
 #ifdef WIN32
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld start\n",(long int)pthreadID.p);
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld start\n",(long int)threadID.p);
 #else
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld start\n",(long int)pthreadID);
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld start\n",(long int)threadID);
 #endif
     printOut(OUTPUT_FULL,"[SEND THREAD] Got print, give queue, take gelp, give print\n");
     vos_semaGive(queueSema);
@@ -341,9 +341,9 @@ VOS_THREAD_FUNC_T testSend(void* arguments)
     }
     printOut(OUTPUT_FULL,"[SEND THREAD] Got queue, queued in, got print\n");
 #ifdef WIN32
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld finished\n",(long int)pthreadID.p);
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld finished\n",(long int)threadID.p);
 #else
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld finished\n",(long int)pthreadID);
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld finished\n",(long int)threadID);
 #endif
     vos_semaGive(printSema);
     vos_semaGive(helpSema);
@@ -363,13 +363,13 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
     VOS_SEMA_T helpSema = arg1->helpSema;
     VOS_ERR_T res = VOS_UNKNOWN_ERR;
     VOS_ERR_T retVal = VOS_NO_ERR;
-    pthread_t pthreadID = pthread_self();
+    int threadID = taskIdSelf();
     struct timespec waitTime = arg1->delay;
 
 #ifdef WIN32
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld start\n",(long int)pthreadID.p);
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld start\n",(long int)threadID.p);
 #else
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld start\n",(long int)pthreadID);
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld start\n",(long int)threadID);
 #endif
     res = vos_threadDelay((UINT32)(waitTime.tv_sec*1000*1000)+((waitTime.tv_nsec)/1000));
     if (res != VOS_NO_ERR)
@@ -425,9 +425,9 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
         retVal = VOS_SEMA_ERR;
     }
 #ifdef WIN32
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)pthreadID.p);
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)threadID.p);
 #else
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)pthreadID);
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)threadID);
 #endif
     vos_semaGive(printSema);
     vos_semaGive(helpSema);
@@ -462,7 +462,9 @@ THREAD_ERR_T L3_test_thread_init()
         retVal = THREAD_INIT_ERR;
     }
     vos_getTime(&startTime);
+    printOut(OUTPUT_ADVANCED,"[THREAD_INIT] time prior vos_threadDelay(100000): %s\n",vos_getTimeStamp());
     res = vos_threadDelay(100000);
+    printOut(OUTPUT_ADVANCED,"[THREAD_INIT] time after vos_threadDelay(100000): %s\n",vos_getTimeStamp());
     vos_getTime(&endTime);
     if ((res != VOS_NO_ERR) && (vos_cmpTime(&endTime,&startTime)))
     {
@@ -540,12 +542,21 @@ THREAD_ERR_T L3_test_thread_init()
         retVal = THREAD_INIT_ERR;
         printOut(OUTPUT_ADVANCED,"[THREAD_INIT] vos_threadIsActive() [1] sendThread Error\n");
     }
+    else
+    {
+        printOut(OUTPUT_ADVANCED,"[THREAD_INIT] vos_threadIsActive() [1] sendThread OK\n");
+    }
     res = vos_threadIsActive(recvThread);
     if (res != VOS_NO_ERR)
     {
         retVal = THREAD_INIT_ERR;
         printOut(OUTPUT_ADVANCED,"[THREAD_INIT] vos_threadIsActive() [1] recvThread Error\n");
     }
+    else
+    {
+        printOut(OUTPUT_ADVANCED,"[THREAD_INIT] vos_threadIsActive() [1] recvThread OK\n");
+    }
+
     /***************************/
     /*  vos_threadTerminate()1 */
     /***************************/
@@ -584,6 +595,7 @@ THREAD_ERR_T L3_test_thread_init()
     /************************/
     /* Make presets 2       */
     /************************/
+    printOut(OUTPUT_FULL,"[THREAD_INIT] Second run prepare\n");
     res = vos_semaCreate(&sema,VOS_SEMA_EMPTY);
     if (res != VOS_NO_ERR)
     {
@@ -1199,7 +1211,7 @@ THREAD_ERR_T L3_test_thread_mutex()
     res = vos_mutexTryLock(mutex);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexTryLock Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexTryLock with available mutex Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
     res = vos_mutexUnlock(mutex);
@@ -1226,7 +1238,7 @@ THREAD_ERR_T L3_test_thread_mutex()
     res = vos_mutexTryLock(mutex);
     if (res == VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexTryLock Error\n");
+        printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] mutexTryLock with not available mutex Error\n");
         retVal = THREAD_MUTEX_ERR;
     }
     vos_mutexDelete(mutex);
@@ -1601,9 +1613,9 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         /************/
         /* send UDP */
         /************/
-        printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockSendUDP() to %s:%u\n",vos_ipDotted(gTestIP),gTestPort);
+        printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockSendUDP() to %s:%u\n",vos_ipDotted(destIP/*gTestIP*/),gTestPort);
         vos_threadDelay(500000);
-        res = vos_sockSendUDP(sockDesc,&sndBuf,&bufSize,gTestIP,gTestPort);
+        res = vos_sockSendUDP(sockDesc,&sndBuf,&bufSize,destIP/*gTestIP*/,gTestPort);
         if (res != VOS_NO_ERR)
         {
             printOut(OUTPUT_ADVANCED,"[SOCK_UDP] vos_sockSendUDP() ERROR!\n");
@@ -1748,16 +1760,19 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         /***********/
         /* connect */
         /***********/
+        int cyclecount=0;
         connected = FALSE;
         printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] vos_sockConnect()\n");
-        while(!connected)
+        while((!connected) && (cyclecount < 10))
         {
+            
             vos_threadDelay(100000);
             res = vos_sockConnect(sockDesc,destIP,portPD);
             if (res != VOS_NO_ERR)
             {
                 retVal = SOCK_TCP_CLIENT_ERR;
                 printOut(OUTPUT_ADVANCED,"[SOCK_TCPCLIENT] vos_sockConnect() ERROR res = %i\n",res);
+                cyclecount++;
             }
             else
             {
@@ -2724,6 +2739,7 @@ int main()
 {
     UINT32 testCnt = 0;
     UINT32 totalErrors = 0;
+
     for (testCnt=0; testCnt<N_ITERATIONS; testCnt++)
     {
         totalErrors += L1_test_basic(testCnt);
