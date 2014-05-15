@@ -89,16 +89,17 @@ typedef struct
 typedef struct
 {
     TRDP_LABEL_T            fctName;        /**< function device or group label */
-    UINT16                  fctId;          /**< unique host identification of the function
-                                                 device or group in the consist as defined in
-                                                 IEC 61375-2-5, application defined. Value range: 1..16383 */
+    UINT16                  fctId;          /**< host identification of the function
+                                                 device or group as defined in
+                                                 IEC 61375-2-5, application defined. 
+                                                 Value range: 1..16383 (device), 256..16383 (group) */
     BOOL8                   grp;            /**< is a function group and will be resolved as IP multicast address */ 
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
     UINT8                   cstVehNo;       /**< Sequence number of the vehicle in the
                                                  consist the function belongs to. Value range: 1..16, 0 = not defined  */
     UINT8                   etbId;          /**< number of connected train backbone. Value range: 0..3 */
     UINT8                   cnId;           /**< identifier of connected consist network in the consist, 
-                                                 related to the etbId. Value range: 0..15 */
+                                                 related to the etbId. Value range: 0..31 */
     UINT8                   reserved02;     /**< reserved for future use (= 0) */
     TRDP_PROP_T             fctProp;        /**< properties, application defined */
 } TRDP_FUNCTION_INFO_T;
@@ -171,19 +172,34 @@ typedef struct
 
 
 /** TCN consist structure */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 typedef struct
 {
-    TRDP_UUID_T             cstUuid;        /**< Reference to static consist attributes,
+    TRDP_UUID_T             cstUUID;        /**< UUID of the consist, provided by ETBN (TrainNetworkDirectory)
+                                                 Reference to static consist attributes
                                                  0 if not available (e.g. correction) */
+    UINT32                  cstTopoCnt;     /**< consist topology counter provided with the CSTINFO
+                                                 0 if no CSTINFO available */
     UINT8                   trnCstNo;       /**< Sequence number of consist in train (1..63) */
     UINT8                   cstOrient;      /**< consist orientation
                                                  '01'B = same as train direction
                                                  '10'B = inverse to train direction */
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
-} TRDP_CONSIST_T;
+} GNU_PACKED TRDP_CONSIST_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 
 /** TCN train directory */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectory data structure version  
@@ -198,10 +214,18 @@ typedef struct
     TRDP_CONSIST_T          cstList[TRDP_MAX_CST_CNT];
                                             /**< consist list ordered list starting with trnCstNo = 1 */
     UINT32                  trnTopoCnt;     /**< sc-32 computed over record (seed value: etbTopoCnt) */
-} TRDP_TRAIN_DIRECTORY_T;
+} GNU_PACKED TRDP_TRAIN_DIRECTORY_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 
 /** Operational train directory state */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectoryState data structure version  
@@ -222,13 +246,18 @@ typedef struct
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter
                                                  set to 0 if opTrnDirState == invalid */
     UINT32                  crc;            /**< sc-32 computed over record (seed value: 'FFFFFFFF'H) */
-} TRDP_OP_TRAIN_DIRECTORY_STATE_T;
+} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_STATE_T;
 
+#ifdef WIN32
+#pragma pack(pop)
+#endif
+
+
+/** Operational vehicle structure */
 #ifdef WIN32
 #pragma pack(push, 1)
 #endif
 
-/** Operational vehicle structure */
 typedef struct
 {
     TRDP_LABEL_T            vehId;          /**< Unique vehicle identifier, application defined (e.g. UIC Identifier) */
@@ -253,19 +282,31 @@ typedef struct
 #endif
 
 /** Operational consist structure */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 typedef struct
 {
-    TRDP_UUID_T             cstUuid;        /**< Reference to static consist attributes, 
+    TRDP_UUID_T             cstUUID;        /**< Reference to static consist attributes, 
                                                  0 if not available (e.g. correction) */
     UINT8                   opCstNo;        /**< operational consist number in train (1..63) */
     UINT8                   opCstOrient;    /**< consist orientation
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
     UINT16                  reserved01;     /*< reserved for future use (= 0) */
-} TRDP_OP_CONSIST_T;
+} GNU_PACKED TRDP_OP_CONSIST_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 
 /** Operational train structure */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< Train info structure version */
@@ -288,13 +329,21 @@ typedef struct
     TRDP_OP_VEHICLE_T       opVehList;      /**< operational vehicle list starting with op. vehicle #1 */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
                                                  SC-32 computed over record (seed value : trnTopoCnt) */
-} TRDP_OP_TRAIN_DIRECTORY_T;
+} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 
 /** Train network directory entry structure acc. to IEC61375-2-5 */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 typedef struct
 {
-    UINT8                   cstUUID[16];    /**< unique consist identifier */
+    TRDP_UUID_T             cstUUID;        /**< unique consist identifier */
     UINT32                  cstNetProp;     /**< consist network properties
                                                  bit0..1:   consist orientation
                                                  bit2..7:   0
@@ -303,10 +352,18 @@ typedef struct
                                                  bit16..21: subnet Id
                                                  bit24..29: CN Id
                                                  bit30..13: 0 */    
-} TRDP_TRAIN_NET_DIR_ENTRY_T;
+} GNU_PACKED TRDP_TRAIN_NET_DIR_ENTRY_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 
 /** Train network directory structure */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
 typedef struct
 {
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
@@ -314,7 +371,11 @@ typedef struct
     TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
                                             /**< train network directory */
     UINT32                  etbTopoCnt;     /**< train network directory CRC */
-} TRDP_TRAIN_NET_DIR_T;
+} GNU_PACKED TRDP_TRAIN_NET_DIR_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 
 #ifdef __cplusplus

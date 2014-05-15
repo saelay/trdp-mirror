@@ -121,7 +121,7 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the operational train directory state.
+/**    Function to retrieve the operational train directory.
  *
  *
  *  @param[out]     pTrDirState     Pointer to an operational train directory state structure to be returned.
