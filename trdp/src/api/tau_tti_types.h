@@ -42,6 +42,8 @@ extern "C" {
 #define __cdecl
 #endif
 
+#define TRDP_MAX_CST_CNT 63                 /**< max number of consists per train */
+
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -61,7 +63,7 @@ typedef struct
 /** Closed train consists information */
 typedef struct
 {
-    UINT8                   cltrCstUUID[16];    /**< closed train consist UUID */
+    TRDP_UUID_T             cltrCstUUID;        /**< closed train consist UUID */
     UINT8                   cltrCstOrient;      /**< closed train consist orientation
                                                      '01'B = same as closed train direction
                                                      '10'B = inverse to closed train direction */
@@ -124,7 +126,6 @@ typedef struct
 /** consist information structure */
 typedef struct
 {
-    UINT32                  totalLength;    /**< total length of data structure in number of octets */
     TRDP_SHORT_VERSION_T    version;        /**< ConsistInfo data structure version, application defined */
     UINT8                   cstClass;       /**< consist info classification
                                                  0 = (single) consist
@@ -164,7 +165,8 @@ typedef struct
     TRDP_SHORT_VERSION_T    version;        /**< ConsistInfoList structure version  
                                                   parameter 'mainVersion' shall be set to 1. */
     UINT16                  cstInfoCnt;     /**< number of consists in train; range: 1..63 */
-    TRDP_CONSIST_INFO_T    *pCstInfoList;   /**< consist info collection cstCnt elements */
+    TRDP_CONSIST_INFO_T     cstInfoList[TRDP_MAX_CST_CNT];
+                                            /**< consist info collection cstCnt elements */
 } TRDP_CONSIST_INFO_LIST_T;
 
 
@@ -193,12 +195,13 @@ typedef struct
                                                  bit3: ETB3 (other network) */
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
     UINT16                  cstCnt;         /**< number of consists in train; range: 1..63 */
-    TRDP_CONSIST_T         *pCstDirList;    /**< dynamic consist list ordered list starting with trnCstNo = 1 */
+    TRDP_CONSIST_T          cstList[TRDP_MAX_CST_CNT];
+                                            /**< consist list ordered list starting with trnCstNo = 1 */
     UINT32                  trnTopoCnt;     /**< sc-32 computed over record (seed value: etbTopoCnt) */
 } TRDP_TRAIN_DIRECTORY_T;
 
 
-/** UIC train directory state */
+/** Operational train directory state */
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectoryState data structure version  
@@ -225,7 +228,7 @@ typedef struct
 #pragma pack(push, 1)
 #endif
 
-/** UIC operational vehicle structure */
+/** Operational vehicle structure */
 typedef struct
 {
     TRDP_LABEL_T            vehId;          /**< Unique vehicle identifier, application defined (e.g. UIC Identifier) */
@@ -249,7 +252,7 @@ typedef struct
 #pragma pack(pop)
 #endif
 
-/** UIC operational consist structure */
+/** Operational consist structure */
 typedef struct
 {
     TRDP_UUID_T             cstUuid;        /**< Reference to static consist attributes, 
@@ -262,7 +265,7 @@ typedef struct
 } TRDP_OP_CONSIST_T;
 
 
-/** UIC operational train structure */
+/** Operational train structure */
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< Train info structure version */
@@ -277,10 +280,12 @@ typedef struct
                                                  '10'B = inverse to train direction */
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
     UINT16                  opCstCnt;       /**< number of consists in train (1..63) */
-    TRDP_OP_CONSIST_T      *pOpCstList;     /**< Pointer to operational consist list starting with op. consist #1 */
+    TRDP_OP_CONSIST_T       opCstList[TRDP_MAX_CST_CNT];
+                                            /**< operational consist list starting with op. consist #1 */
     UINT16                  reserved02;     /**< reserved for future use (= 0) */
-    UINT16                  opVehCnt;       /**< number of vehicles in train (1..63) */
-    TRDP_OP_VEHICLE_T      *pOpVehList;     /**< Pointer to operational vehicle list starting with op. vehicle #1 */
+    UINT16                  opVehCnt[TRDP_MAX_CST_CNT];
+                                            /**< number of vehicles in train (1..63) */
+    TRDP_OP_VEHICLE_T       opVehList;      /**< operational vehicle list starting with op. vehicle #1 */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
                                                  SC-32 computed over record (seed value : trnTopoCnt) */
 } TRDP_OP_TRAIN_DIRECTORY_T;
@@ -306,7 +311,8 @@ typedef struct
 {
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
     UINT16                  entryCnt;       /**< number of entries in train network directory */
-    TRDP_TRAIN_NET_DIR_ENTRY_T *trnNetDir;  /**< unique consist identifier */
+    TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
+                                            /**< train network directory */
     UINT32                  etbTopoCnt;     /**< train network directory CRC */
 } TRDP_TRAIN_NET_DIR_T;
 
