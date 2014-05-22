@@ -81,7 +81,7 @@ typedef struct
                                                  application defined, must be a multiple
                                                  of 4 octets for alignment reasons 
                                                  value range: 0..32768  */
-    UINT8                  *pProp;          /**< properties, application defined */
+    UINT8                   prop[1];        /**< properties, application defined */
 } TRDP_PROP_T;
 
 
@@ -115,8 +115,8 @@ typedef struct
     UINT8                   vehOrient;      /**< vehicle orientation
                                                  '01'B = same as consist direction
                                                  '10'B = inverse to consist direction */
-    UINT8                   vehNo;          /**< Sequence number of vehicle in consist(1..16) */
-    ANTIVALENT8             tracVeh;        /**< vehicle is a traction vehicle
+    UINT8                   cstVehNo;       /**< Sequence number of vehicle in consist(1..16) */
+    ANTIVALENT8             tractVeh;       /**< vehicle is a traction vehicle
                                                  '01'B = vehicle is not a traction vehicle
                                                  '10'B = vehicle is a traction vehicle */
     UINT8                   reserved01;     /**< for future use (= 0) */
@@ -133,9 +133,10 @@ typedef struct
                                                  1 = closed train
                                                  2 = closed train consist */
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
+    TRDP_LABEL_T            cstId;          /**< application defined consist identifier, e.g. UIC identifier */
     TRDP_LABEL_T            cstType;        /**< consist type, application defined */
     TRDP_LABEL_T            cstOwner;       /**< consist owner, e.g. "trenitalia.it", "sncf.fr", "db.de" */
-    TRDP_UUID_T             cstUuid;        /**< consist UUID  */
+    TRDP_UUID_T             cstUUID;        /**< consist UUID  */
     UINT32                  reserved02;     /**< reserved for future use (= 0) */
     TRDP_PROP_T             cstProp;        /**< static consist properties */
     UINT16                  reserved03;     /**< reserved for future use (= 0) */
@@ -221,38 +222,6 @@ typedef struct
 #endif
 
 
-/** Operational train directory state */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
-
-typedef struct
-{
-    TRDP_SHORT_VERSION_T    version;        /**< TrainDirectoryState data structure version  
-                                                  parameter 'mainVersion' shall be set to 1. */
-    UINT16                  reserved01;     /**< reserved for future use (= 0) */
-    BITSET8                 etbId;          /**< identification of the ETB the TTDB is computed for
-                                                 bit0: ETB0 (operational network)
-                                                 bit1: ETB1 (multimedia network)
-                                                 bit2: ETB2 (other network)
-                                                 bit3: ETB3 (other network) */
-    UINT8                   trnDirState;    /**< TTDB status: '01'B == unconfirmed, '10'B == confirmed */
-    UINT8                   opTrnDirState;  /**< Operatiobal train directory status:
-                                                 '01'B == inalid, '10'B == valid */
-    UINT8                   reserved02;     /**< reserved for future use (= 0) */
-    TRDP_LABEL_T            trnId;          /**< train identifier, application defined
-                                                 (e.g. ICE75, IC346), informal */
-    TRDP_LABEL_T            trnOperator;    /**< train operator, e.g. trenitalia.it, informal */
-    UINT32                  opTrnTopoCnt;   /**< operational train topology counter
-                                                 set to 0 if opTrnDirState == invalid */
-    UINT32                  crc;            /**< sc-32 computed over record (seed value: 'FFFFFFFF'H) */
-} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_STATE_T;
-
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
-
 /** Operational vehicle structure */
 #ifdef WIN32
 #pragma pack(push, 1)
@@ -281,6 +250,7 @@ typedef struct
 #pragma pack(pop)
 #endif
 
+
 /** Operational consist structure */
 #ifdef WIN32
 #pragma pack(push, 1)
@@ -296,6 +266,38 @@ typedef struct
                                                  '10'B = inverse to operational train direction */
     UINT16                  reserved01;     /*< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_CONSIST_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
+
+
+/** Operational train directory state */
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< TrainDirectoryState data structure version  
+                                                  parameter 'mainVersion' shall be set to 1. */
+    UINT16                  reserved01;     /**< reserved for future use (= 0) */
+    BITSET8                 etbId;          /**< identification of the ETB the TTDB is computed for
+                                                 bit0: ETB0 (operational network)
+                                                 bit1: ETB1 (multimedia network)
+                                                 bit2: ETB2 (other network)
+                                                 bit3: ETB3 (other network) */
+    UINT8                   trnDirState;    /**< TTDB status: '01'B == unconfirmed, '10'B == confirmed */
+    UINT8                   opTrnDirState;  /**< Operatiobal train directory status:
+                                                 '01'B == inalid, '10'B == valid */
+    UINT8                   reserved02;     /**< reserved for future use (= 0) */
+    TRDP_LABEL_T            trnId;          /**< train identifier, application defined
+                                                 (e.g. ICE75, IC346), informal */
+    TRDP_LABEL_T            trnOperator;    /**< train operator, e.g. trenitalia.it, informal */
+    UINT32                  opTrnTopoCnt;   /**< operational train topology counter
+                                                 set to 0 if opTrnDirState == invalid */
+    UINT32                  crc;            /**< sc-32 computed over record (seed value: 'FFFFFFFF'H) */
+} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_STATE_T;
 
 #ifdef WIN32
 #pragma pack(pop)
@@ -371,7 +373,7 @@ typedef struct
     TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
                                             /**< train network directory */
     UINT32                  etbTopoCnt;     /**< train network directory CRC */
-} GNU_PACKED TRDP_TRAIN_NET_DIR_T;
+} GNU_PACKED TRDP_TRAIN_NET_DIRECTORY_T;
 
 #ifdef WIN32
 #pragma pack(pop)
