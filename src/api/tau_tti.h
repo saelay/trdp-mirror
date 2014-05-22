@@ -138,7 +138,7 @@ EXT_DECL TRDP_ERR_T tau_getTTI (
     TRDP_OP_TRAIN_DIRECTORY_STATE_T         *pOpTrDirState,
     TRDP_OP_TRAIN_DIRECTORY_T               *pOpTrDir,
     TRDP_TRAIN_DIRECTORY_T                  *pTrDir,
-    TRDP_CONSIST_INFO_LIST_T                *pCstInfoList,
+    TRDP_TRAIN_NET_DIRECTORY_T              *pTrNetDir,
     UINT8                            const  etbId);
 
 
