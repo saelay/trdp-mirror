@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2014-06-02: oversized data changed
  */
 
 
@@ -292,7 +293,7 @@ int main (int argc, char * *argv)
                         TRDP_FLAGS_DEFAULT,            /*    packet flags */
                         0,                             /*    Time out in us                         */
                         TRDP_TO_SET_TO_ZERO,           /*    delete invalid data    on timeout      */
-                        1436);                          /*    net data size                          */
+                        1432);                          /*    net data size                          */
 
     if (err != TRDP_NO_ERR)
     {
