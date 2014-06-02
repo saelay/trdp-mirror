@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
+ *                     Removing receive queue on session close added
  *      BL 2014-02-27: Ticket #24: trdp_if.c won't compile without MD_SUPPORT
  *
  *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
@@ -555,6 +557,18 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx, 0, FALSE);
                     vos_memFree(pSession->pSndQueue);
                     pSession->pSndQueue = pNext;
+                }
+                
+                while (pSession->pRcvQueue != NULL)
+                {
+                    PD_ELE_T *pNext = pSession->pRcvQueue->pNext;
+
+                    /*    Only close socket if not used anymore    */
+                    trdp_releaseSocket(pSession->iface, pSession->pRcvQueue->socketIdx, 0, FALSE);
+                    vos_memFree(pSession->pRcvQueue->pSeqCntList);
+                    vos_memFree(pSession->pRcvQueue->pFrame);
+                    vos_memFree(pSession->pRcvQueue);
+                    pSession->pRcvQueue = pNext;
                 }
 
 #if MD_SUPPORT
@@ -1175,6 +1189,7 @@ TRDP_ERR_T  tlp_unpublish (
         trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0, FALSE);
         pElement->magic = 0;
         vos_memFree(pElement->pFrame);
+        vos_memFree(pElement->pSeqCntList);
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
 
@@ -1500,6 +1515,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
             if ( pReqElement == NULL)
             {
+
                 /*  This is the first time, get a new element   */
                 pReqElement = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
 
@@ -1509,6 +1525,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 }
                 else
                 {
+                    vos_printLog(VOS_LOG_INFO, "PD Request (comId: %u) getting new element %p\n", comId, pReqElement);
                     /*
                      Compute the overal packet size
                      Add padding bytes to align to 32 bits
@@ -1557,6 +1574,11 @@ EXT_DECL TRDP_ERR_T tlp_request (
                             pReqElement->pktFlags           =
                                 (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
                             pReqElement->magic = TRDP_MAGIC_PUB_HNDL_VALUE;
+                            /*  Find a possible redundant entry in one of the other sessions and sync
+                                the sequence counter! curSeqCnt holds the last sent sequence counter,
+                                therefore set the value initially to -1, it will be incremented when sending... */
+                            pReqElement->curSeqCnt = trdp_getSeqCnt(pReqElement->addr.comId,
+                                                                    TRDP_MSG_PR, pReqElement->addr.srcIpAddr) - 1;
                             /*    Enter this request into the send queue.    */
                             trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
                         }
@@ -1566,11 +1588,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
             if (ret == TRDP_NO_ERR && pReqElement != NULL)
             {
-                /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
-                 curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,
-                 it will be incremented when sending...                                                          */
-                pReqElement->curSeqCnt = trdp_getSeqCnt(pReqElement->addr.comId,
-                                                        TRDP_MSG_PR, pReqElement->addr.srcIpAddr) - 1;
+                
 
                 /*    Compute the header fields */
                 trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, replyComId, replyIpAddr);
@@ -1591,7 +1609,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
         }
     }
 
@@ -1832,6 +1850,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
         trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0, FALSE);
         pElement->magic = 0;
         vos_memFree(pElement->pFrame);
+        vos_memFree(pElement->pSeqCntList);
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)

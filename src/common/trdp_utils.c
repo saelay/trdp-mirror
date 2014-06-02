@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
  */
 
 /***********************************************************************************************************************
@@ -984,7 +985,7 @@ UINT32  trdp_getSeqCnt (
     TRDP_SESSION_PT pSession        = (TRDP_SESSION_PT)trdp_sessionQueue();
     PD_ELE_T        *pSendElement   = NULL;
 
-    if (0 == comId || 0 == srcIpAddr)
+    if (0 == comId)
     {
         return 0;
     }
@@ -992,8 +993,7 @@ UINT32  trdp_getSeqCnt (
     /*    For process data look at the PD send queue only    */
     if (TRDP_MSG_PD == msgType ||
         TRDP_MSG_PP == msgType ||
-        TRDP_MSG_PR == msgType ||
-        TRDP_MSG_PE == msgType)
+        TRDP_MSG_PR == msgType)
     {
         /*    Loop thru all sessions    */
         while (pSession)
@@ -1002,7 +1002,7 @@ UINT32  trdp_getSeqCnt (
             while (pSendElement)
             {
                 if (pSendElement->addr.comId == comId &&
-                    pSendElement->addr.srcIpAddr != srcIpAddr)
+                    (srcIpAddr == 0 || pSendElement->addr.srcIpAddr != srcIpAddr))
                 {
                     return pSendElement->curSeqCnt;
                 }
@@ -1021,6 +1021,102 @@ UINT32  trdp_getSeqCnt (
 }
 
 
+/**********************************************************************************************************************/
+/** check and update the sequence counter for the comID/source IP.
+ *  If the comID/srcIP is not found, update it and return 0 -
+ *  else if already received, return 1
+ *  On memory error, return -1
+ *
+ *  @param[in]      pElement            subscription element
+ *  @param[in]      sequenceCounter     sequence counter to check
+ *  @param[in]      srcIP               Source IP address
+ *
+ *  @retval         0 - no duplicate
+ *                  1 - duplicate sequence counter
+ *                 -1 - memory error
+ */
+
+int trdp_checkSequenceCounter(
+    PD_ELE_T*       pElement,
+    UINT32          sequenceCounter,
+    TRDP_IP_ADDR_T  srcIP,
+    TRDP_MSG_T      msgType)
+{
+    int index;
+
+    if (pElement == NULL)
+    {
+        vos_printLog(VOS_LOG_DBG, "Parameter error\n");
+        return -1;
+    }
+
+    if (pElement->pSeqCntList == NULL)
+    {
+        /* Allocate some space */
+        pElement->pSeqCntList = (TRDP_SEQ_CNT_LIST_T*) vos_memAlloc(TRDP_SEQ_CNT_START_ARRAY_SIZE *
+                                                                    sizeof(TRDP_SEQ_CNT_ENTRY_T) +
+                                                                    sizeof(TRDP_SEQ_CNT_LIST_T));
+        if (pElement->pSeqCntList == NULL)
+        {
+            return -1;
+        }
+        pElement->pSeqCntList->maxNoOfEntries = TRDP_SEQ_CNT_START_ARRAY_SIZE;
+        pElement->pSeqCntList->curNoOfEntries = 0;
+    }
+    /* Loop over entries */
+    for (index = 0; index < pElement->pSeqCntList->curNoOfEntries; ++index)
+    {
+        if (srcIP == pElement->pSeqCntList->seq[index].srcIpAddr &&
+            msgType == pElement->pSeqCntList->seq[index].msgType)
+        {
+            /*        Is this packet a duplicate?    */
+            if (sequenceCounter >= pElement->pSeqCntList->seq[index].lastSeqCnt + 1)
+            {
+                vos_printLog(VOS_LOG_INFO, "Rcv sequence: %u    last seq: %u\n", sequenceCounter, pElement->pSeqCntList->seq[index].lastSeqCnt);
+                vos_printLog(VOS_LOG_INFO, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
+                pElement->pSeqCntList->seq[index].lastSeqCnt = sequenceCounter;
+                return 0;
+            }
+            else
+            {
+                vos_printLog(VOS_LOG_INFO, "Rcv sequence: %u    last seq: %u\n", sequenceCounter, pElement->pSeqCntList->seq[index].lastSeqCnt);
+                vos_printLog(VOS_LOG_INFO, "-> old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
+                return 1;
+            }
+        }
+    }
+
+    /* Not found in list, add new entry */
+    if (pElement->pSeqCntList->curNoOfEntries >= pElement->pSeqCntList->maxNoOfEntries)
+    {
+        /* Allocate some more space */
+        UINT32  newSize = 2 * pElement->pSeqCntList->curNoOfEntries;
+        TRDP_SEQ_CNT_LIST_T * newList = (TRDP_SEQ_CNT_LIST_T*) vos_memAlloc(newSize * sizeof(TRDP_SEQ_CNT_ENTRY_T) +
+                                                                                      sizeof(TRDP_SEQ_CNT_LIST_T));
+        if (newList == NULL)
+        {
+            return -1;
+        }
+        
+        /* Copy old data into new, larger area */
+        memcpy(newList, pElement->pSeqCntList, pElement->pSeqCntList->maxNoOfEntries *
+                                                                    sizeof(TRDP_SEQ_CNT_ENTRY_T) +
+                                                                    sizeof(TRDP_SEQ_CNT_LIST_T));
+        vos_memFree(pElement->pSeqCntList);     /* Free old area */
+        pElement->pSeqCntList = newList;
+        pElement->pSeqCntList->maxNoOfEntries = newSize;
+    }
+    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].lastSeqCnt = sequenceCounter;
+    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].srcIpAddr = srcIP;
+    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].msgType = msgType;
+    pElement->pSeqCntList->curNoOfEntries++;
+    vos_printLog(VOS_LOG_INFO, "Rcv sequence: %u\n", sequenceCounter);
+    vos_printLog(VOS_LOG_INFO, "*** new sequence entry (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
+
+    return 0;
+}
+
+#if 0
 /**********************************************************************************************************************/
 /** Check if the sequence counter for the comID/message type and subnet (source IP)
  *  has already been received.
@@ -1089,7 +1185,7 @@ BOOL8  trdp_isRcvSeqCnt (
 #endif
     return FALSE;   /* Not found, initial value is zero */
 }
-
+#endif
 
 /**********************************************************************************************************************/
 /** Check if listener URI is in addressing range of destination URI.
