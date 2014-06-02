@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
+ *                     Ticket #42: memcmp only if callback enabled
  *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
  *      BL 2014-02-27: Ticket #23: tlc_getInterval() always returning 10ms
  *      BL 2014-01-09: Ticket #14: Wrong error return in trdp_pdDistribute()
@@ -344,9 +346,8 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_SESSION_PT appHandle,
     INT32           sock)
 {
-    static PD_PACKET_T  *pNewFrame = NULL;      /*  This points to our buffer in hand   */
-    PD_PACKET_T         *pTemp;
-    PD_ELE_T            *pExistingElement = NULL;
+    static PD_PACKET_T  *pNewFrame          = NULL; /*  This points to our buffer in hand   */
+    PD_ELE_T            *pExistingElement   = NULL;
     PD_ELE_T            *pPulledElement;
     TRDP_ERR_T          err         = TRDP_NO_ERR;
     TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
@@ -475,44 +476,40 @@ TRDP_ERR_T  trdp_pdReceive (
     if (pExistingElement == NULL)
     {
         /*
-        vos_printLog(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
+        vos_printLog(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr),
+                        vos_ntohl(pNewFrame->frameHead.comId));
         */
     }
     else
     {
-        /*        Is this packet a duplicate?    */
-        if (vos_ntohl(pNewFrame->frameHead.sequenceCounter) <
-            vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter))
+        /* find sender in our list */
+        switch (trdp_checkSequenceCounter(pExistingElement,
+                                          vos_ntohl(pNewFrame->frameHead.sequenceCounter),
+                                          subAddresses.srcIpAddr,
+                                          vos_ntohs(pNewFrame->frameHead.msgType)))
         {
-            /* Check for overrun situation  */
-            if (vos_ntohl(pNewFrame->frameHead.sequenceCounter) -
-                vos_ntohl(pExistingElement->pFrame->frameHead.sequenceCounter) <
-                vos_ntohl(pNewFrame->frameHead.sequenceCounter))
-            {
+            case 0:                     /* Sequence counter is valid (at least 1 higher than previous one) */
+                break;
+            case -1:                    /* List overflow */
+                return TRDP_MEM_ERR;
+            case 1:
                 vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
                                  subAddresses.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
-                return TRDP_NO_ERR;
-            }
+                return TRDP_NO_ERR;     /* Ignore packet, too old or duplicate */
         }
 
-        /*
-        vos_printLog(VOS_LOG_INFO, "Received (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr) ,vos_ntohl(pNewFrame->frameHead.comId));
-        */
+        /* Store last received sequence counter here, too (pd_get et. al. may access it).   */
+        pExistingElement->curSeqCnt = vos_ntohl(pNewFrame->frameHead.sequenceCounter);
 
         /*  This might have not been set!   */
         pExistingElement->dataSize  = vos_ntohl(pNewFrame->frameHead.datasetLength);
         pExistingElement->grossSize = trdp_packetSizePD(pExistingElement->dataSize);
 
         /*  Has the data changed?   */
-        informUser = memcmp(pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
-
-        /*  Remember this sequence count value    */
-        if (pExistingElement->curSeqCnt != vos_ntohl(pNewFrame->frameHead.sequenceCounter))
+        if (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
         {
-            informUser += 2;    /* informUser can be -1, 0 or 1!   */
-            pExistingElement->curSeqCnt = vos_ntohl(pNewFrame->frameHead.sequenceCounter);
+            informUser = memcmp(pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
         }
-
 
         /*  Get the current time and compute the next time this packet should be received.  */
         vos_getTime(&pExistingElement->timeToGo);
@@ -523,14 +520,13 @@ TRDP_ERR_T  trdp_pdReceive (
         pExistingElement->lastErr   = TRDP_NO_ERR;
         pExistingElement->privFlags = (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~TRDP_TIMED_OUT);
 
-        /* set the data valid */
+        /* mark the data as valid */
         pExistingElement->privFlags = (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~TRDP_INVALID_DATA);
 
-        if (informUser)
+        /*  remove the old one, insert the new one  */
+        /*  -> always swap the frame pointers              */
         {
-            /*  remove the old one, insert the new one  */
-            /*  swap the packet pointers                */
-            pTemp = pExistingElement->pFrame;
+            PD_PACKET_T *pTemp = pExistingElement->pFrame;
             pExistingElement->pFrame = pNewFrame;
             pNewFrame = pTemp;
         }
