@@ -786,8 +786,9 @@ TRDP_ERR_T trdp_pdCheck (
         err = TRDP_CRC_ERR;
     }
     /*  Check protocol version  */
-    else if ((vos_ntohs(pPacket->protocolVersion) & 0xFF000000) != (TRDP_PROTO_VER & 0xFF000000) ||
-             vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
+    else if ((vos_ntohs(pPacket->protocolVersion) & TRDP_PROTOCOL_VERSION_CHECK_MASK)
+                        != (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK) ||
+                        vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
     {
         vos_printLog(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
                      vos_ntohs(pPacket->protocolVersion),
