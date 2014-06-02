@@ -811,6 +811,11 @@ int main(int argc, char * argv[])
 
         return 1;
     }
+
+    srcip = vos_dottedIP(argv[1]);
+    dstip = vos_dottedIP(argv[2]);
+    mcast = vos_dottedIP(argv[3]);
+
 #else
     /* fix settings for vxworks, as program is right now only callable via tshell */
     srcip = vos_dottedIP("53.191.121.40"/*argv[1]*/);
