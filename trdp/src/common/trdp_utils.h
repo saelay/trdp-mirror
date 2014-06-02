@@ -97,7 +97,6 @@ void        trdp_MDqueueInsFirst (
     MD_ELE_T    *pNew);
 #endif
 
-
 /*********************************************************************************************************************/
 /** Handle the socket pool: Initialize it
  *
@@ -213,25 +212,25 @@ UINT32 trdp_getSeqCnt (
 
 
 /**********************************************************************************************************************/
-/** Check if the sequence counter for the comID/message type and subnet (source IP)
- *  has already been received.
+/** check and update the sequence counter for the comID/source IP.
+ *  If the comID/srcIP is not found, update it and return 0 -
+ *  else if already received, return 1
+ *  On memory error, return -1
  *
- *  Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
- *         but shall be the same for redundant telegrams (subnet/srcIP).
+ *  @param[in]      pElement            subscription element
+ *  @param[in]      sequenceCounter     sequence counter to check
+ *  @param[in]      srcIP               Source IP address
  *
- *  @param[in]      seqCnt          sequence counter received
- *  @param[in]      comId           comID to look for
- *  @param[in]      msgType         PD/MD type
- *  @param[in]      srcIP           Source IP address
- *
- *  @retval         return the sequence number
+ *  @retval         0 - no duplicate
+ *                  1 - duplicate sequence counter
+ *                 -1 - memory error
  */
 
-BOOL8 trdp_isRcvSeqCnt (
-    UINT32          seqCnt,
-    UINT32          comId,
-    TRDP_MSG_T      msgType,
-    TRDP_IP_ADDR_T  srcIP);
+int trdp_checkSequenceCounter(
+    PD_ELE_T*       pElement,
+    UINT32          sequenceCounter,
+    TRDP_IP_ADDR_T  srcIP,
+    TRDP_MSG_T      msgType);
 
 
 /**********************************************************************************************************************/

@@ -16,6 +16,8 @@
  *      
  * $Id$
  *
+ *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
+ *
  */
 
 #ifndef TRDP_PRIVATE_H
@@ -68,6 +70,8 @@
 
 #define TRDP_MAGIC_PUB_HNDL_VALUE           0xCAFEBABE
 #define TRDP_MAGIC_SUB_HNDL_VALUE           0xBABECAFE
+
+#define TRDP_SEQ_CNT_START_ARRAY_SIZE       64                          /**< This should be enough for the start    */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -127,6 +131,20 @@ typedef struct TRDP_HANDLE
     UINT32          topoCount;                          /**< topocount belongs to addressing item        */
 } TRDP_ADDRESSES_T /*, *TRDP_PUB_PT, *TRDP_SUB_PT*/;
 
+/** Tuples of last received sequence counter per comId  */
+typedef struct
+{
+    UINT32          lastSeqCnt;                         /**< Sequence counter value for comId           */
+    TRDP_IP_ADDR_T  srcIpAddr;                          /**< Source IP address                          */
+    TRDP_MSG_T      msgType;                            /**< message type                               */
+} TRDP_SEQ_CNT_ENTRY_T;
+
+typedef struct
+{
+    UINT16                  maxNoOfEntries;             /**< Max. no of entries the seq[] can hold      */
+    UINT16                  curNoOfEntries;             /**< Current no of entries in array             */
+    TRDP_SEQ_CNT_ENTRY_T    seq[1];                     /**< list of used sequence no.                  */
+} TRDP_SEQ_CNT_LIST_T;
 
 /** TCP parameters    */
 typedef struct TRDP_SOCKET_TCP
@@ -188,6 +206,7 @@ typedef struct PD_ELE
     UINT32              redId;                  /**< Redundancy group ID or zero                            */
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter             */
     UINT32              curSeqCnt4Pull;         /**< the last sent sequence counter for PULL                */
+    TRDP_SEQ_CNT_LIST_T*pSeqCntList;            /**< pointer to list of received sequence numbers per comId */
     UINT32              numRxTx;                /**< Counter for received packets (statistics)              */
     UINT32              updPkts;                /**< Counter for updated packets (statistics)               */
     UINT32              getPkts;                /**< Counter for read packets (statistics)                  */
@@ -203,7 +222,7 @@ typedef struct PD_ELE
     UINT32              sendSize;               /**< data size sent out                                     */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
-    const void          *pUserRef;               /**< from subscribe()                                       */
+    const void          *pUserRef;              /**< from subscribe()                                       */
     PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                               */
 } PD_ELE_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
