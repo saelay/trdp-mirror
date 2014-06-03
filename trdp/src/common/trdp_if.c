@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2014-06-03: Do not return error on data-less tlp_request
+ *
  *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
  *                     Removing receive queue on session close added
  *      BL 2014-02-27: Ticket #24: trdp_if.c won't compile without MD_SUPPORT
@@ -1593,8 +1595,11 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 /*    Compute the header fields */
                 trdp_pdInit(pReqElement, TRDP_MSG_PR, topoCount, replyComId, replyIpAddr);
 
-                ret = tlp_put(appHandle, (TRDP_PUB_T) pReqElement, pData, dataSize);
-
+                /*  Copy data only if there! */
+                if (NULL != pData && 0 < dataSize)
+                {
+                    ret = tlp_put(appHandle, (TRDP_PUB_T) pReqElement, pData, dataSize);
+                }
                 /*  This flag triggers sending in tlc_process (one shot)  */
                 pReqElement->privFlags |= TRDP_REQ_2B_SENT;
 
