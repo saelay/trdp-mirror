@@ -696,6 +696,31 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %s)\n", buff);
             }
         }
+        if (pOptions->no_mc_loop > 0)
+        {
+            // Default behavior is ON */
+            sockOptValue = 0;
+            if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &sockOptValue,
+                           sizeof(sockOptValue)) == -1)
+            {
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                STRING_ERR(buff);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %s)\n", buff);
+            }
+        }
+#ifdef SO_NO_CHECK
+        if (pOptions->no_udp_crc > 0)
+        {
+            sockOptValue = 1;
+            if (setsockopt(sock, SOL_SOCKET, SO_NO_CHECK, &sockOptValue,
+                           sizeof(sockOptValue)) == -1)
+            {
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                STRING_ERR(buff);
+                vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_NO_CHECK failed (Err: %s)\n", buff);
+            }
+        }
+#endif
     }
     /*  Include struct in_pktinfo in the message "ancilliary" control data.
         This way we can get the destination IP address for received UDP packets */

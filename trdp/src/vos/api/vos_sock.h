@@ -110,21 +110,23 @@ extern const CHAR8 *cDefaultIface;
 /** Common socket options  */
 typedef struct
 {
-    UINT8   qos;            /**< quality/type of service 0...7                     */
-    UINT8   ttl;            /**< time to live for unicast (default 64)             */
-    UINT8   ttl_multicast;  /**< time to live for multicast                        */
-    BOOL8   reuseAddrPort;  /**< allow reuse of address and port                   */
-    BOOL8   nonBlocking;    /**< use non blocking calls                            */
+    UINT8   qos;            /**< quality/type of service 0...7                      */
+    UINT8   ttl;            /**< time to live for unicast (default 64)              */
+    UINT8   ttl_multicast;  /**< time to live for multicast                         */
+    BOOL8   reuseAddrPort;  /**< allow reuse of address and port                    */
+    BOOL8   nonBlocking;    /**< use non blocking calls                             */
+    BOOL8   no_mc_loop;     /**< no multicast loop back                             */
+    BOOL8   no_udp_crc;     /**< supress udp crc computation                        */
 } VOS_SOCK_OPT_T;
 
 typedef fd_set VOS_FDS_T;
 
 typedef struct
 {
-    CHAR8           name[VOS_MAX_IF_NAME_SIZE]; /**< interface adapter name        */
-    VOS_IP4_ADDR_T  ipAddr;                     /**< IP address                    */
-    VOS_IP4_ADDR_T  netMask;                    /**< subnet mask                   */
-    UINT8           mac[VOS_MAC_SIZE];          /**< interface adapter MAC address */
+    CHAR8           name[VOS_MAX_IF_NAME_SIZE]; /**< interface adapter name         */
+    VOS_IP4_ADDR_T  ipAddr;                     /**< IP address                     */
+    VOS_IP4_ADDR_T  netMask;                    /**< subnet mask                    */
+    UINT8           mac[VOS_MAC_SIZE];          /**< interface adapter MAC address  */
     BOOL8           linkState;                  /**< link down (false) / link up (true) */
 } VOS_IF_REC_T;
 

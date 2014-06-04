@@ -638,12 +638,16 @@ typedef struct
 typedef enum
 {
     TRDP_OPTION_NONE    = 0,
-    TRDP_OPTION_BLOCK   = 0x01,              /**< Default: Use nonblocking I/O calls, polling necessary
-                                                  Set: Read calls will block, use select()                */
-    TRDP_OPTION_TRAFFIC_SHAPING = 0x02,      /**< Use traffic shaping - distribute packet sending
-                                                  Default: OFF                                            */
-    TRDP_OPTION_NO_REUSE_ADDR   = 0x04       /**< Do not allow re-use of address/port (-> no multihoming)
-                                                  Default: Allow                                           */
+    TRDP_OPTION_BLOCK   = 0x01,                 /**< Default: Use nonblocking I/O calls, polling necessary
+                                                  Set: Read calls will block, use select()                  */
+    TRDP_OPTION_TRAFFIC_SHAPING = 0x02,         /**< Use traffic shaping - distribute packet sending
+                                                  Default: OFF                                              */
+    TRDP_OPTION_NO_REUSE_ADDR   = 0x04,         /**< Do not allow re-use of address/port (-> no multihoming)
+                                                  Default: Allow                                            */
+    TRDP_OPTION_NO_MC_LOOP_BACK   = 0x08,       /**< Do not allow loop back of multicast traffic
+                                                  Default: Allow                                            */
+    TRDP_OPTION_NO_UDP_CHK      = 0x10          /**< Suppress UDP CRC generation
+                                                  Default: Compute UDP CRC                                  */
 } TRDP_OPTION_T;
 
 /**********************************************************************************************************************/
