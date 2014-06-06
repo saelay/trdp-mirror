@@ -801,7 +801,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             // Default behavior is ON */
             DWORD optValue = 0;
             if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&optValue,
-                           sizeof(sockOptValue)) == SOCKET_ERROR)
+                           sizeof(optValue)) == SOCKET_ERROR)
             {
                 int err = WSAGetLastError();
                 
@@ -812,8 +812,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         if (pOptions->no_udp_crc > 0)
         {
             DWORD optValue = 0;
-            if (setsockopt(sock, IPPROTO_UDP, UDP_CHECKSUM_COVERAGE, &optValue,
-                           sizeof(sockOptValue)) == -1)
+            if (setsockopt(sock, IPPROTO_UDP, UDP_CHECKSUM_COVERAGE, (const char *)&optValue,
+                           sizeof(optValue)) == -1)
             {
                 int err = WSAGetLastError();
                 
