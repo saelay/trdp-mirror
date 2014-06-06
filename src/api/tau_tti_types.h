@@ -181,25 +181,36 @@ typedef struct
 {
     TRDP_UUID_T             cstUUID;        /**< UUID of the consist, provided by ETBN (TrainNetworkDirectory)
                                                  Reference to static consist attributes
-                                                 0 if not available (e.g. correction) */
+                                                 0 if not available (e.g. correction)           */
     UINT32                  cstTopoCnt;     /**< consist topology counter provided with the CSTINFO
                                                  0 if no CSTINFO available */
-    UINT8                   trnCstNo;       /**< Sequence number of consist in train (1..63) */
+    UINT8                   trnCstNo;       /**< Sequence number of consist in train (1..63)    */
     UINT8                   cstOrient;      /**< consist orientation
                                                  '01'B = same as train direction
-                                                 '10'B = inverse to train direction */
-    UINT16                  reserved01;     /**< reserved for future use (= 0) */
+                                                 '10'B = inverse to train direction             */
+    ANTIVALENT8             ctcValid;       /**< cstTopoCnt valid flag
+                                                 FALSE = not valid
+                                                 TRUE = valid                                   */
+    UINT8                   reserved01;     /**< reserved for future use (= 0)                  */
 } GNU_PACKED TRDP_CONSIST_T;
 
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
-
+/** CSTINFO Control telegram */
+    
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< Consist Info Control structure version
+                                                 parameter 'mainVersion' shall be set to 1.     */
+    UINT8                   ctrlType;       /**< telegram control type
+                                                 0 = with trnTopoCnt tracking
+                                                 1 = without trnTopoCnt tracking                */
+    UINT8                   cstCnt;         /**< number of consists in train; range: 1..63      */
+    TRDP_CONSIST_T          cstList[TRDP_MAX_CST_CNT];
+    UINT32                  trnTopoCnt;     /**< trnTopoCnt value 
+                                                 ctrlType == 0: actual value
+                                                 ctrlType == 1: set to 0                        */
+} GNU_PACKED TRDP_CSTINFOCTRL_T;
+    
 /** TCN train directory */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
 
 typedef struct
 {
@@ -217,15 +228,8 @@ typedef struct
     UINT32                  trnTopoCnt;     /**< sc-32 computed over record (seed value: etbTopoCnt) */
 } GNU_PACKED TRDP_TRAIN_DIRECTORY_T;
 
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
 
 /** Operational vehicle structure */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
 
 typedef struct
 {
@@ -246,15 +250,8 @@ typedef struct
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_VEHICLE_T;
 
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
 
 /** Operational consist structure */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
 
 typedef struct
 {
@@ -267,15 +264,8 @@ typedef struct
     UINT16                  reserved01;     /*< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_CONSIST_T;
 
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
 
 /** Operational train directory state */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
 
 typedef struct
 {
@@ -299,15 +289,8 @@ typedef struct
     UINT32                  crc;            /**< sc-32 computed over record (seed value: 'FFFFFFFF'H) */
 } GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_STATE_T;
 
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
 
 /** Operational train structure */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
 
 typedef struct
 {
@@ -333,15 +316,8 @@ typedef struct
                                                  SC-32 computed over record (seed value : trnTopoCnt) */
 } GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_T;
 
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
 
 /** Train network directory entry structure acc. to IEC61375-2-5 */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
 
 typedef struct
 {
@@ -356,15 +332,8 @@ typedef struct
                                                  bit30..13: 0 */    
 } GNU_PACKED TRDP_TRAIN_NET_DIR_ENTRY_T;
 
-#ifdef WIN32
-#pragma pack(pop)
-#endif
-
 
 /** Train network directory structure */
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
 
 typedef struct
 {
@@ -374,6 +343,8 @@ typedef struct
                                             /**< train network directory */
     UINT32                  etbTopoCnt;     /**< train network directory CRC */
 } GNU_PACKED TRDP_TRAIN_NET_DIRECTORY_T;
+
+
 
 #ifdef WIN32
 #pragma pack(pop)
