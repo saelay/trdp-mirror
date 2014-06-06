@@ -96,6 +96,18 @@ EXT_DECL TRDP_ERR_T tau_setEcspCtrl (TRDP_ECSP_CTRL_T  *pEcspCtrl);
 EXT_DECL TRDP_ERR_T tau_getEcspStat (TRDP_ECSP_STAT_T  *pEcspStat);
 
 
+/**********************************************************************************************************************/
+/**    Function to send ECSP correction information
+ *
+ *
+ *  @param[in]      pEcspCtrl       Pointer to the ECSP control structure
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_sendEcspCorrection (TRDP_ECSP_CORR_T  *pEcspCorrection);
+
 
 #ifdef __cplusplus
 }
