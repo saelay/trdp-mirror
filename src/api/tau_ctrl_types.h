@@ -191,13 +191,51 @@ typedef struct
                                                   1 = Leader (default)
                                                   2 = Follower
                                                   3 = Error */
-    UINT8                   trainDirState;  /**<  train directory state
+    UINT8                   trnDirState;    /**<  train directory state
                                                   1 = unconfirmed
                                                   2 = confirmed
                                                   other values are not allowed */
-    UINT16                  reserved03;     /**<  reserved (= 0)  */
-    UINT32                  opTrTopoCnt;    /**<  operational train topology counter */
+    UINT8                   opTrnDirState;  /**<  train directory state
+                                                  1 = invalid
+                                                  2 = valid
+                                                  other values are not allowed */
+    UINT8                   reserved03;     /**<  reserved (= 0)  */
+    UINT32                  opTrnTopoCnt;   /**<  operational train topology counter */
 } GNU_PACKED TRDP_ECSP_STAT_T;
+
+
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
+    UINT16                  reserved01;     /**< reserved (=0)                                                      */
+    UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
+    UINT32                  opTrnTopoCnt;   /**< operational train topocounter value of the operational 
+                                                 train directory the correction is based on                         */
+    UINT16                  reserved02;     /**<  reserved (=0)                                                     */
+    UINT16                  confVehCnt;     /**<  number of confirmed vehicles in the train (1..63).                */
+    TRDP_OP_VEHICLE_T       confVehList[TRDP_MAX_VEH_CNT];  
+                                            /**< ordered list of confirmed vehicles in the train,
+                                                 starting with vehicle at train head, see chapter 5.3.3.2.10.
+                                                 Parameters ‘isLead’ and ‘leadDir’ to be set to 0                   */
+    UINT32                  safetyCode;     /**< SC-32, computed over record up to (but not including) the 
+                                                 SafetyCode. seed value: SID Set to 0 if SDTv2 is not used          */
+}  GNU_PACKED TRDP_ECSP_CORR_T;
+
+
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
+    UINT8                   status;         /**< status of storing correction info
+                                                 0 = correctly stored
+                                                 1 = not stored                                                     */ 
+    UINT16                  reserved01;     /**< reserved (=0)                                                      */
+    UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
+    UINT16                  confVehCnt;     /**<  number of confirmed vehicles in the train (1..63).                */
+    UINT8                   reqSafetyCode;  /**< SC-32 value of the request message                                 */
+    UINT32                  safetyCode;     /**< SC-32, computed over record up to (but not including) the 
+                                                 SafetyCode. seed value: SID Set to 0 if SDTv2 is not used          */
+}  GNU_PACKED TRDP_ECSP_CORR_REPLY_T;
+
 
 #ifdef WIN32
 #pragma pack(pop)

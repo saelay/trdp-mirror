@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 #define TRDP_MAX_CST_CNT 63                 /**< max number of consists per train */
-
+#define TRDP_MAX_VEH_CNT 63                 /**< max number of vehicles per train */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -247,7 +247,8 @@ typedef struct
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
     UINT8                   ownOpCstNo;     /**< operational consist number the vehicle belongs to */
-    UINT16                  reserved01;     /**< reserved for future use (= 0) */
+    UINT8                   reserved01;     /**< reserved for future use (= 0) */
+    UINT8                   reserved02;     /**< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_VEHICLE_T;
 
 
