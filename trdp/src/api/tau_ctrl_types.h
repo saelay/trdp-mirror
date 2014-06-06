@@ -74,9 +74,9 @@ typedef struct
     TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
     UINT16                  reserved01;     /**< reserved (=0) */
     UINT8                   trnCstNo;       /**< own TCN consist number (= 1..32) */
-    UINT8                   trnClTrNo;      /**< own TCN closed train sequence number (= 1..32) */
+    UINT8                   reserved02;      /**< own TCN closed train sequence number (= 1..32) */
     UINT8                   ownOpCstNo;     /**< own operational address (= 1..32) = 0 if unknown (e.g. after Inauguration) */
-    UINT8                   reserved02;     /**< reserved (=0) */
+    UINT8                   reserved03;     /**< reserved (=0) */
     UINT32                  cstTopoCount;   /**< Consist topology counter */
     UINT32                  trnTopoCount;   /**< Train directory topology counter */
     UINT32                  opTopoCount;    /**< Operational Train directory topology counter */
@@ -105,10 +105,35 @@ typedef struct
     UINT8                   leadVehOfCst;   /**< position of leading vehicle in consist, 
                                                  0..31 (0: first vehicle in consist in Direction 1, 1: second vehicle, etc.) */
     UINT8                   reqCstInfo;     /**< rCi: request CSTINFO telegram exchange */
-    UINT16                  reserved03;     /**< reserved (=0) */
+    UINT16                  reserved04;     /**< reserved (=0) */
     UINT16                  confVehCnt;     /**< number of confirmed vehicles in train (1..32) */
     TRDP_CONF_VEHICLE_T     confVehList[32];   /**< dynamic ordered list of confirmed vehicles in train,
                                                  starting with vehicle at train head, see sub-clause 5.3.3.2.6 */
+}  GNU_PACKED TRDP_ETB_CTRL_T;
+
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
+    UINT16                  reserved01;     /**< reserved (=0)                                                      */
+    UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
+    UINT8                   inhibit;        /**< inauguration inhibit
+                                                    0 = no inhibit request
+                                                    1 = inhibit request                                             */
+    UINT8                   leadingReq;     /**<  eading request
+                                                    0 = no leading request
+                                                    1 = leading request                                             */
+    UINT8                   leadingDir;     /**<  leading direction
+                                                    0 = no leading request
+                                                    1 = leading request direction 1
+                                                    2 = leading request direction 2                                 */
+    UINT8                   confReq;        /**< confirmation (&correction) request
+                                                    0 = no confirmation request
+                                                    1 = confirmation request                                        */
+    UINT8                   sleepReq;       /**< sleep request
+                                                    0 = no sleep request
+                                                    1 = sleep request                                               */
+    UINT8                   reserved02;     /**< reserved (= 0)                                                     */
+    UINT16                  reserved03;     /**< reserved (= 0)                                                     */
 }  GNU_PACKED TRDP_ECSP_CTRL_T;
 
 
