@@ -221,10 +221,11 @@ typedef struct
                                                  bit1: ETB1 (multimedia network)
                                                  bit2: ETB2 (other network)
                                                  bit3: ETB3 (other network) */
-    UINT8                   reserved01;     /**< reserved for future use (= 0) */
-    UINT16                  cstCnt;         /**< number of consists in train; range: 1..63 */
+    UINT8                   cstCnt;         /**< number of consists in train; range: 1..63 */
     TRDP_CONSIST_T          cstList[TRDP_MAX_CST_CNT];
-                                            /**< consist list ordered list starting with trnCstNo = 1 */
+                                            /**< consist list ordered list starting with trnCstNo = 1 
+                                                Note: This is a variable size array, only opCstCnt array elements
+                                                are present on the network and for crc computation   */
     UINT32                  trnTopoCnt;     /**< sc-32 computed over record (seed value: etbTopoCnt) */
 } GNU_PACKED TRDP_TRAIN_DIRECTORY_T;
 
@@ -262,7 +263,8 @@ typedef struct
     UINT8                   opCstOrient;    /**< consist orientation
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
-    UINT16                  reserved01;     /*< reserved for future use (= 0) */
+    UINT8                  reserved01;     /*< reserved for future use (= 0) */
+    UINT8                  reserved02;     /*< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_CONSIST_T;
 
 
@@ -272,7 +274,8 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectoryState data structure version  
                                                   parameter 'mainVersion' shall be set to 1. */
-    UINT16                  reserved01;     /**< reserved for future use (= 0) */
+    UINT8                   reserved01;     /**< reserved for future use (= 0) */
+    UINT8                   reserved02;     /**< reserved for future use (= 0) */
     BITSET8                 etbId;          /**< identification of the ETB the TTDB is computed for
                                                  bit0: ETB0 (operational network)
                                                  bit1: ETB1 (multimedia network)
@@ -281,7 +284,7 @@ typedef struct
     UINT8                   trnDirState;    /**< TTDB status: '01'B == unconfirmed, '10'B == confirmed */
     UINT8                   opTrnDirState;  /**< Operatiobal train directory status:
                                                  '01'B == inalid, '10'B == valid */
-    UINT8                   reserved02;     /**< reserved for future use (= 0) */
+    UINT8                   reserved03;     /**< reserved for future use (= 0) */
     TRDP_LABEL_T            trnId;          /**< train identifier, application defined
                                                  (e.g. ICE75, IC346), informal */
     TRDP_LABEL_T            trnOperator;    /**< train operator, e.g. trenitalia.it, informal */
@@ -305,14 +308,22 @@ typedef struct
                                                  '00'B = unknown
                                                  '01'B = same as train direction
                                                  '10'B = inverse to train direction */
-    UINT16                  reserved01;     /**< reserved for future use (= 0) */
-    UINT16                  opCstCnt;       /**< number of consists in train (1..63) */
+    UINT8                   reserved01;     /**< reserved for future use (= 0) */
+    UINT8                   reserved02;     /**< reserved for future use (= 0) */
+    UINT8                   reserved03;     /**< reserved for future use (= 0) */
+    UINT8                   opCstCnt;       /**< number of consists in train (1..63) */
     TRDP_OP_CONSIST_T       opCstList[TRDP_MAX_CST_CNT];
-                                            /**< operational consist list starting with op. consist #1 */
-    UINT16                  reserved02;     /**< reserved for future use (= 0) */
-    UINT16                  opVehCnt[TRDP_MAX_CST_CNT];
+                                            /**< operational consist list starting with op. consist #1
+                                                 Note: This is a variable size array, only opCstCnt array elements
+                                                 are present */
+    UINT8                   reserved04;     /**< reserved for future use (= 0) */
+    UINT8                   reserved05;     /**< reserved for future use (= 0) */
+    UINT8                   reserved06;     /**< reserved for future use (= 0) */
+    UINT8                   opVehCnt;
                                             /**< number of vehicles in train (1..63) */
-    TRDP_OP_VEHICLE_T       opVehList;      /**< operational vehicle list starting with op. vehicle #1 */
+    TRDP_OP_VEHICLE_T       opVehList[TRDP_MAX_CST_CNT];    /**< operational vehicle list starting with op. vehicle #1
+                                                             Note: This is a variable size array, only opCstCnt array elements
+                                                             are present        */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
                                                  SC-32 computed over record (seed value : trnTopoCnt) */
 } GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_T;
