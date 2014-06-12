@@ -74,7 +74,7 @@ typedef struct
     TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
     UINT16                  reserved01;     /**< reserved (=0) */
     UINT8                   trnCstNo;       /**< own TCN consist number (= 1..32) */
-    UINT8                   reserved02;      /**< own TCN closed train sequence number (= 1..32) */
+    UINT8                   reserved02;     /**< reserved (=0) */
     UINT8                   ownOpCstNo;     /**< own operational address (= 1..32) = 0 if unknown (e.g. after Inauguration) */
     UINT8                   reserved03;     /**< reserved (=0) */
     UINT32                  cstTopoCount;   /**< Consist topology counter */
@@ -104,10 +104,11 @@ typedef struct
                                                  '01'B = false, '10'B = true */
     UINT8                   leadVehOfCst;   /**< position of leading vehicle in consist, 
                                                  0..31 (0: first vehicle in consist in Direction 1, 1: second vehicle, etc.) */
-    UINT8                   reqCstInfo;     /**< rCi: request CSTINFO telegram exchange */
-    UINT16                  reserved04;     /**< reserved (=0) */
-    UINT16                  confVehCnt;     /**< number of confirmed vehicles in train (1..32) */
-    TRDP_CONF_VEHICLE_T     confVehList[32];   /**< dynamic ordered list of confirmed vehicles in train,
+    UINT8                   reserved04;     /**< reserved (=0) */
+    UINT16                  reserved05;     /**< reserved (=0) */
+    UINT8                   reserved06;     /**< reserved (=0) */
+    UINT8                   confVehCnt;     /**< number of confirmed vehicles in train (1..63) */
+    TRDP_CONF_VEHICLE_T     confVehList[63];/**< dynamic ordered list of confirmed vehicles in train,
                                                  starting with vehicle at train head, see sub-clause 5.3.3.2.6 */
 }  GNU_PACKED TRDP_ETB_CTRL_T;
 
