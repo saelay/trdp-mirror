@@ -1388,7 +1388,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
         {
             /*  We do not break here, only report error */
             result = err;
-            vos_printLog(VOS_LOG_ERROR, "trdp_pdSendQueued failed (Err: %d)\n", err);
+            /* vos_printLog(VOS_LOG_ERROR, "trdp_pdSendQueued failed (Err: %d)\n", err);*/
         }
 
         /******************************************************
