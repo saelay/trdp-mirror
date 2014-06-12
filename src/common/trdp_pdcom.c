@@ -581,7 +581,7 @@ void trdp_pdCheckPending (
     /*    Find the packet which has to be received next:    */
     for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        if ((!iterPD->privFlags & TRDP_TIMED_OUT) &&                /* Exempt already timed-out packet */
+        if ((!(iterPD->privFlags & TRDP_TIMED_OUT)) &&              /* Exempt already timed-out packet */
             timerisset(&iterPD->interval) &&                        /* not PD PULL?                    */
             (timercmp(&iterPD->timeToGo, &appHandle->nextJob, <) || /* earlier than current time-out?  */
              !timerisset(&appHandle->nextJob)))                     /* or not set at all?              */
