@@ -17,4 +17,3 @@ TCPREFIX =
 TCPOSTFIX = 
 
 CFLAGS += -Wall -fstrength-reduce -fno-builtin -fsigned-char -pthread -fPIC -D__USE_BSD -D_DARWIN_C_SOURCE -DPOSIX
-LDFLAGS += -lrt
