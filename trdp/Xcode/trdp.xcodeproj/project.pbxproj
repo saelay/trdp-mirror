@@ -77,7 +77,6 @@
 		73517C5616BBFFAB00DB5208 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		735BACDE172E67CD00837D0E /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		735BAD16172EC38900837D0E /* trdp_proto.h in Headers */ = {isa = PBXBuildFile; fileRef = 735BAD15172EC38900837D0E /* trdp_proto.h */; };
-		735BAD17172EC38900837D0E /* trdp_proto.h in Headers */ = {isa = PBXBuildFile; fileRef = 735BAD15172EC38900837D0E /* trdp_proto.h */; };
 		73603CED175CBE79004608BD /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73603CF6175CBE9A004608BD /* trdp-md-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7367955D17202EBE003C68ED /* trdp-md-test.c */; };
 		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
@@ -94,27 +93,13 @@
 		7384E6BF172952F800830413 /* test_memSizes.c in Sources */ = {isa = PBXBuildFile; fileRef = 7384E6B4172952A000830413 /* test_memSizes.c */; };
 		7384E6F71729886200830413 /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E0536115136CC90058D590 /* vos_utils.c */; };
 		7384E6F81729886300830413 /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 731291FE15341A58006B3A88 /* vos_mem.c */; };
-		7384E6F91729886500830413 /* vos_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 7327CA871656AB080020536A /* vos_private.h */; };
 		7384E6FA1729886600830413 /* vos_sock.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E052721513537C0058D590 /* vos_sock.c */; };
 		7384E6FB1729886700830413 /* vos_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E0535C1513685D0058D590 /* vos_thread.c */; };
 		7384E6FC1729886900830413 /* vos_shared_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 73F5A50C16A408DC00335006 /* vos_shared_mem.c */; };
-		7384E6FD1729887200830413 /* trdp_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F2A150777B00046E0AC /* trdp_types.h */; };
-		7384E6FE1729887300830413 /* trdp_if_light.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F29150777B00046E0AC /* trdp_if_light.h */; };
-		7384E6FF1729887C00830413 /* trdp_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F36150777B00046E0AC /* trdp_private.h */; };
-		7384E7001729887D00830413 /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
 		7384E7011729887E00830413 /* trdp_if.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F2F150777B00046E0AC /* trdp_if.c */; };
-		7384E7021729888000830413 /* trdp_pdcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F35150777B00046E0AC /* trdp_pdcom.h */; };
 		7384E7031729888100830413 /* trdp_pdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F34150777B00046E0AC /* trdp_pdcom.c */; };
-		7384E7041729888200830413 /* trdp_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F3A150777B00046E0AC /* trdp_utils.h */; };
 		7384E7051729888400830413 /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
-		7384E7061729888500830413 /* trdp_stats.h in Headers */ = {isa = PBXBuildFile; fileRef = 7387F505157795FE00DBAB73 /* trdp_stats.h */; };
 		7384E7071729888600830413 /* trdp_stats.c in Sources */ = {isa = PBXBuildFile; fileRef = 7387F506157795FE00DBAB73 /* trdp_stats.c */; };
-		7384E708172988A200830413 /* vos_shared_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F5A53A16A41A2000335006 /* vos_shared_mem.h */; };
-		7384E709172988A300830413 /* vos_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E0535F15136BF60058D590 /* vos_utils.h */; };
-		7384E70A172988A500830413 /* vos_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05264151352CE0058D590 /* vos_mem.h */; };
-		7384E70B172988A600830413 /* vos_sock.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05265151352CE0058D590 /* vos_sock.h */; };
-		7384E70C172988A700830413 /* vos_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05266151352CE0058D590 /* vos_thread.h */; };
-		7384E70D172988A800830413 /* vos_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05267151352CE0058D590 /* vos_types.h */; };
 		7387F3631575072600DBAB73 /* echoPolling.c in Sources */ = {isa = PBXBuildFile; fileRef = 738220021508E3710046E0AC /* echoPolling.c */; };
 		7387F507157795FE00DBAB73 /* trdp_stats.h in Headers */ = {isa = PBXBuildFile; fileRef = 7387F505157795FE00DBAB73 /* trdp_stats.h */; };
 		7387F508157795FE00DBAB73 /* trdp_stats.c in Sources */ = {isa = PBXBuildFile; fileRef = 7387F506157795FE00DBAB73 /* trdp_stats.c */; };
@@ -131,6 +116,8 @@
 		73C20290174BC9CF003C5A0E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73C2028F174BC9CF003C5A0E /* main.cpp */; };
 		73C20292174BC9CF003C5A0E /* LocalLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73C20291174BC9CF003C5A0E /* LocalLibrary.cpp */; };
 		73C20295174BC9CF003C5A0E /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 73C20294174BC9CF003C5A0E /* Makefile */; };
+		73D71BB31917D5CF003F9A87 /* tau_ctrl.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB11917D5CF003F9A87 /* tau_ctrl.c */; };
+		73D71BB41917D5CF003F9A87 /* tau_dnr.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB21917D5CF003F9A87 /* tau_dnr.c */; };
 		73E0526C151352CF0058D590 /* vos_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05264151352CE0058D590 /* vos_mem.h */; };
 		73E0526D151352CF0058D590 /* vos_sock.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05265151352CE0058D590 /* vos_sock.h */; };
 		73E0526E151352CF0058D590 /* vos_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05266151352CE0058D590 /* vos_thread.h */; };
@@ -723,6 +710,7 @@
 		73890E1C17455036004C0F75 /* posix.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; path = posix.zip; sourceTree = "<group>"; };
 		73890F401746744B004C0F75 /* Lint_win.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Lint_win.bat; sourceTree = "<group>"; };
 		73890F421746748D004C0F75 /* _LINT_WIN.TMP */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _LINT_WIN.TMP; sourceTree = "<group>"; };
+		7396F2281949A4080038FE82 /* OSX_X86_config */ = {isa = PBXFileReference; lastKnownFileType = text; path = OSX_X86_config; sourceTree = "<group>"; };
 		739F99F7179FBF96006238E7 /* LibraryTests.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LibraryTests.c; path = ../test/diverse/LibraryTests.c; sourceTree = SOURCE_ROOT; };
 		73A00E5C1913CCA20020A6EA /* tau_ctrl_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_ctrl_types.h; sourceTree = "<group>"; };
 		73A00E5E1913CCAF0020A6EA /* tau_tti_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_tti_types.h; sourceTree = "<group>"; };
@@ -811,6 +799,8 @@
 		73CE24F317340E2B00314E1C /* POSIX_X86_config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = POSIX_X86_config; sourceTree = "<group>"; };
 		73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = VXWORKS_PPC_config; sourceTree = "<group>"; };
 		73D6657A15D3D88700A352D4 /* tau_marshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_marshall.c; sourceTree = "<group>"; };
+		73D71BB11917D5CF003F9A87 /* tau_ctrl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_ctrl.c; sourceTree = "<group>"; };
+		73D71BB21917D5CF003F9A87 /* tau_dnr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_dnr.c; sourceTree = "<group>"; };
 		73DF2C6C1781C64D00D086EB /* Time.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Time.cpp; sourceTree = "<group>"; };
 		73DF2C6D1781C64D00D086EB /* Time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Time.h; sourceTree = "<group>"; };
 		73DF2C6E1781CD1600D086EB /* TimerOne.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimerOne.cpp; sourceTree = "<group>"; };
@@ -2336,6 +2326,8 @@
 				737B1A9515DB930F00724FEF /* trdp_marshall_fast.c */,
 				7366AC3E16B673B80068A893 /* tau_xml.c */,
 				73D6657A15D3D88700A352D4 /* tau_marshall.c */,
+				73D71BB11917D5CF003F9A87 /* tau_ctrl.c */,
+				73D71BB21917D5CF003F9A87 /* tau_dnr.c */,
 				73890B581743D9B0004C0F75 /* trdp_dllmain.c */,
 			);
 			path = common;
@@ -2599,6 +2591,7 @@
 				7321F85E177B2753008D1DB7 /* AVR_ATMega1680_config */,
 				73CE24F017340E2B00314E1C /* buildsettings_posix_TEMPLATE */,
 				73CE24F117340E2B00314E1C /* buildsettings_vxworks_TEMPLATE */,
+				7396F2281949A4080038FE82 /* OSX_X86_config */,
 				73CE24F317340E2B00314E1C /* POSIX_X86_config */,
 				73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */,
 			);
@@ -3766,21 +3759,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7384E6F91729886500830413 /* vos_private.h in Headers */,
-				7384E6FD1729887200830413 /* trdp_types.h in Headers */,
-				7384E6FE1729887300830413 /* trdp_if_light.h in Headers */,
-				7384E6FF1729887C00830413 /* trdp_private.h in Headers */,
-				7384E7001729887D00830413 /* trdp_if.h in Headers */,
-				7384E7021729888000830413 /* trdp_pdcom.h in Headers */,
-				7384E7041729888200830413 /* trdp_utils.h in Headers */,
-				7384E7061729888500830413 /* trdp_stats.h in Headers */,
-				7384E708172988A200830413 /* vos_shared_mem.h in Headers */,
-				7384E709172988A300830413 /* vos_utils.h in Headers */,
-				7384E70A172988A500830413 /* vos_mem.h in Headers */,
-				7384E70B172988A600830413 /* vos_sock.h in Headers */,
-				7384E70C172988A700830413 /* vos_thread.h in Headers */,
-				7384E70D172988A800830413 /* vos_types.h in Headers */,
-				735BAD17172EC38900837D0E /* trdp_proto.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3788,6 +3766,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				733613A7165A58F200A70D3D /* vos_private.h in Headers */,
 				73821FB51508DC780046E0AC /* trdp_types.h in Headers */,
 				73821FB61508DC790046E0AC /* trdp_if_light.h in Headers */,
 				73E0526C151352CF0058D590 /* vos_mem.h in Headers */,
@@ -3804,7 +3783,6 @@
 				08CE20721649613C0038151B /* trdp_pdcom.h in Headers */,
 				08CE2082164962BB0038151B /* trdp_mdcom.h in Headers */,
 				7327CA6016555BEA0020536A /* tau_marshall.h in Headers */,
-				733613A7165A58F200A70D3D /* vos_private.h in Headers */,
 				73F5A53B16A41A2000335006 /* vos_shared_mem.h in Headers */,
 				73A00E621913CCC50020A6EA /* tau_ctrl.h in Headers */,
 				735BAD16172EC38900837D0E /* trdp_proto.h in Headers */,
@@ -4396,7 +4374,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "trdp" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -4681,12 +4659,14 @@
 				73E0535D1513685D0058D590 /* vos_thread.c in Sources */,
 				73E0536215136CC90058D590 /* vos_utils.c in Sources */,
 				73F458B9152F331E00D1C522 /* trdp_if.c in Sources */,
+				73D71BB31917D5CF003F9A87 /* tau_ctrl.c in Sources */,
 				73F458BC152F332400D1C522 /* trdp_pdcom.c in Sources */,
 				73B68FBF15443B79004968FA /* vos_mem.c in Sources */,
 				73B6907A15446B8D004968FA /* trdp_utils.c in Sources */,
 				7387F508157795FE00DBAB73 /* trdp_stats.c in Sources */,
 				08CE2085164962BE0038151B /* trdp_mdcom.c in Sources */,
 				73F5A50D16A408DC00335006 /* vos_shared_mem.c in Sources */,
+				73D71BB41917D5CF003F9A87 /* tau_dnr.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4924,7 +4904,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -4951,6 +4931,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -4985,6 +4966,7 @@
 					"-DPOSIX",
 				);
 				PRODUCT_NAME = trdp;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
 		};
@@ -5000,13 +4982,14 @@
 					"-DPOSIX",
 				);
 				PRODUCT_NAME = trdp;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Release;
 		};
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -5014,17 +4997,19 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SYMROOT = ../bld/darwin;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
@@ -5609,7 +5594,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -5635,7 +5619,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -6056,7 +6039,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
