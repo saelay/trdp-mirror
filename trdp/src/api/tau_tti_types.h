@@ -199,10 +199,10 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< Consist Info Control structure version
                                                  parameter 'mainVersion' shall be set to 1.     */
-<<<<<<< .mine    UINT8                   trnCstNo;       /**< train consist number
-=======    UINT8                   trnCstNo;       /**< telegram control type
->>>>>>> .theirs                                                 0 = with trnTopoCnt tracking
-                                                 1 = without trnTopoCnt tracking                */
+    UINT8                   trnCstNo;       /**< train consist number
+                                                    telegram control type
+                                                    0 = with trnTopoCnt tracking
+                                                    1 = without trnTopoCnt tracking             */
     UINT8                   cstCnt;         /**< number of consists in train; range: 1..63      */
     TRDP_CONSIST_T          cstList[TRDP_MAX_CST_CNT];
                                             /**< consist list.
