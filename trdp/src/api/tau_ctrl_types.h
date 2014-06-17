@@ -48,7 +48,6 @@ extern "C" {
 #endif
 
 /** Types for ETB control */
-
 typedef struct
 {
     UINT8                   trnVehNo;       /**< vehicle sequence number within the train
@@ -71,7 +70,17 @@ typedef struct
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
+    UINT16                  reserved01;     /**< reserved (=0) */
+    UINT32                  reserved02;     /**< reserved (=0) */
+    TRDP_SHORT_VERSION_T    userDataVersion;/**< version of the vital ETBCTRL telegram
+                                                 mainVersion = 1, subVersion = 0 */ 
+    UINT32                  safeSeqCount;   /**< safe sequence counter, as defined in B.9 */
+    UINT32                  safetyCode;     /**< checksum, as defined in B.9 */
+}  GNU_PACKED TRDP_ETB_CTRL_VDP_T;
+
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT16                  reserved01;     /**< reserved (=0) */
     UINT8                   trnCstNo;       /**< own TCN consist number (= 1..32) */
     UINT8                   reserved02;     /**< reserved (=0) */
@@ -79,7 +88,7 @@ typedef struct
     UINT8                   reserved03;     /**< reserved (=0) */
     UINT32                  cstTopoCount;   /**< Consist topology counter */
     UINT32                  trnTopoCount;   /**< Train directory topology counter */
-    UINT32                  opTopoCount;    /**< Operational Train directory topology counter */
+    UINT32                  opTrnTopoCount; /**< Operational Train topology counter */
     ANTIVALENT8             wasLead;        /**< consist was leading, 
                                                  '01'B = false, '10'B = true */
     ANTIVALENT8             reqLead;        /**< leading request,
@@ -110,11 +119,12 @@ typedef struct
     UINT8                   confVehCnt;     /**< number of confirmed vehicles in train (1..63) */
     TRDP_CONF_VEHICLE_T     confVehList[63];/**< dynamic ordered list of confirmed vehicles in train,
                                                  starting with vehicle at train head, see sub-clause 5.3.3.2.6 */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == not used */
 }  GNU_PACKED TRDP_ETB_CTRL_T;
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT16                  reserved01;     /**< reserved (=0)                                                      */
     UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
     UINT8                   inhibit;        /**< inauguration inhibit
@@ -135,12 +145,13 @@ typedef struct
                                                     1 = sleep request                                               */
     UINT8                   reserved02;     /**< reserved (= 0)                                                     */
     UINT16                  reserved03;     /**< reserved (= 0)                                                     */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == not used */
 }  GNU_PACKED TRDP_ECSP_CTRL_T;
 
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */
     UINT16                  reserved01;     /**< reserved (=0) */
     UINT16                  lifesign;       /**<  wrap-around counter, incremented with each produced datagram. */
     UINT8                   ecspState;      /**<  ECSP state indication
@@ -202,12 +213,13 @@ typedef struct
                                                   other values are not allowed */
     UINT8                   reserved03;     /**<  reserved (= 0)  */
     UINT32                  opTrnTopoCnt;   /**<  operational train topology counter */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == not used */
 } GNU_PACKED TRDP_ECSP_STAT_T;
 
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT16                  reserved01;     /**< reserved (=0)                                                      */
     UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
     UINT32                  opTrnTopoCnt;   /**< operational train topocounter value of the operational 
@@ -218,23 +230,22 @@ typedef struct
                                             /**< ordered list of confirmed vehicles in the train,
                                                  starting with vehicle at train head, see chapter 5.3.3.2.10.
                                                  Parameters ‘isLead’ and ‘leadDir’ to be set to 0                   */
-    UINT32                  safetyCode;     /**< SC-32, computed over record up to (but not including) the 
-                                                 SafetyCode. seed value: SID Set to 0 if SDTv2 is not used          */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+                                                 completely set to 0 == not used                                    */
 }  GNU_PACKED TRDP_ECSP_CORR_T;
 
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< data structure version, parameter 'mainVersion' shall be set to 1. */ 
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT8                   status;         /**< status of storing correction info
                                                  0 = correctly stored
                                                  1 = not stored                                                     */ 
-    UINT16                  reserved01;     /**< reserved (=0)                                                      */
+    UINT8                   reserved01;     /**< reserved (=0)                                                      */
     UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
-    UINT16                  confVehCnt;     /**<  number of confirmed vehicles in the train (1..63).                */
-    UINT8                   reqSafetyCode;  /**< SC-32 value of the request message                                 */
-    UINT32                  safetyCode;     /**< SC-32, computed over record up to (but not including) the 
-                                                 SafetyCode. seed value: SID Set to 0 if SDTv2 is not used          */
+    UINT32                  reqSafetyCode;  /**< SC-32 value of the request message                                 */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+                                                 completely set to 0 == not used                                    */
 }  GNU_PACKED TRDP_ECSP_CORR_REPLY_T;
 
 

@@ -127,7 +127,8 @@ typedef struct
 /** consist information structure */
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< ConsistInfo data structure version, application defined */
+    TRDP_SHORT_VERSION_T    version;        /**< ConsistInfo data structure version, application defined
+                                                 mainVersion = 1, subVersion = 0                         */
     UINT8                   cstClass;       /**< consist info classification
                                                  0 = (single) consist
                                                  1 = closed train
@@ -157,7 +158,8 @@ typedef struct
                                                  value range: 0..32, 0 = consist is no closed train */
     TRDP_CLTRCST_INFO_T    *pCltrCstInfoList; /**< info on closed train composition
                                                  Ordered list starting with cltrCstNo == 1 */
-    UINT32                 cstTopoCnt;      /**< sc-32 computed over record, seed value: 'FFFFFFFF'H */
+    UINT32                 cstTopoCnt;      /**< consist topology counter computed as defined in 5.3.3.2.16, 
+                                                 seed value: 'FFFFFFFF'H */
 } TRDP_CONSIST_INFO_T;
 
 
@@ -188,30 +190,35 @@ typedef struct
     UINT8                   cstOrient;      /**< consist orientation
                                                  '01'B = same as train direction
                                                  '10'B = inverse to train direction             */
-    ANTIVALENT8             ctcValid;       /**< cstTopoCnt valid flag
-                                                 FALSE = not valid
-                                                 TRUE = valid                                   */
-    UINT8                   reserved01;     /**< reserved for future use (= 0)                  */
+    UINT16                  reserved01;     /**< reserved for future use (= 0)                  */
 } GNU_PACKED TRDP_CONSIST_T;
 
+
 /** CSTINFO Control telegram */
-    
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< Consist Info Control structure version
                                                  parameter 'mainVersion' shall be set to 1.     */
-    UINT8                   trnCstNo;       /**< telegram control type
-                                                 0 = with trnTopoCnt tracking
+<<<<<<< .mine    UINT8                   trnCstNo;       /**< train consist number
+=======    UINT8                   trnCstNo;       /**< telegram control type
+>>>>>>> .theirs                                                 0 = with trnTopoCnt tracking
                                                  1 = without trnTopoCnt tracking                */
     UINT8                   cstCnt;         /**< number of consists in train; range: 1..63      */
     TRDP_CONSIST_T          cstList[TRDP_MAX_CST_CNT];
+                                            /**< consist list.
+                                                 If trnCstNo > 0 this shall be an ordered list starting with
+                                                 trnCstNo == 1 (exactly the same as in structure TRAIN_DIRECTORY).
+                                                 If trnCstNo == 0 it is not mandatory to list all consists 
+                                                 (only consists which should send CSTINFO telegram). 
+                                                 The parameters ‘trnCstNo’ and ‘cstOrient’ are optional 
+                                                 and can be set to 0.                                           */
     UINT32                  trnTopoCnt;     /**< trnTopoCnt value 
                                                  ctrlType == 0: actual value
                                                  ctrlType == 1: set to 0                        */
 } GNU_PACKED TRDP_CSTINFOCTRL_T;
     
-/** TCN train directory */
 
+/** TCN train directory */
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectory data structure version  
@@ -223,10 +230,10 @@ typedef struct
                                                  bit3: ETB3 (other network) */
     UINT8                   cstCnt;         /**< number of consists in train; range: 1..63 */
     TRDP_CONSIST_T          cstList[TRDP_MAX_CST_CNT];
-                                            /**< consist list ordered list starting with trnCstNo = 1 
-                                                Note: This is a variable size array, only opCstCnt array elements
-                                                are present on the network and for crc computation   */
-    UINT32                  trnTopoCnt;     /**< sc-32 computed over record (seed value: etbTopoCnt) */
+                                            /**< consist list ordered list starting with trnCstNo == 1 
+                                                 Note: This is a variable size array, only opCstCnt array elements
+                                                 are present on the network and for crc computation   */
+    UINT32                  trnTopoCnt;     /**< computed as defined in 5.3.3.2.16 (seed value: etbTopoCnt) */
 } GNU_PACKED TRDP_TRAIN_DIRECTORY_T;
 
 
@@ -325,7 +332,7 @@ typedef struct
                                                              Note: This is a variable size array, only opCstCnt array elements
                                                              are present        */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
-                                                 SC-32 computed over record (seed value : trnTopoCnt) */
+                                                 computed as defined in 5.3.3.2.16 (seed value : trnTopoCnt) */
 } GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_T;
 
 
