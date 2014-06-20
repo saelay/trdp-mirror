@@ -7,7 +7,7 @@
 #//
 #// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
 #// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-#// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+#// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013/2014. All rights reserved.
 #//
 
 #// Support for POSIX and VXWORKS, set buildsettings and config first!
@@ -363,7 +363,8 @@ help:
 	@echo "  " >&2
 	@echo "  * LINUX_X86_config             - Native build for Linux PC (uses host gcc regardless of 32/64 bit)" >&2
 	@echo "  * LINUX_PPC_config             - Building for Linux on PowerPC using eglibc compiler (603 core)" >&2
-	@echo "  * OSX_X86_config               - Native (X86) build for OS X" >&2
+	@echo "  * LINUX_ARM_OTN_config         - Building for Linux on Xscale" >&2
+    @echo "  * OSX_X86_config               - Native (X86) build for OS X" >&2
 	@echo "  * QNX_X86_config               - Native (X86) build for QNX" >&2	
 	@echo "  * VXWORKS_KMODE_PPC_config     - Building for VXWORKS kernel mode for PowerPC (experimental)" >&2
 	@echo " " >&2
