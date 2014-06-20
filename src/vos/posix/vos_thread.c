@@ -55,6 +55,10 @@
  * DEFINITIONS
  */
 
+#ifndef PTHREAD_MUTEX_RECURSIVE
+#define PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
+#endif
+
 const size_t    cDefaultStackSize   = 16 * 1024;
 const UINT32    cMutextMagic        = 0x1234FEDC;
 
@@ -93,6 +97,18 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
     }
 
     return -1;
+}
+
+//int sem_init(sem_t *, int, unsigned int);
+int sem_init(sem_t *pSema, int flags, unsigned int mode)
+{
+    *pSema = sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)mode);
+    if (*pSema == SEM_FAILED)
+    {
+        return -1;
+    }
+    return 0;
+    //rc = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
 }
 #endif
 
@@ -447,7 +463,8 @@ EXT_DECL void vos_getTime (
 
         clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-        TIMESPEC_TO_TIMEVAL(&myTime, &currentTime);
+        myTime->tv_sec = currentTime->tv_sec;                                    \
+        myTime->tv_usec = currentTime->tv_nsec / 1000;                                    \
 
 #endif
 
@@ -619,7 +636,7 @@ EXT_DECL void vos_mulTime (
 }
 
 /**********************************************************************************************************************/
-/** Compare the second from the first time stamp, return diff in first
+/** Compare the second to the first time stamp
  *
  *
  *  @param[in, out]     pTime           Pointer to time value
@@ -1001,11 +1018,19 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         }
 
         /*pThread Semaphore init*/
+#ifdef __APPLE__
+        *pSema = (VOS_SEMA_T) sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)initialState);
+        if ((sem_t*)*pSema == SEM_FAILED)
+        {
+            rc = -1;
+        }
+#else
         rc = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
+#endif
         if (0 != rc)
         {
             /*Semaphore init failed*/
-            vos_printLog(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
+            vos_printLog(VOS_LOG_ERROR, "vos_semaCreate() ERROR (%d) Semaphore could not be initialized\n", errno);
             retVal = VOS_SEMA_ERR;
         }
         else
@@ -1187,7 +1212,7 @@ EXT_DECL void vos_semaGive (
         else
         {
             /* Could not release Semaphore */
-            vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
+            vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR (%d) could not release semaphore\n", errno);
         }
     }
     return;
