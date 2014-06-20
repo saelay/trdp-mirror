@@ -54,7 +54,7 @@ typedef double REAL64;
 #elif defined(POSIX)
 
 #include <stdint.h>
-#include <wchar.h>
+/*#include <wchar.h>*/
 #include <float.h>
 
 typedef uint8_t UINT8;
