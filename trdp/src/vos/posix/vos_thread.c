@@ -463,8 +463,8 @@ EXT_DECL void vos_getTime (
 
         clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-        myTime->tv_sec = currentTime->tv_sec;                                    \
-        myTime->tv_usec = currentTime->tv_nsec / 1000;                                    \
+        myTime.tv_sec = currentTime.tv_sec;                                    \
+        myTime.tv_usec = currentTime.tv_nsec / 1000;                                    \
 
 #endif
 
