@@ -27,7 +27,6 @@
  * INCLUDES
  */
 
-#include "vos_types.h"
 #include "trdp_types.h"
 
 #ifdef __cplusplus
@@ -181,6 +180,16 @@ typedef struct
 
 typedef struct
 {
+    UINT16                  reserved01;     /**< reserved (=0) */
+    UINT32                  reserved02;     /**< reserved (=0) */
+    TRDP_SHORT_VERSION_T    userDataVersion;/**< version of the vital ETBCTRL telegram
+                                             mainVersion = 1, subVersion = 0 */
+    UINT32                  safeSeqCount;   /**< safe sequence counter, as defined in B.9 */
+    UINT32                  safetyCode;     /**< checksum, as defined in B.9 */
+}  GNU_PACKED TRDP_ETB_CTRL_VDP_T;
+
+typedef struct
+{
     TRDP_UUID_T             cstUUID;        /**< UUID of the consist, provided by ETBN (TrainNetworkDirectory)
                                                  Reference to static consist attributes
                                                  0 if not available (e.g. correction)           */
@@ -215,6 +224,8 @@ typedef struct
     UINT32                  trnTopoCnt;     /**< trnTopoCnt value 
                                                  ctrlType == 0: actual value
                                                  ctrlType == 1: set to 0                        */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ësafeSequCountí == 0
+                                             completely set to 0 == not used                                    */
 } GNU_PACKED TRDP_CSTINFOCTRL_T;
     
 
@@ -334,6 +345,14 @@ typedef struct
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
                                                  computed as defined in 5.3.3.2.16 (seed value : trnTopoCnt) */
 } GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_T;
+
+/** Operational Train directory status info structure */
+
+typedef struct
+{
+    TRDP_OP_TRAIN_DIRECTORY_STATE_T     state;
+    TRDP_ETB_CTRL_VDP_T                 safetyTrail;
+} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_STATUS_INFO_T;
 
 
 /** Train network directory entry structure acc. to IEC61375-2-5 */
