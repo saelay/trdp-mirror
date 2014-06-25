@@ -27,9 +27,7 @@
  * INCLUDES
  */
 
-#include "vos_types.h"
 #include "trdp_types.h"
-#include "vos_types.h"
 #include "tau_tti_types.h"
 
 #ifdef __cplusplus
