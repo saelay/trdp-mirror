@@ -1931,7 +1931,8 @@ EXT_DECL TRDP_ERR_T tlp_get (
             timercmp(&pElement->timeToGo, &now, <))
         {
             /*    Packet is late    */
-            if (pElement->toBehavior == TRDP_TO_SET_TO_ZERO)
+            if (pElement->toBehavior == TRDP_TO_SET_TO_ZERO &&
+                pData != NULL && pDataSize != NULL)
             {
                 memset(pData, 0, *pDataSize);
             }
