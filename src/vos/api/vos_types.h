@@ -141,6 +141,12 @@ typedef double REAL64;
     #define FALSE   (0)
 #endif
 
+/** ANTIVALENT8 values */
+#define AV_ERROR        0x00
+#define AV_FALSE        0x01
+#define AV_TRUE         0x02
+#define AV_UNDEFINED    0x03
+
 /*    Compiler dependent alignment options    */
 #undef GNU_PACKED
 #define GNU_PACKED

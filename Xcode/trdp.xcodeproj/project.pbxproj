@@ -784,6 +784,8 @@
 		73C202CF174BC9D0003C5A0E /* embedXcode_prepare */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; name = embedXcode_prepare; path = Utilities/embedXcode_prepare; sourceTree = "<group>"; };
 		73C202D0174BC9D0003C5A0E /* TemplateIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = TemplateIcon.icns; path = Utilities/TemplateIcon.icns; sourceTree = "<group>"; };
 		73C202D1174BC9D0003C5A0E /* trdp.ino */ = {isa = PBXFileReference; lastKnownFileType = text; path = trdp.ino; sourceTree = "<group>"; };
+		73CBA1AD19548350006648EE /* rules.mk */ = {isa = PBXFileReference; lastKnownFileType = text; name = rules.mk; path = ../rules.mk; sourceTree = "<group>"; };
+		73CBA1AE19549A9F006648EE /* LINUX_ARM_OTN_config */ = {isa = PBXFileReference; lastKnownFileType = text; path = LINUX_ARM_OTN_config; sourceTree = "<group>"; };
 		73CE24481733BE5900314E1C /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vos_private.h; path = ../src/vos/vxworks/vos_private.h; sourceTree = SOURCE_ROOT; };
 		73CE24491733BE5900314E1C /* vos_shared_mem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = vos_shared_mem.c; path = ../src/vos/vxworks/vos_shared_mem.c; sourceTree = SOURCE_ROOT; };
 		73CE244A1733BE5900314E1C /* vos_sock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vos_sock.c; path = ../src/vos/vxworks/vos_sock.c; sourceTree = SOURCE_ROOT; };
@@ -1856,6 +1858,7 @@
 				7334C1421742783700CA739C /* Makefile_MDLadder */,
 				7334C1431742783700CA739C /* Makefile_SE */,
 				7334C1441742783700CA739C /* Makefile_xml */,
+				73CBA1AD19548350006648EE /* rules.mk */,
 				73CE24EF17340E2B00314E1C /* config */,
 				73821F27150777B00046E0AC /* src */,
 				73821F3B150777B00046E0AC /* example */,
@@ -2594,6 +2597,7 @@
 				7396F2281949A4080038FE82 /* OSX_X86_config */,
 				73CE24F317340E2B00314E1C /* POSIX_X86_config */,
 				73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */,
+				73CBA1AE19549A9F006648EE /* LINUX_ARM_OTN_config */,
 			);
 			name = config;
 			path = ../config;

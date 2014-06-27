@@ -92,7 +92,7 @@ typedef struct
                                                  '01'B = false, '10'B = true */
     ANTIVALENT8             clearConfComp;  /**< clear confirmed composition,
                                                  '01'B = false, '10'B = true */
-    ANTIVALENT8             compUnknown;    /**< request confirmation,
+    ANTIVALENT8             corrRequest;    /**< request confirmation,
                                                  '01'B = false, '10'B = true */
     ANTIVALENT8             corrInfoSet;    /**< correction info set,
                                                  '01'B = false, '10'B = true */
