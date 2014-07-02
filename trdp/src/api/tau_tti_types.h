@@ -281,8 +281,11 @@ typedef struct
     UINT8                   opCstOrient;    /**< consist orientation
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
-    UINT8                  reserved01;     /*< reserved for future use (= 0) */
-    UINT8                  reserved02;     /*< reserved for future use (= 0) */
+    UINT8                   trnCstNo;       /*< sequence number of consist in train
+                                                 with vehicle 01 being the first vehicle in ETB reference
+                                                 direction 1 as defined in IEC61375-2-5,
+                                                 value range: 1..63, 0 = inserted by correction */
+    UINT8                   reserved02;     /*< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_CONSIST_T;
 
 
