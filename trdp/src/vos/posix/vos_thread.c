@@ -273,8 +273,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printLog(
             VOS_LOG_ERROR,
-            "%s pthread_attr_setschedpolicy() failed (Err:%d)\n",
+            "%s pthread_attr_setschedpolicy(%d) failed (Err:%d)\n",
             pName,
+            policy,
             retCode );
         return VOS_THREAD_ERR;
     }
@@ -286,8 +287,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     {
         vos_printLog(
             VOS_LOG_ERROR,
-            "%s pthread_attr_setschedparam() failed (Err:%d)\n",
+            "%s pthread_attr_setschedparam/priority(%d) failed (Err:%d)\n",
             pName,
+            priority,
             retCode );
         return VOS_THREAD_ERR;
     }
