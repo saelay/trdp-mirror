@@ -277,7 +277,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             pName,
             policy,
             retCode );
-        return VOS_THREAD_ERR;
+        /*return VOS_THREAD_ERR;*/
     }
 
     /* Set the scheduling priority of the thread */
@@ -291,7 +291,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             pName,
             priority,
             retCode );
-        return VOS_THREAD_ERR;
+        /*return VOS_THREAD_ERR; */
     }
 
     /* Set inheritsched attribute of the thread */
