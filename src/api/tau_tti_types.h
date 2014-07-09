@@ -197,8 +197,8 @@ typedef struct
 
 typedef struct
 {
-    UINT16                  reserved01;     /**< reserved (=0) */
-    UINT32                  reserved02;     /**< reserved (=0) */
+    UINT32                  reserved01;     /**< reserved (=0) */
+    UINT16                  reserved02;     /**< reserved (=0) */
     TRDP_SHORT_VERSION_T    userDataVersion;/**< version of the vital ETBCTRL telegram
                                              mainVersion = 1, subVersion = 0 */
     UINT32                  safeSeqCount;   /**< safe sequence counter, as defined in B.9 */
