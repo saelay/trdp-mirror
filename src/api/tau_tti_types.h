@@ -48,6 +48,23 @@ extern "C" {
  * TYPEDEFS
  */
 
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
+/* moved this typedefinition from trdp_types.h to this place, as it belongs to the  */
+/* communication buffer definitions, which need a packed struct                     */
+
+/** Version information for communication buffers */
+typedef struct
+{
+    UINT8   ver;    /**< Version    - incremented for incompatible changes */
+    UINT8   rel;    /**< Release    - incremented for compatible changes   */
+} GNU_PACKED TRDP_SHORT_VERSION_T;
+
+#ifdef WIN32
+#pragma pack(pop)
+#endif
+
 /** Types for train configuration information */
 
 /** ETB information */
