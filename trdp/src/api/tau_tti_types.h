@@ -117,7 +117,6 @@ typedef struct
     UINT8                   cnId;           /**< identifier of connected consist network in the consist, 
                                                  related to the etbId. Value range: 0..31 */
     UINT8                   reserved02;     /**< reserved for future use (= 0) */
-    TRDP_PROP_T             fctProp;        /**< properties, application defined */
 } TRDP_FUNCTION_INFO_T;
 
 
