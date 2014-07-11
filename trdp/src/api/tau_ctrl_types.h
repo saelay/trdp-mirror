@@ -101,7 +101,7 @@ typedef struct
     ANTIVALENT8             sleepRequest;   /**< request sleep mode,
                                                  '01'B = false, '10'B = true */
     UINT8                   leadVehOfCst;   /**< position of leading vehicle in consist, 
-                                                 0..31 (0: first vehicle in consist in Direction 1, 1: second vehicle, etc.) */
+                                                 0..31 (1: first vehicle in consist in Direction 1, 2: second vehicle, etc.) */
     UINT8                   reserved04;     /**< reserved (=0) */
     UINT16                  reserved05;     /**< reserved (=0) */
     UINT8                   reserved06;     /**< reserved (=0) */
