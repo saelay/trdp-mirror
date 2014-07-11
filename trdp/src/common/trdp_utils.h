@@ -116,6 +116,22 @@ void trdp_initSockets(
 void trdp_initUncompletedTCP (
     TRDP_APP_SESSION_T appHandle);
 
+/**********************************************************************************************************************/
+/** remove the sequence counter for the comID/source IP.
+ *  The sequence counter should be reset if there was a packet time out.
+ *  
+ *
+ *  @param[in]      pElement            subscription element
+ *  @param[in]      srcIP               Source IP address
+ *  @param[in]      msgType             message type
+ *
+ *  @retval         none
+ */
+
+void trdp_resetSequenceCounter(
+                               PD_ELE_T*       pElement,
+                               TRDP_IP_ADDR_T  srcIP,
+                               TRDP_MSG_T      msgType);
 
 /*********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
