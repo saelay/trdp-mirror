@@ -644,6 +644,7 @@ void trdp_pdHandleTimeOuts (
             /*  Update some statistics  */
             appHandle->stats.pd.numTimeout++;
             iterPD->lastErr = TRDP_TIMEOUT_ERR;
+            trdp_resetSequenceCounter(iterPD, iterPD->addr.srcIpAddr, (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType));
 
             /* Packet is late! We inform the user about this:    */
             if (appHandle->pdDefault.pfCbFunction != NULL)

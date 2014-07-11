@@ -1022,6 +1022,39 @@ UINT32  trdp_getSeqCnt (
     return 0;   /*    Not found, initial value is zero    */
 }
 
+/**********************************************************************************************************************/
+/** remove the sequence counter for the comID/source IP.
+ *  The sequence counter should be reset if there was a packet time out.
+ *  
+ *
+ *  @param[in]      pElement            subscription element
+ *  @param[in]      srcIP               Source IP address
+ *  @param[in]      msgType             message type
+ *
+ *  @retval         none
+ */
+
+void trdp_resetSequenceCounter(
+    PD_ELE_T*       pElement,
+    TRDP_IP_ADDR_T  srcIP,
+    TRDP_MSG_T      msgType)
+{
+    int index;
+    
+    if (pElement == NULL || pElement->pSeqCntList == NULL)
+    {
+        return;
+    }
+    /* Loop over entries */
+    for (index = 0; index < pElement->pSeqCntList->curNoOfEntries; ++index)
+    {
+        if (srcIP == pElement->pSeqCntList->seq[index].srcIpAddr &&
+            msgType == pElement->pSeqCntList->seq[index].msgType)
+        {
+            pElement->pSeqCntList->seq[index].lastSeqCnt = 0;
+        }
+    }
+}
 
 /**********************************************************************************************************************/
 /** check and update the sequence counter for the comID/source IP.
@@ -1072,7 +1105,8 @@ int trdp_checkSequenceCounter(
             msgType == pElement->pSeqCntList->seq[index].msgType)
         {
             /*        Is this packet a duplicate?    */
-            if (sequenceCounter >= pElement->pSeqCntList->seq[index].lastSeqCnt + 1)
+            if (pElement->pSeqCntList->seq[index].lastSeqCnt == 0 ||    /* first time after timeout */
+                sequenceCounter >= pElement->pSeqCntList->seq[index].lastSeqCnt + 1)
             {
                 vos_printLog(VOS_LOG_DBG, "Rcv sequence: %u    last seq: %u\n", sequenceCounter, pElement->pSeqCntList->seq[index].lastSeqCnt);
                 vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
