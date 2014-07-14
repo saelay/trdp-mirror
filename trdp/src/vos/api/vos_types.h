@@ -147,6 +147,10 @@ typedef double REAL64;
 #define AV_TRUE         0x02
 #define AV_UNDEFINED    0x03
 
+/** Directions/Orientations */
+#define TR_DIR1         0x01
+#define TR_DIR2         0x02
+
 /*    Compiler dependent alignment options    */
 #undef GNU_PACKED
 #define GNU_PACKED
