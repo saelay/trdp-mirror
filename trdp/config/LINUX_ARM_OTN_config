@@ -17,7 +17,7 @@ TCPOSTFIX =
 #TCPATH = /opt/otn_tools/bin/
 
 CINCLUDES = -I../otn/include -I../otn/include/h -I../otn/include/h/msApi
-CFLAGS += -fsigned-char -D$(TARGET_FLAG) -mbig-endian -mcpu=xscale -msoft-float -fno-common -fno-builtin -pthread -fPIC -DEMBED -DREDFOX -DCONFIGURE_REDFOX -D_REENTRANT -DO_CNV_SIMPLE -D__BIG_ENDIAN__ $(CINCLUDES)
+CFLAGS += -fsigned-char -D$(TARGET_FLAG) -mbig-endian -mcpu=xscale -msoft-float -fno-common -fno-builtin -pthread -fPIC -DEMBED -DREDFOX -DCONFIGURE_REDFOX -D_REENTRANT -DO_CNV_SIMPLE -DB_ENDIAN $(CINCLUDES)
 LDFLAGS += -lrt
 
 ARCH      = linux-arm-otn
