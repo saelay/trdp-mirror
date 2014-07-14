@@ -15,4 +15,4 @@ TARGET_FLAG = VXWORKS
 TCPREFIX = 
 TCPOSTFIX = ppc
 
-CFLAGS += -O2 -Wall -DO_DC -DO_BE -fstrength-reduce -fno-builtin -mlongcall -fsigned-char -D$(TARGET_FLAG)  -lpthread
+CFLAGS += -O2 -Wall -DO_DC -DO_BE -fstrength-reduce -fno-builtin -mlongcall -fsigned-char -D$(TARGET_FLAG)  -lpthread -DB_ENDIAN

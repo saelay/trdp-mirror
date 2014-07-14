@@ -185,7 +185,14 @@ VOS_ERR_T vos_initRuntimeConsts (void)
     memset(&vAlignTest, 0, sizeof(vAlignTest)); /* for lint */
     sIsBigEndian = !(*((char *)(&one)));
 
-#if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
+#ifndef B_ENDIAN
+#ifndef L_ENDIAN
+#error \
+    "Endianess is not set - define B_ENDIAN for big endian platforms or L_ENDIAN for little endian ones"
+#endif
+#endif
+
+#if B_ENDIAN
     if (sIsBigEndian == FALSE)
 #else
     if (sIsBigEndian == TRUE)
