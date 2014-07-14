@@ -25,7 +25,7 @@ TCPREFIX = powerpc-linux-gnu-
 TCPOSTFIX = 
 
 # path to sysroot includes also the trailing slash
-CFLAGS += -Wall -DPOSIX -D_GNU_SOURCE --sysroot=/scm/gbe/repository/sysroot/nrtos/2.4.0.1/sysroot/
+CFLAGS += -Wall -DPOSIX -D_GNU_SOURCE -DB_ENDIAN --sysroot=/scm/gbe/repository/sysroot/nrtos/2.4.0.1/sysroot/
 
 LDFLAGS += -lrt
 

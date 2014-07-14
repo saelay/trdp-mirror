@@ -15,5 +15,5 @@ TARGET_FLAG = POSIX
 TCPREFIX = 
 TCPOSTFIX = 
 
-CFLAGS += -O2 -Wall -fstrength-reduce -fno-builtin -fsigned-char -D$(TARGET_FLAG) -pthread -fPIC
+CFLAGS += -O2 -Wall -fstrength-reduce -fno-builtin -fsigned-char -D$(TARGET_FLAG) -pthread -fPIC -DL_ENDIAN
 LDFLAGS += -lrt
