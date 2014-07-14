@@ -15,6 +15,7 @@ TARGET_VOS = posix
 TARGET_OS = LINUX
 TCPREFIX = 
 TCPOSTFIX = 
+DOXYPATH = /usr/local/bin/
 
 # the _GNU_SOURCE is needed to get the extended poll feature for the POSIX socket
 

@@ -18,7 +18,9 @@
  *
  * $Id$
  *
- *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
+ *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
+ *                     Ticket #47: Protocol change: no FCS for data part of telegrams
+ *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according to IEEE802.3
  *
  */
 
@@ -294,25 +296,6 @@ TRDP_ERR_T trdp_mdCheck (
             }
 
         }
-
-        /* Check Data CRC */
-        if (l_datasetLength > 0 &&
-            checkHeaderOnly == FALSE)       /*  Only check header consistency? */
-        {
-            /* Check only if we have some data */
-            UINT32  crc32       = vos_crc32(INITFCS, (UINT8 *) pPacket + sizeof(MD_HEADER_T), l_datasetLength);
-            UINT32  le_crc32    = MAKE_LE(crc32);
-
-            UINT8   *pDataCRC   = (UINT8 *) pPacket + packetSize - SIZE_OF_FCS;
-            UINT32  pktCRC      = ((UINT32 *) pDataCRC)[0];
-
-            if (le_crc32 != pktCRC)
-            {
-                appHandle->stats.udpMd.numCrcErr++;
-                vos_printLog(VOS_LOG_ERROR, "MDframe data CRC error.\n");
-                err = TRDP_CRC_ERR;
-            }
-        }
     }
 
     /*    Check protocol version    */
@@ -384,13 +367,13 @@ TRDP_ERR_T trdp_mdCheck (
     /* check topocounter */
     if (TRDP_NO_ERR == err)
     {
-        UINT32 l_tc = vos_ntohl(pPacket->topoCount);
-        if (l_tc != 0 && l_tc != appHandle->topoCount)
+        if ((pPacket->etbTopoCnt != 0 && vos_ntohl(pPacket->etbTopoCnt) != appHandle->etbTopoCnt) ||
+            (pPacket->opTrnTopoCnt != 0 && vos_ntohl(pPacket->opTrnTopoCnt) != appHandle->opTrnTopoCnt))
         {
             appHandle->stats.udpMd.numTopoErr++;
-            vos_printLog(VOS_LOG_ERROR, "MDframe topocount error %u, expected %u\n",
-                         l_tc,
-                         appHandle->topoCount);
+            vos_printLog(VOS_LOG_ERROR, "MDframe topocount error %u/%u, expected %u/%u\n",
+                         vos_ntohl(pPacket->etbTopoCnt), vos_ntohl(pPacket->opTrnTopoCnt),
+                         appHandle->etbTopoCnt, appHandle->opTrnTopoCnt);
             err = TRDP_TOPO_ERR;
         }
     }
@@ -410,7 +393,6 @@ void    trdp_mdUpdatePacket (
 
     /* Get header and packet check sum values */
     UINT32  *hFCS   = &pElement->pPacket->frameHead.frameCheckSum;
-    UINT32  *pFCS   = (UINT32 *)((UINT8 *)&pElement->pPacket->frameHead + pElement->grossSize - SIZE_OF_FCS);
 
     /* Calculate CRC for message head */
     myCRC = vos_crc32(INITFCS,
@@ -418,17 +400,6 @@ void    trdp_mdUpdatePacket (
                       sizeof(MD_HEADER_T) - SIZE_OF_FCS);
     /* Convert to Little Endian */
     *hFCS = MAKE_LE(myCRC);
-
-    /*
-     Calculate CRC for message packet
-     */
-    if (pElement->pPacket->frameHead.datasetLength > 0)
-    {
-        myCRC = vos_crc32(INITFCS,
-                          pElement->pPacket->data,
-                          vos_ntohl(pElement->pPacket->frameHead.datasetLength));
-        *pFCS = MAKE_LE(myCRC);
-    }
 }
 
 /**********************************************************************************************************************/
@@ -1123,7 +1094,8 @@ TRDP_ERR_T  trdp_mdRecv (
 
                     iterMD->curSeqCnt       = vos_ntohl(pH->sequenceCounter);
                     iterMD->addr.comId      = vos_ntohl(pH->comId);
-                    iterMD->addr.topoCount  = vos_ntohl(pH->topoCount);
+                    iterMD->addr.etbTopoCnt  = vos_ntohl(pH->etbTopoCnt);
+                    iterMD->addr.opTrnTopoCnt  = vos_ntohl(pH->opTrnTopoCnt);
                     iterMD->addr.srcIpAddr  = appHandle->pMDRcvEle->addr.srcIpAddr;
                     iterMD->addr.destIpAddr = appHandle->pMDRcvEle->addr.destIpAddr;
                     memcpy(iterMD->destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
@@ -1156,10 +1128,11 @@ TRDP_ERR_T  trdp_mdRecv (
                     iterMD->curSeqCnt = vos_ntohl(pH->sequenceCounter);
 
                     /* Copy other identification params */
-                    iterMD->addr.comId      = vos_ntohl(pH->comId);
-                    iterMD->addr.topoCount  = vos_ntohl(pH->topoCount);
-                    iterMD->addr.srcIpAddr  = appHandle->pMDRcvEle->addr.srcIpAddr;
-                    iterMD->addr.destIpAddr = appHandle->pMDRcvEle->addr.destIpAddr;
+                    iterMD->addr.comId          = vos_ntohl(pH->comId);
+                    iterMD->addr.etbTopoCnt     = vos_ntohl(pH->etbTopoCnt);
+                    iterMD->addr.opTrnTopoCnt   = vos_ntohl(pH->opTrnTopoCnt);
+                    iterMD->addr.srcIpAddr      = appHandle->pMDRcvEle->addr.srcIpAddr;
+                    iterMD->addr.destIpAddr     = appHandle->pMDRcvEle->addr.destIpAddr;
                     memcpy(iterMD->destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
 
                     if (TRDP_MSG_MP == vos_ntohs(pH->msgType))
@@ -1212,7 +1185,8 @@ TRDP_ERR_T  trdp_mdRecv (
         theMessage.protVersion  = vos_ntohs(iterMD->pPacket->frameHead.protocolVersion);
         theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterMD->pPacket->frameHead.msgType);
         theMessage.comId        = vos_ntohl(iterMD->pPacket->frameHead.comId);
-        theMessage.topoCount    = vos_ntohl(iterMD->pPacket->frameHead.topoCount);
+        theMessage.etbTopoCnt    = vos_ntohl(iterMD->pPacket->frameHead.etbTopoCnt);
+        theMessage.opTrnTopoCnt    = vos_ntohl(iterMD->pPacket->frameHead.opTrnTopoCnt);
         theMessage.userStatus   = 0;
         theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->pPacket->frameHead.replyStatus);
         theMessage.replyTimeout = vos_ntohl(iterMD->pPacket->frameHead.replyTimeout);
@@ -1502,7 +1476,8 @@ TRDP_ERR_T  trdp_mdSend (
                                         theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(
                                                 iterMD_find->pPacket->frameHead.msgType);
                                         theMessage.comId        = iterMD_find->addr.comId;
-                                        theMessage.topoCount    = iterMD_find->addr.topoCount;
+                                        theMessage.etbTopoCnt   = iterMD_find->addr.etbTopoCnt;
+                                        theMessage.opTrnTopoCnt = iterMD_find->addr.opTrnTopoCnt;
                                         theMessage.userStatus   = 0;
                                         theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(
                                                 iterMD_find->pPacket->frameHead.replyStatus);
@@ -1798,7 +1773,8 @@ void  trdp_mdCheckListenSocks (
                         {
                             TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
 
-                            theMessage.topoCount    = appHandle->topoCount;
+                            theMessage.etbTopoCnt   = appHandle->etbTopoCnt;
+                            theMessage.opTrnTopoCnt = appHandle->opTrnTopoCnt;
                             theMessage.resultCode   = TRDP_SOCK_ERR;
                             theMessage.srcIpAddr    = newIp;
                             appHandle->mdDefault.pfCbFunction(appHandle->mdDefault.pRefCon, appHandle,
@@ -2145,7 +2121,8 @@ void  trdp_mdCheckTimeouts (
                 theMessage.protVersion  = vos_ntohs(iterMD->pPacket->frameHead.protocolVersion);
                 theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterMD->pPacket->frameHead.msgType);
                 theMessage.comId        = iterMD->addr.comId;
-                theMessage.topoCount    = iterMD->addr.topoCount;
+                theMessage.etbTopoCnt   = iterMD->addr.etbTopoCnt;
+                theMessage.opTrnTopoCnt = iterMD->addr.opTrnTopoCnt;
                 theMessage.userStatus   = 0;
                 theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->pPacket->frameHead.replyStatus);
                 memcpy(theMessage.sessionId, iterMD->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
@@ -2234,7 +2211,8 @@ void  trdp_mdCheckTimeouts (
                                 theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(
                                         iterMD_find->pPacket->frameHead.msgType);
                                 theMessage.comId        = iterMD_find->addr.comId;
-                                theMessage.topoCount    = iterMD_find->addr.topoCount;
+                                theMessage.etbTopoCnt   = iterMD_find->addr.etbTopoCnt;
+                                theMessage.opTrnTopoCnt = iterMD_find->addr.opTrnTopoCnt;
                                 theMessage.userStatus   = 0;
                                 theMessage.replyStatus  =
                                     (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD_find->pPacket->frameHead.replyStatus);
@@ -2282,7 +2260,8 @@ TRDP_ERR_T trdp_mdCommonSend (
     const void              *pUserRef,
     TRDP_UUID_T             *pSessionId,
     UINT32                  comId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
@@ -2635,7 +2614,8 @@ TRDP_ERR_T trdp_mdCommonSend (
         pSenderElement->pPacket->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
         pSenderElement->pPacket->frameHead.msgType          = vos_htons((UINT16) msgType);
         pSenderElement->pPacket->frameHead.comId            = vos_htonl(comId);
-        pSenderElement->pPacket->frameHead.topoCount        = vos_htonl(topoCount);
+        pSenderElement->pPacket->frameHead.etbTopoCnt       = vos_htonl(etbTopoCnt);
+        pSenderElement->pPacket->frameHead.opTrnTopoCnt     = vos_htonl(opTrnTopoCnt);
         pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(dataSize);
         pSenderElement->pPacket->frameHead.replyStatus      = vos_htonl(replyStatus);
 

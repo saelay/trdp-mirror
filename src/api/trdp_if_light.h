@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  */
 
 #ifndef TRDP_IF_LIGHT_H
@@ -147,13 +148,27 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void);
  *
  *    This value is used for validating outgoing and incoming packets only!
  *
- *  @param[in]      topoCount           New topocount value
+ *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      etbTopoCnt          New topocount value
  */
-EXT_DECL TRDP_ERR_T tlc_setTopoCount (
+EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
     TRDP_APP_SESSION_T  appHandle,
-    UINT32              topoCount);
+    UINT32              etbTopoCnt);
 
 
+/**********************************************************************************************************************/
+/** Set new operational train topocount for direction/orientation sensitive communication.
+ *
+ *    This value is used for validating outgoing and incoming packets only!
+ *
+ *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      opTrnTopoCnt        New operational topocount value
+ */
+EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
+    TRDP_APP_SESSION_T  appHandle,
+    UINT32              opTrnTopoCnt);
+
+    
 /**********************************************************************************************************************/
 /** Frees the buffer reserved by the TRDP layer.
  *
@@ -220,7 +235,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     pPubHandle          returned handle for related unprepare
  *  @param[in]      comId               comId of packet to send
- *  @param[in]      topoCount           valid topocount, 0 for local consist
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      interval            frequency of PD packet (>= 10ms) in usec
@@ -240,7 +256,8 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_PUB_T              *pPubHandle,
     UINT32                  comId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     UINT32                  interval,
@@ -331,7 +348,8 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      subHandle           handle from related subscribe
  *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      topoCount           valid topocount, 0 for local consist
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
@@ -352,7 +370,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_SUB_T              subHandle,
     UINT32                  comId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     UINT32                  redId,
@@ -373,7 +392,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[out]     pSubHandle          return a handle for these messages
  *  @param[in]      pUserRef            user supplied value returned within the info structure
  *  @param[in]      comId               comId of packet to receive
- *  @param[in]      topoCount           valid topocount, 0 for local consist
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr1          IP for source filtering, set 0 if not used
  *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
  *                                      Used e.g. for source filtering of redundant devices.
@@ -394,7 +414,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_SUB_T          *pSubHandle,
     const void          *pUserRef,
     UINT32              comId,
-    UINT32              topoCount,
+    UINT32              etbTopoCnt,
+    UINT32              opTrnTopoCnt,
     TRDP_IP_ADDR_T      srcIpAddr1,
     TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      destIpAddr,
@@ -456,7 +477,8 @@ EXT_DECL TRDP_ERR_T tlp_get (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      topoCount           topocount to use
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
@@ -475,7 +497,8 @@ EXT_DECL TRDP_ERR_T tlm_notify (
     TRDP_APP_SESSION_T      appHandle,
     const void              *pUserRef,
     UINT32                  comId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
@@ -494,7 +517,8 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[out]     pSessionId          return session ID
  *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      topoCount           topocount to use
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
@@ -516,7 +540,8 @@ EXT_DECL TRDP_ERR_T tlm_request (
     const void              *pUserRef,
     TRDP_UUID_T             *pSessionId,
     UINT32                  comId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
@@ -537,7 +562,8 @@ EXT_DECL TRDP_ERR_T tlm_request (
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pSessionId          Session ID returned by request
  *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      topoCount           topocount to use
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_DEFAULT
@@ -558,7 +584,8 @@ EXT_DECL TRDP_ERR_T tlm_confirm (
     const void              *pUserRef,
     const TRDP_UUID_T       *pSessionId,
     UINT32                  comId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
@@ -593,7 +620,8 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
  *  @param[out]     pListenHandle       Listener ID returned
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      comId               comId to be observed
- *  @param[in]      topoCount           topocount to use
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      mcDestIpAddr        multicast group to listen on
  *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
  *  @param[in]      destURI             only functional group of destination URI
@@ -608,7 +636,8 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
     TRDP_LIS_T              *pListenHandle,
     const void              *pUserRef,
     UINT32                  comId,        /* muliple ComID handled in layer above  */
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          mcDestIpAddr, /* multiple destId handled in layer above */
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI);
@@ -637,7 +666,8 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      topoCount           topocount to use
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
@@ -659,7 +689,8 @@ EXT_DECL TRDP_ERR_T tlm_reply (
     TRDP_APP_SESSION_T      appHandle,
     void                    *pUserRef,
     const TRDP_UUID_T       *pSessionId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
@@ -679,7 +710,8 @@ EXT_DECL TRDP_ERR_T tlm_reply (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      topoCount           topocount to use
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
@@ -702,7 +734,8 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
     TRDP_APP_SESSION_T      appHandle,
     void                    *pUserRef,
     const TRDP_UUID_T       *pSessionId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
@@ -722,7 +755,8 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      topoCount           topocount to use
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
@@ -740,7 +774,8 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
 EXT_DECL TRDP_ERR_T tlm_replyErr (
     TRDP_APP_SESSION_T      appHandle,
     const TRDP_UUID_T       *pSessionId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     UINT32                  comId,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,

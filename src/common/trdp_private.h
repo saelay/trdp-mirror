@@ -124,11 +124,12 @@ typedef enum
 /** Hidden handle definition, used as unique addressing item    */
 typedef struct TRDP_HANDLE
 {
-    UINT32          comId;                              /**< comId for packets to send/receive           */
-    TRDP_IP_ADDR_T  srcIpAddr;                          /**< source IP for PD                            */
-    TRDP_IP_ADDR_T  destIpAddr;                         /**< destination IP for PD                       */
-    TRDP_IP_ADDR_T  mcGroup;                            /**< multicast group to join for PD              */
-    UINT32          topoCount;                          /**< topocount belongs to addressing item        */
+    UINT32          comId;                              /**< comId for packets to send/receive          */
+    TRDP_IP_ADDR_T  srcIpAddr;                          /**< source IP for PD                           */
+    TRDP_IP_ADDR_T  destIpAddr;                         /**< destination IP for PD                      */
+    TRDP_IP_ADDR_T  mcGroup;                            /**< multicast group to join for PD             */
+    UINT32          etbTopoCnt;                         /**< etb topocount belongs to addressing item   */
+    UINT32          opTrnTopoCnt;                       /**< opTrn topocount belongs to addressing item */
 } TRDP_ADDRESSES_T /*, *TRDP_PUB_PT, *TRDP_SUB_PT*/;
 
 /** Tuples of last received sequence counter per comId  */
@@ -299,7 +300,8 @@ typedef struct TRDP_SESSION
     TRDP_IP_ADDR_T          virtualIP;          /**< Virtual IP address                                     */
     BOOL8                   beQuiet;            /**< if set, only react on ownIP requests                   */
     UINT32                  redID;              /**< redundant comId                                        */
-    UINT32                  topoCount;          /**< current valid topocount or zero                        */
+    UINT32                  etbTopoCnt;         /**< current valid topocount or zero                        */
+    UINT32                  opTrnTopoCnt;       /**< current valid topocount or zero                        */
     TRDP_TIME_T             nextJob;            /**< Store for next select interval                         */
     TRDP_PRINT_DBG_T        pPrintDebugString;  /**< Pointer to function to print debug information         */
     TRDP_MARSHALL_CONFIG_T  marshall;           /**< Marshalling(unMarshalling configuration                */

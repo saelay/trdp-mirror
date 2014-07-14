@@ -263,6 +263,7 @@ int main (int argc, char * *argv)
                          NULL,
                          comId_In,                  /*    ComID                                */
                          0,                         /*    topocount: local consist only        */
+                         0,
                          destIP,                    /*  Source to expect packets from          */
                          0,
                          0,
@@ -284,6 +285,7 @@ int main (int argc, char * *argv)
                         &pubHandle,                 /*    our pulication identifier     */
                         comId_Out,                  /*    ComID to send                 */
                         0,                          /*    local consist only            */
+                        0,
                         0,                          /*    default source IP             */
                         destIP,                     /*    where to send to              */
                         PD_COMID1_CYCLE,            /*    Cycle time in ms              */

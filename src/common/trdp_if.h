@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  */
 
 #ifndef TRDP_IF_H

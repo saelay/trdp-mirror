@@ -76,7 +76,8 @@ void tau_recvPdDs (
 	{
 		addr.mcGroup = 0;
 	}
-	addr.topoCount = pPDInfo->topoCount;
+	addr.etbTopoCnt = pPDInfo->etbTopoCnt;
+	addr.opTrnTopoCnt = pPDInfo->opTrnTopoCnt;
 
 	/* Search Subscriber command Value */
 	subscriberPdCommandValue = serachPdCommandValueToAddr(&addr, &subnetId);

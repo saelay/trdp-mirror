@@ -14,5 +14,6 @@ TARGET_VOS = vxworks
 TARGET_FLAG = VXWORKS
 TCPREFIX = 
 TCPOSTFIX = ppc
+DOXYPATH = /usr/local/bin/
 
 CFLAGS += -O2 -Wall -DO_DC -DO_BE -fstrength-reduce -fno-builtin -mlongcall -fsigned-char -D$(TARGET_FLAG)  -lpthread -DB_ENDIAN

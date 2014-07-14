@@ -279,7 +279,7 @@ void pd_updatePublisher (int active)
     }
     if (active)
     {
-        err = tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
+        err = tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
                           TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize);
         if (err != TRDP_NO_ERR)
         {
@@ -337,6 +337,7 @@ void pd_sub (
             NULL,
             recPacket->comID,                           /*	ComID								*/
             0,                                          /*	topocount: local consist only		*/
+            0,
             vos_dottedIP(recPacket->srcIP),             /*	Source IP filter 1					*/
             0,                                          /*	Source IP filter 2					*/
             0,
@@ -398,6 +399,7 @@ void md_listen (
     		NULL,										/*  user ref                            */
     		recPacket->comID,							/*	ComID								*/
     		0,             								/*	topocount: local consist only		*/
+            0,
     		0,											/*  any source address                  */
     		TRDP_FLAGS_CALLBACK,                        /*  use callbacks                       */
     		NULL);
@@ -417,6 +419,7 @@ int md_request(const char* targetIP, uint32_t comID, char* pMessage)
                 NULL,           // user ref
                 &gMessageData.sessionId, comID,
                 0,              // topocount
+                0,
                 0,              // source IP
                 vos_dottedIP(targetIP), TRDP_FLAGS_CALLBACK,
                 1,              //  Expected replies
@@ -568,7 +571,7 @@ void pdCallBack (
             if (pMsg->msgType == TRDP_MSG_MR)
             {
             	/* Send reply	*/
-                err = tlm_reply (appHandle, pRefCon, &pMsg->sessionId, 0, gMessageData.comID, pMsg->srcIpAddr, pMsg->srcIpAddr,
+                err = tlm_reply (appHandle, pRefCon, &pMsg->sessionId, 0, 0, gMessageData.comID, pMsg->srcIpAddr, pMsg->srcIpAddr,
     						TRDP_FLAGS_CALLBACK, 0, NULL, (UINT8*)"Maleikum Salam", 16, NULL, NULL);
                 if (err != TRDP_NO_ERR)
                 {

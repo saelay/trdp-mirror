@@ -317,6 +317,7 @@ int main (int argc, char * *argv)
                             (const void *) i,           /*    user reference                       */
                             gSubPackets[i].comID,       /*    ComID                                */
                             0,                          /*    topocount: local consist only        */
+                            0,
                             0,                          /*    Source to expect packets from        */
                             0,                          /*    2nd source to expect packets from    */
                             gSubPackets[i].addr,        /*    Default destination    (or MC Group) */
@@ -338,6 +339,7 @@ int main (int argc, char * *argv)
                           &gPubPackets[i].pubHandle,    /*    our pulication identifier     */
                           gPubPackets[i].comID,         /*    ComID to send                 */
                           0,                            /*    local consist only            */
+                          0,
                           0,                            /*    default source IP             */
                           gPubPackets[i].addr,          /*    where to send to              */
                           gPubPackets[i].time,          /*    Cycle time in ms              */

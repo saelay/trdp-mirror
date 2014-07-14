@@ -16,6 +16,9 @@
  *
  * $Id$
  *
+ *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
+ *                     Ticket #47: Protocol change: no FCS for data part of telegrams
+ *                     Ticket #43: Usage of memset() in the trdp_pdReceive() function
  *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
  *                     Ticket #42: memcmp only if callback enabled
  *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
@@ -61,14 +64,16 @@
  *
  *  @param[in]      pPacket         pointer to the packet element to init
  *  @param[in]      type            type the packet
- *  @param[in]      topoCount       topocount to use for PD frame
+ *  @param[in]      etbTopoCnt      topocount to use for PD frame
+ *  @param[in]      opTrnTopoCnt    topocount to use for PD frame
  *  @param[in]      replyComId      Pull request comId
  *  @param[in]      replyIpAddress  Pull request Ip
  */
 void    trdp_pdInit (
     PD_ELE_T    *pPacket,
     TRDP_MSG_T  type,
-    UINT32      topoCount,
+    UINT32      etbTopoCnt,
+    UINT32      opTrnTopoCnt,
     UINT32      replyComId,
     UINT32      replyIpAddress)
 {
@@ -78,7 +83,8 @@ void    trdp_pdInit (
     }
 
     pPacket->pFrame->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
-    pPacket->pFrame->frameHead.topoCount        = vos_htonl(topoCount);
+    pPacket->pFrame->frameHead.etbTopoCnt       = vos_htonl(etbTopoCnt);
+    pPacket->pFrame->frameHead.opTrnTopoCnt     = vos_htonl(opTrnTopoCnt);
     pPacket->pFrame->frameHead.comId            = vos_htonl(pPacket->addr.comId);
     pPacket->pFrame->frameHead.msgType          = vos_htons((UINT16)type);
     pPacket->pFrame->frameHead.datasetLength    = vos_htonl(pPacket->dataSize);
@@ -147,7 +153,7 @@ void trdp_pdDataUpdate (
     UINT32  myCRC;
     UINT8   *pDest = pPacket->pFrame->data + pPacket->dataSize;
 
-    /* CRC exists only if data transmitted */
+    /* Padding exists only if data is transmitted */
     if (pPacket->dataSize != 0)
     {
         /*  Pad with zero bytes */
@@ -160,10 +166,6 @@ void trdp_pdDataUpdate (
                 *pDest++ = 0;
             }
         }
-
-        /*  Compute data checksum   */
-        myCRC = vos_crc32(INITFCS, pPacket->pFrame->data, pPacket->dataSize);
-        *(UINT32 *)pDest = MAKE_LE(myCRC);
     }
 }
 
@@ -271,8 +273,10 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
 
-                if (iterPD->pFrame->frameHead.topoCount != 0 &&
-                    vos_ntohl(iterPD->pFrame->frameHead.topoCount) != appHandle->topoCount)
+                if ((iterPD->pFrame->frameHead.etbTopoCnt != 0 &&
+                    vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt) != appHandle->etbTopoCnt) ||
+                    (iterPD->pFrame->frameHead.opTrnTopoCnt != 0 &&
+                     vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt) != appHandle->opTrnTopoCnt))
                 {
                     err = TRDP_TOPO_ERR;
                     vos_printLog(VOS_LOG_INFO, "Sending PD: TopoCount is out of date!\n");
@@ -365,8 +369,6 @@ TRDP_ERR_T  trdp_pdReceive (
             return TRDP_MEM_ERR;
         }
     }
-    /* clean memory before using it */
-    memset(pNewFrame, 0, TRDP_MAX_PD_PACKET_SIZE);
 
     recSize = TRDP_MAX_PD_PACKET_SIZE;
 
@@ -402,14 +404,23 @@ TRDP_ERR_T  trdp_pdReceive (
             return err;
     }
 
-    /*  Check topocount  */
-    if (vos_ntohl(pNewFrame->frameHead.topoCount) &&
-        vos_ntohl(pNewFrame->frameHead.topoCount) != appHandle->topoCount)
+    /*  Check topocounts  */
+    if (vos_ntohl(pNewFrame->frameHead.etbTopoCnt) &&
+        vos_ntohl(pNewFrame->frameHead.etbTopoCnt) != appHandle->etbTopoCnt)
     {
         appHandle->stats.pd.numTopoErr++;
-        vos_printLog(VOS_LOG_INFO, "PD data with wrong topocount ignored (comId %u, topo %u)\n",
+        vos_printLog(VOS_LOG_INFO, "PD data with wrong ETB topocount ignored (comId %u, topo %u)\n",
                      vos_ntohl(pNewFrame->frameHead.comId),
-                     vos_ntohl(pNewFrame->frameHead.topoCount));
+                     vos_ntohl(pNewFrame->frameHead.etbTopoCnt));
+        return TRDP_TOPO_ERR;
+    }
+    if (vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt) &&
+        vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt) != appHandle->opTrnTopoCnt)
+    {
+        appHandle->stats.pd.numTopoErr++;
+        vos_printLog(VOS_LOG_INFO, "PD data with wrong opTrnDir topocount ignored (comId %u, topo %u)\n",
+                     vos_ntohl(pNewFrame->frameHead.comId),
+                     vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt));
         return TRDP_TOPO_ERR;
     }
 
@@ -428,7 +439,7 @@ TRDP_ERR_T  trdp_pdReceive (
                 pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
                 pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrame->frameHead.replyIpAddress);
 
-                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->topoCount, 0, 0);
+                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->etbTopoCnt, appHandle->opTrnTopoCnt, 0, 0);
 
                 trdp_pdPrepareStats(appHandle, pPulledElement);
             }
@@ -543,7 +554,8 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.comId        = pExistingElement->addr.comId;
             theMessage.srcIpAddr    = pExistingElement->addr.srcIpAddr;
             theMessage.destIpAddr   = subAddresses.destIpAddr;
-            theMessage.topoCount    = vos_ntohl(pExistingElement->pFrame->frameHead.topoCount);
+            theMessage.etbTopoCnt   = vos_ntohl(pExistingElement->pFrame->frameHead.etbTopoCnt);
+            theMessage.opTrnTopoCnt = vos_ntohl(pExistingElement->pFrame->frameHead.opTrnTopoCnt);
             theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pExistingElement->pFrame->frameHead.msgType);
             theMessage.seqCount     = pExistingElement->curSeqCnt;
             theMessage.protVersion  = vos_ntohs(pExistingElement->pFrame->frameHead.protocolVersion);
@@ -653,7 +665,8 @@ void trdp_pdHandleTimeOuts (
                 theMessage.comId        = iterPD->addr.comId;
                 theMessage.srcIpAddr    = iterPD->addr.srcIpAddr;
                 theMessage.destIpAddr   = iterPD->addr.destIpAddr;
-                theMessage.topoCount    = vos_ntohl(iterPD->pFrame->frameHead.topoCount);
+                theMessage.etbTopoCnt   = vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt);
+                theMessage.opTrnTopoCnt = vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt);
                 theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
                 theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
                 theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
@@ -767,7 +780,6 @@ TRDP_ERR_T trdp_pdCheck (
     UINT32      packetSize)
 {
     UINT32      myCRC;
-    UINT32      *pDataFCS   = (UINT32 *)((UINT8 *)pPacket + packetSize - SIZE_OF_FCS);
     TRDP_ERR_T  err         = TRDP_NO_ERR;
 
     /*  Check size    */
@@ -804,17 +816,6 @@ TRDP_ERR_T trdp_pdCheck (
     {
         vos_printLog(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
         err = TRDP_WIRE_ERR;
-    }
-    /*  Check Data CRC (FCS)   */
-    else if (pPacket->datasetLength > 0)
-    {
-        myCRC = vos_crc32(INITFCS, (UINT8 *)pPacket + sizeof(PD_HEADER_T), vos_ntohl(pPacket->datasetLength));
-
-        if (*pDataFCS != MAKE_LE(myCRC))
-        {
-            vos_printLog(VOS_LOG_INFO, "PDframe data crc error (%08x != %08x))\n", *pDataFCS, MAKE_LE(myCRC));
-            err = TRDP_CRC_ERR;
-        }
     }
     else
     {

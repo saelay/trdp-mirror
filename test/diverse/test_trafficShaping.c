@@ -246,6 +246,7 @@ int main (int argc, char *argv[])
                           &pubHandle,                 /*    our pulication identifier    */
                           gPD[i].comID,
                           0,                          /*    local consist only            */
+                          0,
                           0,                          /*    default source IP            */
                           destIP,                     /*    where to send to            */
                           gPD[i].cycle,               /*    Cycle time in us            */
