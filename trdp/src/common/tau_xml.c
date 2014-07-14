@@ -1343,11 +1343,11 @@ static void parsePdParameter (
         parseUINT32(pPdParElem, "cycle", &pExchgPar->pPdPar->cycle);
         parseUINT32(pPdParElem, "redundant", &pExchgPar->pPdPar->redundant);
         parseUINT16(pPdParElem, "offset-address", &pExchgPar->pPdPar->offset);
-        if (checkAttrValue(pPdParElem, "validity-behaviour", "keep"))
+        if (checkAttrValue(pPdParElem, "validity-behavior", "keep"))
         {
             pExchgPar->pPdPar->toBehav = TRDP_TO_KEEP_LAST_VALUE;
         }
-        if (checkAttrValue(pPdParElem, "validity-behaviour", "zero"))
+        if (checkAttrValue(pPdParElem, "validity-behavior", "zero"))
         {
             pExchgPar->pPdPar->toBehav = TRDP_TO_SET_TO_ZERO;
         }
