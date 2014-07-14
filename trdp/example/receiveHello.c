@@ -185,6 +185,7 @@ int main (int argc, char *argv[])
                          NULL,
                          comId,                     /*    ComID                                */
                          0,                         /*    topocount: local consist only        */
+                         0,
                          0,                         /*    Source IP filter                    */
                          0,                         /*    2nd Source IP filter                    */
                          0,                         /*    Default destination    (or MC Group)   */

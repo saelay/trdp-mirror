@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
+ *                     Ticket #47: Protocol change: no FCS for data part of telegrams
  */
 
 
@@ -92,7 +94,8 @@ TRDP_ERR_T  trdp_mdCommonSend (
     const void              *pUserRef,
     TRDP_UUID_T             *pSessionId,
     UINT32                  comId,
-    UINT32                  topoCount,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,

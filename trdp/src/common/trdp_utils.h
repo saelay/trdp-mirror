@@ -236,6 +236,7 @@ UINT32 trdp_getSeqCnt (
  *  @param[in]      pElement            subscription element
  *  @param[in]      sequenceCounter     sequence counter to check
  *  @param[in]      srcIP               Source IP address
+ *  @param[in]      msgType             type of the message
  *
  *  @retval         0 - no duplicate
  *                  1 - duplicate sequence counter

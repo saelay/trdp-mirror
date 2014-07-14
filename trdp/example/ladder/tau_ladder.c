@@ -34,10 +34,10 @@
 #endif
 #include <unistd.h>
 
-#include "trdp_utils.h"
+//#include "trdp_utils.h"
 #include "trdp_if.h"
 
-#include "vos_private.h"
+//#include "vos_private.h"
 #include "vos_thread.h"
 #include "vos_shared_mem.h"
 #include "tau_ladder.h"

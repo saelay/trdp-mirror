@@ -312,6 +312,7 @@ void setup_ports()
                 &p->ph,             /* publish handle */
                 p->comid,           /* comid          */
                 0,                  /* topo counter   */
+                0,
                 p->src,             /* source address */
                 p->dst,             /* destination address */
                 p->cycle,           /* cycle period   */
@@ -333,6 +334,7 @@ void setup_ports()
                 ports[p->link].sh,  /* related subscribe handle */
                 p->comid,           /* comid          */
                 0,                  /* topo counter   */
+                0,
                 p->src,             /* source address */
                 p->dst,             /* destination address */
                 0,                  /* redundancy     */
@@ -356,6 +358,7 @@ void setup_ports()
                 NULL,               /* user ref         */
                 p->comid,           /* comid            */
                 0,                  /* topo counter     */
+                0,
                 p->src,             /* source address   */
                 0,                  /* second source address  */
                 p->dst,             /* destination address    */
@@ -707,7 +710,7 @@ void process_data()
                     p->cycle / 1000, p->size, cycle);
             }
 
-            p->err = tlp_request(apph, ports[p->link].sh, p->comid, 0,
+            p->err = tlp_request(apph, ports[p->link].sh, p->comid, 0, 0,
                 p->src, p->dst, 0, TRDP_FLAGS_NONE, NULL, p->data, p->size,
                 p->repid, p->rep);
         }

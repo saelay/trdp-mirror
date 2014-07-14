@@ -132,6 +132,7 @@ int main (int argc, char * *argv)
                          NULL,
                          PD_COMID1,                 /*    ComID                                */
                          0,                         /*    topocount: local consist only        */
+                         0,
                          PD_COMID1_SRC_IP,          /*    Source IP filter                    */
                          0,
                          0,                         /*    Default destination    (or MC Group)   */
@@ -154,6 +155,7 @@ int main (int argc, char * *argv)
                         &pubHandle,                 /*    our pulication identifier         */
                         PD_COMID2,                  /*    ComID to send                     */
                         0,                          /*    local consist only                */
+                        0,
                         0,                          /*    default source IP                 */
                         PD_COMID2_DST_IP,           /*    where to send to                  */
                         PD_COMID2_CYCLE,            /*    Cycle time in us                  */

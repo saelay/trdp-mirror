@@ -950,6 +950,7 @@ void setup_listeners ()
                 (void *) TST_TCP,                   /* user reference */
                 0,                                  /* comid (0 .. take all) */
                 0,                                  /* topo */
+                0,                                  /* topo */
                 opts.srcip,                         /* destination IP address */
                 (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP), /* flags */
                 opts.uri);                          /* destination URI */
@@ -969,6 +970,7 @@ void setup_listeners ()
                 (void *) TST_UCAST,                 /* user reference */
                 0,                                  /* comid (0 .. take all) */
                 0,                                  /* topo */
+                0,                                  /* topo */
                 opts.srcip,                         /* destination IP address */
                 TRDP_FLAGS_CALLBACK,                /* flags */
                 opts.uri);                          /* destination URI */
@@ -987,6 +989,7 @@ void setup_listeners ()
                 &lsnrh,                             /* listener handle */
                 (void *) TST_MCAST,                 /* user reference */
                 0,                                  /* comid (0 .. take all) */
+                0,                                  /* topo */
                 0,                                  /* topo */
                 opts.mcgrp,                         /* destination IP address */
                 TRDP_FLAGS_CALLBACK,                /* flags */
@@ -1064,7 +1067,8 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     apph,                           /* session handle */
                     (void *) sts.test,              /* user reference */
                     msg->comId,                     /* comid */
-                    msg->topoCount,                 /* topo */
+                    msg->etbTopoCnt,                /* topo */
+                    msg->opTrnTopoCnt,              /* topo */
                     msg->srcIpAddr,                 /* source IP address */
                     msg->destIpAddr,                /* destination IP address */
                     flags,                          /* flags */
@@ -1092,7 +1096,8 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     (void *) sts.test,              /* user reference */
                     &uuid,                          /* session id */
                     msg->comId,                     /* comid */
-                    msg->topoCount,                 /* topo */
+                    msg->etbTopoCnt,                /* topo */
+                    msg->opTrnTopoCnt,              /* topo */
                     msg->srcIpAddr,                 /* source IP address */
                     msg->destIpAddr,                /* destination IP address */
                     flags,                          /* flags */
@@ -1122,6 +1127,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     NULL,                           /* user reference */
                     (const TRDP_UUID_T *) &msg->sessionId,               /* session id */
                     0,                              /* topo */
+                    0,
                     msg->comId,                     /* comid */
                     msg->srcIpAddr,                 /* source IP address */
                     msg->destIpAddr,                /* destination IP address */
@@ -1151,6 +1157,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     NULL,                           /* user reference */
                     (const TRDP_UUID_T *) &msg->sessionId, /* session id */
                     0,                              /* topo */
+                    0,
                     msg->comId,                     /* comid */
                     msg->srcIpAddr,                 /* source IP address */
                     msg->destIpAddr,                /* destination IP address */
@@ -1177,7 +1184,8 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     (void *) sts.test,              /* user reference */
                     (const TRDP_UUID_T *) &msg->sessionId, /* session id */
                     msg->comId,                     /* comid */
-                    msg->topoCount,                 /* topo */
+                    msg->etbTopoCnt,                /* topo */
+                    msg->opTrnTopoCnt,              /* topo */
                     msg->srcIpAddr,                 /* source IP address */
                     msg->destIpAddr,                /* destination IP address */
                     flags,                          /* flags */

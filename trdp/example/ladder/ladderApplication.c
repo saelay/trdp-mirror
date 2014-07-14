@@ -255,6 +255,7 @@ int main (void)
                          &OFFSET_ADDRESS1,			/* user referece value = offsetAddress */
                          PD_COMID1,                	/* ComID */
                          0,                        	/* topocount: local consist only */
+                         0,
                          PD_COMID1_SRC_IP,         	/* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
                          PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
@@ -281,6 +282,7 @@ int main (void)
                          &OFFSET_ADDRESS1,			/* user referece value = offsetAddress */
                          PD_COMID1,                	/* ComID */
                          0,                        	/* topocount: local consist only */
+                         0,
                          PD_COMID1_SRC_IP2,         /* Source IP filter */
                          0,                        	/* Source IP filter2 : no used */
                          PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
@@ -302,6 +304,7 @@ int main (void)
                         &pubHandleNet1ComId1,			/* our pulication identifier */
                         PD_COMID1,						/* ComID to send */
                         0,								/* local consist only */
+                        0,
                         subnetId1Address,				/* default source IP */
                         PD_COMID1_DST_IP,				/* where to send to */
                         PD_COMID1_CYCLE,				/* Cycle time in ms */
@@ -323,6 +326,7 @@ int main (void)
                         &pubHandleNet2ComId1,			/* our pulication identifier */
                         PD_COMID1,						/* ComID to send */
                         0,								/* local consist only */
+                        0,
                         subnetId2Address,			    /* default source IP */
                         PD_COMID1_DST_IP,				/* where to send to */
                         PD_COMID1_CYCLE,				/* Cycle time in ms */

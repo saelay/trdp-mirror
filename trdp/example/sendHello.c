@@ -248,6 +248,7 @@ int main (int argc, char *argv[])
                         &pubHandle,                 /*    our pulication identifier     */
                         comId,                      /*    ComID to send                 */
                         0,                          /*    local consist only            */
+                        0,
                         ownIP,                      /*    default source IP             */
                         destIP,                     /*    where to send to              */
                         cycleTime,                  /*    Cycle time in us              */

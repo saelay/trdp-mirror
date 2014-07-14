@@ -15,6 +15,7 @@ TARGET_FLAG = POSIX
 TCPREFIX = arm-linux-
 TCPOSTFIX = 
 #TCPATH = /opt/otn_tools/bin/
+DOXYPATH = /usr/local/bin/
 
 CINCLUDES = -I../otn/include -I../otn/include/h -I../otn/include/h/msApi
 CFLAGS += -fsigned-char -D$(TARGET_FLAG) -mbig-endian -mcpu=xscale -msoft-float -fno-common -fno-builtin -pthread -fPIC -DEMBED -DREDFOX -DCONFIGURE_REDFOX -D_REENTRANT -DO_CNV_SIMPLE -DB_ENDIAN $(CINCLUDES)

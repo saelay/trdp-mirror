@@ -35,9 +35,6 @@ vpath %.h src/api src/vos/api src/common src/vos/common
 
 INCLUDES = $(INCPATH) $(VOS_INCPATH) $(VOS_PATH)
 
-# path to doxygen binary
-DOXYPATH = /usr/local/bin/
-
 FLINT = flint
 
 # Set Objects
@@ -105,7 +102,7 @@ else
 TARGETS += vtests
 endif
 
-all:	$(TARGETS) 
+all:	$(TARGETS)
 
 outdir:
 	mkdir -p $(OUTDIR)
@@ -115,9 +112,7 @@ libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
 demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
 
-
 example:	outdir $(OUTDIR)/mdManager
-
 
 test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle
 
@@ -130,8 +125,7 @@ vtests:		outdir $(OUTDIR)/vtest
 %_config:
 	cp -f config/$@ config/config.mk
 
-	
-	
+
 $(OUTDIR)/trdp_if.o:	trdp_if.c
 			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 

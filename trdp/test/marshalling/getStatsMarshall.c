@@ -445,6 +445,7 @@ int main (int argc, char * *argv)
                          NULL,
                          TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                */
                          0,                             /*    topocount: local consist only        */
+                         0,
                          0,                             /*    Source IP filter                    */
                          0,
                          replyIP,                       /*    Default destination    (or MC Group)   */
@@ -464,6 +465,7 @@ int main (int argc, char * *argv)
     err = tlp_request(appHandle,
                       subHandle,
                       TRDP_STATISTICS_REQUEST_COMID,
+                      0,
                       0,
                       0,
                       destIP,

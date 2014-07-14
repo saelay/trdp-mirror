@@ -532,7 +532,6 @@
 		7321F960177C33AD008D1DB7 /* pins_arduino.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pins_arduino.h; sourceTree = "<group>"; };
 		7321F96E177C6F0C008D1DB7 /* arduino_iface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = arduino_iface.h; sourceTree = "<group>"; };
 		7321F96F177C6F0C008D1DB7 /* arduino_iface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = arduino_iface.cpp; sourceTree = "<group>"; };
-		7322485D16A975DD00148295 /* trdp-config.xsd */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "trdp-config.xsd"; sourceTree = "<group>"; };
 		7322486D16A97D5400148295 /* crc-check */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "crc-check"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7322487F16A97E7900148295 /* crc-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "crc-test.c"; path = "../test/diverse/crc-test.c"; sourceTree = "<group>"; };
 		7327CA871656AB080020536A /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_private.h; sourceTree = "<group>"; };
@@ -684,14 +683,14 @@
 		7381BE581643FB1A003BC539 /* selectcmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = selectcmd; sourceTree = BUILT_PRODUCTS_DIR; };
 		7381BEF916442C14003BC539 /* getStatsMarshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = getStatsMarshall.c; path = marshalling/getStatsMarshall.c; sourceTree = "<group>"; };
 		7381BEFF16442C4B003BC539 /* getStatsMarshall */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = getStatsMarshall; sourceTree = BUILT_PRODUCTS_DIR; };
-		73821F29150777B00046E0AC /* trdp_if_light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_if_light.h; sourceTree = "<group>"; };
-		73821F2A150777B00046E0AC /* trdp_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_types.h; sourceTree = "<group>"; };
-		73821F2F150777B00046E0AC /* trdp_if.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_if.c; sourceTree = "<group>"; wrapsLines = 0; };
-		73821F30150777B00046E0AC /* trdp_mdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_mdcom.c; sourceTree = "<group>"; };
-		73821F31150777B00046E0AC /* trdp_mdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_mdcom.h; sourceTree = "<group>"; };
-		73821F34150777B00046E0AC /* trdp_pdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_pdcom.c; sourceTree = "<group>"; };
+		73821F29150777B00046E0AC /* trdp_if_light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_if_light.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		73821F2A150777B00046E0AC /* trdp_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_types.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		73821F2F150777B00046E0AC /* trdp_if.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_if.c; sourceTree = "<group>"; wrapsLines = 0; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		73821F30150777B00046E0AC /* trdp_mdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_mdcom.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		73821F31150777B00046E0AC /* trdp_mdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_mdcom.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		73821F34150777B00046E0AC /* trdp_pdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_pdcom.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		73821F35150777B00046E0AC /* trdp_pdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_pdcom.h; sourceTree = "<group>"; };
-		73821F36150777B00046E0AC /* trdp_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_private.h; sourceTree = "<group>"; };
+		73821F36150777B00046E0AC /* trdp_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_private.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		73821F39150777B00046E0AC /* trdp_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trdp_utils.c; sourceTree = "<group>"; };
 		73821F3A150777B00046E0AC /* trdp_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_utils.h; sourceTree = "<group>"; };
 		73821F3C150777B00046E0AC /* echoSelect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = echoSelect.c; sourceTree = "<group>"; };
@@ -724,6 +723,11 @@
 		73B68B781790499C00BFA039 /* TCN-TRDP2-D-BOM-019-02 - TRDP System Architecture & Design.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-019-02 - TRDP System Architecture & Design.pdf"; sourceTree = "<group>"; };
 		73B68B7917904A4900BFA039 /* TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf"; sourceTree = "<group>"; };
 		73BA39431625B1D200686E9E /* testserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testserver; sourceTree = BUILT_PRODUCTS_DIR; };
+		73BBD0581973D5AC001BAE15 /* LINUX_PPC_config */ = {isa = PBXFileReference; lastKnownFileType = text; path = LINUX_PPC_config; sourceTree = "<group>"; };
+		73BBD0591973D5AC001BAE15 /* LINUX_X86_config */ = {isa = PBXFileReference; lastKnownFileType = text; path = LINUX_X86_config; sourceTree = "<group>"; };
+		73BBD05A1973D5AC001BAE15 /* QNX_X86_config */ = {isa = PBXFileReference; lastKnownFileType = text; path = QNX_X86_config; sourceTree = "<group>"; };
+		73BBD05B1973D5AC001BAE15 /* trdp-config.xsd */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-config.xsd"; sourceTree = "<group>"; };
+		73BBD05C1973D5AC001BAE15 /* VXWORKS_KMODE_PPC_config */ = {isa = PBXFileReference; lastKnownFileType = text; path = VXWORKS_KMODE_PPC_config; sourceTree = "<group>"; };
 		73C2028C174BC9CF003C5A0E /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		73C2028F174BC9CF003C5A0E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		73C20291174BC9CF003C5A0E /* LocalLibrary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = LocalLibrary.cpp; sourceTree = "<group>"; };
@@ -1862,7 +1866,6 @@
 				73CE24EF17340E2B00314E1C /* config */,
 				73821F27150777B00046E0AC /* src */,
 				73821F3B150777B00046E0AC /* example */,
-				7322485C16A975DD00148295 /* config */,
 				73821F42150777D30046E0AC /* doc */,
 				73821F7C150777D40046E0AC /* test */,
 				73E4979516CEA1DA00045EFA /* spy */,
@@ -1991,15 +1994,6 @@
 			);
 			path = mega;
 			sourceTree = "<group>";
-		};
-		7322485C16A975DD00148295 /* config */ = {
-			isa = PBXGroup;
-			children = (
-				7322485D16A975DD00148295 /* trdp-config.xsd */,
-			);
-			name = config;
-			path = ../config;
-			sourceTree = SOURCE_ROOT;
 		};
 		7334C13B1742780300CA739C /* ladder */ = {
 			isa = PBXGroup;
@@ -2592,11 +2586,16 @@
 			isa = PBXGroup;
 			children = (
 				7321F85E177B2753008D1DB7 /* AVR_ATMega1680_config */,
+				73BBD05B1973D5AC001BAE15 /* trdp-config.xsd */,
 				73CE24F017340E2B00314E1C /* buildsettings_posix_TEMPLATE */,
 				73CE24F117340E2B00314E1C /* buildsettings_vxworks_TEMPLATE */,
 				7396F2281949A4080038FE82 /* OSX_X86_config */,
+				73BBD05A1973D5AC001BAE15 /* QNX_X86_config */,
 				73CE24F317340E2B00314E1C /* POSIX_X86_config */,
 				73CE24F517340E2B00314E1C /* VXWORKS_PPC_config */,
+				73BBD05C1973D5AC001BAE15 /* VXWORKS_KMODE_PPC_config */,
+				73BBD0591973D5AC001BAE15 /* LINUX_X86_config */,
+				73BBD0581973D5AC001BAE15 /* LINUX_PPC_config */,
 				73CBA1AE19549A9F006648EE /* LINUX_ARM_OTN_config */,
 			);
 			name = config;
@@ -4663,13 +4662,13 @@
 				73E0535D1513685D0058D590 /* vos_thread.c in Sources */,
 				73E0536215136CC90058D590 /* vos_utils.c in Sources */,
 				73F458B9152F331E00D1C522 /* trdp_if.c in Sources */,
-				73D71BB31917D5CF003F9A87 /* tau_ctrl.c in Sources */,
 				73F458BC152F332400D1C522 /* trdp_pdcom.c in Sources */,
 				73B68FBF15443B79004968FA /* vos_mem.c in Sources */,
 				73B6907A15446B8D004968FA /* trdp_utils.c in Sources */,
 				7387F508157795FE00DBAB73 /* trdp_stats.c in Sources */,
 				08CE2085164962BE0038151B /* trdp_mdcom.c in Sources */,
 				73F5A50D16A408DC00335006 /* vos_shared_mem.c in Sources */,
+				73D71BB31917D5CF003F9A87 /* tau_ctrl.c in Sources */,
 				73D71BB41917D5CF003F9A87 /* tau_dnr.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4969,6 +4968,7 @@
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
+					"-DL_ENDIAN",
 				);
 				PRODUCT_NAME = trdp;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
@@ -4986,6 +4986,7 @@
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=0",
 					"-DPOSIX",
+					"-DL_ENDIAN",
 				);
 				PRODUCT_NAME = trdp;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
@@ -4996,11 +4997,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
 				SYMROOT = ../bld/darwin;
 				USER_HEADER_SEARCH_PATHS = "";
@@ -5011,9 +5014,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -5217,9 +5222,12 @@
 				OTHER_CFLAGS = (
 					"-DTRDP_OPTION_LADDER",
 					"-DPOSIX",
+					"-DL_ENDIAN",
+					"-DMD_SUPPORT=1",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = testladder;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix";
 			};
 			name = Debug;
 		};
@@ -5232,8 +5240,15 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-DTRDP_OPTION_LADDER",
+					"-DPOSIX",
+					"-DL_ENDIAN",
+					"-DMD_SUPPORT=1",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = receiveHello;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -5338,6 +5353,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = test_marshalling;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
 		};
@@ -5357,6 +5373,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = test_marshalling;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -5529,6 +5546,7 @@
 				);
 				PREBINDING = YES;
 				PRODUCT_NAME = trdpPD;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
 		};
@@ -5543,6 +5561,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = "trdp PDonly";
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -5578,6 +5597,7 @@
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = mdManagerTCP;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
 		};
@@ -5592,6 +5612,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = mdManagerTCP;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				ZERO_LINK = NO;
 			};
 			name = Release;

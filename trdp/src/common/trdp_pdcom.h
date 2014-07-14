@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
+ *                     Ticket #47: Protocol change: no FCS for data part of telegrams
  */
 
 
@@ -41,7 +43,7 @@
  * GLOBAL FUNCTIONS
  */
 
-void        trdp_pdInit(PD_ELE_T *, TRDP_MSG_T, UINT32 topCount, UINT32 replyComId, UINT32 replyIpAddress);
+void        trdp_pdInit(PD_ELE_T *, TRDP_MSG_T, UINT32 topoCount, UINT32 optopoCount, UINT32 replyComId, UINT32 replyIpAddress);
 void        trdp_pdUpdate (
     PD_ELE_T *);
 

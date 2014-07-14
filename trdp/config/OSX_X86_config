@@ -15,5 +15,6 @@ TARGET_VOS = posix
 TARGET_OS = POSIX
 TCPREFIX = 
 TCPOSTFIX = 
+DOXYPATH = /Applications/Doxygen/Doxygen.app/Contents/Resources/
 
 CFLAGS += -Wall -fstrength-reduce -fno-builtin -fsigned-char -pthread -fPIC -D__USE_BSD -D_DARWIN_C_SOURCE -DPOSIX -DL_ENDIAN

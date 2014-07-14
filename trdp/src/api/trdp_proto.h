@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  */
 
 #ifndef TRDP_PROTO_H
@@ -182,7 +183,8 @@ typedef struct
     UINT16  protocolVersion;                    /**< fix value for compatibility (set by the API)           */
     UINT16  msgType;                            /**< of datagram: PD Request (0x5072) or PD_MSG (0x5064)    */
     UINT32  comId;                              /**< set by user: unique id                                 */
-    UINT32  topoCount;                          /**< set by user: ETB to use, '0' to deacticate             */
+    UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
+    UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
     UINT32  datasetLength;                      /**< length of the data to transmit 0...1436
                                                     without padding and FCS                                 */
     UINT32  reserved;                           /**< before used for ladder support                         */
@@ -198,7 +200,8 @@ typedef struct
     UINT16  protocolVersion;                    /**< fix value for compatibility                            */
     UINT16  msgType;                            /**< of datagram: Mn, Mr, Mp, Mq, Mc or Me                  */
     UINT32  comId;                              /**< set by user: unique id                                 */
-    UINT32  topoCount;                          /**< set by user: ETB to use, '0' to deacticate             */
+    UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
+    UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
     UINT32  datasetLength;                      /**< defined by user: length of data to transmit            */
     INT32   replyStatus;                        /**< 0 = OK                                                 */
     UINT8   sessionID[16];                      /**< UUID as a byte stream                                  */
