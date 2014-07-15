@@ -144,13 +144,12 @@ TRDP_ERR_T trdp_pdPut (
 }
 
 /******************************************************************************/
-/** Add padding and update data CRC
+/** Add padding
  *
  */
 void trdp_pdDataUpdate (
     PD_ELE_T *pPacket)
 {
-    UINT32  myCRC;
     UINT8   *pDest = pPacket->pFrame->data + pPacket->dataSize;
 
     /* Padding exists only if data is transmitted */
