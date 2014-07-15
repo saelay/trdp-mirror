@@ -916,7 +916,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
-EXT_DECL TRDP_ERR_T tlc_setEtbTopoCount (
+EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              etbTopoCnt)
 {
@@ -952,9 +952,9 @@ EXT_DECL TRDP_ERR_T tlc_setEtbTopoCount (
  *  @param[in]      appHandle           The handle returned by tlc_init
  *  @param[in]      opTrnTopoCnt        New operational topocount value
  */
-EXT_DECL TRDP_ERR_T tlc_setOpTopoCount (
-                                        TRDP_APP_SESSION_T  appHandle,
-                                        UINT32              opTrnTopoCnt)
+EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
+    TRDP_APP_SESSION_T  appHandle,
+    UINT32              opTrnTopoCnt)
 {
     TRDP_ERR_T ret;
     
