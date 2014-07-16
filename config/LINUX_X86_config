@@ -10,7 +10,7 @@
 #// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
 #//
 
-ARCH = linux-x86-gnu
+ARCH = linux-x86
 TARGET_VOS = posix
 TARGET_OS = LINUX
 TCPREFIX = 
