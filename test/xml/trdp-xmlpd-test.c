@@ -664,7 +664,7 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
         /*  Publish the telegram    */
         result = tlp_publish(
             pPubTlg->sessionhandle, &pPubTlg->pubHandle, pExchgPar->comId, 
-            0, 0, destIP, interval, redId, flags, pSendParam, 
+            0, 0, 0, destIP, interval, redId, flags, pSendParam, 
             (UINT8 *)pPubTlg->dataset.buffer, pPubTlg->dataset.size);
         if (result != TRDP_NO_ERR)
         {
@@ -788,7 +788,7 @@ static TRDP_ERR_T subscribeTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
         /*  Subscribe the telegram    */
         result = tlp_subscribe(
             pSubTlg->sessionhandle, &pSubTlg->subHandle, pSubTlg, pExchgPar->comId, 
-            0, srcIP1, srcIP2, destMCIP, flags, timeout, toBehav, pSubTlg->dataset.size);
+            0, 0, srcIP1, srcIP2, destMCIP, flags, timeout, toBehav, pSubTlg->dataset.size);
         if (result != TRDP_NO_ERR)
         {
             printf("tlp_subscribe for comID %u, srcID %u failed: %s\n", 
