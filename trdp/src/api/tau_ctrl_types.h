@@ -115,7 +115,7 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT16                  reserved01;     /**< reserved (=0)                                                      */
-    UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
+    TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT8                   inhibit;        /**< inauguration inhibit
                                                     0 = no inhibit request
                                                     1 = inhibit request                                             */
@@ -126,15 +126,13 @@ typedef struct
                                                     0 = no leading request
                                                     1 = leading request direction 1
                                                     2 = leading request direction 2                                 */
-    UINT8                   confReq;        /**< confirmation (&correction) request
-                                                    0 = no confirmation request
-                                                    1 = confirmation request                                        */
+    UINT8                   reserved02;     /**< reserved (=0)                                                      */
     UINT8                   sleepReq;       /**< sleep request
                                                     0 = no sleep request
                                                     1 = sleep request                                               */
-    UINT8                   reserved02;     /**< reserved (= 0)                                                     */
-    UINT16                  reserved03;     /**< reserved (= 0)                                                     */
-    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == not used */
+    UINT8                   reserved03;     /**< reserved (= 0)                                                     */
+    UINT16                  reserved04;     /**< reserved (= 0)                                                     */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == SDTv2 not used         */
 }  GNU_PACKED TRDP_ECSP_CTRL_T;
 
 
@@ -146,9 +144,6 @@ typedef struct
     UINT8                   ecspState;      /**<  ECSP state indication
                                                   0 = ECSP not operational(initial value)
                                                   1 = ECSP in operation */
-    UINT8                   etbnState;      /**<  state indication of the (active) ETBN
-                                                  0 = ETBN not operational(initial value)
-                                                  1 = ETBN in operation */
     UINT8                   etbInhibit;     /**<  inauguration inhibit indication
                                                   0 = n/a (default)
                                                   1 = inhibit not requested on ETB
@@ -158,19 +153,10 @@ typedef struct
     UINT8                   etbLength;      /**<  indicates train lengthening in case train inauguration is inhibit
                                                   0 = no lengthening (default)
                                                   1 = lengthening detected */
-    UINT8                   etbnPosition;   /**<  position of the ETBN
-                                                  0 = unknown (default)
-                                                  1 = single node
-                                                  2 = middle node
-                                                  3 = end node TCN direction 1
-                                                  4 = end node TCN direction 2 */
-    BITSET8                 etbLineState;   /**<  indication of ETB line status
-                                                  bit0 = line A ETBN direction 1 trusted
-                                                  bit1 = line B ETBN direction 1 trusted
-                                                  bit2 = line A ETBN direction 2 trusted
-                                                  bit3 = line B ETBN direction 2 trusted
-                                                  bit4..7 = reserved (= 0)  */
-    UINT8                   reserved02;     /**<  reserved (= 0) */
+    UINT8                   etbShort;       /**<  indicates train shortening in case train inauguration is inhibit
+                                                  0 = no shortening (default)
+                                                  1 = shortening detected */
+    UINT16                  reserved02;     /**< reserved (=0) */
     UINT8                   etbLeadState;   /**<  indication of local consist leadership
                                                    5 = consist not leading (initial value)
                                                    6 = consist is leading requesting
@@ -178,39 +164,49 @@ typedef struct
                                                   10 = leading conflict
                                                   other values are not allowed */
     UINT8                   etbLeadDir;     /**<  direction of the leading end car in the local consist
-                                                   0 = unknown (default)
-                                                   1 = TCN direction 1
-                                                   2 = TCN direction 2
-                                                   other values are not allowed */
+                                                  0 = unknown (default)
+                                                  1 = TCN direction 1
+                                                  2 = TCN direction 2
+                                                  other values are not allowed */
     UINT8                   ttdbSrvState;   /**<  TTDB server state indication
-                                                   0 = n/a (initial value)
-                                                   1 = Leader (default)
-                                                   2 = Follower
-                                                   3 = Error */
+                                                  0 = n/a (initial value)
+                                                  1 = Leader (default)
+                                                  2 = Follower
+                                                  3 = Error */
     UINT8                   dnsSrvState;    /**<  DNS server state indication
-                                                   0 = n/a (initial value)
+                                                  0 = n/a (initial value)
                                                   1 = Leader (default)
                                                   2 = Follower
                                                   3 = Error */
     UINT8                   trnDirState;    /**<  train directory state
-                                                  1 = unconfirmed
-                                                  2 = confirmed
+                                                  1 = UNCONFIRMED
+                                                  2 = CONFIRMED
                                                   other values are not allowed */
     UINT8                   opTrnDirState;  /**<  train directory state
-                                                  1 = invalid
-                                                  2 = valid
+                                                  1 = INVALID
+                                                  2 = VALID
+                                                  4 = SHARED
                                                   other values are not allowed */
-    UINT8                   reserved03;     /**<  reserved (= 0)  */
+    UINT8                   sleepCtrlState; /**<  sleep control state (option)
+                                                  0 = option not available
+                                                  1 = RegularOperation
+                                                  2 = WaitForSleepMode
+                                                  3 = PrepareForSleepMode */
+    UINT8                   sleepRequCnt;   /**<  number of sleep requests (option)
+                                                  value range: 0..63, not used = 0  */
     UINT32                  opTrnTopoCnt;   /**<  operational train topology counter */
-    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == not used */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**<  ETBCTRL-VDP trailer, completely set to 0 == SDTv2 not used */
 } GNU_PACKED TRDP_ECSP_STAT_T;
 
 
 typedef struct
 {
-    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
-    UINT16                  reserved01;     /**< reserved (=0)                                                      */
-    UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */
+    UINT8                   command;        /**< confirmation order
+							                    1 = confirmation/correction request
+ 							                    2 = un-confirmation request                                         */
+    UINT8                   reserved01;     /**< reserved (=0)                                                      */
+    TRDP_LABEL_T            deviceName; /**< function device of ECSC which sends the telegram                   */
     UINT32                  opTrnTopoCnt;   /**< operational train topocounter value of the operational 
                                                  train directory the correction is based on                         */
     UINT16                  reserved02;     /**<  reserved (=0)                                                     */
@@ -220,8 +216,8 @@ typedef struct
                                                  starting with vehicle at train head, see chapter 5.3.3.2.10.
                                                  Parameters ‘isLead’ and ‘leadDir’ to be set to 0                   */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
-                                                 completely set to 0 == not used                                    */
-}  GNU_PACKED TRDP_ECSP_CORR_T;
+                                                 completely set to 0 == SDTv2 not used                                    */
+}  GNU_PACKED TRDP_ECSP_CONF_REQUEST_T;
 
 
 typedef struct
@@ -231,11 +227,101 @@ typedef struct
                                                  0 = correctly stored
                                                  1 = not stored                                                     */ 
     UINT8                   reserved01;     /**< reserved (=0)                                                      */
-    UINT8                   deviceName[16]; /**< function device of ECSC which sends the telegram                   */
+    TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT32                  reqSafetyCode;  /**< SC-32 value of the request message                                 */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
                                                  completely set to 0 == not used                                    */
-}  GNU_PACKED TRDP_ECSP_CORR_REPLY_T;
+}  GNU_PACKED TRDP_ECSP_CONF_REPLY_T;
+
+
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
+    UINT16                  reserved01;     /**< reserved (=0)                                                      */
+    TRDP_LABEL_T            deviceName;     /**< function device of ED which sends the telegram                     */
+    UINT8                   inhibit;        /**< ETBN inhibit
+                                                 0 = no action (keep old state)
+                                                 1 = no inhibit request
+                                                 2 = inhibit request                                                */
+    UINT8                   byPassCtrl;     /**< ETBN bypass control
+                                                 0 = no action (keep old state)
+                                                 1 = no bypass
+                                                 2 = activate bypass                                                */
+    UINT8                   txCtrl;         /**< ETBN transmission control
+                                                 0 = no action (keep old state)
+                                                 1 = activate sending on ETB (default)
+                                                 2 = stop sending on ETB                                            */
+    UINT8                   slCtrl;         /**< sleep mode control (option)
+                                                 0 = no action (keep old state)
+                                                 1 = deactivate sleep mode
+                                                 2 = activate sleep mode (line activity sensing)                    */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+                                                 completely set to 0 == not used                                    */
+} GNU_PACKED TRDP_ETBN_CTRL_REQUEST_T;
+
+
+typedef struct
+{
+    TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
+    UINT16                  reserved01;     /**< reserved (=0)                                                      */
+    TRDP_LABEL_T            deviceName;     /**< function device of ED which sends the telegram                     */
+    UINT8                   etbnState;      /**< state indication of the (active) ETBN
+                                                 0 = ETBN not operational(initial value)
+                                                 1 = ETBN in operation                                              */
+    UINT8                   etbnInaugState; /**< ETBN inauguration state as defined in IEC61375-2-5
+                                                 0 = init
+                                                 1 = not inaugurated
+                                                 2 = inaugurated
+                                                 3 = ready for inauguration                                         */
+    UINT8                   etbnPosition;   /**< position of the ETBN
+                                                 0 = unknown (default)
+                                                 1 = single node
+                                                 2 = middle node
+                                                 3 = end node TCN direction 1
+                                                 4 = end node TCN direction 2                                       */
+    UINT8                   etbnRole;       /**< ETBN node role as defined in IEC61375-2-5
+                                                 0 = undefined
+                                                 1 = master (redundancy leader)
+                                                 2 = backup (redundancy follower)
+                                                 3 = not redundant                                                  */
+    UINT8                   etbInhibit;     /**< inauguration inhibit indication
+                                                 0 = n/a (default)
+                                                 1 = inhibit not requested on ETB
+                                                 2 = inhibit set on local ETBN
+                                                 3 = inhibit set on remote ETBN
+                                                 4 = inhibit set on local and remote ETBN                           */
+    UINT8                   etbLength;      /**< indicates train lengthening in case train inauguration is inhibit
+                                                 0 = no lengthening (default)
+                                                 1 = lengthening detected                                           */
+    UINT8                   etbShort;       /**< indicates train shortening in case train inauguration is inhibit
+                                                 0 = no shortening (default)
+                                                 1 = shortening detected                                            */
+    BITSET8                 etbLineState;   /**< indication of ETB line status (FALSE == not trusted, TRUE == trusted)
+                                                 bit0 = line A ETBN direction 1
+                                                 bit1 = line B ETBN direction 1
+                                                 bit2 = line C ETBN direction 1
+                                                 bit3 = line D ETBN direction 1
+                                                 bit4 = line A ETBN direction 2
+                                                 bit5 = line B ETBN direction 2
+                                                 bit6 = line C ETBN direction 2
+                                                 bit7 = line D ETBN direction 2                                     */
+    UINT8                   byPassState;    /**< state of bypass function
+                                                 0 = bypass disabled
+                                                 1 = bypass enabled                                                 */
+    UINT8                   slState;        /**< sleep mode state (option)
+                                                 0 = no sleep mode
+                                                 1 = sleep mode active (line activitysensing)                       */
+    UINT16                  reserved02;     /**< reserved (= 0)                                                     */
+    UINT32                  etbTopoCnt;     /**< ETB topography counter                                             */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+                                                 completely set to 0 == not used                                    */
+} GNU_PACKED TRDP_ETBN_STATUS_REPLY_T;
+
+
+typedef struct
+{
+    TRDP_TRAIN_NET_DIR_T   trnNetDir;       /**< dynamic train info */
+} GNU_PACKED TRDP_ETBN_TRAIN_NET_DIR_INFO_REPLY_T;
 
 
 #ifdef WIN32
