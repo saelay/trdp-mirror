@@ -123,6 +123,9 @@
     <ClInclude Include="..\..\src\api\tau_ctrl_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\api\trdp_proto.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Win32TRDP.rc" />
