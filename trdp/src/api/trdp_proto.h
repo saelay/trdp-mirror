@@ -86,71 +86,126 @@
 /**                          TRDP reserved COMIDs in the range 1 ... 1000                                            */
 /**********************************************************************************************************************/
 
-#define TRDP_COMID_ECHO                 10
+#define TRDP_ETBCTRL_COMID                              1
+#define TRDP_CSTINFO_COMID                              2
+#define TRDP_CSTINFOCTRL_COMID                          3
 
-#define TRDP_STATISTICS_REQUEST_COMID   31
-#define TRDP_GLOBAL_STATISTICS_COMID    35
-#define TRDP_SUBS_STATISTICS_COMID      36
-#define TRDP_PUB_STATISTICS_COMID       37
-#define TRDP_RED_STATISTICS_COMID       38
-#define TRDP_JOIN_STATISTICS_COMID      39
-#define TRDP_UDP_LIST_STATISTICS_COMID  40
-#define TRDP_TCP_LIST_STATISTICS_COMID  41
-#define TRDP_TEST_COMID                 1000
+#define TRDP_COMID_ECHO                                 10
 
-/* more reserved comIds:
+#define TRDP_STATISTICS_REQUEST_COMID                   31
+#define TRDP_GLOBAL_STATISTICS_COMID                    35
+#define TRDP_SUBS_STATISTICS_COMID                      36
+#define TRDP_PUB_STATISTICS_COMID                       37
+#define TRDP_RED_STATISTICS_COMID                       38
+#define TRDP_JOIN_STATISTICS_COMID                      39
+#define TRDP_UDP_LIST_STATISTICS_COMID                  40
+#define TRDP_TCP_LIST_STATISTICS_COMID                  41
 
- 100    PD push Inauguration state and topo count telegram
- 101    PD pull request telegram to retrieve dynamic train configuration information
- 102    PD pull reply telegram with dynamic train configuration information
- 103    MD request telegram to retrieve static consist and car information
- 104    MD reply telegram with static consist and car information
- 105    MD request telegram to retrieve device information for a given consist/car/device
- 106    MD reply telegram with device information for a given consist/car/device
- 107    MD request telegram to retrieve consist and car properties for a given consist/car
- 108    MD reply telegram with consist and car properties for a given consist/car
- 109    MD request telegram to retrieve device properties for a given consist/car/device
- 110    MD reply telegram with device properties for a given consist/car/device
- 111    MD request telegram for manual insertion of a given consist/car
- 112    MD reply telegram for manual insertion of a given consist/car
+#define TRDP_CONFTEST_COMID                             80
+#define TRDP_CONFTEST_STATUS_COMID                      81
+#define TRDP_CONFTEST_CONF_REQUEST_COMID                82
+#define TRDP_CONFTEST_CONF_REPLY_COMID                  83
+#define TRDP_CONFTEST_OPTRAIN_REQUEST_COMID             84
+#define TRDP_CONFTEST_OPTRAIN_REPLY_COMID               85
+#define TRDP_CONFTEST_ECHO_REQUEST_COMID                86
+#define TRDP_CONFTEST_ECHO_REPLY_COMID                  87
+#define TRDP_CONFTEST_REVERSE_ECHO_COMID                88
 
- 120..129    IPTSwitch Control&Monitoring Interface
- 125    MD Data (Version) Request Telegram
- 126    MD Counter Telegram
- 127    MD Dynamic Configuration Telegram
- 128    MD Dynamic Configuration Telegram Response
- 129    PD Dynamic Configuration Telegram (redundant TS to TS IPC)
+#define TRDP_TTDB_OP_TRAIN_DIR_STATUS_INFO_COMID        100
+#define TRDP_TTDB_OP_TRAIN_DIR_INFO_COMID               101
+#define TRDP_TTDB_TRAIN_DIR_INFO_REQUEST_COMID          102
+#define TRDP_TTDB_TRAIN_DIR_INFO_REPLY_COMID            103
+#define TRDP_TTDB_STATIC_CONSIST_INFO_REQUEST_COMID     104
+#define TRDP_TTDB_STATIC_CONSIST_INFO_REPLY_COMID       105
+#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REQUEST_COMID  106
+#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REPLY_COMID    107
+#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REQUEST_COMID       108
+#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REPLY_COMID         109
+#define TRDP_TTDB_READ_COMPLETE_REQUEST_COMID           110
+#define TRDP_TTDB_READ_COMPLETE_REPLY_COMID             111
 
- 400..415     SDTv2 validation test
- */
+#define TRDP_ECSP_CTRL_COMID         	                120    /* Etb control message               */
+#define TRDP_ECSP_STAT_COMID	                        121    /* Etb status message                */
+#define TRDP_ECSP_CONF_REQUEST_COMID                    122    /* ECSP confirmation/correction request message */
+#define TRDP_ECSP_CONF_REPLY_COMID                      123    /* ECSP confirmation/correction reply message */
+
+#define TRDP_ETBN_CTRL_REQUEST_COMID         	        130
+#define TRDP_ETBN_STATUS_REPLY_COMID	                131
+#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REQUEST_COMID  132
+#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REPLY_COMID    133
+
+#define TRDP_DNS_REQUEST_COMID                          140
+#define TRDP_DNS_REPLY_COMID                            141
+
+#define TRDP_TEST_COMID                                 1000
 
 
 /**********************************************************************************************************************/
 /**                          TRDP reserved data set ids in the range 1 ... 1000                                      */
 /**********************************************************************************************************************/
 
-#define TRDP_STATISTICS_REQUEST_DSID        31
-#define TRDP_MEM_STATISTICS_DSID            32
-#define TRDP_PD_STATISTICS_DSID             33
-#define TRDP_MD_STATISTICS_DSID             34
-#define TRDP_GLOBAL_STATISTICS_DSID         35
-#define TRDP_SUBS_STATISTICS_DSID           36
-#define TRDP_SUBS_STATISTICS_ARRAY_DSID     37
-#define TRDP_PUB_STATISTICS_DSID            38
-#define TRDP_PUB_STATISTICS_ARRAY_DSID      39
-#define TRDP_RED_STATISTICS_DSID            40
-#define TRDP_RED_STATISTICS_ARRAY_DSID      41
-#define TRDP_JOIN_STATISTICS_DSID           42
-#define TRDP_JOIN_STATISTICS_ARRAY_DSID     43
-#define TRDP_LIST_STATISTIC_DSID            44
-#define TRDP_LIST_STATISTIC_ARRAY_DSID      45
+#define TRDP_ETBCTRL_DSID                               1
+#define TRDP_CSTINFO_DSID                               2
+#define TRDP_CSTINFOCTRL_DSID                           3
 
-#define TRDP_NEST1_TEST_DSID                990
-#define TRDP_NEST2_TEST_DSID                991
-#define TRDP_NEST3_TEST_DSID                992
-#define TRDP_NEST4_TEST_DSID                993
+#define TRDP_STATISTICS_REQUEST_DSID                    31
+#define TRDP_MEM_STATISTICS_DSID                        32
+#define TRDP_PD_STATISTICS_DSID                         33
+#define TRDP_MD_STATISTICS_DSID                         34
+#define TRDP_GLOBAL_STATISTICS_DSID                     35
+#define TRDP_SUBS_STATISTICS_DSID                       36
+#define TRDP_SUBS_STATISTICS_ARRAY_DSID                 37
+#define TRDP_PUB_STATISTICS_DSID                        38
+#define TRDP_PUB_STATISTICS_ARRAY_DSID                  39
+#define TRDP_RED_STATISTICS_DSID                        40
+#define TRDP_RED_STATISTICS_ARRAY_DSID                  41
+#define TRDP_JOIN_STATISTICS_DSID                       42
+#define TRDP_JOIN_STATISTICS_ARRAY_DSID                 43
+#define TRDP_LIST_STATISTIC_DSID                        44
+#define TRDP_LIST_STATISTIC_ARRAY_DSID                  45
 
-#define TRDP_TEST_DSID                      1000
+#define TRDP_CONFTEST_DSID                              80
+#define TRDP_CONFTEST_STATUS_DSID                       81
+#define TRDP_CONFTEST_CONF_REQUEST_DSID                 82
+#define TRDP_CONFTEST_CONF_REPLY_DSID                   83
+#define TRDP_CONFTEST_OPTRAIN_REQUEST_DSID              84
+#define TRDP_CONFTEST_OPTRAIN_REPLY_DSID                85
+#define TRDP_CONFTEST_ECHO_REQUEST_DSID                 86
+#define TRDP_CONFTEST_ECHO_REPLY_DSID                   87
+#define TRDP_CONFTEST_REVERSE_ECHO_DSID                 88
+
+#define TRDP_TTDB_OP_TRAIN_DIR_STATUS_INFO_DSID         100
+#define TRDP_TTDB_OP_TRAIN_DIR_INFO_DSID                101
+#define TRDP_TTDB_TRAIN_DIR_INFO_REQUEST_DSID           102
+#define TRDP_TTDB_TRAIN_DIR_INFO_REPLY_DSID             103
+#define TRDP_TTDB_STATIC_CONSIST_INFO_REQUEST_DSID      104
+#define TRDP_TTDB_STATIC_CONSIST_INFO_REPLY_DSID        105
+#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REQUEST_DSID   106
+#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REPLY_DSID     107
+#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REQUEST_DSID        108
+#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REPLY_DSID          109
+#define TRDP_TTDB_READ_COMPLETE_REQUEST_DSID            110
+#define TRDP_TTDB_READ_COMPLETE_REPLY_DSID              111
+
+#define TRDP_ECSP_CTRL_DSID         	                120    /* Etb control message               */
+#define TRDP_ECSP_STAT_DSID	                            121    /* Etb status message                */
+#define TRDP_ECSP_CONF_REQUEST_DSID                     122    /* ECSP confirmation/correction request message */
+#define TRDP_ECSP_CONF_REPLY_DSID                       123    /* ECSP confirmation/correction reply message */
+
+#define TRDP_ETBN_CTRL_REQUEST_DSID         	        130
+#define TRDP_ETBN_STATUS_REPLY_DSID	                    131
+#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REQUEST_DSID   132
+#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REPLY_DSID     133
+
+#define TRDP_DNS_REQUEST_DSID                           140
+#define TRDP_DNS_REPLY_DSID                             141
+
+#define TRDP_NEST1_TEST_DSID                            990
+#define TRDP_NEST2_TEST_DSID                            991
+#define TRDP_NEST3_TEST_DSID                            992
+#define TRDP_NEST4_TEST_DSID                            993
+
+#define TRDP_TEST_DSID                                  1000
 
 
 /***********************************************************************************************************************
