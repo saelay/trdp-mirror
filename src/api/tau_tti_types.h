@@ -204,6 +204,8 @@ typedef struct
     UINT32                  safetyCode;     /**< checksum, as defined in B.9 */
 }  GNU_PACKED TRDP_ETB_CTRL_VDP_T;
 
+
+
 typedef struct
 {
     TRDP_UUID_T             cstUUID;        /**< UUID of the consist, provided by ETBN (TrainNetworkDirectory)
@@ -261,11 +263,10 @@ typedef struct
                                                  Note: This is a variable size array, only opCstCnt array elements
                                                  are present on the network and for crc computation   */
     UINT32                  trnTopoCnt;     /**< computed as defined in 5.3.3.2.16 (seed value: etbTopoCnt) */
-} GNU_PACKED TRDP_TRAIN_DIRECTORY_T;
+} GNU_PACKED TRDP_TRAIN_DIR_T;
 
 
 /** Operational vehicle structure */
-
 typedef struct
 {
     TRDP_LABEL_T            vehId;          /**< Unique vehicle identifier, application defined (e.g. UIC Identifier) */
@@ -291,7 +292,6 @@ typedef struct
 
 
 /** Operational consist structure */
-
 typedef struct
 {
     TRDP_UUID_T             cstUUID;        /**< Reference to static consist attributes, 
@@ -304,12 +304,11 @@ typedef struct
                                                  with vehicle 01 being the first vehicle in ETB reference
                                                  direction 1 as defined in IEC61375-2-5,
                                                  value range: 1..63, 0 = inserted by correction */
-    UINT8                   reserved02;     /*< reserved for future use (= 0) */
+    UINT8                   reserved01;     /*< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_CONSIST_T;
 
 
 /** Operational train directory state */
-
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectoryState data structure version  
@@ -331,11 +330,10 @@ typedef struct
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter
                                                  set to 0 if opTrnDirState == invalid */
     UINT32                  crc;            /**< sc-32 computed over record (seed value: 'FFFFFFFF'H) */
-} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_STATE_T;
+} GNU_PACKED TRDP_OP_TRAIN_DIR_STATE_T;
 
 
 /** Operational train structure */
-
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< Train info structure version */
@@ -366,19 +364,18 @@ typedef struct
                                                              are present        */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
                                                  computed as defined in 5.3.3.2.16 (seed value : trnTopoCnt) */
-} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_T;
+} GNU_PACKED TRDP_OP_TRAIN_DIR_T;
+
 
 /** Operational Train directory status info structure */
-
 typedef struct
 {
-    TRDP_OP_TRAIN_DIRECTORY_STATE_T     state;
-    TRDP_ETB_CTRL_VDP_T                 safetyTrail;
-} GNU_PACKED TRDP_OP_TRAIN_DIRECTORY_STATUS_INFO_T;
+    TRDP_OP_TRAIN_DIR_STATE_T   state;
+    TRDP_ETB_CTRL_VDP_T         safetyTrail;
+} GNU_PACKED TRDP_OP_TRAIN_DIR_STATUS_INFO_T;
 
 
 /** Train network directory entry structure acc. to IEC61375-2-5 */
-
 typedef struct
 {
     TRDP_UUID_T             cstUUID;        /**< unique consist identifier */
@@ -389,12 +386,11 @@ typedef struct
                                                  bit14..15: 0
                                                  bit16..21: subnet Id
                                                  bit24..29: CN Id
-                                                 bit30..13: 0 */    
+                                                 bit30..31: 0 */    
 } GNU_PACKED TRDP_TRAIN_NET_DIR_ENTRY_T;
 
 
 /** Train network directory structure */
-
 typedef struct
 {
     UINT16                  reserved01;     /**< reserved for future use (= 0) */
@@ -402,7 +398,7 @@ typedef struct
     TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
                                             /**< train network directory */
     UINT32                  etbTopoCnt;     /**< train network directory CRC */
-} GNU_PACKED TRDP_TRAIN_NET_DIRECTORY_T;
+} GNU_PACKED TRDP_TRAIN_NET_DIR_T;
 
 
 

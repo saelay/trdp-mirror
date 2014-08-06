@@ -81,9 +81,9 @@ EXT_DECL TRDP_ERR_T tau_initTtiAccess (void);
  *
  */
 EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
-    TRDP_OP_TRAIN_DIRECTORY_STATE_T         *pOpTrDirState,
-    TRDP_OP_TRAIN_DIRECTORY_T               *pOpTrDir,
-    UINT8                            const  etbId);
+    TRDP_OP_TRAIN_DIR_STATE_T         *pOpTrDirState,
+    TRDP_OP_TRAIN_DIR_T               *pOpTrDir,
+    UINT8                       const  etbId);
 
 
 /**********************************************************************************************************************/
@@ -98,8 +98,8 @@ EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTrDirectory (
-    TRDP_TRAIN_DIRECTORY_T                  *pTrDir,
-    UINT8                            const  etbId);
+    TRDP_TRAIN_DIR_T                  *pTrDir,
+    UINT8                       const  etbId);
 
 
 /**********************************************************************************************************************/
@@ -133,11 +133,11 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTTI (
-    TRDP_OP_TRAIN_DIRECTORY_STATE_T         *pOpTrDirState,
-    TRDP_OP_TRAIN_DIRECTORY_T               *pOpTrDir,
-    TRDP_TRAIN_DIRECTORY_T                  *pTrDir,
-    TRDP_TRAIN_NET_DIRECTORY_T              *pTrNetDir,
-    UINT8                            const  etbId);
+    TRDP_OP_TRAIN_DIR_STATE_T         *pOpTrDirState,
+    TRDP_OP_TRAIN_DIR_T               *pOpTrDir,
+    TRDP_TRAIN_DIR_T                  *pTrDir,
+    TRDP_TRAIN_NET_DIR_T              *pTrNetDir,
+    UINT8                       const  etbId);
 
 
 /**********************************************************************************************************************/
