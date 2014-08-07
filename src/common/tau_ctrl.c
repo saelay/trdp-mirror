@@ -16,7 +16,6 @@
  *
  * $Id$
  *
- * TODO: echange multicast IP dest address to devECSP.anyVeh.lCst and set ownIP address
  *
  */
 
