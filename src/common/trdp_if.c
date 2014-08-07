@@ -2164,7 +2164,7 @@ TRDP_ERR_T tlm_request (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     pListenHandle       Listener ID returned
- *  @param[in]      pUserRef            user supplied value returned with reply
+ *  @param[in]      pUserRef            user supplied value returned with received message
  *  @param[in]      comId               comId to be observed
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
