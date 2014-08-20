@@ -182,6 +182,7 @@ void proto_reg_handoff_trdp(void);
  * @param trdpRootNode      Root node of the view of an TRDP packet (Necessary, as this function will be called recursively)
  * @param trdp_spy_comid    the already extracted comId
  * @param offset            where the userdata starts in the TRDP package
+ * @param length            Amount of bytes, that are transported for the users
  * @param flag_dataset      on 0, the comId will be searched, on > 0 trdp_spy_comid will be interpreted as a dataset id
  * @param dataset_level     is set to 0 for the beginning
  *
