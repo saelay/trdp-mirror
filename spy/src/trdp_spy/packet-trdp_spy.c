@@ -75,7 +75,8 @@ static int proto_trdp_spy_TCP = -1;
 static int hf_trdp_spy_sequencecounter = -1;    /*uint32*/
 static int hf_trdp_spy_protocolversion = -1;    /*uint16*/
 static int hf_trdp_spy_type = -1;               /*uint16*/
-static int hf_trdp_spy_topocount = -1;          /*uint32*/
+static int hf_trdp_spy_etb_topocount = -1;      /*uint32*/
+static int hf_trdp_spy_op_trn_topocount = -1;   /*uint32*/
 static int hf_trdp_spy_comid = -1;              /*uint32*/
 static int hf_trdp_spy_datasetlength = -1;      /*uint16*/
 
@@ -89,7 +90,6 @@ static int hf_trdp_spy_userdata = -1;           /* userdata */
 static int hf_trdp_spy_reply_comid = -1;        /*uint16*/   /*for MD-family only*/
 static int hf_trdp_spy_reply_ipaddress = -1;    /*uint16*/
 static int hf_trdp_spy_fcs_body = -1;           /*uint8*/
-static int hf_trdp_spy_fcs_body_calc = -1;      /*uint8*/
 static int hf_trdp_spy_isPD = -1;               /* flag */
 
 /* needed only for MD messages*/
@@ -187,24 +187,22 @@ static proto_item* add_crc2tree(tvbuff_t *tvb, proto_tree *trdp_spy_tree, int re
  */
 static gint32 checkPaddingAndOffset(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree, guint32 start_offset, guint32 offset)
 {
-    gint32 offsetBodyCRC;
+    gint32 remainingBytes;
     gint32 isPaddingZero;
     gint32 i;
 
-    /* Display the padding and the body CRC */
-
     /* Jump to the last 4 byte and check the crc */
-    offsetBodyCRC = tvb_length_remaining(tvb, offset) - TRDP_FCS_LENGTH;
-    PRNT(printf("The remaining is %d (startoffset=%d, padding=%d)\n", offsetBodyCRC, start_offset, (offsetBodyCRC % 4)));
+    remainingBytes = tvb_length_remaining(tvb, offset);
+    PRNT(printf("The remaining bytes are %d (startoffset=%d, padding=%d)\n", remainingBytes, start_offset, (remainingBytes % 4)));
 
-    if (offsetBodyCRC < 0) /* There is no space for user data */
+    if (remainingBytes < 0) /* There is no space for user data */
     {
         return offset;
     }
-    else if (offsetBodyCRC > 0)
+    else if (remainingBytes > 0)
     {
         isPaddingZero = 0; // flag, if all padding bytes are zero
-        for(i = 0; i < offsetBodyCRC; i++)
+        for(i = 0; i < remainingBytes; i++)
         {
             if (tvb_get_guint8(tvb, offset + i) != 0)
             {
@@ -212,8 +210,8 @@ static gint32 checkPaddingAndOffset(tvbuff_t *tvb, packet_info *pinfo, proto_tre
                 break;
             }
         }
-        proto_tree_add_text(tree, tvb, offset, offsetBodyCRC, ( (isPaddingZero == 0) ? "padding" : "padding not zero") );
-        offset += offsetBodyCRC;
+        proto_tree_add_text(tree, tvb, offset, remainingBytes, ( (isPaddingZero == 0) ? "padding" : "padding not zero") );
+        offset += remainingBytes;
 
         /* Mark this packet in the statistics also as "not perfect" */
         if (isPaddingZero != 0)
@@ -222,19 +220,9 @@ static gint32 checkPaddingAndOffset(tvbuff_t *tvb, packet_info *pinfo, proto_tre
         }
     }
 
-    if (tvb_length_remaining(tvb, offset) == TRDP_FCS_LENGTH)
-    {
-        add_crc2tree(tvb, tree, hf_trdp_spy_fcs_body, hf_trdp_spy_fcs_body_calc, offset, start_offset,
-                        offset - offsetBodyCRC /* do NOT calculate the CRC over the padding */, "Body");
-    }
-    else /* the space after the Userdata is not fitting*/
-    {
-        expert_add_info_format(pinfo, NULL, PI_UNDECODED, PI_WARN,
-                         "Error at FCS for userdata, expect %d bytes and have %d",
-                         TRDP_FCS_LENGTH, tvb_length_remaining(tvb, offset) );
-    }
 
-    return offsetBodyCRC + TRDP_FCS_LENGTH;
+
+    return remainingBytes + TRDP_FCS_LENGTH;
 }
 
 /**
@@ -295,7 +283,7 @@ guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree 
 
 	if (strcmp(gbl_trdpDictionary_1,"") == 0  ) /* No configuration file was set */
 	{
-	    offset += length + (value32u % 4);
+	    offset += length;
         PRNT(printf("No Configuration, %d byte of userdata -> end offset is %d\n", length, offset));
 	    return checkPaddingAndOffset(tvb, pinfo, trdp_spy_tree, start_offset, offset);
 	}
@@ -326,7 +314,7 @@ guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree 
 	if (pFound == NULL) /* No Configuration for this ComId available */
 	{
 	    /* Move position in front of CRC (padding included) */
-        offset += length + (value32u % 4);
+        offset += length;
         PRNT(printf("No Dataset, %d byte of userdata -> end offset is %d\n", length, offset));
 		return checkPaddingAndOffset(tvb, pinfo, trdp_spy_tree, start_offset, offset);
 	}
@@ -702,9 +690,10 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 		ti = proto_tree_add_item(proto_ver_tree, hf_trdp_spy_protocolversion, tvb, TRDP_HEADER_OFFSET_PROTOVER, 2, FALSE); /* add the raw version of the protocol version in a subtree */
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_type, tvb, TRDP_HEADER_OFFSET_TYPE, 2, FALSE);
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_comid, tvb, TRDP_HEADER_OFFSET_COMID, 4, FALSE);
-		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_topocount, tvb, TRDP_HEADER_OFFSET_TOPOCNT, 4, FALSE);
+		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_etb_topocount, tvb, TRDP_HEADER_OFFSET_ETB_TOPOCNT, 4, FALSE);
+		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_op_trn_topocount, tvb, TRDP_HEADER_OFFSET_OP_TRN_TOPOCNT, 4, FALSE);
 		ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_datasetlength, tvb, TRDP_HEADER_OFFSET_DATASETLENGTH, 4, FALSE);
-		datasetlength = tvb_get_ntohl(tvb, 16);
+		datasetlength = tvb_get_ntohl(tvb, TRDP_HEADER_OFFSET_DATASETLENGTH);
 	}
 	else
 	{
@@ -763,8 +752,8 @@ void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
     }
 
     // Read required values from the package:
-    trdp_spy_string = tvb_get_ephemeral_string(tvb, 6, 2);
-    trdp_spy_comid = tvb_get_ntohl(tvb, 8);
+    trdp_spy_string = tvb_get_ephemeral_string(tvb, TRDP_HEADER_OFFSET_TYPE, 2);
+    trdp_spy_comid = tvb_get_ntohl(tvb, TRDP_HEADER_OFFSET_COMID);
 
     /* Telegram that fits into one packet, or the header of huge telegram, that was reassembled */
     if (tree != NULL)
@@ -860,16 +849,17 @@ void proto_register_trdp(void)
     {
         /* All the general fields for the header */
         { &hf_trdp_spy_sequencecounter,      { "Sequence Counter",      "trdp.sequencecounter",     FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
-        { &hf_trdp_spy_protocolversion,      { "Protocol Version",      "trdp.protocolversion",    FT_UINT16, BASE_HEX, NULL,   0x0, "", HFILL } },
-        { &hf_trdp_spy_type,                 { "Type",                  "trdp.type",               FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
-        { &hf_trdp_spy_comid,                { "Com ID",                "trdp.comid",              FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
-        { &hf_trdp_spy_topocount,            { "Topo Count",            "trdp.topocount",          FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
-        { &hf_trdp_spy_datasetlength,        { "Dataset Length",        "trdp.datasetlength",      FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_protocolversion,      { "Protocol Version",      "trdp.protocolversion",     FT_UINT16, BASE_HEX, NULL,   0x0, "", HFILL } },
+        { &hf_trdp_spy_type,                 { "Type",                  "trdp.type",                FT_STRING, BASE_NONE, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_comid,                { "Com ID",                "trdp.comid",               FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
+        { &hf_trdp_spy_etb_topocount,        { "ETB Topo Count",        "trdp.etbtopocnt",          FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
+        { &hf_trdp_spy_op_trn_topocount,     { "Op Trn Topo Count",     "trdp.optrntopocnt",        FT_UINT32, BASE_DEC, NULL,   0x0, "", HFILL } },
+        { &hf_trdp_spy_datasetlength,        { "Dataset Length",        "trdp.datasetlength",       FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
 
         /* PD specific stuff */
         { &hf_trdp_spy_reply_comid,         { "Requested ComId",        "trdp.replycomid",  FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } }, /* only used in a PD request */
         { &hf_trdp_spy_reply_ipaddress,     { "Reply IP address",       "trdp.replyip",     FT_IPv4, BASE_NONE, NULL, 0x0,     "", HFILL } },
-        { &hf_trdp_spy_isPD,                    { "Process data",           "trdp.pd",          FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
+        { &hf_trdp_spy_isPD,                { "Process data",           "trdp.pd",          FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
 
         /* MD specific stuff */
         { &hf_trdp_spy_replystatus,     { "Reply Status",  "trdp.replystatus",      FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
@@ -890,7 +880,6 @@ void proto_register_trdp(void)
 
         /* The checksum for the body (the trdp.fcsbodycalc is only set, if calculated FCS differs) */
         { &hf_trdp_spy_fcs_body,            { "body FCS",          "trdp.fcsbody",                  FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
-        { &hf_trdp_spy_fcs_body_calc,       { "body FCS",          "trdp.fcsbodycalc",              FT_UINT32, BASE_HEX, NULL, 0x0,     "", HFILL } },
     };
     /* Setup protocol subtree array */
     static gint *ett[] = {
