@@ -448,7 +448,7 @@ guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree 
 			offset += 1;
 			break;
 		case TRDP_CHAR8:
-			text = tvb_get_ephemeral_string(tvb, offset, element_amount);
+			text = (gchar *) tvb_get_ephemeral_string(tvb, offset, element_amount);
 			proto_tree_add_text(userdata_actual, tvb, offset, element_amount, "%s : %s %s", el->name->str, text, (el->unit != 0) ? el->unit->str : "");
 			offset += element_amount;
             array_id = element_amount - 1; // Jump to the next element (remove one, because this will be added automatically later)
@@ -752,7 +752,7 @@ void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
     }
 
     // Read required values from the package:
-    trdp_spy_string = tvb_get_ephemeral_string(tvb, TRDP_HEADER_OFFSET_TYPE, 2);
+    trdp_spy_string = (gchar *) tvb_get_ephemeral_string(tvb, TRDP_HEADER_OFFSET_TYPE, 2);
     trdp_spy_comid = tvb_get_ntohl(tvb, TRDP_HEADER_OFFSET_COMID);
 
     /* Telegram that fits into one packet, or the header of huge telegram, that was reassembled */
