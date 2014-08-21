@@ -279,7 +279,7 @@ guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree 
 	setlocale(LC_ALL,"C");
 
     /* make the userdata accessable for wireshark */
-    ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_userdata, tvb, offset, tvb_length_remaining(tvb, offset), FALSE);
+    ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_userdata, tvb, offset, length, FALSE);
 
 	if (strcmp(gbl_trdpDictionary_1,"") == 0  ) /* No configuration file was set */
 	{
