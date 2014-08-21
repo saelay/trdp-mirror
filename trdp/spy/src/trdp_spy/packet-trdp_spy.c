@@ -87,8 +87,9 @@ static int hf_trdp_spy_fcs_head_data = -1;      /*uint32*/
 static int hf_trdp_spy_userdata = -1;           /* userdata */
 
 /*needed only for PD messages*/
-static int hf_trdp_spy_reply_comid = -1;        /*uint16*/   /*for MD-family only*/
-static int hf_trdp_spy_reply_ipaddress = -1;    /*uint16*/
+static int hf_trdp_spy_reserved    = -1;        /*uint32*/
+static int hf_trdp_spy_reply_comid = -1;        /*uint32*/   /*for MD-family only*/
+static int hf_trdp_spy_reply_ipaddress = -1;    /*uint32*/
 static int hf_trdp_spy_fcs_body = -1;           /*uint8*/
 static int hf_trdp_spy_isPD = -1;               /* flag */
 
@@ -706,7 +707,7 @@ static void build_trdp_tree(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree,
 		{
 		case 'P':
 			/* PD specific stuff */
-			ti = proto_tree_add_text(trdp_spy_tree, tvb, TRDP_HEADER_PD_OFFSET_RESERVED, 4, "Reserved");
+			proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reserved, tvb, TRDP_HEADER_PD_OFFSET_RESERVED, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_comid, tvb, TRDP_HEADER_PD_OFFSET_REPLY_COMID, 4, FALSE);
 			ti = proto_tree_add_item(trdp_spy_tree, hf_trdp_spy_reply_ipaddress, tvb, TRDP_HEADER_PD_OFFSET_REPLY_IPADDR, 4, FALSE);
 			ti = add_crc2tree(tvb,trdp_spy_tree, hf_trdp_spy_fcs_head, hf_trdp_spy_fcs_head_calc, TRDP_HEADER_PD_OFFSET_FCSHEAD , 0, TRDP_HEADER_PD_OFFSET_FCSHEAD, "Header");
@@ -857,6 +858,7 @@ void proto_register_trdp(void)
         { &hf_trdp_spy_datasetlength,        { "Dataset Length",        "trdp.datasetlength",       FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
 
         /* PD specific stuff */
+        { &hf_trdp_spy_reserved,            { "reserved",               "trdp.reserved",    FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } },
         { &hf_trdp_spy_reply_comid,         { "Requested ComId",        "trdp.replycomid",  FT_UINT32, BASE_DEC, NULL, 0x0,     "", HFILL } }, /* only used in a PD request */
         { &hf_trdp_spy_reply_ipaddress,     { "Reply IP address",       "trdp.replyip",     FT_IPv4, BASE_NONE, NULL, 0x0,     "", HFILL } },
         { &hf_trdp_spy_isPD,                { "Process data",           "trdp.pd",          FT_STRING, BASE_NONE, NULL, 0x0, "", HFILL } },
