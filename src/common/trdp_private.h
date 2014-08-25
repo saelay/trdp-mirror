@@ -219,7 +219,7 @@ typedef struct PD_ELE
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
     TRDP_TO_BEHAVIOR_T  toBehavior;             /**< timeout behavior for packets                           */
     UINT32              dataSize;               /**< net data size                                          */
-    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    UINT32              grossSize;              /**< complete packet size (header, data)                    */
     UINT32              sendSize;               /**< data size sent out                                     */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
@@ -262,7 +262,7 @@ typedef struct MD_ELE
                                                      interval for packets to send (set from ms)             */
     TRDP_TIME_T         timeToGo;               /**< next time this packet must be sent/rcv                 */
     UINT32              dataSize;               /**< net data size                                          */
-    UINT32              grossSize;              /**< complete packet size (header, data, padding, FCS)      */
+    UINT32              grossSize;              /**< complete packet size (header, data)                    */
     UINT32              sendSize;               /**< data size sent out                                     */
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */

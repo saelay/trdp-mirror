@@ -1573,8 +1573,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 {
                     vos_printLog(VOS_LOG_INFO, "PD Request (comId: %u) getting new element %p\n", comId, pReqElement);
                     /*
-                     Compute the overal packet size
-                     Add padding bytes to align to 32 bits
+                        Compute the overal packet size
                      */
                     pReqElement->dataSize   = dataSize;
                     pReqElement->grossSize  = trdp_packetSizePD(dataSize);
@@ -1782,7 +1781,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
         if (ret == TRDP_NO_ERR)
         {
-            /*    buffer size is PD_ELEMENT plus max. payload size plus padding & framecheck    */
+            /*    buffer size is PD_ELEMENT plus max. payload size    */
 
             /*    Allocate a buffer for this kind of packets    */
             newPD = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));

@@ -134,38 +134,10 @@ TRDP_ERR_T trdp_pdPut (
         /* set data valid */
         pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
 
-        /* Update PD buffer */
-        trdp_pdDataUpdate(pPacket);
-
         /*  Update some statistics  */
         pPacket->updPkts++;
     }
     return ret;
-}
-
-/******************************************************************************/
-/** Add padding
- *
- */
-void trdp_pdDataUpdate (
-    PD_ELE_T *pPacket)
-{
-    UINT8   *pDest = pPacket->pFrame->data + pPacket->dataSize;
-
-    /* Padding exists only if data is transmitted */
-    if (pPacket->dataSize != 0)
-    {
-        /*  Pad with zero bytes */
-        UINT32 padding = 4 - (pPacket->dataSize & 0x3);
-
-        if (padding < 4)
-        {
-            while (padding--)
-            {
-                *pDest++ = 0;
-            }
-        }
-    }
 }
 
 /******************************************************************************/

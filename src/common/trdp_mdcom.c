@@ -2704,14 +2704,6 @@ TRDP_ERR_T trdp_mdCommonSend (
         {
             /* Copy payload */
             memcpy(pSenderElement->pPacket->data, pData, dataSize);
-            {
-                /* zero padding (as required) */
-                int ix = dataSize;
-                while (0 != (ix & 3))
-                {
-                    pSenderElement->pPacket->data[ix++] = 0;
-                }
-            }
         }
 
         /* Insert element in send queue */

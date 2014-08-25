@@ -185,7 +185,7 @@ void trdp_releaseSocket(
 /*********************************************************************************************************************/
 /** Get the packet size from the raw data size
  *
- *  @param[in]      dataSize            net data size (without padding or FCS)
+ *  @param[in]      dataSize            net data size
  *
  *  @retval         packet size         the size of the complete packet to
  *                                      be sent or received
@@ -197,7 +197,7 @@ UINT32 trdp_packetSizePD (
 /*********************************************************************************************************************/
 /** Get the packet size from the raw data size
  *
- *  @param[in]      dataSize            net data size (without padding or FCS)
+ *  @param[in]      dataSize            net data size
  *
  *  @retval         packet size         the size of the complete packet to
  *                                      be sent or received
