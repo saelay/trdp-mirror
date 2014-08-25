@@ -68,7 +68,7 @@ typedef struct
     UINT32              cycle;     /**< dataset identifier */
     UINT32              redundant; /**< N0 = not redundant, >0 redundancy group */
     UINT32              timeout;   /**< Timeout value in us, before considering received process data invalid */
-    TRDP_TO_BEHAVIOR_T  toBehav;   /**< Behaviour when received process data is invalid/timed out. */
+    TRDP_TO_BEHAVIOR_T  toBehav;   /**< Behavior when received process data is invalid/timed out. */
     TRDP_FLAGS_T        flags;     /**< TRDP_FLAGS_MARSHALL, TRDP_FLAGS_REDUNDANT */
     UINT16              offset;    /**< Offset-address for PD in traffic store for ladder topology */
 } TRDP_PD_PAR_T;

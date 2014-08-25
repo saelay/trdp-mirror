@@ -311,7 +311,7 @@ typedef struct TRDP_SESSION
     TRDP_MARSHALL_CONFIG_T  marshall;           /**< Marshalling(unMarshalling configuration                */
     TRDP_PD_CONFIG_T        pdDefault;          /**< Default configuration for process data                 */
     TRDP_MEM_CONFIG_T       memConfig;          /**< Internal memory handling configuration                 */
-    TRDP_OPTION_T           option;             /**< Stack behaviour options                                */
+    TRDP_OPTION_T           option;             /**< Stack behavior options                                */
     TRDP_SOCKETS_T          iface[VOS_MAX_SOCKET_CNT];  /**< Collection of sockets to use                   */
     PD_ELE_T                *pSndQueue;         /**< pointer to first element of send queue                 */
     PD_ELE_T                *pRcvQueue;         /**< pointer to first element of rcv queue                  */
