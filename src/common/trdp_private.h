@@ -224,6 +224,7 @@ typedef struct PD_ELE
     TRDP_DATASET_T      *pCachedDS;             /**< Pointer to dataset element if known                    */
     INT32               socketIdx;              /**< index into the socket list                             */
     const void          *pUserRef;              /**< from subscribe()                                       */
+    TRDP_PD_CALLBACK_T  pfCbFunction;           /**< Pointer to PD callback function                        */
     PD_PACKET_T         *pFrame;                /**< header ... data + FCS...                               */
 } PD_ELE_T, *TRDP_PUB_PT, *TRDP_SUB_PT;
 
@@ -235,16 +236,17 @@ typedef struct MD_LIS_ELE
     TRDP_ADDRESSES_T    addr;                   /**< addressing values                                      */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
-    const void          *pUserRef;              /**< user reference for call_back from tlm_request()        */
+    const void          *pUserRef;              /**< user reference for call_back                           */
     TRDP_URI_USER_T     destURI;
     INT32               socketIdx;              /**< index into the socket list                             */
+    TRDP_MD_CALLBACK_T  pfCbFunction;           /**< Pointer to MD callback function                        */
 } MD_LIS_ELE_T;
 
 /** Tcp connection parameters    */
 typedef struct TRDP_MD_TCP
 {
     BOOL8   doConnect;                          /**< TCP connection state                                   */
-    BOOL8   msgUncomplete;                      /**< The receive message is uncomplete                   */
+    BOOL8   msgUncomplete;                      /**< The receive message is uncomplete                      */
 } TRDP_MD_TCP_T;
 
 /** Session queue element for MD (UDP and TCP)  */
@@ -276,9 +278,11 @@ typedef struct MD_ELE
     UINT32              numConfirmSent;         /**< number of Confirm sent                                 */
     UINT32              numConfirmTimeout;      /**< number of Confirm Timeouts (incremented by listeners   */
     const void          *pUserRef;              /**< user reference for call_back from tlm_request()        */
-    TRDP_URI_USER_T     destURI;                /**< filter on incoming MD by destination URI               */
+    TRDP_URI_USER_T     destURI;                /**< incoming MD destination URI for filter and reply       */
+    TRDP_URI_USER_T     srcURI;                 /**< incoming MD source URI for reply                       */
     TRDP_MD_TCP_T       tcpParameters;          /**< Tcp connection parameters                              */
-    MD_PACKET_T         *pPacket;               /**< Packet    header in network byte order                 */
+    TRDP_MD_CALLBACK_T  pfCbFunction;           /**< Pointer to MD callback function                        */
+    MD_PACKET_T         *pPacket;               /**< Packet header in network byte order                    */
                                                 /**< data ready to be sent (with CRCs)                      */
 } MD_ELE_T;
 

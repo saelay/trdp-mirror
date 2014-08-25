@@ -1124,20 +1124,12 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
             /* send reply */
             err = tlm_reply(
                     apph,                           /* session handle */
-                    NULL,                           /* user reference */
                     (const TRDP_UUID_T *) &msg->sessionId,               /* session id */
-                    0,                              /* topo */
-                    0,
                     msg->comId,                     /* comid */
-                    msg->srcIpAddr,                 /* source IP address */
-                    msg->destIpAddr,                /* destination IP address */
-                    flags,                          /* flags */
                     0,                              /* user status */
                     NULL,                           /* send parameters */
                     (UINT8 *) buf,                  /* dataset buffer */
-                    opts.msgsz,                     /* dataset size */
-                    msg->srcURI,                    /* source URI */
-                    msg->destURI);                  /* destination URI */
+                    opts.msgsz);                    /* dataset size */
             /* check for errors */
             if (err != TRDP_NO_ERR)
             {
@@ -1154,21 +1146,14 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
             /* send reply */
             err = tlm_replyQuery(
                     apph,                           /* session handle */
-                    NULL,                           /* user reference */
                     (const TRDP_UUID_T *) &msg->sessionId, /* session id */
-                    0,                              /* topo */
-                    0,
                     msg->comId,                     /* comid */
-                    msg->srcIpAddr,                 /* source IP address */
-                    msg->destIpAddr,                /* destination IP address */
-                    flags,                          /* flags */
                     0,                              /* user status */
                     opts.tmo * 1000,                /* confirm timeout */
                     NULL,                           /* send parameters */
                     (UINT8 *) buf,                  /* dataset buffer */
-                    opts.msgsz,                     /* dataset size */
-                    msg->srcURI,                    /* source URI */
-                    msg->destURI);                  /* destination URI */
+                    opts.msgsz);                    /* dataset size */
+
             /* check for errors */
             if (err != TRDP_NO_ERR)
             {
@@ -1181,19 +1166,10 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
             /* send confirm */
             err = tlm_confirm(
                     apph,                           /* session handle */
-                    (void *) sts.test,              /* user reference */
                     (const TRDP_UUID_T *) &msg->sessionId, /* session id */
-                    msg->comId,                     /* comid */
-                    msg->etbTopoCnt,                /* topo */
-                    msg->opTrnTopoCnt,              /* topo */
-                    msg->srcIpAddr,                 /* source IP address */
-                    msg->destIpAddr,                /* destination IP address */
-                    flags,                          /* flags */
-                    0,                              /* user status */
                     msg->replyStatus,               /* reply status */
-                    NULL,                           /* send parameters */
-                    msg->srcURI,                    /* source URI */
-                    msg->destURI);                  /* destination URI */
+                    NULL);                          /* send parameters */
+
             /* check for errors */
             if (err != TRDP_NO_ERR)
             {
