@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2014-08-25: Ticket #51: change underlying function for vos_dottedIP
+ *
  */
 
 #ifndef POSIX
@@ -276,11 +278,20 @@ EXT_DECL UINT32 vos_ntohl (
  *  @param[in]          pDottedIP     IP address as dotted decimal.
  *
  *  @retval             address in UINT32 in host endianess
+ *                      0 (Zero) if error
  */
 EXT_DECL UINT32 vos_dottedIP (
     const CHAR8 *pDottedIP)
 {
-    return vos_ntohl(inet_addr(pDottedIP));
+    struct in_addr addr;
+    if (inet_aton(pDottedIP, &addr) < 0)
+    {
+        return 0;   /* Prevent returning broadcast address on error */
+    }
+    else
+    {
+        return vos_ntohl(addr.s_addr);
+    }
 }
 
 /**********************************************************************************************************************/
