@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2014-08-25: Ticket #57+58: Padding / zero bytes trailing MD & PD packets fixed
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *                     Ticket #47: Protocol change: no FCS for data part of telegrams
  *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according to IEEE802.3
@@ -348,7 +349,7 @@ TRDP_ERR_T trdp_mdCheck (
 
         if (l_datasetLength > 0)
         {
-            expectedLength = sizeof(MD_HEADER_T) + l_datasetLength + SIZE_OF_FCS;
+            expectedLength = sizeof(MD_HEADER_T) + l_datasetLength;
         }
         else
         {
