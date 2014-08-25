@@ -179,7 +179,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
                                                                              */
         pStatistics[lIndex].timeout     = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */
-        pStatistics[lIndex].toBehav = iter->toBehavior;          /* Behaviour at time-out    */
+        pStatistics[lIndex].toBehav = iter->toBehavior;          /* Behavior at time-out    */
         pStatistics[lIndex].numRecv = iter->numRxTx;             /* Number of packets received for this subscription. */
         pStatistics[lIndex].status  = iter->lastErr;             /* Receive status information  */
     }

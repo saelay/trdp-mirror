@@ -329,7 +329,7 @@ typedef apTRDP_DATASET_T *papTRDP_DATASET_T;
 
 /** Statistical data
  * regarding the former info provided via SNMP the following information was left out/can be implemented additionally using MD:
- *   - PD subscr table:  ComId, sourceIpAddr, destIpAddr, cbFct?, timout, toBehaviour, counter
+ *   - PD subscr table:  ComId, sourceIpAddr, destIpAddr, cbFct?, timout, toBehavior, counter
  *   - PD publish table: ComId, destIpAddr, redId, redState cycle, ttl, qos, counter
  *   - PD join table:    joined MC address table
  *   - MD listener table: ComId  destIpAddr, destUri, cbFct?, counter
@@ -420,7 +420,7 @@ typedef struct
     void                *callBack;  /**< Reference for call back function if used */
     UINT32              timeout;  /**< Time-out value in us. 0 = No time-out supervision */
     TRDP_ERR_T          status;   /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
-    TRDP_TO_BEHAVIOR_T  toBehav;  /**< Behaviour at time-out. Set data to zero / keep last value */
+    TRDP_TO_BEHAVIOR_T  toBehav;  /**< Behavior at time-out. Set data to zero / keep last value */
     UINT32              numRecv;  /**< Number of packets received for this subscription. */
 } TRDP_SUBS_STATISTICS_T;
 
@@ -573,7 +573,7 @@ typedef struct
     TRDP_SEND_PARAM_T   sendParam;              /**< Default send parameters                    */
     TRDP_FLAGS_T        flags;                  /**< Default flags for PD packets               */
     UINT32              timeout;                /**< Default timeout in us                      */
-    TRDP_TO_BEHAVIOR_T  toBehavior;             /**< Default timeout behaviour                  */
+    TRDP_TO_BEHAVIOR_T  toBehavior;             /**< Default timeout behavior                  */
     UINT16              port;                   /**< Port to be used for PD communication       */
 } TRDP_PD_CONFIG_T;
 
