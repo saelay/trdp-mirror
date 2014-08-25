@@ -99,15 +99,14 @@ TRDP_ERR_T  trdp_mdCommonSend (
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
-    UINT16                  userStatus,
     UINT32                  confirmTimeout,
     UINT32                  noOfRepliers,
     UINT32                  replyTimeout,
-    TRDP_REPLY_STATUS_T     replyStatus,
+    INT32                   replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
-    const TRDP_URI_USER_T   sourceURI,
+    const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI);
 
 #endif

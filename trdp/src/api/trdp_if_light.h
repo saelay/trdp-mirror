@@ -233,7 +233,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  Queue a PD message, it will be send when trdp_work has been called
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pPubHandle          returned handle for related unprepare
+ *  @param[out]     pPubHandle          returned handle for related re/unpublish
  *  @param[in]      comId               comId of packet to send
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -258,7 +258,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
-    TRDP_IP_ADDR_T          srcIpAddr,
+    TRDP_IP_ADDR_T          srcIpAddr, 
     TRDP_IP_ADDR_T          destIpAddr,
     UINT32                  interval,
     UINT32                  redId,
@@ -267,12 +267,36 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     const UINT8             *pData,
     UINT32                  dataSize);
 
+/**********************************************************************************************************************/
+/** Prepare for sending PD messages.
+ *  Reinitialize and queue a PD message, it will be send when trdp_work has been called
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pubHandle           handle for related unpublish
+ *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr          where to send the packet to
+ *  @param[in]      pData               pointer to packet data / dataset
+ *  @param[in]      dataSize            size of packet data
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not insert (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlp_republish (
+    TRDP_APP_SESSION_T      appHandle,
+    TRDP_PUB_T              pubHandle,
+    TRDP_IP_ADDR_T          srcIpAddr, 
+    TRDP_IP_ADDR_T          destIpAddr,
+    const UINT8             *pData,
+    UINT32                  dataSize);
+
 
 /**********************************************************************************************************************/
 /** Stop sending PD messages.
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pubHandle           the handle returned by prepare
+ *  @param[in]      pubHandle           the handle returned by publish
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -386,10 +410,9 @@ EXT_DECL TRDP_ERR_T tlp_request (
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages.
  *  Subscribe to a specific PD ComID and source IP
- *    To unsubscribe, set maxDataSize to zero!
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pSubHandle          return a handle for these messages
+ *  @param[out]     pSubHandle          return a handle for this subscription
  *  @param[in]      pUserRef            user supplied value returned within the info structure
  *  @param[in]      comId               comId of packet to receive
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
@@ -426,11 +449,35 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
 
 /**********************************************************************************************************************/
+/** Reprepare for receiving PD messages.
+ *  Resubscribe to a specific PD ComID and source IP
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      subHandle           handle for this subscription
+ *  @param[in]      srcIpAddr1          IP for source filtering, set 0 if not used
+ *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
+ *                                      Used e.g. for source filtering of redundant devices.
+ *  @param[in]      destIpAddr          IP address to join
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not reserve memory (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlp_resubscribe (
+    TRDP_SUB_T          subHandle,
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_IP_ADDR_T      srcIpAddr1,
+    TRDP_IP_ADDR_T      srcIpAddr2,
+    TRDP_IP_ADDR_T      destIpAddr);
+
+
+/**********************************************************************************************************************/
 /** Stop receiving PD messages.
  *  Unsubscribe to a specific PD ComID
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      subHandle           the handle returned by subscription
+ *  @param[in]      subHandle           the handle for this subscription
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -557,21 +604,12 @@ EXT_DECL TRDP_ERR_T tlm_request (
 /**********************************************************************************************************************/
 /** Initiate sending MD confirm message.
  *  Send a MD confirmation message
+ *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pSessionId          Session ID returned by request
- *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
- *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_DEFAULT
  *  @param[in]      userStatus          Info for requester about application errors
- *  @param[in]      replyStatus         Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
- *  @param[in]      sourceURI           only functional group of source URI
- *  @param[in]      destURI             only functional group of destination URI
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -581,19 +619,9 @@ EXT_DECL TRDP_ERR_T tlm_request (
  */
 EXT_DECL TRDP_ERR_T tlm_confirm (
     TRDP_APP_SESSION_T      appHandle,
-    const void              *pUserRef,
     const TRDP_UUID_T       *pSessionId,
-    UINT32                  comId,
-    UINT32                  etbTopoCnt,
-    UINT32                  opTrnTopoCnt,
-    TRDP_IP_ADDR_T          srcIpAddr,
-    TRDP_IP_ADDR_T          destIpAddr,
-    TRDP_FLAGS_T            pktFlags,
     UINT16                  userStatus,
-    TRDP_REPLY_STATUS_T     replyStatus,
-    const TRDP_SEND_PARAM_T *pSendParam,
-    const TRDP_URI_USER_T   sourceURI,
-    const TRDP_URI_USER_T   destURI);
+    const TRDP_SEND_PARAM_T *pSendParam);
 
 
 /**********************************************************************************************************************/
@@ -617,7 +645,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
  *  Add a listener to TRDP to get notified when messages are received
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     pListenHandle       Listener ID returned
+ *  @param[out]     pListenHandle       Handle for this listener returned
  *  @param[in]      pUserRef            user supplied value returned with received message
  *  @param[in]      comId               comId to be observed
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
@@ -644,11 +672,30 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
 
 
 /**********************************************************************************************************************/
+/** Resubscribe to MD messages.
+ *  Readd a listener after topoCount changes to get notified when messages are received
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[out]     listenHandle        Handle for this listener
+ *  @param[in]      mcDestIpAddr        multicast group to listen on
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlm_readdListener (
+    TRDP_APP_SESSION_T      appHandle,
+    TRDP_LIS_T              listenHandle,
+    TRDP_IP_ADDR_T          mcDestIpAddr /* multiple destId handled in layer above */);
+
+
+/**********************************************************************************************************************/
 /** Remove Listener.
  *
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[out]     listenHandle        Listener ID returned
+ *  @param[out]     listenHandle        Handle for this listener
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -662,67 +709,45 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
 /**********************************************************************************************************************/
 /** Send a MD reply message.
  *  Send a MD reply message after receiving an request
+ *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
- *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL
  *  @param[in]      userStatus          Info for requester about application errors
- *  @param[in]      pSendParam          pointer to send parameters, NULL to use default send parameters
+ *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      sourceURI           only user part of source URI
- *  @param[in]      destURI             only user part of destination URI
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_MEM_ERR        Out of memory
  *  @retval         TRDP_NO_SESSION_ERR no such session
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
-EXT_DECL TRDP_ERR_T tlm_reply (
+TRDP_ERR_T tlm_reply (
     TRDP_APP_SESSION_T      appHandle,
-    void                    *pUserRef,
     const TRDP_UUID_T       *pSessionId,
-    UINT32                  etbTopoCnt,
-    UINT32                  opTrnTopoCnt,
     UINT32                  comId,
-    TRDP_IP_ADDR_T          srcIpAddr,
-    TRDP_IP_ADDR_T          destIpAddr,
-    TRDP_FLAGS_T            pktFlags,
     UINT16                  userStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
-    UINT32                  dataSize,
-    const TRDP_URI_USER_T   sourceURI,
-    const TRDP_URI_USER_T   destURI);
+    UINT32                  dataSize);
 
 
 /**********************************************************************************************************************/
-/** Send a MD reply message.
- *  Send a MD reply message after receiving a request and ask for confirmation.
+/** Send a MD reply query message.
+ *  Send a MD reply query message after receiving a request and ask for confirmation.
+ *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
- *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL
  *  @param[in]      userStatus          Info for requester about application errors
  *  @param[in]      confirmTimeout      timeout for confirmation
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      sourceURI           only user part of source URI
- *  @param[in]      destURI             only user part of destination URI
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -730,40 +755,26 @@ EXT_DECL TRDP_ERR_T tlm_reply (
  *  @retval         TRDP_NO_SESSION_ERR no such session
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
-EXT_DECL TRDP_ERR_T tlm_replyQuery (
+TRDP_ERR_T tlm_replyQuery (
     TRDP_APP_SESSION_T      appHandle,
-    void                    *pUserRef,
     const TRDP_UUID_T       *pSessionId,
-    UINT32                  etbTopoCnt,
-    UINT32                  opTrnTopoCnt,
     UINT32                  comId,
-    TRDP_IP_ADDR_T          srcIpAddr,
-    TRDP_IP_ADDR_T          destIpAddr,
-    TRDP_FLAGS_T            pktFlags,
     UINT16                  userStatus,
     UINT32                  confirmTimeout,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
-    UINT32                  dataSize,
-    const TRDP_URI_USER_T   sourceURI,
-    const TRDP_URI_USER_T   destURI);
+    UINT32                  dataSize );
 
 
 /**********************************************************************************************************************/
-/** Send a MD error reply message.
+/** Send a MD reply message.
  *  Send a MD error reply message after receiving an request
+ *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
- *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      comId               comId of packet to be sent
- *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      replyState          Info for requester about stack errors
+ *  @param[in]      replyStatus         Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
- *  @param[in]      sourceURI           only user part of source URI
- *  @param[in]      destURI             only user part of destination URI
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -771,18 +782,12 @@ EXT_DECL TRDP_ERR_T tlm_replyQuery (
  *  @retval         TRDP_NO_SESSION_ERR no such session
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
-EXT_DECL TRDP_ERR_T tlm_replyErr (
+TRDP_ERR_T tlm_replyErr (
     TRDP_APP_SESSION_T      appHandle,
     const TRDP_UUID_T       *pSessionId,
-    UINT32                  etbTopoCnt,
-    UINT32                  opTrnTopoCnt,
-    UINT32                  comId,
-    TRDP_IP_ADDR_T          srcIpAddr,
-    TRDP_IP_ADDR_T          destIpAddr,
-    TRDP_REPLY_STATUS_T     replyState,
-    const TRDP_SEND_PARAM_T *pSendParam,
-    const TRDP_URI_USER_T   sourceURI,
-    const TRDP_URI_USER_T   destURI);
+    TRDP_REPLY_STATUS_T     replyStatus,
+    const TRDP_SEND_PARAM_T *pSendParam);
+
 #endif /* MD_SUPPORT    */
 
 
@@ -804,6 +809,7 @@ EXT_DECL TRDP_ERR_T tlm_replyErr (
 EXT_DECL const CHAR8 *tlc_getVersionString (
     void);
 
+
 /**********************************************************************************************************************/
 /** Return version.
  *    Return pointer to version structure
@@ -811,6 +817,7 @@ EXT_DECL const CHAR8 *tlc_getVersionString (
  *  @retval            const TRDP_VERSION_T
  */
 EXT_DECL const TRDP_VERSION_T *tlc_getVersion (void);
+
 
 /**********************************************************************************************************************/
 /** Return statistics.
@@ -888,6 +895,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     UINT16                  *pNumList,
     TRDP_LIST_STATISTICS_T  *pStatistics);
 
+
 /**********************************************************************************************************************/
 /** Return redundancy group statistics.
  *  Memory for statistics information must be provided by the user.
@@ -907,6 +915,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
     UINT16                  *pNumRed,
     TRDP_RED_STATISTICS_T   *pStatistics);
 
+
 /**********************************************************************************************************************/
 /** Return join statistics.
  *  Memory for statistics information must be provided by the user. must be provided by the user.
@@ -925,6 +934,7 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
     TRDP_APP_SESSION_T  appHandle,
     UINT16              *pNumJoin,
     UINT32              *pIpAddr);
+
 
 /**********************************************************************************************************************/
 /** Reset statistics.
