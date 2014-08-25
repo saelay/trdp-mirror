@@ -60,7 +60,7 @@ void        trdp_mdSetSessionTimeout (
     UINT32      usTimeOut);
 
 TRDP_ERR_T  trdp_mdSendPacket (
-    INT32       pdSock,
+    INT32       mdSock,
     UINT32      port,
     MD_ELE_T    *pPacket);
 

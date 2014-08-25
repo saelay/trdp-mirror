@@ -405,7 +405,7 @@ void    trdp_mdUpdatePacket (
 /**********************************************************************************************************************/
 /** Send MD packet
  *
- *  @param[in]      pdSock          socket descriptor
+ *  @param[in]      mdSock          socket descriptor
  *  @param[in]      port            port on which to send
  *  @param[in]      pElement        pointer to element to be sent
  *  @retval         != NULL         error
