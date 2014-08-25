@@ -554,7 +554,7 @@ typedef struct
  *  @param[in]    appHandle  application handle returned by tlc_openSession
  *  @param[in]    *pMsg      pointer to received message information
  *  @param[in]    *pData     pointer to received data
- *  @param[in]    dataSize   size of received data pointer to received data excl. padding and FCS !!!!
+ *  @param[in]    dataSize   size of received data pointer to received data
  */
 typedef void (*TRDP_PD_CALLBACK_T)(
     void                    *pRefCon,
@@ -585,7 +585,7 @@ typedef struct
  *  @param[in]    *pRefCon   pointer to user context
  *  @param[in]    *pMsg      pointer to received message information
  *  @param[in]    *pData     pointer to received data
- *  @param[in]    dataSize   size of received data pointer to received data excl. padding and FCS !!!!
+ *  @param[in]    dataSize   size of received data pointer to received data
  */
 typedef void (*TRDP_MD_CALLBACK_T)(
     void                    *pRefCon,

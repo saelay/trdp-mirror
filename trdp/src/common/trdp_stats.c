@@ -512,7 +512,4 @@ void    trdp_pdPrepareStats (
     pData->tcpMd.numSend            = vos_htonl(appHandle->stats.tcpMd.numSend);
     pPacket->dataSize = sizeof(TRDP_STATISTICS_T);
 
-    /*  Compute the CRC */
-    trdp_pdDataUpdate(pPacket);
-
 }

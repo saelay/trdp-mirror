@@ -54,9 +54,6 @@ TRDP_ERR_T  trdp_pdPut (
     const UINT8     *pData,
     UINT32          dataSize);
 
-void        trdp_pdDataUpdate (
-    PD_ELE_T *pPacket);
-
 TRDP_ERR_T  trdp_pdCheck (
     PD_HEADER_T *pPacket,
     UINT32      packetSize);
