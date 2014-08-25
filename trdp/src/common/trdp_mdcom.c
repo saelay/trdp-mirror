@@ -51,9 +51,9 @@
  *   Locals
  */
 
-static const UINT32 cMinimumMDSize = 1480;                            /**< Initial size for message data received */
-static const UINT8  cEmptySession[TRDP_SESS_ID_SIZE] = {0};           /**< Empty sessionID to compare             */
-static const TRDP_MD_INFO_T cTrdp_md_info_default;
+static const UINT32         cMinimumMDSize = 1480;                    /**< Initial size for message data received */
+static const UINT8          cEmptySession[TRDP_SESS_ID_SIZE] = {0};   /**< Empty sessionID to compare             */
+static const TRDP_MD_INFO_T cTrdp_md_info_default = {0};
 
 /**********************************************************************************************************************/
 /** Initialize the specific parameters for message data
@@ -883,13 +883,13 @@ TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
     UINT32          sockIndex)
 {
-    TRDP_ERR_T result = TRDP_NO_ERR;
-    MD_HEADER_T *pH = NULL;
+    TRDP_ERR_T          result          = TRDP_NO_ERR;
+    MD_HEADER_T         *pH             = NULL;
     MD_ELE_T            *iterMD         = NULL;
     MD_LIS_ELE_T        *iterListener   = NULL;
     TRDP_MD_ELE_ST_T    state;
-    BOOL8   isTCP = FALSE;
-    UINT32  numOfReceivers = 0;
+    BOOL8               isTCP           = FALSE;
+    UINT32              numOfReceivers  = 0;
 
     if (appHandle == NULL)
     {
@@ -1059,6 +1059,9 @@ TRDP_ERR_T  trdp_mdRecv (
                 /* save session Id and sequence counter for next steps */
                 memcpy(iterMD->sessionID, pH->sessionID, TRDP_SESS_ID_SIZE);
                 iterMD->curSeqCnt = vos_ntohl(pH->sequenceCounter);
+
+                /* save source URI for reply */
+                memcpy(iterMD->srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
             }
             else
             {
@@ -1098,7 +1101,9 @@ TRDP_ERR_T  trdp_mdRecv (
                     iterMD->addr.opTrnTopoCnt  = vos_ntohl(pH->opTrnTopoCnt);
                     iterMD->addr.srcIpAddr  = appHandle->pMDRcvEle->addr.srcIpAddr;
                     iterMD->addr.destIpAddr = appHandle->pMDRcvEle->addr.destIpAddr;
+                    /* why??? 
                     memcpy(iterMD->destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
+                    */
                     iterMD->stateEle    = TRDP_ST_RX_CONF_RECEIVED;
                     iterMD->morituri    = TRUE;
                     vos_printLog(VOS_LOG_INFO, "Received Confirmation, session will be closed!\n");
@@ -1133,6 +1138,9 @@ TRDP_ERR_T  trdp_mdRecv (
                     iterMD->addr.opTrnTopoCnt   = vos_ntohl(pH->opTrnTopoCnt);
                     iterMD->addr.srcIpAddr      = appHandle->pMDRcvEle->addr.srcIpAddr;
                     iterMD->addr.destIpAddr     = appHandle->pMDRcvEle->addr.destIpAddr;
+                    
+                    /* save URI for reply */
+                    memcpy(iterMD->srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
                     memcpy(iterMD->destURI, pH->destinationURI, TRDP_MAX_URI_USER_LEN);
 
                     if (TRDP_MSG_MP == vos_ntohs(pH->msgType))
@@ -1177,7 +1185,8 @@ TRDP_ERR_T  trdp_mdRecv (
     /* Inform user  */
     if (NULL != iterMD && appHandle->mdDefault.pfCbFunction != NULL)
     {
-        TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
+        INT32           replyStatus = vos_ntohl(iterMD->pPacket->frameHead.replyStatus);
+        TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
 
         theMessage.srcIpAddr    = iterMD->addr.srcIpAddr;
         theMessage.destIpAddr   = iterMD->addr.destIpAddr;
@@ -1185,10 +1194,18 @@ TRDP_ERR_T  trdp_mdRecv (
         theMessage.protVersion  = vos_ntohs(iterMD->pPacket->frameHead.protocolVersion);
         theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterMD->pPacket->frameHead.msgType);
         theMessage.comId        = vos_ntohl(iterMD->pPacket->frameHead.comId);
-        theMessage.etbTopoCnt    = vos_ntohl(iterMD->pPacket->frameHead.etbTopoCnt);
-        theMessage.opTrnTopoCnt    = vos_ntohl(iterMD->pPacket->frameHead.opTrnTopoCnt);
-        theMessage.userStatus   = 0;
-        theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->pPacket->frameHead.replyStatus);
+        theMessage.etbTopoCnt   = vos_ntohl(iterMD->pPacket->frameHead.etbTopoCnt);
+        theMessage.opTrnTopoCnt = vos_ntohl(iterMD->pPacket->frameHead.opTrnTopoCnt);
+        if (replyStatus >= 0)
+        {
+            theMessage.userStatus   = (UINT16) replyStatus;
+            theMessage.replyStatus  = TRDP_REPLY_OK;
+        }
+        else
+        {
+            theMessage.userStatus   = 0;
+            theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
+        }
         theMessage.replyTimeout = vos_ntohl(iterMD->pPacket->frameHead.replyTimeout);
         memcpy(theMessage.sessionId, iterMD->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
         memcpy(theMessage.destURI, iterMD->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
@@ -1465,7 +1482,8 @@ TRDP_ERR_T  trdp_mdSend (
                                     /* Execute callback for each session */
                                     if (appHandle->mdDefault.pfCbFunction != NULL)
                                     {
-                                        TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
+                                        INT32           replyStatus = vos_ntohl(iterMD_find->pPacket->frameHead.replyStatus);
+                                        TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
 
                                         theMessage.srcIpAddr    = 0;
                                         theMessage.destIpAddr   = iterMD_find->addr.destIpAddr;
@@ -1478,16 +1496,23 @@ TRDP_ERR_T  trdp_mdSend (
                                         theMessage.comId        = iterMD_find->addr.comId;
                                         theMessage.etbTopoCnt   = iterMD_find->addr.etbTopoCnt;
                                         theMessage.opTrnTopoCnt = iterMD_find->addr.opTrnTopoCnt;
-                                        theMessage.userStatus   = 0;
-                                        theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(
-                                                iterMD_find->pPacket->frameHead.replyStatus);
+                                        if (replyStatus >= 0)
+                                        {
+                                            theMessage.userStatus   = (UINT16) replyStatus;
+                                            theMessage.replyStatus  = TRDP_REPLY_OK;
+                                        }
+                                        else
+                                        {
+                                            theMessage.userStatus   = 0;
+                                            theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
+                                        }
                                         memcpy(theMessage.sessionId,
                                                iterMD_find->pPacket->frameHead.sessionID,
                                                TRDP_SESS_ID_SIZE);
                                         theMessage.replyTimeout = vos_ntohl(
                                                 iterMD_find->pPacket->frameHead.replyTimeout);
-                                        memcpy(theMessage.destURI, iterMD_find->destURI, 32);
-                                        memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, 32);
+                                        memcpy(theMessage.destURI, iterMD_find->destURI, TRDP_MAX_URI_USER_LEN);
+                                        memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
                                         theMessage.numExpReplies        = iterMD_find->numReplies;
                                         theMessage.pUserRef             = iterMD_find->pUserRef;
                                         theMessage.numReplies           = iterMD_find->numReplies;
@@ -2113,7 +2138,8 @@ void  trdp_mdCheckTimeouts (
             /* Execute callback */
             if (appHandle->mdDefault.pfCbFunction != NULL)
             {
-                TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
+                INT32           replyStatus = vos_ntohl(iterMD->pPacket->frameHead.replyStatus);
+                TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
 
                 theMessage.srcIpAddr    = 0;
                 theMessage.destIpAddr   = iterMD->addr.destIpAddr;
@@ -2123,12 +2149,20 @@ void  trdp_mdCheckTimeouts (
                 theMessage.comId        = iterMD->addr.comId;
                 theMessage.etbTopoCnt   = iterMD->addr.etbTopoCnt;
                 theMessage.opTrnTopoCnt = iterMD->addr.opTrnTopoCnt;
-                theMessage.userStatus   = 0;
-                theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD->pPacket->frameHead.replyStatus);
+                if (replyStatus >= 0)
+                {
+                    theMessage.userStatus   = (UINT16) replyStatus;
+                    theMessage.replyStatus  = TRDP_REPLY_OK;
+                }
+                else
+                {
+                    theMessage.userStatus   = 0;
+                    theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
+                }
                 memcpy(theMessage.sessionId, iterMD->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
                 theMessage.replyTimeout = vos_ntohl(iterMD->pPacket->frameHead.replyTimeout);
-                memcpy(theMessage.destURI, iterMD->destURI, 32);
-                memcpy(theMessage.srcURI, iterMD->pPacket->frameHead.sourceURI, 32);
+                memcpy(theMessage.destURI, iterMD->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
+                memcpy(theMessage.srcURI, iterMD->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
                 theMessage.numExpReplies        = iterMD->numExpReplies;
                 theMessage.pUserRef             = iterMD->pUserRef;
                 theMessage.numReplies           = iterMD->numReplies;
@@ -2202,7 +2236,8 @@ void  trdp_mdCheckTimeouts (
                             /* Execute callback for each session */
                             if (appHandle->mdDefault.pfCbFunction != NULL)
                             {
-                                TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
+                                INT32           replyStatus = vos_ntohl(iterMD_find->pPacket->frameHead.replyStatus);
+                                TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
 
                                 theMessage.srcIpAddr    = 0;
                                 theMessage.destIpAddr   = iterMD_find->addr.destIpAddr;
@@ -2213,15 +2248,22 @@ void  trdp_mdCheckTimeouts (
                                 theMessage.comId        = iterMD_find->addr.comId;
                                 theMessage.etbTopoCnt   = iterMD_find->addr.etbTopoCnt;
                                 theMessage.opTrnTopoCnt = iterMD_find->addr.opTrnTopoCnt;
-                                theMessage.userStatus   = 0;
-                                theMessage.replyStatus  =
-                                    (TRDP_REPLY_STATUS_T) vos_ntohs(iterMD_find->pPacket->frameHead.replyStatus);
+                                if (replyStatus >= 0)
+                                {
+                                    theMessage.userStatus   = (UINT16) replyStatus;
+                                    theMessage.replyStatus  = TRDP_REPLY_OK;
+                                }
+                                else
+                                {
+                                    theMessage.userStatus   = 0;
+                                    theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
+                                }
                                 memcpy(theMessage.sessionId,
                                        iterMD_find->pPacket->frameHead.sessionID,
                                        TRDP_SESS_ID_SIZE);
                                 theMessage.replyTimeout = vos_ntohl(iterMD_find->pPacket->frameHead.replyTimeout);
-                                memcpy(theMessage.destURI, iterMD_find->destURI, 32);
-                                memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, 32);
+                                memcpy(theMessage.destURI, iterMD_find->destURI, TRDP_MAX_URI_USER_LEN);
+                                memcpy(theMessage.srcURI, iterMD_find->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
                                 theMessage.numExpReplies        = iterMD_find->numReplies;
                                 theMessage.pUserRef             = iterMD_find->pUserRef;
                                 theMessage.numReplies           = iterMD_find->numReplies;
@@ -2265,15 +2307,14 @@ TRDP_ERR_T trdp_mdCommonSend (
     TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     TRDP_FLAGS_T            pktFlags,
-    UINT16                  userStatus,
     UINT32                  confirmTimeout,
     UINT32                  numExpReplies,
     UINT32                  replyTimeout,
-    TRDP_REPLY_STATUS_T     replyStatus,
+    INT32                   replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
-    const TRDP_URI_USER_T   sourceURI,
+    const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI)
 {
     TRDP_ERR_T  errv = TRDP_NO_ERR;
@@ -2326,11 +2367,16 @@ TRDP_ERR_T trdp_mdCommonSend (
                             pSenderElement = iterMD;
 
                             /* do not change vital parameters for reply */
-
                             if (NULL != iterMD->pPacket)
                             {
-                                /* TODO: Is this correct? Shall we get the former counter?  */
                                 sequenceCounter = iterMD->pPacket->frameHead.sequenceCounter;
+                                destIpAddr      = iterMD->addr.srcIpAddr;
+                                srcIpAddr       = iterMD->addr.destIpAddr; 
+                                etbTopoCnt      = iterMD->addr.etbTopoCnt;
+                                opTrnTopoCnt    = iterMD->addr.opTrnTopoCnt;                                        
+                                pktFlags        = iterMD->pktFlags;
+                                destURI         = iterMD->srcURI;
+                                srcURI          = iterMD->destURI;
                             }
                             errv = TRDP_NO_ERR;
                             break;
@@ -2354,9 +2400,17 @@ TRDP_ERR_T trdp_mdCommonSend (
                         if (TRDP_ST_TX_REQ_W4AP_CONFIRM == iterMD->stateEle &&
                             0 == memcmp(iterMD->sessionID, pSessionId, TRDP_SESS_ID_SIZE))
                         {
-                            pSenderElement = iterMD;
+                            pSenderElement              = iterMD;
                             pSenderElement->dataSize    = 0;
                             pSenderElement->grossSize   = trdp_packetSizeMD(0);
+                            destIpAddr                  = iterMD->addr.srcIpAddr;
+                            srcIpAddr                   = iterMD->addr.destIpAddr;
+                            etbTopoCnt                  = iterMD->addr.etbTopoCnt;
+                            opTrnTopoCnt                = iterMD->addr.opTrnTopoCnt;
+                            pktFlags                    = iterMD->pktFlags;
+                            destURI                     = iterMD->srcURI;
+                            srcURI                      = iterMD->destURI;
+
                             errv = TRDP_NO_ERR;
                             break;
                         }
@@ -2380,7 +2434,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                     pSenderElement->dataSize    = dataSize;
                     pSenderElement->grossSize   = trdp_packetSizeMD(dataSize);
                     pSenderElement->socketIdx   = TRDP_INVALID_SOCKET_INDEX;
-                    pSenderElement->pktFlags    =
+                    pSenderElement->pktFlags    =  
                         (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
                     newSession = TRUE;
                 }
@@ -2603,7 +2657,10 @@ TRDP_ERR_T trdp_mdCommonSend (
             case TRDP_MSG_MN:
             case TRDP_MSG_MR:
             case TRDP_MSG_MC:
-                pSenderElement->pUserRef = pUserRef;
+                if (pUserRef != NULL)
+                {
+                    pSenderElement->pUserRef = pUserRef;
+                }
                 break;
             default:
                 break;
@@ -2631,14 +2688,14 @@ TRDP_ERR_T trdp_mdCommonSend (
         }
 
 
-        if (sourceURI != NULL)
+        if (srcURI != NULL)
         {
-            vos_strncpy((CHAR8 *)pSenderElement->pPacket->frameHead.sourceURI, sourceURI, TRDP_MAX_URI_USER_LEN);
+            memcpy((CHAR8 *)pSenderElement->pPacket->frameHead.sourceURI, srcURI, TRDP_MAX_URI_USER_LEN);
         }
 
         if (destURI != NULL)
         {
-            vos_strncpy((CHAR8 *)pSenderElement->pPacket->frameHead.destinationURI, destURI, TRDP_MAX_URI_USER_LEN);
+            memcpy((CHAR8 *)pSenderElement->pPacket->frameHead.destinationURI, destURI, TRDP_MAX_URI_USER_LEN);
         }
 
         /* payload */
