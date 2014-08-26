@@ -464,6 +464,11 @@ TRDP_ERR_T  trdp_pdReceive (
     }
     else
     {
+        if (pNewFrame->frameHead.sequenceCounter == 0)  /* restarted or new sender */
+        {
+            trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr, (TRDP_MSG_T) vos_ntohs(pNewFrame->frameHead.msgType));
+        }
+
         /* find sender in our list */
         switch (trdp_checkSequenceCounter(pExistingElement,
                                           vos_ntohl(pNewFrame->frameHead.sequenceCounter),
@@ -627,7 +632,6 @@ void trdp_pdHandleTimeOuts (
             /*  Update some statistics  */
             appHandle->stats.pd.numTimeout++;
             iterPD->lastErr = TRDP_TIMEOUT_ERR;
-            trdp_resetSequenceCounter(iterPD, iterPD->addr.srcIpAddr, (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType));
 
             /* Packet is late! We inform the user about this:    */
             if (iterPD->pfCbFunction != NULL)
