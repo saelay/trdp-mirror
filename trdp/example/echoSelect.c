@@ -178,14 +178,14 @@ int main (int argc, char * *argv)
                          NULL,                      /*    user reference                         */
                          NULL,                      /*    callback function                      */
                          PD_COMID1,                 /*    ComID                                  */
-                         0,                         /*    topocount: local consist only          */
-                         0,
+                         0,                         /*    etbtopocount: local consist only       */
+                         0,                         /*    optrntopocount                         */
                          0,                         /*    Source IP filter                       */
                          0,
                          0,
                          0xEF000000,                /*    Default destination    (or MC Group)   */
                          PD_COMID1_TIMEOUT,         /*    Time out in us                         */
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout        */
+                         TRDP_TO_SET_TO_ZERO,       /*    delete invalid data    on timeout      */
                          sizeof(gBuffer));          /*    net data size                          */
 
     if (err != TRDP_NO_ERR)
@@ -200,8 +200,8 @@ int main (int argc, char * *argv)
     err = tlp_publish(  appHandle,                  /*    our application identifier    */
                         &pubHandle,                 /*    our pulication identifier     */
                         PD_COMID2,                  /*    ComID to send                 */
-                        0,                          /*    local consist only            */
-                        0,
+                        0,                          /*    etbtopocount                  */
+                        0,                          /*    optrntopocount                */
                         0,                          /*    default source IP             */
                         PD_COMID2_DST_IP,           /*    where to send to              */
                         PD_COMID2_CYCLE,            /*    Cycle time in ms              */
