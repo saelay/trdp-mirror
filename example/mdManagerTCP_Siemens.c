@@ -953,7 +953,7 @@ TRDP_ERR_T notifies_requests()
         if(read_data == 1)
         {
             err = tlm_notify(appHandle,
-                                    NULL,
+                                    NULL, NULL,
                                     MD_COMID,
                                     0,
                                     MD_COMID1_SRC_IP,
@@ -968,7 +968,7 @@ TRDP_ERR_T notifies_requests()
         }else if(read_data == 2)
         {
             err = tlm_request(appHandle,
-                                NULL,
+                                NULL, NULL,
                                 (TRDP_UUID_T *)&pSessionId,
                                 MD_COMID,
                                 0,
