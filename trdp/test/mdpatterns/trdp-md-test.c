@@ -948,6 +948,7 @@ void setup_listeners ()
                 apph,                               /* session handle */
                 &lsnrh,                             /* listener handle */
                 (void *) TST_TCP,                   /* user reference */
+                NULL,                               /* callback function */
                 0,                                  /* comid (0 .. take all) */
                 0,                                  /* topo */
                 0,                                  /* topo */
@@ -968,6 +969,7 @@ void setup_listeners ()
                 apph,                               /* session handle */
                 &lsnrh,                             /* listener handle */
                 (void *) TST_UCAST,                 /* user reference */
+                NULL,                               /* callback function */
                 0,                                  /* comid (0 .. take all) */
                 0,                                  /* topo */
                 0,                                  /* topo */
@@ -988,6 +990,7 @@ void setup_listeners ()
                 apph,                               /* session handle */
                 &lsnrh,                             /* listener handle */
                 (void *) TST_MCAST,                 /* user reference */
+                NULL,                               /* callback function */
                 0,                                  /* comid (0 .. take all) */
                 0,                                  /* topo */
                 0,                                  /* topo */
@@ -1066,6 +1069,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
             err = tlm_notify(
                     apph,                           /* session handle */
                     (void *) sts.test,              /* user reference */
+                    NULL,                           /* callback function */
                     msg->comId,                     /* comid */
                     msg->etbTopoCnt,                /* topo */
                     msg->opTrnTopoCnt,              /* topo */
@@ -1094,6 +1098,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
             err = tlm_request(
                     apph,                           /* session handle */
                     (void *) sts.test,              /* user reference */
+                    NULL,                           /* callback function */
                     &uuid,                          /* session id */
                     msg->comId,                     /* comid */
                     msg->etbTopoCnt,                /* topo */

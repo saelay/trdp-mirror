@@ -181,18 +181,19 @@ int main (int argc, char *argv[])
     memset(gBuffer, 0, sizeof(gBuffer));
 
     err = tlp_subscribe( appHandle,                 /*    our application identifier            */
-                         &subHandle,               /*    our subscription identifier            */
-                         NULL,
-                         comId,                     /*    ComID                                */
-                         0,                         /*    topocount: local consist only        */
-                         0,
-                         0,                         /*    Source IP filter                    */
-                         0,                         /*    2nd Source IP filter                    */
-                         0,                         /*    Default destination    (or MC Group)   */
-                         0,
-                         PD_COMID_CYCLE * 3,            /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
-                         sizeof(gBuffer));          /*    net data size                        */
+                         &subHandle,                /*    our subscription identifier           */
+                         NULL,                      /*    user reference                        */
+                         NULL,                      /*    callback functiom                     */
+                         comId,                     /*    ComID                                 */
+                         0,                         /*    etbTopoCnt: local consist only        */
+                         0,                         /*    opTopoCnt                             */
+                         0,                         /*    Source IP filter                      */
+                         0,                         /*    2nd Source IP filter                  */
+                         0,                         /*    Default destination    (or MC Group)  */
+                         0,                         /*    TRDP flags                            */
+                         PD_COMID_CYCLE * 3,        /*    Time out in us                        */
+                         TRDP_TO_SET_TO_ZERO,       /*    delete invalid data on timeout        */
+                         sizeof(gBuffer));          /*    net data size                         */
 
     if (err != TRDP_NO_ERR)
     {

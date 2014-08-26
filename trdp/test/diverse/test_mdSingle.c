@@ -481,14 +481,14 @@ int main (int argc, char *argv[])
     if (sSessionData.sResponder == TRUE)
     {
         printf("add listener\n");
-        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, sSessionData.sComID, 0, 0, destIP,
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, NULL, sSessionData.sComID, 0, 0, destIP,
                             flags, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error (TCP)\n");
             return 1;
         }
         printf("add listener\n");
-        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, sSessionData.sComID, 0, 0, destIP,
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, NULL, sSessionData.sComID, 0, 0, destIP,
                             flags &= ~TRDP_FLAGS_TCP, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error (UDP)\n");
@@ -591,8 +591,20 @@ int main (int argc, char *argv[])
 
                 if (sSessionData.sNoData == TRUE)
                 {
-                    tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, 0, ownIP,
-                               destIP, flags, NULL, NULL, 0, 0, 0);
+                    tlm_notify( sSessionData.appHandle,
+                                &sSessionData,
+                                NULL,
+                                sSessionData.sComID,
+                                0,
+                                0,
+                                ownIP,
+                                destIP,
+                                flags,
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                0);
 
                 }
                 else if (sSessionData.sDataSize > 0)
@@ -605,13 +617,25 @@ int main (int argc, char *argv[])
                             j = 0;
                         }
                     }
-                    tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, 0, ownIP,
-                               destIP, flags, NULL, (const UINT8 *) gBuffer, sSessionData.sDataSize, 0, 0);
+                    tlm_notify( sSessionData.appHandle,
+                                &sSessionData,
+                                NULL,
+                                sSessionData.sComID,
+                                0,
+                                0,
+                                ownIP,
+                                destIP,
+                                flags,
+                                NULL,
+                                (const UINT8 *) gBuffer,
+                                sSessionData.sDataSize,
+                                0,
+                                0);
 
                 }
                 else
                 {
-                    tlm_notify(sSessionData.appHandle, &sSessionData, sSessionData.sComID, 0, 0, ownIP,
+                    tlm_notify(sSessionData.appHandle, &sSessionData, NULL, sSessionData.sComID, 0, 0, ownIP,
                                destIP, flags, NULL, (const UINT8 *) "Hello, World", 13, 0, 0);
 
                 }
@@ -623,7 +647,7 @@ int main (int argc, char *argv[])
                 if (sSessionData.sNoData == TRUE)
                 {
 
-                    tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, 0, ownIP,
+                    tlm_request(sSessionData.appHandle, &sSessionData, NULL, &sessionId, sSessionData.sComID, 0, 0, ownIP,
                                 destIP, flags, expReplies, 0, NULL, NULL, 0, 0, 0);
                 }
                 else if (sSessionData.sDataSize > 0)
@@ -638,6 +662,7 @@ int main (int argc, char *argv[])
                     }
                     tlm_request(sSessionData.appHandle,
                                 &sSessionData,
+                                NULL,
                                 &sessionId,
                                 sSessionData.sComID,
                                 0,
@@ -656,7 +681,7 @@ int main (int argc, char *argv[])
                 }
                 else
                 {
-                    tlm_request(sSessionData.appHandle, &sSessionData, &sessionId, sSessionData.sComID, 0, 0, ownIP,
+                    tlm_request(sSessionData.appHandle, &sSessionData, NULL, &sessionId, sSessionData.sComID, 0, 0, ownIP,
                                 destIP, flags, expReplies, 0, NULL, (const UINT8 *) "How are you?", 13, 0, 0);
                 }
             }

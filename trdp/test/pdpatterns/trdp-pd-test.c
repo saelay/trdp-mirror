@@ -356,6 +356,7 @@ void setup_ports()
                 apph,               /* session handle   */
                 &p->sh,             /* subscribe handle */
                 NULL,               /* user ref         */
+                NULL,               /* callback funktion */
                 p->comid,           /* comid            */
                 0,                  /* topo counter     */
                 0,

@@ -127,18 +127,18 @@ int main (int argc, char * *argv)
 
     memset(gBuffer, 0, sizeof(gBuffer));
 
-    err = tlp_subscribe( appHandle,                 /*    our application identifier            */
-                         &subHandle,                /*    our subscription identifier            */
-                         NULL,
+    err = tlp_subscribe( appHandle,                 /*    our application identifier           */
+                         &subHandle,                /*    our subscription identifier          */
+                         NULL,                      /*    callback function                    */
                          PD_COMID1,                 /*    ComID                                */
-                         0,                         /*    topocount: local consist only        */
-                         0,
-                         PD_COMID1_SRC_IP,          /*    Source IP filter                    */
-                         0,
-                         0,                         /*    Default destination    (or MC Group)   */
-                         0,
+                         0,                         /*    etbTopocount: local consist only     */
+                         0,                         /*    opTopocount: local consist only      */
+                         PD_COMID1_SRC_IP,          /*    Source IP filter                     */
+                         0,                         /*    source IP 1                          */
+                         0,                         /*    source IP 2                          */
+                         0,                         /*    Default destination IP (or MC Group) */
                          PD_COMID1_TIMEOUT,         /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
+                         TRDP_TO_SET_TO_ZERO,       /*    delete invalid data    on timeout      */
                          sizeof(gBuffer));          /*    net data size                        */
 
 
