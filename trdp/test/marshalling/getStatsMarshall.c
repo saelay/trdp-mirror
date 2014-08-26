@@ -441,18 +441,18 @@ int main (int argc, char * *argv)
     memset(&gBuffer, 0, sizeof(gBuffer));
 
     err = tlp_subscribe( appHandle,                     /*    our application identifier            */
-                         &subHandle,                    /*    our subscription identifier            */
-                         NULL,
-                         TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                */
-                         0,                             /*    topocount: local consist only        */
+                         &subHandle,                    /*    our subscription identifier           */
+                         NULL, NULL,                    /*    userRef & callback function           */
+                         TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                 */
+                         0,                             /*    topocount: local consist only         */
                          0,
-                         0,                             /*    Source IP filter                    */
+                         0,                             /*    Source IP filter                      */
                          0,
-                         replyIP,                       /*    Default destination    (or MC Group)   */
+                         replyIP,                       /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_DEFAULT,
                          PD_COMID1_TIMEOUT,             /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,           /*  delete invalid data    on timeout      */
-                         sizeof(gBuffer));              /*    net data size                        */
+                         TRDP_TO_SET_TO_ZERO,           /*  delete invalid data    on timeout       */
+                         sizeof(gBuffer));              /*    net data size                         */
 
     if (err != TRDP_NO_ERR)
     {

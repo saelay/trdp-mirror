@@ -1163,9 +1163,9 @@ int main (int argc, char *argv[])
 
 		/*	Sub-network Id2 Open a session for callback operation	(PD only) */
 		if (tlc_openSession(&appHandle2,
-								subnetId2Address, subnetId2Address,	    /* Sub-net Id2 IP address/interface	*/
-								pMarshallConfigPtr,                   	/* Marshalling or no Marshalling		*/
-								&pdConfiguration2, NULL,				/* system defaults for PD and MD		*/
+								subnetId2Address, subnetId2Address,	    /* Sub-net Id2 IP address/interface     */
+								pMarshallConfigPtr,                   	/* Marshalling or no Marshalling        */
+								&pdConfiguration2, NULL,				/* system defaults for PD and MD        */
 								&processConfig2) != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "Sub-network Id2 Initialization error (tlc_openSession)\n");
@@ -1177,18 +1177,18 @@ int main (int argc, char *argv[])
 	if ((VALID_PD_COMID & ENABLE_COMDID1) == ENABLE_COMDID1)
 	{
 	    /*	Sub-network Id1 ComID1 Subscribe */
-	    err = tlp_subscribe( appHandle,					/* our application identifier */
-	                         &subHandleNet1ComId1,		/* our subscription identifier */
-	                         &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
-	                         PD_COMID1,                	/* ComID */
-	                         0,                        	/* topocount: local consist only */
-	                         PD_COMID1_SUB_SRC_IP1,     	/* Source IP filter */
-	                         0,                        	/* Source IP filter2 : no used */
-	                         PD_COMID1_SUB_DST_IP1,     	/* Default destination	(or MC Group) */
-	                         TRDP_FLAGS_DEFAULT,			/* Option */
+	    err = tlp_subscribe( appHandle,                 /* our application identifier */
+	                         &subHandleNet1ComId1,      /* our subscription identifier */
+	                         &OFFSET_ADDRESS3, NULL     /* user referece value = offsetAddress */
+	                         PD_COMID1,                 /* ComID */
+	                         0,                         /* topocount: local consist only */
+	                         PD_COMID1_SUB_SRC_IP1,     /* Source IP filter */
+	                         0,                         /* Source IP filter2 : no used */
+	                         PD_COMID1_SUB_DST_IP1,     /* Default destination	(or MC Group) */
+	                         TRDP_FLAGS_DEFAULT,        /* Option */
 	                         PD_COMID1_TIMEOUT,         /* Time out in us	*/
 	                         TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
-	                         dataSet1Size);         	/* net data size */
+	                         dataSet1Size);             /* net data size */
 	    if (err != TRDP_NO_ERR)
 	    {
 	    	 vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
@@ -1206,18 +1206,18 @@ int main (int argc, char *argv[])
 	if ((VALID_PD_COMID & ENABLE_COMDID2) == ENABLE_COMDID2)
 	{
 		/*	Sub-network Id1 ComID2 Subscribe */
-		err = tlp_subscribe( appHandle,					/* our application identifier */
-							 &subHandleNet1ComId2,		/* our subscription identifier */
-							 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
-							 PD_COMID2,                	/* ComID */
-							 0,                        	/* topocount: local consist only */
+		err = tlp_subscribe( appHandle,                 /* our application identifier   */
+							 &subHandleNet1ComId2,      /* our subscription identifier  */
+							 &OFFSET_ADDRESS4, NULL,    /* user referece value = offsetAddress */
+							 PD_COMID2,                 /* ComID */
+							 0,                         /* topocount: local consist only    */
 							 PD_COMID2_SUB_SRC_IP1,     /* Source IP filter */
-							 0,                        	/* Source IP filter2 : no used */
+							 0,                         /* Source IP filter2 : no used  */
 							 PD_COMID2_SUB_DST_IP1,     /* Default destination	(or MC Group) */
-							 TRDP_FLAGS_DEFAULT,			/* Option */
+							 TRDP_FLAGS_DEFAULT,        /* Option */
 							 PD_COMID2_TIMEOUT,         /* Time out in us	*/
 							 TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
-							 dataSet2Size);       	  	/* net data size */
+							 dataSet2Size);             /* net data size */
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
@@ -1243,8 +1243,8 @@ int main (int argc, char *argv[])
 		{
 			/*	Sub-network Id2 ComID1 Subscribe */
 			err = tlp_subscribe( appHandle2,				/* our application identifier */
-								 &subHandleNet2ComId1,		/* our subscription identifier */
-								 &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
+								 &subHandleNet2ComId1,      /* our subscription identifier */
+								 &OFFSET_ADDRESS3, NULL,    /* user referece value = offsetAddress */
 								 PD_COMID1,                	/* ComID */
 								 0,                        	/* topocount: local consist only */
 								 PD_COMID1_SUB_SRC_IP2,    	/* Source IP filter */
@@ -1273,7 +1273,7 @@ int main (int argc, char *argv[])
 			/*	Sub-network Id2 ComID2 Subscribe */
 			err = tlp_subscribe( appHandle2,				/* our application identifier */
 								 &subHandleNet2ComId2,		/* our subscription identifier */
-								 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
+								 &OFFSET_ADDRESS4, NULL,    /* user referece value = offsetAddress */
 								 PD_COMID2,                	/* ComID */
 								 0,                        	/* topocount: local consist only */
 								 PD_COMID2_SUB_SRC_IP2,    	/* Source IP filter */
