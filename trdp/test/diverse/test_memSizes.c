@@ -289,7 +289,7 @@ int main (int argc, char * *argv)
         printf("Subscribing dataSize: %u Bytes\n", gSubPackets[i].dataSize);
         err = tlp_subscribe(appHandle,                  /*    our application identifier           */
                             &gSubPackets[i].subHandle,  /*    our subscription identifier          */
-                            NULL,
+                            NULL, NULL,
                             gSubPackets[i].comID,       /*    ComID                                */
                             0,                          /*    topocount: local consist only        */
                             0,
