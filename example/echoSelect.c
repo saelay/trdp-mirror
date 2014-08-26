@@ -175,12 +175,8 @@ int main (int argc, char * *argv)
 
     err = tlp_subscribe( appHandle,                 /*    our application identifier             */
                          &subHandle,                /*    our subscription identifier            */
-<<<<<<< .mine
                          NULL,                      /*    user reference                         */
                          NULL,                      /*    callback function                      */
-=======
-                         NULL, NULL,                /*    userRef & callback function            */
->>>>>>> .r1302
                          PD_COMID1,                 /*    ComID                                  */
                          0,                         /*    topocount: local consist only          */
                          0,
