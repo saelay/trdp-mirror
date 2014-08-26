@@ -855,16 +855,16 @@ TRDP_ERR_T init_trdp(TRDP_LIS_T *listenHandle, UINT32 *listeners_count, fd_set* 
                 continue;
             }
 
-            err = tlm_addListener( appHandle,                                 /*    our application identifier            */
-                                    &(listenHandle[*listeners_count]),         /*    our subscription identifier            */
-                                    (void *)0x12345678,
-                                     MD_listen_COMID[*listeners_count],     /*    ComID                                */
-                                     0,                                     /*    topocount: local consist only        */
-                                     //MD_COMID1_SRC_IP,
-                                     MD_COMID1_DST_IP,                      /*    Destination IP                       */
-                                     //sizeof(gBuffer),                        /*    maxDataSize */
-                                     TRDP_FLAGS_TCP,                          /*    TRDP_FLAGS_T                        */
-                                     "");                                    /*    destURI*/
+            err = tlm_addListener( appHandle,                               /*    our application identifier            */
+                                    &(listenHandle[*listeners_count]),      /*    our subscription identifier            */
+                                    (void *)0x12345678,                     /*    user reference */
+                                    NULL,                                   /*    callback function */
+                                    MD_listen_COMID[*listeners_count],      /*    ComID                                */
+                                    0,                                      /*    etbTopocount: local consist only        */
+                                    0,                                      /*    opTopocount: local consist only        */
+                                    MD_COMID1_DST_IP,                       /*    Destination IP                       */
+                                    TRDP_FLAGS_TCP,                         /*    TRDP_FLAGS_T                        */
+                                    "");                                    /*    destURI*/
 
             if (err != TRDP_NO_ERR)
             {
@@ -952,25 +952,29 @@ TRDP_ERR_T notifies_requests()
         if(read_data == 1)
         {
             err = tlm_notify(appHandle,
-                                    (void *)0x12345678,
-                                    MD_COMID,
-                                    0,
-                                    MD_COMID1_SRC_IP,
-                                    MD_COMID1_DST_IP,
-                                    TRDP_FLAGS_TCP,
-                                    NULL,
-                                    (UINT8 *)gBuffer,
-                                    sizeof(gBuffer),
-                                    SOURCE_URI,
-                                    DEST_URI);
+                             (void *)0x12345678,    /* user reference */
+                             NULL,                  /* callback function */
+                             MD_COMID,
+                             0,                     /* etbTopoCnt */
+                             0,                     /* opTopoCnt */
+                             MD_COMID1_SRC_IP,
+                             MD_COMID1_DST_IP,
+                             TRDP_FLAGS_TCP,
+                             NULL,                  /* send parameters */
+                             (UINT8 *)gBuffer,
+                             sizeof(gBuffer),
+                             SOURCE_URI,
+                             DEST_URI);
 
         }else if(read_data == 2)
         {
             err = tlm_request(appHandle,
-                                (void *)0x12345678,
+                                (void *)0x12345678,    /* user reference */
+                                NULL,                  /* callback function */
                                 (TRDP_UUID_T *)&pSessionId,
                                 MD_COMID,
-                                0,
+                                0,                     /* etbTopoCnt */
+                                0,                     /* opTopoCnt */
                                 MD_COMID1_SRC_IP,
                                 MD_COMID1_DST_IP,
                                 TRDP_FLAGS_TCP,
@@ -1079,52 +1083,33 @@ TRDP_ERR_T reply_msgs()
         {
             case 0:
                 err = tlm_reply(appHandle,
-                            (void *)0x12345678,
-                            (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
-                            0,
-                            APP_SESSION_TEST[(session_num)].comId,
-                            MD_COMID1_SRC_IP,
-                            MD_COMID1_DST_IP,
-                            TRDP_FLAGS_TCP,
-                            0, //UINT16                  userStatus,
-                            NULL,
-                            (UINT8 *)gBuffer,
-                            sizeof(gBuffer),
-                            SOURCE_URI,
-                            DEST_URI);
+                                (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
+                                0,          /* comId */
+                                0,          /* userStatus */
+                                NULL,       /* sned parameters */
+                                (UINT8 *)gBuffer,
+                                sizeof(gBuffer));
 
                 break;
 
             case 1:
                 err = tlm_replyQuery(appHandle,
-                            (void *)0x12345678,
-                            (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
-                            0,
-                            APP_SESSION_TEST[(session_num)].comId,
-                            MD_COMID1_SRC_IP,
-                            MD_COMID1_DST_IP,
-                            TRDP_FLAGS_TCP,
-                            0, //UINT16                  userStatus,
-                            TRDP_MD_DEFAULT_CONFIRM_TIMEOUT,
-                            NULL,
-                            (UINT8 *)gBuffer,
-                            sizeof(gBuffer),
-                            SOURCE_URI,
-                            DEST_URI);
+                                    (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
+                                    APP_SESSION_TEST[(session_num)].comId,
+                                    0,      /* userStatus */
+                                    TRDP_MD_DEFAULT_CONFIRM_TIMEOUT,
+                                    NULL,
+                                    (UINT8 *)gBuffer,
+                                    sizeof(gBuffer));
 
                 break;
 
             case 2:
                 err = tlm_replyErr(appHandle,
-                            (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
-                            0,
-                            APP_SESSION_TEST[(session_num)].comId,
-                            MD_COMID1_SRC_IP,
-                            MD_COMID1_DST_IP,
-                            TRDP_REPLY_NO_REPLY,
-                            NULL,
-                            SOURCE_URI,
-                            DEST_URI);
+                                    (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
+                                    APP_SESSION_TEST[(session_num)].comId,
+                                    TRDP_REPLY_NO_REPLY,
+                                    NULL);
 
                 break;
 
@@ -1238,18 +1223,10 @@ TRDP_ERR_T confirm_msgs()
         }
 
         err = tlm_confirm(appHandle,
-                (void *)0x12345678,
-                (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
-                APP_SESSION_TEST[(session_num)].comId,
-                0,
-                MD_COMID1_SRC_IP,
-                MD_COMID1_DST_IP,
-                TRDP_FLAGS_TCP,
-                0, //UINT16                  userStatus,
-                TRDP_REPLY_NO_REPLY,
-                NULL,
-                SOURCE_URI,
-                DEST_URI);
+                        (const TRDP_UUID_T *)&(APP_SESSION_TEST[(session_num)].pSessionId),
+                        APP_SESSION_TEST[(session_num)].comId,
+                        0, //UINT16                  userStatus,
+                        NULL);
 
         if (err != TRDP_NO_ERR)
         {

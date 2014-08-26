@@ -318,19 +318,12 @@ static void queue_procricz()
             {
                 TRDP_ERR_T errv = tlm_reply(
                     appHandle,
-                    (void *) 0x2000CAFE,
                     (const TRDP_UUID_T*) &(msg.Msg.sessionId),
-                    msg.Msg.topoCount,
                     msg.Msg.comId,
-                    msg.Msg.destIpAddr,
-                    msg.Msg.srcIpAddr,
-                    0,                                     /* pktFlags */
                     0,                                     /*  userStatus */
                     NULL,                                  /* send param */
                     (UINT8 *) outbuf,
-                    szout + 1,
-                    msg.Msg.destURI,
-                    msg.Msg.srcURI);
+                    szout + 1);
                 printf("tlm_reply()=%d\n", errv);
             }
         }
@@ -342,20 +335,13 @@ static void queue_procricz()
             {
                 TRDP_ERR_T errv = tlm_replyQuery(
                     appHandle,
-                    (void *) 0x2000CAFE,
                     (const TRDP_UUID_T*)&(msg.Msg.sessionId),
-                    msg.Msg.topoCount,
                     msg.Msg.comId,
-                    msg.Msg.destIpAddr,
-                    msg.Msg.srcIpAddr,
-                    0,                                     /* pktFlags */
                     0,                                     /*  userStatus */
                     5 * 1000 * 1000,                       /* confirm timeout */
                     NULL,                                  /* send param */
                     (UINT8 *) outbuf,
-                    szout + 1,
-                    msg.Msg.destURI,
-                    msg.Msg.srcURI);
+                    szout + 1);
                 printf("tlm_replyQuery()=%d\n", errv);
             }
         }
@@ -372,18 +358,10 @@ static void queue_procricz()
         {
             TRDP_ERR_T errv = tlm_confirm(
                 appHandle,
-                (void *) 0x2000CAFE,
                 (const TRDP_UUID_T *) &msg.Msg.sessionId,
-                msg.Msg.comId,
-                msg.Msg.topoCount,
-                msg.Msg.destIpAddr,
-                msg.Msg.srcIpAddr,
-                0,                                 /* pktFlags */
                 0,                                 /*  userStatus */
-                0,                                 /* replystatus */
-                NULL,                              /* send param */
-                msg.Msg.destURI,
-                msg.Msg.srcURI);
+                NULL);                             /* send param */
+
             printf("tlm_confirm()=%d\n", errv);
         }
     }
@@ -536,8 +514,10 @@ static int test_notify()
     errv = tlm_notify(
         appHandle,
         NULL,      /* user ref */
+        NULL,      /* callback function */
         123,       /* comId */
-        150,       /* topoCount */
+        150,       /* etbTopoCnt */
+        150,       /* opTopoCnt */
         0,         /* own IP address from trdp stack */
         vos_htonl(x_ip4_dest),
         0,         /* flags */
@@ -569,9 +549,11 @@ static int test_request()
     errv = tlm_request(
         appHandle,
         (void *) 0x1000CAFE, /* user ref */
-        &session,
+        NULL,                /* callback function */
+        &session,            /* session id */
         123,                 /* comId */
-        150,                 /* topoCount */
+        150,                 /* etbTopoCount */
+        0,                   /* opTopoCount */
         0,                   /* own IP address from trdp stack */
         vos_htonl(x_ip4_dest),
         0,                   /* flags */
@@ -599,14 +581,16 @@ static int test_receiver()
     TRDP_ERR_T errv;
 
     errv = tlm_addListener(
-        appHandle,
-        &lisHandle,
-        &rice_env,
-        123,
-        0,
-        vos_htonl(0),
-        0,
-        "ciao");
+        appHandle,  /* application handle */
+        &lisHandle, /* listener handle */
+        &rice_env,  /* user reference */
+        NULL,       /* callback function */
+        123,        /* comId */
+        150         /* etbTopoCount */
+        0,          /* opTopoCount */
+        0,          /* mcdestIpAddr */
+        0,          /* TRDP flags */
+        "ciao");    /* destURI */
     if (errv != TRDP_NO_ERR)
     {
         fprintf(stderr, "tlm_addListener() error = %d\n", errv);

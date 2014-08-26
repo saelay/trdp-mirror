@@ -463,6 +463,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
             ret = tlp_subscribe(pSession,               /*    our application identifier    */
                                 &dummySubHandle,        /*    our subscription identifier   */
                                 NULL,
+                                NULL,
                                 TRDP_STATISTICS_REQUEST_COMID, /*    ComID                         */
                                 0,                      /*    topocount: local consist only */
                                 0,                      /*    no orient/direction info      */
@@ -1671,6 +1672,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pSubHandle          return a handle for this subscription
  *  @param[in]      pUserRef            user supplied value returned within the info structure
+ *  @param[in]      pfCbFunction        Pointer to subscriber specific callback function, NULL to use default function
  *  @param[in]      comId               comId of packet to receive
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -1693,6 +1695,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_SUB_T          *pSubHandle,
     const void          *pUserRef,
+    TRDP_PD_CALLBACK_T  pfCbFunction,
     UINT32              comId,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
@@ -1704,11 +1707,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior,
     UINT32              maxDataSize)
 {
-    PD_ELE_T    *newPD = NULL;
+    PD_ELE_T            *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
-    INT32       lIndex;
+    INT32               lIndex;
 
     /*    Check params    */
     if (comId == 0 || pSubHandle == NULL)
@@ -1826,7 +1829,10 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->pUserRef         = pUserRef;
                     newPD->socketIdx        = lIndex;
                     newPD->privFlags       |= TRDP_INVALID_DATA;
-                    newPD->pktFlags         = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    newPD->pktFlags         = 
+                        (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    newPD->pfCbFunction     = 
+                        (pfCbFunction == NULL) ? appHandle->pdDefault.pfCbFunction : pfCbFunction;
                     newPD->pCachedDS        = NULL;
                     newPD->magic            = TRDP_MAGIC_SUB_HNDL_VALUE;
 
@@ -2058,6 +2064,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef            user supplied value returned with reply
+ *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -2079,6 +2086,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 TRDP_ERR_T tlm_notify (
     TRDP_APP_SESSION_T      appHandle,
     const void              *pUserRef,
+    TRDP_MD_CALLBACK_T      pfCbFunction,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
@@ -2095,6 +2103,7 @@ TRDP_ERR_T tlm_notify (
                TRDP_MSG_MN,                            /* notify without reply */
                appHandle,
                pUserRef,
+               NULL,                                   /* callback function */
                NULL,                                   /* no return session id?
                                                           useful to abort send while waiting of output queue */
                comId,
@@ -2121,6 +2130,7 @@ TRDP_ERR_T tlm_notify (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef            user supplied value returned with reply
+ *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[out]     pSessionId          return session ID
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
@@ -2145,6 +2155,7 @@ TRDP_ERR_T tlm_notify (
 TRDP_ERR_T tlm_request (
     TRDP_APP_SESSION_T      appHandle,
     const void              *pUserRef,
+    TRDP_MD_CALLBACK_T      pfCbFunction,
     TRDP_UUID_T             *pSessionId,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
@@ -2164,6 +2175,7 @@ TRDP_ERR_T tlm_request (
                TRDP_MSG_MR,                            /* request with reply */
                appHandle,
                pUserRef,
+               pfCbFunction,
                pSessionId,
                comId,
                etbTopoCnt,
@@ -2191,6 +2203,7 @@ TRDP_ERR_T tlm_request (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     pListenHandle       Handle for this listener returned
  *  @param[in]      pUserRef            user supplied value returned with received message
+ *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[in]      comId               comId to be observed
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -2208,6 +2221,7 @@ TRDP_ERR_T tlm_addListener (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_LIS_T              *pListenHandle,
     const void              *pUserRef,
+    TRDP_MD_CALLBACK_T      pfCbFunction,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
@@ -2224,7 +2238,6 @@ TRDP_ERR_T tlm_addListener (
     }
 
     /* lock mutex */
-
     if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
     {
         return TRDP_NOINIT_ERR;
@@ -2258,6 +2271,8 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->addr.opTrnTopoCnt  = opTrnTopoCnt;
                 pNewElement->addr.destIpAddr    = 0;
                 pNewElement->pktFlags           = pktFlags;
+                pNewElement->pfCbFunction       = 
+                    (pfCbFunction == NULL) ? appHandle->mdDefault.pfCbFunction : pfCbFunction;
 
                 /* 2013-02-06 BL: Check for zero pointer  */
                 if (NULL != destURI)
@@ -2484,6 +2499,7 @@ TRDP_ERR_T tlm_reply (
     return trdp_mdCommonSend(
                TRDP_MSG_MP,                         /* reply with confirm request */
                appHandle,
+               NULL,                                /* callback function */
                0,                                   /* userRef to be taken from session */
                (TRDP_UUID_T *)pSessionId,
                comId,
@@ -2538,7 +2554,8 @@ TRDP_ERR_T tlm_replyQuery (
     return trdp_mdCommonSend(
                TRDP_MSG_MQ,                         /* reply with confirm request */
                appHandle,
-               0,                                   /* userRef to be taken from session */
+               NULL,                                /* userRef to be taken from session */
+               NULL,                                /* call back function */
                (TRDP_UUID_T *)pSessionId,
                comId,
                0,                                   /* etbTopoCnt to be taken from session */
@@ -2585,6 +2602,7 @@ TRDP_ERR_T tlm_replyErr (
                TRDP_MSG_ME,                     /* reply with error */
                appHandle,
                NULL,                            /* user ref */
+               NULL,                            /* callback function */
                (TRDP_UUID_T *)pSessionId,
                0,                               /* no data no comId */
                0,                               /* etbTopoCnt to be taken from session */
@@ -2630,7 +2648,8 @@ TRDP_ERR_T tlm_confirm (
     return trdp_mdCommonSend(
                TRDP_MSG_MC,                         /* reply confirm */
                appHandle,
-               0,                                   /* userRef to be taken from session */
+               NULL,                                /* userRef to be taken from session */
+               NULL,                                /* callback function */
                (TRDP_UUID_T *)pSessionId,
                0,                                   /* no data no comId */
                0,                                   /* etbTopoCnt to be taken from session */

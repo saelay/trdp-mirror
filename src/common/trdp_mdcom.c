@@ -1020,9 +1020,10 @@ TRDP_ERR_T  trdp_mdRecv (
                     )
                 {
                     /* We found a listener, set some values for this new session  */
-                    iterMD              = appHandle->pMDRcvEle;
-                    iterMD->pUserRef    = iterListener->pUserRef;
-                    iterMD->stateEle    = state;
+                    iterMD                  = appHandle->pMDRcvEle;
+                    iterMD->pUserRef        = iterListener->pUserRef;
+                    iterMD->pfCbFunction    = iterListener->pfCbFunction;
+                    iterMD->stateEle        = state;
 
                     if (iterListener->socketIdx == TRDP_INVALID_SOCKET_INDEX)    /* On TCP, listeners have no socket
                                                                                    assigned  */
@@ -1184,7 +1185,7 @@ TRDP_ERR_T  trdp_mdRecv (
     }
 
     /* Inform user  */
-    if (NULL != iterMD && appHandle->mdDefault.pfCbFunction != NULL)
+    if (NULL != iterMD && iterMD->pfCbFunction != NULL)
     {
         INT32           replyStatus = vos_ntohl(iterMD->pPacket->frameHead.replyStatus);
         TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
@@ -1220,7 +1221,7 @@ TRDP_ERR_T  trdp_mdRecv (
         theMessage.resultCode           = TRDP_NO_ERR;
         theMessage.pUserRef             = iterMD->pUserRef;
 
-        appHandle->mdDefault.pfCbFunction(
+        iterMD->pfCbFunction(
             appHandle->mdDefault.pRefCon,
             appHandle,
             &theMessage,
@@ -1481,7 +1482,7 @@ TRDP_ERR_T  trdp_mdSend (
                                     iterMD_find->morituri = TRUE;
 
                                     /* Execute callback for each session */
-                                    if (appHandle->mdDefault.pfCbFunction != NULL)
+                                    if (iterMD_find->pfCbFunction != NULL)
                                     {
                                         INT32           replyStatus = vos_ntohl(iterMD_find->pPacket->frameHead.replyStatus);
                                         TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
@@ -1525,7 +1526,7 @@ TRDP_ERR_T  trdp_mdSend (
                                         /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
                                         theMessage.resultCode = TRDP_TIMEOUT_ERR;
 
-                                        appHandle->mdDefault.pfCbFunction(
+                                        iterMD_find->pfCbFunction(
                                             appHandle->mdDefault.pRefCon,
                                             appHandle,
                                             &theMessage,
@@ -2137,7 +2138,7 @@ void  trdp_mdCheckTimeouts (
         if (TRUE == timeOut)    /* Notify user  */
         {
             /* Execute callback */
-            if (appHandle->mdDefault.pfCbFunction != NULL)
+            if (iterMD->pfCbFunction != NULL)
             {
                 INT32           replyStatus = vos_ntohl(iterMD->pPacket->frameHead.replyStatus);
                 TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
@@ -2175,7 +2176,7 @@ void  trdp_mdCheckTimeouts (
                 /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
                 theMessage.resultCode = resultCode;
 
-                appHandle->mdDefault.pfCbFunction(
+                iterMD->pfCbFunction(
                     appHandle->mdDefault.pRefCon,
                     appHandle,
                     &theMessage,
@@ -2235,7 +2236,7 @@ void  trdp_mdCheckTimeouts (
                             iterMD_find->morituri = TRUE;
 
                             /* Execute callback for each session */
-                            if (appHandle->mdDefault.pfCbFunction != NULL)
+                            if (iterMD_find->pfCbFunction != NULL)
                             {
                                 INT32           replyStatus = vos_ntohl(iterMD_find->pPacket->frameHead.replyStatus);
                                 TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
@@ -2276,7 +2277,7 @@ void  trdp_mdCheckTimeouts (
                                 /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
                                 theMessage.resultCode = TRDP_TIMEOUT_ERR;
 
-                                appHandle->mdDefault.pfCbFunction(
+                                iterMD_find->pfCbFunction(
                                     appHandle->mdDefault.pRefCon,
                                     appHandle,
                                     &theMessage,
@@ -2301,6 +2302,7 @@ TRDP_ERR_T trdp_mdCommonSend (
     const TRDP_MSG_T        msgType,
     TRDP_APP_SESSION_T      appHandle,
     const void              *pUserRef,
+    TRDP_MD_CALLBACK_T      pfCbFunction,
     TRDP_UUID_T             *pSessionId,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
@@ -2432,11 +2434,13 @@ TRDP_ERR_T trdp_mdCommonSend (
                 if (NULL != pSenderElement)
                 {
                     memset(pSenderElement, 0, sizeof(MD_ELE_T));
-                    pSenderElement->dataSize    = dataSize;
-                    pSenderElement->grossSize   = trdp_packetSizeMD(dataSize);
-                    pSenderElement->socketIdx   = TRDP_INVALID_SOCKET_INDEX;
-                    pSenderElement->pktFlags    =  
+                    pSenderElement->dataSize        = dataSize;
+                    pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
+                    pSenderElement->socketIdx       = TRDP_INVALID_SOCKET_INDEX;
+                    pSenderElement->pktFlags        =  
                         (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
+                    pSenderElement->pfCbFunction    = 
+                        (pfCbFunction == NULL)?appHandle->mdDefault.pfCbFunction:pfCbFunction;
                     newSession = TRUE;
                 }
                 else

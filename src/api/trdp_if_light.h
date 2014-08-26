@@ -414,6 +414,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     pSubHandle          return a handle for this subscription
  *  @param[in]      pUserRef            user supplied value returned within the info structure
+ *  @param[in]      pfCbFunction        Pointer to subscriber specific callback function, NULL to use default function
  *  @param[in]      comId               comId of packet to receive
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -436,6 +437,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_SUB_T          *pSubHandle,
     const void          *pUserRef,
+    TRDP_PD_CALLBACK_T  pfCbFunction,
     UINT32              comId,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
@@ -523,6 +525,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef            user supplied value returned with reply
+ *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -543,6 +546,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 EXT_DECL TRDP_ERR_T tlm_notify (
     TRDP_APP_SESSION_T      appHandle,
     const void              *pUserRef,
+    TRDP_MD_CALLBACK_T      pfCbFunction,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
@@ -562,6 +566,7 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pUserRef            user supplied value returned with reply
+ *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[out]     pSessionId          return session ID
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
@@ -585,6 +590,7 @@ EXT_DECL TRDP_ERR_T tlm_notify (
 EXT_DECL TRDP_ERR_T tlm_request (
     TRDP_APP_SESSION_T      appHandle,
     const void              *pUserRef,
+    TRDP_MD_CALLBACK_T      pfCbFunction,
     TRDP_UUID_T             *pSessionId,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
@@ -647,6 +653,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     pListenHandle       Handle for this listener returned
  *  @param[in]      pUserRef            user supplied value returned with received message
+ *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[in]      comId               comId to be observed
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -663,6 +670,7 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_LIS_T              *pListenHandle,
     const void              *pUserRef,
+    TRDP_MD_CALLBACK_T      pfCbFunction,
     UINT32                  comId,        /* muliple ComID handled in layer above  */
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,

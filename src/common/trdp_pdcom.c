@@ -519,7 +519,7 @@ TRDP_ERR_T  trdp_pdReceive (
     {
         /*  If a callback was provided, call it now */
         if ((pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
-            && (appHandle->pdDefault.pfCbFunction != NULL))
+            && (pExistingElement->pfCbFunction != NULL))
         {
             TRDP_PD_INFO_T theMessage;
             theMessage.comId        = pExistingElement->addr.comId;
@@ -535,11 +535,11 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.pUserRef     = pExistingElement->pUserRef; /* User reference given with the local subscribe? */
             theMessage.resultCode   = resultCode;
 
-            appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon,
-                                              appHandle,
-                                              &theMessage,
-                                              pExistingElement->pFrame->data,
-                                              vos_ntohl(pExistingElement->pFrame->frameHead.datasetLength));
+            pExistingElement->pfCbFunction(appHandle->pdDefault.pRefCon,
+                                           appHandle,
+                                           &theMessage,
+                                           pExistingElement->pFrame->data,
+                                           vos_ntohl(pExistingElement->pFrame->frameHead.datasetLength));
         }
     }
     return TRDP_NO_ERR;
@@ -630,7 +630,7 @@ void trdp_pdHandleTimeOuts (
             trdp_resetSequenceCounter(iterPD, iterPD->addr.srcIpAddr, (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType));
 
             /* Packet is late! We inform the user about this:    */
-            if (appHandle->pdDefault.pfCbFunction != NULL)
+            if (iterPD->pfCbFunction != NULL)
             {
                 TRDP_PD_INFO_T theMessage;
                 theMessage.comId        = iterPD->addr.comId;
@@ -646,7 +646,7 @@ void trdp_pdHandleTimeOuts (
                 theMessage.pUserRef     = iterPD->pUserRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
-                appHandle->pdDefault.pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0);
+                iterPD->pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0);
             }
 
             /*    Prevent repeated time out events    */

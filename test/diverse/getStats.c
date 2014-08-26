@@ -320,12 +320,12 @@ int main (int argc, char * *argv)
     }
 
     /*    Subscribe to control PD        */
-
     memset(&gBuffer, 0, sizeof(gBuffer));
 
     err = tlp_subscribe( appHandle,                     /*    our application identifier             */
                          &subHandle,                    /*    our subscription identifier            */
-                         NULL,
+                         NULL,                          /*    user reference                         */
+                         NULL,                          /*    callback function                      */
                          TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                  */
                          0,                             /*    topocount: local consist only          */
                          0,
