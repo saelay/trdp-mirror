@@ -587,6 +587,7 @@ VOS_THREAD_FUNC_T MDCaller (
 					err = tlm_request(
 							mdAppHandle,			/* the handle returned by tlc_openSession */
 							pMdUserRef,			/* user supplied value returned with reply */
+                            NULL,
 							&mdSessionId,			/* return session ID */
 							pCallerThreadParameter->pCommandValue->mdSendComId,				/* comId of packet to be sent */
 							mdTopocount,										/* topocount to use */
