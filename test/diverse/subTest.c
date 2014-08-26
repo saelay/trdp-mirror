@@ -258,7 +258,7 @@ int main (int argc, char *argv[])
 
     err = tlp_subscribe( appHandle,                 /*    our application identifier           */
                          &subHandle1,               /*    our subscription identifier          */
-                         NULL,
+                         NULL, NULL,
                          PD_COMID1,                 /*    ComID                                */
                          0,                         /*    topocount: local consist only        */
                          0,
@@ -279,7 +279,7 @@ int main (int argc, char *argv[])
 
     err = tlp_subscribe( appHandle,                 /*    our application identifier             */
                          &subHandle2,               /*    our subscription identifier            */
-                         NULL,
+                         NULL, NULL,
                          PD_COMID2,                 /*    ComID                                  */
                          0,                         /*    topocount: local consist only          */
                          0,

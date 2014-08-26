@@ -1108,7 +1108,7 @@ int main (int argc, char *argv[])
 		/*	Sub-network Id1 ComID1 Subscribe */
 		err = tlp_subscribe( appHandle,					/* our application identifier */
 							 &subHandleNet1ComId1,		/* our subscription identifier */
-							 &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
+							 &OFFSET_ADDRESS3, NULL,    /* user referece value = offsetAddress */
 							 PD_SUB_COMID1,             /* ComID */
 							 0,                        	/* topocount: local consist only */
 							 PD_COMID1_SUB_SRC_IP1,     /* Source IP filter */
@@ -1137,7 +1137,7 @@ int main (int argc, char *argv[])
 		/*	Sub-network Id1 ComID2 Subscribe */
 		err = tlp_subscribe( appHandle,					/* our application identifier */
 							 &subHandleNet1ComId2,		/* our subscription identifier */
-							 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
+							 &OFFSET_ADDRESS4, NULL,    /* user referece value = offsetAddress */
 							 PD_SUB_COMID2,             /* ComID */
 							 0,                        	/* topocount: local consist only */
 							 PD_COMID2_SUB_SRC_IP1,     /* Source IP filter */
@@ -1173,7 +1173,7 @@ int main (int argc, char *argv[])
 			/*	Sub-network Id2 ComID1 Subscribe */
 			err = tlp_subscribe( appHandle2,				/* our application identifier */
 								 &subHandleNet2ComId1,		/* our subscription identifier */
-								 &OFFSET_ADDRESS3,			/* user referece value = offsetAddress */
+								 &OFFSET_ADDRESS3, NULL,    /* user referece value = offsetAddress */
 								 PD_SUB_COMID1,             /* ComID */
 								 0,                        	/* topocount: local consist only */
 								 PD_COMID1_SUB_SRC_IP2,     /* Source IP filter */
@@ -1202,7 +1202,7 @@ int main (int argc, char *argv[])
 			/*	Sub-network Id2 ComID2 Subscribe */
 			err = tlp_subscribe( appHandle2,				/* our application identifier */
 								 &subHandleNet2ComId2,		/* our subscription identifier */
-								 &OFFSET_ADDRESS4,			/* user referece value = offsetAddress */
+								 &OFFSET_ADDRESS4, NULL,    /* user referece value = offsetAddress */
 								 PD_SUB_COMID2,             /* ComID */
 								 0,                        	/* topocount: local consist only */
 								 PD_COMID2_SUB_SRC_IP2,     /* Source IP filter */
