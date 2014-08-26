@@ -825,9 +825,6 @@ TRDP_ERR_T  trdp_pdSend (
         pPacket->pullIpAddress = 0;
     }
 
-#if 0
-    pPacket->frameHead.frameCheckSum = 0x12345678;
-#endif
     pPacket->sendSize = pPacket->grossSize;
 
     err = vos_sockSendUDP(pdSock,
