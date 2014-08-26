@@ -129,7 +129,7 @@ int main (int argc, char * *argv)
 
     err = tlp_subscribe( appHandle,                 /*    our application identifier           */
                          &subHandle,                /*    our subscription identifier          */
-                         NULL,                      /*    callback function                    */
+                         NULL, NULL,                /*    userRef & callback function          */
                          PD_COMID1,                 /*    ComID                                */
                          0,                         /*    etbTopocount: local consist only     */
                          0,                         /*    opTopocount: local consist only      */
@@ -137,8 +137,8 @@ int main (int argc, char * *argv)
                          0,                         /*    source IP 1                          */
                          0,                         /*    source IP 2                          */
                          0,                         /*    Default destination IP (or MC Group) */
-                         PD_COMID1_TIMEOUT,         /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,       /*    delete invalid data    on timeout      */
+                         PD_COMID1_TIMEOUT,         /*    Time out in us                       */
+                         TRDP_TO_SET_TO_ZERO,       /*    delete invalid data on timeout       */
                          sizeof(gBuffer));          /*    net data size                        */
 
 

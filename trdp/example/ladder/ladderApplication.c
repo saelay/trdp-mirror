@@ -250,9 +250,9 @@ int main (void)
 	}
 
     /*	Sub-network Id1 Subscribe */
-    err = tlp_subscribe( appHandle,					/* our application identifier */
-                         &subHandleNet1ComId1,		/* our subscription identifier */
-                         &OFFSET_ADDRESS1,			/* user referece value = offsetAddress */
+    err = tlp_subscribe( appHandle,                 /* our application identifier */
+                         &subHandleNet1ComId1,      /* our subscription identifier */
+                         &OFFSET_ADDRESS1, NULL,    /* user referece value = offsetAddress */
                          PD_COMID1,                	/* ComID */
                          0,                        	/* topocount: local consist only */
                          0,
@@ -277,9 +277,9 @@ int main (void)
     tau_setPdComLadderThreadStartFlag(TRUE);
 
     /*	Sub-network Id2 Subscribe */
-    err = tlp_subscribe( appHandle2,				/* our application identifier */
-                         &subHandleNet2ComId1,		/* our subscription identifier */
-                         &OFFSET_ADDRESS1,			/* user referece value = offsetAddress */
+    err = tlp_subscribe( appHandle2,                /* our application identifier */
+                         &subHandleNet2ComId1,      /* our subscription identifier */
+                         &OFFSET_ADDRESS1, NULL,    /* user referece value = offsetAddress */
                          PD_COMID1,                	/* ComID */
                          0,                        	/* topocount: local consist only */
                          0,

@@ -260,7 +260,7 @@ int main (int argc, char * *argv)
 
     err = tlp_subscribe( appHandle,                 /*    our application identifier           */
                          &subHandle,                /*    our subscription identifier          */
-                         NULL,
+                         NULL, NULL,                /*    userRef & callback function          */
                          comId_In,                  /*    ComID                                */
                          0,                         /*    topocount: local consist only        */
                          0,
