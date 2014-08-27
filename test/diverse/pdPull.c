@@ -290,12 +290,10 @@ int main (int argc, char * *argv)
                         0,                             /*    topocount: local consist only          */
                         0,
                         0,                             /*    Source IP filter                       */
-                        0,
                         replyIP,                       /*    Default destination    (or MC Group)   */
                         TRDP_FLAGS_DEFAULT,            /*    packet flags */
                         0,                             /*    Time out in us                         */
-                        TRDP_TO_SET_TO_ZERO,           /*    delete invalid data    on timeout      */
-                        1432);                          /*    net data size                          */
+                        TRDP_TO_SET_TO_ZERO);          /*    delete invalid data    on timeout      */
 
     if (err != TRDP_NO_ERR)
     {

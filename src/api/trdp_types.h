@@ -413,15 +413,15 @@ typedef struct
 /** Table containing particular PD subscription information. */
 typedef struct
 {
-    UINT32              comId;    /**< Subscribed ComId      */
+    UINT32              comId;      /**< Subscribed ComId      */
     TRDP_IP_ADDR_T      joinedAddr; /**< Joined IP address   */
     TRDP_IP_ADDR_T      filterAddr; /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0
-                                      in case all senders. */
+                                            in case all senders. */
     void                *callBack;  /**< Reference for call back function if used */
-    UINT32              timeout;  /**< Time-out value in us. 0 = No time-out supervision */
-    TRDP_ERR_T          status;   /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
-    TRDP_TO_BEHAVIOR_T  toBehav;  /**< Behavior at time-out. Set data to zero / keep last value */
-    UINT32              numRecv;  /**< Number of packets received for this subscription. */
+    UINT32              timeout;    /**< Time-out value in us. 0 = No time-out supervision */
+    TRDP_ERR_T          status;     /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
+    TRDP_TO_BEHAVIOR_T  toBehav;    /**< Behavior at time-out. Set data to zero / keep last value */
+    UINT32              numRecv;    /**< Number of packets received for this subscription. */
 } TRDP_SUBS_STATISTICS_T;
 
 /** Table containing particular PD publishing information. */
@@ -444,9 +444,8 @@ typedef struct
     TRDP_URI_USER_T uri;        /**< URI user part to listen to */
     TRDP_IP_ADDR_T  joinedAddr; /**< Joined IP address */
     UINT32          callBack;   /**< Call back function reference if used */
-    UINT32          queue;      /**< Queue reference if used */
     UINT32          userRef;    /**< User reference if used */
-    UINT32          numRecv;    /**< Number of received packets */
+    UINT32          numSessions;/**< Number of sessions  */
 } TRDP_LIST_STATISTICS_T;
 
 

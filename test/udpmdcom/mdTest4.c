@@ -2127,6 +2127,7 @@ static int testRequestSend(
     errv = tlm_request(
         appHandle,
         (void *) 0x1000CAFE, /* user ref */
+        NULL,
         &session,
         comId,               /* comId */
         topoCount,           /* topoCount */

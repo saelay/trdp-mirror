@@ -429,7 +429,6 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      timeout             timeout (>= 10ms) in usec
  *  @param[in]      toBehavior          OPTION: TRDP_TO_DEFAULT, TRDP_TO_SET_TO_ZERO, TRDP_TO_KEEP_LAST_VALUE
- *  @param[in]      maxDataSize         expected max. size of packet data
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -889,7 +888,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     UINT16                  *pNumPub,
     TRDP_PUB_STATISTICS_T   *pStatistics);
 
-
+#if MD_SUPPORT
 /**********************************************************************************************************************/
 /** Return MD listener statistics.
  *  Memory for statistics information must be provided by the user.
@@ -909,6 +908,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     UINT16                  *pNumList,
     TRDP_LIST_STATISTICS_T  *pStatistics);
 
+#endif /* MD_SUPPORT    */
 
 /**********************************************************************************************************************/
 /** Return redundancy group statistics.
@@ -932,7 +932,7 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
 
 /**********************************************************************************************************************/
 /** Return join statistics.
- *  Memory for statistics information must be provided by the user. must be provided by the user.
+ *  Memory for statistics information must be provided by the user.
  * The reserved length is given via pNumJoin implicitely.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession

@@ -361,12 +361,10 @@ void setup_ports()
                 0,                  /* topo counter     */
                 0,
                 p->src,             /* source address   */
-                0,                  /* second source address  */
                 p->dst,             /* destination address    */
                 TRDP_FLAGS_NONE,    /* No flags set     */
-                p->timeout,         /* timeout [usec]   */
-                TRDP_TO_SET_TO_ZERO,/* timeout behavior */
-                p->size);           /* maximum size     */
+                p->timeout,             /* timeout [usec]   */
+                TRDP_TO_SET_TO_ZERO);   /* timeout behavior */
 
             if (p->err != TRDP_NO_ERR)
                 printf("tlp_subscribe() failed, err: %d\n", p->err);
