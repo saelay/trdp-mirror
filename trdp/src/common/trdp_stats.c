@@ -28,6 +28,7 @@
 #include "trdp_stats.h"
 #include "trdp_if_light.h"
 #include "trdp_if.h"
+#include "trdp_private.h"
 #include "trdp_pdcom.h"
 #include "vos_mem.h"
 #include "vos_thread.h"
@@ -245,6 +246,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     return err;
 }
 
+#if MD_SUPPORT
 /**********************************************************************************************************************/
 /** Return MD listener statistics.
  *  Memory for statistics information must be provided by the user.
@@ -252,7 +254,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumList            Pointer to the number of listeners
  *  @param[out]     pStatistics         Pointer to a list with the listener statistics information
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
@@ -262,14 +264,32 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
     UINT16                  *pNumList,
     TRDP_LIST_STATISTICS_T  *pStatistics)
 {
+    MD_LIS_ELE_T *pIter = ((TRDP_SESSION_T*)appHandle)->pMDListenQueue;
+    UINT16 lIndex;
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
 
-    /*    TBD    */
+    if (pNumList == NULL || pStatistics == NULL || *pNumList == 0)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    for (lIndex = 0; lIndex < *pNumList && pIter != NULL; ++lIndex, pIter = pIter->pNext)
+    {
+        vos_strncpy(pStatistics->uri, pIter->destURI , TRDP_MAX_URI_USER_LEN);
+        pStatistics->comId          = pIter->addr.comId;
+        pStatistics->joinedAddr     = pIter->addr.mcGroup;
+        pStatistics->callBack       = pIter->pfCbFunction;
+        pStatistics->userRef        = pIter->pUserRef;
+        pStatistics->numSessions    = pIter->numSessions;
+        pStatistics++;
+    }
+    *pNumList = lIndex;
     return TRDP_NO_ERR;
 }
+#endif
 
 /**********************************************************************************************************************/
 /** Return redundancy group statistics.
@@ -278,7 +298,7 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in,out]  pNumRed             Pointer to the number of redundancy groups
  *  @param[out]     pStatistics         Pointer to a list with the redundancy group information
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR     there are more subscriptions than requested
@@ -288,12 +308,35 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
     UINT16                  *pNumRed,
     TRDP_RED_STATISTICS_T   *pStatistics)
 {
+    UINT16      lIndex = 0;
+    PD_ELE_T*   iterPD;
     if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
 
-    /*    TBD    */
+    iterPD = ((TRDP_SESSION_T*) appHandle)->pSndQueue;
+
+    /*    Search the redundancy flag for every PD  */
+    for (lIndex = 0, iterPD = appHandle->pSndQueue; lIndex < *pNumRed && NULL != iterPD; iterPD = iterPD->pNext)
+    {
+        if (iterPD->redId != 0)         /* redundant ID set?    */
+        {
+            pStatistics->id = iterPD->redId;
+            if (iterPD->privFlags & TRDP_REDUNDANT)
+            {
+                pStatistics->state = TRDP_RED_FOLLOWER;
+            }
+            else
+            {
+                pStatistics->state = TRDP_RED_LEADER;
+            }
+            pStatistics++;
+            lIndex++;
+        }
+    }
+    
+    *pNumRed = lIndex;
     return TRDP_NO_ERR;
 }
 

@@ -270,11 +270,9 @@ int main (int argc, char * *argv)
                          0,
                          destIP,                    /*  Source to expect packets from          */
                          0,
-                         0,
                          0,                         /*    Default destination    (or MC Group) */
                          PD_COMID1_TIMEOUT,         /*    Time out in us                       */
-                         TRDP_TO_SET_TO_ZERO,       /*  delete invalid data    on timeout      */
-                         GBUFFER_SIZE);             /*    net data size                        */
+                         TRDP_TO_SET_TO_ZERO);      /*  delete invalid data    on timeout      */
 
     if (err != TRDP_NO_ERR)
     {

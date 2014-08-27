@@ -294,12 +294,10 @@ int main (int argc, char * *argv)
                             0,                          /*    topocount: local consist only        */
                             0,
                             0,                          /*    Source to expect packets from        */
-                            0,                          /*    2nd source to expect packets from    */
                             gSubPackets[i].addr,        /*    Default destination    (or MC Group) */
                             TRDP_FLAGS_CALLBACK,        /*    packet flags                         */
                             gSubPackets[i].time,        /*    Time out in us                       */
-                            TRDP_TO_SET_TO_ZERO,        /*    delete invalid data on timeout       */
-                            gSubPackets[i].dataSize);   /*    net data size                        */
+                            TRDP_TO_SET_TO_ZERO);       /*    delete invalid data on timeout       */
 
         if (err != TRDP_NO_ERR)
         {

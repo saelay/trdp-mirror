@@ -447,12 +447,10 @@ int main (int argc, char * *argv)
                          0,                             /*    topocount: local consist only         */
                          0,
                          0,                             /*    Source IP filter                      */
-                         0,
                          replyIP,                       /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_DEFAULT,
                          PD_COMID1_TIMEOUT,             /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,           /*  delete invalid data    on timeout       */
-                         sizeof(gBuffer));              /*    net data size                         */
+                         TRDP_TO_SET_TO_ZERO);          /*  delete invalid data    on timeout       */
 
     if (err != TRDP_NO_ERR)
     {

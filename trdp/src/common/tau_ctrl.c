@@ -108,12 +108,11 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
                          0,                         /*    ecnTopoCounter                        */
                          0,                         /*    opTopoCounter                         */
                          0,                         /*    Source IP filter                      */
-                         0,                         /*    2nd Source IP filter                  */
                          ecscIpAddr,                /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_MARSHALL,       /*    packet flags - UDP, no call back      */
                          ECSP_STAT_TIMEOUT,         /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO,       /*    delete invalid data    on timeout     */
-                         sizeof(TRDP_ECSP_STAT_T)); /*    net data size                         */
+                         TRDP_TO_SET_TO_ZERO);      /*    delete invalid data on timeout        */
+
     if ( err != TRDP_NO_ERR )
     {
         vos_printLog(VOS_LOG_ERROR, "tlp_subscribe() failed !\n");

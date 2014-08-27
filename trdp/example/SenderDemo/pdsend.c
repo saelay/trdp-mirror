@@ -339,12 +339,10 @@ void pd_sub (
             0,                                          /*	topocount: local consist only		*/
             0,
             vos_dottedIP(recPacket->srcIP),             /*	Source IP filter 1					*/
-            0,                                          /*	Source IP filter 2					*/
             0,
             0x0,                                        /*	Default destination	(or MC Group)   */
             recPacket->timeout,                         /*	Time out in us						*/
-            TRDP_TO_SET_TO_ZERO,                        /*  delete invalid data	on timeout      */
-            sizeof(recPacket->message) + sizeof(recPacket->counter));               /*	net data size   */
+            TRDP_TO_SET_TO_ZERO);                       /*  delete invalid data	on timeout      */
 
     if (err != TRDP_NO_ERR)
     {

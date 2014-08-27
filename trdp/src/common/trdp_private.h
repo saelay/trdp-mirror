@@ -240,6 +240,7 @@ typedef struct MD_LIS_ELE
     TRDP_URI_USER_T     destURI;
     INT32               socketIdx;              /**< index into the socket list                             */
     TRDP_MD_CALLBACK_T  pfCbFunction;           /**< Pointer to MD callback function                        */
+    UINT32              numSessions;            /**< Number of received packets of all sessions             */
 } MD_LIS_ELE_T;
 
 /** Tcp connection parameters    */
