@@ -571,8 +571,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             {
                 /* Calculate the data size that is pending to read */
                 size        = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
-                dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) +
-                    sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum);
+                dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) /* +
+                    sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum)*/;
 
                 pElement->dataSize  = dataSize;
                 dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
@@ -673,7 +673,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
 
                 /* header information can't be read - throw the packet away reading some bytes */
                 size    = sizeof(MD_HEADER_T);
-                err     = (TRDP_ERR_T) vos_sockReceiveUDP(
+                (void) vos_sockReceiveUDP(
                         mdSock,
                         (UINT8 *)pElement->pPacket,
                         &size,
