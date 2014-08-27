@@ -273,6 +273,8 @@ EXT_DECL TRDP_ERR_T tlp_publish (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pubHandle           handle for related unpublish
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
  *  @param[in]      pData               pointer to packet data / dataset
@@ -286,6 +288,8 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 EXT_DECL TRDP_ERR_T tlp_republish (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_PUB_T              pubHandle,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          srcIpAddr, 
     TRDP_IP_ADDR_T          destIpAddr,
     const UINT8             *pData,
@@ -418,8 +422,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      comId               comId of packet to receive
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr1          IP for source filtering, set 0 if not used
- *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
+ *  @param[in]      srcIpAddr           IP for source filtering, set 0 if not used
  *                                      Used e.g. for source filtering of redundant devices.
  *  @param[in]      destIpAddr          IP address to join
  *  @param[in]      pktFlags            OPTION:
@@ -441,13 +444,11 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     UINT32              comId,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
-    TRDP_IP_ADDR_T      srcIpAddr1,
-    TRDP_IP_ADDR_T      srcIpAddr2,
+    TRDP_IP_ADDR_T      srcIpAddr,
     TRDP_IP_ADDR_T      destIpAddr,
     TRDP_FLAGS_T        pktFlags,
     UINT32              timeout,
-    TRDP_TO_BEHAVIOR_T  toBehavior,
-    UINT32              maxDataSize);
+    TRDP_TO_BEHAVIOR_T  toBehavior);
 
 
 /**********************************************************************************************************************/
@@ -456,9 +457,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      subHandle           handle for this subscription
- *  @param[in]      srcIpAddr1          IP for source filtering, set 0 if not used
- *  @param[in]      srcIpAddr2          Second source IP address for source filtering, set to zero if not used.
- *                                      Used e.g. for source filtering of redundant devices.
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr           IP for source filtering, set 0 if not used
  *  @param[in]      destIpAddr          IP address to join
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -469,8 +470,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 EXT_DECL TRDP_ERR_T tlp_resubscribe (
     TRDP_SUB_T          subHandle,
     TRDP_APP_SESSION_T  appHandle,
-    TRDP_IP_ADDR_T      srcIpAddr1,
-    TRDP_IP_ADDR_T      srcIpAddr2,
+    UINT32              etbTopoCnt,
+    UINT32              opTrnTopoCnt,
+    TRDP_IP_ADDR_T      srcIpAddr,
     TRDP_IP_ADDR_T      destIpAddr);
 
 
@@ -685,6 +687,8 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     listenHandle        Handle for this listener
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      mcDestIpAddr        multicast group to listen on
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -695,6 +699,8 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
 EXT_DECL TRDP_ERR_T tlm_readdListener (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_LIS_T              listenHandle,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          mcDestIpAddr /* multiple destId handled in layer above */);
 
 
