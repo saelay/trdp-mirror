@@ -570,7 +570,10 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 
                     /*    Only close socket if not used anymore    */
                     trdp_releaseSocket(pSession->iface, pSession->pRcvQueue->socketIdx, 0, FALSE);
-                    vos_memFree(pSession->pRcvQueue->pSeqCntList);
+                    if (pSession->pRcvQueue->pSeqCntList != NULL)
+                    {
+                        vos_memFree(pSession->pRcvQueue->pSeqCntList);
+                    }
                     vos_memFree(pSession->pRcvQueue->pFrame);
                     vos_memFree(pSession->pRcvQueue);
                     pSession->pRcvQueue = pNext;
@@ -1231,8 +1234,11 @@ TRDP_ERR_T  tlp_unpublish (
         trdp_queueDelElement(&appHandle->pSndQueue, pElement);
         trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0, FALSE);
         pElement->magic = 0;
+        if (pElement->pSeqCntList != NULL)
+        {
+            vos_memFree(pElement->pSeqCntList);
+        }
         vos_memFree(pElement->pFrame);
-        vos_memFree(pElement->pSeqCntList);
         vos_memFree(pElement);
         ret = TRDP_NO_ERR;
 
