@@ -212,39 +212,32 @@ VOS_ERR_T vos_initRuntimeConsts (void)
 
     if (sAlignINT8 != ALIGNOF(INT8))
     {
-        vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != ALIGNOF(INT8)\n", sAlignINT8);
-        sAlignINT8 = ALIGNOF(INT8);
+        vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != %u [ALIGNOF(INT8)]\n", sAlignINT8, ALIGNOF(INT8));
     }
     else if (sAlignINT16 != ALIGNOF(INT16))
     {
-        vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != ALIGNOF(INT16)\n", sAlignINT16);
-        sAlignINT16 = ALIGNOF(INT16);
+        vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != %u [ALIGNOF(INT16)]\n", sAlignINT16, ALIGNOF(INT16));
     }
     else if (sAlignINT32 != ALIGNOF(INT32))
     {
-        vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != ALIGNOF(INT32)\n", sAlignINT32);
-        sAlignINT32 = ALIGNOF(INT32);
+        vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != %u [ALIGNOF(INT32)]\n", sAlignINT32, ALIGNOF(INT32));
     }
     else if (sAlignREAL32 != ALIGNOF(REAL32))
     {
         vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != %u [ALIGNOF(REAL32)]\n", sAlignREAL32, ALIGNOF(REAL32));
-        sAlignREAL32 = ALIGNOF(REAL32);
     }
     else if (sAlignTIMEDATE48 != ALIGNOF(TIMEDATE48))
     {
         vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != %u [ALIGNOF(TIMEDATE48)]\n", sAlignTIMEDATE48,
                      ALIGNOF(TIMEDATE48));
-        sAlignTIMEDATE48 = ALIGNOF(TIMEDATE48);
     }
     else if (sAlignINT64 != ALIGNOF(INT64))
     {
         vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != %u [ALIGNOF(INT64)]\n", sAlignINT64, ALIGNOF(INT64));
-        sAlignINT64 = ALIGNOF(INT64);
     }
     else if (sAlignREAL64 != ALIGNOF(REAL64))
     {
         vos_printLog(VOS_LOG_ERROR, "Unexpected alignment: %u != %u [ALIGNOF(REAL64)]\n", sAlignREAL64, ALIGNOF(REAL64));
-        sAlignREAL64 = ALIGNOF(REAL64);
     }
     else if (sAlignTIMEDATE48Array1 != ALIGNOF(TIMEDATE48))
     {
@@ -252,7 +245,6 @@ VOS_ERR_T vos_initRuntimeConsts (void)
                      "Unexpected alignment 1: %u != %u [ALIGNOF(TIMEDATE48)]\n",
                      sAlignTIMEDATE48Array1,
                      ALIGNOF(TIMEDATE48));
-        sAlignTIMEDATE48Array1 = ALIGNOF(TIMEDATE48);
     }
     else if (sAlignTIMEDATE48Array2 != ALIGNOF(TIMEDATE48))
     {
@@ -260,7 +252,6 @@ VOS_ERR_T vos_initRuntimeConsts (void)
                      "Unexpected alignment 2: %u != %u [ALIGNOF(TIMEDATE48)]\n",
                      sAlignTIMEDATE48Array2,
                      ALIGNOF(TIMEDATE48));
-        sAlignTIMEDATE48Array2 = ALIGNOF(TIMEDATE48);
     }
     else
     {
