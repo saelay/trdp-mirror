@@ -40,7 +40,7 @@
 #define DATA_MAX            1000
 
 #define MD_COMID1           1001
-#define MD_COMID1_TIMEOUT   1000000            /* in us (1000000 = 1 sec) */
+#define MD_COMID1_TIMEOUT   10000000            /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory    */
 #define RESERVED_MEMORY     2000000
@@ -238,17 +238,20 @@ void mdCallback (void                   *pRefCon,
             printf("No Reply within time out for ComID %d, destIP: %s\n",
                    pMsg->comId,
                    vos_ipDotted(pMsg->destIpAddr));
+            sSessionData.sLoop = FALSE;
             break;
         case TRDP_CONFIRMTO_ERR:
         case TRDP_REQCONFIRMTO_ERR:
             printf("No Confirmation within time out for ComID %d, destIP: %s\n",
                    pMsg->comId,
                    vos_ipDotted(pMsg->destIpAddr));
+            sSessionData.sLoop = FALSE;
             break;
         default:
             printf("Error on packet received (ComID %d), err = %d\n",
                    pMsg->comId,
                    pMsg->resultCode);
+            sSessionData.sLoop = FALSE;
             break;
     }
 }
@@ -273,12 +276,12 @@ void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"*Err:", "Warn:", " Inf:", " Dbg:"};
 
-    printf("%s %s %s:%d %s",
-           pTime,
+    printf("%s %s %16s:%-4d %s",
+           strrchr(pTime, '-') + 1,
            catStr[category],
-           pFile,
+           strrchr(pFile, '/') + 1,
            LineNumber,
            pMsgStr);
 }
@@ -576,10 +579,10 @@ int main (int argc, char *argv[])
 
         if (lastRun == TRUE)
         {
-            sSessionData.sLoop = FALSE;
+            //sSessionData.sLoop = FALSE;
         }
 
-        if (sSessionData.sResponder == FALSE && sSessionData.sExitAfterReply == FALSE)
+        else if (sSessionData.sResponder == FALSE && sSessionData.sExitAfterReply == FALSE)
         {
             TRDP_UUID_T sessionId;
             UINT32         i, j;
