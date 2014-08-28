@@ -35,7 +35,14 @@ vpath %.h src/api src/vos/api src/common src/vos/common
 
 INCLUDES = $(INCPATH) $(VOS_INCPATH) $(VOS_PATH)
 
-FLINT = flint
+#set up your specific paths for the lint *.lnt files etc
+#by setting up an environment variable LINT_RULE_DIR like below
+#LINT_RULE_DIR = /home/mkoch/svn_trdp/lint/pclint/9.00i/lnt/
+
+#also you may like to point to a spcific path for the lint
+#binary - have the environment variable LINT_BINPATH available
+#within your build shell
+FLINT = $(LINT_BINPATH)flint
 
 # Set Objects
 VOS_OBJS = vos_utils.o \
@@ -58,6 +65,7 @@ LINT_OBJECTS = trdp_stats.lob\
 	   vos_thread.lob \
 	   vos_shared_mem.lob \
 	   trdp_pdcom.lob \
+	   trdp_mdcom.lob \
 	   trdp_utils.lob \
 	   trdp_if.lob \
 	   trdp_stats.lob     
@@ -318,8 +326,8 @@ lint:   loutdir $(LINT_OUTDIR)/final.lint
 loutdir:
 	@$(MD) $(LINT_OUTDIR)
 
-LINTFLAGS = +v -i ./src/api -i ./src/vos/api -i ./src/common -D$(TARGET_OS) $(LINT_SYSINCLUDE_DIRECTIVES)\
-	-DMD_SUPPORT=1 -summary -u ./test/lint/au-misra2.lnt ./test/lint/co-gnu3.lnt
+LINTFLAGS = +v -i$(LINT_RULE_DIR) $(LINT_RULE_DIR)co-gcc.lnt -i ./src/api -i ./src/vos/api -i ./src/common -D$(TARGET_OS) $(LINT_SYSINCLUDE_DIRECTIVES)\
+	-DMD_SUPPORT=1 -w3 -summary -u
 
 # VxWorks will be the single non POSIX OS right now, MS Win uses proprietary build
 # framework, so this condition will most likely fit also BSD/Unix targets     
