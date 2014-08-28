@@ -18,6 +18,8 @@
  *
  * $Id$
  *
+ *      BL 2014-08-28: Ticket #62: Failing TCP communication fixed,
+ *                                 Do not read if there's nothing to read ('Mc' has no data!)
  *      BL 2014-08-25: Ticket #57+58: Padding / zero bytes trailing MD & PD packets fixed
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *                     Ticket #47: Protocol change: no FCS for data part of telegrams
@@ -526,29 +528,33 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 storedHeader    = appHandle->uncompletedTCP[socketIndex]->grossSize;
             }
 
-            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock,
+            if (readSize > 0)
+            {
+                err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock,
                                                   ((UINT8 *)&pElement->pPacket->frameHead) + storedHeader,
                                                   &readSize);
 
-            /* Add the read data size to the size read before */
-            size = storedHeader + readSize;
+                /* Add the read data size to the size read before */
+                size = storedHeader + readSize;
 
-            if ((appHandle->uncompletedTCP[socketIndex] != NULL)
-                && (size >= sizeof(MD_HEADER_T))
-                && appHandle->uncompletedTCP[socketIndex]->pPacket != NULL)     /* BL: Prevent NULL pointer access */
-            {
-                if (trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, size, CHECK_HEADER_ONLY) == TRDP_NO_ERR)
+                if (err == TRDP_NO_ERR
+                    && (appHandle->uncompletedTCP[socketIndex] != NULL)
+                    && (size >= sizeof(MD_HEADER_T))
+                    && appHandle->uncompletedTCP[socketIndex]->pPacket != NULL)     /* BL: Prevent NULL pointer access */
                 {
-                    /* Uncompleted Header, completed. Save some parameters in the uncompletedTCP structure */
-                    appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength =
-                        pElement->pPacket->frameHead.datasetLength;
-                    appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum =
-                        pElement->pPacket->frameHead.frameCheckSum;
-                }
-                else
-                {
-                    vos_printLog(VOS_LOG_INFO, "TCP MD header check failed\n");
-                    return TRDP_NODATA_ERR;
+                    if (trdp_mdCheck(appHandle, &pElement->pPacket->frameHead, size, CHECK_HEADER_ONLY) == TRDP_NO_ERR)
+                    {
+                        /* Uncompleted Header, completed. Save some parameters in the uncompletedTCP structure */
+                        appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength =
+                            pElement->pPacket->frameHead.datasetLength;
+                        appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum =
+                            pElement->pPacket->frameHead.frameCheckSum;
+                    }
+                    else
+                    {
+                        vos_printLog(VOS_LOG_INFO, "TCP MD header check failed\n");
+                        return TRDP_NODATA_ERR;
+                    }
                 }
             }
         }
@@ -561,8 +567,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             if (appHandle->uncompletedTCP[socketIndex] == NULL)
             {
                 /* Get the rest of the message length */
-                dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength) +
-                    sizeof(pElement->pPacket->frameHead.frameCheckSum);
+                dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength);
 
                 readDataSize        = dataSize;
                 pElement->dataSize  = dataSize;
@@ -571,8 +576,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             {
                 /* Calculate the data size that is pending to read */
                 size        = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
-                dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength) /* +
-                    sizeof(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.frameCheckSum)*/;
+                dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength);
 
                 pElement->dataSize  = dataSize;
                 dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
@@ -600,15 +604,18 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 }
             }
 
-            err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock,
+            if (readDataSize > 0)
+            {
+                err = (TRDP_ERR_T) vos_sockReceiveTCP(mdSock,
                                                   ((UINT8 *)&pElement->pPacket->frameHead) + size,
                                                   &readDataSize);
 
-            /* Add the read data size */
-            size = size + readDataSize;
+                /* Add the read data size */
+                size = size + readDataSize;
 
-            /* Add the read Data size to the size read during this cycle */
-            readSize = readSize + readDataSize;
+                /* Add the read Data size to the size read during this cycle */
+                readSize = readSize + readDataSize;
+            }
         }
         pElement->grossSize = size;
     }
@@ -717,7 +724,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
         /* Check if it's necessary to read some data */
         if (pElement->grossSize == sizeof(MD_HEADER_T))
         {
-            if (dataSize - sizeof(pElement->pPacket->frameHead.frameCheckSum) == 0)
+            if (dataSize == 0)
             {
                 noDataToRead = TRUE;
             }
@@ -1827,6 +1834,7 @@ void  trdp_mdCheckListenSocks (
                     trdp_sock_opt.ttl_multicast = 0;
                     trdp_sock_opt.reuseAddrPort = TRUE;
                     trdp_sock_opt.nonBlocking   = TRUE;
+                    trdp_sock_opt.no_mc_loop    = FALSE;
 
                     err = (TRDP_ERR_T) vos_sockSetOptions(new_sd, &trdp_sock_opt);
                     if (err != TRDP_NO_ERR)
@@ -1952,8 +1960,8 @@ void  trdp_mdCheckListenSocks (
             if (err == TRDP_NODATA_ERR && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
             {
                 vos_printLog(VOS_LOG_INFO,
-                             "The socket has been closed in the other corner (Corner Ip: %u, Socket: %d)\n",
-                             appHandle->iface[lIndex].tcpParams.cornerIp,
+                             "The socket has been closed in the other corner (Corner Ip: %s, Socket: %d)\n",
+                             vos_ipDotted(appHandle->iface[lIndex].tcpParams.cornerIp),
                              appHandle->iface[lIndex].sock);
 
                 appHandle->iface[lIndex].tcpParams.morituri = TRUE;
