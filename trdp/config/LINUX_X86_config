@@ -21,3 +21,5 @@ DOXYPATH = /usr/local/bin/
 
 CFLAGS += -Wall -fstrength-reduce -fno-builtin -fsigned-char -pthread -fPIC -D_GNU_SOURCE -DPOSIX -DL_ENDIAN
 LDFLAGS += -lrt
+
+LINT_SYSINCLUDE_DIRECTIVES = -i ./src/vos/posix -wlib 0 -DL_ENDIAN
