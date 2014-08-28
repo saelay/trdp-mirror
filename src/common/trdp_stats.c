@@ -315,8 +315,6 @@ EXT_DECL TRDP_ERR_T tlc_getRedStatistics (
         return TRDP_NOINIT_ERR;
     }
 
-    iterPD = ((TRDP_SESSION_T*) appHandle)->pSndQueue;
-
     /*    Search the redundancy flag for every PD  */
     for (lIndex = 0, iterPD = appHandle->pSndQueue; lIndex < *pNumRed && NULL != iterPD; iterPD = iterPD->pNext)
     {

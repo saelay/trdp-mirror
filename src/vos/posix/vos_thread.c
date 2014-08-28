@@ -99,11 +99,13 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
     return -1;
 }
 
-//int sem_init(sem_t *, int, unsigned int);
+/* simulate 
+    int sem_init(sem_t *, int, unsigned int);
+*/
 int sem_init(sem_t *pSema, int flags, unsigned int mode)
 {
     *pSema = sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)mode);
-    if (*pSema == SEM_FAILED)
+    if (pSema == SEM_FAILED)
     {
         return -1;
     }

@@ -564,7 +564,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
             || ((appHandle->uncompletedTCP[socketIndex] != NULL)
                 && (appHandle->uncompletedTCP[socketIndex]->grossSize >= sizeof(MD_HEADER_T))))
         {
-            if (appHandle->uncompletedTCP[socketIndex] == NULL)
+            if (appHandle->uncompletedTCP[socketIndex] == NULL || appHandle->uncompletedTCP[socketIndex]->pPacket == NULL)
             {
                 /* Get the rest of the message length */
                 dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength);
@@ -822,7 +822,8 @@ TRDP_ERR_T  trdp_mdRecvPacket (
                 /* Add the received information and copy all the data to the pElement */
                 storedDataSize = appHandle->uncompletedTCP[socketIndex]->grossSize;
 
-                if ((readSize > 0))
+                if ((readSize > 0) &&
+                    appHandle->uncompletedTCP[socketIndex]->pPacket != NULL)
                 {
                     /* Copy the read data in the uncompletedTCP[] */
                     memcpy(((UINT8 *)&appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead) + storedDataSize,
@@ -2389,7 +2390,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                                 srcIpAddr       = iterMD->addr.destIpAddr; 
                                 etbTopoCnt      = iterMD->addr.etbTopoCnt;
                                 opTrnTopoCnt    = iterMD->addr.opTrnTopoCnt;                                        
-                                pktFlags        = iterMD->pktFlags;
+                                /* pktFlags        = iterMD->pktFlags; */
                                 destURI         = iterMD->srcURI;
                                 srcURI          = iterMD->destURI;
                             }
@@ -2422,7 +2423,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                             srcIpAddr                   = iterMD->addr.destIpAddr;
                             etbTopoCnt                  = iterMD->addr.etbTopoCnt;
                             opTrnTopoCnt                = iterMD->addr.opTrnTopoCnt;
-                            pktFlags                    = iterMD->pktFlags;
+                            /* pktFlags                    = iterMD->pktFlags; */
                             destURI                     = iterMD->srcURI;
                             srcURI                      = iterMD->destURI;
 

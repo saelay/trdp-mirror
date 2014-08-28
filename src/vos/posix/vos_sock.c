@@ -140,7 +140,7 @@ BOOL8 vos_getMacAddress (
     {
         struct ifaddrs *cur;
 
-        for (cur = pIfList; cur; cur = cur->ifa_next)
+        for (cur = pIfList; pName != NULL && cur != NULL; cur = cur->ifa_next)
         {
             if ((cur->ifa_addr->sa_family == AF_LINK) &&
                 (strcmp(cur->ifa_name, pName) == 0) &&
