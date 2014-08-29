@@ -123,18 +123,19 @@ void initPacketList (
  *  @retval         none
  */
 void dbgOut (
-    void        *pRefCon,
-    TRDP_LOG_T  category,
-    const CHAR8 *pTime,
-    const CHAR8 *pFile,
-    UINT16      LineNumber,
-    const CHAR8 *pMsgStr)
+             void        *pRefCon,
+             TRDP_LOG_T  category,
+             const CHAR8 *pTime,
+             const CHAR8 *pFile,
+             UINT16      LineNumber,
+             const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s",
-           pTime,
+    const char *catStr[] = {"*Err:", "Warn:", " Inf:", " Dbg:"};
+    
+    printf("%s %s %16s:%-4d %s",
+           strrchr(pTime, '-') + 1,
            catStr[category],
-           pFile,
+           strrchr(pFile, '/') + 1,
            LineNumber,
            pMsgStr);
 }

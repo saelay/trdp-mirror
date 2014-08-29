@@ -108,7 +108,6 @@
 		73A00E621913CCC50020A6EA /* tau_ctrl.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E601913CCC50020A6EA /* tau_ctrl.h */; };
 		73A00E631913CCC50020A6EA /* tau_dnr.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E611913CCC50020A6EA /* tau_dnr.h */; };
 		73A9BE2116EE2A1700FE87C8 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
-		73A9BE2216EE2A2100FE87C8 /* mdManagerTCP.c in Sources */ = {isa = PBXBuildFile; fileRef = 73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */; };
 		73B68FBF15443B79004968FA /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 731291FE15341A58006B3A88 /* vos_mem.c */; };
 		73B6907915446B8C004968FA /* trdp_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F3A150777B00046E0AC /* trdp_utils.h */; };
 		73B6907A15446B8D004968FA /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
@@ -136,7 +135,6 @@
 		73F5A53B16A41A2000335006 /* vos_shared_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F5A53A16A41A2000335006 /* vos_shared_mem.h */; };
 		73F5F9AB171C39380087C6B7 /* pdPull.c in Sources */ = {isa = PBXBuildFile; fileRef = 73F5F9A0171C33970087C6B7 /* pdPull.c */; };
 		73F5F9B3171C398A0087C6B7 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
-		73FD2EEC16C1374700626293 /* test_mdSingle.c in Sources */ = {isa = PBXBuildFile; fileRef = 73FD2EEB16C1374700626293 /* test_mdSingle.c */; };
 		73FD2F1B16C1686800626293 /* test_mdSingle.c in Sources */ = {isa = PBXBuildFile; fileRef = 73FD2EEB16C1374700626293 /* test_mdSingle.c */; };
 		73FD2F1C16C1687200626293 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 /* End PBXBuildFile section */
@@ -478,13 +476,9 @@
 		08014D31164840030065AADD /* NewTec.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NewTec.png; sourceTree = "<group>"; };
 		08014D32164840030065AADD /* Siemens.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Siemens.png; sourceTree = "<group>"; };
 		08014D33164840030065AADD /* SenderDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SenderDemo_Prefix.pch; sourceTree = "<group>"; };
-		08CE20C716496F760038151B /* mdManager.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManager.c; sourceTree = "<group>"; };
 		08CE2171164A6E130038151B /* trdp_reserved.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trdp_reserved.h; path = marshalling/trdp_reserved.h; sourceTree = "<group>"; };
 		08CE2172164A6E130038151B /* trdp_reserved.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trdp_reserved.c; path = marshalling/trdp_reserved.c; sourceTree = "<group>"; };
 		73080FFD17A953AF003DAE84 /* test_marshalling2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_marshalling2.c; sourceTree = "<group>"; };
-		730810BC17AB9B46003DAE84 /* TCN-TRDP1-C-BOM-029-xx - TCNOpen_License_Agreement TRDP.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP1-C-BOM-029-xx - TCNOpen_License_Agreement TRDP.pdf"; sourceTree = "<group>"; };
-		730810BD17AB9B46003DAE84 /* TCN-TRDP2-D-BOM-031-xx - TRDP Conformance Test Specification.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-031-xx - TRDP Conformance Test Specification.pdf"; sourceTree = "<group>"; };
-		730810BE17AB9B46003DAE84 /* TCN-TRDP2-D-BOM-032-xx - TRDP Conformance Test Report.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-032-xx - TRDP Conformance Test Report.pdf"; sourceTree = "<group>"; };
 		730DAF9616A07B150019B4D0 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		730DAF9716A07B150019B4D0 /* trdp-pd-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "trdp-pd-test.c"; sourceTree = "<group>"; };
 		730DAF9D16A07B5B0019B4D0 /* pd-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "pd-test"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -536,7 +530,6 @@
 		7322487F16A97E7900148295 /* crc-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "crc-test.c"; path = "../test/diverse/crc-test.c"; sourceTree = "<group>"; };
 		7327CA871656AB080020536A /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_private.h; sourceTree = "<group>"; };
 		7327CB0A1656BE450020536A /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_private.h; sourceTree = "<group>"; };
-		732961371675DEB600DAC14B /* BugTracking.xls */ = {isa = PBXFileReference; lastKnownFileType = file; name = BugTracking.xls; path = ../BugTracking.xls; sourceTree = SOURCE_ROOT; };
 		732D2790162DBD1D009D7857 /* getStats */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = getStats; sourceTree = BUILT_PRODUCTS_DIR; };
 		732D2792162DBD84009D7857 /* getStats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = getStats.c; path = ../test/diverse/getStats.c; sourceTree = "<group>"; };
 		7331A55C171566E400270642 /* pd_md_responder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pd_md_responder.c; path = ../test/diverse/pd_md_responder.c; sourceTree = "<group>"; };
@@ -560,8 +553,6 @@
 		734092521769E99300CFCE5B /* testladder */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testladder; sourceTree = BUILT_PRODUCTS_DIR; };
 		734721F7169C272E00EC18C6 /* ladderApplication_publisher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_publisher.c; path = ../test/ladderpdtest/ladderApplication_publisher.c; sourceTree = "<group>"; };
 		734721F8169C272E00EC18C6 /* ladderApplication_subscriber.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_subscriber.c; path = ../test/ladderpdtest/ladderApplication_subscriber.c; sourceTree = "<group>"; };
-		7349B3D4173D23E300EC7AEF /* TCN-TRDP1-A-BOM-008-xx - TRDP Coding Rules.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP1-A-BOM-008-xx - TRDP Coding Rules.pdf"; sourceTree = "<group>"; };
-		7349B3D8173D23E300EC7AEF /* TCN-TRDP2-D-BOM-030-xx - TRDP Release Notes.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-030-xx - TRDP Release Notes.pdf"; sourceTree = "<group>"; };
 		7349B3EC173D2CF700EC7AEF /* std_posix.lnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = std_posix.lnt; sourceTree = "<group>"; };
 		734A94FB16CEA320002D0F9B /* getopt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = getopt.c; sourceTree = "<group>"; };
 		734A94FC16CEA320002D0F9B /* getopt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getopt.h; sourceTree = "<group>"; };
@@ -715,12 +706,7 @@
 		73A00E5E1913CCAF0020A6EA /* tau_tti_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_tti_types.h; sourceTree = "<group>"; };
 		73A00E601913CCC50020A6EA /* tau_ctrl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_ctrl.h; sourceTree = "<group>"; };
 		73A00E611913CCC50020A6EA /* tau_dnr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_dnr.h; sourceTree = "<group>"; };
-		73A9BE1616EE29CC00FE87C8 /* mdManagerTCP_Siemens.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManagerTCP_Siemens.c; sourceTree = "<group>"; };
-		73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdManagerTCP.c; sourceTree = "<group>"; };
 		73A9BE1D16EE2A0000FE87C8 /* mdManagerTCP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mdManagerTCP; sourceTree = BUILT_PRODUCTS_DIR; };
-		73AE18E41754AA4800AA5CBC /* TCN-TRDP1-D-BOM-003-xx - TRDP System Requirement Specification.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP1-D-BOM-003-xx - TRDP System Requirement Specification.pdf"; sourceTree = "<group>"; };
-		73AE18E51754AA5400AA5CBC /* TCN-TRDP2-D-BOM-011-xx - TRDP User's Manual.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-011-xx - TRDP User's Manual.pdf"; sourceTree = "<group>"; };
-		73B68B781790499C00BFA039 /* TCN-TRDP2-D-BOM-019-02 - TRDP System Architecture & Design.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-019-02 - TRDP System Architecture & Design.pdf"; sourceTree = "<group>"; };
 		73B68B7917904A4900BFA039 /* TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf"; sourceTree = "<group>"; };
 		73BA39431625B1D200686E9E /* testserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testserver; sourceTree = BUILT_PRODUCTS_DIR; };
 		73BBD0581973D5AC001BAE15 /* LINUX_PPC_config */ = {isa = PBXFileReference; lastKnownFileType = text; path = LINUX_PPC_config; sourceTree = "<group>"; };
@@ -1852,7 +1838,6 @@
 		08FB7794FE84155DC02AAC07 /* trdp */ = {
 			isa = PBXGroup;
 			children = (
-				732961371675DEB600DAC14B /* BugTracking.xls */,
 				73E051EF15123F600058D590 /* Doxyfile */,
 				7387F6441578FDCC00DBAB73 /* readme.txt */,
 				73E4978516CE981E00045EFA /* Deviation Request.txt */,
@@ -2340,9 +2325,6 @@
 				7381BE511643FAC4003BC539 /* echoSelectcmdline.c */,
 				7366AC6116B68C100068A893 /* example.xml */,
 				7366AC6216B68C100068A893 /* interoperability_test.xml */,
-				08CE20C716496F760038151B /* mdManager.c */,
-				73A9BE1616EE29CC00FE87C8 /* mdManagerTCP_Siemens.c */,
-				73A9BE1716EE29CC00FE87C8 /* mdManagerTCP.c */,
 				73517C4A16BBFDA800DB5208 /* receiveHello.c */,
 				73821F3D150777B00046E0AC /* sendHello.c */,
 				73DF2E27178312B700D086EB /* arduinoMain.c */,
@@ -2355,15 +2337,7 @@
 			isa = PBXGroup;
 			children = (
 				735BAD12172EC1AB00837D0E /* memory.xls */,
-				7349B3D4173D23E300EC7AEF /* TCN-TRDP1-A-BOM-008-xx - TRDP Coding Rules.pdf */,
-				73AE18E41754AA4800AA5CBC /* TCN-TRDP1-D-BOM-003-xx - TRDP System Requirement Specification.pdf */,
-				73AE18E51754AA5400AA5CBC /* TCN-TRDP2-D-BOM-011-xx - TRDP User's Manual.pdf */,
-				73B68B781790499C00BFA039 /* TCN-TRDP2-D-BOM-019-02 - TRDP System Architecture & Design.pdf */,
-				7349B3D8173D23E300EC7AEF /* TCN-TRDP2-D-BOM-030-xx - TRDP Release Notes.pdf */,
 				73B68B7917904A4900BFA039 /* TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf */,
-				730810BC17AB9B46003DAE84 /* TCN-TRDP1-C-BOM-029-xx - TCNOpen_License_Agreement TRDP.pdf */,
-				730810BD17AB9B46003DAE84 /* TCN-TRDP2-D-BOM-031-xx - TRDP Conformance Test Specification.pdf */,
-				730810BE17AB9B46003DAE84 /* TCN-TRDP2-D-BOM-032-xx - TRDP Conformance Test Report.pdf */,
 				731292961535BEA1006B3A88 /* images */,
 				73821F66150777D30046E0AC /* latex */,
 			);
@@ -3803,11 +3777,11 @@
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
-			buildWorkingDirectory = "$(SRCROOT)";
+			buildWorkingDirectory = "/Users/bernd/Rep-Sourcen/TCNOpen-trdp/trunk/trdp";
 			dependencies = (
 			);
 			name = "doc generation";
-			passBuildSettingsInEnvironment = 1;
+			passBuildSettingsInEnvironment = 0;
 			productName = "doc generation";
 		};
 		73C20280174BC9CE003C5A0E /* All */ = {
@@ -4525,7 +4499,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				73517C4B16BBFDA800DB5208 /* receiveHello.c in Sources */,
-				73FD2EEC16C1374700626293 /* test_mdSingle.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4609,7 +4582,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				73A9BE2216EE2A2100FE87C8 /* mdManagerTCP.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4969,6 +4941,7 @@
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
 					"-DL_ENDIAN",
+					"-DDEBUG",
 				);
 				PRODUCT_NAME = trdp;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
@@ -4984,7 +4957,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
 				OTHER_CFLAGS = (
-					"-DMD_SUPPORT=0",
+					"-DMD_SUPPORT=1",
 					"-DPOSIX",
 					"-DL_ENDIAN",
 				);
@@ -5509,7 +5482,11 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				OTHER_CFLAGS = "-DPOSIX";
+				OTHER_CFLAGS = (
+					"-DPOSIX",
+					"-DDEBUG",
+					"-DL_ENDIAN",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = test_memSizes;
 			};
@@ -5524,6 +5501,10 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-DL_ENDIAN",
+					"-DPOSIX",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = test_memSizes;
 				ZERO_LINK = NO;

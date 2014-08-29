@@ -64,7 +64,7 @@ typedef enum
 /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
    Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
 
-#define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 0, 0, 4, 0, 0}
+#define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 1, 0, 2, 0, 0}
 
 #else /* Small systems, PD only */
 

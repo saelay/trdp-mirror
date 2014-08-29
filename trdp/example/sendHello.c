@@ -45,7 +45,7 @@
 #define PD_COMID_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY  100000
+#define RESERVED_MEMORY  160000
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -68,9 +68,9 @@ void dbgOut (
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
     printf("%s %s %s:%d %s",
-           pTime,
+           strrchr(pTime, '-') + 1,
            catStr[category],
-           pFile,
+           strrchr(pFile, '/') + 1,
            LineNumber,
            pMsgStr);
 }
