@@ -181,7 +181,7 @@ typedef struct TRDP_SOCKETS
 typedef struct
 {
     PD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
-    UINT8       data[TRDP_MAX_PD_PACKET_SIZE];  /**< data ready to be sent or received (with CRCs)          */
+    UINT8       data[TRDP_MAX_PD_DATA_SIZE];  /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED PD_PACKET_T;
 
 #if MD_SUPPORT
@@ -189,7 +189,7 @@ typedef struct
 typedef struct
 {
     MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
-    UINT8       data[TRDP_MAX_MD_PACKET_SIZE];  /**< data ready to be sent or received (with CRCs)          */
+    UINT8       data[TRDP_MAX_MD_DATA_SIZE];  /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED MD_PACKET_T;
 #endif
 

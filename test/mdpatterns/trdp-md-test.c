@@ -550,15 +550,15 @@ void md_callback (void *ref, TRDP_APP_SESSION_T apph,
     int test;
 
     print(0, "md_callback(%p, %p, %p, %p, %u) - ref %p",
-          ref, apph, msg, data, size, msg ? msg->pUserRef : 0);
+          ref, apph, msg, data, size, (msg != NULL ? msg->pUserRef : 0));
 
     /* test number is encoded into user reference */
     test = (int) (msg ? msg->pUserRef : 0);
     /* verify the callback is related to currently executed test */
-    if (opts.mode == MODE_CALLER && test != sts.test)
+    if (msg == NULL || (opts.mode == MODE_CALLER && test != sts.test))
     {
         print(-4, "unexpected callback ! - %s",
-              get_result_string(msg->resultCode));
+              get_result_string(msg != NULL ? msg->resultCode : 0));
         return;
     }
 

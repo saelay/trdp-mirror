@@ -555,6 +555,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
             pBlock->pNext = gMem.freeBlock[i].pFirst;
             gMem.freeBlock[i].pFirst = pBlock;
 
+            vos_printLog(VOS_LOG_DBG, "vos_memFree() %p, size %u\n", pMemBlock, pBlock->size);
             /* Destroy the size first in the block. If user tries to return same memory this will then fail. */
             pBlock->size = 0;
         }

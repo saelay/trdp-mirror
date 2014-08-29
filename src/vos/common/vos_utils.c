@@ -133,6 +133,29 @@ static BOOL8        sIsBigEndian = FALSE;
  * LOCAL FUNCTIONS
  */
 
+#ifdef DEBUG
+#include "trdp_private.h"
+/**********************************************************************************************************************/
+/** Print sizes of used structs.
+ *
+ *  @retval        none
+ */
+void printStructSizes ()
+{
+    vos_printLog(VOS_LOG_DBG, "Size(in Bytes) of\n");
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SESSION_T", sizeof(TRDP_SESSION_T));
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SOCKETS_T", sizeof(TRDP_SOCKETS_T));
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SEQ_CNT_LIST_T", sizeof(TRDP_SEQ_CNT_LIST_T));
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SEQ_CNT_ENTRY_T", sizeof(TRDP_SEQ_CNT_ENTRY_T));
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "PD_ELE_T", sizeof(PD_ELE_T));
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "PD_PACKET_T", sizeof(PD_PACKET_T));
+#if MD_SUPPORT
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "MD_ELE_T", sizeof(MD_ELE_T));
+    vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "MD_LIS_ELE_T", sizeof(MD_LIS_ELE_T));
+#endif
+}
+#endif
+
 /**********************************************************************************************************************/
 /** Pre-compute alignment and endianess.
  *
@@ -257,7 +280,9 @@ VOS_ERR_T vos_initRuntimeConsts (void)
     {
         err = VOS_NO_ERR;
     }
-
+#ifdef DEBUG
+    printStructSizes();
+#endif
     return err;
 #else
     return VOS_NO_ERR;

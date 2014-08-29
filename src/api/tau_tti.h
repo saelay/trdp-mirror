@@ -72,7 +72,7 @@ EXT_DECL TRDP_ERR_T tau_initTtiAccess (void);
 /**    Function to retrieve the operational train directory state.
  *
  *
- *  @param[out]     pTrDirState     Pointer to an operational train directory state structure to be returned.
+ *  @param[out]     pOpTrDirState   Pointer to an operational train directory state structure to be returned.
  *  @param[out]     pOpTrDir        Pointer to an operational train directory structure to be returned.
  *  @param[in]      etbId           Identifier of the ETB the train directory state is is asked for.
  *
@@ -122,10 +122,10 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
 /**    Function to retrieve the operational train directory.
  *
  *
- *  @param[out]     pTrDirState     Pointer to an operational train directory state structure to be returned.
+ *  @param[out]     pOpTrDirState   Pointer to an operational train directory state structure to be returned.
  *  @param[out]     pOpTrDir        Pointer to an operational train directory structure to be returned.
  *  @param[out]     pTrDir          Pointer to a train directory structure to be returned.
- *  @param[out]     pCstInfoList    Pointer to a consist info list structure to be returned.
+ *  @param[out]     pTrNetDir       Pointer to a train network directory structure to be returned.
  *  @param[in]      etbId           Identifier of the ETB the train directory state is requested for.
  *
  *  @retval         TRDP_NO_ERR     no error
@@ -137,7 +137,7 @@ EXT_DECL TRDP_ERR_T tau_getTTI (
     TRDP_OP_TRAIN_DIR_T               *pOpTrDir,
     TRDP_TRAIN_DIR_T                  *pTrDir,
     TRDP_TRAIN_NET_DIR_T              *pTrNetDir,
-    UINT8                       const  etbId);
+    UINT8                             const  etbId);
 
 
 /**********************************************************************************************************************/
@@ -259,6 +259,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
  *  @param[in,out]  pOpTrTopoCnt    Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means own vehicle  if cstLabel refers to own consist.
  *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      carPropLen      Size of properties
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -269,7 +270,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
     UINT32                  *pOpTrTopoCnt,
     const TRDP_LABEL_T      vehLabel,
     const TRDP_LABEL_T      cstLabel,
-    UINT32              carPropLen);
+    UINT32                  carPropLen);
 
 
 /**********************************************************************************************************************/
@@ -296,7 +297,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
 /**********************************************************************************************************************/
 /**    Function to retrieve the orientation of the given vehicle.
  *
- *  @param[out]     pVehOrient      Pointer to the vehicle orientation to be returned
+ *  @param[out]     pCarOrient      Pointer to the vehicle orientation to be returned
  *  @param[out]     pCstOrient      Pointer to the consist orientation to be returned
  *  @param[in,out]  pOpTrTopoCnt      Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *  @param[in]      vehLabel        vehLabel = NULL means own vehicle if cstLabel == NULL

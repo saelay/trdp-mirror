@@ -384,7 +384,7 @@ EXT_DECL TRDP_ERR_T tau_label2TcnCstNo (
 /**    Function to retrieve the operational consist sequence number of the consist hosting a vehicle with label vehLabel.
  *  
  *
- *  @param[out]     opCstNo         Pointer to the operational consist number to be returned
+ *  @param[out]     pOpCstNo        Pointer to the operational consist number to be returned
  *  @param[in,out]  pTopoCnt        Pointer to the actual topo count. If !=0 will be checked. Returns the actual one.
  *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means own vehicle, so the own IEC consist number is returned.
  *

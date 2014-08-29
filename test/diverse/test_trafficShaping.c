@@ -119,16 +119,17 @@ void dbgOut (
              UINT16      LineNumber,
              const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"*Err:", "Warn:", " Inf:", " Dbg:"};
+    
     if (category == VOS_LOG_DBG)
     {
         return;
     }
 
-    printf("%s %s %s:%d %s",
-           pTime,
+    printf("%s %s %16s:%-4d %s",
+           strrchr(pTime, '-') + 1,
            catStr[category],
-           pFile,
+           strrchr(pFile, '/') + 1,
            LineNumber,
            pMsgStr);
 }
