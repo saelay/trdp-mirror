@@ -27,6 +27,12 @@
 #define USECS_PER_MSEC  1000
 #define MSECS_PER_SEC   1000
 
+/* This define holds the max amount os seconds to get stored in 32bit holiding micro seconds       */
+/* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
+/* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */ 
+/* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */ 
+#define MAXSEC_FOR_USECPRESENTATION 4293U
+
 /***********************************************************************************************************************
  * INCLUDES
  */
@@ -129,10 +135,42 @@ void cyclicThread (
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
+    VOS_TIME_T priorCall;
+    VOS_TIME_T afterCall;
+    UINT32 execTime;
+    UINT32 waitingTime;
     for (;; )
     {
-        (void) vos_threadDelay(interval);
-        pFunction(pArguments);
+        vos_getTime(&priorCall);  /*get initial time*/
+        pFunction(pArguments);    /*perform thread function*/
+        vos_getTime(&afterCall);  /*get time after function ghas returned*/
+        /*subtract in the pattern after - prior to get the runtime of function()*/
+        vos_subTime(&afterCall,&priorCall);
+        /*afterCall holds now the time difference within a structure not compatible with interval*/
+        /*check if UINT32 fits to hold the waiting time value*/
+        if (afterCall.tv_sec <= MAXSEC_FOR_USECPRESENTATION)
+        {
+            /*           sec to usec conversion                               value normalized from 0 .. 999999*/
+            execTime = ((afterCall.tv_sec * MSECS_PER_SEC * USECS_PER_MSEC) + (UINT32)afterCall.tv_usec);
+            if (execTime > interval)
+            {
+                /*severe error: cyclic task time violated*/
+                waitingTime = 0U;
+                /*TODO: define error reaction*/
+            }
+            else
+            {
+                waitingTime = interval - execTime;
+            }
+        } 
+        else
+        {
+            /* seems a very critical overflow has happened - or simply a misconfiguration */
+            /* as a rough first guess use zero waiting time here */
+            waitingTime = 0U;
+            /* TBD: should a log message be issued also? */
+        }
+        (void) vos_threadDelay(waitingTime);
         pthread_testcancel();
     }
 }
@@ -270,7 +308,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     }
 
     /* Set the policy of the thread */
-    retCode = pthread_attr_setschedpolicy(&threadAttrib, policy);
+    retCode = pthread_attr_setschedpolicy(&threadAttrib, (INT32)policy);
     if (retCode != 0)
     {
         vos_printLog(
