@@ -257,12 +257,11 @@ int main (void)
                          0,                        	/* topocount: local consist only */
                          0,
                          PD_COMID1_SRC_IP,         	/* Source IP filter */
-                         0,                        	/* Source IP filter2 : no used */
                          PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
                          0,								/* Option */
                          PD_COMID1_TIMEOUT,         /* Time out in us	*/
-                         TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
-                         PD_DATA_SIZE_MAX);         /* net data size */
+                         TRDP_TO_SET_TO_ZERO        /* delete invalid data on timeout */
+                         );
 
 
     if (err != TRDP_NO_ERR)
@@ -284,12 +283,11 @@ int main (void)
                          0,                        	/* topocount: local consist only */
                          0,
                          PD_COMID1_SRC_IP2,         /* Source IP filter */
-                         0,                        	/* Source IP filter2 : no used */
                          PD_COMID1_DST_IP,        	/* Default destination	(or MC Group) */
                          0,								/* Option */
                          PD_COMID1_TIMEOUT,         /* Time out in us	*/
-                         TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
-                         PD_DATA_SIZE_MAX);         /* net data size */
+                         TRDP_TO_SET_TO_ZERO        /* delete invalid data on timeout */
+                         );
 
     if (err != TRDP_NO_ERR)
     {
