@@ -2717,7 +2717,7 @@ TRDP_ERR_T trdp_mdCommonSend (
         }
 
         /* payload */
-        if ((pData != NULL) && (dataSize > 0) && (dataSize <= TRDP_MAX_MD_PACKET_SIZE))
+        if ((pData != NULL) && (dataSize > 0) && (dataSize <= TRDP_MAX_MD_DATA_SIZE))
         {
             /* Copy payload */
             memcpy(pSenderElement->pPacket->data, pData, dataSize);
