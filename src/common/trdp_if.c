@@ -2105,7 +2105,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
         if (pPdInfo != NULL && pElement != NULL)
         {
             pPdInfo->comId          = pElement->addr.comId;
-            pPdInfo->srcIpAddr      = pElement->addr.srcIpAddr;
+            pPdInfo->srcIpAddr      = pElement->lastSrcIP;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->etbTopoCnt     = vos_ntohl(pElement->pFrame->frameHead.etbTopoCnt);
             pPdInfo->opTrnTopoCnt   = vos_ntohl(pElement->pFrame->frameHead.opTrnTopoCnt);

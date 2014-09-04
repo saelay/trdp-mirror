@@ -203,6 +203,7 @@ typedef struct PD_ELE
     struct PD_ELE       *pNext;                 /**< pointer to next element or NULL                        */
     UINT32              magic;                  /**< prevent acces through dangeling pointer                */
     TRDP_ADDRESSES_T    addr;                   /**< handle of publisher/subscriber                         */
+    TRDP_IP_ADDR_T      lastSrcIP;              /**< last source IP a subscribed packet was received from   */
     TRDP_IP_ADDR_T      pullIpAddress;          /**< In case of pulling a PD this is the requested Ip       */
     UINT32              redId;                  /**< Redundancy group ID or zero                            */
     UINT32              curSeqCnt;              /**< the last sent or received sequence counter             */

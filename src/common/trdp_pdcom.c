@@ -452,6 +452,11 @@ TRDP_ERR_T  trdp_pdReceive (
     }
     else
     {
+        /* Save the source IP address of the received packet */
+        pExistingElement->lastSrcIP = subAddresses.srcIpAddr;
+        /* Save the real destination of the received packet (own IP or MC group) */
+        pExistingElement->addr.destIpAddr = subAddresses.destIpAddr;
+
         if (pNewFrame->frameHead.sequenceCounter == 0)  /* restarted or new sender */
         {
             trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr, (TRDP_MSG_T) vos_ntohs(pNewFrame->frameHead.msgType));
@@ -516,7 +521,7 @@ TRDP_ERR_T  trdp_pdReceive (
         {
             TRDP_PD_INFO_T theMessage;
             theMessage.comId        = pExistingElement->addr.comId;
-            theMessage.srcIpAddr    = pExistingElement->addr.srcIpAddr;
+            theMessage.srcIpAddr    = pExistingElement->lastSrcIP;
             theMessage.destIpAddr   = subAddresses.destIpAddr;
             theMessage.etbTopoCnt   = vos_ntohl(pExistingElement->pFrame->frameHead.etbTopoCnt);
             theMessage.opTrnTopoCnt = vos_ntohl(pExistingElement->pFrame->frameHead.opTrnTopoCnt);
