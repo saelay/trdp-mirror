@@ -1723,12 +1723,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         return TRDP_NOINIT_ERR;
     }
 
-    /*    Check params    */
-    if (comId == 0)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
     if (timeout == 0)
     {
         timeout = appHandle->pdDefault.timeout;
@@ -1748,6 +1742,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     subHandle.comId         = comId;
     subHandle.srcIpAddr     = srcIpAddr;
     subHandle.destIpAddr    = destIpAddr;
+    subHandle.opTrnTopoCnt  = 0;            /* Do not compare topocounts  */
+    subHandle.etbTopoCnt    = 0;
 
     if (vos_isMulticast(destIpAddr))
     {
@@ -1768,6 +1764,9 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     }
     else
     {
+        subHandle.opTrnTopoCnt  = opTrnTopoCnt; /* Set topocounts now  */
+        subHandle.etbTopoCnt    = etbTopoCnt;
+
         /*    Find a (new) socket    */
         ret = trdp_requestSocket(appHandle->iface,
                                  appHandle->pdDefault.port,
@@ -1934,16 +1933,88 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        could not reserve memory (out of memory)
  *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_SOCK_ERR       Resource (socket) not available, subscription canceled
  */
 EXT_DECL TRDP_ERR_T tlp_resubscribe (
-    TRDP_SUB_T          subHandle,
     TRDP_APP_SESSION_T  appHandle,
+    TRDP_SUB_T          subHandle,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
     TRDP_IP_ADDR_T      srcIpAddr,
     TRDP_IP_ADDR_T      destIpAddr)
 {
-    return TRDP_UNKNOWN_ERR;
+    TRDP_ERR_T          ret = TRDP_NO_ERR;
+
+    /*    Check params    */
+    
+    if (!trdp_isValidSession(appHandle))
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    
+    if (subHandle->magic != TRDP_MAGIC_SUB_HNDL_VALUE)
+    {
+        return TRDP_NOSUB_ERR;
+    }
+    
+    /*    Reserve mutual access    */
+    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    
+    /*  Change the addressing item   */
+    subHandle->addr.srcIpAddr   = srcIpAddr;
+    subHandle->addr.destIpAddr  = destIpAddr;
+
+    subHandle->addr.etbTopoCnt = etbTopoCnt;
+    subHandle->addr.opTrnTopoCnt = opTrnTopoCnt;
+
+    if (vos_isMulticast(destIpAddr))
+    {
+        /* For multicast subscriptions, we might need to change the socket joins */
+        if (subHandle->addr.mcGroup != destIpAddr)
+        {
+            /*  Find the correct socket    */
+            trdp_releaseSocket (appHandle->iface, subHandle->socketIdx, 0, FALSE);
+            ret = trdp_requestSocket(appHandle->iface,
+                                     appHandle->pdDefault.port,
+                                     &appHandle->pdDefault.sendParam,
+                                     appHandle->realIP,
+                                     destIpAddr,
+                                     TRDP_SOCK_PD,
+                                     appHandle->option,
+                                     TRUE,
+                                     -1,
+                                     &subHandle->socketIdx,
+                                     0);
+            if (ret != TRDP_NO_ERR)
+            {
+                /* This is a critical error: We must unsubscribe! */
+                tlp_unsubscribe(appHandle, subHandle);
+                vos_printLog(VOS_LOG_ERROR, "tlp_resubscribe() failed, out of sockets\n");
+            }
+            else
+            {
+                subHandle->addr.mcGroup = destIpAddr;
+            }
+        }
+        else
+        {
+            subHandle->addr.mcGroup = destIpAddr;
+        }
+    }
+    else
+    {
+        subHandle->addr.mcGroup = 0;
+    }
+    
+    if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+    }
+
+    return ret;
 }
 
 
@@ -2468,7 +2539,69 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
     UINT32                  opTrnTopoCnt,
     TRDP_IP_ADDR_T          mcDestIpAddr /* multiple destId handled in layer above */)
 {
-    return TRDP_UNKNOWN_ERR;
+    TRDP_ERR_T      ret = TRDP_NO_ERR;
+    MD_LIS_ELE_T    *pListener = NULL;
+    
+    if (!trdp_isValidSession(appHandle))
+    {
+        return TRDP_NOINIT_ERR;
+    }
+
+    if (listenHandle == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    /* lock mutex */
+    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    
+    /* mutex protected */
+    {
+        
+        pListener = (MD_LIS_ELE_T *) listenHandle;
+
+        if (((pListener->pktFlags & TRDP_FLAGS_TCP) == 0) &&        /* We don't need to handle TCP listeners */
+            vos_isMulticast(mcDestIpAddr) &&                        /* nor non-multicast listeners */
+            pListener->addr.mcGroup != mcDestIpAddr)                /* nor if there's no change in group */
+        {
+            /*  Find the correct socket    */
+            trdp_releaseSocket (appHandle->iface, pListener->socketIdx, 0, FALSE);
+            ret = trdp_requestSocket(appHandle->iface,
+                                     appHandle->mdDefault.udpPort,
+                                     &appHandle->mdDefault.sendParam,
+                                     appHandle->realIP,
+                                     mcDestIpAddr,
+                                     TRDP_SOCK_MD_UDP,
+                                     appHandle->option,
+                                     TRUE,
+                                     -1,
+                                     &pListener->socketIdx,
+                                     0);
+
+            if (ret != TRDP_NO_ERR)
+            {
+                /* This is a critical error: We must delete the listener! */
+                tlm_delListener(appHandle, listenHandle);
+                vos_printLog(VOS_LOG_ERROR, "tlm_readdListener() failed, out of sockets\n");
+            }
+            else
+            {
+                pListener->addr.etbTopoCnt = etbTopoCnt;
+                pListener->addr.opTrnTopoCnt = opTrnTopoCnt;
+                pListener->addr.mcGroup = mcDestIpAddr;
+            }
+        }
+    }
+
+    /* Release mutex */
+    if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+    }
+    
+    return ret;
 }
 
 

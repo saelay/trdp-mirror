@@ -58,6 +58,10 @@ TRDP_ERR_T  trdp_pdCheck (
     PD_HEADER_T *pPacket,
     UINT32      packetSize);
 
+TRDP_ERR_T trdp_pdCheckAppTopoCounts (
+    TRDP_SESSION_PT appHandle,
+    PD_HEADER_T     *pFrame);
+
 TRDP_ERR_T  trdp_pdSend (
     INT32       pdSock,
     PD_ELE_T    *pPacket,

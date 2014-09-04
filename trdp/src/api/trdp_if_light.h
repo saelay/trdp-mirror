@@ -467,8 +467,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlp_resubscribe (
-    TRDP_SUB_T          subHandle,
     TRDP_APP_SESSION_T  appHandle,
+    TRDP_SUB_T          subHandle,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
     TRDP_IP_ADDR_T      srcIpAddr,
