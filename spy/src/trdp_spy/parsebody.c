@@ -117,12 +117,18 @@ processNodes(xmlNodeSetPtr nodes)
         {
             if (cur->properties <= 0)
                 continue;
+            // extract the id, if possible
+            text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_DATASET_ID));
+            if (text <= NULL)
+            {
+                continue;
+            }
+            id = atoi(text);
+
             // create the memory to store the custom datatype
             pWorkingDataset = (struct Dataset *) g_malloc(sizeof *pWorkingDataset);
             memset(pWorkingDataset, 0, sizeof *pWorkingDataset);
 
-            text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_DATASET_ID));
-            id = atoi(text);
             /* the stored information is a number */
             pWorkingDataset->datasetId = id;
 
@@ -137,12 +143,17 @@ processNodes(xmlNodeSetPtr nodes)
         {
             if (pWorkingDataset > 0)
             {
+                /******* check if tags are present before trying to store them *************/
+                text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_TYPE));
+                if (text <= 0)
+                {
+                    continue;
+                }
+
                 el = (struct Element *) g_malloc(sizeof *el);
                 memset(el, 0, sizeof *el);
                 el->array_size = 1; // default value
 
-                /******* check if tags are present before trying to store them *************/
-                text = (const char*) xmlGetProp(cur, xmlCharStrdup(ATTR_TYPE));
                 el->type = atoi( text ); /* try to stored information as a number */
                 if (text > 0 && el->type == 0)
                 {
