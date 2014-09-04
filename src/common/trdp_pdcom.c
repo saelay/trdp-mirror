@@ -328,7 +328,7 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
     UINT32 recSize;
     int informUser = 0;
-    TRDP_ADDRESSES_T    subAddresses = { 0, 0, 0, 0};
+    TRDP_ADDRESSES_T    subAddresses = { 0, 0, 0, 0, 0, 0};
 
     /*  Get a buffer    */
     if (pNewFrame == NULL)
@@ -375,28 +375,16 @@ TRDP_ERR_T  trdp_pdReceive (
             return err;
     }
 
-    /*  Check topocounts  */
-    if (vos_ntohl(pNewFrame->frameHead.etbTopoCnt) &&
-        vos_ntohl(pNewFrame->frameHead.etbTopoCnt) != appHandle->etbTopoCnt)
+    /* First check incoming packet's topoCount against session topoCounts */
+    if (trdp_pdCheckAppTopoCounts(appHandle, &pNewFrame->frameHead) != TRDP_NO_ERR)
     {
-        appHandle->stats.pd.numTopoErr++;
-        vos_printLog(VOS_LOG_INFO, "PD data with wrong ETB topocount ignored (comId %u, topo %u)\n",
-                     vos_ntohl(pNewFrame->frameHead.comId),
-                     vos_ntohl(pNewFrame->frameHead.etbTopoCnt));
-        return TRDP_TOPO_ERR;
-    }
-    if (vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt) &&
-        vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt) != appHandle->opTrnTopoCnt)
-    {
-        appHandle->stats.pd.numTopoErr++;
-        vos_printLog(VOS_LOG_INFO, "PD data with wrong opTrnDir topocount ignored (comId %u, topo %u)\n",
-                     vos_ntohl(pNewFrame->frameHead.comId),
-                     vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt));
         return TRDP_TOPO_ERR;
     }
 
     /*  Compute the subscription handle */
     subAddresses.comId = vos_ntohl(pNewFrame->frameHead.comId);
+    subAddresses.etbTopoCnt = vos_ntohl(pNewFrame->frameHead.etbTopoCnt);
+    subAddresses.opTrnTopoCnt = vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt);
 
     /*  It might be a PULL request      */
     if (vos_ntohs(pNewFrame->frameHead.msgType) == (UINT16) TRDP_MSG_PR)
@@ -405,7 +393,7 @@ TRDP_ERR_T  trdp_pdReceive (
         if (vos_ntohl(pNewFrame->frameHead.comId) == TRDP_STATISTICS_REQUEST_COMID)
         {
             pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATISTICS_COMID);
-            if ( pPulledElement != NULL)
+            if (pPulledElement != NULL)
             {
                 pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
                 pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrame->frameHead.replyIpAddress);
@@ -742,6 +730,41 @@ void    trdp_pdUpdate (
 }
 
 /******************************************************************************/
+/** Check if the PD header topocounts are correct compared to the session values
+ *
+ *  @param[in]      appHandle           session pointer
+ *  @param[in]      pFrame              pointer to the packet to check
+ *
+ *  @retval         TRDP_NO_ERR
+ *  @retval         TRDP_TOPO_ERR
+ */
+TRDP_ERR_T trdp_pdCheckAppTopoCounts (
+    TRDP_SESSION_PT appHandle,
+    PD_HEADER_T     *pFrame)
+{
+    /*  Check topocounts  */
+    if (pFrame->etbTopoCnt != 0 &&
+        vos_ntohl(pFrame->etbTopoCnt) != appHandle->etbTopoCnt)
+    {
+        appHandle->stats.pd.numTopoErr++;
+        vos_printLog(VOS_LOG_INFO, "PD data with wrong ETB topocount ignored (comId %u, topo %u)\n",
+                     vos_ntohl(pFrame->comId),
+                     vos_ntohl(pFrame->etbTopoCnt));
+        return TRDP_TOPO_ERR;
+    }
+    if (pFrame->opTrnTopoCnt != 0 &&
+        vos_ntohl(pFrame->opTrnTopoCnt) != appHandle->opTrnTopoCnt)
+    {
+        appHandle->stats.pd.numTopoErr++;
+        vos_printLog(VOS_LOG_INFO, "PD data with wrong opTrnDir topocount ignored (comId %u, topo %u)\n",
+                     vos_ntohl(pFrame->comId),
+                     vos_ntohl(pFrame->opTrnTopoCnt));
+        return TRDP_TOPO_ERR;
+    }
+    return TRDP_NO_ERR;
+}
+
+/******************************************************************************/
 /** Check if the PD header values and the CRCs are sane
  *
  *  @param[in]      pPacket         pointer to the packet to check
@@ -755,7 +778,7 @@ TRDP_ERR_T trdp_pdCheck (
     UINT32      packetSize)
 {
     UINT32      myCRC;
-    TRDP_ERR_T  err         = TRDP_NO_ERR;
+    TRDP_ERR_T  err = TRDP_NO_ERR;
 
     /*  Check size    */
     if (packetSize < TRDP_MIN_PD_HEADER_SIZE ||

@@ -281,9 +281,13 @@ PD_ELE_T *trdp_queueFindSubAddr (
 
     for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        /*  We match if src/dst/mc address is zero or matches */
+        /*  We match if src/dst/mc address is zero or matches or
+                     if etbTopoCnt or opTrnTopoCnt are zero or match*/
         if ((iterPD->addr.comId == addr->comId)
-            && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr)))
+            && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr))
+            && ((addr->etbTopoCnt == 0) || (iterPD->addr.etbTopoCnt == addr->etbTopoCnt))
+            && ((addr->opTrnTopoCnt == 0) || (iterPD->addr.opTrnTopoCnt == addr->opTrnTopoCnt))
+            )
         {
             return iterPD;
         }
@@ -835,20 +839,24 @@ void  trdp_releaseSocket (
     BOOL8           checkAll)
 {
     TRDP_ERR_T  err = TRDP_PARAM_ERR;
-    INT32       index;
 
+    if (iface == NULL)
+    {
+        return;
+    }
 
+#if MD_SUPPORT
     if (checkAll == TRUE)
     {
         /* Check all the sockets */
         /* Close the morituri = TRUE sockets */
-        for (index = 0; index < VOS_MAX_SOCKET_CNT; index++)
+        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
         {
-            if (iface[index].tcpParams.morituri == TRUE)
+            if (iface[lIndex].tcpParams.morituri == TRUE)
             {
-                vos_printLog(VOS_LOG_INFO, "The socket (Num = %d) will be closed\n", iface[index].sock);
+                vos_printLog(VOS_LOG_INFO, "The socket (Num = %d) will be closed\n", iface[lIndex].sock);
 
-                err = (TRDP_ERR_T) vos_sockClose(iface[index].sock);
+                err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
                 if (err != TRDP_NO_ERR)
                 {
                     vos_printLog(VOS_LOG_ERROR, "vos_sockClose() failed (Err:%d)\n", err);
@@ -856,86 +864,89 @@ void  trdp_releaseSocket (
 
                 /* Delete the socket from the iface */
                 vos_printLog(VOS_LOG_INFO,
-                             "Deleting socket from the iface (Sock: %d, Index: %d)\n",
-                             iface[index].sock, index);
-                iface[index].sock = TRDP_INVALID_SOCKET_INDEX;
-                iface[index].sendParam.qos  = 0;
-                iface[index].sendParam.ttl  = 0;
-                iface[index].usage          = 0;
-                iface[index].bindAddr       = 0;
-                iface[index].type       = (TRDP_SOCK_TYPE_T) 0;
-                iface[index].rcvMostly  = FALSE;
-                iface[index].tcpParams.cornerIp = 0;
-                iface[index].tcpParams.connectionTimeout.tv_sec     = 0;
-                iface[index].tcpParams.connectionTimeout.tv_usec    = 0;
-                iface[index].tcpParams.addFileDesc  = FALSE;
-                iface[index].tcpParams.morituri     = FALSE;
+                             "Deleting socket from the iface (Sock: %d, lIndex: %d)\n",
+                             iface[lIndex].sock, lIndex);
+                iface[lIndex].sock = TRDP_INVALID_SOCKET_INDEX;
+                iface[lIndex].sendParam.qos  = 0;
+                iface[lIndex].sendParam.ttl  = 0;
+                iface[lIndex].usage          = 0;
+                iface[lIndex].bindAddr       = 0;
+                iface[lIndex].type       = (TRDP_SOCK_TYPE_T) 0;
+                iface[lIndex].rcvMostly  = FALSE;
+                iface[lIndex].tcpParams.cornerIp = 0;
+                iface[lIndex].tcpParams.connectionTimeout.tv_sec     = 0;
+                iface[lIndex].tcpParams.connectionTimeout.tv_usec    = 0;
+                iface[lIndex].tcpParams.addFileDesc  = FALSE;
+                iface[lIndex].tcpParams.morituri     = FALSE;
             }
         }
 
     }
-    else if (checkAll == FALSE)
+    else
+#endif
     {
         /* Handle a specified socket */
-        if (iface != NULL)
+        if (iface[lIndex].sock != VOS_INVALID_SOCKET &&
+            (iface[lIndex].type == TRDP_SOCK_MD_UDP ||
+             iface[lIndex].type == TRDP_SOCK_PD))
         {
-            if (iface[lIndex].type == TRDP_SOCK_MD_UDP)
+            vos_printLog(VOS_LOG_DBG,
+                         "Decrement the socket %d usage = %d\n",
+                         iface[lIndex].sock,
+                         iface[lIndex].usage);
+            iface[lIndex].usage--;
+
+            if (iface[lIndex].sock != VOS_INVALID_SOCKET &&
+                iface[lIndex].usage <= 0)
+            {
+                /* Close that socket, nobody uses it anymore */
+                err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
+                if (err != TRDP_NO_ERR)
+                {
+                    vos_printLog(VOS_LOG_DBG, "Trying to close socket again?\n");
+                }
+                else
+                {
+                    vos_printLog(VOS_LOG_DBG, "Closed socket %d\n", iface[lIndex].sock);
+                }
+                iface[lIndex].sock = VOS_INVALID_SOCKET;
+            }
+        }
+#if MD_SUPPORT
+        else /* TCP socket */
+        {
+            if (iface[lIndex].sock != VOS_INVALID_SOCKET &&
+                iface[lIndex].rcvMostly == FALSE)
             {
                 vos_printLog(VOS_LOG_DBG,
-                             "Trying to close socket %d (usage = %d)\n",
+                             "Decrement the socket %d usage = %d\n",
                              iface[lIndex].sock,
                              iface[lIndex].usage);
-                if (iface[lIndex].sock > VOS_INVALID_SOCKET &&
-                	iface[lIndex].usage > 0)
+
+                iface[lIndex].usage--;
+
+                if (iface[lIndex].usage <= 0)
                 {
-                    if (--iface[lIndex].usage == 0)
-                    {
-                        /* Close that socket, nobody uses it anymore */
-                        err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
-                        if (err != TRDP_NO_ERR)
-                        {
-                            vos_printLog(VOS_LOG_DBG, "Trying to close socket again?\n");
-                        }
-                        else
-                        {
-                            vos_printLog(VOS_LOG_DBG, "Closed socket %d\n", iface[lIndex].sock);
-                        }
-                        iface[lIndex].sock = VOS_INVALID_SOCKET;
-                    }
-                }
-            }
-            else
-            {
-                if ((iface[lIndex].sock > VOS_INVALID_SOCKET) && (iface[lIndex].rcvMostly == FALSE))
-                {
-                    vos_printLog(VOS_LOG_DBG,
-                                 "Decrement the socket %d usage = %d\n",
-                                 iface[lIndex].sock,
-                                 iface[lIndex].usage);
-                    iface[lIndex].usage--;
+                    /* Start the socket connection timeout */
+                    TRDP_TIME_T tmpt_interval, tmpt_now;
 
-                    if (iface[lIndex].usage == 0)
-                    {
-                        /* Start the socket connection timeout */
-                        TRDP_TIME_T tmpt_interval, tmpt_now;
+                    vos_printLog(VOS_LOG_INFO,
+                                 "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
+                                 iface[lIndex].sock);
 
-                        vos_printLog(VOS_LOG_INFO,
-                                     "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                                     iface[lIndex].sock);
+                    tmpt_interval.tv_sec    = connectTimeout / 1000000;
+                    tmpt_interval.tv_usec   = connectTimeout % 1000000;
 
-                        tmpt_interval.tv_sec    = connectTimeout / 1000000;
-                        tmpt_interval.tv_usec   = connectTimeout % 1000000;
+                    vos_getTime(&tmpt_now);
+                    vos_addTime(&tmpt_now, &tmpt_interval);
 
-                        vos_getTime(&tmpt_now);
-                        vos_addTime(&tmpt_now, &tmpt_interval);
-
-                        memcpy(&iface[lIndex].tcpParams.connectionTimeout,
-                               &tmpt_now,
-                               sizeof(TRDP_TIME_T));
-                    }
+                    memcpy(&iface[lIndex].tcpParams.connectionTimeout,
+                           &tmpt_now,
+                           sizeof(TRDP_TIME_T));
                 }
             }
         }
+#endif
     }
 }
 
