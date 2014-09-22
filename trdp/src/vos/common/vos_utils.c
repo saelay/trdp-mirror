@@ -140,7 +140,7 @@ static BOOL8        sIsBigEndian = FALSE;
  *
  *  @retval        none
  */
-void printStructSizes ()
+static void vos_printStructSizes ()
 {
     vos_printLog(VOS_LOG_DBG, "Size(in Bytes) of\n");
     vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SESSION_T", sizeof(TRDP_SESSION_T));
@@ -281,7 +281,7 @@ VOS_ERR_T vos_initRuntimeConsts (void)
         err = VOS_NO_ERR;
     }
 #ifdef DEBUG
-    printStructSizes();
+    vos_printStructSizes();
 #endif
     return err;
 #else
