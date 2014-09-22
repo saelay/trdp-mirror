@@ -210,7 +210,22 @@ EXT_DECL UINT32 vos_ntohl (
 EXT_DECL UINT32 vos_dottedIP (
     const CHAR8 *pDottedIP)
 {
-    return vos_ntohl(inet_addr(pDottedIP));
+    UINT32 conversionResult;
+    conversionResult = inet_addr(pDottedIP);
+    /* Accd. MSDN the values INADDR_NONE and INADDR_ANY */
+    /* indicate conversion errors, therefore zero has   */
+    /* to be returned in order to have similar behavior */
+    /* as by using inet_aton                            */
+    if ((conversionResult == INADDR_NONE)
+        ||
+        (conversionResult == INADDR_ANY))
+    {
+        return 0;
+    }
+    else
+    {
+        return vos_ntohl(inet_addr(pDottedIP));
+    }
 }
 
 /**********************************************************************************************************************/
