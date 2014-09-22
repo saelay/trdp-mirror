@@ -214,7 +214,17 @@ EXT_DECL UINT32 vos_ntohl (
 EXT_DECL UINT32 vos_dottedIP (
     const CHAR8 *pDottedIP)
 {
-    return vos_ntohl((UINT32)inet_addr((char*)pDottedIP));
+    struct in_addr addr;
+    /* vxWorks does not regard the const qualifier for first parameter */
+    /* casting to non const, helps to get rid of compiler noise        */
+    if (inet_aton((CHAR8*)pDottedIP, &addr) <= 0)
+    {
+        return 0;   /* Prevent returning broadcast address on error */
+    }
+    else
+    {
+        return vos_ntohl(addr.s_addr);
+    }
 }
 
 /**********************************************************************************************************************/

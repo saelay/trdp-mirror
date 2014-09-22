@@ -284,7 +284,7 @@ EXT_DECL UINT32 vos_dottedIP (
     const CHAR8 *pDottedIP)
 {
     struct in_addr addr;
-    if (inet_aton(pDottedIP, &addr) < 0)
+    if (inet_aton(pDottedIP, &addr) <= 0)
     {
         return 0;   /* Prevent returning broadcast address on error */
     }
