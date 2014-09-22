@@ -151,18 +151,6 @@ BOOL8 trdp_SockDelJoin (
  *   Globals
  */
 
-/**********************************************************************************************************************/
-/** Determine if we are Big or Little endian
- *
- *  @retval         != 0        we are big endian
- *  @retval         0           we are little endian
- */
-int am_big_endian ()
-{
-    int one = 1;
-    return !(*((char *)(&one)));
-}
-
 
 /**********************************************************************************************************************/
 /** Get the packet size from the raw data size
