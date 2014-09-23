@@ -23,16 +23,6 @@
     "You are trying to compile the POSIX implementation of vos_thread.c - either define POSIX or exclude this file!"
 #endif
 
-#define NSECS_PER_USEC  1000
-#define USECS_PER_MSEC  1000
-#define MSECS_PER_SEC   1000
-
-/* This define holds the max amount os seconds to get stored in 32bit holiding micro seconds       */
-/* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
-/* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */ 
-/* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */ 
-#define MAXSEC_FOR_USECPRESENTATION 4293U
-
 /***********************************************************************************************************************
  * INCLUDES
  */
@@ -120,17 +110,36 @@ int sem_init(sem_t *pSema, int flags, unsigned int mode)
 }
 #endif
 
+
+/***********************************************************************************************************************
+ * GLOBAL FUNCTIONS
+ */
+
+
+/**********************************************************************************************************************/
+/*  Threads
+                                                                                                               */
 /**********************************************************************************************************************/
 /** Cyclic thread functions.
  *  Wrapper for cyclic threads. The thread function will be called cyclically with interval.
  *
- *  @param[in]      interval        Interval for cyclic threads in us (optional)
+ *  @param[in]      interval        Interval for cyclic threads in us (incl. runtime) 
  *  @param[in]      pFunction       Pointer to the thread function
  *  @param[in]      pArguments      Pointer to the thread function parameters
  *  @retval         void
  */
 
-void cyclicThread (
+#define NSECS_PER_USEC  1000
+#define USECS_PER_MSEC  1000
+#define MSECS_PER_SEC   1000
+
+/* This define holds the max amount os seconds to get stored in 32bit holding micro seconds        */
+/* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
+/* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */ 
+/* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */ 
+#define MAXSEC_FOR_USECPRESENTATION 4293U
+
+EXT_DECL void vos_cyclicThread (
     UINT32              interval,
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
@@ -141,13 +150,13 @@ void cyclicThread (
     UINT32 waitingTime;
     for (;; )
     {
-        vos_getTime(&priorCall);  /*get initial time*/
-        pFunction(pArguments);    /*perform thread function*/
-        vos_getTime(&afterCall);  /*get time after function ghas returned*/
-        /*subtract in the pattern after - prior to get the runtime of function()*/
+        vos_getTime(&priorCall);  /* get initial time */
+        pFunction(pArguments);    /* perform thread function */
+        vos_getTime(&afterCall);  /* get time after function ghas returned */
+        /* subtract in the pattern after - prior to get the runtime of function() */
         vos_subTime(&afterCall,&priorCall);
-        /*afterCall holds now the time difference within a structure not compatible with interval*/
-        /*check if UINT32 fits to hold the waiting time value*/
+        /* afterCall holds now the time difference within a structure not compatible with interval */
+        /* check if UINT32 fits to hold the waiting time value */
         if (afterCall.tv_sec <= MAXSEC_FOR_USECPRESENTATION)
         {
             /*           sec to usec conversion                               value normalized from 0 .. 999999*/
@@ -156,7 +165,10 @@ void cyclicThread (
             {
                 /*severe error: cyclic task time violated*/
                 waitingTime = 0U;
-                /*TODO: define error reaction*/
+                /* Log the runtime violation */
+                vos_printLog(VOS_LOG_ERROR,
+                             "cyclic thread with interval %d usec was running  %d usec\n",
+                             interval, execTime);
             }
             else
             {
@@ -168,24 +180,15 @@ void cyclicThread (
             /* seems a very critical overflow has happened - or simply a misconfiguration */
             /* as a rough first guess use zero waiting time here */
             waitingTime = 0U;
-            /* TBD: should a log message be issued also? */
+            /* Have this value range violation logged */
+            vos_printLog(VOS_LOG_ERROR,
+                         "cyclic thread with interval %d usec exceeded time out by running %d sec\n",
+                         interval, afterCall.tv_sec);
         }
         (void) vos_threadDelay(waitingTime);
         pthread_testcancel();
     }
-}
-
-
-/***********************************************************************************************************************
- * GLOBAL FUNCTIONS
- */
-
-
-/**********************************************************************************************************************/
-/*  Threads
-                                                                                                               */
-/**********************************************************************************************************************/
-
+} 
 
 /**********************************************************************************************************************/
 /** Initialize the thread library.
