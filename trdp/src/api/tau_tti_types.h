@@ -86,7 +86,7 @@ typedef struct
     UINT8                   cltrCstNo;          /**< sequence number of the consist within the
                                                      closed train, value range 1..32 */
     UINT16                  reserved01;         /**< reserved for future use (= 0) */
-} TRDP_CLTRCST_INFO_T;
+} TRDP_CLTR_CST_INFO_T;
 
 
 /** Application defined properties */
@@ -171,9 +171,10 @@ typedef struct
     UINT16                  reserved06;     /**< reserved for future use (= 0) */
     UINT16                  cltrCstCnt;     /**< number of original consists in closed train 
                                                  value range: 0..32, 0 = consist is no closed train */
-    TRDP_CLTRCST_INFO_T    *pCltrCstInfoList; /**< info on closed train composition
+    TRDP_CLTR_CST_INFO_T   *pCltrCstInfoList; 
+                                            /**< info on closed train composition
                                                  Ordered list starting with cltrCstNo == 1 */
-    UINT32                 cstTopoCnt;      /**< consist topology counter computed as defined in 5.3.3.2.16, 
+    UINT32                  cstTopoCnt;      /**< consist topology counter computed as defined in 5.3.3.2.16, 
                                                  seed value: 'FFFFFFFF'H */
 } TRDP_CONSIST_INFO_T;
 
@@ -282,7 +283,8 @@ typedef struct
                                                  direction 1 as defined in IEC61375-2-5,
                                                  value range: 1..63, a value of 0 indicates that this vehicle has 
                                                  been inserted by correction */
-    UINT8                   vehOrient;      /**< vehicle orientation, 
+    UINT8                   vehOrient;      /**< vehicle orientation,
+                                                 ‘00’B = not known (corrected vehicle)
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
     UINT8                   ownOpCstNo;     /**< operational consist number the vehicle belongs to */
@@ -298,6 +300,7 @@ typedef struct
                                                  0 if not available (e.g. correction) */
     UINT8                   opCstNo;        /**< operational consist number in train (1..63) */
     UINT8                   opCstOrient;    /**< consist orientation
+                                                 ‘00’B = not known (corrected vehicle)
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
     UINT8                   trnCstNo;       /*< sequence number of consist in train
