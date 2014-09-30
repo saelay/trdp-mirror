@@ -176,8 +176,8 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[lIndex].comId       = iter->addr.comId;      /* Subscribed ComId     */
         pStatistics[lIndex].joinedAddr  = iter->addr.mcGroup;    /* Joined IP address         */
         pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr;  /* Filter IP address         */
-        pStatistics[lIndex].callBack    = (void *) iter->pUserRef;  /* Reference for call back function if used
-                                                                             */
+        pStatistics[lIndex].callBack    = (UINT32) iter->pfCbFunction; /* call back function if used      */
+        pStatistics[lIndex].userRef    =  (UINT32) iter->pUserRef;     /* user reference function if used */
         pStatistics[lIndex].timeout     = iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */
         pStatistics[lIndex].toBehav = iter->toBehavior;          /* Behavior at time-out    */
@@ -281,8 +281,8 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
         vos_strncpy(pStatistics->uri, pIter->destURI , TRDP_MAX_URI_USER_LEN);
         pStatistics->comId          = pIter->addr.comId;
         pStatistics->joinedAddr     = pIter->addr.mcGroup;
-        pStatistics->callBack       = pIter->pfCbFunction;
-        pStatistics->userRef        = pIter->pUserRef;
+        pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
+        pStatistics->userRef        = (UINT32) pIter->pUserRef;
         pStatistics->numSessions    = pIter->numSessions;
         pStatistics++;
     }

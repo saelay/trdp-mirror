@@ -2114,8 +2114,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
             pPdInfo->protVersion    = vos_ntohs(pElement->pFrame->frameHead.protocolVersion);
             pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
             pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
-            pPdInfo->pUserRef       = pElement->pUserRef;        /* TBD: User reference given with the local subscribe?
-                                                                 */
+            pPdInfo->pUserRef       = pElement->pUserRef;
             pPdInfo->resultCode     = TRDP_NO_ERR;
         }
 
