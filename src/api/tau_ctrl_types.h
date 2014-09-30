@@ -106,7 +106,8 @@ typedef struct
     UINT16                  reserved05;     /**< reserved (=0) */
     UINT8                   reserved06;     /**< reserved (=0) */
     UINT8                   confVehCnt;     /**< number of confirmed vehicles in train (1..63) */
-    TRDP_CONF_VEHICLE_T     confVehList[63];/**< dynamic ordered list of confirmed vehicles in train,
+    TRDP_CONF_VEHICLE_T     confVehList[TRDP_MAX_VEH_CNT];
+                                            /**< dynamic ordered list of confirmed vehicles in train,
                                                  starting with vehicle at train head, see sub-clause 5.3.3.2.6 */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == not used */
 }  GNU_PACKED TRDP_ETB_CTRL_T;
@@ -126,12 +127,9 @@ typedef struct
                                                     0 = no leading request
                                                     1 = leading request direction 1
                                                     2 = leading request direction 2                                 */
-    UINT8                   reserved02;     /**< reserved (=0)                                                      */
     UINT8                   sleepReq;       /**< sleep request
                                                     0 = no sleep request
                                                     1 = sleep request                                               */
-    UINT8                   reserved03;     /**< reserved (= 0)                                                     */
-    UINT16                  reserved04;     /**< reserved (= 0)                                                     */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, completely set to 0 == SDTv2 not used         */
 }  GNU_PACKED TRDP_ECSP_CTRL_T;
 
@@ -192,7 +190,7 @@ typedef struct
                                                   1 = RegularOperation
                                                   2 = WaitForSleepMode
                                                   3 = PrepareForSleepMode */
-    UINT8                   sleepRequCnt;   /**<  number of sleep requests (option)
+    UINT8                   sleepReqCnt;    /**<  number of sleep requests (option)
                                                   value range: 0..63, not used = 0  */
     UINT32                  opTrnTopoCnt;   /**<  operational train topology counter */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**<  ETBCTRL-VDP trailer, completely set to 0 == SDTv2 not used */
@@ -206,7 +204,7 @@ typedef struct
 							                    1 = confirmation/correction request
  							                    2 = un-confirmation request                                         */
     UINT8                   reserved01;     /**< reserved (=0)                                                      */
-    TRDP_LABEL_T            deviceName; /**< function device of ECSC which sends the telegram                   */
+    TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT32                  opTrnTopoCnt;   /**< operational train topocounter value of the operational 
                                                  train directory the correction is based on                         */
     UINT16                  reserved02;     /**<  reserved (=0)                                                     */
