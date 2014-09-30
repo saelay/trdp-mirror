@@ -417,7 +417,8 @@ typedef struct
     TRDP_IP_ADDR_T      joinedAddr; /**< Joined IP address   */
     TRDP_IP_ADDR_T      filterAddr; /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0
                                             in case all senders. */
-    void                *callBack;  /**< Reference for call back function if used */
+    UINT32              callBack;   /**< call back function if used */
+    UINT32              userRef;    /**< User reference if used */
     UINT32              timeout;    /**< Time-out value in us. 0 = No time-out supervision */
     TRDP_ERR_T          status;     /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
     TRDP_TO_BEHAVIOR_T  toBehav;    /**< Behavior at time-out. Set data to zero / keep last value */
@@ -443,7 +444,7 @@ typedef struct
     UINT32          comId;      /**< ComId to listen to */
     TRDP_URI_USER_T uri;        /**< URI user part to listen to */
     TRDP_IP_ADDR_T  joinedAddr; /**< Joined IP address */
-    UINT32          callBack;   /**< Call back function reference if used */
+    UINT32          callBack;   /**< Call back function if used */
     UINT32          userRef;    /**< User reference if used */
     UINT32          numSessions;/**< Number of sessions  */
 } TRDP_LIST_STATISTICS_T;
