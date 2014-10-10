@@ -104,9 +104,10 @@ TRDP_ERR_T  trdp_mdCommonSend (
     UINT32                  noOfRepliers,
     UINT32                  replyTimeout,
     INT32                   replyStatus,
+    UINT32                  maxNumRetries,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
-    const UINT32                  dataSize,
+    UINT32                  dataSize,
     const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI);
 

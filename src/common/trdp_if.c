@@ -2186,6 +2186,7 @@ TRDP_ERR_T tlm_notify (
                0,                                      /* numbber of repliers for notify */
                0,                                      /* reply timeout for notify */
                TRDP_REPLY_OK,                          /* reply state */
+               0,                                      /* no call repetition */
                pSendParam,
                pData,
                dataSize,
@@ -2211,6 +2212,7 @@ TRDP_ERR_T tlm_notify (
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL
  *  @param[in]      numReplies          number of expected replies, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
+ *  @param[in]      maxNumRetries       maximum number of retries (0 … 2) 
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -2235,6 +2237,7 @@ TRDP_ERR_T tlm_request (
     TRDP_FLAGS_T            pktFlags,
     UINT32                  numReplies,
     UINT32                  replyTimeout,
+    UINT32                  maxNumRetries,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
@@ -2257,6 +2260,7 @@ TRDP_ERR_T tlm_request (
                numReplies,
                replyTimeout,
                TRDP_REPLY_OK,                          /* reply state */
+               maxNumRetries,
                pSendParam,
                pData,
                dataSize,
@@ -2648,6 +2652,7 @@ TRDP_ERR_T tlm_reply (
                0,                                   /* num of repliers */
                0,                                   /* reply timeout */
                (INT32) userStatus,                  /* replyStatus */
+               0,                                   /* no call repetition */
                pSendParam,                          /* use given send param */
                pData,                               /* pData - no data */
                dataSize,                            /* dataSize - no data */
@@ -2703,6 +2708,7 @@ TRDP_ERR_T tlm_replyQuery (
                0,                                   /* num of repliers */
                0,                                   /* reply timeout */
                (INT32) userStatus,                  /* replyStatus */
+               0,                                   /* no call repetition */
                pSendParam,                          /* use given send param */
                pData,                               /* pData - no data */
                dataSize,                            /* dataSize - no data */
@@ -2750,6 +2756,7 @@ TRDP_ERR_T tlm_replyErr (
                0,                               /* num of repliers */
                0,                               /* reply timeout */
                (INT32) replyStatus,
+               0,                               /* no call repetition */
                pSendParam,                      /* use send param */
                NULL,                            /* pData - no data */
                0,                               /* dataSize - no data */
@@ -2797,6 +2804,7 @@ TRDP_ERR_T tlm_confirm (
                0,                                   /* num of repliers */
                0,                                   /* reply timeout */
                (INT32) userStatus,                  /* replyStatus */
+               0,                                   /* no call repetition */
                pSendParam,                          /* use send param */
                NULL,                                /* pData - no data */
                0,                                   /* dataSize - no data */

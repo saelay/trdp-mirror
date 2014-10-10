@@ -2562,6 +2562,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                              UINT32                  numExpReplies,
                              UINT32                  replyTimeout,
                              INT32                   replyStatus,
+                             UINT32                  maxNumRetries,
                              const TRDP_SEND_PARAM_T *pSendParam,
                              const UINT8             *pData,
                              UINT32                  dataSize,
