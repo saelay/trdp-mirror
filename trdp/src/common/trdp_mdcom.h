@@ -81,7 +81,7 @@ void        trdp_mdCheckPending (
     INT32               *pNoDesc);
 
 void trdp_mdCheckListenSocks (
-    TRDP_SESSION_PT appHandle,
+    const TRDP_SESSION_PT appHandle,
     TRDP_FDS_T      *pRfds,
     INT32           *pCount);
 
@@ -106,7 +106,7 @@ TRDP_ERR_T  trdp_mdCommonSend (
     INT32                   replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
-    UINT32                  dataSize,
+    const UINT32                  dataSize,
     const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI);
 
