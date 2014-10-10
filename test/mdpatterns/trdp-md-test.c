@@ -1108,6 +1108,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     flags,                          /* flags */
                     msg->numExpReplies,             /* number of expected replies */
                     opts.tmo * 1000,                /* reply timeout [usec] */
+                    2,                              /* maxNumRetries */
                     NULL,                           /* send parameters */
                     (UINT8 *) buf,                  /* dataset buffer */
                     opts.msgsz,                     /* dataset size */

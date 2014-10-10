@@ -651,7 +651,7 @@ int main (int argc, char *argv[])
                 {
 
                     tlm_request(sSessionData.appHandle, &sSessionData, NULL, &sessionId, sSessionData.sComID, 0, 0, ownIP,
-                                destIP, flags, expReplies, 0, NULL, NULL, 0, 0, 0);
+                                destIP, flags, expReplies, 0, 0, NULL, NULL, 0, 0, 0);
                 }
                 else if (sSessionData.sDataSize > 0)
                 {
@@ -675,6 +675,7 @@ int main (int argc, char *argv[])
                                 flags,
                                 expReplies,
                                 0,
+                                0,
                                 NULL,
                                 (const UINT8 *) gBuffer,
                                 sSessionData.sDataSize,
@@ -685,7 +686,7 @@ int main (int argc, char *argv[])
                 else
                 {
                     tlm_request(sSessionData.appHandle, &sSessionData, NULL, &sessionId, sSessionData.sComID, 0, 0, ownIP,
-                                destIP, flags, expReplies, 0, NULL, (const UINT8 *) "How are you?", 13, 0, 0);
+                                destIP, flags, expReplies, 0, 0, NULL, (const UINT8 *) "How are you?", 13, 0, 0);
                 }
             }
 
