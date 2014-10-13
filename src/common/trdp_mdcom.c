@@ -45,18 +45,6 @@
 #define CHECK_HEADER_ONLY   TRUE
 #define CHECK_DATA_TOO      FALSE
 
-/* The define MD_APP_RETRY unset will let the TRDP  */
-/* layer to handle call/reply retry for UDP unicast */
-/* MD transmissions in accordance with IEC61375-2-3 */
-/* A.7.7.1 and A.7.7.2, should MD_APP_RETRY be de-  */
-/* fined, the user application has to handle trans- */
-/* mission disruptions                              */
-#ifndef MD_APP_RETRY
-#define RETRYMAXCOUNT 2U
-#else
-#define RETRYMAXCOUNT 0U
-#endif
-
 /***********************************************************************************************************************
  * TYPEDEFS
  */
@@ -2705,7 +2693,7 @@ TRDP_ERR_T trdp_mdCommonSend (
                      &&
                      (vos_isMulticast(destIpAddr) == FALSE) )/* no multicast addr used    */
                 {
-                    pSenderElement->numRetriesMax = RETRYMAXCOUNT; /* use define here!! */
+                    pSenderElement->numRetriesMax = maxNumRetries;
                 }/* no else needed as memset has set all memory to zero */
 
                 if ( msgType == TRDP_MSG_MR )
