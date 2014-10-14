@@ -230,7 +230,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
 
 /**********************************************************************************************************************/
 /** Prepare for sending PD messages.
- *  Queue a PD message, it will be send when trdp_work has been called
+ *  Queue a PD message, it will be send when tlc_publish has been called
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[out]     pPubHandle          returned handle for related re/unpublish
@@ -269,7 +269,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
 /**********************************************************************************************************************/
 /** Prepare for sending PD messages.
- *  Reinitialize and queue a PD message, it will be send when trdp_work has been called
+ *  Reinitialize and queue a PD message, it will be send when tlc_publish has been called
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
  *  @param[in]      pubHandle           handle for related unpublish

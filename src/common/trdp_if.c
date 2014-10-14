@@ -984,7 +984,7 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
     
 /**********************************************************************************************************************/
 /** Prepare for sending PD messages.
- *  Queue a PD message, it will be send when trdp_work has been called
+ *  Queue a PD message, it will be send when tlc_publish has been called
  *
  *  @param[in]      appHandle            the handle returned by tlc_openSession
  *  @param[out]     pPubHandle           returned handle for related unprepare
@@ -1192,6 +1192,76 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     return ret;
 }
 
+/**********************************************************************************************************************/
+/** Prepare for sending PD messages.
+ *  Reinitialize and queue a PD message, it will be send when tlc_publish has been called
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pubHandle           handle for related unpublish
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr          where to send the packet to
+ *  @param[in]      pData               pointer to packet data / dataset
+ *  @param[in]      dataSize            size of packet data
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not insert (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlp_republish (
+                                   TRDP_APP_SESSION_T      appHandle,
+                                   TRDP_PUB_T              pubHandle,
+                                   UINT32                  etbTopoCnt,
+                                   UINT32                  opTrnTopoCnt,
+                                   TRDP_IP_ADDR_T          srcIpAddr, 
+                                   TRDP_IP_ADDR_T          destIpAddr,
+                                   const UINT8             *pData,
+                                   UINT32                  dataSize)
+{
+    /*    Check params    */
+    
+    if (!trdp_isValidSession(appHandle))
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    
+    if (pubHandle->magic != TRDP_MAGIC_PUB_HNDL_VALUE)
+    {
+        return TRDP_NOSUB_ERR;
+    }
+    
+    /*    Reserve mutual access    */
+    if (vos_mutexLock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    
+    /*  Change the addressing item   */
+    pubHandle->addr.srcIpAddr   = srcIpAddr;
+    pubHandle->addr.destIpAddr  = destIpAddr;
+    
+    pubHandle->addr.etbTopoCnt = etbTopoCnt;
+    pubHandle->addr.opTrnTopoCnt = opTrnTopoCnt;
+    
+    if (vos_isMulticast(destIpAddr))
+    {
+        pubHandle->addr.mcGroup = destIpAddr;
+    }
+    else
+    {
+        pubHandle->addr.mcGroup = 0;
+    }
+    
+    if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+    {
+        vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+    }
+    
+    return TRDP_NO_ERR;
+}
+    
 /**********************************************************************************************************************/
 /** Stop sending PD messages.
  *
