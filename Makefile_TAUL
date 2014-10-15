@@ -282,14 +282,6 @@ $(OUTDIR)/getstats:   getStats.c  $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 			
-$(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building example MD application $(@F)'
-			$(CC) $(SUBDIRS)/example/mdManager.c \
-			    -ltrdp \
-			    -luuid -lrt \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
 
 $(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building UDPMDCom test application $(@F)'
@@ -303,15 +295,6 @@ $(OUTDIR)/mdTest0001: mdTest0001.c  $(OUTDIR)/libtrdp.a
 $(OUTDIR)/mdTest0002: mdTest0002.c  $(OUTDIR)/libtrdp.a 
 			@$(ECHO) ' ### Building UDPMDCom test application $(@F)'
 			$(CC) test/udpmdcom/mdTest0002.c \
-			    -ltrdp \
-			    -luuid -lrt \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-
-$(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a 
-			@$(ECHO) ' ### Building TCPMDCom test application $(@F)'
-			$(CC) $(SUBDIRS)/example/mdManagerTCP.c \
 			    -ltrdp \
 			    -luuid -lrt \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \

@@ -105,7 +105,7 @@ endif
 TARGETS = outdir libtrdp
 
 ifneq ($(TARGET_OS),VXWORKS)
-TARGETS += demo example test pdtest mdtest
+TARGETS += example test pdtest mdtest
 else
 TARGETS += vtests
 endif
@@ -118,14 +118,14 @@ outdir:
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
-demo:		outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/mdManagerTCP $(OUTDIR)/mdManagerTCP_Siemens
-
-example:	outdir $(OUTDIR)/mdManager
+example:	outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello
 
 test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test $(OUTDIR)/pd_md_responder $(OUTDIR)/testSub
-mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/mdTest4
+
+mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/trdp-md-reptestcaller $(OUTDIR)/trdp-md-reptestreplier
+
 vtests:		outdir $(OUTDIR)/vtest
 
 
@@ -236,24 +236,6 @@ $(OUTDIR)/test_mdSingle: test_mdSingle.c $(OUTDIR)/libtrdp.a
 			    -o $@
 			$(STRIP) $@
 
-$(OUTDIR)/mdManagerTCP_Siemens: mdManagerTCP_Siemens.c  $(OUTDIR)/libtrdp.a
-			@echo ' ### Building TCPMDCom Siemens test application $(@F)'
-			$(CC) example/mdManagerTCP_Siemens.c \
-			    -ltrdp \
-			    -luuid \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-
-$(OUTDIR)/mdManagerTCP: mdManagerTCP.c  $(OUTDIR)/libtrdp.a
-			@echo ' ### Building TCPMDCom test application $(@F)'
-			$(CC) example/mdManagerTCP.c \
-			    -ltrdp \
-			    -luuid \
-			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
-			    -o $@
-			$(STRIP) $@
-
 $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building PD test application $(@F)'
 			$(CC) test/pdpatterns/trdp-pd-test.c \
@@ -265,6 +247,22 @@ $(OUTDIR)/trdp-pd-test: $(OUTDIR)/libtrdp.a
 $(OUTDIR)/trdp-md-test: $(OUTDIR)/libtrdp.a
 			@echo ' ### Building MD test application $(@F)'
 			$(CC) test/mdpatterns/trdp-md-test.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/trdp-md-reptestcaller: $(OUTDIR)/libtrdp.a
+			@echo ' ### Building MD test Caller application $(@F)'
+			$(CC) test/mdpatterns/rep-testcaller.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/trdp-md-reptestreplier: $(OUTDIR)/libtrdp.a
+			@echo ' ### Building MD test Replier application $(@F)'
+			$(CC) test/mdpatterns/rep-testreplier.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
@@ -327,7 +325,7 @@ loutdir:
 	@$(MD) $(LINT_OUTDIR)
 
 LINTFLAGS = +v -i$(LINT_RULE_DIR) $(LINT_RULE_DIR)co-gcc.lnt -i ./src/api -i ./src/vos/api -i ./src/common -D$(TARGET_OS) $(LINT_SYSINCLUDE_DIRECTIVES)\
-	-DMD_SUPPORT=1 -w3 -summary -u
+	-DMD_SUPPORT=1 -w3 -e655 -summary -u
 
 # VxWorks will be the single non POSIX OS right now, MS Win uses proprietary build
 # framework, so this condition will most likely fit also BSD/Unix targets     
