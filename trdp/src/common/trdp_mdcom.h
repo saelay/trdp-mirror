@@ -46,31 +46,8 @@
 TRDP_ERR_T  trdp_mdGetTCPSocket (
     TRDP_SESSION_PT pSession);
 
-void        trdp_mdCloseSessions (
-    TRDP_SESSION_PT appHandle,
-    INT32 socketIndex,
-    INT32 newSocket,
-    BOOL8 checkAllSockets);
-
 void        trdp_mdFreeSession (
     MD_ELE_T *pMDSession);
-
-void        trdp_mdSetSessionTimeout (
-    MD_ELE_T    *pMDSession,
-    UINT32      usTimeOut);
-
-TRDP_ERR_T  trdp_mdSendPacket (
-    INT32       mdSock,
-    UINT32      port,
-    MD_ELE_T    *pPacket);
-
-void        trdp_mdUpdatePacket (
-    MD_ELE_T *pPacket);
-
-TRDP_ERR_T  trdp_mdRecv (
-    TRDP_SESSION_PT appHandle,
-    UINT32          sock/*,
-    TRDP_SOCK_TYPE_T    sockType*/);
 
 TRDP_ERR_T  trdp_mdSend (
     TRDP_SESSION_PT appHandle);
