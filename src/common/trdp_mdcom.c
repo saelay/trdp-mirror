@@ -61,6 +61,28 @@ static const TRDP_MD_INFO_T cTrdp_md_info_default = {0};
 /***********************************************************************************************************************
  *   Local Functions
  */
+static void trdp_mdUpdatePacket(MD_ELE_T *pElement);
+static void trdp_mdFillStateElement(const TRDP_MSG_T msgType, MD_ELE_T *pMdElement);
+static void trdp_mdManageSessionId(TRDP_UUID_T *pSessionId,  MD_ELE_T *pMdElement);
+static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
+                                       const TRDP_MD_ELE_ST_T elementState,
+                                       const TRDP_UUID_T *pSessionId,
+                                       MD_ELE_T **pretrievedMdElement);
+static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT appHandle, const TRDP_ERR_T resultCode);
+static BOOL8 trdp_mdTimeOutStateHandler( MD_ELE_T *pElement, TRDP_SESSION_PT appHandle, TRDP_ERR_T *pResult);
+static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEADER_T *pMdItemHeader);
+static void trdp_mdCloseSessions(TRDP_SESSION_PT appHandle, INT32 socketIndex, INT32 newSocket, BOOL8 checkAllSockets);
+static void trdp_mdSetSessionTimeout(MD_ELE_T *pMDSession, UINT32 usTimeOut);
+static TRDP_ERR_T trdp_mdCheck(TRDP_SESSION_PT appHandle, MD_HEADER_T *pPacket, UINT32 packetSize, BOOL8 checkHeaderOnly);
+static void    trdp_mdUpdatePacket(MD_ELE_T *pElement);
+static TRDP_ERR_T  trdp_mdSendPacket(INT32 mdSock, UINT32 port, MD_ELE_T *pElement);
+static TRDP_ERR_T trdp_mdRecvTCPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement);
+static TRDP_ERR_T trdp_mdRecvUDPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement);
+static TRDP_ERR_T  trdp_mdRecvPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement);
+static TRDP_ERR_T  trdp_mdRecv(TRDP_SESSION_PT appHandle, UINT32 sockIndex);
+
+
+
 
 /**********************************************************************************************************************/
 /** Set the statEle property to next state
@@ -153,7 +175,7 @@ static void trdp_mdManageSessionId(TRDP_UUID_T *pSessionId,  MD_ELE_T *pMdElemen
  *  @retval         TRDP_NO_ERR           no error
  *  @retval         TRDP_NOLIST_ERR       no match found error
  */
-static TRDP_ERR_T trdp_mdLookupElement(const MD_ELE_T *pinitialMdElement,
+static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
                                        const TRDP_MD_ELE_ST_T elementState,
                                        const TRDP_UUID_T *pSessionId,
                                        MD_ELE_T **pretrievedMdElement)
@@ -178,7 +200,7 @@ static TRDP_ERR_T trdp_mdLookupElement(const MD_ELE_T *pinitialMdElement,
         }
         if (errv != TRDP_NO_ERR)
         {
-            vos_printLog(VOS_LOG_ERROR,"element not found for sessionId %s", pSessionId);
+            vos_printLog(VOS_LOG_ERROR,"element not found for sessionId %s", (char*)pSessionId);
         }
     }
     return errv;
@@ -549,83 +571,6 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
     return iterMD;
 }
 
-/**********************************************************************************************************************/
-/** Initialize the specific parameters for message data
- *  Open a listening socket.
- *
- *  @param[in]      pSession              session parameters
- *
- *  @retval         TRDP_NO_ERR           no error
- *  @retval         TRDP_PARAM_ERR        initialization error
- */
-TRDP_ERR_T trdp_mdGetTCPSocket (
-    TRDP_SESSION_PT pSession)
-{
-    TRDP_ERR_T      result = TRDP_NO_ERR;
-    VOS_SOCK_OPT_T  trdp_sock_opt;
-    UINT32          backlog = 10; /* Backlog = maximum connection atempts if system is busy. */
-
-    if (pSession->tcpFd.listen_sd == VOS_INVALID_SOCKET)     /* First time TCP is used */
-    {
-        /* Define the common TCP socket options */
-        trdp_sock_opt.qos   = pSession->mdDefault.sendParam.qos;  /* (default should be 5 for PD and 3 for MD) */
-        trdp_sock_opt.ttl   = pSession->mdDefault.sendParam.ttl;  /* Time to live (default should be 64) */
-        trdp_sock_opt.ttl_multicast = 0;
-        trdp_sock_opt.reuseAddrPort = TRUE;
-        trdp_sock_opt.no_mc_loop = FALSE;
-
-        /* The socket is defined non-blocking */
-        trdp_sock_opt.nonBlocking = TRUE;
-
-        result = (TRDP_ERR_T)vos_sockOpenTCP(&pSession->tcpFd.listen_sd, &trdp_sock_opt);
-
-        if (result != TRDP_NO_ERR)
-        {
-            return result;
-        }
-
-        result = (TRDP_ERR_T)vos_sockBind(pSession->tcpFd.listen_sd,
-                                          pSession->realIP,
-                                          pSession->mdDefault.tcpPort);
-
-        if (result != TRDP_NO_ERR)
-        {
-            return result;
-        }
-
-        result = (TRDP_ERR_T)vos_sockListen(pSession->tcpFd.listen_sd, backlog);
-
-        if (result != TRDP_NO_ERR)
-        {
-            return result;
-        }
-
-        vos_printLog(VOS_LOG_INFO, "TCP socket opened and listening (Sock: %d, Port: %d)\n",
-                     pSession->tcpFd.listen_sd, (UINT32) pSession->mdDefault.tcpPort);
-
-        return TRDP_NO_ERR;
-    }
-
-    return result;
-}
-
-/**********************************************************************************************************************/
-/** Free memory of session
- *
- *  @param[in]      pMDSession        session pointer
- */
-void trdp_mdFreeSession (
-    MD_ELE_T *pMDSession)
-{
-    if (NULL != pMDSession)
-    {
-        if (NULL != pMDSession->pPacket)
-        {
-            vos_memFree(pMDSession->pPacket);
-        }
-        vos_memFree(pMDSession);
-    }
-}
 
 /**********************************************************************************************************************/
 /** Close and free any session marked as dead.
@@ -635,7 +580,7 @@ void trdp_mdFreeSession (
  *  @param[in]      newSocket       the new socket
  *  @param[in]      checkAllSockets check all the sockets that are waiting to be closed
  */
-void trdp_mdCloseSessions (
+static void trdp_mdCloseSessions (
     TRDP_SESSION_PT appHandle,
     INT32           socketIndex,
     INT32           newSocket,
@@ -724,7 +669,7 @@ void trdp_mdCloseSessions (
  *  @param[in]      pMDSession          session pointer
  *  @param[in]      usTimeOut           timeout in us
  */
-void trdp_mdSetSessionTimeout (
+static void trdp_mdSetSessionTimeout (
     MD_ELE_T    *pMDSession,
     UINT32      usTimeOut)
 {
@@ -752,7 +697,7 @@ void trdp_mdSetSessionTimeout (
  *  @retval         TRDP_WIRE_ERR
  *  @retval         TRDP_CRC_ERR
  */
-TRDP_ERR_T trdp_mdCheck (
+static TRDP_ERR_T trdp_mdCheck (
     TRDP_SESSION_PT appHandle,
     MD_HEADER_T     *pPacket,
     UINT32          packetSize,
@@ -875,7 +820,7 @@ TRDP_ERR_T trdp_mdCheck (
  *
  *  @param[in]      pElement         pointer to the packet to update
  */
-void    trdp_mdUpdatePacket (
+static void    trdp_mdUpdatePacket (
     MD_ELE_T *pElement)
 {
     /* Initialize CRC calculation */
@@ -900,7 +845,7 @@ void    trdp_mdUpdatePacket (
  *  @param[in]      pElement        pointer to element to be sent
  *  @retval         != NULL         error
  */
-TRDP_ERR_T  trdp_mdSendPacket (
+static TRDP_ERR_T  trdp_mdSendPacket (
     INT32       mdSock,
     UINT32      port,
     MD_ELE_T    *pElement)
@@ -1265,8 +1210,7 @@ static TRDP_ERR_T trdp_mdRecvUDPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, 
 {
     /* UDP receiver */
     TRDP_ERR_T  err = TRDP_NO_ERR;
-    UINT32      size;                       /* Size of the all data read until now */
-    UINT32      readSize        = 0;            /* All the data read in this cycle (Header + Data) */
+    UINT32      size; /* Size of the all data read until now */
 
     /* We read the header first */
     size = sizeof(MD_HEADER_T);
@@ -1363,7 +1307,7 @@ static TRDP_ERR_T trdp_mdRecvUDPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, 
  *  @param[in]      pElement        pointer to received packet
  *  @retval         != TRDP_NO_ERR  error
  */
-TRDP_ERR_T  trdp_mdRecvPacket (
+static TRDP_ERR_T  trdp_mdRecvPacket (
     TRDP_SESSION_PT appHandle,
     INT32           mdSock,
     MD_ELE_T        *pElement)
@@ -1443,7 +1387,7 @@ TRDP_ERR_T  trdp_mdRecvPacket (
  *  @retval         TRDP_CRC_ERR        header checksum
  *  @retval         TRDP_TOPOCOUNT_ERR  invalid topocount
  */
-TRDP_ERR_T  trdp_mdRecv (
+static TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
     UINT32          sockIndex)
 {
@@ -1721,6 +1665,84 @@ TRDP_ERR_T  trdp_mdRecv (
     return TRDP_NO_ERR;
 }
 
+
+/**********************************************************************************************************************/
+/** Initialize the specific parameters for message data
+ *  Open a listening socket.
+ *
+ *  @param[in]      pSession              session parameters
+ *
+ *  @retval         TRDP_NO_ERR           no error
+ *  @retval         TRDP_PARAM_ERR        initialization error
+ */
+TRDP_ERR_T trdp_mdGetTCPSocket (
+    TRDP_SESSION_PT pSession)
+{
+    TRDP_ERR_T      result = TRDP_NO_ERR;
+    VOS_SOCK_OPT_T  trdp_sock_opt;
+    UINT32          backlog = 10; /* Backlog = maximum connection atempts if system is busy. */
+
+    if (pSession->tcpFd.listen_sd == VOS_INVALID_SOCKET)     /* First time TCP is used */
+    {
+        /* Define the common TCP socket options */
+        trdp_sock_opt.qos   = pSession->mdDefault.sendParam.qos;  /* (default should be 5 for PD and 3 for MD) */
+        trdp_sock_opt.ttl   = pSession->mdDefault.sendParam.ttl;  /* Time to live (default should be 64) */
+        trdp_sock_opt.ttl_multicast = 0;
+        trdp_sock_opt.reuseAddrPort = TRUE;
+        trdp_sock_opt.no_mc_loop = FALSE;
+
+        /* The socket is defined non-blocking */
+        trdp_sock_opt.nonBlocking = TRUE;
+
+        result = (TRDP_ERR_T)vos_sockOpenTCP(&pSession->tcpFd.listen_sd, &trdp_sock_opt);
+
+        if (result != TRDP_NO_ERR)
+        {
+            return result;
+        }
+
+        result = (TRDP_ERR_T)vos_sockBind(pSession->tcpFd.listen_sd,
+                                          pSession->realIP,
+                                          pSession->mdDefault.tcpPort);
+
+        if (result != TRDP_NO_ERR)
+        {
+            return result;
+        }
+
+        result = (TRDP_ERR_T)vos_sockListen(pSession->tcpFd.listen_sd, backlog);
+
+        if (result != TRDP_NO_ERR)
+        {
+            return result;
+        }
+
+        vos_printLog(VOS_LOG_INFO, "TCP socket opened and listening (Sock: %d, Port: %d)\n",
+                     pSession->tcpFd.listen_sd, (UINT32) pSession->mdDefault.tcpPort);
+
+        return TRDP_NO_ERR;
+    }
+
+    return result;
+}
+
+/**********************************************************************************************************************/
+/** Free memory of session
+ *
+ *  @param[in]      pMDSession        session pointer
+ */
+void trdp_mdFreeSession (
+    MD_ELE_T *pMDSession)
+{
+    if (NULL != pMDSession)
+    {
+        if (NULL != pMDSession->pPacket)
+        {
+            vos_memFree(pMDSession->pPacket);
+        }
+        vos_memFree(pMDSession);
+    }
+}
 
 /**********************************************************************************************************************/
 /** Sending MD messages
@@ -2596,7 +2618,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             errv = TRDP_NOLIST_ERR;
             if ( pSessionId )
             {
-                errv = trdp_mdLookupElement((const MD_ELE_T*)appHandle->pMDRcvQueue,
+                errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDRcvQueue,
                                             TRDP_ST_RX_REQ_W4AP_REPLY,
                                             (const TRDP_UUID_T*)pSessionId,
                                             &pSenderElement);
@@ -2631,7 +2653,7 @@ TRDP_ERR_T trdp_mdCommonSend (
             vos_printLog(VOS_LOG_INFO, "MD TRDP_MSG_MC\n"); 
             if ( pSessionId )
             {
-                errv = trdp_mdLookupElement((const MD_ELE_T*)appHandle->pMDSndQueue,
+                errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDSndQueue,
                                             TRDP_ST_TX_REQ_W4AP_CONFIRM,
                                             (const TRDP_UUID_T*)pSessionId,
                                             &pSenderElement);
