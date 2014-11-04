@@ -120,7 +120,7 @@ typedef struct
     UINT8                   inhibit;        /**< inauguration inhibit
                                                     0 = no inhibit request
                                                     1 = inhibit request                                             */
-    UINT8                   leadingReq;     /**<  eading request
+    UINT8                   leadingReq;     /**<  leading request
                                                     0 = no leading request
                                                     1 = leading request                                             */
     UINT8                   leadingDir;     /**<  leading direction
@@ -214,7 +214,7 @@ typedef struct
                                                  starting with vehicle at train head, see chapter 5.3.3.2.10.
                                                  Parameters ‘isLead’ and ‘leadDir’ to be set to 0                   */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
-                                                 completely set to 0 == SDTv2 not used                                    */
+                                                 completely set to 0 == SDTv2 not used                              */
 }  GNU_PACKED TRDP_ECSP_CONF_REQUEST_T;
 
 
@@ -222,7 +222,7 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT8                   status;         /**< status of storing correction info
-                                                 0 = correctly stored
+                                                 0 = correctly stored 
                                                  1 = not stored                                                     */ 
     UINT8                   reserved01;     /**< reserved (=0)                                                      */
     TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
@@ -308,7 +308,7 @@ typedef struct
                                                  1 = bypass enabled                                                 */
     UINT8                   slState;        /**< sleep mode state (option)
                                                  0 = no sleep mode
-                                                 1 = sleep mode active (line activitysensing)                       */
+                                                 1 = sleep mode active (line activity sensing)                      */
     UINT16                  reserved02;     /**< reserved (= 0)                                                     */
     UINT32                  etbTopoCnt;     /**< ETB topography counter                                             */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
