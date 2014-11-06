@@ -155,8 +155,8 @@ typedef VOS_FDS_T TRDP_FDS_T;
 /** Reply status messages    */
 typedef enum
 {
-    TRDP_REPLY_OK = 0,
-    TRDP_REPLY_APPL_TIMEOUT         = -1,
+    TRDP_REPLY_OK                   = 0,
+    TRDP_REPLY_RESERVED01           = -1,
     TRDP_REPLY_SESSION_ABORT        = -2,
     TRDP_REPLY_NO_REPLIER_INST      = -3,
     TRDP_REPLY_NO_MEM_REPL          = -4,
@@ -164,7 +164,7 @@ typedef enum
     TRDP_REPLY_NO_REPLY             = -6,
     TRDP_REPLY_NOT_ALL_REPLIES      = -7,
     TRDP_REPLY_NO_CONFIRM           = -8,
-    TRDP_REPLY_WRONG_TOPO_COUNT     = -9,
+    TRDP_REPLY_RESERVED02           = -9,
     TRDP_REPLY_SENDING_FAILED       = -10,
     TRDP_REPLY_UNSPECIFIED_ERROR    = -99
 } TRDP_REPLY_STATUS_T;
