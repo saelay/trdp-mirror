@@ -215,7 +215,7 @@ VOS_ERR_T vos_initRuntimeConsts (void)
 #endif
 #endif
 
-#if B_ENDIAN
+#ifdef B_ENDIAN
     if (sIsBigEndian == FALSE)
 #else
     if (sIsBigEndian == TRUE)

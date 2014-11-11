@@ -41,11 +41,11 @@
                                  ((0x0000FF00 & (UINT32)val) << 8)  | \
                                  ((0x000000FF & (UINT32)val) << 24))
 
-#if B_ENDIAN
+#ifdef B_ENDIAN
 /* introduce byte swapping on big endian machines needed for CRC handling */
 #define MAKE_LE(a)      Swap32(a)
 #else
-#if L_ENDIAN
+#ifdef L_ENDIAN
 #define MAKE_LE(a)      (a)
 #endif
 #endif
