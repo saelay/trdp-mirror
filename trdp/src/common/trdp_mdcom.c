@@ -1645,6 +1645,7 @@ static TRDP_ERR_T  trdp_mdRecv (
         case TRDP_MSG_MP:
             /*  */
             iterMD = trdp_mdHandleConfirmReply(appHandle, pH);
+            break;
         default:
             /* Shall never get here! */
             break;
@@ -2914,7 +2915,6 @@ TRDP_ERR_T trdp_mdCommonSend (
         pSenderElement->pPacket->frameHead.replyTimeout = 0;
     }
 
-
     if ( srcURI != NULL )
     {
         memcpy((CHAR8 *)pSenderElement->pPacket->frameHead.sourceURI, srcURI, TRDP_MAX_URI_USER_LEN);
@@ -2926,7 +2926,10 @@ TRDP_ERR_T trdp_mdCommonSend (
     }
 
     /* pData and the corresponding dataSize have been checked already - just use them here */
-    memcpy(pSenderElement->pPacket->data, pData, dataSize);
+    if (pData != NULL)
+    {
+        memcpy(pSenderElement->pPacket->data, pData, dataSize);
+    }
 
     /* Insert element in send queue */
     if ( TRUE == newSession )

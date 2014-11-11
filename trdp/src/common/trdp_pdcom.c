@@ -466,7 +466,7 @@ TRDP_ERR_T  trdp_pdReceive (
         switch (trdp_checkSequenceCounter(pExistingElement,
                                           vos_ntohl(pNewFrame->frameHead.sequenceCounter),
                                           subAddresses.srcIpAddr,
-                                          vos_ntohs(pNewFrame->frameHead.msgType)))
+                                          (TRDP_MSG_T) vos_ntohs(pNewFrame->frameHead.msgType)))
         {
             case 0:                     /* Sequence counter is valid (at least 1 higher than previous one) */
                 break;
