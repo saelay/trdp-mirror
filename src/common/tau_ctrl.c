@@ -240,7 +240,7 @@ EXT_DECL TRDP_ERR_T tau_requestEcspConfirm ( TRDP_APP_SESSION_T         appHandl
     if (priv_ecspCtrlInitialised == TRUE)
     {
         TRDP_UUID_T sessionId;                 /*    Our session ID for sending MD                             */
-       
+
         return tlm_request( appHandle,                      /* appHandle */
                             pUserRef,                       /* pUserRef */
                             pfCbFunction,                   /* callback function */

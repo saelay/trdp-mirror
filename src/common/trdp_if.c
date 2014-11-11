@@ -2061,7 +2061,7 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
             if (ret != TRDP_NO_ERR)
             {
                 /* This is a critical error: We must unsubscribe! */
-                tlp_unsubscribe(appHandle, subHandle);
+                (void) tlp_unsubscribe(appHandle, subHandle);
                 vos_printLog(VOS_LOG_ERROR, "tlp_resubscribe() failed, out of sockets\n");
             }
             else
@@ -2656,7 +2656,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
             if (ret != TRDP_NO_ERR)
             {
                 /* This is a critical error: We must delete the listener! */
-                tlm_delListener(appHandle, listenHandle);
+                (void) tlm_delListener(appHandle, listenHandle);
                 vos_printLog(VOS_LOG_ERROR, "tlm_readdListener() failed, out of sockets\n");
             }
             else
