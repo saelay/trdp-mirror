@@ -23,42 +23,146 @@
 
 --- Module:   ..\..\src\common\tau_xml.c (C)
 
+--- Module:   ..\..\src\common\tau_ctrl.c (C)
+                                      _
+                            &sessionId,                     /* pSessionId */
+..\..\src\common\tau_ctrl.c(247) : Warning 545: Suspicious use of &
+
+    --- Wrap-up for Module: ..\..\src\common\tau_ctrl.c
+
+Warning 551: Symbol 'priv_ecscIpAddr' (line 52, file ..\..\src\common\tau_ctrl.c)
+    not accessed
+..\..\src\common\tau_ctrl.c(52) : Info 830: Location cited in prior message
+
+--- Module:   ..\..\src\common\tau_dnr.c (C)
+
+--- Module:   ..\..\src\common\tau_tti.c (C)
+
 /// Start of Pass 2 ///
 
 --- Module:   ..\..\src\vos\common\vos_utils.c (C)
 
-During Specific Walk:
-  File ..\..\src\common\trdp_pdcom.c line 377: trdp_pdCheck([1], ?)
-  File ..\..\src\common\trdp_pdcom.c line 802: vos_crc32(4294967295, [0], ?)
-..\..\src\vos\common\vos_utils.c(331) : Warning 661: Possible access of
-    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_utils.c: lines 329, 331; file
-    ..\..\src\common\trdp_pdcom.c: lines 377, 802]
-..\..\src\vos\common\vos_utils.c(329) : Info 831: Reference cited in prior
-    message
-..\..\src\vos\common\vos_utils.c(331) : Info 831: Reference cited in prior
-    message
-..\..\src\common\trdp_pdcom.c(377) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_pdcom.c(802) : Info 831: Reference cited in prior message
-
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
+
+During Specific Walk:
+  File ..\..\src\common\trdp_if.c line 274: vos_strncpy([16], [16], 16)
+..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_if.c:
+    line 274]
+..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_if.c(274) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\trdp_if.c line 274: vos_strncpy([16], [16], 16)
+..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_if.c:
+    line 274]
+..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_if.c(274) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\trdp_if.c line 2424: vos_strncpy([32], !=0, 32)
+..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_if.c:
+    line 2424]
+..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_if.c(2424) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\trdp_if.c line 2424: vos_strncpy([32], !=0, 32)
+..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_if.c:
+    line 2424]
+..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_if.c(2424) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\trdp_stats.c line 78: vos_strncpy([16], !=0, 16)
+..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_stats.c:
+    line 78]
+..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_stats.c(78) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\trdp_stats.c line 78: vos_strncpy([16], !=0, 16)
+..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_stats.c:
+    line 78]
+..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_stats.c(78) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\trdp_stats.c line 281: vos_strncpy([32], [32], 32)
+..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_stats.c:
+    line 281]
+..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_stats.c(281) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\trdp_stats.c line 281: vos_strncpy([32], [32], 32)
+..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_stats.c:
+    line 281]
+..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_stats.c(281) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 798: vos_strncpy([128], !=0, 128)
+..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\tau_xml.c:
+    line 798]
+..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(798) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 798: vos_strncpy([128], !=0, 128)
+..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\tau_xml.c:
+    line 798]
+..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(798) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\vos\windows\vos_thread.c (C)
 
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 628: vos_sockReceiveTCP(?, [0]?, [1])
-..\..\src\vos\windows\vos_sock.c(1412) : Warning 662: Possible creation of
+  File ..\..\src\common\trdp_mdcom.c line 1040: vos_sockReceiveTCP(?, [0]?,
+    [1])
+..\..\src\vos\windows\vos_sock.c(1555) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1409, 1412; file
-    ..\..\src\common\trdp_mdcom.c: lines 606, 627]
-..\..\src\vos\windows\vos_sock.c(1409) : Info 831: Reference cited in prior
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1552, 1555; file
+    ..\..\src\common\trdp_mdcom.c: lines 1016, 1039]
+..\..\src\vos\windows\vos_sock.c(1552) : Info 831: Reference cited in prior
     message
-..\..\src\vos\windows\vos_sock.c(1412) : Info 831: Reference cited in prior
+..\..\src\vos\windows\vos_sock.c(1555) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(606) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(627) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_mdcom.c(1016) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_mdcom.c(1039) : Info 831: Reference cited in prior
+    message
 
 --- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)
 
@@ -67,42 +171,19 @@ During Specific Walk:
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(302) : Warning 662: Possible creation of
-    out-of-bounds pointer (65418 beyond end of data) by operator 'ptr+int'
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 862]
-..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
-
-During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(302) : Warning 662: Possible creation of
-    out-of-bounds pointer (65414 beyond end of data) by operator 'ptr-int'
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 862]
-..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
-
-During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(303) : Warning 662: Possible creation of
-    out-of-bounds pointer (16354 beyond end of data) by operator '['
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 303, 862]
-..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
-
-During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 862: trdp_mdCheck(?, [1], ?, 0)
-..\..\src\common\trdp_mdcom.c(303) : Warning 661: Possible access of
-    out-of-bounds pointer (16354 beyond end of data) by operator '['
-    [Reference: file ..\..\src\common\trdp_mdcom.c: lines 270, 302, 303, 862]
-..\..\src\common\trdp_mdcom.c(270) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(302) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(303) : Info 831: Reference cited in prior message
-..\..\src\common\trdp_mdcom.c(862) : Info 831: Reference cited in prior message
+  File ..\..\src\common\tau_ctrl.c line 261: tlm_request(?, ?, ?, [1], 122, 0,
+    0, ?, ?, 1, 1, 3000000, 0, 0, [4], 1556, 0, 0)
+  File ..\..\src\common\trdp_if.c line 2339: trdp_mdCommonSend(19826, ?, ?, ?,
+    [1], 122, 0, 0, ?, ?, 1, 0, 1, 3000000, 0, 0, 0, [4], 1556, 0, 0)
+..\..\src\common\trdp_mdcom.c(2931) : Warning 420: Apparent access beyond array
+    for function 'memcpy(void *, const void *, unsigned int)', argument 3
+    (size=1556) exceeds argument 2 (size=4) [Reference: file
+    ..\..\src\common\trdp_if.c: lines 2335, 2336; file ..\..\src\common\tau_ctrl.c:
+    lines 258, 259]
+..\..\src\common\trdp_if.c(2335) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_if.c(2336) : Info 831: Reference cited in prior message
+..\..\src\common\tau_ctrl.c(258) : Info 831: Reference cited in prior message
+..\..\src\common\tau_ctrl.c(259) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\common\trdp_pdcom.c (C)
 
@@ -113,6 +194,12 @@ During Specific Walk:
 --- Module:   ..\..\src\common\tau_marshall.c (C)
 
 --- Module:   ..\..\src\common\tau_xml.c (C)
+
+--- Module:   ..\..\src\common\tau_ctrl.c (C)
+
+--- Module:   ..\..\src\common\tau_dnr.c (C)
+
+--- Module:   ..\..\src\common\tau_tti.c (C)
 
 --- Global Wrap-up
 

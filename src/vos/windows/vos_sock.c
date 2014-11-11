@@ -282,15 +282,11 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     UINT32 bufLen = (UINT32) NULL;
     PIP_ADAPTER_INFO pAdapterList = NULL;
     PIP_ADAPTER_INFO pAdapter = NULL;
-    UINT32 addrCnt = 0;
     UINT32 err = 0;
-    UINT8 physAddr[VOS_MAC_SIZE];
-    BOOL8 mismatch = FALSE;    
+    UINT32 addrCnt = 0;
     DWORD dwSize = 0;
     DWORD dwRetVal = 0;
-    unsigned int i, j;
     MIB_IFTABLE *pIfTable;
-    MIB_IFROW *pIfRow;
     VOS_ERR_T retVal = VOS_NO_ERR;
 
     if (   (pAddrCnt == NULL) 
@@ -306,14 +302,17 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
         return VOS_MEM_ERR;
     }
     pAdapterList = (PIP_ADAPTER_INFO) buf;
+    
     /* get the actual data we want */
     err = GetAdaptersInfo(pAdapterList, (PULONG)&bufLen);
     if (err != NO_ERROR)
     {   
         vos_printLog(VOS_LOG_ERROR, "GetAdaptersInfo failed (Err: %d)\n", err);
+        vos_memFree(buf);
         return VOS_SOCK_ERR;
     }
     pAdapter = pAdapterList;
+
     /* Iterate adapter list */
     while(pAdapter != NULL) 
     {
@@ -346,55 +345,67 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     }
     *pAddrCnt = addrCnt;
     vos_memFree(buf);
+
     /* get link/up down information from interface table */
-    pIfTable = (MIB_IFTABLE *) malloc(sizeof (MIB_IFTABLE));
+    pIfTable = (MIB_IFTABLE *) vos_memAlloc(sizeof (MIB_IFTABLE));
     if (pIfTable == NULL) 
     {
-        vos_printLog(VOS_LOG_ERROR,"Error allocating memory needed to call GetIfTable\n");
-        retVal = VOS_MEM_ERR;
+        vos_printLog(VOS_LOG_ERROR,"Error allocating memory\n");
+        return (VOS_MEM_ERR);
     }
-    /* Make an initial call to GetIfTable to get the
-    necessary size into dwSize */
+
+    /* Make an initial call to GetIfTable to get the necessary size into dwSize */
     dwSize = sizeof (MIB_IFTABLE);
     if (GetIfTable(pIfTable, &dwSize, 0) == ERROR_INSUFFICIENT_BUFFER) 
     {
-        free(pIfTable);
-        pIfTable = (MIB_IFTABLE *) malloc(dwSize);
+        vos_memFree(pIfTable);
+        pIfTable = (MIB_IFTABLE *) vos_memAlloc(dwSize);
         if (pIfTable == NULL) 
         {
             vos_printLog(VOS_LOG_ERROR,"Error allocating memory\n");
-            retVal = VOS_MEM_ERR;
+            return (VOS_MEM_ERR);
         }
     }
-    /* Make a second call to GetIfTable to get the actual
-    data we want.*/
+
+    /* Make a second call to GetIfTable to get the actual data we want.*/
     if ((dwRetVal = GetIfTable(pIfTable, &dwSize, 0)) == NO_ERROR) 
     {
         if (pIfTable->dwNumEntries > 0) 
         {
-            pIfRow = (MIB_IFROW *) malloc(sizeof (MIB_IFROW));
+            MIB_IFROW *pIfRow;
+            unsigned int i, j;
+
+
+            pIfRow = (MIB_IFROW *) vos_memAlloc(sizeof (MIB_IFROW));
+            
             if (pIfRow == NULL) 
             {
                 vos_printLog(VOS_LOG_ERROR,"Error allocating memory\n");
                 if (pIfTable != NULL) 
                 {
-                    free(pIfTable);
+                    vos_memFree(pIfTable);
                     pIfTable = NULL;
                 }
-                retVal = VOS_MEM_ERR;
+                return (VOS_MEM_ERR);
             }
+
             for (i = 0; i < pIfTable->dwNumEntries; i++) 
             {
                 pIfRow->dwIndex = pIfTable->table[i].dwIndex;
                 if ((dwRetVal = GetIfEntry(pIfRow)) == NO_ERROR) 
                 {
+                    UINT8 physAddr[VOS_MAC_SIZE];
+                    BOOL8 mismatch;    
+
                     for (j = 0; j < pIfRow->dwPhysAddrLen; j++) 
                     {
                         physAddr[j] = (UINT8) pIfRow->bPhysAddr[j];
                     }
+
                     for (addrCnt = 0; addrCnt < *pAddrCnt; addrCnt++)
                     {
                         mismatch = FALSE;
+
                         for (j = 0; j<VOS_MAC_SIZE; j++)
                         {
                             if (ifAddrs[addrCnt].mac[j] != physAddr[j])
@@ -402,6 +413,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                                 mismatch = TRUE;
                             }
                         }
+
                         if (mismatch == FALSE)
                         {
                             for (j=0; j<VOS_MAX_IF_NAME_SIZE-1; j++)
@@ -421,12 +433,17 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                     }
                 }
             }
+
+            vos_memFree(pIfRow);
         }
         else 
         {
             vos_printLog(VOS_LOG_ERROR,"\tGetIfTable failed with error: %ld\n", dwRetVal);
         }
     }
+    
+    vos_memFree(pIfTable);
+    
     return retVal;
 }
 
