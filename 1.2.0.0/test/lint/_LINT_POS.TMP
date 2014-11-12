@@ -1,0 +1,29 @@
+
+--- Module:   ..\..\src\vos\common\vos_mem.c (C++)
+
+--- Module:   ..\..\src\vos\common\vos_utils.c (C++)
+
+--- Module:   ..\..\src\vos\posix\vos_thread.c (C++)
+
+--- Module:   ..\..\src\vos\posix\vos_sock.c (C++)
+
+--- Module:   ..\..\src\common\trdp_if.c (C++)
+
+--- Module:   ..\..\src\common\trdp_mdcom.c (C++)
+
+--- Module:   ..\..\src\common\trdp_pdcom.c (C++)
+
+--- Module:   ..\..\src\common\trdp_utils.c (C++)
+
+--- Module:   ..\..\src\common\trdp_stats.c (C++)
+
+--- Module:   ..\..\src\common\tau_marshall.c (C++)
+
+--- Global Wrap-up
+
+Warning 526: Symbol 'offsetof_violates_MISRA_Rule_120()' (line 121, file
+    ..\..\src\common\tau_marshall.c) not defined
+..\..\src\common\tau_marshall.c  121  Info 830: Location cited in prior message
+Warning 628: no argument information provided for function 'offsetof_violates_MISRA_Rule_120()'
+    (line 121, file ..\..\src\common\tau_marshall.c)
+..\..\src\common\tau_marshall.c  121  Info 830: Location cited in prior message

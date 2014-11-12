@@ -1,0 +1,162 @@
+#//
+#// $Id: Makefile 251 2013-01-07 12:20:22Z goiarbide $
+#//
+#// DESCRIPTION    trdp Makefile
+#//
+#// AUTHOR         Bernd Loehr, NewTec GmbH, Tomas Svoboda, UniControls a.s.
+#//
+#//   This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+#//   If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#//   Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+#//
+
+# Preliminary: Currently, posix support only
+
+TARGET_VOS = posix
+TARGET_FLAG = POSIX
+
+# --------------------------------------------------------------------
+
+VOS_PATH = src/vos/$(TARGET_VOS)
+
+vpath %.c src/common src/example src/vos/common test/xml $(VOS_PATH)
+vpath %.h src/api src/vos/api src/common src/vos/common
+
+INCPATH = src/api -I $(LIBXMLINC)
+VOS_INCPATH = src/vos/api -I src/common
+BUILD_PATH = bld/$(TARGET_VOS)
+
+ifdef TARGET
+DIR_PATH=$(TARGET)/
+CROSS=$(TARGET)-
+
+CC=$(CROSS)gcc
+AR=$(CROSS)ar
+LD=$(CROSS)ld
+STRIP=$(CROSS)strip
+else
+CC = $(GNUPATH)gcc
+AR = $(GNUPATH)ar
+LD = $(GNUPATH)ld
+STRIP = $(GNUPATH)strip
+endif
+
+ECHO = echo
+RM = rm -f
+MD = mkdir -p
+CP = cp
+
+
+ifeq ($(MD_SUPPORT),1)
+CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=1
+else
+CFLAGS += -D__USE_BSD -D_DARWIN_C_SOURCE -D_XOPEN_SOURCE=500 -pthread -D$(TARGET_FLAG)  -fPIC -Wall -DMD_SUPPORT=0
+endif
+
+SUBDIRS	= src
+INCLUDES = -I $(INCPATH) -I $(VOS_INCPATH) -I $(VOS_PATH)
+OUTDIR = $(BUILD_PATH)
+
+LDFLAGS = -L $(OUTDIR)
+
+ifeq ($(DEBUG),1)
+CFLAGS += -g -O -DDEBUG
+LDFLAGS += -g
+# Display the strip command and do not execut it
+STRIP = $(ECHO) "do NOT strip: " 
+else
+CFLAGS += -Os  -DNO_DEBUG
+endif
+
+VOS_OBJS = vos_utils.o vos_sock.o vos_mem.o vos_thread.o
+TRDP_OBJS = trdp_pdcom.o trdp_utils.o trdp_marshall.o trdp_xml.o trdp_if.o trdp_stats.o $(VOS_OBJS)
+
+ifeq ($(MD_SUPPORT),1)
+TRDP_OBJS += trdp_mdcom.o
+endif
+
+all:		outdir libtrdp test
+
+libtrdp:	outdir $(OUTDIR)/libtrdp.a
+test:		outdir $(OUTDIR)/trdp-xmlprint-test $(OUTDIR)/trdp-xmlpd-test
+
+doc:		doc/latex/refman.pdf
+
+$(OUTDIR)/trdp_if.o:	trdp_if.c
+			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(OUTDIR)/%.o: %.c %.h trdp_if_light.h trdp_types.h vos_types.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(OUTDIR)/trdp_xml.o:	tau_xml.c
+			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(OUTDIR)/trdp_marshall.o:	tau_marshall.c
+			$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+			
+$(OUTDIR)/libtrdp.a:	$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
+			@$(ECHO) ' ### Building the lib $(@F)'
+			$(RM) $@
+			$(AR) cq $@ $^
+
+
+$(OUTDIR)/trdp-xmlprint-test:  trdp-xmlprint-test.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) test/xml/trdp-xmlprint-test.c \
+				$(CFLAGS) $(INCLUDES) -o $@\
+                -L $(LIBXMLLIB) \
+				-lxml2 -ltrdp -lz \
+			    $(LDFLAGS)
+			    
+			$(STRIP) $@
+
+$(OUTDIR)/trdp-xmlpd-test:  trdp-xmlpd-test.c  $(OUTDIR)/libtrdp.a 
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) test/xml/trdp-xmlpd-test.c \
+				$(CFLAGS) $(INCLUDES) -o $@\
+                -L $(LIBXMLLIB) \
+				-lxml2 -ltrdp -lz \
+			    $(LDFLAGS)
+			    
+			$(STRIP) $@
+			
+outdir:
+		$(MD) $(OUTDIR)
+
+
+doc/latex/refman.pdf: Doxyfile trdp_if_light.h trdp_types.h
+			@$(ECHO) ' ### Making the PDF document'
+			doxygen Doxyfile
+			make -C doc/latex
+			$(CP) doc/latex/refman.pdf doc
+
+
+
+help:
+	@echo " " >&2
+	@echo "BUILD TARGETS FOR TRDP (with XML configuration support)" >&2
+	@echo "Define LIBXMLINC and LIBXMLLIB variables to point to libxml2 headers and library." >&2
+	@echo "Edit the paths in the top part of this Makefile to suit your environment." >&2
+	@echo "Then call 'make' or 'make all' to build everything." >&2
+	@echo "To build debug binaries, append 'DEBUG=TRUE' to the make command " >&2
+	@echo "To include message data support, append 'MD_SUPPORT=1' to the make command " >&2
+	@echo " " >&2
+	@echo "Other builds:" >&2
+	@echo "  * make test      - build the xml test applications" >&2
+	@echo "  * make clean     - remove all binaries and objects of the current target" >&2
+	@echo "  * make libtrdp	  - build the static library, only" >&2
+	@echo " " >&2
+	@echo "  * make doc	      - build the documentation (refman.pdf)" >&2
+	@echo "                   - (needs doxygen installed in executable path)" >&2
+	@echo " " >&2
+
+#########################################################################
+
+
+clean:
+	$(RM) -r bld/*
+	$(RM) -r doc/latex/*
+
+
+#########################################################################
