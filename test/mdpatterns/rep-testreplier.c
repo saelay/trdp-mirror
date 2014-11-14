@@ -39,13 +39,22 @@
 #include "vos_thread.h"                           
 #include "trdp_if_light.h"
 
-
 #define CALLTEST_MR_COMID 2000
 #define CALLTEST_MQ_COMID 2001
 
+/* Status MR/MP tuple */
 #define CALLTEST_MR_MP_COMID 3000
 #define CALLTEST_MP_COMID 3001
-         
+
+/* No listener ever - triggers ME */
+#define CALLTEST_MR_NOLISTENER_COMID 4000
+#define CALLTEST_MP_NOLISTENER_COMID 4001
+
+/* Moving Topo - triggers ME */
+#define CALLTEST_MR_TOPOX_COMID 5000
+#define CALLTEST_MP_TOPOX_COMID 5001
+
+
 static TRDP_APP_SESSION_T appSessionReplier = NULL;
 static TRDP_LIS_T         listenHandle     = NULL;
 static char               dataMQ[0x1000];
@@ -162,9 +171,26 @@ static  void mdCallback(
                 if (err != TRDP_NO_ERR)
                 {
                     /* echo unformatted error code */
-                    printf("tlm_reply failed - error code %d\n",err);
+                    printf("tlm_reply CALLTEST_MP_COMID failed - error code %d\n",err);
                 }
                 countMP++;
+            }
+            if (pMsg->comId == CALLTEST_MR_TOPOX_COMID)
+            {
+                /* */
+                err = tlm_reply(appSessionReplier,
+                                (const TRDP_UUID_T*)pMsg->sessionId,
+                                CALLTEST_MP_TOPOX_COMID,
+                                0,
+                                NULL,
+                                (const UINT8*)&dataMP,
+                                sizeof(dataMP));
+                if (err != TRDP_NO_ERR)
+                {
+                    /* echo unformatted error code */
+                    printf("tlm_reply CALLTEST_MP_TOPOX_COMID failed - error code %d\n",err);
+                }
+
             }
             break;
         case TRDP_REPLYTO_ERR:
@@ -204,7 +230,7 @@ int main(int argc, char** argv)
                                         1000000, 
                                         20550, 
                                         0, 
-                                        5};
+                                        20};/*have some space for sessions*/
     TRDP_PROCESS_CONFIG_T   processConfig   = {"MD_REPLIER", "", 0, 0, TRDP_OPTION_BLOCK};
 
     printf("TRDP message data repetition test program REPLIER, version 0\n");
@@ -271,6 +297,23 @@ int main(int argc, char** argv)
         printf("Listening to CALLTEST_MR_COMID failed\n");
         goto CLEANUP;
     }
+    err = tlm_addListener(appSessionReplier, 
+                          &listenHandle, 
+                          NULL,
+                          NULL,
+                          CALLTEST_MR_TOPOX_COMID, 
+                          0, 
+                          0,
+                          0, 
+                          TRDP_FLAGS_CALLBACK, 
+                          NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("Listening to CALLTEST_MR_COMID failed\n");
+        goto CLEANUP;
+    }
+
 
     while (1)
     {   

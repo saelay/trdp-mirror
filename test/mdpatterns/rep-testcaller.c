@@ -42,18 +42,31 @@
 #define CALLTEST_MR_COMID 2000
 #define CALLTEST_MQ_COMID 2001
 
+/* Status MR/MP tuple */
 #define CALLTEST_MR_MP_COMID 3000
 #define CALLTEST_MP_COMID 3001
 
-         
+/* No listener ever - triggers ME */
+#define CALLTEST_MR_NOLISTENER_COMID 4000
+#define CALLTEST_MP_NOLISTENER_COMID 4001
+
+/* Moving Topo - triggers ME */
+#define CALLTEST_MR_TOPOX_COMID 5000
+#define CALLTEST_MP_TOPOX_COMID 5001
+
+
 static TRDP_APP_SESSION_T appSessionCaller = NULL;
 static TRDP_LIS_T         listenHandle     = NULL;
 static char               dataMRMQ[0x1000]; /* for CALLTEST_MR_COMID */
 static char               dataMRMP[0x1000]; /* for CALLTEST_MR_MP_COMID */
 static VOS_MUTEX_T        callMutex        = NULL; /* for the MR MQ tuple */
 static VOS_MUTEX_T        callMutexMP      = NULL; /* for the MR MP tuple */
+static VOS_MUTEX_T        callMutexME      = NULL; /* for the MR ME tuple */
+static VOS_MUTEX_T        callMutexTO      = NULL; /* for the MR MP/ME topo trouble */
 static INT32              callFlagMR_MQ    = TRUE;
 static INT32              callFlagMR_MP    = TRUE;
+static INT32              callFlagME       = TRUE;
+static INT32              callFlagTO       = TRUE;
 
 
 /* --- debug log --------------------------------------------------------------- */
@@ -84,6 +97,46 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
     fprintf(stderr, "%s %s:%d %s",
             cat[category], file ? file + 1 : pFile, line, pMsgStr);
 #endif
+}
+
+static void manageMDCall(TRDP_APP_SESSION_T appSession,
+                         UINT32 comId,
+                         UINT32 replierIP,
+                         const UINT8* pData,
+                         UINT32 datasize,
+                         VOS_MUTEX_T mutex,
+                         INT32* callFlag,
+                         UINT32 etbTopo,
+                         UINT32 opTopo)
+{
+    if ( vos_mutexTryLock(mutex) == VOS_NO_ERR )
+    {
+        if ( *callFlag == TRUE )
+        {
+            /* call replier */
+            printf("perform tlm_request comId %d\n",comId);
+            (void)tlm_request(appSession,
+                              NULL,
+                              NULL/*default callback fct.*/,
+                              NULL,
+                              comId,
+                              etbTopo,
+                              opTopo,
+                              0U,
+                              replierIP,
+                              TRDP_FLAGS_DEFAULT,
+                              1,
+                              1000000/*1sec*/,
+                              2, /* number of retries */
+                              NULL,
+                              pData,
+                              datasize,
+                              NULL,
+                              NULL);
+            *callFlag = FALSE;
+        }
+        vos_mutexUnlock(mutex);
+    }
 }
 
 /******************************************************************************/
@@ -136,12 +189,20 @@ static  void mdCallback(
                     vos_mutexUnlock(callMutexMP);
                 }
             }
+            if (pMsg->comId == CALLTEST_MP_TOPOX_COMID)
+            {
+                if (vos_mutexLock(callMutexTO) == VOS_NO_ERR)
+                {
+                    callFlagTO = TRUE;
+                    vos_mutexUnlock(callMutexTO);
+                }
+            }
             break;
         case TRDP_REPLYTO_ERR:
         case TRDP_TIMEOUT_ERR:
             /* The application can decide here if old data shall be invalidated or kept	*/
             printf("Packet timed out (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
-            if (pMsg->comId == CALLTEST_MQ_COMID)
+            if (pMsg->comId == CALLTEST_MR_COMID)
             {
                 if (vos_mutexLock(callMutex) == VOS_NO_ERR)
                 {
@@ -157,9 +218,42 @@ static  void mdCallback(
                     vos_mutexUnlock(callMutexMP);
                 }
             }
+            else if (pMsg->comId == CALLTEST_MR_NOLISTENER_COMID)
+            {
+                printf("CALLTEST_MR_NOLISTENER call expired\n");
+                if (vos_mutexLock(callMutexME) == VOS_NO_ERR)
+                {
+                    callFlagME = TRUE;
+                    vos_mutexUnlock(callMutexME);
+                }                
+            }
+            else if (pMsg->comId == CALLTEST_MR_TOPOX_COMID)
+            {
+                printf("CALLTEST_MR_TOPOX_COMID call expired\n");
+                if (vos_mutexLock(callMutexTO) == VOS_NO_ERR)
+                {
+                    callFlagTO = TRUE;
+                    vos_mutexUnlock(callMutexTO);
+                }                
+            }
             else
             {
                 /* should not happen */
+            }
+            break;
+        case TRDP_NOLIST_ERR:
+            if (pMsg->comId == CALLTEST_MR_NOLISTENER_COMID)
+            {
+                /* this is the routine to deal with the Me */
+                if (pMsg->msgType == TRDP_MSG_ME )
+                {  
+                    /* re-enable calling */
+                    if (vos_mutexLock(callMutexME) == VOS_NO_ERR)
+                    {
+                        callFlagME = TRUE;
+                        vos_mutexUnlock(callMutexME);
+                    }                
+                }
             }
             break;
         default:
@@ -213,7 +307,7 @@ int main(int argc, char** argv)
         printf("illegal IP address(es) supplied, aborting!\n");
         return -1;
     }
-    err = tlc_init(NULL/*print_log*/,NULL);
+    err = tlc_init(print_log,NULL);
 
     /* pure MD session */
     if (tlc_openSession(&appSessionCaller,
@@ -264,6 +358,25 @@ int main(int argc, char** argv)
         goto CLEANUP;
     }
 
+    /* Listener for reply expected to have transient topo counter trouble */
+    err = tlm_addListener(appSessionCaller, 
+                          &listenHandle, 
+                          NULL,
+                          NULL,
+                          CALLTEST_MP_TOPOX_COMID, 
+                          0, 
+                          0,
+                          0, 
+                          TRDP_FLAGS_CALLBACK, 
+                          NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("TRDP Listening to CALLTEST_MP_COMID failed\n");
+        goto CLEANUP;
+    }
+
+
     if (vos_mutexCreate(&callMutex) != VOS_NO_ERR)
     {
         printf("Mutex Creation for callMutex failed\n");
@@ -274,9 +387,21 @@ int main(int argc, char** argv)
         printf("Mutex Creation for callMutexMP failed\n");
         goto CLEANUP;
     }
+    if (vos_mutexCreate(&callMutexME) != VOS_NO_ERR)
+    {
+        printf("Mutex Creation for callMutexME failed\n");
+        goto CLEANUP;
+    }
+    if (vos_mutexCreate(&callMutexTO) != VOS_NO_ERR)
+    {
+        printf("Mutex Creation for callMutexTO failed\n");
+        goto CLEANUP;
+    }
+
 
     while (1)
     {
+        static UINT32 switchTopoDiffOnOff = 0U;
         FD_ZERO(&rfds);
         noOfDesc = 0;
         tlc_getInterval(appSessionCaller, &tv, &rfds, &noOfDesc);
@@ -287,62 +412,61 @@ int main(int argc, char** argv)
         /* see mdCallback for unlocking conditions - be aware, that   */
         /* the replier must really must be started before this pro-   */
         /* gram! */
-        if (vos_mutexTryLock(callMutex) == VOS_NO_ERR)
-        {
-            if (callFlagMR_MQ == TRUE)
-            {
-                /* call replier */
-                printf("perform tlm_request CALLTEST_MR_COMID\n");
-                err = tlm_request(appSessionCaller,
-                                  NULL,
-                                  NULL/*default callback fct.*/,
-                                  NULL,
-                                  CALLTEST_MR_COMID,
-                                  0U,
-                                  0U,
-                                  0U,
-                                  replierIP,
-                                  TRDP_FLAGS_DEFAULT,
-                                  1,
-                                  1000000/*1sec*/,
-                                  2, /* number of retries */
-                                  NULL,
-                                  (const UINT8*)&dataMRMQ,
-                                  sizeof(dataMRMQ),
-                                  NULL,
-                                  NULL);
-                callFlagMR_MQ = FALSE;
-            }
-            vos_mutexUnlock(callMutex);
-        }
 
-        if (vos_mutexTryLock(callMutexMP) == VOS_NO_ERR)
+        manageMDCall(appSessionCaller,
+                     CALLTEST_MR_COMID,
+                     replierIP,
+                     &dataMRMQ,
+                     sizeof(dataMRMQ),
+                     callMutex,
+                     &callFlagMR_MQ,
+                     0,
+                     0);
+        manageMDCall(appSessionCaller,
+                     CALLTEST_MR_MP_COMID,
+                     replierIP,
+                     &dataMRMP,
+                     sizeof(dataMRMP),
+                     callMutexMP,
+                     &callFlagMR_MP,
+                     0,
+                     0);
+        manageMDCall(appSessionCaller,
+                     CALLTEST_MR_NOLISTENER_COMID,
+                     replierIP,
+                     (const UINT8*)"HELLO",
+                     sizeof("HELLO"),
+                     callMutexME,
+                     &callFlagME,
+                     0,
+                     0);
+        if ((switchTopoDiffOnOff % 10) < 6 )
         {
-            if (callFlagMR_MP == TRUE)
-            {
-                /* call replier */
-                printf("perform tlm_request CALLTEST_MR_MP_COMID\n");
-                err = tlm_request(appSessionCaller,
-                                  NULL,
-                                  NULL/*default callback fct.*/,
-                                  NULL,
-                                  CALLTEST_MR_MP_COMID,
-                                  0U,
-                                  0U,
-                                  0U,
-                                  replierIP,
-                                  TRDP_FLAGS_DEFAULT,
-                                  1,
-                                  1000000/*1sec*/,
-                                  2, /* number of retries */
-                                  NULL,
-                                  (const UINT8*)&dataMRMP,
-                                  sizeof(dataMRMP),
-                                  NULL,
-                                  NULL);
-                callFlagMR_MP = FALSE;
-            }
-            vos_mutexUnlock(callMutexMP);
+            /* not existing topo config - replier shall asnwer with Me */
+            manageMDCall(appSessionCaller,
+                         CALLTEST_MR_TOPOX_COMID,
+                         replierIP,
+                         (const UINT8*)"WORLD",
+                         sizeof("WORLD"),
+                         callMutexTO,
+                         &callFlagTO,
+                         0,
+                         0);
+            switchTopoDiffOnOff++;
+        }
+        else
+        {
+            /* not existing topo config - replier shall asnwer with Me */
+            manageMDCall(appSessionCaller,
+                         CALLTEST_MR_TOPOX_COMID,
+                         replierIP,
+                         (const UINT8*)"DLROW",
+                         sizeof("DLROW"),
+                         callMutexTO,
+                         &callFlagTO,
+                         12345,
+                         0);
+            switchTopoDiffOnOff++;
         }
     }    
 
@@ -352,3 +476,4 @@ CLEANUP:
 
     return 0;
 }
+
