@@ -272,4 +272,8 @@ BOOL8 trdp_isAddressed (
     const TRDP_URI_USER_T   listUri,
     const TRDP_URI_USER_T   destUri);
 
+
+TRDP_ERR_T trdpCheckTopograhy(TRDP_APP_SESSION_T appHandle,
+                              UINT32             etbTopoCnt,
+                              UINT32             opTrnTopoCnt);
 #endif
