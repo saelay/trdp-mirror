@@ -88,4 +88,39 @@ TRDP_ERR_T  trdp_mdCommonSend (
     const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI);
 
+TRDP_ERR_T trdp_mdConfirm (TRDP_APP_SESSION_T      appHandle,
+                            const TRDP_UUID_T       *pSessionId,
+                            UINT16                  userStatus,
+                            const TRDP_SEND_PARAM_T *pSendParam);
+
+TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
+                         TRDP_APP_SESSION_T      appHandle,
+                         TRDP_UUID_T             *pSessionId,
+                         UINT32                  comId,
+                         UINT32                  timeout,
+                         INT32                   replyStatus,
+                         const TRDP_SEND_PARAM_T *pSendParam,
+                         const UINT8             *pData,
+                         UINT32                  dataSize);
+
+TRDP_ERR_T trdp_mdCall (const TRDP_MSG_T        msgType,
+                        TRDP_APP_SESSION_T      appHandle,
+                        const void              *pUserRef,
+                        TRDP_MD_CALLBACK_T      pfCbFunction,
+                        TRDP_UUID_T             *pSessionId,
+                        UINT32                  comId,
+                        UINT32                  etbTopoCnt,
+                        UINT32                  opTrnTopoCnt,
+                        TRDP_IP_ADDR_T          srcIpAddr,
+                        TRDP_IP_ADDR_T          destIpAddr,
+                        TRDP_FLAGS_T            pktFlags,
+                        UINT32                  numExpReplies,
+                        UINT32                  replyTimeout,
+                        INT32                   replyStatus,
+                        UINT32                  maxNumRetries,
+                        const TRDP_SEND_PARAM_T *pSendParam,
+                        const UINT8             *pData,
+                        UINT32                  dataSize,
+                        const TRDP_URI_USER_T   srcURI,
+                        const TRDP_URI_USER_T   destURI);
 #endif

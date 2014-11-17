@@ -2239,7 +2239,15 @@ TRDP_ERR_T tlm_notify (
     const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI)
 {
-    return trdp_mdCommonSend(
+    if ( !trdp_isValidSession(appHandle) )
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    if ( (pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    {
+        return TRDP_PARAM_ERR;
+    }  
+    return trdp_mdCall(
                TRDP_MSG_MN,                            /* notify without reply */
                appHandle,
                pUserRef,
@@ -2252,7 +2260,6 @@ TRDP_ERR_T tlm_notify (
                srcIpAddr,
                destIpAddr,
                pktFlags,
-               0,                                      /* confirm timeout */
                0,                                      /* numbber of repliers for notify */
                0,                                      /* reply timeout for notify */
                TRDP_REPLY_OK,                          /* reply state */
@@ -2314,29 +2321,48 @@ TRDP_ERR_T tlm_request (
     const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI)
 {
-    return trdp_mdCommonSend(
-               TRDP_MSG_MR,                            /* request with reply */
-               appHandle,
-               pUserRef,
-               pfCbFunction,
-               pSessionId,
-               comId,
-               etbTopoCnt,
-               opTrnTopoCnt,
-               srcIpAddr,
-               destIpAddr,
-               pktFlags,
-               0,                                      /* confirm timeout */
-               numReplies,
-               replyTimeout,
-               TRDP_REPLY_OK,                          /* reply state */
-               maxNumRetries,
-               pSendParam,
-               pData,
-               dataSize,
-               sourceURI,
-               destURI
-               );
+    TRDP_ERR_T errv = TRDP_NO_ERR;
+
+    if ( !trdp_isValidSession(appHandle) )
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    if ( (pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    errv = trdpCheckTopograhy(appHandle, etbTopoCnt, opTrnTopoCnt);
+
+    if ( errv != TRDP_NO_ERR )
+    {
+        return errv;
+    }
+    else
+    {   
+        return trdp_mdCall(
+                          TRDP_MSG_MR,                            /* request with reply */
+                          appHandle,
+                          pUserRef,
+                          pfCbFunction,
+                          pSessionId,
+                          comId,
+                          etbTopoCnt,
+                          opTrnTopoCnt,
+                          srcIpAddr,
+                          destIpAddr,
+                          pktFlags,
+                          numReplies,
+                          replyTimeout,
+                          TRDP_REPLY_OK,                          /* reply state */
+                          maxNumRetries,
+                          pSendParam,
+                          pData,
+                          dataSize,
+                          sourceURI,
+                          destURI
+                          );
+    }
 }
 
 
@@ -2706,29 +2732,23 @@ TRDP_ERR_T tlm_reply (
     const UINT8             *pData,
     UINT32                  dataSize)
 {
-    return trdp_mdCommonSend(
-               TRDP_MSG_MP,                         /* reply with confirm request */
-               appHandle,
-               NULL,                                /* callback function */
-               0,                                   /* userRef to be taken from session */
-               (TRDP_UUID_T *)pSessionId,
-               comId,
-               0,                                   /* etbTopoCnt to be taken from session */
-               0,                                   /* opTrainTopoCnt to be taken from session */
-               0,                                   /* srcIpAddr to be taken from session */
-               0,                                   /* destIpAddr to be taken from session */
-               TRDP_FLAGS_DEFAULT,                  /* default packet flags */
-               0,                                   /* confirm timeout */
-               0,                                   /* num of repliers */
-               0,                                   /* reply timeout */
-               (INT32) userStatus,                  /* replyStatus */
-               0,                                   /* no call repetition */
-               pSendParam,                          /* use given send param */
-               pData,                               /* pData - no data */
-               dataSize,                            /* dataSize - no data */
-               0,                                   /* sourceURI taken from session */
-               0                                    /* destURI taken from session */
-               );
+    if ( !trdp_isValidSession(appHandle) )
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    if ( (pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    {
+        return TRDP_PARAM_ERR;
+    }  
+    return trdp_mdReply (TRDP_MSG_MP,
+                         appHandle,
+                         (TRDP_UUID_T *)pSessionId,
+                         comId,
+                         (INT32)userStatus,
+                         0,
+                         pSendParam,
+                         pData,
+                         dataSize);
 }
 
 
@@ -2762,29 +2782,33 @@ TRDP_ERR_T tlm_replyQuery (
     const UINT8             *pData,
     UINT32                  dataSize )
 {
-    return trdp_mdCommonSend(
-               TRDP_MSG_MQ,                         /* reply with confirm request */
-               appHandle,
-               NULL,                                /* userRef to be taken from session */
-               NULL,                                /* call back function */
-               (TRDP_UUID_T *)pSessionId,
-               comId,
-               0,                                   /* etbTopoCnt to be taken from session */
-               0,                                   /* opTrainTopoCnt to be taken from session */
-               0,                                   /* srcIpAddr to be taken from session */
-               0,                                   /* destIpAddr to be taken from session */
-               TRDP_FLAGS_DEFAULT,                  /* default packet flags */
-               confirmTimeout,                      /* confirm timeout */
-               0,                                   /* num of repliers */
-               0,                                   /* reply timeout */
-               (INT32) userStatus,                  /* replyStatus */
-               0,                                   /* no call repetition */
-               pSendParam,                          /* use given send param */
-               pData,                               /* pData - no data */
-               dataSize,                            /* dataSize - no data */
-               0,                                   /* sourceURI taken from session */
-               0                                    /* destURI taken from session */
-               );
+    UINT32 mdTimeOut;
+    if ( !trdp_isValidSession(appHandle) )
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    if ( (pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    {
+        return TRDP_PARAM_ERR;
+    }
+    if ( confirmTimeout != 0U )
+    {
+        mdTimeOut = confirmTimeout;
+    }
+    else
+    {
+        mdTimeOut = appHandle->mdDefault.confirmTimeout;
+    }
+
+    return trdp_mdReply (TRDP_MSG_MQ,
+                         appHandle,
+                         (TRDP_UUID_T *)pSessionId,
+                         comId,
+						 mdTimeOut,
+                         (INT32)userStatus,                         
+                         pSendParam,
+                         pData,
+                         dataSize);
 }
 
 
@@ -2810,29 +2834,7 @@ TRDP_ERR_T tlm_replyErr (
     TRDP_REPLY_STATUS_T     replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam)
 {
-    return trdp_mdCommonSend(
-               TRDP_MSG_ME,                     /* reply with error */
-               appHandle,
-               NULL,                            /* user ref */
-               NULL,                            /* callback function */
-               (TRDP_UUID_T *)pSessionId,
-               0,                               /* no data no comId */
-               0,                               /* etbTopoCnt to be taken from session */
-               0,                               /* opTrainTopoCnt to be taken from session */
-               0,                               /* srcIpAddr to be taken from session */
-               0,                               /* destIpAddr to be taken from session */
-               TRDP_FLAGS_DEFAULT,              /* default packet flags */
-               0,                               /* confirm timeout */
-               0,                               /* num of repliers */
-               0,                               /* reply timeout */
-               (INT32) replyStatus,
-               0,                               /* no call repetition */
-               pSendParam,                      /* use send param */
-               NULL,                            /* pData - no data */
-               0,                               /* dataSize - no data */
-               NULL,                            /* sourceURI taken from session */
-               NULL                             /* destURI taken from session */
-               );
+    return TRDP_PARAM_ERR; /* this function is deprecated!!!! */
 }
 
 
@@ -2858,29 +2860,11 @@ TRDP_ERR_T tlm_confirm (
     UINT16                  userStatus,
     const TRDP_SEND_PARAM_T *pSendParam)
 {
-    return trdp_mdCommonSend(
-               TRDP_MSG_MC,                         /* reply confirm */
-               appHandle,
-               NULL,                                /* userRef to be taken from session */
-               NULL,                                /* callback function */
-               (TRDP_UUID_T *)pSessionId,
-               0,                                   /* no data no comId */
-               0,                                   /* etbTopoCnt to be taken from session */
-               0,                                   /* opTrainTopoCnt to be taken from session */
-               0,                                   /* srcIpAddr to be taken from session */
-               0,                                   /* destIpAddr to be taken from session */
-               TRDP_FLAGS_DEFAULT,                  /* default packet flags */
-               0,                                   /* confirm timeout */
-               0,                                   /* num of repliers */
-               0,                                   /* reply timeout */
-               (INT32) userStatus,                  /* replyStatus */
-               0,                                   /* no call repetition */
-               pSendParam,                          /* use send param */
-               NULL,                                /* pData - no data */
-               0,                                   /* dataSize - no data */
-               0,                                   /* sourceURI taken from session */
-               0                                    /* destURI taken from session */
-               );
+    if ( !trdp_isValidSession(appHandle) )
+    {
+        return TRDP_NOINIT_ERR;
+    }
+    return trdp_mdConfirm(appHandle, pSessionId, userStatus, pSendParam);
 }
 
 /**********************************************************************************************************************/

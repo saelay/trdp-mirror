@@ -74,12 +74,32 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
 static void trdp_mdCloseSessions(TRDP_SESSION_PT appHandle, INT32 socketIndex, INT32 newSocket, BOOL8 checkAllSockets);
 static void trdp_mdSetSessionTimeout(MD_ELE_T *pMDSession, UINT32 usTimeOut);
 static TRDP_ERR_T trdp_mdCheck(TRDP_SESSION_PT appHandle, MD_HEADER_T *pPacket, UINT32 packetSize, BOOL8 checkHeaderOnly);
-static void    trdp_mdUpdatePacket(MD_ELE_T *pElement);
 static TRDP_ERR_T  trdp_mdSendPacket(INT32 mdSock, UINT32 port, MD_ELE_T *pElement);
 static TRDP_ERR_T trdp_mdRecvTCPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement);
 static TRDP_ERR_T trdp_mdRecvUDPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement);
 static TRDP_ERR_T  trdp_mdRecvPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement);
 static TRDP_ERR_T  trdp_mdRecv(TRDP_SESSION_PT appHandle, UINT32 sockIndex);
+
+static void trdp_mdDetailSenderPacket(const TRDP_MSG_T msgType, 
+                                      const INT32 replyStatus,
+                                      const UINT32 mdTimeOut,
+                                      const UINT32 sequenceCounter,
+                                      const UINT8* pData,
+                                      const UINT32 dataSize,
+                                      const BOOL8 newSession,
+                                      TRDP_APP_SESSION_T appHandle, 
+                                      const TRDP_URI_USER_T* srcURI,
+                                      const TRDP_URI_USER_T* destURI,
+                                      MD_ELE_T* pSenderElement);
+
+static TRDP_ERR_T trdp_mdSendME(TRDP_SESSION_PT appHandle, MD_HEADER_T* pH, INT32 replyStatus);
+static TRDP_ERR_T trdp_mdConnectSocket(TRDP_APP_SESSION_T appHandle,
+                                       const TRDP_SEND_PARAM_T* pSendParam, 
+                                       TRDP_IP_ADDR_T srcIpAddr,
+                                       TRDP_IP_ADDR_T destIpAddr, 
+                                       BOOL8 newSession, 
+                                       MD_ELE_T* pSenderElement);
+
 
 
 
@@ -112,6 +132,10 @@ static void trdp_mdFillStateElement(const TRDP_MSG_T msgType, MD_ELE_T *pMdEleme
             break;
         case TRDP_MSG_MC:
             pMdElement->stateEle = TRDP_ST_TX_CONFIRM_ARM;
+            break;
+        case TRDP_MSG_ME:
+            /* The Me message is similar to Mp in terms of lifetime and caller side handling */
+            pMdElement->stateEle = TRDP_ST_TX_REPLY_ARM;
             break;
         default:
             pMdElement->stateEle = TRDP_ST_TX_NOTIFY_ARM;
@@ -248,7 +272,7 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
     /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
     theMessage.resultCode           = resultCode;
 
-    if (resultCode == TRDP_NO_ERR)
+    if ( resultCode == TRDP_NO_ERR )
     {
         theMessage.comId        = vos_ntohl(pMdItem->pPacket->frameHead.comId);
         theMessage.etbTopoCnt   = vos_ntohl(pMdItem->pPacket->frameHead.etbTopoCnt);
@@ -263,7 +287,7 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
     }
     else
     {
-	    theMessage.comId        = pMdItem->addr.comId;
+        theMessage.comId        = pMdItem->addr.comId;
         theMessage.etbTopoCnt   = pMdItem->addr.etbTopoCnt;
         theMessage.opTrnTopoCnt = pMdItem->addr.opTrnTopoCnt;
         theMessage.srcIpAddr    = 0;
@@ -275,7 +299,6 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
                              (UINT8 *)0, 
                              0);
     }
-
 }
 
 /**********************************************************************************************************************/
@@ -352,7 +375,6 @@ static BOOL8 trdp_mdTimeOutStateHandler( MD_ELE_T *pElement, TRDP_SESSION_PT app
                         /* Increment sequence counter in network order of course */
                         pElement->pPacket->frameHead.sequenceCounter = vos_htonl((vos_ntohl(pElement->pPacket->frameHead.sequenceCounter) + 1));
                         /* Store new sequence counter within the management info */
-                        /*pElement->curSeqCnt = vos_ntohl(pElement->pPacket->frameHead.sequenceCounter);*/
                         /* Set new time out value */
                         vos_addTime(&pElement->timeToGo, &pElement->interval);
                         /* update the frame header CRC also */
@@ -456,7 +478,8 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
     MD_ELE_T* iterMD = NULL;
     MD_ELE_T* startElement = NULL;
     /* determine the queue to look for the recevd pMdItemHeader */
-    if (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MC)
+    if ((vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MC)
+        )
     {
         startElement = appHandle->pMDRcvQueue;
     }
@@ -464,7 +487,9 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
     {
         if ((vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MQ)
             ||
-            (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MP))
+            (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MP)
+            ||
+            (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_ME))
         {
             startElement = appHandle->pMDSndQueue;
         }                                         
@@ -500,8 +525,15 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
 
             appHandle->pMDRcvEle->pPacket = NULL;
 
-            /*iterMD->curSeqCnt       = vos_ntohl(pMdItemHeader->sequenceCounter);*/
-            iterMD->addr.comId      = vos_ntohl(pMdItemHeader->comId);
+            /* Table A.26 states that the comID for an Me message is zero. This     */
+            /* induces the need to lookup the caller comID by using the received    */
+            /* sesionID of the Me mesage. Otherwise the application would need to   */
+            /* accompilsh this task, which is not desirable - callers comID for map-*/
+            /* ping within the applications callback function                       */
+            if ( vos_ntohs(pMdItemHeader->msgType) != TRDP_MSG_ME )
+            {
+                iterMD->addr.comId      = vos_ntohl(pMdItemHeader->comId);
+            }
             iterMD->addr.srcIpAddr  = appHandle->pMDRcvEle->addr.srcIpAddr;
             iterMD->addr.destIpAddr = appHandle->pMDRcvEle->addr.destIpAddr;
 
@@ -517,7 +549,7 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
             else 
             {
                 /* save URI for reply */
-                memcpy(iterMD->srcURI, pMdItemHeader->sourceURI, TRDP_MAX_URI_USER_LEN);
+                memcpy(iterMD->srcURI,  pMdItemHeader->sourceURI,      TRDP_MAX_URI_USER_LEN);
                 memcpy(iterMD->destURI, pMdItemHeader->destinationURI, TRDP_MAX_URI_USER_LEN);
 
                 if (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MQ)
@@ -538,12 +570,13 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
                     break; /* exit for loop */
 
                 }
-                else if (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MP)
+                else if ((vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MP)
+                         ||
+                         (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_ME))
                 {
                     /* dedicated MP handling */
                     iterMD->stateEle = TRDP_ST_TX_REPLY_RECEIVED;
                     iterMD->numReplies++;
-
                     /* Handle multiple replies
                      Close session now if number of expected replies reached and confirmed as far as requested
                      or close session later by timeout if unknown number of replies expected */
@@ -561,7 +594,6 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
                 else
                 {
                     /* fatal */
-
                 }
             }
         }/* end of session matching comparison */
@@ -592,8 +624,7 @@ static void trdp_mdCloseSessions (
     /* Check all the sockets */
     if (checkAllSockets == TRUE)
     {
-        trdp_releaseSocket(appHandle->iface, TRDP_INVALID_SOCKET_INDEX, 0, checkAllSockets);
-
+        trdp_releaseSocket(appHandle->iface, TRDP_INVALID_SOCKET_INDEX, 0, checkAllSockets); 
     }
 
     iterMD = appHandle->pMDSndQueue;
@@ -697,30 +728,26 @@ static void trdp_mdSetSessionTimeout (
  *  @retval         TRDP_WIRE_ERR
  *  @retval         TRDP_CRC_ERR
  */
-static TRDP_ERR_T trdp_mdCheck (
-    TRDP_SESSION_PT appHandle,
-    MD_HEADER_T     *pPacket,
-    UINT32          packetSize,
-    BOOL8           checkHeaderOnly)
+static TRDP_ERR_T trdp_mdCheck (TRDP_SESSION_PT appHandle,
+                                MD_HEADER_T     *pPacket,
+                                UINT32          packetSize,
+                                BOOL8           checkHeaderOnly)
 {
     TRDP_ERR_T  err = TRDP_NO_ERR;
     UINT32      l_datasetLength = vos_ntohl(pPacket->datasetLength);
 
     /* size shall be in MIN..MAX */
-    if (TRDP_NO_ERR == err)
+    /* Min size is sizeof(MD_HEADER_T) because in case of no data no further data and data crc32 are added */
+    if ( packetSize < (sizeof(MD_HEADER_T)) ||
+         packetSize > TRDP_MAX_MD_PACKET_SIZE ||
+         l_datasetLength > TRDP_MAX_MD_PACKET_SIZE )
     {
-        /* Min size is sizeof(MD_HEADER_T) because in case of no data no further data and data crc32 are added */
-        if (packetSize < (sizeof(MD_HEADER_T)) ||
-            packetSize > TRDP_MAX_MD_PACKET_SIZE ||
-            l_datasetLength > TRDP_MAX_MD_PACKET_SIZE)
-        {
-            vos_printLog(VOS_LOG_ERROR, "MDframe size error (%u)\n", packetSize);
-            err = TRDP_WIRE_ERR;
-        }
+        vos_printLog(VOS_LOG_ERROR, "MDframe size error (%u)\n", packetSize);
+        err = TRDP_WIRE_ERR;
     }
 
     /*    crc check */
-    if (TRDP_NO_ERR == err)
+    if ( TRDP_NO_ERR == err )
     {
         /* Check Header CRC */
         {
@@ -820,8 +847,7 @@ static TRDP_ERR_T trdp_mdCheck (
  *
  *  @param[in]      pElement         pointer to the packet to update
  */
-static void    trdp_mdUpdatePacket (
-    MD_ELE_T *pElement)
+static void    trdp_mdUpdatePacket(MD_ELE_T *pElement)
 {
     /* Initialize CRC calculation */
     UINT32  myCRC;
@@ -845,10 +871,9 @@ static void    trdp_mdUpdatePacket (
  *  @param[in]      pElement        pointer to element to be sent
  *  @retval         != NULL         error
  */
-static TRDP_ERR_T  trdp_mdSendPacket (
-    INT32       mdSock,
-    UINT32      port,
-    MD_ELE_T    *pElement)
+static TRDP_ERR_T  trdp_mdSendPacket(INT32       mdSock,
+                                     UINT32      port,
+                                     MD_ELE_T    *pElement)
 {
     VOS_ERR_T   err         = VOS_NO_ERR;
     UINT32      tmpSndSize  = 0;
@@ -1299,6 +1324,7 @@ static TRDP_ERR_T trdp_mdRecvUDPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, 
     }
     return TRDP_NO_ERR;
 }
+
 /**********************************************************************************************************************/
 /** Receive MD packet
  *
@@ -1372,6 +1398,348 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
 }
 
 /**********************************************************************************************************************/
+/** Initiate sending MD request message - private SW level
+ *  Send a MD request message
+ *
+ *  @param[in]      appHandle       the handle returned by tlc_init
+ *  @param[in]      isTCP           Pointer to listener specific callback function, NULL to use default function
+ *  @param[out]     state           return session ID
+ *  @param[in]      sockIndex       comId of packet to be sent
+ *  @param[in]      iterMD          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      pH              operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      iterListener    own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      pResult         where to send the packet to
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ */
+static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
+                                      BOOL8            isTCP,
+                                      TRDP_MD_ELE_ST_T state,
+                                      UINT32           sockIndex,
+                                      MD_ELE_T*        iterMD,
+                                      MD_HEADER_T*     pH,
+                                      MD_LIS_ELE_T*    iterListener,
+                                      TRDP_ERR_T*      pResult) 
+{
+    UINT32 numOfReceivers = 0;
+
+    /* Search for existing session (in case it is a repeated request)  */
+    /* This is kind of error detection/comm issue remedy functionality */
+    /* running ahead of further logic */
+
+    for ( iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext )
+    {
+        numOfReceivers++; /* count the list items here */
+        if ( 0 == memcmp(iterMD->pPacket->frameHead.sessionID, pH->sessionID, TRDP_SESS_ID_SIZE) )
+        {
+            /* According IEC61375-2-3 A.7.7.1 */
+            /* encountered a matching session */
+            if ( (pH->sequenceCounter == iterMD->pPacket->frameHead.sequenceCounter)
+                 || 
+                 (isTCP == TRUE)/* include TCP as topmost discard criterium */
+                 || 
+                 (iterMD->addr.mcGroup != 0) )/* discard multicasts anyway */
+            {
+                /* discard call immediately */
+                vos_printLog(VOS_LOG_INFO,
+                             "trdp_mdRecv: Repeated request discarded!\n");
+                *pResult = TRDP_NO_ERR;
+                return (MD_ELE_T*)NULL;
+            }
+            else if ( iterMD->stateEle != TRDP_ST_RX_REPLYQUERY_W4C )
+            {
+                /* reply has not been sent - discard immediately */
+                vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Reply not sent, request discarded!\n");
+                *pResult = TRDP_NO_ERR;
+                return (MD_ELE_T*)NULL; 
+            }
+            else if ( (pH->etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
+                      || 
+                      (pH->opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
+            {
+                /* there has been a change in train configuration - ignore request */
+                vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Repeated request with wrong topocount - discard!\n");
+                break; /* exit lookup at this place */
+            }
+            else
+            {
+                /* criteria reched to schedule resending reply message */
+                vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Restart reply transmission\n");
+                /* Retransmission will occur upon resetting the state of */
+                /* this MD_ELE_T item to TRDP_ST_TX_REPLYQUERY_ARM, for  */
+                /* reference check the trdp_mdSend function              */
+                iterMD->stateEle = TRDP_ST_TX_REPLYQUERY_ARM;
+                /* Increment the retry counter */
+                iterMD->numRetries++;
+                /* Align sequence counter with the received counter. Both*/
+                /* retain network order, as pH consists out of network   */
+                /* ordered data                                          */
+                iterMD->pPacket->frameHead.sequenceCounter = pH->sequenceCounter;
+                /* Store new sequence counter within the management info */
+                /* Set new time out value */
+                vos_addTime(&iterMD->timeToGo, &iterMD->interval);
+                /* update the frame header CRC also */
+                trdp_mdUpdatePacket(iterMD);
+                /* ready to proceed - will be handled by trdp_mdSend run- */
+                /* ning within its own loop triggered cyclically.         */
+                *pResult = TRDP_NO_ERR;
+                return (MD_ELE_T*)NULL;
+            }
+        }
+    }
+    /* Inhibit MQ/MN Flooding */
+    if ( appHandle->mdDefault.maxNumSessions <= numOfReceivers )
+    {
+        /* Discard MD request, we shall not be flooded by incoming requests */
+        vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Max. number of requests reached (%d)!\n", numOfReceivers);
+        /* Indicate that this call can not get replied due to receiver count limitation  */
+        (void)trdp_mdSendME(appHandle, pH, TRDP_REPLY_NO_MEM_REPL);
+        /* return to calling routine without performing any receiver action */
+        *pResult = TRDP_NO_ERR;
+        return (MD_ELE_T*)NULL;
+    }
+
+    iterMD = NULL; /* reset item for the actual lookup task */
+    /* search for existing listener */
+    for ( iterListener = appHandle->pMDListenQueue; iterListener != NULL;
+        iterListener = iterListener->pNext )
+    {
+        if ( iterListener->socketIdx != TRDP_INVALID_SOCKET_INDEX
+             && 
+             isTCP == TRUE )
+        {
+            continue;
+        }
+        /* If multicast address is set, but does not match, we go to the next listener (if any) */
+        if ( iterListener->addr.mcGroup != 0
+             && 
+             iterListener->addr.mcGroup != appHandle->pMDRcvEle->addr.destIpAddr )
+        {
+            /* no IP match for unicast addressing */
+            continue;
+        }
+
+        if ( (iterListener->destURI[0] == 0 && /* ComId listener ?    */
+              vos_ntohl(pH->comId) == iterListener->addr.comId)
+             || 
+             (iterListener->destURI[0] != 0 && /* URI listener   */
+                 vos_strnicmp((CHAR8 *) iterListener->destURI,
+                              (CHAR8 *) pH->destinationURI,
+                              TRDP_DEST_URI_SIZE) == 0) )
+        {
+            /* Step 1: here we need to check the topccounts */
+            /* in case of train communication (topo counter != zero) check topo validity of recvd message and */
+            /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                    */
+            if ( (pH->etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
+                 || 
+                 (pH->opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
+            {
+                /* wrong topo count, this listener must be updated (re-added) */
+                continue;
+            }
+            else
+            { 
+                /* We found a listener, set some values for this new session  */
+                iterMD                    = appHandle->pMDRcvEle;
+                iterMD->pUserRef          = iterListener->pUserRef;
+                iterMD->pfCbFunction      = iterListener->pfCbFunction;
+                iterMD->stateEle          = state;
+                iterMD->addr.etbTopoCnt   = iterListener->addr.etbTopoCnt;
+                iterMD->addr.opTrnTopoCnt = iterListener->addr.opTrnTopoCnt;
+
+                /* Count this Request/Notification as new session */
+                iterListener->numSessions++;
+
+                if ( iterListener->socketIdx == TRDP_INVALID_SOCKET_INDEX ) /* On TCP, listeners have no socket
+                   assigned  */
+                {
+                    iterMD->socketIdx = sockIndex;
+                }
+                else
+                {
+                    iterMD->socketIdx = iterListener->socketIdx;
+                }
+
+                trdp_MDqueueInsFirst(&appHandle->pMDRcvQueue, iterMD);
+
+                appHandle->pMDRcvEle = NULL;
+
+                vos_printLog(VOS_LOG_INFO,
+                             "Creating %s MD replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                             iterMD->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
+                             pH->sessionID[0], pH->sessionID[1], pH->sessionID[2],
+                             pH->sessionID[3], pH->sessionID[4], pH->sessionID[5],
+                             pH->sessionID[6], pH->sessionID[7]);
+                break;
+            }         
+        }
+    }
+    if ( NULL != iterMD )
+    {
+        /* receive time */
+        vos_getTime(&iterMD->timeToGo);
+
+        /* timeout value */
+        iterMD->interval.tv_sec = vos_ntohl(pH->replyTimeout) / 1000000;
+        iterMD->interval.tv_usec = vos_ntohl(pH->replyTimeout) % 1000000;
+        vos_addTime(&iterMD->timeToGo, &iterMD->interval);
+
+        /* save session Id and sequence counter for next steps */
+        memcpy(iterMD->sessionID, pH->sessionID, TRDP_SESS_ID_SIZE);
+        /* save source URI for reply */
+        memcpy(iterMD->srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
+    }
+    else
+    {
+        /*this should be the place to add the Me call*/
+        if ( isTCP == TRUE )
+        {
+            appHandle->stats.tcpMd.numNoListener++;
+        }
+        else
+        {
+            appHandle->stats.udpMd.numNoListener++;
+        }
+        vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: No listener found!\n");
+        *pResult = TRDP_NOLIST_ERR;
+        /* attempt sending Me, do not worry about issues */
+        (void)trdp_mdSendME(appHandle, pH, TRDP_REPLY_NO_REPLIER_INST);
+    }
+    return iterMD;
+}
+
+
+/**********************************************************************************************************************/
+/** Initiate sending Me error message - private SW level
+ *  Attempt to send Me in bare metal fashion as there is simply no session available
+ *  This is only an attempt, where no error handling is implemented yet for the caller, which is in effect the stack
+ *  itself.
+ *  The routine is essentially a new call like Mn, therefore it leaves no open session behind.
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pH                  the retrieved item header, where no listener was matching
+ *  @param[in]      replyStatus         must be either TRDP_REPLY_NO_REPLIER_INST or TRDP_REPLY_NO_MEM_REPL
+ *
+ */
+static TRDP_ERR_T trdp_mdSendME(TRDP_SESSION_PT appHandle, MD_HEADER_T* pH, INT32 replyStatus)
+{
+    TRDP_ERR_T  errv = TRDP_NO_ERR;
+
+    MD_ELE_T    *pSenderElement = NULL;
+    MD_ELE_T    *mdElement = appHandle->pMDRcvEle;
+
+    UINT32 timeout = 0U;
+
+    /* there are only two valid reply stati */
+    if ((replyStatus != TRDP_REPLY_NO_REPLIER_INST)
+        &&
+        (replyStatus != TRDP_REPLY_NO_MEM_REPL))
+    {
+        return TRDP_PARAM_ERR;
+    }
+    /* lock mutex */
+    if ( vos_mutexLock(appHandle->mutex) != VOS_NO_ERR )
+    {
+        return TRDP_MUTEX_ERR;
+    }
+
+    if ( mdElement != NULL )
+    {
+        /* we have found the MD_ELE_T */
+        /* Room for MD element */
+        pSenderElement = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
+        /* Reset descriptor value */
+        if ( NULL != pSenderElement )
+        {
+            memset(pSenderElement, 0, sizeof(MD_ELE_T));
+            pSenderElement->addr.comId      = 0;
+            pSenderElement->addr.srcIpAddr  = mdElement->addr.destIpAddr;
+            pSenderElement->addr.destIpAddr = mdElement->addr.srcIpAddr;
+            pSenderElement->addr.mcGroup    = 0;
+            pSenderElement->addr.etbTopoCnt = 0;
+            pSenderElement->addr.opTrnTopoCnt = 0;
+            pSenderElement->dataSize        = 0;
+            pSenderElement->grossSize       = trdp_packetSizeMD(0);
+            pSenderElement->socketIdx       = TRDP_INVALID_SOCKET_INDEX;
+            pSenderElement->pktFlags        = appHandle->mdDefault.flags;
+            pSenderElement->pfCbFunction    = mdElement->pfCbFunction;
+            pSenderElement->privFlags       = TRDP_PRIV_NONE;
+            pSenderElement->sendSize        = 0;
+            pSenderElement->numReplies      = 0;
+            pSenderElement->pCachedDS       = NULL;
+            pSenderElement->morituri        = FALSE;
+            trdp_mdSetSessionTimeout(pSenderElement, 0);
+
+            errv = trdp_mdConnectSocket(appHandle, 
+                                        &appHandle->mdDefault.sendParam, 
+                                        pSenderElement->addr.srcIpAddr,
+                                        pSenderElement->addr.destIpAddr,
+                                        TRUE,
+                                        pSenderElement);
+            if ( errv == TRDP_NO_ERR )
+            {
+                trdp_mdFillStateElement(TRDP_MSG_ME, pSenderElement);
+
+                memcpy(pSenderElement->sessionID, pH->sessionID, TRDP_SESS_ID_SIZE);
+                /*
+                 (Re-)allocate the data buffer if current size is different from requested size.
+                 If no data at all, free data pointer
+                 */
+                if ( NULL != pSenderElement->pPacket )
+                {
+                    vos_memFree(pSenderElement->pPacket);
+                    pSenderElement->pPacket = NULL;
+                }
+                /* allocate a buffer for the data   */
+                pSenderElement->pPacket = (MD_PACKET_T *) vos_memAlloc(pSenderElement->grossSize);
+                if ( NULL == pSenderElement->pPacket )
+                {
+                    vos_memFree(pSenderElement);
+                    pSenderElement = NULL;
+                    errv = TRDP_MEM_ERR;
+
+                }
+                else
+                {
+                    trdp_mdDetailSenderPacket(TRDP_MSG_ME,
+                                              replyStatus,
+                                              timeout,
+                                              0, /* initial sequenceCounter is always 0 */
+                                              NULL,
+                                              0,
+                                              TRUE,
+                                              appHandle,
+                                              (const TRDP_URI_USER_T*)mdElement->destURI,/*srcURI cross over*/
+                                              (const TRDP_URI_USER_T*)mdElement->srcURI,/*destURI cross over*/
+                                              pSenderElement);
+                    errv = TRDP_NO_ERR; 
+                }
+            }
+        }
+        else
+        {
+            errv = TRDP_MEM_ERR;
+        }        
+        /* Error and deallocate element ! */
+        if ( TRDP_NO_ERR != errv &&
+             NULL != pSenderElement )
+        {
+            trdp_mdFreeSession(pSenderElement);
+            pSenderElement = NULL;
+        }
+    }
+    /* Release mutex */
+    if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
+    {
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
+        errv = TRDP_MUTEX_ERR;
+    }
+    return errv;
+}
+
+/**********************************************************************************************************************/
 /** Receiving MD messages
  *  Read the receive socket for arriving MDs, copy the packet to a new MD_ELE_T
  *  Check for protocol errors and dispatch to proper receive queue.
@@ -1392,12 +1760,12 @@ static TRDP_ERR_T  trdp_mdRecv (
     UINT32          sockIndex)
 {
     TRDP_ERR_T          result          = TRDP_NO_ERR;
+    TRDP_ERR_T          resForCallback  = TRDP_NO_ERR;
     MD_HEADER_T         *pH             = NULL;
     MD_ELE_T            *iterMD         = NULL;
     MD_LIS_ELE_T        *iterListener   = NULL;
     TRDP_MD_ELE_ST_T    state;
     BOOL8               isTCP           = FALSE;
-    UINT32              numOfReceivers  = 0;
 
     if (appHandle == NULL)
     {
@@ -1480,170 +1848,43 @@ static TRDP_ERR_T  trdp_mdRecv (
     state = TRDP_ST_RX_REQ_W4AP_REPLY;
 
     /*  Depending on message type, we take appropriate measures */
-    switch (vos_ntohs(pH->msgType))
+    switch ( vos_ntohs(pH->msgType) )
     {
         /* Find a listener and create a new rcvQueue entry  */
         case TRDP_MSG_MN:
             state = TRDP_ST_RX_NOTIFY_RECEIVED;
-        /* FALL THRU    */
+            /* FALL THRU    */
         case TRDP_MSG_MR:
             /* Search for existing session (in case it is a repeated request)  */
             /* This is kind of error detection/comm issue remedy functionality */
             /* running ahead of further logic */
-            for (iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext)
+            iterMD = trdp_mdHandleRequest(appHandle, 
+                                          isTCP, 
+                                          state,
+                                          sockIndex, 
+                                          iterMD, 
+                                          pH, 
+                                          iterListener, 
+                                          &result);
+            /* handle the various result values here */
+            if ((iterMD == NULL)&&(result == TRDP_NO_ERR))
             {
-                numOfReceivers++;
-                if (0 == memcmp(iterMD->pPacket->frameHead.sessionID, pH->sessionID, TRDP_SESS_ID_SIZE))
-                {
-                    /* According IEC61375-2-3 A.7.7.1*/
-                    /* encountered a matching session */
-                    if ((pH->sequenceCounter == iterMD->pPacket->frameHead.sequenceCounter)
-                        ||
-                        (isTCP == TRUE))/* include TCP as topmost discard criterium */
-                    {
-                        /* discard call immediately */
-                        vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Repeated request discarded!\n");
-                        return TRDP_NO_ERR;
-                    }
-                    else if( iterMD->stateEle != TRDP_ST_RX_REPLYQUERY_W4C )
-                    {
-                        /* reply has not been sent - discard immediately */
-                        vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Reply not sent, request discarded!\n");
-                        return TRDP_NO_ERR; 
-                    }
-                    else
-                    {
-                        /* criteria reched to schedule resending reply message */
-                        vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Restart reply transmission\n");
-                        /* Retransmission will occur upon resetting the state of  */
-                        /* this MD_ELE_T item to TRDP_ST_TX_REPLYQUERY_ARM, for   */
-                        /* reference check the trdp_mdSend function               */
-                        iterMD->stateEle = TRDP_ST_TX_REPLYQUERY_ARM;
-                        /* Increment the retry counter */
-                        iterMD->numRetries++;
-                        /* Align sequence counter with the received counter. Both*/
-						/* retain network order, as pH consists out of network   */
-						/* ordered data                                          */
-                        iterMD->pPacket->frameHead.sequenceCounter = pH->sequenceCounter;
-						/* Store new sequence counter within the management info */
-                        /*iterMD->curSeqCnt = vos_ntohl(pH->sequenceCounter);*/
-						/* Set new time out value */
-                        vos_addTime(&iterMD->timeToGo, &iterMD->interval); 
-						/* update the frame header CRC also */
-						trdp_mdUpdatePacket(iterMD);
-                        /* ready to proceed - will be handled by trdp_mdSend run- */
-                        /* ning within its own loop triggered cyclically.         */
-                        return TRDP_NO_ERR;
-                    }
-                }
-            }
-
-            if (appHandle->mdDefault.maxNumSessions <= numOfReceivers)
-            {
-                /* Discard MD request, we shall not be flooded by incoming requests */
-                vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Max. number of requests reached (%d)!\n", numOfReceivers);
+                /* this is a discard action, not needing further acitvities */
                 return TRDP_NO_ERR;
-            }
-
-            /* search for existing listener */
-            for (iterListener = appHandle->pMDListenQueue; iterListener != NULL; iterListener = iterListener->pNext)
-            {
-                if (iterListener->socketIdx != TRDP_INVALID_SOCKET_INDEX && isTCP == TRUE)
-                {
-                    continue;
-                }
-                /* in case of train communication (topo counter != zero) check topo validity of recvd message and */
-                /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                    */
-                if ((pH->etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
-                    ||
-                    (pH->opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)))
-                {   
-                    /* wrong topo count, this listener must be updated (re-added) */
-                    continue;
-                }
-
-                /* If multicast address is set, but does not match, we go to the next listener (if any) */
-                if (iterListener->addr.mcGroup != 0 &&
-                    iterListener->addr.mcGroup != appHandle->pMDRcvEle->addr.destIpAddr)
-                {
-                    /* no IP match for unicast addressing */
-                    continue;
-                }
-                
-                if ((iterListener->destURI[0] == 0 &&                               /* ComId listener ?    */
-                     vos_ntohl(pH->comId) == iterListener->addr.comId) ||
-                    (iterListener->destURI[0] != 0 &&                               /* URI listener   */
-                     vos_strnicmp((CHAR8 *)iterListener->destURI, (CHAR8 *)pH->destinationURI, TRDP_DEST_URI_SIZE) == 0)
-                    )
-                {
-                    /* We found a listener, set some values for this new session  */
-                    iterMD                    = appHandle->pMDRcvEle;
-                    iterMD->pUserRef          = iterListener->pUserRef;
-                    iterMD->pfCbFunction      = iterListener->pfCbFunction;
-                    iterMD->stateEle          = state;
-                    iterMD->addr.etbTopoCnt   = iterListener->addr.etbTopoCnt;
-                    iterMD->addr.opTrnTopoCnt = iterListener->addr.opTrnTopoCnt;
-
-                    /* Count this Request/Notification as new session */
-                    iterListener->numSessions++;
-
-                    if (iterListener->socketIdx == TRDP_INVALID_SOCKET_INDEX)    /* On TCP, listeners have no socket
-                                                                                   assigned  */
-                    {
-                        iterMD->socketIdx = sockIndex;
-                    }
-                    else
-                    {
-                        iterMD->socketIdx = iterListener->socketIdx;
-                    }
-
-                    trdp_MDqueueInsFirst(&appHandle->pMDRcvQueue, iterMD);
-
-                    appHandle->pMDRcvEle = NULL;
-
-                    vos_printLog(VOS_LOG_INFO, "Creating %s MD replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
-                                 iterMD->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
-                                 pH->sessionID[0], pH->sessionID[1], pH->sessionID[2], pH->sessionID[3],
-                                 pH->sessionID[4], pH->sessionID[5], pH->sessionID[6], pH->sessionID[7])
-
-                    break;
-                }
-            }
-            if (NULL != iterMD)
-            {
-                /* receive time */
-                vos_getTime(&iterMD->timeToGo);
-
-                /* timeout value */
-                iterMD->interval.tv_sec     = vos_ntohl(pH->replyTimeout) / 1000000;
-                iterMD->interval.tv_usec    = vos_ntohl(pH->replyTimeout) % 1000000;
-                vos_addTime(&iterMD->timeToGo, &iterMD->interval);
-
-                /* save session Id and sequence counter for next steps */
-                memcpy(iterMD->sessionID, pH->sessionID, TRDP_SESS_ID_SIZE);
-                /*iterMD->curSeqCnt = vos_ntohl(pH->sequenceCounter);*/
-
-                /* save source URI for reply */
-                memcpy(iterMD->srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
             }
             else
             {
-                if (isTCP == TRUE)
+                /* simplified: return in any other case of error */
+                if(result != TRDP_NO_ERR)
                 {
-                    appHandle->stats.tcpMd.numNoListener++;
-                }
-                else
-                {
-                    appHandle->stats.udpMd.numNoListener++;
-                }
-                vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: No listener found!\n");
-                return TRDP_NOLIST_ERR;
+                    return result;
+                }                 
             }
             break;
         case TRDP_MSG_MC:
         case TRDP_MSG_MQ:
         case TRDP_MSG_MP:
-            /*  */
+        case TRDP_MSG_ME:
             iterMD = trdp_mdHandleConfirmReply(appHandle, pH);
             break;
         default:
@@ -1654,7 +1895,12 @@ static TRDP_ERR_T  trdp_mdRecv (
     /* Inform user  */
     if (NULL != iterMD && iterMD->pfCbFunction != NULL)
     {
-        trdp_mdInvokeCallback(iterMD, appHandle, TRDP_NO_ERR);
+        if (vos_ntohs(pH->msgType) == TRDP_MSG_ME)
+        {
+            /*sending Me needs to carry an error information for the callback to the application*/
+            resForCallback = TRDP_NOLIST_ERR;
+        }
+        trdp_mdInvokeCallback(iterMD, appHandle, resForCallback);
     }
 
     /*  notification sessions can be discarded after application was informed */
@@ -2556,43 +2802,359 @@ void  trdp_mdCheckTimeouts (
 
 
 /**********************************************************************************************************************/
+/*reply side functions*/
+static TRDP_ERR_T trdp_mdConnectSocket(TRDP_APP_SESSION_T appHandle,
+                                       const TRDP_SEND_PARAM_T* pSendParam, 
+                                       TRDP_IP_ADDR_T srcIpAddr,
+                                       TRDP_IP_ADDR_T destIpAddr, 
+                                       BOOL8 newSession, 
+                                       MD_ELE_T* pSenderElement)
+{
+    TRDP_ERR_T err = TRDP_NO_ERR;
+    /*break up here*/
+    if ( (pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
+    {
+        if ( pSenderElement->socketIdx == TRDP_INVALID_SOCKET_INDEX )
+        {
+            /* socket to send TCP MD for request or notify only */
+            err = trdp_requestSocket(appHandle->iface,
+                                     appHandle->mdDefault.tcpPort,
+                                     (pSendParam != NULL) ?
+                                     pSendParam : (&appHandle->mdDefault.sendParam),
+                                     srcIpAddr, 0, /* no TCP multicast possible */
+                                     TRDP_SOCK_MD_TCP,
+                                     TRDP_OPTION_NONE,
+                                     FALSE,
+                                     VOS_INVALID_SOCKET,
+                                     &pSenderElement->socketIdx, 
+                                     destIpAddr);
 
-TRDP_ERR_T trdp_mdCommonSend (
-                             const TRDP_MSG_T        msgType,
-                             TRDP_APP_SESSION_T      appHandle,
-                             const void              *pUserRef,
-                             TRDP_MD_CALLBACK_T      pfCbFunction,
-                             TRDP_UUID_T             *pSessionId,
-                             UINT32                  comId,
-                             UINT32                  etbTopoCnt,
-                             UINT32                  opTrnTopoCnt,
-                             TRDP_IP_ADDR_T          srcIpAddr,
-                             TRDP_IP_ADDR_T          destIpAddr,
-                             TRDP_FLAGS_T            pktFlags,
-                             UINT32                  confirmTimeout,
-                             UINT32                  numExpReplies,
-                             UINT32                  replyTimeout,
-                             INT32                   replyStatus,
-                             UINT32                  maxNumRetries,
-                             const TRDP_SEND_PARAM_T *pSendParam,
-                             const UINT8             *pData,
-                             UINT32                  dataSize,
-                             const TRDP_URI_USER_T   srcURI,
-                             const TRDP_URI_USER_T   destURI)
+            if ( TRDP_NO_ERR != err )
+            {
+                /* Error getting socket, exit function */
+                return err;
+            }
+        }
+
+        /* In the case that it is the first connection, do connect() */
+        if ( appHandle->iface[pSenderElement->socketIdx].usage > 0 )
+        {
+            pSenderElement->tcpParameters.doConnect = FALSE;
+        }
+        else
+        {
+            pSenderElement->tcpParameters.doConnect = TRUE;
+            appHandle->iface[pSenderElement->socketIdx].usage++;
+        }
+    }
+    else if ( TRUE == newSession
+              && TRDP_INVALID_SOCKET_INDEX == pSenderElement->socketIdx )
+    {
+        /* socket to send UDP MD */
+        err = trdp_requestSocket(appHandle->iface,
+                                 appHandle->mdDefault.udpPort,
+                                 (pSendParam != NULL) ?
+                                 pSendParam : (&appHandle->mdDefault.sendParam),
+                                 srcIpAddr, vos_isMulticast(destIpAddr) ? destIpAddr : 0,
+                                 TRDP_SOCK_MD_UDP, 
+                                 appHandle->option,
+                                 FALSE,
+                                 VOS_INVALID_SOCKET, 
+                                 &pSenderElement->socketIdx, 
+                                 0);
+
+        if ( TRDP_NO_ERR != err )
+        {
+            /* Error getting socket, exit function */
+            return err;
+        }
+    }   
+    return err;
+}
+
+/**********************************************************************************************************************/
+/** Details and finally enqueues a TRDP message.
+ *
+ *  @param[in]      msgType             TRDP message type
+ *  @param[in]      replyStatus         Info for requester about application errors
+ *  @param[in]      mdTimeout           time out in us
+ *  @param[in]      sequenceCounter     sequence counter for packet (usually zero for callers)
+ *  @param[in]      pData               pointer to packet data / dataset
+ *  @param[in]      dataSize            size of packet data
+ *  @param[in]      newSession          flag to indicate wheter a new session is used (TRUE) or an existing (FALSE)
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      srcURI              only functional group of source URI
+ *  @param[in]      destURI             only functional group of destination URI
+ *  @param[in]      pSenderElement      pointer to MD element to get finally detailled and enqueued   
+ *
+ */
+static void trdp_mdDetailSenderPacket(const TRDP_MSG_T msgType, 
+                                      const INT32 replyStatus,
+                                      const UINT32 mdTimeOut,
+                                      const UINT32 sequenceCounter,
+                                      const UINT8* pData,
+                                      const UINT32 dataSize,
+                                      const BOOL8 newSession,
+                                      TRDP_APP_SESSION_T appHandle, 
+                                      const TRDP_URI_USER_T* srcURI,
+                                      const TRDP_URI_USER_T* destURI,
+                                      MD_ELE_T* pSenderElement)
+{
+    /* Prepare header */
+    pSenderElement->pPacket->frameHead.sequenceCounter = sequenceCounter;
+    pSenderElement->pPacket->frameHead.protocolVersion = vos_htons(TRDP_PROTO_VER);
+    pSenderElement->pPacket->frameHead.msgType         = vos_htons((UINT16) msgType);
+    pSenderElement->pPacket->frameHead.comId           = vos_htonl(pSenderElement->addr.comId);
+    pSenderElement->pPacket->frameHead.etbTopoCnt      = vos_htonl(pSenderElement->addr.etbTopoCnt);
+    pSenderElement->pPacket->frameHead.opTrnTopoCnt    = vos_htonl(pSenderElement->addr.opTrnTopoCnt);
+    pSenderElement->pPacket->frameHead.datasetLength   = vos_htonl(pSenderElement->dataSize);
+    pSenderElement->pPacket->frameHead.replyStatus     = vos_htonl(replyStatus);
+    memcpy(pSenderElement->pPacket->frameHead.sessionID,pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
+    pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(mdTimeOut);
+    if ( srcURI != NULL )
+    {
+        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, srcURI,
+               TRDP_MAX_URI_USER_LEN);
+    }
+    if ( destURI != NULL )
+    {
+        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI,
+               destURI, TRDP_MAX_URI_USER_LEN);
+    }
+    if ( pData != NULL )
+    {
+        memcpy(pSenderElement->pPacket->data, pData, dataSize);
+    }
+    
+    /* Insert element in send queue */
+    if ( TRUE == newSession )
+    {
+        if ( (pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
+        {
+            trdp_MDqueueAppLast(&appHandle->pMDSndQueue, pSenderElement);
+        }
+        else
+        {
+            trdp_MDqueueInsFirst(&appHandle->pMDSndQueue, pSenderElement);
+        }
+    }
+    vos_printLog(VOS_LOG_INFO,
+                 "MD sender element state = %d, msgType=%c%c\n",
+                 pSenderElement->stateEle,
+                 (char)((int)msgType >> 8),
+                 (char)((int)msgType & 0xFF)
+                );
+}
+
+/**********************************************************************************************************************/
+/** Send a MD reply/reply query message.
+ *  Send either a MD reply message or a MD reply query message after receiving a request and ask for confirmation.
+ *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
+ *
+ *  @param[in]      msgType             TRDP_MSG_MP or TRDP_MSG_MQ
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pSessionId          Session ID returned by indication
+ *  @param[in]      comId               comId of packet to be sent
+ *  @param[in]      timeout             time out for confirmations (zero for TRDP_MSG_MP)
+ *  @param[in]      replyStatus         Info for requester about application errors
+ *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
+ *  @param[in]      pData               pointer to packet data / dataset
+ *  @param[in]      dataSize            size of packet data
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NO_SESSION_ERR no such session 
+ */                                                    
+TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
+                         TRDP_APP_SESSION_T      appHandle,
+                         TRDP_UUID_T             *pSessionId,
+                         UINT32                  comId,
+                         UINT32                  timeout,
+                         INT32                   replyStatus,
+                         const TRDP_SEND_PARAM_T *pSendParam,
+                         const UINT8             *pData,
+                         UINT32                  dataSize)
+{
+    TRDP_IP_ADDR_T          srcIpAddr;
+    TRDP_IP_ADDR_T          destIpAddr;
+    TRDP_URI_USER_T*   srcURI = NULL;
+    TRDP_URI_USER_T*   destURI = NULL;
+    UINT32 sequenceCounter;
+    TRDP_ERR_T  errv = TRDP_NOLIST_ERR;
+    MD_ELE_T    *pSenderElement = NULL;
+    BOOL8       newSession      = FALSE;
+
+    /*check for valid values within msgType*/
+    if ( (msgType != TRDP_MSG_MP)
+         &&
+         (msgType != TRDP_MSG_MQ) )
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    /* lock mutex */
+    if ( vos_mutexLock(appHandle->mutex) != VOS_NO_ERR )
+    {
+        return TRDP_MUTEX_ERR;
+    }
+
+    if ( pSessionId )
+    {
+        errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDRcvQueue,
+                                    TRDP_ST_RX_REQ_W4AP_REPLY,
+                                    (const TRDP_UUID_T*)pSessionId,
+                                    &pSenderElement);
+
+        if ( TRDP_NO_ERR == errv && NULL != pSenderElement )
+        {
+
+            if ( NULL != pSenderElement->pPacket )
+            {
+                /*get values for later use*/
+                destURI         = (TRDP_URI_USER_T*)pSenderElement->srcURI;
+                srcURI          = (TRDP_URI_USER_T*)pSenderElement->destURI;
+                /*perform cross over of IP adresses*/
+                destIpAddr      = pSenderElement->addr.srcIpAddr;
+                srcIpAddr       = pSenderElement->addr.destIpAddr; 
+                pSenderElement->addr.srcIpAddr  = srcIpAddr;
+                pSenderElement->addr.destIpAddr = destIpAddr; 
+                /*save sequenceCounter*/
+                sequenceCounter = pSenderElement->pPacket->frameHead.sequenceCounter;
+                /*set values from input values*/
+                pSenderElement->addr.comId      = comId;
+                pSenderElement->addr.mcGroup    = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0;
+                pSenderElement->privFlags       = TRDP_PRIV_NONE;
+                pSenderElement->dataSize        = dataSize;
+                pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
+                pSenderElement->sendSize        = 0;
+                pSenderElement->numReplies      = 0;
+                pSenderElement->pCachedDS       = NULL;
+                pSenderElement->morituri        = FALSE; 
+                trdp_mdFillStateElement(msgType, pSenderElement);
+                trdp_mdManageSessionId(pSessionId, pSenderElement);
+
+                if ( msgType == TRDP_MSG_MQ )
+                {
+                    pSenderElement->interval.tv_sec     = timeout / 1000000;
+                    pSenderElement->interval.tv_usec    = timeout % 1000000;
+                    trdp_mdSetSessionTimeout(pSenderElement, timeout);
+                }
+                errv = trdp_mdConnectSocket(appHandle, 
+                                            pSendParam, 
+                                            srcIpAddr,
+                                            destIpAddr,
+                                            newSession,
+                                            pSenderElement);
+                if ( errv == TRDP_NO_ERR )
+                {
+                    if ( NULL != pSenderElement->pPacket )
+                    {
+                        vos_memFree(pSenderElement->pPacket);
+                        pSenderElement->pPacket = NULL;
+                    }
+                    /* allocate a buffer for the data   */
+                    pSenderElement->pPacket = (MD_PACKET_T *) vos_memAlloc(pSenderElement->grossSize);
+                    if ( NULL == pSenderElement->pPacket )
+                    {
+                        vos_memFree(pSenderElement);
+                        pSenderElement = NULL;
+                        errv = TRDP_MEM_ERR;
+                    }
+                    else
+                    {
+                        trdp_mdDetailSenderPacket(msgType,
+                                                  replyStatus,
+                                                  timeout,
+                                                  sequenceCounter,
+                                                  pData,
+                                                  dataSize,
+                                                  newSession,
+                                                  appHandle,
+                                                  (const TRDP_URI_USER_T*)srcURI,
+                                                  (const TRDP_URI_USER_T*)destURI,
+                                                  pSenderElement);
+                        errv = TRDP_NO_ERR;
+                    }
+                }
+                /*intentionally no else here*/
+            }
+        }
+    }
+    else
+    {
+        errv = TRDP_PARAM_ERR;
+    }      
+
+    /* Release mutex */
+    if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
+    {
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
+    }
+
+    return errv;
+}
+
+/**********************************************************************************************************************/
+/** Initiate sending MD request message - private SW level
+ *  Send a MD request message
+ *
+ *  @param[in]      msgType             TRDP_MSG_MN or TRDP_MSG_MR
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pUserRef            user supplied value returned with reply
+ *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
+ *  @param[out]     pSessionId          return session ID
+ *  @param[in]      comId               comId of packet to be sent
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr          where to send the packet to
+ *  @param[in]      pktFlags            OPTION:
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL
+ *  @param[in]      confirmTimeout      time out for replies (zero for TRDP_MSG_MN)
+ *  @param[in]      numExpReplies       number of expected replies, 0 if unknown
+ *  @param[in]      replyTimeout        timeout for reply
+ *  @param[in]      maxNumRetries       maximum number of retries (0 … 2) 
+ *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
+ *  @param[in]      pData               pointer to packet data / dataset
+ *  @param[in]      dataSize            size of packet data
+ *  @param[in]      sourceURI           only functional group of source URI
+ *  @param[in]      destURI             only functional group of destination URI
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ */
+TRDP_ERR_T trdp_mdCall (
+                       const TRDP_MSG_T        msgType,
+                       TRDP_APP_SESSION_T      appHandle,
+                       const void              *pUserRef,
+                       TRDP_MD_CALLBACK_T      pfCbFunction,
+                       TRDP_UUID_T             *pSessionId,
+                       UINT32                  comId,
+                       UINT32                  etbTopoCnt,
+                       UINT32                  opTrnTopoCnt,
+                       TRDP_IP_ADDR_T          srcIpAddr,
+                       TRDP_IP_ADDR_T          destIpAddr,
+                       TRDP_FLAGS_T            pktFlags,
+                       UINT32                  numExpReplies,
+                       UINT32                  replyTimeout,
+                       INT32                   replyStatus,
+                       UINT32                  maxNumRetries,
+                       const TRDP_SEND_PARAM_T *pSendParam,
+                       const UINT8             *pData,
+                       UINT32                  dataSize,
+                       const TRDP_URI_USER_T   srcURI,
+                       const TRDP_URI_USER_T   destURI)
 {
     TRDP_ERR_T  errv = TRDP_NO_ERR;
     MD_ELE_T    *pSenderElement = NULL;
-    UINT32      sequenceCounter = 0;
-    BOOL8       newSession      = FALSE;
+    UINT32 timeout = 0U;
 
-    UINT32 mdTimeOut = 0U;
-
-    if ( !trdp_isValidSession(appHandle) )
-    {
-        return TRDP_NOINIT_ERR;
-    }
-
-    if ( (pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    /*check for valid values within msgType*/
+    if ( (msgType != TRDP_MSG_MR)
+         &&
+         (msgType != TRDP_MSG_MN) )
     {
         return TRDP_PARAM_ERR;
     }
@@ -2609,354 +3171,129 @@ TRDP_ERR_T trdp_mdCommonSend (
         srcIpAddr = appHandle->realIP;
     }
 
-    /* mutex protected */
-    switch ( msgType )
+    /* Room for MD element */
+    pSenderElement = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
+
+    /* Reset descriptor value */
+    if ( NULL != pSenderElement )
     {
-        /* in case of reply ... */
-        case TRDP_MSG_MP: /* reply with no confirm */
-        case TRDP_MSG_MQ: /* reply with confirm req. */
-        case TRDP_MSG_ME: /* error */
-            errv = TRDP_NOLIST_ERR;
-            if ( pSessionId )
+        memset(pSenderElement, 0, sizeof(MD_ELE_T));
+        pSenderElement->dataSize        = dataSize;
+        pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
+        pSenderElement->socketIdx       = TRDP_INVALID_SOCKET_INDEX;
+        pSenderElement->pktFlags        =  
+        (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
+        pSenderElement->pfCbFunction    = 
+        (pfCbFunction == NULL)?appHandle->mdDefault.pfCbFunction:pfCbFunction;
+        
+        /* add userRef, if supplied */
+        if ( pUserRef != NULL )
+        {
+            pSenderElement->pUserRef = pUserRef;
+        }
+        /* Extension for mutual retransmission */
+        if ( ((pktFlags & TRDP_FLAGS_TCP) == 0)      /* only UDP */
+             &&
+             (numExpReplies == 1)                    /* only ONE reply -> unicast */
+             &&
+             (vos_isMulticast(destIpAddr) == FALSE) )/* no multicast addr used    */
+        {
+            pSenderElement->numRetriesMax = maxNumRetries;
+        }/* no else needed as memset has set all memory to zero */
+        /* Prepare element data */
+        pSenderElement->addr.comId      = comId;
+        pSenderElement->addr.srcIpAddr  = srcIpAddr;
+        pSenderElement->addr.destIpAddr = destIpAddr;
+        pSenderElement->addr.etbTopoCnt = etbTopoCnt;
+        pSenderElement->addr.opTrnTopoCnt = opTrnTopoCnt;
+        pSenderElement->addr.mcGroup    = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0;
+        pSenderElement->privFlags       = TRDP_PRIV_NONE;
+        pSenderElement->dataSize        = dataSize;
+        pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
+        pSenderElement->sendSize        = 0;
+        pSenderElement->numReplies      = 0;
+        pSenderElement->pCachedDS       = NULL;
+        pSenderElement->morituri        = FALSE;
+        if ( msgType == TRDP_MSG_MR )
+        {
+            /* Multiple replies expected only for multicast */
+            if ( vos_isMulticast(destIpAddr) )
             {
-                errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDRcvQueue,
-                                            TRDP_ST_RX_REQ_W4AP_REPLY,
-                                            (const TRDP_UUID_T*)pSessionId,
-                                            &pSenderElement);
-
-                if ( TRDP_NO_ERR != errv || NULL == pSenderElement )
-                {
-                    /* non recoverable system error caused corrupt list, clean up immediately */
-                    goto MDCOMMONSEND_ERROR;
-                }
-
-                if ( NULL != pSenderElement->pPacket )
-                {
-                    sequenceCounter = pSenderElement->pPacket->frameHead.sequenceCounter;
-                    destIpAddr      = pSenderElement->addr.srcIpAddr;
-                    srcIpAddr       = pSenderElement->addr.destIpAddr; 
-                    etbTopoCnt      = pSenderElement->addr.etbTopoCnt;
-                    opTrnTopoCnt    = pSenderElement->addr.opTrnTopoCnt;
-                    /* pktFlags        = iterMD->pktFlags; */
-                    destURI         = pSenderElement->srcURI;
-                    srcURI          = pSenderElement->destURI;
-                }
-                errv = TRDP_NO_ERR;
+                pSenderElement->numExpReplies = numExpReplies;
             }
             else
             {
-                errv = TRDP_PARAM_ERR;
+                pSenderElement->numExpReplies = 1;
             }
-            break;
-            /* in case of confirm ... */
-        case TRDP_MSG_MC: /* confirm */
-            errv = TRDP_NOLIST_ERR;
-            vos_printLog(VOS_LOG_INFO, "MD TRDP_MSG_MC\n"); 
-            if ( pSessionId )
+            if ( replyTimeout != 0U )
             {
-                errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDSndQueue,
-                                            TRDP_ST_TX_REQ_W4AP_CONFIRM,
-                                            (const TRDP_UUID_T*)pSessionId,
-                                            &pSenderElement);
-
-                if ( TRDP_NO_ERR != errv || NULL == pSenderElement )
-                {
-                    /* non recoverable system error caused corrupt list, clean up immediately */
-                    goto MDCOMMONSEND_ERROR;
-                }
-
-                pSenderElement->dataSize    = 0;
-                pSenderElement->grossSize   = trdp_packetSizeMD(0);
-                destIpAddr                  = pSenderElement->addr.srcIpAddr;
-                srcIpAddr                   = pSenderElement->addr.destIpAddr;
-                etbTopoCnt                  = pSenderElement->addr.etbTopoCnt;
-                opTrnTopoCnt                = pSenderElement->addr.opTrnTopoCnt;
-                /* pktFlags                    = iterMD->pktFlags; */
-                destURI                     = pSenderElement->srcURI;
-                srcURI                      = pSenderElement->destURI;
-                /* add userRef, if supplied */
-                if ( pUserRef != NULL )
-                {
-                    pSenderElement->pUserRef = pUserRef;
-                }
-                errv = TRDP_NO_ERR;
+                timeout = replyTimeout;
             }
             else
             {
-                errv = TRDP_PARAM_ERR;
+                timeout = appHandle->mdDefault.replyTimeout;
             }
-            break;
+            /*no else needed here, the only other value must be TRDP_MSG_MN*/
+            /*the very initial param check takes care of correct msg types */   
+        }
+        pSenderElement->interval.tv_sec     = timeout / 1000000;
+        pSenderElement->interval.tv_usec    = timeout % 1000000;
+        trdp_mdSetSessionTimeout(pSenderElement, timeout);
 
-        case TRDP_MSG_MN:
-        case TRDP_MSG_MR:
-            /* Room for MD element */
-            pSenderElement = (MD_ELE_T *) vos_memAlloc(sizeof(MD_ELE_T));
+        errv = trdp_mdConnectSocket(appHandle, 
+                                    pSendParam, 
+                                    srcIpAddr,
+                                    destIpAddr,
+                                    TRUE,
+                                    pSenderElement);
+        if ( errv == TRDP_NO_ERR )
+        {
+            trdp_mdFillStateElement(msgType, pSenderElement);
 
-            /* Reset descriptor value */
-            if ( NULL != pSenderElement )
+            trdp_mdManageSessionId(pSessionId, pSenderElement);
+
+            /*
+             (Re-)allocate the data buffer if current size is different from requested size.
+             If no data at all, free data pointer
+             */
+            if ( NULL != pSenderElement->pPacket )
             {
-                memset(pSenderElement, 0, sizeof(MD_ELE_T));
-                pSenderElement->dataSize        = dataSize;
-                pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
-                pSenderElement->socketIdx       = TRDP_INVALID_SOCKET_INDEX;
-                pSenderElement->pktFlags        =  
-                (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
-                pSenderElement->pfCbFunction    = 
-                (pfCbFunction == NULL)?appHandle->mdDefault.pfCbFunction:pfCbFunction;
-                newSession = TRUE;
-                /* add userRef, if supplied */
-                if ( pUserRef != NULL )
-                {
-                    pSenderElement->pUserRef = pUserRef;
-                }
-                /* Extension for mutual retransmission */
-                if ( ((pktFlags & TRDP_FLAGS_TCP) == 0)      /* only UDP */
-                     &&
-                     (numExpReplies == 1)                    /* only ONE reply -> unicast */
-                     &&
-                     (vos_isMulticast(destIpAddr) == FALSE) )/* no multicast addr used    */
-                {
-                    pSenderElement->numRetriesMax = maxNumRetries;
-                }/* no else needed as memset has set all memory to zero */
-
-                if ( msgType == TRDP_MSG_MR )
-                {
-                    /* Multiple replies expected only for multicast */
-                    if ( vos_isMulticast(destIpAddr) )
-                    {
-                        pSenderElement->numExpReplies = numExpReplies;
-                    }
-                    else
-                    {
-                        pSenderElement->numExpReplies = 1;
-                    }
-                }
-                errv = TRDP_NO_ERR;
+                vos_memFree(pSenderElement->pPacket);
+                pSenderElement->pPacket = NULL;
             }
-            else
+            /* allocate a buffer for the data   */
+            pSenderElement->pPacket = (MD_PACKET_T *) vos_memAlloc(pSenderElement->grossSize);
+            if ( NULL == pSenderElement->pPacket )
             {
+                vos_memFree(pSenderElement);
+                pSenderElement = NULL;
                 errv = TRDP_MEM_ERR;
+
             }
-            break;
-        default:
-            errv = TRDP_PARAM_ERR;
-            break;
-    }  
-
-    /* if error ... */
-    if ( TRDP_NO_ERR != errv || NULL == pSenderElement )
-    {
-        goto MDCOMMONSEND_ERROR;
-/*NON RECOVERABLE*/
-    }
-
-    /* Prepare element data */
-    pSenderElement->addr.comId      = comId;
-    pSenderElement->addr.srcIpAddr  = srcIpAddr;
-    pSenderElement->addr.destIpAddr = destIpAddr;
-    pSenderElement->addr.mcGroup    = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0;
-    pSenderElement->privFlags       = TRDP_PRIV_NONE;
-    pSenderElement->dataSize        = dataSize;
-    pSenderElement->grossSize       = trdp_packetSizeMD(dataSize);
-    pSenderElement->sendSize        = 0;
-    pSenderElement->numReplies      = 0;
-    pSenderElement->pCachedDS       = NULL;
-    pSenderElement->morituri        = FALSE;
-
-    /* evaluate start time and timeout. For notify I use replyTimeout as sendTimeout */
-
-    if ( (msgType != TRDP_MSG_MP)
-         &&
-         (msgType != TRDP_MSG_MC) )
-    {
-        switch ( msgType )
-        {
-            case TRDP_MSG_MN:     /* notify (no reply)*/
-                mdTimeOut = 0U;
-                break;
-            case TRDP_MSG_MR:     /* request with reply */
-            case TRDP_MSG_ME:     /* reply error */
-                if ( replyTimeout != 0U )
-                {
-                    mdTimeOut = replyTimeout;
-                }
-                else
-                {
-                    mdTimeOut = appHandle->mdDefault.replyTimeout;
-                }
-                break;
-            case TRDP_MSG_MQ:     /* reply with confirm */
-                if ( confirmTimeout != 0U )
-                {
-                    mdTimeOut = confirmTimeout;
-                }
-                else
-                {
-                    mdTimeOut = appHandle->mdDefault.confirmTimeout;
-                }
-                break;
-            default:
-                break;
-        }
-        pSenderElement->interval.tv_sec     = mdTimeOut / 1000000;
-        pSenderElement->interval.tv_usec    = mdTimeOut % 1000000;
-        trdp_mdSetSessionTimeout(pSenderElement, mdTimeOut);
-    }
-
-    if ( (pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
-    {
-        if ( pSenderElement->socketIdx == TRDP_INVALID_SOCKET_INDEX )
-        {
-            /* socket to send TCP MD for request or notify only */
-            errv = trdp_requestSocket(
-                                     appHandle->iface,
-                                     appHandle->mdDefault.tcpPort,
-                                     (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
-                                     srcIpAddr,
-                                     0,                     /* no TCP multicast possible */
-                                     TRDP_SOCK_MD_TCP,
-                                     TRDP_OPTION_NONE,
-                                     FALSE,
-                                     VOS_INVALID_SOCKET,
-                                     &pSenderElement->socketIdx,
-                                     destIpAddr);
-
-            if ( TRDP_NO_ERR != errv )
+            else
             {
-                /* Error getting socket */
-                goto MDCOMMONSEND_ERROR;
-/*NON RECOVERABLE*/
+                trdp_mdDetailSenderPacket(msgType,
+                                          replyStatus,
+                                          timeout,
+                                          0, /* initial sequenceCounter is always 0 */
+                                          pData,
+                                          dataSize,
+                                          TRUE,
+                                          appHandle,
+                                          (const TRDP_URI_USER_T*)srcURI,
+                                          (const TRDP_URI_USER_T*)destURI,
+                                          pSenderElement);
+                errv = TRDP_NO_ERR; 
             }
         }
-
-        /* In the case that it is the first connection, do connect() */
-
-        if ( appHandle->iface[pSenderElement->socketIdx].usage > 0 )
-        {
-            pSenderElement->tcpParameters.doConnect = FALSE;
-        }
-        else
-        {
-            pSenderElement->tcpParameters.doConnect = TRUE;
-            appHandle->iface[pSenderElement->socketIdx].usage++;
-        } 
-    }
-    else if ( TRUE == newSession && TRDP_INVALID_SOCKET_INDEX == pSenderElement->socketIdx )
-    {
-        /* socket to send UDP MD */
-        errv = trdp_requestSocket(
-                                 appHandle->iface,
-                                 appHandle->mdDefault.udpPort,
-                                 (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
-                                 srcIpAddr,
-                                 vos_isMulticast(destIpAddr) ? destIpAddr : 0,
-                                 TRDP_SOCK_MD_UDP,
-                                 appHandle->option,
-                                 FALSE,
-                                 VOS_INVALID_SOCKET,
-                                 &pSenderElement->socketIdx,
-                                 0);
-
-        if ( TRDP_NO_ERR != errv )
-        {
-            /* Error getting socket */
-            goto MDCOMMONSEND_ERROR;
-/*NON RECOVERABLE*/
-        }
-    }
-
-    trdp_mdFillStateElement(msgType, pSenderElement);
-
-    trdp_mdManageSessionId(pSessionId, pSenderElement);
-
-    /*
-     (Re-)allocate the data buffer if current size is different from requested size.
-     If no data at all, free data pointer
-     */
-
-    if ( pSenderElement->grossSize <= trdp_packetSizeMD(dataSize) ||
-         NULL == pSenderElement->pPacket )
-    {
-        if ( NULL != pSenderElement->pPacket )
-        {
-            vos_memFree(pSenderElement->pPacket);
-            pSenderElement->pPacket = NULL;
-        }
-        /* allocate a buffer for the data   */
-        pSenderElement->pPacket = (MD_PACKET_T *) vos_memAlloc(pSenderElement->grossSize);
-        if ( NULL == pSenderElement->pPacket )
-        {
-            vos_memFree(pSenderElement);
-            pSenderElement = NULL;
-            errv = TRDP_MEM_ERR;
-            goto MDCOMMONSEND_ERROR;
-/*NON RECOVERABLE*/
-        }
-    }
-
-    /* Prepare header */
-    pSenderElement->pPacket->frameHead.sequenceCounter  = sequenceCounter;
-    pSenderElement->pPacket->frameHead.protocolVersion  = vos_htons(TRDP_PROTO_VER);
-    pSenderElement->pPacket->frameHead.msgType          = vos_htons((UINT16) msgType);
-    pSenderElement->pPacket->frameHead.comId            = vos_htonl(comId);
-    pSenderElement->pPacket->frameHead.etbTopoCnt       = vos_htonl(etbTopoCnt);
-    pSenderElement->pPacket->frameHead.opTrnTopoCnt     = vos_htonl(opTrnTopoCnt);
-    pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(dataSize);
-    pSenderElement->pPacket->frameHead.replyStatus      = vos_htonl(replyStatus);
-
-    if ( TRDP_MSG_MN != msgType )
-    {
-        memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
-        pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(mdTimeOut);
     }
     else
     {
-        memset(pSenderElement->pPacket->frameHead.sessionID, 0, TRDP_SESS_ID_SIZE);
-        pSenderElement->pPacket->frameHead.replyTimeout = 0;
-    }
-
-    if ( srcURI != NULL )
-    {
-        memcpy((CHAR8 *)pSenderElement->pPacket->frameHead.sourceURI, srcURI, TRDP_MAX_URI_USER_LEN);
-    }
-
-    if ( destURI != NULL )
-    {
-        memcpy((CHAR8 *)pSenderElement->pPacket->frameHead.destinationURI, destURI, TRDP_MAX_URI_USER_LEN);
-    }
-
-    /* pData and the corresponding dataSize have been checked already - just use them here */
-    if (pData != NULL)
-    {
-        memcpy(pSenderElement->pPacket->data, pData, dataSize);
-    }
-
-    /* Insert element in send queue */
-    if ( TRUE == newSession )
-    {
-        if ( (pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
-        {
-            trdp_MDqueueAppLast(&appHandle->pMDSndQueue, pSenderElement);
-        }
-        else
-        {
-            trdp_MDqueueInsFirst(&appHandle->pMDSndQueue, pSenderElement);
-        }
-    }
-
-    /* change state of receiver */
-    vos_printLog(VOS_LOG_INFO,
-                 "MD sender element state = %d, msgType=%c%c\n",
-                 pSenderElement->stateEle,
-                 (char)((int)msgType >> 8),
-                 (char)((int)msgType & 0xFF)
-                );
-
-MDCOMMONSEND_ERROR:
+        errv = TRDP_MEM_ERR;
+    }        
     /* Error and deallocate element ! */
     if ( TRDP_NO_ERR != errv &&
-         NULL != pSenderElement &&
-         TRUE == newSession )
+         NULL != pSenderElement )
     {
         trdp_mdFreeSession(pSenderElement);
         pSenderElement = NULL;
@@ -2970,3 +3307,132 @@ MDCOMMONSEND_ERROR:
 
     return errv;
 }
+
+
+/**********************************************************************************************************************/
+/** Initiate sending MD confirm message - private SW level
+ *  Send a MD confirmation message
+ *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      pSessionId          Session ID returned by request
+ *  @param[in]      userStatus          Info for requester about application errors
+ *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NOSESSION_ERR  no such session
+ */
+TRDP_ERR_T trdp_mdConfirm (
+                          TRDP_APP_SESSION_T      appHandle,
+                          const TRDP_UUID_T       *pSessionId,
+                          UINT16                  userStatus,
+                          const TRDP_SEND_PARAM_T *pSendParam)
+{
+    TRDP_IP_ADDR_T   srcIpAddr;
+    TRDP_IP_ADDR_T   destIpAddr;
+    
+    TRDP_URI_USER_T* srcURI  = NULL;
+    TRDP_URI_USER_T* destURI = NULL;
+
+    TRDP_ERR_T  errv = TRDP_NO_ERR;
+    MD_ELE_T    *pSenderElement = NULL;    
+    
+    /* lock mutex */
+    if ( vos_mutexLock(appHandle->mutex) != VOS_NO_ERR )
+    {
+        return TRDP_MUTEX_ERR;
+    }
+
+    srcIpAddr = appHandle->realIP;
+
+    errv = TRDP_NOLIST_ERR;
+    vos_printLog(VOS_LOG_INFO, "MD TRDP_MSG_MC\n"); 
+    if ( pSessionId )
+    {
+        errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDSndQueue,
+                                    TRDP_ST_TX_REQ_W4AP_CONFIRM,
+                                    (const TRDP_UUID_T*)pSessionId,
+                                    &pSenderElement);
+
+        if ( TRDP_NO_ERR == errv && NULL != pSenderElement )
+        {
+
+            /*perform cross over of IP adresses and URIs*/
+            destIpAddr                  = pSenderElement->addr.srcIpAddr;
+            srcIpAddr                   = pSenderElement->addr.destIpAddr;        
+            destURI                     = (TRDP_URI_USER_T*)pSenderElement->srcURI;
+            srcURI                      = (TRDP_URI_USER_T*)pSenderElement->destURI;
+
+            pSenderElement->dataSize    = 0;
+            pSenderElement->grossSize   = trdp_packetSizeMD(0);
+            pSenderElement->addr.comId      = 0;
+            pSenderElement->addr.srcIpAddr  = srcIpAddr;
+            pSenderElement->addr.destIpAddr = destIpAddr;
+            pSenderElement->addr.mcGroup    = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0;
+            pSenderElement->privFlags       = TRDP_PRIV_NONE;
+
+            pSenderElement->sendSize        = 0;
+            pSenderElement->numReplies      = 0;
+            pSenderElement->pCachedDS       = NULL;
+            pSenderElement->morituri        = FALSE;
+
+            errv = trdp_mdConnectSocket(appHandle, 
+                                        pSendParam, 
+                                        srcIpAddr,
+                                        destIpAddr,
+                                        FALSE,
+                                        pSenderElement);
+
+            if ( TRDP_NO_ERR == errv )
+            {
+                trdp_mdFillStateElement(TRDP_MSG_MC, pSenderElement);
+
+                trdp_mdManageSessionId(pSessionId, pSenderElement);
+
+                if ( NULL != pSenderElement->pPacket )
+                {
+                    vos_memFree(pSenderElement->pPacket);
+                    pSenderElement->pPacket = NULL;
+                }
+                /* allocate a buffer for the data   */
+                pSenderElement->pPacket = (MD_PACKET_T *) vos_memAlloc(pSenderElement->grossSize);
+                if ( NULL == pSenderElement->pPacket )
+                {
+                    vos_memFree(pSenderElement);
+                    pSenderElement = NULL;
+                    errv = TRDP_MEM_ERR;
+                }
+                else
+                {
+                    trdp_mdDetailSenderPacket(TRDP_MSG_MC,
+                                              userStatus,
+                                              0,    /* no timeout needed */
+                                              0,    /* no sequenceCounter Value other tha 0 for Mc */
+                                              NULL, /* no data no buffer */
+                                              0,    /* zero data */
+                                              FALSE,/* no new session obviously */
+                                              appHandle,
+                                              (const TRDP_URI_USER_T*)srcURI,
+                                              (const TRDP_URI_USER_T*)destURI,
+                                              pSenderElement);
+                    errv = TRDP_NO_ERR;
+                }  
+            }
+        }
+    }
+    else
+    {
+        errv = TRDP_PARAM_ERR;
+    }
+    /* Release mutex */
+    if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
+    {
+        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
+    }
+    return errv;
+}
+
+
+
