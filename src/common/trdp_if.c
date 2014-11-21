@@ -48,6 +48,7 @@
 #include "trdp_stats.h"
 #include "vos_sock.h"
 #include "vos_mem.h"
+#include "vos_utils.h"
 
 #if MD_SUPPORT
 #include "trdp_mdcom.h"
@@ -1369,20 +1370,16 @@ TRDP_ERR_T tlp_put (
 
     /*    Reserve mutual access    */
     ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
-    if ( ret == TRDP_NO_ERR)
+    if ( ret == TRDP_NO_ERR )
     {
         /*    Find the published queue entry    */
-        /* pElement = trdp_queueFindPubAddr(appHandle->pSndQueue, pubHandle); */
-        if (pElement != NULL)
-        {
-            ret = trdp_pdPut(pElement,
-                             appHandle->marshall.pfCbMarshall,
-                             appHandle->marshall.pRefCon,
-                             pData,
-                             dataSize);
-        }
+        ret = trdp_pdPut(pElement,
+                         appHandle->marshall.pfCbMarshall,
+                         appHandle->marshall.pRefCon,
+                         pData,
+                         dataSize);
 
-        if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+        if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
         {
             vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
@@ -2172,7 +2169,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
                              pDataSize);
         }
 
-        if (pPdInfo != NULL && pElement != NULL)
+        if (pPdInfo != NULL)
         {
             pPdInfo->comId          = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->lastSrcIP;
@@ -2322,6 +2319,7 @@ TRDP_ERR_T tlm_request (
     const TRDP_URI_USER_T   destURI)
 {
     TRDP_ERR_T errv = TRDP_NO_ERR;
+    UINT32 mdTimeOut;
 
     if ( !trdp_isValidSession(appHandle) )
     {
@@ -2331,6 +2329,14 @@ TRDP_ERR_T tlm_request (
     {
         return TRDP_PARAM_ERR;
     }
+    if ( replyTimeout != 0U )
+    {
+        mdTimeOut = replyTimeout;
+    }
+    else
+    {
+        mdTimeOut = appHandle->mdDefault.confirmTimeout;
+    }
 
     errv = trdpCheckTopograhy(appHandle, etbTopoCnt, opTrnTopoCnt);
 
@@ -2339,7 +2345,7 @@ TRDP_ERR_T tlm_request (
         return errv;
     }
     else
-    {   
+    {
         return trdp_mdCall(
                           TRDP_MSG_MR,                            /* request with reply */
                           appHandle,
@@ -2353,7 +2359,7 @@ TRDP_ERR_T tlm_request (
                           destIpAddr,
                           pktFlags,
                           numReplies,
-                          replyTimeout,
+                          mdTimeOut,
                           TRDP_REPLY_OK,                          /* reply state */
                           maxNumRetries,
                           pSendParam,
@@ -2595,20 +2601,17 @@ TRDP_ERR_T tlm_delListener (
     }
 
     /* Statistics */
-    if (errv == TRDP_NO_ERR)
+    if ( (appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0 )
     {
-        if ((appHandle->mdDefault.flags & TRDP_FLAGS_TCP) != 0)
-        {
-            appHandle->stats.tcpMd.numList--;
-        }
-        else
-        {
-            appHandle->stats.udpMd.numList--;
-        }
+        appHandle->stats.tcpMd.numList--;
+    }
+    else
+    {
+        appHandle->stats.udpMd.numList--;
     }
 
     /* Release mutex */
-    if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
+    if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
     {
         vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
     }

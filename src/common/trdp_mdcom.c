@@ -64,15 +64,27 @@ static const TRDP_MD_INFO_T cTrdp_md_info_default = {0};
 static void trdp_mdUpdatePacket(MD_ELE_T *pElement);
 static void trdp_mdFillStateElement(const TRDP_MSG_T msgType, MD_ELE_T *pMdElement);
 static void trdp_mdManageSessionId(TRDP_UUID_T *pSessionId,  MD_ELE_T *pMdElement);
+
 static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
                                        const TRDP_MD_ELE_ST_T elementState,
                                        const TRDP_UUID_T *pSessionId,
                                        MD_ELE_T **pretrievedMdElement);
+
 static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT appHandle, const TRDP_ERR_T resultCode);
 static BOOL8 trdp_mdTimeOutStateHandler( MD_ELE_T *pElement, TRDP_SESSION_PT appHandle, TRDP_ERR_T *pResult);
 static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEADER_T *pMdItemHeader);
+
+static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
+                                      BOOL8            isTCP,
+                                      TRDP_MD_ELE_ST_T state,
+                                      UINT32           sockIndex,
+                                      MD_ELE_T*        iterMD,
+                                      MD_HEADER_T*     pH,
+                                      MD_LIS_ELE_T*    iterListener,
+                                      TRDP_ERR_T*      pResult);
+
 static void trdp_mdCloseSessions(TRDP_SESSION_PT appHandle, INT32 socketIndex, INT32 newSocket, BOOL8 checkAllSockets);
-static void trdp_mdSetSessionTimeout(MD_ELE_T *pMDSession, UINT32 usTimeOut);
+static void trdp_mdSetSessionTimeout(MD_ELE_T *pMDSession);
 static TRDP_ERR_T trdp_mdCheck(TRDP_SESSION_PT appHandle, MD_HEADER_T *pPacket, UINT32 packetSize, BOOL8 checkHeaderOnly);
 static TRDP_ERR_T  trdp_mdSendPacket(INT32 mdSock, UINT32 port, MD_ELE_T *pElement);
 static TRDP_ERR_T trdp_mdRecvTCPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement);
@@ -93,16 +105,13 @@ static void trdp_mdDetailSenderPacket(const TRDP_MSG_T msgType,
                                       MD_ELE_T* pSenderElement);
 
 static TRDP_ERR_T trdp_mdSendME(TRDP_SESSION_PT appHandle, MD_HEADER_T* pH, INT32 replyStatus);
+
 static TRDP_ERR_T trdp_mdConnectSocket(TRDP_APP_SESSION_T appHandle,
                                        const TRDP_SEND_PARAM_T* pSendParam, 
                                        TRDP_IP_ADDR_T srcIpAddr,
                                        TRDP_IP_ADDR_T destIpAddr, 
                                        BOOL8 newSession, 
-                                       MD_ELE_T* pSenderElement);
-
-
-
-
+                                       MD_ELE_T* pSenderElement); 
 
 /**********************************************************************************************************************/
 /** Set the statEle property to next state
@@ -564,6 +573,7 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
                     /* receive time */
                     vos_getTime(&iterMD->timeToGo);
                     /* timeout value */
+                    /* the implementation of an infinite confirm timeout does not make sense */
                     iterMD->interval.tv_sec     = vos_ntohl(pMdItemHeader->replyTimeout) / 1000000;
                     iterMD->interval.tv_usec    = vos_ntohl(pMdItemHeader->replyTimeout) % 1000000;
                     vos_addTime(&iterMD->timeToGo, &iterMD->interval);
@@ -698,19 +708,17 @@ static void trdp_mdCloseSessions (
 /** set time out
  *
  *  @param[in]      pMDSession          session pointer
- *  @param[in]      usTimeOut           timeout in us
  */
 static void trdp_mdSetSessionTimeout (
-    MD_ELE_T    *pMDSession,
-    UINT32      usTimeOut)
+    MD_ELE_T    *pMDSession)
 {
     TRDP_TIME_T timeOut;
 
     if (NULL != pMDSession)
     {
         vos_getTime(&pMDSession->timeToGo);
-        timeOut.tv_sec  = usTimeOut / 1000000;
-        timeOut.tv_usec = usTimeOut % 1000000;
+        timeOut.tv_sec  = pMDSession->interval.tv_sec;
+        timeOut.tv_usec = pMDSession->interval.tv_usec;
         vos_addTime(&pMDSession->timeToGo, &timeOut);
     }
 }
@@ -1581,9 +1589,21 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
         /* receive time */
         vos_getTime(&iterMD->timeToGo);
 
-        /* timeout value */
-        iterMD->interval.tv_sec = vos_ntohl(pH->replyTimeout) / 1000000;
-        iterMD->interval.tv_usec = vos_ntohl(pH->replyTimeout) % 1000000;
+        /* timeout value */ 
+        if ((pH->replyTimeout == 0)&&(pH->msgType == TRDP_MSG_MR))
+        {
+            /* Timeout compliance with Table A.17 */
+            iterMD->interval.tv_sec  = 0xFFFFFFFFU;
+            iterMD->interval.tv_usec = 999999U;
+            /* Use extreme caution with infinite timeouts! */
+        }
+        else
+        {
+            /* for all other kinds of MD call (only Mn in this case) */
+            iterMD->interval.tv_sec  = vos_ntohl(pH->replyTimeout) / 1000000;
+            iterMD->interval.tv_usec = vos_ntohl(pH->replyTimeout) % 1000000;
+        }
+
         vos_addTime(&iterMD->timeToGo, &iterMD->interval);
 
         /* save session Id and sequence counter for next steps */
@@ -1670,7 +1690,7 @@ static TRDP_ERR_T trdp_mdSendME(TRDP_SESSION_PT appHandle, MD_HEADER_T* pH, INT3
             pSenderElement->numReplies      = 0;
             pSenderElement->pCachedDS       = NULL;
             pSenderElement->morituri        = FALSE;
-            trdp_mdSetSessionTimeout(pSenderElement, 0);
+            trdp_mdSetSessionTimeout(pSenderElement);/* the ->interval timestruct is already memset to zero */
 
             errv = trdp_mdConnectSocket(appHandle, 
                                         &appHandle->mdDefault.sendParam, 
@@ -3036,10 +3056,12 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
 
                 if ( msgType == TRDP_MSG_MQ )
                 {
+                    /* infinite timeouts for confirmation shall not exist */
                     pSenderElement->interval.tv_sec     = timeout / 1000000;
                     pSenderElement->interval.tv_usec    = timeout % 1000000;
-                    trdp_mdSetSessionTimeout(pSenderElement, timeout);
+                    trdp_mdSetSessionTimeout(pSenderElement);
                 }
+                
                 errv = trdp_mdConnectSocket(appHandle, 
                                             pSendParam, 
                                             srcIpAddr,
@@ -3149,7 +3171,8 @@ TRDP_ERR_T trdp_mdCall (
 {
     TRDP_ERR_T  errv = TRDP_NO_ERR;
     MD_ELE_T    *pSenderElement = NULL;
-    UINT32 timeout = 0U;
+    
+    UINT32 timeoutWire = 0U;
 
     /*check for valid values within msgType*/
     if ( (msgType != TRDP_MSG_MR)
@@ -3225,20 +3248,28 @@ TRDP_ERR_T trdp_mdCall (
             {
                 pSenderElement->numExpReplies = 1;
             }
-            if ( replyTimeout != 0U )
-            {
-                timeout = replyTimeout;
-            }
-            else
-            {
-                timeout = appHandle->mdDefault.replyTimeout;
-            }
-            /*no else needed here, the only other value must be TRDP_MSG_MN*/
-            /*the very initial param check takes care of correct msg types */   
+            /* getting default timeout values is now the task of the API function */
         }
-        pSenderElement->interval.tv_sec     = timeout / 1000000;
-        pSenderElement->interval.tv_usec    = timeout % 1000000;
-        trdp_mdSetSessionTimeout(pSenderElement, timeout);
+
+        /* This condition is used to deicriminate the infinite timeout for Mr */
+        if ((msgType == TRDP_MSG_MR)&&(replyTimeout == TDRP_MD_INFINITE_TIME))
+        {
+            /* add the infinity requirement from table A.17 */
+            pSenderElement->interval.tv_sec     = 0xFFFFFFFFU;/* let alone this setting gives a timeout way longer than a century */
+            pSenderElement->interval.tv_usec    = 999999U;    /* max upper limit for micro seconds below 1 second */
+            timeoutWire = 0U; /* the table A.17 representation of infinity, only applicable for Mr! */
+        }
+        else
+        {
+            pSenderElement->interval.tv_sec     = replyTimeout / 1000000;
+            pSenderElement->interval.tv_usec    = replyTimeout % 1000000;
+            /* this line will set the timeout value for Mn also to zero, which */
+            /* seems to be ok, as this mesage will not cause the creation of   */
+            /* a session. */
+            timeoutWire = replyTimeout;
+        }                                                           
+
+        trdp_mdSetSessionTimeout(pSenderElement);
 
         errv = trdp_mdConnectSocket(appHandle, 
                                     pSendParam, 
@@ -3274,7 +3305,7 @@ TRDP_ERR_T trdp_mdCall (
             {
                 trdp_mdDetailSenderPacket(msgType,
                                           replyStatus,
-                                          timeout,
+                                          timeoutWire, /* holds the wire values accd. table A.17 */
                                           0, /* initial sequenceCounter is always 0 */
                                           pData,
                                           dataSize,
