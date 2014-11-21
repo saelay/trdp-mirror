@@ -52,6 +52,8 @@
 /*  Default MD communication parameters   */
 #define TRDP_MD_DEFAULT_QOS     3
 #define TRDP_MD_DEFAULT_TTL     64
+/*  Definitions for time out behaviour accd. table A.17 */
+#define TDRP_MD_INFINITE_TIME 0xFFFFFFFF
 
 /*  Default PD communication parameters   */
 #define TRDP_PD_DEFAULT_QOS     5
