@@ -626,10 +626,11 @@ int main (int argc, char * *argv)
                 int nread;
                 UINT32  addr;
                 UINT8 buffer[256];
+                int i;
                 ioctl(STDIN_FILENO,FIONREAD, &nread);
                 nread = read(STDIN_FILENO, buffer, nread);
                 buffer[nread] = 0;
-                for (int i = 0; buffer[i] != 0; i++)
+                for (i = 0; buffer[i] != 0; i++)
                 {
                     switch (buffer[i])
                     {
