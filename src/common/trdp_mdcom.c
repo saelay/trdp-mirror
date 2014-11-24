@@ -717,9 +717,18 @@ static void trdp_mdSetSessionTimeout (
     if (NULL != pMDSession)
     {
         vos_getTime(&pMDSession->timeToGo);
-        timeOut.tv_sec  = pMDSession->interval.tv_sec;
-        timeOut.tv_usec = pMDSession->interval.tv_usec;
-        vos_addTime(&pMDSession->timeToGo, &timeOut);
+		if (( pMDSession->interval.tv_sec == 0xFFFFFFFFU ) && ( pMDSession->interval.tv_usec == 999999U ))
+		{
+			/* bypass calculation in case of infinity desired from user */
+			pMDSession->timeToGo.tv_sec = pMDSession->interval.tv_sec; 
+			pMDSession->timeToGo.tv_usec = pMDSession->interval.tv_usec;
+		}
+		else
+		{
+			timeOut.tv_sec  = pMDSession->interval.tv_sec;
+			timeOut.tv_usec = pMDSession->interval.tv_usec;
+			vos_addTime(&pMDSession->timeToGo, &timeOut);
+		}
     }
 }
 
@@ -1590,22 +1599,23 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
         vos_getTime(&iterMD->timeToGo);
 
         /* timeout value */ 
-        if ((pH->replyTimeout == 0)&&(pH->msgType == TRDP_MSG_MR))
+        if ( (vos_ntohl(pH->replyTimeout) == 0)&&(vos_ntohs(pH->msgType) == TRDP_MSG_MR) )
         {
             /* Timeout compliance with Table A.17 */
             iterMD->interval.tv_sec  = 0xFFFFFFFFU;
             iterMD->interval.tv_usec = 999999U;
             /* Use extreme caution with infinite timeouts! */
+            iterMD->timeToGo.tv_sec  = 0xFFFFFFFFU;
+            iterMD->timeToGo.tv_usec = 999999U;
+            /* needs to be set this way to avoid wrap around */
         }
         else
         {
             /* for all other kinds of MD call (only Mn in this case) */
             iterMD->interval.tv_sec  = vos_ntohl(pH->replyTimeout) / 1000000;
             iterMD->interval.tv_usec = vos_ntohl(pH->replyTimeout) % 1000000;
-        }
-
-        vos_addTime(&iterMD->timeToGo, &iterMD->interval);
-
+            vos_addTime(&iterMD->timeToGo, &iterMD->interval);
+        } 
         /* save session Id and sequence counter for next steps */
         memcpy(iterMD->sessionID, pH->sessionID, TRDP_SESS_ID_SIZE);
         /* save source URI for reply */
