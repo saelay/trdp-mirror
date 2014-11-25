@@ -54,6 +54,10 @@
 #define CALLTEST_MR_TOPOX_COMID 5000
 #define CALLTEST_MP_TOPOX_COMID 5001
 
+/* Infinity Pair - sound weird, though basically a reply after 0xFFFFFFFE usec, will proof it */
+#define CALLTEST_MR_INF_COMID 6000
+#define CALLTEST_MQ_INF_COMID 6001
+
 
 static TRDP_APP_SESSION_T appSessionReplier = NULL;
 static TRDP_LIS_T         listenHandle     = NULL;
@@ -192,6 +196,23 @@ static  void mdCallback(
                 }
 
             }
+            if (pMsg->comId == CALLTEST_MR_INF_COMID)
+            {
+                err = tlm_replyQuery(appSessionReplier,
+                                     (const TRDP_UUID_T*)pMsg->sessionId,
+                                     CALLTEST_MQ_INF_COMID,
+                                     0,
+                                     1500000,
+                                     NULL,
+                                     (const UINT8*)&dataMQ,
+                                     sizeof(dataMQ));
+                if (err != TRDP_NO_ERR)
+                {
+                    /* echo unformatted error code */
+                    printf("tlm_replyQuery CALLTEST_MQ_INF_COMID failed - error code %d\n",err);
+                }                
+            }
+
             break;
         case TRDP_REPLYTO_ERR:
         case TRDP_TIMEOUT_ERR:
@@ -313,7 +334,22 @@ int main(int argc, char** argv)
         printf("Listening to CALLTEST_MR_COMID failed\n");
         goto CLEANUP;
     }
+    err = tlm_addListener(appSessionReplier, 
+                          &listenHandle, 
+                          NULL,
+                          NULL,
+                          CALLTEST_MR_INF_COMID, 
+                          0, 
+                          0,
+                          0, 
+                          TRDP_FLAGS_CALLBACK, 
+                          NULL);
 
+    if (err != TRDP_NO_ERR)
+    {
+        printf("Listening to CALLTEST_MR_COMID failed\n");
+        goto CLEANUP;
+    }
 
     while (1)
     {   
