@@ -843,6 +843,7 @@ static TRDP_ERR_T trdp_mdCheck (TRDP_SESSION_PT appHandle,
             err = TRDP_WIRE_ERR;
         }
     }
+
     /* check topocounter */
     if (TRDP_NO_ERR == err)
     {
@@ -1401,6 +1402,9 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
         case TRDP_WIRE_ERR:
             pElementStatistics->numProtErr++;
             break;
+        case TRDP_TOPO_ERR:
+            pElementStatistics->numTopoErr++;
+            break;
         default:
             ;
     }
@@ -1857,17 +1861,17 @@ static TRDP_ERR_T  trdp_mdRecv (
     vos_printLog(VOS_LOG_INFO,
                  "Received %s MD packet (type: '%c%c' UUID: %02x%02x%02x%02x%02x%02x%02x%02x Data len: %u)\n",
                  appHandle->pMDRcvEle->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
-                 (char) (appHandle->pMDRcvEle->pPacket->frameHead.msgType & 0xFF),
-                 (char) (appHandle->pMDRcvEle->pPacket->frameHead.msgType >> 8),
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[0],
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[1],
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[2],
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[3],
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[4],
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[5],
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[6],
-                 appHandle->pMDRcvEle->pPacket->frameHead.sessionID[7],
-                 vos_ntohl(appHandle->pMDRcvEle->pPacket->frameHead.datasetLength));
+                 (char) (pH->msgType & 0xFF),
+                 (char) (pH->msgType >> 8),
+                 pH->sessionID[0],
+                 pH->sessionID[1],
+                 pH->sessionID[2],
+                 pH->sessionID[3],
+                 pH->sessionID[4],
+                 pH->sessionID[5],
+                 pH->sessionID[6],
+                 pH->sessionID[7],
+                 vos_ntohl(pH->datasetLength));
 
     /* TCP cornerIp */
     if (isTCP)
