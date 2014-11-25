@@ -1181,7 +1181,7 @@ TRDP_ERR_T trdpCheckTopograhy(TRDP_APP_SESSION_T appHandle,
             /* unlock mutex */
             if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
             {
-                return VOS_MUTEX_ERR;
+                return TRDP_MUTEX_ERR;
             }
             else
             {
@@ -1192,12 +1192,12 @@ TRDP_ERR_T trdpCheckTopograhy(TRDP_APP_SESSION_T appHandle,
         /* unlock mutex */        
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
         {
-            return VOS_MUTEX_ERR;
+            return TRDP_MUTEX_ERR;
         }
     }
     else
     {
-        return VOS_MUTEX_ERR;
+        return TRDP_MUTEX_ERR;
     }
     /* topography check passed */
     return TRDP_NO_ERR;
