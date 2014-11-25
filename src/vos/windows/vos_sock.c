@@ -397,7 +397,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                     UINT8 physAddr[VOS_MAC_SIZE];
                     BOOL8 mismatch;    
 
-                    for (j = 0; j < pIfRow->dwPhysAddrLen; j++) 
+                    for (j = 0; (j < pIfRow->dwPhysAddrLen) && (j < VOS_MAC_SIZE); j++) 
                     {
                         physAddr[j] = (UINT8) pIfRow->bPhysAddr[j];
                     }
