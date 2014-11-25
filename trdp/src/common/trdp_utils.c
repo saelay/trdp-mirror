@@ -559,8 +559,8 @@ TRDP_ERR_T  trdp_requestSocket (
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           lIndex, emptySock = VOS_INVALID_SOCKET;
-    TRDP_ERR_T      err         = TRDP_NO_ERR;
-    TRDP_IP_ADDR_T  bindAddr    = srcIP;
+    TRDP_ERR_T      err               = TRDP_NO_ERR;
+    TRDP_IP_ADDR_T  bindAddr          = vos_determineBindAddr(srcIP, mcGroup, rcvMostly);
 
     if (iface == NULL || params == NULL || pIndex == NULL)
     {
@@ -572,12 +572,6 @@ TRDP_ERR_T  trdp_requestSocket (
      if we search for a multicast group enabled socket, we also search the list of mc groups (max. 20)
      and possibly add that group, if everything else fits.
      We remember already closed sockets on the way to be able to fill up gaps  */
-
-	/* On Linux, binding to an interface address will prevent receiving of MCs! It'll work on Windows, though	*/ 
-    if (vos_isMulticast(mcGroup) && rcvMostly)
-    {
-        bindAddr = 0;
-    }
 
     for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
     {
