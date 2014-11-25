@@ -3430,7 +3430,12 @@ TRDP_ERR_T trdp_mdConfirm (
             {
                 trdp_mdFillStateElement(TRDP_MSG_MC, pSenderElement);
 
-                trdp_mdManageSessionId(pSessionId, pSenderElement);
+                vos_printLog(VOS_LOG_INFO, "Using %s MD session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                    pSenderElement->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
+                    pSenderElement->sessionID[0], pSenderElement->sessionID[1],
+                    pSenderElement->sessionID[2], pSenderElement->sessionID[3],
+                    pSenderElement->sessionID[4], pSenderElement->sessionID[5],
+                    pSenderElement->sessionID[6], pSenderElement->sessionID[7]);
 
                 if ( NULL != pSenderElement->pPacket )
                 {
