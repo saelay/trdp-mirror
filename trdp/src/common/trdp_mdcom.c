@@ -76,10 +76,10 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
 
 static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
                                        BOOL8            isTCP,
-                                       TRDP_MD_ELE_ST_T state,
                                        UINT32           sockIndex,
-                                       MD_ELE_T*        iterMD,
-                                       MD_HEADER_T*     pH);
+                                       MD_HEADER_T*     pH,
+                                       TRDP_MD_ELE_ST_T state,
+                                       MD_ELE_T*        iterMD); 
 
 static void trdp_mdCloseSessions(TRDP_SESSION_PT appHandle, INT32 socketIndex, INT32 newSocket, BOOL8 checkAllSockets);
 static void trdp_mdSetSessionTimeout(MD_ELE_T *pMDSession);
@@ -1347,6 +1347,7 @@ static TRDP_ERR_T trdp_mdRecvUDPPacket(TRDP_SESSION_PT appHandle, INT32 mdSock, 
  *  @param[in]      appHandle       session pointer
  *  @param[in]      mdSock          socket descriptor
  *  @param[in]      pElement        pointer to received packet
+ *
  *  @retval         != TRDP_NO_ERR  error
  */
 static TRDP_ERR_T  trdp_mdRecvPacket (
@@ -1417,25 +1418,24 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
 }
 
 /**********************************************************************************************************************/
-/** Initiate sending MD request message - private SW level
- *  Send a MD request message
+/** Handle incoming request message - private SW level
  *
  *  @param[in]      appHandle       the handle returned by tlc_init
- *  @param[in]      isTCP           Pointer to listener specific callback function, NULL to use default function
- *  @param[out]     state           return session ID
- *  @param[in]      sockIndex       comId of packet to be sent
- *  @param[out]     iterMD          ETB topocount to use, 0 if consist local communication
- *  @param[in]      pH              operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      isTCP           TCP ?
+ *  @param[in]      sockIndex       socket index
+ *  @param[in]      pH              Header of the incoming message
+ *  @param[in ]     state           listener state to be set
+ *  @param[out]     iterMD          MD element handle to be returned
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOLIST_ERR     no listener
  */
 static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
                                        BOOL8            isTCP,
-                                       TRDP_MD_ELE_ST_T state,
                                        UINT32           sockIndex,
-                                       MD_ELE_T*        iterMD,
-                                       MD_HEADER_T*     pH) 
+                                       MD_HEADER_T*     pH,
+                                       TRDP_MD_ELE_ST_T state,
+                                       MD_ELE_T*        iterMD) 
 {
     UINT32         numOfReceivers = 0;
     MD_LIS_ELE_T  *iterListener   = NULL;
@@ -1888,10 +1888,11 @@ static TRDP_ERR_T  trdp_mdRecv (
             /* running ahead of further logic */
             result = trdp_mdHandleRequest(appHandle, 
                                           isTCP, 
-                                          state,
                                           sockIndex, 
-                                          iterMD, 
-                                          pH);
+                                          pH,
+                                          state,
+                                          iterMD);
+
             /* handle the various result values here */
             if ((iterMD == NULL)&&(result == TRDP_NO_ERR))
             {
