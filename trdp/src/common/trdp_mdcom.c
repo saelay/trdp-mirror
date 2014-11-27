@@ -1476,9 +1476,9 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                 *pResult = TRDP_NO_ERR;
                 return (MD_ELE_T*)NULL; 
             }
-            else if ( (pH->etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
+            else if ( (iterListener->addr.etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
                       || 
-                      (pH->opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
+                      (iterListener->addr.opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
             {
                 /* there has been a change in train configuration - ignore request */
                 vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Repeated request with wrong topocount - discard!\n");
