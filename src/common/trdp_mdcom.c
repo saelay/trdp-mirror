@@ -74,14 +74,12 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
 static BOOL8 trdp_mdTimeOutStateHandler( MD_ELE_T *pElement, TRDP_SESSION_PT appHandle, TRDP_ERR_T *pResult);
 static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEADER_T *pMdItemHeader);
 
-static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
-                                      BOOL8            isTCP,
-                                      TRDP_MD_ELE_ST_T state,
-                                      UINT32           sockIndex,
-                                      MD_ELE_T*        iterMD,
-                                      MD_HEADER_T*     pH,
-                                      MD_LIS_ELE_T*    iterListener,
-                                      TRDP_ERR_T*      pResult);
+static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
+                                       BOOL8            isTCP,
+                                       TRDP_MD_ELE_ST_T state,
+                                       UINT32           sockIndex,
+                                       MD_ELE_T*        iterMD,
+                                       MD_HEADER_T*     pH);
 
 static void trdp_mdCloseSessions(TRDP_SESSION_PT appHandle, INT32 socketIndex, INT32 newSocket, BOOL8 checkAllSockets);
 static void trdp_mdSetSessionTimeout(MD_ELE_T *pMDSession);
@@ -1426,25 +1424,22 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
  *  @param[in]      isTCP           Pointer to listener specific callback function, NULL to use default function
  *  @param[out]     state           return session ID
  *  @param[in]      sockIndex       comId of packet to be sent
- *  @param[in]      iterMD          ETB topocount to use, 0 if consist local communication
+ *  @param[out]     iterMD          ETB topocount to use, 0 if consist local communication
  *  @param[in]      pH              operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      iterListener    own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      pResult         where to send the packet to
  *
  *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR        out of memory
+ *  @retval         TRDP_NOLIST_ERR     no listener
  */
-static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
-                                      BOOL8            isTCP,
-                                      TRDP_MD_ELE_ST_T state,
-                                      UINT32           sockIndex,
-                                      MD_ELE_T*        iterMD,
-                                      MD_HEADER_T*     pH,
-                                      MD_LIS_ELE_T*    iterListener,
-                                      TRDP_ERR_T*      pResult) 
+static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
+                                       BOOL8            isTCP,
+                                       TRDP_MD_ELE_ST_T state,
+                                       UINT32           sockIndex,
+                                       MD_ELE_T*        iterMD,
+                                       MD_HEADER_T*     pH) 
 {
-    UINT32 numOfReceivers = 0;
+    UINT32         numOfReceivers = 0;
+    MD_LIS_ELE_T  *iterListener   = NULL;
+    TRDP_ERR_T     result         = TRDP_NO_ERR;
 
     /* Search for existing session (in case it is a repeated request)  */
     /* This is kind of error detection/comm issue remedy functionality */
@@ -1466,19 +1461,19 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                 /* discard call immediately */
                 vos_printLog(VOS_LOG_INFO,
                              "trdp_mdRecv: Repeated request discarded!\n");
-                *pResult = TRDP_NO_ERR;
-                return (MD_ELE_T*)NULL;
+                iterMD = (MD_ELE_T*)NULL;
+                return result;
             }
             else if ( iterMD->stateEle != TRDP_ST_RX_REPLYQUERY_W4C )
             {
                 /* reply has not been sent - discard immediately */
                 vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Reply not sent, request discarded!\n");
-                *pResult = TRDP_NO_ERR;
-                return (MD_ELE_T*)NULL; 
+                iterMD = (MD_ELE_T*)NULL;
+                return result; 
             }
-            else if ( (iterListener->addr.etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
+            else if ( (iterMD->addr.etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterMD->addr.etbTopoCnt))
                       || 
-                      (iterListener->addr.opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
+                      (iterMD->addr.opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterMD->addr.opTrnTopoCnt)) )
             {
                 /* there has been a change in train configuration - ignore request */
                 vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Repeated request with wrong topocount - discard!\n");
@@ -1505,8 +1500,8 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                 trdp_mdUpdatePacket(iterMD);
                 /* ready to proceed - will be handled by trdp_mdSend run- */
                 /* ning within its own loop triggered cyclically.         */
-                *pResult = TRDP_NO_ERR;
-                return (MD_ELE_T*)NULL;
+                iterMD = (MD_ELE_T*)NULL;
+                return result;
             }
         }
     }
@@ -1518,8 +1513,8 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
         /* Indicate that this call can not get replied due to receiver count limitation  */
         (void)trdp_mdSendME(appHandle, pH, TRDP_REPLY_NO_MEM_REPL);
         /* return to calling routine without performing any receiver action */
-        *pResult = TRDP_NO_ERR;
-        return (MD_ELE_T*)NULL;
+        iterMD = (MD_ELE_T*)NULL;
+        return result;
     }
 
     iterMD = NULL; /* reset item for the actual lookup task */
@@ -1553,9 +1548,9 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
             /* Step 1: here we need to check the topccounts */
             /* in case of train communication (topo counter != zero) check topo validity of recvd message and */
             /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                    */
-            if ( (pH->etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
+            if ( (iterListener->addr.etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
                  || 
-                 (pH->opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
+                 (iterListener->addr.opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
             {
                 /* wrong topo count, this listener must be updated (re-added) */
                 continue;
@@ -1637,11 +1632,11 @@ static MD_ELE_T* trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
             appHandle->stats.udpMd.numNoListener++;
         }
         vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: No listener found!\n");
-        *pResult = TRDP_NOLIST_ERR;
+        result = TRDP_NOLIST_ERR;
         /* attempt sending Me, do not worry about issues */
         (void)trdp_mdSendME(appHandle, pH, TRDP_REPLY_NO_REPLIER_INST);
     }
-    return iterMD;
+    return result;
 }
 
 
@@ -1797,7 +1792,6 @@ static TRDP_ERR_T  trdp_mdRecv (
     TRDP_ERR_T          resForCallback  = TRDP_NO_ERR;
     MD_HEADER_T         *pH             = NULL;
     MD_ELE_T            *iterMD         = NULL;
-    MD_LIS_ELE_T        *iterListener   = NULL;
     TRDP_MD_ELE_ST_T    state;
     BOOL8               isTCP           = FALSE;
 
@@ -1892,14 +1886,12 @@ static TRDP_ERR_T  trdp_mdRecv (
             /* Search for existing session (in case it is a repeated request)  */
             /* This is kind of error detection/comm issue remedy functionality */
             /* running ahead of further logic */
-            iterMD = trdp_mdHandleRequest(appHandle, 
+            result = trdp_mdHandleRequest(appHandle, 
                                           isTCP, 
                                           state,
                                           sockIndex, 
                                           iterMD, 
-                                          pH, 
-                                          iterListener, 
-                                          &result);
+                                          pH);
             /* handle the various result values here */
             if ((iterMD == NULL)&&(result == TRDP_NO_ERR))
             {
