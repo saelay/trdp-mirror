@@ -273,8 +273,8 @@ PD_ELE_T *trdp_queueFindSubAddr (
                      if etbTopoCnt or opTrnTopoCnt are zero or match*/
         if ((iterPD->addr.comId == addr->comId)
             && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr))
-            && ((addr->etbTopoCnt == 0) || (iterPD->addr.etbTopoCnt == addr->etbTopoCnt))
-            && ((addr->opTrnTopoCnt == 0) || (iterPD->addr.opTrnTopoCnt == addr->opTrnTopoCnt))
+            && ((iterPD->addr.etbTopoCnt == 0) || (iterPD->addr.etbTopoCnt == addr->etbTopoCnt))
+            && ((iterPD->addr.opTrnTopoCnt == 0) || (iterPD->addr.opTrnTopoCnt == addr->opTrnTopoCnt))
             )
         {
             return iterPD;
