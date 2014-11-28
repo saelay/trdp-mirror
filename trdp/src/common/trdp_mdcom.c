@@ -77,9 +77,9 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
 static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
                                        BOOL8            isTCP,
                                        UINT32           sockIndex,
-                                       MD_HEADER_T*     pH,
+                                       MD_HEADER_T     *pH,
                                        TRDP_MD_ELE_ST_T state,
-                                       MD_ELE_T*        iterMD); 
+                                       MD_ELE_T       **pIterMD); 
 
 static void trdp_mdCloseSessions(TRDP_SESSION_PT appHandle, INT32 socketIndex, INT32 newSocket, BOOL8 checkAllSockets);
 static void trdp_mdSetSessionTimeout(MD_ELE_T *pMDSession);
@@ -1425,7 +1425,7 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
  *  @param[in]      sockIndex       socket index
  *  @param[in]      pH              Header of the incoming message
  *  @param[in ]     state           listener state to be set
- *  @param[out]     iterMD          MD element handle to be returned
+ *  @param[out]     pIterMD         Pointer to MD element handle to be returned
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOLIST_ERR     no listener
@@ -1433,18 +1433,21 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
 static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle, 
                                        BOOL8            isTCP,
                                        UINT32           sockIndex,
-                                       MD_HEADER_T*     pH,
+                                       MD_HEADER_T     *pH,
                                        TRDP_MD_ELE_ST_T state,
-                                       MD_ELE_T*        iterMD) 
+                                       MD_ELE_T       **pIterMD) 
 {
     UINT32         numOfReceivers = 0;
     MD_LIS_ELE_T  *iterListener   = NULL;
     TRDP_ERR_T     result         = TRDP_NO_ERR;
+    MD_ELE_T*      iterMD         = NULL;
+
+    /* set pointer to be returned to NULL */
+    *pIterMD = NULL;
 
     /* Search for existing session (in case it is a repeated request)  */
     /* This is kind of error detection/comm issue remedy functionality */
     /* running ahead of further logic */
-
     for ( iterMD = appHandle->pMDRcvQueue; iterMD != NULL; iterMD = iterMD->pNext )
     {
         numOfReceivers++; /* count the list items here */
@@ -1461,14 +1464,12 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                 /* discard call immediately */
                 vos_printLog(VOS_LOG_INFO,
                              "trdp_mdRecv: Repeated request discarded!\n");
-                iterMD = (MD_ELE_T*)NULL;
                 return result;
             }
             else if ( iterMD->stateEle != TRDP_ST_RX_REPLYQUERY_W4C )
             {
                 /* reply has not been sent - discard immediately */
                 vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Reply not sent, request discarded!\n");
-                iterMD = (MD_ELE_T*)NULL;
                 return result; 
             }
             else if ( (iterMD->addr.etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterMD->addr.etbTopoCnt))
@@ -1500,7 +1501,6 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                 trdp_mdUpdatePacket(iterMD);
                 /* ready to proceed - will be handled by trdp_mdSend run- */
                 /* ning within its own loop triggered cyclically.         */
-                iterMD = (MD_ELE_T*)NULL;
                 return result;
             }
         }
@@ -1636,6 +1636,8 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
         /* attempt sending Me, do not worry about issues */
         (void)trdp_mdSendME(appHandle, pH, TRDP_REPLY_NO_REPLIER_INST);
     }
+
+    *pIterMD = iterMD;
     return result;
 }
 
@@ -1891,7 +1893,7 @@ static TRDP_ERR_T  trdp_mdRecv (
                                           sockIndex, 
                                           pH,
                                           state,
-                                          iterMD);
+                                          &iterMD);
 
             /* handle the various result values here */
             if ((iterMD == NULL)&&(result == TRDP_NO_ERR))
