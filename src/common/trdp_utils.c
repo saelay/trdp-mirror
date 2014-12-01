@@ -269,15 +269,19 @@ PD_ELE_T *trdp_queueFindSubAddr (
 
     for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
-        /*  We match if src/dst/mc address is zero or matches or
-                     if etbTopoCnt or opTrnTopoCnt are zero or match*/
+        /*  We match if src/dst/mc address is zero or matches */
         if ((iterPD->addr.comId == addr->comId)
             && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr))
-            && ((iterPD->addr.etbTopoCnt == 0) || (iterPD->addr.etbTopoCnt == addr->etbTopoCnt))
-            && ((iterPD->addr.opTrnTopoCnt == 0) || (iterPD->addr.opTrnTopoCnt == addr->opTrnTopoCnt))
-            )
+            && ((iterPD->addr.etbTopoCnt == 0) || (iterPD->addr.etbTopoCnt == addr->srcIpAddr)))
         {
-            return iterPD;
+            /*  We match if etbTopoCnt or opTrnTopoCnt of the subscription are zero or match */
+            if ( trdp_validTopoCounters( addr->srcIpAddr,
+                                         addr->opTrnTopoCnt,
+                                         iterPD->addr.etbTopoCnt,
+                                         iterPD->addr.opTrnTopoCnt))
+            {
+                return iterPD;
+            }
         }
     }
     return NULL;
@@ -315,6 +319,43 @@ void    trdp_queueDelElement (
             iterPD->pNext = pDelete->pNext;
             return;
         }
+    }
+}
+
+
+/**********************************************************************************************************************/
+/** Check topography counters
+ *  The applied conformance pattern follows Table A.5/A.21 (positive match):
+ *  Telegram to be sent   Locally stored value (appSession)
+ *  Case etbTopoCnt opTrnTopoCnt etbTopoCntFilter opTrnTopoCntFilter
+ *  1    any        any          0                0
+ *  2    any        equal        0                equal
+ *  3    equal      any          equal            0
+ *  4    equal      equal        equal            equal
+ *
+ *  @param[in]      etbTopoCount            ETB topography counter to be checked
+ *  @param[in]      opTopoCount             Operational topography counter to be checked
+ *  @param[in]      etbTopoCountFilter      ETB topography counter filter value
+ *  @param[in]      opTopoCountFilter       Operational topography counter filter value
+ *
+ *  @retval         TRUE           Filter criteria matched
+ *                  FALSE          Filter criteria not matched
+ */
+BOOL8 trdp_validTopoCounters (
+    UINT32  etbTopoCnt,
+    UINT32  opTrnTopoCnt,
+    UINT32  etbTopoCntFilter,
+    UINT32  opTrnTopoCntFilter)
+{
+    if (((etbTopoCntFilter == 0) || (etbTopoCnt == etbTopoCntFilter))
+        &&
+        ((opTrnTopoCntFilter == 0) || (opTrnTopoCnt == opTrnTopoCntFilter)) )
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
     }
 }
 
@@ -1139,66 +1180,3 @@ BOOL8 trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T des
 }
 
 
-/**********************************************************************************************************************/
-/** Check the topgraphy values for synchronicity
- *  Mutex protected the given topography values are checked to be in line with those of
- *  of the application session
- *  The applied conformance pattern follows Table A.5 (positive match):
- *  Telegram to be sent   Locally stored value (appSession)
- *  Case etbTopoCnt opTrnTopoCnt etbTopoCnt opTrnTopoCnt
- *  1    any        any          0          0
- *  2    0          equal        0          equal
- *  3    equal      any          equal      0
- *  4    equal      equal        equal      equal
-
- *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
- *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *
- *  @retval         TRDP_NO_ERR         no error
- *  @retval         VOS_MUTEX_ERR       parameter error
- *  @retval         TRDP_TOPO_ERR       out of memory
- */
-TRDP_ERR_T trdpCheckTopograhy(TRDP_APP_SESSION_T appHandle,
-                              UINT32             etbTopoCnt,
-                              UINT32             opTrnTopoCnt)
-{ 
-    if (vos_mutexLock(appHandle->mutex) == VOS_NO_ERR)
-    {
-        /* train communication seems to get established */
-        /* check, that topo values are equal, to those  */
-        /* specified within app session - use mutex     */
-        /* protection                                   */
-        /* this check is performed for synchronicity:   */
-        /* during inauguration a scenario where the     */
-        /* session is yet updated but the MD generating */
-        /* has not updated the topography               */
-        if (((etbTopoCnt != 0) && (etbTopoCnt != appHandle->etbTopoCnt))
-            ||
-            ((opTrnTopoCnt != 0) && (opTrnTopoCnt != appHandle->opTrnTopoCnt)))
-        {
-            /* topography check failed */
-            /* unlock mutex */
-            if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
-            {
-                return TRDP_MUTEX_ERR;
-            }
-            else
-            {
-                return TRDP_TOPO_ERR;
-            }
-        }
-        /* topography check passed */
-        /* unlock mutex */        
-        if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
-        {
-            return TRDP_MUTEX_ERR;
-        }
-    }
-    else
-    {
-        return TRDP_MUTEX_ERR;
-    }
-    /* topography check passed */
-    return TRDP_NO_ERR;
-}

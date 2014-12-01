@@ -273,7 +273,28 @@ BOOL8 trdp_isAddressed (
     const TRDP_URI_USER_T   destUri);
 
 
-TRDP_ERR_T trdpCheckTopograhy(TRDP_APP_SESSION_T appHandle,
-                              UINT32             etbTopoCnt,
-                              UINT32             opTrnTopoCnt);
+/**********************************************************************************************************************/
+/** Check topography counters
+ *  The applied conformance pattern follows Table A.5/A.21 (positive match):
+ *  Telegram to be sent   Locally stored value (appSession)
+ *  Case etbTopoCnt opTrnTopoCnt etbTopoCntFilter opTrnTopoCntFilter
+ *  1    any        any          0                0
+ *  2    any        equal        0                equal
+ *  3    equal      any          equal            0
+ *  4    equal      equal        equal            equal
+ *
+ *  @param[in]      etbTopoCount            ETB topography counter to be checked
+ *  @param[in]      opTopoCount             Operational topography counter to be checked
+ *  @param[in]      etbTopoCountFilter      ETB topography counter filter value
+ *  @param[in]      opTopoCountFilter       Operational topography counter filter value
+ *
+ *  @retval         TRUE           Filter criteria matched
+ *                  FALSE          Filter criteria not matched
+ */
+BOOL8 trdp_validTopoCounters (
+    UINT32  etbTopoCnt,
+    UINT32  opTrnTopoCnt,
+    UINT32  etbTopoCntFilter,
+    UINT32  opTrnTopoCntFilter);
+
 #endif

@@ -508,11 +508,10 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
     /* iterate through the receive queue */
     for (iterMD = startElement; iterMD != NULL; iterMD = iterMD->pNext)
     {
-        /* in case of train communication (topo counter != zero) check topo validity of recvd message and */
-        /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                    */
-        if ((pMdItemHeader->etbTopoCnt   != 0 && iterMD->addr.etbTopoCnt   != vos_ntohl(pMdItemHeader->etbTopoCnt))
-            ||
-            (pMdItemHeader->opTrnTopoCnt != 0 && iterMD->addr.opTrnTopoCnt != vos_ntohl(pMdItemHeader->opTrnTopoCnt)))
+        if ( !trdp_validTopoCounters( vos_ntohl(pMdItemHeader->etbTopoCnt),
+                                      vos_ntohl(pMdItemHeader->opTrnTopoCnt),
+                                      iterMD->addr.etbTopoCnt,
+                                      iterMD->addr.opTrnTopoCnt))
         {
             /* wrong topo count, this receiver is outdated */
             continue;
@@ -845,11 +844,12 @@ static TRDP_ERR_T trdp_mdCheck (TRDP_SESSION_PT appHandle,
     /* check topocounter */
     if (TRDP_NO_ERR == err)
     {
-        if ((pPacket->etbTopoCnt   != 0 && vos_ntohl(pPacket->etbTopoCnt)   != appHandle->etbTopoCnt)
-            ||
-            (pPacket->opTrnTopoCnt != 0 && vos_ntohl(pPacket->opTrnTopoCnt) != appHandle->opTrnTopoCnt))
+        if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
+                                      appHandle->opTrnTopoCnt,
+                                      vos_ntohl(pPacket->etbTopoCnt),
+                                      vos_ntohl(pPacket->opTrnTopoCnt)))
         {
-            vos_printLog(VOS_LOG_ERROR, "MDframe topocount error %u/%u, expected %u/%u\n",
+            vos_printLog(VOS_LOG_ERROR, "Topocount error - received: %u/%u, actual: %u/%u\n",
                          vos_ntohl(pPacket->etbTopoCnt), vos_ntohl(pPacket->opTrnTopoCnt),
                          appHandle->etbTopoCnt, appHandle->opTrnTopoCnt);
             err = TRDP_TOPO_ERR;
@@ -1472,12 +1472,15 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                 vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Reply not sent, request discarded!\n");
                 return result; 
             }
-            else if ( (iterMD->addr.etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterMD->addr.etbTopoCnt))
-                      || 
-                      (iterMD->addr.opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterMD->addr.opTrnTopoCnt)) )
+            else if ( !trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
+                                               vos_ntohl(pH->opTrnTopoCnt),
+                                               iterMD->addr.etbTopoCnt,
+                                               iterMD->addr.opTrnTopoCnt))
             {
                 /* there has been a change in train configuration - ignore request */
-                vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Repeated request with wrong topocount - discard!\n");
+                vos_printLog(VOS_LOG_ERROR, "Repeated request topocount error - received: %u/%u, expected: %u/%u\n",
+                             vos_ntohl(pH->etbTopoCnt), vos_ntohl(pH->opTrnTopoCnt),
+                             iterMD->addr.etbTopoCnt, iterMD->addr.opTrnTopoCnt);
                 break; /* exit lookup at this place */
             }
             else
@@ -1548,14 +1551,10 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
             /* Step 1: here we need to check the topccounts */
             /* in case of train communication (topo counter != zero) check topo validity of recvd message and */
             /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                    */
-            if ( (iterListener->addr.etbTopoCnt   != 0 && (vos_ntohl(pH->etbTopoCnt)   != iterListener->addr.etbTopoCnt))
-                 || 
-                 (iterListener->addr.opTrnTopoCnt != 0 && (vos_ntohl(pH->opTrnTopoCnt) != iterListener->addr.opTrnTopoCnt)) )
-            {
-                /* wrong topo count, this listener must be updated (re-added) */
-                continue;
-            }
-            else
+            if ( trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
+                                         vos_ntohl(pH->opTrnTopoCnt),
+                                         iterListener->addr.etbTopoCnt,
+                                         iterListener->addr.opTrnTopoCnt))
             { 
                 /* We found a listener, set some values for this new session  */
                 iterMD                    = appHandle->pMDRcvEle;
@@ -1589,7 +1588,12 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                              pH->sessionID[3], pH->sessionID[4], pH->sessionID[5],
                              pH->sessionID[6], pH->sessionID[7]);
                 break;
-            }         
+            }
+            else
+            {
+                /* wrong topo count, this listener must be updated (re-added) */
+                continue;
+            }
         }
     }
     if ( NULL != iterMD )
