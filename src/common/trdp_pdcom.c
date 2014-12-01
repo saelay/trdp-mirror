@@ -381,6 +381,7 @@ TRDP_ERR_T  trdp_pdReceive (
                                   vos_ntohl(pNewFrame->frameHead.etbTopoCnt),
                                   vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt)))
     {
+        appHandle->stats.pd.numTopoErr++;
         return TRDP_TOPO_ERR;
     }
 
