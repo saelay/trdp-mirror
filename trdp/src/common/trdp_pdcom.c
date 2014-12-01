@@ -244,10 +244,10 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
 
-                if ((iterPD->pFrame->frameHead.etbTopoCnt != 0 &&
-                    vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt) != appHandle->etbTopoCnt) ||
-                    (iterPD->pFrame->frameHead.opTrnTopoCnt != 0 &&
-                     vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt) != appHandle->opTrnTopoCnt))
+                if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
+                                              appHandle->opTrnTopoCnt,
+                                              vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt),
+                                              vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt)))
                 {
                     err = TRDP_TOPO_ERR;
                     vos_printLog(VOS_LOG_INFO, "Sending PD: TopoCount is out of date!\n");
@@ -376,7 +376,10 @@ TRDP_ERR_T  trdp_pdReceive (
     }
 
     /* First check incoming packet's topoCount against session topoCounts */
-    if (trdp_pdCheckAppTopoCounts(appHandle, &pNewFrame->frameHead) != TRDP_NO_ERR)
+    if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
+                                  appHandle->opTrnTopoCnt,
+                                  vos_ntohl(pNewFrame->frameHead.etbTopoCnt),
+                                  vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt)))
     {
         return TRDP_TOPO_ERR;
     }
@@ -734,40 +737,6 @@ void    trdp_pdUpdate (
     pPacket->pFrame->frameHead.frameCheckSum = MAKE_LE(myCRC);
 }
 
-/******************************************************************************/
-/** Check if the PD header topocounts are correct compared to the session values
- *
- *  @param[in]      appHandle           session pointer
- *  @param[in]      pFrame              pointer to the packet to check
- *
- *  @retval         TRDP_NO_ERR
- *  @retval         TRDP_TOPO_ERR
- */
-TRDP_ERR_T trdp_pdCheckAppTopoCounts (
-    TRDP_SESSION_PT appHandle,
-    PD_HEADER_T     *pFrame)
-{
-    /*  Check topocounts  */
-    if (pFrame->etbTopoCnt != 0 &&
-        vos_ntohl(pFrame->etbTopoCnt) != appHandle->etbTopoCnt)
-    {
-        appHandle->stats.pd.numTopoErr++;
-        vos_printLog(VOS_LOG_INFO, "PD data with wrong ETB topocount ignored (comId %u, topo %u)\n",
-                     vos_ntohl(pFrame->comId),
-                     vos_ntohl(pFrame->etbTopoCnt));
-        return TRDP_TOPO_ERR;
-    }
-    if (pFrame->opTrnTopoCnt != 0 &&
-        vos_ntohl(pFrame->opTrnTopoCnt) != appHandle->opTrnTopoCnt)
-    {
-        appHandle->stats.pd.numTopoErr++;
-        vos_printLog(VOS_LOG_INFO, "PD data with wrong opTrnDir topocount ignored (comId %u, topo %u)\n",
-                     vos_ntohl(pFrame->comId),
-                     vos_ntohl(pFrame->opTrnTopoCnt));
-        return TRDP_TOPO_ERR;
-    }
-    return TRDP_NO_ERR;
-}
 
 /******************************************************************************/
 /** Check if the PD header values and the CRCs are sane
