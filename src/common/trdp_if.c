@@ -2338,11 +2338,12 @@ TRDP_ERR_T tlm_request (
         mdTimeOut = appHandle->mdDefault.confirmTimeout;
     }
 
-    errv = trdpCheckTopograhy(appHandle, etbTopoCnt, opTrnTopoCnt);
-
-    if ( errv != TRDP_NO_ERR )
+    if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
+                                  appHandle->opTrnTopoCnt,
+                                  etbTopoCnt,
+                                  opTrnTopoCnt))  
     {
-        return errv;
+        return TRDP_TOPO_ERR;
     }
     else
     {
