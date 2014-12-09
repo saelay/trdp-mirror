@@ -271,14 +271,16 @@ PD_ELE_T *trdp_queueFindSubAddr (
     {
         /*  We match if src/dst/mc address is zero or matches */
         if ((iterPD->addr.comId == addr->comId)
-            && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr))
-            && ((iterPD->addr.etbTopoCnt == 0) || (iterPD->addr.etbTopoCnt == addr->srcIpAddr)))
+            && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr)))
         {
-            /*  We match if etbTopoCnt or opTrnTopoCnt of the subscription are zero or match */
-            if ( trdp_validTopoCounters( addr->srcIpAddr,
-                                         addr->opTrnTopoCnt,
-                                         iterPD->addr.etbTopoCnt,
-                                         iterPD->addr.opTrnTopoCnt))
+            /*  We check for local communication
+                or if etbTopoCnt and opTrnTopoCnt of the subscription are zero or match */
+            if ( 
+                    ((addr->etbTopoCnt == 0) && (addr->opTrnTopoCnt == 0))
+                  || trdp_validTopoCounters( addr->etbTopoCnt,
+                                             addr->opTrnTopoCnt,
+                                             iterPD->addr.etbTopoCnt,
+                                             iterPD->addr.opTrnTopoCnt))
             {
                 return iterPD;
             }
