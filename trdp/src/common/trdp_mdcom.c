@@ -508,10 +508,12 @@ static MD_ELE_T* trdp_mdHandleConfirmReply(TRDP_APP_SESSION_T appHandle, MD_HEAD
     /* iterate through the receive queue */
     for (iterMD = startElement; iterMD != NULL; iterMD = iterMD->pNext)
     {
-        if ( !trdp_validTopoCounters( vos_ntohl(pMdItemHeader->etbTopoCnt),
-                                      vos_ntohl(pMdItemHeader->opTrnTopoCnt),
-                                      iterMD->addr.etbTopoCnt,
-                                      iterMD->addr.opTrnTopoCnt))
+        /* accept only local communication or matching topo counters */
+        if (    ((pMdItemHeader->etbTopoCnt != 0) || (pMdItemHeader->opTrnTopoCnt !=  0))
+             && !trdp_validTopoCounters( vos_ntohl(pMdItemHeader->etbTopoCnt),
+                                         vos_ntohl(pMdItemHeader->opTrnTopoCnt),
+                                         iterMD->addr.etbTopoCnt,
+                                         iterMD->addr.opTrnTopoCnt))
         {
             /* wrong topo count, this receiver is outdated */
             continue;
@@ -841,7 +843,7 @@ static TRDP_ERR_T trdp_mdCheck (TRDP_SESSION_PT appHandle,
         }
     }
 
-    /* check topocounter */
+    /* check topocounters */
     if (TRDP_NO_ERR == err)
     {
         if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
@@ -1472,12 +1474,13 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                 vos_printLog(VOS_LOG_INFO,"trdp_mdRecv: Reply not sent, request discarded!\n");
                 return result; 
             }
-            else if ( !trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
-                                               vos_ntohl(pH->opTrnTopoCnt),
-                                               iterMD->addr.etbTopoCnt,
-                                               iterMD->addr.opTrnTopoCnt))
+            else if (    ((pH->etbTopoCnt != 0) || (pH->opTrnTopoCnt !=  0))
+                      && !trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
+                                                  vos_ntohl(pH->opTrnTopoCnt),
+                                                  iterMD->addr.etbTopoCnt,
+                                                  iterMD->addr.opTrnTopoCnt))
             {
-                /* there has been a change in train configuration - ignore request */
+                /* no local communication and there has been a change in train configuration - ignore request */
                 vos_printLog(VOS_LOG_ERROR, "Repeated request topocount error - received: %u/%u, expected: %u/%u\n",
                              vos_ntohl(pH->etbTopoCnt), vos_ntohl(pH->opTrnTopoCnt),
                              iterMD->addr.etbTopoCnt, iterMD->addr.opTrnTopoCnt);
@@ -1549,12 +1552,13 @@ static TRDP_ERR_T trdp_mdHandleRequest(TRDP_SESSION_PT  appHandle,
                               TRDP_DEST_URI_SIZE) == 0) )
         {
             /* Step 1: here we need to check the topccounts */
-            /* in case of train communication (topo counter != zero) check topo validity of recvd message and */
+            /* in case of train communication (topo counters != zero) check topo validity of recvd message and */
             /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                    */
-            if ( trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
-                                         vos_ntohl(pH->opTrnTopoCnt),
-                                         iterListener->addr.etbTopoCnt,
-                                         iterListener->addr.opTrnTopoCnt))
+            if (    ((pH->etbTopoCnt == 0) && (pH->opTrnTopoCnt == 0))
+                 || trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
+                                            vos_ntohl(pH->opTrnTopoCnt),
+                                            iterListener->addr.etbTopoCnt,
+                                            iterListener->addr.opTrnTopoCnt))
             { 
                 /* We found a listener, set some values for this new session  */
                 iterMD                    = appHandle->pMDRcvEle;
