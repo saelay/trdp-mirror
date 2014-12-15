@@ -335,10 +335,10 @@ void    trdp_queueDelElement (
  *  3    equal      any          equal            0
  *  4    equal      equal        equal            equal
  *
- *  @param[in]      etbTopoCount            ETB topography counter to be checked
- *  @param[in]      opTopoCount             Operational topography counter to be checked
- *  @param[in]      etbTopoCountFilter      ETB topography counter filter value
- *  @param[in]      opTopoCountFilter       Operational topography counter filter value
+ *  @param[in]      etbTopoCnt              ETB topography counter to be checked
+ *  @param[in]      opTrnTopoCnt            Operational topography counter to be checked
+ *  @param[in]      etbTopoCntFilter        ETB topography counter filter value
+ *  @param[in]      opTrnTopoCntFilter      Operational topography counter filter value
  *
  *  @retval         TRUE           Filter criteria matched
  *                  FALSE          Filter criteria not matched
