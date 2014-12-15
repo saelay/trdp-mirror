@@ -802,7 +802,7 @@ int main(int argc, char * argv[])
     unsigned tick = 0;
 
     printf("TRDP process data test program, version r178\n");
-#if defined (POSIX)
+
     if (argc < 4)
     {
         printf("usage: %s <localip> <remoteip> <mcast> <logfile>\n", argv[0]);
@@ -818,12 +818,6 @@ int main(int argc, char * argv[])
     dstip = vos_dottedIP(argv[2]);
     mcast = vos_dottedIP(argv[3]);
 
-#else
-    /* fix settings for vxworks, as program is right now only callable via tshell */
-    srcip = vos_dottedIP("53.191.121.40"/*argv[1]*/);
-    dstip = vos_dottedIP("53.191.121.73"/*argv[2]*/);
-    mcast = vos_dottedIP("239.0.0.1"    /*argv[3]*/);
-#endif
     if (!srcip || !dstip || (mcast >> 28) != 0xE)
     {
         printf("invalid input arguments\n");
