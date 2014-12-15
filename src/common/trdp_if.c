@@ -2286,7 +2286,7 @@ TRDP_ERR_T tlm_notify (
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL
  *  @param[in]      numReplies          number of expected replies, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
- *  @param[in]      maxNumRetries       maximum number of retries (0 … 2) 
+ *  @param[in]      maxNumRetries       maximum number of retries (0 ... 2)
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -2318,7 +2318,6 @@ TRDP_ERR_T tlm_request (
     const TRDP_URI_USER_T   sourceURI,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T errv = TRDP_NO_ERR;
     UINT32 mdTimeOut;
 
     if ( !trdp_isValidSession(appHandle) )
