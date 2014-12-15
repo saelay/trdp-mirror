@@ -113,7 +113,7 @@ typedef struct
 typedef struct
 {
     TRDP_LABEL_T    ifName;       /**< interface name   */
-    UINT8           networkId;    /**< used network on the device (1…4)   */
+    UINT8           networkId;    /**< used network on the device (1...4)   */
     TRDP_IP_ADDR_T  hostIp;       /**< host IP address   */
     TRDP_IP_ADDR_T  leaderIp;     /**< Leader IP address dependant on redundancy concept   */
 } TRDP_IF_CONFIG_T;

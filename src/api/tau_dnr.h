@@ -63,7 +63,7 @@ EXT_DECL TRDP_ERR_T tau_initDnr (void);
 
 /**********************************************************************************************************************/
 /**    Who am I ?.
- *  Realizes a kind of ëWho am Ií function. It is used to determine the own identifiers (i.e. the own labels),
+ *  Realizes a kind of 'Who am I' function. It is used to determine the own identifiers (i.e. the own labels),
  *  which may be used as host part of the own fully qualified domain name.
  *
  *  @param[out]     devId           Returns the device label (host name)

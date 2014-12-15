@@ -724,7 +724,7 @@ typedef struct
    interrelated.
 
    \image html SingleThreadedWorkflowPD.pdf "Sample client workflow"
-   \image latex SingleThreadedWorkflowPD.eps "Sample client workflow" width=\textwidth
+   \image latex SingleThreadedWorkflowPD.eps "Sample client workflow" height=15cm
 
 
    \section api_conventions_sec Conventions of the API

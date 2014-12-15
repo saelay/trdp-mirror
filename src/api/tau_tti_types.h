@@ -238,12 +238,12 @@ typedef struct
                                                  trnCstNo == 1 (exactly the same as in structure TRAIN_DIRECTORY).
                                                  If trnCstNo == 0 it is not mandatory to list all consists 
                                                  (only consists which should send CSTINFO telegram). 
-                                                 The parameters ‘trnCstNo’ and ‘cstOrient’ are optional 
+                                                 The parameters 'trnCstNo' and 'cstOrient' are optional
                                                  and can be set to 0.                                           */
     UINT32                  trnTopoCnt;     /**< trnTopoCnt value 
                                                  ctrlType == 0: actual value
                                                  ctrlType == 1: set to 0                        */
-    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ësafeSequCountí == 0
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter 'safeSequCount' == 0
                                              completely set to 0 == not used                                    */
 } GNU_PACKED TRDP_CSTINFOCTRL_T;
     
@@ -284,7 +284,7 @@ typedef struct
                                                  value range: 1..63, a value of 0 indicates that this vehicle has 
                                                  been inserted by correction */
     UINT8                   vehOrient;      /**< vehicle orientation,
-                                                 ‘00’B = not known (corrected vehicle)
+                                                 '00'B = not known (corrected vehicle)
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
     UINT8                   ownOpCstNo;     /**< operational consist number the vehicle belongs to */
@@ -300,7 +300,7 @@ typedef struct
                                                  0 if not available (e.g. correction) */
     UINT8                   opCstNo;        /**< operational consist number in train (1..63) */
     UINT8                   opCstOrient;    /**< consist orientation
-                                                 ‘00’B = not known (corrected vehicle)
+                                                 '00'B = not known (corrected vehicle)
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
     UINT8                   trnCstNo;       /*< sequence number of consist in train
@@ -328,8 +328,8 @@ typedef struct
                                                  '01'B == inalid, '10'B == valid */
     UINT8                   reserved03;     /**< reserved for future use (= 0) */
     TRDP_LABEL_T            trnId;          /**< train identifier, application defined
-                                                 (e.g. ICE75, IC346), informal */
-    TRDP_LABEL_T            trnOperator;    /**< train operator, e.g. trenitalia.it, informal */
+                                                 (e.g. 'ICE75', 'IC346'), informal */
+    TRDP_LABEL_T            trnOperator;    /**< train operator, e.g. 'trenitalia.it', informal */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter
                                                  set to 0 if opTrnDirState == invalid */
     UINT32                  crc;            /**< sc-32 computed over record (seed value: 'FFFFFFFF'H) */
