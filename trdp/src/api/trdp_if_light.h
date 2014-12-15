@@ -577,7 +577,7 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
  *  @param[in]      numReplies          number of expected replies, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
- *  @param[in]      maxNumRetries       maximum number of retries (0 … 2)
+ *  @param[in]      maxNumRetries       maximum number of retries (0 ... 2)
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data

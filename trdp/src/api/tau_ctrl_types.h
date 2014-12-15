@@ -212,8 +212,8 @@ typedef struct
     TRDP_OP_VEHICLE_T       confVehList[TRDP_MAX_VEH_CNT];  
                                             /**< ordered list of confirmed vehicles in the train,
                                                  starting with vehicle at train head, see chapter 5.3.3.2.10.
-                                                 Parameters ‘isLead’ and ‘leadDir’ to be set to 0                   */
-    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+                                                 Parameters 'isLead' and 'leadDir' to be set to 0                   */
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter 'safeSequCount' == 0
                                                  completely set to 0 == SDTv2 not used                              */
 }  GNU_PACKED TRDP_ECSP_CONF_REQUEST_T;
 
@@ -227,7 +227,7 @@ typedef struct
     UINT8                   reserved01;     /**< reserved (=0)                                                      */
     TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT32                  reqSafetyCode;  /**< SC-32 value of the request message                                 */
-    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter 'safeSequCount' == 0
                                                  completely set to 0 == not used                                    */
 }  GNU_PACKED TRDP_ECSP_CONF_REPLY_T;
 
@@ -253,7 +253,7 @@ typedef struct
                                                  0 = no action (keep old state)
                                                  1 = deactivate sleep mode
                                                  2 = activate sleep mode (line activity sensing)                    */
-    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter 'safeSequCount' == 0
                                                  completely set to 0 == not used                                    */
 } GNU_PACKED TRDP_ETBN_CTRL_REQUEST_T;
 
@@ -311,7 +311,7 @@ typedef struct
                                                  1 = sleep mode active (line activity sensing)                      */
     UINT16                  reserved02;     /**< reserved (= 0)                                                     */
     UINT32                  etbTopoCnt;     /**< ETB topography counter                                             */
-    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter ‘safeSequCount’ == 0
+    TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter 'safeSequCount' == 0
                                                  completely set to 0 == not used                                    */
 } GNU_PACKED TRDP_ETBN_STATUS_REPLY_T;
 

@@ -56,6 +56,8 @@
 		7308114C17ABF8C9003DAE84 /* test_marshalling.c in Sources */ = {isa = PBXBuildFile; fileRef = 737B18CE15D901F000724FEF /* test_marshalling.c */; };
 		730DAFA116A07B700019B4D0 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		730DAFA216A07B8F0019B4D0 /* trdp-pd-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 730DAF9716A07B150019B4D0 /* trdp-pd-test.c */; };
+		732076C819FA724F00B52C75 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		732076C919FA726500B52C75 /* inaugTest.c in Sources */ = {isa = PBXBuildFile; fileRef = 732076BA19FA493400B52C75 /* inaugTest.c */; };
 		7322488016A97E7900148295 /* crc-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7322487F16A97E7900148295 /* crc-test.c */; };
 		7322488516A97EE200148295 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		7327CA6016555BEA0020536A /* tau_marshall.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F457C9152DE1FE00D1C522 /* tau_marshall.h */; };
@@ -188,6 +190,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 7322486C16A97D5400148295;
 			remoteInfo = "crc-check";
+		};
+		732076CA19FA727100B52C75 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
 		};
 		7322481E16A879EB00148295 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -439,6 +448,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		732076BD19FA722200B52C75 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		73603CEE175CBE79004608BD /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -491,6 +509,8 @@
 		7312929C1535BEA1006B3A88 /* SingleThreadedWorkflowPDpolling.graffle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = SingleThreadedWorkflowPDpolling.graffle; path = ../diverse/SingleThreadedWorkflowPDpolling.graffle; sourceTree = "<group>"; };
 		7312929D1535BEA1006B3A88 /* SingleThreadedWorkflowPDpolling.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = SingleThreadedWorkflowPDpolling.pdf; sourceTree = "<group>"; };
 		7312929E1535BEA1006B3A88 /* TCNOpen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TCNOpen.png; sourceTree = "<group>"; };
+		732076BA19FA493400B52C75 /* inaugTest.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = inaugTest.c; path = ../test/diverse/inaugTest.c; sourceTree = "<group>"; };
+		732076BF19FA722200B52C75 /* inaugTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = inaugTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7321F85E177B2753008D1DB7 /* AVR_ATMega1680_config */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AVR_ATMega1680_config; sourceTree = "<group>"; };
 		7321F85F177B2835008D1DB7 /* Makefile_Arduino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_Arduino; path = ../Makefile_Arduino; sourceTree = SOURCE_ROOT; };
 		7321F861177B2AAE008D1DB7 /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_private.h; sourceTree = "<group>"; };
@@ -793,6 +813,103 @@
 		73D6657A15D3D88700A352D4 /* tau_marshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_marshall.c; sourceTree = "<group>"; };
 		73D71BB11917D5CF003F9A87 /* tau_ctrl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_ctrl.c; sourceTree = "<group>"; };
 		73D71BB21917D5CF003F9A87 /* tau_dnr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_dnr.c; sourceTree = "<group>"; };
+		73DC3DBB1A3EEB2500D660BB /* MDtests.sln */ = {isa = PBXFileReference; lastKnownFileType = text; path = MDtests.sln; sourceTree = "<group>"; };
+		73DC3DBC1A3EEB2500D660BB /* trdp-light.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-light.vcproj"; sourceTree = "<group>"; };
+		73DC3DBD1A3EEB2500D660BB /* trdp-md-test.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-md-test.vcproj"; sourceTree = "<group>"; };
+		73DC3DBF1A3EEB2500D660BB /* PDtests.sln */ = {isa = PBXFileReference; lastKnownFileType = text; path = PDtests.sln; sourceTree = "<group>"; };
+		73DC3DC01A3EEB2500D660BB /* trdp-light.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-light.vcproj"; sourceTree = "<group>"; };
+		73DC3DC11A3EEB2500D660BB /* trdp-pd-test.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-pd-test.vcproj"; sourceTree = "<group>"; };
+		73DC3DC41A3EEB2600D660BB /* cl.command.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = cl.command.1.tlog; sourceTree = "<group>"; };
+		73DC3DC51A3EEB2600D660BB /* cl.read.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = cl.read.1.tlog; sourceTree = "<group>"; };
+		73DC3DC61A3EEB2600D660BB /* cl.write.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = cl.write.1.tlog; sourceTree = "<group>"; };
+		73DC3DC71A3EEB2600D660BB /* Lib-link-cvtres.read.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Lib-link-cvtres.read.1.tlog"; sourceTree = "<group>"; };
+		73DC3DC81A3EEB2600D660BB /* Lib-link-cvtres.write.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Lib-link-cvtres.write.1.tlog"; sourceTree = "<group>"; };
+		73DC3DC91A3EEB2600D660BB /* Lib-link.read.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Lib-link.read.1.tlog"; sourceTree = "<group>"; };
+		73DC3DCA1A3EEB2600D660BB /* Lib-link.write.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Lib-link.write.1.tlog"; sourceTree = "<group>"; };
+		73DC3DCB1A3EEB2600D660BB /* lib.command.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = lib.command.1.tlog; sourceTree = "<group>"; };
+		73DC3DCC1A3EEB2600D660BB /* rc.command.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = rc.command.1.tlog; sourceTree = "<group>"; };
+		73DC3DCD1A3EEB2600D660BB /* rc.read.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = rc.read.1.tlog; sourceTree = "<group>"; };
+		73DC3DCE1A3EEB2600D660BB /* rc.write.1.tlog */ = {isa = PBXFileReference; lastKnownFileType = text; path = rc.write.1.tlog; sourceTree = "<group>"; };
+		73DC3DCF1A3EEB2600D660BB /* tau_ctrl.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = tau_ctrl.obj; sourceTree = "<group>"; };
+		73DC3DD01A3EEB2600D660BB /* tau_dnr.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = tau_dnr.obj; sourceTree = "<group>"; };
+		73DC3DD11A3EEB2600D660BB /* tau_marshall.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = tau_marshall.obj; sourceTree = "<group>"; };
+		73DC3DD21A3EEB2600D660BB /* tau_tti.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = tau_tti.obj; sourceTree = "<group>"; };
+		73DC3DD31A3EEB2600D660BB /* tau_xml.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = tau_xml.obj; sourceTree = "<group>"; };
+		73DC3DD41A3EEB2600D660BB /* trdp_if.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = trdp_if.obj; sourceTree = "<group>"; };
+		73DC3DD51A3EEB2600D660BB /* trdp_mdcom.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = trdp_mdcom.obj; sourceTree = "<group>"; };
+		73DC3DD61A3EEB2600D660BB /* trdp_pdcom.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = trdp_pdcom.obj; sourceTree = "<group>"; };
+		73DC3DD71A3EEB2600D660BB /* trdp_stats.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = trdp_stats.obj; sourceTree = "<group>"; };
+		73DC3DD81A3EEB2600D660BB /* trdp_utils.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = trdp_utils.obj; sourceTree = "<group>"; };
+		73DC3DD91A3EEB2600D660BB /* vc100.idb */ = {isa = PBXFileReference; lastKnownFileType = file; path = vc100.idb; sourceTree = "<group>"; };
+		73DC3DDA1A3EEB2600D660BB /* vc100.pdb */ = {isa = PBXFileReference; lastKnownFileType = file; path = vc100.pdb; sourceTree = "<group>"; };
+		73DC3DDB1A3EEB2600D660BB /* vos_mem.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = vos_mem.obj; sourceTree = "<group>"; };
+		73DC3DDC1A3EEB2600D660BB /* vos_shared_mem.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = vos_shared_mem.obj; sourceTree = "<group>"; };
+		73DC3DDD1A3EEB2600D660BB /* vos_sock.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = vos_sock.obj; sourceTree = "<group>"; };
+		73DC3DDE1A3EEB2600D660BB /* vos_thread.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = vos_thread.obj; sourceTree = "<group>"; };
+		73DC3DDF1A3EEB2600D660BB /* vos_utils.obj */ = {isa = PBXFileReference; lastKnownFileType = file; path = vos_utils.obj; sourceTree = "<group>"; };
+		73DC3DE01A3EEB2600D660BB /* Win32TRDP.Build.CppClean.log */ = {isa = PBXFileReference; lastKnownFileType = text; path = Win32TRDP.Build.CppClean.log; sourceTree = "<group>"; };
+		73DC3DE11A3EEB2600D660BB /* Win32TRDP.lastbuildstate */ = {isa = PBXFileReference; lastKnownFileType = text; path = Win32TRDP.lastbuildstate; sourceTree = "<group>"; };
+		73DC3DE21A3EEB2600D660BB /* Win32TRDP.log */ = {isa = PBXFileReference; lastKnownFileType = text; path = Win32TRDP.log; sourceTree = "<group>"; };
+		73DC3DE31A3EEB2600D660BB /* Win32TRDP.res */ = {isa = PBXFileReference; lastKnownFileType = file; path = Win32TRDP.res; sourceTree = "<group>"; };
+		73DC3DE41A3EEB2600D660BB /* resource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = resource.h; sourceTree = "<group>"; };
+		73DC3DE51A3EEB2600D660BB /* Win32TRDP.rc */ = {isa = PBXFileReference; lastKnownFileType = text; path = Win32TRDP.rc; sourceTree = "<group>"; };
+		73DC3DE61A3EEB2600D660BB /* Win32TRDP.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP.vcproj; sourceTree = "<group>"; };
+		73DC3DE71A3EEB2600D660BB /* Win32TRDP.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP.vcxproj; sourceTree = "<group>"; };
+		73DC3DE81A3EEB2600D660BB /* Win32TRDP.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3DEA1A3EEB2600D660BB /* Win32TRDP_VS8.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_VS8.vcproj; sourceTree = "<group>"; };
+		73DC3DEB1A3EEB2600D660BB /* Win32TRDP_VS8_xml.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_VS8_xml.vcproj; sourceTree = "<group>"; };
+		73DC3E1A1A3EEB2600D660BB /* Win32TRDP_DLL.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_DLL.vcxproj; sourceTree = "<group>"; };
+		73DC3E1B1A3EEB2600D660BB /* Win32TRDP_DLL.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_DLL.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3E1C1A3EEB2600D660BB /* Win32TRDP_DLL.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_DLL.vcxproj.user; sourceTree = "<group>"; };
+		73DC3E601A3EEB2700D660BB /* Win32TRDP_MarshallTest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MarshallTest.vcxproj; sourceTree = "<group>"; };
+		73DC3E611A3EEB2700D660BB /* Win32TRDP_MarshallTest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MarshallTest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3E621A3EEB2700D660BB /* Win32TRDP_MarshallTest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MarshallTest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3E641A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MD_Repetition_Caller.vcxproj; sourceTree = "<group>"; };
+		73DC3E651A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MD_Repetition_Caller.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3E661A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MD_Repetition_Caller.vcxproj.user; sourceTree = "<group>"; };
+		73DC3E681A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MD_Repetition_Replier.vcxproj; sourceTree = "<group>"; };
+		73DC3E691A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MD_Repetition_Replier.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3E6A1A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MD_Repetition_Replier.vcxproj.user; sourceTree = "<group>"; };
+		73DC3E891A3EEB2700D660BB /* WIN32TRDP_MDTest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_MDTest.vcxproj; sourceTree = "<group>"; };
+		73DC3E8A1A3EEB2700D660BB /* WIN32TRDP_MDTest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_MDTest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3E8B1A3EEB2700D660BB /* WIN32TRDP_MDTest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_MDTest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3EB01A3EEB2800D660BB /* Win32TRDP_MDTest_Basic.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MDTest_Basic.vcxproj; sourceTree = "<group>"; };
+		73DC3EB11A3EEB2800D660BB /* Win32TRDP_MDTest_Basic.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_MDTest_Basic.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3ED41A3EEB2800D660BB /* Win32TRDP_PDTest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_PDTest.vcxproj; sourceTree = "<group>"; };
+		73DC3ED51A3EEB2800D660BB /* Win32TRDP_PDTest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_PDTest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3ED61A3EEB2800D660BB /* Win32TRDP_PDTest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_PDTest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3EED1A3EEB2800D660BB /* WIN32TRDP_PDTest_CB.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_PDTest_CB.vcxproj; sourceTree = "<group>"; };
+		73DC3EEE1A3EEB2800D660BB /* WIN32TRDP_PDTest_CB.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_PDTest_CB.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3EEF1A3EEB2800D660BB /* WIN32TRDP_PDTest_CB.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_PDTest_CB.vcxproj.user; sourceTree = "<group>"; };
+		73DC3F0F1A3EEB2800D660BB /* Win32TRDP_StatisticsTest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_StatisticsTest.vcxproj; sourceTree = "<group>"; };
+		73DC3F101A3EEB2800D660BB /* Win32TRDP_StatisticsTest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_StatisticsTest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3F111A3EEB2800D660BB /* Win32TRDP_StatisticsTest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_StatisticsTest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3F311A3EEB2900D660BB /* Win32TRDP_Tests.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_Tests.vcxproj; sourceTree = "<group>"; };
+		73DC3F321A3EEB2900D660BB /* Win32TRDP_Tests.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_Tests.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3F331A3EEB2900D660BB /* Win32TRDP_Tests.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_Tests.vcxproj.user; sourceTree = "<group>"; };
+		73DC3F531A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_TrafficShapingTest.vcxproj; sourceTree = "<group>"; };
+		73DC3F541A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_TrafficShapingTest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3F551A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_TrafficShapingTest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3F751A3EEB2900D660BB /* vtest.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = vtest.c; sourceTree = "<group>"; };
+		73DC3F761A3EEB2900D660BB /* vtest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vtest.h; sourceTree = "<group>"; };
+		73DC3F771A3EEB2900D660BB /* WIN32TRDP_VOStest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_VOStest.vcxproj; sourceTree = "<group>"; };
+		73DC3F781A3EEB2900D660BB /* WIN32TRDP_VOStest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_VOStest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3F791A3EEB2900D660BB /* WIN32TRDP_VOStest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = WIN32TRDP_VOStest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3F7A1A3EEB2900D660BB /* Win32TRDP_VS2010.sln */ = {isa = PBXFileReference; lastKnownFileType = text; path = Win32TRDP_VS2010.sln; sourceTree = "<group>"; };
+		73DC3F9B1A3EEB2A00D660BB /* Win32TRDP_XMLPDTest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_XMLPDTest.vcxproj; sourceTree = "<group>"; };
+		73DC3F9C1A3EEB2A00D660BB /* Win32TRDP_XMLPDTest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_XMLPDTest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3F9D1A3EEB2A00D660BB /* Win32TRDP_XMLPDTest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_XMLPDTest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3FBD1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest.vcxproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_XMLPrintTest.vcxproj; sourceTree = "<group>"; };
+		73DC3FBE1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest.vcxproj.filters */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_XMLPrintTest.vcxproj.filters; sourceTree = "<group>"; };
+		73DC3FBF1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest.vcxproj.user */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Win32TRDP_XMLPrintTest.vcxproj.user; sourceTree = "<group>"; };
+		73DC3FC11A3EEB2A00D660BB /* trdp-xmlpd-test.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-xmlpd-test.vcproj"; sourceTree = "<group>"; };
+		73DC3FC21A3EEB2A00D660BB /* trdp-xmlprint-test.vcproj */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-xmlprint-test.vcproj"; sourceTree = "<group>"; };
+		73DC3FC31A3EEB2A00D660BB /* XMLtests.sln */ = {isa = PBXFileReference; lastKnownFileType = text; path = XMLtests.sln; sourceTree = "<group>"; };
+		73DC3FC41A3EEB8700D660BB /* rep-testcaller.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "rep-testcaller.c"; sourceTree = "<group>"; };
+		73DC3FC51A3EEB8700D660BB /* rep-testreplier.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "rep-testreplier.c"; sourceTree = "<group>"; };
+		73DC3FC61A3EEB8700D660BB /* trdp-md-test.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-md-test.xml"; sourceTree = "<group>"; };
+		73DC3FC71A3EEB8700D660BB /* patterns.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = patterns.txt; sourceTree = "<group>"; };
+		73DC3FC81A3EEB9D00D660BB /* patterns.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = patterns.txt; sourceTree = "<group>"; };
 		73DF2C6C1781C64D00D086EB /* Time.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Time.cpp; sourceTree = "<group>"; };
 		73DF2C6D1781C64D00D086EB /* Time.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Time.h; sourceTree = "<group>"; };
 		73DF2C6E1781CD1600D086EB /* TimerOne.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimerOne.cpp; sourceTree = "<group>"; };
@@ -1619,6 +1736,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		732076BC19FA722200B52C75 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				732076C819FA724F00B52C75 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7322486B16A97D5400148295 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1856,6 +1981,7 @@
 				73E4979516CEA1DA00045EFA /* spy */,
 				734A94F816CEA320002D0F9B /* resources */,
 				73C2028E174BC9CF003C5A0E /* ArduinoMega */,
+				73DC3D8B1A3EEB2500D660BB /* VisualC */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
 			name = trdp;
@@ -1889,6 +2015,7 @@
 				73603CF2175CBE79004608BD /* md-test */,
 				734091B91765D8A100CFCE5B /* testSub */,
 				734092521769E99300CFCE5B /* testladder */,
+				732076BF19FA722200B52C75 /* inaugTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1896,6 +2023,7 @@
 		730DAF9516A07B150019B4D0 /* pdpatterns */ = {
 			isa = PBXGroup;
 			children = (
+				73DC3FC81A3EEB9D00D660BB /* patterns.txt */,
 				730DAF9616A07B150019B4D0 /* readme.txt */,
 				730DAF9716A07B150019B4D0 /* trdp-pd-test.c */,
 			);
@@ -2258,6 +2386,10 @@
 		7367955C17202EBE003C68ED /* mdpatterns */ = {
 			isa = PBXGroup;
 			children = (
+				73DC3FC41A3EEB8700D660BB /* rep-testcaller.c */,
+				73DC3FC51A3EEB8700D660BB /* rep-testreplier.c */,
+				73DC3FC61A3EEB8700D660BB /* trdp-md-test.xml */,
+				73DC3FC71A3EEB8700D660BB /* patterns.txt */,
 				7367955D17202EBE003C68ED /* trdp-md-test.c */,
 			);
 			path = mdpatterns;
@@ -2500,6 +2632,7 @@
 				73361446165BBF4500A70D3D /* test_trafficShaping.c */,
 				73FD2EEB16C1374700626293 /* test_mdSingle.c */,
 				7331A55C171566E400270642 /* pd_md_responder.c */,
+				732076BA19FA493400B52C75 /* inaugTest.c */,
 				7384E6B4172952A000830413 /* test_memSizes.c */,
 			);
 			name = diverse;
@@ -2575,6 +2708,258 @@
 			name = config;
 			path = ../config;
 			sourceTree = SOURCE_ROOT;
+		};
+		73DC3D8B1A3EEB2500D660BB /* VisualC */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3DBA1A3EEB2500D660BB /* MDtests */,
+				73DC3DBE1A3EEB2500D660BB /* PDtests */,
+				73DC3DC21A3EEB2500D660BB /* Win32TRDP */,
+				73DC3DEC1A3EEB2600D660BB /* Win32TRDP_DLL */,
+				73DC3E421A3EEB2700D660BB /* Win32TRDP_MarshallTest */,
+				73DC3E631A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller */,
+				73DC3E671A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier */,
+				73DC3E6B1A3EEB2700D660BB /* WIN32TRDP_MDTest */,
+				73DC3E8C1A3EEB2700D660BB /* Win32TRDP_MDTest_Basic */,
+				73DC3EB31A3EEB2800D660BB /* Win32TRDP_PDTest */,
+				73DC3ED71A3EEB2800D660BB /* WIN32TRDP_PDTest_CB */,
+				73DC3EF01A3EEB2800D660BB /* Win32TRDP_StatisticsTest */,
+				73DC3F121A3EEB2800D660BB /* Win32TRDP_Tests */,
+				73DC3F341A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest */,
+				73DC3F561A3EEB2900D660BB /* WIN32TRDP_VOStest */,
+				73DC3F7A1A3EEB2900D660BB /* Win32TRDP_VS2010.sln */,
+				73DC3F7C1A3EEB2900D660BB /* Win32TRDP_XMLPDTest */,
+				73DC3F9E1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest */,
+				73DC3FC01A3EEB2A00D660BB /* XMLTests */,
+			);
+			name = VisualC;
+			path = ../VisualC;
+			sourceTree = "<group>";
+		};
+		73DC3DBA1A3EEB2500D660BB /* MDtests */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3DBB1A3EEB2500D660BB /* MDtests.sln */,
+				73DC3DBC1A3EEB2500D660BB /* trdp-light.vcproj */,
+				73DC3DBD1A3EEB2500D660BB /* trdp-md-test.vcproj */,
+			);
+			path = MDtests;
+			sourceTree = "<group>";
+		};
+		73DC3DBE1A3EEB2500D660BB /* PDtests */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3DBF1A3EEB2500D660BB /* PDtests.sln */,
+				73DC3DC01A3EEB2500D660BB /* trdp-light.vcproj */,
+				73DC3DC11A3EEB2500D660BB /* trdp-pd-test.vcproj */,
+			);
+			path = PDtests;
+			sourceTree = "<group>";
+		};
+		73DC3DC21A3EEB2500D660BB /* Win32TRDP */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3DC31A3EEB2500D660BB /* Debug */,
+				73DC3DE41A3EEB2600D660BB /* resource.h */,
+				73DC3DE51A3EEB2600D660BB /* Win32TRDP.rc */,
+				73DC3DE61A3EEB2600D660BB /* Win32TRDP.vcproj */,
+				73DC3DE71A3EEB2600D660BB /* Win32TRDP.vcxproj */,
+				73DC3DE81A3EEB2600D660BB /* Win32TRDP.vcxproj.filters */,
+				73DC3DEA1A3EEB2600D660BB /* Win32TRDP_VS8.vcproj */,
+				73DC3DEB1A3EEB2600D660BB /* Win32TRDP_VS8_xml.vcproj */,
+			);
+			path = Win32TRDP;
+			sourceTree = "<group>";
+		};
+		73DC3DC31A3EEB2500D660BB /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3DC41A3EEB2600D660BB /* cl.command.1.tlog */,
+				73DC3DC51A3EEB2600D660BB /* cl.read.1.tlog */,
+				73DC3DC61A3EEB2600D660BB /* cl.write.1.tlog */,
+				73DC3DC71A3EEB2600D660BB /* Lib-link-cvtres.read.1.tlog */,
+				73DC3DC81A3EEB2600D660BB /* Lib-link-cvtres.write.1.tlog */,
+				73DC3DC91A3EEB2600D660BB /* Lib-link.read.1.tlog */,
+				73DC3DCA1A3EEB2600D660BB /* Lib-link.write.1.tlog */,
+				73DC3DCB1A3EEB2600D660BB /* lib.command.1.tlog */,
+				73DC3DCC1A3EEB2600D660BB /* rc.command.1.tlog */,
+				73DC3DCD1A3EEB2600D660BB /* rc.read.1.tlog */,
+				73DC3DCE1A3EEB2600D660BB /* rc.write.1.tlog */,
+				73DC3DCF1A3EEB2600D660BB /* tau_ctrl.obj */,
+				73DC3DD01A3EEB2600D660BB /* tau_dnr.obj */,
+				73DC3DD11A3EEB2600D660BB /* tau_marshall.obj */,
+				73DC3DD21A3EEB2600D660BB /* tau_tti.obj */,
+				73DC3DD31A3EEB2600D660BB /* tau_xml.obj */,
+				73DC3DD41A3EEB2600D660BB /* trdp_if.obj */,
+				73DC3DD51A3EEB2600D660BB /* trdp_mdcom.obj */,
+				73DC3DD61A3EEB2600D660BB /* trdp_pdcom.obj */,
+				73DC3DD71A3EEB2600D660BB /* trdp_stats.obj */,
+				73DC3DD81A3EEB2600D660BB /* trdp_utils.obj */,
+				73DC3DD91A3EEB2600D660BB /* vc100.idb */,
+				73DC3DDA1A3EEB2600D660BB /* vc100.pdb */,
+				73DC3DDB1A3EEB2600D660BB /* vos_mem.obj */,
+				73DC3DDC1A3EEB2600D660BB /* vos_shared_mem.obj */,
+				73DC3DDD1A3EEB2600D660BB /* vos_sock.obj */,
+				73DC3DDE1A3EEB2600D660BB /* vos_thread.obj */,
+				73DC3DDF1A3EEB2600D660BB /* vos_utils.obj */,
+				73DC3DE01A3EEB2600D660BB /* Win32TRDP.Build.CppClean.log */,
+				73DC3DE11A3EEB2600D660BB /* Win32TRDP.lastbuildstate */,
+				73DC3DE21A3EEB2600D660BB /* Win32TRDP.log */,
+				73DC3DE31A3EEB2600D660BB /* Win32TRDP.res */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		73DC3DEC1A3EEB2600D660BB /* Win32TRDP_DLL */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3E1A1A3EEB2600D660BB /* Win32TRDP_DLL.vcxproj */,
+				73DC3E1B1A3EEB2600D660BB /* Win32TRDP_DLL.vcxproj.filters */,
+				73DC3E1C1A3EEB2600D660BB /* Win32TRDP_DLL.vcxproj.user */,
+			);
+			path = Win32TRDP_DLL;
+			sourceTree = "<group>";
+		};
+		73DC3E421A3EEB2700D660BB /* Win32TRDP_MarshallTest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3E601A3EEB2700D660BB /* Win32TRDP_MarshallTest.vcxproj */,
+				73DC3E611A3EEB2700D660BB /* Win32TRDP_MarshallTest.vcxproj.filters */,
+				73DC3E621A3EEB2700D660BB /* Win32TRDP_MarshallTest.vcxproj.user */,
+			);
+			path = Win32TRDP_MarshallTest;
+			sourceTree = "<group>";
+		};
+		73DC3E631A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3E641A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller.vcxproj */,
+				73DC3E651A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller.vcxproj.filters */,
+				73DC3E661A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Caller.vcxproj.user */,
+			);
+			path = Win32TRDP_MD_Repetition_Caller;
+			sourceTree = "<group>";
+		};
+		73DC3E671A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3E681A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier.vcxproj */,
+				73DC3E691A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier.vcxproj.filters */,
+				73DC3E6A1A3EEB2700D660BB /* Win32TRDP_MD_Repetition_Replier.vcxproj.user */,
+			);
+			path = Win32TRDP_MD_Repetition_Replier;
+			sourceTree = "<group>";
+		};
+		73DC3E6B1A3EEB2700D660BB /* WIN32TRDP_MDTest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3E891A3EEB2700D660BB /* WIN32TRDP_MDTest.vcxproj */,
+				73DC3E8A1A3EEB2700D660BB /* WIN32TRDP_MDTest.vcxproj.filters */,
+				73DC3E8B1A3EEB2700D660BB /* WIN32TRDP_MDTest.vcxproj.user */,
+			);
+			path = WIN32TRDP_MDTest;
+			sourceTree = "<group>";
+		};
+		73DC3E8C1A3EEB2700D660BB /* Win32TRDP_MDTest_Basic */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3EB01A3EEB2800D660BB /* Win32TRDP_MDTest_Basic.vcxproj */,
+				73DC3EB11A3EEB2800D660BB /* Win32TRDP_MDTest_Basic.vcxproj.filters */,
+			);
+			path = Win32TRDP_MDTest_Basic;
+			sourceTree = "<group>";
+		};
+		73DC3EB31A3EEB2800D660BB /* Win32TRDP_PDTest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3ED41A3EEB2800D660BB /* Win32TRDP_PDTest.vcxproj */,
+				73DC3ED51A3EEB2800D660BB /* Win32TRDP_PDTest.vcxproj.filters */,
+				73DC3ED61A3EEB2800D660BB /* Win32TRDP_PDTest.vcxproj.user */,
+			);
+			path = Win32TRDP_PDTest;
+			sourceTree = "<group>";
+		};
+		73DC3ED71A3EEB2800D660BB /* WIN32TRDP_PDTest_CB */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3EED1A3EEB2800D660BB /* WIN32TRDP_PDTest_CB.vcxproj */,
+				73DC3EEE1A3EEB2800D660BB /* WIN32TRDP_PDTest_CB.vcxproj.filters */,
+				73DC3EEF1A3EEB2800D660BB /* WIN32TRDP_PDTest_CB.vcxproj.user */,
+			);
+			path = WIN32TRDP_PDTest_CB;
+			sourceTree = "<group>";
+		};
+		73DC3EF01A3EEB2800D660BB /* Win32TRDP_StatisticsTest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3F0F1A3EEB2800D660BB /* Win32TRDP_StatisticsTest.vcxproj */,
+				73DC3F101A3EEB2800D660BB /* Win32TRDP_StatisticsTest.vcxproj.filters */,
+				73DC3F111A3EEB2800D660BB /* Win32TRDP_StatisticsTest.vcxproj.user */,
+			);
+			path = Win32TRDP_StatisticsTest;
+			sourceTree = "<group>";
+		};
+		73DC3F121A3EEB2800D660BB /* Win32TRDP_Tests */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3F311A3EEB2900D660BB /* Win32TRDP_Tests.vcxproj */,
+				73DC3F321A3EEB2900D660BB /* Win32TRDP_Tests.vcxproj.filters */,
+				73DC3F331A3EEB2900D660BB /* Win32TRDP_Tests.vcxproj.user */,
+			);
+			path = Win32TRDP_Tests;
+			sourceTree = "<group>";
+		};
+		73DC3F341A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3F531A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest.vcxproj */,
+				73DC3F541A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest.vcxproj.filters */,
+				73DC3F551A3EEB2900D660BB /* Win32TRDP_TrafficShapingTest.vcxproj.user */,
+			);
+			path = Win32TRDP_TrafficShapingTest;
+			sourceTree = "<group>";
+		};
+		73DC3F561A3EEB2900D660BB /* WIN32TRDP_VOStest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3F751A3EEB2900D660BB /* vtest.c */,
+				73DC3F761A3EEB2900D660BB /* vtest.h */,
+				73DC3F771A3EEB2900D660BB /* WIN32TRDP_VOStest.vcxproj */,
+				73DC3F781A3EEB2900D660BB /* WIN32TRDP_VOStest.vcxproj.filters */,
+				73DC3F791A3EEB2900D660BB /* WIN32TRDP_VOStest.vcxproj.user */,
+			);
+			path = WIN32TRDP_VOStest;
+			sourceTree = "<group>";
+		};
+		73DC3F7C1A3EEB2900D660BB /* Win32TRDP_XMLPDTest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3F9B1A3EEB2A00D660BB /* Win32TRDP_XMLPDTest.vcxproj */,
+				73DC3F9C1A3EEB2A00D660BB /* Win32TRDP_XMLPDTest.vcxproj.filters */,
+				73DC3F9D1A3EEB2A00D660BB /* Win32TRDP_XMLPDTest.vcxproj.user */,
+			);
+			path = Win32TRDP_XMLPDTest;
+			sourceTree = "<group>";
+		};
+		73DC3F9E1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3FBD1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest.vcxproj */,
+				73DC3FBE1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest.vcxproj.filters */,
+				73DC3FBF1A3EEB2A00D660BB /* Win32TRDP_XMLPrintTest.vcxproj.user */,
+			);
+			path = Win32TRDP_XMLPrintTest;
+			sourceTree = "<group>";
+		};
+		73DC3FC01A3EEB2A00D660BB /* XMLTests */ = {
+			isa = PBXGroup;
+			children = (
+				73DC3FC11A3EEB2A00D660BB /* trdp-xmlpd-test.vcproj */,
+				73DC3FC21A3EEB2A00D660BB /* trdp-xmlprint-test.vcproj */,
+				73DC3FC31A3EEB2A00D660BB /* XMLtests.sln */,
+			);
+			path = XMLTests;
+			sourceTree = "<group>";
 		};
 		73DF2DEB17830CA900D086EB /* EthernetMulti */ = {
 			isa = PBXGroup;
@@ -3968,6 +4353,24 @@
 			productReference = 730DAF9D16A07B5B0019B4D0 /* pd-test */;
 			productType = "com.apple.product-type.tool";
 		};
+		732076BE19FA722200B52C75 /* inaugTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 732076C519FA722300B52C75 /* Build configuration list for PBXNativeTarget "inaugTest" */;
+			buildPhases = (
+				732076BB19FA722200B52C75 /* Sources */,
+				732076BC19FA722200B52C75 /* Frameworks */,
+				732076BD19FA722200B52C75 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				732076CB19FA727100B52C75 /* PBXTargetDependency */,
+			);
+			name = inaugTest;
+			productName = inaugTest;
+			productReference = 732076BF19FA722200B52C75 /* inaugTest */;
+			productType = "com.apple.product-type.tool";
+		};
 		7322486C16A97D5400148295 /* crc-check */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7322487B16A97D7800148295 /* Build configuration list for PBXNativeTarget "crc-check" */;
@@ -4404,6 +4807,7 @@
 				73C20289174BC9CF003C5A0E /* Fast */,
 				73C2028B174BC9CF003C5A0E /* Index */,
 				73DF2EA41783304600D086EB /* ArduinoDemo */,
+				732076BE19FA722200B52C75 /* inaugTest */,
 			);
 		};
 /* End PBXProject section */
@@ -4441,6 +4845,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				730DAFA216A07B8F0019B4D0 /* trdp-pd-test.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		732076BB19FA722200B52C75 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				732076C919FA726500B52C75 /* inaugTest.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4682,6 +5094,11 @@
 			isa = PBXTargetDependency;
 			target = 7322486C16A97D5400148295 /* crc-check */;
 			targetProxy = 731F5F2017204BF4005CDBA1 /* PBXContainerItemProxy */;
+		};
+		732076CB19FA727100B52C75 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 732076CA19FA727100B52C75 /* PBXContainerItemProxy */;
 		};
 		7322481F16A879EB00148295 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5025,6 +5442,78 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = "pd-test";
 				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		732076C619FA722300B52C75 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_CFLAGS = (
+					"-DL_ENDIAN",
+					"-DPOSIX",
+					"-D__APPLE__",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		732076C719FA722300B52C75 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_CFLAGS = (
+					"-DL_ENDIAN",
+					"-DPOSIX",
+					"-D__APPLE__",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -6140,6 +6629,15 @@
 			buildConfigurations = (
 				730DAF9F16A07B5C0019B4D0 /* Debug */,
 				730DAFA016A07B5C0019B4D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		732076C519FA722300B52C75 /* Build configuration list for PBXNativeTarget "inaugTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				732076C619FA722300B52C75 /* Debug */,
+				732076C719FA722300B52C75 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
