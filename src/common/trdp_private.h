@@ -38,7 +38,7 @@
  */
 
 #define TRDP_VERSION            1
-#define TRDP_RELEASE            0
+#define TRDP_RELEASE            2
 #define TRDP_UPDATE             1
 #define TRDP_EVOLUTION          0
 
