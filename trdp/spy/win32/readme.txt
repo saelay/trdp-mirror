@@ -1,6 +1,7 @@
-v1.2.0.0
+TRDP SPY
 ----------------------------------
-1. Only for wireshark version 1.8.3
+Requirements:
+Wireshark version 1.8.3
 
 Features:
 1. User data interpretation support
