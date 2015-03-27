@@ -646,7 +646,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
                 else
                 {
-                    if (vos_sockJoinMC(iface[lIndex].sock, mcGroup, iface[lIndex].bindAddr) != VOS_NO_ERR)
+                    if (vos_sockJoinMC(iface[lIndex].sock, mcGroup, srcIP) != VOS_NO_ERR)
                     {
                         if (trdp_SockDelJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
                         {
@@ -778,7 +778,7 @@ TRDP_ERR_T  trdp_requestSocket (
                         if (0 != mcGroup)
                         {
 
-                            err = (TRDP_ERR_T) vos_sockJoinMC(iface[lIndex].sock, mcGroup, iface[lIndex].bindAddr);
+                            err = (TRDP_ERR_T) vos_sockJoinMC(iface[lIndex].sock, mcGroup, srcIP);
                             if (err != TRDP_NO_ERR)
                             {
                                 vos_printLog(VOS_LOG_ERROR, "vos_sockJoinMC() for UDP rcv failed! (Err: %d)\n", err);
