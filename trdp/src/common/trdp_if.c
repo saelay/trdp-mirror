@@ -681,6 +681,10 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void)
             }
         }
 
+        /* Delete SessionMutex and clear static variable */
+        vos_mutexDelete(sSessionMutex);
+        sSessionMutex = NULL;
+
         /* Close stop timers, release memory  */
         vos_terminate();
         sInited = FALSE;
