@@ -100,9 +100,9 @@ extern "C" {
 /** Thread policy matching pthread/Posix defines    */
 typedef enum
 {
-    VOS_THREAD_POLICY_OTHER = 1,        /*  Default for the target system    */
-    VOS_THREAD_POLICY_FIFO = 4,         /*  First come, first serve          */
-    VOS_THREAD_POLICY_RR = 2            /*  Round robin                      */
+    VOS_THREAD_POLICY_OTHER = 0,        /*  Default for the target system    */
+    VOS_THREAD_POLICY_FIFO,             /*  First come, first serve          */
+    VOS_THREAD_POLICY_RR                /*  Round robin                      */
 } VOS_THREAD_POLICY_T;
 
 /** Thread priority range from 1 (highest) to 255 (lowest), 0 default of the target system    */
