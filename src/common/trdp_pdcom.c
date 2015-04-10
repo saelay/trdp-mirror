@@ -127,16 +127,17 @@ TRDP_ERR_T trdp_pdPut (
                            &dataSize,
                            &pPacket->pCachedDS);
         }
+
+        if (TRDP_NO_ERR == ret)
+        {
+            /* set data valid */
+            pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
+
+            /*  Update some statistics  */
+            pPacket->updPkts++;
+        }
     }
 
-    if (TRDP_NO_ERR == ret)
-    {
-        /* set data valid */
-        pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
-
-        /*  Update some statistics  */
-        pPacket->updPkts++;
-    }
     return ret;
 }
 
