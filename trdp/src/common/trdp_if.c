@@ -1003,8 +1003,8 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
  *  @param[in]      pktFlags             OPTION:
  *                                       TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam           optional pointer to send parameter, NULL - default parameters are used
- *  @param[in]      pData                pointer to packet data / dataset
- *  @param[in]      dataSize             size of packet data <= 1436 without FCS
+ *  @param[in]      pData                pointer to data packet / dataset, NULL if sending starts later with tlp_put()
+ *  @param[in]      dataSize             size of data packet > 0 and <= TRDP_MAX_PD_DATA_SIZE
  *
  *  @retval         TRDP_NO_ERR          no error
  *  @retval         TRDP_PARAM_ERR       parameter error
@@ -1034,7 +1034,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 
     /*    Check params    */
     if ((comId == 0)
-        || (pData != NULL && dataSize == 0)
+        || (dataSize == 0)
         || (dataSize > TRDP_MAX_PD_DATA_SIZE)
         || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
         || (pPubHandle == NULL))
@@ -1077,12 +1077,9 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                 /*
                  Compute the overal packet size
                  */
-                if (dataSize == 0)
-                {
-                    /* mark data as invalid, data will be set valid with tlp_put */
-                    pNewElement->privFlags |= TRDP_INVALID_DATA;
-                    /* dataSize = TRDP_MAX_PD_DATA_SIZE; */
-                }
+
+                /* mark data as invalid, data will be set valid with tlp_put */
+                pNewElement->privFlags |= TRDP_INVALID_DATA;
 
                 pNewElement->dataSize   = dataSize;
                 pNewElement->grossSize  = trdp_packetSizePD(dataSize);
@@ -1357,7 +1354,8 @@ TRDP_ERR_T tlp_put (
     TRDP_ERR_T  ret         = TRDP_NO_ERR;
 
     if (pElement == NULL ||
-        dataSize > TRDP_MAX_PD_DATA_SIZE )
+        dataSize > TRDP_MAX_PD_DATA_SIZE ||
+        dataSize == 0 )
     {
         return TRDP_PARAM_ERR;
     }

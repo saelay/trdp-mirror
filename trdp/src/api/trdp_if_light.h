@@ -244,8 +244,8 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
- *  @param[in]      pData               pointer to packet data / dataset
- *  @param[in]      dataSize            size of packet data
+ *  @param[in]      pData               pointer to data packet / dataset, NULL if sending starts later with tlp_put()
+ *  @param[in]      dataSize            size of data packet > 0 and <= TRDP_MAX_PD_DATA_SIZE
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -321,7 +321,7 @@ EXT_DECL TRDP_ERR_T tlp_unpublish (
  *  @param[in,out]  pData               pointer to application's data buffer
  *  @param[in,out]  dataSize            size of data
  *
- *  @retval         TRDP_NO_ERR            no error
+ *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error on uninitialized parameter or changed dataSize compared to published one
  *  @retval         TRDP_PUB_ERR        not published
  *  @retval         TRDP_NOINIT_ERR     handle invalid
