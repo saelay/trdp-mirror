@@ -429,6 +429,13 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     pSession->stats.ownIpAddr       = ownIpAddr;
     pSession->stats.leaderIpAddr    = leaderIpAddr;
 
+    /*  Get a buffer to receive PD   */
+    pSession->pNewFrame = (PD_PACKET_T *) vos_memAlloc(TRDP_MAX_PD_PACKET_SIZE);
+    if (pSession->pNewFrame == NULL)
+    {
+        vos_printLog(VOS_LOG_ERROR, "Out of meory!\n");
+        return TRDP_MEM_ERR;
+    }
 
     /*    Queue the session in    */
     ret = (TRDP_ERR_T) vos_mutexLock(sSessionMutex);
@@ -555,6 +562,8 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
             else
             {
                 /*    Release all allocated sockets and memory    */
+                vos_memFree(pSession->pNewFrame);   
+
                 while (pSession->pSndQueue != NULL)
                 {
                     PD_ELE_T *pNext = pSession->pSndQueue->pNext;

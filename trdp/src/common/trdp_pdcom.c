@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *     AHW 2015-04-10: Ticket #76: Wrong initialisation of frame pointer in trdp_pdReceive()
+ *     AHW 2015-04-10: Ticket #79: handling for dataSize==0/pData== NULL fixed in in trdp_pdPut()
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *                     Ticket #47: Protocol change: no FCS for data part of telegrams
  *                     Ticket #43: Usage of memset() in the trdp_pdReceive() function
@@ -322,31 +324,18 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_SESSION_PT appHandle,
     INT32           sock)
 {
-    static PD_PACKET_T  *pNewFrame          = NULL; /*  This points to our buffer in hand   */
+    PD_HEADER_T         *pNewFrameHead      = &appHandle->pNewFrame->frameHead;
     PD_ELE_T            *pExistingElement   = NULL;
     PD_ELE_T            *pPulledElement;
     TRDP_ERR_T          err         = TRDP_NO_ERR;
     TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
-    UINT32 recSize;
-    int informUser = 0;
+    UINT32              recSize     = TRDP_MAX_PD_PACKET_SIZE;
+    int                 informUser  = 0;
     TRDP_ADDRESSES_T    subAddresses = { 0, 0, 0, 0, 0, 0};
-
-    /*  Get a buffer    */
-    if (pNewFrame == NULL)
-    {
-        pNewFrame = (PD_PACKET_T *) vos_memAlloc(TRDP_MAX_PD_PACKET_SIZE);
-        if (pNewFrame == NULL)
-        {
-            vos_printLog(VOS_LOG_ERROR, "Receiving PD: Out of receive buffers!\n");
-            return TRDP_MEM_ERR;
-        }
-    }
-
-    recSize = TRDP_MAX_PD_PACKET_SIZE;
 
     /*  Get the packet from the wire:  */
     err = (TRDP_ERR_T) vos_sockReceiveUDP(sock,
-                                          (UINT8 *) &pNewFrame->frameHead,
+                                          (UINT8 *) pNewFrameHead,
                                           &recSize,
                                           &subAddresses.srcIpAddr,
                                           NULL,
@@ -358,7 +347,7 @@ TRDP_ERR_T  trdp_pdReceive (
     }
 
     /*  Is packet sane?    */
-    err = trdp_pdCheck(&pNewFrame->frameHead, recSize);
+    err = trdp_pdCheck(pNewFrameHead, recSize);
 
     /*  Update statistics   */
     switch (err)
@@ -379,29 +368,29 @@ TRDP_ERR_T  trdp_pdReceive (
     /* First check incoming packet's topoCount against session topoCounts */
     if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
                                   appHandle->opTrnTopoCnt,
-                                  vos_ntohl(pNewFrame->frameHead.etbTopoCnt),
-                                  vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt)))
+                                  vos_ntohl(pNewFrameHead->etbTopoCnt),
+                                  vos_ntohl(pNewFrameHead->opTrnTopoCnt)))
     {
         appHandle->stats.pd.numTopoErr++;
         return TRDP_TOPO_ERR;
     }
 
     /*  Compute the subscription handle */
-    subAddresses.comId = vos_ntohl(pNewFrame->frameHead.comId);
-    subAddresses.etbTopoCnt = vos_ntohl(pNewFrame->frameHead.etbTopoCnt);
-    subAddresses.opTrnTopoCnt = vos_ntohl(pNewFrame->frameHead.opTrnTopoCnt);
+    subAddresses.comId = vos_ntohl(pNewFrameHead->comId);
+    subAddresses.etbTopoCnt = vos_ntohl(pNewFrameHead->etbTopoCnt);
+    subAddresses.opTrnTopoCnt = vos_ntohl(pNewFrameHead->opTrnTopoCnt);
 
     /*  It might be a PULL request      */
-    if (vos_ntohs(pNewFrame->frameHead.msgType) == (UINT16) TRDP_MSG_PR)
+    if (vos_ntohs(pNewFrameHead->msgType) == (UINT16) TRDP_MSG_PR)
     {
         /*  Handle statistics request  */
-        if (vos_ntohl(pNewFrame->frameHead.comId) == TRDP_STATISTICS_REQUEST_COMID)
+        if (vos_ntohl(pNewFrameHead->comId) == TRDP_STATISTICS_REQUEST_COMID)
         {
             pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATISTICS_COMID);
             if (pPulledElement != NULL)
             {
                 pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
-                pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrame->frameHead.replyIpAddress);
+                pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrameHead->replyIpAddress);
 
                 trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->etbTopoCnt, appHandle->opTrnTopoCnt, 0, 0);
 
@@ -415,7 +404,7 @@ TRDP_ERR_T  trdp_pdReceive (
         else
         {
             /*  Find requested publish element  */
-            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, vos_ntohl(pNewFrame->frameHead.replyComId));
+            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, vos_ntohl(pNewFrameHead->replyComId));
         }
 
         if (pPulledElement != NULL)
@@ -423,9 +412,9 @@ TRDP_ERR_T  trdp_pdReceive (
             /*  Set the destination address of the requested telegram either to the replyIp or the source Ip of the
                 requester   */
 
-            if (pNewFrame->frameHead.replyIpAddress != 0)
+            if (pNewFrameHead->replyIpAddress != 0)
             {
-                pPulledElement->pullIpAddress = vos_ntohl(pNewFrame->frameHead.replyIpAddress);
+                pPulledElement->pullIpAddress = vos_ntohl(pNewFrameHead->replyIpAddress);
             }
             else
             {
@@ -462,16 +451,16 @@ TRDP_ERR_T  trdp_pdReceive (
         /* Save the real destination of the received packet (own IP or MC group) */
         pExistingElement->addr.destIpAddr = subAddresses.destIpAddr;
 
-        if (pNewFrame->frameHead.sequenceCounter == 0)  /* restarted or new sender */
+        if (pNewFrameHead->sequenceCounter == 0)  /* restarted or new sender */
         {
-            trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr, (TRDP_MSG_T) vos_ntohs(pNewFrame->frameHead.msgType));
+            trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr, (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType));
         }
 
         /* find sender in our list */
         switch (trdp_checkSequenceCounter(pExistingElement,
-                                          vos_ntohl(pNewFrame->frameHead.sequenceCounter),
+                                          vos_ntohl(pNewFrameHead->sequenceCounter),
                                           subAddresses.srcIpAddr,
-                                          (TRDP_MSG_T) vos_ntohs(pNewFrame->frameHead.msgType)))
+                                          (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType)))
         {
             case 0:                     /* Sequence counter is valid (at least 1 higher than previous one) */
                 break;
@@ -479,21 +468,21 @@ TRDP_ERR_T  trdp_pdReceive (
                 return TRDP_MEM_ERR;
             case 1:
                 vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
-                                 subAddresses.srcIpAddr), vos_ntohl(pNewFrame->frameHead.comId));
+                                 subAddresses.srcIpAddr), vos_ntohl(pNewFrameHead->comId));
                 return TRDP_NO_ERR;     /* Ignore packet, too old or duplicate */
         }
 
         /* Store last received sequence counter here, too (pd_get et. al. may access it).   */
-        pExistingElement->curSeqCnt = vos_ntohl(pNewFrame->frameHead.sequenceCounter);
+        pExistingElement->curSeqCnt = vos_ntohl(pNewFrameHead->sequenceCounter);
 
         /*  This might have not been set!   */
-        pExistingElement->dataSize  = vos_ntohl(pNewFrame->frameHead.datasetLength);
+        pExistingElement->dataSize  = vos_ntohl(pNewFrameHead->datasetLength);
         pExistingElement->grossSize = trdp_packetSizePD(pExistingElement->dataSize);
 
         /*  Has the data changed?   */
         if (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
         {
-            informUser = memcmp(pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
+            informUser = memcmp(appHandle->pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
         }
 
         /*  Get the current time and compute the next time this packet should be received.  */
@@ -512,8 +501,8 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  -> always swap the frame pointers              */
         {
             PD_PACKET_T *pTemp = pExistingElement->pFrame;
-            pExistingElement->pFrame = pNewFrame;
-            pNewFrame = pTemp;
+            pExistingElement->pFrame = appHandle->pNewFrame;
+            appHandle->pNewFrame = pTemp;
         }
     }
 
