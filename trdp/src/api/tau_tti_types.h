@@ -145,9 +145,9 @@ typedef struct
     TRDP_SHORT_VERSION_T    version;        /**< ConsistInfo data structure version, application defined
                                                  mainVersion = 1, subVersion = 0                         */
     UINT8                   cstClass;       /**< consist info classification
-                                                 0 = (single) consist
-                                                 1 = closed train
-                                                 2 = closed train consist */
+                                                 1 = (single) consist
+                                                 2 = closed train
+                                                 3 = closed train consist */
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
     TRDP_LABEL_T            cstId;          /**< application defined consist identifier, e.g. UIC identifier */
     TRDP_LABEL_T            cstType;        /**< consist type, application defined */
@@ -253,7 +253,7 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< TrainDirectory data structure version  
                                                   parameter 'mainVersion' shall be set to 1. */
-    BITSET8                 etbId;          /**< identification of the ETB the TTDB is computed for
+    UINT8                   etbId;          /**< identification of the ETB the TTDB is computed for
                                                  bit0: ETB0 (operational network)
                                                  bit1: ETB1 (multimedia network)
                                                  bit2: ETB2 (other network)
@@ -318,7 +318,7 @@ typedef struct
                                                   parameter 'mainVersion' shall be set to 1. */
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
     UINT8                   reserved02;     /**< reserved for future use (= 0) */
-    BITSET8                 etbId;          /**< identification of the ETB the TTDB is computed for
+    UINT8                   etbId;          /**< identification of the ETB the TTDB is computed for
                                                  bit0: ETB0 (operational network)
                                                  bit1: ETB1 (multimedia network)
                                                  bit2: ETB2 (other network)
@@ -340,7 +340,7 @@ typedef struct
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< Train info structure version */
-    BITSET8                 etbId;          /**< identification of the ETB the TTDB is computed for
+    UINT8                   etbId;          /**< identification of the ETB the TTDB is computed for
                                                  bit0: ETB0 (operational network)
                                                  bit1: ETB1 (multimedia network)
                                                  bit2: ETB2 (other network)
