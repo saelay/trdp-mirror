@@ -599,7 +599,16 @@ EXT_DECL VOS_ERR_T vos_memCount (
 
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
-         return VOS_INIT_ERR;
+        /* normal heap memory is used */
+		*pAllocatedMemory   = 0;
+		*pFreeMemory        = 0;
+		*pMinFree           = 0;
+		*pNumAllocBlocks    = 0;
+		*pNumAllocErr       = 0;
+		*pNumFreeErr        = 0;
+
+		memset(blockSize, 0, sizeof(blockSize));
+		memset(usedBlockSize, 0, sizeof(usedBlockSize));
     }
 
     *pAllocatedMemory   = gMem.memSize;
