@@ -1120,7 +1120,7 @@ int trdp_checkSequenceCounter(
         {
             /*        Is this packet a duplicate?    */
             if (pElement->pSeqCntList->seq[index].lastSeqCnt == 0 ||    /* first time after timeout */
-                sequenceCounter >= pElement->pSeqCntList->seq[index].lastSeqCnt + 1)
+                sequenceCounter != pElement->pSeqCntList->seq[index].lastSeqCnt)
             {
                 vos_printLog(VOS_LOG_DBG, "Rcv sequence: %u    last seq: %u\n", sequenceCounter, pElement->pSeqCntList->seq[index].lastSeqCnt);
                 vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
@@ -1130,7 +1130,7 @@ int trdp_checkSequenceCounter(
             else
             {
                 vos_printLog(VOS_LOG_DBG, "Rcv sequence: %u    last seq: %u\n", sequenceCounter, pElement->pSeqCntList->seq[index].lastSeqCnt);
-                vos_printLog(VOS_LOG_DBG, "-> old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
+                vos_printLog(VOS_LOG_DBG, "-> duplicated PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
                 return 1;
             }
         }
