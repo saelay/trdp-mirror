@@ -44,7 +44,7 @@
 #define PD_COMID_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY  100000
+#define RESERVED_MEMORY  1000000
 
 CHAR8 gBuffer[32] = "Hello World";
 
@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 20548};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
-    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
     UINT32                  ownIP           = 0;
     int                     rv              = 0;
     UINT32                  lastSeqCount    = 0;
@@ -209,8 +209,8 @@ int main (int argc, char *argv[])
         TRDP_FDS_T          rfds;
         INT32               noDesc;
         TRDP_TIME_T         tv;
-        const TRDP_TIME_T   max_tv  = {0, 200000};
-        const TRDP_TIME_T   min_tv  = {0, 100000};
+        const TRDP_TIME_T   max_tv  = {0, 2000000};
+        const TRDP_TIME_T   min_tv  = {0, 10000};
 
         /*
          Prepare the file descriptor set for the select call.
@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
          Select() will wait for ready descriptors or time out,
          what ever comes first.
          */
-        rv = vos_select(noDesc + 1, &rfds, NULL, NULL, &tv);
+        rv = vos_select(noDesc + 1, NULL, NULL, NULL, &tv);
 
         /*
          Check for overdue PDs (sending and receiving)
@@ -293,9 +293,7 @@ int main (int argc, char *argv[])
                       (UINT8 *) gBuffer,
                       &receivedSize);
         if ((TRDP_NO_ERR == err)
-            && (receivedSize > 0)
-            && (myPDInfo.seqCount != lastSeqCount)   /* only treat new telegrams */
-            )
+            && (receivedSize > 0))
         {
             lastSeqCount = myPDInfo.seqCount;
             printf("\nMessage reveived:\n");
@@ -305,6 +303,10 @@ int main (int argc, char *argv[])
             printf("   %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx\n",
                    gBuffer[0], gBuffer[1], gBuffer[2], gBuffer[3],
                    gBuffer[4], gBuffer[5], gBuffer[6], gBuffer[7]);
+            printf("   %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx\n",
+                   gBuffer[8], gBuffer[9], gBuffer[10], gBuffer[11],
+                   gBuffer[12], gBuffer[13], gBuffer[14], gBuffer[15]);
+            printf("%s\n", gBuffer);
         }
         else if (TRDP_NO_ERR == err)
         {
