@@ -335,7 +335,7 @@ int main (int argc, char *argv[])
             fflush(stdout);
         }
 
-        if (strlen((char*)outputBuffer) == 0)
+        if (outputBuffer != NULL && strlen((char*)outputBuffer) == 0)
         {
             sprintf((char*)outputBuffer, "Just a Counter: %08d", hugeCounter++);
             outputBufferSize = strlen((char*)outputBuffer);
