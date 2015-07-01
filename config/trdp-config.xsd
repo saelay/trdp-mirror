@@ -15,9 +15,12 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.9.0.0
+#  VERSION       : 1.10.0.0
 #
-#   HISTORY      :
+#  SVN           : $Id$
+#
+#  HISTORY       :
+#                            1.10.0.0  sink/source attribute for telegrams added
 #                            1.9.0.0   debug parameters updated
 #                            1.8.0.0   BITSET8, ANTIVALENT8 added
 #                            1.7.0.0   id of data-set must start at 1000
@@ -676,7 +679,7 @@ keep = keep the last value</xs:documentation>
       </xs:attribute>
       <xs:attribute name="name" type="name30" use="optional">
         <xs:annotation>
-          <xs:documentation>Name of the telegram associated with this filter. Not used by IPTCom but required when importing the configuration into the MTPE.</xs:documentation>
+          <xs:documentation>Name of the telegram associated with this filter. Not used by TRDP but required when importing the configuration into the MTPE.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
@@ -793,6 +796,19 @@ keep = keep the last value</xs:documentation>
           <xs:documentation>ID for communication parameter to be used.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="type" use="optional">
+          <xs:annotation>
+              <xs:documentation>Defines the type of a telegram. Only required for use with automatic XML-configuration.</xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+              <xs:restriction base="xs:string">
+                  <xs:enumeration value="sink"/>
+                  <xs:enumeration value="source"/>
+                  <xs:enumeration value="source-sink"/>
+              </xs:restriction>
+          </xs:simpleType>
+      </xs:attribute>
+
     </xs:complexType>
   </xs:element>
 </xs:schema>
