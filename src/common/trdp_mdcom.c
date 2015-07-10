@@ -247,9 +247,15 @@ static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
  */ 
 static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT appHandle, const TRDP_ERR_T resultCode)
 {
-    INT32           replyStatus = vos_ntohl(pMdItem->pPacket->frameHead.replyStatus);
+    INT32           replyStatus;
     TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
 
+    if (pMdItem == NULL)
+    {
+        return;
+    }
+
+    replyStatus = vos_ntohl(pMdItem->pPacket->frameHead.replyStatus);
     theMessage.destIpAddr   = pMdItem->addr.destIpAddr;
     theMessage.seqCount     = vos_ntohs(pMdItem->pPacket->frameHead.sequenceCounter);
     theMessage.protVersion  = vos_ntohs(pMdItem->pPacket->frameHead.protocolVersion);
@@ -3393,10 +3399,8 @@ TRDP_ERR_T trdp_mdConfirm (
         return TRDP_MUTEX_ERR;
     }
 
-    srcIpAddr = appHandle->realIP;
+    vos_printLog(VOS_LOG_INFO, "MD TRDP_MSG_MC\n");
 
-    errv = TRDP_NOLIST_ERR;
-    vos_printLog(VOS_LOG_INFO, "MD TRDP_MSG_MC\n"); 
     if ( pSessionId )
     {
         errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDSndQueue,
