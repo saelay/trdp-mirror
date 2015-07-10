@@ -47,6 +47,8 @@
 #else
 #ifdef L_ENDIAN
 #define MAKE_LE(a)      (a)
+#else
+#error "Endianess undefined!"
 #endif
 #endif
 

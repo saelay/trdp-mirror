@@ -37,10 +37,13 @@
  * DEFINES
  */
 
+/* The TRDP version can be predefined as CFLAG   */
+#ifndef TRDP_VERSION
 #define TRDP_VERSION            1
-#define TRDP_RELEASE            2
-#define TRDP_UPDATE             2
-#define TRDP_EVOLUTION          1
+#define TRDP_RELEASE            3
+#define TRDP_UPDATE             0
+#define TRDP_EVOLUTION          0
+#endif
 
 #define TRDP_TIMER_GRANULARITY  10000                                   /**< granularity in us                      */
 #define TRDP_TIMER_FOREVER      0xffffffff                              /**< granularity in us                      */
