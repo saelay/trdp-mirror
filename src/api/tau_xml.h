@@ -48,6 +48,16 @@ extern "C" {
  * TYPEDEFS
  */
 
+/** Type attribute for telegrams.
+ */
+typedef enum
+{
+    TRDP_EXCHG_UNSET        = 0,    /**< default, direction is not defined  */
+    TRDP_EXCHG_SOURCE       = 1,    /**< telegram shall be published  */
+    TRDP_EXCHG_SINK         = 2,    /**< telegram shall be subscribed  */
+    TRDP_EXCHG_SOURCESINK   = 3,    /**< telegram shall be published and subscribed  */
+} TRDP_EXCHG_OPTION_T;
+
 /** Types to read out the XML configuration    */
 typedef struct
 {
@@ -99,15 +109,16 @@ typedef struct
 
 typedef struct
 {
-    UINT32          comId;        /**< source filter identifier */
-    UINT32          datasetId;    /**< data set identifier */
-    UINT32          comParId;     /**< communication parameter id */
-    TRDP_MD_PAR_T   *pMdPar;      /**< Pointer to MD Parameters for this connection */
-    TRDP_PD_PAR_T   *pPdPar;      /**< Pointer to PD Parameters for this connection */
-    UINT32          destCnt;      /**< number of destinations */
-    TRDP_DEST_T     *pDest;       /**< Pointer to array of destination descriptors */
-    UINT32          srcCnt;       /**< number of sources */
-    TRDP_SRC_T      *pSrc;        /**< Pointer to array of source descriptors */
+    UINT32              comId;      /**< source filter identifier */
+    UINT32              datasetId;  /**< data set identifier */
+    UINT32              comParId;   /**< communication parameter id */
+    TRDP_MD_PAR_T       *pMdPar;    /**< Pointer to MD Parameters for this connection */
+    TRDP_PD_PAR_T       *pPdPar;    /**< Pointer to PD Parameters for this connection */
+    UINT32              destCnt;    /**< number of destinations */
+    TRDP_DEST_T         *pDest;     /**< Pointer to array of destination descriptors */
+    UINT32              srcCnt;     /**< number of sources */
+    TRDP_SRC_T          *pSrc;      /**< Pointer to array of source descriptors */
+    TRDP_EXCHG_OPTION_T type;       /**< shall telegram be sent or received */
 } TRDP_EXCHG_PAR_T;
 
 typedef struct
