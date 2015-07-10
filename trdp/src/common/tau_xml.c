@@ -1570,6 +1570,23 @@ static TRDP_ERR_T parseTelegram (
     parseUINT32(pTlgElem, "data-set-id", &pExchgPar->datasetId);
     parseUINT32(pTlgElem, "com-parameter-id", &pExchgPar->comParId);
 
+    if (checkAttrValue(pTlgElem, "type", "source-sink"))
+    {
+        pExchgPar->type = TRDP_EXCHG_SOURCESINK;
+    }
+    else if (checkAttrValue(pTlgElem, "type", "source"))
+    {
+        pExchgPar->type = TRDP_EXCHG_SOURCE;
+    }
+    else if (checkAttrValue(pTlgElem, "type", "sink"))
+    {
+        pExchgPar->type = TRDP_EXCHG_SINK;
+    }
+    else
+    {
+        pExchgPar->type = TRDP_EXCHG_UNSET;
+    }
+
     /*  Set current node to XPath context   */
     pXPathCtx->node = pTlgElem;
 

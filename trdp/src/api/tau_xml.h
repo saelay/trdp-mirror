@@ -55,7 +55,7 @@ typedef enum
     TRDP_EXCHG_UNSET        = 0,    /**< default, direction is not defined  */
     TRDP_EXCHG_SOURCE       = 1,    /**< telegram shall be published  */
     TRDP_EXCHG_SINK         = 2,    /**< telegram shall be subscribed  */
-    TRDP_EXCHG_SOURCESINK   = 3,    /**< telegram shall be published and subscribed  */
+    TRDP_EXCHG_SOURCESINK   = 3     /**< telegram shall be published and subscribed  */
 } TRDP_EXCHG_OPTION_T;
 
 /** Types to read out the XML configuration    */
