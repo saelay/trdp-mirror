@@ -607,8 +607,8 @@ EXT_DECL VOS_ERR_T vos_memCount (
 		*pNumAllocErr       = 0;
 		*pNumFreeErr        = 0;
 
-		memset(blockSize, 0, sizeof(blockSize));
-		memset(usedBlockSize, 0, sizeof(usedBlockSize));
+		memset(blockSize, 0, sizeof(blockSize[VOS_MEM_NBLOCKSIZES]));
+		memset(usedBlockSize, 0, sizeof(usedBlockSize[VOS_MEM_NBLOCKSIZES]));
     }
 
     *pAllocatedMemory   = gMem.memSize;
