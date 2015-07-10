@@ -145,6 +145,24 @@ EXT_DECL VOS_ERR_T vos_init (
 
 EXT_DECL void vos_terminate ();
 
+/**********************************************************************************************************************/
+/** Return a human readable version representation.
+ *    Return string in the form 'v.r.u.b'
+ *
+ *  @retval            const string
+ */
+EXT_DECL const CHAR8 *vos_getVersionString (void);
+
+
+/**********************************************************************************************************************/
+/** Return version.
+ *    Return pointer to version structure
+ *
+ *  @retval            const VOS_VERSION_T
+ */
+EXT_DECL const VOS_VERSION_T *vos_getVersion (void);
+    
+    
 
 #ifdef __cplusplus
 }

@@ -38,6 +38,11 @@ extern "C" {
  * DEFINES
  */
 
+#define VOS_VERSION            1
+#define VOS_RELEASE            0
+#define VOS_UPDATE             0
+#define VOS_EVOLUTION          0
+
 struct VOS_MUTEX
 {
     UINT32          magicNo;

@@ -206,6 +206,15 @@ typedef uuid_t VOS_UUID_T;      /**< universal unique identifier according to RF
 typedef UINT8 VOS_UUID_T[16];   /**< universal unique identifier according to RFC 4122, time based version */
 #endif
 
+/** Version information */
+typedef struct
+{
+    UINT8   ver;                /**< Version    - incremented for incompatible changes */
+    UINT8   rel;                /**< Release    - incremented for compatible changes   */
+    UINT8   upd;                /**< Update     - incremented for bug fixes            */
+    UINT8   evo;                /**< Evolution  - incremented for build                */
+} VOS_VERSION_T;
+    
 /**    Timer value compatible with timeval / select.
  * Relative or absolute date, depending on usage
  */
