@@ -50,8 +50,8 @@
 #define TRDP_TIMEDATE48	15	/**< 48 bit TCN time (32 bit seconds and 16 bit ticks) */
 #define TRDP_TIMEDATE64	16	/**< 32 bit seconds and 32 bit microseconds */
 
-#define TRDP_DEFAULT_UDPTCP_MD_PORT 20550   /*< Default port address for Message data (MD) communication */
-#define TRDP_DEFAULT_UDP_PD_PORT    20548   /*< Default port address for Process data (PD) communication */
+#define TRDP_DEFAULT_UDPTCP_MD_PORT 17225   /*< Default port address for Message data (MD) communication */
+#define TRDP_DEFAULT_UDP_PD_PORT    17224   /*< Default port address for Process data (PD) communication */
 
 #define PROTO_TAG_TRDP          "TRDP"
 #define PROTO_NAME_TRDP         "Train Real Time Data Protocol"
