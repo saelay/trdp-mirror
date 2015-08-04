@@ -100,7 +100,7 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
 */
 int sem_init(sem_t *pSema, int flags, unsigned int mode)
 {
-    *pSema = sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)mode);
+    pSema = sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)mode);
     if (pSema == SEM_FAILED)
     {
         return -1;
@@ -1026,7 +1026,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
 /** Create a semaphore.
  *  Return a semaphore handle. Depending on the initial state the semaphore will be available on creation or not.
  *
- *  @param[out]     pSema           Pointer to semaphore handle
+ *  @param[out]     ppSema          Pointer to semaphore pointer
  *  @param[in]      initialState    The initial state of the sempahore
  *  @retval         VOS_NO_ERR      no error
  *  @retval         VOS_INIT_ERR    module not initialised
@@ -1035,14 +1035,14 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
  */
 
 EXT_DECL VOS_ERR_T vos_semaCreate (
-    VOS_SEMA_T          *pSema,
+    VOS_SEMA_T          *ppSema,
     VOS_SEMA_STATE_T    initialState)
 {
     VOS_ERR_T   retVal  = VOS_SEMA_ERR;
     int         rc      = 0;
 
     /*Check parameters*/
-    if (pSema == NULL)
+    if (ppSema == NULL)
     {
         vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
         retVal = VOS_PARAM_ERR;
@@ -1054,23 +1054,23 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     }
     else
     {
+        /*pThread Semaphore init*/
+#ifdef __APPLE__
+        *ppSema = (VOS_SEMA_T) sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)initialState);
+        if ((sem_t*)*ppSema == SEM_FAILED)
+        {
+            rc = -1;
+        }
+#else
         /*Parameters are OK*/
-        *pSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
+        *ppSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
 
         if (*pSema == NULL)
         {
             return VOS_MEM_ERR;
         }
 
-        /*pThread Semaphore init*/
-#ifdef __APPLE__
-        *pSema = (VOS_SEMA_T) sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)initialState);
-        if ((sem_t*)*pSema == SEM_FAILED)
-        {
-            rc = -1;
-        }
-#else
-        rc = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
+        rc = sem_init((sem_t *)*ppSema, 0, (UINT8)initialState);
 #endif
         if (0 != rc)
         {
@@ -1111,6 +1111,19 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
         rc = sem_getvalue((sem_t *)sema, &sval);
         if (0 == rc)
         {
+#ifdef __APPLE__
+            rc = sem_close((sem_t *)sema);
+            if (0 != rc)
+            {
+                /* Error closing Semaphore */
+                vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR sem_close failed\n");
+            }
+            else
+            {
+                /* Semaphore deleted successfully, free allocated memory */
+                sem_unlink("/tmp/trdp.sema");
+            }
+#else
             rc = sem_destroy((sem_t *)sema);
             if (0 != rc)
             {
@@ -1122,6 +1135,7 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
                 /* Semaphore deleted successfully, free allocated memory */
                 vos_memFree(sema);
             }
+#endif
         }
     }
     return;
