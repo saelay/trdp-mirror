@@ -3391,7 +3391,7 @@
 											<string key="NSFrame">{{0, 15}, {832, 14}}</string>
 											<reference key="NSSuperview" ref="982278386"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView" ref="752358107"/>
+											<reference key="NSNextKeyView" ref="173792873"/>
 											<object class="NSTextContainer" key="NSTextContainer" id="753806620">
 												<object class="NSLayoutManager" key="NSLayoutManager">
 													<object class="NSTextStorage" key="NSTextStorage">
@@ -3509,7 +3509,6 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 									<string key="NSFrame">{{831, 1}, {15, 110}}</string>
 									<reference key="NSSuperview" ref="334934244"/>
 									<reference key="NSWindow"/>
-									<reference key="NSNextKeyView"/>
 									<reference key="NSTarget" ref="334934244"/>
 									<string key="NSAction">_doScroller:</string>
 									<double key="NSCurValue">1</double>
@@ -3532,7 +3531,7 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<string key="NSFrame">{{33, 20}, {834, 112}}</string>
 							<reference key="NSSuperview" ref="439893737"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView" ref="173792873"/>
+							<reference key="NSNextKeyView" ref="982278386"/>
 							<int key="NSsFlags">562</int>
 							<reference key="NSVScroller" ref="752358107"/>
 							<reference key="NSHScroller" ref="173792873"/>
@@ -4582,6 +4581,14 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 						<reference key="destination" ref="424424900"/>
 					</object>
 					<int key="connectionID">833</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">MsgView</string>
+						<reference key="source" ref="50326847"/>
+						<reference key="destination" ref="334934244"/>
+					</object>
+					<int key="connectionID">836</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -7681,7 +7688,7 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">835</int>
+			<int key="maxID">836</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -7871,6 +7878,7 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<string>MDrecColor</string>
 							<string>MRcomID</string>
 							<string>MRinMessage</string>
+							<string>MsgView</string>
 							<string>comID</string>
 							<string>interval</string>
 							<string>ipAddress</string>
@@ -7940,6 +7948,7 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
+							<string>id</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -7952,6 +7961,7 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							<string>MDrecColor</string>
 							<string>MRcomID</string>
 							<string>MRinMessage</string>
+							<string>MsgView</string>
 							<string>comID</string>
 							<string>interval</string>
 							<string>ipAddress</string>
@@ -8007,6 +8017,10 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">MRinMessage</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">MsgView</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBToOneOutletInfo">
