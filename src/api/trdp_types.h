@@ -353,6 +353,7 @@ typedef struct
     UINT32  numNoPub;         /**< number of received PD pull packets without publisher */
     UINT32  numTimeout;       /**< number of PD timeouts */
     UINT32  numSend;          /**< number of sent PD  packets */
+    UINT32  numMissed;        /**< number of packets skipped */
 } TRDP_PD_STATISTICS_T;
 
 
@@ -408,7 +409,8 @@ typedef struct
     UINT32              timeout;    /**< Time-out value in us. 0 = No time-out supervision */
     TRDP_ERR_T          status;     /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
     TRDP_TO_BEHAVIOR_T  toBehav;    /**< Behavior at time-out. Set data to zero / keep last value */
-    UINT32              numRecv;    /**< Number of packets received for this subscription. */
+    UINT32              numRecv;    /**< Number of packets received for this subscription */
+    UINT32              numMissed;  /**< number of packets skipped for this subscription */
 } TRDP_SUBS_STATISTICS_T;
 
 /** Table containing particular PD publishing information. */
