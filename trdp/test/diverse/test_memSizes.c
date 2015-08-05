@@ -204,7 +204,7 @@ int main (int argc, char * *argv)
     TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
-                                               10000000, TRDP_TO_SET_TO_ZERO, 20548};
+                                               10000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int rv = 0;
@@ -342,8 +342,8 @@ int main (int argc, char * *argv)
     {
         VOS_FDS_T       rfds;
         INT32           noOfDesc;
-        struct timeval  tv;
-        struct timeval  max_tv = {0, 100000};
+        TRDP_TIME_T     tv;
+        TRDP_TIME_T     max_tv = {0, 100000};
 
         /*
          Prepare the file descriptor set for the select call.
@@ -355,8 +355,8 @@ int main (int argc, char * *argv)
          This way we can guarantee that PDs are sent in time...
          */
         err = tlc_getInterval(appHandle,
-                              (TRDP_TIME_T *) &tv,
-                              (TRDP_FDS_T *) &rfds,
+                              &tv,
+                              &rfds,
                               &noOfDesc);
 
         /*
@@ -366,7 +366,7 @@ int main (int argc, char * *argv)
          we need to set the maximum timeout ourselfs
          */
 
-        if (vos_cmpTime((TRDP_TIME_T *) &tv, (TRDP_TIME_T *) &max_tv) > 0)
+        if (vos_cmpTime(&tv, &max_tv) > 0)
         {
             tv = max_tv;
         }
@@ -389,7 +389,7 @@ int main (int argc, char * *argv)
          function (in it's context and thread)!
          */
 
-        err = tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        err = tlc_process(appHandle, &rfds, &rv);
 
         /*
          Handle other ready descriptors...

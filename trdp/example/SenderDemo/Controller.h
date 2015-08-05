@@ -65,6 +65,7 @@
 	IBOutlet	id	MRcomID;
 	IBOutlet	id	MDrecColor;
     
+	IBOutlet	id	MsgView;
     
 	Boolean	isActive;
 	
