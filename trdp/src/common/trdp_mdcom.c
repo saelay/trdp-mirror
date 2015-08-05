@@ -2710,6 +2710,23 @@ void  trdp_mdCheckListenSocks (
 
                 trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
             }
+
+            /* Check if the socket has been closed in the other corner */
+            if ((err == TRDP_CRC_ERR ||
+                 err == TRDP_WIRE_ERR ||
+                 err == TRDP_TOPO_ERR ||
+                 err == TRDP_PACKET_ERR)
+                 && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
+            {
+                vos_printLog(VOS_LOG_INFO,
+                             "Closing TCP connection, out of sync (Corner Ip: %s, Socket: %d)\n",
+                             vos_ipDotted(appHandle->iface[lIndex].tcpParams.cornerIp),
+                             appHandle->iface[lIndex].sock);
+
+                appHandle->iface[lIndex].tcpParams.morituri = TRUE;
+
+                trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
+            }
         }
     }
 }
