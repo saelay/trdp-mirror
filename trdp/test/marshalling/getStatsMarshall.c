@@ -238,6 +238,7 @@ void print_stats (
     printf("pd.numNoPub:    %u\n", pData->pd.numNoPub);
     printf("pd.numTimeout:  %u\n", pData->pd.numTimeout);
     printf("pd.numSend:     %u\n", pData->pd.numSend);
+    printf("pd.numMissed:   %u\n", pData->pd.numMissed);
     printf("--------------------\n");
 }
 
@@ -344,7 +345,7 @@ int main (int argc, char * *argv)
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                               TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 20548};
+                                               TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     TRDP_MARSHALL_CONFIG_T  marshall        = {NULL, tau_unmarshall, 0};

@@ -182,6 +182,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         /* Time-out value in us. 0 = No time-out supervision  */
         pStatistics[lIndex].toBehav = iter->toBehavior;          /* Behavior at time-out    */
         pStatistics[lIndex].numRecv = iter->numRxTx;             /* Number of packets received for this subscription. */
+        pStatistics[lIndex].numMissed = iter->numMissed;         /* Number of packets received for this subscription. */
         pStatistics[lIndex].status  = iter->lastErr;             /* Receive status information  */
     }
     if (lIndex >= *pNumSubs && iter != NULL)
@@ -426,10 +427,12 @@ void    trdp_UpdateStats (
         vos_printLog(VOS_LOG_ERROR, "vos_memCount() failed (Err: %d)\n", ret);
     }
 
+    appHandle->stats.pd.numMissed = 0;
+
     /*  Count our subscriptions */
     for (lIndex = 0, iter = appHandle->pRcvQueue; iter != NULL; lIndex++, iter = iter->pNext)
     {
-        ;
+        appHandle->stats.pd.numMissed += iter->numMissed;
     }
 
     appHandle->stats.pd.numSubs = lIndex;
@@ -522,6 +525,7 @@ void    trdp_pdPrepareStats (
     pData->pd.numNoPub      = vos_htonl(appHandle->stats.pd.numNoPub);
     pData->pd.numTimeout    = vos_htonl(appHandle->stats.pd.numTimeout);
     pData->pd.numSend       = vos_htonl(appHandle->stats.pd.numSend);
+    pData->pd.numMissed     = vos_htonl(appHandle->stats.pd.numMissed);
 
     /* Message data */
     pData->udpMd.defQos = vos_htonl(appHandle->stats.udpMd.defQos);
