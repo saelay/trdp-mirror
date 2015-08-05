@@ -603,7 +603,7 @@ keep = keep the last value</xs:documentation>
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
-      <xs:attribute name="port" default="20548" type="uint32" use="optional"/>
+      <xs:attribute name="port" default="17224" type="uint32" use="optional"/>
     </xs:complexType>
   </xs:element>
   

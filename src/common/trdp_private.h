@@ -215,6 +215,7 @@ typedef struct PD_ELE
     UINT32              numRxTx;                /**< Counter for received packets (statistics)              */
     UINT32              updPkts;                /**< Counter for updated packets (statistics)               */
     UINT32              getPkts;                /**< Counter for read packets (statistics)                  */
+    UINT32              numMissed;              /**< Counter for skipped sequence number (statistics)       */
     TRDP_ERR_T          lastErr;                /**< Last error (timeout)                                   */
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */

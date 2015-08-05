@@ -9,8 +9,8 @@
    <bus-interface-list>
       <bus-interface network-id="1" name="eth0" host-ip="10.0.0.221">
          <trdp-process blocking="yes" traffic-shaping="on" />
-         <pd-com-parameter port="20548"  marshall="on" validity-behavior="zero"/>
-         <md-com-parameter udp-port="20550" tcp-port="20550" />
+         <pd-com-parameter port="17224"  marshall="on" validity-behavior="zero"/>
+         <md-com-parameter udp-port="17225" tcp-port="17225" />
          <telegram name="send_hello" com-id="1000" data-set-id="1000">
             <pd-parameter cycle="1000000" />
          </telegram>

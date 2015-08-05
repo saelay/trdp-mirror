@@ -851,7 +851,7 @@ int main(int argc, char * argv[])
     pdcfg.flags = TRDP_FLAGS_NONE;
     pdcfg.timeout = 10000000;
     pdcfg.toBehavior = TRDP_TO_SET_TO_ZERO;
-    pdcfg.port = 20548;
+    pdcfg.port = 17224;
 
     /* open session */
     err = tlc_openSession(&apph, srcip, 0, NULL, &pdcfg, NULL, &proccfg);

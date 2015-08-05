@@ -485,7 +485,7 @@ EXT_DECL VOS_ERR_T vos_sockListen (
  *  @param[in]      sock               Socket descriptor
  *  @param[out]     pSock              Pointer to socket descriptor, on exit new socket
  *  @param[out]     pIPAddress         source IP to receive on, 0 for any
- *  @param[out]     pPort              port to receive on, 20548 for PD
+ *  @param[out]     pPort              port to receive on, 17224 for PD
  *
  *  @retval         VOS_NO_ERR         no error
  *  @retval         VOS_PARAM_ERR      NULL parameter, parameter error
