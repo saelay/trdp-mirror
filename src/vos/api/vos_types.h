@@ -35,6 +35,8 @@ extern "C" {
 
 #if defined(WIN32)
 
+#include <stdint.h>
+
 typedef unsigned char UINT8;
 typedef unsigned short UINT16;
 typedef unsigned int UINT32;
@@ -54,7 +56,6 @@ typedef double REAL64;
 #elif defined(POSIX)
 
 #include <stdint.h>
-/*#include <wchar.h>*/
 #include <float.h>
 
 typedef uint8_t UINT8;
