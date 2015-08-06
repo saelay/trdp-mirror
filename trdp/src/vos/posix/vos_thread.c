@@ -1065,7 +1065,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         /*Parameters are OK*/
         *ppSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
 
-        if (*pSema == NULL)
+        if (*ppSema == NULL)
         {
             return VOS_MEM_ERR;
         }
