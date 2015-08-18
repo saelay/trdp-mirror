@@ -892,7 +892,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
 
 #if MD_SUPPORT
 /**********************************************************************************************************************/
-/** Return MD listener statistics.
+/** Return UDP MD listener statistics.
  *  Memory for statistics information must be provided by the user.
  * The reserved length is given via pNumLis implicitely.
  *
@@ -905,7 +905,27 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
-EXT_DECL TRDP_ERR_T tlc_getListStatistics (
+EXT_DECL TRDP_ERR_T tlc_getUdpListStatistics (
+    TRDP_APP_SESSION_T      appHandle,
+    UINT16                  *pNumList,
+    TRDP_LIST_STATISTICS_T  *pStatistics);
+
+
+/**********************************************************************************************************************/
+/** Return TCP MD listener statistics.
+ *  Memory for statistics information must be provided by the user.
+ * The reserved length is given via pNumLis implicitely.
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in,out]  pNumList            Pointer to the number of listeners
+ *  @param[out]     pStatistics         Pointer to a list with the listener statistics information
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
+ */
+EXT_DECL TRDP_ERR_T tlc_getTcpListStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumList,
     TRDP_LIST_STATISTICS_T  *pStatistics);
