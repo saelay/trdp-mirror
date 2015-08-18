@@ -249,7 +249,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
 
 #if MD_SUPPORT
 /**********************************************************************************************************************/
-/** Return MD listener statistics.
+/** Return UDP MD listener statistics.
  *  Memory for statistics information must be provided by the user.
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
@@ -260,7 +260,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
  */
-EXT_DECL TRDP_ERR_T tlc_getListStatistics (
+EXT_DECL TRDP_ERR_T tlc_getUdpListStatistics (
     TRDP_APP_SESSION_T      appHandle,
     UINT16                  *pNumList,
     TRDP_LIST_STATISTICS_T  *pStatistics)
@@ -277,15 +277,67 @@ EXT_DECL TRDP_ERR_T tlc_getListStatistics (
         return TRDP_PARAM_ERR;
     }
     
-    for (lIndex = 0; lIndex < *pNumList && pIter != NULL; ++lIndex, pIter = pIter->pNext)
+    for (lIndex = 0; lIndex < *pNumList && pIter != NULL; pIter = pIter->pNext)
     {
-        vos_strncpy(pStatistics->uri, pIter->destURI , TRDP_MAX_URI_USER_LEN);
-        pStatistics->comId          = pIter->addr.comId;
-        pStatistics->joinedAddr     = pIter->addr.mcGroup;
-        pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
-        pStatistics->userRef        = (UINT32) pIter->pUserRef;
-        pStatistics->numSessions    = pIter->numSessions;
-        pStatistics++;
+		if ((pIter->pktFlags & TRDP_FLAGS_TCP) == 0)
+		{
+			vos_strncpy(pStatistics->uri, pIter->destURI , TRDP_MAX_URI_USER_LEN);
+			pStatistics->comId          = pIter->addr.comId;
+			pStatistics->joinedAddr     = pIter->addr.mcGroup;
+			pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
+			pStatistics->userRef        = (UINT32) pIter->pUserRef;
+			pStatistics->numSessions    = pIter->numSessions;
+			pStatistics++;
+			lIndex++;
+		}
+    }
+    *pNumList = lIndex;
+    return TRDP_NO_ERR;
+}
+
+
+/**********************************************************************************************************************/
+/** Return TCP MD listener statistics.
+ *  Memory for statistics information must be provided by the user.
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in,out]  pNumList            Pointer to the number of listeners
+ *  @param[out]     pStatistics         Pointer to a list with the listener statistics information
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        there are more subscriptions than requested
+ */
+EXT_DECL TRDP_ERR_T tlc_getTcpListStatistics (
+    TRDP_APP_SESSION_T      appHandle,
+    UINT16                  *pNumList,
+    TRDP_LIST_STATISTICS_T  *pStatistics)
+{
+    MD_LIS_ELE_T *pIter = ((TRDP_SESSION_T*)appHandle)->pMDListenQueue;
+    UINT16 lIndex;
+    if (!trdp_isValidSession(appHandle))
+    {
+        return TRDP_NOINIT_ERR;
+    }
+
+    if (pNumList == NULL || pStatistics == NULL || *pNumList == 0)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    for (lIndex = 0; lIndex < *pNumList && pIter != NULL; pIter = pIter->pNext)
+    {
+		if ((pIter->pktFlags & TRDP_FLAGS_TCP) != 0)
+		{
+			vos_strncpy(pStatistics->uri, pIter->destURI , TRDP_MAX_URI_USER_LEN);
+			pStatistics->comId          = pIter->addr.comId;
+			pStatistics->joinedAddr     = pIter->addr.mcGroup;
+			pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
+			pStatistics->userRef        = (UINT32) pIter->pUserRef;
+			pStatistics->numSessions    = pIter->numSessions;
+			pStatistics++;
+			lIndex++;
+		}
     }
     *pNumList = lIndex;
     return TRDP_NO_ERR;
