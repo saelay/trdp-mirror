@@ -82,7 +82,6 @@ EXT_DECL TRDP_ERR_T tau_initTtiAccess (
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pOpTrDirState   Pointer to an operational train directory state structure to be returned.
  *  @param[out]     pOpTrDir        Pointer to an operational train directory structure to be returned.
- *  @param[in]      etbId           Identifier of the ETB the train directory state is is asked for.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -91,8 +90,7 @@ EXT_DECL TRDP_ERR_T tau_initTtiAccess (
 EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
 	TRDP_APP_SESSION_T                 appHandle,
     TRDP_OP_TRAIN_DIR_STATE_T         *pOpTrDirState,
-    TRDP_OP_TRAIN_DIR_T               *pOpTrDir,
-    UINT8                       const  etbId);
+    TRDP_OP_TRAIN_DIR_T               *pOpTrDir);
 
 
 /**********************************************************************************************************************/
@@ -101,7 +99,6 @@ EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pTrDir          Pointer to a train directory structure to be returned.
- *  @param[in]      etbId           Identifier of the ETB the train directory is requested for.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -109,8 +106,7 @@ EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
  */
 EXT_DECL TRDP_ERR_T tau_getTrDirectory (
 	TRDP_APP_SESSION_T                 appHandle,
-    TRDP_TRAIN_DIR_T                  *pTrDir,
-    UINT8                       const  etbId);
+    TRDP_TRAIN_DIR_T                  *pTrDir);
 
 
 /**********************************************************************************************************************/
@@ -140,7 +136,6 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
  *  @param[out]     pOpTrDir        Pointer to an operational train directory structure to be returned.
  *  @param[out]     pTrDir          Pointer to a train directory structure to be returned.
  *  @param[out]     pTrNetDir       Pointer to a train network directory structure to be returned.
- *  @param[in]      etbId           Identifier of the ETB the train directory state is requested for.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -151,8 +146,7 @@ EXT_DECL TRDP_ERR_T tau_getTTI (
 	TRDP_OP_TRAIN_DIR_STATE_T         *pOpTrDirState,
     TRDP_OP_TRAIN_DIR_T               *pOpTrDir,
     TRDP_TRAIN_DIR_T                  *pTrDir,
-    TRDP_TRAIN_NET_DIR_T              *pTrNetDir,
-    UINT8                              const  etbId);
+    TRDP_TRAIN_NET_DIR_T              *pTrNetDir);
 
 
 /**********************************************************************************************************************/
@@ -172,36 +166,36 @@ EXT_DECL TRDP_ERR_T tau_getTrnCstCnt (
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the total number of consists in the train.
+/**    Function to retrieve the total number of vehicles in the train.
  *
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     pTrnCarCnt      Pointer to the number of cars to be returned
+ *  @param[out]     pTrnCnt         Pointer to the number of vehicles to be returned
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
-EXT_DECL TRDP_ERR_T tau_getTrnCarCnt (
+EXT_DECL TRDP_ERR_T tau_getTrnVehCnt (
 	TRDP_APP_SESSION_T   appHandle,
-    UINT16              *pTrnCarCnt);
+    UINT16              *pTrnVehCnt);
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the total number of cars in a consist.
+/**    Function to retrieve the total number of vehicles in a consist.
  *
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     pCstCarCnt      Pointer to the number of cars to be returned
+ *  @param[out]     pCstVehCnt      Pointer to the number of vehicles to be returned
  *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
-EXT_DECL TRDP_ERR_T tau_getCstCarCnt (
+EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
 	TRDP_APP_SESSION_T   appHandle,
-    UINT16              *pCstCarCnt,
+    UINT16              *pCstVehCnt,
     const TRDP_LABEL_T   cstLabel);
 
 
@@ -220,26 +214,6 @@ EXT_DECL TRDP_ERR_T tau_getCstCarCnt (
 EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
 	TRDP_APP_SESSION_T   appHandle,
     UINT16              *pCstFctCnt,
-    const TRDP_LABEL_T   cstLabel);
-
-
-/**********************************************************************************************************************/
-/**    Function to retrieve the total number of devices in a car.
- *
- *
- *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     pDevCnt         Pointer to the device count to be returned
- *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means own vehicle if cstLabel == NULL.
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *
- */
-EXT_DECL TRDP_ERR_T tau_getCarDevCnt (
-	TRDP_APP_SESSION_T   appHandle,
-    UINT16              *pDevCnt,
-    const TRDP_LABEL_T   vehLabel,
     const TRDP_LABEL_T   cstLabel);
 
 
@@ -267,14 +241,13 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the car information of a consist's car.
+/**    Function to retrieve the vehicle information of a consist's vehicle.
  *
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pVehInfo        Pointer to the vehicle info to be returned. 
  *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means own vehicle  if cstLabel refers to own consist.
  *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
- *  @param[in]      carPropLen      Size of properties
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -284,8 +257,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
 	TRDP_APP_SESSION_T      appHandle,
     TRDP_VEHICLE_INFO_T    *pVehInfo,
     const TRDP_LABEL_T      vehLabel,
-    const TRDP_LABEL_T      cstLabel,
-    UINT32                  carPropLen);
+    const TRDP_LABEL_T      cstLabel);
 
 
 /**********************************************************************************************************************/
@@ -313,8 +285,14 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
 /**    Function to retrieve the orientation of the given vehicle.
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     pCarOrient      Pointer to the vehicle orientation to be returned
+ *  @param[out]     pVehOrient      Pointer to the vehicle orientation to be returned
+ *                                   '00'B = not known (corrected vehicle)
+ *                                   '01'B = same as operational train direction
+ *                                   '10'B = inverse to operational train direction
  *  @param[out]     pCstOrient      Pointer to the consist orientation to be returned
+ *                                   '00'B = not known (corrected vehicle)
+ *                                   '01'B = same as operational train direction
+ *                                   '10'B = inverse to operational train direction
  *  @param[in]      vehLabel        vehLabel = NULL means own vehicle if cstLabel == NULL
  *  @param[in]      cstLabel        cstLabel = NULL means own consist
  *
@@ -324,32 +302,10 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
  */
 EXT_DECL TRDP_ERR_T tau_getVehOrient (
 	TRDP_APP_SESSION_T   appHandle,
-    UINT8               *pCarOrient,
+    UINT8               *pVehOrient,
     UINT8               *pCstOrient,
     TRDP_LABEL_T         vehLabel,
     TRDP_LABEL_T         cstLabel);
-
-
-/**********************************************************************************************************************/
-/**    Function to retrieve the leading car depending IEC orientation of the given consist.
- *
- *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     pIecCarOrient   Pointer to the IEC car orientation to be returned
- *  @param[out]     pIecCstOrient   Pointer to the IEC consist orientation to be returned
- *  @param[in]      vehLabel        vehLabel = NULL means own vehicle if cstLabel == NULL
- *  @param[in]      cstLabel        cstLabel = NULL means own consist
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *
- */
-EXT_DECL TRDP_ERR_T tau_getIecCarOrient (
-	TRDP_APP_SESSION_T   appHandle,
-    UINT8               *pIecCarOrient,
-    UINT8               *pIecCstOrient,
-    TRDP_LABEL_T         vehLabel,
-    TRDP_LABEL_T         cstLabel);
-
 
 
 
