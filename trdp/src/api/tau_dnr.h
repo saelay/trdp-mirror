@@ -57,6 +57,7 @@ extern "C" {
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[in]      ecspIpAddr      ECSP IP address.
  *  @param[in]      ecspPort        ECSP port number.
+ *  @param[in]      hostFileName    Optional host file name as ECSP replacement.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error
@@ -65,7 +66,8 @@ extern "C" {
 EXT_DECL TRDP_ERR_T tau_initDnr (
 	TRDP_APP_SESSION_T appHandle,
     TRDP_IP_ADDR_T     ecspIpAddr,
-    UINT32             ecspPort);
+    UINT32             ecspPort,
+    CHAR8             *hostFileName);
 
 
 /**********************************************************************************************************************/
