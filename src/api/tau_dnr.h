@@ -148,11 +148,12 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
 /* ---------------------------------------------------------------------------- */
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the vehId of the car with label vehLabel in the consist with cstLabel.
+/**    Function to retrieve the id of the consist and vehicle with label vehLabel in the consist with cstLabel.
  *  
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     vehId           Pointer to a label string to return the vehicle id
+ *  @param[out]     cstId           Pointer to a label string to return the consist id
  *  @param[in]      vehLabel        Pointer to the vehicle label. NULL means own vehicle if cstLabel == NULL. 
  *  @param[in]      cstLabel        Pointer to the consist label. NULL means own consist.
  *
@@ -160,9 +161,10 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
  *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
-EXT_DECL TRDP_ERR_T tau_label2VehId (
+EXT_DECL TRDP_ERR_T tau_label2Ids (
 	TRDP_APP_SESSION_T    appHandle,
     TRDP_LABEL_T          vehId,
+    TRDP_LABEL_T          cstId,
     const TRDP_LABEL_T    vehLabel,
     const TRDP_LABEL_T    cstLabel);    
 
@@ -174,6 +176,7 @@ EXT_DECL TRDP_ERR_T tau_label2VehId (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pTcnVehNo       Pointer to the TCN vehicle number to be returned
+ *  @param[out]     pTcnCstNo       Pointer to the TCN consist number to be returned
  *  @param[in]      vehLabel        Pointer to the vehicle label. NULL means own vehicle.
  *  @param[in]      cstLabel        Pointer to the consist label. NULL means own consist.
  *
@@ -184,6 +187,7 @@ EXT_DECL TRDP_ERR_T tau_label2VehId (
 EXT_DECL TRDP_ERR_T tau_label2TcnVehNo (
 	TRDP_APP_SESSION_T    appHandle,
     UINT8                *pTcnVehNo,
+    UINT8                *pTcnCstNo,
     const TRDP_LABEL_T    vehLabel,
     const TRDP_LABEL_T    cstLabel); 
 
@@ -213,7 +217,7 @@ EXT_DECL TRDP_ERR_T tau_label2OpVehNo (
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the car and consist id of the car given with carNo and trnCstNo.
+/**    Function to retrieve the vehicle and consist id of the vehicle given with tcnVehNo and tcnCstNo.
  *  
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
@@ -230,8 +234,8 @@ EXT_DECL TRDP_ERR_T tau_tcnVehNo2Ids (
 	TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         vehId,  
     TRDP_LABEL_T         cstId,  
-    UINT8                tcnVehNo,
-    UINT8                tcnCstNo);
+    const UINT8          tcnVehNo,
+    const UINT8          tcnCstNo);
 
 
 
@@ -252,7 +256,7 @@ EXT_DECL TRDP_ERR_T tau_opVehNo2Ids (
 	TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         vehId,  
     TRDP_LABEL_T         cstId,  
-    UINT8                opVehNo); 
+    const UINT8          opVehNo); 
 
 
 
@@ -260,29 +264,32 @@ EXT_DECL TRDP_ERR_T tau_opVehNo2Ids (
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the vehId of the car hosting a device with the IPAddress ipAddr.
+/**    Function to retrieve the consist and vehicle id of the vehicle hosting a device with the IPAddress ipAddr.
  *  
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     vehId           Pointer to the vehicle id to be returned
+ *  @param[out]     cstId           Pointer to the consist id to be returned
  *  @param[in]      ipAddr          IP address. 0 means own address, so the own vehicle id is returned.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
-EXT_DECL TRDP_ERR_T tau_addr2VehId (
+EXT_DECL TRDP_ERR_T tau_addr2Ids (
 	TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         vehId,  
-    TRDP_IP_ADDR_T       ipAddr);
+    TRDP_LABEL_T         cstId, 
+    const TRDP_IP_ADDR_T ipAddr);
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the TCN vehicle number in consist of the car hosting the device with the given IP address
+/**    Function to retrieve the TCN vehicle number in consist of the vehicle hosting the device with the given IP address
  *  
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pTcnVehNo       Pointer to the TCN vehicle number in consist to be returned
+ *  @param[out]     pTcnVehNo       Pointer to the TCN consist number in train to be returned
  *  @param[in]      ipAddr          IP address. 0 means own address, so the own vehicle number is returned.
  *
  *  @retval         TRDP_NO_ERR     no error
@@ -290,9 +297,10 @@ EXT_DECL TRDP_ERR_T tau_addr2VehId (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2TcnVehNo (
-	TRDP_APP_SESSION_T   appHandle,
-    UINT8               *pTcnVehNo, 
-    TRDP_IP_ADDR_T       ipAddr);
+	TRDP_APP_SESSION_T    appHandle,
+    UINT8                *pTcnVehNo, 
+    UINT8                *pTcnCstNo,
+    const TRDP_IP_ADDR_T  ipAddr);
 
 
 
@@ -309,21 +317,24 @@ EXT_DECL TRDP_ERR_T tau_addr2TcnVehNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2OpVehNo (
-	TRDP_APP_SESSION_T   appHandle,
-    UINT8               *pOpVehNo, 
-    TRDP_IP_ADDR_T       ipAddr);
+	TRDP_APP_SESSION_T    appHandle,
+    UINT8                *pOpVehNo, 
+    const TRDP_IP_ADDR_T  ipAddr);
 
 
 /* ---------------------------------------------------------------------------- */
 
 
+
+
 /**********************************************************************************************************************/
-/**    Function to retrieve the consist identifier of the consist with train consist sequence number cstNo.
+/**    Function to retrieve the consist identifier of the consist with TCN sequence consist number tcnCstNo.
  *  
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     cstId           Pointer to the consist id to be returned
- *  @param[in]      tcnCstNo        Consist sequence number based on IP reference direction. 0 means own consist.
+ *  @param[in]      tcnCstNo        TCN consist sequence number based on IP reference direction.
+ *                                  0 means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -332,37 +343,34 @@ EXT_DECL TRDP_ERR_T tau_addr2OpVehNo (
 EXT_DECL TRDP_ERR_T tau_tcnCstNo2CstId     (
 	TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         cstId,     
-    UINT8                tcnCstNo);
-
+    const UINT8          tcnCstNo);
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the consist identifier of the consist with IEC sequence consist number iecCstNo.
+/**    Function to retrieve the consist identifier of the consist with operational consist sequence number opCstNo.
  *  
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     cstId           Pointer to the consist id to be returned
- *  @param[in]      opCstNo         Operational consist sequence number based on the leading car.
- *                                  0 means own consist.
+ *  @param[in]      opCstNo         Operational consist sequence number based on the leading vehicle. 0 means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
-EXT_DECL TRDP_ERR_T tau_iecCstNo2CstId     (
+EXT_DECL TRDP_ERR_T tau_opCstNo2CstId     (
 	TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         cstId,     
-    UINT8                opCstNo);
-
+    const UINT8          opCstNo);
 
 /* ---------------------------------------------------------------------------- */
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the consist identifier of the consist hosting a car with label vehLabel.
+/**    Function to retrieve the consist identifier of the consist hosting a vehicle with label vehLabel.
  *  
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     cstId           Pointer to the consist id to be returned
- *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means any car. 
+ *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means any vehicle. 
  *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist. 
  *
  *  @retval         TRDP_NO_ERR     no error
@@ -429,7 +437,7 @@ EXT_DECL TRDP_ERR_T tau_label2OpCstNo (
 EXT_DECL TRDP_ERR_T tau_addr2CstId      (
 	TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         cstId,     
-    TRDP_IP_ADDR_T       ipAddr);
+    const TRDP_IP_ADDR_T ipAddr);
 
 
 /**********************************************************************************************************************/
@@ -445,9 +453,9 @@ EXT_DECL TRDP_ERR_T tau_addr2CstId      (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2TcnCstNo (
-	TRDP_APP_SESSION_T   appHandle,
-    UINT8               *pTcnCstNo,
-    TRDP_IP_ADDR_T       ipAddr);
+	TRDP_APP_SESSION_T    appHandle,
+    UINT8                *pTcnCstNo,
+    const TRDP_IP_ADDR_T  ipAddr);
   
 
 /**********************************************************************************************************************/
@@ -463,9 +471,9 @@ EXT_DECL TRDP_ERR_T tau_addr2TcnCstNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2OpCstNo (
-	TRDP_APP_SESSION_T   appHandle,
-	UINT8				*pOpCstNo,
-    TRDP_IP_ADDR_T		 ipAddr);
+	TRDP_APP_SESSION_T    appHandle,
+	UINT8				 *pOpCstNo,
+    const TRDP_IP_ADDR_T  ipAddr);
 
 /* ---------------------------------------------------------------------------- */
 
