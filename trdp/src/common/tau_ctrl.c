@@ -49,7 +49,6 @@
  static TRDP_PUB_T      priv_pubHandle          = 0;    /*    Our identifier to the publication                     */
  static TRDP_SUB_T      priv_subHandle          = 0;    /*    Our identifier to the subscription                    */
  static TRDP_IP_ADDR_T  priv_ecspIpAddr         = 0;    /*    ECSP IP address                                       */
- static TRDP_IP_ADDR_T  priv_ecscIpAddr         = 0;    /*    ECSC IP address                                       */
  static BOOL8           priv_ecspCtrlInitialised= FALSE;
   
 
@@ -69,14 +68,12 @@
  *
  */
 EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle, 
-                                       TRDP_IP_ADDR_T       ecspIpAddr, 
-                                       TRDP_IP_ADDR_T       ecscIpAddr)
+                                       TRDP_IP_ADDR_T       ecspIpAddr)
 {
     /* session already opened, handle publish/subscribe */
     TRDP_ERR_T             err;
     
     priv_ecspIpAddr = ecspIpAddr;
-    priv_ecscIpAddr = ecscIpAddr;
 
     /*    Copy the packet into the internal send queue, prepare for sending.    */
     /*    If we change the data, just re-publish it    */
@@ -108,7 +105,7 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
                          0,                         /*    ecnTopoCounter                        */
                          0,                         /*    opTopoCounter                         */
                          0,                         /*    Source IP filter                      */
-                         ecscIpAddr,                /*    Default destination    (or MC Group)  */
+                         appHandle->realIP,         /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_MARSHALL,       /*    packet flags - UDP, no call back      */
                          ECSP_STAT_TIMEOUT,         /*    Time out in us                        */
                          TRDP_TO_SET_TO_ZERO);      /*    delete invalid data on timeout        */
