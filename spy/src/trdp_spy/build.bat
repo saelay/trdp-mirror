@@ -10,6 +10,7 @@ SET LIBXML=libxml
 SET LIBXML_DIR=%RESOURCES_DIR%\%LIBXML%
 SET ICONV=iconv-1.9.2.win32
 SET ICONV_DIR=%RESOURCES_DIR%\%ICONV%
+SET SVN_OUTPUT=%WORKINGDIR%\..\..\win32
 
 echo ====================== TRDP-SPY setup ======================
 rem copy the plugin to the place where it is needed to be when compiling
@@ -56,13 +57,10 @@ IF     ERRORLEVEL 1 goto :quit
 copy trdp_spy.dll C:\wireshark-%WS_VERSION%\wireshark-gtk2\plugins\%WS_VERSION%
 copy C:\wireshark-%WS_VERSION%\wireshark-gtk2\libxml2-2.dll C:\wireshark-%WS_VERSION%\wireshark-gtk2\libxml2.dll
 
-goto:end
+echo === Copy the new version into the output location of the SVN ===
+copy trdp_spy.dll %SVN_OUTPUT%
 
-rem generate a package
-cd "c:\wireshark-%WS_VERSION%"
-cd ..
-cd ..
-nmake -f makefile.nmake packaging
+goto :end
 
 :quit
 echo ERROR..!!build fail
