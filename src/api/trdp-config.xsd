@@ -808,6 +808,17 @@ keep = keep the last value</xs:documentation>
               </xs:restriction>
           </xs:simpleType>
       </xs:attribute>
+      <xs:attribute name="create" default="off" use="optional">
+         <xs:annotation>
+            <xs:documentation>Defines whether publisher/listener/subscriber should be automatically created based on the given type or not.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="on"/>
+            <xs:enumeration value="off"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
 
     </xs:complexType>
   </xs:element>
