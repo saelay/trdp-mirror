@@ -119,6 +119,8 @@ typedef struct
     UINT32              srcCnt;     /**< number of sources */
     TRDP_SRC_T          *pSrc;      /**< Pointer to array of source descriptors */
     TRDP_EXCHG_OPTION_T type;       /**< shall telegram be sent or received */
+    BOOL8               create;     /**< TRUE: associated publisher/listener/subscriber 
+                                         shall be generated automatically */
 } TRDP_EXCHG_PAR_T;
 
 typedef struct
