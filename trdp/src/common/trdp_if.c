@@ -139,7 +139,7 @@ TRDP_APP_SESSION_T *trdp_sessionQueue (void)
 /**********************************************************************************************************************/
 /** Initialize the TRDP stack.
  *
- *  tlc_init returns in pAppHandle a unique handle to be used in further calls to the stack.
+ *    tlc_init initializes the memory subsystem and takes a function pointer to an output function for logging.
  *
  *  @param[in]      pPrintDebugString   Pointer to debug print function
  *  @param[in]      pMemConfig          Pointer to memory configuration
@@ -509,8 +509,8 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
     TRDP_APP_SESSION_T appHandle)
 {
     TRDP_SESSION_PT pSession    = NULL;
-    BOOL8 found         = FALSE;
-    TRDP_ERR_T      ret = TRDP_NOINIT_ERR;
+    BOOL8           found       = FALSE;
+    TRDP_ERR_T      ret;
 
     /*    Find the session    */
     if (appHandle == NULL)
