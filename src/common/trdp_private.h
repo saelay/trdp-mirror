@@ -16,6 +16,7 @@
  *      
  * $Id$
  *
+ *      BL 2015-08-31: Ticket #94: "beQuiet" removed
  *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
  *
  */
@@ -308,7 +309,6 @@ typedef struct TRDP_SESSION
     VOS_MUTEX_T             mutex;              /**< protect this session                                   */
     TRDP_IP_ADDR_T          realIP;             /**< Real IP address                                        */
     TRDP_IP_ADDR_T          virtualIP;          /**< Virtual IP address                                     */
-    BOOL8                   beQuiet;            /**< if set, only react on ownIP requests                   */
     UINT32                  redID;              /**< redundant comId                                        */
     UINT32                  etbTopoCnt;         /**< current valid topocount or zero                        */
     UINT32                  opTrnTopoCnt;       /**< current valid topocount or zero                        */
