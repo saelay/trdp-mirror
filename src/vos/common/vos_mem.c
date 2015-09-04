@@ -11,7 +11,7 @@
  * @author          Bernd Loehr, NewTec GmbH
  *
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
@@ -49,7 +49,7 @@
 #endif
 
 #ifndef PTHREAD_MUTEX_INITIALIZER
-#define PTHREAD_MUTEX_INITIALIZER 0	/* Dummy */
+#define PTHREAD_MUTEX_INITIALIZER  0 /* Dummy */
 #endif
 
 #include "vos_types.h"
@@ -131,8 +131,8 @@ struct VOS_QUEUE_ELEM
 };
 
 /* Forward declaration, Mutex size is target dependant! */
-VOS_ERR_T   vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
-void        vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
+VOS_ERR_T       vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
+void            vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 
 const UINT32    cQueueMagic = 0xE5E1E5E1;
 /***********************************************************************************************************************
@@ -185,8 +185,8 @@ EXT_DECL VOS_ERR_T vos_memInit (
     UINT8   *p[VOS_MEM_MAX_PREALLOCATE];
 
     /* Initialize memory */
-    gMem.memSize            = size;
-    gMem.allocSize          = 0;
+    gMem.memSize = size;
+    gMem.allocSize = 0;
     gMem.noOfBlocks         = 0;
     gMem.memCnt.freeSize    = size;
     gMem.memCnt.minFreeSize = size;
@@ -239,7 +239,8 @@ EXT_DECL VOS_ERR_T vos_memInit (
     {
         if (pMemoryArea == NULL)                    /* We must allocate memory from the heap once   */
         {
-            gMem.pArea = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development */
+            gMem.pArea = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development
+                                                      */
             if (gMem.pArea == NULL)
             {
                 return VOS_MEM_ERR;
@@ -290,8 +291,10 @@ EXT_DECL VOS_ERR_T vos_memInit (
             p[j] = vos_memAlloc(blockSize[i]);
             if (p[j] == NULL)
             {
-                vos_printLog(VOS_LOG_ERROR, "vos_memInit() Pre-Allocation size exceeds overall memory size!!! (%u > %u)\n",
-                           minSize, size);
+                vos_printLog(VOS_LOG_ERROR,
+                             "vos_memInit() Pre-Allocation size exceeds overall memory size!!! (%u > %u)\n",
+                             minSize,
+                             size);
                 break;
             }
         }
@@ -319,19 +322,18 @@ EXT_DECL VOS_ERR_T vos_memInit (
 EXT_DECL void vos_memDelete (
     UINT8 *pMemoryArea)
 {
-    if (NULL == gMem.pArea || (pMemoryArea != NULL && pMemoryArea != gMem.pArea))
+    if (pMemoryArea != NULL && pMemoryArea != gMem.pArea)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_memDelete() ERROR NULL pointer/Parameter\n");
+        vos_printLog(VOS_LOG_ERROR, "vos_memDelete() ERROR wrong pointer/parameter\n");
     }
-    else
+
+    /* we will nevertheless clear the memory area because it makes no sence to report to the application... */
+    vos_mutexLocalDelete(&gMem.mutex);
+    if (gMem.wasMalloced && gMem.pArea != NULL)
     {
-        vos_mutexLocalDelete(&gMem.mutex);
-        if (gMem.wasMalloced)
-        {
-            free(gMem.pArea);    /*lint !e421 optional use of heap memory for debugging/development */
-        }
-        memset(&gMem, 0, sizeof(gMem));
+        free(gMem.pArea);    /*lint !e421 optional use of heap memory for debugging/development */
     }
+    memset(&gMem, 0, sizeof(gMem));
 }
 
 /**********************************************************************************************************************/
@@ -455,8 +457,8 @@ EXT_DECL UINT8 *vos_memAlloc (
         if (pBlock != NULL)
         {
             /* Fill in size in memory header of the block. To be used when it is returned.*/
-            pBlock->size            = blockSize;
-            gMem.memCnt.freeSize    -= blockSize + sizeof(MEM_BLOCK_T);
+            pBlock->size = blockSize;
+            gMem.memCnt.freeSize -= blockSize + sizeof(MEM_BLOCK_T);
             if (gMem.memCnt.freeSize < gMem.memCnt.minFreeSize)
             {
                 gMem.memCnt.minFreeSize = gMem.memCnt.freeSize;
@@ -600,15 +602,15 @@ EXT_DECL VOS_ERR_T vos_memCount (
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
         /* normal heap memory is used */
-		*pAllocatedMemory   = 0;
-		*pFreeMemory        = 0;
-		*pMinFree           = 0;
-		*pNumAllocBlocks    = 0;
-		*pNumAllocErr       = 0;
-		*pNumFreeErr        = 0;
+        *pAllocatedMemory   = 0;
+        *pFreeMemory        = 0;
+        *pMinFree           = 0;
+        *pNumAllocBlocks    = 0;
+        *pNumAllocErr       = 0;
+        *pNumFreeErr        = 0;
 
-		memset(blockSize, 0, sizeof(blockSize[VOS_MEM_NBLOCKSIZES]));
-		memset(usedBlockSize, 0, sizeof(usedBlockSize[VOS_MEM_NBLOCKSIZES]));
+        memset(blockSize, 0, sizeof(blockSize[VOS_MEM_NBLOCKSIZES]));
+        memset(usedBlockSize, 0, sizeof(usedBlockSize[VOS_MEM_NBLOCKSIZES]));
     }
 
     *pAllocatedMemory   = gMem.memSize;
@@ -620,8 +622,8 @@ EXT_DECL VOS_ERR_T vos_memCount (
 
     for (i = 0; i < (UINT32) VOS_MEM_NBLOCKSIZES; i++)
     {
-        usedBlockSize[i] = gMem.memCnt.blockCnt[i];
-        blockSize[i]     = gMem.freeBlock[i].size;
+        usedBlockSize[i]    = gMem.memCnt.blockCnt[i];
+        blockSize[i]        = gMem.freeBlock[i].size;
     }
 
     return VOS_NO_ERR;
@@ -726,7 +728,7 @@ EXT_DECL void vos_strncpy (
 {
 #ifdef WIN32
     CHAR8 character = pStrDst[count];
-    (void) strncpy_s((char *)pStrDst, (size_t)(count+1), (const char *)pStrSrc, (size_t) count);
+    (void) strncpy_s((char *)pStrDst, (size_t)(count + 1), (const char *)pStrSrc, (size_t) count);
     pStrDst[count] = character;
 #else
     (void) strncpy((char *)pStrDst, (const char *)pStrSrc, (size_t) count);
@@ -772,7 +774,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
     }
     else
     {
-        (*pQueueHandle) = (VOS_QUEUE_T) vos_memAlloc (sizeof(struct VOS_QUEUE));
+        (*pQueueHandle) = (VOS_QUEUE_T) vos_memAlloc(sizeof(struct VOS_QUEUE));
         if (*pQueueHandle == NULL)
         {
             vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
@@ -780,7 +782,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
         }
         else
         {
-            retVal = vos_semaCreate(&((*pQueueHandle)->semaphore),VOS_SEMA_EMPTY);
+            retVal = vos_semaCreate(&((*pQueueHandle)->semaphore), VOS_SEMA_EMPTY);
             if (retVal != VOS_NO_ERR)
             {
                 vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not create semaphore\n");
@@ -805,13 +807,14 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                     else
                     {
                         /* init header */
-                        (*pQueueHandle)->firstElem = 0;
-                        (*pQueueHandle)->lastElem = 0;
-                        (*pQueueHandle)->queueType = queueType;
-                        (*pQueueHandle)->maxNoOfMsg = maxNoOfMsg;
-                        (*pQueueHandle)->magicNumber = cQueueMagic;
+                        (*pQueueHandle)->firstElem      = 0;
+                        (*pQueueHandle)->lastElem       = 0;
+                        (*pQueueHandle)->queueType      = queueType;
+                        (*pQueueHandle)->maxNoOfMsg     = maxNoOfMsg;
+                        (*pQueueHandle)->magicNumber    = cQueueMagic;
                         /* alloc queue memory */
-                        (*pQueueHandle)->pQueue = (struct VOS_QUEUE_ELEM*)vos_memAlloc(maxNoOfMsg * sizeof(struct VOS_QUEUE_ELEM));
+                        (*pQueueHandle)->pQueue =
+                            (struct VOS_QUEUE_ELEM *)vos_memAlloc(maxNoOfMsg * sizeof(struct VOS_QUEUE_ELEM));
                         if ((*pQueueHandle)->pQueue == NULL)
                         {
                             vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
@@ -819,8 +822,8 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                         }
                         else
                         {
-                            (*pQueueHandle)->pQueue->pData = NULL;
-                            (*pQueueHandle)->pQueue->size = 0;
+                            (*pQueueHandle)->pQueue->pData  = NULL;
+                            (*pQueueHandle)->pQueue->size   = 0;
                             retVal = vos_mutexUnlock((*pQueueHandle)->mutex);
                             if (retVal != VOS_NO_ERR)
                             {
@@ -831,7 +834,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                             {
                                 /* do nothing here */
                             }
-                        }                    
+                        }
                     }
                 }
             }
@@ -860,9 +863,9 @@ EXT_DECL VOS_ERR_T vos_queueSend (
     UINT8       *pData,
     UINT32      size)
 {
-    VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
-    VOS_ERR_T err = VOS_UNKNOWN_ERR;
-    BOOL8     giveSemaphore = FALSE;
+    VOS_ERR_T   retVal = VOS_UNKNOWN_ERR;
+    VOS_ERR_T   err = VOS_UNKNOWN_ERR;
+    BOOL8       giveSemaphore = FALSE;
 
     if ((queueHandle == (VOS_QUEUE_T) NULL)
         || (pData == NULL)
@@ -899,7 +902,7 @@ EXT_DECL VOS_ERR_T vos_queueSend (
                         || (queueHandle->queueType == VOS_QUEUE_POLICY_OTHER))
                     {
                         /* FIFO, append to end */
-                        if (queueHandle->lastElem == queueHandle->maxNoOfMsg -1)
+                        if (queueHandle->lastElem == queueHandle->maxNoOfMsg - 1)
                         {
                             queueHandle->lastElem = 0;
                         }
@@ -907,8 +910,8 @@ EXT_DECL VOS_ERR_T vos_queueSend (
                         {
                             queueHandle->lastElem++;
                         }
-                        queueHandle->pQueue[queueHandle->lastElem].pData = pData;
-                        queueHandle->pQueue[queueHandle->lastElem].size = size;
+                        queueHandle->pQueue[queueHandle->lastElem].pData    = pData;
+                        queueHandle->pQueue[queueHandle->lastElem].size     = size;
                     }
                     else
                     {
@@ -921,15 +924,15 @@ EXT_DECL VOS_ERR_T vos_queueSend (
                         {
                             queueHandle->firstElem--;
                         }
-                        queueHandle->pQueue[queueHandle->firstElem].pData = pData;
-                        queueHandle->pQueue[queueHandle->firstElem].size = size;
+                        queueHandle->pQueue[queueHandle->firstElem].pData   = pData;
+                        queueHandle->pQueue[queueHandle->firstElem].size    = size;
                     }
                 }
                 else
                 {
                     /* queue is empty, don't need to update first / last element indicators */
-                    queueHandle->pQueue[queueHandle->firstElem].pData = pData;
-                    queueHandle->pQueue[queueHandle->firstElem].size = size;
+                    queueHandle->pQueue[queueHandle->firstElem].pData   = pData;
+                    queueHandle->pQueue[queueHandle->firstElem].size    = size;
                 }
                 giveSemaphore = TRUE;
             }
@@ -970,12 +973,12 @@ EXT_DECL VOS_ERR_T vos_queueSend (
 
 EXT_DECL VOS_ERR_T vos_queueReceive (
     VOS_QUEUE_T queueHandle,
-    UINT8       **ppData,
+    UINT8       * *ppData,
     UINT32      *pSize,
     UINT32      usTimeout )
 {
-    VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
-    VOS_ERR_T err = VOS_UNKNOWN_ERR;
+    VOS_ERR_T   retVal  = VOS_UNKNOWN_ERR;
+    VOS_ERR_T   err     = VOS_UNKNOWN_ERR;
 
     if ((queueHandle == (VOS_QUEUE_T) NULL)
         || (queueHandle->magicNumber != cQueueMagic))
@@ -984,15 +987,15 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
         retVal = VOS_PARAM_ERR;
     }
     else
-    {      
+    {
         /* wait for semaphore indicating new message in queue */
-        err = vos_semaTake(queueHandle->semaphore,usTimeout);
+        err = vos_semaTake(queueHandle->semaphore, usTimeout);
         if (err != VOS_NO_ERR)
         {
             vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not take semaphore\n");
             *ppData = NULL;
-            *pSize = 0;
-            retVal = VOS_QUEUE_ERR;
+            *pSize  = 0;
+            retVal  = VOS_QUEUE_ERR;
         }
         else
         {
@@ -1005,9 +1008,9 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
             else
             {
                 *ppData = queueHandle->pQueue[queueHandle->firstElem].pData;
-                *pSize = queueHandle->pQueue[queueHandle->firstElem].size;
-                queueHandle->pQueue[queueHandle->firstElem].pData = NULL;
-                queueHandle->pQueue[queueHandle->firstElem].size = 0;
+                *pSize  = queueHandle->pQueue[queueHandle->firstElem].size;
+                queueHandle->pQueue[queueHandle->firstElem].pData   = NULL;
+                queueHandle->pQueue[queueHandle->firstElem].size    = 0;
                 if (queueHandle->firstElem != queueHandle->lastElem)
                 {
                     if (queueHandle->firstElem < queueHandle->maxNoOfMsg - 1)
@@ -1055,8 +1058,8 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
 EXT_DECL VOS_ERR_T vos_queueDestroy (
     VOS_QUEUE_T queueHandle)
 {
-    VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
-    VOS_ERR_T err = VOS_UNKNOWN_ERR;
+    VOS_ERR_T   retVal  = VOS_UNKNOWN_ERR;
+    VOS_ERR_T   err     = VOS_UNKNOWN_ERR;
 
     if ((queueHandle == (VOS_QUEUE_T) NULL)
         || (queueHandle->magicNumber != cQueueMagic))
