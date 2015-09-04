@@ -17,6 +17,7 @@
  * $Id$
  *
  *      BL 2015-08-31: Ticket #94: "beQuiet" removed
+ *      BL 2015-08-05: Ticket #81: Counts for packet loss
  *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
  *
  */
