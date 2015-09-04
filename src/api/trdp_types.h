@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-08-05: Ticket #81: Counts for packet loss
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *      BL 2014-02-27: Ticket #17: tlp_subscribe() returns wrong *pSubHandle
  *
@@ -121,6 +122,7 @@ typedef enum
     TRDP_CONFIRMTO_ERR      = -44,  /**< Protocol Confirm Timeout                       */
     TRDP_REQCONFIRMTO_ERR   = -45,  /**< Protocol Confirm Timeout (Request sender)      */
     TRDP_PACKET_ERR         = -46,  /**< Incomplete message data packet                 */
+    TRDP_UNRESOLVED_ERR     = -47,  /**< DNR: address could not be resolved             */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 
