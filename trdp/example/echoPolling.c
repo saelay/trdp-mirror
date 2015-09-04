@@ -112,6 +112,7 @@ int main (int argc, char * *argv)
 
     /*    Init the library for non-blocking operation    */
     if (tlc_init(&dbgOut,                            /* actually printf                    */
+                 NULL,
                  &dynamicConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
