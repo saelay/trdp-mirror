@@ -200,6 +200,7 @@ int pd_init (
 
     /*	Init the library for dynamic operation	(PD only) */
     if (tlc_init(dbgOut,                            /* actually printf	*/
+                 NULL,
                  &dynamicConfig                    /* Use application supplied memory	*/
                  ) != TRDP_NO_ERR)
     {

@@ -225,6 +225,7 @@ int main (int argc, char *argv[])
 
     /*    Init the library  */
     if (tlc_init(&dbgOut,                              /* no logging    */
+                 NULL,
                  &dynamicConfig) != TRDP_NO_ERR)    /* Use application supplied memory    */
     {
         printf("Initialization error\n");
