@@ -17,6 +17,7 @@
  * $Id$
  *
  *      BL 2015-08-31: Ticket #94: TRDP_REDUNDANT flag is evaluated, beQuiet removed
+ *      BL 2015-08-05: Ticket #81: Counts for packet loss
  *     AHW 2015-04-10: Ticket #76: Wrong initialisation of frame pointer in trdp_pdReceive()
  *     AHW 2015-04-10: Ticket #79: handling for dataSize==0/pData== NULL fixed in in trdp_pdPut()
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
