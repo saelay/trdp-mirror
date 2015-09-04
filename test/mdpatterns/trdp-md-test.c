@@ -237,6 +237,8 @@ const char *get_result_string (TRDP_ERR_T err)
             return "TRDP_REQCONFIRMTO_ERR (protocol confirm timeout (request sender)";
         case TRDP_PACKET_ERR:
             return "TRDP_PACKET_ERR (Incomplete message data packet)";
+        case TRDP_UNRESOLVED_ERR:
+            return "TRDP_UNRESOLVED_ERR (URI was not resolved error)";
         case TRDP_UNKNOWN_ERR:
             return "TRDP_UNKNOWN_ERR (unspecified error)";
     }
@@ -683,7 +685,7 @@ int main (int argc, char *argv[])
     memset(&proccfg, 0, sizeof(proccfg));
 
     /* initialize TRDP protocol library */
-    err = tlc_init(print_log, &memcfg);
+    err = tlc_init(print_log, NULL, &memcfg);
     if (err != TRDP_NO_ERR)
     {
         printf("tlc_init() failed, err: %s\n", get_result_string(err));

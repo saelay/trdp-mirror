@@ -837,7 +837,7 @@ int main(int argc, char * argv[])
     }
 
     /* initialize TRDP protocol library */
-    err = tlc_init(printLog, &memcfg);
+    err = tlc_init(printLog, NULL, &memcfg);
     if (err != TRDP_NO_ERR)
     {
         printf("tlc_init() failed, err: %d\n", err);

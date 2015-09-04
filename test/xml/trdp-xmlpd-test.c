@@ -1078,7 +1078,7 @@ int main(int argc, char * argv[])
         maxLogCategory = VOS_LOG_ERROR;
 
     /*  Initialize the stack    */
-    result = tlc_init(dbgOut, &memConfig);
+    result = tlc_init(dbgOut, NULL, &memConfig);
     if (result != TRDP_NO_ERR)
     {
         printf("Failed to initialize TRDP stack: %s\n", getResultString(result));

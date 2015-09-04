@@ -2020,6 +2020,7 @@ static int test_initialize()
     /*	Init the library  */
     errv = tlc_init(
         private_debug_printf,                   /* debug print function */
+        NULL,
         &mem_config                             /* Use application supplied memory	*/
         );
 

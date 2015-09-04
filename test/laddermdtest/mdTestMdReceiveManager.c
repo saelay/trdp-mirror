@@ -246,6 +246,7 @@ MD_APP_ERR_TYPE trdp_initialize(void)
 	/*	Init the library  */
 	errv = tlc_init(
 	    dbgOut,						/* debug print function */
+        NULL,
 	    &mem_config					/* Use application supplied memory	*/
 	    );
 

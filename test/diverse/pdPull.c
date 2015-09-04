@@ -262,6 +262,7 @@ int main (int argc, char * *argv)
 
     /*    Init the library for callback operation    (PD only) */
     if (tlc_init(dbgOut,                            /* actually printf    */
+                 NULL,
                  &dynamicConfig                    /* Use application supplied memory    */
                  ) != TRDP_NO_ERR)
     {
