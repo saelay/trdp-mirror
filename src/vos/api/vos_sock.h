@@ -43,6 +43,7 @@
 #include "vos_private.h"
 #elif defined(POSIX)
 #include <sys/select.h>
+#include <netinet/in.h>
 #else
 #include "vos_private.h"
 #endif
@@ -97,7 +98,10 @@ extern "C" {
 #define TRDP_SOCKBUF_SIZE   (8 * 1024)
 #endif
 #endif
+
 #define VOS_INVALID_SOCKET  -1      /**< Invalid socket number */
+
+#define VOS_INADDR_ANY      INADDR_ANY
 
 #define VOS_DEFAULT_IFACE   cDefaultIface
 
