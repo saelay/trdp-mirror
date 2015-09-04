@@ -56,8 +56,8 @@
  */
 
 static const UINT32         cMinimumMDSize = 1480;                    /**< Initial size for message data received */
-static const UINT8          cEmptySession[TRDP_SESS_ID_SIZE] = {0};   /**< Empty sessionID to compare             */
-static const TRDP_MD_INFO_T cTrdp_md_info_default = {0};
+static const UINT8          cEmptySession[TRDP_SESS_ID_SIZE];         /**< Empty sessionID to compare             */
+static const TRDP_MD_INFO_T cTrdp_md_info_default;
 
 /***********************************************************************************************************************
  *   Local Functions
