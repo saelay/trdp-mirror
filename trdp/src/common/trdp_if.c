@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
+ *
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *
  *      BL 2014-06-03: Do not return error on data-less tlp_request
@@ -138,18 +140,20 @@ TRDP_APP_SESSION_T *trdp_sessionQueue (void)
 
 /**********************************************************************************************************************/
 /** Initialize the TRDP stack.
- *
- *    tlc_init initializes the memory subsystem and takes a function pointer to an output function for logging.
- *
- *  @param[in]      pPrintDebugString   Pointer to debug print function
- *  @param[in]      pMemConfig          Pointer to memory configuration
- *
- *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_MEM_ERR        memory allocation failed
- *  @retval         TRDP_PARAM_ERR      initialization error
- */
+*
+*    tlc_init initializes the memory subsystem and takes a function pointer to an output function for logging.
+*
+*  @param[in]      pPrintDebugString   Pointer to debug print function
+*  @param[in]      pRefCon             user context
+*  @param[in]      pMemConfig          Pointer to memory configuration
+*
+*  @retval         TRDP_NO_ERR         no error
+*  @retval         TRDP_MEM_ERR        memory allocation failed
+*  @retval         TRDP_PARAM_ERR      initialization error
+*/
 EXT_DECL TRDP_ERR_T tlc_init (
     const TRDP_PRINT_DBG_T  pPrintDebugString,
+    void                    *pRefCon,
     const TRDP_MEM_CONFIG_T *pMemConfig)
 {
     TRDP_ERR_T ret = TRDP_NO_ERR;
@@ -158,7 +162,7 @@ EXT_DECL TRDP_ERR_T tlc_init (
     if (sInited == FALSE)
     {
         /*    Initialize VOS    */
-        ret = (TRDP_ERR_T) vos_init(NULL, pPrintDebugString);
+        ret = (TRDP_ERR_T) vos_init(pRefCon, pPrintDebugString);
 
         if (ret != TRDP_NO_ERR)
         {
@@ -1098,7 +1102,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         appHandle->iface,
                         appHandle->pdDefault.port,
                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
-                        (srcIpAddr == 0) ? appHandle->realIP : srcIpAddr,
+                        (srcIpAddr == VOS_INADDR_ANY) ? appHandle->realIP : srcIpAddr,
                         pubHandle.mcGroup,
                         TRDP_SOCK_PD,
                         appHandle->option,

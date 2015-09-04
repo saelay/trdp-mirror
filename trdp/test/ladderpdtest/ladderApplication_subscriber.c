@@ -1051,6 +1051,7 @@ int main (int argc, char *argv[])
 
 	/* Sub-network Id1 Init the library for callback operation	(PD only) */
 	if (tlc_init(dbgOut,								/* actually printf	*/
+                 NULL,
 				 &dynamicConfig						/* Use application supplied memory	*/
 				) != TRDP_NO_ERR)
 	{

@@ -10,11 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
+ *
+ *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
  *
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  */
@@ -61,9 +63,10 @@ extern "C" {
 /**********************************************************************************************************************/
 /** Initialize the TRDP stack.
  *
- *    tlc_init returns in pAppHandle a unique handle to be used in further calls to the stack.
+ *    tlc_init initializes the memory subsystem and takes a function pointer to an output function for logging.
  *
  *  @param[in]      pPrintDebugString   Pointer to debug print function
+ *  @param[in]      pRefCon             user context
  *  @param[in]      pMemConfig          Pointer to memory configuration
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -72,6 +75,7 @@ extern "C" {
  */
 EXT_DECL TRDP_ERR_T tlc_init (
     const TRDP_PRINT_DBG_T  pPrintDebugString,
+    void                    *pRefCon,
     const TRDP_MEM_CONFIG_T *pMemConfig);
 
 /**********************************************************************************************************************/
@@ -168,7 +172,7 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              opTrnTopoCnt);
 
-    
+
 /**********************************************************************************************************************/
 /** Frees the buffer reserved by the TRDP layer.
  *
@@ -258,7 +262,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
-    TRDP_IP_ADDR_T          srcIpAddr, 
+    TRDP_IP_ADDR_T          srcIpAddr,
     TRDP_IP_ADDR_T          destIpAddr,
     UINT32                  interval,
     UINT32                  redId,
@@ -286,14 +290,14 @@ EXT_DECL TRDP_ERR_T tlp_publish (
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlp_republish (
-    TRDP_APP_SESSION_T      appHandle,
-    TRDP_PUB_T              pubHandle,
-    UINT32                  etbTopoCnt,
-    UINT32                  opTrnTopoCnt,
-    TRDP_IP_ADDR_T          srcIpAddr, 
-    TRDP_IP_ADDR_T          destIpAddr,
-    const UINT8             *pData,
-    UINT32                  dataSize);
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_PUB_T          pubHandle,
+    UINT32              etbTopoCnt,
+    UINT32              opTrnTopoCnt,
+    TRDP_IP_ADDR_T      srcIpAddr,
+    TRDP_IP_ADDR_T      destIpAddr,
+    const UINT8         *pData,
+    UINT32              dataSize);
 
 
 /**********************************************************************************************************************/
@@ -698,11 +702,11 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlm_readdListener (
-    TRDP_APP_SESSION_T      appHandle,
-    TRDP_LIS_T              listenHandle,
-    UINT32                  etbTopoCnt,
-    UINT32                  opTrnTopoCnt,
-    TRDP_IP_ADDR_T          mcDestIpAddr /* multiple destId handled in layer above */);
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_LIS_T          listenHandle,
+    UINT32              etbTopoCnt,
+    UINT32              opTrnTopoCnt,
+    TRDP_IP_ADDR_T      mcDestIpAddr /* multiple destId handled in layer above */);
 
 
 /**********************************************************************************************************************/
