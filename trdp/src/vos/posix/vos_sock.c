@@ -286,7 +286,7 @@ EXT_DECL UINT32 vos_dottedIP (
     struct in_addr addr;
     if (inet_aton(pDottedIP, &addr) <= 0)
     {
-        return 0;   /* Prevent returning broadcast address on error */
+        return INADDR_ANY;          /* Prevent returning broadcast address on error */
     }
     else
     {
@@ -536,12 +536,13 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         close(sock);
+        vos_printLog(VOS_LOG_ERROR, "socket() failed, setsockoptions or buffer failed!\n");
         return VOS_SOCK_ERR;
     }
 
     *pSock = (INT32) sock;
 
-    vos_printLog(VOS_LOG_INFO, "vos_sockOpenUDP: socket()=%d success\n", sock);
+    vos_printLog(VOS_LOG_DBG, "vos_sockOpenUDP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
 }
 
@@ -616,7 +617,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     }
     else
     {
-        vos_printLog(VOS_LOG_INFO,
+        vos_printLog(VOS_LOG_DBG,
                      "vos_sockClose(%d) okay\n", sock);
     }
 
