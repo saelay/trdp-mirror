@@ -66,8 +66,19 @@ extern "C" {
 EXT_DECL TRDP_ERR_T tau_initDnr (
 	TRDP_APP_SESSION_T appHandle,
     TRDP_IP_ADDR_T     ecspIpAddr,
-    UINT32             ecspPort,
-    CHAR8             *hostFileName);
+    UINT16             ecspPort,
+    const CHAR8        *hostFileName);
+
+/**********************************************************************************************************************/
+/**    Release any resources allocated by DNR
+ *
+ *  @param[in]      appHandle       Handle returned by tlc_openSession().
+ *
+ *  @retval         none
+ *
+ */
+EXT_DECL void tau_deInitDnr (
+    TRDP_APP_SESSION_T appHandle);
 
 
 /**********************************************************************************************************************/
