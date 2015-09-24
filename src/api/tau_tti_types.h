@@ -371,38 +371,51 @@ typedef struct
 } GNU_PACKED TRDP_OP_TRAIN_DIR_T;
 
 
-/** Operational Train directory status info structure */
-typedef struct
-{
-    TRDP_OP_TRAIN_DIR_STATE_T   state;
-    TRDP_ETB_CTRL_VDP_T         safetyTrail;
-} GNU_PACKED TRDP_OP_TRAIN_DIR_STATUS_INFO_T;
-
-
-/** Train network directory entry structure acc. to IEC61375-2-5 */
-typedef struct
-{
-    TRDP_UUID_T             cstUUID;        /**< unique consist identifier */
-    UINT32                  cstNetProp;     /**< consist network properties
+    /** Operational Train directory status info structure */
+    typedef struct
+    {
+        TRDP_OP_TRAIN_DIR_STATE_T   state;
+        UINT32                      etbTopoCnt;
+        UINT8                       ownOpCstNo;
+        UINT8                       ownTrnCstNo;
+        UINT16                      reserved02;
+        TRDP_ETB_CTRL_VDP_T         safetyTrail;
+    } GNU_PACKED TRDP_OP_TRAIN_DIR_STATUS_INFO_T;
+    
+    
+    /** Train network directory entry structure acc. to IEC61375-2-5 */
+    typedef struct
+    {
+        TRDP_UUID_T             cstUUID;        /**< unique consist identifier */
+        UINT32                  cstNetProp;     /**< consist network properties
                                                  bit0..1:   consist orientation
                                                  bit2..7:   0
                                                  bit8..13:  ETBN Id
                                                  bit14..15: 0
                                                  bit16..21: subnet Id
                                                  bit24..29: CN Id
-                                                 bit30..31: 0 */    
-} GNU_PACKED TRDP_TRAIN_NET_DIR_ENTRY_T;
-
-
-/** Train network directory structure */
-typedef struct
-{
-    UINT16                  reserved01;     /**< reserved for future use (= 0) */
-    UINT16                  entryCnt;       /**< number of entries in train network directory */
-    TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
-                                            /**< train network directory */
-    UINT32                  etbTopoCnt;     /**< train network directory CRC */
-} GNU_PACKED TRDP_TRAIN_NET_DIR_T;
+                                                 bit30..31: 0 */
+    } GNU_PACKED TRDP_TRAIN_NET_DIR_ENTRY_T;
+    
+    
+    /** Train network directory structure */
+    typedef struct
+    {
+        UINT16                  reserved01;     /**< reserved for future use (= 0) */
+        UINT16                  entryCnt;       /**< number of entries in train network directory */
+        TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
+        /**< train network directory */
+        UINT32                  etbTopoCnt;     /**< train network directory CRC */
+    } GNU_PACKED TRDP_TRAIN_NET_DIR_T;
+    
+    /** Complete TTDB structure */
+    typedef struct
+    {
+        TRDP_OP_TRAIN_DIR_STATE_T   state;          /**< operational state of the train */
+        TRDP_OP_TRAIN_DIR_T         opTrnDir;       /**< operational directory          */
+        TRDP_TRAIN_DIR_T            trnDir;         /**< train directory                */
+        TRDP_TRAIN_NET_DIR_T        trnNetDir;      /**< network directory              */
+    } GNU_PACKED TRDP_READ_COMPLETE_REPLY_T;
 
 
 
