@@ -331,7 +331,7 @@ int main(int argc, char** argv)
         printf("illegal IP address(es) supplied, aborting!\n");
         return -1;
     }
-    err = tlc_init(print_log,NULL);
+    err = tlc_init(print_log, NULL, NULL);
 
     /* pure MD session */
     if (tlc_openSession(&appSessionCaller,
