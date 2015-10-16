@@ -249,7 +249,7 @@ int main(int argc, char** argv)
                                         1000000, 
                                         1000000, 
                                         1000000, 
-                                        20550, 
+                                        17225, 
                                         0, 
                                         20};/*have some space for sessions*/
     TRDP_PROCESS_CONFIG_T   processConfig   = {"MD_REPLIER", "", 0, 0, TRDP_OPTION_BLOCK};

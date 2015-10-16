@@ -10,7 +10,7 @@
       <bus-interface network-id="1" name="eth0">
 		<trdp-process />
 		<pd-com-parameter />
-		<md-com-parameter udp-port="20550" tcp-port="20550" />
+		<md-com-parameter udp-port="17225" tcp-port="17225" />
          <telegram name="compelte_telegram" com-id="999" data-set-id="999" >
              <!-- inside "md-parameter" or "pd-parameter" with optional stuff -->
          </telegram>

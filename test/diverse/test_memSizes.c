@@ -35,15 +35,13 @@
  * DEFINES
  */
 
-#define PD_MAX_DATASIZE  1436
-
 /* Some sample comId definitions    */
 
 #define PUBLISH_INTERVAL    100000
 #define SUBSCRIBE_TIMEOUT   10000000
 #define DATASIZE_SMALL      4
 #define DATASIZE_MEDIUM     128
-#define DATASIZE_LARGE      PD_MAX_DATASIZE
+#define DATASIZE_LARGE      TRDP_MAX_PD_DATA_SIZE
 
 /* We use dynamic memory    */
 #define RESERVED_MEMORY     1000000
@@ -60,7 +58,7 @@ typedef struct pd_demo_pkt
     UINT32      time;               /*  us interval or time out */
     UINT32      addr;               /*  dest addr */
     UINT32      dataSize;           /*  actual data size  */
-    UINT8       data[1436];
+    UINT8       data[TRDP_MAX_PD_DATA_SIZE];
 } PD_PKT_T;
 
 PD_PKT_T    gPubPackets[] =
@@ -107,7 +105,7 @@ void initPacketList (
     for (int i = 0; i < MAX_NO_OF_PKTS; i++)
     {
         memcpy(gPubPackets[i].data, cDemoData, gPubPackets[i].dataSize);
-        memset(gSubPackets[i].data, 0, 1436);
+        memset(gSubPackets[i].data, 0, TRDP_MAX_PD_DATA_SIZE);
     }
 }
 
