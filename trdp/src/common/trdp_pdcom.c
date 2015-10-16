@@ -855,7 +855,7 @@ TRDP_ERR_T  trdp_pdSend (
  *
  *  The duration of PD packets on a 100MBit/s network ranges from 3us to 150us max.
  *  Because a cyclic thread scheduling below 5ms would put a too heavy load on the system, and
- *  PD packets cannot get larger than 1436 (+ UDP header), we will not account for differences in packet size.
+ *  PD packets cannot get larger than 1432 (+ UDP header), we will not account for differences in packet size.
  *  Another factor is the differences in intervals for different packets: We should only change the
  *  starting times of the packets within 1/2 the interval time. Otherwise a late addition of packets
  *  could lead to timeouts of already queued packets.
