@@ -44,7 +44,7 @@
 #define PUBLISH_INTERVAL        1000000
 #define SUBSCRIBE_TIMEOUT       3000000
 
-#define DATASIZE_PD             1432
+#define DATASIZE_PD             TRDP_MAX_PD_DATA_SIZE
 #define DATASIZE_MD             2000
 
 /* We use dynamic memory    */
@@ -384,7 +384,7 @@ void usage (const char *appName)
            );
     printf("\nTest PD republish:\n"
            "1. Start inaugTest as caller with 2 different target addresses.\n"
-           "2. Watch UDP packets using e.g. tcpdump port 20548 and observe destination address\n"
+           "2. Watch UDP packets using e.g. tcpdump port 17224 and observe destination address\n"
            "3. With inaugTest active, type 'i' followed by return key\n"
            "4. Destination address should toggle between the two target addresses each time 'i' + <return> is entered.\n"
            "\nTest PD republish plus PD resubscribe:\n"
@@ -421,9 +421,9 @@ int main (int argc, char * *argv)
 {
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
-                                                10000000, TRDP_TO_SET_TO_ZERO, 20548};
+                                                10000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MD_CONFIG_T        mdConfiguration = {myMDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
-                                                10000000, 10000000, 10000000, 10000000, 20550, 20550, 5};
+                                                10000000, 10000000, 10000000, 10000000, 0, 0, 5};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int     rv = 0;

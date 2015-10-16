@@ -68,11 +68,11 @@ typedef struct
     TRDP_IP_ADDR_T rep;             /* reply ip address (for PULL requests) */
     UINT32 cycle;                   /* cycle                                */
     UINT32 timeout;                 /* timeout (for SINK ports)             */
-    unsigned char data[1432];       /* data buffer                          */
+    unsigned char data[TRDP_MAX_PD_DATA_SIZE];       /* data buffer                          */
     int link;                       /* index of linked port (echo or subscribe) */
 } Port;
 
-int size[3] = { 0, 256, 1432 };     /* small/medium/big dataset */
+int size[3] = { 0, 256, TRDP_MAX_PD_DATA_SIZE };     /* small/medium/big dataset */
 int period[2]  = { 100, 250 };      /* fast/slow cycle          */
 unsigned cycle = 0;
 

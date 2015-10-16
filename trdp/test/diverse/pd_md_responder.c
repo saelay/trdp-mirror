@@ -59,7 +59,7 @@ typedef struct pd_demo_pkt
     UINT32      time;               /*  us interval or time out */
     UINT32      addr;               /*  dest addr */
     UINT32      dataSize;           /*  actual data size  */
-    UINT8       data[1436];
+    UINT8       data[TRDP_MAX_PD_DATA_SIZE];
 } PD_PKT_T;
 
 PD_PKT_T    gPubPackets[MAX_NO_OF_PKTS];
@@ -107,7 +107,7 @@ void initPacketList (
         gSubPackets[i].time         = SUBSCRIBE_TIMEOUT_BASE * i;
         gSubPackets[i].addr         = gOwnIP;
         gSubPackets[i].dataSize     = DATASIZE_STEP * i;
-        memset(gSubPackets[i].data, 0, 1436);
+        memset(gSubPackets[i].data, 0, TRDP_MAX_PD_DATA_SIZE);
     }
 }
 

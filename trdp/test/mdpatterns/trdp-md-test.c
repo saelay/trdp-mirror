@@ -701,8 +701,8 @@ int main (int argc, char *argv[])
     mdcfg.replyTimeout      = 1000 * opts.tmo;
     mdcfg.confirmTimeout    = 1000 * opts.tmo;
     mdcfg.connectTimeout    = 1000 * opts.tmo;
-    mdcfg.udpPort           = 20550;
-    mdcfg.tcpPort           = 20550;
+    mdcfg.udpPort           = 17225;
+    mdcfg.tcpPort           = 17225;
     mdcfg.maxNumSessions    = 64;
 
     /* open session */
