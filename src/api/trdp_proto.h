@@ -242,7 +242,7 @@ typedef struct
     UINT32  comId;                              /**< set by user: unique id                                 */
     UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
     UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
-    UINT32  datasetLength;                      /**< length of the data to transmit 0...1436                */
+    UINT32  datasetLength;                      /**< length of the data to transmit 0...1432                */
     UINT32  reserved;                           /**< before used for ladder support                         */
     UINT32  replyComId;                         /**< used in PD request                                     */
     UINT32  replyIpAddress;                     /**< used for PD request                                    */
