@@ -25,6 +25,14 @@ For Linux:
 
 If not already done, libxml2 must be installed as development version on the host.
 
+Example for Ubuntu step by step:
+ cd <this directory>
+ sudo aptitude install libxml2-dev
+ sudo aptitude install wireshark-dev
+ export WIRESHARK_SRC=/usr/include/wireshark
+ make
+ sudo cp packet-trdp_spy.so "/usr/lib/$(uname -m)-linux-gnu/wireshark/libwireshark3/plugins/"
+ 
 C L E A N
 =========
 
