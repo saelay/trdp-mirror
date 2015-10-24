@@ -5,8 +5,9 @@
 # export WIRESHARK_SRC=$HOME/src/wireshark-1.8.3
 # $Id: $
 
+INCS_GLIB=`pkg-config --cflags glib-2.0`
 
-INCS = -I $(WIRESHARK_SRC) -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/libxml2 
+INCS = -I $(WIRESHARK_SRC) $(INCS_GLIB) -I/usr/include/libxml2 
 # Debugging:
 #INCS += -DPRINT_DEBUG
 

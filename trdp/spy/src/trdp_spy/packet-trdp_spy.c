@@ -934,12 +934,23 @@ void proto_reg_handoff_trdp(void)
     }
     else
     {
+#if VERSION_MAJOR >= 1 && VERSION_MICRO >= 6
+        dissector_delete_uint("udp.port", g_pd_port, trdp_spy_handle);
+        dissector_delete_uint("udp.port", g_md_port, trdp_spy_handle);
+	dissector_delete_uint("tcp.port", g_md_port, trdp_spy_TCP_handle);
+#else /* old API is used */
         dissector_delete("udp.port", g_pd_port, trdp_spy_handle);
         dissector_delete("udp.port", g_md_port, trdp_spy_handle);
-		dissector_delete("tcp.port", g_md_port, trdp_spy_TCP_handle);
+	dissector_delete("tcp.port", g_md_port, trdp_spy_TCP_handle);
+#endif
     }
-
+#if VERSION_MAJOR >= 1 && VERSION_MICRO >= 6
+    dissector_add_uint("udp.port", g_pd_port, trdp_spy_handle);
+    dissector_add_uint("udp.port", g_md_port, trdp_spy_handle);
+    dissector_add_uint("tcp.port", g_md_port, trdp_spy_TCP_handle);
+#else /* old API is used */
     dissector_add("udp.port", g_pd_port, trdp_spy_handle);
     dissector_add("udp.port", g_md_port, trdp_spy_handle);
-	dissector_add("tcp.port", g_md_port, trdp_spy_TCP_handle);
+    dissector_add("tcp.port", g_md_port, trdp_spy_TCP_handle);
+#endif
 }
