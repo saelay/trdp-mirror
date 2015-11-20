@@ -2215,7 +2215,7 @@ UTILS_ERR_T L3_test_utils_init()
 UTILS_ERR_T L3_test_utils_CRC()
 {
     UTILS_ERR_T retVal = UTILS_NO_ERR;
-    UINT8 testdata[1432];
+    UINT8 testdata[TRDP_MAX_PD_DATA_SIZE];
     UINT32 length = sizeof(testdata);
     UINT32 crc = vos_crc32(0xffffffff, NULL, 0);
     UINT32 ix = 0; /*counter */
