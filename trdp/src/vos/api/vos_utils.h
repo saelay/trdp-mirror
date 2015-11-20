@@ -100,6 +100,34 @@ extern void *gRefCon;
 #define INITFCS         0xffffffff      /**< Initial FCS value */
 #define SIZE_OF_FCS     4               /**< for better understanding of address calculations */
 
+/** Define endianess if not already done by compiler */
+#if (!defined(L_ENDIAN) && !defined(B_ENDIAN))
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define L_ENDIAN
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define B_ENDIAN
+#else
+#error "Endianess undefined!"
+#endif
+#endif
+
+#define Swap32(val)     (UINT32)(((0xFF000000 & (UINT32)val) >> 24) | \
+                                 ((0x00FF0000 & (UINT32)val) >> 8)  | \
+                                 ((0x0000FF00 & (UINT32)val) << 8)  | \
+                                 ((0x000000FF & (UINT32)val) << 24))
+    
+#ifdef B_ENDIAN
+/** introduce byte swapping on big endian machines needed for CRC handling */
+#define MAKE_LE(a)      Swap32(a)
+#else
+#ifdef L_ENDIAN
+#define MAKE_LE(a)      (a)
+#else
+#error "Endianess undefined!"
+#endif
+#endif
+    
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */
