@@ -532,9 +532,10 @@ void print_status ()
     /* print test statistics */
     printf("\n");
     print(0, "finished : %u iteration(s)", ++sts.err[0]);
-    for (i = TST_BEGIN + 1; i < TST_END; ++i, nerr += sts.err[i])
+    for (i = TST_BEGIN + 1; i < TST_END; ++i)
     {
         print(0, "  test %d : %u errors", i, sts.err[i]);
+        nerr += sts.err[i];
     }
     printf("\n");
     /* update final result code */

@@ -640,7 +640,7 @@ void _sleep_msec(int msec)
 
 void process_data()
 {
-    static int w = 80, h = 24;
+    static int w = 80;
     int _w, _h;
     int i, n;
     /* get terminal size */
@@ -651,7 +651,6 @@ void process_data()
         else
             cursor_home();
         w = _w;
-        h = _h;
     }
     else
     {
