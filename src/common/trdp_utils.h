@@ -36,22 +36,6 @@
  * DEFINES
  */
 
-#define Swap32(val)     (UINT32)(((0xFF000000 & (UINT32)val) >> 24) | \
-                                 ((0x00FF0000 & (UINT32)val) >> 8)  | \
-                                 ((0x0000FF00 & (UINT32)val) << 8)  | \
-                                 ((0x000000FF & (UINT32)val) << 24))
-
-#ifdef B_ENDIAN
-/* introduce byte swapping on big endian machines needed for CRC handling */
-#define MAKE_LE(a)      Swap32(a)
-#else
-#ifdef L_ENDIAN
-#define MAKE_LE(a)      (a)
-#else
-#error "Endianess undefined!"
-#endif
-#endif
-
 #define TRDP_INVALID_SOCKET_INDEX  -1
 
 /*******************************************************************************
