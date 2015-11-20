@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-11-20: Compiler warnings fixed (lines 392 + 393)
  *      BL 2014-08-25: Ticket #51: change underlying function for vos_dottedIP
  *
  */
@@ -389,8 +390,10 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
         {
             if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
             {
-                ifAddrs[count].ipAddr   = ntohl(*(UINT32 *)&cursor->ifa_addr->sa_data[2]);
-                ifAddrs[count].netMask  = ntohl(*(UINT32 *)&cursor->ifa_netmask->sa_data[2]);
+                memcpy(&ifAddrs[count].ipAddr, &cursor->ifa_addr->sa_data[2], 4);
+                ifAddrs[count].ipAddr   = vos_ntohl(ifAddrs[count].ipAddr);
+                memcpy(&ifAddrs[count].netMask, &cursor->ifa_netmask->sa_data[2], 4);
+                ifAddrs[count].netMask  = vos_ntohl(ifAddrs[count].netMask);
                 if (cursor->ifa_name != NULL)
                 {
                     strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);

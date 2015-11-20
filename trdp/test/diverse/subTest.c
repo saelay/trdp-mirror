@@ -128,12 +128,7 @@ void usage (const char *appName)
     printf("This tool receives PD messages from an ED.\n"
            "Arguments are:\n"
            "-o <own IP address> (default INADDR_ANY)\n"
-/*           "-t <target IP address>\n" */
            "-c <comId> (default 1000)\n"
-/*
-             "-e send empty request\n"
-             "-d <custom string to send> (default: 'Hello World')\n"
- */
            "-v print version and quit\n"
            );
 }
@@ -161,19 +156,9 @@ int main (int argc, char *argv[])
 
     UINT32                  ownIP = 0;
     int                     rv = 0;
-
-
-    UINT32                  destIP = 0;
-
-    /*    Generate some data, that we want to send, when nothing was specified. */
-    UINT8                   *outputBuffer;
-    UINT8                   exampleData[DATA_MAX] = "Hello World";
-
     int                     ch;
     TRDP_PD_INFO_T          myPDInfo;
     UINT32                  receivedSize;
-
-    outputBuffer = exampleData;
 
     while ((ch = getopt(argc, argv, "t:o:h?vec:")) != -1)
     {
@@ -200,17 +185,6 @@ int main (int argc, char *argv[])
                 }
                 break;
             }
-            case 't':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
             break;
             case 'v':   /*  version */
                 printf("%s: Version %s\t(%s - %s)\n",
@@ -224,14 +198,6 @@ int main (int argc, char *argv[])
                 return 1;
         }
     }
-/*
-    if (destIP == 0)
-    {
-        fprintf(stderr, "No destination address given!\n");
-        usage(argv[0]);
-        return 1;
-    }
-*/
 
     /*    Init the library  */
     if (tlc_init(&dbgOut,                              /* no logging    */
