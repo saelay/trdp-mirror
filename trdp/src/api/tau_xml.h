@@ -134,7 +134,7 @@ typedef struct
 typedef struct
 {
     UINT32            id;         /**< communication parameter identifier */
-    TRDP_SEND_PARAM_T sendParam;  /**< Send parameter (TTL, QoS, retries) */
+    TRDP_SEND_PARAM_T sendParam;  /**< Send parameter (TTL, QoS) */
 } TRDP_COM_PAR_T;
 
 /** Control for debug output format on application level.

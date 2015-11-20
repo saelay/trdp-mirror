@@ -1098,7 +1098,6 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
 {
     int rc      = 0;
-    int sval    = 0;
 
     /* Check parameter */
     if (sema == NULL)
@@ -1107,23 +1106,24 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
     }
     else
     {
+#ifdef __APPLE__
+        rc = sem_close((sem_t *)sema);
+        if (0 != rc)
+        {
+            /* Error closing Semaphore */
+            vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR sem_close failed\n");
+        }
+        else
+        {
+            /* Semaphore deleted successfully, free allocated memory */
+            sem_unlink("/tmp/trdp.sema");
+        }
+#else
+        int sval    = 0;
         /* Check if this is a valid semaphore handle*/
         rc = sem_getvalue((sem_t *)sema, &sval);
         if (0 == rc)
         {
-#ifdef __APPLE__
-            rc = sem_close((sem_t *)sema);
-            if (0 != rc)
-            {
-                /* Error closing Semaphore */
-                vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR sem_close failed\n");
-            }
-            else
-            {
-                /* Semaphore deleted successfully, free allocated memory */
-                sem_unlink("/tmp/trdp.sema");
-            }
-#else
             rc = sem_destroy((sem_t *)sema);
             if (0 != rc)
             {
@@ -1135,8 +1135,8 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
                 /* Semaphore deleted successfully, free allocated memory */
                 vos_memFree(sema);
             }
-#endif
         }
+#endif
     }
     return;
 }
