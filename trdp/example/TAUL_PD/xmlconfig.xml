@@ -27,9 +27,9 @@
 			<!-- Process Config -->
             <trdp-process blocking="no" cycle-time="10000" priority="80" traffic-shaping="on" />
 			<!-- PD Config -->
-            <pd-com-parameter marshall="on" port="20548" qos="5" ttl="64" timeout-value="100000" validity-behavior="zero" callback="on"/>
+            <pd-com-parameter marshall="on" port="17224" qos="5" ttl="64" timeout-value="100000" validity-behavior="zero" callback="on"/>
 			<!-- MD Config -->
-            <md-com-parameter udp-port="20550" tcp-port="20550"
+            <md-com-parameter udp-port="17225" tcp-port="17225"
                               confirm-timeout="1000000" connect-timeout="60000000" reply-timeout="5000000"
                               marshall="on" protocol="UDP" qos="3" retries="2" ttl="64" num-sessions="1000"/>
 			<!-- Publish Telegram -->
@@ -46,9 +46,9 @@
 			<!-- Process Config -->
             <trdp-process blocking="no" cycle-time="10000" priority="80" traffic-shaping="on" />
 			<!-- PD Config -->
-            <pd-com-parameter marshall="on" port="20548" qos="5" ttl="64" timeout-value="100000" validity-behavior="zero" callback="on"/>
+            <pd-com-parameter marshall="on" port="17224" qos="5" ttl="64" timeout-value="100000" validity-behavior="zero" callback="on"/>
 			<!-- MD Config -->
-            <md-com-parameter udp-port="20550" tcp-port="20550"
+            <md-com-parameter udp-port="17225" tcp-port="17225"
                               confirm-timeout="1000000" connect-timeout="60000000" reply-timeout="5000000"
                               marshall="on" protocol="UDP" qos="3" retries="2" ttl="64" num-sessions="1000"/>
 			<!-- Publish Telegram -->
