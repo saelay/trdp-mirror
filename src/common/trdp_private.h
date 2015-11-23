@@ -303,6 +303,8 @@ typedef struct
 } TRDP_TCP_FD_T;
 #endif
 
+struct TAU_TTDB;
+
 /** Session/application variables store */
 typedef struct TRDP_SESSION
 {
@@ -326,7 +328,9 @@ typedef struct TRDP_SESSION
     TRDP_TIME_T             initTime;           /**< initialization time of session                         */
     TRDP_STATISTICS_T       stats;              /**< statistics of this session                             */
 #if MD_SUPPORT
-    TRDP_TCP_FD_T           tcpFd;              /**< TCP file descriptor parameters   */
+    struct TAU_TTDB         *pTTDB;             /**< session related TTDB data                              */
+    void                    *pUser;             /**< space for higher layer data                            */
+    TRDP_TCP_FD_T           tcpFd;              /**< TCP file descriptor parameters                         */
     TRDP_MD_CONFIG_T        mdDefault;          /**< Default configuration for message data                 */
     MD_LIS_ELE_T            *pMDListenQueue;    /**< pointer to first element of listeners queue            */
     MD_ELE_T                *pMDSndQueue;       /**< pointer to first element of send MD queue (caller)     */

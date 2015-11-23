@@ -75,8 +75,8 @@ typedef struct
 
 typedef struct
 {
-    UINT32              cycle;     /**< dataset identifier */
-    UINT32              redundant; /**< N0 = not redundant, >0 redundancy group */
+    UINT32              cycle;     /**< Interval for push data in us */
+    UINT32              redundant; /**< 0 = not redundant, != 0 redundancy group */
     UINT32              timeout;   /**< Timeout value in us, before considering received process data invalid */
     TRDP_TO_BEHAVIOR_T  toBehav;   /**< Behavior when received process data is invalid/timed out. */
     TRDP_FLAGS_T        flags;     /**< TRDP_FLAGS_MARSHALL, TRDP_FLAGS_REDUNDANT */
@@ -85,7 +85,7 @@ typedef struct
 
 typedef struct
 {
-    UINT32          confirmTimeout; /**< dataset identifier */
+    UINT32          confirmTimeout; /**< timeout for confirmation */
     UINT32          replyTimeout;  /**< Number of elements */
     TRDP_FLAGS_T    flags;         /**< Pointer to URI host part or IP */
 } TRDP_MD_PAR_T;

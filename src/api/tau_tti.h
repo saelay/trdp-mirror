@@ -69,11 +69,21 @@ extern "C" {
  *  @retval         TRDP_INIT_ERR   initialisation error
  *
  */
-EXT_DECL TRDP_ERR_T tau_initTtiAccess (
+EXT_DECL TRDP_ERR_T tau_initTTIaccess (
 	TRDP_APP_SESSION_T appHandle,
     TRDP_IP_ADDR_T     ecspIpAddr,
     CHAR8             *hostFileName);
 
+/**********************************************************************************************************************/
+/**    Function to terminate TTI access
+ *
+ *  @param[in]      appHandle       Handle returned by tlc_openSession().
+ *
+ *  @retval         none
+ *
+ */
+EXT_DECL void tau_deInitTTI (
+    TRDP_APP_SESSION_T appHandle);
 
 /**********************************************************************************************************************/
 /**    Function to retrieve the operational train directory state.
