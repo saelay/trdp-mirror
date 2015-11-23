@@ -1046,9 +1046,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_ERR_T  ret = TRDP_NO_ERR;
 
     /*    Check params    */
-    if ((comId == 0)
-        || (dataSize == 0)
-        || (dataSize > TRDP_MAX_PD_DATA_SIZE)
+    if ((dataSize > TRDP_MAX_PD_DATA_SIZE)
         || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
         || (pPubHandle == NULL))
     {
@@ -1116,7 +1114,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                     vos_memFree(pNewElement);
                     pNewElement = NULL;
                 }
-                else
+                else if (dataSize != 0)
                 {
                     /*  Alloc the corresponding data buffer  */
                     pNewElement->pFrame = (PD_PACKET_T *) vos_memAlloc(pNewElement->grossSize);
@@ -1125,6 +1123,10 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         vos_memFree(pNewElement);
                         pNewElement = NULL;
                     }
+                }
+                else    /* Allow late allocation (on tlp_put)   */
+                {
+                    pNewElement->pFrame = NULL;
                 }
             }
         }

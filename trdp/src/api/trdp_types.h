@@ -123,6 +123,8 @@ typedef enum
     TRDP_REQCONFIRMTO_ERR   = -45,  /**< Protocol Confirm Timeout (Request sender)      */
     TRDP_PACKET_ERR         = -46,  /**< Incomplete message data packet                 */
     TRDP_UNRESOLVED_ERR     = -47,  /**< DNR: address could not be resolved             */
+    TRDP_XML_PARSER_ERR     = -48,  /**< Returned by the tau_xml subsystem              */
+    TRDP_INUSE_ERR          = -49,  /**< Resource is still in use                       */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 

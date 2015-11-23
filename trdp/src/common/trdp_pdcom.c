@@ -110,13 +110,23 @@ TRDP_ERR_T trdp_pdPut (
 {
     TRDP_ERR_T ret = TRDP_NO_ERR;
 
-    if (pPacket == NULL || dataSize != pPacket->dataSize)
+    if (pPacket == NULL || (pPacket->pFrame != NULL && dataSize != pPacket->dataSize))
     {
         return TRDP_PARAM_ERR;
     }
 
     if (pData != NULL && dataSize != 0)
     {
+        if (pPacket->pFrame == NULL)
+        {
+            pPacket->dataSize   = dataSize;
+            pPacket->grossSize  = trdp_packetSizePD(dataSize);
+            pPacket->pFrame = (PD_PACKET_T*) vos_memAlloc(pPacket->grossSize);
+            if (pPacket->pFrame == NULL)
+            {
+                return TRDP_MEM_ERR;
+            }
+        }
 
         if (!(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (marshall == NULL))
         {
