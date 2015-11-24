@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
  *      BL 2015-08-31: Ticket #94: TRDP_REDUNDANT flag is evaluated, beQuiet removed
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
  *     AHW 2015-04-10: Ticket #76: Wrong initialisation of frame pointer in trdp_pdReceive()
@@ -115,7 +116,27 @@ TRDP_ERR_T trdp_pdPut (
         return TRDP_PARAM_ERR;
     }
 
-    if (pData != NULL && dataSize != 0)
+    /* Ticket #104: There is no data!
+        Start sending by validating the packet */
+    if (dataSize == 0)
+    {
+        if (pPacket->pFrame == NULL)
+        {
+            pPacket->dataSize   = dataSize;
+            pPacket->grossSize  = trdp_packetSizePD(dataSize);
+            pPacket->pFrame = (PD_PACKET_T*) vos_memAlloc(pPacket->grossSize);
+            if (pPacket->pFrame == NULL)
+            {
+                return TRDP_MEM_ERR;
+            }
+        }
+        /* set data valid */
+        pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
+        
+        /*  Update some statistics  */
+        pPacket->updPkts++;
+    }
+    else if (pData != NULL && dataSize != 0)
     {
         if (pPacket->pFrame == NULL)
         {
