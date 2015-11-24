@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
  *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
  *
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
@@ -1219,8 +1220,6 @@ EXT_DECL TRDP_ERR_T tlp_publish (
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pData               pointer to packet data / dataset
- *  @param[in]      dataSize            size of packet data
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -1233,9 +1232,7 @@ EXT_DECL TRDP_ERR_T tlp_republish (
                                    UINT32                  etbTopoCnt,
                                    UINT32                  opTrnTopoCnt,
                                    TRDP_IP_ADDR_T          srcIpAddr, 
-                                   TRDP_IP_ADDR_T          destIpAddr,
-                                   const UINT8             *pData,
-                                   UINT32                  dataSize)
+                                   TRDP_IP_ADDR_T          destIpAddr)
 {
     /*    Check params    */
     
@@ -1369,8 +1366,7 @@ TRDP_ERR_T tlp_put (
     TRDP_ERR_T  ret         = TRDP_NO_ERR;
 
     if (pElement == NULL ||
-        dataSize > TRDP_MAX_PD_DATA_SIZE ||
-        dataSize == 0 )
+        dataSize > TRDP_MAX_PD_DATA_SIZE)
     {
         return TRDP_PARAM_ERR;
     }

@@ -249,7 +249,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to data packet / dataset, NULL if sending starts later with tlp_put()
- *  @param[in]      dataSize            size of data packet > 0 and <= TRDP_MAX_PD_DATA_SIZE
+ *  @param[in]      dataSize            size of data packet >= 0 and <= TRDP_MAX_PD_DATA_SIZE
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -281,8 +281,6 @@ EXT_DECL TRDP_ERR_T tlp_publish (
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
  *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
  *  @param[in]      destIpAddr          where to send the packet to
- *  @param[in]      pData               pointer to packet data / dataset
- *  @param[in]      dataSize            size of packet data
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
@@ -295,9 +293,7 @@ EXT_DECL TRDP_ERR_T tlp_republish (
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
     TRDP_IP_ADDR_T      srcIpAddr,
-    TRDP_IP_ADDR_T      destIpAddr,
-    const UINT8         *pData,
-    UINT32              dataSize);
+    TRDP_IP_ADDR_T      destIpAddr);
 
 
 /**********************************************************************************************************************/
