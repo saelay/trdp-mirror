@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-11-24: Accessor for IP address of session
  *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
  *
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
@@ -152,7 +153,7 @@ EXT_DECL TRDP_ERR_T tlc_terminate (void);
  *
  *    This value is used for validating outgoing and incoming packets only!
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @param[in]      etbTopoCnt          New topocount value
  */
 EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
@@ -165,7 +166,7 @@ EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
  *
  *    This value is used for validating outgoing and incoming packets only!
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @param[in]      opTrnTopoCnt        New operational topocount value
  */
 EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
@@ -176,7 +177,7 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
 /**********************************************************************************************************************/
 /** Frees the buffer reserved by the TRDP layer.
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @param[in]      pBuf                pointer to the buffer to be freed
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -194,7 +195,7 @@ EXT_DECL TRDP_ERR_T tlc_freeBuf (
  *    can send due PD packets in time.
  *    If the PD send queue is empty, return zero time
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @param[out]     pInterval           pointer to needed interval
  *  @param[in,out]  pFileDesc           pointer to file descriptor set
  *  @param[out]     pNoDesc             pointer to put no of used descriptors (for select())
@@ -215,7 +216,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
  *    Search the receive queue for pending PDs (time out)
  *
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @param[in]      pRfds               pointer to set of ready descriptors
  *  @param[in,out]  pCount              pointer to number of ready descriptors
  *
@@ -227,6 +228,14 @@ EXT_DECL TRDP_ERR_T tlc_process (
     TRDP_FDS_T          *pRfds,
     INT32               *pCount);
 
+/**********************************************************************************************************************/
+/** Get the interface address
+ *
+ *  @param[out]     appHandle          A handle for further calls to the trdp stack
+ *
+ *  @retval         realIP
+ */
+EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T   appHandle);
 
 /*******************************************************************************
    PD specific functions
@@ -236,7 +245,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
 /** Prepare for sending PD messages.
  *  Queue a PD message, it will be send when tlc_publish has been called
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pPubHandle          returned handle for related re/unpublish
  *  @param[in]      comId               comId of packet to send
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
@@ -275,7 +284,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 /** Prepare for sending PD messages.
  *  Reinitialize and queue a PD message, it will be send when tlc_publish has been called
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pubHandle           handle for related unpublish
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -299,7 +308,7 @@ EXT_DECL TRDP_ERR_T tlp_republish (
 /**********************************************************************************************************************/
 /** Stop sending PD messages.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pubHandle           the handle returned by publish
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -316,7 +325,7 @@ EXT_DECL TRDP_ERR_T tlp_unpublish (
 /** Update the process data to send.
  *  Update previously published data. The new telegram will be sent earliest when tlc_process is called.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pubHandle           the handle returned by publish
  *  @param[in,out]  pData               pointer to application's data buffer
  *  @param[in,out]  dataSize            size of data
@@ -337,7 +346,7 @@ EXT_DECL TRDP_ERR_T tlp_put (
 /**********************************************************************************************************************/
 /** Do not send redundant PD's when we are follower.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      redId               will be set for all ComID's with the given redId, 0 to change for all redId
  *  @param[in]      leader              TRUE if we send
  *
@@ -354,7 +363,7 @@ EXT_DECL TRDP_ERR_T tlp_setRedundant (
 /**********************************************************************************************************************/
 /** Get status of redundant ComIds.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      redId               will be set for all ComID's with the given redId, 0 for all redId
  *  @param[in,out]  pLeader             TRUE if we send (leader)
  *
@@ -373,7 +382,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
 /** Initiate sending PD messages (PULL).
  *  Send a PD request message
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      subHandle           handle from related subscribe
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
@@ -415,7 +424,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 /** Prepare for receiving PD messages.
  *  Subscribe to a specific PD ComID and source IP
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pSubHandle          return a handle for this subscription
  *  @param[in]      pUserRef            user supplied value returned within the info structure
  *  @param[in]      pfCbFunction        Pointer to subscriber specific callback function, NULL to use default function
@@ -454,7 +463,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 /** Reprepare for receiving PD messages.
  *  Resubscribe to a specific PD ComID and source IP
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      subHandle           handle for this subscription
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -479,7 +488,7 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
 /** Stop receiving PD messages.
  *  Unsubscribe to a specific PD ComID
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      subHandle           the handle for this subscription
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -496,7 +505,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
 /** Get the last valid PD message.
  *  This allows polling of PDs instead of event driven handling by callback
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      subHandle           the handle returned by subscription
  *  @param[in,out]  pPdInfo             pointer to application's info buffer
  *  @param[in,out]  pData               pointer to application's data buffer
@@ -524,7 +533,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 /** Initiate sending MD notification message.
  *  Send a MD notification message
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[in]      comId               comId of packet to be sent
@@ -565,7 +574,7 @@ EXT_DECL TRDP_ERR_T tlm_notify (
 /** Initiate sending MD request message.
  *  Send a MD request message
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[out]     pSessionId          return session ID
@@ -615,7 +624,7 @@ EXT_DECL TRDP_ERR_T tlm_request (
  *  Send a MD confirmation message
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by request
  *  @param[in]      userStatus          Info for requester about application errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
@@ -637,7 +646,7 @@ EXT_DECL TRDP_ERR_T tlm_confirm (
 /** Cancel an open session.
  *  Abort an open session; any pending messages will be dropped
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by request
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -653,7 +662,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
 /** Subscribe to MD messages.
  *  Add a listener to TRDP to get notified when messages are received
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pListenHandle       Handle for this listener returned
  *  @param[in]      pUserRef            user supplied value returned with received message
  *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
@@ -686,7 +695,7 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
 /** Resubscribe to MD messages.
  *  Readd a listener after topoCount changes to get notified when messages are received
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     listenHandle        Handle for this listener
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -709,7 +718,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
 /** Remove Listener.
  *
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     listenHandle        Handle for this listener
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -726,7 +735,7 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  *  Send a MD reply message after receiving an request
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by indication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      userStatus          Info for requester about application errors
@@ -755,7 +764,7 @@ TRDP_ERR_T tlm_reply (
  *  Send a MD reply query message after receiving a request and ask for confirmation.
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by indication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      userStatus          Info for requester about application errors
@@ -786,7 +795,7 @@ TRDP_ERR_T tlm_replyQuery (
  *  Send a MD error reply message after receiving an request
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by indication
  *  @param[in]      replyStatus         Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
@@ -838,7 +847,7 @@ EXT_DECL const TRDP_VERSION_T *tlc_getVersion (void);
 /** Return statistics.
  *  Memory for statistics information must be preserved by the user.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pStatistics         Pointer to statistics for this application session
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -975,7 +984,7 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 /**********************************************************************************************************************/
 /** Reset statistics.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_NOINIT_ERR     handle invalid
