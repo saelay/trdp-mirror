@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-11-24: Accessor for IP address of session
  *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
  *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
  *
@@ -137,6 +138,23 @@ BOOL8    trdp_isValidSession (
 TRDP_APP_SESSION_T *trdp_sessionQueue (void)
 {
     return (TRDP_APP_SESSION_T *)sSession;
+}
+
+/**********************************************************************************************************************/
+/** Get the interface address
+ *
+ *  @param[out]     appHandle          A handle for further calls to the trdp stack
+ *  @retval         realIP
+ */
+EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T   appHandle)
+{
+    /*    Find the session    */
+    if (appHandle == NULL)
+    {
+        return VOS_INADDR_ANY;
+    }
+    
+    return appHandle->realIP;
 }
 
 /**********************************************************************************************************************/
@@ -1115,7 +1133,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                     vos_memFree(pNewElement);
                     pNewElement = NULL;
                 }
-                else if (dataSize != 0)
+                else
                 {
                     /*  Alloc the corresponding data buffer  */
                     pNewElement->pFrame = (PD_PACKET_T *) vos_memAlloc(pNewElement->grossSize);
@@ -1124,10 +1142,6 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         vos_memFree(pNewElement);
                         pNewElement = NULL;
                     }
-                }
-                else    /* Allow late allocation (on tlp_put)   */
-                {
-                    pNewElement->pFrame = NULL;
                 }
             }
         }
@@ -1155,7 +1169,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             /*    Update the internal data */
             pNewElement->addr = pubHandle;
             pNewElement->pktFlags       = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
-            pNewElement->privFlags      = TRDP_PRIV_NONE;
+            //pNewElement->privFlags      = TRDP_PRIV_NONE;
             pNewElement->pullIpAddress  = 0;
             pNewElement->redId          = redId;
             pNewElement->pCachedDS      = NULL;
@@ -1193,8 +1207,11 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             trdp_queueInsFirst(&appHandle->pSndQueue, pNewElement);
 
             *pPubHandle = (TRDP_PUB_T) pNewElement;
-            ret         = tlp_put(appHandle, *pPubHandle, pData, dataSize);
-
+            
+            if (dataSize != 0)
+            {
+                ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
+            }
             if ((ret == TRDP_NO_ERR) && (appHandle->option & TRDP_OPTION_TRAFFIC_SHAPING))
             {
                 ret = trdp_pdDistribute(appHandle->pSndQueue);
@@ -1760,7 +1777,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      comId               comId of packet to receive
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr          IP for source filtering, set 0 if not used
+ *  @param[in]      srcIpAddr           IP for source filtering, set 0 if not used
  *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      destIpAddr          IP address to join

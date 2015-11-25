@@ -82,7 +82,7 @@ void    trdp_pdInit (
     UINT32      replyComId,
     UINT32      replyIpAddress)
 {
-    if (pPacket == NULL)
+    if (pPacket == NULL || pPacket->pFrame == NULL)
     {
         return;
     }
@@ -111,25 +111,15 @@ TRDP_ERR_T trdp_pdPut (
 {
     TRDP_ERR_T ret = TRDP_NO_ERR;
 
-    if (pPacket == NULL || (pPacket->pFrame != NULL && dataSize != pPacket->dataSize))
+    if (pPacket == NULL)
     {
         return TRDP_PARAM_ERR;
     }
 
     /* Ticket #104: There is no data!
         Start sending by validating the packet */
-    if (dataSize == 0)
+    if (pPacket->dataSize == 0 && dataSize == 0)
     {
-        if (pPacket->pFrame == NULL)
-        {
-            pPacket->dataSize   = dataSize;
-            pPacket->grossSize  = trdp_packetSizePD(dataSize);
-            pPacket->pFrame = (PD_PACKET_T*) vos_memAlloc(pPacket->grossSize);
-            if (pPacket->pFrame == NULL)
-            {
-                return TRDP_MEM_ERR;
-            }
-        }
         /* set data valid */
         pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
         
@@ -138,15 +128,21 @@ TRDP_ERR_T trdp_pdPut (
     }
     else if (pData != NULL && dataSize != 0)
     {
-        if (pPacket->pFrame == NULL)
+        if (pPacket->dataSize == 0)
         {
+            /* late data, enlarge packet buffer and copy existing header info */
+            PD_PACKET_T     *pTemp;
+            
             pPacket->dataSize   = dataSize;
             pPacket->grossSize  = trdp_packetSizePD(dataSize);
-            pPacket->pFrame = (PD_PACKET_T*) vos_memAlloc(pPacket->grossSize);
-            if (pPacket->pFrame == NULL)
+            pTemp = (PD_PACKET_T*) vos_memAlloc(pPacket->grossSize);
+            if (pTemp == NULL)
             {
                 return TRDP_MEM_ERR;
             }
+            memcpy(pTemp, pPacket->pFrame, trdp_packetSizePD(0));
+            vos_memFree(pPacket->pFrame);
+            pPacket->pFrame = pTemp;
         }
 
         if (!(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (marshall == NULL))
