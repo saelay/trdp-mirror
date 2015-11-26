@@ -140,9 +140,12 @@ TRDP_ERR_T trdp_pdPut (
             {
                 return TRDP_MEM_ERR;
             }
+            /* copy existing header info */
             memcpy(pTemp, pPacket->pFrame, trdp_packetSizePD(0));
             vos_memFree(pPacket->pFrame);
             pPacket->pFrame = pTemp;
+            /* complete header info, set dataset length */
+            pPacket->pFrame->frameHead.datasetLength = vos_htonl(pPacket->dataSize);
         }
 
         if (!(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (marshall == NULL))
