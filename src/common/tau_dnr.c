@@ -35,7 +35,7 @@
  */
 
 #define TAU_MAX_HOSTS_LINE_LENGTH   120
-#define TAU_MAX_NO_CACHE_ENTRY      200
+#define TAU_MAX_NO_CACHE_ENTRY      50
 #define TAU_MAX_NO_IF               4       /**< Default interface should be in the first 4 */
 #define TAU_MAX_DNS_BUFFER_SIZE     1500    /* if this doesn't suffice, we need to allocate it */
 #define TAU_MAX_URI_SIZE            64      /* host part only, without user part */
@@ -118,7 +118,7 @@ typedef struct QUESTION
  *   Locals
  */
 
-TAU_DNR_DATA_T gDNR = {0x0a000001, 53, 0};  /**< default DNR/ECSP settings  */
+//TAU_DNR_DATA_T gDNR = {0x0a000001, 53, 0};  /**< default DNR/ECSP settings  */
 
 #pragma mark ----------------------- Local -----------------------------
 
@@ -226,30 +226,32 @@ static int compareURI ( const void *arg1, const void *arg2 )
     return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN);
 }
 
-static void printDNRcache ()
+static void printDNRcache (TAU_DNR_DATA_T *pDNR)
 {
     UINT32 i;
-    for (i = 0; i < gDNR.noOfCachedEntries; i++)
+    for (i = 0; i < pDNR->noOfCachedEntries; i++)
     {
         vos_printLog(VOS_LOG_DBG, "%03d:\t%0u.%0u.%0u.%0u\t%s\t(topo: 0x%08x)\n", i,
-                     gDNR.cache[i].ipAddr >> 24,
-                     (gDNR.cache[i].ipAddr >> 16) & 0xFF,
-                     (gDNR.cache[i].ipAddr >> 8) & 0xFF,
-                     gDNR.cache[i].ipAddr & 0xFF,
-                     gDNR.cache[i].uri,
-                     gDNR.cache[i].topoCnt);
+                     pDNR->cache[i].ipAddr >> 24,
+                     (pDNR->cache[i].ipAddr >> 16) & 0xFF,
+                     (pDNR->cache[i].ipAddr >> 8) & 0xFF,
+                     pDNR->cache[i].ipAddr & 0xFF,
+                     pDNR->cache[i].uri,
+                     pDNR->cache[i].topoCnt);
     }
 }
 
 /**********************************************************************************************************************/
 /**    Function to populate the cache from a hosts file
  *
+ *  @param[in]      pDNR                Pointer to dnr data
  *  @param[in]      pHostsFileName      Hosts file name as ECSP replacement
  *
  *  @retval         none
  */
 static void readHostsFile (
-    const CHAR8 *pHostsFileName)
+    TAU_DNR_DATA_T      *pDNR,
+    const CHAR8         *pHostsFileName)
 {
     FILE    *fp = fopen(pHostsFileName, "r");
     CHAR8   line[TAU_MAX_HOSTS_LINE_LENGTH];
@@ -257,7 +259,7 @@ static void readHostsFile (
     if (fp != NULL)
     {
         /* while not end of file */
-        while (!feof(fp) && gDNR.noOfCachedEntries < TAU_MAX_NO_CACHE_ENTRY)
+        while (!feof(fp) && pDNR->noOfCachedEntries < TAU_MAX_NO_CACHE_ENTRY)
         {
             /* get a line from the file */
             if (fgets(line, TAU_MAX_HOSTS_LINE_LENGTH, fp) != NULL)
@@ -271,25 +273,25 @@ static void readHostsFile (
                                    &ip2,
                                    &ip3,
                                    &ip4,
-                                   gDNR.cache[gDNR.noOfCachedEntries].uri);
+                                   pDNR->cache[pDNR->noOfCachedEntries].uri);
                 if (noOfItems == 5)
                 {
-                    gDNR.cache[gDNR.noOfCachedEntries].uri[TRDP_MAX_URI_HOST_LEN - 1] = 0;
-                    gDNR.cache[gDNR.noOfCachedEntries].ipAddr   = ip1 << 24 | ip2 << 16 | ip3 << 8 | ip4;
-                    gDNR.cache[gDNR.noOfCachedEntries].topoCnt  = 0;
-                    gDNR.noOfCachedEntries++;
+                    pDNR->cache[pDNR->noOfCachedEntries].uri[TRDP_MAX_URI_HOST_LEN - 1] = 0;
+                    pDNR->cache[pDNR->noOfCachedEntries].ipAddr   = ip1 << 24 | ip2 << 16 | ip3 << 8 | ip4;
+                    pDNR->cache[pDNR->noOfCachedEntries].topoCnt  = 0;
+                    pDNR->noOfCachedEntries++;
                 }
             }
         }
-        vos_printLog(VOS_LOG_DBG, "readHostsFile: %d entries processed\n", gDNR.noOfCachedEntries);
-        vos_qsort(gDNR.cache, gDNR.noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
+        vos_printLog(VOS_LOG_DBG, "readHostsFile: %d entries processed\n", pDNR->noOfCachedEntries);
+        vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
         fclose(fp);
     }
     else
     {
         vos_printLogStr(VOS_LOG_ERROR, "readHostsFile: Not found!\n");
     }
-    printDNRcache();
+    printDNRcache(pDNR);
 }
 
 /**********************************************************************************************************************/
@@ -306,10 +308,11 @@ static void readHostsFile (
  *
  */
 static TRDP_ERR_T createSendQuery (
-    INT32       sock,
-    const CHAR8 *pUri,
-    UINT16      id,
-    UINT32      *pSize)
+    TAU_DNR_DATA_T      *pDNR,
+    INT32               sock,
+    const CHAR8         *pUri,
+    UINT16              id,
+    UINT32              *pSize)
 {
     CHAR8               strBuf[TAU_MAX_URI_SIZE + 3];      /* conversion enlarges this buffer */
     UINT8               packetBuffer[TAU_MAX_DNS_BUFFER_SIZE], *pBuf;
@@ -322,8 +325,6 @@ static TRDP_ERR_T createSendQuery (
         vos_printLogStr(VOS_LOG_ERROR, "createSendQuery has no search string\n");
         return TRDP_PARAM_ERR;
     }
-
-    pBuf = packetBuffer;
 
     memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
 
@@ -348,7 +349,7 @@ static TRDP_ERR_T createSendQuery (
     *pSize  += 4;               /* add query type and class size! */
 
     /* send the query */
-    err = vos_sockSendUDP(sock, packetBuffer, &size, gDNR.ecspIpAddr, gDNR.ecspPort);
+    err = vos_sockSendUDP(sock, packetBuffer, &size, pDNR->ecspIpAddr, pDNR->ecspPort);
     if (err != VOS_NO_ERR)
     {
         vos_printLogStr(VOS_LOG_ERROR, "createSendQuery failed to sent a query!\n");
@@ -525,6 +526,7 @@ static void updateDNSentry (
     UINT32          size, querySize;
     VOS_SOCK_OPT_T  opts;
     UINT16          id      = (UINT16) appHandle;
+    TAU_DNR_DATA_T  *pDNR = (TAU_DNR_DATA_T *) appHandle->pUser;
     TRDP_IP_ADDR_T  ip_addr = VOS_INADDR_ANY;
 
     memset(&opts, 0, sizeof(opts));
@@ -537,7 +539,7 @@ static void updateDNSentry (
         return;
     }
 
-    err = createSendQuery(my_socket, pUri, id, &querySize);
+    err = createSendQuery(pDNR, my_socket, pUri, id, &querySize);
 
     if (err != VOS_NO_ERR)
     {
@@ -548,7 +550,7 @@ static void updateDNSentry (
     while (1)
     {
         VOS_FDS_T   rfds;
-        TRDP_TIME_T tv = {gDNR.timeout, 0};
+        TRDP_TIME_T tv = {pDNR->timeout, 0};
         int         rv;
 
         FD_ZERO(&rfds);
@@ -562,7 +564,7 @@ static void updateDNSentry (
             memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
             size = TAU_MAX_DNS_BUFFER_SIZE;
             /* Get what was announced */
-            vos_sockReceiveUDP(my_socket, packetBuffer, &size, &gDNR.ecspIpAddr, &gDNR.ecspPort, NULL, FALSE);
+            vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->ecspIpAddr, &pDNR->ecspPort, NULL, FALSE);
             FD_CLR(my_socket, &rfds);
             
             if (size == 0)
@@ -581,7 +583,7 @@ static void updateDNSentry (
             }
             else /* It's a new one, update our cache */
             {
-                int cacheEntry = gDNR.noOfCachedEntries;
+                int cacheEntry = pDNR->noOfCachedEntries;
 
                 if (cacheEntry >= TAU_MAX_NO_CACHE_ENTRY)   /* Cache is full! */
                 {
@@ -589,16 +591,16 @@ static void updateDNSentry (
                 }
                 else
                 {
-                    gDNR.noOfCachedEntries++;
+                    pDNR->noOfCachedEntries++;
                 }
 
                 /* Position found, store everything */
-                strncpy(gDNR.cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE);
-                gDNR.cache[cacheEntry].ipAddr   = ip_addr;
-                gDNR.cache[cacheEntry].topoCnt  = appHandle->etbTopoCnt;
+                strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE);
+                pDNR->cache[cacheEntry].ipAddr   = ip_addr;
+                pDNR->cache[cacheEntry].topoCnt  = appHandle->etbTopoCnt;
 
                 /* Sort the entries to get faster hits  */
-                vos_qsort(gDNR.cache, gDNR.noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
+                vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
                 break;
             }
         }
@@ -638,33 +640,57 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     UINT16              ecspPort,
     const CHAR8         *pHostsFileName)
 {
+    TAU_DNR_DATA_T *pDNR;  /**< default DNR/ECSP settings  */
+
     if (appHandle == NULL)
     {
         return TRDP_PARAM_ERR;
     }
 
-    /* Overwrite defaults: */
-    if (ecspIpAddr != 0)
+    pDNR = (TAU_DNR_DATA_T*) vos_memAlloc(sizeof(TAU_DNR_DATA_T));
+    if (pDNR == NULL)
     {
-        gDNR.ecspIpAddr = ecspIpAddr;
+        return TRDP_MEM_ERR;
     }
-    if (ecspPort != 0)
-    {
-        gDNR.ecspPort = ecspPort;
-    }
+    
+    /* save to application session */
+    appHandle->pUser  = pDNR;
 
+    pDNR->ecspIpAddr = (ecspIpAddr == 0)? 0x0a000001 : ecspIpAddr;
+    pDNR->ecspPort = (ecspPort == 0)? 53 : ecspPort;
+    
     /* Get locally defined hosts */
     if (pHostsFileName != NULL && strlen(pHostsFileName) > 0)
     {
-        readHostsFile(pHostsFileName);
-        gDNR.timeout = TAU_DNS_TIME_OUT_SHORT;
+        readHostsFile(pDNR, pHostsFileName);
+        pDNR->timeout = TAU_DNS_TIME_OUT_SHORT;
     }
     else
     {
-        gDNR.noOfCachedEntries = 0;
-        gDNR.timeout = TAU_DNS_TIME_OUT_LONG;
+        pDNR->noOfCachedEntries = 0;
+        pDNR->timeout = TAU_DNS_TIME_OUT_LONG;
     }
     return TRDP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/**    Function to deinit DNR
+ *
+ *  @param[in]      appHandle           Handle returned by tlc_openSession()
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *
+ */
+EXT_DECL void tau_deInitDnr (
+    TRDP_APP_SESSION_T  appHandle)
+{
+    
+    if (appHandle != NULL && appHandle->pUser != NULL)
+    {
+        vos_memFree(appHandle->pUser);
+        appHandle->pUser = NULL;
+    }
 }
 
 /**********************************************************************************************************************/
@@ -755,6 +781,7 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
     TRDP_IP_ADDR_T      *pAddr,
     const TRDP_URI_T    pUri)
 {
+    TAU_DNR_DATA_T  *pDNR;
     TAU_DNR_ENTRY_T *pTemp;
     int i;
 
@@ -770,6 +797,8 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
         *pAddr = tau_getOwnAddr(appHandle);
         return TRDP_NO_ERR;
     }
+    
+    pDNR = (TAU_DNR_DATA_T*) appHandle->pUser;
 
     /* Check for dotted IP address  */
     if ((*pAddr = vos_dottedIP(pUri)) != VOS_INADDR_ANY)
@@ -779,7 +808,7 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
     /* Look inside the cache    */
     for (i = 0; i < 2; ++i)
     {
-        pTemp = (TAU_DNR_ENTRY_T *) vos_bsearch(pUri, gDNR.cache, gDNR.noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T),
+        pTemp = (TAU_DNR_ENTRY_T *) vos_bsearch(pUri, pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T),
                                                 compareURI);
         if (pTemp != NULL &&
             (pTemp->topoCnt == appHandle->etbTopoCnt ||     /* Do the topocounts match? */
@@ -820,10 +849,13 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
     TRDP_URI_HOST_T     pUri,
     TRDP_IP_ADDR_T      addr)
 {
+    TAU_DNR_DATA_T  *pDNR;
     if (appHandle == NULL)
     {
         return TRDP_PARAM_ERR;
     }
+    
+    pDNR = (TAU_DNR_DATA_T*) appHandle->pUser;
 
     if (addr == 0)
     {
@@ -831,12 +863,12 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
     else
     {
         int i;
-        for (i = 0; i < gDNR.noOfCachedEntries; ++i)
+        for (i = 0; i < pDNR->noOfCachedEntries; ++i)
         {
-            if (gDNR.cache[i].ipAddr == addr &&
-                (appHandle->etbTopoCnt == 0 || (gDNR.cache[i].topoCnt == appHandle->etbTopoCnt)))
+            if (pDNR->cache[i].ipAddr == addr &&
+                (appHandle->etbTopoCnt == 0 || (pDNR->cache[i].topoCnt == appHandle->etbTopoCnt)))
             {
-                strncpy(pUri, gDNR.cache[i].uri, TRDP_MAX_URI_HOST_LEN);
+                strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN);
                 return TRDP_NO_ERR;
             }
         }

@@ -797,6 +797,7 @@ TRDP_ERR_T tlm_replyQuery (
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by indication
+ *  @param[in]      comId               ComId for reply
  *  @param[in]      replyStatus         Info for requester about stack errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *
@@ -809,6 +810,7 @@ TRDP_ERR_T tlm_replyQuery (
 TRDP_ERR_T tlm_replyErr (
     TRDP_APP_SESSION_T      appHandle,
     const TRDP_UUID_T       *pSessionId,
+    UINT32                  comId,
     TRDP_REPLY_STATUS_T     replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam);
 
