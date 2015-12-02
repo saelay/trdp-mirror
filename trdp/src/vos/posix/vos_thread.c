@@ -311,16 +311,19 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     }
 
     /* Set the policy of the thread */
-    retCode = pthread_attr_setschedpolicy(&threadAttrib, (INT32)policy);
-    if (retCode != 0)
+    if (policy != VOS_THREAD_POLICY_OTHER)
     {
-        vos_printLog(
-            VOS_LOG_ERROR,
-            "%s pthread_attr_setschedpolicy(%d) failed (Err:%d)\n",
-            pName,
-            policy,
-            retCode );
-        /*return VOS_THREAD_ERR;*/
+        retCode = pthread_attr_setschedpolicy(&threadAttrib, (INT32)policy);
+        if (retCode != 0)
+        {
+            vos_printLog(
+                VOS_LOG_ERROR,
+                "%s pthread_attr_setschedpolicy(%d) failed (Err:%d)\n",
+                pName,
+                policy,
+                retCode );
+                return VOS_THREAD_ERR;
+        }
     }
 
     /* Set the scheduling priority of the thread */
@@ -1056,7 +1059,10 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     {
         /*pThread Semaphore init*/
 #ifdef __APPLE__
-        *ppSema = (VOS_SEMA_T) sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)initialState);
+        static int count = 1;
+        char tempPath[64];
+        sprintf(tempPath, "/tmp/trdp%d.sema", count++);
+        *ppSema = (VOS_SEMA_T) sem_open(tempPath, O_CREAT, 0644, (UINT8)initialState);
         if ((sem_t*)*ppSema == SEM_FAILED)
         {
             rc = -1;
@@ -1167,7 +1173,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     if (sema == NULL)
     {
         vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
-        /* retVal = VOS_PARAM_ERR;  BL: will never be used! */
+        retVal = VOS_PARAM_ERR;
     }
     else if (timeout == 0)
     {

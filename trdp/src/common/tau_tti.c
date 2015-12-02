@@ -143,6 +143,9 @@ static void ttiPDCallback (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
+    int         changed = 0;
+    VOS_SEMA_T  waitForInaug = (VOS_SEMA_T) pRefCon;
+
     if (pMsg->comId == TTDB_STATUS_COMID)
     {
         if (pMsg->resultCode == TRDP_NO_ERR &&
@@ -151,7 +154,11 @@ static void ttiPDCallback (
             TRDP_OP_TRAIN_DIR_STATUS_INFO_T *pTelegram = (TRDP_OP_TRAIN_DIR_STATUS_INFO_T *) pData;
             UINT32 crc;
 
-            tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
+            if (appHandle->etbTopoCnt != vos_ntohl(pTelegram->etbTopoCnt))
+            {
+                changed++;
+                tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
+            }
 
             /* check the crc:   */
             crc = vos_crc32(0xFFFFFFFF, (const UINT8 *) &pTelegram->state, dataSize - 4);
@@ -166,13 +173,32 @@ static void ttiPDCallback (
 
             /* unmarshall manually:   */
             appHandle->pTTDB->opTrnState.state.opTrnTopoCnt = vos_ntohl(pTelegram->state.opTrnTopoCnt);
+            
+            if (appHandle->opTrnTopoCnt != vos_ntohl(pTelegram->state.opTrnTopoCnt))
+            {
+                changed++;
+                tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
+            }
+
             tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
             appHandle->pTTDB->opTrnState.state.crc = vos_ntohl(pTelegram->state.crc);
         }
         else if (pMsg->resultCode == TRDP_TIMED_OUT)
         {
-            tlc_setETBTopoCount(appHandle, 0);
-            tlc_setOpTrainTopoCount(appHandle, 0);
+            if (appHandle->etbTopoCnt != 0)
+            {
+                changed++;
+                tlc_setETBTopoCount(appHandle, 0);
+            }
+            if (appHandle->opTrnTopoCnt != 0)
+            {
+                changed++;
+                tlc_setOpTrainTopoCount(appHandle, 0);
+            }
+        }
+        if (changed > 0 && waitForInaug != NULL)
+        {
+            vos_semaGive(waitForInaug);
         }
     }
 }
@@ -342,6 +368,8 @@ static void ttiMDCallback (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
+    VOS_SEMA_T  waitForInaug = (VOS_SEMA_T) pRefCon;
+
     if (pMsg->comId == TTDB_OP_DIR_INFO_COMID ||      /* TTDB notification */
         pMsg->comId == TTDB_OP_DIR_INFO_REP_COMID)
     {
@@ -349,6 +377,10 @@ static void ttiMDCallback (
             dataSize <= sizeof(TRDP_OP_TRAIN_DIR_T))
         {
             ttiStoreOpTrnDir(appHandle, pData);
+            if (waitForInaug != NULL)
+            {
+                vos_semaGive(waitForInaug);           /* Signal new inauguration    */
+            }
         }
     }
     else if (pMsg->comId == TTDB_TRN_DIR_REP_COMID)
@@ -508,6 +540,7 @@ static void ttiRequestTTDBdata (
  *  Subscribe to necessary process data for correct ECSP handling
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
+ *  @param[in]      pUserAction     Semaphore to fire if inauguration took place.
  *  @param[in]      ecspIpAddr      ECSP IP address.
  *  @param[in]      hostFileName    Optional host file name as ECSP replacement.
  *
@@ -517,6 +550,7 @@ static void ttiRequestTTDBdata (
  */
 EXT_DECL TRDP_ERR_T tau_initTTIaccess (
     TRDP_APP_SESSION_T  appHandle,
+    VOS_SEMA_T          userAction,
     TRDP_IP_ADDR_T      ecspIpAddr,
     CHAR8               *hostFileName)
 {
@@ -535,7 +569,7 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
 
     if (tlp_subscribe(appHandle,
                       &appHandle->pTTDB->pd100SubHandle,
-                      NULL, ttiPDCallback,
+                      userAction, ttiPDCallback,
                       TRDP_TTDB_OP_TRAIN_DIR_STATUS_INFO_COMID,
                       0, 0,
                       VOS_INADDR_ANY,
@@ -552,7 +586,7 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
 
     if (tlm_addListener(appHandle,
                         &appHandle->pTTDB->md101Listener,
-                        NULL,
+                        userAction,
                         ttiMDCallback,
                         TTDB_OP_DIR_INFO_COMID,
                         0,
@@ -589,6 +623,8 @@ EXT_DECL void tau_deInitTTI (
                 appHandle->pTTDB->cstInfo[i] = NULL;
             }
         }
+        tlm_delListener(appHandle, appHandle->pTTDB->md101Listener);
+        tlp_unsubscribe(appHandle, appHandle->pTTDB->pd100SubHandle);
         vos_memFree(appHandle->pTTDB);
         appHandle->pTTDB = NULL;
     }
@@ -884,7 +920,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
     }
     if (index < TTI_CACHED_CONSISTS)
     {
-        pCstVehCnt = appHandle->pTTDB->cstInfo[index]->vehCnt;
+        *pCstVehCnt = appHandle->pTTDB->cstInfo[index]->vehCnt;
     }
     else    /* not found, get it and return directly */
     {
