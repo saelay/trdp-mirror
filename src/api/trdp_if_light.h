@@ -124,6 +124,29 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 EXT_DECL TRDP_ERR_T tlc_reinitSession (
     TRDP_APP_SESSION_T appHandle);
 
+/**********************************************************************************************************************/
+/** (Re-)configure a session.
+ *
+ *  tlc_configSession is called by openSession, but may also be called later on to change the defaults.
+ *
+ *  @param[in]      appHandle          A handle for further calls to the trdp stack
+ *  @param[in]      pMarshall           Pointer to marshalling configuration
+ *  @param[in]      pPdDefault          Pointer to default PD configuration
+ *  @param[in]      pMdDefault          Pointer to default MD configuration
+ *  @param[in]      pProcessConfig      Pointer to process configuration
+ *                                      only option parameter is used here to define session behavior
+ *                                      all other parameters are only used to feed statistics
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_INIT_ERR       not yet inited
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ */
+EXT_DECL TRDP_ERR_T tlc_configSession (
+    TRDP_APP_SESSION_T              appHandle,
+    const TRDP_MARSHALL_CONFIG_T    *pMarshall,
+    const TRDP_PD_CONFIG_T          *pPdDefault,
+    const TRDP_MD_CONFIG_T          *pMdDefault,
+    const TRDP_PROCESS_CONFIG_T     *pProcessConfig);
 
 /**********************************************************************************************************************/
 /** Close a session.
