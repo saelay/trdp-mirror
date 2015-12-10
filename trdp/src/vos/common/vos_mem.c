@@ -662,7 +662,7 @@ EXT_DECL void vos_qsort (
  *  This is just a wrapper for the standard bsearch function.
  *
  *  @param[in]      pKey            Key to search for
- *  @param[in]      pBuf            Pointer to the array to sort
+ *  @param[in]      pBuf            Pointer to the array to search
  *  @param[in]      num             number of elements
  *  @param[in]      size            size of one element
  *  @param[in]      compare         Pointer to compare function
