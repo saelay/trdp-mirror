@@ -976,7 +976,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
 {
     UINT32 i, j;
 
-    if (ppRefCon == NULL || pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
+    if (pDataset == NULL || numDataSet == 0 || numComId == 0 || pComIdDsIdMap == 0)
     {
         return TRDP_PARAM_ERR;
     }
