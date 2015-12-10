@@ -248,7 +248,7 @@ static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
  */ 
 static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT appHandle, const TRDP_ERR_T resultCode)
 {
-    INT32           replyStatus;
+    INT32           replyStatus = 0;
     TRDP_MD_INFO_T  theMessage  = cTrdp_md_info_default;
 
     if (pMdItem == NULL)
@@ -256,11 +256,22 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
         return;
     }
 
-    replyStatus = vos_ntohl(pMdItem->pPacket->frameHead.replyStatus);
-    theMessage.destIpAddr   = pMdItem->addr.destIpAddr;
-    theMessage.seqCount     = vos_ntohs(pMdItem->pPacket->frameHead.sequenceCounter);
-    theMessage.protVersion  = vos_ntohs(pMdItem->pPacket->frameHead.protocolVersion);
-    theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pMdItem->pPacket->frameHead.msgType);
+    if (pMdItem->pPacket != NULL)
+    {
+        replyStatus = vos_ntohl(pMdItem->pPacket->frameHead.replyStatus);
+        theMessage.seqCount     = vos_ntohs(pMdItem->pPacket->frameHead.sequenceCounter);
+        theMessage.protVersion  = vos_ntohs(pMdItem->pPacket->frameHead.protocolVersion);
+        theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pMdItem->pPacket->frameHead.msgType);
+        memcpy(theMessage.sessionId, pMdItem->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
+        theMessage.replyTimeout = vos_ntohl(pMdItem->pPacket->frameHead.replyTimeout);
+        memcpy(theMessage.destURI, pMdItem->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
+        memcpy(theMessage.srcURI, pMdItem->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
+    }
+    else
+    {
+        replyStatus = TRDP_REPLY_UNSPECIFIED_ERROR;
+    }
+
     if ( replyStatus >= 0 )
     {
         theMessage.userStatus   = (UINT16) replyStatus;
@@ -271,10 +282,7 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
         theMessage.userStatus   = 0;
         theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
     }
-    memcpy(theMessage.sessionId, pMdItem->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
-    theMessage.replyTimeout = vos_ntohl(pMdItem->pPacket->frameHead.replyTimeout);
-    memcpy(theMessage.destURI, pMdItem->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
-    memcpy(theMessage.srcURI, pMdItem->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
+    theMessage.destIpAddr           = pMdItem->addr.destIpAddr;
     theMessage.numExpReplies        = pMdItem->numExpReplies;
     theMessage.pUserRef             = pMdItem->pUserRef;
     theMessage.numReplies           = pMdItem->numReplies;
@@ -286,7 +294,7 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
     /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
     theMessage.resultCode           = resultCode;
 
-    if ( resultCode == TRDP_NO_ERR )
+    if ( resultCode == TRDP_NO_ERR && pMdItem->pPacket != NULL)
     {
         theMessage.comId        = vos_ntohl(pMdItem->pPacket->frameHead.comId);
         theMessage.etbTopoCnt   = vos_ntohl(pMdItem->pPacket->frameHead.etbTopoCnt);
