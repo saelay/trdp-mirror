@@ -1236,6 +1236,46 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     return result;
 }
 
+/**********************************************************************************************************************/
+/**    Function to free the memory for the DataSet configuration
+ *
+ *  Free the memory for the DataSet configuration which was allocated when parsing the XML configuration file.
+ *
+ *
+ *  @param[in]      numComId            The number of entries in the ComId DatasetId mapping list
+ *  @param[in]      pComIdDsIdMap       Pointer to an array of structures of type TRDP_COMID_DSID_MAP_T
+ *  @param[in]      numDataset          The number of datasets found in the configuration
+ *  @param[in]      pNumDataset         Pointer to an array of pointers to a structures of type TRDP_DATASET_T
+ *
+ *  @retval         none
+ *
+ */
+EXT_DECL void tau_freeXmlDatasetConfig (
+    UINT32                      numComId,
+    TRDP_COMID_DSID_MAP_T       *pComIdDsIdMap,
+    UINT32                      numDataset,
+    TRDP_DATASET_T              **ppDataset)
+{
+    int i;
+    
+    /*  Mapping between ComId and DatasetId   */
+    if (numComId > 0 && pComIdDsIdMap != NULL)
+    {
+        vos_memFree(pComIdDsIdMap);
+    }
+    
+    /*  Dataset definitions   */
+    if (numDataset > 0 && ppDataset != NULL)
+    {
+        for (i = 0; i < numDataset; ++i)
+        {
+            vos_memFree(ppDataset[i]);
+        }
+        vos_memFree(ppDataset);
+    }
+}
+
+
 /*
  * Parse message data communication parameters configured for one telegram
  * Default values are used for properties which are not configured

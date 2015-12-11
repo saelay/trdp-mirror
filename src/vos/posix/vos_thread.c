@@ -80,6 +80,7 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
         {
             return 0;
         }
+        usleep(10000);      /* cancellation point */
         if (errno == EINTR)
         {
             break;
