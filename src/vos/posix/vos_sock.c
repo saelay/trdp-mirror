@@ -440,6 +440,53 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     return VOS_NO_ERR;
 }
 
+/**********************************************************************************************************************/
+/** Get the state of an interface
+ *
+ *
+ *  @param[in]      ifAddress       address of interface to check
+ *
+ *  @retval         TRUE            interface is up and ready
+ *                  FALSE           interface is down / not ready
+ */
+EXT_DECL BOOL8 vos_netIfUp(
+    VOS_IP4_ADDR_T  ifAddress)
+{
+    struct ifaddrs  *addrs;
+    struct ifaddrs  *cursor;
+    VOS_IF_REC_T    ifAddrs;
+    
+    ifAddrs.linkState = FALSE;
+    
+    if (getifaddrs(&addrs) == 0)
+    {
+        cursor = addrs;
+        while (cursor != 0)
+        {
+            if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
+            {
+                memcpy(&ifAddrs.ipAddr, &cursor->ifa_addr->sa_data[2], 4);
+                ifAddrs.ipAddr   = vos_ntohl(ifAddrs.ipAddr);
+                /* Exit if first (default) interface matches */
+                if (ifAddress == INADDR_ANY || ifAddress == ifAddrs.ipAddr)
+                {
+                    if (cursor->ifa_flags & IFF_UP)
+                    {
+                        ifAddrs.linkState = TRUE;
+                    }
+                    /* vos_printLog(VOS_LOG_INFO, "cursor->ifa_flags = 0x%x\n", cursor->ifa_flags); */
+                    break;
+                }
+            }
+            cursor = cursor->ifa_next;
+        }
+        
+        freeifaddrs(addrs);
+        
+    }
+    return ifAddrs.linkState;
+}
+
 /*    Sockets    */
 
 /**********************************************************************************************************************/

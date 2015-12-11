@@ -360,6 +360,22 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     return VOS_UNKNOWN_ERR;
 }
 
+/**********************************************************************************************************************/
+/** Get the state of an interface
+ *
+ *
+ *  @param[in]      ifAddress       address of interface to check
+ *
+ *  @retval         TRUE            interface is up and ready
+ *                  FALSE           interface is down / not ready
+ */
+EXT_DECL BOOL8 vos_netIfUp(
+    VOS_IP4_ADDR_T  ifAddress)
+{
+    // tbd
+    return TRUE;
+}
+
 /*    Sockets    */
 
 /**********************************************************************************************************************/
