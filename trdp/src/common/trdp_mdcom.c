@@ -264,8 +264,8 @@ static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT
         theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pMdItem->pPacket->frameHead.msgType);
         memcpy(theMessage.sessionId, pMdItem->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
         theMessage.replyTimeout = vos_ntohl(pMdItem->pPacket->frameHead.replyTimeout);
-        memcpy(theMessage.destURI, pMdItem->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
-        memcpy(theMessage.srcURI, pMdItem->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
+        memcpy(theMessage.destUserURI, pMdItem->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
+        memcpy(theMessage.srcUserURI, pMdItem->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
     }
     else
     {
