@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-14: Ticket #33: source size check for marshalling
  *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
  *      BL 2015-08-31: Ticket #94: TRDP_REDUNDANT flag is evaluated, beQuiet removed
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
@@ -157,6 +158,7 @@ TRDP_ERR_T trdp_pdPut (
             ret = marshall(refCon,
                            pPacket->addr.comId,
                            (UINT8 *) pData,
+                           dataSize,
                            pPacket->pFrame->data,
                            &dataSize,
                            &pPacket->pCachedDS);
@@ -224,6 +226,7 @@ TRDP_ERR_T trdp_pdGet (
             return unmarshall(refCon,
                               pPacket->addr.comId,
                               pPacket->pFrame->data,
+                              vos_ntohs(pPacket->pFrame->frameHead.datasetLength),
                               (UINT8 *)pData,
                               pDataSize,
                               &pPacket->pCachedDS);

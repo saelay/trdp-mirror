@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-14: Ticket #33: source size check for marshalling
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *      BL 2014-02-27: Ticket #17: tlp_subscribe() returns wrong *pSubHandle
@@ -125,6 +126,7 @@ typedef enum
     TRDP_UNRESOLVED_ERR     = -47,  /**< DNR: address could not be resolved             */
     TRDP_XML_PARSER_ERR     = -48,  /**< Returned by the tau_xml subsystem              */
     TRDP_INUSE_ERR          = -49,  /**< Resource is still in use                       */
+    TRDP_MARSHALLING_ERR    = -50,  /**< Source size exceeded, dataset mismatch         */
     TRDP_UNKNOWN_ERR        = -99   /**< Unspecified error                              */
 } TRDP_ERR_T;
 
@@ -482,14 +484,15 @@ typedef VOS_LOG_T TRDP_LOG_T;
 
 
 /**********************************************************************************************************************/
-/**    Function type for marshalling .
- * The function must know about the dataset's alignment etc.
+/** Function type for marshalling .
+ *  The function must know about the dataset's alignment etc.
  *
  *  @param[in]        *pRefCon      pointer to user context
  *  @param[in]        comId         ComId to identify the structure out of a configuration
  *  @param[in]        *pSrc         pointer to received original message
+ *  @param[in]        srcSize       size of the source buffer
  *  @param[in]        *pDst         pointer to a buffer for the treated message
- *  @param[in,out]    *pDstSize      size of the provide buffer / size of the treated message
+ *  @param[in,out]    *pDstSize     size of the provide buffer / size of the treated message
  *  @param[in,out]    *ppCachedDS   pointer to pointer of cached dataset
  *
  *  @retval         TRDP_NO_ERR        no error
@@ -502,6 +505,7 @@ typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDst,
     UINT32          *pDstSize,
     TRDP_DATASET_T  * *ppCachedDS);
@@ -514,6 +518,7 @@ typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
  *  @param[in]        *pRefCon      pointer to user context
  *  @param[in]        comId         ComId to identify the structure out of a configuration
  *  @param[in]        *pSrc         pointer to received original message
+ *  @param[in]        srcSize       data length from TRDP packet header
  *  @param[in]        *pDst         pointer to a buffer for the treated message
  *  @param[in,out]    *pDstSize     size of the provide buffer / size of the treated message
  *  @param[in,out]    *ppCachedDS   pointer to pointer of cached dataset
@@ -528,6 +533,7 @@ typedef TRDP_ERR_T (*TRDP_UNMARSHALL_T)(
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDst,
     UINT32          *pDstSize,
     TRDP_DATASET_T  * *ppCachedDS);

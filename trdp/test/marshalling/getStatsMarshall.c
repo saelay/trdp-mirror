@@ -311,7 +311,7 @@ void myPDcallBack (
             {
                 if (pMsg->comId == 12)
                 {
-                    tau_unmarshall(NULL, pMsg->comId, pData, (UINT8 *) &gBuffer, &dataSize, NULL);
+                    tau_unmarshall(NULL, pMsg->comId, pData, dataSize, (UINT8 *) &gBuffer, &dataSize, NULL);
                     print_stats(&gBuffer);
                     gKeepOnRunning = FALSE;
                 }

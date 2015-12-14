@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-14: Ticket #33: source size check for marshalling
  */
 
 /***********************************************************************************************************************
@@ -40,6 +41,7 @@ typedef struct
 {
     INT32   level;          /**< track recursive level   */
     UINT8   *pSrc;          /**< source pointer          */
+    UINT8   *pSrcEnd;       /**< last source             */
     UINT8   *pDst;          /**< destination pointer     */
     UINT8   *pDstEnd;       /**< last destination        */
 } TAU_MARSHALL_INFO_T;
@@ -370,7 +372,7 @@ static TRDP_ERR_T marshallDs (
     pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
 
     /*    Loop over all datasets in the array    */
-    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
+    for (lIndex = 0; lIndex < pDataset->numElement && pInfo->pSrcEnd > pInfo->pSrc; ++lIndex)
     {
         UINT32 noOfItems = pDataset->pElement[lIndex].size;
 
@@ -552,6 +554,10 @@ static TRDP_ERR_T marshallDs (
         }
     }
 
+    if (pInfo->pSrc > pInfo->pSrcEnd)
+    {
+        return TRDP_MARSHALLING_ERR;
+    }
 
     return TRDP_NO_ERR;
 }
@@ -562,10 +568,11 @@ static TRDP_ERR_T marshallDs (
  *  @param[in,out]  pInfo           Pointer with src & dest info
  *  @param[in]      pDataset        Pointer to one dataset
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *  @retval         TRDP_STATE_ERR  Too deep recursion
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -587,7 +594,7 @@ static TRDP_ERR_T unmarshallDs (
     }
 
     /*    Loop over all datasets in the array    */
-    for (lIndex = 0; lIndex < pDataset->numElement; ++lIndex)
+    for (lIndex = 0; lIndex < pDataset->numElement && pInfo->pSrcEnd > pInfo->pSrc; ++lIndex)
     {
         UINT32 noOfItems = pDataset->pElement[lIndex].size;
 
@@ -763,6 +770,11 @@ static TRDP_ERR_T unmarshallDs (
             pInfo->pSrc = pSrc;
         }
     }
+    
+    if (pInfo->pSrc > pInfo->pSrcEnd)
+    {
+        return TRDP_MARSHALLING_ERR;
+    }
 
     return TRDP_NO_ERR;
 }
@@ -773,10 +785,11 @@ static TRDP_ERR_T unmarshallDs (
  *  @param[in,out]  pInfo           Pointer with src & dest info
  *  @param[in]      pDataset        Pointer to one dataset
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *  @retval         TRDP_STATE_ERR  Too deep recursion
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -943,6 +956,11 @@ static TRDP_ERR_T size_marshall (
         }
     }
 
+    if (pInfo->pSrc > pInfo->pSrcEnd)
+    {
+        return TRDP_MARSHALLING_ERR;
+    }
+
     return TRDP_NO_ERR;
 }
 
@@ -1012,16 +1030,17 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      comId           ComId to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
  *                                  set NULL if not used, set content NULL if unknown
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
- *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -1029,6 +1048,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
@@ -1080,15 +1100,19 @@ EXT_DECL TRDP_ERR_T tau_marshall (
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      comId           ComId to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
  *                                  set NULL if not used, set content NULL if unknown
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
+ *  @retval         TRDP_INIT_ERR           marshalling not initialised
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_COMID_ERR          comid not existing
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -1096,6 +1120,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
@@ -1131,6 +1156,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 
     info.level      = 0;
     info.pSrc       = pSrc;
+    info.pSrcEnd    = pSrc + srcSize;
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
@@ -1148,16 +1174,19 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      dsId            Data set id to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
  *                                  set NULL if not used, set content NULL if unknown
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
- *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_INIT_ERR           marshalling not initialised
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_COMID_ERR          comid not existing
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -1165,6 +1194,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     void            *pRefCon,
     UINT32          dsId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
@@ -1200,6 +1230,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
 
     info.level      = 0;
     info.pSrc       = pSrc;
+    info.pSrcEnd    = pSrc + srcSize;
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
@@ -1216,15 +1247,19 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      dsId            Data set id to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
  *                                  set NULL if not used, set content NULL if unknown
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_MEM_ERR    provided buffer to small
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_COMID_ERR  comid not existing
+ *  @retval         TRDP_INIT_ERR           marshalling not initialised
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_COMID_ERR          comid not existing
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -1232,6 +1267,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     void            *pRefCon,
     UINT32          dsId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
@@ -1267,6 +1303,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
 
     info.level      = 0;
     info.pSrc       = pSrc;
+    info.pSrcEnd    = pSrc + srcSize;
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
@@ -1284,13 +1321,18 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
  *  @param[in]      pRefCon         Pointer to user context
  *  @param[in]      dsId            Dataset id to identify the structure out of a configuration
  *  @param[in]      pSrc            Pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[out]     pDestSize       Pointer to the size of the data set
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
  *                                  set NULL if not used, set content NULL if unknown
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_PARAM_ERR  data set id not existing
+ *  @retval         TRDP_INIT_ERR           marshalling not initialised
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_COMID_ERR          comid not existing
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -1298,6 +1340,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     void            *pRefCon,
     UINT32          dsId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
@@ -1330,9 +1373,10 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
         return TRDP_COMID_ERR;
     }
 
-    info.level  = 0;
-    info.pSrc   = pSrc;
-    info.pDst   = 0;
+    info.level      = 0;
+    info.pSrc       = pSrc;
+    info.pSrcEnd    = pSrc + srcSize;
+    info.pDst       = 0;
 
     err = size_marshall(&info, pDataset);
 
@@ -1347,13 +1391,18 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
  *  @param[in]      pRefCon         Pointer to user context
  *  @param[in]      comId           ComId id to identify the structure out of a configuration
  *  @param[in]      pSrc            Pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[out]     pDestSize       Pointer to the size of the data set
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
  *                                  set NULL if not used, set content NULL if unknown
  *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_INIT_ERR   marshalling not initialised
- *  @retval         TRDP_PARAM_ERR  data set id not existing
+ *  @retval         TRDP_INIT_ERR           marshalling not initialised
+ *  @retval         TRDP_NO_ERR             no error
+ *  @retval         TRDP_MEM_ERR            provided buffer to small
+ *  @retval         TRDP_PARAM_ERR          Parameter error
+ *  @retval         TRDP_STATE_ERR          Too deep recursion
+ *  @retval         TRDP_COMID_ERR          comid not existing
+ *  @retval         TRDP_MARSHALLING_ERR    dataset/source size mismatch
  *
  */
 
@@ -1361,6 +1410,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer)
 {
@@ -1393,9 +1443,10 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
         return TRDP_COMID_ERR;
     }
 
-    info.level  = 0;
-    info.pSrc   = pSrc;
-    info.pDst   = 0;
+    info.level      = 0;
+    info.pSrc       = pSrc;
+    info.pSrcEnd    = pSrc + srcSize;
+    info.pDst       = 0;
 
     err = size_marshall(&info, pDataset);
 
