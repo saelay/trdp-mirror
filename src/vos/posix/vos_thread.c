@@ -1174,7 +1174,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     if (sema == NULL)
     {
         vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
-        retVal = VOS_PARAM_ERR;
+        return VOS_PARAM_ERR;
     }
     else if (timeout == 0)
     {

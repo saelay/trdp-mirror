@@ -78,6 +78,8 @@
 
 #define TRDP_SEQ_CNT_START_ARRAY_SIZE       64                          /**< This should be enough for the start    */
 
+#define TRDP_IF_WAIT_FOR_READY              120   /**< 120 seconds (120 tries each second to bind to an IP address) */
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */
