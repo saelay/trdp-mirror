@@ -368,12 +368,16 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
+        int retries;
+
         pSession->pNext = sSession;
         sSession        = pSession;
         *pAppHandle     = pSession;
 
-        /*  Publish our statistics packet   */
-        ret = tlp_publish(pSession,                     /*    our application identifier    */
+        for (retries = 0; retries < TRDP_IF_WAIT_FOR_READY; retries++)
+        {
+            /*  Publish our statistics packet   */
+            ret = tlp_publish(pSession,                     /*    our application identifier    */
                           &dummyPubHndl,                /*    our pulication identifier     */
                           TRDP_GLOBAL_STATISTICS_COMID, /*    ComID to send                 */
                           0,                            /*    local consist only            */
@@ -386,6 +390,15 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           NULL,                         /*    default qos and ttl           */
                           NULL,                         /*    initial data                  */
                           sizeof(TRDP_STATISTICS_T));
+            if (ret == VOS_SOCK_ERR)
+            {
+                vos_threadDelay(1000000);
+            }
+            else
+            {
+                break;
+            }
+        } 
 
         /*  Subscribe our request packet   */
         if (ret == TRDP_NO_ERR)
