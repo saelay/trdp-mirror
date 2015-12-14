@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-14: Ticket #8: DNR client
  */
 
 #ifndef TAU_DNR_H
@@ -156,7 +157,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
 
 
 /* ---------------------------------------------------------------------------- */
-
+#if 0
 /**********************************************************************************************************************/
 /**    Function to retrieve the id of the consist and vehicle with label vehLabel in the consist with cstLabel.
  *  
@@ -487,7 +488,7 @@ EXT_DECL TRDP_ERR_T tau_addr2OpCstNo (
 
 /* ---------------------------------------------------------------------------- */
 
-
+#endif /* if 0 */
 
 #ifdef __cplusplus
 }
