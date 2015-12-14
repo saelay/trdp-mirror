@@ -217,7 +217,7 @@ int main ()
     }
 
     /*    Compute size of marshalled data */
-    err = tau_calcDatasetSizeByComId(refCon, TEST_COMID, (UINT8 *) &gMyDataSet2, &bufSize, NULL);
+    err = tau_calcDatasetSizeByComId(refCon, TEST_COMID, (UINT8 *) &gMyDataSet2, sizeof(gMyDataSet2), &bufSize, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -246,7 +246,7 @@ int main ()
     bufSize = sizeof(gDstDataBuffer);
     memset(gDstDataBuffer, 0, bufSize);
 
-    err = tau_marshall(refCon, TEST_COMID, (UINT8 *) &gMyDataSet2, gDstDataBuffer, &bufSize, NULL);
+    err = tau_marshall(refCon, TEST_COMID, (UINT8 *) &gMyDataSet2, sizeof(gMyDataSet2), gDstDataBuffer, &bufSize, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -265,10 +265,10 @@ int main ()
         printf("...### Marshalled size is different!\n");
     }
 
-    bufSize = sizeof(gMyDataSet2Copy);
-    memset(&gMyDataSet2Copy, 0, bufSize);
+    UINT32 bufSize2 = sizeof(gMyDataSet2Copy);
+    memset(&gMyDataSet2Copy, 0, bufSize2);
 
-    err = tau_unmarshall(refCon, TEST_COMID, gDstDataBuffer, (UINT8 *) &gMyDataSet2Copy, &bufSize, NULL);
+    err = tau_unmarshall(refCon, TEST_COMID, gDstDataBuffer, bufSize, (UINT8 *) &gMyDataSet2Copy, &bufSize2, NULL);
 
     if (err != TRDP_NO_ERR)
     {

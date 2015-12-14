@@ -239,6 +239,12 @@ const char *get_result_string (TRDP_ERR_T err)
             return "TRDP_PACKET_ERR (Incomplete message data packet)";
         case TRDP_UNRESOLVED_ERR:
             return "TRDP_UNRESOLVED_ERR (URI was not resolved error)";
+        case TRDP_XML_PARSER_ERR:
+            return "TRDP_XML_PARSER_ERR (error while parsing XML file)";
+        case TRDP_INUSE_ERR:
+            return "TRDP_INUSE_ERR (Resource is in use error)";
+        case TRDP_MARSHALLING_ERR:
+            return "TRDP_MARSHALLING_ERR (Mismatch between source size and dataset size)";
         case TRDP_UNKNOWN_ERR:
             return "TRDP_UNKNOWN_ERR (unspecified error)";
     }
@@ -766,8 +772,8 @@ void exec_next_test ()
 
     /* prepare request message */
     memset(&msg, 0, sizeof(msg));
-    strcpy(msg.destURI, opts.uri);
-    strcpy(msg.srcURI, opts.uri);
+    strcpy(msg.destUserURI, opts.uri);
+    strcpy(msg.srcUserURI, opts.uri);
 
     switch (sts.test)
     {
@@ -1022,8 +1028,8 @@ void reply (const TRDP_MD_INFO_T *request, TRDP_MSG_T type, TRDP_FLAGS_T flags)
     reply.destIpAddr    = request->srcIpAddr;
     reply.numExpReplies = (type == TRDP_MSG_MQ) ? 1 : 0;
     memcpy(&reply.sessionId, &request->sessionId, sizeof(TRDP_UUID_T));
-    strcpy(reply.destURI, request->srcURI);
-    strcpy(reply.srcURI, request->destURI);
+    strcpy(reply.destUserURI, request->srcUserURI);
+    strcpy(reply.srcUserURI, request->destUserURI);
 
     /* enqueue confirm */
     enqueue(REQ_SEND, 0, &reply, flags);
@@ -1042,8 +1048,8 @@ void confirm (const TRDP_MD_INFO_T *reply, TRDP_FLAGS_T flags)
     confirm.destIpAddr      = reply->srcIpAddr;
     confirm.numExpReplies   = 0;
     memcpy(&confirm.sessionId, &reply->sessionId, sizeof(TRDP_UUID_T));
-    strcpy(confirm.destURI, reply->srcURI);
-    strcpy(confirm.srcURI, reply->destURI);
+    strcpy(confirm.destUserURI, reply->srcUserURI);
+    strcpy(confirm.srcUserURI, reply->destUserURI);
 
     /* enqueue confirm */
     enqueue(REQ_SEND, 0, &confirm, flags);
@@ -1057,7 +1063,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
     TRDP_ERR_T  err;
 
     print(1, "sending %s to %s@%s ... (flags:%#x)",
-          get_msg_type_str(msg->msgType), msg->destURI,
+          get_msg_type_str(msg->msgType), msg->destUserURI,
           vos_ipDotted(msg->destIpAddr), flags);
 
     /* depending on message type */
@@ -1082,8 +1088,8 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     NULL,                           /* send parameters */
                     (UINT8 *) buf,                  /* dataset buffer */
                     opts.msgsz,                     /* dataset size */
-                    msg->srcURI,                    /* source URI */
-                    msg->destURI);                  /* destination URI */
+                    msg->srcUserURI,                    /* source URI */
+                    msg->destUserURI);                  /* destination URI */
             /* check for errors */
             if (err != TRDP_NO_ERR)
             {
@@ -1115,8 +1121,8 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
                     NULL,                           /* send parameters */
                     (UINT8 *) buf,                  /* dataset buffer */
                     opts.msgsz,                     /* dataset size */
-                    msg->srcURI,                    /* source URI */
-                    msg->destURI);                  /* destination URI */
+                    msg->srcUserURI,                    /* source URI */
+                    msg->destUserURI);                  /* destination URI */
             /* check for errors */
             if (err != TRDP_NO_ERR)
             {
@@ -1198,7 +1204,7 @@ void recv_msg (const TRDP_MD_INFO_T *msg, UINT8 *data, UINT32 size)
     /* print information about incoming message */
     print(2, "incoming %s: %u/%ub from %s@%s",
           get_msg_type_str(msg->msgType), msg->comId, size,
-          msg->srcURI, vos_ipDotted(msg->srcIpAddr));
+          msg->srcUserURI, vos_ipDotted(msg->srcIpAddr));
     if (size)
     {
         print(0, "%s", data);

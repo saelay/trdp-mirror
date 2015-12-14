@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-14: Ticket #33: source size check for marshalling
  */
 
 #ifndef TAU_MARSHALL_H
@@ -89,6 +90,7 @@ EXT_DECL TRDP_ERR_T tau_initMarshall(
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      comId           ComId to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
@@ -106,6 +108,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer);
@@ -117,6 +120,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      dsId            Data set id to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
@@ -134,6 +138,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     void            *pRefCon,
     UINT32          dsId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer);
@@ -145,6 +150,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      comId           ComId to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
@@ -161,6 +167,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer);
@@ -172,6 +179,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
  *  @param[in]      pRefCon         pointer to user context
  *  @param[in]      dsId            Data set id to identify the structure out of a configuration
  *  @param[in]      pSrc            pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[in]      pDest           pointer to a buffer for the treated message
  *  @param[in,out]  pDestSize       size of the provide buffer / size of the treated message
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset
@@ -188,6 +196,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     void            *pRefCon,
     UINT32          dsId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT8           *pDest,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer);
@@ -199,6 +208,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
  *  @param[in]      pRefCon         Pointer to user context
  *  @param[in]      dsId            Dataset id to identify the structure out of a configuration
  *  @param[in]      pSrc            Pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[out]     pDestSize       Pointer to the size of the data set
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
  *                                  set NULL if not used, set content NULL if unknown
@@ -213,6 +223,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     void            *pRefCon,
     UINT32          dsId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer);
 
@@ -223,6 +234,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
  *  @param[in]      pRefCon         Pointer to user context
  *  @param[in]      comId           ComId id to identify the structure out of a configuration
  *  @param[in]      pSrc            Pointer to received original message
+ *  @param[in]      srcSize         size of the source buffer
  *  @param[out]     pDestSize       Pointer to the size of the data set
  *  @param[in,out]  ppDSPointer     pointer to pointer to cached dataset,
  *                                  set NULL if not used, set content NULL if unknown
@@ -237,6 +249,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
     void            *pRefCon,
     UINT32          comId,
     UINT8           *pSrc,
+    UINT32          srcSize,
     UINT32          *pDestSize,
     TRDP_DATASET_T  * *ppDSPointer);
 

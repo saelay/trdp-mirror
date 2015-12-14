@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-14: Setter for default configuration added
  *      BL 2015-11-24: Accessor for IP address of session
  *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
  *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
@@ -280,7 +281,6 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     pSession = (TRDP_SESSION_PT) vos_memAlloc(sizeof(TRDP_SESSION_T));
     if (pSession == NULL)
     {
-        /* vos_memDelete(NULL); */
         vos_printLog(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
         return TRDP_MEM_ERR;
     }
@@ -289,6 +289,34 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 
     pSession->realIP    = ownIpAddr;
     pSession->virtualIP = leaderIpAddr;
+    
+    pSession->pdDefault.pfCbFunction    = NULL;
+    pSession->pdDefault.pRefCon         = NULL;
+    pSession->pdDefault.flags           = TRDP_FLAGS_NONE;
+    pSession->pdDefault.timeout         = TRDP_PD_DEFAULT_TIMEOUT;
+    pSession->pdDefault.toBehavior      = TRDP_TO_SET_TO_ZERO;
+    pSession->pdDefault.port            = TRDP_PD_UDP_PORT;
+    pSession->pdDefault.sendParam.qos   = TRDP_PD_DEFAULT_QOS;
+    pSession->pdDefault.sendParam.ttl   = TRDP_PD_DEFAULT_TTL;
+
+#if MD_SUPPORT
+    pSession->mdDefault.pfCbFunction    = NULL;
+    pSession->mdDefault.pRefCon         = NULL;
+    pSession->mdDefault.confirmTimeout  = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+    pSession->mdDefault.connectTimeout  = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+    pSession->mdDefault.replyTimeout    = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+    pSession->mdDefault.flags           = TRDP_FLAGS_NONE;
+    pSession->mdDefault.udpPort         = TRDP_MD_UDP_PORT;
+    pSession->mdDefault.tcpPort         = TRDP_MD_TCP_PORT;
+    pSession->mdDefault.sendParam.qos   = TRDP_MD_DEFAULT_QOS;
+    pSession->mdDefault.sendParam.ttl   = TRDP_MD_DEFAULT_TTL;
+#ifdef TRDP_RETRIES
+    pSession->mdDefault.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
+#endif
+    pSession->mdDefault.maxNumSessions  = TRDP_MD_MAX_NUM_SESSIONS;
+    pSession->tcpFd.listen_sd           = -1;
+
+#endif
 
     ret = tlc_configSession (pSession, pMarshall, pPdDefault, pMdDefault, pProcessConfig);
     if (ret != TRDP_NO_ERR)
@@ -391,7 +419,8 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 /**********************************************************************************************************************/
 /** (Re-)configure a session.
  *
- *  tlc_configSession is called by openSession, but can be may also be called later on to change the defaults.
+ *  tlc_configSession is called by openSession, but may also be called later on to change the defaults.
+ *  Only the supplied settings (pointer != NULL) will be evaluated.
  *
  *  @param[in]      appHandle          A handle for further calls to the trdp stack
  *  @param[in]      pMarshall           Pointer to marshalling configuration
@@ -468,18 +497,6 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
             pSession->pdDefault.sendParam.qos = TRDP_PD_DEFAULT_QOS;
         }
     }
-    else
-    {
-        pSession->pdDefault.pfCbFunction    = NULL;
-        pSession->pdDefault.pRefCon         = NULL;
-        pSession->pdDefault.flags           = TRDP_FLAGS_NONE;
-        pSession->pdDefault.timeout         = TRDP_PD_DEFAULT_TIMEOUT;
-        pSession->pdDefault.toBehavior      = TRDP_TO_SET_TO_ZERO;
-        pSession->pdDefault.port            = TRDP_PD_UDP_PORT;
-        pSession->pdDefault.sendParam.qos   = TRDP_PD_DEFAULT_QOS;
-        pSession->pdDefault.sendParam.ttl   = TRDP_PD_DEFAULT_TTL;
-        /*       pSession->pdDefault.sendParam.retries   = 0; */
-    }
     
 #if MD_SUPPORT
     
@@ -533,27 +550,6 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
             pSession->mdDefault.maxNumSessions = TRDP_MD_MAX_NUM_SESSIONS;
         }
     }
-    else
-    {
-        pSession->mdDefault.pfCbFunction    = NULL;
-        pSession->mdDefault.pRefCon         = NULL;
-        pSession->mdDefault.confirmTimeout  = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
-        pSession->mdDefault.connectTimeout  = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
-        pSession->mdDefault.replyTimeout    = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
-        pSession->mdDefault.flags           = TRDP_FLAGS_NONE;
-        pSession->mdDefault.udpPort         = TRDP_MD_UDP_PORT;
-        pSession->mdDefault.tcpPort         = TRDP_MD_TCP_PORT;
-        pSession->mdDefault.sendParam.qos   = TRDP_MD_DEFAULT_QOS;
-        pSession->mdDefault.sendParam.ttl   = TRDP_MD_DEFAULT_TTL;
-#ifdef TRDP_RETRIES
-        pSession->mdDefault.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
-#endif
-        pSession->mdDefault.maxNumSessions = TRDP_MD_MAX_NUM_SESSIONS;
-        
-    }
-    
-    /* zero is a valid file/socket descriptor! */
-    pSession->tcpFd.listen_sd = -1;
     
 #endif
     return TRDP_NO_ERR;
