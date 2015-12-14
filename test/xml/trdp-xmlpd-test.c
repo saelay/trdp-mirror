@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2015-12-14: Ticket #97  trdp-xmlpd-test.c subscribed telegram issue.
+ *
  */
 
 #include <stdio.h>
@@ -989,7 +991,7 @@ void processData()
         for (i = 0; i < numSubTelegrams; i++)
         {
             /*  Read data from TRDP stack   */
-            dataSize = aPubTelegrams[i].dataset.size;
+            dataSize = aSubTelegrams[i].dataset.size;
             aSubTelegrams[i].result = tlp_get(
                 aSubTelegrams[i].sessionhandle, aSubTelegrams[i].subHandle, 
                 &aSubTelegrams[i].pdInfo, 
