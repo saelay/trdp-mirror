@@ -350,8 +350,8 @@ static TRDP_ERR_T createSendQuery (
     *pSize  += 4;               /* add query type and class size! */
 
     /* send the query */
-    err = vos_sockSendUDP(sock, packetBuffer, &size, pDNR->ecspIpAddr, pDNR->ecspPort);
-    if (err != VOS_NO_ERR)
+    err = (TRDP_ERR_T) vos_sockSendUDP(sock, packetBuffer, &size, pDNR->ecspIpAddr, pDNR->ecspPort);
+    if (err != TRDP_NO_ERR)
     {
         vos_printLogStr(VOS_LOG_ERROR, "createSendQuery failed to sent a query!\n");
         return err;
@@ -540,7 +540,7 @@ static void updateDNSentry (
         return;
     }
 
-    err = createSendQuery(pDNR, my_socket, pUri, id, &querySize);
+    err = (VOS_ERR_T) createSendQuery(pDNR, my_socket, pUri, id, &querySize);
 
     if (err != VOS_NO_ERR)
     {

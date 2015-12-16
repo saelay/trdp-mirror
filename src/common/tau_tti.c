@@ -486,7 +486,7 @@ static void ttiRequestTTDBdata (
         {
             UINT8 param = 0;
             tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_OP_DIR_INFO_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, TTDB_OP_DIR_INFO_REQ_IP, TRDP_FLAGS_CALLBACK, 1,
+                        appHandle->opTrnTopoCnt, 0, vos_dottedIP(TTDB_OP_DIR_INFO_REQ_IP), TRDP_FLAGS_CALLBACK, 1,
                         TTDB_OP_DIR_INFO_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
             /* Make sure the request is sent: */
         }
@@ -495,7 +495,7 @@ static void ttiRequestTTDBdata (
         {
             UINT8 param = 0;        /* ETB0 */
             tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_TRN_DIR_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, TTDB_TRN_DIR_REQ_IP, TRDP_FLAGS_CALLBACK, 1,
+                        appHandle->opTrnTopoCnt, 0, vos_dottedIP(TTDB_TRN_DIR_REQ_IP), TRDP_FLAGS_CALLBACK, 1,
                         TTDB_TRN_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
         }
         break;
@@ -503,7 +503,7 @@ static void ttiRequestTTDBdata (
         {
             UINT8 param = 0;        /* ETB0 */
             tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_NET_DIR_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, TTDB_NET_DIR_REQ_IP, TRDP_FLAGS_CALLBACK, 1,
+                        appHandle->opTrnTopoCnt, 0, vos_dottedIP(TTDB_NET_DIR_REQ_IP), TRDP_FLAGS_CALLBACK, 1,
                         TTDB_NET_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
         }
         break;
@@ -511,14 +511,14 @@ static void ttiRequestTTDBdata (
         {
             UINT8 param = 0;        /* ETB0 */
             tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_READ_CMPLT_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, TTDB_READ_CMPLT_REQ_IP, TRDP_FLAGS_CALLBACK, 1,
+                        appHandle->opTrnTopoCnt, 0, vos_dottedIP(TTDB_READ_CMPLT_REQ_IP), TRDP_FLAGS_CALLBACK, 1,
                         TTDB_READ_CMPLT_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
         }
         break;
         case TTDB_STAT_CST_REQ_COMID:
         {
             tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_STAT_CST_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, TTDB_STAT_CST_REQ_IP, TRDP_FLAGS_CALLBACK, 1,
+                        appHandle->opTrnTopoCnt, 0, vos_dottedIP(TTDB_STAT_CST_REQ_IP), TRDP_FLAGS_CALLBACK, 1,
                         TTDB_STAT_CST_REQ_TO, 0, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
         }
         break;
@@ -591,7 +591,7 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
                         TTDB_OP_DIR_INFO_COMID,
                         0,
                         0,
-                        TTDB_OP_DIR_INFO_IP_ETB0,
+                        vos_dottedIP(TTDB_OP_DIR_INFO_IP_ETB0),
                         TRDP_FLAGS_CALLBACK, NULL) != TRDP_NO_ERR)
     {
         vos_memFree(appHandle->pTTDB);

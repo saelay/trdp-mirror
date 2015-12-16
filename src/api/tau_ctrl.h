@@ -27,7 +27,6 @@
  * INCLUDES
  */
 
-#include "vos_types.h"
 #include "trdp_types.h"
 #include "tau_tti.h"
 #include "tau_ctrl_types.h"
