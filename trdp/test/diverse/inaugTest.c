@@ -155,9 +155,7 @@ void publishPD(
                           0,                            /*    etbTopoCnt local consist only */
                           0,                            /*    opTrnTopoCnt                  */
                           0,                            /*    default source IP             */
-                          pdData->addr,                 /*    where to send to              */
-                          pdData->dataSize ? pdData->data : NULL,      /*    actual data    */
-                          pdData->dataSize              /*    data size                     */
+                          pdData->addr                 /*    where to send to              */
                           );
     }
     if (err != TRDP_NO_ERR)

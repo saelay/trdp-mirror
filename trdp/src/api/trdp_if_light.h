@@ -759,7 +759,7 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
- *  @param[in]      pSessionId          Session ID returned by indication
+ *  @param[in]      sessionId           Session ID returned by indication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      userStatus          Info for requester about application errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
@@ -774,7 +774,7 @@ EXT_DECL TRDP_ERR_T tlm_delListener (
  */
 TRDP_ERR_T tlm_reply (
     TRDP_APP_SESSION_T      appHandle,
-    const TRDP_UUID_T       *pSessionId,
+    const TRDP_UUID_T       sessionId,
     UINT32                  comId,
     UINT16                  userStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
