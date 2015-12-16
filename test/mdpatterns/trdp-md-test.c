@@ -1139,7 +1139,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
             /* send reply */
             err = tlm_reply(
                     apph,                           /* session handle */
-                    (const TRDP_UUID_T *) &msg->sessionId,               /* session id */
+                    msg->sessionId,                 /* session id */
                     msg->comId,                     /* comid */
                     0,                              /* user status */
                     NULL,                           /* send parameters */

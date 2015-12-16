@@ -166,7 +166,7 @@ void cstInfoGetCltrCstInfo (
     UINT16  etbCnt  = vos_ntohs(*pSrc);
     UINT16  vehCnt;
     UINT16  fctCnt;
-    UINT16  cltrCstCnt;
+    // UINT16  cltrCstCnt;
     UINT32  itemSize;
     UINT32  i;
     pSrc    += 2 + etbCnt * sizeof(TRDP_ETB_INFO_T) + 2;        /* pSrc points to first vehicle count    */
@@ -190,8 +190,8 @@ void cstInfoGetCltrCstInfo (
         pSrc += sizeof(TRDP_FUNCTION_INFO_T);                   /* advance to next info */
     }
 
-    pSrc        = pCurInfo + itemSize + 2;                      /* pSrc points to fctCnt    */
-    cltrCstCnt  = vos_ntohs(*(UINT16 *)pSrc);
+    pSrc        = pCurInfo + itemSize + 2;                      /* pSrc points to cltrCstCnt    */
+    //cltrCstCnt  = vos_ntohs(*(UINT16 *)pSrc);
 
     if (index > fctCnt)
     {

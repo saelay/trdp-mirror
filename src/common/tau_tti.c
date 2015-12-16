@@ -183,7 +183,7 @@ static void ttiPDCallback (
             tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
             appHandle->pTTDB->opTrnState.state.crc = vos_ntohl(pTelegram->state.crc);
         }
-        else if (pMsg->resultCode == TRDP_TIMED_OUT)
+        else if (pMsg->resultCode == TRDP_TIMEOUT_ERR )
         {
             if (appHandle->etbTopoCnt != 0)
             {

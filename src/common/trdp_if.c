@@ -390,7 +390,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           NULL,                         /*    default qos and ttl           */
                           NULL,                         /*    initial data                  */
                           sizeof(TRDP_STATISTICS_T));
-            if (ret == VOS_SOCK_ERR)
+            if (ret == TRDP_SOCK_ERR)
             {
                 vos_threadDelay(1000000);
             }
@@ -2814,7 +2814,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
  *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pSessionId          Session ID returned by indication
+ *  @param[in]      sessionId           Session ID returned by indication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      userStatus          Info for requester about application errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
@@ -2829,7 +2829,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
  */
 TRDP_ERR_T tlm_reply (
     TRDP_APP_SESSION_T      appHandle,
-    const TRDP_UUID_T       *pSessionId,
+    const TRDP_UUID_T       sessionId,
     UINT32                  comId,
     UINT16                  userStatus,
     const TRDP_SEND_PARAM_T *pSendParam,
@@ -2846,7 +2846,7 @@ TRDP_ERR_T tlm_reply (
     }  
     return trdp_mdReply (TRDP_MSG_MP,
                          appHandle,
-                         (TRDP_UUID_T *)pSessionId,
+                         sessionId,
                          comId,
                          (INT32)userStatus,
                          0,
