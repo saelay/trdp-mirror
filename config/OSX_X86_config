@@ -17,4 +17,5 @@ TCPREFIX =
 TCPOSTFIX = 
 DOXYPATH = /Applications/Doxygen/Doxygen.app/Contents/Resources/
 
-CFLAGS += -Wall -fstrength-reduce -fno-builtin -fsigned-char -pthread -fPIC -D__USE_BSD -D_DARWIN_C_SOURCE -DPOSIX -DL_ENDIAN
+CFLAGS += -Wall -m32 -fno-builtin -fsigned-char -pthread -fPIC -D__USE_BSD -D_DARWIN_C_SOURCE -DPOSIX -DL_ENDIAN
+INCPATH += -I /usr/include/libxml2 -I /usr/include/uuid
