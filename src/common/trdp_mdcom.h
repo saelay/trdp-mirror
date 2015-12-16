@@ -95,7 +95,7 @@ TRDP_ERR_T trdp_mdConfirm (TRDP_APP_SESSION_T      appHandle,
 
 TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
                          TRDP_APP_SESSION_T      appHandle,
-                         TRDP_UUID_T             sessionId,
+                         TRDP_UUID_T             *pSessionId,
                          UINT32                  comId,
                          UINT32                  timeout,
                          INT32                   replyStatus,

@@ -3042,7 +3042,7 @@ static void trdp_mdDetailSenderPacket(const TRDP_MSG_T msgType,
  */                                                    
 TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
                          TRDP_APP_SESSION_T      appHandle,
-                         TRDP_UUID_T             sessionId,
+                         TRDP_UUID_T             *pSessionId,
                          UINT32                  comId,
                          UINT32                  timeout,
                          INT32                   replyStatus,
@@ -3073,11 +3073,11 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
         return TRDP_MUTEX_ERR;
     }
 
-    if ( sessionId )
+    if ( pSessionId )
     {
         errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDRcvQueue,
                                     TRDP_ST_RX_REQ_W4AP_REPLY,
-                                    sessionId,
+                                    (const TRDP_UUID_T*)pSessionId,
                                     &pSenderElement);
 
         if ( TRDP_NO_ERR == errv && NULL != pSenderElement )
@@ -3106,7 +3106,7 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
                 pSenderElement->pCachedDS       = NULL;
                 pSenderElement->morituri        = FALSE; 
                 trdp_mdFillStateElement(msgType, pSenderElement);
-                trdp_mdManageSessionId(sessionId, pSenderElement);
+                trdp_mdManageSessionId(pSessionId, pSenderElement);
 
                 if ( msgType == TRDP_MSG_MQ )
                 {
