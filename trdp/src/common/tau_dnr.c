@@ -526,7 +526,7 @@ static void updateDNSentry (
     UINT8           packetBuffer[TAU_MAX_DNS_BUFFER_SIZE];
     UINT32          size, querySize;
     VOS_SOCK_OPT_T  opts;
-    UINT16          id      = (UINT16) appHandle;
+    UINT16          id      = (UINT16) ((UINT32)appHandle & 0xFFFF);
     TAU_DNR_DATA_T  *pDNR = (TAU_DNR_DATA_T *) appHandle->pUser;
     TRDP_IP_ADDR_T  ip_addr = VOS_INADDR_ANY;
 
