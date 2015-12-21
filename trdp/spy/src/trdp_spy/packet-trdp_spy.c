@@ -910,10 +910,10 @@ void proto_register_trdp(void)
                                      &gbl_trdpDictionary_1);
     prefs_register_uint_preference(trdp_spy_module, "pd.udp.port",
                                    "PD message Port",
-                                   "UDP port for PD messages (Default port is 20548)", 10 /*base */,  &g_pd_port);
+                                   "UDP port for PD messages (Default port is 17224)", 10 /*base */,  &g_pd_port);
     prefs_register_uint_preference(trdp_spy_module, "md.udptcp.port",
                                    "MD message Port",
-                                   "UDP and TCP port for MD messages (Default port is 20550)", 10 /*base */,  &g_md_port);
+                                   "UDP and TCP port for MD messages (Default port is 17225)", 10 /*base */,  &g_md_port);
 }
 
 void proto_reg_handoff_trdp(void)
