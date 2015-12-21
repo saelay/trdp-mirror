@@ -28,8 +28,8 @@
 #include "trdp_types.h"
 #include "trdp_utils.h"
 #include "tau_xml.h"
-#include "libxml/parser.h"
-#include "libxml/xpath.h"
+#include <libxml2/libxml/parser.h>
+#include <libxml2/libxml/xpath.h>
 
 /*******************************************************************************
  * DEFINES

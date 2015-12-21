@@ -14,7 +14,6 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
- * $Id$
  *
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
@@ -43,6 +42,9 @@ extern "C" {
  * DEFINES
  */
 
+#ifndef MD_SUPPORT
+    #define MD_SUPPORT 1
+#endif
 
 #ifndef USE_HEAP
     #define USE_HEAP  0                 /**< If this is set, we can allocate dynamically memory    */

@@ -106,6 +106,10 @@ extern void *gRefCon;
 #define L_ENDIAN
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define B_ENDIAN
+    #elif defined(O_BE)
+        #define B_ENDIAN
+    #elif defined(O_LE)
+        #define L_ENDIAN
 #else
 #error "Endianess undefined!"
 #endif
