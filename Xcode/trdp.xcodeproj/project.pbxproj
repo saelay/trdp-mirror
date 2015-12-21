@@ -2559,7 +2559,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
-				SYMROOT = ../output/osx_x86/dbg;
+				SYMROOT = output/osx_x86/dbg;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -2577,7 +2577,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
-				SYMROOT = ../output/osx_x86/rls;
+				SYMROOT = output/osx_x86/rls;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
