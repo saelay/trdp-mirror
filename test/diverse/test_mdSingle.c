@@ -172,7 +172,7 @@ void mdCallback (void                   *pRefCon,
                     {
                         printf("-> sending reply\n");
                         err = tlm_reply(myGlobals->appHandle, 
-                                        pMsg->sessionId,
+                                        &pMsg->sessionId,
                                         pMsg->comId,
                                         0,
                                         NULL,
