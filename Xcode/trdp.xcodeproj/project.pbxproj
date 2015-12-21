@@ -80,13 +80,33 @@
 		08CE2192164A91B30038151B /* trdp_reserved.c in Sources */ = {isa = PBXBuildFile; fileRef = 08CE2172164A6E130038151B /* trdp_reserved.c */; };
 		73080FE517A91716003DAE84 /* tau_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* tau_marshall.c */; settings = {COMPILER_FLAGS = "-DL_ENDIAN"; }; };
 		7308114C17ABF8C9003DAE84 /* test_marshalling.c in Sources */ = {isa = PBXBuildFile; fileRef = 737B18CE15D901F000724FEF /* test_marshalling.c */; };
+		730C15C21B95A5480075D7F3 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		730C15C71B95A56E0075D7F3 /* LibraryTests.c in Sources */ = {isa = PBXBuildFile; fileRef = 739F99F7179FBF96006238E7 /* LibraryTests.c */; };
+		730C15CF1B95AE450075D7F3 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		730C15D41B95C52C0075D7F3 /* test_tau_dnr.c in Sources */ = {isa = PBXBuildFile; fileRef = 730C15C81B95AE200075D7F3 /* test_tau_dnr.c */; };
+		730C15D71B95CEF40075D7F3 /* hosts_example in CopyFiles */ = {isa = PBXBuildFile; fileRef = 730C15D51B95CB340075D7F3 /* hosts_example */; };
 		730DAFA116A07B700019B4D0 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		730DAFA216A07B8F0019B4D0 /* trdp-pd-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 730DAF9716A07B150019B4D0 /* trdp-pd-test.c */; };
+		730EB9721C0343110066FE7C /* tau_tti.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B281B70DFBD0066EA06 /* tau_tti.c */; };
+		730EB9731C0343360066FE7C /* tau_xml.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B291B70DFD20066EA06 /* tau_xml.c */; };
+		730EB9741C0343430066FE7C /* tau_dnr.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB21917D5CF003F9A87 /* tau_dnr.c */; };
+		730EB9751C0343430066FE7C /* tau_cstinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */; };
+		730F3B351BA2DD7800737C74 /* tau_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* tau_marshall.c */; };
+		730F3B381BA2FEFE00737C74 /* iec61375-2-3.h in Headers */ = {isa = PBXBuildFile; fileRef = 730F3B371BA2FEFE00737C74 /* iec61375-2-3.h */; };
+		730F3B391BA2FEFE00737C74 /* iec61375-2-3.h in Headers */ = {isa = PBXBuildFile; fileRef = 730F3B371BA2FEFE00737C74 /* iec61375-2-3.h */; };
+		73134A2A1BCBD95E00E3BF88 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		73134A311BCBD9C100E3BF88 /* inaugTest.c in Sources */ = {isa = PBXBuildFile; fileRef = 73134A221BCBD8FA00E3BF88 /* inaugTest.c */; };
 		7322488016A97E7900148295 /* crc-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7322487F16A97E7900148295 /* crc-test.c */; };
 		7322488516A97EE200148295 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		732755291BB1B41300FF64D1 /* tau_cstinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */; };
+		7327552D1BB1B49000FF64D1 /* tau_dnr.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB21917D5CF003F9A87 /* tau_dnr.c */; };
+		7327552F1BB1B49800FF64D1 /* tau_tti.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B281B70DFBD0066EA06 /* tau_tti.c */; };
 		7327CA6016555BEA0020536A /* tau_marshall.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F457C9152DE1FE00D1C522 /* tau_marshall.h */; };
 		732D278C162DBD1D009D7857 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		732D2794162DBD84009D7857 /* getStats.c in Sources */ = {isa = PBXBuildFile; fileRef = 732D2792162DBD84009D7857 /* getStats.c */; };
+		732D87C31BA9571B004BF837 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		732D87C51BA9571B004BF837 /* hosts_example in CopyFiles */ = {isa = PBXBuildFile; fileRef = 730C15D51B95CB340075D7F3 /* hosts_example */; };
+		732D87CA1BA9573C004BF837 /* test_tau_tti.c in Sources */ = {isa = PBXBuildFile; fileRef = 732D87BC1BA9562E004BF837 /* test_tau_tti.c */; };
 		7331A5661715AB3400270642 /* pd_md_responder.c in Sources */ = {isa = PBXBuildFile; fileRef = 7331A55C171566E400270642 /* pd_md_responder.c */; };
 		7331A5671715AB5200270642 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73331E2E17A11D7E005ECA9C /* tau_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* tau_marshall.c */; };
@@ -96,6 +116,37 @@
 		734091B51765D8A100CFCE5B /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		734091BD1765D8C600CFCE5B /* subTest.c in Sources */ = {isa = PBXBuildFile; fileRef = 7340919E1765CD2000CFCE5B /* subTest.c */; };
 		73517C5616BBFFAB00DB5208 /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		73591F711B986C7900B758F0 /* vos_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 7327CA871656AB080020536A /* vos_private.h */; };
+		73591F721B986C7900B758F0 /* trdp_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F2A150777B00046E0AC /* trdp_types.h */; };
+		73591F731B986C7900B758F0 /* trdp_if_light.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F29150777B00046E0AC /* trdp_if_light.h */; };
+		73591F741B986C7900B758F0 /* vos_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05264151352CE0058D590 /* vos_mem.h */; };
+		73591F751B986C7900B758F0 /* vos_sock.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05265151352CE0058D590 /* vos_sock.h */; };
+		73591F761B986C7900B758F0 /* tau_ctrl_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E5C1913CCA20020A6EA /* tau_ctrl_types.h */; };
+		73591F771B986C7900B758F0 /* vos_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05266151352CE0058D590 /* vos_thread.h */; };
+		73591F781B986C7900B758F0 /* vos_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05267151352CE0058D590 /* vos_types.h */; };
+		73591F791B986C7900B758F0 /* vos_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E0535F15136BF60058D590 /* vos_utils.h */; };
+		73591F7A1B986C7900B758F0 /* trdp_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F36150777B00046E0AC /* trdp_private.h */; };
+		73591F7B1B986C7900B758F0 /* tau_tti_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E5E1913CCAF0020A6EA /* tau_tti_types.h */; };
+		73591F7C1B986C7900B758F0 /* trdp_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F3A150777B00046E0AC /* trdp_utils.h */; };
+		73591F7D1B986C7900B758F0 /* trdp_stats.h in Headers */ = {isa = PBXBuildFile; fileRef = 7387F505157795FE00DBAB73 /* trdp_stats.h */; };
+		73591F7E1B986C7900B758F0 /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
+		73591F7F1B986C7900B758F0 /* trdp_pdcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F35150777B00046E0AC /* trdp_pdcom.h */; };
+		73591F801B986C7900B758F0 /* trdp_mdcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F31150777B00046E0AC /* trdp_mdcom.h */; };
+		73591F811B986C7900B758F0 /* tau_marshall.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F457C9152DE1FE00D1C522 /* tau_marshall.h */; };
+		73591F821B986C7900B758F0 /* vos_shared_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F5A53A16A41A2000335006 /* vos_shared_mem.h */; };
+		73591F831B986C7900B758F0 /* tau_ctrl.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E601913CCC50020A6EA /* tau_ctrl.h */; };
+		73591F841B986C7900B758F0 /* trdp_proto.h in Headers */ = {isa = PBXBuildFile; fileRef = 735BAD15172EC38900837D0E /* trdp_proto.h */; };
+		73591F851B986C7900B758F0 /* tau_dnr.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E611913CCC50020A6EA /* tau_dnr.h */; };
+		73591F871B986C7900B758F0 /* vos_sock.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E052721513537C0058D590 /* vos_sock.c */; };
+		73591F881B986C7900B758F0 /* vos_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E0535C1513685D0058D590 /* vos_thread.c */; };
+		73591F891B986C7900B758F0 /* trdp_if.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F2F150777B00046E0AC /* trdp_if.c */; };
+		73591F8A1B986C7900B758F0 /* trdp_pdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F34150777B00046E0AC /* trdp_pdcom.c */; };
+		73591F8B1B986C7900B758F0 /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
+		73591F8C1B986C7900B758F0 /* trdp_stats.c in Sources */ = {isa = PBXBuildFile; fileRef = 7387F506157795FE00DBAB73 /* trdp_stats.c */; };
+		73591F8D1B986C7900B758F0 /* trdp_mdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F30150777B00046E0AC /* trdp_mdcom.c */; };
+		73591F8E1B986C7900B758F0 /* vos_shared_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 73F5A50C16A408DC00335006 /* vos_shared_mem.c */; };
+		73591F911B986C7900B758F0 /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B321B70E9DF0066EA06 /* vos_mem.c */; };
+		73591F921B986C7900B758F0 /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B331B70E9DF0066EA06 /* vos_utils.c */; };
 		735BACDE172E67CD00837D0E /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		735BAD16172EC38900837D0E /* trdp_proto.h in Headers */ = {isa = PBXBuildFile; fileRef = 735BAD15172EC38900837D0E /* trdp_proto.h */; };
 		73603CED175CBE79004608BD /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
@@ -119,8 +170,6 @@
 		73A00E631913CCC50020A6EA /* tau_dnr.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E611913CCC50020A6EA /* tau_dnr.h */; };
 		73B6907915446B8C004968FA /* trdp_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F3A150777B00046E0AC /* trdp_utils.h */; };
 		73B6907A15446B8D004968FA /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
-		73D71BB31917D5CF003F9A87 /* tau_ctrl.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB11917D5CF003F9A87 /* tau_ctrl.c */; };
-		73D71BB41917D5CF003F9A87 /* tau_dnr.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB21917D5CF003F9A87 /* tau_dnr.c */; };
 		73E0526C151352CF0058D590 /* vos_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05264151352CE0058D590 /* vos_mem.h */; };
 		73E0526D151352CF0058D590 /* vos_sock.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05265151352CE0058D590 /* vos_sock.h */; };
 		73E0526E151352CF0058D590 /* vos_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05266151352CE0058D590 /* vos_thread.h */; };
@@ -191,6 +240,27 @@
 			remoteGlobalIDString = 73603CE7175CBE79004608BD;
 			remoteInfo = "md-test";
 		};
+		730C15BE1B95A5480075D7F3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
+		730C15CB1B95AE450075D7F3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
+		73134A251BCBD95E00E3BF88 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
 		731F5F1817204BE7005CDBA1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -234,6 +304,13 @@
 			remoteInfo = "trdp Posix";
 		};
 		732D2787162DBD1D009D7857 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
+		732D87BF1BA9571B004BF837 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
@@ -439,12 +516,41 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		730C15D61B95CED50075D7F3 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				730C15D71B95CEF40075D7F3 /* hosts_example in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73134A2B1BCBD95E00E3BF88 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		731F5F4817214C3F005CDBA1 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		732D87C41BA9571B004BF837 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				732D87C51BA9571B004BF837 /* hosts_example in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,18 +597,37 @@
 		08594B3A1B70EA3F0066EA06 /* VisualC */ = {isa = PBXFileReference; lastKnownFileType = folder; name = VisualC; path = ../VisualC; sourceTree = "<group>"; };
 		08CE2171164A6E130038151B /* trdp_reserved.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trdp_reserved.h; path = marshalling/trdp_reserved.h; sourceTree = "<group>"; };
 		08CE2172164A6E130038151B /* trdp_reserved.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trdp_reserved.c; path = marshalling/trdp_reserved.c; sourceTree = "<group>"; };
-		73080FFD17A953AF003DAE84 /* test_marshalling2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test_marshalling2.c; sourceTree = "<group>"; };
+		7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_cstinfo.c; sourceTree = "<group>"; };
+		730C15C61B95A5480075D7F3 /* test_library */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_library; sourceTree = BUILT_PRODUCTS_DIR; };
+		730C15C81B95AE200075D7F3 /* test_tau_dnr.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = test_tau_dnr.c; path = ../test/diverse/test_tau_dnr.c; sourceTree = "<group>"; };
+		730C15D31B95AE450075D7F3 /* test_tau_dnr */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_tau_dnr; sourceTree = BUILT_PRODUCTS_DIR; };
+		730C15D51B95CB340075D7F3 /* hosts_example */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = hosts_example; path = ../test/diverse/hosts_example; sourceTree = "<group>"; };
 		730DAF9616A07B150019B4D0 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		730DAF9716A07B150019B4D0 /* trdp-pd-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "trdp-pd-test.c"; sourceTree = "<group>"; };
 		730DAF9D16A07B5B0019B4D0 /* pd-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "pd-test"; sourceTree = BUILT_PRODUCTS_DIR; };
+		730EB9761C0347850066FE7C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		730F3B371BA2FEFE00737C74 /* iec61375-2-3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "iec61375-2-3.h"; sourceTree = "<group>"; };
 		731292991535BEA1006B3A88 /* SingleThreadedWorkflowPD.eps */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SingleThreadedWorkflowPD.eps; sourceTree = "<group>"; };
 		7312929B1535BEA1006B3A88 /* SingleThreadedWorkflowPD.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = SingleThreadedWorkflowPD.pdf; sourceTree = "<group>"; };
 		7312929E1535BEA1006B3A88 /* TCNOpen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TCNOpen.png; sourceTree = "<group>"; };
+		73134A221BCBD8FA00E3BF88 /* inaugTest.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = inaugTest.c; path = ../test/diverse/inaugTest.c; sourceTree = "<group>"; };
+		73134A301BCBD95E00E3BF88 /* test_inaug */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_inaug; sourceTree = BUILT_PRODUCTS_DIR; };
+		73134A321BCBDC7900E3BF88 /* patterns.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = patterns.txt; sourceTree = "<group>"; };
+		73134A331BCBDC7900E3BF88 /* rep-testcaller.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "rep-testcaller.c"; sourceTree = "<group>"; };
+		73134A341BCBDC7900E3BF88 /* rep-testreplier.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = "rep-testreplier.c"; sourceTree = "<group>"; };
+		73134A351BCBDC7900E3BF88 /* trdp-md-test.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "trdp-md-test.xml"; sourceTree = "<group>"; };
+		73134A361BCBDCDC00E3BF88 /* patterns.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = patterns.txt; sourceTree = "<group>"; };
+		73134A371BCBDD4600E3BF88 /* test_marshalling2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = test_marshalling2.c; path = marshalling/test_marshalling2.c; sourceTree = "<group>"; };
+		73134A381BCBDD8D00E3BF88 /* mdTest.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = mdTest.txt; sourceTree = "<group>"; };
+		73134A391BCBDD9A00E3BF88 /* pdTest.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = pdTest.txt; path = ../test/ladderpdtest/pdTest.txt; sourceTree = "<group>"; };
+		731FC61B1C16CE6C00E79657 /* iconv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = iconv.h; path = usr/include/iconv.h; sourceTree = SDKROOT; };
 		7322486D16A97D5400148295 /* crc-check */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "crc-check"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7322487F16A97E7900148295 /* crc-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "crc-test.c"; path = "../test/diverse/crc-test.c"; sourceTree = "<group>"; };
 		7327CA871656AB080020536A /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_private.h; sourceTree = "<group>"; };
 		732D2790162DBD1D009D7857 /* getStats */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = getStats; sourceTree = BUILT_PRODUCTS_DIR; };
 		732D2792162DBD84009D7857 /* getStats.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = getStats.c; path = ../test/diverse/getStats.c; sourceTree = "<group>"; };
+		732D87BC1BA9562E004BF837 /* test_tau_tti.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = test_tau_tti.c; path = ../test/diverse/test_tau_tti.c; sourceTree = "<group>"; };
+		732D87C91BA9571B004BF837 /* test_tau_tti */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_tau_tti; sourceTree = BUILT_PRODUCTS_DIR; };
 		7331A55C171566E400270642 /* pd_md_responder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pd_md_responder.c; path = ../test/diverse/pd_md_responder.c; sourceTree = "<group>"; };
 		7331A5621715AB1F00270642 /* pd_md_responder */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pd_md_responder; sourceTree = BUILT_PRODUCTS_DIR; };
 		7334C1411742783700CA739C /* Makefile_Ladder */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_Ladder; path = ../Makefile_Ladder; sourceTree = SOURCE_ROOT; };
@@ -513,7 +638,6 @@
 		73361446165BBF4500A70D3D /* test_trafficShaping.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = test_trafficShaping.c; path = ../test/diverse/test_trafficShaping.c; sourceTree = "<group>"; };
 		7336144C165BBF5B00A70D3D /* test_traffic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_traffic; sourceTree = BUILT_PRODUCTS_DIR; };
 		733615AA165BF91200A70D3D /* mdTest4.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mdTest4.c; sourceTree = "<group>"; };
-		733615AB165BF91200A70D3D /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
 		7340919E1765CD2000CFCE5B /* subTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = subTest.c; path = ../test/diverse/subTest.c; sourceTree = SOURCE_ROOT; };
 		734091B91765D8A100CFCE5B /* testSub */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testSub; sourceTree = BUILT_PRODUCTS_DIR; };
 		734721F7169C272E00EC18C6 /* ladderApplication_publisher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ladderApplication_publisher.c; path = ../test/ladderpdtest/ladderApplication_publisher.c; sourceTree = "<group>"; };
@@ -521,6 +645,7 @@
 		7349B3EC173D2CF700EC7AEF /* std_posix.lnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = std_posix.lnt; sourceTree = "<group>"; };
 		73517C4216BBFD5300DB5208 /* receiveHello */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = receiveHello; sourceTree = BUILT_PRODUCTS_DIR; };
 		73517C4A16BBFDA800DB5208 /* receiveHello.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = receiveHello.c; sourceTree = "<group>"; };
+		73591F971B986C7900B758F0 /* libtrdp Posix copy.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libtrdp Posix copy.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		735BAD12172EC1AB00837D0E /* memory.xls */ = {isa = PBXFileReference; lastKnownFileType = file; path = memory.xls; sourceTree = "<group>"; };
 		735BAD15172EC38900837D0E /* trdp_proto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trdp_proto.h; sourceTree = "<group>"; };
 		73603CF2175CBE79004608BD /* md-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "md-test"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -598,7 +723,7 @@
 		73D71BB11917D5CF003F9A87 /* tau_ctrl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_ctrl.c; sourceTree = "<group>"; };
 		73D71BB21917D5CF003F9A87 /* tau_dnr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_dnr.c; sourceTree = "<group>"; };
 		73E051EF15123F600058D590 /* Doxyfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Doxyfile; path = ../Doxyfile; sourceTree = SOURCE_ROOT; };
-		73E051F015123F690058D590 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = SOURCE_ROOT; };
+		73E051F015123F690058D590 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = SOURCE_ROOT; usesTabs = 1; };
 		73E05264151352CE0058D590 /* vos_mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_mem.h; sourceTree = "<group>"; };
 		73E05265151352CE0058D590 /* vos_sock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_sock.h; sourceTree = "<group>"; };
 		73E05266151352CE0058D590 /* vos_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_thread.h; sourceTree = "<group>"; };
@@ -629,11 +754,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		730C15C11B95A5480075D7F3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				730C15C21B95A5480075D7F3 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		730C15CE1B95AE450075D7F3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				730C15CF1B95AE450075D7F3 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		730DAF9B16A07B5B0019B4D0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				730DAFA116A07B700019B4D0 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73134A291BCBD95E00E3BF88 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73134A2A1BCBD95E00E3BF88 /* libtrdp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -650,6 +799,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				732D278C162DBD1D009D7857 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		732D87C21BA9571B004BF837 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				732D87C31BA9571B004BF837 /* libtrdp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -682,6 +839,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				73517C5616BBFFAB00DB5208 /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73591F931B986C7900B758F0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -841,6 +1005,8 @@
 		08FB7794FE84155DC02AAC07 /* trdp */ = {
 			isa = PBXGroup;
 			children = (
+				731FC61B1C16CE6C00E79657 /* iconv.h */,
+				730EB9761C0347850066FE7C /* libxml2.dylib */,
 				73E051EF15123F600058D590 /* Doxyfile */,
 				7387F6441578FDCC00DBAB73 /* readme.txt */,
 				73E4978516CE981E00045EFA /* Deviation Request.txt */,
@@ -852,11 +1018,11 @@
 				73CBA1AD19548350006648EE /* rules.mk */,
 				08594B071B6FB24E0066EA06 /* config */,
 				73821F27150777B00046E0AC /* src */,
-				08594B081B6FB3E80066EA06 /* example */,
 				73821F3B150777B00046E0AC /* example */,
 				73821F42150777D30046E0AC /* doc */,
 				73821F7C150777D40046E0AC /* test */,
 				08594B061B6FAC160066EA06 /* spy */,
+				08594B081B6FB3E80066EA06 /* example */,
 				08594B101B70D6EE0066EA06 /* resources */,
 				08594B3A1B70EA3F0066EA06 /* VisualC */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -888,6 +1054,11 @@
 				7384E6BA172952D300830413 /* test_memSizes */,
 				73603CF2175CBE79004608BD /* md-test */,
 				734091B91765D8A100CFCE5B /* testSub */,
+				730C15C61B95A5480075D7F3 /* test_library */,
+				730C15D31B95AE450075D7F3 /* test_tau_dnr */,
+				73591F971B986C7900B758F0 /* libtrdp Posix copy.a */,
+				732D87C91BA9571B004BF837 /* test_tau_tti */,
+				73134A301BCBD95E00E3BF88 /* test_inaug */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -896,6 +1067,7 @@
 			isa = PBXGroup;
 			children = (
 				730DAF9616A07B150019B4D0 /* readme.txt */,
+				73134A361BCBDCDC00E3BF88 /* patterns.txt */,
 				730DAF9716A07B150019B4D0 /* trdp-pd-test.c */,
 			);
 			path = pdpatterns;
@@ -917,7 +1089,6 @@
 				733615AA165BF91200A70D3D /* mdTest4.c */,
 				7366AC7616B68CC80068A893 /* readme.txt */,
 				7366AC7716B68CC80068A893 /* TRDP_UDPMDCom_TestPatterns.xlsx */,
-				733615AB165BF91200A70D3D /* readme.txt */,
 			);
 			path = udpmdcom;
 			sourceTree = "<group>";
@@ -962,6 +1133,7 @@
 				7367955217202E93003C68ED /* mdLiteral4 */,
 				7367955317202E93003C68ED /* mdLiteral5 */,
 				7367955417202E93003C68ED /* mdLiteral6 */,
+				73134A381BCBDD8D00E3BF88 /* mdTest.txt */,
 				7367955517202E93003C68ED /* mdTestApp.h */,
 				7367955617202E93003C68ED /* mdTestCaller.c */,
 				7367955717202E93003C68ED /* mdTestCommon.c */,
@@ -976,6 +1148,10 @@
 		7367955C17202EBE003C68ED /* mdpatterns */ = {
 			isa = PBXGroup;
 			children = (
+				73134A321BCBDC7900E3BF88 /* patterns.txt */,
+				73134A331BCBDC7900E3BF88 /* rep-testcaller.c */,
+				73134A341BCBDC7900E3BF88 /* rep-testreplier.c */,
+				73134A351BCBDC7900E3BF88 /* trdp-md-test.xml */,
 				7367955D17202EBE003C68ED /* trdp-md-test.c */,
 			);
 			path = mdpatterns;
@@ -995,6 +1171,7 @@
 		73821F28150777B00046E0AC /* api */ = {
 			isa = PBXGroup;
 			children = (
+				730F3B371BA2FEFE00737C74 /* iec61375-2-3.h */,
 				73A00E5C1913CCA20020A6EA /* tau_ctrl_types.h */,
 				73A00E601913CCC50020A6EA /* tau_ctrl.h */,
 				73A00E611913CCC50020A6EA /* tau_dnr.h */,
@@ -1015,8 +1192,9 @@
 			children = (
 				73D71BB11917D5CF003F9A87 /* tau_ctrl.c */,
 				73D71BB21917D5CF003F9A87 /* tau_dnr.c */,
-				73D6657A15D3D88700A352D4 /* tau_marshall.c */,
 				08594B281B70DFBD0066EA06 /* tau_tti.c */,
+				7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */,
+				73D6657A15D3D88700A352D4 /* tau_marshall.c */,
 				08594B291B70DFD20066EA06 /* tau_xml.c */,
 				73821F2F150777B00046E0AC /* trdp_if.c */,
 				7373E4AF157CE42C0084966B /* trdp_if.h */,
@@ -1101,6 +1279,7 @@
 		73CE24581733F28100314E1C /* diverse */ = {
 			isa = PBXGroup;
 			children = (
+				73134A221BCBD8FA00E3BF88 /* inaugTest.c */,
 				739F99F7179FBF96006238E7 /* LibraryTests.c */,
 				7322487F16A97E7900148295 /* crc-test.c */,
 				7340919E1765CD2000CFCE5B /* subTest.c */,
@@ -1110,6 +1289,9 @@
 				73FD2EEB16C1374700626293 /* test_mdSingle.c */,
 				7331A55C171566E400270642 /* pd_md_responder.c */,
 				7384E6B4172952A000830413 /* test_memSizes.c */,
+				730C15C81B95AE200075D7F3 /* test_tau_dnr.c */,
+				732D87BC1BA9562E004BF837 /* test_tau_tti.c */,
+				730C15D51B95CB340075D7F3 /* hosts_example */,
 			);
 			name = diverse;
 			path = ../Xcode;
@@ -1121,6 +1303,7 @@
 				7367955E17202EF3003C68ED /* ladderApplication_multiPD.c */,
 				734721F7169C272E00EC18C6 /* ladderApplication_publisher.c */,
 				734721F8169C272E00EC18C6 /* ladderApplication_subscriber.c */,
+				73134A391BCBDD9A00E3BF88 /* pdTest.txt */,
 			);
 			name = ladderpdtest;
 			path = ../Xcode;
@@ -1133,7 +1316,7 @@
 				08CE2171164A6E130038151B /* trdp_reserved.h */,
 				08CE2172164A6E130038151B /* trdp_reserved.c */,
 				737B18CE15D901F000724FEF /* test_marshalling.c */,
-				73080FFD17A953AF003DAE84 /* test_marshalling2.c */,
+				73134A371BCBDD4600E3BF88 /* test_marshalling2.c */,
 			);
 			name = marshalling;
 			sourceTree = "<group>";
@@ -1165,6 +1348,35 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		73591F701B986C7900B758F0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73591F711B986C7900B758F0 /* vos_private.h in Headers */,
+				73591F721B986C7900B758F0 /* trdp_types.h in Headers */,
+				73591F731B986C7900B758F0 /* trdp_if_light.h in Headers */,
+				73591F741B986C7900B758F0 /* vos_mem.h in Headers */,
+				73591F751B986C7900B758F0 /* vos_sock.h in Headers */,
+				73591F761B986C7900B758F0 /* tau_ctrl_types.h in Headers */,
+				730F3B391BA2FEFE00737C74 /* iec61375-2-3.h in Headers */,
+				73591F771B986C7900B758F0 /* vos_thread.h in Headers */,
+				73591F781B986C7900B758F0 /* vos_types.h in Headers */,
+				73591F791B986C7900B758F0 /* vos_utils.h in Headers */,
+				73591F7A1B986C7900B758F0 /* trdp_private.h in Headers */,
+				73591F7B1B986C7900B758F0 /* tau_tti_types.h in Headers */,
+				73591F7C1B986C7900B758F0 /* trdp_utils.h in Headers */,
+				73591F7D1B986C7900B758F0 /* trdp_stats.h in Headers */,
+				73591F7E1B986C7900B758F0 /* trdp_if.h in Headers */,
+				73591F7F1B986C7900B758F0 /* trdp_pdcom.h in Headers */,
+				73591F801B986C7900B758F0 /* trdp_mdcom.h in Headers */,
+				73591F811B986C7900B758F0 /* tau_marshall.h in Headers */,
+				73591F821B986C7900B758F0 /* vos_shared_mem.h in Headers */,
+				73591F831B986C7900B758F0 /* tau_ctrl.h in Headers */,
+				73591F841B986C7900B758F0 /* trdp_proto.h in Headers */,
+				73591F851B986C7900B758F0 /* tau_dnr.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7384E6EF172987CE00830413 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1191,6 +1403,7 @@
 				73E0526C151352CF0058D590 /* vos_mem.h in Headers */,
 				73E0526D151352CF0058D590 /* vos_sock.h in Headers */,
 				73A00E5D1913CCA20020A6EA /* tau_ctrl_types.h in Headers */,
+				730F3B381BA2FEFE00737C74 /* iec61375-2-3.h in Headers */,
 				73E0526E151352CF0058D590 /* vos_thread.h in Headers */,
 				73E0526F151352CF0058D590 /* vos_types.h in Headers */,
 				73E0536015136BF60058D590 /* vos_utils.h in Headers */,
@@ -1247,6 +1460,41 @@
 			productReference = 08014D0B16483EAD0065AADD /* SenderDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
+		730C15BC1B95A5480075D7F3 /* test_library */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 730C15C31B95A5480075D7F3 /* Build configuration list for PBXNativeTarget "test_library" */;
+			buildPhases = (
+				730C15BF1B95A5480075D7F3 /* Sources */,
+				730C15C11B95A5480075D7F3 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				730C15BD1B95A5480075D7F3 /* PBXTargetDependency */,
+			);
+			name = test_library;
+			productName = "crc-check";
+			productReference = 730C15C61B95A5480075D7F3 /* test_library */;
+			productType = "com.apple.product-type.tool";
+		};
+		730C15C91B95AE450075D7F3 /* test_tau_dnr */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 730C15D01B95AE450075D7F3 /* Build configuration list for PBXNativeTarget "test_tau_dnr" */;
+			buildPhases = (
+				730C15CC1B95AE450075D7F3 /* Sources */,
+				730C15CE1B95AE450075D7F3 /* Frameworks */,
+				730C15D61B95CED50075D7F3 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				730C15CA1B95AE450075D7F3 /* PBXTargetDependency */,
+			);
+			name = test_tau_dnr;
+			productName = "crc-check";
+			productReference = 730C15D31B95AE450075D7F3 /* test_tau_dnr */;
+			productType = "com.apple.product-type.tool";
+		};
 		730DAF9C16A07B5B0019B4D0 /* pd-test */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 730DAFA316A07BAD0019B4D0 /* Build configuration list for PBXNativeTarget "pd-test" */;
@@ -1264,6 +1512,24 @@
 			name = "pd-test";
 			productName = "pd-test";
 			productReference = 730DAF9D16A07B5B0019B4D0 /* pd-test */;
+			productType = "com.apple.product-type.tool";
+		};
+		73134A231BCBD95E00E3BF88 /* test_inaug */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73134A2D1BCBD95E00E3BF88 /* Build configuration list for PBXNativeTarget "test_inaug" */;
+			buildPhases = (
+				73134A261BCBD95E00E3BF88 /* Sources */,
+				73134A291BCBD95E00E3BF88 /* Frameworks */,
+				73134A2B1BCBD95E00E3BF88 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				73134A241BCBD95E00E3BF88 /* PBXTargetDependency */,
+			);
+			name = test_inaug;
+			productName = "crc-check";
+			productReference = 73134A301BCBD95E00E3BF88 /* test_inaug */;
 			productType = "com.apple.product-type.tool";
 		};
 		7322486C16A97D5400148295 /* test_crc-check */ = {
@@ -1298,6 +1564,24 @@
 			name = test_getStats;
 			productName = receiveSelect;
 			productReference = 732D2790162DBD1D009D7857 /* getStats */;
+			productType = "com.apple.product-type.tool";
+		};
+		732D87BD1BA9571B004BF837 /* test_tau_tti */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 732D87C61BA9571B004BF837 /* Build configuration list for PBXNativeTarget "test_tau_tti" */;
+			buildPhases = (
+				732D87C01BA9571B004BF837 /* Sources */,
+				732D87C21BA9571B004BF837 /* Frameworks */,
+				732D87C41BA9571B004BF837 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				732D87BE1BA9571B004BF837 /* PBXTargetDependency */,
+			);
+			name = test_tau_tti;
+			productName = "crc-check";
+			productReference = 732D87C91BA9571B004BF837 /* test_tau_tti */;
 			productType = "com.apple.product-type.tool";
 		};
 		7331A5611715AB1F00270642 /* pd_md_responder */ = {
@@ -1367,6 +1651,23 @@
 			productName = receiveHello;
 			productReference = 73517C4216BBFD5300DB5208 /* receiveHello */;
 			productType = "com.apple.product-type.tool";
+		};
+		73591F6F1B986C7900B758F0 /* trdp64Posix */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73591F941B986C7900B758F0 /* Build configuration list for PBXNativeTarget "trdp64Posix" */;
+			buildPhases = (
+				73591F701B986C7900B758F0 /* Headers */,
+				73591F861B986C7900B758F0 /* Sources */,
+				73591F931B986C7900B758F0 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = trdp64Posix;
+			productName = trdp;
+			productReference = 73591F971B986C7900B758F0 /* libtrdp Posix copy.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 		73603CE7175CBE79004608BD /* md-test */ = {
 			isa = PBXNativeTarget;
@@ -1582,7 +1883,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0720;
 			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "trdp" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1599,6 +1900,7 @@
 			projectRoot = ..;
 			targets = (
 				D2AAC045055464E500DB518D /* trdp Posix */,
+				73591F6F1B986C7900B758F0 /* trdp64Posix */,
 				7384E6F2172987CE00830413 /* trdp PDonly */,
 				73821FBB1508DCA80046E0AC /* echoSelect */,
 				7382200B1508E9FA0046E0AC /* echoPolling */,
@@ -1618,6 +1920,10 @@
 				73F5F9A6171C392B0087C6B7 /* test_pdpull */,
 				7384E6B9172952D300830413 /* test_memSizes */,
 				734091AE1765D8A100CFCE5B /* testSubscribe */,
+				730C15BC1B95A5480075D7F3 /* test_library */,
+				730C15C91B95AE450075D7F3 /* test_tau_dnr */,
+				732D87BD1BA9571B004BF837 /* test_tau_tti */,
+				73134A231BCBD95E00E3BF88 /* test_inaug */,
 				7387F6181578F75600DBAB73 /* doc generation */,
 				7366AD9C16B7CC6B0068A893 /* All */,
 			);
@@ -1652,11 +1958,36 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		730C15BF1B95A5480075D7F3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				730C15C71B95A56E0075D7F3 /* LibraryTests.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		730C15CC1B95AE450075D7F3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				730C15D41B95C52C0075D7F3 /* test_tau_dnr.c in Sources */,
+				7327552D1BB1B49000FF64D1 /* tau_dnr.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		730DAF9A16A07B5B0019B4D0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				730DAFA216A07B8F0019B4D0 /* trdp-pd-test.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73134A261BCBD95E00E3BF88 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73134A311BCBD9C100E3BF88 /* inaugTest.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1673,6 +2004,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				732D2794162DBD84009D7857 /* getStats.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		732D87C01BA9571B004BF837 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7327552F1BB1B49800FF64D1 /* tau_tti.c in Sources */,
+				732D87CA1BA9573C004BF837 /* test_tau_tti.c in Sources */,
+				732755291BB1B41300FF64D1 /* tau_cstinfo.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1705,6 +2046,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				0812A92F1B284714004118F8 /* receiveHello.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73591F861B986C7900B758F0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73591F871B986C7900B758F0 /* vos_sock.c in Sources */,
+				73591F881B986C7900B758F0 /* vos_thread.c in Sources */,
+				73591F891B986C7900B758F0 /* trdp_if.c in Sources */,
+				73591F8A1B986C7900B758F0 /* trdp_pdcom.c in Sources */,
+				73591F8B1B986C7900B758F0 /* trdp_utils.c in Sources */,
+				73591F8C1B986C7900B758F0 /* trdp_stats.c in Sources */,
+				73591F8D1B986C7900B758F0 /* trdp_mdcom.c in Sources */,
+				73591F8E1B986C7900B758F0 /* vos_shared_mem.c in Sources */,
+				73591F911B986C7900B758F0 /* vos_mem.c in Sources */,
+				73591F921B986C7900B758F0 /* vos_utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1810,18 +2168,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				73E052731513537C0058D590 /* vos_sock.c in Sources */,
-				73E0535D1513685D0058D590 /* vos_thread.c in Sources */,
+				730EB9741C0343430066FE7C /* tau_dnr.c in Sources */,
+				730EB9751C0343430066FE7C /* tau_cstinfo.c in Sources */,
+				730EB9731C0343360066FE7C /* tau_xml.c in Sources */,
+				730EB9721C0343110066FE7C /* tau_tti.c in Sources */,
+				730F3B351BA2DD7800737C74 /* tau_marshall.c in Sources */,
 				73F458B9152F331E00D1C522 /* trdp_if.c in Sources */,
 				73F458BC152F332400D1C522 /* trdp_pdcom.c in Sources */,
 				73B6907A15446B8D004968FA /* trdp_utils.c in Sources */,
 				7387F508157795FE00DBAB73 /* trdp_stats.c in Sources */,
 				08CE2085164962BE0038151B /* trdp_mdcom.c in Sources */,
-				73F5A50D16A408DC00335006 /* vos_shared_mem.c in Sources */,
-				73D71BB31917D5CF003F9A87 /* tau_ctrl.c in Sources */,
-				73D71BB41917D5CF003F9A87 /* tau_dnr.c in Sources */,
+				73E052731513537C0058D590 /* vos_sock.c in Sources */,
+				73E0535D1513685D0058D590 /* vos_thread.c in Sources */,
 				08594B341B70E9DF0066EA06 /* vos_mem.c in Sources */,
 				08594B361B70E9DF0066EA06 /* vos_utils.c in Sources */,
+				73F5A50D16A408DC00335006 /* vos_shared_mem.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1863,6 +2224,21 @@
 			target = 73603CE7175CBE79004608BD /* md-test */;
 			targetProxy = 08594B411B70F2810066EA06 /* PBXContainerItemProxy */;
 		};
+		730C15BD1B95A5480075D7F3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 730C15BE1B95A5480075D7F3 /* PBXContainerItemProxy */;
+		};
+		730C15CA1B95AE450075D7F3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 730C15CB1B95AE450075D7F3 /* PBXContainerItemProxy */;
+		};
+		73134A241BCBD95E00E3BF88 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 73134A251BCBD95E00E3BF88 /* PBXContainerItemProxy */;
+		};
 		731F5F1917204BE7005CDBA1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 73FD2F1616C1683F00626293 /* test_mdSingle */;
@@ -1897,6 +2273,11 @@
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
 			targetProxy = 732D2787162DBD1D009D7857 /* PBXContainerItemProxy */;
+		};
+		732D87BE1BA9571B004BF837 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 732D87BF1BA9571B004BF837 /* PBXContainerItemProxy */;
 		};
 		73361453165BBF7E00A70D3D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2064,6 +2445,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2079,11 +2461,14 @@
 				INFOPLIST_FILE = ../example/SenderDemo/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = "-DPOSIX";
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
-				SDKROOT = "";
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -2091,6 +2476,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2100,6 +2486,8 @@
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "SenderDemo-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -2107,6 +2495,7 @@
 					AppKit,
 				);
 				PREBINDING = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
 				ZERO_LINK = NO;
 			};
@@ -2122,6 +2511,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
@@ -2129,6 +2519,7 @@
 					"-DDEBUG",
 				);
 				PRODUCT_NAME = trdp;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -2141,12 +2532,14 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
 					"-DL_ENDIAN",
 				);
 				PRODUCT_NAME = trdp;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Release;
@@ -2154,12 +2547,15 @@
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SDKROOT )/usr/include/libxml2";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
@@ -2171,14 +2567,86 @@
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SDKROOT )/usr/include/libxml2";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+		730C15C41B95A5480075D7F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-DPOSIX",
+					"-DL_ENDIAN",
+					"-D__APPLE__",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = test_library;
+			};
+			name = Debug;
+		};
+		730C15C51B95A5480075D7F3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = test_library;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		730C15D11B95AE450075D7F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-DPOSIX",
+					"-DL_ENDIAN",
+					"-D__APPLE__",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = test_tau_dnr;
+			};
+			name = Debug;
+		};
+		730C15D21B95AE450075D7F3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = test_tau_dnr;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -2192,6 +2660,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = YES;
 				PRODUCT_NAME = "pd-test";
@@ -2207,8 +2676,46 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = "pd-test";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		73134A2E1BCBD95E00E3BF88 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-DPOSIX",
+					"-DL_ENDIAN",
+					"-D__APPLE__",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.9;
+			};
+			name = Debug;
+		};
+		73134A2F1BCBD95E00E3BF88 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx10.9;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2223,6 +2730,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = "crc-check";
@@ -2238,6 +2746,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = "crc-check";
 				ZERO_LINK = NO;
@@ -2253,6 +2762,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = getStats;
 			};
@@ -2266,7 +2776,43 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = getStats;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		732D87C71BA9571B004BF837 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-DPOSIX",
+					"-DL_ENDIAN",
+					"-D__APPLE__",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = test_tau_tti;
+			};
+			name = Debug;
+		};
+		732D87C81BA9571B004BF837 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = test_tau_tti;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2281,6 +2827,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = pd_md_responder;
@@ -2296,6 +2843,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = pd_md_responder;
 				ZERO_LINK = NO;
@@ -2312,6 +2860,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = test_traffic;
@@ -2327,6 +2876,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = Untitled;
 				ZERO_LINK = NO;
@@ -2343,6 +2893,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
@@ -2361,6 +2912,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = receiveHello;
 				ZERO_LINK = NO;
@@ -2377,6 +2929,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = receiveHello;
@@ -2392,9 +2945,78 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = receiveHello;
 				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		73591F951B986C7900B758F0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_CFLAGS = (
+					"-DMD_SUPPORT=1",
+					"-DPOSIX",
+					"-DL_ENDIAN",
+					"-DDEBUG",
+				);
+				PRODUCT_NAME = "trdp Posix copy";
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
+			};
+			name = Debug;
+		};
+		73591F961B986C7900B758F0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_PEDANTIC = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-DMD_SUPPORT=1",
+					"-DPOSIX",
+					"-DL_ENDIAN",
+				);
+				PRODUCT_NAME = "trdp Posix copy";
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Release;
 		};
@@ -2408,6 +3030,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = YES;
 				PRODUCT_NAME = "md-test";
@@ -2423,6 +3046,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = "pd-test";
 				ZERO_LINK = NO;
@@ -2435,6 +3059,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = All;
 			};
 			name = Debug;
@@ -2445,6 +3070,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = All;
 				ZERO_LINK = NO;
 			};
@@ -2461,6 +3087,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = NO;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DL_ENDIAN",
 					"-DPOSIX",
@@ -2482,6 +3109,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = NO;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DL_ENDIAN",
 					"-DPOSIX",
@@ -2504,6 +3132,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = selectcmd;
@@ -2519,6 +3148,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = selectcmd;
@@ -2536,6 +3166,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DL_ENDIAN",
 					"-DPOSIX",
@@ -2555,6 +3186,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DL_ENDIAN",
 					"-DPOSIX",
@@ -2574,6 +3206,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = receiveSelect;
 			};
@@ -2587,6 +3220,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = receiveSelect;
 				ZERO_LINK = NO;
 			};
@@ -2601,6 +3235,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = receivePolling;
 			};
@@ -2614,6 +3249,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = receivePolling;
 				ZERO_LINK = NO;
 			};
@@ -2629,6 +3265,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DPOSIX",
 					"-DDEBUG",
@@ -2648,6 +3285,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DL_ENDIAN",
 					"-DPOSIX",
@@ -2668,6 +3306,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=0",
 					"-DPOSIX",
@@ -2676,6 +3315,7 @@
 				);
 				PREBINDING = YES;
 				PRODUCT_NAME = trdpPDonly;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -2689,6 +3329,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=0",
 					"-DPOSIX",
@@ -2696,6 +3337,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = trdpPDonly;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				ZERO_LINK = NO;
 			};
@@ -2728,6 +3370,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = sendHello;
 			};
@@ -2741,6 +3384,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = sendHello;
 				ZERO_LINK = NO;
 			};
@@ -2756,6 +3400,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = pdpull;
@@ -2771,6 +3416,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = pdpull;
 				ZERO_LINK = NO;
@@ -2787,6 +3433,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = test_mdRequestReply;
@@ -2802,6 +3449,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PREBINDING = NO;
 				PRODUCT_NAME = test_mdRequestReply;
 				ZERO_LINK = NO;
@@ -2838,11 +3486,38 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		730C15C31B95A5480075D7F3 /* Build configuration list for PBXNativeTarget "test_library" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				730C15C41B95A5480075D7F3 /* Debug */,
+				730C15C51B95A5480075D7F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		730C15D01B95AE450075D7F3 /* Build configuration list for PBXNativeTarget "test_tau_dnr" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				730C15D11B95AE450075D7F3 /* Debug */,
+				730C15D21B95AE450075D7F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		730DAFA316A07BAD0019B4D0 /* Build configuration list for PBXNativeTarget "pd-test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				730DAF9F16A07B5C0019B4D0 /* Debug */,
 				730DAFA016A07B5C0019B4D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73134A2D1BCBD95E00E3BF88 /* Build configuration list for PBXNativeTarget "test_inaug" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73134A2E1BCBD95E00E3BF88 /* Debug */,
+				73134A2F1BCBD95E00E3BF88 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2861,6 +3536,15 @@
 			buildConfigurations = (
 				732D278E162DBD1D009D7857 /* Debug */,
 				732D278F162DBD1D009D7857 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		732D87C61BA9571B004BF837 /* Build configuration list for PBXNativeTarget "test_tau_tti" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				732D87C71BA9571B004BF837 /* Debug */,
+				732D87C81BA9571B004BF837 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2897,6 +3581,15 @@
 			buildConfigurations = (
 				73517C4416BBFD5500DB5208 /* Debug */,
 				73517C4516BBFD5500DB5208 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73591F941B986C7900B758F0 /* Build configuration list for PBXNativeTarget "trdp64Posix" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73591F951B986C7900B758F0 /* Debug */,
+				73591F961B986C7900B758F0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
