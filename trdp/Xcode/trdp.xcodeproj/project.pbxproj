@@ -2559,7 +2559,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
-				SYMROOT = ../bld/darwin;
+				SYMROOT = ../output/osx_x86/dbg;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
@@ -2574,8 +2574,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(SDKROOT )/usr/include/libxml2";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
+				SYMROOT = ../output/osx_x86/rls;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
