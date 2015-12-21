@@ -1245,7 +1245,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
  *  @param[in]      numComId            The number of entries in the ComId DatasetId mapping list
  *  @param[in]      pComIdDsIdMap       Pointer to an array of structures of type TRDP_COMID_DSID_MAP_T
  *  @param[in]      numDataset          The number of datasets found in the configuration
- *  @param[in]      pNumDataset         Pointer to an array of pointers to a structures of type TRDP_DATASET_T
+ *  @param[in]      ppDataset           Pointer to an array of pointers to a structures of type TRDP_DATASET_T
  *
  *  @retval         none
  *
