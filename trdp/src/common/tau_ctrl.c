@@ -61,7 +61,6 @@
  *
  *  @param[in]      appHandle           Application handle
  *  @param[in]      ecspIpAddr          ECSP address
- *  @param[in]      ecscIpAddr          ECSC address
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error

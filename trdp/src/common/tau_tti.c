@@ -540,9 +540,9 @@ static void ttiRequestTTDBdata (
  *  Subscribe to necessary process data for correct ECSP handling
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[in]      pUserAction     Semaphore to fire if inauguration took place.
+ *  @param[in]      userAction      Semaphore to fire if inauguration took place.
  *  @param[in]      ecspIpAddr      ECSP IP address.
- *  @param[in]      hostFileName    Optional host file name as ECSP replacement.
+ *  @param[in]      hostsFileName   Optional host file name as ECSP replacement.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error
@@ -552,7 +552,7 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
     TRDP_APP_SESSION_T  appHandle,
     VOS_SEMA_T          userAction,
     TRDP_IP_ADDR_T      ecspIpAddr,
-    CHAR8               *hostFileName)
+    CHAR8               *hostsFileName)
 {
     if (appHandle == NULL || appHandle->pTTDB != NULL)
     {

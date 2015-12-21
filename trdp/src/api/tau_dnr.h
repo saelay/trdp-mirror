@@ -57,7 +57,7 @@ extern "C" {
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[in]      ecspIpAddr      ECSP IP address.
  *  @param[in]      ecspPort        ECSP port number.
- *  @param[in]      hostFileName    Optional host file name as ECSP replacement.
+ *  @param[in]      hostsFileName    Optional host file name as ECSP replacement.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error
@@ -67,7 +67,7 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
 	TRDP_APP_SESSION_T appHandle,
     TRDP_IP_ADDR_T     ecspIpAddr,
     UINT16             ecspPort,
-    const CHAR8        *hostFileName);
+    const CHAR8        *hostsFileName);
 
 /**********************************************************************************************************************/
 /**    Release any resources allocated by DNR
@@ -124,7 +124,7 @@ EXT_DECL  TRDP_IP_ADDR_T tau_getOwnAddr (
  * 
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pAddr           Pointer to return the IP address
- *  @param[in]      uri             Pointer to a URI or an IP Address string, NULL==own URI
+ *  @param[in]      pUri            Pointer to a URI or an IP Address string, NULL==own URI
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -133,7 +133,7 @@ EXT_DECL  TRDP_IP_ADDR_T tau_getOwnAddr (
 EXT_DECL TRDP_ERR_T tau_uri2Addr (
 	TRDP_APP_SESSION_T   appHandle,
 	TRDP_IP_ADDR_T      *pAddr,
-    const TRDP_URI_T     uri);   
+    const TRDP_URI_T     pUri);
 
 
 /**********************************************************************************************************************/
@@ -143,7 +143,7 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
  *
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     uri             Pointer to a string to return the URI host part
+ *  @param[out]     pUri            Pointer to a string to return the URI host part
  *  @param[in]      addr            IP address, 0==own address
  *
  *  @retval         TRDP_NO_ERR     no error
@@ -152,7 +152,7 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
  */
 EXT_DECL TRDP_ERR_T tau_addr2Uri (
 	TRDP_APP_SESSION_T   appHandle,
-    TRDP_URI_HOST_T      uri,
+    TRDP_URI_HOST_T      pUri,
     TRDP_IP_ADDR_T       addr);  
 
 

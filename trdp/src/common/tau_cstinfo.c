@@ -47,9 +47,8 @@
 /**    Getter function to retrieve a value from the consist info telegram value.
  *
  *  @param[in]      pCstInfo        pointer to packed consist info in network byte order
- *  @param[out]     pValue          pointer to value to return
  *
- *  @retval         none
+ *  @retval         len
  *
  */
 UINT16 cstInfoGetPropSize (TRDP_CONSIST_INFO_T *pCstInfo)
