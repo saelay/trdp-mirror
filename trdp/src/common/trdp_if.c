@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-22: Mutex optimised in closeSession
  *      BL 2015-12-14: Setter for default configuration added
  *      BL 2015-11-24: Accessor for IP address of session
  *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
@@ -621,6 +622,12 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
             }
         }
 
+        /* We can release the global session mutex after removing the session from the list */
+        if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
+        {
+            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+        }
+
         /*    At this point we removed the session from the queue    */
         if (found)
         {
@@ -740,10 +747,6 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 vos_mutexDelete(pSession->mutex);
                 vos_memFree(pSession);
             }
-        }
-        if (vos_mutexUnlock(sSessionMutex) != VOS_NO_ERR)
-        {
-            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 

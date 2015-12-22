@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2015-12-22: Mutex removed
  *      BL 2015-08-31: Ticket #94: TRDP_REDUNDANT flag is evaluated, beQuiet removed
  *      BL 2014-08-28: Ticket #62: Failing TCP communication fixed,
  *                                 Do not read if there's nothing to read ('Mc' has no data!)
@@ -1693,11 +1694,11 @@ static TRDP_ERR_T trdp_mdSendME(TRDP_SESSION_PT appHandle, MD_HEADER_T* pH, INT3
     {
         return TRDP_PARAM_ERR;
     }
-    /* lock mutex */
+    /* lock mutex (BL 2015-12-22: not necessary)
     if ( vos_mutexLock(appHandle->mutex) != VOS_NO_ERR )
     {
         return TRDP_MUTEX_ERR;
-    }
+    }*/
 
     if ( mdElement != NULL )
     {
@@ -1784,12 +1785,12 @@ static TRDP_ERR_T trdp_mdSendME(TRDP_SESSION_PT appHandle, MD_HEADER_T* pH, INT3
             pSenderElement = NULL;
         }
     }
-    /* Release mutex */
+    /* Release mutex (BL 2015-12-22: not necessary) 
     if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
     {
         vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
         errv = TRDP_MUTEX_ERR;
-    }
+    }*/
     return errv;
 }
 
