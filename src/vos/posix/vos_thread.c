@@ -453,8 +453,11 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
     struct timespec remaining_delay;
     int ret;
 
+
     if (delay == 0)
     {
+        pthread_testcancel();
+
         /*    yield cpu to other processes   */
         if (sched_yield() != 0)
         {
@@ -467,6 +470,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
     wanted_delay.tv_nsec    = (delay % 1000000) * 1000;
     do
     {
+        pthread_testcancel();
         ret = nanosleep(&wanted_delay, &remaining_delay);
         if (ret == -1 && errno == EINTR)
         {
