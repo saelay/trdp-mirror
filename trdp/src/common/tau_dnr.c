@@ -863,7 +863,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
     }
     else
     {
-        int i;
+        UINT32 i;
         for (i = 0; i < pDNR->noOfCachedEntries; ++i)
         {
             if (pDNR->cache[i].ipAddr == addr &&
