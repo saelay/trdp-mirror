@@ -39,6 +39,14 @@ extern "C" {
  * DEFINES
  */
 
+    /* The VOS version can be predefined as CFLAG   */
+#ifndef VOS_VERSION
+#define VOS_VERSION            1
+#define VOS_RELEASE            0
+#define VOS_UPDATE             0
+#define VOS_EVOLUTION          0
+#endif
+
 struct VOS_MUTEX
 {
     UINT32          magicNo;
