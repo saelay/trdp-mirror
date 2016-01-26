@@ -15,11 +15,12 @@
 #
 #  ABSTRACT      : XML Schema for TRDP configuration configuration
 #
-#  VERSION       : 1.10.0.0
+#  VERSION       : 1.11.0.0
 #
 #  SVN           : $Id$
 #
 #  HISTORY       :
+#                            1.11.0.0  Ticket #106: User needs to be informed on every received PD packet
 #                            1.10.0.0  sink/source attribute for telegrams added
 #                            1.9.0.0   debug parameters updated
 #                            1.8.0.0   BITSET8, ANTIVALENT8 added
@@ -599,6 +600,7 @@ keep = keep the last value</xs:documentation>
         <xs:simpleType>
           <xs:restriction base="xs:string">
             <xs:enumeration value="on"/>
+            <xs:enumeration value="always"/>
             <xs:enumeration value="off"/>
           </xs:restriction>
         </xs:simpleType>
@@ -649,6 +651,7 @@ keep = keep the last value</xs:documentation>
         <xs:simpleType>
           <xs:restriction base="xs:string">
             <xs:enumeration value="on"/>
+            <xs:enumeration value="always"/>
             <xs:enumeration value="off"/>
           </xs:restriction>
         </xs:simpleType>
