@@ -12,9 +12,10 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2016-01-25: Ticket #106: User needs to be informed on every received PD packet
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
@@ -171,7 +172,8 @@ typedef enum
     TRDP_FLAGS_NONE     = 0x01,     /**< No flags set                                               */
     TRDP_FLAGS_MARSHALL = 0x02,     /**< Optional marshalling/unmarshalling in TRDP stack           */
     TRDP_FLAGS_CALLBACK = 0x04,     /**< Use of callback function                                   */
-    TRDP_FLAGS_TCP      = 0x08      /**< Use TCP for message data                                   */
+    TRDP_FLAGS_TCP      = 0x08,     /**< Use TCP for message data                                   */
+    TRDP_FLAGS_FORCE_CB = 0x10      /**< Force a callback for every received packet                 */
 } TRDP_FLAGS_T;
 
 

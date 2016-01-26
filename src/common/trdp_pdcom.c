@@ -12,10 +12,11 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-01-25: Ticket #106: User needs to be informed on every received PD packet
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
  *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
  *      BL 2015-08-31: Ticket #94: TRDP_REDUNDANT flag is evaluated, beQuiet removed
@@ -535,7 +536,14 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  Has the data changed?   */
         if (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
         {
-            informUser = memcmp(appHandle->pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
+            if (pExistingElement->pktFlags & TRDP_FLAGS_FORCE_CB)
+            {
+                informUser = 1;                 /* Inform user anyway */
+            }
+            else
+            {
+                informUser = memcmp(appHandle->pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
+            }
         }
 
         /*  Get the current time and compute the next time this packet should be received.  */

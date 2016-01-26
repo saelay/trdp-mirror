@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2016-01-25: Ticket #106: Callback can be ON, OFF, ALWAYS
+ *
  */
 
 /*******************************************************************************
@@ -706,6 +708,10 @@ static void parsePDDefaultParams (xmlNodePtr pPDParElem, TRDP_PD_CONFIG_T *pPdCo
     {
         pPdConfig->flags |= TRDP_FLAGS_CALLBACK;
     }
+    else if (checkAttrValue(pPDParElem, "callback", "always"))
+    {
+        pPdConfig->flags |= TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB;
+    }
     parseUINT16(pPDParElem, "port", &pPdConfig->port);
 }
 
@@ -1316,7 +1322,7 @@ static void parseMdParameter (
         {
             pExchgPar->pMdPar->flags |= TRDP_FLAGS_TCP;
         }
-        if (checkAttrValue(pMdParElem, "protocol", "UDP"))
+        else if (checkAttrValue(pMdParElem, "protocol", "UDP"))
         {
             pExchgPar->pMdPar->flags &= (TRDP_FLAGS_T) ~TRDP_FLAGS_TCP;
         }
@@ -1324,15 +1330,15 @@ static void parseMdParameter (
         {
             pExchgPar->pMdPar->flags |= TRDP_FLAGS_MARSHALL;
         }
-        if (checkAttrValue(pMdParElem, "marshall", "off"))
+        else if (checkAttrValue(pMdParElem, "marshall", "off"))
         {
             pExchgPar->pMdPar->flags &= (TRDP_FLAGS_T) ~TRDP_FLAGS_MARSHALL;
         }
-        if (checkAttrValue(pMdParElem, "callback", "on"))
+        if (checkAttrValue(pMdParElem, "callback", "on") || checkAttrValue(pMdParElem, "callback", "always"))
         {
             pExchgPar->pMdPar->flags |= TRDP_FLAGS_CALLBACK;
         }
-        if (checkAttrValue(pMdParElem, "callback", "off"))
+        else if (checkAttrValue(pMdParElem, "callback", "off"))
         {
             pExchgPar->pMdPar->flags &= (TRDP_FLAGS_T) ~TRDP_FLAGS_CALLBACK;
         }
@@ -1387,7 +1393,7 @@ static void parsePdParameter (
         {
             pExchgPar->pPdPar->toBehav = TRDP_TO_KEEP_LAST_VALUE;
         }
-        if (checkAttrValue(pPdParElem, "validity-behavior", "zero"))
+        else if (checkAttrValue(pPdParElem, "validity-behavior", "zero"))
         {
             pExchgPar->pPdPar->toBehav = TRDP_TO_SET_TO_ZERO;
         }
@@ -1395,7 +1401,7 @@ static void parsePdParameter (
         {
             pExchgPar->pPdPar->flags |= TRDP_FLAGS_MARSHALL;
         }
-        if (checkAttrValue(pPdParElem, "marshall", "off"))
+        else if (checkAttrValue(pPdParElem, "marshall", "off"))
         {
             pExchgPar->pPdPar->flags &= (TRDP_FLAGS_T) ~TRDP_FLAGS_MARSHALL;
         }
@@ -1403,7 +1409,11 @@ static void parsePdParameter (
         {
             pExchgPar->pPdPar->flags |= TRDP_FLAGS_CALLBACK;
         }
-        if (checkAttrValue(pPdParElem, "callback", "off"))
+        else if (checkAttrValue(pPdParElem, "callback", "always"))
+        {
+            pExchgPar->pPdPar->flags |= TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB;
+        }
+        else if (checkAttrValue(pPdParElem, "callback", "off"))
         {
             pExchgPar->pPdPar->flags &= (TRDP_FLAGS_T) ~TRDP_FLAGS_CALLBACK;
         }
