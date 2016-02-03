@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-02-03: Ticket #108: Uninitialized info variable
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
  */
 
@@ -1084,6 +1085,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 
     info.level      = 0;
     info.pSrc       = pSrc;
+    info.pSrcEnd    = pSrc + srcSize;
     info.pDst       = pDest;
     info.pDstEnd    = pDest + *pDestSize;
 
