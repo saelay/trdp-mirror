@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2016-02-04: Ticket #110: Handling of optional marshalling on sending
  *      BL 2015-12-22: Mutex removed
  *      BL 2015-08-31: Ticket #94: TRDP_REDUNDANT flag is evaluated, beQuiet removed
  *      BL 2014-08-28: Ticket #62: Failing TCP communication fixed,
@@ -2998,7 +2999,23 @@ static void trdp_mdDetailSenderPacket(const TRDP_MSG_T msgType,
     }
     if ( pData != NULL )
     {
-        memcpy(pSenderElement->pPacket->data, pData, dataSize);
+        if (pSenderElement->pktFlags & TRDP_FLAGS_MARSHALL &&
+            appHandle->marshall.pfCbMarshall != NULL)
+        {
+            UINT32  destSize = dataSize;
+            appHandle->marshall.pfCbMarshall(appHandle->marshall.pRefCon,
+                                             pSenderElement->addr.comId,
+                                             (UINT8*) pData,
+                                             dataSize,
+                                             pSenderElement->pPacket->data,
+                                             &destSize,
+                                             &pSenderElement->pCachedDS);
+            pSenderElement->pPacket->frameHead.datasetLength   = vos_htonl(destSize);
+        }
+        else
+        {
+            memcpy(pSenderElement->pPacket->data, pData, dataSize);
+        }
     }
     
     /* Insert element in send queue */
