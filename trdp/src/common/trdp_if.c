@@ -1671,7 +1671,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
- *  @param[in]      replyComId          comId of reply
+ *  @param[in]      replyComId          comId of reply (default comID of subscription)
  *  @param[in]      replyIpAddr         IP for reply
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -1804,6 +1804,10 @@ EXT_DECL TRDP_ERR_T tlp_request (
             if (ret == TRDP_NO_ERR && pReqElement != NULL)
             {
                 
+                if (replyComId == 0)
+                {
+                    replyComId = pSubPD->addr.comId;
+                }
 
                 /*    Compute the header fields */
                 trdp_pdInit(pReqElement, TRDP_MSG_PR, etbTopoCnt, opTrnTopoCnt, replyComId, replyIpAddr);
