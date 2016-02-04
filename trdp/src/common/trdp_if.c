@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-02-04: Late configuration update/merging 
  *      BL 2015-12-22: Mutex optimised in closeSession
  *      BL 2015-12-14: Setter for default configuration added
  *      BL 2015-11-24: Accessor for IP address of session
@@ -478,91 +479,141 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
     
     if (pPdDefault != NULL)
     {
-        pSession->pdDefault = *pPdDefault;
-        
         /* check whether default values needed or not */
-        if (pSession->pdDefault.flags == TRDP_FLAGS_DEFAULT)
+
+        if (pSession->pdDefault.pfCbFunction == NULL &&
+            pPdDefault->pfCbFunction != NULL)
         {
-            pSession->pdDefault.flags = TRDP_FLAGS_NONE;
+            pSession->pdDefault.pfCbFunction = pPdDefault->pfCbFunction;
         }
         
-        if (pSession->pdDefault.port == 0)
+        if (pSession->pdDefault.pRefCon == NULL &&
+            pPdDefault->pRefCon != NULL)
         {
-            pSession->pdDefault.port = TRDP_PD_UDP_PORT;
+            pSession->pdDefault.pRefCon = pPdDefault->pRefCon;
         }
         
-        if (pSession->pdDefault.timeout == 0)
+        if (pPdDefault->flags != TRDP_FLAGS_DEFAULT &&
+            !(pPdDefault->flags & TRDP_FLAGS_NONE))
         {
-            pSession->pdDefault.timeout = TRDP_PD_DEFAULT_TIMEOUT;
+            pSession->pdDefault.flags |= pPdDefault->flags;
+        }
+
+        if (pSession->pdDefault.port == TRDP_PD_UDP_PORT &&
+            pPdDefault->port != 0)
+        {
+            pSession->pdDefault.port = pPdDefault->port;
+        }
+
+        if (pSession->pdDefault.timeout == TRDP_PD_DEFAULT_TIMEOUT &&
+            pPdDefault->timeout != 0)
+        {
+            pSession->pdDefault.timeout = pPdDefault->timeout;
+        }
+
+        if (pSession->pdDefault.toBehavior == TRDP_TO_DEFAULT &&
+            pPdDefault->toBehavior != TRDP_TO_DEFAULT)
+        {
+            pSession->pdDefault.toBehavior = pPdDefault->toBehavior;
+        }
+
+        if (pSession->pdDefault.sendParam.qos == TRDP_PD_DEFAULT_QOS &&
+            pPdDefault->sendParam.qos != TRDP_PD_DEFAULT_QOS &&
+            pPdDefault->sendParam.qos != 0)
+        {
+            pSession->pdDefault.sendParam.qos = pPdDefault->sendParam.qos;
         }
         
-        if (pSession->pdDefault.toBehavior == TRDP_TO_DEFAULT)
+        if (pSession->pdDefault.sendParam.ttl == TRDP_PD_DEFAULT_TTL &&
+            pPdDefault->sendParam.ttl != TRDP_PD_DEFAULT_TTL &&
+            pPdDefault->sendParam.ttl != 0)
         {
-            pSession->pdDefault.toBehavior = TRDP_TO_SET_TO_ZERO;
+            pSession->pdDefault.sendParam.ttl = pPdDefault->sendParam.ttl;
         }
-        
-        if (pSession->pdDefault.sendParam.ttl == 0)
-        {
-            pSession->pdDefault.sendParam.ttl = TRDP_PD_DEFAULT_TTL;
-        }
-        
-        if (pSession->pdDefault.sendParam.qos == 0)
-        {
-            pSession->pdDefault.sendParam.qos = TRDP_PD_DEFAULT_QOS;
-        }
-    }
+}
     
 #if MD_SUPPORT
     
     if (pMdDefault != NULL)
     {
-        pSession->mdDefault = *pMdDefault;
+        /* If the existing values are the defaults or unset, and new non-default values are supplied,
+           overwrite the existing ones  */
+
+        if (pSession->mdDefault.pfCbFunction == NULL &&
+            pMdDefault->pfCbFunction != NULL)
+        {
+            pSession->mdDefault.pfCbFunction = pMdDefault->pfCbFunction;
+        }
+
+        if (pSession->mdDefault.pRefCon == NULL &&
+            pMdDefault->pRefCon != NULL)
+        {
+            pSession->mdDefault.pRefCon = pMdDefault->pRefCon;
+        }
+
+        if (pSession->mdDefault.sendParam.qos == TRDP_MD_DEFAULT_QOS &&
+            pMdDefault->sendParam.qos != TRDP_MD_DEFAULT_QOS &&
+            pMdDefault->sendParam.qos != 0)
+        {
+            pSession->mdDefault.sendParam.qos = pMdDefault->sendParam.qos;
+        }
         
+        if (pSession->mdDefault.sendParam.ttl == TRDP_MD_DEFAULT_TTL &&
+            pMdDefault->sendParam.ttl != TRDP_MD_DEFAULT_TTL &&
+            pMdDefault->sendParam.ttl != 0)
+        {
+            pSession->mdDefault.sendParam.ttl = pMdDefault->sendParam.ttl;
+        }
+
+        if (pMdDefault->flags != TRDP_FLAGS_DEFAULT &&
+            !(pMdDefault->flags & TRDP_FLAGS_NONE))
+        {
+            pSession->mdDefault.flags |= pMdDefault->flags;
+        }
+
         /* check whether default values needed or not */
-        if (pSession->mdDefault.tcpPort == 0)
+        if (pSession->mdDefault.tcpPort == TRDP_MD_TCP_PORT &&
+            pMdDefault->tcpPort != 0)
         {
-            pSession->mdDefault.tcpPort = TRDP_MD_TCP_PORT;
+            pSession->mdDefault.tcpPort = pMdDefault->tcpPort;
         }
         
-        if (pSession->mdDefault.udpPort == 0)
+        if (pSession->mdDefault.udpPort == TRDP_MD_UDP_PORT &&
+            pMdDefault->udpPort != 0)
         {
-            pSession->mdDefault.udpPort = TRDP_MD_UDP_PORT;
+            pSession->mdDefault.udpPort = pMdDefault->udpPort;
         }
         
-        if (pSession->mdDefault.confirmTimeout == 0)
+        if (pSession->mdDefault.confirmTimeout == TRDP_MD_DEFAULT_CONFIRM_TIMEOUT &&
+            pMdDefault->confirmTimeout != 0)
         {
-            pSession->mdDefault.confirmTimeout = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+            pSession->mdDefault.confirmTimeout = pMdDefault->confirmTimeout;
         }
         
-        if (pSession->mdDefault.connectTimeout == 0)
+        if (pSession->mdDefault.connectTimeout == TRDP_MD_DEFAULT_CONNECTION_TIMEOUT &&
+            pMdDefault->connectTimeout != 0)
         {
-            pSession->mdDefault.connectTimeout = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+            pSession->mdDefault.connectTimeout = pMdDefault->connectTimeout;
         }
         
-        if (pSession->mdDefault.sendingTimeout == 0)
+        if (pSession->mdDefault.sendingTimeout == TRDP_MD_DEFAULT_SENDING_TIMEOUT &&
+            pMdDefault->sendingTimeout != 0)
         {
-            pSession->mdDefault.sendingTimeout = TRDP_MD_DEFAULT_SENDING_TIMEOUT;
+            pSession->mdDefault.sendingTimeout = pMdDefault->sendingTimeout;
         }
         
-        if (pSession->mdDefault.replyTimeout == 0)
+        if (pSession->mdDefault.replyTimeout == TRDP_MD_DEFAULT_REPLY_TIMEOUT &&
+            pMdDefault->replyTimeout != 0)
         {
-            pSession->mdDefault.replyTimeout = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+            pSession->mdDefault.replyTimeout = pMdDefault->replyTimeout;
         }
         
-        if (pSession->mdDefault.sendParam.ttl == 0)
+        if (pSession->mdDefault.maxNumSessions == TRDP_MD_MAX_NUM_SESSIONS &&
+            pMdDefault->maxNumSessions != 0)
         {
-            pSession->mdDefault.sendParam.ttl = TRDP_MD_DEFAULT_TTL;
+            pSession->mdDefault.maxNumSessions = pMdDefault->maxNumSessions;
         }
-        
-        if (pSession->mdDefault.sendParam.qos == 0)
-        {
-            pSession->mdDefault.sendParam.qos = TRDP_MD_DEFAULT_QOS;
-        }
-        
-        if (pSession->mdDefault.maxNumSessions == 0)
-        {
-            pSession->mdDefault.maxNumSessions = TRDP_MD_MAX_NUM_SESSIONS;
-        }
+
     }
     
 #endif
