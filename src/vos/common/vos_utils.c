@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2016-02-10: ifdef DEBUG for some functions
  *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
  *
  */
@@ -167,7 +168,7 @@ static void vos_printStructSizes ()
 
 VOS_ERR_T vos_initRuntimeConsts (void)
 {
-#if MD_SUPPORT
+#ifdef DEBUG
     VOS_ERR_T   err                     = VOS_INTEGRATION_ERR;
     UINT32      sAlignINT8              = 1;
     UINT32      sAlignINT16             = 2;
@@ -362,6 +363,7 @@ UINT32 vos_crc32 (
     return ~crc;
 }
 
+#ifdef DEBUG
 /**********************************************************************************************************************/
 /** Return endianess
  *
@@ -371,6 +373,7 @@ INLINE BOOL8 vos_isBigEndian (void)
 {
     return sIsBigEndian;
 }
+#endif
 
 /**********************************************************************************************************************/
 /** Return a human readable version representation.
