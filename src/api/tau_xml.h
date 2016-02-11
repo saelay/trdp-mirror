@@ -12,12 +12,13 @@
  *
  * @author          Armin-H. Weiss (initial version)
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-02-11: Ticket #102: Custom XML parser, libxml2 not needed anymore
  */
 
 #ifndef TAU_XML_H
@@ -29,7 +30,6 @@
 
 #include "vos_types.h"
 #include "trdp_types.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,7 +119,7 @@ typedef struct
     UINT32              srcCnt;     /**< number of sources */
     TRDP_SRC_T          *pSrc;      /**< Pointer to array of source descriptors */
     TRDP_EXCHG_OPTION_T type;       /**< shall telegram be sent or received */
-    BOOL8               create;     /**< TRUE: associated publisher/listener/subscriber 
+    BOOL8               create;     /**< TRUE: associated publisher/listener/subscriber
                                          shall be generated automatically */
 } TRDP_EXCHG_PAR_T;
 
@@ -133,8 +133,8 @@ typedef struct
 
 typedef struct
 {
-    UINT32            id;         /**< communication parameter identifier */
-    TRDP_SEND_PARAM_T sendParam;  /**< Send parameter (TTL, QoS) */
+    UINT32              id;       /**< communication parameter identifier */
+    TRDP_SEND_PARAM_T   sendParam; /**< Send parameter (TTL, QoS) */
 } TRDP_COM_PAR_T;
 
 /** Control for debug output format on application level.
@@ -162,13 +162,14 @@ typedef struct
     TRDP_FILE_NAME_T    fileName;      /**< Debug file name and path */
 } TRDP_DBG_CONFIG_T;
 
+struct XML_HANDLE;
+
+
 /** Parsed XML document handle
  */
 typedef struct
 {
-    void               *pXmlDocument;   /**< Pointer to parsed XML document */
-    void               *pRootElement;   /**< Pointer to the document root element   */
-    void               *pXPathContext;  /**< Pointer to prepared XPath context  */
+    struct XML_HANDLE *pXmlDocument;           /**< XML document context */
 } TRDP_XML_DOC_HANDLE_T;
 
 
@@ -178,7 +179,8 @@ typedef struct
 
 
 /**********************************************************************************************************************/
-/*    XML Configuration                                                                                                  */
+/*    XML Configuration
+                                                                                                   */
 /**********************************************************************************************************************/
 
 /**********************************************************************************************************************/
@@ -205,7 +207,7 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
  *
  */
 EXT_DECL void tau_freeXmlDoc (
-    TRDP_XML_DOC_HANDLE_T   *pDocHnd
+    TRDP_XML_DOC_HANDLE_T *pDocHnd
     );
 
 /**********************************************************************************************************************/
@@ -230,9 +232,9 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
     TRDP_MEM_CONFIG_T           *pMemConfig,
     TRDP_DBG_CONFIG_T           *pDbgConfig,
     UINT32                      *pNumComPar,
-    TRDP_COM_PAR_T             **ppComPar,
+    TRDP_COM_PAR_T              * *ppComPar,
     UINT32                      *pNumIfConfig,
-    TRDP_IF_CONFIG_T           **ppIfConfig
+    TRDP_IF_CONFIG_T            * *ppIfConfig
     );
 
 /**********************************************************************************************************************/
@@ -259,7 +261,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     TRDP_PD_CONFIG_T            *pPdConfig,
     TRDP_MD_CONFIG_T            *pMdConfig,
     UINT32                      *pNumExchgPar,
-    TRDP_EXCHG_PAR_T           **ppExchgPar
+    TRDP_EXCHG_PAR_T            * *ppExchgPar
     );
 
 /**********************************************************************************************************************/
@@ -281,9 +283,9 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
 EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
     const TRDP_XML_DOC_HANDLE_T *pDocHnd,
     UINT32                      *pNumComId,
-    TRDP_COMID_DSID_MAP_T      **ppComIdDsIdMap,        
+    TRDP_COMID_DSID_MAP_T       * *ppComIdDsIdMap,
     UINT32                      *pNumDataset,
-    papTRDP_DATASET_T            papDataset);
+    papTRDP_DATASET_T           papDataset);
 
 /**********************************************************************************************************************/
 /**    Function to free the memory for the DataSet configuration
@@ -300,10 +302,10 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
  *
  */
 EXT_DECL void tau_freeXmlDatasetConfig (
-    UINT32                      numComId,
-    TRDP_COMID_DSID_MAP_T       *pComIdDsIdMap,
-    UINT32                      numDataset,
-    TRDP_DATASET_T              **pNumDataset);
+    UINT32                  numComId,
+    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,
+    UINT32                  numDataset,
+    TRDP_DATASET_T          * *pNumDataset);
 
 /**********************************************************************************************************************/
 /**    Free array of telegram configurations allocated by tau_readXmlInterfaceConfig
@@ -312,9 +314,9 @@ EXT_DECL void tau_freeXmlDatasetConfig (
  *  @param[in]      pExchgPar         Pointer to array of telegram configurations
  *
  */
-EXT_DECL void tau_freeTelegrams(
-    UINT32                  numExchgPar,
-    TRDP_EXCHG_PAR_T       *pExchgPar);
+EXT_DECL void tau_freeTelegrams (
+    UINT32              numExchgPar,
+    TRDP_EXCHG_PAR_T    *pExchgPar);
 
 #ifdef __cplusplus
 }

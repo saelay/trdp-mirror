@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2016-02-11: Ticket #111: 'unit', 'scale', 'offset' attributes added to TRDP_DATASET_ELEMENT
  *      BL 2016-01-25: Ticket #106: User needs to be informed on every received PD packet
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
@@ -44,7 +45,7 @@ extern "C" {
  */
 
 #ifndef MD_SUPPORT
-    #define MD_SUPPORT 1
+    #define MD_SUPPORT  1
 #endif
 
 #ifndef USE_HEAP
@@ -297,9 +298,12 @@ struct TRDP_DATASET;
 /**    Dataset element definition    */
 typedef struct
 {
-    UINT32              type;            /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000 */
-    UINT32              size;            /**< Number of items or TDRP_VAR_SIZE (0)                     */
-    struct TRDP_DATASET *pCachedDS;      /**< Used internally for marshalling speed-up                 */
+    UINT32              type;           /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000   */
+    UINT32              size;           /**< Number of items or TDRP_VAR_SIZE (0)                       */
+    CHAR8               *unit;          /**< Unit text for visualisation                                */
+    REAL32              scale;          /**< Factor for visualisation                                   */
+    INT32               offset;         /**< Offset for visualisation   (val = scale * x + offset)      */
+    struct TRDP_DATASET *pCachedDS;     /**< Used internally for marshalling speed-up                   */
 } TRDP_DATASET_ELEMENT_T;
 
 /**    Dataset definition    */
@@ -448,7 +452,7 @@ typedef struct
     TRDP_IP_ADDR_T  joinedAddr; /**< Joined IP address */
     UINT32          callBack;   /**< Call back function if used */
     UINT32          userRef;    /**< User reference if used */
-    UINT32          numSessions;/**< Number of sessions  */
+    UINT32          numSessions; /**< Number of sessions  */
 } TRDP_LIST_STATISTICS_T;
 
 
@@ -647,7 +651,7 @@ typedef enum
                                                   Default: OFF                                              */
     TRDP_OPTION_NO_REUSE_ADDR   = 0x04,         /**< Do not allow re-use of address/port (-> no multihoming)
                                                   Default: Allow                                            */
-    TRDP_OPTION_NO_MC_LOOP_BACK   = 0x08,       /**< Do not allow loop back of multicast traffic
+    TRDP_OPTION_NO_MC_LOOP_BACK = 0x08,         /**< Do not allow loop back of multicast traffic
                                                   Default: Allow                                            */
     TRDP_OPTION_NO_UDP_CHK      = 0x10          /**< Suppress UDP CRC generation
                                                   Default: Compute UDP CRC                                  */
