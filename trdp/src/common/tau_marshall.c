@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-02-11: Ticket #108: missing initialisation of size-pointer
  *      BL 2016-02-04: Ticket #109: size_marshall -> size_unmarshall
  *      BL 2016-02-03: Ticket #108: Uninitialized info variable
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
@@ -689,7 +690,7 @@ static TRDP_ERR_T unmarshallDs (
 
                     while (noOfItems-- > 0)
                     {
-                        *pDst32     =  ((UINT32)(*pSrc++)) << 24;
+                        *pDst32     = ((UINT32)(*pSrc++)) << 24;
                         *pDst32     += ((UINT32)(*pSrc++)) << 16;
                         *pDst32     += ((UINT32)(*pSrc++)) << 8;
                         *pDst32     += *pSrc++;
@@ -712,8 +713,8 @@ static TRDP_ERR_T unmarshallDs (
 
                     while (noOfItems-- > 0)
                     {
-                        pDst32  =  (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        *pDst32 =  ((UINT32)(*pSrc++)) << 24;
+                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+                        *pDst32 = ((UINT32)(*pSrc++)) << 24;
                         *pDst32 += ((UINT32)(*pSrc++)) << 16;
                         *pDst32 += ((UINT32)(*pSrc++)) << 8;
                         *pDst32 += *pSrc++;
@@ -729,7 +730,7 @@ static TRDP_ERR_T unmarshallDs (
                 case TRDP_TIMEDATE64:
                 {
                     /*    This is not a base type but a structure    */
-                    UINT32 *pDst32;
+                    UINT32 *pDst32 = (UINT32 *) pDst;
 
                     if (pDst + noOfItems * 8 > pInfo->pDstEnd)
                     {
@@ -738,14 +739,14 @@ static TRDP_ERR_T unmarshallDs (
 
                     while (noOfItems-- > 0)
                     {
-                        pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
-                        *pDst32 =  ((UINT32)(*pSrc++)) << 24;
+                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
+                        *pDst32 = ((UINT32)(*pSrc++)) << 24;
                         *pDst32 += ((UINT32)(*pSrc++)) << 16;
                         *pDst32 += ((UINT32)(*pSrc++)) << 8;
                         *pDst32 += *pSrc++;
                         pDst32++;
-                        pDst32  =  (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
-                        *pDst32 =  ((UINT32)(*pSrc++)) << 24;
+                        pDst32  = (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
+                        *pDst32 = ((UINT32)(*pSrc++)) << 24;
                         *pDst32 += ((UINT32)(*pSrc++)) << 16;
                         *pDst32 += ((UINT32)(*pSrc++)) << 8;
                         *pDst32 += *pSrc++;
@@ -773,7 +774,7 @@ static TRDP_ERR_T unmarshallDs (
             pInfo->pSrc = pSrc;
         }
     }
-    
+
     if (pInfo->pSrc > pInfo->pSrcEnd)
     {
         return TRDP_MARSHALLING_ERR;
@@ -802,27 +803,27 @@ static TRDP_ERR_T size_unmarshall (
 {
     TRDP_ERR_T  err;
     UINT16      lIndex;
-    UINT32      var_size = 0;
-    UINT8       *pSrc = pInfo->pSrc;
-    UINT8       *pDst = pInfo->pDst;
-    
+    UINT32      var_size    = 0;
+    UINT8       *pSrc       = pInfo->pSrc;
+    UINT8       *pDst       = pInfo->pDst;
+
     /* Restrict recursion */
     pInfo->level++;
     if (pInfo->level > TAU_MAX_DS_LEVEL)
     {
         return TRDP_STATE_ERR;
     }
-    
+
     /*    Loop over all datasets in the array    */
     for (lIndex = 0; lIndex < pDataset->numElement && pInfo->pSrcEnd > pInfo->pSrc; ++lIndex)
     {
         UINT32 noOfItems = pDataset->pElement[lIndex].size;
-        
+
         if (TDRP_VAR_SIZE == noOfItems) /* variable size    */
         {
             noOfItems = var_size;
         }
-        
+
         /*    Is this a composite type?    */
         if (pDataset->pElement[lIndex].type > (UINT32) TRDP_TYPE_MAX)
         {
@@ -835,13 +836,13 @@ static TRDP_ERR_T size_unmarshall (
                     /* Look for it   */
                     pDataset->pElement[lIndex].pCachedDS = findDs(pDataset->pElement[lIndex].type);
                 }
-                
+
                 if (NULL == pDataset->pElement[lIndex].pCachedDS)      /* Not in our DB    */
                 {
                     vos_printLog(VOS_LOG_ERROR, "ComID/DatasetID (%u) unknown\n", pDataset->pElement[lIndex].type);
                     return TRDP_COMID_ERR;
                 }
-                
+
                 err = size_unmarshall(pInfo, pDataset->pElement[lIndex].pCachedDS);
                 if (err != TRDP_NO_ERR)
                 {
@@ -862,7 +863,7 @@ static TRDP_ERR_T size_unmarshall (
                 {
                     /*    possible variable source size    */
                     var_size = *pSrc;
-                    
+
                     while (noOfItems-- > 0)
                     {
                         pDst++;
@@ -875,10 +876,10 @@ static TRDP_ERR_T size_unmarshall (
                 case TRDP_UINT16:
                 {
                     UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
-                    
+
                     /*    possible variable source size    */
-                    var_size = *(UINT16*)pSrc;
-                    
+                    var_size = *(UINT16 *)pSrc;
+
                     while (noOfItems-- > 0)
                     {
                         pDst16++;
@@ -893,10 +894,10 @@ static TRDP_ERR_T size_unmarshall (
                 case TRDP_TIMEDATE32:
                 {
                     UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
-                    
+
                     /*    possible variable source size    */
-                    var_size = *(UINT32*)pSrc;
-                    
+                    var_size = *(UINT32 *)pSrc;
+
                     while (noOfItems-- > 0)
                     {
                         pSrc += 4;
@@ -909,27 +910,27 @@ static TRDP_ERR_T size_unmarshall (
                 {
                     /*    This is not a base type but a structure    */
                     UINT16 *pDst16;
-                    
+
                     while (noOfItems-- > 0)
                     {
                         pDst16  = (UINT16 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
                         pDst16  += 3;
                         pSrc    += 6;
-                        pDst = (UINT8 *) pDst16;
+                        pDst    = (UINT8 *) pDst16;
                     }
                     break;
                 }
                 case TRDP_TIMEDATE64:
                 {
                     UINT32 *pDst32;
-                    
+
                     while (noOfItems-- > 0)
                     {
-                        pDst32 = (UINT32*) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
+                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
                         pSrc    += 8;
-                        pDst32  ++;
-                        pDst32 = (UINT32*) alignePtr((UINT8*) pDst32, ALIGNOF(UINT32));
-                        pDst = (UINT8 *) pDst32++;
+                        pDst32++;
+                        pDst32  = (UINT32 *) alignePtr((UINT8 *) pDst32, ALIGNOF(UINT32));
+                        pDst    = (UINT8 *) pDst32++;
                     }
                     break;
                 }
@@ -938,31 +939,31 @@ static TRDP_ERR_T size_unmarshall (
                 case TRDP_REAL64:
                 {
                     UINT32 *pDst32;
-                    
+
                     while (noOfItems-- > 0)
                     {
-                        pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT64));
+                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT64));
                         pSrc    += 8;
                         pDst32  += 2;
-                        pDst = (UINT8 *) pDst32;
+                        pDst    = (UINT8 *) pDst32;
                     }
                     break;
                 }
                 default:
                     break;
             }
-            
+
             /* Update info structure if we need to! (was issue #137) */
             pInfo->pDst = pDst;
             pInfo->pSrc = pSrc;
         }
     }
-    
+
     if (pInfo->pSrc > pInfo->pSrcEnd)
     {
         return TRDP_MARSHALLING_ERR;
     }
-    
+
     return TRDP_NO_ERR;
 }
 

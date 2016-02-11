@@ -7,8 +7,10 @@
 #//
 #// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
 #// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-#// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013/2014. All rights reserved.
+#// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013-2016. All rights reserved.
 #//
+#// BL 2016-02-11: Ticket #88 Cleanup makefiles, remove dependencies on external libraries
+
 
 #// Support for POSIX and VXWORKS, set buildsettings and config first!
  .EXPORT_ALL_VARIABLES:
@@ -29,7 +31,7 @@ INCPATH += -I src/api
 VOS_PATH = -I src/vos/$(TARGET_VOS)
 VOS_INCPATH = -I src/vos/api -I src/common
 
-vpath %.c src/common src/vos/common test/udpmdcom src/vos/$(TARGET_VOS) test example test/diverse
+vpath %.c src/common src/vos/common test/udpmdcom src/vos/$(TARGET_VOS) test example test/diverse test/xml
 vpath %.h src/api src/vos/api src/common src/vos/common
 
 INCLUDES = $(INCPATH) $(VOS_INCPATH) $(VOS_PATH)
@@ -56,6 +58,15 @@ TRDP_OBJS = trdp_pdcom.o \
 	    trdp_stats.o \
 	    $(VOS_OBJS)
 
+# Optional objects for full blown TRDP usage
+TRDP_OPT_OBJS = trdp_xml.o \
+		tau_xml.o \
+		tau_marshall.o \
+		tau_dnr.o \
+		tau_tti.o \
+		tau_ctrl.o
+
+
 # Set LINT Objects
 LINT_OBJECTS = trdp_stats.lob\
            vos_utils.lob \
@@ -81,7 +92,6 @@ TRDP_OBJS += trdp_mdcom.o
 CFLAGS += -DMD_SUPPORT=1
 endif
 
-
 ifeq ($(DEBUG), TRUE)
 	OUTDIR = bld/output/$(ARCH)-dbg
 else
@@ -104,7 +114,7 @@ endif
 TARGETS = outdir libtrdp
 
 ifneq ($(TARGET_OS),VXWORKS)
-TARGETS += example test pdtest mdtest
+TARGETS += example test pdtest mdtest xml
 else
 TARGETS += vtests
 endif
@@ -112,8 +122,7 @@ endif
 all:	$(TARGETS)
 
 outdir:
-	mkdir -p $(OUTDIR)
-#outdir libtrdp demo example test pdtest mdtest vtests
+	@$(MD) $(OUTDIR)
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
@@ -127,6 +136,8 @@ mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/trdp-md-reptestcaller $(OUTDIR)
 
 vtests:		outdir $(OUTDIR)/vtest
 
+xml:		outdir $(OUTDIR)/trdp-xmlprint-test $(OUTDIR)/trdp-xmlpd-test
+
 
 
 %_config:
@@ -135,7 +146,7 @@ vtests:		outdir $(OUTDIR)/vtest
 $(OUTDIR)/%.o: %.c %.h trdp_if_light.h trdp_types.h vos_types.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(OUTDIR)/libtrdp.a:	$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
+$(OUTDIR)/libtrdp.a:		$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
 			@echo ' ### Building the lib $(@F)'
 			$(RM) $@
 			$(AR) cq $@ $^
@@ -214,6 +225,22 @@ $(OUTDIR)/mdManager: mdManager.c  $(OUTDIR)/libtrdp.a
 # rule for the various test binaries
 #
 ###############################################################################
+$(OUTDIR)/trdp-xmlprint-test:  trdp-xmlprint-test.c  $(OUTDIR)/libtrdp.a $(addprefix $(OUTDIR)/,$(notdir $(TRDP_OPT_OBJS)))
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $^ \
+			$(CFLAGS) $(INCLUDES) -o $@ \
+			-ltrdp -lz \
+			$(LDFLAGS)
+			$(STRIP) $@
+
+$(OUTDIR)/trdp-xmlpd-test:  trdp-xmlpd-test.c  $(OUTDIR)/libtrdp.a $(OUTDIR)/libtrdp.a $(addprefix $(OUTDIR)/,$(notdir $(TRDP_OPT_OBJS)))
+			@$(ECHO) ' ### Building application $(@F)'
+			$(CC) $^  \
+			$(CFLAGS) $(INCLUDES) -o $@\
+			-ltrdp -lz \
+			$(LDFLAGS)
+			$(STRIP) $@
+
 $(OUTDIR)/mdTest4: mdTest4.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building UDPMDCom test application $(@F)'
 			$(CC) test/udpmdcom/mdTest4.c \
@@ -397,7 +424,8 @@ help:
 	@echo "  * make mdtest    # build the UDPMDcom test application" >&2
 	@echo "  * make example   # build the example for MD communication, but needs libuuid!" >&2
 	@echo "  * make libtrdp   # build the static library, only" >&2
-	@echo " " >&2	
+	@echo "  * make xml       # build the xml test applications" >&2
+	@echo " " >&2
 	@echo "Static analysis (currently in prototype state) " >&2
 	@echo "  * make lint      - build LINT analysis files using the LINT binary under $FLINT" >&2	
 	@echo " " >&2	
