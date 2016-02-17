@@ -115,7 +115,11 @@ typedef struct
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
-    UINT16                  reserved01;     /**< reserved (=0)                                                      */
+    UINT8                   reserved01;     /**< reserved (=0)                                                      */
+    UINT8                   leadVehOfCst;   /**< position of leading vehicle in consist range 0...32
+                                                    0 = not defined
+                                                    1 = first vehicle in consist in direction 1
+                                                    2 = second vehicle etc.                                         */
     TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT8                   inhibit;        /**< inauguration inhibit
                                                     0 = no inhibit request
