@@ -320,13 +320,13 @@ typedef struct
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
     UINT8                   reserved02;     /**< reserved for future use (= 0) */
     UINT8                   etbId;          /**< identification of the ETB the TTDB is computed for
-                                                 bit0: ETB0 (operational network)
-                                                 bit1: ETB1 (multimedia network)
-                                                 bit2: ETB2 (other network)
-                                                 bit3: ETB3 (other network) */
+                                                 0: ETB0 (operational network)
+                                                 1: ETB1 (multimedia network)
+                                                 2: ETB2 (other network)
+                                                 3: ETB3 (other network) */
     UINT8                   trnDirState;    /**< TTDB status: '01'B == unconfirmed, '10'B == confirmed */
-    UINT8                   opTrnDirState;  /**< Operatiobal train directory status:
-                                                 '01'B == ivnalid, '10'B == valid */
+    UINT8                   opTrnDirState;  /**< Operational train directory status:
+                                                 '01'B == invalid, '10'B == valid, '100'B == shared */
     UINT8                   reserved03;     /**< reserved for future use (= 0) */
     TRDP_LABEL_T            trnId;          /**< train identifier, application defined
                                                  (e.g. 'ICE75', 'IC346'), informal */
@@ -342,10 +342,10 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< Train info structure version */
     UINT8                   etbId;          /**< identification of the ETB the TTDB is computed for
-                                                 bit0: ETB0 (operational network)
-                                                 bit1: ETB1 (multimedia network)
-                                                 bit2: ETB2 (other network)
-                                                 bit3: ETB3 (other network) */
+                                                 0: ETB0 (operational network)
+                                                 1: ETB1 (multimedia network)
+                                                 2: ETB2 (other network)
+                                                 3: ETB3 (other network) */
     UINT8                   opTrnOrient;    /**< operational train orientation
                                                  '00'B = unknown
                                                  '01'B = same as train direction
@@ -371,51 +371,51 @@ typedef struct
 } GNU_PACKED TRDP_OP_TRAIN_DIR_T;
 
 
-    /** Operational Train directory status info structure */
-    typedef struct
-    {
-        TRDP_OP_TRAIN_DIR_STATE_T   state;
-        UINT32                      etbTopoCnt;
-        UINT8                       ownOpCstNo;
-        UINT8                       ownTrnCstNo;
-        UINT16                      reserved02;
-        TRDP_ETB_CTRL_VDP_T         safetyTrail;
-    } GNU_PACKED TRDP_OP_TRAIN_DIR_STATUS_INFO_T;
-    
-    
-    /** Train network directory entry structure acc. to IEC61375-2-5 */
-    typedef struct
-    {
-        TRDP_UUID_T             cstUUID;        /**< unique consist identifier */
-        UINT32                  cstNetProp;     /**< consist network properties
-                                                 bit0..1:   consist orientation
-                                                 bit2..7:   0
-                                                 bit8..13:  ETBN Id
-                                                 bit14..15: 0
-                                                 bit16..21: subnet Id
-                                                 bit24..29: CN Id
-                                                 bit30..31: 0 */
-    } GNU_PACKED TRDP_TRAIN_NET_DIR_ENTRY_T;
-    
-    
-    /** Train network directory structure */
-    typedef struct
-    {
-        UINT16                  reserved01;     /**< reserved for future use (= 0) */
-        UINT16                  entryCnt;       /**< number of entries in train network directory */
-        TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
-        /**< train network directory */
-        UINT32                  etbTopoCnt;     /**< train network directory CRC */
-    } GNU_PACKED TRDP_TRAIN_NET_DIR_T;
-    
-    /** Complete TTDB structure */
-    typedef struct
-    {
-        TRDP_OP_TRAIN_DIR_STATE_T   state;          /**< operational state of the train */
-        TRDP_OP_TRAIN_DIR_T         opTrnDir;       /**< operational directory          */
-        TRDP_TRAIN_DIR_T            trnDir;         /**< train directory                */
-        TRDP_TRAIN_NET_DIR_T        trnNetDir;      /**< network directory              */
-    } GNU_PACKED TRDP_READ_COMPLETE_REPLY_T;
+/** Operational Train directory status info structure */
+typedef struct
+{
+    TRDP_OP_TRAIN_DIR_STATE_T   state;
+    UINT32                      etbTopoCnt;
+    UINT8                       ownOpCstNo;
+    UINT8                       ownTrnCstNo;
+    UINT16                      reserved02;
+    TRDP_ETB_CTRL_VDP_T         safetyTrail;
+} GNU_PACKED TRDP_OP_TRAIN_DIR_STATUS_INFO_T;
+
+
+/** Train network directory entry structure acc. to IEC61375-2-5 */
+typedef struct
+{
+    TRDP_UUID_T             cstUUID;        /**< unique consist identifier */
+    UINT32                  cstNetProp;     /**< consist network properties
+                                             bit0..1:   consist orientation
+                                             bit2..7:   0
+                                             bit8..13:  ETBN Id
+                                             bit14..15: 0
+                                             bit16..21: subnet Id
+                                             bit24..29: CN Id
+                                             bit30..31: 0 */
+} GNU_PACKED TRDP_TRAIN_NET_DIR_ENTRY_T;
+
+
+/** Train network directory structure */
+typedef struct
+{
+    UINT16                  reserved01;     /**< reserved for future use (= 0) */
+    UINT16                  entryCnt;       /**< number of entries in train network directory */
+    TRDP_TRAIN_NET_DIR_ENTRY_T trnNetDir[TRDP_MAX_CST_CNT];
+    /**< train network directory */
+    UINT32                  etbTopoCnt;     /**< train network directory CRC */
+} GNU_PACKED TRDP_TRAIN_NET_DIR_T;
+
+/** Complete TTDB structure */
+typedef struct
+{
+    TRDP_OP_TRAIN_DIR_STATE_T   state;          /**< operational state of the train */
+    TRDP_OP_TRAIN_DIR_T         opTrnDir;       /**< operational directory          */
+    TRDP_TRAIN_DIR_T            trnDir;         /**< train directory                */
+    TRDP_TRAIN_NET_DIR_T        trnNetDir;      /**< network directory              */
+} GNU_PACKED TRDP_READ_COMPLETE_REPLY_T;
 
 
 
