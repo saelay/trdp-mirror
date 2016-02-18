@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2016-02-18: Ticket #7: Add train topology information support
  */
 
 #ifndef TAU_TTI_H
@@ -199,7 +200,7 @@ EXT_DECL TRDP_ERR_T tau_getTrnVehCnt (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pCstVehCnt      Pointer to the number of vehicles to be returned
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -208,7 +209,7 @@ EXT_DECL TRDP_ERR_T tau_getTrnVehCnt (
 EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
 	TRDP_APP_SESSION_T   appHandle,
     UINT16              *pCstVehCnt,
-    const TRDP_LABEL_T   cstLabel);
+    const TRDP_LABEL_T   pCstLabel);
 
 
 /**********************************************************************************************************************/
@@ -217,7 +218,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pCstFctCnt      Pointer to the number of functions to be returned
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -226,7 +227,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
 EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
 	TRDP_APP_SESSION_T   appHandle,
     UINT16              *pCstFctCnt,
-    const TRDP_LABEL_T   cstLabel);
+    const TRDP_LABEL_T   pCstLabel);
 
 
 /* ---------------------------------------------------------------------------- */
@@ -238,7 +239,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pFctInfo        Pointer to function info list to be returned.
  *                                  Memory needs to be provided by application. Set NULL if not used.
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *  @param[in]      maxFctCnt       Maximal number of functions to be returned in provided buffer.
  *
  *  @retval         TRDP_NO_ERR     no error
@@ -248,7 +249,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
 EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
 	TRDP_APP_SESSION_T      appHandle,
     TRDP_FUNCTION_INFO_T   *pFctInfo,
-    const TRDP_LABEL_T      cstLabel,
+    const TRDP_LABEL_T      pCstLabel,
     UINT16                  maxFctCnt);
 
 
@@ -258,8 +259,8 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pVehInfo        Pointer to the vehicle info to be returned. 
- *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means own vehicle  if cstLabel refers to own consist.
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pVehLabel       Pointer to a vehicle label. NULL means own vehicle  if cstLabel refers to own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -268,8 +269,8 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
 EXT_DECL TRDP_ERR_T tau_getVehInfo (
 	TRDP_APP_SESSION_T      appHandle,
     TRDP_VEHICLE_INFO_T    *pVehInfo,
-    const TRDP_LABEL_T      vehLabel,
-    const TRDP_LABEL_T      cstLabel);
+    const TRDP_LABEL_T      pVehLabel,
+    const TRDP_LABEL_T      pCstLabel);
 
 
 /**********************************************************************************************************************/
@@ -278,7 +279,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pCstInfo        Pointer to the consist info to be returned.
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -287,7 +288,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
 EXT_DECL TRDP_ERR_T tau_getCstInfo (
 	TRDP_APP_SESSION_T      appHandle,
     TRDP_CONSIST_INFO_T    *pCstInfo,
-    const TRDP_LABEL_T      cstLabel);
+    const TRDP_LABEL_T      pCstLabel);
 
 
 /* ---------------------------------------------------------------------------- */
@@ -305,8 +306,8 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
  *                                   '00'B = not known (corrected vehicle)
  *                                   '01'B = same as operational train direction
  *                                   '10'B = inverse to operational train direction
- *  @param[in]      vehLabel        vehLabel = NULL means own vehicle if cstLabel == NULL
- *  @param[in]      cstLabel        cstLabel = NULL means own consist
+ *  @param[in]      pVehLabel       vehLabel = NULL means own vehicle if cstLabel == NULL
+ *  @param[in]      pCstLabel       cstLabel = NULL means own consist
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -316,8 +317,8 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
 	TRDP_APP_SESSION_T   appHandle,
     UINT8               *pVehOrient,
     UINT8               *pCstOrient,
-    TRDP_LABEL_T         vehLabel,
-    TRDP_LABEL_T         cstLabel);
+    TRDP_LABEL_T        pVehLabel,
+    TRDP_LABEL_T        pCstLabel);
 
 
 
