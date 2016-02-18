@@ -18,10 +18,11 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2016. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-02-18: Ticket #7: Add train topology information support
  */
 
 /***********************************************************************************************************************
@@ -36,6 +37,7 @@
 #include "tau_marshall.h"
 #include "tau_tti.h"
 #include "iec61375-2-3.h"
+#include "vos_sock.h"
 
 #include "tau_cstinfo.c"
 
@@ -277,7 +279,7 @@ static void ttiStoreTrnNetDir (
     if (appHandle->pTTDB->trnNetDir.entryCnt > TRDP_MAX_CST_CNT)
     {
         vos_printLog(VOS_LOG_ERROR, "Max count of consists of received train net dir exceeded (%d)!\n",
-                     vos_ntohs(pTelegram->entryCnt));
+                     vos_ntohs(appHandle->pTTDB->trnNetDir.entryCnt));
         return;
     }
 
@@ -920,7 +922,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
     }
     if (index < TTI_CACHED_CONSISTS)
     {
-        *pCstVehCnt = appHandle->pTTDB->cstInfo[index]->vehCnt;
+        *pCstVehCnt = vos_ntohs(appHandle->pTTDB->cstInfo[index]->vehCnt);
     }
     else    /* not found, get it and return directly */
     {
@@ -939,7 +941,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pCstFctCnt      Pointer to the number of functions to be returned
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -948,8 +950,43 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
 EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
     TRDP_APP_SESSION_T  appHandle,
     UINT16              *pCstFctCnt,
-    const TRDP_LABEL_T  cstLabel)
+    const TRDP_LABEL_T  pCstLabel)
 {
+    UINT32 index;
+    if (appHandle == NULL ||
+        appHandle->pTTDB == NULL ||
+        pCstFctCnt == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    if (pCstLabel == NULL)
+    {
+        index = 0;
+    }
+    else
+    {
+        /* find the consist in our cache list */
+        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        {
+            if (appHandle->pTTDB->cstInfo[index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            {
+                break;
+            }
+        }
+    }
+    if (index < TTI_CACHED_CONSISTS)
+    {
+        *pCstFctCnt = vos_ntohs(appHandle->pTTDB->cstInfo[index]->fctCnt);
+    }
+    else    /* not found, get it and return directly */
+    {
+        TRDP_UUID_T cstUUID;
+        ttiGetUUIDfromLabel(appHandle, cstUUID, pCstLabel);
+        ttiRequestTTDBdata(appHandle, TTDB_STAT_CST_REQ_COMID, cstUUID);
+        return TRDP_NODATA_ERR;
+    }
     return TRDP_NO_ERR;
 }
 
@@ -963,7 +1000,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pFctInfo        Pointer to function info list to be returned.
  *                                  Memory needs to be provided by application. Set NULL if not used.
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *  @param[in]      maxFctCnt       Maximal number of functions to be returned in provided buffer.
  *
  *  @retval         TRDP_NO_ERR     no error
@@ -973,9 +1010,50 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
 EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_FUNCTION_INFO_T    *pFctInfo,
-    const TRDP_LABEL_T      cstLabel,
+    const TRDP_LABEL_T      pCstLabel,
     UINT16                  maxFctCnt)
 {
+    UINT32 index, index2;
+    if (appHandle == NULL ||
+        appHandle->pTTDB == NULL ||
+        pFctInfo == NULL ||
+        maxFctCnt == 0)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    if (pCstLabel == NULL)
+    {
+        index = 0;
+    }
+    else
+    {
+        /* find the consist in our cache list */
+        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        {
+            if (appHandle->pTTDB->cstInfo[index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            {
+                break;
+            }
+        }
+    }
+    if (index < TTI_CACHED_CONSISTS)
+    {
+        for (index2 = 0; index2 <  vos_ntohs(appHandle->pTTDB->cstInfo[index]->fctCnt) &&
+             index2 < maxFctCnt; ++index2)
+        {
+            pFctInfo[index2] = appHandle->pTTDB->cstInfo[index]->pFctInfoList[index2];
+            pFctInfo[index2].fctId = vos_ntohs(pFctInfo[index2].fctId);
+        }
+    }
+    else    /* not found, get it and return directly */
+    {
+        TRDP_UUID_T cstUUID;
+        ttiGetUUIDfromLabel(appHandle, cstUUID, pCstLabel);
+        ttiRequestTTDBdata(appHandle, TTDB_STAT_CST_REQ_COMID, cstUUID);
+        return TRDP_NODATA_ERR;
+    }
     return TRDP_NO_ERR;
 }
 
@@ -986,8 +1064,8 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pVehInfo        Pointer to the vehicle info to be returned.
- *  @param[in]      vehLabel        Pointer to a vehicle label. NULL means own vehicle  if cstLabel refers to own consist.
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pVehLabel       Pointer to a vehicle label. NULL means own vehicle  if cstLabel refers to own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -996,9 +1074,51 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
 EXT_DECL TRDP_ERR_T tau_getVehInfo (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_VEHICLE_INFO_T *pVehInfo,
-    const TRDP_LABEL_T  vehLabel,
-    const TRDP_LABEL_T  cstLabel)
+    const TRDP_LABEL_T  pVehLabel,
+    const TRDP_LABEL_T  pCstLabel)
 {
+    UINT32 index, index2;
+    if (appHandle == NULL ||
+        appHandle->pTTDB == NULL ||
+        pVehInfo == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    if (pCstLabel == NULL)
+    {
+        index = 0;
+    }
+    else
+    {
+        /* find the consist in our cache list */
+        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        {
+            if (appHandle->pTTDB->cstInfo[index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            {
+                break;
+            }
+        }
+    }
+    if (index < TTI_CACHED_CONSISTS)
+    {
+        for (index2 = 0; index2 < vos_ntohs(appHandle->pTTDB->cstInfo[index]->vehCnt); ++index2)
+        {
+            if (pVehLabel == NULL ||
+                vos_strnicmp(pVehLabel, appHandle->pTTDB->cstInfo[index]->pVehInfoList[index2].vehId, sizeof(TRDP_LABEL_T)) == 0)
+            {
+                *pVehInfo = appHandle->pTTDB->cstInfo[index]->pVehInfoList[index2];
+            }
+        }
+    }
+    else    /* not found, get it and return directly */
+    {
+        TRDP_UUID_T cstUUID;
+        ttiGetUUIDfromLabel(appHandle, cstUUID, pCstLabel);
+        ttiRequestTTDBdata(appHandle, TTDB_STAT_CST_REQ_COMID, cstUUID);
+        return TRDP_NODATA_ERR;
+    }
     return TRDP_NO_ERR;
 }
 
@@ -1009,7 +1129,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[out]     pCstInfo        Pointer to the consist info to be returned.
- *  @param[in]      cstLabel        Pointer to a consist label. NULL means own consist.
+ *  @param[in]      pCstLabel       Pointer to a consist label. NULL means own consist.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -1018,8 +1138,46 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
 EXT_DECL TRDP_ERR_T tau_getCstInfo (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_CONSIST_INFO_T *pCstInfo,
-    const TRDP_LABEL_T  cstLabel)
+    const TRDP_LABEL_T  pCstLabel)
 {
+    UINT32 index;
+    if (appHandle == NULL ||
+        appHandle->pTTDB == NULL ||
+        pCstInfo == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    if (pCstLabel == NULL)
+    {
+        index = 0;
+    }
+    else
+    {
+        /* find the consist in our cache list */
+        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        {
+            if (appHandle->pTTDB->cstInfo[index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            {
+                break;
+            }
+        }
+    }
+    if (index < TTI_CACHED_CONSISTS)
+    {
+        *pCstInfo = *appHandle->pTTDB->cstInfo[index];
+        pCstInfo->etbCnt = vos_ntohs(pCstInfo->etbCnt);
+        pCstInfo->vehCnt = vos_ntohs(pCstInfo->vehCnt);
+        pCstInfo->fctCnt = vos_ntohs(pCstInfo->fctCnt);
+    }
+    else    /* not found, get it and return directly */
+    {
+        TRDP_UUID_T cstUUID;
+        ttiGetUUIDfromLabel(appHandle, cstUUID, pCstLabel);
+        ttiRequestTTDBdata(appHandle, TTDB_STAT_CST_REQ_COMID, cstUUID);
+        return TRDP_NODATA_ERR;
+    }
     return TRDP_NO_ERR;
 }
 
@@ -1039,8 +1197,8 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
  *                                   '00'B = not known (corrected vehicle)
  *                                   '01'B = same as operational train direction
  *                                   '10'B = inverse to operational train direction
- *  @param[in]      vehLabel        vehLabel = NULL means own vehicle if cstLabel == NULL
- *  @param[in]      cstLabel        cstLabel = NULL means own consist
+ *  @param[in]      pVehLabel       vehLabel = NULL means own vehicle if cstLabel == NULL
+ *  @param[in]      pCstLabel       cstLabel = NULL means own consist
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -1050,8 +1208,67 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     TRDP_APP_SESSION_T  appHandle,
     UINT8               *pVehOrient,
     UINT8               *pCstOrient,
-    TRDP_LABEL_T        vehLabel,
-    TRDP_LABEL_T        cstLabel)
+    TRDP_LABEL_T        pVehLabel,
+    TRDP_LABEL_T        pCstLabel)
 {
+    UINT32 index, index2, index3;
+    
+    if (appHandle == NULL ||
+        appHandle->pTTDB == NULL ||
+        pVehOrient == NULL ||
+        pCstOrient == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    
+    *pVehOrient = 0;
+    *pCstOrient = 0;
+
+    if (pCstLabel == NULL)
+    {
+        index = 0;
+    }
+    else
+    {
+        /* find the consist in our cache list */
+        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        {
+            if (appHandle->pTTDB->cstInfo[index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            {
+                break;
+            }
+        }
+    }
+    if (index < TTI_CACHED_CONSISTS)
+    {
+        /* Search the vehicles in the OP_TRAIN_DIR for a matching vehID */
+        
+        for (index2 = 0; index2 < appHandle->pTTDB->opTrnDir.opCstCnt; index2++)
+        {
+            if (vos_strnicmp((CHAR8*) appHandle->pTTDB->opTrnDir.opCstList[index2].cstUUID,
+                             (CHAR8*) appHandle->pTTDB->cstInfo[index]->cstUUID, sizeof(TRDP_UUID_T)) == 0)
+            {
+                /* consist found   */
+                *pCstOrient = appHandle->pTTDB->opTrnDir.opCstList[index2].opCstOrient;
+                
+                for (index3 = 0; index3 < appHandle->pTTDB->opTrnDir.opVehCnt; index3++)
+                {
+                    if (appHandle->pTTDB->opTrnDir.opVehList[index3].ownOpCstNo == appHandle->pTTDB->opTrnDir.opCstList[index2].opCstNo)
+                    {
+                        *pVehOrient = appHandle->pTTDB->opTrnDir.opVehList[index3].vehOrient;
+                        return TRDP_NO_ERR;
+                    }
+                }
+            }
+        }
+    }
+    else    /* not found, get it and return directly */
+    {
+        TRDP_UUID_T cstUUID;
+        ttiGetUUIDfromLabel(appHandle, cstUUID, pCstLabel);
+        ttiRequestTTDBdata(appHandle, TTDB_STAT_CST_REQ_COMID, cstUUID);
+        return TRDP_NODATA_ERR;
+    }
     return TRDP_NO_ERR;
 }
