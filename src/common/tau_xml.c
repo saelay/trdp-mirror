@@ -220,6 +220,8 @@ TRDP_ERR_T readTelegramDef (
     CHAR8   value[MAX_TOK_LEN];
     UINT32  valueInt;
     UINT32  countSrc, countDst;
+    TRDP_SRC_T  *pSrc;
+    TRDP_DEST_T *pDest;
 
     /* Get the attributes */
 
@@ -261,15 +263,16 @@ TRDP_ERR_T readTelegramDef (
         }
     }
 
-    if (pExchgParam->comId == 1005)
+    if (pExchgParam->comId == 10002)
     {
-        printf("1005");
+        printf("10002");
     }
-    /* trdp_XMLEnter(pXML); */
 
     /* find out how many sources are defined before hand */
     countSrc    = trdp_XMLCountStartTag(pXML, "source");
+    pSrc        = NULL;
     countDst    = trdp_XMLCountStartTag(pXML, "destination");
+    pDest        = NULL;
 
     /* Iterate thru <telegram> */
 
@@ -402,28 +405,30 @@ TRDP_ERR_T readTelegramDef (
                     return TRDP_MEM_ERR;
                 }
                 pExchgParam->srcCnt = countSrc;
+                countSrc = 0;
+                pSrc = pExchgParam->pSrc;
             }
 
             while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
             {
                 if (vos_strnicmp(attribute, "id", MAX_TOK_LEN) == 0)
                 {
-                    pExchgParam->pSrc->id = valueInt;
+                    pSrc->id = valueInt;
                 }
                 else if (vos_strnicmp(attribute, "uri1", MAX_TOK_LEN) == 0)
                 {
                     char *p = strchr(value, '@');   /* Get host part only */
                     if (p != NULL)
                     {
-                        pExchgParam->pSrc->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
-                        if (pExchgParam->pSrc->pUriUser == NULL)
+                        pSrc->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+                        if (pSrc->pUriUser == NULL)
                         {
                             vos_printLog(VOS_LOG_ERROR,
                                          "%u Bytes failed to allocate while reading XML source definitions!\n",
                                          TRDP_MAX_URI_USER_LEN + 1);
                             return TRDP_MEM_ERR;
                         }
-                        memcpy(pExchgParam->pSrc->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
+                        memcpy(pSrc->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
                         p++;
                     }
                     else
@@ -431,38 +436,39 @@ TRDP_ERR_T readTelegramDef (
                         p = value;
                     }
 
-                    pExchgParam->pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
-                    if (pExchgParam->pSrc->pUriHost1 == NULL)
+                    pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+                    if (pSrc->pUriHost1 == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pExchgParam->pSrc->pUriHost1, p, TRDP_MAX_URI_HOST_LEN);
+                    vos_strncpy((char *)pSrc->pUriHost1, p, TRDP_MAX_URI_HOST_LEN);
                 }
                 else if (vos_strnicmp(attribute, "uri2", MAX_TOK_LEN) == 0)
                 {
                     char *p = strchr(value, '@');   /* Get host part only */
                     p = (p == NULL) ? value : p + 1;
 
-                    pExchgParam->pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
-                    if (pExchgParam->pSrc->pUriHost2 == NULL)
+                    pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+                    if (pSrc->pUriHost2 == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pExchgParam->pSrc->pUriHost2, p, TRDP_MAX_URI_HOST_LEN);
+                    vos_strncpy((char *)pSrc->pUriHost2, p, TRDP_MAX_URI_HOST_LEN);
                 }
             }
+#if 0
             trdp_XMLEnter(pXML);
             if (trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
             {
-                pExchgParam->pSrc->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
+                pSrc->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
 
-                if (pExchgParam->pSrc->pSdtPar == NULL)
+                if (pSrc->pSdtPar == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
                                  sizeof(TRDP_SDT_PAR_T));
@@ -473,39 +479,41 @@ TRDP_ERR_T readTelegramDef (
                 {
                     if (vos_strnicmp(attribute, "smi1", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->smi1 = valueInt;
+                        pSrc->pSdtPar->smi1 = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "smi2", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->smi2 = valueInt;
+                        pSrc->pSdtPar->smi2 = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "udv", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->udv = valueInt;
+                        pSrc->pSdtPar->udv = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "rx-period", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->rxPeriod = valueInt;
+                        pSrc->pSdtPar->rxPeriod = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "tx-period", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->txPeriod = valueInt;
+                        pSrc->pSdtPar->txPeriod = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-rxsafe", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->nrxSafe = valueInt;
+                        pSrc->pSdtPar->nrxSafe = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-guard", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->nGuard = valueInt;
+                        pSrc->pSdtPar->nGuard = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "cm-thr", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pSrc->pSdtPar->cmThr = valueInt;
+                        pSrc->pSdtPar->cmThr = valueInt;
                     }
                 }
             }
             trdp_XMLLeave(pXML);
+#endif
+            pSrc++;
         }
         else if (vos_strnicmp(tag, "destination", MAX_TAG_LEN) == 0)
         {
@@ -520,28 +528,30 @@ TRDP_ERR_T readTelegramDef (
                     return TRDP_MEM_ERR;
                 }
                 pExchgParam->destCnt = countDst;
+                countDst = 0;
+                pDest = pExchgParam->pDest;
             }
 
             while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
             {
                 if (vos_strnicmp(attribute, "id", MAX_TOK_LEN) == 0)
                 {
-                    pExchgParam->pDest->id = valueInt;
+                    pDest->id = valueInt;
                 }
                 else if (vos_strnicmp(attribute, "uri", MAX_TOK_LEN) == 0)
                 {
                     char *p = strchr(value, '@');   /* Get host part only */
                     if (p != NULL)
                     {
-                        pExchgParam->pDest->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
-                        if (pExchgParam->pDest->pUriUser == NULL)
+                        pDest->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+                        if (pDest->pUriUser == NULL)
                         {
                             vos_printLog(VOS_LOG_ERROR,
                                          "%u Bytes failed to allocate while reading XML source definitions!\n",
                                          TRDP_MAX_URI_USER_LEN + 1);
                             return TRDP_MEM_ERR;
                         }
-                        memcpy(pExchgParam->pDest->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
+                        memcpy(pDest->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
                         p++;
                     }
                     else
@@ -549,23 +559,24 @@ TRDP_ERR_T readTelegramDef (
                         p = value;
                     }
 
-                    pExchgParam->pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
-                    if (pExchgParam->pDest->pUriHost == NULL)
+                    pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+                    if (pDest->pUriHost == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pExchgParam->pDest->pUriHost, p, TRDP_MAX_URI_HOST_LEN);
+                    vos_strncpy((char *)pDest->pUriHost, p, TRDP_MAX_URI_HOST_LEN);
                 }
             }
+#if 0
             trdp_XMLEnter(pXML);
             if (trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
             {
-                pExchgParam->pDest->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
+                pDest->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
 
-                if (pExchgParam->pDest->pSdtPar == NULL)
+                if (pDest->pSdtPar == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
                                  sizeof(TRDP_SDT_PAR_T));
@@ -576,39 +587,41 @@ TRDP_ERR_T readTelegramDef (
                 {
                     if (vos_strnicmp(attribute, "smi1", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->smi1 = valueInt;
+                        pDest->pSdtPar->smi1 = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "smi2", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->smi2 = valueInt;
+                        pDest->pSdtPar->smi2 = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "udv", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->udv = valueInt;
+                        pDest->pSdtPar->udv = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "rx-period", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->rxPeriod = valueInt;
+                        pDest->pSdtPar->rxPeriod = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "tx-period", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->txPeriod = valueInt;
+                        pDest->pSdtPar->txPeriod = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-rxsafe", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->nrxSafe = valueInt;
+                        pDest->pSdtPar->nrxSafe = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-guard", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->nGuard = valueInt;
+                        pDest->pSdtPar->nGuard = valueInt;
                     }
                     else if (vos_strnicmp(attribute, "cm-thr", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pDest->pSdtPar->cmThr = valueInt;
+                        pDest->pSdtPar->cmThr = valueInt;
                     }
                 }
             }
             trdp_XMLLeave(pXML);
+#endif
+            pDest++;
         }
     }
     return TRDP_NO_ERR;
