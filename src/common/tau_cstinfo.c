@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-02-24: C89 compatibility (thanks to Robert)
  */
 
 /***********************************************************************************************************************
@@ -68,11 +69,12 @@ void cstInfoGetETBInfo (TRDP_CONSIST_INFO_T *pCstInfo,
 {
     UINT8   *pSrc   = (UINT8 *)&pCstInfo->cstProp + vos_ntohs(pCstInfo->cstProp.len) + 4 + 2;   /* pCstInfo->etbCnt   */
     UINT16  etbCnt  = vos_ntohs(*pSrc);
+    TRDP_ETB_INFO_T     *pCurInfo;
     if (index > etbCnt)
     {
         memset(pValue, 0, sizeof(TRDP_ETB_INFO_T));
     }
-    TRDP_ETB_INFO_T *pCurInfo = (TRDP_ETB_INFO_T *) (pSrc + 2);
+    pCurInfo = (TRDP_ETB_INFO_T *) (pSrc + 2);
     *pValue = pCurInfo[index];
 }
 
@@ -95,13 +97,14 @@ void cstInfoGetVehInfo (TRDP_CONSIST_INFO_T *pCstInfo,
     UINT16  etbCnt  = vos_ntohs(*pSrc);
     UINT16  vehCnt;
     UINT32  i;
+    UINT8 *pCurInfo;
     pSrc    += 2 + etbCnt * sizeof(TRDP_ETB_INFO_T) + 2;        /* pSrc points to first vehicle count    */
     vehCnt  = vos_ntohs(*pSrc);
     if (index > vehCnt)
     {
         memset(pValue, 0, sizeof(TRDP_VEHICLE_INFO_T));
     }
-    UINT8 *pCurInfo = (UINT8 *) (pSrc + 2);
+    pCurInfo = (UINT8 *) (pSrc + 2);
     *pSize = cstInfoGetVehInfoSize(pCurInfo);                   /* size of first vehicle info   */
 
     for (i = 0; i < index; i++)
@@ -124,9 +127,11 @@ void cstInfoGetFctInfo (TRDP_CONSIST_INFO_T     *pCstInfo,
     UINT16  fctCnt;
     UINT32  itemSize;
     UINT32  i;
+    UINT8   *pCurInfo;
+
     pSrc    += 2 + etbCnt * sizeof(TRDP_ETB_INFO_T) + 2;        /* pSrc points to first vehicle count    */
     vehCnt  = vos_ntohs(*(UINT16 *)pSrc);
-    UINT8   *pCurInfo = (UINT8 *) (pSrc + 2);
+    pCurInfo = (UINT8 *) (pSrc + 2);
     itemSize = cstInfoGetVehInfoSize(pCurInfo);                 /* size of first vehicle info   */
 
     for (i = 0; i < vehCnt; i++)
@@ -168,9 +173,10 @@ void cstInfoGetCltrCstInfo (
     // UINT16  cltrCstCnt;
     UINT32  itemSize;
     UINT32  i;
+    UINT8   *pCurInfo;
     pSrc    += 2 + etbCnt * sizeof(TRDP_ETB_INFO_T) + 2;        /* pSrc points to first vehicle count    */
     vehCnt  = vos_ntohs(*(UINT16 *)pSrc);
-    UINT8   *pCurInfo = (UINT8 *) (pSrc + 2);
+    pCurInfo = (UINT8 *) (pSrc + 2);
     itemSize = cstInfoGetVehInfoSize(pCurInfo);                 /* size of first vehicle info   */
 
     for (i = 0; i < vehCnt; i++)
