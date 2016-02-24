@@ -4,7 +4,8 @@
  *
  * @brief           Simple XML parser
  *
- * @details
+ * @details         Hint: Missing optional elements must be handled using the count-function, otherwise following
+ *                           elements will be following ignored!
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -15,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-02-24: missing include (thanks to Robert)
  *      BL 2016-02-11: Ticket #102: Replacing libxml2
  */
 
@@ -25,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "trdp_xml.h"
 
@@ -413,13 +416,12 @@ int trdp_XMLSeekStartTag (
 {
     int     ret;
     char    buf[MAX_TAG_LEN + 1];
-
     do
     {
         ret = trdp_XMLSeekStartTagAny(pXML, buf, sizeof(buf));
     }
     while (ret == 0 && strcmp(buf, tag) != 0);
-
+    
     return ret;
 }
 
