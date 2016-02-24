@@ -263,9 +263,9 @@ TRDP_ERR_T readTelegramDef (
         }
     }
 
-    if (pExchgParam->comId == 10002)
+    if (pExchgParam->comId == 10004)
     {
-        printf("10002");
+        printf("10004");
     }
 
     /* find out how many sources are defined before hand */
@@ -462,9 +462,9 @@ TRDP_ERR_T readTelegramDef (
                     vos_strncpy((char *)pSrc->pUriHost2, p, TRDP_MAX_URI_HOST_LEN);
                 }
             }
-#if 0
             trdp_XMLEnter(pXML);
-            if (trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
+            if (trdp_XMLCountStartTag(pXML, "sdt-parameter") > 0 &&
+                trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
             {
                 pSrc->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
 
@@ -512,7 +512,6 @@ TRDP_ERR_T readTelegramDef (
                 }
             }
             trdp_XMLLeave(pXML);
-#endif
             pSrc++;
         }
         else if (vos_strnicmp(tag, "destination", MAX_TAG_LEN) == 0)
@@ -570,9 +569,9 @@ TRDP_ERR_T readTelegramDef (
                     vos_strncpy((char *)pDest->pUriHost, p, TRDP_MAX_URI_HOST_LEN);
                 }
             }
-#if 0
             trdp_XMLEnter(pXML);
-            if (trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
+            if (trdp_XMLCountStartTag(pXML, "sdt-parameter") > 0 &&
+                trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
             {
                 pDest->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
 
@@ -620,7 +619,6 @@ TRDP_ERR_T readTelegramDef (
                 }
             }
             trdp_XMLLeave(pXML);
-#endif
             pDest++;
         }
     }
