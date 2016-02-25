@@ -27,7 +27,6 @@
  */
 #include <string.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 
 #include "trdp_types.h"
@@ -735,7 +734,7 @@ TRDP_ERR_T readXmlDatasets (
         if (trdp_XMLSeekStartTag(pXML, "data-set-list") == 0)
         {
             UINT32  count = 0;
-            int     idx;
+            UINT32  idx;
 
             trdp_XMLEnter(pXML);
 
@@ -756,7 +755,7 @@ TRDP_ERR_T readXmlDatasets (
             /* Read the interface params */
             for (idx = 0; idx < *pNumDataset && trdp_XMLSeekStartTag(pXML, "data-set") == 0; idx++)
             {
-                int i = 0;
+                UINT32 i = 0;
                 trdp_XMLEnter(pXML);
                 count = trdp_XMLCountStartTag(pXML, "element");
 
@@ -804,7 +803,7 @@ TRDP_ERR_T readXmlDatasets (
                         }
                         else if (vos_strnicmp(attribute, "scale", MAX_TOK_LEN) == 0)
                         {
-                            (*papDataset)[idx]->pElement[i].scale = atof(value);
+                            (*papDataset)[idx]->pElement[i].scale = (REAL32) atof(value);
                         }
                         else if (vos_strnicmp(attribute, "offset", MAX_TOK_LEN) == 0)
                         {
@@ -1429,7 +1428,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
 
                 if (*ppComPar != NULL)
                 {
-                    int i;
+                    UINT32 i;
                     *pNumComPar = count;
 
                     /* Read the com params */
@@ -1472,7 +1471,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
 
                 if (*ppIfConfig != NULL)
                 {
-                    int i;
+                    UINT32 i;
                     *pNumIfConfig = count;
 
                     /* Read the interface params */
@@ -1563,7 +1562,7 @@ EXT_DECL void tau_freeXmlDatasetConfig (
     UINT32                  numDataset,
     TRDP_DATASET_T          * *ppDataset)
 {
-    int i, j;
+    UINT32 i, j;
 
     /*  Mapping between ComId and DatasetId   */
     if (numComId > 0 && pComIdDsIdMap != NULL)
