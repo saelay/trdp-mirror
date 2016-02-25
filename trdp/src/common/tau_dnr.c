@@ -336,7 +336,7 @@ static TRDP_ERR_T createSendQuery (
 
     pBuf = (UINT8 *) (pHeader + 1);
 
-    strncpy((char *)strBuf, pUri, TAU_MAX_URI_SIZE);
+    vos_strncpy((char *)strBuf, pUri, TAU_MAX_URI_SIZE);
     changetoDnsNameFormat(pBuf, strBuf);
 
     *pSize = (UINT32) strlen((char *)strBuf) + 1;
@@ -596,7 +596,7 @@ static void updateDNSentry (
                 }
 
                 /* Position found, store everything */
-                strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE);
+                vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE);
                 pDNR->cache[cacheEntry].ipAddr   = ip_addr;
                 pDNR->cache[cacheEntry].topoCnt  = appHandle->etbTopoCnt;
 
@@ -869,7 +869,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
             if (pDNR->cache[i].ipAddr == addr &&
                 (appHandle->etbTopoCnt == 0 || (pDNR->cache[i].topoCnt == appHandle->etbTopoCnt)))
             {
-                strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN);
+                vos_strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN);
                 return TRDP_NO_ERR;
             }
         }
