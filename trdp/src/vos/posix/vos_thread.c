@@ -72,7 +72,7 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
     VOS_TIME_T now, timeOut;
 
     timeOut.tv_sec  = abs_timeout->tv_sec;
-    timeOut.tv_usec = abs_timeout->tv_nsec;
+    timeOut.tv_usec = abs_timeout->tv_nsec * 1000;
 
     while (1)
     {
