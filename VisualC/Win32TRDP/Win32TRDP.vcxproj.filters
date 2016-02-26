@@ -10,9 +10,6 @@
     <ClCompile Include="..\..\src\common\trdp_if.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\trdp_mdcom.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\trdp_pdcom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -45,6 +42,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\common\tau_tti.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\trdp_mdcom.c">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -126,9 +126,6 @@
     <ClInclude Include="..\..\src\api\trdp_proto.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Win32TRDP.rc" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
