@@ -737,6 +737,28 @@ EXT_DECL void vos_strncpy (
 }
 
 /**********************************************************************************************************************/
+/** String concatenation with length limitation.
+ *
+ *  @param[in]      pStrDst       Destination string
+ *  @param[in]      count         Size of destination buffer
+ *  @param[in]      pStrSrc       Null terminated string to append
+ *
+ *  @retval         none
+ */
+
+EXT_DECL void vos_strncat (
+    CHAR8       *pStrDst,
+    UINT32      count,
+    const CHAR8 *pStrSrc)
+{
+#ifdef WIN32
+    (void) strcat_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc);
+#else
+    (void) strncat((char *)pStrDst, (const char *)pStrSrc, (size_t) count);
+#endif
+}
+
+/**********************************************************************************************************************/
 /*    Queues
                                                                                                                */
 /**********************************************************************************************************************/

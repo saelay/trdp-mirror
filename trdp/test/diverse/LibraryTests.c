@@ -279,8 +279,8 @@ int testInterfaces()
         CHAR8 ipString[16];
         CHAR8 maskString[16];
 
-        strcpy(ipString, vos_ipDotted(ifAddrs[i].ipAddr));
-        strcpy(maskString, vos_ipDotted(ifAddrs[i].netMask));
+        vos_strncpy(ipString, vos_ipDotted(ifAddrs[i].ipAddr), 16);
+        vos_strncpy(maskString, vos_ipDotted(ifAddrs[i].netMask), 16);
 
         printf(" Interface %d:\nName: %s IP: %s SubnetMask: %s MAC: %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n\n",
                 i,
