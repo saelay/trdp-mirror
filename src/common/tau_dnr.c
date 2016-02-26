@@ -25,9 +25,11 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 
 #include "tau_dnr.h"
 #include "trdp_utils.h"
+#include "vos_mem.h"
 #include "vos_sock.h"
 
 
@@ -205,7 +207,7 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 {
     int lock = 0, i;
 
-    strcat((char *)pHost, ".");
+    vos_strncat(pHost, TAU_MAX_URI_SIZE, ".");
 
     for (i = 0; i < (int)strlen((char *)pHost); i++)
     {
@@ -250,11 +252,14 @@ static void printDNRcache (TAU_DNR_DATA_T *pDNR)
  *
  *  @retval         none
  */
+
 static void readHostsFile (
     TAU_DNR_DATA_T      *pDNR,
     const CHAR8         *pHostsFileName)
 {
+    /* Note: MS says use of fopen is unsecure. Reading a hosts file is used for development only */
     FILE    *fp = fopen(pHostsFileName, "r");
+
     CHAR8   line[TAU_MAX_HOSTS_LINE_LENGTH];
 
     if (fp != NULL)
@@ -265,20 +270,48 @@ static void readHostsFile (
             /* get a line from the file */
             if (fgets(line, TAU_MAX_HOSTS_LINE_LENGTH, fp) != NULL)
             {
-                unsigned int    ip1, ip2, ip3, ip4;
-                int             noOfItems = 0;
-                /* Try to get IP and URI */
-                noOfItems = sscanf(line,
-                                   "%d.%d.%d.%d %64s",
-                                   &ip1,
-                                   &ip2,
-                                   &ip3,
-                                   &ip4,
-                                   pDNR->cache[pDNR->noOfCachedEntries].uri);
-                if (noOfItems == 5)
+                UINT32          start = 0, index = 0;
+
+                /* Skip empty lines, comment lines */
+                if (line[index] == '#' ||
+                    line[index] == '\0' ||
+                    iscntrl(line[index]))
                 {
-                    pDNR->cache[pDNR->noOfCachedEntries].uri[TRDP_MAX_URI_HOST_LEN - 1] = 0;
-                    pDNR->cache[pDNR->noOfCachedEntries].ipAddr   = ip1 << 24 | ip2 << 16 | ip3 << 8 | ip4;
+                    continue;
+                }
+                
+                /* Try to get IP */
+                pDNR->cache[pDNR->noOfCachedEntries].ipAddr = vos_dottedIP(&line[index]);
+                
+                if (pDNR->cache[pDNR->noOfCachedEntries].ipAddr == INADDR_ANY)
+                {
+                    continue;
+                }
+                /* now skip the address */
+                while (isdigit(line[index]) || ispunct(line[index]))
+                {
+                    index++;
+                }
+
+                /* skip the space between IP and URI */
+                while (isspace(line[index]))
+                {
+                    index++;
+                }
+
+                /* remember start of URI */
+                start = index;
+
+                /* remember start of URI */
+                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+                {
+                    index++;
+                }
+                vos_strncpy(pDNR->cache[pDNR->noOfCachedEntries].uri, &line[start], index - start);
+                
+                /* increment only if entry is valid */
+                if (strlen(pDNR->cache[pDNR->noOfCachedEntries].uri) > 0)
+                {
                     pDNR->cache[pDNR->noOfCachedEntries].topoCnt  = 0;
                     pDNR->noOfCachedEntries++;
                 }

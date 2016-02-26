@@ -168,7 +168,7 @@ static void setDefaultInterfaceValues (
 
 void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
 {
-    int i, j;
+    UINT32 i, j;
 
     printf( "---\nExchange parameters (ComId / parId / dataSetId / type:\n");
     for (i = 0; i < num; ++i)
