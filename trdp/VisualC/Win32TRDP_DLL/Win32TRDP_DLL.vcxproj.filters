@@ -134,6 +134,5 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\resources\windows\pthread\lib\pthreadVC2.lib" />
-    <Library Include="..\..\resources\windows\libxml\lib\libxml2.lib" />
   </ItemGroup>
 </Project>
