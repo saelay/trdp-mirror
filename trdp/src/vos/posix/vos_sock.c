@@ -287,7 +287,7 @@ EXT_DECL UINT32 vos_dottedIP (
     struct in_addr addr;
     if (inet_aton(pDottedIP, &addr) <= 0)
     {
-        return INADDR_ANY;          /* Prevent returning broadcast address on error */
+        return VOS_INADDR_ANY;          /* Prevent returning broadcast address on error */
     }
     else
     {
@@ -468,7 +468,7 @@ EXT_DECL BOOL8 vos_netIfUp(
                 memcpy(&ifAddrs.ipAddr, &cursor->ifa_addr->sa_data[2], 4);
                 ifAddrs.ipAddr   = vos_ntohl(ifAddrs.ipAddr);
                 /* Exit if first (default) interface matches */
-                if (ifAddress == INADDR_ANY || ifAddress == ifAddrs.ipAddr)
+                if (ifAddress == VOS_INADDR_ANY || ifAddress == ifAddrs.ipAddr)
                 {
                     if (cursor->ifa_flags & IFF_UP)
                     {
