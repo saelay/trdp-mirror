@@ -56,6 +56,7 @@ typedef struct tau_dnr_cache
     CHAR8           uri[TRDP_MAX_URI_HOST_LEN];
     TRDP_IP_ADDR_T  ipAddr;
     UINT32          topoCnt;
+    BOOL8           fixedEntry;
 } TAU_DNR_ENTRY_T;
 
 typedef struct tau_dnr_data
@@ -313,6 +314,7 @@ static void readHostsFile (
                 if (strlen(pDNR->cache[pDNR->noOfCachedEntries].uri) > 0)
                 {
                     pDNR->cache[pDNR->noOfCachedEntries].topoCnt  = 0;
+                    pDNR->cache[pDNR->noOfCachedEntries].fixedEntry = TRUE;
                     pDNR->noOfCachedEntries++;
                 }
             }
@@ -845,7 +847,8 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
         pTemp = (TAU_DNR_ENTRY_T *) vos_bsearch(pUri, pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T),
                                                 compareURI);
         if (pTemp != NULL &&
-            (pTemp->topoCnt == appHandle->etbTopoCnt ||     /* Do the topocounts match? */
+            (pTemp->fixedEntry == TRUE ||
+             pTemp->topoCnt == appHandle->etbTopoCnt ||     /* Do the topocounts match? */
              appHandle->etbTopoCnt == 0))                   /* Or do we not care?       */
         {
             *pAddr = pTemp->ipAddr;
