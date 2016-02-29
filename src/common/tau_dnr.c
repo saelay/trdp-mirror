@@ -284,7 +284,7 @@ static void readHostsFile (
                 /* Try to get IP */
                 pDNR->cache[pDNR->noOfCachedEntries].ipAddr = vos_dottedIP(&line[index]);
                 
-                if (pDNR->cache[pDNR->noOfCachedEntries].ipAddr == INADDR_ANY)
+                if (pDNR->cache[pDNR->noOfCachedEntries].ipAddr == VOS_INADDR_ANY)
                 {
                     continue;
                 }
