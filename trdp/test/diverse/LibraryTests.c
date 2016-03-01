@@ -44,6 +44,7 @@
 #include "vos_thread.h"
 #include "vos_sock.h"
 #include "vos_utils.h"
+#include "vos_mem.h"
 
 int testTimeCompare()
 {

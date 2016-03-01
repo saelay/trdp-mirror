@@ -74,27 +74,13 @@
 #define CSTINFOCTRL_DEST_URI        "grpECSP.anyVeh.aCst.aClTrn.lTrn"
 #define CSTINFOCTRL_DEST_IP         "239.192.0.130"
 
-/** ECSP Control telegram                                                                                       */
-
-#define ECSP_CTRL_COMID             120
-#define ECSP_CTRL_CYC               1000                                        /**< 1s                         */
-#define ECSP_CTRL_TO                5000                                        /**< 5s                         */
-#define ECSP_CTRL_DEST_URI          "devECSP.anyVeh.lCst"                       /**< 10.0.0.1                   */
-#define ECSP_CTRL_DEST_IP           "10.0.0.1"
-
-/** ECSP status telegram                                                                                        */
-
-#define ECSP_STATUS_COMID           121
-#define ECSP_STATUS_CYC             1000                                        /**< 1s                         */
-#define ECSP_STATUS_TO              5000                                        /**< 5s                         */
-#define ECSP_STATUS_DEST_URI        "devECSC.anyVeh.lCst"                       /**< 10.0.0.100                 */
-#define ECSP_STATUS_DEST_IP         "10.0.0.100"
-
 /** TTDB manager telegram PD                                                                                    */
 
 #define TTDB_STATUS_COMID           100
 #define TTDB_STATUS_CYC             1000                                        /**< Push                       */
 #define TTDB_STATUS_TO              5000                                        /**< 5s                         */
+#define TTDB_STATUS_SMI             100
+#define TTDB_STATUS_USER_DATA_VER   0x0100
 #define TTDB_STATUS_DEST_URI        "grpAll.aVeh.lCst.lClTrn.lTrn"
 #define TTDB_STATUS_DEST_IP_ETB0    "239.194.0.0"
 #define TTDB_STATUS_DEST_IP         "239.255.0.0"
@@ -111,8 +97,7 @@
 /** TTDB manager telegram MD: Get the TRAIN_DIRECTORY                                                           */
 
 #define TTDB_TRN_DIR_REQ_COMID      102                                         /**< MD request */
-#define TTDB_TRN_DIR_REQ_URI        "devECSP.anyVeh.lCst.lClTrn.lTrn"
-#define TTDB_TRN_DIR_REQ_IP         ECSP_CTRL_DEST_IP
+#define TTDB_TRN_DIR_REQ_URI        "devECSP.anyVeh.lCst"
 #define TTDB_TRN_DIR_REQ_DS         "TTDB_TRAIN_DIRECTORY_INFO_REQUEST"
 #define TTDB_TRN_DIR_REQ_TO         3000                                        /**< 3s timeout                 */
 
@@ -122,7 +107,6 @@
 /** TTDB manager telegram MD: Get the static consist information                                                */
 #define TTDB_STAT_CST_REQ_COMID     104                                         /**< MD request                 */
 #define TTDB_STAT_CST_REQ_URI       "devECSP.anyVeh.lCst.lClTrn.lTrn"
-#define TTDB_STAT_CST_REQ_IP        ECSP_CTRL_DEST_IP
 #define TTDB_STAT_CST_REQ_DS        "TTDB_STATIC_CONSIST_INFO_REQUEST"
 #define TTDB_STAT_CST_REQ_TO        3000                                        /**< 3s timeout                 */
 
@@ -132,8 +116,7 @@
 /** TTDB manager telegram MD: Get the NETWORK_TRAIN_DIRECTORY                                                   */
 
 #define TTDB_NET_DIR_REQ_COMID      106                                         /**< MD request                 */
-#define TTDB_NET_DIR_REQ_URI        "devECSP.anyVeh.lCst.lClTrn.lTrn"
-#define TTDB_NET_DIR_REQ_IP         ECSP_CTRL_DEST_IP
+#define TTDB_NET_DIR_REQ_URI        "devECSP.anyVeh.lCst"
 #define TTDB_NET_DIR_REQ_DS         "TTDB_TRAIN_NETWORK_DIRECTORY_INFO_REQUEST"
 #define TTDB_NET_DIR_REQ_TO         3000                                        /**< 3s timeout                 */
 #define TTDB_NET_DIR_REP_COMID      107                                         /**< MD reply                   */
@@ -142,8 +125,7 @@
 /** TTDB manager telegram MD: Get the OP_TRAIN_DIRECTORY                                                        */
 
 #define TTDB_OP_DIR_INFO_REQ_COMID  108
-#define TTDB_OP_DIR_INFO_REQ_URI    "devECSP.anyVeh.lCst.lClTrn.lTrn"
-#define TTDB_OP_DIR_INFO_REQ_IP     ECSP_CTRL_DEST_IP
+#define TTDB_OP_DIR_INFO_REQ_URI    "devECSP.anyVeh.lCst"
 #define TTDB_OP_DIR_INFO_REQ_TO     3000                                        /**< 3s timeout                 */
 #define TTDB_OP_DIR_INFO_REP_COMID  109
 #define TTDB_OP_DIR_INFO_REP_DS     "TTDB_OP_TRAIN_DIR_INFO"                    /**< OP_TRAIN_DIRECTORY         */
@@ -151,13 +133,26 @@
 /** TTDB manager telegram MD: Get the TTDB                                                                      */
 
 #define TTDB_READ_CMPLT_REQ_COMID   110
-#define TTDB_READ_CMPLT_REQ_URI     "devECSP.anyVeh.lCst.lClTrn.lTrn"
-#define TTDB_READ_CMPLT_REQ_IP      ECSP_CTRL_DEST_IP
+#define TTDB_READ_CMPLT_REQ_URI     "devECSP.anyVeh.lCst"
 #define TTDB_READ_CMPLT_REQ_DS      "TTDB_READ_COMPLETE_REQUEST"                /**< ETBx                       */
 #define TTDB_READ_CMPLT_REQ_TO      3000                                        /**< 3s timeout                 */
 
 #define TTDB_READ_CMPLT_REP_COMID   111                                         /**< MD reply                   */
 #define TTDB_READ_CMPLT_REP_DS      "TTDB_READ_COMPLETE_REPLY"                  /**< TRDP_READ_COMPLETE_REPLY_T */
+
+/** ECSP Control telegram                                                                                       */
+
+#define ECSP_CTRL_COMID             120
+#define ECSP_CTRL_CYC               1000                                        /**< 1s                         */
+#define ECSP_CTRL_TO                5000                                        /**< 5s                         */
+#define ECSP_CTRL_DEST_URI          "devECSP.anyVeh.lCst"                       /**< 10.0.0.1                   */
+
+/** ECSP status telegram                                                                                        */
+
+#define ECSP_STATUS_COMID           121
+#define ECSP_STATUS_CYC             1000                                        /**< 1s                         */
+#define ECSP_STATUS_TO              5000                                        /**< 5s                         */
+#define ECSP_STATUS_DEST_URI        "devECSC.anyVeh.lCst"                       /**< 10.0.0.100                 */
 
 /** ETBN STATUS Telegram PD                                                                                     */
 
@@ -166,6 +161,21 @@
 #define ETBN_STATUS_TO              5000                                        /**< 5s timeout                 */
 #define ETBN_STATUS_DEST_URI        "grpAll.aVeh.lCst"
 #define ETBN_STATUS_DEST_IP         "239.255.0.0"
+
+/** ETBN Control Telegram MD                                                                                    */
+
+#define ETBN_CTRL_REQ_COMID         130
+#define ETBN_CTRL_REQ_DS            "ETBN_CTRL"                                 /**< ETBx                       */
+#define ETBN_CTRL_REQ_TO            3000                                        /**< 3s timeout                 */
+#define ETBN_CTRL_REP_COMID         131
+#define ETBN_CTRL_REP_DS            "ETBN_STATUS"                               /**< ETBN status reply          */
+
+/** ETBN Control Telegram MD                                                                                    */
+
+#define ETBN_TRN_NET_DIR_REQ_COMID  132
+#define ETBN_TRN_NET_DIR_REQ_TO     3000                                        /**< 3s timeout                 */
+#define ETBN_TRN_NET_DIR_REP_COMID  133
+#define ETBN_TRN_NET_DIR_REP_DS     "ETBN_TRAIN_NETWORK_DIRECTORY_INFO_REPLY"   /**< ETBx                       */
 
 /*******************************************************************************
  *  TYPEDEFS
