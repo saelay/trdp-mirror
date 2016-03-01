@@ -61,8 +61,8 @@ typedef struct tau_dnr_cache
 
 typedef struct tau_dnr_data
 {
-    TRDP_IP_ADDR_T  ecspIpAddr;
-    UINT16          ecspPort;
+    TRDP_IP_ADDR_T  dnsIpAddr;
+    UINT16          dnsPort;
     UINT16          timeout;
     UINT32          noOfCachedEntries;
     TAU_DNR_ENTRY_T cache[TAU_MAX_NO_CACHE_ENTRY];
@@ -385,7 +385,7 @@ static TRDP_ERR_T createSendQuery (
     *pSize  += 4;               /* add query type and class size! */
 
     /* send the query */
-    err = (TRDP_ERR_T) vos_sockSendUDP(sock, packetBuffer, &size, pDNR->ecspIpAddr, pDNR->ecspPort);
+    err = (TRDP_ERR_T) vos_sockSendUDP(sock, packetBuffer, &size, pDNR->dnsIpAddr, pDNR->dnsPort);
     if (err != TRDP_NO_ERR)
     {
         vos_printLogStr(VOS_LOG_ERROR, "createSendQuery failed to sent a query!\n");
@@ -600,7 +600,7 @@ static void updateDNSentry (
             memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
             size = TAU_MAX_DNS_BUFFER_SIZE;
             /* Get what was announced */
-            vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->ecspIpAddr, &pDNR->ecspPort, NULL, FALSE);
+            vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
             FD_CLR(my_socket, &rfds);
             
             if (size == 0)
@@ -661,9 +661,9 @@ exit:
 /**    Function to init DNR
  *
  *  @param[in]      appHandle           Handle returned by tlc_openSession()
- *  @param[in]      ecspIpAddr          IP address of DNR server (default 10.0.0.1)
- *  @param[in]      ecspPort            Port of DNR server (default 53)
- *  @param[in]      pHostsFileName       Optional hosts file name as ECSP replacement
+ *  @param[in]      dnsIpAddr           IP address of DNS server (default 10.0.0.1)
+ *  @param[in]      dnsPort             Port of DNS server (default 53)
+ *  @param[in]      pHostsFileName      Optional hosts file name as ECSP replacement
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -672,8 +672,8 @@ exit:
  */
 EXT_DECL TRDP_ERR_T tau_initDnr (
     TRDP_APP_SESSION_T  appHandle,
-    TRDP_IP_ADDR_T      ecspIpAddr,
-    UINT16              ecspPort,
+    TRDP_IP_ADDR_T      dnsIpAddr,
+    UINT16              dnsPort,
     const CHAR8         *pHostsFileName)
 {
     TAU_DNR_DATA_T *pDNR;  /**< default DNR/ECSP settings  */
@@ -692,8 +692,8 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     /* save to application session */
     appHandle->pUser  = pDNR;
 
-    pDNR->ecspIpAddr = (ecspIpAddr == 0)? 0x0a000001 : ecspIpAddr;
-    pDNR->ecspPort = (ecspPort == 0)? 53 : ecspPort;
+    pDNR->dnsIpAddr = (dnsIpAddr == 0)? 0x0a000001 : dnsIpAddr;
+    pDNR->dnsPort = (dnsPort == 0)? 53 : dnsPort;
     
     /* Get locally defined hosts */
     if (pHostsFileName != NULL && strlen(pHostsFileName) > 0)
@@ -727,6 +727,40 @@ EXT_DECL void tau_deInitDnr (
         vos_memFree(appHandle->pUser);
         appHandle->pUser = NULL;
     }
+}
+
+/**********************************************************************************************************************/
+/**    Function to get the status of DNR
+ *
+ *  @param[in]      appHandle           Handle returned by tlc_openSession()
+ *
+ *  @retval         TRDP_DNR_NOT_AVAILABLE      no error
+ *  @retval         TRDP_DNR_UNKNOWN            enabled, but cache is empty
+ *  @retval         TRDP_DNR_ACTIVE             enabled, cache has values
+ *  @retval         TRDP_DNR_HOSTSFILE          enabled, hostsfile used (static mode)
+ *
+ */
+EXT_DECL TRDP_DNR_STATE_T tau_DNRstatus (
+    TRDP_APP_SESSION_T  appHandle)
+{
+    TAU_DNR_DATA_T  *pDNR;
+    if (appHandle != NULL && appHandle->pUser != NULL)
+    {
+        pDNR = (TAU_DNR_DATA_T*) appHandle->pUser;
+        if (pDNR != NULL)
+        {
+            if (pDNR->timeout == TAU_DNS_TIME_OUT_SHORT)
+            {
+                return TRDP_DNR_HOSTSFILE;
+            }
+            if (pDNR->noOfCachedEntries > 0)
+            {
+                return TRDP_DNR_ACTIVE;
+            }
+            return TRDP_DNR_UNKNOWN;
+        }
+    }
+    return TRDP_DNR_NOT_AVAILABLE;
 }
 
 /**********************************************************************************************************************/

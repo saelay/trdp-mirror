@@ -46,6 +46,12 @@ extern "C" {
  * TYPEDEFS
  */
 
+typedef enum TRDP_DNR_STATE {
+    TRDP_DNR_UNKNOWN        = 0,
+    TRDP_DNR_NOT_AVAILABLE  = 1,
+    TRDP_DNR_ACTIVE         = 2,
+    TRDP_DNR_HOSTSFILE      = 3
+} TRDP_DNR_STATE_T;
 
 /***********************************************************************************************************************
  * PROTOTYPES
@@ -55,9 +61,9 @@ extern "C" {
 /**    Function to init DNR
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[in]      ecspIpAddr      ECSP IP address.
- *  @param[in]      ecspPort        ECSP port number.
- *  @param[in]      hostsFileName    Optional host file name as ECSP replacement.
+ *  @param[in]      dnsIpAddr       DNS/ECSP IP address.
+ *  @param[in]      dnsPort         DNS port number.
+ *  @param[in]      hostsFileName   Optional host file name as ECSP replacement/addition.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error
@@ -65,8 +71,8 @@ extern "C" {
  */
 EXT_DECL TRDP_ERR_T tau_initDnr (
 	TRDP_APP_SESSION_T appHandle,
-    TRDP_IP_ADDR_T     ecspIpAddr,
-    UINT16             ecspPort,
+    TRDP_IP_ADDR_T     dnsIpAddr,
+    UINT16             dnsPort,
     const CHAR8        *hostsFileName);
 
 /**********************************************************************************************************************/
@@ -80,6 +86,19 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
 EXT_DECL void tau_deInitDnr (
     TRDP_APP_SESSION_T appHandle);
 
+
+/**********************************************************************************************************************/
+/**    Function to get the status of DNR
+ *
+ *  @param[in]      appHandle           Handle returned by tlc_openSession()
+ *
+ *  @retval         TRDP_DNR_NOT_AVAILABLE      no error
+ *  @retval         TRDP_DNR_UNKNOWN            enabled, but cache is empty
+ *  @retval         TRDP_DNR_ACTIVE             enabled, cache has values
+ *  @retval         TRDP_DNR_HOSTSFILE          enabled, hostsfile used (static mode)
+ *
+ */
+EXT_DECL TRDP_DNR_STATE_T tau_DNRstatus (TRDP_APP_SESSION_T  appHandle);
 
 /**********************************************************************************************************************/
 /**    Who am I ?.
