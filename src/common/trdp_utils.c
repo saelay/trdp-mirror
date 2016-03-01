@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-03-01: Setting correct multicast TTL for PDs
  *      BL 2014-08-25: Ticket #57+58: Padding / zero bytes trailing MD & PD packets fixed
  *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
  */
@@ -275,12 +276,12 @@ PD_ELE_T *trdp_queueFindSubAddr (
         {
             /*  We check for local communication
                 or if etbTopoCnt and opTrnTopoCnt of the subscription are zero or match */
-            if ( 
-                    ((addr->etbTopoCnt == 0) && (addr->opTrnTopoCnt == 0))
-                  || trdp_validTopoCounters( addr->etbTopoCnt,
-                                             addr->opTrnTopoCnt,
-                                             iterPD->addr.etbTopoCnt,
-                                             iterPD->addr.opTrnTopoCnt))
+            if (
+                ((addr->etbTopoCnt == 0) && (addr->opTrnTopoCnt == 0))
+                || trdp_validTopoCounters( addr->etbTopoCnt,
+                                           addr->opTrnTopoCnt,
+                                           iterPD->addr.etbTopoCnt,
+                                           iterPD->addr.opTrnTopoCnt))
             {
                 return iterPD;
             }
@@ -351,7 +352,7 @@ BOOL8 trdp_validTopoCounters (
 {
     if (((etbTopoCntFilter == 0) || (etbTopoCnt == etbTopoCntFilter))
         &&
-        ((opTrnTopoCntFilter == 0) || (opTrnTopoCnt == opTrnTopoCntFilter)) )
+        ((opTrnTopoCntFilter == 0) || (opTrnTopoCnt == opTrnTopoCntFilter)))
     {
         return TRUE;
     }
@@ -602,8 +603,8 @@ TRDP_ERR_T  trdp_requestSocket (
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           lIndex, emptySock = VOS_INVALID_SOCKET;
-    TRDP_ERR_T      err               = TRDP_NO_ERR;
-    TRDP_IP_ADDR_T  bindAddr          = vos_determineBindAddr(srcIP, mcGroup, rcvMostly);
+    TRDP_ERR_T      err         = TRDP_NO_ERR;
+    TRDP_IP_ADDR_T  bindAddr    = vos_determineBindAddr(srcIP, mcGroup, rcvMostly);
 
     if (iface == NULL || params == NULL || pIndex == NULL)
     {
@@ -700,7 +701,7 @@ TRDP_ERR_T  trdp_requestSocket (
             sCurrentMaxSocketCnt = lIndex + 1;
         }
 
-        iface[lIndex].sock          = VOS_INVALID_SOCKET;
+        iface[lIndex].sock = VOS_INVALID_SOCKET;
         iface[lIndex].bindAddr      = bindAddr /* was srcIP (ID #125) */;
         iface[lIndex].type          = usage;
         iface[lIndex].sendParam.qos = params->qos;
@@ -737,6 +738,7 @@ TRDP_ERR_T  trdp_requestSocket (
         sock_options.reuseAddrPort  = (options & TRDP_OPTION_NO_REUSE_ADDR) ? FALSE : TRUE;
         sock_options.nonBlocking    = (options & TRDP_OPTION_BLOCK) ? FALSE : TRUE;
         sock_options.ttl_multicast  = (usage != TRDP_SOCK_MD_TCP) ? VOS_TTL_MULTICAST : 0;
+        sock_options.ttl_multicast  = (mcGroup != VOS_INADDR_ANY) ? params->ttl : sock_options.ttl_multicast;
         sock_options.no_mc_loop     = ((usage != TRDP_SOCK_MD_TCP) && (options & TRDP_OPTION_NO_MC_LOOP_BACK)) ? 1 : 0;
         sock_options.no_udp_crc     = ((usage != TRDP_SOCK_MD_TCP) && (options & TRDP_OPTION_NO_UDP_CHK)) ? 1 : 0;
 
@@ -863,7 +865,7 @@ void  trdp_releaseSocket (
     UINT32          connectTimeout,
     BOOL8           checkAll)
 {
-    TRDP_ERR_T  err = TRDP_PARAM_ERR;
+    TRDP_ERR_T err = TRDP_PARAM_ERR;
 
     if (iface == NULL)
     {
@@ -892,17 +894,17 @@ void  trdp_releaseSocket (
                              "Deleting socket from the iface (Sock: %d, lIndex: %d)\n",
                              iface[lIndex].sock, lIndex);
                 iface[lIndex].sock = TRDP_INVALID_SOCKET_INDEX;
-                iface[lIndex].sendParam.qos  = 0;
-                iface[lIndex].sendParam.ttl  = 0;
-                iface[lIndex].usage          = 0;
-                iface[lIndex].bindAddr       = 0;
-                iface[lIndex].type       = (TRDP_SOCK_TYPE_T) 0;
-                iface[lIndex].rcvMostly  = FALSE;
-                iface[lIndex].tcpParams.cornerIp = 0;
-                iface[lIndex].tcpParams.connectionTimeout.tv_sec     = 0;
-                iface[lIndex].tcpParams.connectionTimeout.tv_usec    = 0;
-                iface[lIndex].tcpParams.addFileDesc  = FALSE;
-                iface[lIndex].tcpParams.morituri     = FALSE;
+                iface[lIndex].sendParam.qos         = 0;
+                iface[lIndex].sendParam.ttl         = 0;
+                iface[lIndex].usage                 = 0;
+                iface[lIndex].bindAddr              = 0;
+                iface[lIndex].type                  = (TRDP_SOCK_TYPE_T) 0;
+                iface[lIndex].rcvMostly             = FALSE;
+                iface[lIndex].tcpParams.cornerIp    = 0;
+                iface[lIndex].tcpParams.connectionTimeout.tv_sec    = 0;
+                iface[lIndex].tcpParams.connectionTimeout.tv_usec   = 0;
+                iface[lIndex].tcpParams.addFileDesc = FALSE;
+                iface[lIndex].tcpParams.morituri    = FALSE;
             }
         }
 
@@ -1038,7 +1040,7 @@ UINT32  trdp_getSeqCnt (
 /**********************************************************************************************************************/
 /** remove the sequence counter for the comID/source IP.
  *  The sequence counter should be reset if there was a packet time out.
- *  
+ *
  *
  *  @param[in]      pElement            subscription element
  *  @param[in]      srcIP               Source IP address
@@ -1047,13 +1049,13 @@ UINT32  trdp_getSeqCnt (
  *  @retval         none
  */
 
-void trdp_resetSequenceCounter(
-    PD_ELE_T*       pElement,
+void trdp_resetSequenceCounter (
+    PD_ELE_T        *pElement,
     TRDP_IP_ADDR_T  srcIP,
     TRDP_MSG_T      msgType)
 {
     int index;
-    
+
     if (pElement == NULL || pElement->pSeqCntList == NULL)
     {
         return;
@@ -1085,8 +1087,8 @@ void trdp_resetSequenceCounter(
  *                 -1 - memory error
  */
 
-int trdp_checkSequenceCounter(
-    PD_ELE_T*       pElement,
+int trdp_checkSequenceCounter (
+    PD_ELE_T        *pElement,
     UINT32          sequenceCounter,
     TRDP_IP_ADDR_T  srcIP,
     TRDP_MSG_T      msgType)
@@ -1102,15 +1104,15 @@ int trdp_checkSequenceCounter(
     if (pElement->pSeqCntList == NULL)
     {
         /* Allocate some space */
-        pElement->pSeqCntList = (TRDP_SEQ_CNT_LIST_T*) vos_memAlloc(TRDP_SEQ_CNT_START_ARRAY_SIZE *
-                                                                    sizeof(TRDP_SEQ_CNT_ENTRY_T) +
-                                                                    sizeof(TRDP_SEQ_CNT_LIST_T));
+        pElement->pSeqCntList = (TRDP_SEQ_CNT_LIST_T *) vos_memAlloc(TRDP_SEQ_CNT_START_ARRAY_SIZE *
+                                                                     sizeof(TRDP_SEQ_CNT_ENTRY_T) +
+                                                                     sizeof(TRDP_SEQ_CNT_LIST_T));
         if (pElement->pSeqCntList == NULL)
         {
             return -1;
         }
-        pElement->pSeqCntList->maxNoOfEntries = TRDP_SEQ_CNT_START_ARRAY_SIZE;
-        pElement->pSeqCntList->curNoOfEntries = 0;
+        pElement->pSeqCntList->maxNoOfEntries   = TRDP_SEQ_CNT_START_ARRAY_SIZE;
+        pElement->pSeqCntList->curNoOfEntries   = 0;
     }
     /* Loop over entries */
     for (index = 0; index < pElement->pSeqCntList->curNoOfEntries; ++index)
@@ -1122,15 +1124,23 @@ int trdp_checkSequenceCounter(
             if (pElement->pSeqCntList->seq[index].lastSeqCnt == 0 ||    /* first time after timeout */
                 sequenceCounter != pElement->pSeqCntList->seq[index].lastSeqCnt)
             {
-                vos_printLog(VOS_LOG_DBG, "Rcv sequence: %u    last seq: %u\n", sequenceCounter, pElement->pSeqCntList->seq[index].lastSeqCnt);
-                vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
+                vos_printLog(VOS_LOG_DBG,
+                             "Rcv sequence: %u    last seq: %u\n",
+                             sequenceCounter,
+                             pElement->pSeqCntList->seq[index].lastSeqCnt);
+                vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(
+                                 srcIP), pElement->addr.comId);
                 pElement->pSeqCntList->seq[index].lastSeqCnt = sequenceCounter;
                 return 0;
             }
             else
             {
-                vos_printLog(VOS_LOG_DBG, "Rcv sequence: %u    last seq: %u\n", sequenceCounter, pElement->pSeqCntList->seq[index].lastSeqCnt);
-                vos_printLog(VOS_LOG_DBG, "-> duplicated PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
+                vos_printLog(VOS_LOG_DBG,
+                             "Rcv sequence: %u    last seq: %u\n",
+                             sequenceCounter,
+                             pElement->pSeqCntList->seq[index].lastSeqCnt);
+                vos_printLog(VOS_LOG_DBG, "-> duplicated PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
+                                 srcIP), pElement->addr.comId);
                 return 1;
             }
         }
@@ -1140,28 +1150,29 @@ int trdp_checkSequenceCounter(
     if (pElement->pSeqCntList->curNoOfEntries >= pElement->pSeqCntList->maxNoOfEntries)
     {
         /* Allocate some more space */
-        UINT32  newSize = 2 * pElement->pSeqCntList->curNoOfEntries;
-        TRDP_SEQ_CNT_LIST_T * newList = (TRDP_SEQ_CNT_LIST_T*) vos_memAlloc(newSize * sizeof(TRDP_SEQ_CNT_ENTRY_T) +
-                                                                                      sizeof(TRDP_SEQ_CNT_LIST_T));
+        UINT32 newSize = 2 * pElement->pSeqCntList->curNoOfEntries;
+        TRDP_SEQ_CNT_LIST_T *newList = (TRDP_SEQ_CNT_LIST_T *) vos_memAlloc(newSize * sizeof(TRDP_SEQ_CNT_ENTRY_T) +
+                                                                            sizeof(TRDP_SEQ_CNT_LIST_T));
         if (newList == NULL)
         {
             return -1;
         }
-        
+
         /* Copy old data into new, larger area */
         memcpy(newList, pElement->pSeqCntList, pElement->pSeqCntList->maxNoOfEntries *
-                                                                    sizeof(TRDP_SEQ_CNT_ENTRY_T) +
-                                                                    sizeof(TRDP_SEQ_CNT_LIST_T));
+               sizeof(TRDP_SEQ_CNT_ENTRY_T) +
+               sizeof(TRDP_SEQ_CNT_LIST_T));
         vos_memFree(pElement->pSeqCntList);     /* Free old area */
         pElement->pSeqCntList = newList;
         pElement->pSeqCntList->maxNoOfEntries = newSize;
     }
-    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].lastSeqCnt = sequenceCounter;
-    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].srcIpAddr = srcIP;
-    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].msgType = msgType;
+    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].lastSeqCnt    = sequenceCounter;
+    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].srcIpAddr     = srcIP;
+    pElement->pSeqCntList->seq[pElement->pSeqCntList->curNoOfEntries].msgType       = msgType;
     pElement->pSeqCntList->curNoOfEntries++;
     vos_printLog(VOS_LOG_DBG, "Rcv sequence: %u\n", sequenceCounter);
-    vos_printLog(VOS_LOG_DBG, "*** new sequence entry (SrcIp: %s comId %u)\n", vos_ipDotted(srcIP), pElement->addr.comId);
+    vos_printLog(VOS_LOG_DBG, "*** new sequence entry (SrcIp: %s comId %u)\n", vos_ipDotted(
+                     srcIP), pElement->addr.comId);
 
     return 0;
 }
@@ -1180,5 +1191,3 @@ BOOL8 trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T des
 {
     return (vos_strnicmp(listUri, destUri, TRDP_DEST_URI_SIZE) == 0);
 }
-
-
