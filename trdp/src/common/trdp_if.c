@@ -1140,6 +1140,43 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
 }
     
 /**********************************************************************************************************************/
+/** Set new topocount for trainwide communication
+ *
+ *    This value is used for validating outgoing and incoming packets only!
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *
+ *  @retval         etbTopoCnt
+ */
+EXT_DECL UINT32 tlc_getETBTopoCount (TRDP_APP_SESSION_T  appHandle)
+{
+    if (trdp_isValidSession(appHandle))
+    {
+        return appHandle->etbTopoCnt;
+    }
+    return 0;
+}
+    
+/**********************************************************************************************************************/
+/** Set new operational train topocount for direction/orientation sensitive communication.
+ *
+ *    This value is used for validating outgoing and incoming packets only!
+ *
+ *  @param[in]      appHandle           The handle returned by tlc_init
+ *
+ *  @retval         opTrnTopoCnt        New operational topocount value
+ */
+EXT_DECL UINT32 tlc_getOpTrainTopoCount (
+        TRDP_APP_SESSION_T  appHandle)
+{
+    if (trdp_isValidSession(appHandle))
+    {
+        return appHandle->opTrnTopoCnt;
+    }
+    return 0;
+}
+    
+/**********************************************************************************************************************/
 /** Prepare for sending PD messages.
  *  Queue a PD message, it will be send when tlc_publish has been called
  *
