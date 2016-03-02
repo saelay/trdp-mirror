@@ -183,7 +183,9 @@ EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              etbTopoCnt);
 
-
+EXT_DECL UINT32 tlc_getETBTopoCount (
+    TRDP_APP_SESSION_T  appHandle);
+    
 /**********************************************************************************************************************/
 /** Set new operational train topocount for direction/orientation sensitive communication.
  *
@@ -196,6 +198,8 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              opTrnTopoCnt);
 
+EXT_DECL UINT32 tlc_getOpTrainTopoCount (
+    TRDP_APP_SESSION_T  appHandle);
 
 /**********************************************************************************************************************/
 /** Frees the buffer reserved by the TRDP layer.
