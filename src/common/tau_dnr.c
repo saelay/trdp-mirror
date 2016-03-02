@@ -254,10 +254,11 @@ static void printDNRcache (TAU_DNR_DATA_T *pDNR)
  *  @retval         none
  */
 
-static void readHostsFile (
+static TRDP_ERR_T readHostsFile (
     TAU_DNR_DATA_T      *pDNR,
     const CHAR8         *pHostsFileName)
 {
+    TRDP_ERR_T  err = TRDP_PARAM_ERR;
     /* Note: MS says use of fopen is unsecure. Reading a hosts file is used for development only */
     FILE    *fp = fopen(pHostsFileName, "r");
 
@@ -322,12 +323,14 @@ static void readHostsFile (
         vos_printLog(VOS_LOG_DBG, "readHostsFile: %d entries processed\n", pDNR->noOfCachedEntries);
         vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
         fclose(fp);
+        err = TRDP_NO_ERR;
     }
     else
     {
         vos_printLogStr(VOS_LOG_ERROR, "readHostsFile: Not found!\n");
     }
     printDNRcache(pDNR);
+    return err;
 }
 
 /**********************************************************************************************************************/
@@ -676,6 +679,7 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     UINT16              dnsPort,
     const CHAR8         *pHostsFileName)
 {
+    TRDP_ERR_T  err = TRDP_NO_ERR;
     TAU_DNR_DATA_T *pDNR;  /**< default DNR/ECSP settings  */
 
     if (appHandle == NULL)
@@ -698,7 +702,7 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     /* Get locally defined hosts */
     if (pHostsFileName != NULL && strlen(pHostsFileName) > 0)
     {
-        readHostsFile(pDNR, pHostsFileName);
+        err = readHostsFile(pDNR, pHostsFileName);
         pDNR->timeout = TAU_DNS_TIME_OUT_SHORT;
     }
     else
@@ -706,7 +710,7 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
         pDNR->noOfCachedEntries = 0;
         pDNR->timeout = TAU_DNS_TIME_OUT_LONG;
     }
-    return TRDP_NO_ERR;
+    return err;
 }
 
 /**********************************************************************************************************************/
