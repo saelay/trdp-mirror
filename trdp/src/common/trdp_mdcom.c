@@ -66,11 +66,11 @@ static const TRDP_MD_INFO_T cTrdp_md_info_default;
  */
 static void trdp_mdUpdatePacket(MD_ELE_T *pElement);
 static void trdp_mdFillStateElement(const TRDP_MSG_T msgType, MD_ELE_T *pMdElement);
-static void trdp_mdManageSessionId(TRDP_UUID_T *pSessionId,  MD_ELE_T *pMdElement);
+static void trdp_mdManageSessionId(TRDP_UUID_T pSessionId,  MD_ELE_T *pMdElement);
 
 static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
                                        const TRDP_MD_ELE_ST_T elementState,
-                                       const TRDP_UUID_T *pSessionId,
+                                       const TRDP_UUID_T pSessionId,
                                        MD_ELE_T **pretrievedMdElement);
 
 static void trdp_mdInvokeCallback(const MD_ELE_T *pMdItem, const TRDP_SESSION_PT appHandle, const TRDP_ERR_T resultCode);
@@ -164,7 +164,7 @@ static void trdp_mdFillStateElement(const TRDP_MSG_T msgType, MD_ELE_T *pMdEleme
  * 
  *  @retval         none
  */
-static void trdp_mdManageSessionId(TRDP_UUID_T *pSessionId,  MD_ELE_T *pMdElement)
+static void trdp_mdManageSessionId(TRDP_UUID_T pSessionId,  MD_ELE_T *pMdElement)
 {
     if (memcmp(pMdElement->sessionID, cEmptySession, TRDP_SESS_ID_SIZE) != 0)
     {
@@ -211,7 +211,7 @@ static void trdp_mdManageSessionId(TRDP_UUID_T *pSessionId,  MD_ELE_T *pMdElemen
  */
 static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
                                        const TRDP_MD_ELE_ST_T elementState,
-                                       const TRDP_UUID_T *pSessionId,
+                                       const TRDP_UUID_T pSessionId,
                                        MD_ELE_T **pretrievedMdElement)
 {
     TRDP_ERR_T errv = TRDP_NOLIST_ERR; /* init error code indicating no matching MD_ELE_T in list */
@@ -234,7 +234,9 @@ static TRDP_ERR_T trdp_mdLookupElement(MD_ELE_T *pinitialMdElement,
         }
         if (errv != TRDP_NO_ERR)
         {
-            vos_printLog(VOS_LOG_ERROR,"element not found for sessionId %s", (char*)pSessionId);
+            vos_printLog(VOS_LOG_ERROR, "element not found for sessionId '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                         (UINT8)pSessionId[0], (UINT8)pSessionId[1], (UINT8)pSessionId[2], (UINT8)pSessionId[3],
+                         (UINT8)pSessionId[4], (UINT8)pSessionId[5], (UINT8)pSessionId[6], (UINT8)pSessionId[7]);
         }
     }
     return errv;
@@ -3060,7 +3062,7 @@ static void trdp_mdDetailSenderPacket(const TRDP_MSG_T msgType,
  */                                                    
 TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
                          TRDP_APP_SESSION_T      appHandle,
-                         TRDP_UUID_T             *pSessionId,
+                         TRDP_UUID_T             pSessionId,
                          UINT32                  comId,
                          UINT32                  timeout,
                          INT32                   replyStatus,
@@ -3095,7 +3097,7 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T        msgType,
     {
         errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDRcvQueue,
                                     TRDP_ST_RX_REQ_W4AP_REPLY,
-                                    (const TRDP_UUID_T*)pSessionId,
+                                    pSessionId,
                                     &pSenderElement);
 
         if ( TRDP_NO_ERR == errv && NULL != pSenderElement )
