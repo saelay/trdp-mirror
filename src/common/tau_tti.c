@@ -158,7 +158,7 @@ static void ttiPDCallback (
     UINT32                  dataSize)
 {
     int         changed = 0;
-    VOS_SEMA_T  waitForInaug = (VOS_SEMA_T) pRefCon;
+    VOS_SEMA_T  waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
 
     if (pMsg->comId == TTDB_STATUS_COMID)
     {
@@ -167,12 +167,6 @@ static void ttiPDCallback (
         {
             TRDP_OP_TRAIN_DIR_STATUS_INFO_T *pTelegram = (TRDP_OP_TRAIN_DIR_STATUS_INFO_T *) pData;
             UINT32 crc;
-
-            if (appHandle->etbTopoCnt != vos_ntohl(pTelegram->etbTopoCnt))
-            {
-                changed++;
-                tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
-            }
 
             /* check the crc:   */
             crc = vos_crc32(0xFFFFFFFF, (const UINT8 *) &pTelegram->state, sizeof(TRDP_OP_TRAIN_DIR_STATE_T) - 4);
@@ -183,6 +177,16 @@ static void ttiPDCallback (
                 tlc_setOpTrainTopoCount(appHandle, 0);
                 return;
             }
+
+            //vos_printLog(VOS_LOG_INFO, "---> Operational status info received on %p\n", appHandle);
+            if (appHandle->etbTopoCnt != vos_ntohl(pTelegram->etbTopoCnt))
+            {
+                vos_printLog(VOS_LOG_INFO, "ETB topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
+                             appHandle->etbTopoCnt, vos_ntohl(pTelegram->etbTopoCnt), appHandle);
+                changed++;
+                tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
+            }
+
             memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
 
             /* unmarshall manually:   */
@@ -199,6 +203,9 @@ static void ttiPDCallback (
         }
         else if (pMsg->resultCode == TRDP_TIMEOUT_ERR )
         {
+            vos_printLog(VOS_LOG_ERROR, "---> Operational status info timed out! Invalidating topocounts on %p!\n",
+                                        appHandle);
+
             if (appHandle->etbTopoCnt != 0)
             {
                 changed++;
@@ -209,6 +216,11 @@ static void ttiPDCallback (
                 changed++;
                 tlc_setOpTrainTopoCount(appHandle, 0);
             }
+        }
+        else
+        {
+            vos_printLog(VOS_LOG_INFO, "---> Unsolicited msg received on %p!\n",
+                         appHandle);
         }
         if (changed > 0 && waitForInaug != NULL)
         {
@@ -587,9 +599,9 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
                       TRDP_TTDB_OP_TRAIN_DIR_STATUS_INFO_COMID,
                       0, 0,
                       VOS_INADDR_ANY,
-                      vos_dottedIP(TTDB_STATUS_DEST_IP/*_ETB0*/),
+                      vos_dottedIP(TTDB_STATUS_DEST_IP),
                       TRDP_FLAGS_CALLBACK,
-                      TTDB_STATUS_TO,
+                      TTDB_STATUS_TO * 1000,
                       TRDP_TO_SET_TO_ZERO) != TRDP_NO_ERR)
     {
         vos_memFree(appHandle->pTTDB);
@@ -605,7 +617,7 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
                         TTDB_OP_DIR_INFO_COMID,
                         0,
                         0,
-                        vos_dottedIP(TTDB_OP_DIR_INFO_IP/*_ETB0*/),
+                        vos_dottedIP(TTDB_OP_DIR_INFO_IP),
                         TRDP_FLAGS_CALLBACK, NULL) != TRDP_NO_ERR)
     {
         vos_memFree(appHandle->pTTDB);
