@@ -83,22 +83,22 @@ typedef struct tau_dnr_query
 #pragma pack(push, 1)
 typedef struct R_DATA
 {
-    UINT16      type;
-    UINT16      class;
-    UINT32      ttl;
-    UINT16      data_len;
+    UINT16  type;
+    UINT16  class;
+    UINT32  ttl;
+    UINT16  data_len;
 } GNU_PACKED TAU_R_DATA_T;
 
 /* DNS header structure */
 typedef struct DNS_HEADER
 {
-    UINT16          id;         /* identification number */
-    UINT8           param1;     /* Bits 7...0   */
-    UINT8           param2;     /* Bits 15...8  */
-    UINT16          q_count;    /* number of question entries */
-    UINT16          ans_count;  /* number of answer entries */
-    UINT16          auth_count; /* number of authority entries */
-    UINT16          add_count;  /* number of resource entries */
+    UINT16  id;                 /* identification number */
+    UINT8   param1;             /* Bits 7...0   */
+    UINT8   param2;             /* Bits 15...8  */
+    UINT16  q_count;            /* number of question entries */
+    UINT16  ans_count;          /* number of answer entries */
+    UINT16  auth_count;         /* number of authority entries */
+    UINT16  add_count;          /* number of resource entries */
 }  GNU_PACKED TAU_DNS_HEADER_T;
 #pragma pack(pop)
 
@@ -122,8 +122,6 @@ typedef struct QUESTION
  *   Locals
  */
 
-//TAU_DNR_DATA_T gDNR = {0x0a000001, 53, 0};  /**< default DNR/ECSP settings  */
-
 #pragma mark ----------------------- Local -----------------------------
 
 /***********************************************************************************************************************
@@ -142,12 +140,12 @@ typedef struct QUESTION
  */
 static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *pNameBuffer)
 {
-    CHAR8           *pName = pNameBuffer;
-    unsigned int    p = 0, jumped = 0, offset;
+    CHAR8           *pName  = pNameBuffer;
+    unsigned int    p       = 0, jumped = 0, offset;
     int             i, j;
 
-    *pCount  = 1;
-    pName[0] = '\0';
+    *pCount     = 1;
+    pName[0]    = '\0';
 
     /* read the names in 3www6newtec2de0 format */
     while (*pReader != 0 && p < TAU_MAX_NAME_SIZE)
@@ -155,7 +153,7 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
         if (*pReader >= 192)
         {
             offset  = (*pReader) * 256 + *(pReader + 1) - 49152;        /* 49152 = 11000000 00000000 ;) */
-            pReader  = pBuffer + offset - 1;
+            pReader = pBuffer + offset - 1;
             jumped  = 1;                                /* we have jumped to another location so counting wont go up! */
         }
         else
@@ -185,8 +183,8 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
         p = pName[i];
         for (j = 0; j < (int)p; j++)
         {
-            pName[i] = pName[i + 1];
-            i       = i + 1;
+            pName[i]    = pName[i + 1];
+            i           = i + 1;
         }
         pName[i] = '.';
     }
@@ -255,14 +253,14 @@ static void printDNRcache (TAU_DNR_DATA_T *pDNR)
  */
 
 static TRDP_ERR_T readHostsFile (
-    TAU_DNR_DATA_T      *pDNR,
-    const CHAR8         *pHostsFileName)
+    TAU_DNR_DATA_T  *pDNR,
+    const CHAR8     *pHostsFileName)
 {
     TRDP_ERR_T  err = TRDP_PARAM_ERR;
     /* Note: MS says use of fopen is unsecure. Reading a hosts file is used for development only */
-    FILE    *fp = fopen(pHostsFileName, "r");
+    FILE        *fp = fopen(pHostsFileName, "r");
 
-    CHAR8   line[TAU_MAX_HOSTS_LINE_LENGTH];
+    CHAR8       line[TAU_MAX_HOSTS_LINE_LENGTH];
 
     if (fp != NULL)
     {
@@ -272,7 +270,7 @@ static TRDP_ERR_T readHostsFile (
             /* get a line from the file */
             if (fgets(line, TAU_MAX_HOSTS_LINE_LENGTH, fp) != NULL)
             {
-                UINT32          start = 0, index = 0;
+                UINT32 start = 0, index = 0;
 
                 /* Skip empty lines, comment lines */
                 if (line[index] == '#' ||
@@ -281,10 +279,10 @@ static TRDP_ERR_T readHostsFile (
                 {
                     continue;
                 }
-                
+
                 /* Try to get IP */
                 pDNR->cache[pDNR->noOfCachedEntries].ipAddr = vos_dottedIP(&line[index]);
-                
+
                 if (pDNR->cache[pDNR->noOfCachedEntries].ipAddr == VOS_INADDR_ANY)
                 {
                     continue;
@@ -310,11 +308,11 @@ static TRDP_ERR_T readHostsFile (
                     index++;
                 }
                 vos_strncpy(pDNR->cache[pDNR->noOfCachedEntries].uri, &line[start], index - start);
-                
+
                 /* increment only if entry is valid */
                 if (strlen(pDNR->cache[pDNR->noOfCachedEntries].uri) > 0)
                 {
-                    pDNR->cache[pDNR->noOfCachedEntries].topoCnt  = 0;
+                    pDNR->cache[pDNR->noOfCachedEntries].topoCnt    = 0;
                     pDNR->cache[pDNR->noOfCachedEntries].fixedEntry = TRUE;
                     pDNR->noOfCachedEntries++;
                 }
@@ -347,11 +345,11 @@ static TRDP_ERR_T readHostsFile (
  *
  */
 static TRDP_ERR_T createSendQuery (
-    TAU_DNR_DATA_T      *pDNR,
-    INT32               sock,
-    const CHAR8         *pUri,
-    UINT16              id,
-    UINT32              *pSize)
+    TAU_DNR_DATA_T  *pDNR,
+    INT32           sock,
+    const CHAR8     *pUri,
+    UINT16          id,
+    UINT32          *pSize)
 {
     CHAR8               strBuf[TAU_MAX_URI_SIZE + 3];      /* conversion enlarges this buffer */
     UINT8               packetBuffer[TAU_MAX_DNS_BUFFER_SIZE], *pBuf;
@@ -408,8 +406,8 @@ static void parseResponse (
     TAU_DNS_HEADER_T    *dns = (TAU_DNS_HEADER_T *) pPacket;
     UINT8 *pReader;
     UINT32 i, skip;
-    CHAR8   name[256];
-    TAU_RES_RECORD_T   answers[20] /*, auth[20], addit[20]*/; /* the replies from the DNS server */
+    CHAR8 name[256];
+    TAU_RES_RECORD_T    answers[20] /*, auth[20], addit[20]*/; /* the replies from the DNS server */
 
     /* move ahead of the dns header and the query field */
     pReader = pPacket + sizeof(TAU_DNS_HEADER_T) + querySize;
@@ -458,20 +456,20 @@ static void parseResponse (
     /* read authorities */
     for (i = 0; i < vos_ntohs(dns->auth_count); i++)
     {
-        auth[i].name    = (UINT8*) readName(pReader, pPacket, &skip, name);
+        auth[i].name    = (UINT8 *) readName(pReader, pPacket, &skip, name);
         pReader         += skip;
 
         auth[i].resource = (struct R_DATA *)(pReader);
         pReader += sizeof(struct R_DATA);
 
-        auth[i].rdata   = (UINT8*) readName(pReader, pPacket, &skip, name);
+        auth[i].rdata   = (UINT8 *) readName(pReader, pPacket, &skip, name);
         pReader         += skip;
     }
 
     /* read additional */
     for (i = 0; i < vos_ntohs(dns->add_count); i++)
     {
-        addit[i].name   = (UINT8*) readName(pReader, pPacket, &skip, name);
+        addit[i].name   = (UINT8 *) readName(pReader, pPacket, &skip, name);
         pReader         += skip;
 
         addit[i].resource = (struct R_DATA *)(pReader);
@@ -480,7 +478,7 @@ static void parseResponse (
         if (vos_ntohs(addit[i].resource->type) == 1)
         {
             int j;
-            addit[i].rdata = (UINT8*)vos_memAlloc(vos_ntohs(addit[i].resource->data_len));
+            addit[i].rdata = (UINT8 *)vos_memAlloc(vos_ntohs(addit[i].resource->data_len));
             for (j = 0; j < vos_ntohs(addit[i].resource->data_len); j++)
             {
                 addit[i].rdata[j] = pReader[j];
@@ -492,7 +490,7 @@ static void parseResponse (
         }
         else
         {
-            addit[i].rdata  = (UINT8*) readName(pReader, pPacket, &skip, name);
+            addit[i].rdata  = (UINT8 *) readName(pReader, pPacket, &skip, name);
             pReader         += skip;
         }
     }
@@ -565,7 +563,7 @@ static void updateDNSentry (
     UINT32          size, querySize;
     VOS_SOCK_OPT_T  opts;
     UINT16          id      = (UINT16) ((UINT32)appHandle & 0xFFFF);
-    TAU_DNR_DATA_T  *pDNR = (TAU_DNR_DATA_T *) appHandle->pUser;
+    TAU_DNR_DATA_T  *pDNR   = (TAU_DNR_DATA_T *) appHandle->pUser;
     TRDP_IP_ADDR_T  ip_addr = VOS_INADDR_ANY;
 
     memset(&opts, 0, sizeof(opts));
@@ -605,7 +603,7 @@ static void updateDNSentry (
             /* Get what was announced */
             vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
             FD_CLR(my_socket, &rfds);
-            
+
             if (size == 0)
             {
                 continue;       /* Try again, if there was no data */
@@ -635,8 +633,8 @@ static void updateDNSentry (
 
                 /* Position found, store everything */
                 vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE);
-                pDNR->cache[cacheEntry].ipAddr   = ip_addr;
-                pDNR->cache[cacheEntry].topoCnt  = appHandle->etbTopoCnt;
+                pDNR->cache[cacheEntry].ipAddr  = ip_addr;
+                pDNR->cache[cacheEntry].topoCnt = appHandle->etbTopoCnt;
 
                 /* Sort the entries to get faster hits  */
                 vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
@@ -679,26 +677,26 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     UINT16              dnsPort,
     const CHAR8         *pHostsFileName)
 {
-    TRDP_ERR_T  err = TRDP_NO_ERR;
-    TAU_DNR_DATA_T *pDNR;  /**< default DNR/ECSP settings  */
+    TRDP_ERR_T      err = TRDP_NO_ERR;
+    TAU_DNR_DATA_T  *pDNR; /**< default DNR/ECSP settings  */
 
     if (appHandle == NULL)
     {
         return TRDP_PARAM_ERR;
     }
 
-    pDNR = (TAU_DNR_DATA_T*) vos_memAlloc(sizeof(TAU_DNR_DATA_T));
+    pDNR = (TAU_DNR_DATA_T *) vos_memAlloc(sizeof(TAU_DNR_DATA_T));
     if (pDNR == NULL)
     {
         return TRDP_MEM_ERR;
     }
-    
-    /* save to application session */
-    appHandle->pUser  = pDNR;
 
-    pDNR->dnsIpAddr = (dnsIpAddr == 0)? 0x0a000001 : dnsIpAddr;
-    pDNR->dnsPort = (dnsPort == 0)? 53 : dnsPort;
-    
+    /* save to application session */
+    appHandle->pUser = pDNR;
+
+    pDNR->dnsIpAddr = (dnsIpAddr == 0) ? 0x0a000001 : dnsIpAddr;
+    pDNR->dnsPort   = (dnsPort == 0) ? 53 : dnsPort;
+
     /* Get locally defined hosts */
     if (pHostsFileName != NULL && strlen(pHostsFileName) > 0)
     {
@@ -723,9 +721,9 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
  *
  */
 EXT_DECL void tau_deInitDnr (
-    TRDP_APP_SESSION_T  appHandle)
+    TRDP_APP_SESSION_T appHandle)
 {
-    
+
     if (appHandle != NULL && appHandle->pUser != NULL)
     {
         vos_memFree(appHandle->pUser);
@@ -745,12 +743,12 @@ EXT_DECL void tau_deInitDnr (
  *
  */
 EXT_DECL TRDP_DNR_STATE_T tau_DNRstatus (
-    TRDP_APP_SESSION_T  appHandle)
+    TRDP_APP_SESSION_T appHandle)
 {
-    TAU_DNR_DATA_T  *pDNR;
+    TAU_DNR_DATA_T *pDNR;
     if (appHandle != NULL && appHandle->pUser != NULL)
     {
-        pDNR = (TAU_DNR_DATA_T*) appHandle->pUser;
+        pDNR = (TAU_DNR_DATA_T *) appHandle->pUser;
         if (pDNR != NULL)
         {
             if (pDNR->timeout == TAU_DNS_TIME_OUT_SHORT)
@@ -871,8 +869,8 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
         *pAddr = tau_getOwnAddr(appHandle);
         return TRDP_NO_ERR;
     }
-    
-    pDNR = (TAU_DNR_DATA_T*) appHandle->pUser;
+
+    pDNR = (TAU_DNR_DATA_T *) appHandle->pUser;
 
     /* Check for dotted IP address  */
     if ((*pAddr = vos_dottedIP(pUri)) != VOS_INADDR_ANY)
@@ -924,17 +922,16 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
     TRDP_URI_HOST_T     pUri,
     TRDP_IP_ADDR_T      addr)
 {
-    TAU_DNR_DATA_T  *pDNR;
+    TAU_DNR_DATA_T *pDNR;
     if (appHandle == NULL)
     {
         return TRDP_PARAM_ERR;
     }
-    
-    pDNR = (TAU_DNR_DATA_T*) appHandle->pUser;
+
+    pDNR = (TAU_DNR_DATA_T *) appHandle->pUser;
 
     if (addr == 0)
-    {
-    }
+    {}
     else
     {
         UINT32 i;
@@ -948,7 +945,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
             }
         }
         /* address not in cache: Make reverse request */
-        
+
     }
     return TRDP_NO_ERR;
 }

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-03-04: Ticket #112: Marshalling sets wrong datasetLength (PD)
  *     IBO 2016-02-03: Ticket #109: vos_ntohs -> vos_ntohl for datasetlength when unmarshalling
  *      BL 2016-01-25: Ticket #106: User needs to be informed on every received PD packet
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
@@ -167,6 +168,10 @@ TRDP_ERR_T trdp_pdPut (
                            pPacket->pFrame->data,
                            &dataSize,
                            &pPacket->pCachedDS);
+            /* We must set a possible smaller packet size! */
+            pPacket->dataSize   = dataSize;
+            pPacket->grossSize  = trdp_packetSizePD(dataSize);
+            pPacket->pFrame->frameHead.datasetLength = vos_htonl(pPacket->dataSize);
         }
 
         if (TRDP_NO_ERR == ret)

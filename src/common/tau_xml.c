@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-03-04: Ticket #113: parsing of dataset element "type" always returns 0
  *      BL 2016-02-11: Ticket #111: unit, scale, offset added
  *      BL 2016-02-11: Ticket #102: Replacing libxml2
  *      BL 2016-01-25: Ticket #106: Callback can be ON, OFF, ALWAYS
@@ -60,6 +61,24 @@
 /******************************************************************************
  *   Locals
  */
+
+/*
+ * Get type value
+ */
+TRDP_DATA_TYPE_T string2type (const CHAR8 *pTypeStr)
+{
+    CHAR8       *p;
+    const CHAR8 tokenList[] =
+        "01 BITSET8 01 BOOL8 01 ANTIVALENT8 02 CHAR8 02 UTF8 03 UTF16 04 INT8 05 INT16 06 INT32 07 INT64 08 UINT8"
+        " 09 UINT16 10 UINT32 11 UINT64 12 REAL32 13 REAL64 14 TIMEDATE32 15 TIMEDATE48 16 TIMEDATE64";
+
+    p = strstr(tokenList, pTypeStr);
+    if (p != NULL)
+    {
+        return (TRDP_DATA_TYPE_T) atoi(p - 3);
+    }
+    return 0;
+}
 
 
 /*
@@ -214,11 +233,11 @@ TRDP_ERR_T readTelegramDef (
     XML_HANDLE_T        *pXML,
     TRDP_EXCHG_PAR_T    *pExchgParam)
 {
-    CHAR8   tag[MAX_TAG_LEN];
-    CHAR8   attribute[MAX_TOK_LEN];
-    CHAR8   value[MAX_TOK_LEN];
-    UINT32  valueInt;
-    UINT32  countSrc, countDst;
+    CHAR8       tag[MAX_TAG_LEN];
+    CHAR8       attribute[MAX_TOK_LEN];
+    CHAR8       value[MAX_TOK_LEN];
+    UINT32      valueInt;
+    UINT32      countSrc, countDst;
     TRDP_SRC_T  *pSrc;
     TRDP_DEST_T *pDest;
 
@@ -271,7 +290,7 @@ TRDP_ERR_T readTelegramDef (
     countSrc    = trdp_XMLCountStartTag(pXML, "source");
     pSrc        = NULL;
     countDst    = trdp_XMLCountStartTag(pXML, "destination");
-    pDest        = NULL;
+    pDest       = NULL;
 
     /* Iterate thru <telegram> */
 
@@ -404,8 +423,8 @@ TRDP_ERR_T readTelegramDef (
                     return TRDP_MEM_ERR;
                 }
                 pExchgParam->srcCnt = countSrc;
-                countSrc = 0;
-                pSrc = pExchgParam->pSrc;
+                countSrc    = 0;
+                pSrc        = pExchgParam->pSrc;
             }
 
             while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
@@ -526,8 +545,8 @@ TRDP_ERR_T readTelegramDef (
                     return TRDP_MEM_ERR;
                 }
                 pExchgParam->destCnt = countDst;
-                countDst = 0;
-                pDest = pExchgParam->pDest;
+                countDst    = 0;
+                pDest       = pExchgParam->pDest;
             }
 
             while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
@@ -786,7 +805,7 @@ TRDP_ERR_T readXmlDatasets (
                     {
                         if (vos_strnicmp(attribute, "type", MAX_TOK_LEN) == 0)
                         {
-                            (*papDataset)[idx]->pElement[i].type = valueInt;
+                            (*papDataset)[idx]->pElement[i].type = string2type(value);
                         }
                         else if (vos_strnicmp(attribute, "array-size", MAX_TOK_LEN) == 0)
                         {
