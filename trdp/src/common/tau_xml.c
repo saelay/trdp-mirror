@@ -805,7 +805,14 @@ TRDP_ERR_T readXmlDatasets (
                     {
                         if (vos_strnicmp(attribute, "type", MAX_TOK_LEN) == 0)
                         {
-                            (*papDataset)[idx]->pElement[i].type = string2type(value);
+                            if (valueInt == 0)
+                            {
+                                (*papDataset)[idx]->pElement[i].type = string2type(value);
+                            }
+                            else
+                            {
+                                (*papDataset)[idx]->pElement[i].type = valueInt;
+                            }
                         }
                         else if (vos_strnicmp(attribute, "array-size", MAX_TOK_LEN) == 0)
                         {
