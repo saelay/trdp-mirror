@@ -2941,7 +2941,7 @@ TRDP_ERR_T tlm_reply (
     }  
     return trdp_mdReply (TRDP_MSG_MP,
                          appHandle,
-                         (TRDP_UUID_T *)pSessionId,
+                         (UINT8 *)pSessionId,
                          comId,
                          (INT32)userStatus,
                          0,
@@ -3001,7 +3001,7 @@ TRDP_ERR_T tlm_replyQuery (
 
     return trdp_mdReply (TRDP_MSG_MQ,
                          appHandle,
-                         (TRDP_UUID_T *)pSessionId,
+                         (UINT8 *)pSessionId,
                          comId,
 						 mdTimeOut,
                          (INT32)userStatus,                         
@@ -3045,7 +3045,7 @@ TRDP_ERR_T tlm_replyErr (
 
     return trdp_mdReply (TRDP_MSG_MP,
                          appHandle,
-                         (TRDP_UUID_T *)pSessionId,
+                         (UINT8 *)pSessionId,
                          comId,
                          0,
                          replyStatus,
