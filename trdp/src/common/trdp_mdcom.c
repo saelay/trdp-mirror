@@ -3355,7 +3355,7 @@ TRDP_ERR_T trdp_mdCall (
         {
             trdp_mdFillStateElement(msgType, pSenderElement);
 
-            trdp_mdManageSessionId(pSessionId, pSenderElement);
+            trdp_mdManageSessionId((UINT8*)pSessionId, pSenderElement);
 
             /*
              (Re-)allocate the data buffer if current size is different from requested size.
@@ -3456,7 +3456,7 @@ TRDP_ERR_T trdp_mdConfirm (
     {
         errv = trdp_mdLookupElement((MD_ELE_T*)appHandle->pMDSndQueue,
                                     TRDP_ST_TX_REQ_W4AP_CONFIRM,
-                                    (const TRDP_UUID_T*)pSessionId,
+                                    (const UINT8 *)pSessionId,
                                     &pSenderElement);
 
         if ( TRDP_NO_ERR == errv && NULL != pSenderElement )
