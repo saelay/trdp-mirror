@@ -40,34 +40,6 @@ C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\api\trdp_types.h(554)
             _
     return 0;
 ..\..\src\common\tau_xml.c(80) : Error 64: Type mismatch (return) (int/enum)
-                                                                           _
-                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(320) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                           _
-                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(328) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                           _
-                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(333) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                         _
-                            pExchgParam->pMdPar->flags &= ~TRDP_FLAGS_TCP;
-..\..\src\common\tau_xml.c(344) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                           _
-                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(375) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                           _
-                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(383) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                           _
-                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(388) : Error 64: Type mismatch (assignment)
-    (int/enum)
                                        _
                     pSrc->id = valueInt;
 ..\..\src\common\tau_xml.c(434) : Warning 613: Possible use of null pointer
@@ -306,30 +278,6 @@ C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\api\trdp_types.h(554)
                             (*papDataset)[idx]->pElement[i].scale = (REAL32) atof(value);
 ..\..\src\common\tau_xml.c(832) : Warning 421: Caution -- function 'atof(const
     char *)' is considered dangerous [MISRA Rule 125]
-                                                                               _
-                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(1062) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                               _
-                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(1081) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                               _
-                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(1086) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                               _
-                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(1114) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                               _
-                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(1122) : Error 64: Type mismatch (assignment)
-    (int/enum)
-                                                                               _
-                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
-..\..\src\common\tau_xml.c(1130) : Error 64: Type mismatch (assignment)
-    (int/enum)
                                                                                     _
                                         pProcessConfig->options |= TRDP_OPTION_BLOCK;
 ..\..\src\common\tau_xml.c(1183) : Warning 613: Possible use of null pointer

@@ -317,7 +317,7 @@ TRDP_ERR_T readTelegramDef (
                         if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                         {
                             pExchgParam->pMdPar->flags  |= TRDP_FLAGS_MARSHALL;
-                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
+                            pExchgParam->pMdPar->flags  &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                         }
                     }
                     else if (vos_strnicmp(attribute, "callback", MAX_TOK_LEN) == 0)
@@ -325,12 +325,12 @@ TRDP_ERR_T readTelegramDef (
                         if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                         {
                             pExchgParam->pMdPar->flags  |= TRDP_FLAGS_CALLBACK;
-                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
+                            pExchgParam->pMdPar->flags  &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                         }
                         else if (vos_strnicmp("always", value, TRDP_MAX_LABEL_LEN) == 0)
                         {
                             pExchgParam->pMdPar->flags  |= TRDP_FLAGS_FORCE_CB;
-                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
+                            pExchgParam->pMdPar->flags  &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                         }
                     }
                     else if (vos_strnicmp(attribute, "protocol", MAX_TOK_LEN) == 0)
@@ -341,7 +341,7 @@ TRDP_ERR_T readTelegramDef (
                         }
                         else
                         {
-                            pExchgParam->pMdPar->flags &= ~TRDP_FLAGS_TCP;
+                            pExchgParam->pMdPar->flags &= (TRDP_FLAGS_T) ~TRDP_FLAGS_TCP;
                         }
                     }
                 }
@@ -372,7 +372,7 @@ TRDP_ERR_T readTelegramDef (
                         if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                         {
                             pExchgParam->pPdPar->flags  |= TRDP_FLAGS_MARSHALL;
-                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
+                            pExchgParam->pPdPar->flags  &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                         }
                     }
                     else if (vos_strnicmp(attribute, "callback", MAX_TOK_LEN) == 0)
@@ -380,12 +380,12 @@ TRDP_ERR_T readTelegramDef (
                         if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                         {
                             pExchgParam->pPdPar->flags  |= TRDP_FLAGS_CALLBACK;
-                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
+                            pExchgParam->pPdPar->flags  &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                         }
                         else if (vos_strnicmp("always", value, TRDP_MAX_LABEL_LEN) == 0)
                         {
                             pExchgParam->pPdPar->flags  |= TRDP_FLAGS_FORCE_CB;
-                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
+                            pExchgParam->pPdPar->flags  &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                         }
                     }
                     else if (vos_strnicmp(attribute, "redundant", MAX_TOK_LEN) == 0)
@@ -1059,7 +1059,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                     if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                                     {
                                         pPdConfig->flags    |= TRDP_FLAGS_MARSHALL;
-                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
+                                        pPdConfig->flags    &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                                     }
                                 }
                                 else if (vos_strnicmp(attribute, "validity-behavior", MAX_TOK_LEN) == 0)
@@ -1078,12 +1078,12 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                     if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                                     {
                                         pPdConfig->flags    |= TRDP_FLAGS_CALLBACK;
-                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
+                                        pPdConfig->flags    &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                                     }
                                     else if (vos_strnicmp("always", value, TRDP_MAX_LABEL_LEN) == 0)
                                     {
                                         pPdConfig->flags    |= TRDP_FLAGS_FORCE_CB;
-                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
+                                        pPdConfig->flags    &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                                     }
                                 }
                                 else if (vos_strnicmp(attribute, "port", MAX_TOK_LEN) == 0)
@@ -1111,7 +1111,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                     if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                                     {
                                         pMdConfig->flags    |= TRDP_FLAGS_MARSHALL;
-                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
+                                        pMdConfig->flags    &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                                     }
                                 }
                                 else if (vos_strnicmp(attribute, "protocol", MAX_TOK_LEN) == 0)
@@ -1119,7 +1119,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                     if (vos_strnicmp("TCP", value, TRDP_MAX_LABEL_LEN) == 0)
                                     {
                                         pMdConfig->flags    |= TRDP_FLAGS_TCP;
-                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
+                                        pMdConfig->flags    &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                                     }
                                 }
                                 else if (vos_strnicmp(attribute, "callback", MAX_TOK_LEN) == 0)
@@ -1127,7 +1127,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                     if (vos_strnicmp("on", value, TRDP_MAX_LABEL_LEN) == 0)
                                     {
                                         pMdConfig->flags    |= TRDP_FLAGS_CALLBACK;
-                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
+                                        pMdConfig->flags    &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                                     }
                                 }
                                 else if (vos_strnicmp(attribute, "udp-port", MAX_TOK_LEN) == 0)
