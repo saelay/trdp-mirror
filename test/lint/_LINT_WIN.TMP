@@ -12,6 +12,13 @@
 --- Module:   ..\..\src\common\trdp_if.c (C)
 
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
+                                                                        _
+                                             &pSenderElement->pCachedDS);
+..\..\src\common\trdp_mdcom.c(3014) : Warning 534: Ignoring return value of
+    function 'pfCbMarshall' (compare with line 554, file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\api\trdp_types.h,
+    module ..\..\src\common\trdp_if.c)
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\api\trdp_types.h(554)
+    : Info 830: Location cited in prior message
 
 --- Module:   ..\..\src\common\trdp_pdcom.c (C)
 
@@ -22,21 +29,615 @@
 --- Module:   ..\..\src\common\tau_marshall.c (C)
 
 --- Module:   ..\..\src\common\tau_xml.c (C)
+                                   _
+    p = strstr(tokenList, pTypeStr);
+..\..\src\common\tau_xml.c(75) : Warning 605: Increase in pointer capability
+    (assignment)
+                                             _
+        return (TRDP_DATA_TYPE_T) atoi(p - 3);
+..\..\src\common\tau_xml.c(78) : Warning 421: Caution -- function 'atoi(const
+    char *)' is considered dangerous [MISRA Rule 125]
+            _
+    return 0;
+..\..\src\common\tau_xml.c(80) : Error 64: Type mismatch (return) (int/enum)
+                                                                           _
+                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(320) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                           _
+                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(328) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                           _
+                            pExchgParam->pMdPar->flags  &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(333) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                         _
+                            pExchgParam->pMdPar->flags &= ~TRDP_FLAGS_TCP;
+..\..\src\common\tau_xml.c(344) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                           _
+                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(375) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                           _
+                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(383) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                           _
+                            pExchgParam->pPdPar->flags  &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(388) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                       _
+                    pSrc->id = valueInt;
+..\..\src\common\tau_xml.c(434) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                                    _
+                        pSrc->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+..\..\src\common\tau_xml.c(441) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                              _
+                        if (pSrc->pUriUser == NULL)
+..\..\src\common\tau_xml.c(442) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                            _
+                        memcpy(pSrc->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
+..\..\src\common\tau_xml.c(449) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                     _
+                    pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+..\..\src\common\tau_xml.c(457) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                           _
+                    if (pSrc->pUriHost1 == NULL)
+..\..\src\common\tau_xml.c(458) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                  _
+                    vos_strncpy((char *)pSrc->pUriHost1, p, TRDP_MAX_URI_HOST_LEN);
+..\..\src\common\tau_xml.c(465) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                     _
+                    pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+..\..\src\common\tau_xml.c(472) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                           _
+                    if (pSrc->pUriHost2 == NULL)
+..\..\src\common\tau_xml.c(473) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                  _
+                    vos_strncpy((char *)pSrc->pUriHost2, p, TRDP_MAX_URI_HOST_LEN);
+..\..\src\common\tau_xml.c(480) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                      _
+                pSrc->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
+..\..\src\common\tau_xml.c(487) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                     _
+                if (pSrc->pSdtPar == NULL)
+..\..\src\common\tau_xml.c(489) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                      _
+                        pSrc->pSdtPar->smi1 = valueInt;
+..\..\src\common\tau_xml.c(500) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                      _
+                        pSrc->pSdtPar->smi2 = valueInt;
+..\..\src\common\tau_xml.c(504) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                     _
+                        pSrc->pSdtPar->udv = valueInt;
+..\..\src\common\tau_xml.c(508) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                          _
+                        pSrc->pSdtPar->rxPeriod = valueInt;
+..\..\src\common\tau_xml.c(512) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                          _
+                        pSrc->pSdtPar->txPeriod = valueInt;
+..\..\src\common\tau_xml.c(516) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                         _
+                        pSrc->pSdtPar->nrxSafe = valueInt;
+..\..\src\common\tau_xml.c(520) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                        _
+                        pSrc->pSdtPar->nGuard = valueInt;
+..\..\src\common\tau_xml.c(524) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                       _
+                        pSrc->pSdtPar->cmThr = valueInt;
+..\..\src\common\tau_xml.c(528) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                  _
+            pSrc++;
+..\..\src\common\tau_xml.c(533) : Warning 613: Possible use of null pointer
+    'pSrc' in argument to operator '++' [Reference: file ..\..\src\common\tau_xml.c:
+    line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                        _
+                    pDest->id = valueInt;
+..\..\src\common\tau_xml.c(556) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                                     _
+                        pDest->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+..\..\src\common\tau_xml.c(563) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                               _
+                        if (pDest->pUriUser == NULL)
+..\..\src\common\tau_xml.c(564) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                             _
+                        memcpy(pDest->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
+..\..\src\common\tau_xml.c(571) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                     _
+                    pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+..\..\src\common\tau_xml.c(579) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                           _
+                    if (pDest->pUriHost == NULL)
+..\..\src\common\tau_xml.c(580) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                  _
+                    vos_strncpy((char *)pDest->pUriHost, p, TRDP_MAX_URI_HOST_LEN);
+..\..\src\common\tau_xml.c(587) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                       _
+                pDest->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
+..\..\src\common\tau_xml.c(594) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                      _
+                if (pDest->pSdtPar == NULL)
+..\..\src\common\tau_xml.c(596) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                       _
+                        pDest->pSdtPar->smi1 = valueInt;
+..\..\src\common\tau_xml.c(607) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                       _
+                        pDest->pSdtPar->smi2 = valueInt;
+..\..\src\common\tau_xml.c(611) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                      _
+                        pDest->pSdtPar->udv = valueInt;
+..\..\src\common\tau_xml.c(615) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                           _
+                        pDest->pSdtPar->rxPeriod = valueInt;
+..\..\src\common\tau_xml.c(619) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                           _
+                        pDest->pSdtPar->txPeriod = valueInt;
+..\..\src\common\tau_xml.c(623) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                          _
+                        pDest->pSdtPar->nrxSafe = valueInt;
+..\..\src\common\tau_xml.c(627) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                         _
+                        pDest->pSdtPar->nGuard = valueInt;
+..\..\src\common\tau_xml.c(631) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                        _
+                        pDest->pSdtPar->cmThr = valueInt;
+..\..\src\common\tau_xml.c(635) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                   _
+            pDest++;
+..\..\src\common\tau_xml.c(640) : Warning 613: Possible use of null pointer
+    'pDest' in argument to operator '++' [Reference: file ..\..\src\common\tau_xml.c:
+    line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                        _
+                            (*papDataset)[idx]->pElement[i].scale = (REAL32) atof(value);
+..\..\src\common\tau_xml.c(832) : Warning 421: Caution -- function 'atof(const
+    char *)' is considered dangerous [MISRA Rule 125]
+                                                                               _
+                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(1062) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                               _
+                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(1081) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                               _
+                                        pPdConfig->flags    &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(1086) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                               _
+                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(1114) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                               _
+                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(1122) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                               _
+                                        pMdConfig->flags    &= ~TRDP_FLAGS_NONE;
+..\..\src\common\tau_xml.c(1130) : Error 64: Type mismatch (assignment)
+    (int/enum)
+                                                                                    _
+                                        pProcessConfig->options |= TRDP_OPTION_BLOCK;
+..\..\src\common\tau_xml.c(1183) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
+                                                                                               _
+                                        pProcessConfig->options &= ~TRDP_OPTION_TRAFFIC_SHAPING;
+..\..\src\common\tau_xml.c(1190) : Error 64: Type mismatch (assignment)
+    (int/enum)
+..\..\src\common\tau_xml.c(1190) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
+                                                                       _
+                                    pProcessConfig->priority = valueInt;
+..\..\src\common\tau_xml.c(1195) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
+                                                                        _
+                                    pProcessConfig->cycleTime = valueInt;
+..\..\src\common\tau_xml.c(1199) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
+                                                                                                 _
+                        trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &sizeValue, value);
+..\..\src\common\tau_xml.c(1390) : Warning 534: Ignoring return value of
+    function 'trdp_XMLGetAttribute(struct XML_HANDLE *, char *, unsigned int *,
+    char *)' (compare with line 96, file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h)
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(96)
+    : Info 830: Location cited in prior message
+                                                                                                    _
+                            trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &preAlloc, value);
+..\..\src\common\tau_xml.c(1393) : Warning 534: Ignoring return value of
+    function 'trdp_XMLGetAttribute(struct XML_HANDLE *, char *, unsigned int *,
+    char *)' (compare with line 96, file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h)
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(96)
+    : Info 830: Location cited in prior message
 
 --- Module:   ..\..\src\common\tau_ctrl.c (C)
                                       _
                             &sessionId,                     /* pSessionId */
-..\..\src\common\tau_ctrl.c(247) : Warning 545: Suspicious use of &
-
-    --- Wrap-up for Module: ..\..\src\common\tau_ctrl.c
-
-Warning 551: Symbol 'priv_ecscIpAddr' (line 52, file ..\..\src\common\tau_ctrl.c)
-    not accessed
-..\..\src\common\tau_ctrl.c(52) : Info 830: Location cited in prior message
+..\..\src\common\tau_ctrl.c(243) : Warning 545: Suspicious use of &
 
 --- Module:   ..\..\src\common\tau_dnr.c (C)
+                  _
+    UINT8   data[];
+..\..\src\common\tau_dnr.c(79) : Error 43: Vacuous type for variable
+    'tau_dnr_query::data' [MISRA Rule 108]
+
+..\..\src\common\tau_dnr.c(297) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 297, 299]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(297) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+                                                                                           _
+                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+                                                                                           _
+                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+                                                                                           _
+                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+                                               _
+        readName(pReader, pPacket, &skip, name);
+..\..\src\common\tau_dnr.c(425) : Warning 534: Ignoring return value of
+    function 'readName(unsigned char *, unsigned char *, unsigned int *, char
+    *)' (compare with line 141)
+..\..\src\common\tau_dnr.c(141) : Info 830: Location cited in prior message
+                                       _
+        TRDP_TIME_T tv = {pDNR->timeout, 0};
+..\..\src\common\tau_dnr.c(590) : Warning 614: auto aggregate initializer not
+    constant
+                                                                                                             _
+            vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
+..\..\src\common\tau_dnr.c(604) : Warning 534: Ignoring return value of
+    function 'vos_sockReceiveUDP(int, unsigned char *, unsigned int *, unsigned
+    int *, unsigned short *, unsigned int *, unsigned char)' (compare with line
+    1137, file ..\..\src\vos\windows\vos_sock.c)
+..\..\src\vos\windows\vos_sock.c(1137) : Info 830: Location cited in prior
+    message
+                            _
+    vos_sockClose(my_socket);
+..\..\src\common\tau_dnr.c(651) : Warning 534: Ignoring return value of
+    function 'vos_sockClose(int)' (compare with line 741, file
+    ..\..\src\vos\windows\vos_sock.c)
+..\..\src\vos\windows\vos_sock.c(741) : Info 830: Location cited in prior
+    message
+                                                _
+            vos_getInterfaces(&addrCnt, localIF);
+..\..\src\common\tau_dnr.c(813) : Warning 534: Ignoring return value of
+    function 'vos_getInterfaces(unsigned int *, VOS_IF_REC_T *)' (compare with
+    line 277, file ..\..\src\vos\windows\vos_sock.c)
+..\..\src\vos\windows\vos_sock.c(277) : Info 830: Location cited in prior
+    message
 
 --- Module:   ..\..\src\common\tau_tti.c (C)
+                                         _
+    tau_uri2Addr(appHandle, &ipAddr, uri);
+..\..\src\common\tau_tti.c(83) : Warning 534: Ignoring return value of function
+    'tau_uri2Addr(struct TRDP_SESSION *, unsigned int *, const char *)'
+    (compare with line 851, file ..\..\src\common\tau_dnr.c)
+..\..\src\common\tau_dnr.c(851) : Info 830: Location cited in prior message
+                                                     _
+                tlc_setOpTrainTopoCount(appHandle, 0);
+..\..\src\common\tau_tti.c(177) : Warning 534: Ignoring return value of
+    function 'tlc_setOpTrainTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1114, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1114) : Info 830: Location cited in prior message
+                                                                                _
+                tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
+..\..\src\common\tau_tti.c(187) : Warning 534: Ignoring return value of
+    function 'tlc_setETBTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1078, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1078) : Info 830: Location cited in prior message
+                                                                              _
+            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+..\..\src\common\tau_tti.c(190) : Warning 670: Possible access beyond array for
+    function 'memcpy(void *, const void *, unsigned int)', argument 3 (size=72)
+    exceeds argument 2 (size=48) [Reference: file ..\..\src\common\tau_tti.c:
+    lines 166, 190]
+..\..\src\common\tau_tti.c(166) : Info 831: Reference cited in prior message
+..\..\src\common\tau_tti.c(190) : Info 831: Reference cited in prior message
+                                                                                                   _
+                tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
+..\..\src\common\tau_tti.c(198) : Warning 534: Ignoring return value of
+    function 'tlc_setOpTrainTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1114, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1114) : Info 830: Location cited in prior message
+                                                                                               _
+            tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
+..\..\src\common\tau_tti.c(201) : Warning 534: Ignoring return value of
+    function 'tlc_setOpTrainTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1114, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1114) : Info 830: Location cited in prior message
+                                                 _
+                tlc_setETBTopoCount(appHandle, 0);
+..\..\src\common\tau_tti.c(212) : Warning 534: Ignoring return value of
+    function 'tlc_setETBTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1078, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1078) : Info 830: Location cited in prior message
+                                                     _
+                tlc_setOpTrainTopoCount(appHandle, 0);
+..\..\src\common\tau_tti.c(217) : Warning 534: Ignoring return value of
+    function 'tlc_setOpTrainTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1114, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1114) : Info 830: Location cited in prior message
+                                                                               _
+    tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnDir.opTrnTopoCnt);
+..\..\src\common\tau_tti.c(259) : Warning 534: Ignoring return value of
+    function 'tlc_setOpTrainTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1114, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1114) : Info 830: Location cited in prior message
+                                                     _
+                tlc_setOpTrainTopoCount(appHandle, 0);
+..\..\src\common\tau_tti.c(464) : Warning 534: Ignoring return value of
+    function 'tlc_setOpTrainTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1114, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1114) : Info 830: Location cited in prior message
+                                                                              _
+            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+..\..\src\common\tau_tti.c(467) : Warning 669: Possible data overrun for
+    function 'memcpy(void *, const void *, unsigned int)', argument 3
+    (size=5624) exceeds argument 1 (size=72) [Reference: file
+    ..\..\src\common\tau_tti.c: lines 451, 467]
+..\..\src\common\tau_tti.c(451) : Info 831: Reference cited in prior message
+..\..\src\common\tau_tti.c(467) : Info 831: Reference cited in prior message
+                                                                              _
+            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+..\..\src\common\tau_tti.c(467) : Warning 670: Possible access beyond array for
+    function 'memcpy(void *, const void *, unsigned int)', argument 3
+    (size=5624) exceeds argument 2 (size=48) [Reference: file
+    ..\..\src\common\tau_tti.c: lines 451, 467]
+..\..\src\common\tau_tti.c(451) : Info 831: Reference cited in prior message
+..\..\src\common\tau_tti.c(467) : Info 831: Reference cited in prior message
+                                                                                               _
+            tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
+..\..\src\common\tau_tti.c(471) : Warning 534: Ignoring return value of
+    function 'tlc_setOpTrainTopoCount(struct TRDP_SESSION *, unsigned int)'
+    (compare with line 1114, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1114) : Info 830: Location cited in prior message
+                                                                                            _
+                        TTDB_OP_DIR_INFO_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+..\..\src\common\tau_tti.c(516) : Warning 534: Ignoring return value of
+    function 'tlm_request(struct TRDP_SESSION *, const void *, void (*)(void *,
+    struct TRDP_SESSION *, const TRDP_MD_INFO_T *, unsigned char *, unsigned
+    int), unsigned char (*)[16], unsigned int, unsigned int, unsigned int,
+    unsigned int, unsigned int, TRDP_FLAGS_T, unsigned int, unsigned int,
+    unsigned int, const TRDP_SEND_PARAM_T *, const unsigned char *, unsigned
+    int, const char *, const char *)' (compare with line 2497, file
+    ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(2497) : Info 830: Location cited in prior message
+                                                                                        _
+                        TTDB_TRN_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+..\..\src\common\tau_tti.c(525) : Warning 534: Ignoring return value of
+    function 'tlm_request(struct TRDP_SESSION *, const void *, void (*)(void *,
+    struct TRDP_SESSION *, const TRDP_MD_INFO_T *, unsigned char *, unsigned
+    int), unsigned char (*)[16], unsigned int, unsigned int, unsigned int,
+    unsigned int, unsigned int, TRDP_FLAGS_T, unsigned int, unsigned int,
+    unsigned int, const TRDP_SEND_PARAM_T *, const unsigned char *, unsigned
+    int, const char *, const char *)' (compare with line 2497, file
+    ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(2497) : Info 830: Location cited in prior message
+                                                                                        _
+                        TTDB_NET_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+..\..\src\common\tau_tti.c(533) : Warning 534: Ignoring return value of
+    function 'tlm_request(struct TRDP_SESSION *, const void *, void (*)(void *,
+    struct TRDP_SESSION *, const TRDP_MD_INFO_T *, unsigned char *, unsigned
+    int), unsigned char (*)[16], unsigned int, unsigned int, unsigned int,
+    unsigned int, unsigned int, TRDP_FLAGS_T, unsigned int, unsigned int,
+    unsigned int, const TRDP_SEND_PARAM_T *, const unsigned char *, unsigned
+    int, const char *, const char *)' (compare with line 2497, file
+    ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(2497) : Info 830: Location cited in prior message
+                                                                                           _
+                        TTDB_READ_CMPLT_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+..\..\src\common\tau_tti.c(541) : Warning 534: Ignoring return value of
+    function 'tlm_request(struct TRDP_SESSION *, const void *, void (*)(void *,
+    struct TRDP_SESSION *, const TRDP_MD_INFO_T *, unsigned char *, unsigned
+    int), unsigned char (*)[16], unsigned int, unsigned int, unsigned int,
+    unsigned int, unsigned int, TRDP_FLAGS_T, unsigned int, unsigned int,
+    unsigned int, const TRDP_SEND_PARAM_T *, const unsigned char *, unsigned
+    int, const char *, const char *)' (compare with line 2497, file
+    ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(2497) : Info 830: Location cited in prior message
+                                                                                                _
+                        TTDB_STAT_CST_REQ_TO, 0, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
+..\..\src\common\tau_tti.c(548) : Warning 534: Ignoring return value of
+    function 'tlm_request(struct TRDP_SESSION *, const void *, void (*)(void *,
+    struct TRDP_SESSION *, const TRDP_MD_INFO_T *, unsigned char *, unsigned
+    int), unsigned char (*)[16], unsigned int, unsigned int, unsigned int,
+    unsigned int, unsigned int, TRDP_FLAGS_T, unsigned int, unsigned int,
+    unsigned int, const TRDP_SEND_PARAM_T *, const unsigned char *, unsigned
+    int, const char *, const char *)' (compare with line 2497, file
+    ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(2497) : Info 830: Location cited in prior message
+                                      _
+    tlc_process(appHandle, NULL, NULL);
+..\..\src\common\tau_tti.c(554) : Warning 534: Ignoring return value of
+    function 'tlc_process(struct TRDP_SESSION *, struct fd_set *, int *)'
+    (compare with line 1660, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(1660) : Info 830: Location cited in prior message
+                                                                   _
+        tlm_delListener(appHandle, appHandle->pTTDB->md101Listener);
+..\..\src\common\tau_tti.c(652) : Warning 534: Ignoring return value of
+    function 'tlm_delListener(struct TRDP_SESSION *, struct MD_LIS_ELE *)'
+    (compare with line 2744, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(2744) : Info 830: Location cited in prior message
+                                                                    _
+        tlp_unsubscribe(appHandle, appHandle->pTTDB->pd100SubHandle);
+..\..\src\common\tau_tti.c(653) : Warning 534: Ignoring return value of
+    function 'tlp_unsubscribe(struct TRDP_SESSION *, struct PD_ELE *)' (compare
+    with line 2134, file ..\..\src\common\trdp_if.c)
+..\..\src\common\trdp_if.c(2134) : Info 830: Location cited in prior message
+    _
+    return TRDP_NO_ERR;
+..\..\src\common\tau_tti.c(785) : Warning 527: Unreachable code at token
+    'return' [MISRA Rule 52]
 
 /// Start of Pass 2 ///
 
@@ -45,123 +646,163 @@ Warning 551: Symbol 'priv_ecscIpAddr' (line 52, file ..\..\src\common\tau_ctrl.c
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_if.c line 275: vos_strncpy([16], [16], 16)
-..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_if.c line 471: vos_strncpy([16], [16], 16)
+..\..\src\vos\common\vos_mem.c(731) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_if.c:
-    line 275]
-..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 731; file ..\..\src\common\trdp_if.c:
+    line 471]
+..\..\src\vos\common\vos_mem.c(731) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_if.c(275) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_if.c(471) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_if.c line 275: vos_strncpy([16], [16], 16)
-..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_if.c line 471: vos_strncpy([16], [16], 16)
+..\..\src\vos\common\vos_mem.c(733) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_if.c:
-    line 275]
-..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 733; file ..\..\src\common\trdp_if.c:
+    line 471]
+..\..\src\vos\common\vos_mem.c(733) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_if.c(275) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_if.c(471) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_if.c line 2456: vos_strncpy([32], !=0, 32)
-..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_if.c line 2652: vos_strncpy([32], !=0, 32)
+..\..\src\vos\common\vos_mem.c(731) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_if.c:
-    line 2456]
-..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 731; file ..\..\src\common\trdp_if.c:
+    line 2652]
+..\..\src\vos\common\vos_mem.c(731) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_if.c(2456) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_if.c(2652) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_if.c line 2456: vos_strncpy([32], !=0, 32)
-..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_if.c line 2652: vos_strncpy([32], !=0, 32)
+..\..\src\vos\common\vos_mem.c(733) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_if.c:
-    line 2456]
-..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 733; file ..\..\src\common\trdp_if.c:
+    line 2652]
+..\..\src\vos\common\vos_mem.c(733) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_if.c(2456) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_if.c(2652) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_stats.c line 78: vos_strncpy([16], !=0, 16)
-..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_stats.c line 79: vos_strncpy([16], !=0, 16)
+..\..\src\vos\common\vos_mem.c(731) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_stats.c:
-    line 78]
-..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 731; file ..\..\src\common\trdp_stats.c:
+    line 79]
+..\..\src\vos\common\vos_mem.c(731) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_stats.c(78) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_stats.c(79) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_stats.c line 78: vos_strncpy([16], !=0, 16)
-..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_stats.c line 79: vos_strncpy([16], !=0, 16)
+..\..\src\vos\common\vos_mem.c(733) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_stats.c:
-    line 78]
-..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 733; file ..\..\src\common\trdp_stats.c:
+    line 79]
+..\..\src\vos\common\vos_mem.c(733) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_stats.c(78) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_stats.c(79) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_stats.c line 281: vos_strncpy([32], [32], 32)
-..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_stats.c line 284: vos_strncpy([32], [32], 32)
+..\..\src\vos\common\vos_mem.c(731) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\trdp_stats.c:
-    line 281]
-..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 731; file ..\..\src\common\trdp_stats.c:
+    line 284]
+..\..\src\vos\common\vos_mem.c(731) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_stats.c(281) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_stats.c(284) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\trdp_stats.c line 281: vos_strncpy([32], [32], 32)
-..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+  File ..\..\src\common\trdp_stats.c line 284: vos_strncpy([32], [32], 32)
+..\..\src\vos\common\vos_mem.c(733) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\trdp_stats.c:
-    line 281]
-..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 733; file ..\..\src\common\trdp_stats.c:
+    line 284]
+..\..\src\vos\common\vos_mem.c(733) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_stats.c(281) : Info 831: Reference cited in prior message
+..\..\src\common\trdp_stats.c(284) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 798: vos_strncpy([128], !=0, 128)
-..\..\src\vos\common\vos_mem.c(719) : Warning 415: Likely access of
+  File ..\..\src\common\tau_xml.c line 986: vos_strncpy([16], [124], 16)
+..\..\src\vos\common\vos_mem.c(731) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 719; file ..\..\src\common\tau_xml.c:
-    line 798]
-..\..\src\vos\common\vos_mem.c(719) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 731; file ..\..\src\common\tau_xml.c:
+    line 986]
+..\..\src\vos\common\vos_mem.c(731) : Info 831: Reference cited in prior
     message
-..\..\src\common\tau_xml.c(798) : Info 831: Reference cited in prior message
+..\..\src\common\tau_xml.c(986) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 798: vos_strncpy([128], !=0, 128)
-..\..\src\vos\common\vos_mem.c(721) : Warning 415: Likely access of
+  File ..\..\src\common\tau_xml.c line 986: vos_strncpy([16], [124], 16)
+..\..\src\vos\common\vos_mem.c(733) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 721; file ..\..\src\common\tau_xml.c:
-    line 798]
-..\..\src\vos\common\vos_mem.c(721) : Info 831: Reference cited in prior
+    file ..\..\src\vos\common\vos_mem.c: line 733; file ..\..\src\common\tau_xml.c:
+    line 986]
+..\..\src\vos\common\vos_mem.c(733) : Info 831: Reference cited in prior
     message
-..\..\src\common\tau_xml.c(798) : Info 831: Reference cited in prior message
+..\..\src\common\tau_xml.c(986) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1419: vos_strncpy([128], [124], 128)
+..\..\src\vos\common\vos_mem.c(731) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 731; file ..\..\src\common\tau_xml.c:
+    line 1419]
+..\..\src\vos\common\vos_mem.c(731) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(1419) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1419: vos_strncpy([128], [124], 128)
+..\..\src\vos\common\vos_mem.c(733) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 733; file ..\..\src\common\tau_xml.c:
+    line 1419]
+..\..\src\vos\common\vos_mem.c(733) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(1419) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 635: vos_strncpy([64], ?, 64)
+..\..\src\vos\common\vos_mem.c(731) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 731; file ..\..\src\common\tau_dnr.c:
+    line 635]
+..\..\src\vos\common\vos_mem.c(731) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_dnr.c(635) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 635: vos_strncpy([64], ?, 64)
+..\..\src\vos\common\vos_mem.c(733) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 733; file ..\..\src\common\tau_dnr.c:
+    line 635]
+..\..\src\vos\common\vos_mem.c(733) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_dnr.c(635) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\vos\windows\vos_thread.c (C)
 
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 1083: vos_sockReceiveTCP(?, [0]?,
+  File ..\..\src\common\trdp_mdcom.c line 1102: vos_sockReceiveTCP(?, [0]?,
     [1])
-..\..\src\vos\windows\vos_sock.c(1555) : Warning 662: Possible creation of
+..\..\src\vos\windows\vos_sock.c(1571) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1552, 1555; file
-    ..\..\src\common\trdp_mdcom.c: lines 1059, 1082]
-..\..\src\vos\windows\vos_sock.c(1552) : Info 831: Reference cited in prior
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1568, 1571; file
+    ..\..\src\common\trdp_mdcom.c: lines 1078, 1101]
+..\..\src\vos\windows\vos_sock.c(1568) : Info 831: Reference cited in prior
     message
-..\..\src\vos\windows\vos_sock.c(1555) : Info 831: Reference cited in prior
+..\..\src\vos\windows\vos_sock.c(1571) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1059) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1078) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1082) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1101) : Info 831: Reference cited in prior
     message
 
 --- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)
@@ -169,28 +810,6 @@ During Specific Walk:
 --- Module:   ..\..\src\common\trdp_if.c (C)
 
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
-
-During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 1902: trdp_mdHandleRequest(!=0, 1? |
-    0?, 12?, ?, 0, [1], 0, [1])
-..\..\src\common\trdp_mdcom.c(1479) : Warning 413: Likely use of null pointer
-    'iterListener' in left argument to operator '->' [Reference: file
-    ..\..\src\common\trdp_mdcom.c: lines 1800, 1901] [MISRA Rule 107]
-..\..\src\common\trdp_mdcom.c(1800) : Info 831: Reference cited in prior
-    message
-..\..\src\common\trdp_mdcom.c(1901) : Info 831: Reference cited in prior
-    message
-
-During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 1902: trdp_mdHandleRequest(!=0, 1? |
-    0?, 12?, ?, 0, [1], 0, [1])
-..\..\src\common\trdp_mdcom.c(1481) : Warning 413: Likely use of null pointer
-    'iterListener' in left argument to operator '->' [Reference: file
-    ..\..\src\common\trdp_mdcom.c: lines 1800, 1901] [MISRA Rule 107]
-..\..\src\common\trdp_mdcom.c(1800) : Info 831: Reference cited in prior
-    message
-..\..\src\common\trdp_mdcom.c(1901) : Info 831: Reference cited in prior
-    message
 
 --- Module:   ..\..\src\common\trdp_pdcom.c (C)
 
@@ -201,12 +820,790 @@ During Specific Walk:
 --- Module:   ..\..\src\common\tau_marshall.c (C)
 
 --- Module:   ..\..\src\common\tau_xml.c (C)
+                                       _
+                    pSrc->id = valueInt;
+..\..\src\common\tau_xml.c(434) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                                    _
+                        pSrc->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+..\..\src\common\tau_xml.c(441) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                              _
+                        if (pSrc->pUriUser == NULL)
+..\..\src\common\tau_xml.c(442) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                            _
+                        memcpy(pSrc->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
+..\..\src\common\tau_xml.c(449) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                     _
+                    pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+..\..\src\common\tau_xml.c(457) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                           _
+                    if (pSrc->pUriHost1 == NULL)
+..\..\src\common\tau_xml.c(458) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                  _
+                    vos_strncpy((char *)pSrc->pUriHost1, p, TRDP_MAX_URI_HOST_LEN);
+..\..\src\common\tau_xml.c(465) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                     _
+                    pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+..\..\src\common\tau_xml.c(472) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                           _
+                    if (pSrc->pUriHost2 == NULL)
+..\..\src\common\tau_xml.c(473) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                  _
+                    vos_strncpy((char *)pSrc->pUriHost2, p, TRDP_MAX_URI_HOST_LEN);
+..\..\src\common\tau_xml.c(480) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                                                      _
+                pSrc->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
+..\..\src\common\tau_xml.c(487) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                     _
+                if (pSrc->pSdtPar == NULL)
+..\..\src\common\tau_xml.c(489) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                      _
+                        pSrc->pSdtPar->smi1 = valueInt;
+..\..\src\common\tau_xml.c(500) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                      _
+                        pSrc->pSdtPar->smi2 = valueInt;
+..\..\src\common\tau_xml.c(504) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                     _
+                        pSrc->pSdtPar->udv = valueInt;
+..\..\src\common\tau_xml.c(508) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                          _
+                        pSrc->pSdtPar->rxPeriod = valueInt;
+..\..\src\common\tau_xml.c(512) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                          _
+                        pSrc->pSdtPar->txPeriod = valueInt;
+..\..\src\common\tau_xml.c(516) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                         _
+                        pSrc->pSdtPar->nrxSafe = valueInt;
+..\..\src\common\tau_xml.c(520) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                        _
+                        pSrc->pSdtPar->nGuard = valueInt;
+..\..\src\common\tau_xml.c(524) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                                       _
+                        pSrc->pSdtPar->cmThr = valueInt;
+..\..\src\common\tau_xml.c(528) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                  _
+            pSrc++;
+..\..\src\common\tau_xml.c(533) : Warning 613: Possible use of null pointer
+    'pSrc' in argument to operator '++' [Reference: file ..\..\src\common\tau_xml.c:
+    line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+                                        _
+                    pDest->id = valueInt;
+..\..\src\common\tau_xml.c(556) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                                     _
+                        pDest->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+..\..\src\common\tau_xml.c(563) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                               _
+                        if (pDest->pUriUser == NULL)
+..\..\src\common\tau_xml.c(564) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                             _
+                        memcpy(pDest->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
+..\..\src\common\tau_xml.c(571) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                     _
+                    pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+..\..\src\common\tau_xml.c(579) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                           _
+                    if (pDest->pUriHost == NULL)
+..\..\src\common\tau_xml.c(580) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                  _
+                    vos_strncpy((char *)pDest->pUriHost, p, TRDP_MAX_URI_HOST_LEN);
+..\..\src\common\tau_xml.c(587) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                       _
+                pDest->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
+..\..\src\common\tau_xml.c(594) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                      _
+                if (pDest->pSdtPar == NULL)
+..\..\src\common\tau_xml.c(596) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                       _
+                        pDest->pSdtPar->smi1 = valueInt;
+..\..\src\common\tau_xml.c(607) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                       _
+                        pDest->pSdtPar->smi2 = valueInt;
+..\..\src\common\tau_xml.c(611) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                      _
+                        pDest->pSdtPar->udv = valueInt;
+..\..\src\common\tau_xml.c(615) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                           _
+                        pDest->pSdtPar->rxPeriod = valueInt;
+..\..\src\common\tau_xml.c(619) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                           _
+                        pDest->pSdtPar->txPeriod = valueInt;
+..\..\src\common\tau_xml.c(623) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                          _
+                        pDest->pSdtPar->nrxSafe = valueInt;
+..\..\src\common\tau_xml.c(627) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                         _
+                        pDest->pSdtPar->nGuard = valueInt;
+..\..\src\common\tau_xml.c(631) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                        _
+                        pDest->pSdtPar->cmThr = valueInt;
+..\..\src\common\tau_xml.c(635) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                   _
+            pDest++;
+..\..\src\common\tau_xml.c(640) : Warning 613: Possible use of null pointer
+    'pDest' in argument to operator '++' [Reference: file ..\..\src\common\tau_xml.c:
+    line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(434) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(441) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(442) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(449) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(457) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(458) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(465) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(472) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(473) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(480) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(487) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(489) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(500) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(504) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(508) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(512) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(516) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(520) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(524) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(528) : Warning 613: Possible use of null pointer
+    'pSrc' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(533) : Warning 613: Possible use of null pointer
+    'pSrc' in argument to operator '++' [Reference: file ..\..\src\common\tau_xml.c:
+    line 291] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(291) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(556) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(563) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(564) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(571) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(579) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(580) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(587) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(594) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(596) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(607) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(611) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(615) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(619) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(623) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(627) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(631) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(635) : Warning 613: Possible use of null pointer
+    'pDest' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1207: readTelegramDef(?, !=0)
+..\..\src\common\tau_xml.c(640) : Warning 613: Possible use of null pointer
+    'pDest' in argument to operator '++' [Reference: file ..\..\src\common\tau_xml.c:
+    line 293] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(293) : Info 831: Reference cited in prior message
+                                                                                    _
+                                        pProcessConfig->options |= TRDP_OPTION_BLOCK;
+..\..\src\common\tau_xml.c(1183) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
+                                                                                               _
+                                        pProcessConfig->options &= ~TRDP_OPTION_TRAFFIC_SHAPING;
+..\..\src\common\tau_xml.c(1190) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
+                                                                       _
+                                    pProcessConfig->priority = valueInt;
+..\..\src\common\tau_xml.c(1195) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
+                                                                        _
+                                    pProcessConfig->cycleTime = valueInt;
+..\..\src\common\tau_xml.c(1199) : Warning 613: Possible use of null pointer
+    'pProcessConfig' in left argument to operator '->' [Reference: file
+    ..\..\src\common\tau_xml.c: line 980] [MISRA Rule 107]
+..\..\src\common\tau_xml.c(980) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\common\tau_ctrl.c (C)
 
 --- Module:   ..\..\src\common\tau_dnr.c (C)
 
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 425: readName(?, ?, [1], [256])
+..\..\src\common\tau_dnr.c(172) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 151, 161, 172, 425]
+..\..\src\common\tau_dnr.c(151) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(161) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(172) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(425) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 425: readName(?, ?, [1], [256])
+..\..\src\common\tau_dnr.c(186) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 181, 186, 425]
+..\..\src\common\tau_dnr.c(181) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(186) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(425) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 425: readName(?, ?, [1], [256])
+..\..\src\common\tau_dnr.c(189) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 181, 187, 189, 425]
+..\..\src\common\tau_dnr.c(181) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(187) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(189) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(425) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 425: readName(?, ?, [1], [256])
+..\..\src\common\tau_dnr.c(192) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 181, 187, 192, 425]
+..\..\src\common\tau_dnr.c(181) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(187) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(192) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(425) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 449: readName(!=0, ?, [1], [256])
+..\..\src\common\tau_dnr.c(172) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 151, 161, 172, 449]
+..\..\src\common\tau_dnr.c(151) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(161) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(172) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(449) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 449: readName(!=0, ?, [1], [256])
+..\..\src\common\tau_dnr.c(186) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 181, 186, 449]
+..\..\src\common\tau_dnr.c(181) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(186) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(449) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 449: readName(!=0, ?, [1], [256])
+..\..\src\common\tau_dnr.c(189) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 181, 187, 189, 449]
+..\..\src\common\tau_dnr.c(181) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(187) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(189) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(449) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 449: readName(!=0, ?, [1], [256])
+..\..\src\common\tau_dnr.c(192) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 181, 187, 192, 449]
+..\..\src\common\tau_dnr.c(181) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(187) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(192) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(449) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 376: changetoDnsNameFormat([1488], [67])
+..\..\src\common\tau_dnr.c(218) : Warning 676: Possibly negative subscript (-1)
+    in operator '[' [Reference: file ..\..\src\common\tau_dnr.c: lines 211,
+    216, 218, 376]
+..\..\src\common\tau_dnr.c(211) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(216) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(218) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(376) : Info 831: Reference cited in prior message
+
+..\..\src\common\tau_dnr.c(297) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 297, 299]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(297) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+                                                                                           _
+                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+                                                                                           _
+                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+                                                                                           _
+                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 703: readHostsFile(!=0, !=0)
+..\..\src\common\tau_dnr.c(297) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 297, 299]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(297) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 703: readHostsFile(!=0, !=0)
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 703: readHostsFile(!=0, !=0)
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 703: readHostsFile(!=0, !=0)
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (1 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 703: readHostsFile(!=0, !=0)
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 703: readHostsFile(!=0, !=0)
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 703: readHostsFile(!=0, !=0)
+..\..\src\common\tau_dnr.c(306) : Warning 661: Possible access of out-of-bounds
+    pointer (2 beyond end of data) by operator '[' [Reference: file
+    ..\..\src\common\tau_dnr.c: lines 273, 293, 299, 306, 308]
+..\..\src\common\tau_dnr.c(273) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(293) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(299) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(306) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(308) : Info 831: Reference cited in prior message
+
 --- Module:   ..\..\src\common\tau_tti.c (C)
+                                                                              _
+            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+..\..\src\common\tau_tti.c(190) : Warning 670: Possible access beyond array for
+    function 'memcpy(void *, const void *, unsigned int)', argument 3 (size=72)
+    exceeds argument 2 (size=48) [Reference: file ..\..\src\common\tau_tti.c:
+    lines 166, 190]
+..\..\src\common\tau_tti.c(166) : Info 831: Reference cited in prior message
+..\..\src\common\tau_tti.c(190) : Info 831: Reference cited in prior message
+                                                                              _
+            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+..\..\src\common\tau_tti.c(467) : Warning 669: Possible data overrun for
+    function 'memcpy(void *, const void *, unsigned int)', argument 3
+    (size=5624) exceeds argument 1 (size=72) [Reference: file
+    ..\..\src\common\tau_tti.c: lines 451, 467]
+..\..\src\common\tau_tti.c(451) : Info 831: Reference cited in prior message
+..\..\src\common\tau_tti.c(467) : Info 831: Reference cited in prior message
+                                                                              _
+            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+..\..\src\common\tau_tti.c(467) : Warning 670: Possible access beyond array for
+    function 'memcpy(void *, const void *, unsigned int)', argument 3
+    (size=5624) exceeds argument 2 (size=48) [Reference: file
+    ..\..\src\common\tau_tti.c: lines 451, 467]
+..\..\src\common\tau_tti.c(451) : Info 831: Reference cited in prior message
+..\..\src\common\tau_tti.c(467) : Info 831: Reference cited in prior message
 
 --- Global Wrap-up
 
@@ -214,16 +1611,56 @@ Warning 552: Symbol 'gNumberOfOpenSockets' (line 88, file ..\..\src\vos\windows\
     not accessed
 ..\..\src\vos\windows\vos_sock.c(88) : Info 830: Location cited in prior
     message
-Warning 526: Symbol '__alignof()' (line 120, file ..\..\src\common\tau_marshall.c)
+Warning 526: Symbol 'trdp_XMLClose(struct XML_HANDLE *)' (line 84, file
+    C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(84)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLCountStartTag(struct XML_HANDLE *, const char *)'
+    (line 85, file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(85)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLEnter(struct XML_HANDLE *)' (line 100, file
+    C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(100)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLGetAttribute(struct XML_HANDLE *, char *, unsigned
+    int *, char *)' (line 93, file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(93)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLLeave(struct XML_HANDLE *)' (line 101, file
+    C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(101)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLOpen(struct XML_HANDLE *, const char *)' (line 82,
+    file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(82)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLSeekStartTagAny(struct XML_HANDLE *, char *, int)'
+    (line 88, file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(88)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLSeekStartTag(struct XML_HANDLE *, const char *)'
+    (line 91, file C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(91)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol 'trdp_XMLRewind(struct XML_HANDLE *)' (line 98, file
+    C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h,
+    module ..\..\src\common\tau_xml.c) not defined
+C:\Users\arweiss\Documents\EUProjekte\TCNOpenSF\trdp\src\common\trdp_xml.h(98)
+    : Info 830: Location cited in prior message
+Warning 526: Symbol '__alignof()' (line 125, file ..\..\src\common\tau_marshall.c)
     not defined
-..\..\src\common\tau_marshall.c(120) : Info 830: Location cited in prior
+..\..\src\common\tau_marshall.c(125) : Info 830: Location cited in prior
     message
 Warning 628: no argument information provided for function '__alignof()' (line
-    120, file ..\..\src\common\tau_marshall.c)
-..\..\src\common\tau_marshall.c(120) : Info 830: Location cited in prior
+    125, file ..\..\src\common\tau_marshall.c)
+..\..\src\common\tau_marshall.c(125) : Info 830: Location cited in prior
     message
-Warning 628: no argument information provided for function 'NetWkstaTransportEnum()'
-    (line 102, file C:\Program Files\Microsoft SDKs\Windows\v7.0A\Include\lmwksta.h,
-    module ..\..\src\vos\windows\vos_sock.c)
-C:\Program Files\Microsoft SDKs\Windows\v7.0A\Include\lmwksta.h(102) : Info
-    830: Location cited in prior message

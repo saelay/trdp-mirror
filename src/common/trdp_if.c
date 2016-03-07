@@ -394,7 +394,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                           sizeof(TRDP_STATISTICS_T));
             if (ret == TRDP_SOCK_ERR)
             {
-                vos_threadDelay(1000000);
+                (void) vos_threadDelay(1000000);
             }
             else
             {
@@ -530,7 +530,7 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
         {
             pSession->pdDefault.sendParam.ttl = pPdDefault->sendParam.ttl;
         }
-}
+	}
     
 #if MD_SUPPORT
     
