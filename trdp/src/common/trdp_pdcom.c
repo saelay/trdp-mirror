@@ -477,7 +477,7 @@ TRDP_ERR_T  trdp_pdReceive (
             if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
             {
                 /*  We do not break here, only report error */
-                vos_printLog(VOS_LOG_ERROR, "Error sending one or more PD packets (Err: %d)\n", err);
+                vos_printLog(VOS_LOG_WARNING, "Error sending one or more PD packets\n");
             }
 
             informUser = TRUE;
