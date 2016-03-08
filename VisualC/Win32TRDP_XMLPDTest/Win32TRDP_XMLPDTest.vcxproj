@@ -78,7 +78,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Library Include="..\..\resources\windows\libxml\lib\libxml2.lib" />
     <Library Include="..\Debug\Win32TRDP.lib" />
   </ItemGroup>
   <ItemGroup>

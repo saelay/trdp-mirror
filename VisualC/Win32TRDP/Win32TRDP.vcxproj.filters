@@ -46,6 +46,9 @@
     <ClCompile Include="..\..\src\common\trdp_mdcom.c">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\trdp_xml.c">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resources\pthread\pthread.h">

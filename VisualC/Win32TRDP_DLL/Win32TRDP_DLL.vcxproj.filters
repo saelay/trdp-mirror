@@ -66,6 +66,9 @@
     <ClCompile Include="..\..\src\common\tau_tti.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\trdp_xml.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\common\trdp_if.h">

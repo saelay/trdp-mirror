@@ -15,7 +15,6 @@
     <ClCompile Include="..\..\test\xml\trdp-xmlprint-test.c" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\resources\windows\libxml\lib\libxml2.lib" />
     <Library Include="..\Debug\Win32TRDP.lib" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
