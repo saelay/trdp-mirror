@@ -1442,6 +1442,9 @@ EXT_DECL TRDP_ERR_T tlp_republish (
         pubHandle->addr.mcGroup = 0;
     }
     
+    /*    Compute the header fields */
+    trdp_pdInit(pubHandle, TRDP_MSG_PD, etbTopoCnt, opTrnTopoCnt, 0, 0);
+    
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
     {
         vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
