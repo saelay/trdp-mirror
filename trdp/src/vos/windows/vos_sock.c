@@ -11,7 +11,7 @@
  * @author          Bernd Loehr, NewTec GmbH
  *
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
@@ -84,8 +84,7 @@
  *  LOCALS
  */
 
-BOOL8   vosSockInitialised      = FALSE;
-UINT32  gNumberOfOpenSockets    = 0;
+BOOL8   vosSockInitialised = FALSE;
 UINT8   mac[VOS_MAC_SIZE];
 
 
@@ -106,10 +105,10 @@ INT32 recvmsg (int sock, struct msghdr *pMessage, int flags)
 {
     GUID    WSARecvMsg_GUID = WSAID_WSARECVMSG;
     LPFN_WSARECVMSG WSARecvMsg;
-    DWORD   numBytes = 0;
-    int     res = WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER,
-                           &WSARecvMsg_GUID, sizeof(WSARecvMsg_GUID), &WSARecvMsg,
-                           sizeof(WSARecvMsg), &numBytes, NULL, NULL);
+    DWORD   numBytes    = 0;
+    int     res         = WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                                   &WSARecvMsg_GUID, sizeof(WSARecvMsg_GUID), &WSARecvMsg,
+                                   sizeof(WSARecvMsg), &numBytes, NULL, NULL);
 
     pMessage->dwFlags = flags;
     res = WSARecvMsg(sock, pMessage, &numBytes, NULL, NULL);
@@ -117,7 +116,9 @@ INT32 recvmsg (int sock, struct msghdr *pMessage, int flags)
     {
         DWORD err = WSAGetLastError();
         if (err != WSAEMSGSIZE)
+        {
             return -1;
+        }
     }
     return numBytes;
 }
@@ -130,10 +131,10 @@ INT32 recvmsg (int sock, struct msghdr *pMessage, int flags)
  *  @retval         VOS_NO_ERR       no error
  *  @retval         VOS_SOCK_ERR     buffer size can't be set
  */
-VOS_ERR_T vos_sockSetBuffer(INT32 sock)
+VOS_ERR_T vos_sockSetBuffer (INT32 sock)
 {
-    int   optval      = 0;
-    int   option_len  = sizeof(optval);
+    int optval      = 0;
+    int option_len  = sizeof(optval);
 
     (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (char *)&optval, &option_len);
     if (optval < TRDP_SOCKBUF_SIZE)
@@ -242,7 +243,7 @@ EXT_DECL const CHAR8 *vos_ipDotted (
     static CHAR8 dotted[16];
 
     (void) vos_snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
-                 ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+                        ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
     return dotted;
 }
 
@@ -275,23 +276,23 @@ EXT_DECL BOOL8 vos_isMulticast (
  *  @retval         VOS_SOCK_ERR    GetAdaptersInfo() error
  */
 EXT_DECL VOS_ERR_T vos_getInterfaces (
-    UINT32         *pAddrCnt,
+    UINT32          *pAddrCnt,
     VOS_IF_REC_T    ifAddrs[])
 {
-    UINT8 *buf = NULL;
-    UINT32 bufLen = (UINT32) NULL;
-    PIP_ADAPTER_INFO pAdapterList = NULL;
-    PIP_ADAPTER_INFO pAdapter = NULL;
-    UINT32 err = 0;
-    UINT32 addrCnt = 0;
-    DWORD dwSize = 0;
-    DWORD dwRetVal = 0;
-    MIB_IFTABLE *pIfTable;
-    VOS_ERR_T retVal = VOS_NO_ERR;
+    UINT8               *buf            = NULL;
+    UINT32              bufLen          = (UINT32) NULL;
+    PIP_ADAPTER_INFO    pAdapterList    = NULL;
+    PIP_ADAPTER_INFO    pAdapter        = NULL;
+    UINT32              err         = 0;
+    UINT32              addrCnt     = 0;
+    DWORD               dwSize      = 0;
+    DWORD               dwRetVal    = 0;
+    MIB_IFTABLE         *pIfTable;
+    VOS_ERR_T           retVal = VOS_NO_ERR;
 
-    if (   (pAddrCnt == NULL) 
-        || (ifAddrs == NULL) )
-    { 
+    if ((pAddrCnt == NULL)
+        || (ifAddrs == NULL))
+    {
         return VOS_PARAM_ERR;
     }
     /* determine required buffer size, therefore no error check */
@@ -302,11 +303,11 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
         return VOS_MEM_ERR;
     }
     pAdapterList = (PIP_ADAPTER_INFO) buf;
-    
+
     /* get the actual data we want */
     err = GetAdaptersInfo(pAdapterList, (PULONG)&bufLen);
     if (err != NO_ERROR)
-    {   
+    {
         vos_printLog(VOS_LOG_ERROR, "GetAdaptersInfo failed (Err: %d)\n", err);
         vos_memFree(buf);
         return VOS_SOCK_ERR;
@@ -314,7 +315,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     pAdapter = pAdapterList;
 
     /* Iterate adapter list */
-    while(pAdapter != NULL) 
+    while (pAdapter != NULL)
     {
         /* Only consider ethernet adapters (no loopback adapters etc.) */
         if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
@@ -348,40 +349,40 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
 
     /* get link/up down information from interface table */
     pIfTable = (MIB_IFTABLE *) vos_memAlloc(sizeof (MIB_IFTABLE));
-    if (pIfTable == NULL) 
+    if (pIfTable == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR,"Error allocating memory\n");
+        vos_printLog(VOS_LOG_ERROR, "Error allocating memory\n");
         return (VOS_MEM_ERR);
     }
 
     /* Make an initial call to GetIfTable to get the necessary size into dwSize */
     dwSize = sizeof (MIB_IFTABLE);
-    if (GetIfTable(pIfTable, &dwSize, 0) == ERROR_INSUFFICIENT_BUFFER) 
+    if (GetIfTable(pIfTable, &dwSize, 0) == ERROR_INSUFFICIENT_BUFFER)
     {
         vos_memFree(pIfTable);
         pIfTable = (MIB_IFTABLE *) vos_memAlloc(dwSize);
-        if (pIfTable == NULL) 
+        if (pIfTable == NULL)
         {
-            vos_printLog(VOS_LOG_ERROR,"Error allocating memory\n");
+            vos_printLog(VOS_LOG_ERROR, "Error allocating memory\n");
             return (VOS_MEM_ERR);
         }
     }
 
     /* Make a second call to GetIfTable to get the actual data we want.*/
-    if ((dwRetVal = GetIfTable(pIfTable, &dwSize, 0)) == NO_ERROR) 
+    if ((dwRetVal = GetIfTable(pIfTable, &dwSize, 0)) == NO_ERROR)
     {
-        if (pIfTable->dwNumEntries > 0) 
+        if (pIfTable->dwNumEntries > 0)
         {
-            MIB_IFROW *pIfRow;
-            unsigned int i, j;
+            MIB_IFROW       *pIfRow;
+            unsigned int    i, j;
 
 
             pIfRow = (MIB_IFROW *) vos_memAlloc(sizeof (MIB_IFROW));
-            
-            if (pIfRow == NULL) 
+
+            if (pIfRow == NULL)
             {
-                vos_printLog(VOS_LOG_ERROR,"Error allocating memory\n");
-                if (pIfTable != NULL) 
+                vos_printLog(VOS_LOG_ERROR, "Error allocating memory\n");
+                if (pIfTable != NULL)
                 {
                     vos_memFree(pIfTable);
                     pIfTable = NULL;
@@ -389,15 +390,15 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                 return (VOS_MEM_ERR);
             }
 
-            for (i = 0; i < pIfTable->dwNumEntries; i++) 
+            for (i = 0; i < pIfTable->dwNumEntries; i++)
             {
                 pIfRow->dwIndex = pIfTable->table[i].dwIndex;
-                if ((dwRetVal = GetIfEntry(pIfRow)) == NO_ERROR) 
+                if ((dwRetVal = GetIfEntry(pIfRow)) == NO_ERROR)
                 {
-                    UINT8 physAddr[VOS_MAC_SIZE];
-                    BOOL8 mismatch;    
+                    UINT8   physAddr[VOS_MAC_SIZE];
+                    BOOL8   mismatch;
 
-                    for (j = 0; (j < pIfRow->dwPhysAddrLen) && (j < VOS_MAC_SIZE); j++) 
+                    for (j = 0; (j < pIfRow->dwPhysAddrLen) && (j < VOS_MAC_SIZE); j++)
                     {
                         physAddr[j] = (UINT8) pIfRow->bPhysAddr[j];
                     }
@@ -406,7 +407,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                     {
                         mismatch = FALSE;
 
-                        for (j = 0; j<VOS_MAC_SIZE; j++)
+                        for (j = 0; j < VOS_MAC_SIZE; j++)
                         {
                             if (ifAddrs[addrCnt].mac[j] != physAddr[j])
                             {
@@ -416,11 +417,11 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
 
                         if (mismatch == FALSE)
                         {
-                            for (j=0; j<VOS_MAX_IF_NAME_SIZE-1; j++)
+                            for (j = 0; j < VOS_MAX_IF_NAME_SIZE - 1; j++)
                             {
                                 ifAddrs[addrCnt].name[j] = pIfRow->bDescr[j];
                             }
-                            ifAddrs[addrCnt].name[VOS_MAX_IF_NAME_SIZE-1] = '\0';
+                            ifAddrs[addrCnt].name[VOS_MAX_IF_NAME_SIZE - 1] = '\0';
                             if (pIfRow->dwOperStatus == IF_OPER_STATUS_OPERATIONAL)
                             {
                                 ifAddrs[addrCnt].linkState = TRUE;
@@ -436,14 +437,14 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
 
             vos_memFree(pIfRow);
         }
-        else 
+        else
         {
-            vos_printLog(VOS_LOG_ERROR,"\tGetIfTable failed with error: %ld\n", dwRetVal);
+            vos_printLog(VOS_LOG_ERROR, "\tGetIfTable failed with error: %ld\n", dwRetVal);
         }
     }
-    
+
     vos_memFree(pIfTable);
-    
+
     return retVal;
 }
 
@@ -456,10 +457,10 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
  *  @retval         TRUE            interface is up and ready
  *                  FALSE           interface is down / not ready
  */
-EXT_DECL BOOL8 vos_netIfUp(
-    VOS_IP4_ADDR_T  ifAddress)
+EXT_DECL BOOL8 vos_netIfUp (
+    VOS_IP4_ADDR_T ifAddress)
 {
-    // tbd
+    /* tbd */
     return TRUE;
 }
 
@@ -665,15 +666,14 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_SOCK_ERR;
     }
 
-    if (   (vos_sockSetOptions(sock, pOptions))
-        || (vos_sockSetBuffer(sock)!= VOS_NO_ERR))
+    if ((vos_sockSetOptions(sock, pOptions))
+        || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         (void) closesocket(sock);
         return VOS_SOCK_ERR;
     }
 
     *pSock = (INT32) sock;
-    gNumberOfOpenSockets++;
     return VOS_NO_ERR;
 }
 
@@ -716,7 +716,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         return VOS_SOCK_ERR;
     }
 
-    if (   (vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
+    if ((vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
         || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         (void) closesocket(sock);
@@ -724,7 +724,6 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
     }
 
     *pSock = (INT32) sock;
-    gNumberOfOpenSockets++;
     return VOS_NO_ERR;
 }
 
@@ -749,7 +748,6 @@ EXT_DECL VOS_ERR_T vos_sockClose (
         vos_printLog(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n");
         return VOS_PARAM_ERR;
     }
-    gNumberOfOpenSockets--;
     return VOS_NO_ERR;
 }
 
@@ -846,13 +844,13 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (pOptions->no_mc_loop > 0)
         {
-            // Default behavior is ON */
+            /* Default behavior is ON * / */
             DWORD optValue = 0;
             if (setsockopt((SOCKET)sock, IPPROTO_IP, IP_MULTICAST_LOOP, (const char *)&optValue,
                            sizeof(optValue)) == SOCKET_ERROR)
             {
                 int err = WSAGetLastError();
-                
+
                 err = err; /* for lint */
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", err);
             }
@@ -864,7 +862,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                            sizeof(optValue)) == -1)
             {
                 int err = WSAGetLastError();
-                
+
                 err = err; /* for lint */
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() UDP_CHECKSUM_COVERAGE failed (Err: %d)\n", err);
             }
@@ -1102,7 +1100,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
     if (sendSize == SOCKET_ERROR)
     {
         vos_printLog(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %d)\n",
-                   inet_ntoa(destAddr.sin_addr), port, err);
+                     inet_ntoa(destAddr.sin_addr), port, err);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -1144,11 +1142,11 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     BOOL8   peek)
 {
     struct sockaddr_in  srcAddr;
-    INT32           rcvSize = 0;
-    int             err     = 0;
-    char            controlBuffer[64];       /* buffer for destination address record */
-    struct iovec    wsabuf;
-    struct msghdr   Msg;
+    INT32 rcvSize   = 0;
+    int err         = 0;
+    char controlBuffer[64];                  /* buffer for destination address record */
+    struct iovec        wsabuf;
+    struct msghdr       Msg;
 
     if (sock == (INT32)INVALID_SOCKET || pBuffer == NULL || pSize == NULL)
     {
@@ -1197,7 +1195,8 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
             if (pSrcIPAddr != NULL)
             {
                 *pSrcIPAddr = (UINT32) vos_ntohl(srcAddr.sin_addr.s_addr);
-                /* vos_printLog(VOS_LOG_INFO, "recvmsg found %d bytes from IP address %x to \n", rcvSize, *pSrcIPAddr); */
+                /* vos_printLog(VOS_LOG_INFO, "recvmsg found %d bytes from IP address %x to \n", rcvSize, *pSrcIPAddr);
+                  */
             }
             if (NULL != pSrcIPPort)
             {
@@ -1282,7 +1281,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     srcAddress.sin_port         = vos_htons(port);
 
     vos_printLog(VOS_LOG_INFO, "binding to: %s:%hu\n",
-               inet_ntoa(srcAddress.sin_addr), port);
+                 inet_ntoa(srcAddress.sin_addr), port);
 
     /*  Try to bind the socket to the PD port.    */
     if (bind(sock, (struct sockaddr *)&srcAddress, sizeof(srcAddress)) == SOCKET_ERROR)
@@ -1663,9 +1662,9 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
  *
  *  @retval         Address to bind to
  */
-EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr( VOS_IP4_ADDR_T   srcIP,
-                                               VOS_IP4_ADDR_T   mcGroup,
-                                               VOS_IP4_ADDR_T   rcvMostly)
+EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr ( VOS_IP4_ADDR_T  srcIP,
+                                                VOS_IP4_ADDR_T  mcGroup,
+                                                VOS_IP4_ADDR_T  rcvMostly)
 {
     return srcIP;
 }
