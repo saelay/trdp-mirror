@@ -10,7 +10,6 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\Debug\Win32TRDP.lib" />
-    <Library Include="..\..\resources\windows\libxml\lib\libxml2.lib" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

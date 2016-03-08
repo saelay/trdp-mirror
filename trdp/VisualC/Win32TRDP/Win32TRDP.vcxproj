@@ -45,7 +45,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\resources\windows\pthread\inc;..\..\resources\windows\libxml\inc;..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\resources\windows\pthread\inc;..\..\src\api;..\..\src\vos\api;..\..\src\vos\windows;..\..\src\vos\windows\pthread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;MD_SUPPORT=1;L_ENDIAN;__LITTLE_ENDIAN__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -103,6 +103,7 @@
       <DeploymentContent>false</DeploymentContent>
     </ClCompile>
     <ClCompile Include="..\..\src\common\trdp_utils.c" />
+    <ClCompile Include="..\..\src\common\trdp_xml.c" />
     <ClCompile Include="..\..\src\vos\common\vos_mem.c" />
     <ClCompile Include="..\..\src\vos\windows\vos_shared_mem.c" />
     <ClCompile Include="..\..\src\vos\windows\vos_sock.c" />
