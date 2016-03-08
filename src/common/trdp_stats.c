@@ -76,11 +76,11 @@ void trdp_initStats (
 
     if (appHandle->stats.hostName[0] == 0)
     {
-        vos_strncpy(appHandle->stats.hostName, "unknown", TRDP_MAX_LABEL_LEN);      /**< host name */
+        vos_strncpy(appHandle->stats.hostName, "unknown", TRDP_MAX_LABEL_LEN - 1);      /**< host name */
     }
     if (appHandle->stats.leaderName[0] == 0)
     {
-        vos_strncpy(appHandle->stats.leaderName, "unknown", TRDP_MAX_LABEL_LEN);    /**< leader host name */
+        vos_strncpy(appHandle->stats.leaderName, "unknown", TRDP_MAX_LABEL_LEN - 1);    /**< leader host name */
     }
 }
 
@@ -178,8 +178,8 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr; /* Filter IP address           */
         pStatistics[lIndex].callBack    = (UINT32) iter->pfCbFunction;  /* call back function if used      */
         pStatistics[lIndex].userRef     = (UINT32) iter->pUserRef;      /* user reference function if used */
-        pStatistics[lIndex].timeout = (UINT32) iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
-                                                                /* Time-out value in us. 0 = No time-out supervision  */
+        pStatistics[lIndex].timeout     = (UINT32) iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
+        /* Time-out value in us. 0 = No time-out supervision  */
         pStatistics[lIndex].toBehav     = iter->toBehavior;     /* Behavior at time-out    */
         pStatistics[lIndex].numRecv     = iter->numRxTx;        /* Number of packets received for this subscription.  */
         pStatistics[lIndex].numMissed   = iter->numMissed;      /* Number of packets received for this subscription.  */
@@ -235,7 +235,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
                                                                                         0 = Leader                 */
 
         pStatistics[lIndex].cycle = (UINT32) iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
-                                                                /* Interval/cycle in us. 0 = No time-out supervision */
+        /* Interval/cycle in us. 0 = No time-out supervision */
         pStatistics[lIndex].numSend = iter->numRxTx;            /* Number of packets sent for this publisher.        */
         pStatistics[lIndex].numPut  = iter->updPkts;            /* Updated packets (via put)                         */
     }
@@ -281,7 +281,7 @@ EXT_DECL TRDP_ERR_T tlc_getUdpListStatistics (
     {
         if ((pIter->pktFlags & TRDP_FLAGS_TCP) == 0)
         {
-            vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN);
+            vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN - 1);
             pStatistics->comId          = pIter->addr.comId;
             pStatistics->joinedAddr     = pIter->addr.mcGroup;
             pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
@@ -329,7 +329,7 @@ EXT_DECL TRDP_ERR_T tlc_getTcpListStatistics (
     {
         if ((pIter->pktFlags & TRDP_FLAGS_TCP) != 0)
         {
-            vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN);
+            vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN - 1);
             pStatistics->comId          = pIter->addr.comId;
             pStatistics->joinedAddr     = pIter->addr.mcGroup;
             pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
@@ -546,8 +546,8 @@ void    trdp_pdPrepareStats (
     pData->leaderIpAddr     = vos_htonl(appHandle->stats.leaderIpAddr);
     pData->processPrio      = vos_htonl(appHandle->stats.processPrio);
     pData->processCycle     = vos_htonl(appHandle->stats.processCycle);
-    vos_strncpy(pData->hostName, appHandle->stats.hostName, TRDP_MAX_LABEL_LEN);
-    vos_strncpy(pData->leaderName, appHandle->stats.leaderName, TRDP_MAX_LABEL_LEN);
+    vos_strncpy(pData->hostName, appHandle->stats.hostName, TRDP_MAX_LABEL_LEN - 1);
+    vos_strncpy(pData->leaderName, appHandle->stats.leaderName, TRDP_MAX_LABEL_LEN - 1);
 
     /*  Memory  */
     pData->mem.total            = vos_htonl(appHandle->stats.mem.total);

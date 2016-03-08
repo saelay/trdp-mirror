@@ -13,11 +13,8 @@ au-misra.lnt
 -i"..\..\src\vos\common"
 -i"..\..\src\vos\windows"
 -i"..\..\resources\windows\pthread\inc"
--i"..\..\resources\windows\libxml\inc"
--i"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include"
--i"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include"
--i"C:\Program Files (x86)\Microsoft Visual Studio 8\VC\include"
--i"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include"
+-i"C:\Programme\Microsoft Visual Studio 10.0\VC\include"
+-i"C:\Programme\Microsoft SDKs\Windows\v7.0A\Include"
 
 -D__ARMEB__=0
 -D__MIPSEB__=0
@@ -28,11 +25,8 @@ au-misra.lnt
 +macros
 +ppw(warning)
 
-+libdir(..\..\resources\windows\libxml\inc)
-+libdir(C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include)
-+libdir(C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include)
-+libdir(C:\Program Files (x86)\Microsoft Visual Studio 8\VC\include)
-+libdir(C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include)
++libdir(C:\Programme\Microsoft Visual Studio 10.0\VC\include)
++libdir(C:\Programme\Microsoft SDKs\Windows\v7.0A\Include)
 -elib(*)
 -e537   // "Repeated include file 'FileName'"
 -e755   // "global macro 'Symbol' (Location) not referenced"

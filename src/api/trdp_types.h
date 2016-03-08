@@ -269,6 +269,7 @@ typedef struct
 /**    Dataset element definition    */
 typedef enum
 {
+    TRDP_INVALID    = 0,   /**< Invalid/unknown                   */
     TRDP_BITSET8    = 1,   /**< =UINT8                            */
     TRDP_CHAR8      = 2,   /**< char, can be used also as UTF8    */
     TRDP_UTF16      = 3,   /**< Unicode UTF-16 character          */
