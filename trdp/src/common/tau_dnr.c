@@ -76,7 +76,7 @@ typedef struct tau_dnr_query
     UINT16  noOfReplies;
     UINT16  noOfAuth;
     UINT16  noOfAddInfo;
-    UINT8   data[];
+    UINT8   data[1];
 } TAU_DNR_QUERY_T;
 
 /* Constant sized fields of the resource record structure */
@@ -148,7 +148,7 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
     pName[0]    = '\0';
 
     /* read the names in 3www6newtec2de0 format */
-    while (*pReader != 0 && p < TAU_MAX_NAME_SIZE)
+    while (*pReader != 0 && p < TAU_MAX_NAME_SIZE - 1)
     {
         if (*pReader >= 192)
         {
@@ -178,7 +178,7 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
 
     /* now convert 3www6newtec2de0 to www.newtec.de */
 
-    for (i = 0; i < (int)strlen((const char *)pName) && i < TAU_MAX_NAME_SIZE; i++)
+    for (i = 0; i < (int)strlen((const char *)pName) && i < TAU_MAX_NAME_SIZE - 1; i++)
     {
         p = pName[i];
         for (j = 0; j < (int)p; j++)
@@ -206,7 +206,7 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 {
     int lock = 0, i;
 
-    vos_strncat(pHost, TAU_MAX_URI_SIZE, ".");
+    vos_strncat(pHost, TAU_MAX_URI_SIZE - 1, ".");
 
     for (i = 0; i < (int)strlen((char *)pHost); i++)
     {
@@ -225,7 +225,7 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 
 static int compareURI ( const void *arg1, const void *arg2 )
 {
-    return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN);
+    return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN - 1);
 }
 
 static void printDNRcache (TAU_DNR_DATA_T *pDNR)
@@ -270,7 +270,8 @@ static TRDP_ERR_T readHostsFile (
             /* get a line from the file */
             if (fgets(line, TAU_MAX_HOSTS_LINE_LENGTH, fp) != NULL)
             {
-                UINT32 start = 0, index = 0;
+                UINT32  start       = 0, index = 0;
+                UINT32  maxIndex    = strlen(line);
 
                 /* Skip empty lines, comment lines */
                 if (line[index] == '#' ||
@@ -288,13 +289,13 @@ static TRDP_ERR_T readHostsFile (
                     continue;
                 }
                 /* now skip the address */
-                while (isdigit(line[index]) || ispunct(line[index]))
+                while (index < maxIndex && (isdigit(line[index]) || ispunct(line[index])))
                 {
                     index++;
                 }
 
                 /* skip the space between IP and URI */
-                while (isspace(line[index]))
+                while (index < maxIndex && isspace(line[index]))
                 {
                     index++;
                 }
@@ -303,12 +304,14 @@ static TRDP_ERR_T readHostsFile (
                 start = index;
 
                 /* remember start of URI */
-                while (!isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+                while (index < maxIndex && !isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
                 {
                     index++;
                 }
-                vos_strncpy(pDNR->cache[pDNR->noOfCachedEntries].uri, &line[start], index - start);
-
+                if (index < maxIndex)
+                {
+                    vos_strncpy(pDNR->cache[pDNR->noOfCachedEntries].uri, &line[start], index - start);
+                }
                 /* increment only if entry is valid */
                 if (strlen(pDNR->cache[pDNR->noOfCachedEntries].uri) > 0)
                 {
@@ -352,7 +355,7 @@ static TRDP_ERR_T createSendQuery (
     UINT32          *pSize)
 {
     CHAR8               strBuf[TAU_MAX_URI_SIZE + 3];      /* conversion enlarges this buffer */
-    UINT8               packetBuffer[TAU_MAX_DNS_BUFFER_SIZE], *pBuf;
+    UINT8               packetBuffer[TAU_MAX_DNS_BUFFER_SIZE + 1], *pBuf;
     TAU_DNS_HEADER_T    *pHeader = (TAU_DNS_HEADER_T *) packetBuffer;
     UINT32              size;
     TRDP_ERR_T          err;
@@ -372,7 +375,7 @@ static TRDP_ERR_T createSendQuery (
 
     pBuf = (UINT8 *) (pHeader + 1);
 
-    vos_strncpy((char *)strBuf, pUri, TAU_MAX_URI_SIZE);
+    vos_strncpy((char *)strBuf, pUri, TAU_MAX_URI_SIZE - 1);
     changetoDnsNameFormat(pBuf, strBuf);
 
     *pSize = (UINT32) strlen((char *)strBuf) + 1;
@@ -422,7 +425,7 @@ static void parseResponse (
 
     for (i = 0; i < vos_ntohs(dns->ans_count); i++)
     {
-        readName(pReader, pPacket, &skip, name);
+        (void) readName(pReader, pPacket, &skip, name);
         pReader += skip;
 
         answers[i].resource = (TAU_R_DATA_T *)(pReader);
@@ -587,8 +590,11 @@ static void updateDNSentry (
     while (1)
     {
         VOS_FDS_T   rfds;
-        TRDP_TIME_T tv = {pDNR->timeout, 0};
+        TRDP_TIME_T tv;
         int         rv;
+
+        tv.tv_sec   = pDNR->timeout;
+        tv.tv_usec  = 0;
 
         FD_ZERO(&rfds);
         FD_SET(my_socket, &rfds);
@@ -601,7 +607,8 @@ static void updateDNSentry (
             memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
             size = TAU_MAX_DNS_BUFFER_SIZE;
             /* Get what was announced */
-            vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
+            (void) vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
+
             FD_CLR(my_socket, &rfds);
 
             if (size == 0)
@@ -632,7 +639,7 @@ static void updateDNSentry (
                 }
 
                 /* Position found, store everything */
-                vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE);
+                vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE - 1);
                 pDNR->cache[cacheEntry].ipAddr  = ip_addr;
                 pDNR->cache[cacheEntry].topoCnt = appHandle->etbTopoCnt;
 
@@ -648,7 +655,7 @@ static void updateDNSentry (
     }
 
 exit:
-    vos_sockClose(my_socket);
+    (void) vos_sockClose(my_socket);
     return;
 }
 
@@ -785,7 +792,7 @@ EXT_DECL TRDP_ERR_T tau_getOwnIds (
     TRDP_LABEL_T        vehId,
     TRDP_LABEL_T        cstId)
 {
-    return TRDP_NO_ERR;
+    return TRDP_PARAM_ERR;
 }
 
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -810,7 +817,7 @@ EXT_DECL TRDP_IP_ADDR_T tau_getOwnAddr (
             UINT32          i;
             UINT32          addrCnt = VOS_MAX_NUM_IF;
             VOS_IF_REC_T    localIF[VOS_MAX_NUM_IF];
-            vos_getInterfaces(&addrCnt, localIF);
+            (void) vos_getInterfaces(&addrCnt, localIF);
             for (i = 0; i < addrCnt; ++i)
             {
                 if (localIF[i].mac[0] ||        /* Take a MAC address as indicator for an ethernet interface */

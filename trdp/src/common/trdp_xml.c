@@ -115,7 +115,7 @@ static XML_TOKEN_T trdp_XMLNextToken (
                         }
                         else
                         {
-                            ungetc(ch, pXML->infile);
+                            (void) ungetc(ch, pXML->infile);
                         }
                     }
                 }
@@ -256,7 +256,7 @@ static XML_TOKEN_T trdp_XMLNextTokenHl (
 
         if (token == TOK_ID)
         {
-            strncpy(pXML->tokenTag, pXML->tokenValue, MAX_TAG_LEN + 1);
+            vos_strncpy(pXML->tokenTag, pXML->tokenValue, MAX_TAG_LEN);
             token = TOK_START_TAG;  /* TOK_OPEN + TOK_ID */
         }
         else
@@ -271,7 +271,7 @@ static XML_TOKEN_T trdp_XMLNextTokenHl (
 
         if (token == TOK_ID)
         {
-            strncpy(pXML->tokenTag, pXML->tokenValue, MAX_TAG_LEN + 1);
+            vos_strncpy(pXML->tokenTag, pXML->tokenValue, MAX_TAG_LEN);
             token = TOK_END_TAG; /* TOK_OPEN_END + TOK_ID + TOK_CLOSE */
         }
         else
@@ -285,7 +285,7 @@ static XML_TOKEN_T trdp_XMLNextTokenHl (
     }
     else if (token == TOK_ID)
     {
-        strncpy(pXML->tokenTag, pXML->tokenValue, MAX_TAG_LEN + 1);
+        vos_strncpy(pXML->tokenTag, pXML->tokenValue, MAX_TAG_LEN);
         token = TOK_ID;
     }
 
@@ -316,7 +316,7 @@ TRDP_ERR_T trdp_XMLOpen (
     pXML->tagDepth      = 0;
     pXML->tagDepthSeek  = 0;
     pXML->error         = TRDP_NO_ERR;
-    return 0;
+    return TRDP_NO_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -392,7 +392,7 @@ int trdp_XMLSeekStartTagAny (
         else if (pXML->tagDepth == pXML->tagDepthSeek && token == TOK_START_TAG)
         {
             /* We are on the correct depth and have found a start tag */
-            strncpy(tag, pXML->tokenTag, maxlen);
+            vos_strncpy(tag, pXML->tokenTag, maxlen);
             ret = 0;
         }
         /* else ignore */
@@ -421,7 +421,7 @@ int trdp_XMLSeekStartTag (
         ret = trdp_XMLSeekStartTagAny(pXML, buf, sizeof(buf));
     }
     while (ret == 0 && strcmp(buf, tag) != 0);
-    
+
     return ret;
 }
 
@@ -509,7 +509,7 @@ XML_TOKEN_T trdp_XMLGetAttribute (
 
     if (token == TOK_ID)
     {
-        strncpy(attribute, pXML->tokenValue, MAX_TOK_LEN);
+        vos_strncpy(attribute, pXML->tokenValue, MAX_TOK_LEN - 1);
         token = trdp_XMLNextTokenHl(pXML);
 
         if (token == TOK_EQUAL)
@@ -518,8 +518,8 @@ XML_TOKEN_T trdp_XMLGetAttribute (
 
             if (token == TOK_ID)
             {
-                strncpy(value, pXML->tokenValue, MAX_TOK_LEN);
-                *pValueInt  = atoi(value);
+                vos_strncpy(value, pXML->tokenValue, MAX_TOK_LEN - 1);
+                *pValueInt  = (UINT32) strtol(value, NULL, 10); /* atoi(value); */
                 token       = TOK_ATTRIBUTE;
             }
         }

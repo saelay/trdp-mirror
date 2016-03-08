@@ -74,13 +74,13 @@ static void ttiRequestTTDBdata (TRDP_APP_SESSION_T  appHandle,
                                 UINT32              comID,
                                 const TRDP_UUID_T   cstUUID);
 
-static TRDP_IP_ADDR_T ipFromURI(
+static TRDP_IP_ADDR_T ipFromURI (
     TRDP_APP_SESSION_T  appHandle,
-    TRDP_URI_HOST_T uri)
+    TRDP_URI_HOST_T     uri)
 {
     TRDP_IP_ADDR_T ipAddr = VOS_INADDR_ANY;
-    
-    tau_uri2Addr(appHandle, &ipAddr, uri);
+
+    (void) tau_uri2Addr(appHandle, &ipAddr, uri);
 
     return ipAddr;
 }
@@ -157,8 +157,8 @@ static void ttiPDCallback (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-    int         changed = 0;
-    VOS_SEMA_T  waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
+    int changed = 0;
+    VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
 
     if (pMsg->comId == TTDB_STATUS_COMID)
     {
@@ -174,47 +174,48 @@ static void ttiPDCallback (
             {
                 vos_printLog(VOS_LOG_ERROR, "CRC error of received operational status info (%08x != %08x)!\n",
                              crc, vos_ntohl(pTelegram->state.crc))
-                tlc_setOpTrainTopoCount(appHandle, 0);
+                    (void) tlc_setOpTrainTopoCount(appHandle, 0);
                 return;
             }
 
-            //vos_printLog(VOS_LOG_INFO, "---> Operational status info received on %p\n", appHandle);
+            /* vos_printLog(VOS_LOG_INFO, "---> Operational status info received on %p\n", appHandle); */
             if (appHandle->etbTopoCnt != vos_ntohl(pTelegram->etbTopoCnt))
             {
                 vos_printLog(VOS_LOG_INFO, "ETB topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
                              appHandle->etbTopoCnt, vos_ntohl(pTelegram->etbTopoCnt), appHandle);
                 changed++;
-                tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
+                (void) tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
             }
 
-            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state,
+                   (sizeof(TRDP_OP_TRAIN_DIR_STATE_T) < dataSize) ? sizeof(TRDP_OP_TRAIN_DIR_STATE_T) : dataSize);
 
             /* unmarshall manually:   */
             appHandle->pTTDB->opTrnState.state.opTrnTopoCnt = vos_ntohl(pTelegram->state.opTrnTopoCnt);
-            
+
             if (appHandle->opTrnTopoCnt != vos_ntohl(pTelegram->state.opTrnTopoCnt))
             {
                 changed++;
-                tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
+                (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
             }
 
-            tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
+            (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
             appHandle->pTTDB->opTrnState.state.crc = vos_ntohl(pTelegram->state.crc);
         }
         else if (pMsg->resultCode == TRDP_TIMEOUT_ERR )
         {
             vos_printLog(VOS_LOG_ERROR, "---> Operational status info timed out! Invalidating topocounts on %p!\n",
-                                        appHandle);
+                         appHandle);
 
             if (appHandle->etbTopoCnt != 0)
             {
                 changed++;
-                tlc_setETBTopoCount(appHandle, 0);
+                (void) tlc_setETBTopoCount(appHandle, 0);
             }
             if (appHandle->opTrnTopoCnt != 0)
             {
                 changed++;
-                tlc_setOpTrainTopoCount(appHandle, 0);
+                (void) tlc_setOpTrainTopoCount(appHandle, 0);
             }
         }
         else
@@ -256,7 +257,7 @@ static void ttiStoreOpTrnDir (
 
     /* unmarshall manually and update the opTrnTopoCount   */
     appHandle->pTTDB->opTrnDir.opTrnTopoCnt = vos_ntohl(appHandle->pTTDB->opTrnDir.opTrnTopoCnt);
-    tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnDir.opTrnTopoCnt);
+    (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnDir.opTrnTopoCnt);
 }
 
 static void ttiStoreTrnDir (
@@ -394,7 +395,7 @@ static void ttiMDCallback (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-    VOS_SEMA_T  waitForInaug = (VOS_SEMA_T) pRefCon;
+    VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pRefCon;
 
     if (pMsg->comId == TTDB_OP_DIR_INFO_COMID ||      /* TTDB notification */
         pMsg->comId == TTDB_OP_DIR_INFO_REP_COMID)
@@ -461,15 +462,16 @@ static void ttiMDCallback (
             {
                 vos_printLog(VOS_LOG_ERROR, "CRC error of received operational status info (%08x != %08x)!\n",
                              crc, vos_ntohl(pTelegram->state.crc))
-                tlc_setOpTrainTopoCount(appHandle, 0);
+                    (void) tlc_setOpTrainTopoCount(appHandle, 0);
                 return;
             }
-            memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state, dataSize);
+            memcpy(&appHandle->pTTDB->opTrnState.state, &pTelegram->state,
+                   (dataSize > sizeof(TRDP_OP_TRAIN_DIR_STATE_T)) ? sizeof(TRDP_OP_TRAIN_DIR_STATE_T) : dataSize);
 
             /* unmarshall manually:   */
             appHandle->pTTDB->opTrnState.state.opTrnTopoCnt = vos_ntohl(pTelegram->state.opTrnTopoCnt);
-            tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
-            appHandle->pTTDB->opTrnState.state.crc = vos_ntohl(pTelegram->state.crc);
+            (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
+            appHandle->pTTDB->opTrnState.state.crc = MAKE_LE(pTelegram->state.crc);
 
             /* handle the other parts of the message    */
             ttiStoreOpTrnDir(appHandle, (UINT8 *) &pTelegram->opTrnDir);
@@ -511,47 +513,52 @@ static void ttiRequestTTDBdata (
         case TTDB_OP_DIR_INFO_REQ_COMID:
         {
             UINT8 param = 0;
-            tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_OP_DIR_INFO_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle, TTDB_OP_DIR_INFO_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                        TTDB_OP_DIR_INFO_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_OP_DIR_INFO_REQ_COMID, appHandle->etbTopoCnt,
+                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                     TTDB_OP_DIR_INFO_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                               TTDB_OP_DIR_INFO_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
             /* Make sure the request is sent: */
         }
         break;
         case TTDB_TRN_DIR_REQ_COMID:
         {
             UINT8 param = 0;        /* ETB0 */
-            tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_TRN_DIR_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle, TTDB_TRN_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                        TTDB_TRN_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_TRN_DIR_REQ_COMID, appHandle->etbTopoCnt,
+                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                     TTDB_TRN_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                               TTDB_TRN_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
         }
         break;
         case TTDB_NET_DIR_REQ_COMID:
         {
             UINT8 param = 0;        /* ETB0 */
-            tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_NET_DIR_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle, TTDB_NET_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                        TTDB_NET_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_NET_DIR_REQ_COMID, appHandle->etbTopoCnt,
+                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                     TTDB_NET_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                               TTDB_NET_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
         }
         break;
         case TTDB_READ_CMPLT_REQ_COMID:
         {
             UINT8 param = 0;        /* ETB0 */
-            tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_READ_CMPLT_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle, TTDB_READ_CMPLT_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                        TTDB_READ_CMPLT_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_READ_CMPLT_REQ_COMID, appHandle->etbTopoCnt,
+                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                     TTDB_READ_CMPLT_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                               TTDB_READ_CMPLT_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
         }
         break;
         case TTDB_STAT_CST_REQ_COMID:
         {
-            tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_STAT_CST_REQ_COMID, appHandle->etbTopoCnt,
-                        appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle, TTDB_STAT_CST_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                        TTDB_STAT_CST_REQ_TO, 0, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
+            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_STAT_CST_REQ_COMID, appHandle->etbTopoCnt,
+                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                     TTDB_STAT_CST_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                               TTDB_STAT_CST_REQ_TO, 0, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
         }
         break;
 
     }
     /* Make sure the request is sent: */
-    tlc_process(appHandle, NULL, NULL);
+    (void) tlc_process(appHandle, NULL, NULL);
 }
 
 #pragma mark ----------------------- Public -----------------------------
@@ -649,8 +656,8 @@ EXT_DECL void tau_deInitTTI (
                 appHandle->pTTDB->cstInfo[i] = NULL;
             }
         }
-        tlm_delListener(appHandle, appHandle->pTTDB->md101Listener);
-        tlp_unsubscribe(appHandle, appHandle->pTTDB->pd100SubHandle);
+        (void) tlm_delListener(appHandle, appHandle->pTTDB->md101Listener);
+        (void) tlp_unsubscribe(appHandle, appHandle->pTTDB->pd100SubHandle);
         vos_memFree(appHandle->pTTDB);
         appHandle->pTTDB = NULL;
     }
@@ -781,7 +788,6 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
         ttiRequestTTDBdata(appHandle, TTDB_STAT_CST_REQ_COMID, cstUUID);
         return TRDP_NODATA_ERR;
     }
-    return TRDP_NO_ERR;
     return TRDP_NO_ERR;
 }
 
@@ -983,7 +989,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     if (pCstLabel == NULL)
     {
         index = 0;
@@ -1045,7 +1051,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     if (pCstLabel == NULL)
     {
         index = 0;
@@ -1064,11 +1070,11 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
     }
     if (index < TTI_CACHED_CONSISTS)
     {
-        for (index2 = 0; index2 <  vos_ntohs(appHandle->pTTDB->cstInfo[index]->fctCnt) &&
+        for (index2 = 0; index2 < vos_ntohs(appHandle->pTTDB->cstInfo[index]->fctCnt) &&
              index2 < maxFctCnt; ++index2)
         {
-            pFctInfo[index2] = appHandle->pTTDB->cstInfo[index]->pFctInfoList[index2];
-            pFctInfo[index2].fctId = vos_ntohs(pFctInfo[index2].fctId);
+            pFctInfo[index2]        = appHandle->pTTDB->cstInfo[index]->pFctInfoList[index2];
+            pFctInfo[index2].fctId  = vos_ntohs(pFctInfo[index2].fctId);
         }
     }
     else    /* not found, get it and return directly */
@@ -1108,7 +1114,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     if (pCstLabel == NULL)
     {
         index = 0;
@@ -1130,7 +1136,8 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
         for (index2 = 0; index2 < vos_ntohs(appHandle->pTTDB->cstInfo[index]->vehCnt); ++index2)
         {
             if (pVehLabel == NULL ||
-                vos_strnicmp(pVehLabel, appHandle->pTTDB->cstInfo[index]->pVehInfoList[index2].vehId, sizeof(TRDP_LABEL_T)) == 0)
+                vos_strnicmp(pVehLabel, appHandle->pTTDB->cstInfo[index]->pVehInfoList[index2].vehId,
+                             sizeof(TRDP_LABEL_T)) == 0)
             {
                 *pVehInfo = appHandle->pTTDB->cstInfo[index]->pVehInfoList[index2];
             }
@@ -1171,7 +1178,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     if (pCstLabel == NULL)
     {
         index = 0;
@@ -1191,9 +1198,9 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
     if (index < TTI_CACHED_CONSISTS)
     {
         *pCstInfo = *appHandle->pTTDB->cstInfo[index];
-        pCstInfo->etbCnt = vos_ntohs(pCstInfo->etbCnt);
-        pCstInfo->vehCnt = vos_ntohs(pCstInfo->vehCnt);
-        pCstInfo->fctCnt = vos_ntohs(pCstInfo->fctCnt);
+        pCstInfo->etbCnt    = vos_ntohs(pCstInfo->etbCnt);
+        pCstInfo->vehCnt    = vos_ntohs(pCstInfo->vehCnt);
+        pCstInfo->fctCnt    = vos_ntohs(pCstInfo->fctCnt);
     }
     else    /* not found, get it and return directly */
     {
@@ -1236,7 +1243,7 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     TRDP_LABEL_T        pCstLabel)
 {
     UINT32 index, index2, index3;
-    
+
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
         pVehOrient == NULL ||
@@ -1244,7 +1251,7 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     *pVehOrient = 0;
     *pCstOrient = 0;
 
@@ -1267,18 +1274,19 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     if (index < TTI_CACHED_CONSISTS)
     {
         /* Search the vehicles in the OP_TRAIN_DIR for a matching vehID */
-        
+
         for (index2 = 0; index2 < appHandle->pTTDB->opTrnDir.opCstCnt; index2++)
         {
-            if (vos_strnicmp((CHAR8*) appHandle->pTTDB->opTrnDir.opCstList[index2].cstUUID,
-                             (CHAR8*) appHandle->pTTDB->cstInfo[index]->cstUUID, sizeof(TRDP_UUID_T)) == 0)
+            if (vos_strnicmp((CHAR8 *) appHandle->pTTDB->opTrnDir.opCstList[index2].cstUUID,
+                             (CHAR8 *) appHandle->pTTDB->cstInfo[index]->cstUUID, sizeof(TRDP_UUID_T)) == 0)
             {
                 /* consist found   */
                 *pCstOrient = appHandle->pTTDB->opTrnDir.opCstList[index2].opCstOrient;
-                
+
                 for (index3 = 0; index3 < appHandle->pTTDB->opTrnDir.opVehCnt; index3++)
                 {
-                    if (appHandle->pTTDB->opTrnDir.opVehList[index3].ownOpCstNo == appHandle->pTTDB->opTrnDir.opCstList[index2].opCstNo)
+                    if (appHandle->pTTDB->opTrnDir.opVehList[index3].ownOpCstNo ==
+                        appHandle->pTTDB->opTrnDir.opCstList[index2].opCstNo)
                     {
                         *pVehOrient = appHandle->pTTDB->opTrnDir.opVehList[index3].vehOrient;
                         return TRDP_NO_ERR;

@@ -75,9 +75,9 @@ TRDP_DATA_TYPE_T string2type (const CHAR8 *pTypeStr)
     p = strstr(tokenList, pTypeStr);
     if (p != NULL)
     {
-        return (TRDP_DATA_TYPE_T) atoi(p - 3);
+        return (TRDP_DATA_TYPE_T) strtol(p - 3, NULL, 10);
     }
-    return 0;
+    return TRDP_INVALID;
 }
 
 
@@ -427,7 +427,7 @@ TRDP_ERR_T readTelegramDef (
                 pSrc        = pExchgParam->pSrc;
             }
 
-            while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
+            while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE && pSrc != NULL)
             {
                 if (vos_strnicmp(attribute, "id", MAX_TOK_LEN) == 0)
                 {
@@ -462,7 +462,7 @@ TRDP_ERR_T readTelegramDef (
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pSrc->pUriHost1, p, TRDP_MAX_URI_HOST_LEN);
+                    vos_strncpy((char *)pSrc->pUriHost1, p, TRDP_MAX_URI_HOST_LEN - 1);
                 }
                 else if (vos_strnicmp(attribute, "uri2", MAX_TOK_LEN) == 0)
                 {
@@ -477,12 +477,13 @@ TRDP_ERR_T readTelegramDef (
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pSrc->pUriHost2, p, TRDP_MAX_URI_HOST_LEN);
+                    vos_strncpy((char *)pSrc->pUriHost2, p, TRDP_MAX_URI_HOST_LEN - 1);
                 }
             }
             trdp_XMLEnter(pXML);
             if (trdp_XMLCountStartTag(pXML, "sdt-parameter") > 0 &&
-                trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
+                trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0 &&
+                pSrc != NULL)
             {
                 pSrc->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
 
@@ -530,7 +531,10 @@ TRDP_ERR_T readTelegramDef (
                 }
             }
             trdp_XMLLeave(pXML);
-            pSrc++;
+            if (pSrc != NULL)
+            {
+                pSrc++;
+            }
         }
         else if (vos_strnicmp(tag, "destination", MAX_TAG_LEN) == 0)
         {
@@ -549,7 +553,7 @@ TRDP_ERR_T readTelegramDef (
                 pDest       = pExchgParam->pDest;
             }
 
-            while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
+            while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE && pDest != NULL)
             {
                 if (vos_strnicmp(attribute, "id", MAX_TOK_LEN) == 0)
                 {
@@ -584,12 +588,13 @@ TRDP_ERR_T readTelegramDef (
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pDest->pUriHost, p, TRDP_MAX_URI_HOST_LEN);
+                    vos_strncpy((char *)pDest->pUriHost, p, TRDP_MAX_URI_HOST_LEN - 1);
                 }
             }
             trdp_XMLEnter(pXML);
             if (trdp_XMLCountStartTag(pXML, "sdt-parameter") > 0 &&
-                trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0)
+                trdp_XMLSeekStartTag(pXML, "sdt-parameter") == 0 &&
+                pDest != NULL)
             {
                 pDest->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
 
@@ -637,7 +642,10 @@ TRDP_ERR_T readTelegramDef (
                 }
             }
             trdp_XMLLeave(pXML);
-            pDest++;
+            if (pDest != NULL)
+            {
+                pDest++;
+            }
         }
     }
     return TRDP_NO_ERR;
@@ -829,7 +837,7 @@ TRDP_ERR_T readXmlDatasets (
                         }
                         else if (vos_strnicmp(attribute, "scale", MAX_TOK_LEN) == 0)
                         {
-                            (*papDataset)[idx]->pElement[i].scale = (REAL32) atof(value);
+                            (*papDataset)[idx]->pElement[i].scale = (REAL32) strtod(value, NULL);
                         }
                         else if (vos_strnicmp(attribute, "offset", MAX_TOK_LEN) == 0)
                         {
@@ -983,11 +991,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
             {
                 if (vos_strnicmp(attribute, "host-name", MAX_TOK_LEN) == 0)
                 {
-                    vos_strncpy(pProcessConfig->hostName, value, TRDP_MAX_LABEL_LEN);
+                    vos_strncpy(pProcessConfig->hostName, value, TRDP_MAX_LABEL_LEN - 1);
                 }
                 else if (vos_strnicmp(attribute, "leader-name", MAX_TOK_LEN) == 0)
                 {
-                    vos_strncpy(pProcessConfig->leaderName, value, TRDP_MAX_LABEL_LEN);
+                    vos_strncpy(pProcessConfig->leaderName, value, TRDP_MAX_LABEL_LEN - 1);
                 }
             }
         }
@@ -1171,7 +1179,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                             }
                         }
 
-                        if (vos_strnicmp(tag, "trdp-process", MAX_TAG_LEN) == 0)
+                        if (vos_strnicmp(tag, "trdp-process", MAX_TAG_LEN) == 0 && pProcessConfig != NULL)
                         {
                             while (trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &valueInt,
                                                         value) == TOK_ATTRIBUTE)
@@ -1187,7 +1195,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                 {
                                     if (vos_strnicmp("off", value, TRDP_MAX_LABEL_LEN) == 0)
                                     {
-                                        pProcessConfig->options &= ~TRDP_OPTION_TRAFFIC_SHAPING;
+                                        pProcessConfig->options &= (TRDP_OPTION_T) ~TRDP_OPTION_TRAFFIC_SHAPING;
                                     }
                                 }
                                 else if (vos_strnicmp(attribute, "priority", MAX_TOK_LEN) == 0)
@@ -1386,12 +1394,13 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                         UINT32          sizeValue   = 0;
                         UINT32          preAlloc    = 0;
                         int             i;
+                        XML_TOKEN_T     found;
 
-                        trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &sizeValue, value);
-                        if (vos_strnicmp(attribute, "size", MAX_TOK_LEN) == 0)
+                        found = trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &sizeValue, value);
+                        if (found == TOK_ATTRIBUTE && vos_strnicmp(attribute, "size", MAX_TOK_LEN) == 0)
                         {
-                            trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &preAlloc, value);
-                            if (vos_strnicmp(attribute, "preallocate", MAX_TOK_LEN) == 0)
+                            found = trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &preAlloc, value);
+                            if (found == TOK_ATTRIBUTE && vos_strnicmp(attribute, "preallocate", MAX_TOK_LEN) == 0)
                             {
                                 /* Find the slot to store the value in  */
                                 for (i = 0; sizeValue > mem_list[i]; i++)
@@ -1416,7 +1425,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                 {
                     if (vos_strnicmp(attribute, "file-name", MAX_TOK_LEN) == 0)
                     {
-                        vos_strncpy(pDbgConfig->fileName, value, TRDP_MAX_FILE_NAME_LEN);
+                        vos_strncpy(pDbgConfig->fileName, value, TRDP_MAX_FILE_NAME_LEN - 1);
                     }
                     else if (vos_strnicmp(attribute, "file-size", MAX_TOK_LEN) == 0)
                     {
@@ -1512,7 +1521,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                             }
                             else if (vos_strnicmp(attribute, "name", MAX_TOK_LEN) == 0)
                             {
-                                vos_strncpy((*ppIfConfig)[i].ifName, value, TRDP_MAX_LABEL_LEN);
+                                vos_strncpy((*ppIfConfig)[i].ifName, value, TRDP_MAX_LABEL_LEN - 1);
                             }
                             else if (vos_strnicmp(attribute, "host-ip", MAX_TOK_LEN) == 0)
                             {
