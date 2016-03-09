@@ -384,7 +384,7 @@ doc:		doc/latex/refman.pdf
 
 doc/latex/refman.pdf: Doxyfile trdp_if_light.h trdp_types.h
 			@echo ' ### Making the Reference Manual PDF'
-			$(DOXYPATH)/doxygen Doxyfile
+			$(DOXYPATH)doxygen Doxyfile
 			make -C doc/latex
 			cp doc/latex/refman.pdf "doc/TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf"
                                                  
