@@ -2887,12 +2887,12 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
                 (void) tlm_delListener(appHandle, listenHandle);
                 vos_printLog(VOS_LOG_ERROR, "tlm_readdListener() failed, out of sockets\n");
             }
-            else
-            {
-                pListener->addr.etbTopoCnt      = etbTopoCnt;
-                pListener->addr.opTrnTopoCnt    = opTrnTopoCnt;
-                pListener->addr.mcGroup         = mcDestIpAddr;
-            }
+        }
+        if (ret == TRDP_NO_ERR)
+        {
+            pListener->addr.etbTopoCnt      = etbTopoCnt;
+            pListener->addr.opTrnTopoCnt    = opTrnTopoCnt;
+            pListener->addr.mcGroup         = mcDestIpAddr;
         }
     }
 
