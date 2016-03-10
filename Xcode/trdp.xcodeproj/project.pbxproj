@@ -626,7 +626,6 @@
 		73134A371BCBDD4600E3BF88 /* test_marshalling2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = test_marshalling2.c; path = marshalling/test_marshalling2.c; sourceTree = "<group>"; };
 		73134A381BCBDD8D00E3BF88 /* mdTest.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = mdTest.txt; sourceTree = "<group>"; };
 		73134A391BCBDD9A00E3BF88 /* pdTest.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = pdTest.txt; path = ../test/ladderpdtest/pdTest.txt; sourceTree = "<group>"; };
-		731FC61B1C16CE6C00E79657 /* iconv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = iconv.h; path = usr/include/iconv.h; sourceTree = SDKROOT; };
 		7322486D16A97D5400148295 /* crc-check */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "crc-check"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7322487F16A97E7900148295 /* crc-test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "crc-test.c"; path = "../test/diverse/crc-test.c"; sourceTree = "<group>"; };
 		7327CA871656AB080020536A /* vos_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_private.h; sourceTree = "<group>"; };
@@ -639,7 +638,6 @@
 		7334C1411742783700CA739C /* Makefile_Ladder */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_Ladder; path = ../Makefile_Ladder; sourceTree = SOURCE_ROOT; };
 		7334C1421742783700CA739C /* Makefile_MDLadder */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_MDLadder; path = ../Makefile_MDLadder; sourceTree = SOURCE_ROOT; };
 		7334C1431742783700CA739C /* Makefile_SE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_SE; path = ../Makefile_SE; sourceTree = SOURCE_ROOT; };
-		7334C1441742783700CA739C /* Makefile_xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_xml; path = ../Makefile_xml; sourceTree = SOURCE_ROOT; };
 		7334C1491742912200CA739C /* Lint_posix.bat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Lint_posix.bat; sourceTree = "<group>"; };
 		73361446165BBF4500A70D3D /* test_trafficShaping.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = test_trafficShaping.c; path = ../test/diverse/test_trafficShaping.c; sourceTree = "<group>"; };
 		7336144C165BBF5B00A70D3D /* test_traffic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_traffic; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1013,7 +1011,6 @@
 		08FB7794FE84155DC02AAC07 /* trdp */ = {
 			isa = PBXGroup;
 			children = (
-				731FC61B1C16CE6C00E79657 /* iconv.h */,
 				73E051EF15123F600058D590 /* Doxyfile */,
 				7387F6441578FDCC00DBAB73 /* readme.txt */,
 				73E4978516CE981E00045EFA /* Deviation Request.txt */,
@@ -1021,7 +1018,6 @@
 				7334C1411742783700CA739C /* Makefile_Ladder */,
 				7334C1421742783700CA739C /* Makefile_MDLadder */,
 				7334C1431742783700CA739C /* Makefile_SE */,
-				7334C1441742783700CA739C /* Makefile_xml */,
 				73CBA1AD19548350006648EE /* rules.mk */,
 				08594B071B6FB24E0066EA06 /* config */,
 				73821F27150777B00046E0AC /* src */,

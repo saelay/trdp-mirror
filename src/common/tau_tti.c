@@ -169,7 +169,7 @@ static void ttiPDCallback (
             UINT32 crc;
 
             /* check the crc:   */
-            crc = vos_crc32(0xFFFFFFFF, (const UINT8 *) &pTelegram->state, sizeof(TRDP_OP_TRAIN_DIR_STATE_T) - 4);
+            crc = vos_sc32(0xFFFFFFFF, (const UINT8 *) &pTelegram->state, sizeof(TRDP_OP_TRAIN_DIR_STATE_T) - 4);
             if (crc != MAKE_LE(pTelegram->state.crc))
             {
                 vos_printLog(VOS_LOG_ERROR, "CRC error of received operational status info (%08x != %08x)!\n",
