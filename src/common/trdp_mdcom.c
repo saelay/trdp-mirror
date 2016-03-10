@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2016-03-10: Ticket #115 MD: Missing parameter pktFlags in tlm_reply() and tlm_replyQuery()
  *      BL 2016-02-04: Ticket #110: Handling of optional marshalling on sending
  *      BL 2015-12-22: Mutex removed
  *      BL 2015-08-31: Ticket #94: TRDP_REDUNDANT flag is evaluated, beQuiet removed
@@ -1608,12 +1609,14 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
                                            iterListener->addr.opTrnTopoCnt))
             {
                 /* We found a listener, set some values for this new session  */
-                iterMD = appHandle->pMDRcvEle;
-                iterMD->pUserRef = iterListener->pUserRef;
+                iterMD                      = appHandle->pMDRcvEle;
+                iterMD->pUserRef            = iterListener->pUserRef;
                 iterMD->pfCbFunction        = iterListener->pfCbFunction;
                 iterMD->stateEle            = state;
                 iterMD->addr.etbTopoCnt     = iterListener->addr.etbTopoCnt;
                 iterMD->addr.opTrnTopoCnt   = iterListener->addr.opTrnTopoCnt;
+                iterMD->pktFlags            = iterListener->pktFlags;           /* BL: This was missing! */
+
 
                 /* Count this Request/Notification as new session */
                 iterListener->numSessions++;
