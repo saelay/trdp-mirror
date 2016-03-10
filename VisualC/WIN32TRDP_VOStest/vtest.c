@@ -1379,6 +1379,17 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
     UINT32 bufSize = cBufSize;
     BOOL8 received = FALSE;
 
+    /*  Output available interfaces (in debug output)  */
+    {
+#define MAX_IF  10
+        VOS_IF_REC_T            interfaces[MAX_IF];
+        UINT32 availableIfaces = MAX_IF;
+        if (vos_getInterfaces(&availableIfaces, interfaces) == VOS_NO_ERR)
+        {
+            printOut(OUTPUT_FULL,"[SOCK_UDPMC] %u IP interfaces found\n", availableIfaces);
+        }
+    }
+    
     printOut(OUTPUT_ADVANCED,"[SOCK_UDPMC] start...\n");
     /*******************/
     /* open UDP socket */
