@@ -132,6 +132,10 @@ static const UINT32 fcs_table[256] PROGMEM =
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
+/** Table of CRC-32s of all single-byte values according to IEC 61375-2-3 B.7 / IEC61784-3-3
+ *  The CRC of the string "123456789" is 0x1697d06a
+ *
+ */
 static const UINT32 sc32_table[256] PROGMEM =
 {
     0x00000000U, 0xF4ACFB13U, 0x1DF50D35U, 0xE959F626U,
