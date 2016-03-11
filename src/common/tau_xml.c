@@ -1213,7 +1213,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                         {
                             trdp_XMLEnter(pDocHnd->pXmlDocument);
                             result = readTelegramDef(pDocHnd->pXmlDocument, &(*ppExchgPar)[idx]);
-                            dbgPrint(1, &(*ppExchgPar)[idx]);
+                            //dbgPrint(1, &(*ppExchgPar)[idx]);
                             trdp_XMLLeave(pDocHnd->pXmlDocument);
                             if (result != TRDP_NO_ERR)
                             {
