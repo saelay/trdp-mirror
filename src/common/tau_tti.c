@@ -22,6 +22,7 @@
  *
  * $Id$
  *
+ *      BL 2016-03-11: Ticket #114: SC32 check
  *      BL 2016-02-18: Ticket #7: Add train topology information support
  */
 
@@ -170,7 +171,7 @@ static void ttiPDCallback (
 
             /* check the crc:   */
             crc = vos_sc32(0xFFFFFFFF, (const UINT8 *) &pTelegram->state, sizeof(TRDP_OP_TRAIN_DIR_STATE_T) - 4);
-            if (crc != MAKE_LE(pTelegram->state.crc))
+            if (crc != vos_ntohl(pTelegram->state.crc))
             {
                 vos_printLog(VOS_LOG_ERROR, "CRC error of received operational status info (%08x != %08x)!\n",
                              crc, vos_ntohl(pTelegram->state.crc))
