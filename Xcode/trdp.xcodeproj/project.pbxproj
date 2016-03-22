@@ -175,6 +175,8 @@
 		73A00E631913CCC50020A6EA /* tau_dnr.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E611913CCC50020A6EA /* tau_dnr.h */; };
 		73B6907915446B8C004968FA /* trdp_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F3A150777B00046E0AC /* trdp_utils.h */; };
 		73B6907A15446B8D004968FA /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
+		73D7FDE51CA1A6A700E52ACC /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
+		73D7FDEA1CA1A6DB00E52ACC /* sendData.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D7FDDE1CA1A4AE00E52ACC /* sendData.c */; };
 		73E0526C151352CF0058D590 /* vos_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05264151352CE0058D590 /* vos_mem.h */; };
 		73E0526D151352CF0058D590 /* vos_sock.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05265151352CE0058D590 /* vos_sock.h */; };
 		73E0526E151352CF0058D590 /* vos_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05266151352CE0058D590 /* vos_thread.h */; };
@@ -483,6 +485,13 @@
 			remoteGlobalIDString = 7384E6F2172987CE00830413;
 			remoteInfo = "trdp PDonly";
 		};
+		73D7FDE11CA1A6A700E52ACC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
 		73E14B301560221600FAC175 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -728,6 +737,8 @@
 		73D6657A15D3D88700A352D4 /* tau_marshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_marshall.c; sourceTree = "<group>"; };
 		73D71BB11917D5CF003F9A87 /* tau_ctrl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_ctrl.c; sourceTree = "<group>"; };
 		73D71BB21917D5CF003F9A87 /* tau_dnr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_dnr.c; sourceTree = "<group>"; };
+		73D7FDDE1CA1A4AE00E52ACC /* sendData.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sendData.c; sourceTree = "<group>"; };
+		73D7FDE91CA1A6A700E52ACC /* sendData */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sendData; sourceTree = BUILT_PRODUCTS_DIR; };
 		73E051EF15123F600058D590 /* Doxyfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Doxyfile; path = ../Doxyfile; sourceTree = SOURCE_ROOT; };
 		73E051F015123F690058D590 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = SOURCE_ROOT; usesTabs = 1; };
 		73E05264151352CE0058D590 /* vos_mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vos_mem.h; sourceTree = "<group>"; };
@@ -918,6 +929,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		73D7FDE41CA1A6A700E52ACC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73D7FDE51CA1A6A700E52ACC /* libtrdp.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		73F2D2331518C6F200BA962A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1062,6 +1081,7 @@
 				73591F971B986C7900B758F0 /* libtrdp Posix copy.a */,
 				732D87C91BA9571B004BF837 /* test_tau_tti */,
 				73134A301BCBD95E00E3BF88 /* test_inaug */,
+				73D7FDE91CA1A6A700E52ACC /* sendData */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1227,6 +1247,7 @@
 				7366AC6216B68C100068A893 /* interoperability_test.xml */,
 				73517C4A16BBFDA800DB5208 /* receiveHello.c */,
 				73821F3D150777B00046E0AC /* sendHello.c */,
+				73D7FDDE1CA1A4AE00E52ACC /* sendData.c */,
 			);
 			name = example;
 			path = ../example;
@@ -1818,6 +1839,23 @@
 			productReference = 7384E6F3172987CE00830413 /* libtrdpPDonly.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		73D7FDDF1CA1A6A700E52ACC /* sendData */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73D7FDE61CA1A6A700E52ACC /* Build configuration list for PBXNativeTarget "sendData" */;
+			buildPhases = (
+				73D7FDE21CA1A6A700E52ACC /* Sources */,
+				73D7FDE41CA1A6A700E52ACC /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				73D7FDE01CA1A6A700E52ACC /* PBXTargetDependency */,
+			);
+			name = sendData;
+			productName = sendHello;
+			productReference = 73D7FDE91CA1A6A700E52ACC /* sendData */;
+			productType = "com.apple.product-type.tool";
+		};
 		73F2D2341518C6F200BA962A /* sendHello */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 73F2D2391518C71100BA962A /* Build configuration list for PBXNativeTarget "sendHello" */;
@@ -1935,6 +1973,7 @@
 				73134A231BCBD95E00E3BF88 /* test_inaug */,
 				7387F6181578F75600DBAB73 /* doc generation */,
 				7366AD9C16B7CC6B0068A893 /* All */,
+				73D7FDDF1CA1A6A700E52ACC /* sendData */,
 			);
 		};
 /* End PBXProject section */
@@ -2148,6 +2187,14 @@
 				08594B1E1B70DBF60066EA06 /* vos_thread.c in Sources */,
 				08594B351B70E9DF0066EA06 /* vos_mem.c in Sources */,
 				08594B371B70E9DF0066EA06 /* vos_utils.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73D7FDE21CA1A6A700E52ACC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73D7FDEA1CA1A6DB00E52ACC /* sendData.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2405,6 +2452,11 @@
 			isa = PBXTargetDependency;
 			target = 7384E6F2172987CE00830413 /* trdp PDonly */;
 			targetProxy = 73CE24711733F85C00314E1C /* PBXContainerItemProxy */;
+		};
+		73D7FDE01CA1A6A700E52ACC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 73D7FDE11CA1A6A700E52ACC /* PBXContainerItemProxy */;
 		};
 		73E14B311560221600FAC175 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3375,6 +3427,35 @@
 			};
 			name = Release;
 		};
+		73D7FDE71CA1A6A700E52ACC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				OTHER_CFLAGS = "-DPOSIX";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		73D7FDE81CA1A6A700E52ACC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		73F2D2371518C6F300BA962A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3694,6 +3775,15 @@
 			buildConfigurations = (
 				7387F6191578F75600DBAB73 /* Debug */,
 				7387F61A1578F75600DBAB73 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73D7FDE61CA1A6A700E52ACC /* Build configuration list for PBXNativeTarget "sendData" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73D7FDE71CA1A6A700E52ACC /* Debug */,
+				73D7FDE81CA1A6A700E52ACC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
