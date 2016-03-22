@@ -126,7 +126,7 @@ outdir:
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
-example:	outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello
+example:	outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/sendData
 
 test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle $(OUTDIR)/inaugTest
 
@@ -196,6 +196,14 @@ $(OUTDIR)/sendHello:   sendHello.c  $(OUTDIR)/libtrdp.a
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
 			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/sendData:   sendData.c  $(OUTDIR)/libtrdp.a
+			@echo ' ### Building application $(@F)'
+			$(CC) example/sendData.c \
+				-ltrdp \
+				$(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+				-o $@
 			$(STRIP) $@
 
 $(OUTDIR)/getStats:   diverse/getStats.c  $(OUTDIR)/libtrdp.a
