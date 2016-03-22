@@ -41,8 +41,8 @@
 
 /* The TRDP version can be predefined as CFLAG   */
 #ifndef TRDP_VERSION
-#define TRDP_VERSION            1
-#define TRDP_RELEASE            3
+#define TRDP_VERSION            0
+#define TRDP_RELEASE            0
 #define TRDP_UPDATE             0
 #define TRDP_EVOLUTION          0
 #endif
