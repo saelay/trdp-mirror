@@ -248,8 +248,8 @@ int main (int argc, char *argv[])
     err = tlp_publish(  appHandle,                  /*    our application identifier    */
                         &pubHandle,                 /*    our pulication identifier     */
                         comId,                      /*    ComID to send                 */
-                        0,                          /*    local consist only            */
-                        0,
+                        0,                          /*    etbTopoCnt = 0 for local consist only     */
+                        0,                          /*    opTopoCnt = 0 for non-directinal data     */
                         ownIP,                      /*    default source IP             */
                         destIP,                     /*    where to send to              */
                         cycleTime,                  /*    Cycle time in us              */
