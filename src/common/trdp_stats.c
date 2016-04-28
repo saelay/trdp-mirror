@@ -609,4 +609,6 @@ void    trdp_pdPrepareStats (
     pData->tcpMd.numSend            = vos_htonl(appHandle->stats.tcpMd.numSend);
     pPacket->dataSize = sizeof(TRDP_STATISTICS_T);
 
+    /* mark the data as valid */
+    pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
 }

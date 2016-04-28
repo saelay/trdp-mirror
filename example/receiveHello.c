@@ -36,7 +36,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.1"
+#define APP_VERSION     "1.2"
 
 #define DATA_MAX        1000
 
@@ -83,6 +83,7 @@ void usage (const char *appName)
     printf("This tool receives PD messages from an ED.\n"
            "Arguments are:\n"
            "-o <own IP address> (default INADDR_ANY)\n"
+           "-m <multicast group IP> (default none)\n"
            "-c <comId> (default 1000)\n"
            "-v print version and quit\n"
            );
@@ -106,13 +107,14 @@ int main (int argc, char *argv[])
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
     UINT32                  ownIP           = 0;
+    UINT32                  dstIP           = 0;
     int                     rv              = 0;
 
     int                     ch;
     TRDP_PD_INFO_T          myPDInfo;
     UINT32                  receivedSize;
 
-    while ((ch = getopt(argc, argv, "o:h?vc:")) != -1)
+    while ((ch = getopt(argc, argv, "o:m:h?vc:")) != -1)
     {
         switch (ch)
         {
@@ -125,6 +127,17 @@ int main (int argc, char *argv[])
                     exit(1);
                 }
                 ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                break;
+            }
+            case 'm':
+            {   /*  read ip    */
+                if (sscanf(optarg, "%u.%u.%u.%u",
+                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+                {
+                    usage(argv[0]);
+                    exit(1);
+                }
+                dstIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
                 break;
             }
             case 'c':
@@ -182,7 +195,7 @@ int main (int argc, char *argv[])
                          0,                         /*    etbTopoCnt: local consist only        */
                          0,                         /*    opTopoCnt                             */
                          0,                         /*    Source IP filter                      */
-                         0,                         /*    Default destination    (or MC Group)  */
+                         dstIP,                     /*    Default destination    (or MC Group)  */
                          0,                         /*    TRDP flags                            */
                          PD_COMID_CYCLE * 3,        /*    Time out in us                        */
                          TRDP_TO_SET_TO_ZERO       /*    delete invalid data on timeout        */
