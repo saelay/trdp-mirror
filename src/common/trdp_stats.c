@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-05-04: Ticket #117: PD Status packet is not sent on request
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
  */
 
