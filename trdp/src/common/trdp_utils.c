@@ -701,7 +701,7 @@ TRDP_ERR_T  trdp_requestSocket (
             sCurrentMaxSocketCnt = lIndex + 1;
         }
 
-        iface[lIndex].sock = VOS_INVALID_SOCKET;
+        iface[lIndex].sock          = VOS_INVALID_SOCKET;
         iface[lIndex].bindAddr      = bindAddr /* was srcIP (ID #125) */;
         iface[lIndex].type          = usage;
         iface[lIndex].sendParam.qos = params->qos;
@@ -737,7 +737,7 @@ TRDP_ERR_T  trdp_requestSocket (
         sock_options.ttl    = params->ttl;
         sock_options.reuseAddrPort  = (options & TRDP_OPTION_NO_REUSE_ADDR) ? FALSE : TRUE;
         sock_options.nonBlocking    = (options & TRDP_OPTION_BLOCK) ? FALSE : TRUE;
-        //sock_options.ttl_multicast  = (usage != TRDP_SOCK_MD_TCP) ? VOS_TTL_MULTICAST : 0;
+        /* sock_options.ttl_multicast  = (usage != TRDP_SOCK_MD_TCP) ? VOS_TTL_MULTICAST : 0; */
         sock_options.ttl_multicast  = params->ttl;
         sock_options.no_mc_loop     = ((usage != TRDP_SOCK_MD_TCP) && (options & TRDP_OPTION_NO_MC_LOOP_BACK)) ? 1 : 0;
         sock_options.no_udp_crc     = ((usage != TRDP_SOCK_MD_TCP) && (options & TRDP_OPTION_NO_UDP_CHK)) ? 1 : 0;
@@ -894,13 +894,13 @@ void  trdp_releaseSocket (
                              "Deleting socket from the iface (Sock: %d, lIndex: %d)\n",
                              iface[lIndex].sock, lIndex);
                 iface[lIndex].sock = TRDP_INVALID_SOCKET_INDEX;
-                iface[lIndex].sendParam.qos         = 0;
-                iface[lIndex].sendParam.ttl         = 0;
-                iface[lIndex].usage                 = 0;
-                iface[lIndex].bindAddr              = 0;
-                iface[lIndex].type                  = (TRDP_SOCK_TYPE_T) 0;
-                iface[lIndex].rcvMostly             = FALSE;
-                iface[lIndex].tcpParams.cornerIp    = 0;
+                iface[lIndex].sendParam.qos = 0;
+                iface[lIndex].sendParam.ttl = 0;
+                iface[lIndex].usage         = 0;
+                iface[lIndex].bindAddr      = 0;
+                iface[lIndex].type      = (TRDP_SOCK_TYPE_T) 0;
+                iface[lIndex].rcvMostly = FALSE;
+                iface[lIndex].tcpParams.cornerIp = 0;
                 iface[lIndex].tcpParams.connectionTimeout.tv_sec    = 0;
                 iface[lIndex].tcpParams.connectionTimeout.tv_usec   = 0;
                 iface[lIndex].tcpParams.addFileDesc = FALSE;
@@ -1124,12 +1124,14 @@ int trdp_checkSequenceCounter (
             if (pElement->pSeqCntList->seq[index].lastSeqCnt == 0 ||    /* first time after timeout */
                 sequenceCounter != pElement->pSeqCntList->seq[index].lastSeqCnt)
             {
-                vos_printLog(VOS_LOG_DBG,
-                             "Rcv sequence: %u    last seq: %u\n",
-                             sequenceCounter,
-                             pElement->pSeqCntList->seq[index].lastSeqCnt);
-                vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(
-                                 srcIP), pElement->addr.comId);
+/*
+                  vos_printLog(VOS_LOG_DBG,
+                               "Rcv sequence: %u    last seq: %u\n",
+                               sequenceCounter,
+                               pElement->pSeqCntList->seq[index].lastSeqCnt);
+                  vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(
+                                   srcIP), pElement->addr.comId);
+ */
                 pElement->pSeqCntList->seq[index].lastSeqCnt = sequenceCounter;
                 return 0;
             }

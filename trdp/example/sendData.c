@@ -37,7 +37,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION         "1.0"
+#define APP_VERSION         "1.1"
 
 #define DATA_MAX            1432
 #define CYCLE_MIN           10000
@@ -46,7 +46,7 @@
 #define PD_DEF_COMID_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 #define PD_DEF_DATASIZE     1000
 
-UINT8   gData[DATA_MAX];
+UINT8 gData[DATA_MAX];
 
 /* We use dynamic memory    */
 #define RESERVED_MEMORY  160000
@@ -111,7 +111,7 @@ int main (int argc, char *argv[])
     UINT32                  cycleTime   = PD_DEF_COMID_CYCLE;
     UINT32                  dataSize    = PD_DEF_DATASIZE;
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 0};
+    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     UINT32                  ownIP   = 0;
@@ -126,7 +126,7 @@ int main (int argc, char *argv[])
     {
         gData[i] = (UINT8)i;
     }
-    
+
 
     if (argc <= 1)
     {
@@ -184,7 +184,7 @@ int main (int argc, char *argv[])
             {   /*  read datasize    */
                 if (sscanf(optarg, "%u",
                            &dataSize) < 1 ||
-                           dataSize > DATA_MAX)
+                    dataSize > DATA_MAX)
                 {
                     usage(argv[0]);
                     exit(1);
@@ -266,11 +266,11 @@ int main (int argc, char *argv[])
      */
     while (1)
     {
-        TRDP_FDS_T  rfds;
-        INT32       noDesc;
-        TRDP_TIME_T tv;
-        const TRDP_TIME_T max_tv = {1, 0};
-        const TRDP_TIME_T min_tv = {0, 10000};
+        TRDP_FDS_T          rfds;
+        INT32               noDesc;
+        TRDP_TIME_T         tv;
+        const TRDP_TIME_T   max_tv  = {1, 0};
+        const TRDP_TIME_T   min_tv  = {0, 10000};
 
         /*
            Prepare the file descriptor set for the select call.

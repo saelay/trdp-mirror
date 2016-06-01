@@ -37,7 +37,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.1"
+#define APP_VERSION     "1.2"
 
 #define DATA_MAX        1000
 
@@ -107,7 +107,7 @@ int main (int argc, char *argv[])
     UINT32                  comId       = PD_COMID;
     UINT32                  cycleTime   = PD_COMID_CYCLE;
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 0};
+    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     UINT32                  ownIP   = 0;
@@ -273,11 +273,11 @@ int main (int argc, char *argv[])
      */
     while (1)
     {
-        TRDP_FDS_T  rfds;
-        INT32       noDesc;
-        TRDP_TIME_T tv;
-        const TRDP_TIME_T max_tv = {0, 1000000};
-        const TRDP_TIME_T min_tv = {0, 10000};
+        TRDP_FDS_T          rfds;
+        INT32               noDesc;
+        TRDP_TIME_T         tv;
+        const TRDP_TIME_T   max_tv  = {0, 1000000};
+        const TRDP_TIME_T   min_tv  = {0, 10000};
 
         /*
            Prepare the file descriptor set for the select call.
@@ -336,10 +336,10 @@ int main (int argc, char *argv[])
             fflush(stdout);
         }
 
-        if (outputBuffer != NULL && strlen((char*)outputBuffer) == 0)
+        if (outputBuffer != NULL && strlen((char *)outputBuffer) == 0)
         {
-            sprintf((char*)outputBuffer, "Just a Counter: %08d", hugeCounter++);
-            outputBufferSize = strlen((char*)outputBuffer);
+            sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
+            outputBufferSize = strlen((char *)outputBuffer);
         }
 
         err = tlp_put(appHandle, pubHandle, outputBuffer, outputBufferSize);

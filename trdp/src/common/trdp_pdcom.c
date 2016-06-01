@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-06-01: Ticket #119 tlc_getInterval() repeatedly returns 0 after timeout
  *      BL 2016-03-04: Ticket #112: Marshalling sets wrong datasetLength (PD)
  *     IBO 2016-02-03: Ticket #109: vos_ntohs -> vos_ntohl for datasetlength when unmarshalling
  *      BL 2016-01-25: Ticket #106: User needs to be informed on every received PD packet
@@ -129,7 +130,7 @@ TRDP_ERR_T trdp_pdPut (
     {
         /* set data valid */
         pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
-        
+
         /*  Update some statistics  */
         pPacket->updPkts++;
     }
@@ -138,11 +139,11 @@ TRDP_ERR_T trdp_pdPut (
         if (pPacket->dataSize == 0)
         {
             /* late data, enlarge packet buffer and copy existing header info */
-            PD_PACKET_T     *pTemp;
-            
+            PD_PACKET_T *pTemp;
+
             pPacket->dataSize   = dataSize;
             pPacket->grossSize  = trdp_packetSizePD(dataSize);
-            pTemp = (PD_PACKET_T*) vos_memAlloc(pPacket->grossSize);
+            pTemp = (PD_PACKET_T *) vos_memAlloc(pPacket->grossSize);
             if (pTemp == NULL)
             {
                 return TRDP_MEM_ERR;
@@ -374,14 +375,14 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_SESSION_PT appHandle,
     INT32           sock)
 {
-    PD_HEADER_T         *pNewFrameHead      = &appHandle->pNewFrame->frameHead;
-    PD_ELE_T            *pExistingElement   = NULL;
-    PD_ELE_T            *pPulledElement;
-    TRDP_ERR_T          err         = TRDP_NO_ERR;
-    TRDP_ERR_T          resultCode  = TRDP_NO_ERR;
-    UINT32              recSize     = TRDP_MAX_PD_PACKET_SIZE;
-    int                 informUser  = 0;
-    TRDP_ADDRESSES_T    subAddresses = { 0, 0, 0, 0, 0, 0};
+    PD_HEADER_T *pNewFrameHead  = &appHandle->pNewFrame->frameHead;
+    PD_ELE_T *pExistingElement  = NULL;
+    PD_ELE_T *pPulledElement;
+    TRDP_ERR_T err = TRDP_NO_ERR;
+    TRDP_ERR_T resultCode   = TRDP_NO_ERR;
+    UINT32 recSize          = TRDP_MAX_PD_PACKET_SIZE;
+    int informUser          = 0;
+    TRDP_ADDRESSES_T subAddresses = { 0, 0, 0, 0, 0, 0};
 
     /*  Get the packet from the wire:  */
     err = (TRDP_ERR_T) vos_sockReceiveUDP(sock,
@@ -427,8 +428,8 @@ TRDP_ERR_T  trdp_pdReceive (
 
     /*  Compute the subscription handle */
     subAddresses.comId = vos_ntohl(pNewFrameHead->comId);
-    subAddresses.etbTopoCnt = vos_ntohl(pNewFrameHead->etbTopoCnt);
-    subAddresses.opTrnTopoCnt = vos_ntohl(pNewFrameHead->opTrnTopoCnt);
+    subAddresses.etbTopoCnt     = vos_ntohl(pNewFrameHead->etbTopoCnt);
+    subAddresses.opTrnTopoCnt   = vos_ntohl(pNewFrameHead->opTrnTopoCnt);
 
     /*  It might be a PULL request      */
     if (vos_ntohs(pNewFrameHead->msgType) == (UINT16) TRDP_MSG_PR)
@@ -504,7 +505,8 @@ TRDP_ERR_T  trdp_pdReceive (
 
         if (newSeqCnt == 0)  /* restarted or new sender */
         {
-            trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr, (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType));
+            trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr,
+                                      (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType));
         }
 
         /* find sender in our list */
@@ -548,7 +550,9 @@ TRDP_ERR_T  trdp_pdReceive (
             }
             else
             {
-                informUser = memcmp(appHandle->pNewFrame->data, pExistingElement->pFrame->data, pExistingElement->dataSize);
+                informUser = memcmp(appHandle->pNewFrame->data,
+                                    pExistingElement->pFrame->data,
+                                    pExistingElement->dataSize);
             }
         }
 
@@ -568,8 +572,8 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  -> always swap the frame pointers              */
         {
             PD_PACKET_T *pTemp = pExistingElement->pFrame;
-            pExistingElement->pFrame = appHandle->pNewFrame;
-            appHandle->pNewFrame = pTemp;
+            pExistingElement->pFrame    = appHandle->pNewFrame;
+            appHandle->pNewFrame        = pTemp;
         }
     }
 
@@ -619,6 +623,8 @@ void trdp_pdCheckPending (
     PD_ELE_T *iterPD;
 
     /*    Walk over the registered PDs, find pending packets */
+
+    timerclear(&appHandle->nextJob);
 
     /*    Find the packet which has to be received next:    */
     for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
@@ -746,19 +752,27 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
             if (iterPD->socketIdx != -1 &&
                 FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))  /*lint !e573 signed/unsigned
                                                                                          division in macro */
-            {       /*    PD frame received? */
+            {
+                /*  PD frame received? */
                 /*  Compare the received data to the data in our receive queue
-                 Call user's callback if data changed    */
+                    Call user's callback if data changed    */
 
                 err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
 
-                if (err != TRDP_NO_ERR &&
-                    err != TRDP_TIMEOUT_ERR)
+                switch (err)
                 {
-                    result = err;
-                    vos_printLog(VOS_LOG_ERROR, "trdp_pdReceive() failed (Err: %d)\n", err);
-                }
+                    VOS_LOG_T logType = VOS_LOG_ERROR;
+                    case TRDP_NO_ERR:
+                        break;
+                    case TRDP_TOPO_ERR:
+                    case TRDP_TIMEOUT_ERR:
+                        result  = err;
+                        logType = VOS_LOG_WARNING;
+                    default:
+                        vos_printLog(logType, "trdp_pdReceive() failed (Err: %d)\n", err);
+                        break;
 
+                }
                 (*pCount)--;
                 FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds); /*lint !e502 !e573 signed/unsigned division
                                                                                      in macro */
@@ -831,8 +845,8 @@ TRDP_ERR_T trdp_pdCheck (
         }
         /*  Check protocol version  */
         else if ((vos_ntohs(pPacket->protocolVersion) & TRDP_PROTOCOL_VERSION_CHECK_MASK)
-                            != (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK) ||
-                            vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
+                 != (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK) ||
+                 vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
         {
             vos_printLog(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
                          vos_ntohs(pPacket->protocolVersion),

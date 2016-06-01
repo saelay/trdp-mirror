@@ -32,11 +32,12 @@
 
 #include "trdp_if_light.h"
 #include "tau_marshall.h"
+#include "vos_utils.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.2"
+#define APP_VERSION     "1.3"
 
 #define DATA_MAX        1000
 
@@ -68,12 +69,16 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s",
-           pTime,
-           catStr[category],
-           pFile,
-           LineNumber,
-           pMsgStr);
+
+    if (category != VOS_LOG_DBG)
+    {
+        printf("%s %s %s:%d %s",
+               pTime,
+               catStr[category],
+               strrchr(pFile, '/') + 1,
+               LineNumber,
+               pMsgStr);
+    }
 }
 
 /* Print a sensible usage message */
@@ -103,12 +108,12 @@ int main (int argc, char *argv[])
     TRDP_SUB_T              subHandle; /*    Our identifier to the publication         */
     UINT32                  comId = PD_COMID;
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO, 0};
+    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
-    UINT32                  ownIP           = 0;
-    UINT32                  dstIP           = 0;
-    int                     rv              = 0;
+    UINT32                  ownIP   = 0;
+    UINT32                  dstIP   = 0;
+    int                     rv      = 0;
 
     int                     ch;
     TRDP_PD_INFO_T          myPDInfo;
@@ -215,8 +220,8 @@ int main (int argc, char *argv[])
     {
         TRDP_FDS_T          rfds;
         INT32               noDesc;
-        TRDP_TIME_T         tv;
-        const TRDP_TIME_T   max_tv  = {0, 2000000};
+        TRDP_TIME_T         tv      = {0, 0};
+        const TRDP_TIME_T   max_tv  = {10, 0};
         const TRDP_TIME_T   min_tv  = {0, 10000};
 
         /*
@@ -283,8 +288,8 @@ int main (int argc, char *argv[])
         }
         else
         {
-            printf(".");
-            fflush(stdout);
+            /*printf(".");
+            fflush(stdout);*/
         }
 
         /*
@@ -322,11 +327,15 @@ int main (int argc, char *argv[])
         }
         else if (TRDP_TIMEOUT_ERR == err)
         {
-            printf("Packet timed out\n");
+            vos_printLog(VOS_LOG_INFO, "Packet timed out\n");
+        }
+        else if (TRDP_NODATA_ERR == err)
+        {
+            vos_printLog(VOS_LOG_INFO, "No data yet\n");
         }
         else
         {
-            printf("PD GET ERROR: %d\n", err);
+            vos_printLog(VOS_LOG_ERROR, "PD GET ERROR: %d\n", err);
         }
     }
 
