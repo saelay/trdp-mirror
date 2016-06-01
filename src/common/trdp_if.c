@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-06-01: Ticket #119 tlc_getInterval() repeatedly returns 0 after timeout
  *      BL 2016-02-04: Late configuration update/merging
  *      BL 2015-12-22: Mutex optimised in closeSession
  *      BL 2015-12-14: Setter for default configuration added
@@ -415,7 +416,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                                 0,                      /*    Source IP filter                 */
                                 0,                      /*    Default destination (or MC Group)   */
                                 TRDP_FLAGS_NONE,        /*    packet flags                  */
-                                0,                      /*    Time out in us                */
+                                TRDP_TIMER_FOREVER,     /*    Time out in us                */
                                 TRDP_TO_DEFAULT);       /*    delete invalid data on timeout  */
         }
         if (ret == TRDP_NO_ERR)
@@ -1631,10 +1632,16 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                     vos_subTime(&appHandle->nextJob, &now);
                     *pInterval = appHandle->nextJob;
                 }
-                else    /* if lower than 10ms, set minimum poll time to 10ms   */
+                else if (timerisset(&appHandle->nextJob))
                 {
-                    pInterval->tv_sec   = 0;
-                    pInterval->tv_usec  = TRDP_PROCESS_DEFAULT_CYCLE_TIME;      /* Minimum poll time 10ms    */
+                    pInterval->tv_sec   = 0;                                /* 0ms if time is over (were we delayed?) */
+                    pInterval->tv_usec  = 0;                                /* Application should limit this    */
+                    vos_printLog(VOS_LOG_WARNING, "Task time exceeded! System overload?\n");
+                }
+                else    /* if no timeout set, set maximum time to 1000sec   */
+                {
+                    pInterval->tv_sec   = 1000;                             /* 1 hour if no timeout is set      */
+                    pInterval->tv_usec  = 0;                                /* Application should limit this    */
                 }
 
                 if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
@@ -2080,7 +2087,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->addr.destIpAddr  = destIpAddr;
                     newPD->interval.tv_sec  = timeout / 1000000;
                     newPD->interval.tv_usec = timeout % 1000000;
-                    newPD->timeToGo         = newPD->interval;
                     newPD->toBehavior       =
                         (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
                     newPD->grossSize    = TRDP_MAX_PD_PACKET_SIZE;
@@ -2097,6 +2103,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     if (timeout == TRDP_TIMER_FOREVER)
                     {
                         vos_clearTime(&newPD->timeToGo);
+                        vos_clearTime(&newPD->interval);
                     }
                     else
                     {
