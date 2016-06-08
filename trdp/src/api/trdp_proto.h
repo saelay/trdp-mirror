@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  */
 
@@ -94,7 +95,8 @@
 
 #define TRDP_COMID_ECHO                                 10
 
-#define TRDP_STATISTICS_REQUEST_COMID                   31
+#define TRDP_STATISTICS_PULL_COMID                      31
+#define TRDP_STATISTICS_REQUEST_COMID                   32
 #define TRDP_GLOBAL_STATISTICS_COMID                    35
 #define TRDP_SUBS_STATISTICS_COMID                      36
 #define TRDP_PUB_STATISTICS_COMID                       37

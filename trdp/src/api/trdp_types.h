@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2016-02-11: Ticket #111: 'unit', 'scale', 'offset' attributes added to TRDP_DATASET_ELEMENT
  *      BL 2016-01-25: Ticket #106: User needs to be informed on every received PD packet
  *      BL 2015-12-14: Ticket #33: source size check for marshalling
@@ -340,6 +341,12 @@ typedef apTRDP_DATASET_T *papTRDP_DATASET_T;
  *   - MD listener table: ComId  destIpAddr, destUri, cbFct?, counter
  *   - Memory usage
  */
+
+/** Structure containing comId for MD statistics request (ComId 32). */
+typedef struct
+{
+    UINT32  comId;                                      /**< ComId to request: 35...41 */
+} TRDP_STATISTICS_REQUEST_T;
 
 
 /** Structure containing all general memory statistics information. */

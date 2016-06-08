@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
+ *
  */
 
 
@@ -347,7 +349,7 @@ int main (int argc, char * *argv)
     /*    Request statistics PD        */
     err = tlp_request(appHandle,
                       subHandle,
-                      TRDP_STATISTICS_REQUEST_COMID,
+                      TRDP_STATISTICS_PULL_COMID,
                       0,
                       0,
                       0,
