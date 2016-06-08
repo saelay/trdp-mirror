@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2016-06-01: Ticket #119 tlc_getInterval() repeatedly returns 0 after timeout
  *      BL 2016-03-04: Ticket #112: Marshalling sets wrong datasetLength (PD)
  *     IBO 2016-02-03: Ticket #109: vos_ntohs -> vos_ntohl for datasetlength when unmarshalling
@@ -435,7 +436,7 @@ TRDP_ERR_T  trdp_pdReceive (
     if (vos_ntohs(pNewFrameHead->msgType) == (UINT16) TRDP_MSG_PR)
     {
         /*  Handle statistics request  */
-        if (vos_ntohl(pNewFrameHead->comId) == TRDP_STATISTICS_REQUEST_COMID)
+        if (vos_ntohl(pNewFrameHead->comId) == TRDP_STATISTICS_PULL_COMID)
         {
             pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATISTICS_COMID);
             if (pPulledElement != NULL)
@@ -687,7 +688,7 @@ void trdp_pdHandleTimeOuts (
             timerisset(&iterPD->timeToGo) &&                        /*  Prevent timing out of PULLed data too early */
             !timercmp(&iterPD->timeToGo, &now, >) &&                /*  late?   */
             !(iterPD->privFlags & TRDP_TIMED_OUT) &&                /*  and not already flagged ?   */
-            !(iterPD->addr.comId == TRDP_STATISTICS_REQUEST_COMID)) /*  Do not bother user with statistics timeout */
+            !(iterPD->addr.comId == TRDP_STATISTICS_PULL_COMID)) /*  Do not bother user with statistics timeout */
         {
             /*  Update some statistics  */
             appHandle->stats.pd.numTimeout++;
