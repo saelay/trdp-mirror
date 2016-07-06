@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings), alignment casts fixed
  *      BL 2016-02-11: Ticket #108: missing initialisation of size-pointer
  *      BL 2016-02-04: Ticket #109: size_marshall -> size_unmarshall
  *      BL 2016-02-03: Ticket #108: Uninitialized info variable
@@ -85,16 +86,17 @@ static UINT32 sNumEntries = 0;
  *
  *
  *  @param[in]      pSrc            Pointer to align
+ *  @param[in]      alignment       0, 1, 2, 4, 8
  *
  *  @retval         aligned pointer
  */
 static INLINE UINT8 *alignePtr (
     const UINT8 *pSrc,
-    UINT32      alignment)
+    uintptr_t   alignment)
 {
     alignment--;
 
-    return (UINT8 *) (((UINT32) pSrc + alignment) & ~alignment);
+    return (UINT8 *) (((uintptr_t) pSrc + alignment) & ~alignment);
 }
 
 /**********************************************************************************************************************/

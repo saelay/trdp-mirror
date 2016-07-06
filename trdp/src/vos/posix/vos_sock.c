@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2015-11-20: Compiler warnings fixed (lines 392 + 393)
  *      BL 2014-08-25: Ticket #51: change underlying function for vos_dottedIP
  *
@@ -76,9 +77,9 @@ const CHAR8 *cDefaultIface = "eth0";
  *  LOCALS
  */
 
-BOOL8 vosSockInitialised = FALSE;
+BOOL8           vosSockInitialised = FALSE;
 
-struct ifreq gIfr;
+struct ifreq    gIfr;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -129,8 +130,8 @@ BOOL8 vos_getMacAddress (
 #   define LLADDR_OFF  11
 
     struct ifaddrs  *pIfList;
-    BOOL8 found = FALSE;
-    const char      *pName = cDefaultIface;
+    BOOL8           found   = FALSE;
+    const char      *pName  = cDefaultIface;
 
     if (pIfName != NULL)
     {
@@ -391,9 +392,9 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
             if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
             {
                 memcpy(&ifAddrs[count].ipAddr, &cursor->ifa_addr->sa_data[2], 4);
-                ifAddrs[count].ipAddr   = vos_ntohl(ifAddrs[count].ipAddr);
+                ifAddrs[count].ipAddr = vos_ntohl(ifAddrs[count].ipAddr);
                 memcpy(&ifAddrs[count].netMask, &cursor->ifa_netmask->sa_data[2], 4);
-                ifAddrs[count].netMask  = vos_ntohl(ifAddrs[count].netMask);
+                ifAddrs[count].netMask = vos_ntohl(ifAddrs[count].netMask);
                 if (cursor->ifa_name != NULL)
                 {
                     strncpy((char *) ifAddrs[count].name, cursor->ifa_name, VOS_MAX_IF_NAME_SIZE);
@@ -449,15 +450,15 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
  *  @retval         TRUE            interface is up and ready
  *                  FALSE           interface is down / not ready
  */
-EXT_DECL BOOL8 vos_netIfUp(
-    VOS_IP4_ADDR_T  ifAddress)
+EXT_DECL BOOL8 vos_netIfUp (
+    VOS_IP4_ADDR_T ifAddress)
 {
     struct ifaddrs  *addrs;
     struct ifaddrs  *cursor;
     VOS_IF_REC_T    ifAddrs;
-    
+
     ifAddrs.linkState = FALSE;
-    
+
     if (getifaddrs(&addrs) == 0)
     {
         cursor = addrs;
@@ -466,7 +467,7 @@ EXT_DECL BOOL8 vos_netIfUp(
             if (cursor->ifa_addr != NULL && cursor->ifa_addr->sa_family == AF_INET)
             {
                 memcpy(&ifAddrs.ipAddr, &cursor->ifa_addr->sa_data[2], 4);
-                ifAddrs.ipAddr   = vos_ntohl(ifAddrs.ipAddr);
+                ifAddrs.ipAddr = vos_ntohl(ifAddrs.ipAddr);
                 /* Exit if first (default) interface matches */
                 if (ifAddress == VOS_INADDR_ANY || ifAddress == ifAddrs.ipAddr)
                 {
@@ -480,9 +481,9 @@ EXT_DECL BOOL8 vos_netIfUp(
             }
             cursor = cursor->ifa_next;
         }
-        
+
         freeifaddrs(addrs);
-        
+
     }
     return ifAddrs.linkState;
 }
@@ -531,7 +532,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 {
     if (pMAC == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -570,7 +571,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     if (pSock == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -586,7 +587,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         close(sock);
-        vos_printLog(VOS_LOG_ERROR, "socket() failed, setsockoptions or buffer failed!\n");
+        vos_printLogStr(VOS_LOG_ERROR, "socket() failed, setsockoptions or buffer failed!\n");
         return VOS_SOCK_ERR;
     }
 
@@ -622,7 +623,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if (pSock == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -760,7 +761,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (pOptions->no_mc_loop > 0)
         {
-            // Default behavior is ON */
+            /* Default behavior is ON * / */
             sockOptValue = 0;
             if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, &sockOptValue,
                            sizeof(sockOptValue)) == -1)
@@ -1168,7 +1169,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     else
     {
-        *pSize = rcvSize;
+        *pSize = (UINT32) rcvSize;  /* We will not expect larger packets (max. size is 64k anyway!) */
         return VOS_NO_ERR;
     }
 }
@@ -1419,7 +1420,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
         sendSize = write(sock, pBuffer, bufferSize);
         if (sendSize >= 0)
         {
-            bufferSize  -= sendSize;
+            bufferSize  -= (size_t) sendSize;
             pBuffer     += sendSize;
             *pSize      += sendSize;
         }
@@ -1489,7 +1490,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         rcvSize = read(sock, pBuffer, bufferSize);
         if (rcvSize > 0)
         {
-            bufferSize  -= rcvSize;
+            bufferSize  -= (size_t) rcvSize;
             pBuffer     += rcvSize;
             *pSize      += rcvSize;
         }
@@ -1595,11 +1596,11 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
  *
  *  @retval         Address to bind to
  */
-EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr( VOS_IP4_ADDR_T   srcIP,
-                                               VOS_IP4_ADDR_T   mcGroup,
-                                               VOS_IP4_ADDR_T   rcvMostly)
+EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr ( VOS_IP4_ADDR_T  srcIP,
+                                                VOS_IP4_ADDR_T  mcGroup,
+                                                VOS_IP4_ADDR_T  rcvMostly)
 {
-	/* On Linux, binding to an interface address will prevent receiving of MCs! */ 
+    /* On Linux, binding to an interface address will prevent receiving of MCs! */
     if (vos_isMulticast(mcGroup) && rcvMostly)
     {
         return 0;

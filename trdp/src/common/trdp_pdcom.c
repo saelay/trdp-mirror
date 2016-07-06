@@ -131,7 +131,7 @@ TRDP_ERR_T trdp_pdPut (
     if (pPacket->dataSize == 0 && dataSize == 0)
     {
         /* set data valid */
-        pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
+        pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_INVALID_DATA);
 
         /*  Update some statistics  */
         pPacket->updPkts++;
@@ -180,7 +180,7 @@ TRDP_ERR_T trdp_pdPut (
         if (TRDP_NO_ERR == ret)
         {
             /* set data valid */
-            pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
+            pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_INVALID_DATA);
 
             /*  Update some statistics  */
             pPacket->updPkts++;
@@ -301,12 +301,12 @@ TRDP_ERR_T  trdp_pdSendQueued (
                                               vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt)))
                 {
                     err = TRDP_TOPO_ERR;
-                    vos_printLog(VOS_LOG_INFO, "Sending PD: TopoCount is out of date!\n");
+                    vos_printLogStr(VOS_LOG_INFO, "Sending PD: TopoCount is out of date!\n");
                 }
                 /*    In case we're sending on an uninitialized publisher; should never happen. */
                 else if (iterPD->socketIdx == TRDP_INVALID_SOCKET_INDEX)
                 {
-                    vos_printLog(VOS_LOG_ERROR, "Sending PD: Socket invalid!\n");
+                    vos_printLogStr(VOS_LOG_ERROR, "Sending PD: Socket invalid!\n");
                     /* Try to send the other packets */
                 }
                 /*    Send the packet if it is not redundant    */
@@ -349,7 +349,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
             }
 
             /* Reset "immediate" flag for request or requested packet */
-            iterPD->privFlags = (TRDP_PRIV_FLAGS_T) (iterPD->privFlags & ~TRDP_REQ_2B_SENT);
+            iterPD->privFlags = (TRDP_PRIV_FLAGS_T) (iterPD->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_REQ_2B_SENT);
         }
     }
     return err;
@@ -451,7 +451,7 @@ TRDP_ERR_T  trdp_pdReceive (
             }
             else
             {
-                vos_printLog(VOS_LOG_ERROR, "Statistics request failed, not published!\n");
+                vos_printLogStr(VOS_LOG_ERROR, "Statistics request failed, not published!\n");
             }
         }
         else
@@ -480,7 +480,7 @@ TRDP_ERR_T  trdp_pdReceive (
             if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
             {
                 /*  We do not break here, only report error */
-                vos_printLog(VOS_LOG_WARNING, "Error sending one or more PD packets\n");
+                vos_printLogStr(VOS_LOG_WARNING, "Error sending one or more PD packets\n");
             }
 
             informUser = TRUE;
@@ -566,10 +566,12 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  Update some statistics  */
         pExistingElement->numRxTx++;
         pExistingElement->lastErr   = TRDP_NO_ERR;
-        pExistingElement->privFlags = (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~TRDP_TIMED_OUT);
+        pExistingElement->privFlags =
+            (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_TIMED_OUT);
 
         /* mark the data as valid */
-        pExistingElement->privFlags = (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~TRDP_INVALID_DATA);
+        pExistingElement->privFlags =
+            (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_INVALID_DATA);
 
         /*  remove the old one, insert the new one  */
         /*  -> always swap the frame pointers              */
@@ -904,13 +906,13 @@ TRDP_ERR_T  trdp_pdSend (
 
     if (err != VOS_NO_ERR)
     {
-        vos_printLog(VOS_LOG_ERROR, "trdp_pdSend failed\n");
+        vos_printLogStr(VOS_LOG_ERROR, "trdp_pdSend failed\n");
         return TRDP_IO_ERR;
     }
 
     if (pPacket->sendSize != pPacket->grossSize)
     {
-        vos_printLog(VOS_LOG_ERROR, "trdp_pdSend incomplete\n");
+        vos_printLogStr(VOS_LOG_ERROR, "trdp_pdSend incomplete\n");
         return TRDP_IO_ERR;
     }
 
@@ -990,8 +992,8 @@ TRDP_ERR_T  trdp_pdDistribute (
     /*  This is the delta time we can jitter...   */
     vos_divTime(&deltaTmax, noOfPackets);
 
-    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %u.%06u\n", deltaTmax.tv_sec, deltaTmax.tv_usec);
-    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %u.%06u\n", tNull.tv_sec, tNull.tv_usec);
+    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %ld.%06u\n", (long) deltaTmax.tv_sec, deltaTmax.tv_usec);
+    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %ld.%06u\n", (long) tNull.tv_sec, tNull.tv_usec);
     vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: noOfPackets = %d\n", noOfPackets);
 
     for (packetIndex = 0, pPacket = pSndQueue; packetIndex < noOfPackets && pPacket != NULL; )
@@ -1009,15 +1011,15 @@ TRDP_ERR_T  trdp_pdDistribute (
 
             if (vos_cmpTime(&temp, &pPacket->interval) > 0)
             {
-                vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: packet [%d] with interval %u.%06u could timeout...\n",
-                             packetIndex, temp.tv_sec, temp.tv_usec);
-                vos_printLog(VOS_LOG_INFO, "...no change in send time!\n");
+                vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: packet [%d] with interval %lu.%06u could timeout...\n",
+                             packetIndex, (long) temp.tv_sec, temp.tv_usec);
+                vos_printLogStr(VOS_LOG_INFO, "...no change in send time!\n");
             }
             else
             {
                 pPacket->timeToGo = nextTime2Go;
-                vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: nextTime2Go[%d] = %u.%06u\n",
-                             packetIndex, nextTime2Go.tv_sec, nextTime2Go.tv_usec);
+                vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: nextTime2Go[%d] = %lu.%06u\n",
+                             packetIndex, (unsigned long) nextTime2Go.tv_sec, nextTime2Go.tv_usec);
 
             }
             packetIndex++;
