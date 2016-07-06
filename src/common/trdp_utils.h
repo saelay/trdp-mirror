@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
 
 
@@ -113,7 +114,7 @@ void trdp_initUncompletedTCP (
 /**********************************************************************************************************************/
 /** remove the sequence counter for the comID/source IP.
  *  The sequence counter should be reset if there was a packet time out.
- *  
+ *
  *
  *  @param[in]      pElement            subscription element
  *  @param[in]      srcIP               Source IP address
@@ -122,10 +123,10 @@ void trdp_initUncompletedTCP (
  *  @retval         none
  */
 
-void trdp_resetSequenceCounter(
-                               PD_ELE_T*       pElement,
-                               TRDP_IP_ADDR_T  srcIP,
-                               TRDP_MSG_T      msgType);
+void trdp_resetSequenceCounter (
+    PD_ELE_T        *pElement,
+    TRDP_IP_ADDR_T  srcIP,
+    TRDP_MSG_T      msgType);
 
 /*********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
@@ -148,7 +149,7 @@ void trdp_resetSequenceCounter(
 
 TRDP_ERR_T trdp_requestSocket(
     TRDP_SOCKETS_T iface[],
-    UINT32 port,
+    UINT16 port,
     const TRDP_SEND_PARAM_T * params,
     TRDP_IP_ADDR_T srcIP,
     TRDP_IP_ADDR_T mcGroup,
@@ -237,8 +238,8 @@ UINT32 trdp_getSeqCnt (
  *                 -1 - memory error
  */
 
-int trdp_checkSequenceCounter(
-    PD_ELE_T*       pElement,
+int trdp_checkSequenceCounter (
+    PD_ELE_T        *pElement,
     UINT32          sequenceCounter,
     TRDP_IP_ADDR_T  srcIP,
     TRDP_MSG_T      msgType);

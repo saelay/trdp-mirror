@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
 
 #ifndef POSIX
@@ -52,7 +53,7 @@
  */
 
 #ifndef PTHREAD_MUTEX_RECURSIVE
-#define PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
+#define PTHREAD_MUTEX_RECURSIVE  PTHREAD_MUTEX_RECURSIVE_NP
 #endif
 
 const size_t    cDefaultStackSize   = 16 * 1024;
@@ -72,7 +73,7 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
     VOS_TIME_T now, timeOut;
 
     timeOut.tv_sec  = abs_timeout->tv_sec;
-    timeOut.tv_usec = abs_timeout->tv_nsec * 1000;
+    timeOut.tv_usec = (__darwin_suseconds_t) abs_timeout->tv_nsec * 1000;
 
     while (1)
     {
@@ -96,10 +97,10 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
     return -1;
 }
 
-/* simulate 
+/* simulate
     int sem_init(sem_t *, int, unsigned int);
 */
-int sem_init(sem_t *pSema, int flags, unsigned int mode)
+int sem_init (sem_t *pSema, int flags, unsigned int mode)
 {
     pSema = sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)mode);
     if (pSema == SEM_FAILED)
@@ -107,7 +108,7 @@ int sem_init(sem_t *pSema, int flags, unsigned int mode)
         return -1;
     }
     return 0;
-    //rc = sem_init((sem_t *)*pSema, 0, (UINT8)initialState);
+    /* rc = sem_init((sem_t *)*pSema, 0, (UINT8)initialState); */
 }
 #endif
 
@@ -124,7 +125,7 @@ int sem_init(sem_t *pSema, int flags, unsigned int mode)
 /** Cyclic thread functions.
  *  Wrapper for cyclic threads. The thread function will be called cyclically with interval.
  *
- *  @param[in]      interval        Interval for cyclic threads in us (incl. runtime) 
+ *  @param[in]      interval        Interval for cyclic threads in us (incl. runtime)
  *  @param[in]      pFunction       Pointer to the thread function
  *  @param[in]      pArguments      Pointer to the thread function parameters
  *  @retval         void
@@ -136,32 +137,32 @@ int sem_init(sem_t *pSema, int flags, unsigned int mode)
 
 /* This define holds the max amount os seconds to get stored in 32bit holding micro seconds        */
 /* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
-/* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */ 
-/* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */ 
-#define MAXSEC_FOR_USECPRESENTATION 4293U
+/* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */
+/* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */
+#define MAXSEC_FOR_USECPRESENTATION  4293U
 
 EXT_DECL void vos_cyclicThread (
     UINT32              interval,
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
-    VOS_TIME_T priorCall;
-    VOS_TIME_T afterCall;
-    UINT32 execTime;
-    UINT32 waitingTime;
+    VOS_TIME_T  priorCall;
+    VOS_TIME_T  afterCall;
+    UINT32      execTime;
+    UINT32      waitingTime;
     for (;; )
     {
         vos_getTime(&priorCall);  /* get initial time */
         pFunction(pArguments);    /* perform thread function */
         vos_getTime(&afterCall);  /* get time after function ghas returned */
         /* subtract in the pattern after - prior to get the runtime of function() */
-        vos_subTime(&afterCall,&priorCall);
+        vos_subTime(&afterCall, &priorCall);
         /* afterCall holds now the time difference within a structure not compatible with interval */
         /* check if UINT32 fits to hold the waiting time value */
         if (afterCall.tv_sec <= MAXSEC_FOR_USECPRESENTATION)
         {
             /*           sec to usec conversion                               value normalized from 0 .. 999999*/
-            execTime = ((afterCall.tv_sec * MSECS_PER_SEC * USECS_PER_MSEC) + (UINT32)afterCall.tv_usec);
+            execTime = ((UINT32) (afterCall.tv_sec * MSECS_PER_SEC * USECS_PER_MSEC) + (UINT32)afterCall.tv_usec);
             if (execTime > interval)
             {
                 /*severe error: cyclic task time violated*/
@@ -175,7 +176,7 @@ EXT_DECL void vos_cyclicThread (
             {
                 waitingTime = interval - execTime;
             }
-        } 
+        }
         else
         {
             /* seems a very critical overflow has happened - or simply a misconfiguration */
@@ -183,13 +184,13 @@ EXT_DECL void vos_cyclicThread (
             waitingTime = 0U;
             /* Have this value range violation logged */
             vos_printLog(VOS_LOG_ERROR,
-                         "cyclic thread with interval %d usec exceeded time out by running %d sec\n",
+                         "cyclic thread with interval %d usec exceeded time out by running %ld sec\n",
                          interval, afterCall.tv_sec);
         }
         (void) vos_threadDelay(waitingTime);
         pthread_testcancel();
     }
-} 
+}
 
 /**********************************************************************************************************************/
 /** Initialize the thread library.
@@ -323,7 +324,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
                 pName,
                 policy,
                 retCode );
-                return VOS_THREAD_ERR;
+            return VOS_THREAD_ERR;
         }
     }
 
@@ -497,7 +498,7 @@ EXT_DECL void vos_getTime (
 
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -516,8 +517,8 @@ EXT_DECL void vos_getTime (
 
         clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-        myTime.tv_sec = currentTime.tv_sec;                                    \
-        myTime.tv_usec = currentTime.tv_nsec / 1000;                                    \
+        myTime.tv_sec   = currentTime.tv_sec;         \
+        myTime.tv_usec  = currentTime.tv_nsec / 1000; \
 
 #endif
 
@@ -572,7 +573,7 @@ EXT_DECL void vos_clearTime (
 {
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -594,7 +595,7 @@ EXT_DECL void vos_addTime (
 {
     if (pTime == NULL || pAdd == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -619,7 +620,7 @@ EXT_DECL void vos_subTime (
 {
     if (pTime == NULL || pSub == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -644,7 +645,7 @@ EXT_DECL void vos_divTime (
 {
     if (pTime == NULL || divisor == 0)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -674,7 +675,7 @@ EXT_DECL void vos_mulTime (
 {
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -880,7 +881,7 @@ EXT_DECL void vos_mutexDelete (
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
     }
     else
     {
@@ -912,7 +913,7 @@ EXT_DECL void vos_mutexLocalDelete (
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
     }
     else
     {
@@ -1010,7 +1011,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
 
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
         return VOS_PARAM_ERR;
     }
     else
@@ -1052,23 +1053,23 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     /*Check parameters*/
     if (ppSema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
         retVal = VOS_PARAM_ERR;
     }
     else
     {
         /*pThread Semaphore init*/
 #ifdef __APPLE__
-        static int count = 1;
-        char tempPath[64];
+        static int  count = 1;
+        char        tempPath[64];
         sprintf(tempPath, "/tmp/trdp%d.sema", count++);
         *ppSema = (VOS_SEMA_T) sem_open(tempPath, O_CREAT, 0644, (UINT8)initialState);
-        if ((sem_t*)*ppSema == SEM_FAILED)
+        if ((sem_t *)*ppSema == SEM_FAILED)
         {
             rc = -1;
         }
@@ -1108,12 +1109,12 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
 
 EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
 {
-    int rc      = 0;
+    int rc = 0;
 
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
     }
     else
     {
@@ -1122,7 +1123,7 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
         if (0 != rc)
         {
             /* Error closing Semaphore */
-            vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR sem_close failed\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_semaDelete() ERROR sem_close failed\n");
         }
         else
         {
@@ -1130,7 +1131,7 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
             sem_unlink("/tmp/trdp.sema");
         }
 #else
-        int sval    = 0;
+        int sval = 0;
         /* Check if this is a valid semaphore handle*/
         rc = sem_getvalue((sem_t *)sema, &sval);
         if (0 == rc)
@@ -1139,7 +1140,7 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
             if (0 != rc)
             {
                 /* Error destroying Semaphore */
-                vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
             }
             else
             {
@@ -1177,7 +1178,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         return VOS_PARAM_ERR;
     }
     else if (timeout == 0)
@@ -1194,7 +1195,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     {
         /* Get time and convert it to timespec format */
 #ifdef __APPLE__
-		VOS_TIME_T      waitTimeVos     = {0, 0};
+        VOS_TIME_T waitTimeVos = {0, 0};
         vos_getTime(&waitTimeVos);
         waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
         waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * NSECS_PER_USEC;
@@ -1269,7 +1270,7 @@ EXT_DECL void vos_semaGive (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
     }
     else
     {

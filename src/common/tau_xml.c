@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-21: Ticket #116: Memory corruption using new XML library
  *      BL 2016-03-04: Ticket #113: parsing of dataset element "type" always returns 0
  *      BL 2016-02-11: Ticket #111: unit, scale, offset added
@@ -70,9 +71,9 @@ TRDP_DATA_TYPE_T string2type (const CHAR8 *pTypeStr)
 {
     CHAR8       *p;
     const CHAR8 tokenList[] =
-    "01 BITSET8 01 BOOL8 01 ANTIVALENT8 02 CHAR8 02 UTF8 03 UTF16 04 INT8 05 INT16 06 INT32 07 INT64 08 UINT8"
-    " 09 UINT16 10 UINT32 11 UINT64 12 REAL32 13 REAL64 14 TIMEDATE32 15 TIMEDATE48 16 TIMEDATE64";
-    
+        "01 BITSET8 01 BOOL8 01 ANTIVALENT8 02 CHAR8 02 UTF8 03 UTF16 04 INT8 05 INT16 06 INT32 07 INT64 08 UINT8"
+        " 09 UINT16 10 UINT32 11 UINT64 12 REAL32 13 REAL64 14 TIMEDATE32 15 TIMEDATE48 16 TIMEDATE64";
+
     p = strstr(tokenList, pTypeStr);
     if (p != NULL)
     {
@@ -86,13 +87,13 @@ TRDP_DATA_TYPE_T string2type (const CHAR8 *pTypeStr)
  * Set default values to device parameters
  */
 static void setDefaultDeviceValues (
-                                    TRDP_MEM_CONFIG_T   *pMemConfig,
-                                    TRDP_DBG_CONFIG_T   *pDbgConfig,
-                                    UINT32              *pNumComPar,
-                                    TRDP_COM_PAR_T      * *ppComPar,
-                                    UINT32              *pNumIfConfig,
-                                    TRDP_IF_CONFIG_T    * *ppIfConfig
-                                    )
+    TRDP_MEM_CONFIG_T   *pMemConfig,
+    TRDP_DBG_CONFIG_T   *pDbgConfig,
+    UINT32              *pNumComPar,
+    TRDP_COM_PAR_T      * *ppComPar,
+    UINT32              *pNumIfConfig,
+    TRDP_IF_CONFIG_T    * *ppIfConfig
+    )
 {
     /*  Memory configuration    */
     if (pMemConfig)
@@ -109,7 +110,7 @@ static void setDefaultDeviceValues (
         pDbgConfig->maxFileSize = TRDP_DEBUG_DEFAULT_FILE_SIZE;
         pDbgConfig->option      = TRDP_DBG_ERR;
     }
-    
+
     /*  No Communication parameters*/
     if (pNumComPar)
     {
@@ -119,7 +120,7 @@ static void setDefaultDeviceValues (
     {
         *ppComPar = NULL;
     }
-    
+
     /*  No Interface configurations*/
     if (pNumIfConfig)
     {
@@ -135,10 +136,10 @@ static void setDefaultDeviceValues (
  * Set default values to interface (session) parameters
  */
 static void setDefaultInterfaceValues (
-                                       TRDP_PROCESS_CONFIG_T   *pProcessConfig,
-                                       TRDP_PD_CONFIG_T        *pPdConfig,
-                                       TRDP_MD_CONFIG_T        *pMdConfig
-                                       )
+    TRDP_PROCESS_CONFIG_T   *pProcessConfig,
+    TRDP_PD_CONFIG_T        *pPdConfig,
+    TRDP_MD_CONFIG_T        *pMdConfig
+    )
 {
     /*  Process configuration   */
     if (pProcessConfig)
@@ -149,7 +150,7 @@ static void setDefaultInterfaceValues (
         pProcessConfig->options     = TRDP_PROCESS_DEFAULT_OPTIONS;
         pProcessConfig->priority    = TRDP_PROCESS_DEFAULT_PRIORITY;
     }
-    
+
     /*  Default Pd configuration    */
     if (pPdConfig)
     {
@@ -165,7 +166,7 @@ static void setDefaultInterfaceValues (
         pPdConfig->timeout      = TRDP_PD_DEFAULT_TIMEOUT;
         pPdConfig->toBehavior   = TRDP_TO_SET_TO_ZERO;
     }
-    
+
     /*  Default Md configuration    */
     if (pMdConfig)
     {
@@ -189,41 +190,41 @@ static void setDefaultInterfaceValues (
 void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
 {
     UINT32 i, j;
-    
+
     printf( "---\nExchange parameters (ComId / parId / dataSetId / type:\n");
     for (i = 0; i < num; ++i)
     {
         printf( "%u:  %u / %u / %u / %u\n", i,
-               pArray[i].comId,
-               pArray[i].comParId,
-               pArray[i].datasetId,
-               pArray[i].type);
+                pArray[i].comId,
+                pArray[i].comParId,
+                pArray[i].datasetId,
+                pArray[i].type);
         if (pArray[i].pMdPar != NULL)
         {
             printf( "MD flags: %u reply timeout: %u\n",
-                   pArray[i].pMdPar->flags,
-                   pArray[i].pMdPar->replyTimeout);
+                    pArray[i].pMdPar->flags,
+                    pArray[i].pMdPar->replyTimeout);
         }
-        
+
         if (pArray[i].pPdPar != NULL)
         {
             printf( "PD flags: %u cycle: %u timeout: %u\n",
-                   pArray[i].pPdPar->flags,
-                   pArray[i].pPdPar->cycle,
-                   pArray[i].pPdPar->timeout);
+                    pArray[i].pPdPar->flags,
+                    pArray[i].pPdPar->cycle,
+                    pArray[i].pPdPar->timeout);
         }
         for (j = 0; j < pArray[i].destCnt; ++j)
         {
             printf( "Dest Id: %u URI: %s\n",
-                   pArray[i].pDest[j].id,
-                   *pArray[i].pDest[j].pUriHost);
+                    pArray[i].pDest[j].id,
+                    *pArray[i].pDest[j].pUriHost);
         }
         for (j = 0; j < pArray[i].srcCnt; ++j)
         {
             printf( "Src Id: %u URI1: %s URI2: %s\n",
-                   pArray[i].pSrc[j].id,
-                   *pArray[i].pSrc[j].pUriHost1,
-                   (*pArray[i].pSrc[j].pUriHost2 != NULL) ? *pArray[i].pSrc[j].pUriHost2 : "---");
+                    pArray[i].pSrc[j].id,
+                    *pArray[i].pSrc[j].pUriHost1,
+                    (*pArray[i].pSrc[j].pUriHost2 != NULL) ? *pArray[i].pSrc[j].pUriHost2 : "---");
         }
     }
     printf( "---------------------------------\n");
@@ -231,8 +232,8 @@ void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
 
 /**********************************************************************************************************************/
 TRDP_ERR_T readTelegramDef (
-                            XML_HANDLE_T        *pXML,
-                            TRDP_EXCHG_PAR_T    *pExchgParam)
+    XML_HANDLE_T        *pXML,
+    TRDP_EXCHG_PAR_T    *pExchgParam)
 {
     CHAR8       tag[MAX_TAG_LEN];
     CHAR8       attribute[MAX_TOK_LEN];
@@ -241,9 +242,9 @@ TRDP_ERR_T readTelegramDef (
     UINT32      countSrc, countDst;
     TRDP_SRC_T  *pSrc;
     TRDP_DEST_T *pDest;
-    
+
     /* Get the attributes */
-    
+
     while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
     {
         if (vos_strnicmp(attribute, "com-id", MAX_TOK_LEN) == 0)
@@ -281,26 +282,26 @@ TRDP_ERR_T readTelegramDef (
             }
         }
     }
-    
+
     if (pExchgParam->comId == 10004)
     {
         printf("10004");
     }
-    
+
     /* find out how many sources are defined before hand */
-    countSrc    = trdp_XMLCountStartTag(pXML, "source");
+    countSrc    = (UINT32) trdp_XMLCountStartTag(pXML, "source");
     pSrc        = NULL;
-    countDst    = trdp_XMLCountStartTag(pXML, "destination");
+    countDst    = (UINT32) trdp_XMLCountStartTag(pXML, "destination");
     pDest       = NULL;
-    
+
     /* Iterate thru <telegram> */
-    
+
     while (trdp_XMLSeekStartTagAny(pXML, tag, MAX_TAG_LEN) == 0)
     {
         if (vos_strnicmp(tag, "md-parameter", MAX_TAG_LEN) == 0)
         {
             pExchgParam->pMdPar = (TRDP_MD_PAR_T *) vos_memAlloc(sizeof(TRDP_MD_PAR_T));
-            
+
             if (pExchgParam->pMdPar != NULL)
             {
                 while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
@@ -355,7 +356,7 @@ TRDP_ERR_T readTelegramDef (
         else if (vos_strnicmp(tag, "pd-parameter", MAX_TAG_LEN) == 0)
         {
             pExchgParam->pPdPar = (TRDP_PD_PAR_T *) vos_memAlloc(sizeof(TRDP_PD_PAR_T));
-            
+
             if (pExchgParam->pPdPar != NULL)
             {
                 while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
@@ -406,7 +407,7 @@ TRDP_ERR_T readTelegramDef (
                     }
                     else if (vos_strnicmp(attribute, "offset-address", MAX_TOK_LEN) == 0)
                     {
-                        pExchgParam->pPdPar->offset = valueInt;
+                        pExchgParam->pPdPar->offset = (UINT16) valueInt;
                     }
                 }
             }
@@ -416,7 +417,7 @@ TRDP_ERR_T readTelegramDef (
             if (countSrc > 0)
             {
                 pExchgParam->pSrc = (TRDP_SRC_T *)vos_memAlloc(countSrc * sizeof(TRDP_SRC_T));
-                
+
                 if (pExchgParam->pSrc == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
@@ -427,7 +428,7 @@ TRDP_ERR_T readTelegramDef (
                 countSrc    = 0;
                 pSrc        = pExchgParam->pSrc;
             }
-            
+
             while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE && pSrc != NULL)
             {
                 if (vos_strnicmp(attribute, "id", MAX_TOK_LEN) == 0)
@@ -454,8 +455,8 @@ TRDP_ERR_T readTelegramDef (
                     {
                         p = value;
                     }
-                    
-                    pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+
+                    pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32)strlen(p) + 1);
                     if (pSrc->pUriHost1 == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
@@ -463,14 +464,14 @@ TRDP_ERR_T readTelegramDef (
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pSrc->pUriHost1, p, strlen(p) + 1);
+                    vos_strncpy((char *)pSrc->pUriHost1, p, (UINT32) strlen(p) + 1);
                 }
                 else if (vos_strnicmp(attribute, "uri2", MAX_TOK_LEN) == 0)
                 {
                     char *p = strchr(value, '@');   /* Get host part only */
                     p = (p == NULL) ? value : p + 1;
-                    
-                    pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+
+                    pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32) strlen(p) + 1);
                     if (pSrc->pUriHost2 == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
@@ -478,7 +479,7 @@ TRDP_ERR_T readTelegramDef (
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pSrc->pUriHost2, p, strlen(p) + 1);
+                    vos_strncpy((char *)pSrc->pUriHost2, p, (UINT32)  strlen(p) + 1);
                 }
             }
             trdp_XMLEnter(pXML);
@@ -487,14 +488,14 @@ TRDP_ERR_T readTelegramDef (
                 pSrc != NULL)
             {
                 pSrc->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
-                
+
                 if (pSrc->pSdtPar == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
                                  sizeof(TRDP_SDT_PAR_T));
                     return TRDP_MEM_ERR;
                 }
-                
+
                 while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
                 {
                     if (vos_strnicmp(attribute, "smi1", MAX_TOK_LEN) == 0)
@@ -507,23 +508,23 @@ TRDP_ERR_T readTelegramDef (
                     }
                     else if (vos_strnicmp(attribute, "udv", MAX_TOK_LEN) == 0)
                     {
-                        pSrc->pSdtPar->udv = valueInt;
+                        pSrc->pSdtPar->udv = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "rx-period", MAX_TOK_LEN) == 0)
                     {
-                        pSrc->pSdtPar->rxPeriod = valueInt;
+                        pSrc->pSdtPar->rxPeriod = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "tx-period", MAX_TOK_LEN) == 0)
                     {
-                        pSrc->pSdtPar->txPeriod = valueInt;
+                        pSrc->pSdtPar->txPeriod = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-rxsafe", MAX_TOK_LEN) == 0)
                     {
-                        pSrc->pSdtPar->nrxSafe = valueInt;
+                        pSrc->pSdtPar->nrxSafe = (UINT8) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-guard", MAX_TOK_LEN) == 0)
                     {
-                        pSrc->pSdtPar->nGuard = valueInt;
+                        pSrc->pSdtPar->nGuard = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "cm-thr", MAX_TOK_LEN) == 0)
                     {
@@ -542,7 +543,7 @@ TRDP_ERR_T readTelegramDef (
             if (countDst > 0)
             {
                 pExchgParam->pDest = (TRDP_DEST_T *)vos_memAlloc(countDst * sizeof(TRDP_DEST_T));
-                
+
                 if (pExchgParam->pDest == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
@@ -553,7 +554,7 @@ TRDP_ERR_T readTelegramDef (
                 countDst    = 0;
                 pDest       = pExchgParam->pDest;
             }
-            
+
             while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE && pDest != NULL)
             {
                 if (vos_strnicmp(attribute, "id", MAX_TOK_LEN) == 0)
@@ -580,8 +581,8 @@ TRDP_ERR_T readTelegramDef (
                     {
                         p = value;
                     }
-                    
-                    pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc(strlen(p) + 1);
+
+                    pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32) strlen(p) + 1);
                     if (pDest->pUriHost == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
@@ -589,7 +590,7 @@ TRDP_ERR_T readTelegramDef (
                                      strlen(p) + 1);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pDest->pUriHost, p, strlen(p) + 1);
+                    vos_strncpy((char *)pDest->pUriHost, p, (UINT32) strlen(p) + 1);
                 }
             }
             trdp_XMLEnter(pXML);
@@ -598,14 +599,14 @@ TRDP_ERR_T readTelegramDef (
                 pDest != NULL)
             {
                 pDest->pSdtPar = (TRDP_SDT_PAR_T *)vos_memAlloc(sizeof(TRDP_SDT_PAR_T));
-                
+
                 if (pDest->pSdtPar == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
                                  sizeof(TRDP_SDT_PAR_T));
                     return TRDP_MEM_ERR;
                 }
-                
+
                 while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
                 {
                     if (vos_strnicmp(attribute, "smi1", MAX_TOK_LEN) == 0)
@@ -618,23 +619,23 @@ TRDP_ERR_T readTelegramDef (
                     }
                     else if (vos_strnicmp(attribute, "udv", MAX_TOK_LEN) == 0)
                     {
-                        pDest->pSdtPar->udv = valueInt;
+                        pDest->pSdtPar->udv = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "rx-period", MAX_TOK_LEN) == 0)
                     {
-                        pDest->pSdtPar->rxPeriod = valueInt;
+                        pDest->pSdtPar->rxPeriod = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "tx-period", MAX_TOK_LEN) == 0)
                     {
-                        pDest->pSdtPar->txPeriod = valueInt;
+                        pDest->pSdtPar->txPeriod = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-rxsafe", MAX_TOK_LEN) == 0)
                     {
-                        pDest->pSdtPar->nrxSafe = valueInt;
+                        pDest->pSdtPar->nrxSafe = (UINT8) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "n-guard", MAX_TOK_LEN) == 0)
                     {
-                        pDest->pSdtPar->nGuard = valueInt;
+                        pDest->pSdtPar->nGuard = (UINT16) valueInt;
                     }
                     else if (vos_strnicmp(attribute, "cm-thr", MAX_TOK_LEN) == 0)
                     {
@@ -654,37 +655,37 @@ TRDP_ERR_T readTelegramDef (
 
 /**********************************************************************************************************************/
 TRDP_ERR_T readXmlDatasetMap (
-                              XML_HANDLE_T            *pXML,
-                              UINT32                  *pNumComId,
-                              TRDP_COMID_DSID_MAP_T   * *ppComIdDsIdMap)
+    XML_HANDLE_T            *pXML,
+    UINT32                  *pNumComId,
+    TRDP_COMID_DSID_MAP_T   * *ppComIdDsIdMap)
 {
     /* CHAR8   tag[MAX_TAG_LEN]; */
     CHAR8   attribute[MAX_TOK_LEN];
     CHAR8   value[MAX_TOK_LEN];
     UINT32  valueInt;
     UINT32  count = 0, idx = 0;
-    
+
     trdp_XMLRewind(pXML);
-    
+
     trdp_XMLEnter(pXML);
-    
+
     if (trdp_XMLSeekStartTag(pXML, "device") == 0) /* Optional */
     {
         trdp_XMLEnter(pXML);
-        
+
         if (trdp_XMLSeekStartTag(pXML, "bus-interface-list") == 0)
         {
             trdp_XMLEnter(pXML);
-            
+
             while (trdp_XMLSeekStartTag(pXML, "bus-interface") == 0)
             {
                 trdp_XMLEnter(pXML);
-                count += trdp_XMLCountStartTag(pXML, "telegram");
+                count += (UINT32) trdp_XMLCountStartTag(pXML, "telegram");
                 trdp_XMLLeave(pXML);
             }
             trdp_XMLLeave(pXML);
         }
-        
+
         if (count > 0)
         {
             *ppComIdDsIdMap = (TRDP_COMID_DSID_MAP_T *) vos_memAlloc(count * sizeof(TRDP_COMID_DSID_MAP_T));
@@ -697,21 +698,21 @@ TRDP_ERR_T readXmlDatasetMap (
             *pNumComId = count;
         }
     }
-    
+
     trdp_XMLLeave(pXML);
-    
+
     trdp_XMLRewind(pXML);
-    
+
     trdp_XMLEnter(pXML);
-    
+
     if (trdp_XMLSeekStartTag(pXML, "device") == 0) /* Optional */
     {
         trdp_XMLEnter(pXML);
-        
+
         if (trdp_XMLSeekStartTag(pXML, "bus-interface-list") == 0)
         {
             trdp_XMLEnter(pXML);
-            
+
             while (trdp_XMLSeekStartTag(pXML, "bus-interface") == 0)
             {
                 trdp_XMLEnter(pXML);
@@ -737,60 +738,60 @@ TRDP_ERR_T readXmlDatasetMap (
     }
     trdp_XMLLeave(pXML);
     return TRDP_NO_ERR;
-    
+
 }
 
 /**********************************************************************************************************************/
 TRDP_ERR_T readXmlDatasets (
-                            XML_HANDLE_T        *pXML,
-                            UINT32              *pNumDataset,
-                            papTRDP_DATASET_T   papDataset)
+    XML_HANDLE_T        *pXML,
+    UINT32              *pNumDataset,
+    papTRDP_DATASET_T   papDataset)
 {
     /* CHAR8   tag[MAX_TAG_LEN]; */
     CHAR8   attribute[MAX_TOK_LEN];
     CHAR8   value[MAX_TOK_LEN];
     UINT32  valueInt;
-    
+
     trdp_XMLRewind(pXML);
-    
+
     trdp_XMLEnter(pXML);
-    
+
     if (trdp_XMLSeekStartTag(pXML, "device") == 0) /* Optional */
     {
         trdp_XMLEnter(pXML);
-        
+
         if (trdp_XMLSeekStartTag(pXML, "data-set-list") == 0)
         {
             UINT32  count = 0;
             UINT32  idx;
-            
+
             trdp_XMLEnter(pXML);
-            
-            count = trdp_XMLCountStartTag(pXML, "data-set");
-            
+
+            count = (UINT32) trdp_XMLCountStartTag(pXML, "data-set");
+
             /* Allocate an array of pointers */
             *papDataset = (apTRDP_DATASET_T) vos_memAlloc(count * sizeof(apTRDP_DATASET_T));
-            
+
             if (papDataset == NULL)
             {
                 vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML telegram definitions!\n",
                              count * sizeof(apTRDP_DATASET_T));
                 return TRDP_MEM_ERR;
             }
-            
+
             *pNumDataset = count;
-            
+
             /* Read the interface params */
             for (idx = 0; idx < *pNumDataset && trdp_XMLSeekStartTag(pXML, "data-set") == 0; idx++)
             {
                 UINT32 i = 0;
                 trdp_XMLEnter(pXML);
-                count = trdp_XMLCountStartTag(pXML, "element");
-                
+                count = (UINT32) trdp_XMLCountStartTag(pXML, "element");
+
                 /* Allocate the dataset element */
                 (*papDataset)[idx] =
-                (TRDP_DATASET_T *)vos_memAlloc(count * sizeof(TRDP_DATASET_ELEMENT_T) + sizeof(TRDP_DATASET_T));
-                
+                    (TRDP_DATASET_T *)vos_memAlloc(count * sizeof(TRDP_DATASET_ELEMENT_T) + sizeof(TRDP_DATASET_T));
+
                 if ((*papDataset)[idx] == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR,
@@ -798,7 +799,7 @@ TRDP_ERR_T readXmlDatasets (
                                  count * sizeof(TRDP_DATASET_ELEMENT_T) + sizeof(TRDP_DATASET_T));
                     return TRDP_MEM_ERR;
                 }
-                
+
                 while (trdp_XMLGetAttribute(pXML, attribute, &valueInt, value) == TOK_ATTRIBUTE)
                 {
                     if (vos_strnicmp(attribute, "id", MAX_TOK_LEN) == 0)
@@ -806,7 +807,7 @@ TRDP_ERR_T readXmlDatasets (
                         (*papDataset)[idx]->id = valueInt;
                     }
                 }
-                
+
                 while (trdp_XMLSeekStartTag(pXML, "element") == 0)
                 {
                     (*papDataset)[idx]->pElement[i].size = 1;   /* default  */
@@ -829,12 +830,12 @@ TRDP_ERR_T readXmlDatasets (
                         }
                         else if (vos_strnicmp(attribute, "unit", MAX_TOK_LEN) == 0)
                         {
-                            (*papDataset)[idx]->pElement[i].unit = (CHAR8 *) vos_memAlloc(strlen(value) + 1);
+                            (*papDataset)[idx]->pElement[i].unit = (CHAR8 *) vos_memAlloc((UINT32) strlen(value) + 1);
                             if ((*papDataset)[idx]->pElement[i].unit == NULL)
                             {
                                 return TRDP_MEM_ERR;
                             }
-                            vos_strncpy((*papDataset)[idx]->pElement[i].unit, value, strlen(value) + 1);
+                            vos_strncpy((*papDataset)[idx]->pElement[i].unit, value, (UINT32) strlen(value) + 1);
                         }
                         else if (vos_strnicmp(attribute, "scale", MAX_TOK_LEN) == 0)
                         {
@@ -842,7 +843,7 @@ TRDP_ERR_T readXmlDatasets (
                         }
                         else if (vos_strnicmp(attribute, "offset", MAX_TOK_LEN) == 0)
                         {
-                            (*papDataset)[idx]->pElement[i].offset = valueInt;
+                            (*papDataset)[idx]->pElement[i].offset = (INT32) valueInt;
                         }
                     }
                     (*papDataset)[idx]->numElement++;
@@ -873,38 +874,38 @@ TRDP_ERR_T readXmlDatasets (
  *
  */
 EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
-                                       const CHAR8             *pFileName,
-                                       TRDP_XML_DOC_HANDLE_T   *pDocHnd
-                                       )
+    const CHAR8             *pFileName,
+    TRDP_XML_DOC_HANDLE_T   *pDocHnd
+    )
 {
     /*  Check file name */
     if (!pFileName || strlen(pFileName) == 0)
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     /* Check parameters */
     if (!pDocHnd)
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     /*  Set handle pointers to NULL */
     memset(pDocHnd, 0, sizeof(TRDP_XML_DOC_HANDLE_T));
-    
+
     pDocHnd->pXmlDocument = (XML_HANDLE_T *) vos_memAlloc(sizeof(XML_HANDLE_T));
     if (pDocHnd->pXmlDocument == NULL)
     {
         return TRDP_MEM_ERR;
     }
-    
+
     /*  Read XML file  */
     if (trdp_XMLOpen(pDocHnd->pXmlDocument, pFileName))
     {
-        vos_printLog(VOS_LOG_ERROR, "Prepare XML doc: failed to open XML file\n");
+        vos_printLogStr(VOS_LOG_ERROR, "Prepare XML doc: failed to open XML file\n");
         return TRDP_PARAM_ERR;
     }
-    
+
     return TRDP_NO_ERR;
 }
 
@@ -916,18 +917,18 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
  *
  */
 EXT_DECL void tau_freeXmlDoc (
-                              TRDP_XML_DOC_HANDLE_T *pDocHnd)
+    TRDP_XML_DOC_HANDLE_T *pDocHnd)
 {
     /*  Check parameter */
     if (!pDocHnd)
     {
         return;
     }
-    
+
     trdp_XMLClose(pDocHnd->pXmlDocument);
-    
+
     vos_memFree(pDocHnd->pXmlDocument);
-    
+
     pDocHnd->pXmlDocument = NULL;
 }
 
@@ -949,21 +950,21 @@ EXT_DECL void tau_freeXmlDoc (
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
-                                                const TRDP_XML_DOC_HANDLE_T *pDocHnd,
-                                                const CHAR8                 *pIfName,
-                                                TRDP_PROCESS_CONFIG_T       *pProcessConfig,
-                                                TRDP_PD_CONFIG_T            *pPdConfig,
-                                                TRDP_MD_CONFIG_T            *pMdConfig,
-                                                UINT32                      *pNumExchgPar,
-                                                TRDP_EXCHG_PAR_T            * *ppExchgPar
-                                                )
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    const CHAR8                 *pIfName,
+    TRDP_PROCESS_CONFIG_T       *pProcessConfig,
+    TRDP_PD_CONFIG_T            *pPdConfig,
+    TRDP_MD_CONFIG_T            *pMdConfig,
+    UINT32                      *pNumExchgPar,
+    TRDP_EXCHG_PAR_T            * *ppExchgPar
+    )
 {
     CHAR8       tag[MAX_TAG_LEN];
     CHAR8       attribute[MAX_TOK_LEN];
     CHAR8       value[MAX_TOK_LEN];
     UINT32      valueInt;
     TRDP_ERR_T  result = TRDP_NO_ERR;
-    
+
     /*  Check parameters    */
     if (!pDocHnd || !pIfName || !pNumExchgPar || !ppExchgPar)
     {
@@ -973,17 +974,17 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
     {
         return TRDP_PARAM_ERR;
     }
-    
+
     trdp_XMLRewind(pDocHnd->pXmlDocument);
-    
+
     /* Set default values */
     *pNumExchgPar   = 0;
     *ppExchgPar     = NULL;
-    
+
     setDefaultInterfaceValues(pProcessConfig, pPdConfig, pMdConfig);
-    
+
     trdp_XMLEnter(pDocHnd->pXmlDocument);
-    
+
     if (trdp_XMLSeekStartTag(pDocHnd->pXmlDocument, "device") == 0) /* Optional */
     {
         if (pProcessConfig != NULL)
@@ -1000,25 +1001,25 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                 }
             }
         }
-        
+
         trdp_XMLEnter(pDocHnd->pXmlDocument);
-        
+
         /* Iterate thru <device> */
         while (trdp_XMLSeekStartTagAny(pDocHnd->pXmlDocument, tag, MAX_TAG_LEN) == 0)
         {
             if (vos_strnicmp(tag, "bus-interface-list", MAX_TAG_LEN) == 0)
             {
                 int foundIdx = 0;
-                
+
                 trdp_XMLEnter(pDocHnd->pXmlDocument);
-                
+
                 /* Iterate thru <bus-interface-list>,
                  find the first that matches ifName, if set */
-                
+
                 while (trdp_XMLSeekStartTag(pDocHnd->pXmlDocument, "bus-interface") == 0)
                 {
                     UINT32 idx = 0, count = 0;
-                    
+
                     /* find the interface, if its name was supplied, otherwise take the first one which was defined */
                     if (pIfName != NULL && strlen(pIfName))
                     {
@@ -1036,17 +1037,17 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                             continue;
                         }
                     }
-                    
+
                     trdp_XMLEnter(pDocHnd->pXmlDocument);
-                    
+
                     /* find out how many telegrams are defined before hand */
-                    
-                    count = trdp_XMLCountStartTag(pDocHnd->pXmlDocument, "telegram");
-                    
+
+                    count = (UINT32) trdp_XMLCountStartTag(pDocHnd->pXmlDocument, "telegram");
+
                     if (count > 0)
                     {
                         *ppExchgPar = (TRDP_EXCHG_PAR_T *)vos_memAlloc(count * sizeof(TRDP_EXCHG_PAR_T));
-                        
+
                         if (*ppExchgPar == NULL)
                         {
                             vos_printLog(VOS_LOG_ERROR,
@@ -1055,7 +1056,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                             return TRDP_MEM_ERR;
                         }
                     }
-                    
+
                     while (trdp_XMLSeekStartTagAny(pDocHnd->pXmlDocument, tag, MAX_TAG_LEN) == 0)
                     {
                         if (vos_strnicmp(tag, "pd-com-parameter", MAX_TOK_LEN) == 0)
@@ -1097,19 +1098,19 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                 }
                                 else if (vos_strnicmp(attribute, "port", MAX_TOK_LEN) == 0)
                                 {
-                                    pPdConfig->port = valueInt;
+                                    pPdConfig->port = (UINT16) valueInt;
                                 }
                                 else if (vos_strnicmp(attribute, "ttl", MAX_TOK_LEN) == 0)
                                 {
-                                    pPdConfig->sendParam.ttl = valueInt;
+                                    pPdConfig->sendParam.ttl = (UINT8) valueInt;
                                 }
                                 else if (vos_strnicmp(attribute, "qos", MAX_TOK_LEN) == 0)
                                 {
-                                    pPdConfig->sendParam.qos = valueInt;
+                                    pPdConfig->sendParam.qos = (UINT8) valueInt;
                                 }
                             }
                         }
-                        
+
                         if (vos_strnicmp(tag, "md-com-parameter", MAX_TAG_LEN) == 0)
                         {
                             while (trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &valueInt,
@@ -1141,11 +1142,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                 }
                                 else if (vos_strnicmp(attribute, "udp-port", MAX_TOK_LEN) == 0)
                                 {
-                                    pMdConfig->udpPort = valueInt;
+                                    pMdConfig->udpPort = (UINT16) valueInt;
                                 }
                                 else if (vos_strnicmp(attribute, "tcp-port", MAX_TOK_LEN) == 0)
                                 {
-                                    pMdConfig->tcpPort = valueInt;
+                                    pMdConfig->tcpPort = (UINT16) valueInt;
                                 }
 #ifdef TRDP_RETRIES
                                 else if (vos_strnicmp(attribute, "retries", MAX_TOK_LEN) == 0)
@@ -1155,11 +1156,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
 #endif
                                 else if (vos_strnicmp(attribute, "ttl", MAX_TOK_LEN) == 0)
                                 {
-                                    pMdConfig->sendParam.ttl = valueInt;
+                                    pMdConfig->sendParam.ttl = (UINT8)valueInt;
                                 }
                                 else if (vos_strnicmp(attribute, "qos", MAX_TOK_LEN) == 0)
                                 {
-                                    pMdConfig->sendParam.qos = valueInt;
+                                    pMdConfig->sendParam.qos = (UINT8) valueInt;
                                 }
                                 else if (vos_strnicmp(attribute, "num-sessions", MAX_TOK_LEN) == 0)
                                 {
@@ -1179,7 +1180,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                 }
                             }
                         }
-                        
+
                         if (vos_strnicmp(tag, "trdp-process", MAX_TAG_LEN) == 0 && pProcessConfig != NULL)
                         {
                             while (trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &valueInt,
@@ -1214,7 +1215,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                         {
                             trdp_XMLEnter(pDocHnd->pXmlDocument);
                             result = readTelegramDef(pDocHnd->pXmlDocument, &(*ppExchgPar)[idx]);
-                            //dbgPrint(1, &(*ppExchgPar)[idx]);
+                            /* dbgPrint(1, &(*ppExchgPar)[idx]); */
                             trdp_XMLLeave(pDocHnd->pXmlDocument);
                             if (result != TRDP_NO_ERR)
                             {
@@ -1231,7 +1232,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
         trdp_XMLLeave(pDocHnd->pXmlDocument);
     }
     trdp_XMLLeave(pDocHnd->pXmlDocument);
-    
+
     return result;
 }
 
@@ -1243,17 +1244,17 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
  *
  */
 EXT_DECL void tau_freeTelegrams (
-                                 UINT32              numExchgPar,
-                                 TRDP_EXCHG_PAR_T    *pExchgPar)
+    UINT32              numExchgPar,
+    TRDP_EXCHG_PAR_T    *pExchgPar)
 {
     UINT32 idxEP, i;
-    
+
     /*  Check parameters    */
     if (numExchgPar == 0 || pExchgPar == NULL)
     {
         return;
     }
-    
+
     /*  Iterate over all exchange parameters    */
     for (idxEP = 0; idxEP < numExchgPar; idxEP++)
     {
@@ -1262,12 +1263,12 @@ EXT_DECL void tau_freeTelegrams (
         {
             vos_memFree(pExchgPar[idxEP].pMdPar);
         }
-        
+
         if (pExchgPar[idxEP].pPdPar)
         {
             vos_memFree(pExchgPar[idxEP].pPdPar);
         }
-        
+
         /*  vos_memFree array of destinations  */
         if (pExchgPar[idxEP].destCnt)
         {
@@ -1320,9 +1321,9 @@ EXT_DECL void tau_freeTelegrams (
             /*  Free sources array  */
             vos_memFree(pExchgPar[idxEP].pSrc);
         }
-        
+
     }
-    
+
     /*  Free array of TRDP_EXCHG_PAR_T structures   */
     vos_memFree(pExchgPar);
 }
@@ -1345,32 +1346,32 @@ EXT_DECL void tau_freeTelegrams (
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
-                                             const TRDP_XML_DOC_HANDLE_T *pDocHnd,
-                                             TRDP_MEM_CONFIG_T           *pMemConfig,
-                                             TRDP_DBG_CONFIG_T           *pDbgConfig,
-                                             UINT32                      *pNumComPar,
-                                             TRDP_COM_PAR_T              * *ppComPar,
-                                             UINT32                      *pNumIfConfig,
-                                             TRDP_IF_CONFIG_T            * *ppIfConfig
-                                             )
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    TRDP_MEM_CONFIG_T           *pMemConfig,
+    TRDP_DBG_CONFIG_T           *pDbgConfig,
+    UINT32                      *pNumComPar,
+    TRDP_COM_PAR_T              * *ppComPar,
+    UINT32                      *pNumIfConfig,
+    TRDP_IF_CONFIG_T            * *ppIfConfig
+    )
 {
     CHAR8   tag[MAX_TAG_LEN];
     CHAR8   attribute[MAX_TOK_LEN];
     CHAR8   value[MAX_TOK_LEN];
     UINT32  valueInt;
-    
+
     trdp_XMLRewind(pDocHnd->pXmlDocument);
-    
+
     /*  Default all parameters    */
     setDefaultDeviceValues(pMemConfig, pDbgConfig, pNumComPar, ppComPar, pNumIfConfig, ppIfConfig);
-    
+
     trdp_XMLEnter(pDocHnd->pXmlDocument);
-    
+
     if (trdp_XMLSeekStartTag(pDocHnd->pXmlDocument, "device") == 0) /* Optional */
     {
-        
+
         trdp_XMLEnter(pDocHnd->pXmlDocument);
-        
+
         while (trdp_XMLSeekStartTagAny(pDocHnd->pXmlDocument, tag, MAX_TAG_LEN) == 0)
         {
             if (vos_strnicmp(tag, "device-configuration", MAX_TAG_LEN) == 0)
@@ -1396,7 +1397,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                         UINT32          preAlloc    = 0;
                         int             i;
                         XML_TOKEN_T     found;
-                        
+
                         found = trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &sizeValue, value);
                         if (found == TOK_ATTRIBUTE && vos_strnicmp(attribute, "size", MAX_TOK_LEN) == 0)
                         {
@@ -1457,16 +1458,16 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
             {
                 UINT32 count = 0;
                 trdp_XMLEnter(pDocHnd->pXmlDocument);
-                
-                count = trdp_XMLCountStartTag(pDocHnd->pXmlDocument, "com-parameter");
-                
+
+                count = (UINT32) trdp_XMLCountStartTag(pDocHnd->pXmlDocument, "com-parameter");
+
                 *ppComPar = (TRDP_COM_PAR_T *)vos_memAlloc(count * sizeof(TRDP_COM_PAR_T));
-                
+
                 if (*ppComPar != NULL)
                 {
                     UINT32 i;
                     *pNumComPar = count;
-                    
+
                     /* Read the com params */
                     for (i = 0; i < count && trdp_XMLSeekStartTag(pDocHnd->pXmlDocument, "com-parameter") == 0; i++)
                     {
@@ -1479,11 +1480,11 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                             }
                             else if (vos_strnicmp(attribute, "qos", MAX_TOK_LEN) == 0)
                             {
-                                (*ppComPar)[i].sendParam.qos = valueInt;
+                                (*ppComPar)[i].sendParam.qos = (UINT8) valueInt;
                             }
                             else if (vos_strnicmp(attribute, "ttl", MAX_TOK_LEN) == 0)
                             {
-                                (*ppComPar)[i].sendParam.ttl = valueInt;
+                                (*ppComPar)[i].sendParam.ttl = (UINT8) valueInt;
                             }
 #ifdef TRDP_RETRIES
                             else if (vos_strnicmp(attribute, "retries", MAX_TOK_LEN) == 0)
@@ -1500,16 +1501,16 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
             {
                 UINT32 count = 0;
                 trdp_XMLEnter(pDocHnd->pXmlDocument);
-                
-                count = trdp_XMLCountStartTag(pDocHnd->pXmlDocument, "bus-interface");
-                
+
+                count = (UINT32) trdp_XMLCountStartTag(pDocHnd->pXmlDocument, "bus-interface");
+
                 *ppIfConfig = (TRDP_IF_CONFIG_T *)vos_memAlloc(count * sizeof(TRDP_IF_CONFIG_T));
-                
+
                 if (*ppIfConfig != NULL)
                 {
                     UINT32 i;
                     *pNumIfConfig = count;
-                    
+
                     /* Read the interface params */
                     for (i = 0; i < count && trdp_XMLSeekStartTag(pDocHnd->pXmlDocument, "bus-interface") == 0; i++)
                     {
@@ -1518,7 +1519,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                         {
                             if (vos_strnicmp(attribute, "network-id", MAX_TOK_LEN) == 0)
                             {
-                                (*ppIfConfig)[i].networkId = valueInt;
+                                (*ppIfConfig)[i].networkId = (UINT8) valueInt;
                             }
                             else if (vos_strnicmp(attribute, "name", MAX_TOK_LEN) == 0)
                             {
@@ -1540,9 +1541,9 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
         }
         trdp_XMLLeave(pDocHnd->pXmlDocument);
     }
-    
+
     trdp_XMLLeave(pDocHnd->pXmlDocument);
-    
+
     return TRDP_NO_ERR;
 }
 
@@ -1563,12 +1564,12 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
  *
  */
 EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
-                                              const TRDP_XML_DOC_HANDLE_T *pDocHnd,
-                                              UINT32                      *pNumComId,
-                                              TRDP_COMID_DSID_MAP_T       * *ppComIdDsIdMap,
-                                              UINT32                      *pNumDataset,
-                                              apTRDP_DATASET_T            *apDataset
-                                              )
+    const TRDP_XML_DOC_HANDLE_T *pDocHnd,
+    UINT32                      *pNumComId,
+    TRDP_COMID_DSID_MAP_T       * *ppComIdDsIdMap,
+    UINT32                      *pNumDataset,
+    apTRDP_DATASET_T            *apDataset
+    )
 {
     TRDP_ERR_T err = readXmlDatasetMap(pDocHnd->pXmlDocument, pNumComId, ppComIdDsIdMap);
     if (err == TRDP_NO_ERR)
@@ -1593,19 +1594,19 @@ EXT_DECL TRDP_ERR_T tau_readXmlDatasetConfig (
  *
  */
 EXT_DECL void tau_freeXmlDatasetConfig (
-                                        UINT32                  numComId,
-                                        TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,
-                                        UINT32                  numDataset,
-                                        TRDP_DATASET_T          * *ppDataset)
+    UINT32                  numComId,
+    TRDP_COMID_DSID_MAP_T   *pComIdDsIdMap,
+    UINT32                  numDataset,
+    TRDP_DATASET_T          * *ppDataset)
 {
     UINT32 i, j;
-    
+
     /*  Mapping between ComId and DatasetId   */
     if (numComId > 0 && pComIdDsIdMap != NULL)
     {
         vos_memFree(pComIdDsIdMap);
     }
-    
+
     /*  Dataset definitions   */
     if (numDataset > 0 && ppDataset != NULL)
     {

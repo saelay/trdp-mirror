@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-05-04: Ticket #117: PD Status packet is not sent on request
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
  */
@@ -179,7 +180,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr; /* Filter IP address           */
         pStatistics[lIndex].callBack    = (UINT32) iter->pfCbFunction;  /* call back function if used      */
         pStatistics[lIndex].userRef     = (UINT32) iter->pUserRef;      /* user reference function if used */
-        pStatistics[lIndex].timeout     = (UINT32) iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
+        pStatistics[lIndex].timeout     = (UINT32) iter->interval.tv_usec + (UINT32) iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */
         pStatistics[lIndex].toBehav     = iter->toBehavior;     /* Behavior at time-out    */
         pStatistics[lIndex].numRecv     = iter->numRxTx;        /* Number of packets received for this subscription.  */
@@ -235,7 +236,7 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
                                                                                         1 = Follower
                                                                                         0 = Leader                 */
 
-        pStatistics[lIndex].cycle = (UINT32) iter->interval.tv_usec + iter->interval.tv_sec * 1000000;
+        pStatistics[lIndex].cycle = (UINT32) iter->interval.tv_usec + (UINT32)iter->interval.tv_sec * 1000000;
         /* Interval/cycle in us. 0 = No time-out supervision */
         pStatistics[lIndex].numSend = iter->numRxTx;            /* Number of packets sent for this publisher.        */
         pStatistics[lIndex].numPut  = iter->updPkts;            /* Updated packets (via put)                         */
@@ -462,8 +463,8 @@ void    trdp_UpdateStats (
 
     /*  Compute statistics from old uptime and old statistics values by maintaining the offset */
     diff = appHandle->stats.upTime - appHandle->stats.statisticTime;
-    appHandle->stats.upTime         = temp.tv_sec;              /* round down */
-    appHandle->stats.statisticTime  = temp.tv_sec - diff;       /* round down */
+    appHandle->stats.upTime         = (TIMEDATE32) temp.tv_sec;         /* will never be up for more than 139 years! */
+    appHandle->stats.statisticTime  = (TIMEDATE32) temp.tv_sec - diff;  /* round down */
 
 
     /*  Update memory statsp    */
@@ -611,5 +612,5 @@ void    trdp_pdPrepareStats (
     pPacket->dataSize = sizeof(TRDP_STATISTICS_T);
 
     /* mark the data as valid */
-    pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~TRDP_INVALID_DATA);
+    pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_INVALID_DATA);
 }

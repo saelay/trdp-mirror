@@ -199,7 +199,7 @@ void print_stats (
 
     printf("\n--------------------\n");
     printf("version:        %u\n", pData->version);
-    printf("timestamp:      %u:%u\n", pData->timeStamp.tv_sec, pData->timeStamp.tv_usec);
+    printf("timestamp:      %ld:%u\n", pData->timeStamp.tv_sec, pData->timeStamp.tv_usec);
     printf("upTime:         %u\n", pData->upTime);
     printf("statisticTime:  %u\n", pData->statisticTime);
     printf("ownIpAddr:      %u\n", pData->ownIpAddr);

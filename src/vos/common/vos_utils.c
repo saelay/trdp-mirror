@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-10: Ticket #114 SC-32
  *      BL 2016-02-10: ifdef DEBUG for some functions
  *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
@@ -219,7 +220,7 @@ static BOOL8        sIsBigEndian = FALSE;
  */
 static void vos_printStructSizes ()
 {
-    vos_printLog(VOS_LOG_DBG, "Size(in Bytes) of\n");
+    vos_printLogStr(VOS_LOG_DBG, "Size(in Bytes) of\n");
     vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SESSION_T", sizeof(TRDP_SESSION_T));
     vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SOCKETS_T", sizeof(TRDP_SOCKETS_T));
     vos_printLog(VOS_LOG_DBG, "\t%-22s:\t%lu\n", "TRDP_SEQ_CNT_LIST_T", sizeof(TRDP_SEQ_CNT_LIST_T));
@@ -298,7 +299,7 @@ VOS_ERR_T vos_initRuntimeConsts (void)
     if (sIsBigEndian == TRUE)
 #endif
     {
-        vos_printLog(VOS_LOG_ERROR, "Endianess is not set correctly!\n");
+        vos_printLogStr(VOS_LOG_ERROR, "Endianess is not set correctly!\n");
     }
 
     sAlignINT16             = (INT8 *) &vAlignTest.word - (INT8 *) &vAlignTest.byte3;
@@ -451,7 +452,7 @@ UINT32 vos_sc32 (
     const UINT8 *pData,
     UINT32      dataLen)
 {
-    
+
     UINT32 i;
     for (i = 0; i < dataLen; i++)
     {
@@ -466,7 +467,7 @@ UINT32 vos_sc32 (
  *
  *  @retval             TRUE if big endian
  */
-INLINE BOOL8 vos_isBigEndian (void)
+static INLINE BOOL8 vos_isBigEndian (void)
 {
     return sIsBigEndian;
 }

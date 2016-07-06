@@ -18,6 +18,7 @@
  * $Id$
  *
  * Changes:
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-02-10: Debug print: tabs before size output
  *      BL 2012-12-03: ID 1: "using uninitialized PD_ELE_T.pullIpAddress variable"
  *                     ID 2: "uninitialized PD_ELE_T newPD->pNext in tlp_subscribe()"
@@ -198,7 +199,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
     /*  Create the memory mutex   */
     if (vos_mutexLocalCreate(&gMem.mutex) != VOS_NO_ERR)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_memInit Mutex creation failed\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_memInit Mutex creation failed\n");
         return VOS_MUTEX_ERR;
     }
 
@@ -265,7 +266,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
         {
             gMem.memCnt.preAlloc[i] = 0;
         }
-        vos_printLog(VOS_LOG_INFO, "vos_memInit() Pre-Allocation disabled\n");
+        vos_printLogStr(VOS_LOG_INFO, "vos_memInit() Pre-Allocation disabled\n");
     }
 
     minSize = 0;
@@ -325,7 +326,7 @@ EXT_DECL void vos_memDelete (
 {
     if (pMemoryArea != NULL && pMemoryArea != gMem.pArea)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_memDelete() ERROR wrong pointer/parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_memDelete() ERROR wrong pointer/parameter\n");
     }
 
     /* we will nevertheless clear the memory area because it makes no sence to report to the application... */
@@ -367,7 +368,7 @@ EXT_DECL UINT8 *vos_memAlloc (
         {
             memset(p, 0, size);
         }
-        vos_printLog(VOS_LOG_DBG, "vos_memAlloc() %p, size\t%u\n", p, size);
+        vos_printLog(VOS_LOG_DBG, "vos_memAlloc() %p, size\t%u\n", (void *) p, size);
 
         return p;
     }
@@ -398,7 +399,7 @@ EXT_DECL UINT8 *vos_memAlloc (
     {
         gMem.memCnt.allocErrCnt++;
 
-        vos_printLog(VOS_LOG_ERROR, "vos_memAlloc can't get semaphore\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_memAlloc can't get semaphore\n");
 
         return NULL;
     }
@@ -452,7 +453,7 @@ EXT_DECL UINT8 *vos_memAlloc (
         /* Release semaphore */
         if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
         {
-            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLogStr(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
 
         if (pBlock != NULL)
@@ -470,7 +471,10 @@ EXT_DECL UINT8 *vos_memAlloc (
             memset((UINT8 *) pBlock + sizeof(MEM_BLOCK_T), 0, blockSize);
 
             /* Return pointer to data area, not the memory block itself */
-            vos_printLog(VOS_LOG_DBG, "vos_memAlloc() %p, size\t%u\n", ((UINT8 *) pBlock + sizeof(MEM_BLOCK_T)), size);
+            vos_printLog(VOS_LOG_DBG,
+                         "vos_memAlloc() %p, size\t%u\n",
+                         (void *) ((UINT8 *) pBlock + sizeof(MEM_BLOCK_T)),
+                         size);
             return (UINT8 *) pBlock + sizeof(MEM_BLOCK_T);
         }
         else
@@ -500,7 +504,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
     if (pMemBlock == NULL)
     {
         gMem.memCnt.freeErrCnt++;
-        vos_printLog(VOS_LOG_ERROR, "vos_memFree() ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_memFree() ERROR NULL pointer\n");
         return;
     }
 
@@ -517,7 +521,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         ((UINT8 *)pMemBlock >= (gMem.pArea + gMem.memSize)))
     {
         gMem.memCnt.freeErrCnt++;
-        vos_printLog(VOS_LOG_ERROR, "vos_memFree ERROR returned memory not within allocated memory\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_memFree ERROR returned memory not within allocated memory\n");
         return;
     }
 
@@ -526,7 +530,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
     {
         gMem.memCnt.freeErrCnt++;
 
-        vos_printLog(VOS_LOG_ERROR, "vos_memFree can't get semaphore\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_memFree can't get semaphore\n");
     }
     else
     {
@@ -547,7 +551,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         {
             gMem.memCnt.freeErrCnt++;
 
-            vos_printLog(VOS_LOG_ERROR, "vos_memFree illegal sized memory\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_memFree illegal sized memory\n");
         }
         else
         {
@@ -566,7 +570,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
         /* Release semaphore */
         if (vos_mutexUnlock(&gMem.mutex) != VOS_NO_ERR)
         {
-            vos_printLog(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
+            vos_printLogStr(VOS_LOG_INFO, "vos_mutexUnlock() failed\n");
         }
     }
 }
@@ -792,7 +796,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
         || (pQueueHandle == NULL)
         || (maxNoOfMsg == 0))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_queueCreate() ERROR invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
     else
@@ -800,7 +804,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
         (*pQueueHandle) = (VOS_QUEUE_T) vos_memAlloc(sizeof(struct VOS_QUEUE));
         if (*pQueueHandle == NULL)
         {
-            vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
             retVal = VOS_MEM_ERR;
         }
         else
@@ -808,7 +812,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
             retVal = vos_semaCreate(&((*pQueueHandle)->semaphore), VOS_SEMA_EMPTY);
             if (retVal != VOS_NO_ERR)
             {
-                vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not create semaphore\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not create semaphore\n");
                 retVal = VOS_SEMA_ERR;
             }
             else
@@ -816,7 +820,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                 retVal = vos_mutexCreate(&((*pQueueHandle)->mutex));
                 if (retVal != VOS_NO_ERR)
                 {
-                    vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not create mutex\n");
+                    vos_printLogStr(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not create mutex\n");
                     retVal = VOS_MUTEX_ERR;
                 }
                 else
@@ -824,7 +828,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                     retVal = vos_mutexLock((*pQueueHandle)->mutex);
                     if (retVal != VOS_NO_ERR)
                     {
-                        vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not lock mutex\n");
+                        vos_printLogStr(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not lock mutex\n");
                         retVal = VOS_MUTEX_ERR;
                     }
                     else
@@ -840,7 +844,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                             (struct VOS_QUEUE_ELEM *)vos_memAlloc(maxNoOfMsg * sizeof(struct VOS_QUEUE_ELEM));
                         if ((*pQueueHandle)->pQueue == NULL)
                         {
-                            vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
+                            vos_printLogStr(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not allocate memory\n");
                             retVal = VOS_MEM_ERR;
                         }
                         else
@@ -850,7 +854,7 @@ EXT_DECL VOS_ERR_T vos_queueCreate (
                             retVal = vos_mutexUnlock((*pQueueHandle)->mutex);
                             if (retVal != VOS_NO_ERR)
                             {
-                                vos_printLog(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not lock mutex\n");
+                                vos_printLogStr(VOS_LOG_ERROR, "vos_queueCreate() ERROR could not lock mutex\n");
                                 retVal = VOS_MUTEX_ERR;
                             }
                             else
@@ -895,7 +899,7 @@ EXT_DECL VOS_ERR_T vos_queueSend (
         || (size == 0)
         || (queueHandle->magicNumber != cQueueMagic))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_queueSend() ERROR invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
     else
@@ -903,7 +907,7 @@ EXT_DECL VOS_ERR_T vos_queueSend (
         err = vos_mutexLock(queueHandle->mutex);
         if (err != VOS_NO_ERR)
         {
-            vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR could not lock mutex\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_queueSend() ERROR could not lock mutex\n");
             retVal = VOS_MUTEX_ERR;
         }
         else
@@ -912,7 +916,7 @@ EXT_DECL VOS_ERR_T vos_queueSend (
             if ((queueHandle->lastElem + 1 == queueHandle->firstElem)
                 || ((queueHandle->lastElem == queueHandle->maxNoOfMsg - 1) && (queueHandle->firstElem == 0)))
             {
-                vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR Queue is full\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_queueSend() ERROR Queue is full\n");
                 retVal = VOS_QUEUE_FULL_ERR;
             }
             else
@@ -962,7 +966,7 @@ EXT_DECL VOS_ERR_T vos_queueSend (
             err = vos_mutexUnlock(queueHandle->mutex);
             if (err != VOS_NO_ERR)
             {
-                vos_printLog(VOS_LOG_ERROR, "vos_queueSend() ERROR could not unlock mutex\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_queueSend() ERROR could not unlock mutex\n");
                 retVal = VOS_MUTEX_ERR;
             }
             else if (giveSemaphore == TRUE)
@@ -1006,7 +1010,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
     if ((queueHandle == (VOS_QUEUE_T) NULL)
         || (queueHandle->magicNumber != cQueueMagic))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_queueReceive() ERROR invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
     else
@@ -1017,7 +1021,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
         {
             if (usTimeout != 0)
             {
-                vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() could not take semaphore\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_queueReceive() could not take semaphore\n");
             }
             *ppData = NULL;
             *pSize  = 0;
@@ -1028,7 +1032,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
             err = vos_mutexLock(queueHandle->mutex);
             if (err != VOS_NO_ERR)
             {
-                vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not lock mutex\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not lock mutex\n");
                 retVal = VOS_MUTEX_ERR;
             }
             else
@@ -1055,7 +1059,7 @@ EXT_DECL VOS_ERR_T vos_queueReceive (
                 err = vos_mutexUnlock(queueHandle->mutex);
                 if (err != VOS_NO_ERR)
                 {
-                    vos_printLog(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not unlock mutex\n");
+                    vos_printLogStr(VOS_LOG_ERROR, "vos_queueReceive() ERROR could not unlock mutex\n");
                     retVal = VOS_MUTEX_ERR;
                 }
                 else
@@ -1090,7 +1094,7 @@ EXT_DECL VOS_ERR_T vos_queueDestroy (
     if ((queueHandle == (VOS_QUEUE_T) NULL)
         || (queueHandle->magicNumber != cQueueMagic))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_queueDestroy() ERROR invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_queueDestroy() ERROR invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
     else
@@ -1098,7 +1102,7 @@ EXT_DECL VOS_ERR_T vos_queueDestroy (
         err = vos_mutexLock(queueHandle->mutex);
         if (err != VOS_NO_ERR)
         {
-            vos_printLog(VOS_LOG_ERROR, "vos_queueDestroy() ERROR could not lock mutex\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_queueDestroy() ERROR could not lock mutex\n");
             /* retVal = VOS_MUTEX_ERR; BL: never read */
         }
         else
@@ -1111,7 +1115,7 @@ EXT_DECL VOS_ERR_T vos_queueDestroy (
         err = vos_mutexUnlock(queueHandle->mutex);
         if (err != VOS_NO_ERR)
         {
-            vos_printLog(VOS_LOG_ERROR, "vos_queueDestroy() ERROR could not unlock mutex\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_queueDestroy() ERROR could not unlock mutex\n");
             retVal = VOS_MUTEX_ERR;
         }
         else

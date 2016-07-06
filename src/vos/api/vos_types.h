@@ -10,11 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
+ *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *
  */
 
@@ -129,7 +131,7 @@ typedef double REAL64;
 #ifdef WIN32
     #define INLINE  _inline
 #elif defined (VXWORKS)
-    #define INLINE __inline__
+    #define INLINE  __inline__
 #elif defined(__GNUC__)
     #define INLINE  inline
 #else
@@ -149,8 +151,8 @@ typedef double REAL64;
 #define AV_UNDEFINED    0x03
 
 /** Directions/Orientations */
-#define TR_DIR1         0x01
-#define TR_DIR2         0x02
+#define TR_DIR1     0x01
+#define TR_DIR2     0x02
 
 /*    Compiler dependent alignment options    */
 #undef GNU_PACKED
@@ -215,16 +217,23 @@ typedef struct
     UINT8   upd;                /**< Update     - incremented for bug fixes            */
     UINT8   evo;                /**< Evolution  - incremented for build                */
 } VOS_VERSION_T;
-    
-/**    Timer value compatible with timeval / select.
- * Relative or absolute date, depending on usage
+
+/** Timer value compatible with timeval / select.
+ *      Relative or absolute date, depending on usage
+ *      Assume 32 Bit system, if not defined
  */
+#ifndef _STRUCT_TIMEVAL
 typedef struct
 {
     UINT32  tv_sec;         /**< full seconds                                     */
     INT32   tv_usec;        /**< Micro seconds (max. value 999999)                */
 } VOS_TIME_T;
 
+#else
+
+typedef struct timeval VOS_TIME_T;
+
+#endif
 
 #ifndef TIMEDATE32
 #define TIMEDATE32  UINT32

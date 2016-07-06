@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-01: Setting correct multicast TTL for PDs
  *      BL 2014-08-25: Ticket #57+58: Padding / zero bytes trailing MD & PD packets fixed
  *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
@@ -52,7 +53,7 @@ void printSocketUsage (
     TRDP_SOCKETS_T iface[])
 {
     INT32 lIndex = 0;
-    vos_printLog(VOS_LOG_DBG, "------- Socket usage -------\n");
+    vos_printLogStr(VOS_LOG_DBG, "------- Socket usage -------\n");
     for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
     {
         if (iface[lIndex].sock == -1)
@@ -67,7 +68,7 @@ void printSocketUsage (
         vos_printLog(VOS_LOG_DBG, "iface[%u].sendParam.ttl = %u\n", lIndex, iface[lIndex].sendParam.ttl);
         vos_printLog(VOS_LOG_DBG, "iface[%u].rcvMostly = %u\n", lIndex, iface[lIndex].rcvMostly);
     }
-    vos_printLog(VOS_LOG_DBG, "----------------------------\n\n");
+    vos_printLogStr(VOS_LOG_DBG, "----------------------------\n\n");
 }
 
 /**********************************************************************************************************************/
@@ -590,7 +591,7 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  */
 TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCKETS_T          iface[],
-    UINT32                  port,
+    UINT16                  port,
     const TRDP_SEND_PARAM_T *params,
     TRDP_IP_ADDR_T          srcIP,
     TRDP_IP_ADDR_T          mcGroup,
@@ -651,7 +652,7 @@ TRDP_ERR_T  trdp_requestSocket (
                     {
                         if (trdp_SockDelJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
                         {
-                            vos_printLog(VOS_LOG_ERROR, "trdp_SockDelJoin() failed!\n");
+                            vos_printLogStr(VOS_LOG_ERROR, "trdp_SockDelJoin() failed!\n");
                         }
                         continue;   /* No, socket cannot join more MC groups */
                     }
@@ -791,7 +792,7 @@ TRDP_ERR_T  trdp_requestSocket (
                             {
                                 if (trdp_SockAddJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
                                 {
-                                    vos_printLog(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
+                                    vos_printLogStr(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
                                 }
                             }
                         }
@@ -930,7 +931,7 @@ void  trdp_releaseSocket (
                 err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
                 if (err != TRDP_NO_ERR)
                 {
-                    vos_printLog(VOS_LOG_DBG, "Trying to close socket again?\n");
+                    vos_printLogStr(VOS_LOG_DBG, "Trying to close socket again?\n");
                 }
                 else
                 {
@@ -1097,7 +1098,7 @@ int trdp_checkSequenceCounter (
 
     if (pElement == NULL)
     {
-        vos_printLog(VOS_LOG_DBG, "Parameter error\n");
+        vos_printLogStr(VOS_LOG_DBG, "Parameter error\n");
         return -1;
     }
 
@@ -1152,7 +1153,7 @@ int trdp_checkSequenceCounter (
     if (pElement->pSeqCntList->curNoOfEntries >= pElement->pSeqCntList->maxNoOfEntries)
     {
         /* Allocate some more space */
-        UINT32 newSize = 2 * pElement->pSeqCntList->curNoOfEntries;
+        UINT16 newSize = 2 * pElement->pSeqCntList->curNoOfEntries;
         TRDP_SEQ_CNT_LIST_T *newList = (TRDP_SEQ_CNT_LIST_T *) vos_memAlloc(newSize * sizeof(TRDP_SEQ_CNT_ENTRY_T) +
                                                                             sizeof(TRDP_SEQ_CNT_LIST_T));
         if (newList == NULL)

@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-10: Ticket #115 MD: Missing parameter pktFlags in tlm_reply() and tlm_replyQuery()
  *      BL 2016-02-04: Ticket #110: Handling of optional marshalling on sending
  *      BL 2015-12-22: Mutex removed
@@ -65,23 +66,23 @@ static const TRDP_MD_INFO_T cTrdp_md_info_default;
 /***********************************************************************************************************************
  *   Local Functions
  */
-static void trdp_mdUpdatePacket (MD_ELE_T *pElement);
-static void trdp_mdFillStateElement (const TRDP_MSG_T   msgType,
-                                     MD_ELE_T           *pMdElement);
-static void trdp_mdManageSessionId (TRDP_UUID_T pSessionId,
-                                    MD_ELE_T    *pMdElement);
+static void         trdp_mdUpdatePacket (MD_ELE_T *pElement);
+static void         trdp_mdFillStateElement (const TRDP_MSG_T   msgType,
+                                             MD_ELE_T           *pMdElement);
+static void         trdp_mdManageSessionId (TRDP_UUID_T pSessionId,
+                                            MD_ELE_T    *pMdElement);
 
-static TRDP_ERR_T trdp_mdLookupElement (MD_ELE_T                *pinitialMdElement,
-                                        const TRDP_MD_ELE_ST_T  elementState,
-                                        const TRDP_UUID_T       pSessionId,
-                                        MD_ELE_T                * *pretrievedMdElement);
+static TRDP_ERR_T   trdp_mdLookupElement (MD_ELE_T                  *pinitialMdElement,
+                                          const TRDP_MD_ELE_ST_T    elementState,
+                                          const TRDP_UUID_T         pSessionId,
+                                          MD_ELE_T                  * *pretrievedMdElement);
 
-static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
-                                   const TRDP_SESSION_PT    appHandle,
-                                   const TRDP_ERR_T         resultCode);
-static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T          *pElement,
-                                          TRDP_SESSION_PT   appHandle,
-                                          TRDP_ERR_T        *pResult);
+static void         trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
+                                           const TRDP_SESSION_PT    appHandle,
+                                           const TRDP_ERR_T         resultCode);
+static BOOL8        trdp_mdTimeOutStateHandler ( MD_ELE_T           *pElement,
+                                                 TRDP_SESSION_PT    appHandle,
+                                                 TRDP_ERR_T         *pResult);
 static MD_ELE_T     *trdp_mdHandleConfirmReply (TRDP_APP_SESSION_T  appHandle,
                                                 MD_HEADER_T         *pMdItemHeader);
 
@@ -102,7 +103,7 @@ static TRDP_ERR_T   trdp_mdCheck (TRDP_SESSION_PT   appHandle,
                                   UINT32            packetSize,
                                   BOOL8             checkHeaderOnly);
 static TRDP_ERR_T   trdp_mdSendPacket (INT32    mdSock,
-                                       UINT32   port,
+                                       UINT16   port,
                                        MD_ELE_T *pElement);
 static TRDP_ERR_T   trdp_mdRecvTCPPacket (TRDP_SESSION_PT   appHandle,
                                           INT32             mdSock,
@@ -279,8 +280,8 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
                                    const TRDP_SESSION_PT    appHandle,
                                    const TRDP_ERR_T         resultCode)
 {
-    INT32 replyStatus = 0;
-    TRDP_MD_INFO_T theMessage = cTrdp_md_info_default;
+    INT32 replyStatus           = 0;
+    TRDP_MD_INFO_T theMessage   = cTrdp_md_info_default;
 
     if (pMdItem == NULL)
     {
@@ -289,8 +290,10 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
 
     if (pMdItem->pPacket != NULL)
     {
-        replyStatus = vos_ntohl(pMdItem->pPacket->frameHead.replyStatus);
-        theMessage.seqCount     = vos_ntohs(pMdItem->pPacket->frameHead.sequenceCounter);
+        replyStatus             = (INT32) vos_ntohl((UINT32)pMdItem->pPacket->frameHead.replyStatus);
+        theMessage.seqCount     = vos_ntohl(pMdItem->pPacket->frameHead.sequenceCounter); /* Bug: was vos_ntohs!
+                                                                                            Detected thru comp warning!
+                                                                                           */
         theMessage.protVersion  = vos_ntohs(pMdItem->pPacket->frameHead.protocolVersion);
         theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pMdItem->pPacket->frameHead.msgType);
         memcpy(theMessage.sessionId, pMdItem->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
@@ -313,7 +316,7 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
         theMessage.userStatus   = 0;
         theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
     }
-    theMessage.destIpAddr = pMdItem->addr.destIpAddr;
+    theMessage.destIpAddr           = pMdItem->addr.destIpAddr;
     theMessage.numExpReplies        = pMdItem->numExpReplies;
     theMessage.pUserRef             = pMdItem->pUserRef;
     theMessage.numReplies           = pMdItem->numReplies;
@@ -378,12 +381,12 @@ static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T *pElement, TRDP_SESSION_PT ap
 
             if ( pElement->stateEle == TRDP_ST_TX_REQ_W4AP_CONFIRM )
             {
-                vos_printLog(VOS_LOG_ERROR, "MD application confirm timeout\n");
+                vos_printLogStr(VOS_LOG_ERROR, "MD application confirm timeout\n");
                 *pResult = TRDP_APP_CONFIRMTO_ERR;
             }
             else
             {
-                vos_printLog(VOS_LOG_ERROR, "MD application reply timeout\n");
+                vos_printLogStr(VOS_LOG_ERROR, "MD application reply timeout\n");
                 *pResult = TRDP_APP_REPLYTO_ERR;
             }
             break;
@@ -392,7 +395,7 @@ static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T *pElement, TRDP_SESSION_PT ap
             /* TCP handling*/
             if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
             {
-                vos_printLog(VOS_LOG_INFO, "TCP MD reply/confirm timeout\n");
+                vos_printLogStr(VOS_LOG_INFO, "TCP MD reply/confirm timeout\n");
                 pElement->morituri  = TRUE;
                 hasTimedOut         = TRUE;
                 *pResult = TRDP_REPLYTO_ERR;
@@ -407,7 +410,7 @@ static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T *pElement, TRDP_SESSION_PT ap
                 {
                     /* Session is in reception phase */
                     /* Check for Reply timeout */
-                    vos_printLog(VOS_LOG_INFO, "UDP MD reply/confirm timeout\n");
+                    vos_printLogStr(VOS_LOG_INFO, "UDP MD reply/confirm timeout\n");
                     /* The retransmission condition is accd. IEC61375-2-3 A.7.7.1: */
                     /* - UDP only       */
                     /* - Unicast Caller */
@@ -418,7 +421,7 @@ static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T *pElement, TRDP_SESSION_PT ap
                         &&
                         (pElement->pPacket != NULL))
                     {
-                        vos_printLog(VOS_LOG_INFO, "UDP MD start retransmission\n");
+                        vos_printLogStr(VOS_LOG_INFO, "UDP MD start retransmission\n");
                         /* Retransmission will occur upon resetting the state of  */
                         /* this MD_ELE_T item to TRDP_ST_TX_REQUEST_ARM, for ref- */
                         /* erence check the trdp_mdSend function                  */
@@ -599,7 +602,7 @@ static MD_ELE_T *trdp_mdHandleConfirmReply (TRDP_APP_SESSION_T appHandle, MD_HEA
                 /* set element state and indicate that the item has to be removed */
                 iterMD->stateEle    = TRDP_ST_RX_CONF_RECEIVED;
                 iterMD->morituri    = TRUE;
-                vos_printLog(VOS_LOG_INFO, "Received Confirmation, session will be closed!\n");
+                vos_printLogStr(VOS_LOG_INFO, "Received Confirmation, session will be closed!\n");
                 break; /* exit for loop */
             }
             else
@@ -655,8 +658,8 @@ static MD_ELE_T *trdp_mdHandleConfirmReply (TRDP_APP_SESSION_T appHandle, MD_HEA
             }
         } /* end of session matching comparison */
     } /* end of for loop */
-     /* NULL will get returned in case no matching session can be found */
-     /* for the given pMdItemHeader */
+      /* NULL will get returned in case no matching session can be found */
+      /* for the given pMdItemHeader */
     return iterMD;
 }
 
@@ -738,8 +741,8 @@ static void trdp_mdCloseSessions (
                      "Replacing the old socket by the new one (New sock: %d, Index: %d)\n",
                      newSocket, socketIndex);
 
-        appHandle->iface[socketIndex].sock = newSocket;
-        appHandle->iface[socketIndex].rcvMostly = TRUE;
+        appHandle->iface[socketIndex].sock                  = newSocket;
+        appHandle->iface[socketIndex].rcvMostly             = TRUE;
         appHandle->iface[socketIndex].tcpParams.notSend     = FALSE;
         appHandle->iface[socketIndex].type                  = TRDP_SOCK_MD_TCP;
         appHandle->iface[socketIndex].usage                 = 0;
@@ -938,7 +941,7 @@ static void    trdp_mdUpdatePacket (MD_ELE_T *pElement)
  *  @retval         != NULL         error
  */
 static TRDP_ERR_T  trdp_mdSendPacket (INT32     mdSock,
-                                      UINT32    port,
+                                      UINT16    port,
                                       MD_ELE_T  *pElement)
 {
     VOS_ERR_T   err         = VOS_NO_ERR;
@@ -1001,8 +1004,8 @@ static TRDP_ERR_T  trdp_mdSendPacket (INT32     mdSock,
 static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock, MD_ELE_T *pElement)
 {
     /* TCP receiver */
-    TRDP_ERR_T  err = TRDP_NO_ERR;
-    UINT32      size = 0;                       /* Size of the all data read until now */
+    TRDP_ERR_T  err             = TRDP_NO_ERR;
+    UINT32      size            = 0;            /* Size of the all data read until now */
     UINT32      dataSize        = 0;            /* The pending data to read */
     UINT32      socketIndex     = 0;
     UINT32      readSize        = 0;            /* All the data read in this cycle (Header + Data) */
@@ -1028,7 +1031,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
 
     if ( socketIndex >= VOS_MAX_SOCKET_CNT )
     {
-        vos_printLog(VOS_LOG_ERROR, "trdp_mdRecvPacket - Socket index out of range\n");
+        vos_printLogStr(VOS_LOG_ERROR, "trdp_mdRecvPacket - Socket index out of range\n");
         return TRDP_UNKNOWN_ERR;
     }
 
@@ -1072,7 +1075,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
                 }
                 else
                 {
-                    vos_printLog(VOS_LOG_INFO, "TCP MD header check failed\n");
+                    vos_printLogStr(VOS_LOG_INFO, "TCP MD header check failed\n");
                     return TRDP_NODATA_ERR;
                 }
             }
@@ -1098,7 +1101,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
             size        = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
             dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength);
 
-            pElement->dataSize  = dataSize;
+            pElement->dataSize = dataSize;
             dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
             readDataSize    = dataSize;
         }
@@ -1182,7 +1185,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
             if ( appHandle->uncompletedTCP[socketIndex] == NULL )
             {
                 /* vos_memDelete(NULL); */
-                vos_printLog(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_memAlloc() failed\n");
                 return TRDP_MEM_ERR;
             }
 
@@ -1487,7 +1490,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
                                         TRDP_MD_ELE_ST_T    state,
                                         MD_ELE_T            * *pIterMD)
 {
-    UINT32 numOfReceivers = 0;
+    UINT32          numOfReceivers  = 0;
     MD_LIS_ELE_T    *iterListener   = NULL;
     TRDP_ERR_T      result          = TRDP_NO_ERR;
     MD_ELE_T        *iterMD         = NULL;
@@ -1512,14 +1515,14 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
                 (iterMD->addr.mcGroup != 0))  /* discard multicasts anyway */
             {
                 /* discard call immediately */
-                vos_printLog(VOS_LOG_INFO,
-                             "trdp_mdRecv: Repeated request discarded!\n");
+                vos_printLogStr(VOS_LOG_INFO,
+                                "trdp_mdRecv: Repeated request discarded!\n");
                 return result;
             }
             else if ( iterMD->stateEle != TRDP_ST_RX_REPLYQUERY_W4C )
             {
                 /* reply has not been sent - discard immediately */
-                vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Reply not sent, request discarded!\n");
+                vos_printLogStr(VOS_LOG_INFO, "trdp_mdRecv: Reply not sent, request discarded!\n");
                 return result;
             }
             else if (((pH->etbTopoCnt != 0) || (pH->opTrnTopoCnt != 0))
@@ -1537,7 +1540,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
             else
             {
                 /* criteria reched to schedule resending reply message */
-                vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: Restart reply transmission\n");
+                vos_printLogStr(VOS_LOG_INFO, "trdp_mdRecv: Restart reply transmission\n");
                 /* Retransmission will occur upon resetting the state of */
                 /* this MD_ELE_T item to TRDP_ST_TX_REPLYQUERY_ARM, for  */
                 /* reference check the trdp_mdSend function              */
@@ -1609,7 +1612,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
                                            iterListener->addr.opTrnTopoCnt))
             {
                 /* We found a listener, set some values for this new session  */
-                iterMD                      = appHandle->pMDRcvEle;
+                iterMD = appHandle->pMDRcvEle;
                 iterMD->pUserRef            = iterListener->pUserRef;
                 iterMD->pfCbFunction        = iterListener->pfCbFunction;
                 iterMD->stateEle            = state;
@@ -1624,7 +1627,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
                 if ( iterListener->socketIdx == TRDP_INVALID_SOCKET_INDEX ) /* On TCP, listeners have no socket
                    assigned  */
                 {
-                    iterMD->socketIdx = sockIndex;
+                    iterMD->socketIdx = (INT32) sockIndex;
                 }
                 else
                 {
@@ -1689,7 +1692,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         {
             appHandle->stats.udpMd.numNoListener++;
         }
-        vos_printLog(VOS_LOG_INFO, "trdp_mdRecv: No listener found!\n");
+        vos_printLogStr(VOS_LOG_INFO, "trdp_mdRecv: No listener found!\n");
         result = TRDP_NOLIST_ERR;
         /* attempt sending Me, do not worry about issues */
         (void)trdp_mdSendME(appHandle, pH, TRDP_REPLY_NO_REPLIER_INST);
@@ -1743,7 +1746,7 @@ static TRDP_ERR_T trdp_mdSendME (TRDP_SESSION_PT appHandle, MD_HEADER_T *pH, INT
         if ( NULL != pSenderElement )
         {
             memset(pSenderElement, 0, sizeof(MD_ELE_T));
-            pSenderElement->addr.comId = 0;
+            pSenderElement->addr.comId          = 0;
             pSenderElement->addr.srcIpAddr      = mdElement->addr.destIpAddr;
             pSenderElement->addr.destIpAddr     = mdElement->addr.srcIpAddr;
             pSenderElement->addr.mcGroup        = 0;
@@ -1848,12 +1851,12 @@ static TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
     UINT32          sockIndex)
 {
-    TRDP_ERR_T result = TRDP_NO_ERR;
-    TRDP_ERR_T  resForCallback  = TRDP_NO_ERR;
+    TRDP_ERR_T          result          = TRDP_NO_ERR;
+    TRDP_ERR_T          resForCallback  = TRDP_NO_ERR;
     MD_HEADER_T         *pH     = NULL;
     MD_ELE_T            *iterMD = NULL;
     TRDP_MD_ELE_ST_T    state;
-    BOOL8       isTCP = FALSE;
+    BOOL8 isTCP = FALSE;
 
     if (appHandle == NULL)
     {
@@ -1871,7 +1874,7 @@ static TRDP_ERR_T  trdp_mdRecv (
         }
         else
         {
-            vos_printLog(VOS_LOG_ERROR, "trdp_mdRecv - Out of receive buffers!\n");
+            vos_printLogStr(VOS_LOG_ERROR, "trdp_mdRecv - Out of receive buffers!\n");
             return TRDP_MEM_ERR;
         }
     }
@@ -1883,7 +1886,7 @@ static TRDP_ERR_T  trdp_mdRecv (
     }
     else
     {
-        appHandle->pMDRcvEle->pktFlags = (TRDP_FLAGS_T) (appHandle->pMDRcvEle->pktFlags & ~TRDP_FLAGS_TCP);
+        appHandle->pMDRcvEle->pktFlags = (TRDP_FLAGS_T) (appHandle->pMDRcvEle->pktFlags & ~(TRDP_FLAGS_T)TRDP_FLAGS_TCP);
         isTCP = FALSE;
     }
 
@@ -1896,7 +1899,7 @@ static TRDP_ERR_T  trdp_mdRecv (
         {
             vos_memFree(appHandle->pMDRcvEle);
             appHandle->pMDRcvEle = NULL;
-            vos_printLog(VOS_LOG_ERROR, "trdp_mdRecv - Out of receive buffers!\n");
+            vos_printLogStr(VOS_LOG_ERROR, "trdp_mdRecv - Out of receive buffers!\n");
             return TRDP_MEM_ERR;
         }
     }
@@ -2138,7 +2141,7 @@ TRDP_ERR_T  trdp_mdSend (
             /*    In case we're sending on an uninitialized publisher; should never happen. */
             if (iterMD->socketIdx == TRDP_INVALID_SOCKET_INDEX)
             {
-                vos_printLog(VOS_LOG_ERROR, "Sending MD: Socket invalid!\n");
+                vos_printLogStr(VOS_LOG_ERROR, "Sending MD: Socket invalid!\n");
                 /* Try to send the other packets */
             }
             /*    Send the packet if it is not redundant    */
@@ -2247,7 +2250,7 @@ TRDP_ERR_T  trdp_mdSend (
                             /* Update timeout */
                             vos_getTime(&iterMD->timeToGo);
                             vos_addTime(&iterMD->timeToGo, &iterMD->interval);
-                            vos_printLog(VOS_LOG_INFO, "Setting timeout for confirmation!\n");
+                            vos_printLogStr(VOS_LOG_INFO, "Setting timeout for confirmation!\n");
                         }
 
                         switch (iterMD->stateEle)
@@ -2367,9 +2370,9 @@ void trdp_mdCheckPending (
     TRDP_FDS_T          *pFileDesc,
     INT32               *pNoDesc)
 {
-    int lIndex;
-    MD_ELE_T *iterMD;
-    MD_LIS_ELE_T *iterListener;
+    int             lIndex;
+    MD_ELE_T        *iterMD;
+    MD_LIS_ELE_T    *iterListener;
 
     /*    Add the socket to the pFileDesc    */
     if (appHandle->tcpFd.listen_sd != VOS_INVALID_SOCKET)
@@ -2537,7 +2540,7 @@ void  trdp_mdCheckListenSocks (
         noOfDesc = vos_select(highDesc + 1, &rfds, NULL, NULL, &timeOut);
         if (noOfDesc == VOS_INVALID_SOCKET)
         {
-            vos_printLog(VOS_LOG_ERROR, "select() failed\n");
+            vos_printLogStr(VOS_LOG_ERROR, "select() failed\n");
             return;
         }
         pRfds   = &rfds;
@@ -2557,7 +2560,7 @@ void  trdp_mdCheckListenSocks (
         /* Check to see if this is the TCP listening socket */
         /****************************************************/
 
-        /* vos_printLog(VOS_LOG_INFO, " ----- CHECKING READY DESCRIPTORS -----\n"); */
+        /* vos_printLogStr(VOS_LOG_INFO, " ----- CHECKING READY DESCRIPTORS -----\n"); */
         if (appHandle->tcpFd.listen_sd != VOS_INVALID_SOCKET &&
             FD_ISSET(appHandle->tcpFd.listen_sd, (fd_set *)pRfds)) /*lint !e573 signed/unsigned division in macro */
         {
@@ -2579,8 +2582,8 @@ void  trdp_mdCheckListenSocks (
                 TRDP_IP_ADDR_T  newIp;
                 UINT16          read_tcpPort;
 
-                newIp = appHandle->realIP;
-                read_tcpPort = appHandle->mdDefault.tcpPort;
+                newIp           = appHandle->realIP;
+                read_tcpPort    = appHandle->mdDefault.tcpPort;
 
                 err = (TRDP_ERR_T) vos_sockAccept(appHandle->tcpFd.listen_sd,
                                                   &new_sd, &newIp,
@@ -2739,12 +2742,12 @@ void  trdp_mdCheckListenSocks (
             }
             FD_CLR(appHandle->iface[lIndex].sock, (fd_set *)pRfds); /*lint !e502 !e573 signed/unsigned division in macro
                                                                       */
-            err = trdp_mdRecv(appHandle, lIndex);
+            err = trdp_mdRecv(appHandle, (UINT32) lIndex);
 
             /* The receive message is incomplete */
             if (err == TRDP_PACKET_ERR && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
             {
-                vos_printLog(VOS_LOG_INFO, "Incomplete TCP MD received \n");
+                vos_printLogStr(VOS_LOG_INFO, "Incomplete TCP MD received \n");
             }
 
             /* Check if the socket has been closed in the other corner */
@@ -3017,7 +3020,7 @@ static void trdp_mdDetailSenderPacket (const TRDP_MSG_T         msgType,
     pSenderElement->pPacket->frameHead.etbTopoCnt       = vos_htonl(pSenderElement->addr.etbTopoCnt);
     pSenderElement->pPacket->frameHead.opTrnTopoCnt     = vos_htonl(pSenderElement->addr.opTrnTopoCnt);
     pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(pSenderElement->dataSize);
-    pSenderElement->pPacket->frameHead.replyStatus      = vos_htonl(replyStatus);
+    pSenderElement->pPacket->frameHead.replyStatus      = (INT32) vos_htonl((UINT32)replyStatus);
     memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
     pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(mdTimeOut);
     if ( srcURI != NULL )
@@ -3216,7 +3219,7 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T           msgType,
     /* Release mutex */
     if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
     }
 
     return errv;
@@ -3328,8 +3331,8 @@ TRDP_ERR_T trdp_mdCall (
         {
             pSenderElement->numRetriesMax = maxNumRetries;
         } /* no else needed as memset has set all memory to zero */
-         /* Prepare element data */
-        pSenderElement->addr.comId = comId;
+          /* Prepare element data */
+        pSenderElement->addr.comId          = comId;
         pSenderElement->addr.srcIpAddr      = srcIpAddr;
         pSenderElement->addr.destIpAddr     = destIpAddr;
         pSenderElement->addr.etbTopoCnt     = etbTopoCnt;
@@ -3439,7 +3442,7 @@ TRDP_ERR_T trdp_mdCall (
     /* Release mutex */
     if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
     }
 
     return errv;
@@ -3482,7 +3485,7 @@ TRDP_ERR_T trdp_mdConfirm (
         return TRDP_MUTEX_ERR;
     }
 
-    vos_printLog(VOS_LOG_INFO, "MD TRDP_MSG_MC\n");
+    vos_printLogStr(VOS_LOG_INFO, "MD TRDP_MSG_MC\n");
 
     if ( pSessionId )
     {
@@ -3569,7 +3572,7 @@ TRDP_ERR_T trdp_mdConfirm (
     /* Release mutex */
     if ( vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR )
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
     }
     return errv;
 }
