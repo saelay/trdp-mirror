@@ -59,6 +59,7 @@ typedef double REAL64;
 
 #include <stdint.h>
 #include <float.h>
+#include <sys/time.h>
 
 typedef uint8_t UINT8;
 typedef uint16_t UINT16;
@@ -230,7 +231,6 @@ typedef struct
 } VOS_TIME_T;
 
 #else
-
 typedef struct timeval VOS_TIME_T;
 
 #endif
