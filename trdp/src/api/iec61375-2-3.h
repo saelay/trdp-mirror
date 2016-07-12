@@ -147,6 +147,7 @@
 /** ECSP Control telegram                                                                                       */
 
 #define ECSP_CTRL_COMID             120
+#define ECSP_CTRL_SMI               120
 #define ECSP_CTRL_CYC               1000                                        /**< 1s                         */
 #define ECSP_CTRL_TO                5000                                        /**< 5s                         */
 #define ECSP_CTRL_DEST_URI          "devECSP.anyVeh.lCst.lClTrn.lTrn"           /**< 10.0.0.1                   */
@@ -155,6 +156,7 @@
 /** ECSP status telegram                                                                                        */
 
 #define ECSP_STATUS_COMID           121
+#define ECSP_STATUS_SMI             121
 #define ECSP_STATUS_CYC             1000                                        /**< 1s                         */
 #define ECSP_STATUS_TO              5000                                        /**< 5s                         */
 #define ECSP_STATUS_DEST_URI        "devECSC.anyVeh.lCst.lClTrn.lTrn"           /**< 10.0.0.100                 */
@@ -163,40 +165,48 @@
 /** ECSP Confirmation Request telegram MD:                                                                                       */
 
 #define ECSP_CONF_REQ_COMID         122
+#define ECSP_CONF_REQ_SMI           122
 #define ECSP_CONF_REQ_TO            3000
 #define ECSP_CONF_REQ_URI           "devECSP.anyVeh.lCst.lClTrn.lTrn"           /**< 10.0.0.1                   */
 #define ECSP_CONF_REQ_DS            "ECSP_CONF_REQUEST"
 
 #define ECSP_CONF_REP_COMID         123
+#define ECSP_CONF_REP_SMI           123
 #define ECSP_CONF_REP_TO            3000
 #define ECSP_CONF_REP_DS            "ECSP_CONF_REPLY"
 
 /** ETBN Control & Status Telegram MD                                                                           */
 
 #define ETBN_CTRL_REQ_COMID         130
+#define ETBN_CTRL_REQ_SMI           130
 #define ETBN_CTRL_REQ_DS            "ETBN_CTRL"                                 /**< ETBx                       */
 #define ETBN_CTRL_REQ_TO            3000                                        /**< 3s timeout                 */
 
 #define ETBN_CTRL_REP_COMID         131
+#define ETBN_CTRL_REP_SMI           131
 #define ETBN_CTRL_REP_DS            "ETBN_STATUS"                               /**< ETBN status reply          */
 
 /** ETBN Control Telegram MD                                                                                    */
 
 #define ETBN_TRN_NET_DIR_REQ_COMID  132
+#define ETBN_TRN_NET_DIR_REQ_SMI    132
 #define ETBN_TRN_NET_DIR_REQ_TO     3000                                        /**< 3s timeout                 */
 
 #define ETBN_TRN_NET_DIR_REP_COMID  133
+#define ETBN_TRN_NET_DIR_REP_SMI    133
 #define ETBN_TRN_NET_DIR_REP_DS     "ETBN_TRAIN_NETWORK_DIRECTORY_INFO_REPLY"
 
 
 /** TCN-DNS Request Telegram MD                                                                                 */
 
 #define TCN_DNS_REQ_COMID           140
+#define TCN_DNS_REQ_SMI             140
 #define TCN_DNS_REQ_TO              3000                                        /**< 3s timeout                 */
 #define TCN_DNS_REQ_DS              "DNS_REQUEST"
 #define TCN_DNS_REQ_URI             "devDNS.anyVeh.lCst.lClTrn.lTrn"
 
 #define TCN_DNS_REP_COMID           141
+#define TCN_DNS_REP_SMI             141
 #define TCN_DNS_REP_DS              "DNS_REPLY"
 
 #endif

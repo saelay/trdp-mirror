@@ -107,6 +107,22 @@ EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
 
 
 /**********************************************************************************************************************/
+/**    Function to retrieve the operational train directory state info.
+ *  Return a copy of the last received PD 100 telegram.
+ *  Note: The values are in host endianess! When validating (SDTv2), network endianess must be ensured.
+ *
+ *  @param[in]      appHandle               Handle returned by tlc_openSession().
+ *  @param[out]     pOpTrnDirStatusInfo     Pointer to an operational train directory state structure to be returned.
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_getOpTrnDirectoryStatusInfo (
+    TRDP_APP_SESSION_T              appHandle,
+    TRDP_OP_TRAIN_DIR_STATUS_INFO_T *pOpTrnDirStatusInfo);
+
+/**********************************************************************************************************************/
 /**    Function to retrieve the operational train directory.
  *
  *

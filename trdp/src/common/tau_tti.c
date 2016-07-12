@@ -178,29 +178,32 @@ static void ttiPDCallback (
                 return;
             }
 
-            /* vos_printLog(VOS_LOG_INFO, "---> Operational status info received on %p\n", appHandle); */
-            if (appHandle->etbTopoCnt != vos_ntohl(pTelegram->etbTopoCnt))
-            {
-                vos_printLog(VOS_LOG_INFO, "ETB topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
-                             appHandle->etbTopoCnt, vos_ntohl(pTelegram->etbTopoCnt), appHandle);
-                changed++;
-                (void) tlc_setETBTopoCount(appHandle, vos_ntohl(pTelegram->etbTopoCnt));
-            }
-
+            /* Store the state locally */
             memcpy(&appHandle->pTTDB->opTrnState, &pTelegram->state,
                    (sizeof(TRDP_OP_TRAIN_DIR_STATE_T) < dataSize) ? sizeof(TRDP_OP_TRAIN_DIR_STATE_T) : dataSize);
 
             /* unmarshall manually:   */
+            appHandle->pTTDB->opTrnState.etbTopoCnt = vos_ntohl(pTelegram->etbTopoCnt);
             appHandle->pTTDB->opTrnState.state.opTrnTopoCnt = vos_ntohl(pTelegram->state.opTrnTopoCnt);
+            appHandle->pTTDB->opTrnState.state.crc = vos_ntohl(pTelegram->state.crc);
 
-            if (appHandle->opTrnTopoCnt != vos_ntohl(pTelegram->state.opTrnTopoCnt))
+            /* vos_printLog(VOS_LOG_INFO, "---> Operational status info received on %p\n", appHandle); */
+
+            /* Has the etbTopoCnt changed? */
+            if (appHandle->etbTopoCnt != appHandle->pTTDB->opTrnState.etbTopoCnt)
+            {
+                vos_printLog(VOS_LOG_INFO, "ETB topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
+                             appHandle->etbTopoCnt, appHandle->pTTDB->opTrnState.etbTopoCnt, appHandle);
+                changed++;
+                (void) tlc_setETBTopoCount(appHandle, appHandle->pTTDB->opTrnState.etbTopoCnt);
+            }
+
+            if (appHandle->opTrnTopoCnt != appHandle->pTTDB->opTrnState.state.opTrnTopoCnt)
             {
                 changed++;
                 (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
             }
 
-            (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
-            appHandle->pTTDB->opTrnState.state.crc = vos_ntohl(pTelegram->state.crc);
         }
         else if (pMsg->resultCode == TRDP_TIMEOUT_ERR )
         {
@@ -607,7 +610,7 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
                       0, 0,
                       VOS_INADDR_ANY,
                       vos_dottedIP(TTDB_STATUS_DEST_IP),
-                      TRDP_FLAGS_CALLBACK,
+                      TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB,
                       TTDB_STATUS_TO * 1000,
                       TRDP_TO_SET_TO_ZERO) != TRDP_NO_ERR)
     {
@@ -700,6 +703,32 @@ EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
     {
         *pOpTrnDir = appHandle->pTTDB->opTrnDir;
     }
+    return TRDP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/**    Function to retrieve the operational train directory state info.
+ *  Return a copy of the last received PD 100 telegram.
+ *  Note: The values are in host endianess! When validating (SDTv2), network endianess must be ensured.
+ *
+ *  @param[in]      appHandle               Handle returned by tlc_openSession().
+ *  @param[out]     pOpTrnDirStatusInfo     Pointer to an operational train directory state structure to be returned.
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_getOpTrnDirectoryStatusInfo (
+    TRDP_APP_SESSION_T              appHandle,
+    TRDP_OP_TRAIN_DIR_STATUS_INFO_T *pOpTrnDirStatusInfo)
+{
+    if (appHandle == NULL ||
+        appHandle->pTTDB == NULL ||
+        pOpTrnDirStatusInfo == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    *pOpTrnDirStatusInfo = appHandle->pTTDB->opTrnState;
     return TRDP_NO_ERR;
 }
 
