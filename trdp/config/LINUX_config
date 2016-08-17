@@ -19,7 +19,7 @@ DOXYPATH = /usr/local/bin/
 
 # the _GNU_SOURCE is needed to get the extended poll feature for the POSIX socket
 
-CFLAGS += -Wall -fstrength-reduce -fno-builtin -fsigned-char -pthread -fPIC -D_GNU_SOURCE -DPOSIX
+CFLAGS += -Wall -Wno-unknown-pragmas -Wno-format -fstrength-reduce -fno-builtin -fsigned-char -pthread -fPIC -D_GNU_SOURCE -DPOSIX
 LDFLAGS += -lrt
 
 LINT_SYSINCLUDE_DIRECTIVES = -i ./src/vos/posix -wlib 0 -DL_ENDIAN
