@@ -1216,7 +1216,8 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     {
         char buff[VOS_MAX_ERR_STR_SIZE];
         STRING_ERR(buff);
-        vos_printLog(VOS_LOG_ERROR, "bind() failed (Err: %s)\n", buff);
+        vos_printLog(VOS_LOG_ERROR, "binding to %s:%hu failed (Err: %s)\n",
+                     inet_ntoa(srcAddress.sin_addr), port, buff);
         return VOS_SOCK_ERR;
     }
     return VOS_NO_ERR;

@@ -661,12 +661,14 @@ TRDP_ERR_T  trdp_requestSocket (
 
 /* add_start TOSHIBA 0306 */
             if ((usage != TRDP_SOCK_MD_TCP)
-                && (iface[lIndex].bindAddr != 0))
+                && (iface[lIndex].bindAddr != 0)
+                && !vos_isMulticast(iface[lIndex].bindAddr))
             {
                 err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
                 if (err != TRDP_NO_ERR)
                 {
-                    vos_printLog(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err);
+                   /* Avoid to excessive error reporting:
+                    vos_printLog(VOS_LOG_WARNING, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
                 }
             }
 /* add_end TOSHIBA */
@@ -803,12 +805,13 @@ TRDP_ERR_T  trdp_requestSocket (
                     }
 
                     /*    Multicast sender shall be bound to an interface    */
-                    if (iface[lIndex].bindAddr != 0)
+                    if (iface[lIndex].bindAddr != 0 && !vos_isMulticast(iface[lIndex].bindAddr))
                     {
                         err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
                         if (err != TRDP_NO_ERR)
                         {
-                            vos_printLog(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err);
+                           /* Avoid to excessive error reporting:
+                            vos_printLog(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
                             *pIndex = TRDP_INVALID_SOCKET_INDEX;
                             break;
                         }
