@@ -41,8 +41,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		08014D1316483ED90065AADD /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
-		08014D1816483F240065AADD /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08014D1716483F240065AADD /* Cocoa.framework */; };
 		08014D34164840030065AADD /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 08014D23164840020065AADD /* Controller.m */; };
 		08014D35164840030065AADD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 08014D25164840020065AADD /* InfoPlist.strings */; };
 		08014D36164840030065AADD /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 08014D27164840030065AADD /* MainMenu.xib */; };
@@ -199,6 +197,7 @@
 		73A00E631913CCC50020A6EA /* tau_dnr.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E611913CCC50020A6EA /* tau_dnr.h */; };
 		73B6907915446B8C004968FA /* trdp_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F3A150777B00046E0AC /* trdp_utils.h */; };
 		73B6907A15446B8D004968FA /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
+		73D452751D90302000CEF20D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73D452741D90301F00CEF20D /* Cocoa.framework */; };
 		73D7FDE51CA1A6A700E52ACC /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73D7FDEA1CA1A6DB00E52ACC /* sendData.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D7FDDE1CA1A4AE00E52ACC /* sendData.c */; };
 		73E0526C151352CF0058D590 /* vos_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73E05264151352CE0058D590 /* vos_mem.h */; };
@@ -222,13 +221,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		08014D1116483EC10065AADD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = "trdp Posix";
-		};
 		08014D3F164840510065AADD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -537,6 +529,13 @@
 			remoteGlobalIDString = 7384E6F2172987CE00830413;
 			remoteInfo = "trdp PDonly";
 		};
+		73D4526D1D9022E000CEF20D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73591F6F1B986C7900B758F0;
+			remoteInfo = trdp64Posix;
+		};
 		73D7FDE11CA1A6A700E52ACC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -633,7 +632,6 @@
 
 /* Begin PBXFileReference section */
 		08014D0B16483EAD0065AADD /* SenderDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SenderDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		08014D1716483F240065AADD /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		08014D22164840020065AADD /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		08014D23164840020065AADD /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 		08014D26164840030065AADD /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -786,6 +784,7 @@
 		73A00E611913CCC50020A6EA /* tau_dnr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_dnr.h; sourceTree = "<group>"; };
 		73B68B7917904A4900BFA039 /* TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "TCN-TRDP2-D-BOM-033-xx - TRDP Reference Manual.pdf"; sourceTree = "<group>"; };
 		73CBA1AD19548350006648EE /* rules.mk */ = {isa = PBXFileReference; lastKnownFileType = text; name = rules.mk; path = ../rules.mk; sourceTree = "<group>"; };
+		73D452741D90301F00CEF20D /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		73D6657A15D3D88700A352D4 /* tau_marshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_marshall.c; sourceTree = "<group>"; };
 		73D71BB11917D5CF003F9A87 /* tau_ctrl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_ctrl.c; sourceTree = "<group>"; };
 		73D71BB21917D5CF003F9A87 /* tau_dnr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tau_dnr.c; sourceTree = "<group>"; };
@@ -818,9 +817,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73D452751D90302000CEF20D /* Cocoa.framework in Frameworks */,
 				731CF7361D2D456F0062A5F9 /* libtrdp64.a in Frameworks */,
-				08014D1316483ED90065AADD /* libtrdp.a in Frameworks */,
-				08014D1816483F240065AADD /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1049,7 +1047,6 @@
 		08014D1616483F240065AADD /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				08014D1716483F240065AADD /* Cocoa.framework */,
 			);
 			name = "Linked Frameworks";
 			path = ../Xcode;
@@ -1123,6 +1120,7 @@
 				08594B101B70D6EE0066EA06 /* resources */,
 				08594B3A1B70EA3F0066EA06 /* VisualC */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				73D452731D90301F00CEF20D /* Frameworks */,
 			);
 			name = trdp;
 			sourceTree = "<group>";
@@ -1424,6 +1422,14 @@
 			name = marshalling;
 			sourceTree = "<group>";
 		};
+		73D452731D90301F00CEF20D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				73D452741D90301F00CEF20D /* Cocoa.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		73E05263151352CE0058D590 /* api */ = {
 			isa = PBXGroup;
 			children = (
@@ -1558,7 +1564,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				08014D1216483EC10065AADD /* PBXTargetDependency */,
+				73D4526E1D9022E000CEF20D /* PBXTargetDependency */,
 			);
 			name = SenderDemo;
 			productName = SenderDemo;
@@ -2008,7 +2014,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "trdp" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -2326,11 +2332,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		08014D1216483EC10065AADD /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D2AAC045055464E500DB518D /* trdp Posix */;
-			targetProxy = 08014D1116483EC10065AADD /* PBXContainerItemProxy */;
-		};
 		08014D40164840510065AADD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
@@ -2551,6 +2552,11 @@
 			target = 7384E6F2172987CE00830413 /* trdp PDonly */;
 			targetProxy = 73CE24711733F85C00314E1C /* PBXContainerItemProxy */;
 		};
+		73D4526E1D9022E000CEF20D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73591F6F1B986C7900B758F0 /* trdp64Posix */;
+			targetProxy = 73D4526D1D9022E000CEF20D /* PBXContainerItemProxy */;
+		};
 		73D7FDE01CA1A6A700E52ACC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
@@ -2607,7 +2613,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2623,14 +2628,14 @@
 				INFOPLIST_FILE = ../example/SenderDemo/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = "-DPOSIX";
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 			};
 			name = Debug;
 		};
@@ -2638,7 +2643,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2648,7 +2652,7 @@
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "SenderDemo-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2659,6 +2663,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
+				SDKROOT = macosx10.11;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2681,7 +2686,7 @@
 					"-DDEBUG",
 				);
 				PRODUCT_NAME = trdp;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -2701,7 +2706,7 @@
 					"-DL_ENDIAN",
 				);
 				PRODUCT_NAME = trdp;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Release;
@@ -2710,17 +2715,32 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SDKROOT )/usr/include/libxml2";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				SYMROOT = output/osx_x86/dbg;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -2730,15 +2750,30 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SDKROOT )/usr/include/libxml2";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				SYMROOT = output/osx_x86/rls;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -3146,7 +3181,7 @@
 					"-DDEBUG",
 				);
 				PRODUCT_NAME = trdp64;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -3179,7 +3214,7 @@
 					"-DL_ENDIAN",
 				);
 				PRODUCT_NAME = trdp64;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Release;
@@ -3481,7 +3516,7 @@
 				);
 				PREBINDING = YES;
 				PRODUCT_NAME = trdpPDonly;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -3503,7 +3538,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = trdpPDonly;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.11;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				ZERO_LINK = NO;
 			};

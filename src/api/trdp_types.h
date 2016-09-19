@@ -53,6 +53,9 @@ extern "C" {
     #define USE_HEAP  0                 /**< If this is set, we can allocate dynamically memory    */
 #endif
 
+#define TRDP_RETRIES    1
+
+
 /*    Special handling for Windows DLLs    */
 #ifdef WIN32
     #ifdef DLL_EXPORT
@@ -260,6 +263,9 @@ typedef struct
 {
     UINT8   qos;       /**< Quality of service (default should be 5 for PD and 3 for MD)  */
     UINT8   ttl;       /**< Time to live (default should be 64)  */
+#ifdef TRDP_RETRIES
+   UINT8   retries;   /**< Retries from XML file */
+#endif
 } TRDP_SEND_PARAM_T;
 
 
