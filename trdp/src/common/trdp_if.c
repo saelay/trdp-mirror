@@ -1630,7 +1630,6 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 {
                     pInterval->tv_sec   = 0;                                /* 0ms if time is over (were we delayed?) */
                     pInterval->tv_usec  = 0;                                /* Application should limit this    */
-                    vos_printLogStr(VOS_LOG_WARNING, "Task time exceeded! System overload?\n");
                 }
                 else    /* if no timeout set, set maximum time to 1000sec   */
                 {
