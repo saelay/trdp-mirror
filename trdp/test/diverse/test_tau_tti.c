@@ -77,7 +77,7 @@ void dbgOut (
     
     if (category == VOS_LOG_ERROR || category == VOS_LOG_INFO)
     {
-        CHAR8 *pStr = strrchr(pFile, '/');
+        CHAR8 *pStr = (strrchr(pFile, '/') == NULL)? strrchr(pFile, '\\') + 1 : strrchr(pFile, '/') + 1;
         printf("%s %s %s:%d %s",
                pTime,
                catStr[category],

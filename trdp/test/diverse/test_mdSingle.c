@@ -281,7 +281,7 @@ void dbgOut (
     printf("%s %s %16s:%-4d %s",
            strrchr(pTime, '-') + 1,
            catStr[category],
-           strrchr(pFile, '/') + 1,
+           (strrchr(pFile, '/') == NULL)? strrchr(pFile, '\\') + 1 : strrchr(pFile, '/') + 1,
            LineNumber,
            pMsgStr);
 }
@@ -653,6 +653,7 @@ int main (int argc, char *argv[])
 
                     tlm_request(sSessionData.appHandle, &sSessionData, NULL, &sessionId, sSessionData.sComID, 0, 0, ownIP,
                                 destIP, flags, expReplies, 0, 0, NULL, NULL, 0, 0, 0);
+
                 }
                 else if (sSessionData.sDataSize > 0)
                 {
