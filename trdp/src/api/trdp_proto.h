@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2016-11-09: Default PD/MD parameter defines moved from trdp_private.h
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  */
@@ -50,15 +51,30 @@
 #define TRDP_DEST_URI_SIZE                  32                          /**< max. Dest URI size in MD header        */
 
 
-/*  Default MD communication parameters   */
-#define TRDP_MD_DEFAULT_QOS     3
-#define TRDP_MD_DEFAULT_TTL     64
 /*  Definitions for time out behaviour accd. table A.17 */
 #define TDRP_MD_INFINITE_TIME 0xFFFFFFFF
 
+/*  Default MD communication parameters   */
+#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000                      /**< default reply time out 5s             */
+#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000                      /**< default confirm time out 1s           */
+#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000                     /**< Socket connection time out 1 minute   */
+#define TRDP_MD_DEFAULT_SENDING_TIMEOUT     5000000                      /**< Socket sending time out 5s            */
+#define TRDP_MD_DEFAULT_QOS                 3
+#define TRDP_MD_DEFAULT_TTL                 64
+#define TRDP_MD_DEFAULT_RETRIES             3
+#define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
+#define TRDP_MD_MAX_NUM_SESSIONS            1000
+
 /*  Default PD communication parameters   */
-#define TRDP_PD_DEFAULT_QOS     5
-#define TRDP_PD_DEFAULT_TTL     64
+#define TRDP_PD_DEFAULT_QOS                 5
+#define TRDP_PD_DEFAULT_TTL                 64
+#define TRDP_PD_DEFAULT_TIMEOUT             100000
+#define TRDP_PD_DEFAULT_SEND_PARAM          {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
+
+/*  Default TRDP process options    */
+#define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000                       /**< Default cycle time for TRDP process    */
+#define TRDP_PROCESS_DEFAULT_PRIORITY       64                          /**< Default priority of TRDP process       */
+#define TRDP_PROCESS_DEFAULT_OPTIONS        TRDP_OPTION_TRAFFIC_SHAPING /**< Default options for TRDP process       */
 
 /*  PD packet properties    */
 #define TRDP_MIN_PD_HEADER_SIZE     sizeof(PD_HEADER_T)                 /**< PD header size with FCS                */

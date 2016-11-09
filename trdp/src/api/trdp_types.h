@@ -53,8 +53,9 @@ extern "C" {
     #define USE_HEAP  0                 /**< If this is set, we can allocate dynamically memory    */
 #endif
 
+#ifndef TRDP_RETRIES
 #define TRDP_RETRIES    1
-
+#endif
 
 /*    Special handling for Windows DLLs    */
 #ifdef WIN32

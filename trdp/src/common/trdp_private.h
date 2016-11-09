@@ -50,28 +50,6 @@
 #define TRDP_TIMER_GRANULARITY  10000                                    /**< granularity in us                      */
 #define TRDP_TIMER_FOREVER      0xffffffff                               /**< granularity in us                      */
 
-/*  Default MD communication parameters   */
-#define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000                      /**< default reply time out 5s             */
-#define TRDP_MD_DEFAULT_CONFIRM_TIMEOUT     1000000                      /**< default confirm time out 1s           */
-#define TRDP_MD_DEFAULT_CONNECTION_TIMEOUT  60000000                     /**< Socket connection time out 1 minute   */
-#define TRDP_MD_DEFAULT_SENDING_TIMEOUT     5000000                      /**< Socket sending time out 5s            */
-#define TRDP_MD_DEFAULT_QOS                 3
-#define TRDP_MD_DEFAULT_TTL                 64
-#define TRDP_MD_DEFAULT_RETRIES             3
-#define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
-#define TRDP_MD_MAX_NUM_SESSIONS            1000
-
-/*  Default PD communication parameters   */
-#define TRDP_PD_DEFAULT_QOS                 5
-#define TRDP_PD_DEFAULT_TTL                 64
-#define TRDP_PD_DEFAULT_TIMEOUT             100000
-#define TRDP_PD_DEFAULT_SEND_PARAM          {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0}
-
-/*  Default TRDP process options    */
-#define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000                       /**< Default cycle time for TRDP process    */
-#define TRDP_PROCESS_DEFAULT_PRIORITY       64                          /**< Default priority of TRDP process       */
-#define TRDP_PROCESS_DEFAULT_OPTIONS        TRDP_OPTION_TRAFFIC_SHAPING /**< Default options for TRDP process       */
-
 #define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536                       /**< Default maximum size of log file       */
 
 #define TRDP_MAGIC_PUB_HNDL_VALUE           0xCAFEBABE
