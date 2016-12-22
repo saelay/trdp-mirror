@@ -129,7 +129,7 @@ void dbgOut (
     printf("%s %s %16s:%-4d %s",
            strrchr(pTime, '-') + 1,
            catStr[category],
-		   strrchr(pFile, '/') == NULL)? strrchr(pFile, '\\') + 1 : strrchr(pFile, '/') + 1,
+          (strrchr(pFile, '/') == NULL)? strrchr(pFile, '\\') + 1 : strrchr(pFile, '/') + 1,
            LineNumber,
            pMsgStr);
 }
@@ -306,7 +306,7 @@ int main (int argc, char *argv[])
          Select() will wait for ready descriptors or time out,
          what ever comes first.
          */
-        rv = select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+        rv = vos_select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
         
         /*
          Check for overdue PDs (sending and receiving)
