@@ -32,6 +32,7 @@
 
 #include "trdp_if_light.h"
 #include "vos_thread.h"
+#include "vos_utils.h"
 
 
 /***********************************************************************************************************************
@@ -70,7 +71,7 @@ void dbgOut (
     printf("%s %s %s:%d %s",
            strrchr(pTime, '-') + 1,
            catStr[category],
-           strrchr(pFile, '/') + 1,
+           strrchr(pFile, VOS_DIR_SEP) + 1,
            LineNumber,
            pMsgStr);
 }

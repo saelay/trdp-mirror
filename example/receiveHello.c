@@ -75,7 +75,7 @@ void dbgOut (
         printf("%s %s %s:%d %s",
                pTime,
                catStr[category],
-               strrchr(pFile, '/') + 1,
+               strrchr(pFile, VOS_DIR_SEP) + 1,
                LineNumber,
                pMsgStr);
     }
@@ -327,11 +327,11 @@ int main (int argc, char *argv[])
         }
         else if (TRDP_TIMEOUT_ERR == err)
         {
-            vos_printLog(VOS_LOG_INFO, "Packet timed out\n");
+            vos_printLogStr(VOS_LOG_INFO, "Packet timed out\n");
         }
         else if (TRDP_NODATA_ERR == err)
         {
-            vos_printLog(VOS_LOG_INFO, "No data yet\n");
+            vos_printLogStr(VOS_LOG_INFO, "No data yet\n");
         }
         else
         {
