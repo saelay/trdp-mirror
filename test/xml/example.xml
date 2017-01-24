@@ -90,7 +90,7 @@
             <element name="u8" type="UINT8"/>
             <element name="i8" type="INT8"/>
             <element name="c" type="CHAR8"/>
-            <element name="b" type="BOOLEAN8"/>
+            <element name="b" type="BOOL8"/>
         </data-set>
         <data-set name="testDS1005" id="1005">
             <element name="aDS1001" type="1001" array-size ="32"/>
