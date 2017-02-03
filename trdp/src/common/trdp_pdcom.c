@@ -456,8 +456,15 @@ TRDP_ERR_T  trdp_pdReceive (
         }
         else
         {
-            /*  Find requested publish element  */
-            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, vos_ntohl(pNewFrameHead->replyComId));
+			UINT32 replyComId = vos_ntohl(pNewFrameHead->replyComId);
+
+			if (replyComId == 0)
+			{
+				replyComId = vos_ntohl(pNewFrameHead->comId);
+			}
+
+			/*  Find requested publish element  */
+            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, replyComId);
         }
 
         if (pPulledElement != NULL)
