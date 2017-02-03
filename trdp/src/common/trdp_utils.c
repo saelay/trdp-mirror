@@ -198,7 +198,7 @@ PD_ELE_T *trdp_queueFindComId (
 {
     PD_ELE_T *iterPD;
 
-    if (pHead == NULL || comId == 0)
+    if (pHead == NULL)
     {
         return NULL;
     }
