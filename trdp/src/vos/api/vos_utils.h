@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2016-03-10: Ticket #114 SC-32
  *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
  *
@@ -44,8 +45,8 @@ extern VOS_PRINT_DBG_T gPDebugFunction;
 extern void *gRefCon;
 
 /** String size definitions for the debug output functions */
-#define VOS_MAX_PRNT_STR_SIZE   256         /**< Max. size of the debug/error string of debug function */
-#define VOS_MAX_FRMT_SIZE       64          /**< Max. size of the 'format' part */
+#define VOS_MAX_PRNT_STR_SIZE   256u         /**< Max. size of the debug/error string of debug function */
+#define VOS_MAX_FRMT_SIZE       64u          /**< Max. size of the 'format' part */
 #define VOS_MAX_ERR_STR_SIZE    (VOS_MAX_PRNT_STR_SIZE - VOS_MAX_FRMT_SIZE) /**< Max. size of the error part */
 
 /** This is a helper define for separating a path in debug output */
@@ -86,12 +87,12 @@ extern void *gRefCon;
      }                                                                         \
     }
 #elif defined(__clang__)
-    #define vos_printLog(level, format, ...)            \
-    {if (gPDebugFunction != NULL)                            \
-     {   char str[VOS_MAX_PRNT_STR_SIZE];                    \
-         (void) snprintf(str, sizeof(str), format, __VA_ARGS__); \
-         vos_printLogStr(level, str);                        \
-     }                                                       \
+    #define vos_printLog(level, format, ...)                      \
+    {if (gPDebugFunction != NULL)                                 \
+     {   char str[VOS_MAX_PRNT_STR_SIZE];                         \
+         (void)snprintf(str, sizeof(str), format, __VA_ARGS__);  \
+         vos_printLogStr(level, str);                             \
+     }                                                            \
     }
 #else
     #define vos_printLog(level, format, args ...)            \
@@ -116,8 +117,8 @@ extern void *gRefCon;
 #endif
 
 /** CRC/FCS constants */
-#define INITFCS         0xffffffff      /**< Initial FCS value */
-#define SIZE_OF_FCS     4               /**< for better understanding of address calculations */
+#define INITFCS         0xffffffffu      /**< Initial FCS value */
+#define SIZE_OF_FCS     4u               /**< for better understanding of address calculations */
 
 /** Define endianess if not already done by compiler */
 #if (!defined(L_ENDIAN) && !defined(B_ENDIAN))
@@ -134,10 +135,10 @@ extern void *gRefCon;
 #endif
 #endif
 
-#define Swap32(val)     (UINT32)(((0xFF000000 & (UINT32)val) >> 24) | \
-                                 ((0x00FF0000 & (UINT32)val) >> 8)  | \
-                                 ((0x0000FF00 & (UINT32)val) << 8)  | \
-                                 ((0x000000FF & (UINT32)val) << 24))
+#define Swap32(val)     (UINT32)(((0xFF000000u & (UINT32)val) >> 24u) | \
+                                 ((0x00FF0000u & (UINT32)val) >> 8u)  | \
+                                 ((0x0000FF00u & (UINT32)val) << 8u)  | \
+                                 ((0x000000FFu & (UINT32)val) << 24u))
     
 #ifdef B_ENDIAN
 /** introduce byte swapping on big endian machines needed for CRC handling */

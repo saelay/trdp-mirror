@@ -67,7 +67,7 @@ static XML_TOKEN_T trdp_XMLNextToken (
     int     ch = 0;
     char    *p;
 
-    while (1)
+    for (;;)
     {
         /* Skip whitespace */
         while (!feof(pXML->infile) && (ch = fgetc(pXML->infile)) <= ' ') /*lint !e160 Lint objects a GNU warning
@@ -207,14 +207,14 @@ static XML_TOKEN_T trdp_XMLNextToken (
             /* Unquoted identifier */
             p       = pXML->tokenValue;
             *(p++)  = (char) ch;
-            while (!feof(pXML->infile) &&
-                   (ch = fgetc(pXML->infile)) != '<' /*lint !e160 Lint objects a GNU warning suppression macro - OK */
-                   && ch != '>'
-                   && ch != '='
-                   && ch != '/'
-                   && ch > ' ')
+            while ((!feof(pXML->infile)) &&
+                   ((ch = fgetc(pXML->infile)) != '<') /*lint !e160 Lint objects a GNU warning suppression macro - OK */
+                   && (ch != '>')
+                   && (ch != '=')
+                   && (ch != '/')
+                   && (ch > ' '))
             {
-                if (p < (pXML->tokenValue + MAX_TOK_LEN - 1))
+                if (p < (pXML->tokenValue + MAX_TOK_LEN - 1u))
                 {
                     *(p++) = (char) ch;
                 }
@@ -222,7 +222,7 @@ static XML_TOKEN_T trdp_XMLNextToken (
 
             *(p++) = 0;
 
-            if (ch == '<' || ch == '>' || ch == '=' || ch == '/')
+            if ((ch == '<') || (ch == '>') || (ch == '=') || (ch == '/'))
             {
                 (void) ungetc(ch, pXML->infile);
             }
@@ -390,7 +390,7 @@ int trdp_XMLSeekStartTagAny (
         {
             ret = -2;            /* No more tokens on this depth, interrupt */
         }
-        else if (pXML->tagDepth == pXML->tagDepthSeek && token == TOK_START_TAG)
+        else if ((pXML->tagDepth == pXML->tagDepthSeek) && (token == TOK_START_TAG))
         {
             /* We are on the correct depth and have found a start tag */
             vos_strncpy(tag, pXML->tokenTag, (UINT32) maxlen);
@@ -421,7 +421,7 @@ int trdp_XMLSeekStartTag (
     {
         ret = trdp_XMLSeekStartTagAny(pXML, buf, sizeof(buf));
     }
-    while (ret == 0 && strcmp(buf, tag) != 0);
+    while ((ret == 0) && (strcmp(buf, tag) != 0));
 
     return ret;
 }
@@ -440,7 +440,7 @@ int trdp_XMLCountStartTag (
     const char      *tag)
 {
     int             ret;
-    char            buf[MAX_TAG_LEN + 1];
+    char            buf[MAX_TAG_LEN + 1u];
     int             count = 0;
 
     XML_HANDLE_T    safe        = *pXML;
@@ -457,7 +457,7 @@ int trdp_XMLCountStartTag (
     while (ret == 0);
 
     *pXML = safe;
-    fseek(pXML->infile, last_read, SEEK_SET);
+    fseek(pXML->infile, (long) last_read, SEEK_SET);
     return count;
 }
 
@@ -510,7 +510,7 @@ XML_TOKEN_T trdp_XMLGetAttribute (
 
     if (token == TOK_ID)
     {
-        vos_strncpy(attribute, pXML->tokenValue, MAX_TOK_LEN - 1);
+        vos_strncpy(attribute, pXML->tokenValue, MAX_TOK_LEN - 1u);
         token = trdp_XMLNextTokenHl(pXML);
 
         if (token == TOK_EQUAL)
@@ -519,7 +519,7 @@ XML_TOKEN_T trdp_XMLGetAttribute (
 
             if (token == TOK_ID)
             {
-                vos_strncpy(value, pXML->tokenValue, MAX_TOK_LEN - 1);
+                vos_strncpy(value, pXML->tokenValue, MAX_TOK_LEN - 1u);
                 *pValueInt  = (UINT32) strtol(value, NULL, 10); /* atoi(value); */
                 token       = TOK_ATTRIBUTE;
             }

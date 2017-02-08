@@ -281,7 +281,7 @@ void pd_updatePublisher (int active)
     if (active)
     {
         err = tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
-                          TRDP_FLAGS_NONE, NULL, gDataBuffer, gDataSize);
+                          TRDP_FLAGS_NONE, NULL, gDataBuffer, (UINT32) gDataSize);
         if (err != TRDP_NO_ERR)
         {
             printf("tlp_publish error %d\n", err);
@@ -416,15 +416,16 @@ int md_request(const char* targetIP, uint32_t comID, char* pMessage)
     err = tlm_request(gAppHandle,
                 NULL,  NULL,          // user ref
                 &gMessageData.sessionId, comID,
-                0,              // topocount
-                0,
-                0,              // source IP
+                0u,              // topocount
+                0u,
+                0u,              // source IP
                 vos_dottedIP(targetIP), TRDP_FLAGS_CALLBACK,
-                1,              //  Expected replies
-                0,              //  reply timeout
-                3,              //  number of replies
+                1u,              //  Expected replies
+                0u,              //  reply timeout
+                3u,              //  number of replies
                 NULL,           //  send parameters
-                (const UINT8*) pMessage, strlen(pMessage),
+                (const UINT8*) pMessage,
+                (UINT32) strlen(pMessage),
                 NULL,           //  source URI
                 NULL);          //  destination URI
     return (err != TRDP_NO_ERR);
@@ -456,10 +457,10 @@ void pdCallBack (
         case TRDP_NO_ERR:
             switch (pMsg->comId)
             {
-                case 100:
+                case 100u:
                     printf("PD 100 received\n");
                     break;
-                case 1000:
+                case 1000u:
                     printf("PD 1000 received\n");
                     break;
                 case PD_COMID1:
@@ -664,7 +665,7 @@ int pd_loop2 ()
             /*	Copy the packet into the internal send queue, prepare for sending.
                 If we change the data, just re-publish it	*/
 
-            err = tlp_put(gAppHandle, gPubHandle, gDataBuffer, gDataSize);
+            err = tlp_put(gAppHandle, gPubHandle, gDataBuffer, (UINT32) gDataSize);
 
 
             if (err != TRDP_NO_ERR)

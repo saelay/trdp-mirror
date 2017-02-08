@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-08: Ticket #124 tau_dnr: Cache keeps etbTopoCount only
  *      BL 2015-12-14: Ticket #8: DNR client
  */
 
@@ -37,14 +38,14 @@
  * DEFINES
  */
 
-#define TAU_MAX_HOSTS_LINE_LENGTH   120
-#define TAU_MAX_NO_CACHE_ENTRY      50
-#define TAU_MAX_NO_IF               4       /**< Default interface should be in the first 4 */
-#define TAU_MAX_DNS_BUFFER_SIZE     1500    /* if this doesn't suffice, we need to allocate it */
-#define TAU_MAX_URI_SIZE            64      /* host part only, without user part */
-#define TAU_MAX_NAME_SIZE           256     /* Allocated on stack */
-#define TAU_DNS_TIME_OUT_LONG       10      /**< Timeout in seconds for DNS server reply, if no hosts file provided   */
-#define TAU_DNS_TIME_OUT_SHORT      1       /**< Timeout in seconds for DNS server reply, if hosts file was provided  */
+#define TAU_MAX_HOSTS_LINE_LENGTH   120u
+#define TAU_MAX_NO_CACHE_ENTRY      50u
+#define TAU_MAX_NO_IF               4u      /**< Default interface should be in the first 4 */
+#define TAU_MAX_DNS_BUFFER_SIZE     1500u   /* if this doesn't suffice, we need to allocate it */
+#define TAU_MAX_URI_SIZE            64u     /* host part only, without user part */
+#define TAU_MAX_NAME_SIZE           256u    /* Allocated on stack */
+#define TAU_DNS_TIME_OUT_LONG       10u     /**< Timeout in seconds for DNS server reply, if no hosts file provided   */
+#define TAU_DNS_TIME_OUT_SHORT      1u      /**< Timeout in seconds for DNS server reply, if hosts file was provided  */
 
 
 /***********************************************************************************************************************
@@ -55,7 +56,8 @@ typedef struct tau_dnr_cache
 {
     CHAR8           uri[TRDP_MAX_URI_HOST_LEN];
     TRDP_IP_ADDR_T  ipAddr;
-    UINT32          topoCnt;
+    UINT32          etbTopoCnt;
+    UINT32          opTrnTopoCnt;
     BOOL8           fixedEntry;
 } TAU_DNR_ENTRY_T;
 
@@ -141,44 +143,47 @@ typedef struct QUESTION
 static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *pNameBuffer)
 {
     CHAR8           *pName  = pNameBuffer;
-    unsigned int    p       = 0, jumped = 0, offset;
-    int             i, j;
+    unsigned int    p       = 0u;
+    unsigned int    jumped  = 0u;
+    unsigned int    offset;
+    int             i;
+    int             j;
 
     *pCount     = 1;
     pName[0]    = '\0';
 
     /* read the names in 3www6newtec2de0 format */
-    while (*pReader != 0 && p < TAU_MAX_NAME_SIZE - 1)
+    while ((*pReader != 0u) && (p < (TAU_MAX_NAME_SIZE - 1u)))
     {
-        if (*pReader >= 192)
+        if (*pReader >= 192u)
         {
-            offset  = (*pReader) * 256 + *(pReader + 1) - 49152;        /* 49152 = 11000000 00000000 ;) */
-            pReader = pBuffer + offset - 1;
-            jumped  = 1;                                /* we have jumped to another location so counting wont go up! */
+            offset  = (*pReader) * 256u + *(pReader + 1u) - 49152u;        /* 49152 = 11000000 00000000 ;) */
+            pReader = pBuffer + offset - 1u;
+            jumped  = 1u;                                /* we have jumped to another location so counting wont go up! */
         }
         else
         {
             pName[p++] = *pReader;
         }
 
-        pReader = pReader + 1;
+        pReader = pReader + 1u;
 
-        if (jumped == 0)
+        if (jumped == 0u)
         {
-            *pCount = *pCount + 1;                  /* if we havent jumped to another location then we can count up */
+            *pCount = *pCount + 1u;                  /* if we havent jumped to another location then we can count up */
         }
     }
 
     pName[p] = '\0';                                 /* string complete */
 
-    if (jumped == 1)
+    if (jumped == 1u)
     {
-        *pCount = *pCount + 1;                      /* number of steps we actually moved forward in the packet */
+        *pCount = *pCount + 1u;                      /* number of steps we actually moved forward in the packet */
     }
 
     /* now convert 3www6newtec2de0 to www.newtec.de */
 
-    for (i = 0; i < (int)strlen((const char *)pName) && i < TAU_MAX_NAME_SIZE - 1; i++)
+    for (i = 0; (i < (int)strlen((const char *)pName)) && (i < (int)(TAU_MAX_NAME_SIZE - 1u)); i++)
     {
         p = pName[i];
         for (j = 0; j < (int)p; j++)
@@ -206,7 +211,7 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 {
     int lock = 0, i;
 
-    vos_strncat(pHost, TAU_MAX_URI_SIZE - 1, ".");
+    vos_strncat(pHost, TAU_MAX_URI_SIZE - 1u, ".");
 
     for (i = 0; i < (int)strlen((char *)pHost); i++)
     {
@@ -225,21 +230,22 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 
 static int compareURI ( const void *arg1, const void *arg2 )
 {
-    return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN - 1);
+    return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN - 1u);
 }
 
 static void printDNRcache (TAU_DNR_DATA_T *pDNR)
 {
     UINT32 i;
-    for (i = 0; i < pDNR->noOfCachedEntries; i++)
+    for (i = 0u; i < pDNR->noOfCachedEntries; i++)
     {
-        vos_printLog(VOS_LOG_DBG, "%03d:\t%0u.%0u.%0u.%0u\t%s\t(topo: 0x%08x)\n", i,
-                     pDNR->cache[i].ipAddr >> 24,
-                     (pDNR->cache[i].ipAddr >> 16) & 0xFF,
-                     (pDNR->cache[i].ipAddr >> 8) & 0xFF,
-                     pDNR->cache[i].ipAddr & 0xFF,
+        vos_printLog(VOS_LOG_DBG, "%03u:\t%0u.%0u.%0u.%0u\t%s\t(topo: 0x%08x/0x%08x)\n", i,
+                     pDNR->cache[i].ipAddr >> 24u,
+                     (pDNR->cache[i].ipAddr >> 16u) & 0xFFu,
+                     (pDNR->cache[i].ipAddr >> 8u) & 0xFFu,
+                     pDNR->cache[i].ipAddr & 0xFFu,
                      pDNR->cache[i].uri,
-                     pDNR->cache[i].topoCnt);
+                     pDNR->cache[i].etbTopoCnt,
+                     pDNR->cache[i].opTrnTopoCnt);
     }
 }
 
@@ -265,12 +271,13 @@ static TRDP_ERR_T readHostsFile (
     if (fp != NULL)
     {
         /* while not end of file */
-        while (!feof(fp) && pDNR->noOfCachedEntries < TAU_MAX_NO_CACHE_ENTRY)
+        while ((!feof(fp)) && (pDNR->noOfCachedEntries < TAU_MAX_NO_CACHE_ENTRY))
         {
             /* get a line from the file */
             if (fgets(line, TAU_MAX_HOSTS_LINE_LENGTH, fp) != NULL)
             {
-                UINT32  start       = 0, index = 0;
+                UINT32  start       = 0u;
+                UINT32  index       = 0u;
                 UINT32  maxIndex    = strlen(line);
 
                 /* Skip empty lines, comment lines */
@@ -313,10 +320,11 @@ static TRDP_ERR_T readHostsFile (
                     vos_strncpy(pDNR->cache[pDNR->noOfCachedEntries].uri, &line[start], index - start);
                 }
                 /* increment only if entry is valid */
-                if (strlen(pDNR->cache[pDNR->noOfCachedEntries].uri) > 0)
+                if (strlen(pDNR->cache[pDNR->noOfCachedEntries].uri) > 0u)
                 {
-                    pDNR->cache[pDNR->noOfCachedEntries].topoCnt    = 0;
-                    pDNR->cache[pDNR->noOfCachedEntries].fixedEntry = TRUE;
+                    pDNR->cache[pDNR->noOfCachedEntries].etbTopoCnt     = 0u;
+                    pDNR->cache[pDNR->noOfCachedEntries].opTrnTopoCnt   = 0u;
+                    pDNR->cache[pDNR->noOfCachedEntries].fixedEntry     = TRUE;
                     pDNR->noOfCachedEntries++;
                 }
             }
@@ -354,13 +362,14 @@ static TRDP_ERR_T createSendQuery (
     UINT16          id,
     UINT32          *pSize)
 {
-    CHAR8               strBuf[TAU_MAX_URI_SIZE + 3];      /* conversion enlarges this buffer */
-    UINT8               packetBuffer[TAU_MAX_DNS_BUFFER_SIZE + 1], *pBuf;
+    CHAR8               strBuf[TAU_MAX_URI_SIZE + 3u];      /* conversion enlarges this buffer */
+    UINT8               packetBuffer[TAU_MAX_DNS_BUFFER_SIZE + 1u];
+    UINT8               *pBuf;
     TAU_DNS_HEADER_T    *pHeader = (TAU_DNS_HEADER_T *) packetBuffer;
     UINT32              size;
     TRDP_ERR_T          err;
 
-    if (pUri == NULL || strlen(pUri) == 0 || pSize == NULL)
+    if ((pUri == NULL) || (strlen(pUri) == 0u) || (pSize == NULL))
     {
         vos_printLogStr(VOS_LOG_ERROR, "createSendQuery has no search string\n");
         return TRDP_PARAM_ERR;
@@ -369,24 +378,24 @@ static TRDP_ERR_T createSendQuery (
     memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
 
     pHeader->id         = vos_htons(id);
-    pHeader->param1     = 0x1;              /* Recursion desired */
-    pHeader->param2     = 0x0;              /* all zero */
+    pHeader->param1     = 0x1u;              /* Recursion desired */
+    pHeader->param2     = 0x0u;              /* all zero */
     pHeader->q_count    = vos_htons(1);
 
     pBuf = (UINT8 *) (pHeader + 1);
 
-    vos_strncpy((char *)strBuf, pUri, TAU_MAX_URI_SIZE - 1);
+    vos_strncpy((char *)strBuf, pUri, TAU_MAX_URI_SIZE - 1u);
     changetoDnsNameFormat(pBuf, strBuf);
 
-    *pSize = (UINT32) strlen((char *)strBuf) + 1;
+    *pSize = (UINT32) strlen((char *)strBuf) + 1u;
 
     pBuf    += *pSize;
-    *pBuf++ = 0;                /* Query type 'A'   */
-    *pBuf++ = 1;
-    *pBuf++ = 0;                /* Query class ?   */
-    *pBuf++ = 1;
+    *pBuf++ = 0u;                /* Query type 'A'   */
+    *pBuf++ = 1u;
+    *pBuf++ = 0u;                /* Query class ?   */
+    *pBuf++ = 1u;
     size    = (UINT32) (pBuf - packetBuffer);
-    *pSize  += 4;               /* add query type and class size! */
+    *pSize  += 4u;               /* add query type and class size! */
 
     /* send the query */
     err = (TRDP_ERR_T) vos_sockSendUDP(sock, packetBuffer, &size, pDNR->dnsIpAddr, pDNR->dnsPort);
@@ -407,15 +416,16 @@ static void parseResponse (
     TRDP_IP_ADDR_T  *pIP_addr)
 {
     TAU_DNS_HEADER_T    *dns = (TAU_DNS_HEADER_T *) pPacket;
-    UINT8 *pReader;
-    UINT32 i, skip;
-    CHAR8 name[256];
+    UINT8               *pReader;
+    UINT32              i;
+    UINT32              skip;
+    CHAR8               name[256];
     TAU_RES_RECORD_T    answers[20] /*, auth[20], addit[20]*/; /* the replies from the DNS server */
 
     /* move ahead of the dns header and the query field */
     pReader = pPacket + sizeof(TAU_DNS_HEADER_T) + querySize;
 
-    vos_printLog(VOS_LOG_DBG, "The response contains : \n");
+    vos_printLogStr(VOS_LOG_DBG, "The response contains : \n");
     vos_printLog(VOS_LOG_DBG, " %d Questions.\n", vos_ntohs(dns->q_count));
     vos_printLog(VOS_LOG_DBG, " %d Answers.\n", vos_ntohs(dns->ans_count));
     vos_printLog(VOS_LOG_DBG, " %d Authoritative Servers.\n", vos_ntohs(dns->auth_count));
@@ -423,7 +433,7 @@ static void parseResponse (
 
     /* reading answers */
 
-    for (i = 0; i < vos_ntohs(dns->ans_count); i++)
+    for (i = 0u; i < vos_ntohs(dns->ans_count); i++)
     {
         (void) readName(pReader, pPacket, &skip, name);
         pReader += skip;
@@ -431,9 +441,9 @@ static void parseResponse (
         answers[i].resource = (TAU_R_DATA_T *)(pReader);
         pReader = pReader + sizeof(TAU_R_DATA_T);
 
-        if (vos_ntohs(answers[i].resource->type) == 1) /* if its an ipv4 address */
+        if (vos_ntohs(answers[i].resource->type) == 1u) /* if its an ipv4 address */
         {
-            if (vos_ntohs(answers[i].resource->data_len) != 4)
+            if (vos_ntohs(answers[i].resource->data_len) != 4u)
             {
                 vos_printLog(VOS_LOG_ERROR,
                              "*** DNS server promised IPv4 address, but returned %d Bytes!!!\n",
@@ -441,7 +451,7 @@ static void parseResponse (
                 *pIP_addr = VOS_INADDR_ANY;
             }
 
-            *pIP_addr = pReader[0] << 24 | pReader[1] << 16 | pReader[2] << 8 | pReader[3];
+            *pIP_addr = pReader[0] << 24u | pReader[1] << 16u | pReader[2] << 8u | pReader[3];
             vos_printLog(VOS_LOG_INFO, "%s -> 0x%08x\n", name, *pIP_addr);
 
             pReader = pReader + vos_ntohs(answers[i].resource->data_len);
@@ -563,9 +573,10 @@ static void updateDNSentry (
     INT32           my_socket;
     VOS_ERR_T       err;
     UINT8           packetBuffer[TAU_MAX_DNS_BUFFER_SIZE];
-    UINT32          size, querySize;
+    UINT32          size;
+    UINT32          querySize;
     VOS_SOCK_OPT_T  opts;
-    UINT16          id      = (UINT16) ((UINT32)appHandle & 0xFFFF);
+    UINT16          id      = (UINT16) ((UINT32)appHandle & 0xFFFFu);
     TAU_DNR_DATA_T  *pDNR   = (TAU_DNR_DATA_T *) appHandle->pUser;
     TRDP_IP_ADDR_T  ip_addr = VOS_INADDR_ANY;
 
@@ -587,7 +598,7 @@ static void updateDNSentry (
     }
 
     /* wait for reply */
-    while (1)
+    for (;;)
     {
         VOS_FDS_T   rfds;
         TRDP_TIME_T tv;
@@ -611,7 +622,7 @@ static void updateDNSentry (
 
             FD_CLR(my_socket, &rfds);
 
-            if (size == 0)
+            if (size == 0u)
             {
                 continue;       /* Try again, if there was no data */
             }
@@ -621,17 +632,18 @@ static void updateDNSentry (
             if (pTemp != NULL && ip_addr != VOS_INADDR_ANY)
             {
                 /* Overwrite outdated entry */
-                pTemp->ipAddr   = ip_addr;
-                pTemp->topoCnt  = appHandle->etbTopoCnt;
+                pTemp->ipAddr       = ip_addr;
+                pTemp->etbTopoCnt   = appHandle->etbTopoCnt;
+                pTemp->opTrnTopoCnt = appHandle->opTrnTopoCnt;
                 break;
             }
             else /* It's a new one, update our cache */
             {
-                int cacheEntry = pDNR->noOfCachedEntries;
+                UINT32 cacheEntry = pDNR->noOfCachedEntries;
 
                 if (cacheEntry >= TAU_MAX_NO_CACHE_ENTRY)   /* Cache is full! */
                 {
-                    cacheEntry = 0;                         /* Overwrite first */
+                    cacheEntry = 0u;                         /* Overwrite first */
                 }
                 else
                 {
@@ -639,9 +651,10 @@ static void updateDNSentry (
                 }
 
                 /* Position found, store everything */
-                vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE - 1);
-                pDNR->cache[cacheEntry].ipAddr  = ip_addr;
-                pDNR->cache[cacheEntry].topoCnt = appHandle->etbTopoCnt;
+                vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE - 1u);
+                pDNR->cache[cacheEntry].ipAddr          = ip_addr;
+                pDNR->cache[cacheEntry].etbTopoCnt      = appHandle->etbTopoCnt;
+                pDNR->cache[cacheEntry].opTrnTopoCnt    = appHandle->opTrnTopoCnt;
 
                 /* Sort the entries to get faster hits  */
                 vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
@@ -889,10 +902,13 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
     {
         pTemp = (TAU_DNR_ENTRY_T *) vos_bsearch(pUri, pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T),
                                                 compareURI);
-        if (pTemp != NULL &&
-            (pTemp->fixedEntry == TRUE ||
-             pTemp->topoCnt == appHandle->etbTopoCnt ||     /* Do the topocounts match? */
-             appHandle->etbTopoCnt == 0))                   /* Or do we not care?       */
+        if ((pTemp != NULL) &&
+            ((pTemp->fixedEntry == TRUE) ||
+             (pTemp->etbTopoCnt == appHandle->etbTopoCnt) ||                    /* Do the topocounts match? */
+             (pTemp->opTrnTopoCnt == appHandle->opTrnTopoCnt) ||
+             ((appHandle->etbTopoCnt == 0u) && (appHandle->opTrnTopoCnt == 0u))   /* Or do we not care?       */
+            )
+           )
         {
             *pAddr = pTemp->ipAddr;
             return TRDP_NO_ERR;
@@ -930,31 +946,31 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
     TRDP_IP_ADDR_T      addr)
 {
     TAU_DNR_DATA_T *pDNR;
-    if (appHandle == NULL)
+    if ((appHandle == NULL) || (pUri == NULL))
     {
         return TRDP_PARAM_ERR;
     }
 
     pDNR = (TAU_DNR_DATA_T *) appHandle->pUser;
 
-    if (addr == 0)
-    {}
-    else
+    if (addr != VOS_INADDR_ANY)
     {
         UINT32 i;
-        for (i = 0; i < pDNR->noOfCachedEntries; ++i)
+        for (i = 0u; i < pDNR->noOfCachedEntries; ++i)
         {
-            if (pDNR->cache[i].ipAddr == addr &&
-                (appHandle->etbTopoCnt == 0 || (pDNR->cache[i].topoCnt == appHandle->etbTopoCnt)))
+            if ((pDNR->cache[i].ipAddr == addr) &&
+                ((appHandle->etbTopoCnt == 0u) || (pDNR->cache[i].etbTopoCnt == appHandle->etbTopoCnt)) &&
+                ((appHandle->opTrnTopoCnt == 0u) || (pDNR->cache[i].opTrnTopoCnt == appHandle->opTrnTopoCnt)))
             {
                 vos_strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN);
                 return TRDP_NO_ERR;
             }
         }
         /* address not in cache: Make reverse request */
+        /* tbd */
 
     }
-    return TRDP_NO_ERR;
+    return TRDP_UNRESOLVED_ERR;
 }
 
 /* ---------------------------------------------------------------------------- */

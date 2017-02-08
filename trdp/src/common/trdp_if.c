@@ -16,7 +16,9 @@
  *
  * $Id$
  *
- *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
+ *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-08: Ticket #139: Swap parameter in tlm_reply
+ *      BL 2016-07-06: Ticket #122: 64Bit compatibility (+ compiler warnings)
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2016-06-01: Ticket #119 tlc_getInterval() repeatedly returns 0 after timeout
  *      BL 2016-02-04: Late configuration update/merging
@@ -2949,8 +2951,8 @@ TRDP_ERR_T tlm_reply (
                         appHandle,
                         (UINT8 *)pSessionId,
                         comId,
-                        (UINT32)userStatus,
                         0,
+                        (INT32)userStatus,
                         pSendParam,
                         pData,
                         dataSize);

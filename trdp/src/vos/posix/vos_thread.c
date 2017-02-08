@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-08: Stacksize computation enhanced
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
 
@@ -32,6 +33,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <limits.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <sched.h>
@@ -56,8 +58,8 @@
 #define PTHREAD_MUTEX_RECURSIVE  PTHREAD_MUTEX_RECURSIVE_NP
 #endif
 
-const size_t    cDefaultStackSize   = 16 * 1024;
-const UINT32    cMutextMagic        = 0x1234FEDC;
+const size_t    cDefaultStackSize   = 4u * PTHREAD_STACK_MIN;
+const UINT32    cMutextMagic        = 0x1234FEDCu;
 
 int             vosThreadInitialised = FALSE;
 
@@ -75,7 +77,7 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
     timeOut.tv_sec  = abs_timeout->tv_sec;
     timeOut.tv_usec = (__darwin_suseconds_t) abs_timeout->tv_nsec * 1000;
 
-    while (1)
+    for (;;)
     {
         if (sem_trywait(sem) == 0)
         {
@@ -132,7 +134,7 @@ int sem_init (sem_t *pSema, int flags, unsigned int mode)
  */
 
 #define NSECS_PER_USEC  1000
-#define USECS_PER_MSEC  1000
+#define USECS_PER_MSEC  1000u
 #define MSECS_PER_SEC   1000
 
 /* This define holds the max amount os seconds to get stored in 32bit holding micro seconds        */
@@ -279,10 +281,14 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         return VOS_THREAD_ERR;
     }
 
-    /* Set the stack size */
-    if (stackSize > 0)
-    {
-        retCode = pthread_attr_setstacksize(&threadAttrib, (size_t) stackSize);
+   /* Set the stack size */
+   if (stackSize > PTHREAD_STACK_MIN)
+   {
+      if (stackSize % (UINT32)getpagesize() > 0u)
+      {
+         stackSize = ((stackSize / (UINT32)getpagesize()) + 1u) * (UINT32)getpagesize();
+      }
+      retCode = pthread_attr_setstacksize(&threadAttrib, (size_t) stackSize);
     }
     else
     {
@@ -455,7 +461,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
     int ret;
 
 
-    if (delay == 0)
+    if (delay == 0u)
     {
         pthread_testcancel();
 
@@ -467,7 +473,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
         return VOS_NO_ERR;
     }
 
-    wanted_delay.tv_sec     = delay / 1000000;
+    wanted_delay.tv_sec     = delay / 1000000u;
     wanted_delay.tv_nsec    = (delay % 1000000) * 1000;
     do
     {
@@ -593,7 +599,7 @@ EXT_DECL void vos_addTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pAdd)
 {
-    if (pTime == NULL || pAdd == NULL)
+    if ((pTime == NULL) || (pAdd == NULL))
     {
         vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
@@ -618,7 +624,7 @@ EXT_DECL void vos_subTime (
     VOS_TIME_T          *pTime,
     const VOS_TIME_T    *pSub)
 {
-    if (pTime == NULL || pSub == NULL)
+    if ((pTime == NULL) || (pSub == NULL))
     {
         vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
@@ -643,7 +649,7 @@ EXT_DECL void vos_divTime (
     VOS_TIME_T  *pTime,
     UINT32      divisor)
 {
-    if (pTime == NULL || divisor == 0)
+    if ((pTime == NULL) || (divisor == 0))
     {
         vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
@@ -704,7 +710,7 @@ EXT_DECL INT32 vos_cmpTime (
     const VOS_TIME_T    *pTime,
     const VOS_TIME_T    *pCmp)
 {
-    if (pTime == NULL || pCmp == NULL)
+    if ((pTime == NULL) || (pCmp == NULL))
     {
         return 0;
     }
@@ -733,24 +739,24 @@ EXT_DECL void vos_getUuid (
     uuid_generate_time(pUuID);
 #else
     /*  Manually creating a UUID from time stamp and MAC address  */
-    static UINT16   count = 1;
+    static UINT16   count = 1u;
     VOS_TIME_T      current;
     VOS_ERR_T       ret;
 
     vos_getTime(&current);
 
-    pUuID[0]    = current.tv_usec & 0xFF;
-    pUuID[1]    = (current.tv_usec & 0xFF00) >> 8;
-    pUuID[2]    = (current.tv_usec & 0xFF0000) >> 16;
-    pUuID[3]    = (current.tv_usec & 0xFF000000) >> 24;
-    pUuID[4]    = current.tv_sec & 0xFF;
-    pUuID[5]    = (current.tv_sec & 0xFF00) >> 8;
-    pUuID[6]    = (current.tv_sec & 0xFF0000) >> 16;
-    pUuID[7]    = ((current.tv_sec & 0x0F000000) >> 24) | 0x4; /*  pseudo-random version   */
+    pUuID[0]    = current.tv_usec & 0xFFu;
+    pUuID[1]    = (current.tv_usec & 0xFF00u) >> 8u;
+    pUuID[2]    = (current.tv_usec & 0xFF0000u) >> 16u;
+    pUuID[3]    = (current.tv_usec & 0xFF000000u) >> 24u;
+    pUuID[4]    = current.tv_sec & 0xFFu;
+    pUuID[5]    = (current.tv_sec & 0xFF00u) >> 8u;
+    pUuID[6]    = (current.tv_sec & 0xFF0000u) >> 16u;
+    pUuID[7]    = ((current.tv_sec & 0x0F000000u) >> 24u) | 0x4u; /*  pseudo-random version   */
 
     /* we always increment these values, this definitely makes the UUID unique */
-    pUuID[8]    = (UINT8) (count & 0xFF);
-    pUuID[9]    = (UINT8) (count >> 8);
+    pUuID[8]    = (UINT8) (count & 0xFFu);
+    pUuID[9]    = (UINT8) (count >> 8u);
     count++;
 
     /*  Copy the mac address into the rest of the array */
@@ -879,7 +885,7 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
 EXT_DECL void vos_mutexDelete (
     VOS_MUTEX_T pMutex)
 {
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ((pMutex == NULL) || (pMutex->magicNo != cMutextMagic))
     {
         vos_printLogStr(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
     }
@@ -911,7 +917,7 @@ EXT_DECL void vos_mutexDelete (
 EXT_DECL void vos_mutexLocalDelete (
     struct VOS_MUTEX *pMutex)
 {
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ((pMutex == NULL) || (pMutex->magicNo != cMutextMagic))
     {
         vos_printLogStr(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
     }
@@ -947,7 +953,7 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
 {
     int err;
 
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ((pMutex == NULL) || (pMutex->magicNo != cMutextMagic))
     {
         return VOS_PARAM_ERR;
     }
@@ -978,7 +984,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
 {
     int err;
 
-    if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
+    if ((pMutex == NULL) || (pMutex->magicNo != cMutextMagic))
     {
         return VOS_PARAM_ERR;
     }
@@ -1068,7 +1074,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         static int  count = 1;
         char        tempPath[64];
         sprintf(tempPath, "/tmp/trdp%d.sema", count++);
-        *ppSema = (VOS_SEMA_T) sem_open(tempPath, O_CREAT, 0644, (UINT8)initialState);
+        *ppSema = (VOS_SEMA_T) sem_open(tempPath, O_CREAT, 0644u, (UINT8)initialState);
         if ((sem_t *)*ppSema == SEM_FAILED)
         {
             rc = -1;
@@ -1173,7 +1179,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 {
     int             rc              = 0;
     VOS_ERR_T       retVal          = VOS_SEMA_ERR;
-    struct timespec waitTimeSpec    = {0, 0};
+    struct timespec waitTimeSpec    = {0u, 0};
 
     /* Check parameter */
     if (sema == NULL)
@@ -1181,7 +1187,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         vos_printLogStr(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         return VOS_PARAM_ERR;
     }
-    else if (timeout == 0)
+    else if (timeout == 0u)
     {
         /* Take Semaphore, return ERROR if Semaphore cannot be taken immediately instead of blocking */
         rc = sem_trywait((sem_t *)sema);
@@ -1195,7 +1201,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     {
         /* Get time and convert it to timespec format */
 #ifdef __APPLE__
-        VOS_TIME_T waitTimeVos = {0, 0};
+        VOS_TIME_T waitTimeVos = {0u, 0};
         vos_getTime(&waitTimeVos);
         waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
         waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * NSECS_PER_USEC;
