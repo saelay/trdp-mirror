@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-08: Ticket #134 Example trdp-xmlpd-test crash due to zero elemSize
  *      BL 2015-12-14: Ticket #97  trdp-xmlpd-test.c subscribed telegram issue.
  *
  */
@@ -38,17 +39,17 @@
  */
 
 /*  Global constansts   */
-#define MAX_SESSIONS        16      /* Maximum number of sessions (interfaces) supported */
-#define MAX_DATASET_LEN     2048    /* Maximum supported length of dataset in bytes */
-#define MAX_DATASETS        32      /* Maximum number of dataset types supported    */
-#define MAX_PUB_TELEGRAMS   32      /* Maximum number of published telegrams supported  */
-#define MAX_SUB_TELEGRAMS   32      /* Maximum number of subscribed telegrams supported  */
-#define DATA_PERIOD         1000000 /* Period [us] in which tlg data are updated and printed    */
+#define MAX_SESSIONS        16u      /* Maximum number of sessions (interfaces) supported */
+#define MAX_DATASET_LEN     2048u    /* Maximum supported length of dataset in bytes */
+#define MAX_DATASETS        32u      /* Maximum number of dataset types supported    */
+#define MAX_PUB_TELEGRAMS   32u      /* Maximum number of published telegrams supported  */
+#define MAX_SUB_TELEGRAMS   32u      /* Maximum number of subscribed telegrams supported  */
+#define DATA_PERIOD         1000000u /* Period [us] in which tlg data are updated and printed    */
 
 /*  General parameters from xml configuration file */
 TRDP_MEM_CONFIG_T       memConfig;
 TRDP_DBG_CONFIG_T       dbgConfig;
-UINT32                  numComPar = 0;
+UINT32                  numComPar = 0u;
 TRDP_COM_PAR_T         *pComPar = NULL;
 UINT32                  numIfConfig = 0;
 TRDP_IF_CONFIG_T       *pIfConfig = NULL;
@@ -58,9 +59,9 @@ UINT32                  minCycleTime = 0xFFFFFFFF;
 INT32                   maxLogCategory = -1;
 
 /*  Dataset configuration from xml configuration file */
-UINT32                  numComId = 0;
+UINT32                  numComId = 0u;
 TRDP_COMID_DSID_MAP_T  *pComIdDsIdMap = NULL;
-UINT32                  numDataset = 0;
+UINT32                  numDataset = 0u;
 apTRDP_DATASET_T        apDataset = NULL;
 
 /*  Session configurations  */
@@ -98,7 +99,7 @@ typedef struct
 } PUBLISHED_TLG_T;
 /*  Arrray of published telegram descriptors - only numPubTelegrams elements actually used  */
 PUBLISHED_TLG_T     aPubTelegrams[MAX_PUB_TELEGRAMS];
-UINT32              numPubTelegrams = 0;
+UINT32              numPubTelegrams = 0u;
 
 /*  Subscribed telegrams    */
 typedef struct
@@ -116,10 +117,10 @@ typedef struct
 } SUBSCRIBED_TLG_T;
 /*  Arrray of subscribed telegram descriptors - only numSubTelegrams elements actually used  */
 SUBSCRIBED_TLG_T    aSubTelegrams[MAX_SUB_TELEGRAMS];
-UINT32              numSubTelegrams = 0;
+UINT32              numSubTelegrams = 0u;
 
 /*  Global counter and system time - used to fill datasets*/
-UINT64                  globCounter = 0;
+UINT64                  globCounter = 0u;
 
 /*********************************************************************************************************************/
 /** Terminal helper functions.
@@ -335,7 +336,7 @@ static void freeParameters()
  */
 static TRDP_ERR_T fillDatasetElem(UINT8 * pBuff, UINT32 * pOffset, UINT32 elemType, UINT32 count)
 {
-    static UINT32   aSizes[TRDP_TIMEDATE64+1] = {0,1,1,2,1,2,4,8,1,2,4,8,4,8,4,6,8};
+    static UINT32   aSizes[TRDP_TIMEDATE64+1] = {0u,1u,1u,2u,1u,2u,4u,8u,1u,2u,4u,8u,4u,8u,4u,6u,8u};
     UINT32  elemSize;
     UINT8  *pData;
     UINT32  offset;
@@ -350,6 +351,11 @@ static TRDP_ERR_T fillDatasetElem(UINT8 * pBuff, UINT32 * pOffset, UINT32 elemTy
     }
     /*  Get size of dataset element */
     elemSize = aSizes[elemType];
+    if (elemSize == 0u)
+    {
+        printf("Element size of type  %u is zero!\n", elemType);
+        return TRDP_PARAM_ERR;
+    }
     /*  Align the offset    */
     if (offset % elemSize)
         offset += (elemSize - (offset % elemSize));
@@ -362,22 +368,22 @@ static TRDP_ERR_T fillDatasetElem(UINT8 * pBuff, UINT32 * pOffset, UINT32 elemTy
     /*  Get pointer to the buffer   */
     pData = pBuff + offset;
     /*  Copy values to the dataset  */
-    if (count == 0)
-        count = 1;
-    for (i = 0; i < count; i++)
+    if (count == 0u)
+        count = 1u;
+    for (i = 0u; i < count; i++)
     {
         switch (elemSize)
         {
-        case 1:
+        case 1u:
             *pData = (UINT8)globCounter;
             break;
-        case 2:
+        case 2u:
             *(UINT16 *)pData = (UINT16)globCounter;
             break;
-        case 4:
+        case 4u:
             *(UINT32 *)pData = (UINT32)globCounter;
             break;
-        case 8:
+        case 8u:
             *(UINT64 *)pData = (UINT64)globCounter;
             break;
         }
@@ -408,9 +414,15 @@ static TRDP_ERR_T printDatasetElem(UINT8 * pBuff, UINT32 * pOffset, UINT32 elemT
     }
     /*  Get size of dataset element */
     elemSize = aSizes[elemType];
+    if (elemSize == 0u)
+    {
+        printf("Element size of type  %u is zero!\n", elemType);
+        return TRDP_PARAM_ERR;
+    }
     /*  Align the offset    */
     if (offset % elemSize)
         offset += (elemSize - (offset % elemSize));
+
     if (offset > MAX_DATASET_LEN)
     {
         printf("Maximum dataset length %u exceeded\n", MAX_DATASET_LEN);

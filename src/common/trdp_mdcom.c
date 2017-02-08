@@ -3297,7 +3297,7 @@ TRDP_ERR_T trdp_mdCall (
     }
 
     /* set correct source IP address */
-    if ( srcIpAddr == 0 )
+    if ( srcIpAddr == 0u )
     {
         srcIpAddr = appHandle->realIP;
     }
@@ -3363,14 +3363,14 @@ TRDP_ERR_T trdp_mdCall (
         if ((msgType == TRDP_MSG_MR) && (replyTimeout == TDRP_MD_INFINITE_TIME))
         {
             /* add the infinity requirement from table A.17 */
-            pSenderElement->interval.tv_sec     = 0xFFFFFFFFU; /* let alone this setting gives a timeout way longer than
+            pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
                                                                  a century */
-            pSenderElement->interval.tv_usec    = 999999U;    /* max upper limit for micro seconds below 1 second */
+            pSenderElement->interval.tv_usec    = 999999;    /* max upper limit for micro seconds below 1 second */
             timeoutWire = 0U; /* the table A.17 representation of infinity, only applicable for Mr! */
         }
         else
         {
-            pSenderElement->interval.tv_sec     = replyTimeout / 1000000;
+            pSenderElement->interval.tv_sec     = replyTimeout / 1000000u;
             pSenderElement->interval.tv_usec    = replyTimeout % 1000000;
             /* this line will set the timeout value for Mn also to zero, which */
             /* seems to be ok, as this mesage will not cause the creation of   */

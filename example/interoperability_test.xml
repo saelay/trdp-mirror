@@ -128,7 +128,7 @@
       </data-set>
    </data-set-list>
    <!-- All possible datatypes:
-BOOLEAN8	1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
+BOOL8    1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
 CHAR8		2	char, can be used also as UTF8 
 UTF16		3	Unicode UTF-16 character
 INT8		4	Signed integer, 8 bit

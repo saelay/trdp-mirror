@@ -43,9 +43,9 @@
 
 /* XML parser declarations */
 
-#define MAX_URI_LEN     101         /* Max length of a URI string */
-#define MAX_TOK_LEN     124         /* Max length of token/attribute string */
-#define MAX_TAG_LEN     132         /* Max length of tag string */
+#define MAX_URI_LEN     101u         /* Max length of a URI string */
+#define MAX_TOK_LEN     124u         /* Max length of token/attribute string */
+#define MAX_TAG_LEN     132u         /* Max length of tag string */
 
 /* Tokens */
 typedef enum

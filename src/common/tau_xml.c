@@ -1151,7 +1151,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
 #ifdef TRDP_RETRIES
                                 else if (vos_strnicmp(attribute, "retries", MAX_TOK_LEN) == 0)
                                 {
-                                    pMdConfig->sendParam.retries = valueInt;
+                                    pMdConfig->sendParam.retries = (UINT8) valueInt;
                                 }
 #endif
                                 else if (vos_strnicmp(attribute, "ttl", MAX_TOK_LEN) == 0)
@@ -1489,7 +1489,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
 #ifdef TRDP_RETRIES
                             else if (vos_strnicmp(attribute, "retries", MAX_TOK_LEN) == 0)
                             {
-                                (*ppComPar)[i].sendParam.retries = valueInt;
+                                (*ppComPar)[i].sendParam.retries = (UINT8) valueInt;
                             }
 #endif
                         }

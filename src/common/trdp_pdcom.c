@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-08: Ticket #133: Accelerate PD packet reception
  *      BL 2016-06-24: Ticket #121: Callback on first packet after time out
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2016-06-01: Ticket #119: tlc_getInterval() repeatedly returns 0 after timeout
@@ -128,7 +130,7 @@ TRDP_ERR_T trdp_pdPut (
 
     /* Ticket #104: There is no data!
         Start sending by validating the packet */
-    if (pPacket->dataSize == 0 && dataSize == 0)
+    if ((pPacket->dataSize == 0u) && (dataSize == 0u))
     {
         /* set data valid */
         pPacket->privFlags = (TRDP_PRIV_FLAGS_T) (pPacket->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_INVALID_DATA);
@@ -136,9 +138,9 @@ TRDP_ERR_T trdp_pdPut (
         /*  Update some statistics  */
         pPacket->updPkts++;
     }
-    else if (pData != NULL && dataSize != 0)
+    else if ((pData != NULL) && (dataSize != 0u))
     {
-        if (pPacket->dataSize == 0)
+        if (pPacket->dataSize == 0u)
         {
             /* late data, enlarge packet buffer and copy existing header info */
             PD_PACKET_T *pTemp;
@@ -151,7 +153,7 @@ TRDP_ERR_T trdp_pdPut (
                 return TRDP_MEM_ERR;
             }
             /* copy existing header info */
-            memcpy(pTemp, pPacket->pFrame, trdp_packetSizePD(0));
+            memcpy(pTemp, pPacket->pFrame, trdp_packetSizePD(0u));
             vos_memFree(pPacket->pFrame);
             pPacket->pFrame = pTemp;
             /* complete header info, set dataset length */
@@ -282,19 +284,21 @@ TRDP_ERR_T  trdp_pdSendQueued (
          */
         if ((timerisset(&iterPD->interval) &&                   /*  Request for immediate sending   */
              !timercmp(&iterPD->timeToGo, &now, >)) ||
-            iterPD->privFlags & TRDP_REQ_2B_SENT)
+            (iterPD->privFlags & TRDP_REQ_2B_SENT))
         {
             /* send only if there is valid data */
             if (!(iterPD->privFlags & TRDP_INVALID_DATA))
             {
-                if (iterPD->privFlags & TRDP_REQ_2B_SENT &&
-                    iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PD))       /*  PULL packet?  */
+                if ((iterPD->privFlags & TRDP_REQ_2B_SENT) &&
+                    (iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PD)))       /*  PULL packet?  */
                 {
                     iterPD->pFrame->frameHead.msgType = vos_htons(TRDP_MSG_PP);
                 }
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
 
+               /* Publisher check from Table A.5:
+                  Actual topography counter values <-> Locally stored with publish */
                 if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
                                               appHandle->opTrnTopoCnt,
                                               vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt),
@@ -384,7 +388,7 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_ERR_T resultCode   = TRDP_NO_ERR;
     UINT32 recSize          = TRDP_MAX_PD_PACKET_SIZE;
     int informUser          = 0;
-    TRDP_ADDRESSES_T subAddresses = { 0, 0, 0, 0, 0, 0};
+    TRDP_ADDRESSES_T subAddresses = { 0u, 0u, 0u, 0u, 0u, 0u};
 
     /*  Get the packet from the wire:  */
     err = (TRDP_ERR_T) vos_sockReceiveUDP(sock,
@@ -419,6 +423,8 @@ TRDP_ERR_T  trdp_pdReceive (
     }
 
     /* First check incoming packet's topoCount against session topoCounts */
+    /* First subscriber check from Table A.5:
+       Actual topography counter values <-> Topography counters of received */
     if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
                                   appHandle->opTrnTopoCnt,
                                   vos_ntohl(pNewFrameHead->etbTopoCnt),
@@ -445,7 +451,7 @@ TRDP_ERR_T  trdp_pdReceive (
                 pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
                 pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrameHead->replyIpAddress);
 
-                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->etbTopoCnt, appHandle->opTrnTopoCnt, 0, 0);
+                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->etbTopoCnt, appHandle->opTrnTopoCnt, 0u, 0u);
 
                 trdp_pdPrepareStats(appHandle, pPulledElement);
             }
@@ -458,7 +464,7 @@ TRDP_ERR_T  trdp_pdReceive (
         {
 			UINT32 replyComId = vos_ntohl(pNewFrameHead->replyComId);
 
-			if (replyComId == 0)
+			if (replyComId == 0u)
 			{
 				replyComId = vos_ntohl(pNewFrameHead->comId);
 			}
@@ -472,7 +478,7 @@ TRDP_ERR_T  trdp_pdReceive (
             /*  Set the destination address of the requested telegram either to the replyIp or the source Ip of the
                 requester   */
 
-            if (pNewFrameHead->replyIpAddress != 0)
+            if (pNewFrameHead->replyIpAddress != 0u)
             {
                 pPulledElement->pullIpAddress = vos_ntohl(pNewFrameHead->replyIpAddress);
             }
@@ -512,7 +518,7 @@ TRDP_ERR_T  trdp_pdReceive (
         /* Save the real destination of the received packet (own IP or MC group) */
         pExistingElement->addr.destIpAddr = subAddresses.destIpAddr;
 
-        if (newSeqCnt == 0)  /* restarted or new sender */
+        if (newSeqCnt == 0u)  /* restarted or new sender */
         {
             trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr,
                                       (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType));
@@ -534,9 +540,9 @@ TRDP_ERR_T  trdp_pdReceive (
                 return TRDP_NO_ERR;     /* Ignore packet, too old or duplicate */
         }
 
-        if (newSeqCnt > 0 && newSeqCnt > pExistingElement->curSeqCnt + 1)
+        if ((newSeqCnt > 0u) && (newSeqCnt > (pExistingElement->curSeqCnt + 1u)))
         {
-            pExistingElement->numMissed += newSeqCnt - pExistingElement->curSeqCnt - 1;
+            pExistingElement->numMissed += newSeqCnt - pExistingElement->curSeqCnt - 1u;
         }
         else if (pExistingElement->curSeqCnt > newSeqCnt)
         {
@@ -553,8 +559,8 @@ TRDP_ERR_T  trdp_pdReceive (
         /*  Has the data changed?   */
         if (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
         {
-            if (pExistingElement->pktFlags & TRDP_FLAGS_FORCE_CB ||
-                pExistingElement->privFlags & TRDP_TIMED_OUT)
+            if ((pExistingElement->pktFlags & TRDP_FLAGS_FORCE_CB) ||
+                (pExistingElement->privFlags & TRDP_TIMED_OUT))
             {
                 informUser = 1;                 /* Inform user anyway */
             }
@@ -749,6 +755,7 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
 {
     PD_ELE_T    *iterPD = NULL;
     TRDP_ERR_T  err, result = TRDP_NO_ERR;
+    BOOL8       nonBlocking = !(appHandle->option & TRDP_OPTION_BLOCK);
 
     /*  Check the input params, in case we are in polling mode, the application
      is responsible to get any process data by calling tlp_get()    */
@@ -765,16 +772,25 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                 FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))  /*lint !e573 signed/unsigned
                                                                                          division in macro */
             {
+                VOS_LOG_T logType = VOS_LOG_ERROR;
+               
                 /*  PD frame received? */
                 /*  Compare the received data to the data in our receive queue
-                    Call user's callback if data changed    */
-
-                err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
+                   Call user's callback if data changed    */
+               
+                do
+                {
+                   /* Read as long as data is available */
+                   err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
+                  
+                } while (err == TRDP_NO_ERR && nonBlocking);
 
                 switch (err)
                 {
-                    VOS_LOG_T logType = VOS_LOG_ERROR;
                     case TRDP_NO_ERR:
+                        break;
+                    case TRDP_NODATA_ERR:
+                        result  = err;
                         break;
                     case TRDP_TOPO_ERR:
                     case TRDP_TIMEOUT_ERR:
@@ -839,8 +855,8 @@ TRDP_ERR_T trdp_pdCheck (
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
     /*  Check size    */
-    if (packetSize < TRDP_MIN_PD_HEADER_SIZE ||
-        packetSize > TRDP_MAX_PD_PACKET_SIZE)
+    if ((packetSize < TRDP_MIN_PD_HEADER_SIZE) ||
+        (packetSize > TRDP_MAX_PD_PACKET_SIZE))
     {
         vos_printLog(VOS_LOG_INFO, "PDframe size error (%u))\n", packetSize);
         err = TRDP_WIRE_ERR;
@@ -856,9 +872,9 @@ TRDP_ERR_T trdp_pdCheck (
             err = TRDP_CRC_ERR;
         }
         /*  Check protocol version  */
-        else if ((vos_ntohs(pPacket->protocolVersion) & TRDP_PROTOCOL_VERSION_CHECK_MASK)
-                 != (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK) ||
-                 vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE)
+        else if (((vos_ntohs(pPacket->protocolVersion) & TRDP_PROTOCOL_VERSION_CHECK_MASK)
+                   != (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK)) ||
+                 (vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE))
         {
             vos_printLog(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
                          vos_ntohs(pPacket->protocolVersion),
@@ -866,10 +882,10 @@ TRDP_ERR_T trdp_pdCheck (
             err = TRDP_WIRE_ERR;
         }
         /*  Check type  */
-        else if (vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PD &&
-                 vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PP &&
-                 vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PR &&
-                 vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PE)
+        else if ((vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PD) &&
+                 (vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PP) &&
+                 (vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PR) &&
+                 (vos_ntohs(pPacket->msgType) != (UINT16) TRDP_MSG_PE))
         {
             vos_printLog(VOS_LOG_INFO, "PDframe type error, received %04x\n", vos_ntohs(pPacket->msgType));
             err = TRDP_WIRE_ERR;
@@ -897,10 +913,10 @@ TRDP_ERR_T  trdp_pdSend (
     UINT32      destIp  = pPacket->addr.destIpAddr;
 
     /*  check for temporary address (PD PULL):  */
-    if (pPacket->pullIpAddress != 0)
+    if (pPacket->pullIpAddress != 0u)
     {
         destIp = pPacket->pullIpAddress;
-        pPacket->pullIpAddress = 0;
+        pPacket->pullIpAddress = 0u;
     }
 
     pPacket->sendSize = pPacket->grossSize;
@@ -945,12 +961,12 @@ TRDP_ERR_T  trdp_pdDistribute (
     PD_ELE_T *pSndQueue)
 {
     PD_ELE_T    *pPacket    = pSndQueue;
-    TRDP_TIME_T deltaTmax   = {1000, 0}; /*    Preset to highest value    */
-    TRDP_TIME_T tNull       = {0, 0};
-    TRDP_TIME_T temp        = {0, 0};
+    TRDP_TIME_T deltaTmax   = {1000u, 0}; /*    Preset to highest value    */
+    TRDP_TIME_T tNull       = {0u, 0};
+    TRDP_TIME_T temp        = {0u, 0};
     TRDP_TIME_T nextTime2Go;
-    UINT32      noOfPackets = 0;
-    UINT32      packetIndex = 0;
+    UINT32      noOfPackets = 0u;
+    UINT32      packetIndex = 0u;
 
     if (pSndQueue == NULL)
     {
@@ -972,8 +988,8 @@ TRDP_ERR_T  trdp_pdDistribute (
     while (pPacket)
     {
         /*  Do not count PULL-only packets!  */
-        if (pPacket->interval.tv_sec != 0 ||
-            pPacket->interval.tv_usec != 0)
+        if ((pPacket->interval.tv_sec != 0u) ||
+            (pPacket->interval.tv_usec != 0))
         {
             if (vos_cmpTime(&deltaTmax, &pPacket->interval) > 0)
             {
@@ -989,8 +1005,8 @@ TRDP_ERR_T  trdp_pdDistribute (
     }
 
     /*  Sanity check  */
-    if (vos_cmpTime(&deltaTmax, &temp) == 0 ||
-        noOfPackets == 0)
+    if ((vos_cmpTime(&deltaTmax, &temp) == 0) ||
+        (noOfPackets == 0))
     {
         vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: no minimal interval in %d packets found!\n", noOfPackets);
         return TRDP_NO_ERR;     /* Ticket #14: Nothing to shape is not an error */
@@ -999,34 +1015,34 @@ TRDP_ERR_T  trdp_pdDistribute (
     /*  This is the delta time we can jitter...   */
     vos_divTime(&deltaTmax, noOfPackets);
 
-    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %ld.%06u\n", (long) deltaTmax.tv_sec, deltaTmax.tv_usec);
-    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %ld.%06u\n", (long) tNull.tv_sec, tNull.tv_usec);
+    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %ld.%06u\n", (long) deltaTmax.tv_sec, (unsigned int)deltaTmax.tv_usec);
+    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %ld.%06u\n", (long) tNull.tv_sec, (unsigned int)tNull.tv_usec);
     vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: noOfPackets = %d\n", noOfPackets);
 
     for (packetIndex = 0, pPacket = pSndQueue; packetIndex < noOfPackets && pPacket != NULL; )
     {
         /*  Ignore PULL-only packets!  */
-        if (pPacket->interval.tv_sec != 0 ||
-            pPacket->interval.tv_usec != 0)
+        if ((pPacket->interval.tv_sec != 0u) ||
+            (pPacket->interval.tv_usec != 0))
         {
             nextTime2Go = tNull;
             temp        = deltaTmax;
             vos_mulTime(&temp, packetIndex);
 
             vos_addTime(&nextTime2Go, &temp);
-            vos_mulTime(&temp, 2);
+            vos_mulTime(&temp, 2u);
 
             if (vos_cmpTime(&temp, &pPacket->interval) > 0)
             {
                 vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: packet [%d] with interval %lu.%06u could timeout...\n",
-                             packetIndex, (long) temp.tv_sec, temp.tv_usec);
+                             packetIndex, (long) temp.tv_sec, (unsigned int)temp.tv_usec);
                 vos_printLogStr(VOS_LOG_INFO, "...no change in send time!\n");
             }
             else
             {
                 pPacket->timeToGo = nextTime2Go;
                 vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: nextTime2Go[%d] = %lu.%06u\n",
-                             packetIndex, (unsigned long) nextTime2Go.tv_sec, nextTime2Go.tv_usec);
+                             packetIndex, (unsigned long) nextTime2Go.tv_sec, (unsigned int)nextTime2Go.tv_usec);
 
             }
             packetIndex++;
