@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2016-07-09: Ticket #127 MD notify message: Invalid session identifier
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-10: Ticket #115 MD: Missing parameter pktFlags in tlm_reply() and tlm_replyQuery()
  *      BL 2016-02-04: Ticket #110: Handling of optional marshalling on sending
@@ -3021,13 +3022,26 @@ static void trdp_mdDetailSenderPacket (const TRDP_MSG_T         msgType,
     pSenderElement->pPacket->frameHead.opTrnTopoCnt     = vos_htonl(pSenderElement->addr.opTrnTopoCnt);
     pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(pSenderElement->dataSize);
     pSenderElement->pPacket->frameHead.replyStatus      = (INT32) vos_htonl((UINT32)replyStatus);
-    memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
+    
+    /* MD notifications should not send UUID (#127) */
+    if (msgType == TRDP_MSG_MN)
+    {
+        /* Normally, allocated memory is always cleared - just in case... */
+        memset(pSenderElement->pPacket->frameHead.sessionID, 0, TRDP_SESS_ID_SIZE);
+    }
+    else
+    {
+        memcpy(pSenderElement->pPacket->frameHead.sessionID, pSenderElement->sessionID, TRDP_SESS_ID_SIZE);
+    }
+
     pSenderElement->pPacket->frameHead.replyTimeout = vos_htonl(mdTimeOut);
+
     if ( srcURI != NULL )
     {
         memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, srcURI,
                TRDP_MAX_URI_USER_LEN);
     }
+
     if ( destURI != NULL )
     {
         memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI,
