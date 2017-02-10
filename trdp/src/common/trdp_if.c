@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-10: Ticket #137 tlc_closeSession should close the tcp socket used for md communication
  *      BL 2017-02-10: Ticket #128 PD: Support of ComId == 0
  *      BL 2017-02-10: Ticket #130 PD Pull: Request is always sent to the same ip address
  *      BL 2017-02-09: Ticket #132  tlp_publish: Check of datasize wrong if using marshaller
@@ -315,8 +316,8 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
 #ifdef TRDP_RETRIES
     pSession->mdDefault.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
 #endif
-    pSession->mdDefault.maxNumSessions = TRDP_MD_MAX_NUM_SESSIONS;
-    pSession->tcpFd.listen_sd = -1;
+    pSession->mdDefault.maxNumSessions  = TRDP_MD_MAX_NUM_SESSIONS;
+    pSession->tcpFd.listen_sd           = VOS_INVALID_SOCKET;
 
 #endif
 
@@ -789,6 +790,12 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     vos_memFree(pSession->pMDListenQueue);
                     pSession->pMDListenQueue = pNext;
                 }
+                /* Ticket #137: close TCP listener socket */
+                if (pSession->tcpFd.listen_sd != VOS_INVALID_SOCKET)
+                {
+                    (void)vos_sockClose(pSession->tcpFd.listen_sd);
+                    pSession->tcpFd.listen_sd = VOS_INVALID_SOCKET;
+                }
 #endif
                 if (vos_mutexUnlock(pSession->mutex) != VOS_NO_ERR)
                 {
@@ -798,6 +805,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 vos_mutexDelete(pSession->mutex);
                 vos_memFree(pSession);
             }
+            
         }
     }
 
