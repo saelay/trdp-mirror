@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-09: Ticket #131 TRDP_ECSP_CTRL_T in the tau_ctrl_types.h should not include the leadVehOfCst field
  */
 
 #ifndef TAU_CTRL_TYPES_H
@@ -115,11 +116,7 @@ typedef struct
 typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
-    UINT8                   reserved01;     /**< reserved (=0)                                                      */
-    UINT8                   leadVehOfCst;   /**< position of leading vehicle in consist range 0...32
-                                                    0 = not defined
-                                                    1 = first vehicle in consist in direction 1
-                                                    2 = second vehicle etc.                                         */
+    UINT16                  reserved01;     /**< reserved (=0)                                                      */
     TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT8                   inhibit;        /**< inauguration inhibit
                                                     0 = no inhibit request
