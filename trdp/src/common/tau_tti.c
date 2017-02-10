@@ -23,7 +23,7 @@
  * $Id$
  *
  *      BL 2017-02-10: Ticket #129 Found a bug which yields wrong output params and potentially segfaults
- *      BL 2017-02-08: Ticket #142 Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-08: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-02-18: Ticket #7: Add train topology information support
  */
 
@@ -48,7 +48,7 @@
  * DEFINES
  */
 
-#define TTI_CACHED_CONSISTS     8u          /**< We hold this number of consist infos (ca. 105kB) */
+#define TTI_CACHED_CONSISTS  8u             /**< We hold this number of consist infos (ca. 105kB) */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -160,8 +160,8 @@ static void ttiPDCallback (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-    int changed = 0;
-    VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
+    int         changed         = 0;
+    VOS_SEMA_T  waitForInaug    = (VOS_SEMA_T) pMsg->pUserRef;
 
     if (pMsg->comId == TTDB_STATUS_COMID)
     {
@@ -186,7 +186,7 @@ static void ttiPDCallback (
                    (sizeof(TRDP_OP_TRAIN_DIR_STATE_T) < dataSize) ? sizeof(TRDP_OP_TRAIN_DIR_STATE_T) : dataSize);
 
             /* unmarshall manually:   */
-            appHandle->pTTDB->opTrnState.etbTopoCnt = vos_ntohl(pTelegram->etbTopoCnt);
+            appHandle->pTTDB->opTrnState.etbTopoCnt         = vos_ntohl(pTelegram->etbTopoCnt);
             appHandle->pTTDB->opTrnState.state.opTrnTopoCnt = vos_ntohl(pTelegram->state.opTrnTopoCnt);
             appHandle->pTTDB->opTrnState.state.crc = vos_ntohl(pTelegram->state.crc);
 
@@ -516,51 +516,51 @@ static void ttiRequestTTDBdata (
 {
     switch (comID)
     {
-        case TTDB_OP_DIR_INFO_REQ_COMID:
-        {
-            UINT8 param = 0;
-            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_OP_DIR_INFO_REQ_COMID, appHandle->etbTopoCnt,
-                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
-                                                                     TTDB_OP_DIR_INFO_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                               TTDB_OP_DIR_INFO_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
-            /* Make sure the request is sent: */
-        }
-        break;
-        case TTDB_TRN_DIR_REQ_COMID:
-        {
-            UINT8 param = 0;        /* ETB0 */
-            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_TRN_DIR_REQ_COMID, appHandle->etbTopoCnt,
-                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
-                                                                     TTDB_TRN_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                               TTDB_TRN_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
-        }
-        break;
-        case TTDB_NET_DIR_REQ_COMID:
-        {
-            UINT8 param = 0;        /* ETB0 */
-            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_NET_DIR_REQ_COMID, appHandle->etbTopoCnt,
-                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
-                                                                     TTDB_NET_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                               TTDB_NET_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
-        }
-        break;
-        case TTDB_READ_CMPLT_REQ_COMID:
-        {
-            UINT8 param = 0;        /* ETB0 */
-            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_READ_CMPLT_REQ_COMID, appHandle->etbTopoCnt,
-                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
-                                                                     TTDB_READ_CMPLT_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                               TTDB_READ_CMPLT_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
-        }
-        break;
-        case TTDB_STAT_CST_REQ_COMID:
-        {
-            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_STAT_CST_REQ_COMID, appHandle->etbTopoCnt,
-                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
-                                                                     TTDB_STAT_CST_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                               TTDB_STAT_CST_REQ_TO, 0, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
-        }
-        break;
+       case TTDB_OP_DIR_INFO_REQ_COMID:
+       {
+           UINT8 param = 0;
+           (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_OP_DIR_INFO_REQ_COMID, appHandle->etbTopoCnt,
+                              appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                    TTDB_OP_DIR_INFO_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                              TTDB_OP_DIR_INFO_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+           /* Make sure the request is sent: */
+       }
+       break;
+       case TTDB_TRN_DIR_REQ_COMID:
+       {
+           UINT8 param = 0;         /* ETB0 */
+           (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_TRN_DIR_REQ_COMID, appHandle->etbTopoCnt,
+                              appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                    TTDB_TRN_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                              TTDB_TRN_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+       }
+       break;
+       case TTDB_NET_DIR_REQ_COMID:
+       {
+           UINT8 param = 0;         /* ETB0 */
+           (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_NET_DIR_REQ_COMID, appHandle->etbTopoCnt,
+                              appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                    TTDB_NET_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                              TTDB_NET_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+       }
+       break;
+       case TTDB_READ_CMPLT_REQ_COMID:
+       {
+           UINT8 param = 0;         /* ETB0 */
+           (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_READ_CMPLT_REQ_COMID, appHandle->etbTopoCnt,
+                              appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                    TTDB_READ_CMPLT_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                              TTDB_READ_CMPLT_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+       }
+       break;
+       case TTDB_STAT_CST_REQ_COMID:
+       {
+           (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_STAT_CST_REQ_COMID, appHandle->etbTopoCnt,
+                              appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
+                                                                    TTDB_STAT_CST_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
+                              TTDB_STAT_CST_REQ_TO, 0, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
+       }
+       break;
 
     }
     /* Make sure the request is sent: */
@@ -1229,7 +1229,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
     }
     if (index < TTI_CACHED_CONSISTS)
     {
-        *pCstInfo = *appHandle->pTTDB->cstInfo[index];
+        *pCstInfo           = *appHandle->pTTDB->cstInfo[index];
         pCstInfo->etbCnt    = vos_ntohs(pCstInfo->etbCnt);
         pCstInfo->vehCnt    = vos_ntohs(pCstInfo->vehCnt);
         pCstInfo->fctCnt    = vos_ntohs(pCstInfo->fctCnt);

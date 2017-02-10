@@ -426,7 +426,6 @@ help:
 	@echo "To include message data support, append 'MD_SUPPORT=1' to the make command " >&2
 	@echo " " >&2
 	@echo "Other builds:" >&2
-	@echo "  * make demo      # build the sample applications" >&2
 	@echo "  * make test      # build the test server application" >&2
 	@echo "  * make pdtest    # build the PDCom test applications" >&2
 	@echo "  * make mdtest    # build the UDPMDcom test application" >&2
