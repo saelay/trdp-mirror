@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-10: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2017-02-08: Stacksize computation enhanced
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
@@ -83,7 +84,7 @@ int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
         {
             return 0;
         }
-        usleep(10000);      /* cancellation point */
+        usleep(10000u);      /* cancellation point */
         if (errno == EINTR)
         {
             break;
@@ -262,7 +263,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         return VOS_INIT_ERR;
     }
 
-    if (interval > 0)
+    if (interval > 0u)
     {
         vos_printLog(VOS_LOG_ERROR,
                      "%s cyclic threads not implemented yet\n",
@@ -514,17 +515,16 @@ EXT_DECL void vos_getTime (
             changing the system clock during operation
             might interrupt process data packet transmissions!    */
 
-        /*lint -e(534) ignore return value */
-        gettimeofday(&myTime, NULL);
+        (void)gettimeofday(&myTime, NULL);
 
 #else
 
         struct timespec currentTime;
 
-        clock_gettime(CLOCK_MONOTONIC, &currentTime);
+        (void)clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
         myTime.tv_sec   = currentTime.tv_sec;         \
-        myTime.tv_usec  = currentTime.tv_nsec / 1000; \
+        myTime.tv_usec  = (int) currentTime.tv_nsec / 1000; \
 
 #endif
 
@@ -547,14 +547,12 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
     struct timeval  curTime;
     struct tm       *curTimeTM;
 
-    /*lint -e(534) ignore return value */
-    gettimeofday(&curTime, NULL);
+    (void)gettimeofday(&curTime, NULL);
     curTimeTM = localtime(&curTime.tv_sec);
 
     if (curTimeTM != NULL)
     {
-        /*lint -e(534) ignore return value */
-        sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
+        (void)sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
                 curTimeTM->tm_year + 1900,
                 curTimeTM->tm_mon + 1,
                 curTimeTM->tm_mday,
@@ -649,7 +647,7 @@ EXT_DECL void vos_divTime (
     VOS_TIME_T  *pTime,
     UINT32      divisor)
 {
-    if ((pTime == NULL) || (divisor == 0))
+    if ((pTime == NULL) || (divisor == 0u))
     {
         vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
@@ -659,7 +657,7 @@ EXT_DECL void vos_divTime (
 
         temp = pTime->tv_sec % divisor;
         pTime->tv_sec /= divisor;
-        if (temp > 0)
+        if (temp > 0u)
         {
             pTime->tv_usec += temp * 1000000;
         }

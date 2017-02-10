@@ -16,6 +16,9 @@
  *
  * $Id$
  *
+ *      BL 2017-02-10: Ticket #128 PD: Support of ComId == 0
+ *      BL 2017-02-10: Ticket #130 PD Pull: Request is always sent to the same ip address
+ *      BL 2017-02-09: Ticket #132  tlp_publish: Check of datasize wrong if using marshaller
  *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2017-02-08: Ticket #139: Swap parameter in tlm_reply
  *      BL 2016-07-06: Ticket #122: 64Bit compatibility (+ compiler warnings)
@@ -376,22 +379,22 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         for (retries = 0; retries < TRDP_IF_WAIT_FOR_READY; retries++)
         {
             /*  Publish our statistics packet   */
-            ret = tlp_publish(pSession,                     /*    our application identifier    */
+            ret = tlp_publish(pSession,                 /*    our application identifier    */
                               &dummyPubHndl,            /*    our pulication identifier     */
                               TRDP_GLOBAL_STATISTICS_COMID, /*    ComID to send                 */
-                              0,                        /*    local consist only            */
-                              0,                        /*    no orient/direction info      */
-                              0,                        /*    default source IP             */
-                              0,                        /*    where to send to              */
-                              0,                        /*    Cycle time in ms              */
-                              0,                        /*    not redundant                 */
+                              0u,                       /*    local consist only            */
+                              0u,                       /*    no orient/direction info      */
+                              0u,                       /*    default source IP             */
+                              0u,                       /*    where to send to              */
+                              0u,                       /*    Cycle time in ms              */
+                              0u,                       /*    not redundant                 */
                               TRDP_FLAGS_NONE,          /*    No callbacks                  */
                               NULL,                     /*    default qos and ttl           */
                               NULL,                     /*    initial data                  */
                               sizeof(TRDP_STATISTICS_T));
             if (ret == TRDP_SOCK_ERR)
             {
-                (void) vos_threadDelay(1000000);
+                (void) vos_threadDelay(1000000u);
             }
             else
             {
@@ -407,13 +410,13 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                                 NULL,
                                 NULL,
                                 TRDP_STATISTICS_PULL_COMID, /*    ComID                         */
-                                0,                      /*    etbtopocount: local consist only */
-                                0,                      /*    optrntopocount                   */
-                                0,                      /*    Source IP filter                 */
-                                0,                      /*    Default destination (or MC Group)   */
-                                TRDP_FLAGS_NONE,        /*    packet flags                  */
-                                TRDP_TIMER_FOREVER,     /*    Time out in us                */
-                                TRDP_TO_DEFAULT);       /*    delete invalid data on timeout  */
+                                0u,                     /*    etbtopocount: local consist only  */
+                                0u,                     /*    optrntopocount                    */
+                                0u,                     /*    Source IP filter                  */
+                                0u,                     /*    Default destination (or MC Group) */
+                                TRDP_FLAGS_NONE,        /*    packet flags                      */
+                                TRDP_TIMER_FOREVER,     /*    Time out in us                    */
+                                TRDP_TO_DEFAULT);       /*    delete invalid data on timeout    */
         }
         if (ret == TRDP_NO_ERR)
         {
@@ -478,52 +481,52 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
     {
         /* check whether default values needed or not */
 
-        if (pSession->pdDefault.pfCbFunction == NULL &&
-            pPdDefault->pfCbFunction != NULL)
+        if ((pSession->pdDefault.pfCbFunction == NULL) &&
+            (pPdDefault->pfCbFunction != NULL))
         {
             pSession->pdDefault.pfCbFunction = pPdDefault->pfCbFunction;
         }
 
-        if (pSession->pdDefault.pRefCon == NULL &&
-            pPdDefault->pRefCon != NULL)
+        if ((pSession->pdDefault.pRefCon == NULL) &&
+            (pPdDefault->pRefCon != NULL))
         {
             pSession->pdDefault.pRefCon = pPdDefault->pRefCon;
         }
 
-        if (pPdDefault->flags != TRDP_FLAGS_DEFAULT &&
-            !(pPdDefault->flags & TRDP_FLAGS_NONE))
+        if ((pPdDefault->flags != TRDP_FLAGS_DEFAULT) &&
+            (!(pPdDefault->flags & TRDP_FLAGS_NONE)))
         {
             pSession->pdDefault.flags |= pPdDefault->flags;
         }
 
-        if (pSession->pdDefault.port == TRDP_PD_UDP_PORT &&
-            pPdDefault->port != 0)
+        if ((pSession->pdDefault.port == TRDP_PD_UDP_PORT) &&
+            (pPdDefault->port != 0u))
         {
             pSession->pdDefault.port = pPdDefault->port;
         }
 
-        if (pSession->pdDefault.timeout == TRDP_PD_DEFAULT_TIMEOUT &&
-            pPdDefault->timeout != 0)
+        if ((pSession->pdDefault.timeout == TRDP_PD_DEFAULT_TIMEOUT) &&
+            (pPdDefault->timeout != 0u))
         {
             pSession->pdDefault.timeout = pPdDefault->timeout;
         }
 
-        if (pSession->pdDefault.toBehavior == TRDP_TO_DEFAULT &&
-            pPdDefault->toBehavior != TRDP_TO_DEFAULT)
+        if ((pSession->pdDefault.toBehavior == TRDP_TO_DEFAULT) &&
+            (pPdDefault->toBehavior != TRDP_TO_DEFAULT))
         {
             pSession->pdDefault.toBehavior = pPdDefault->toBehavior;
         }
 
-        if (pSession->pdDefault.sendParam.qos == TRDP_PD_DEFAULT_QOS &&
-            pPdDefault->sendParam.qos != TRDP_PD_DEFAULT_QOS &&
-            pPdDefault->sendParam.qos != 0)
+        if ((pSession->pdDefault.sendParam.qos == TRDP_PD_DEFAULT_QOS) &&
+            (pPdDefault->sendParam.qos != TRDP_PD_DEFAULT_QOS) &&
+            (pPdDefault->sendParam.qos != 0u))
         {
             pSession->pdDefault.sendParam.qos = pPdDefault->sendParam.qos;
         }
 
-        if (pSession->pdDefault.sendParam.ttl == TRDP_PD_DEFAULT_TTL &&
-            pPdDefault->sendParam.ttl != TRDP_PD_DEFAULT_TTL &&
-            pPdDefault->sendParam.ttl != 0)
+        if ((pSession->pdDefault.sendParam.ttl == TRDP_PD_DEFAULT_TTL) &&
+            (pPdDefault->sendParam.ttl != TRDP_PD_DEFAULT_TTL) &&
+            (pPdDefault->sendParam.ttl != 0u))
         {
             pSession->pdDefault.sendParam.ttl = pPdDefault->sendParam.ttl;
         }
@@ -536,77 +539,77 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
         /* If the existing values are the defaults or unset, and new non-default values are supplied,
            overwrite the existing ones  */
 
-        if (pSession->mdDefault.pfCbFunction == NULL &&
-            pMdDefault->pfCbFunction != NULL)
+        if ((pSession->mdDefault.pfCbFunction == NULL) &&
+            (pMdDefault->pfCbFunction != NULL))
         {
             pSession->mdDefault.pfCbFunction = pMdDefault->pfCbFunction;
         }
 
-        if (pSession->mdDefault.pRefCon == NULL &&
-            pMdDefault->pRefCon != NULL)
+        if ((pSession->mdDefault.pRefCon == NULL) &&
+            (pMdDefault->pRefCon != NULL))
         {
             pSession->mdDefault.pRefCon = pMdDefault->pRefCon;
         }
 
-        if (pSession->mdDefault.sendParam.qos == TRDP_MD_DEFAULT_QOS &&
-            pMdDefault->sendParam.qos != TRDP_MD_DEFAULT_QOS &&
-            pMdDefault->sendParam.qos != 0)
+        if ((pSession->mdDefault.sendParam.qos == TRDP_MD_DEFAULT_QOS) &&
+            (pMdDefault->sendParam.qos != TRDP_MD_DEFAULT_QOS) &&
+            (pMdDefault->sendParam.qos != 0u))
         {
             pSession->mdDefault.sendParam.qos = pMdDefault->sendParam.qos;
         }
 
-        if (pSession->mdDefault.sendParam.ttl == TRDP_MD_DEFAULT_TTL &&
-            pMdDefault->sendParam.ttl != TRDP_MD_DEFAULT_TTL &&
-            pMdDefault->sendParam.ttl != 0)
+        if ((pSession->mdDefault.sendParam.ttl == TRDP_MD_DEFAULT_TTL) &&
+            (pMdDefault->sendParam.ttl != TRDP_MD_DEFAULT_TTL) &&
+            (pMdDefault->sendParam.ttl != 0u))
         {
             pSession->mdDefault.sendParam.ttl = pMdDefault->sendParam.ttl;
         }
 
-        if (pMdDefault->flags != TRDP_FLAGS_DEFAULT &&
-            !(pMdDefault->flags & TRDP_FLAGS_NONE))
+        if ((pMdDefault->flags != TRDP_FLAGS_DEFAULT) &&
+            (!(pMdDefault->flags & TRDP_FLAGS_NONE)))
         {
             pSession->mdDefault.flags |= pMdDefault->flags;
         }
 
         /* check whether default values needed or not */
-        if (pSession->mdDefault.tcpPort == TRDP_MD_TCP_PORT &&
-            pMdDefault->tcpPort != 0)
+        if ((pSession->mdDefault.tcpPort == TRDP_MD_TCP_PORT) &&
+            (pMdDefault->tcpPort != 0u))
         {
             pSession->mdDefault.tcpPort = pMdDefault->tcpPort;
         }
 
-        if (pSession->mdDefault.udpPort == TRDP_MD_UDP_PORT &&
-            pMdDefault->udpPort != 0)
+        if ((pSession->mdDefault.udpPort == TRDP_MD_UDP_PORT) &&
+            (pMdDefault->udpPort != 0u))
         {
             pSession->mdDefault.udpPort = pMdDefault->udpPort;
         }
 
-        if (pSession->mdDefault.confirmTimeout == TRDP_MD_DEFAULT_CONFIRM_TIMEOUT &&
-            pMdDefault->confirmTimeout != 0)
+        if ((pSession->mdDefault.confirmTimeout == TRDP_MD_DEFAULT_CONFIRM_TIMEOUT) &&
+            (pMdDefault->confirmTimeout != 0u))
         {
             pSession->mdDefault.confirmTimeout = pMdDefault->confirmTimeout;
         }
 
-        if (pSession->mdDefault.connectTimeout == TRDP_MD_DEFAULT_CONNECTION_TIMEOUT &&
-            pMdDefault->connectTimeout != 0)
+        if ((pSession->mdDefault.connectTimeout == TRDP_MD_DEFAULT_CONNECTION_TIMEOUT) &&
+            (pMdDefault->connectTimeout != 0u))
         {
             pSession->mdDefault.connectTimeout = pMdDefault->connectTimeout;
         }
 
-        if (pSession->mdDefault.sendingTimeout == TRDP_MD_DEFAULT_SENDING_TIMEOUT &&
-            pMdDefault->sendingTimeout != 0)
+        if ((pSession->mdDefault.sendingTimeout == TRDP_MD_DEFAULT_SENDING_TIMEOUT) &&
+            (pMdDefault->sendingTimeout != 0u))
         {
             pSession->mdDefault.sendingTimeout = pMdDefault->sendingTimeout;
         }
 
-        if (pSession->mdDefault.replyTimeout == TRDP_MD_DEFAULT_REPLY_TIMEOUT &&
-            pMdDefault->replyTimeout != 0)
+        if ((pSession->mdDefault.replyTimeout == TRDP_MD_DEFAULT_REPLY_TIMEOUT) &&
+            (pMdDefault->replyTimeout != 0u))
         {
             pSession->mdDefault.replyTimeout = pMdDefault->replyTimeout;
         }
 
-        if (pSession->mdDefault.maxNumSessions == TRDP_MD_MAX_NUM_SESSIONS &&
-            pMdDefault->maxNumSessions != 0)
+        if ((pSession->mdDefault.maxNumSessions == TRDP_MD_MAX_NUM_SESSIONS) &&
+            (pMdDefault->maxNumSessions != 0u))
         {
             pSession->mdDefault.maxNumSessions = pMdDefault->maxNumSessions;
         }
@@ -632,7 +635,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
     TRDP_APP_SESSION_T appHandle)
 {
     TRDP_SESSION_PT pSession = NULL;
-    BOOL8 found = FALSE;
+    BOOL8           found = FALSE;
     TRDP_ERR_T      ret;
 
     /*    Find the session    */
@@ -1219,8 +1222,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_ERR_T  ret = TRDP_NO_ERR;
 
     /*    Check params    */
-    if ((dataSize > TRDP_MAX_PD_DATA_SIZE)
-        || (interval != 0 && interval < TRDP_TIMER_GRANULARITY)
+    if ((interval != 0u && interval < TRDP_TIMER_GRANULARITY)
         || (pPubHandle == NULL))
     {
         return TRDP_PARAM_ERR;
@@ -1240,7 +1242,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
         /* initialize pubHandle */
         pubHandle.comId         = comId;
         pubHandle.destIpAddr    = destIpAddr;
-        pubHandle.mcGroup       = vos_isMulticast(destIpAddr) ? destIpAddr : 0;
+        pubHandle.mcGroup       = vos_isMulticast(destIpAddr) ? destIpAddr : 0u;
         pubHandle.srcIpAddr     = srcIpAddr;
 
         /*    Look for existing element    */
@@ -1280,7 +1282,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         FALSE,
                         -1,
                         &pNewElement->socketIdx,
-                        0);
+                        0u);
 
                 if (ret != TRDP_NO_ERR)
                 {
@@ -1313,7 +1315,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             else
             {
                 vos_getTime(&nextTime);
-                tv_interval.tv_sec  = interval / 1000000;
+                tv_interval.tv_sec  = interval / 1000000u;
                 tv_interval.tv_usec = interval % 1000000;
                 vos_addTime(&nextTime, &tv_interval);
                 pNewElement->interval   = tv_interval;
@@ -1324,7 +1326,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             pNewElement->addr       = pubHandle;
             pNewElement->pktFlags   = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
             /* pNewElement->privFlags      = TRDP_PRIV_NONE; */
-            pNewElement->pullIpAddress  = 0;
+            pNewElement->pullIpAddress  = 0u;
             pNewElement->redId          = redId;
             pNewElement->pCachedDS      = NULL;
             pNewElement->magic          = TRDP_MAGIC_PUB_HNDL_VALUE;
@@ -1355,14 +1357,14 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             }
 
             /*    Compute the header fields */
-            trdp_pdInit(pNewElement, TRDP_MSG_PD, etbTopoCnt, opTrnTopoCnt, 0, 0);
+            trdp_pdInit(pNewElement, TRDP_MSG_PD, etbTopoCnt, opTrnTopoCnt, 0u, 0u);
 
             /*    Insert at front    */
             trdp_queueInsFirst(&appHandle->pSndQueue, pNewElement);
 
             *pPubHandle = (TRDP_PUB_T) pNewElement;
 
-            if (dataSize != 0)
+            if (dataSize != 0u)
             {
                 ret = tlp_put(appHandle, *pPubHandle, pData, dataSize);
             }
@@ -1436,11 +1438,11 @@ EXT_DECL TRDP_ERR_T tlp_republish (
     }
     else
     {
-        pubHandle->addr.mcGroup = 0;
+        pubHandle->addr.mcGroup = 0u;
     }
 
     /*    Compute the header fields */
-    trdp_pdInit(pubHandle, TRDP_MSG_PD, etbTopoCnt, opTrnTopoCnt, 0, 0);
+    trdp_pdInit(pubHandle, TRDP_MSG_PD, etbTopoCnt, opTrnTopoCnt, 0u, 0u);
 
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
     {
@@ -1490,8 +1492,8 @@ TRDP_ERR_T  tlp_unpublish (
     {
         /*    Remove from queue?    */
         trdp_queueDelElement(&appHandle->pSndQueue, pElement);
-        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0, FALSE);
-        pElement->magic = 0;
+        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0u, FALSE);
+        pElement->magic = 0u;
         if (pElement->pSeqCntList != NULL)
         {
             vos_memFree(pElement->pSeqCntList);
@@ -1538,8 +1540,7 @@ TRDP_ERR_T tlp_put (
     PD_ELE_T    *pElement   = (PD_ELE_T *)pubHandle;
     TRDP_ERR_T  ret         = TRDP_NO_ERR;
 
-    if (pElement == NULL ||
-        dataSize > TRDP_MAX_PD_DATA_SIZE)
+    if (pElement == NULL)
     {
         return TRDP_PARAM_ERR;
     }
@@ -1630,12 +1631,12 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
                 }
                 else if (timerisset(&appHandle->nextJob))
                 {
-                    pInterval->tv_sec   = 0;                                /* 0ms if time is over (were we delayed?) */
+                    pInterval->tv_sec   = 0u;                               /* 0ms if time is over (were we delayed?) */
                     pInterval->tv_usec  = 0;                                /* Application should limit this    */
                 }
                 else    /* if no timeout set, set maximum time to 1000sec   */
                 {
-                    pInterval->tv_sec   = 1000;                             /* 1 hour if no timeout is set      */
+                    pInterval->tv_sec   = 1000u;                            /* 1 hour if no timeout is set      */
                     pInterval->tv_usec  = 0;                                /* Application should limit this    */
                 }
 
@@ -1794,11 +1795,10 @@ EXT_DECL TRDP_ERR_T tlp_request (
     PD_ELE_T    *pReqElement    = NULL;
 
     /*    Check params    */
-    if ((appHandle == 0)
-        || (subHandle == 0)
-        || (comId == 0)
-        || (dataSize > TRDP_MAX_PD_PACKET_SIZE)
-        || (destIpAddr == 0))
+    if ((appHandle == NULL)
+        || (subHandle == NULL)
+        || ((comId == 0u) && (replyComId == 0u))
+        || (destIpAddr == 0u))
     {
         return TRDP_PARAM_ERR;
     }
@@ -1819,8 +1819,15 @@ EXT_DECL TRDP_ERR_T tlp_request (
     if ( ret == TRDP_NO_ERR)
     {
         {
+            TRDP_ADDRESSES_T    addr;
+            
+            addr.comId         = comId;
+            addr.srcIpAddr     = srcIpAddr;
+            addr.destIpAddr    = destIpAddr;
+            addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1)? destIpAddr: VOS_INADDR_ANY;
+
             /*    Look for former request element    */
-            pReqElement = trdp_queueFindComId(appHandle->pSndQueue, comId);
+            pReqElement = trdp_queueFindPubAddr(appHandle->pSndQueue, &addr);
 
             if ( pReqElement == NULL)
             {
@@ -1857,13 +1864,13 @@ EXT_DECL TRDP_ERR_T tlp_request (
                                                  appHandle->pdDefault.port,
                                                  (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
                                                  srcIpAddr,
-                                                 0,
+                                                 0u,
                                                  TRDP_SOCK_PD,
                                                  appHandle->option,
                                                  FALSE,
                                                  -1,
                                                  &pReqElement->socketIdx,
-                                                 0);
+                                                 0u);
 
                         if (ret != TRDP_NO_ERR)
                         {
@@ -1881,7 +1888,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                             pReqElement->addr.comId         = comId;
                             pReqElement->addr.destIpAddr    = destIpAddr;
                             pReqElement->addr.srcIpAddr     = srcIpAddr;
-                            pReqElement->addr.mcGroup       = 0;
+                            pReqElement->addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1)? destIpAddr: VOS_INADDR_ANY;
                             pReqElement->pktFlags           =
                                 (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
                             pReqElement->magic = TRDP_MAGIC_PUB_HNDL_VALUE;
@@ -1900,16 +1907,20 @@ EXT_DECL TRDP_ERR_T tlp_request (
             if (ret == TRDP_NO_ERR && pReqElement != NULL)
             {
 
-                if (replyComId == 0)
+                if (replyComId == 0u)
                 {
                     replyComId = pSubPD->addr.comId;
                 }
 
+                pReqElement->addr.destIpAddr    = destIpAddr;
+                pReqElement->addr.srcIpAddr     = srcIpAddr;
+                pReqElement->addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1)? destIpAddr: VOS_INADDR_ANY;
+                
                 /*    Compute the header fields */
                 trdp_pdInit(pReqElement, TRDP_MSG_PR, etbTopoCnt, opTrnTopoCnt, replyComId, replyIpAddr);
 
-                /*  Copy data only if there! */
-                if (NULL != pData && 0 < dataSize)
+                /*  Copy data only if available! */
+                if ((NULL != pData) && (0u < dataSize))
                 {
                     ret = tlp_put(appHandle, (TRDP_PUB_T) pReqElement, pData, dataSize);
                 }
@@ -1978,7 +1989,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     INT32       lIndex;
 
     /*    Check params    */
-    if (comId == 0 || pSubHandle == NULL)
+    if (pSubHandle == NULL)
     {
         return TRDP_PARAM_ERR;
     }
@@ -1988,7 +1999,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
         return TRDP_NOINIT_ERR;
     }
 
-    if (timeout == 0)
+    if (timeout == 0u)
     {
         timeout = appHandle->pdDefault.timeout;
     }
@@ -2007,8 +2018,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     subHandle.comId         = comId;
     subHandle.srcIpAddr     = srcIpAddr;
     subHandle.destIpAddr    = destIpAddr;
-    subHandle.opTrnTopoCnt  = 0;            /* Do not compare topocounts  */
-    subHandle.etbTopoCnt    = 0;
+    subHandle.opTrnTopoCnt  = 0u;            /* Do not compare topocounts  */
+    subHandle.etbTopoCnt    = 0u;
 
     if (vos_isMulticast(destIpAddr))
     {
@@ -2016,7 +2027,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     }
     else
     {
-        subHandle.mcGroup = 0;
+        subHandle.mcGroup = 0u;
     }
 
     /*    Get the current time    */
@@ -2043,7 +2054,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                                  TRUE,
                                  -1,
                                  &lIndex,
-                                 0);
+                                 0u);
 
         if (ret == TRDP_NO_ERR)
         {
@@ -2055,7 +2066,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             if (newPD == NULL)
             {
                 ret = TRDP_MEM_ERR;
-                trdp_releaseSocket(appHandle->iface, lIndex, 0, FALSE);
+                trdp_releaseSocket(appHandle->iface, lIndex, 0u, FALSE);
             }
             else
             {
@@ -2083,7 +2094,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->addr.comId       = comId;
                     newPD->addr.srcIpAddr   = srcIpAddr;
                     newPD->addr.destIpAddr  = destIpAddr;
-                    newPD->interval.tv_sec  = timeout / 1000000;
+                    newPD->interval.tv_sec  = timeout / 1000000u;
                     newPD->interval.tv_usec = timeout % 1000000;
                     newPD->toBehavior       =
                         (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
@@ -2167,8 +2178,8 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     {
         /*    Remove from queue?    */
         trdp_queueDelElement(&appHandle->pRcvQueue, pElement);
-        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0, FALSE);
-        pElement->magic = 0;
+        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0u, FALSE);
+        pElement->magic = 0u;
         if (pElement->pFrame != NULL)
         {
             vos_memFree(pElement->pFrame);
@@ -2247,7 +2258,7 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
         if (subHandle->addr.mcGroup != destIpAddr)
         {
             /*  Find the correct socket    */
-            trdp_releaseSocket(appHandle->iface, subHandle->socketIdx, 0, FALSE);
+            trdp_releaseSocket(appHandle->iface, subHandle->socketIdx, 0u, FALSE);
             ret = trdp_requestSocket(appHandle->iface,
                                      appHandle->pdDefault.port,
                                      &appHandle->pdDefault.sendParam,
@@ -2258,7 +2269,7 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
                                      TRUE,
                                      -1,
                                      &subHandle->socketIdx,
-                                     0);
+                                     0u);
             if (ret != TRDP_NO_ERR)
             {
                 /* This is a critical error: We must unsubscribe! */
@@ -2277,7 +2288,7 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
     }
     else
     {
-        subHandle->addr.mcGroup = 0;
+        subHandle->addr.mcGroup = 0u;
     }
 
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
@@ -2375,7 +2386,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL)
         {
-            pPdInfo->comId = pElement->addr.comId;
+            pPdInfo->comId          = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->lastSrcIP;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->etbTopoCnt     = vos_ntohl(pElement->pFrame->frameHead.etbTopoCnt);
@@ -2444,7 +2455,7 @@ TRDP_ERR_T tlm_notify (
     {
         return TRDP_NOINIT_ERR;
     }
-    if ((pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE))
     {
         return TRDP_PARAM_ERR;
     }
@@ -2461,10 +2472,10 @@ TRDP_ERR_T tlm_notify (
                srcIpAddr,
                destIpAddr,
                pktFlags,
-               0,                                      /* numbber of repliers for notify */
-               0,                                      /* reply timeout for notify */
+               0u,                                      /* numbber of repliers for notify */
+               0u,                                      /* reply timeout for notify */
                TRDP_REPLY_OK,                          /* reply state */
-               0,                                      /* no call repetition */
+               0u,                                      /* no call repetition */
                pSendParam,
                pData,
                dataSize,
@@ -2528,7 +2539,7 @@ TRDP_ERR_T tlm_request (
     {
         return TRDP_NOINIT_ERR;
     }
-    if ((pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE))
     {
         return TRDP_PARAM_ERR;
     }
@@ -2649,7 +2660,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.etbTopoCnt    = etbTopoCnt;
                 pNewElement->addr.opTrnTopoCnt  = opTrnTopoCnt;
-                pNewElement->addr.destIpAddr    = 0;
+                pNewElement->addr.destIpAddr    = 0u;
                 pNewElement->pktFlags           = pktFlags;
                 pNewElement->pfCbFunction       =
                     (pfCbFunction == NULL) ? appHandle->mdDefault.pfCbFunction : pfCbFunction;
@@ -2667,7 +2678,7 @@ TRDP_ERR_T tlm_addListener (
                 }
                 else
                 {
-                    pNewElement->addr.mcGroup = 0;
+                    pNewElement->addr.mcGroup = 0u;
                 }
 
                 if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) == 0)
@@ -2873,7 +2884,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
             pListener->addr.mcGroup != mcDestIpAddr)                /* nor if there's no change in group */
         {
             /*  Find the correct socket    */
-            trdp_releaseSocket(appHandle->iface, pListener->socketIdx, 0, FALSE);
+            trdp_releaseSocket(appHandle->iface, pListener->socketIdx, 0u, FALSE);
             ret = trdp_requestSocket(appHandle->iface,
                                      appHandle->mdDefault.udpPort,
                                      &appHandle->mdDefault.sendParam,
@@ -2884,7 +2895,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
                                      TRUE,
                                      -1,
                                      &pListener->socketIdx,
-                                     0);
+                                     0u);
 
             if (ret != TRDP_NO_ERR)
             {
@@ -2943,7 +2954,7 @@ TRDP_ERR_T tlm_reply (
     {
         return TRDP_NOINIT_ERR;
     }
-    if ((pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE ))
     {
         return TRDP_PARAM_ERR;
     }
@@ -2951,7 +2962,7 @@ TRDP_ERR_T tlm_reply (
                         appHandle,
                         (UINT8 *)pSessionId,
                         comId,
-                        0,
+                        0u,
                         (INT32)userStatus,
                         pSendParam,
                         pData,
@@ -2994,7 +3005,7 @@ TRDP_ERR_T tlm_replyQuery (
     {
         return TRDP_NOINIT_ERR;
     }
-    if ((pData == NULL && dataSize != 0) || dataSize > TRDP_MAX_MD_DATA_SIZE )
+    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE) )
     {
         return TRDP_PARAM_ERR;
     }
@@ -3042,7 +3053,7 @@ TRDP_ERR_T tlm_replyErr (
     TRDP_REPLY_STATUS_T     replyStatus,
     const TRDP_SEND_PARAM_T *pSendParam)
 {
-    if ( !trdp_isValidSession(appHandle))
+    if (!trdp_isValidSession(appHandle))
     {
         return TRDP_NOINIT_ERR;
     }
@@ -3055,11 +3066,11 @@ TRDP_ERR_T tlm_replyErr (
                         appHandle,
                         (UINT8 *)pSessionId,
                         comId,
-                        0,
+                        0u,
                         replyStatus,
                         pSendParam,
                         NULL,
-                        0);
+                        0u);
 }
 
 
@@ -3133,7 +3144,7 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
     do
     {
         /*  Switch to receive queue */
-        if (NULL == iterMD && TRUE == firstLoop)
+        if ((NULL == iterMD) && (TRUE == firstLoop))
         {
             iterMD      = appHandle->pMDRcvQueue;
             firstLoop   = FALSE;

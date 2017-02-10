@@ -22,6 +22,8 @@
  *
  * $Id$
  *
+ *      BL 2017-02-10: Ticket #129 Found a bug which yields wrong output params and potentially segfaults
+ *      BL 2017-02-08: Ticket #142 Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2016-02-18: Ticket #7: Add train topology information support
  */
 
@@ -46,7 +48,7 @@
  * DEFINES
  */
 
-#define TTI_CACHED_CONSISTS  8          /**< We hold this number of consist infos (ca. 105kB) */
+#define TTI_CACHED_CONSISTS     8u          /**< We hold this number of consist infos (ca. 105kB) */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -96,17 +98,18 @@ void ttiGetUUIDfromLabel (
     TRDP_UUID_T         cstUUID,
     const TRDP_LABEL_T  cstLabel)
 {
-    UINT32 i, j;
+    UINT32  i;
+    UINT32  j;
 
     /* Search the vehicles in the OP_TRAIN_DIR for a matching vehID */
 
-    for (i = 0; i < appHandle->pTTDB->opTrnDir.opVehCnt; i++)
+    for (i = 0u; i < appHandle->pTTDB->opTrnDir.opVehCnt; i++)
     {
         if (vos_strnicmp(appHandle->pTTDB->opTrnDir.opVehList[i].vehId, cstLabel, sizeof(TRDP_LABEL_T)) == 0)
         {
             /* vehicle found, is it the first in the consist?   */
             UINT8 opCstNo = appHandle->pTTDB->opTrnDir.opVehList[i].ownOpCstNo;
-            for (j = 0; j < appHandle->pTTDB->opTrnDir.opCstCnt; j++)
+            for (j = 0u; j < appHandle->pTTDB->opTrnDir.opCstCnt; j++)
             {
                 if (opCstNo == appHandle->pTTDB->opTrnDir.opCstList[j].opCstNo)
                 {
@@ -125,12 +128,12 @@ BOOL8   ttiIsOwnCstInfo (
     TRDP_CONSIST_INFO_T *pTelegram)
 {
     UINT32 i;
-    for (i = 0; i < appHandle->pTTDB->opTrnDir.opCstCnt; i++)
+    for (i = 0u; i < appHandle->pTTDB->opTrnDir.opCstCnt; i++)
     {
         if (appHandle->pTTDB->opTrnState.ownTrnCstNo == appHandle->pTTDB->opTrnDir.opCstList[i].trnCstNo)
         {
             return memcmp(appHandle->pTTDB->opTrnDir.opCstList[i].cstUUID, pTelegram->cstUUID,
-                          sizeof(TRDP_UUID_T)) == 0;
+                          sizeof(TRDP_UUID_T)) == 0u;
         }
     }
     return FALSE;
@@ -162,14 +165,14 @@ static void ttiPDCallback (
 
     if (pMsg->comId == TTDB_STATUS_COMID)
     {
-        if (pMsg->resultCode == TRDP_NO_ERR &&
-            dataSize <= sizeof(TRDP_OP_TRAIN_DIR_STATUS_INFO_T))
+        if ((pMsg->resultCode == TRDP_NO_ERR) &&
+            (dataSize <= sizeof(TRDP_OP_TRAIN_DIR_STATUS_INFO_T)))
         {
             TRDP_OP_TRAIN_DIR_STATUS_INFO_T *pTelegram = (TRDP_OP_TRAIN_DIR_STATUS_INFO_T *) pData;
             UINT32 crc;
 
             /* check the crc:   */
-            crc = vos_sc32(0xFFFFFFFF, (const UINT8 *) &pTelegram->state, sizeof(TRDP_OP_TRAIN_DIR_STATE_T) - 4);
+            crc = vos_sc32(0xFFFFFFFFu, (const UINT8 *) &pTelegram->state, sizeof(TRDP_OP_TRAIN_DIR_STATE_T) - 4);
             if (crc != vos_ntohl(pTelegram->state.crc))
             {
                 vos_printLog(VOS_LOG_ERROR, "CRC error of received operational status info (%08x != %08x)!\n",
@@ -210,15 +213,15 @@ static void ttiPDCallback (
             vos_printLog(VOS_LOG_ERROR, "---> Operational status info timed out! Invalidating topocounts on %p!\n",
                          appHandle);
 
-            if (appHandle->etbTopoCnt != 0)
+            if (appHandle->etbTopoCnt != 0u)
             {
                 changed++;
-                (void) tlc_setETBTopoCount(appHandle, 0);
+                (void) tlc_setETBTopoCount(appHandle, 0u);
             }
-            if (appHandle->opTrnTopoCnt != 0)
+            if (appHandle->opTrnTopoCnt != 0u)
             {
                 changed++;
-                (void) tlc_setOpTrainTopoCount(appHandle, 0);
+                (void) tlc_setOpTrainTopoCount(appHandle, 0u);
             }
         }
         else
@@ -226,7 +229,7 @@ static void ttiPDCallback (
             vos_printLog(VOS_LOG_INFO, "---> Unsolicited msg received on %p!\n",
                          appHandle);
         }
-        if (changed > 0 && waitForInaug != NULL)
+        if ((changed > 0) && (waitForInaug != NULL))
         {
             vos_semaGive(waitForInaug);
         }
@@ -837,10 +840,10 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
  */
 EXT_DECL TRDP_ERR_T tau_getTTI (
     TRDP_APP_SESSION_T          appHandle,
-    TRDP_OP_TRAIN_DIR_STATE_T   *pOpTrDirState,
-    TRDP_OP_TRAIN_DIR_T         *pOpTrDir,
-    TRDP_TRAIN_DIR_T            *pTrDir,
-    TRDP_TRAIN_NET_DIR_T        *pTrNetDir)
+    TRDP_OP_TRAIN_DIR_STATE_T   *pOpTrnDirState,
+    TRDP_OP_TRAIN_DIR_T         *pOpTrnDir,
+    TRDP_TRAIN_DIR_T            *pTrnDir,
+    TRDP_TRAIN_NET_DIR_T        *pTrnNetDir)
 {
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL)
@@ -848,21 +851,21 @@ EXT_DECL TRDP_ERR_T tau_getTTI (
         return TRDP_PARAM_ERR;
     }
 
-    if (pOpTrDirState != NULL)
+    if (pOpTrnDirState != NULL)
     {
-        *pTrNetDir = appHandle->pTTDB->trnNetDir;
+        *pOpTrnDirState = appHandle->pTTDB->opTrnState.state;
     }
-    if (pOpTrDir != NULL)
+    if (pOpTrnDir != NULL)
     {
-        *pOpTrDir = appHandle->pTTDB->opTrnDir;
+        *pOpTrnDir = appHandle->pTTDB->opTrnDir;
     }
-    if (pTrDir != NULL)
+    if (pTrnDir != NULL)
     {
-        *pTrDir = appHandle->pTTDB->trnDir;
+        *pTrnDir = appHandle->pTTDB->trnDir;
     }
-    if (pTrNetDir != NULL)
+    if (pTrnNetDir != NULL)
     {
-        *pTrNetDir = appHandle->pTTDB->trnNetDir;
+        *pTrnNetDir = appHandle->pTTDB->trnNetDir;
     }
     return TRDP_NO_ERR;
 }
