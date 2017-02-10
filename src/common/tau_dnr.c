@@ -159,7 +159,8 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
         {
             offset  = (*pReader) * 256u + *(pReader + 1u) - 49152u;        /* 49152 = 11000000 00000000 ;) */
             pReader = pBuffer + offset - 1u;
-            jumped  = 1u;                                /* we have jumped to another location so counting wont go up! */
+            jumped  = 1u;                                /* we have jumped to another location so counting wont go up!
+                                                           */
         }
         else
         {
@@ -415,12 +416,12 @@ static void parseResponse (
     UINT32          querySize,
     TRDP_IP_ADDR_T  *pIP_addr)
 {
-    TAU_DNS_HEADER_T    *dns = (TAU_DNS_HEADER_T *) pPacket;
-    UINT8               *pReader;
-    UINT32              i;
-    UINT32              skip;
-    CHAR8               name[256];
-    TAU_RES_RECORD_T    answers[20] /*, auth[20], addit[20]*/; /* the replies from the DNS server */
+    TAU_DNS_HEADER_T *dns = (TAU_DNS_HEADER_T *) pPacket;
+    UINT8   *pReader;
+    UINT32  i;
+    UINT32  skip;
+    CHAR8   name[256];
+    TAU_RES_RECORD_T answers[20] /*, auth[20], addit[20]*/;    /* the replies from the DNS server */
 
     /* move ahead of the dns header and the query field */
     pReader = pPacket + sizeof(TAU_DNS_HEADER_T) + querySize;
@@ -598,7 +599,7 @@ static void updateDNSentry (
     }
 
     /* wait for reply */
-    for (;;)
+    for (;; )
     {
         VOS_FDS_T   rfds;
         TRDP_TIME_T tv;
@@ -908,7 +909,7 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
              (pTemp->opTrnTopoCnt == appHandle->opTrnTopoCnt) ||
              ((appHandle->etbTopoCnt == 0u) && (appHandle->opTrnTopoCnt == 0u))   /* Or do we not care?       */
             )
-           )
+            )
         {
             *pAddr = pTemp->ipAddr;
             return TRDP_NO_ERR;

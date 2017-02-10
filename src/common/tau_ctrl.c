@@ -10,7 +10,7 @@
  *
  * @author          Armin-H. Weiss (initial version)
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
@@ -46,11 +46,11 @@
  *   Locals
  */
 
- static TRDP_PUB_T      priv_pubHandle          = 0;    /*    Our identifier to the publication                     */
- static TRDP_SUB_T      priv_subHandle          = 0;    /*    Our identifier to the subscription                    */
- static TRDP_IP_ADDR_T  priv_ecspIpAddr         = 0;    /*    ECSP IP address                                       */
- static BOOL8           priv_ecspCtrlInitialised= FALSE;
-  
+static TRDP_PUB_T       priv_pubHandle  = 0;            /*    Our identifier to the publication                     */
+static TRDP_SUB_T       priv_subHandle  = 0;            /*    Our identifier to the subscription                    */
+static TRDP_IP_ADDR_T   priv_ecspIpAddr = 0u;           /*    ECSP IP address                                       */
+static BOOL8            priv_ecspCtrlInitialised = FALSE;
+
 
 /**********************************************************************************************************************/
 /*    Train switch control                                                                                            */
@@ -66,12 +66,12 @@
  *  @retval         TRDP_INIT_ERR   initialisation error
  *
  */
-EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle, 
+EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
                                        TRDP_IP_ADDR_T       ecspIpAddr)
 {
     /* session already opened, handle publish/subscribe */
-    TRDP_ERR_T             err;
-    
+    TRDP_ERR_T err;
+
     priv_ecspIpAddr = ecspIpAddr;
 
     /*    Copy the packet into the internal send queue, prepare for sending.    */
@@ -92,7 +92,7 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
                         );
     if ( err != TRDP_NO_ERR )
     {
-        vos_printLog(VOS_LOG_ERROR, "tlp_publish() failed !\n");
+        vos_printLogStr(VOS_LOG_ERROR, "tlp_publish() failed !\n");
         return err;
     }
 
@@ -111,7 +111,7 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
 
     if ( err != TRDP_NO_ERR )
     {
-        vos_printLog(VOS_LOG_ERROR, "tlp_subscribe() failed !\n");
+        vos_printLogStr(VOS_LOG_ERROR, "tlp_subscribe() failed !\n");
         return err;
     }
 
@@ -132,26 +132,26 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
  *
  */
 
-EXT_DECL TRDP_ERR_T tau_terminateEcspCtrl (TRDP_APP_SESSION_T   appHandle)
+EXT_DECL TRDP_ERR_T tau_terminateEcspCtrl (TRDP_APP_SESSION_T appHandle)
 {
     if (priv_ecspCtrlInitialised == TRUE)
     {
         /* clean up */
-        TRDP_ERR_T             err;
+        TRDP_ERR_T err;
 
         priv_ecspCtrlInitialised = FALSE;
 
         err = tlp_unpublish(appHandle, priv_pubHandle);
         if ( err != TRDP_NO_ERR )
         {
-            vos_printLog(VOS_LOG_ERROR, "tlp_unpublish() failed!\n");
+            vos_printLogStr(VOS_LOG_ERROR, "tlp_unpublish() failed!\n");
             return err;
         }
 
         err = tlp_unsubscribe(appHandle, priv_subHandle);
         if ( err != TRDP_NO_ERR )
         {
-            vos_printLog(VOS_LOG_ERROR, "tlp_unsubscribe() failed !\n");
+            vos_printLogStr(VOS_LOG_ERROR, "tlp_unsubscribe() failed !\n");
             return err;
         }
 
@@ -197,20 +197,20 @@ EXT_DECL TRDP_ERR_T tau_setEcspCtrl ( TRDP_APP_SESSION_T    appHandle,
  *  @retval         TRDP_PARAM_ERR  Parameter error
  *
  */
-EXT_DECL TRDP_ERR_T tau_getEcspStat ( TRDP_APP_SESSION_T   appHandle,
-                                      TRDP_ECSP_STAT_T    *pEcspStat,
-                                      TRDP_PD_INFO_T      *pPdInfo)
+EXT_DECL TRDP_ERR_T tau_getEcspStat ( TRDP_APP_SESSION_T    appHandle,
+                                      TRDP_ECSP_STAT_T      *pEcspStat,
+                                      TRDP_PD_INFO_T        *pPdInfo)
 {
     if (priv_ecspCtrlInitialised == TRUE)
     {
-        UINT32      receivedSize =      sizeof(TRDP_ECSP_STAT_T);
+        UINT32 receivedSize = sizeof(TRDP_ECSP_STAT_T);
         return tlp_get(appHandle,
-                  priv_subHandle,
-                  pPdInfo,
-                  (UINT8 *) pEcspStat,
-                  &receivedSize);
+                       priv_subHandle,
+                       pPdInfo,
+                       (UINT8 *) pEcspStat,
+                       &receivedSize);
     }
-    
+
     return TRDP_NOINIT_ERR;
 }
 
@@ -229,9 +229,9 @@ EXT_DECL TRDP_ERR_T tau_getEcspStat ( TRDP_APP_SESSION_T   appHandle,
  *
  */
 EXT_DECL TRDP_ERR_T tau_requestEcspConfirm ( TRDP_APP_SESSION_T         appHandle,
-                                             const void                *pUserRef,
+                                             const void                 *pUserRef,
                                              TRDP_MD_CALLBACK_T         pfCbFunction,
-                                             TRDP_ECSP_CONF_REQUEST_T  *pEcspConfRequest)
+                                             TRDP_ECSP_CONF_REQUEST_T   *pEcspConfRequest)
 {
     if (priv_ecspCtrlInitialised == TRUE)
     {
