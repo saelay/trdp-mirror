@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-10: Ticket #132: tlp_publish: Check of datasize wrong if using marshaller
  *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2017-02-08: Ticket #133: Accelerate PD packet reception
  *      BL 2016-06-24: Ticket #121: Callback on first packet after time out
@@ -112,7 +113,16 @@ void    trdp_pdInit (
 
 /******************************************************************************/
 /** Copy data
- *  Set the header infos
+ *  Update the data to be sent
+ *
+ *  @param[in]      pPacket         pointer to the packet element to send
+ *  @param[in]      marshall        pointer to marshalling function
+ *  @param[in]      refCon          reference for marshalling function
+ *  @param[in]      pData           pointer to data
+ *  @param[in]      dataSize        size of data
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *                                  other errors
  */
 TRDP_ERR_T trdp_pdPut (
     PD_ELE_T        *pPacket,
@@ -162,6 +172,11 @@ TRDP_ERR_T trdp_pdPut (
 
         if (!(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (marshall == NULL))
         {
+            /* We must check the packet size! */
+            if (dataSize > TRDP_MAX_PD_DATA_SIZE)
+            {
+                return TRDP_PARAM_ERR;
+            }
             memcpy(pPacket->pFrame->data, pData, dataSize);
         }
         else
@@ -173,7 +188,11 @@ TRDP_ERR_T trdp_pdPut (
                            pPacket->pFrame->data,
                            &dataSize,
                            &pPacket->pCachedDS);
-            /* We must set a possible smaller packet size! */
+            /* We must set and check a possible smaller packet size! (Ticket #132) */
+            if (dataSize > TRDP_MAX_PD_DATA_SIZE)
+            {
+                return TRDP_PARAM_ERR;
+            }
             pPacket->dataSize   = dataSize;
             pPacket->grossSize  = trdp_packetSizePD(dataSize);
             pPacket->pFrame->frameHead.datasetLength = vos_htonl(pPacket->dataSize);
@@ -331,8 +350,8 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 }
             }
 
-            if (iterPD->privFlags & TRDP_REQ_2B_SENT &&
-                iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PP))       /*  PULL packet?  */
+            if ((iterPD->privFlags & TRDP_REQ_2B_SENT) &&
+                (iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PP)))       /*  PULL packet?  */
             {
                 /* Do not reset timer, but restore msgType */
                 iterPD->pFrame->frameHead.msgType = vos_htons(TRDP_MSG_PD);
@@ -435,7 +454,7 @@ TRDP_ERR_T  trdp_pdReceive (
     }
 
     /*  Compute the subscription handle */
-    subAddresses.comId = vos_ntohl(pNewFrameHead->comId);
+    subAddresses.comId          = vos_ntohl(pNewFrameHead->comId);
     subAddresses.etbTopoCnt     = vos_ntohl(pNewFrameHead->etbTopoCnt);
     subAddresses.opTrnTopoCnt   = vos_ntohl(pNewFrameHead->opTrnTopoCnt);
 
@@ -728,7 +747,7 @@ void trdp_pdHandleTimeOuts (
                 theMessage.pUserRef     = iterPD->pUserRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
-                iterPD->pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0);
+                iterPD->pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0u);
             }
 
             /*    Prevent repeated time out events    */
@@ -754,22 +773,23 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
     INT32           *pCount)
 {
     PD_ELE_T    *iterPD = NULL;
-    TRDP_ERR_T  err, result = TRDP_NO_ERR;
+    TRDP_ERR_T  err;
+    TRDP_ERR_T  result = TRDP_NO_ERR;
     BOOL8       nonBlocking = !(appHandle->option & TRDP_OPTION_BLOCK);
 
     /*  Check the input params, in case we are in polling mode, the application
      is responsible to get any process data by calling tlp_get()    */
-    if (pRfds == NULL || pCount == NULL)
+    if ((pRfds == NULL) || (pCount == NULL))
     {
         /* polling mode */
     }
-    else if (pCount != NULL && *pCount > 0)
+    else if ((pCount != NULL) && (*pCount > 0))
     {
         /*    Check the sockets for received PD packets    */
         for (iterPD = appHandle->pRcvQueue; iterPD != NULL; iterPD = iterPD->pNext)
         {
-            if (iterPD->socketIdx != -1 &&
-                FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds))  /*lint !e573 signed/unsigned
+            if ((iterPD->socketIdx != -1) &&
+                (FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *) pRfds)))  /*lint !e573 signed/unsigned
                                                                                          division in macro */
             {
                 VOS_LOG_T logType = VOS_LOG_ERROR;
