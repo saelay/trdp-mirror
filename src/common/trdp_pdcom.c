@@ -809,6 +809,7 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                 {
                     case TRDP_NO_ERR:
                         break;
+                    case TRDP_BLOCK_ERR:
                     case TRDP_NODATA_ERR:
                         result  = err;
                         break;
