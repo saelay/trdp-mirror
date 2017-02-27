@@ -20,7 +20,7 @@
  *      BL 2017-02-10: Ticket #128 PD: Support of ComId == 0
  *      BL 2017-02-10: Ticket #130 PD Pull: Request is always sent to the same ip address
  *      BL 2017-02-09: Ticket #132  tlp_publish: Check of datasize wrong if using marshaller
- *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-08: Ticket #142: Compiler warnings / MISRA-C 2012 issues
  *      BL 2017-02-08: Ticket #139: Swap parameter in tlm_reply
  *      BL 2016-07-06: Ticket #122: 64Bit compatibility (+ compiler warnings)
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
@@ -303,21 +303,19 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     pSession->pdDefault.sendParam.ttl   = TRDP_PD_DEFAULT_TTL;
 
 #if MD_SUPPORT
-    pSession->mdDefault.pfCbFunction    = NULL;
-    pSession->mdDefault.pRefCon         = NULL;
-    pSession->mdDefault.confirmTimeout  = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
-    pSession->mdDefault.connectTimeout  = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
-    pSession->mdDefault.replyTimeout    = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
-    pSession->mdDefault.flags           = TRDP_FLAGS_NONE;
-    pSession->mdDefault.udpPort         = TRDP_MD_UDP_PORT;
-    pSession->mdDefault.tcpPort         = TRDP_MD_TCP_PORT;
-    pSession->mdDefault.sendParam.qos   = TRDP_MD_DEFAULT_QOS;
-    pSession->mdDefault.sendParam.ttl   = TRDP_MD_DEFAULT_TTL;
-#ifdef TRDP_RETRIES
-    pSession->mdDefault.sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
-#endif
-    pSession->mdDefault.maxNumSessions  = TRDP_MD_MAX_NUM_SESSIONS;
-    pSession->tcpFd.listen_sd           = VOS_INVALID_SOCKET;
+    pSession->mdDefault.pfCbFunction        = NULL;
+    pSession->mdDefault.pRefCon             = NULL;
+    pSession->mdDefault.confirmTimeout      = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+    pSession->mdDefault.connectTimeout      = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+    pSession->mdDefault.replyTimeout        = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+    pSession->mdDefault.flags               = TRDP_FLAGS_NONE;
+    pSession->mdDefault.udpPort             = TRDP_MD_UDP_PORT;
+    pSession->mdDefault.tcpPort             = TRDP_MD_TCP_PORT;
+    pSession->mdDefault.sendParam.qos       = TRDP_MD_DEFAULT_QOS;
+    pSession->mdDefault.sendParam.ttl       = TRDP_MD_DEFAULT_TTL;
+    pSession->mdDefault.sendParam.retries   = TRDP_MD_DEFAULT_RETRIES;
+    pSession->mdDefault.maxNumSessions      = TRDP_MD_MAX_NUM_SESSIONS;
+    pSession->tcpFd.listen_sd               = VOS_INVALID_SOCKET;
 
 #endif
 
@@ -636,7 +634,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
     TRDP_APP_SESSION_T appHandle)
 {
     TRDP_SESSION_PT pSession = NULL;
-    BOOL8           found = FALSE;
+    BOOL8 found = FALSE;
     TRDP_ERR_T      ret;
 
     /*    Find the session    */
@@ -805,7 +803,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                 vos_mutexDelete(pSession->mutex);
                 vos_memFree(pSession);
             }
-            
+
         }
     }
 
@@ -1827,12 +1825,12 @@ EXT_DECL TRDP_ERR_T tlp_request (
     if ( ret == TRDP_NO_ERR)
     {
         {
-            TRDP_ADDRESSES_T    addr;
-            
-            addr.comId         = comId;
-            addr.srcIpAddr     = srcIpAddr;
-            addr.destIpAddr    = destIpAddr;
-            addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1)? destIpAddr: VOS_INADDR_ANY;
+            TRDP_ADDRESSES_T addr;
+
+            addr.comId      = comId;
+            addr.srcIpAddr  = srcIpAddr;
+            addr.destIpAddr = destIpAddr;
+            addr.mcGroup    = (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
 
             /*    Look for former request element    */
             pReqElement = trdp_queueFindPubAddr(appHandle->pSndQueue, &addr);
@@ -1896,8 +1894,9 @@ EXT_DECL TRDP_ERR_T tlp_request (
                             pReqElement->addr.comId         = comId;
                             pReqElement->addr.destIpAddr    = destIpAddr;
                             pReqElement->addr.srcIpAddr     = srcIpAddr;
-                            pReqElement->addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1)? destIpAddr: VOS_INADDR_ANY;
-                            pReqElement->pktFlags           =
+                            pReqElement->addr.mcGroup       =
+                                (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
+                            pReqElement->pktFlags =
                                 (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
                             pReqElement->magic = TRDP_MAGIC_PUB_HNDL_VALUE;
                             /*  Find a possible redundant entry in one of the other sessions and sync
@@ -1922,8 +1921,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
                 pReqElement->addr.destIpAddr    = destIpAddr;
                 pReqElement->addr.srcIpAddr     = srcIpAddr;
-                pReqElement->addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1)? destIpAddr: VOS_INADDR_ANY;
-                
+                pReqElement->addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
+
                 /*    Compute the header fields */
                 trdp_pdInit(pReqElement, TRDP_MSG_PR, etbTopoCnt, opTrnTopoCnt, replyComId, replyIpAddr);
 
@@ -2394,7 +2393,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL)
         {
-            pPdInfo->comId          = pElement->addr.comId;
+            pPdInfo->comId = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->lastSrcIP;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->etbTopoCnt     = vos_ntohl(pElement->pFrame->frameHead.etbTopoCnt);
@@ -2962,7 +2961,7 @@ TRDP_ERR_T tlm_reply (
     {
         return TRDP_NOINIT_ERR;
     }
-    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE ))
+    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE))
     {
         return TRDP_PARAM_ERR;
     }
@@ -3013,7 +3012,7 @@ TRDP_ERR_T tlm_replyQuery (
     {
         return TRDP_NOINIT_ERR;
     }
-    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE) )
+    if (((pData == NULL) && (dataSize != 0u)) || (dataSize > TRDP_MAX_MD_DATA_SIZE))
     {
         return TRDP_PARAM_ERR;
     }
