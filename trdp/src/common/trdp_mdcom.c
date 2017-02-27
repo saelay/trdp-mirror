@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2017-02-27: Ticket #148 Wrong element used in trdp_mdCheckTimeouts() to invoke the callback
  *      BL 2017-02-10: Ticket #138 Erroneous closing of receive md socket
  *      BL 2017-02-10: Ticket #142 Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2016-07-09: Ticket #127 MD notify message: Invalid session identifier
@@ -2904,7 +2905,7 @@ void  trdp_mdCheckTimeouts (
                             /* Execute callback for each session */
                             if (iterMD_find->pfCbFunction != NULL)
                             {
-                                trdp_mdInvokeCallback(iterMD, appHandle, TRDP_TIMEOUT_ERR);
+                                trdp_mdInvokeCallback(iterMD_find, appHandle, TRDP_TIMEOUT_ERR);
                             }
                         }
                     }
