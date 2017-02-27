@@ -16,8 +16,9 @@
  *
  * $Id$
  *
+ *      BL 2017-02-27: Ticket #146 On Timeout, PD Callback is always called with no data/datasize == 0
  *      BL 2017-02-10: Ticket #132: tlp_publish: Check of datasize wrong if using marshaller
- *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-08: Ticket #142: Compiler warnings / MISRA-C 2012 issues
  *      BL 2017-02-08: Ticket #133: Accelerate PD packet reception
  *      BL 2016-06-24: Ticket #121: Callback on first packet after time out
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
@@ -106,7 +107,7 @@ void    trdp_pdInit (
     pPacket->pFrame->frameHead.comId            = vos_htonl(pPacket->addr.comId);
     pPacket->pFrame->frameHead.msgType          = vos_htons((UINT16)type);
     pPacket->pFrame->frameHead.datasetLength    = vos_htonl(pPacket->dataSize);
-    pPacket->pFrame->frameHead.reserved         = 0;
+    pPacket->pFrame->frameHead.reserved         = 0u;
     pPacket->pFrame->frameHead.replyComId       = vos_htonl(replyComId);
     pPacket->pFrame->frameHead.replyIpAddress   = vos_htonl(replyIpAddress);
 }
@@ -230,17 +231,17 @@ TRDP_ERR_T trdp_pdGet (
     /*  Update some statistics  */
     pPacket->getPkts++;
 
-    if (pPacket->privFlags & TRDP_INVALID_DATA)
+    if ((pPacket->privFlags & TRDP_INVALID_DATA) != 0)
     {
         return TRDP_NODATA_ERR;
     }
 
-    if (pPacket->privFlags & TRDP_TIMED_OUT)
+    if ((pPacket->privFlags & TRDP_TIMED_OUT) != 0)
     {
         return TRDP_TIMEOUT_ERR;
     }
 
-    if (pData != NULL && pDataSize != NULL)
+    if ((pData != NULL) && (pDataSize != NULL))
     {
         if ( !(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (unmarshall == NULL))
         {
@@ -316,8 +317,8 @@ TRDP_ERR_T  trdp_pdSendQueued (
                 /*  Update the sequence counter and re-compute CRC    */
                 trdp_pdUpdate(iterPD);
 
-               /* Publisher check from Table A.5:
-                  Actual topography counter values <-> Locally stored with publish */
+                /* Publisher check from Table A.5:
+                   Actual topography counter values <-> Locally stored with publish */
                 if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
                                               appHandle->opTrnTopoCnt,
                                               vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt),
@@ -400,14 +401,14 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_SESSION_PT appHandle,
     INT32           sock)
 {
-    PD_HEADER_T *pNewFrameHead  = &appHandle->pNewFrame->frameHead;
-    PD_ELE_T *pExistingElement  = NULL;
-    PD_ELE_T *pPulledElement;
-    TRDP_ERR_T err = TRDP_NO_ERR;
-    TRDP_ERR_T resultCode   = TRDP_NO_ERR;
-    UINT32 recSize          = TRDP_MAX_PD_PACKET_SIZE;
-    int informUser          = 0;
-    TRDP_ADDRESSES_T subAddresses = { 0u, 0u, 0u, 0u, 0u, 0u};
+    PD_HEADER_T         *pNewFrameHead      = &appHandle->pNewFrame->frameHead;
+    PD_ELE_T            *pExistingElement   = NULL;
+    PD_ELE_T            *pPulledElement;
+    TRDP_ERR_T          err             = TRDP_NO_ERR;
+    TRDP_ERR_T          resultCode      = TRDP_NO_ERR;
+    UINT32              recSize         = TRDP_MAX_PD_PACKET_SIZE;
+    int                 informUser      = 0;
+    TRDP_ADDRESSES_T    subAddresses    = { 0u, 0u, 0u, 0u, 0u, 0u};
 
     /*  Get the packet from the wire:  */
     err = (TRDP_ERR_T) vos_sockReceiveUDP(sock,
@@ -428,17 +429,17 @@ TRDP_ERR_T  trdp_pdReceive (
     /*  Update statistics   */
     switch (err)
     {
-        case TRDP_NO_ERR:
-            appHandle->stats.pd.numRcv++;
-            break;
-        case TRDP_CRC_ERR:
-            appHandle->stats.pd.numCrcErr++;
-            return err;
-        case TRDP_WIRE_ERR:
-            appHandle->stats.pd.numProtErr++;
-            return err;
-        default:
-            return err;
+       case TRDP_NO_ERR:
+           appHandle->stats.pd.numRcv++;
+           break;
+       case TRDP_CRC_ERR:
+           appHandle->stats.pd.numCrcErr++;
+           return err;
+       case TRDP_WIRE_ERR:
+           appHandle->stats.pd.numProtErr++;
+           return err;
+       default:
+           return err;
     }
 
     /* First check incoming packet's topoCount against session topoCounts */
@@ -481,14 +482,14 @@ TRDP_ERR_T  trdp_pdReceive (
         }
         else
         {
-			UINT32 replyComId = vos_ntohl(pNewFrameHead->replyComId);
+            UINT32 replyComId = vos_ntohl(pNewFrameHead->replyComId);
 
-			if (replyComId == 0u)
-			{
-				replyComId = vos_ntohl(pNewFrameHead->comId);
-			}
+            if (replyComId == 0u)
+            {
+                replyComId = vos_ntohl(pNewFrameHead->comId);
+            }
 
-			/*  Find requested publish element  */
+            /*  Find requested publish element  */
             pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, replyComId);
         }
 
@@ -549,14 +550,14 @@ TRDP_ERR_T  trdp_pdReceive (
                                           subAddresses.srcIpAddr,
                                           (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType)))
         {
-            case 0:                     /* Sequence counter is valid (at least 1 higher than previous one) */
-                break;
-            case -1:                    /* List overflow */
-                return TRDP_MEM_ERR;
-            case 1:
-                vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
-                                 subAddresses.srcIpAddr), vos_ntohl(pNewFrameHead->comId));
-                return TRDP_NO_ERR;     /* Ignore packet, too old or duplicate */
+           case 0:                      /* Sequence counter is valid (at least 1 higher than previous one) */
+               break;
+           case -1:                     /* List overflow */
+               return TRDP_MEM_ERR;
+           case 1:
+               vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
+                                subAddresses.srcIpAddr), vos_ntohl(pNewFrameHead->comId));
+               return TRDP_NO_ERR;      /* Ignore packet, too old or duplicate */
         }
 
         if ((newSeqCnt > 0u) && (newSeqCnt > (pExistingElement->curSeqCnt + 1u)))
@@ -747,7 +748,22 @@ void trdp_pdHandleTimeOuts (
                 theMessage.pUserRef     = iterPD->pUserRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
 
-                iterPD->pfCbFunction(appHandle->pdDefault.pRefCon, appHandle, &theMessage, NULL, 0u);
+                if (iterPD->pFrame != NULL)
+                {
+                    iterPD->pfCbFunction(appHandle->pdDefault.pRefCon,
+                                         appHandle,
+                                         &theMessage,
+                                         iterPD->pFrame->data,
+                                         iterPD->dataSize);
+                }
+                else
+                {
+                    iterPD->pfCbFunction(appHandle->pdDefault.pRefCon,
+                                         appHandle,
+                                         &theMessage,
+                                         NULL,
+                                         iterPD->dataSize);
+                }
             }
 
             /*    Prevent repeated time out events    */
@@ -774,7 +790,7 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
 {
     PD_ELE_T    *iterPD = NULL;
     TRDP_ERR_T  err;
-    TRDP_ERR_T  result = TRDP_NO_ERR;
+    TRDP_ERR_T  result      = TRDP_NO_ERR;
     BOOL8       nonBlocking = !(appHandle->option & TRDP_OPTION_BLOCK);
 
     /*  Check the input params, in case we are in polling mode, the application
@@ -793,33 +809,34 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                                                                                          division in macro */
             {
                 VOS_LOG_T logType = VOS_LOG_ERROR;
-               
+
                 /*  PD frame received? */
                 /*  Compare the received data to the data in our receive queue
                    Call user's callback if data changed    */
-               
+
                 do
                 {
-                   /* Read as long as data is available */
-                   err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
-                  
-                } while (err == TRDP_NO_ERR && nonBlocking);
+                    /* Read as long as data is available */
+                    err = trdp_pdReceive(appHandle, appHandle->iface[iterPD->socketIdx].sock);
+
+                }
+                while (err == TRDP_NO_ERR && nonBlocking);
 
                 switch (err)
                 {
-                    case TRDP_NO_ERR:
-                        break;
-                    case TRDP_BLOCK_ERR:
-                    case TRDP_NODATA_ERR:
-                        result  = err;
-                        break;
-                    case TRDP_TOPO_ERR:
-                    case TRDP_TIMEOUT_ERR:
-                        result  = err;
-                        logType = VOS_LOG_WARNING;
-                    default:
-                        vos_printLog(logType, "trdp_pdReceive() failed (Err: %d)\n", err);
-                        break;
+                   case TRDP_NO_ERR:
+                       break;
+                   case TRDP_BLOCK_ERR:
+                   case TRDP_NODATA_ERR:
+                       result = err;
+                       break;
+                   case TRDP_TOPO_ERR:
+                   case TRDP_TIMEOUT_ERR:
+                       result   = err;
+                       logType  = VOS_LOG_WARNING;
+                   default:
+                       vos_printLog(logType, "trdp_pdReceive() failed (Err: %d)\n", err);
+                       break;
 
                 }
                 (*pCount)--;
@@ -894,7 +911,7 @@ TRDP_ERR_T trdp_pdCheck (
         }
         /*  Check protocol version  */
         else if (((vos_ntohs(pPacket->protocolVersion) & TRDP_PROTOCOL_VERSION_CHECK_MASK)
-                   != (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK)) ||
+                  != (TRDP_PROTO_VER & TRDP_PROTOCOL_VERSION_CHECK_MASK)) ||
                  (vos_ntohl(pPacket->datasetLength) > TRDP_MAX_PD_DATA_SIZE))
         {
             vos_printLog(VOS_LOG_INFO, "PDframe protocol error (%04x != %04x))\n",
@@ -1036,8 +1053,14 @@ TRDP_ERR_T  trdp_pdDistribute (
     /*  This is the delta time we can jitter...   */
     vos_divTime(&deltaTmax, noOfPackets);
 
-    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: deltaTmax   = %ld.%06u\n", (long) deltaTmax.tv_sec, (unsigned int)deltaTmax.tv_usec);
-    vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: tNull       = %ld.%06u\n", (long) tNull.tv_sec, (unsigned int)tNull.tv_usec);
+    vos_printLog(VOS_LOG_INFO,
+                 "trdp_pdDistribute: deltaTmax   = %ld.%06u\n",
+                 (long) deltaTmax.tv_sec,
+                 (unsigned int)deltaTmax.tv_usec);
+    vos_printLog(VOS_LOG_INFO,
+                 "trdp_pdDistribute: tNull       = %ld.%06u\n",
+                 (long) tNull.tv_sec,
+                 (unsigned int)tNull.tv_usec);
     vos_printLog(VOS_LOG_INFO, "trdp_pdDistribute: noOfPackets = %d\n", noOfPackets);
 
     for (packetIndex = 0, pPacket = pSndQueue; packetIndex < noOfPackets && pPacket != NULL; )

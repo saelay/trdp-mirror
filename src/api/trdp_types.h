@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2017-02-27: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2016-02-11: Ticket #111: 'unit', 'scale', 'offset' attributes added to TRDP_DATASET_ELEMENT
  *      BL 2016-01-25: Ticket #106: User needs to be informed on every received PD packet
@@ -54,7 +55,7 @@ extern "C" {
 #endif
 
 #ifndef TRDP_RETRIES
-#define TRDP_RETRIES    1
+#define TRDP_RETRIES  1
 #endif
 
 /*    Special handling for Windows DLLs    */
@@ -174,28 +175,28 @@ typedef enum
 /** Various flags for PD and MD packets    */
 typedef enum
 {
-    TRDP_FLAGS_DEFAULT  = 0,        /**< Default value defined in tlc_openDession will be taken     */
-    TRDP_FLAGS_NONE     = 0x01,     /**< No flags set                                               */
-    TRDP_FLAGS_MARSHALL = 0x02,     /**< Optional marshalling/unmarshalling in TRDP stack           */
-    TRDP_FLAGS_CALLBACK = 0x04,     /**< Use of callback function                                   */
-    TRDP_FLAGS_TCP      = 0x08,     /**< Use TCP for message data                                   */
-    TRDP_FLAGS_FORCE_CB = 0x10      /**< Force a callback for every received packet                 */
+    TRDP_FLAGS_DEFAULT  = 0u,        /**< Default value defined in tlc_openDession will be taken     */
+    TRDP_FLAGS_NONE     = 0x01u,     /**< No flags set                                               */
+    TRDP_FLAGS_MARSHALL = 0x02u,     /**< Optional marshalling/unmarshalling in TRDP stack           */
+    TRDP_FLAGS_CALLBACK = 0x04u,     /**< Use of callback function                                   */
+    TRDP_FLAGS_TCP      = 0x08u,     /**< Use TCP for message data                                   */
+    TRDP_FLAGS_FORCE_CB = 0x10u      /**< Force a callback for every received packet                 */
 } TRDP_FLAGS_T;
 
 
 /** Redundancy states */
 typedef enum
 {
-    TRDP_RED_FOLLOWER   = 0,        /**< Redundancy follower - redundant PD will be not sent out    */
-    TRDP_RED_LEADER     = 1         /**< Redundancy leader - redundant PD will be sent out          */
+    TRDP_RED_FOLLOWER   = 0u,        /**< Redundancy follower - redundant PD will be not sent out    */
+    TRDP_RED_LEADER     = 1u         /**< Redundancy leader - redundant PD will be sent out          */
 } TRDP_RED_STATE_T;
 
 /** How invalid PD shall be handled    */
 typedef enum
 {
-    TRDP_TO_DEFAULT         = 0,    /**< Default value defined in tlc_openDession will be taken     */
-    TRDP_TO_SET_TO_ZERO     = 1,    /**< If set, data will be reset to zero on time out             */
-    TRDP_TO_KEEP_LAST_VALUE = 2     /**< If set, last received values will be returned              */
+    TRDP_TO_DEFAULT         = 0u,    /**< Default value defined in tlc_openDession will be taken     */
+    TRDP_TO_SET_TO_ZERO     = 1u,    /**< If set, data will be reset to zero on time out             */
+    TRDP_TO_KEEP_LAST_VALUE = 2u     /**< If set, last received values will be returned              */
 } TRDP_TO_BEHAVIOR_T;
 
 /**    Process data info from received telegram; allows the application to generate responses.
@@ -204,20 +205,21 @@ typedef enum
  */
 typedef struct
 {
-    TRDP_IP_ADDR_T  srcIpAddr;      /**< source IP address for filtering                            */
-    TRDP_IP_ADDR_T  destIpAddr;     /**< destination IP address for filtering                       */
-    UINT32          seqCount;       /**< sequence counter                                           */
-    UINT16          protVersion;    /**< Protocol version                                           */
-    TRDP_MSG_T      msgType;        /**< Protocol ('PD', 'MD', ...)                                 */
-    UINT32          comId;          /**< ComID                                                      */
-    UINT32          etbTopoCnt;     /**< received ETB topocount                                     */
-    UINT32          opTrnTopoCnt;   /**< received operational train directory topocount             */
-    UINT32          replyComId;     /**< ComID for reply (request only)                             */
-    TRDP_IP_ADDR_T  replyIpAddr;    /**< IP address for reply (request only)                        */
-    const void      *pUserRef;      /**< User reference given with the local subscribe              */
-    TRDP_ERR_T      resultCode;     /**< error code                                                 */
-    TRDP_URI_HOST_T srcHostURI;     /**< source URI host part (unused)                              */
-    TRDP_URI_HOST_T destHostURI;    /**< destination URI host part (unused)                         */
+    TRDP_IP_ADDR_T      srcIpAddr;  /**< source IP address for filtering                            */
+    TRDP_IP_ADDR_T      destIpAddr; /**< destination IP address for filtering                       */
+    UINT32              seqCount;   /**< sequence counter                                           */
+    UINT16              protVersion; /**< Protocol version                                           */
+    TRDP_MSG_T          msgType;    /**< Protocol ('PD', 'MD', ...)                                 */
+    UINT32              comId;      /**< ComID                                                      */
+    UINT32              etbTopoCnt; /**< received ETB topocount                                     */
+    UINT32              opTrnTopoCnt; /**< received operational train directory topocount             */
+    UINT32              replyComId; /**< ComID for reply (request only)                             */
+    TRDP_IP_ADDR_T      replyIpAddr; /**< IP address for reply (request only)                        */
+    const void          *pUserRef;  /**< User reference given with the local subscribe              */
+    TRDP_ERR_T          resultCode; /**< error code                                                 */
+    TRDP_URI_HOST_T     srcHostURI; /**< source URI host part (unused)                              */
+    TRDP_URI_HOST_T     destHostURI; /**< destination URI host part (unused)                         */
+    TRDP_TO_BEHAVIOR_T  toBehavior; /**< callback can decide about handling of data on timeout      */
 } TRDP_PD_INFO_T;
 
 
@@ -264,9 +266,7 @@ typedef struct
 {
     UINT8   qos;       /**< Quality of service (default should be 5 for PD and 3 for MD)  */
     UINT8   ttl;       /**< Time to live (default should be 64)  */
-#ifdef TRDP_RETRIES
-   UINT8   retries;   /**< Retries from XML file */
-#endif
+    UINT8   retries;   /**< Retries from XML file */
 } TRDP_SEND_PARAM_T;
 
 
@@ -277,24 +277,24 @@ typedef struct
 /**    Dataset element definition    */
 typedef enum
 {
-    TRDP_INVALID    = 0,   /**< Invalid/unknown                   */
-    TRDP_BITSET8    = 1,   /**< =UINT8                            */
-    TRDP_CHAR8      = 2,   /**< char, can be used also as UTF8    */
-    TRDP_UTF16      = 3,   /**< Unicode UTF-16 character          */
-    TRDP_INT8       = 4,   /**< Signed integer, 8 bit             */
-    TRDP_INT16      = 5,   /**< Signed integer, 16 bit            */
-    TRDP_INT32      = 6,   /**< Signed integer, 32 bit            */
-    TRDP_INT64      = 7,   /**< Signed integer, 64 bit            */
-    TRDP_UINT8      = 8,   /**< Unsigned integer, 8 bit           */
-    TRDP_UINT16     = 9,   /**< Unsigned integer, 16 bit          */
-    TRDP_UINT32     = 10,  /**< Unsigned integer, 32 bit          */
-    TRDP_UINT64     = 11,  /**< Unsigned integer, 64 bit          */
-    TRDP_REAL32     = 12,  /**< Floating point real, 32 bit       */
-    TRDP_REAL64     = 13,  /**< Floating point real, 64 bit       */
-    TRDP_TIMEDATE32 = 14,  /**< 32 bit UNIX time  */
-    TRDP_TIMEDATE48 = 15,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
-    TRDP_TIMEDATE64 = 16,  /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
-    TRDP_TYPE_MAX   = 30   /**< Values greater are considered nested datasets */
+    TRDP_INVALID    = 0u,   /**< Invalid/unknown                   */
+    TRDP_BITSET8    = 1u,   /**< =UINT8                            */
+    TRDP_CHAR8      = 2u,   /**< char, can be used also as UTF8    */
+    TRDP_UTF16      = 3u,   /**< Unicode UTF-16 character          */
+    TRDP_INT8       = 4u,   /**< Signed integer, 8 bit             */
+    TRDP_INT16      = 5u,   /**< Signed integer, 16 bit            */
+    TRDP_INT32      = 6u,   /**< Signed integer, 32 bit            */
+    TRDP_INT64      = 7u,   /**< Signed integer, 64 bit            */
+    TRDP_UINT8      = 8u,   /**< Unsigned integer, 8 bit           */
+    TRDP_UINT16     = 9u,   /**< Unsigned integer, 16 bit          */
+    TRDP_UINT32     = 10u,  /**< Unsigned integer, 32 bit          */
+    TRDP_UINT64     = 11u,  /**< Unsigned integer, 64 bit          */
+    TRDP_REAL32     = 12u,  /**< Floating point real, 32 bit       */
+    TRDP_REAL64     = 13u,  /**< Floating point real, 64 bit       */
+    TRDP_TIMEDATE32 = 14u,  /**< 32 bit UNIX time  */
+    TRDP_TIMEDATE48 = 15u,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
+    TRDP_TIMEDATE64 = 16u,  /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
+    TRDP_TYPE_MAX   = 30u   /**< Values greater are considered nested datasets */
 } TRDP_DATA_TYPE_T;
 
 #define TRDP_BOOL8          TRDP_BITSET8 /**< 1 bit relevant
@@ -352,7 +352,7 @@ typedef apTRDP_DATASET_T *papTRDP_DATASET_T;
 /** Structure containing comId for MD statistics request (ComId 32). */
 typedef struct
 {
-    UINT32  comId;                                      /**< ComId to request: 35...41 */
+    UINT32 comId;                                       /**< ComId to request: 35...41 */
 } TRDP_STATISTICS_REQUEST_T;
 
 
@@ -659,16 +659,16 @@ typedef struct
  */
 typedef enum
 {
-    TRDP_OPTION_NONE    = 0,
-    TRDP_OPTION_BLOCK   = 0x01,                 /**< Default: Use nonblocking I/O calls, polling necessary
+    TRDP_OPTION_NONE    = 0u,
+    TRDP_OPTION_BLOCK   = 0x01u,                 /**< Default: Use nonblocking I/O calls, polling necessary
                                                   Set: Read calls will block, use select()                  */
-    TRDP_OPTION_TRAFFIC_SHAPING = 0x02,         /**< Use traffic shaping - distribute packet sending
+    TRDP_OPTION_TRAFFIC_SHAPING = 0x02u,         /**< Use traffic shaping - distribute packet sending
                                                   Default: OFF                                              */
-    TRDP_OPTION_NO_REUSE_ADDR   = 0x04,         /**< Do not allow re-use of address/port (-> no multihoming)
+    TRDP_OPTION_NO_REUSE_ADDR   = 0x04u,         /**< Do not allow re-use of address/port (-> no multihoming)
                                                   Default: Allow                                            */
-    TRDP_OPTION_NO_MC_LOOP_BACK = 0x08,         /**< Do not allow loop back of multicast traffic
+    TRDP_OPTION_NO_MC_LOOP_BACK = 0x08u,         /**< Do not allow loop back of multicast traffic
                                                   Default: Allow                                            */
-    TRDP_OPTION_NO_UDP_CHK      = 0x10          /**< Suppress UDP CRC generation
+    TRDP_OPTION_NO_UDP_CHK      = 0x10u          /**< Suppress UDP CRC generation
                                                   Default: Compute UDP CRC                                  */
 } TRDP_OPTION_T;
 
