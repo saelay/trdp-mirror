@@ -448,7 +448,7 @@ int test1 (int argc, char *argv[])
 }
 
 /**********************************************************************************************************************/
-/** test2 Notification transmission
+/** test2
  *
  *  @retval         0        no error
  *  @retval         1        some error
@@ -545,7 +545,7 @@ int test2 (int argc, char *argv[])
 }
 
 /**********************************************************************************************************************/
-/** test3 Notification transmission + reception
+/** test3 tlp_get
  *
  *  @retval         0        no error
  *  @retval         1        some error
@@ -619,11 +619,95 @@ int test3 (int argc, char *argv[])
  */
 int test4 (int argc, char *argv[])
 {
-    PREPARE("", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("#153 (two PDs on one pull request", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
+        {
+            TRDP_PUB_T      pubHandle;
+            TRDP_SUB_T      subHandle;
+            
+#define TEST4_COMID     1000u
+#define TEST4_INTERVAL  100000u
+#define TEST4_DATA      "Hello World!"
+#define TEST4_DATA_LEN  16u
+            
+            /*    Session1 Install subscriber and publisher for PULL (interval = 0).    */
+            
+            err = tlp_subscribe(gSession1.appHandle, &subHandle, NULL, NULL,
+                                TEST4_COMID, 0u, 0u,
+                                0u,
+                                gDestMC,                            /* MC group */
+                                TRDP_FLAGS_NONE, 0, TRDP_TO_DEFAULT);
+            
+            
+            IF_ERROR("tlp_subscribe");
+
+            err = tlp_publish(gSession1.appHandle, &pubHandle, TEST4_COMID, 0u, 0u,
+                              0u,
+                              gDestMC,                              /* Destination */
+                              0u,
+                              0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8*) TEST4_DATA, TEST4_DATA_LEN);
+            
+            IF_ERROR("tlp_publish");
+            
+            /*    Session2 Install subscriber and do a request for PULL.    */
+            
+            err = tlp_subscribe(gSession2.appHandle, &subHandle, NULL, NULL,
+                                TEST4_COMID, 0u, 0u,
+                                0u,                                 /* Source */
+                                gDestMC,                            /* Destination */
+                                TRDP_FLAGS_DEFAULT, TEST4_INTERVAL * 3, TRDP_TO_DEFAULT);
+            
+            
+            IF_ERROR("tlp_subscribe");
+            
+            err = tlp_request(gSession2.appHandle, subHandle,
+                              TEST4_COMID, 0u, 0u, gSession2.ifaceIP, gSession1.ifaceIP,
+                              0u, TRDP_FLAGS_NONE, NULL , NULL , 0u, TEST4_COMID, gDestMC);
+
+            IF_ERROR("tlp_request");
+
+            /*
+             Enter the main processing loop.
+             */
+            int counter = 0;
+            while (counter++ < 50)         /* 5 seconds */
+            {
+                char            data2[1432u];
+                UINT32          dataSize2 = sizeof(data2);
+                TRDP_PD_INFO_T  pdInfo;
+                
+                usleep(100000u);
+                
+                err = tlp_get(gSession2.appHandle, subHandle, &pdInfo, (UINT8 *) data2, &dataSize2);
+                if (err == TRDP_NODATA_ERR)
+                {
+                    continue;
+                }
+                
+                if (err == TRDP_TIMEOUT_ERR)
+                {
+                    continue;
+                }
+
+                if (err != TRDP_NO_ERR)
+                {
+                    fprintf(gFp, "### tlp_get error: %d\n", err);
+                    
+                    gFailed = 1;
+                    goto end;
+                    
+                }
+                else
+                {
+                    fprintf(gFp, "received data from pull: %s (seq: %u, size: %u)\n", data2, pdInfo.seqCount, dataSize2);
+                    gFailed = 0;
+                    goto end;
+                }
+            }
+        }
     }
 
     /* ------------------------- test code ends here --------------------------- */
@@ -912,7 +996,7 @@ int test10 (int argc, char *argv[])
 }
 
 /**********************************************************************************************************************/
-/** test11 MD Request - Reply - Confirm
+/** test11
  *
  *  @retval         0        no error
  *  @retval         1        some error
@@ -938,12 +1022,6 @@ int test11 (int argc, char *argv[])
 /**********************************************************************************************************************/
 /** test12
  *
- *  TRDP_SDK.IVVS.002
- *  tac_openAppSession: default configs, marshalling on
- *
- *  PD data transfer
- *  api_test1.xml: marshall = on
- *  api_test2.xml: marshall = on
  *
  *  @retval         0        no error
  *  @retval         1        some error
