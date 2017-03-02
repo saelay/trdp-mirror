@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-08: Ticket #124 tau_dnr: Cache keeps etbTopoCount only
  *      BL 2015-12-14: Ticket #8: DNR client
  */
@@ -54,7 +55,7 @@
 
 typedef struct tau_dnr_cache
 {
-    CHAR8           uri[TRDP_MAX_URI_HOST_LEN];
+    CHAR8           uri[TRDP_MAX_URI_HOST_LEN + 1];
     TRDP_IP_ADDR_T  ipAddr;
     UINT32          etbTopoCnt;
     UINT32          opTrnTopoCnt;
@@ -231,7 +232,7 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 
 static int compareURI ( const void *arg1, const void *arg2 )
 {
-    return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN - 1u);
+    return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN);
 }
 
 static void printDNRcache (TAU_DNR_DATA_T *pDNR)
@@ -715,8 +716,8 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     /* save to application session */
     appHandle->pUser = pDNR;
 
-    pDNR->dnsIpAddr = (dnsIpAddr == 0) ? 0x0a000001 : dnsIpAddr;
-    pDNR->dnsPort   = (dnsPort == 0) ? 53 : dnsPort;
+    pDNR->dnsIpAddr = (dnsIpAddr == 0u) ? 0x0a000001u : dnsIpAddr;
+    pDNR->dnsPort   = (dnsPort == 0u) ? 53u : dnsPort;
 
     /* Get locally defined hosts */
     if (pHostsFileName != NULL && strlen(pHostsFileName) > 0)
@@ -726,7 +727,7 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     }
     else
     {
-        pDNR->noOfCachedEntries = 0;
+        pDNR->noOfCachedEntries = 0u;
         pDNR->timeout = TAU_DNS_TIME_OUT_LONG;
     }
     return err;
@@ -776,7 +777,7 @@ EXT_DECL TRDP_DNR_STATE_T tau_DNRstatus (
             {
                 return TRDP_DNR_HOSTSFILE;
             }
-            if (pDNR->noOfCachedEntries > 0)
+            if (pDNR->noOfCachedEntries > 0u)
             {
                 return TRDP_DNR_ACTIVE;
             }
@@ -832,7 +833,7 @@ EXT_DECL TRDP_IP_ADDR_T tau_getOwnAddr (
             UINT32          addrCnt = VOS_MAX_NUM_IF;
             VOS_IF_REC_T    localIF[VOS_MAX_NUM_IF];
             (void) vos_getInterfaces(&addrCnt, localIF);
-            for (i = 0; i < addrCnt; ++i)
+            for (i = 0u; i < addrCnt; ++i)
             {
                 if (localIF[i].mac[0] ||        /* Take a MAC address as indicator for an ethernet interface */
                     localIF[i].mac[1] ||
@@ -963,7 +964,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
                 ((appHandle->etbTopoCnt == 0u) || (pDNR->cache[i].etbTopoCnt == appHandle->etbTopoCnt)) &&
                 ((appHandle->opTrnTopoCnt == 0u) || (pDNR->cache[i].opTrnTopoCnt == appHandle->opTrnTopoCnt)))
             {
-                vos_strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN);
+                vos_strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN + 1);
                 return TRDP_NO_ERR;
             }
         }

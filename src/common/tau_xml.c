@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-21: Ticket #116: Memory corruption using new XML library
@@ -434,7 +435,7 @@ TRDP_ERR_T readTelegramDef (
                     char *p = strchr(value, '@');   /* Get host part only */
                     if (p != NULL)
                     {
-                        pSrc->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+                        pSrc->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1u);
                         if (pSrc->pUriUser == NULL)
                         {
                             vos_printLog(VOS_LOG_ERROR,
@@ -450,30 +451,30 @@ TRDP_ERR_T readTelegramDef (
                         p = value;
                     }
 
-                    pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32)strlen(p) + 1);
+                    pSrc->pUriHost1 = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32)strlen(p) + 1u);
                     if (pSrc->pUriHost1 == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                     strlen(p) + 1);
+                                     strlen(p) + 1u);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pSrc->pUriHost1, p, (UINT32) strlen(p) + 1);
+                    vos_strncpy((char *)pSrc->pUriHost1, p, (UINT32) strlen(p) + 1u);
                 }
                 else if (vos_strnicmp(attribute, "uri2", MAX_TOK_LEN) == 0)
                 {
                     char *p = strchr(value, '@');   /* Get host part only */
                     p = (p == NULL) ? value : p + 1;
 
-                    pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32) strlen(p) + 1);
+                    pSrc->pUriHost2 = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32) strlen(p) + 1u);
                     if (pSrc->pUriHost2 == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                     strlen(p) + 1);
+                                     strlen(p) + 1u);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pSrc->pUriHost2, p, (UINT32)  strlen(p) + 1);
+                    vos_strncpy((char *)pSrc->pUriHost2, p, (UINT32)  strlen(p) + 1u);
                 }
             }
             trdp_XMLEnter(pXML);
@@ -560,7 +561,7 @@ TRDP_ERR_T readTelegramDef (
                     char *p = strchr(value, '@');   /* Get host part only */
                     if (p != NULL)
                     {
-                        pDest->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1);
+                        pDest->pUriUser = (TRDP_URI_USER_T *) vos_memAlloc(TRDP_MAX_URI_USER_LEN + 1u);
                         if (pDest->pUriUser == NULL)
                         {
                             vos_printLog(VOS_LOG_ERROR,
@@ -576,15 +577,15 @@ TRDP_ERR_T readTelegramDef (
                         p = value;
                     }
 
-                    pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32) strlen(p) + 1);
+                    pDest->pUriHost = (TRDP_URI_HOST_T *) vos_memAlloc((UINT32) strlen(p) + 1u);
                     if (pDest->pUriHost == NULL)
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                     strlen(p) + 1);
+                                     strlen(p) + 1u);
                         return TRDP_MEM_ERR;
                     }
-                    vos_strncpy((char *)pDest->pUriHost, p, (UINT32) strlen(p) + 1);
+                    vos_strncpy((char *)pDest->pUriHost, p, (UINT32) strlen(p) + 1u);
                 }
             }
             trdp_XMLEnter(pXML);
@@ -825,12 +826,12 @@ TRDP_ERR_T readXmlDatasets (
                         }
                         else if (vos_strnicmp(attribute, "unit", MAX_TOK_LEN) == 0)
                         {
-                            (*papDataset)[idx]->pElement[i].unit = (CHAR8 *) vos_memAlloc((UINT32) strlen(value) + 1);
+                            (*papDataset)[idx]->pElement[i].unit = (CHAR8 *) vos_memAlloc((UINT32) strlen(value) + 1u);
                             if ((*papDataset)[idx]->pElement[i].unit == NULL)
                             {
                                 return TRDP_MEM_ERR;
                             }
-                            vos_strncpy((*papDataset)[idx]->pElement[i].unit, value, (UINT32) strlen(value) + 1);
+                            vos_strncpy((*papDataset)[idx]->pElement[i].unit, value, (UINT32) strlen(value) + 1u);
                         }
                         else if (vos_strnicmp(attribute, "scale", MAX_TOK_LEN) == 0)
                         {
@@ -874,13 +875,13 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
     )
 {
     /*  Check file name */
-    if (!pFileName || strlen(pFileName) == 0)
+    if ((pFileName == NULL) || (strlen(pFileName) == 0u))
     {
         return TRDP_PARAM_ERR;
     }
 
     /* Check parameters */
-    if (!pDocHnd)
+    if (pDocHnd == NULL)
     {
         return TRDP_PARAM_ERR;
     }

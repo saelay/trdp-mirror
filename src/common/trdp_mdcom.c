@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #148 Wrong element used in trdp_mdCheckTimeouts() to invoke the callback
  *      BL 2017-02-10: Ticket #138 Erroneous closing of receive md socket
  *      BL 2017-02-10: Ticket #142 Compiler warnings /​ MISRA-C 2012 issues
@@ -303,8 +304,8 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
         theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(pMdItem->pPacket->frameHead.msgType);
         memcpy(theMessage.sessionId, pMdItem->pPacket->frameHead.sessionID, TRDP_SESS_ID_SIZE);
         theMessage.replyTimeout = vos_ntohl(pMdItem->pPacket->frameHead.replyTimeout);
-        memcpy(theMessage.destUserURI, pMdItem->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
-        memcpy(theMessage.srcUserURI, pMdItem->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
+        vos_strncpy(theMessage.destUserURI, (CHAR8 *) pMdItem->pPacket->frameHead.destinationURI, TRDP_MAX_URI_USER_LEN);
+        vos_strncpy(theMessage.srcUserURI, (CHAR8 *) pMdItem->pPacket->frameHead.sourceURI, TRDP_MAX_URI_USER_LEN);
     }
     else
     {
@@ -613,8 +614,8 @@ static MD_ELE_T *trdp_mdHandleConfirmReply (TRDP_APP_SESSION_T appHandle, MD_HEA
             else
             {
                 /* save URI for reply */
-                memcpy(iterMD->srcURI, pMdItemHeader->sourceURI, TRDP_MAX_URI_USER_LEN);
-                memcpy(iterMD->destURI, pMdItemHeader->destinationURI, TRDP_MAX_URI_USER_LEN);
+                vos_strncpy(iterMD->srcURI, (CHAR8 *) pMdItemHeader->sourceURI, TRDP_MAX_URI_USER_LEN);
+                vos_strncpy(iterMD->destURI, (CHAR8 *) pMdItemHeader->destinationURI, TRDP_MAX_URI_USER_LEN);
 
                 if (vos_ntohs(pMdItemHeader->msgType) == TRDP_MSG_MQ)
                 {
@@ -1688,7 +1689,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         /* save session Id and sequence counter for next steps */
         memcpy(iterMD->sessionID, pH->sessionID, TRDP_SESS_ID_SIZE);
         /* save source URI for reply */
-        memcpy(iterMD->srcURI, pH->sourceURI, TRDP_MAX_URI_USER_LEN);
+        vos_strncpy(iterMD->srcURI, (CHAR8*) pH->sourceURI, TRDP_MAX_URI_USER_LEN);
     }
     else
     {
@@ -3046,14 +3047,14 @@ static void trdp_mdDetailSenderPacket (const TRDP_MSG_T         msgType,
 
     if ( srcURI != NULL )
     {
-        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, srcURI,
-               TRDP_MAX_URI_USER_LEN);
+        memset((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, 0, TRDP_MAX_URI_USER_LEN);
+        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, srcURI, strlen((char*)srcURI));
     }
 
     if ( destURI != NULL )
     {
-        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI,
-               destURI, TRDP_MAX_URI_USER_LEN);
+        memset((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI, 0, TRDP_MAX_URI_USER_LEN);
+        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI, destURI, strlen((char*)destURI));
     }
     if ( pData != NULL )
     {

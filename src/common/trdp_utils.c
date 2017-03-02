@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-03-01: Ticket #136 PD topography counter with faulty behavior
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-01: Setting correct multicast TTL for PDs
  *      BL 2014-08-25: Ticket #57+58: Padding / zero bytes trailing MD & PD packets fixed
@@ -275,17 +276,7 @@ PD_ELE_T *trdp_queueFindSubAddr (
         if ((iterPD->addr.comId == addr->comId)
             && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr)))
         {
-            /*  We check for local communication
-                or if etbTopoCnt and opTrnTopoCnt of the subscription are zero or match */
-            if (
-                ((addr->etbTopoCnt == 0) && (addr->opTrnTopoCnt == 0))
-                || trdp_validTopoCounters( addr->etbTopoCnt,
-                                           addr->opTrnTopoCnt,
-                                           iterPD->addr.etbTopoCnt,
-                                           iterPD->addr.opTrnTopoCnt))
-            {
-                return iterPD;
-            }
+            return iterPD;
         }
     }
     return NULL;
