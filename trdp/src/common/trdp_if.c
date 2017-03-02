@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2017-03-02: Ticket #151 tlp_request: timeout-flag is not cleared
+ *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-10: Ticket #137 tlc_closeSession should close the tcp socket used for md communication
  *      BL 2017-02-10: Ticket #128 PD: Support of ComId == 0
  *      BL 2017-02-10: Ticket #130 PD Pull: Request is always sent to the same ip address
@@ -1939,6 +1941,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 {
                     vos_getTime(&pSubPD->timeToGo);
                     vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
+                    pSubPD->privFlags ^= ~TRDP_TIMED_OUT;   /* Reset time out flag (#151) */
                 }
             }
         }
@@ -2095,14 +2098,14 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     }
                     else
                     {
-                        newPD->addr.mcGroup = 0;
+                        newPD->addr.mcGroup = 0u;
                     }
 
                     newPD->addr.comId       = comId;
                     newPD->addr.srcIpAddr   = srcIpAddr;
                     newPD->addr.destIpAddr  = destIpAddr;
                     newPD->interval.tv_sec  = timeout / 1000000u;
-                    newPD->interval.tv_usec = timeout % 1000000;
+                    newPD->interval.tv_usec = timeout % 1000000u;
                     newPD->toBehavior       =
                         (toBehavior == TRDP_TO_DEFAULT) ? appHandle->pdDefault.toBehavior : toBehavior;
                     newPD->grossSize    = TRDP_MAX_PD_PACKET_SIZE;
@@ -2675,7 +2678,7 @@ TRDP_ERR_T tlm_addListener (
                 /* 2013-02-06 BL: Check for zero pointer  */
                 if (NULL != destURI)
                 {
-                    vos_strncpy(pNewElement->destURI, destURI, TRDP_MAX_URI_USER_LEN - 1);
+                    vos_strncpy(pNewElement->destURI, destURI, TRDP_MAX_URI_USER_LEN);
                 }
 
                 if (vos_isMulticast(mcDestIpAddr))

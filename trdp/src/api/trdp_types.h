@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2016-02-11: Ticket #111: 'unit', 'scale', 'offset' attributes added to TRDP_DATASET_ELEMENT
@@ -88,8 +89,8 @@ typedef VOS_IP4_ADDR_T TRDP_IP_ADDR_T;
 
 typedef CHAR8 TRDP_LABEL_T[TRDP_MAX_LABEL_LEN];
 typedef CHAR8 TRDP_URI_T[TRDP_MAX_URI_LEN];
-typedef CHAR8 TRDP_URI_HOST_T[TRDP_MAX_URI_HOST_LEN];
-typedef CHAR8 TRDP_URI_USER_T[TRDP_MAX_URI_USER_LEN];
+typedef CHAR8 TRDP_URI_HOST_T[TRDP_MAX_URI_HOST_LEN + 1];
+typedef CHAR8 TRDP_URI_USER_T[TRDP_MAX_URI_USER_LEN + 1];
 
 typedef CHAR8 TRDP_FILE_NAME_T[TRDP_MAX_FILE_NAME_LEN];
 
@@ -199,6 +200,8 @@ typedef enum
     TRDP_TO_KEEP_LAST_VALUE = 2u     /**< If set, last received values will be returned              */
 } TRDP_TO_BEHAVIOR_T;
 
+#define TRDP_TIMER_FOREVER  0xffffffff      /**< No time out for subscription                        */
+    
 /**    Process data info from received telegram; allows the application to generate responses.
  *
  * Note: Not all fields are relevant for each message type!

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2016-11-09: Default PD/MD parameter defines moved from trdp_private.h
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
@@ -95,9 +96,9 @@
 /**  to facilitate alignment the size will be increased by 1 byte             */
 
 #define TRDP_MAX_LABEL_LEN      16u                              /**< label length incl. terminating '0' */
-#define TRDP_MAX_URI_USER_LEN   (2u * TRDP_MAX_LABEL_LEN)        /**< URI user part incl. terminating '0' */
-#define TRDP_MAX_URI_HOST_LEN   (4u * TRDP_MAX_LABEL_LEN)        /**< URI host part length incl. terminating '0' */
-#define TRDP_MAX_URI_LEN        ((6u * TRDP_MAX_LABEL_LEN) + 8u)  /**< URI length incl. terminating '0' and 1 padding byte
+#define TRDP_MAX_URI_USER_LEN   (2u * TRDP_MAX_LABEL_LEN)        /**< URI user part excl. terminating '0' */
+#define TRDP_MAX_URI_HOST_LEN   (4u * TRDP_MAX_LABEL_LEN)        /**< URI host part length excl. terminating '0' */
+#define TRDP_MAX_URI_LEN        ((6u * TRDP_MAX_LABEL_LEN) + 8u)  /**< URI length excl. terminating '0' and 1 padding byte
                                                                   */
 #define TRDP_MAX_FILE_NAME_LEN  128u                             /**< path and file name length incl. terminating '0' */
 

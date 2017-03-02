@@ -16,6 +16,8 @@
  *      
  * $Id$
  *
+ *      BL 2017-02-28: Ticket #140 TRDP_TIMER_FOREVER -> 
+ *      BL 2017-02-28: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2015-08-31: Ticket #94: "beQuiet" removed
  *      BL 2015-08-05: Ticket #81: Counts for packet loss
  *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
@@ -41,23 +43,22 @@
 
 /* The TRDP version can be predefined as CFLAG   */
 #ifndef TRDP_VERSION
-#define TRDP_VERSION            0
-#define TRDP_RELEASE            0
-#define TRDP_UPDATE             0
-#define TRDP_EVOLUTION          0
+#define TRDP_VERSION            0u
+#define TRDP_RELEASE            0u
+#define TRDP_UPDATE             0u
+#define TRDP_EVOLUTION          0u
 #endif
 
-#define TRDP_TIMER_GRANULARITY  10000                                    /**< granularity in us                      */
-#define TRDP_TIMER_FOREVER      0xffffffff                               /**< granularity in us                      */
+#define TRDP_TIMER_GRANULARITY  10000u                                    /**< granularity in us                      */
 
-#define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536                       /**< Default maximum size of log file       */
+#define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536u                        /**< Default maximum size of log file       */
 
-#define TRDP_MAGIC_PUB_HNDL_VALUE           0xCAFEBABE
-#define TRDP_MAGIC_SUB_HNDL_VALUE           0xBABECAFE
+#define TRDP_MAGIC_PUB_HNDL_VALUE           0xCAFEBABEu
+#define TRDP_MAGIC_SUB_HNDL_VALUE           0xBABECAFEu
 
-#define TRDP_SEQ_CNT_START_ARRAY_SIZE       64                          /**< This should be enough for the start    */
+#define TRDP_SEQ_CNT_START_ARRAY_SIZE       64u                           /**< This should be enough for the start    */
 
-#define TRDP_IF_WAIT_FOR_READY              120   /**< 120 seconds (120 tries each second to bind to an IP address) */
+#define TRDP_IF_WAIT_FOR_READY              120u    /**< 120 seconds (120 tries each second to bind to an IP address) */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -66,45 +67,45 @@
 /** Internal MD state */
 typedef enum
 {
-    TRDP_ST_NONE = 0,                  /**< neutral value                                        */
+    TRDP_ST_NONE = 0u,                  /**< neutral value                                        */
 
-    TRDP_ST_TX_NOTIFY_ARM       = 1,      /**< ready to send notify MD                              */
-    TRDP_ST_TX_REQUEST_ARM      = 2,      /**< ready to send request MD                             */
-    TRDP_ST_TX_REPLY_ARM        = 3,      /**< ready to send reply MD                               */
-    TRDP_ST_TX_REPLYQUERY_ARM   = 4,      /**< ready to send reply with confirm request MD          */
-    TRDP_ST_TX_CONFIRM_ARM      = 5,      /**< ready to send confirm MD                             */
+    TRDP_ST_TX_NOTIFY_ARM       = 1u,      /**< ready to send notify MD                              */
+    TRDP_ST_TX_REQUEST_ARM      = 2u,      /**< ready to send request MD                             */
+    TRDP_ST_TX_REPLY_ARM        = 3u,      /**< ready to send reply MD                               */
+    TRDP_ST_TX_REPLYQUERY_ARM   = 4u,      /**< ready to send reply with confirm request MD          */
+    TRDP_ST_TX_CONFIRM_ARM      = 5u,      /**< ready to send confirm MD                             */
     TRDP_ST_RX_READY = 6,                 /**< armed listener                                       */
 
-    TRDP_ST_TX_REQUEST_W4REPLY  = 7,      /**< request sent, wait for reply                         */
-    TRDP_ST_RX_REPLYQUERY_W4C   = 8,      /**< reply send, with confirm request MD                  */
+    TRDP_ST_TX_REQUEST_W4REPLY  = 7u,      /**< request sent, wait for reply                         */
+    TRDP_ST_RX_REPLYQUERY_W4C   = 8u,      /**< reply send, with confirm request MD                  */
 
-    TRDP_ST_RX_REQ_W4AP_REPLY   = 9,      /**< request received, wait for application reply send    */
-    TRDP_ST_TX_REQ_W4AP_CONFIRM = 10,     /**< reply conf. rq. tx, wait for application conf send   */
-    TRDP_ST_RX_REPLY_SENT       = 11,     /**< reply sent    */
+    TRDP_ST_RX_REQ_W4AP_REPLY   = 9u,      /**< request received, wait for application reply send    */
+    TRDP_ST_TX_REQ_W4AP_CONFIRM = 10u,     /**< reply conf. rq. tx, wait for application conf send   */
+    TRDP_ST_RX_REPLY_SENT       = 11u,     /**< reply sent    */
 
-    TRDP_ST_RX_NOTIFY_RECEIVED  = 12,     /**< notification received, wait for application to accept    */
-    TRDP_ST_TX_REPLY_RECEIVED   = 13,     /**< reply received    */
-    TRDP_ST_RX_CONF_RECEIVED    = 14      /**< confirmation received  */
+    TRDP_ST_RX_NOTIFY_RECEIVED  = 12u,     /**< notification received, wait for application to accept    */
+    TRDP_ST_TX_REPLY_RECEIVED   = 13u,     /**< reply received    */
+    TRDP_ST_RX_CONF_RECEIVED    = 14u      /**< confirmation received  */
 } TRDP_MD_ELE_ST_T;
 
 /** Internal flags for packets    */
 typedef enum
 {
-    TRDP_PRIV_NONE      = 0,
-    TRDP_MC_JOINT       = 0x1,
-    TRDP_TIMED_OUT      = 0x2,              /**< if set, inform the user                                */
-    TRDP_INVALID_DATA   = 0x4,              /**< if set, inform the user                                */
-    TRDP_REQ_2B_SENT    = 0x8,              /**< if set, the request needs to be sent                   */
-    TRDP_PULL_SUB       = 0x10,             /**< if set, its a PULL subscription                        */
-    TRDP_REDUNDANT      = 0x20              /**< if set, packet should not be sent (redundant           */
+    TRDP_PRIV_NONE      = 0u,
+    TRDP_MC_JOINT       = 0x1u,
+    TRDP_TIMED_OUT      = 0x2u,              /**< if set, inform the user                                */
+    TRDP_INVALID_DATA   = 0x4u,              /**< if set, inform the user                                */
+    TRDP_REQ_2B_SENT    = 0x8u,              /**< if set, the request needs to be sent                   */
+    TRDP_PULL_SUB       = 0x10u,             /**< if set, its a PULL subscription                        */
+    TRDP_REDUNDANT      = 0x20u              /**< if set, packet should not be sent (redundant           */
 } TRDP_PRIV_FLAGS_T;
 
 /** Socket usage    */
 typedef enum
 {
-    TRDP_SOCK_PD        = 0,                /**< Socket is used for UDP process data                    */
-    TRDP_SOCK_MD_UDP    = 1,                /**< Socket is used for UDP message data                    */
-    TRDP_SOCK_MD_TCP    = 2                 /**< Socket is used for TCP message data                    */
+    TRDP_SOCK_PD        = 0u,                /**< Socket is used for UDP process data                    */
+    TRDP_SOCK_MD_UDP    = 1u,                /**< Socket is used for UDP message data                    */
+    TRDP_SOCK_MD_TCP    = 2u                 /**< Socket is used for TCP message data                    */
 } TRDP_SOCK_TYPE_T;
 
 /** Hidden handle definition, used as unique addressing item    */
@@ -167,7 +168,7 @@ typedef struct TRDP_SOCKETS
 typedef struct
 {
     PD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
-    UINT8       data[TRDP_MAX_PD_DATA_SIZE];  /**< data ready to be sent or received (with CRCs)          */
+    UINT8       data[TRDP_MAX_PD_DATA_SIZE];    /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED PD_PACKET_T;
 
 #if MD_SUPPORT
@@ -175,7 +176,7 @@ typedef struct
 typedef struct
 {
     MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
-    UINT8       data[TRDP_MAX_MD_DATA_SIZE];  /**< data ready to be sent or received (with CRCs)          */
+    UINT8       data[TRDP_MAX_MD_DATA_SIZE];    /**< data ready to be sent or received (with CRCs)          */
 } GNU_PACKED MD_PACKET_T;
 #endif
 
@@ -257,7 +258,7 @@ typedef struct MD_ELE
     INT32               socketIdx;              /**< index into the socket list                             */
     UINT16              replyPort;              /**< replies are sent to the requesters source port         */
     TRDP_MD_ELE_ST_T    stateEle;               /**< internal status                                        */
-    UINT8               sessionID[16];          /**< UUID as a byte stream                                  */
+    UINT8               sessionID[16u];          /**< UUID as a byte stream                                  */
     UINT32              numExpReplies;          /**< number of expected repliers, 0 if unknown              */
     UINT32              numReplies;             /**< actual number of replies for the request               */
     UINT32              numRetriesMax;          /**< maximun number of retries for request to a know dev    */

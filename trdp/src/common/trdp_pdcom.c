@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-03-01: Ticket #136 PD topography counter with faulty behavior
  *      BL 2017-02-27: Ticket #146 On Timeout, PD Callback is always called with no data/datasize == 0
  *      BL 2017-02-10: Ticket #132: tlp_publish: Check of datasize wrong if using marshaller
  *      BL 2017-02-08: Ticket #142: Compiler warnings / MISRA-C 2012 issues
@@ -405,9 +406,8 @@ TRDP_ERR_T  trdp_pdReceive (
     PD_ELE_T            *pExistingElement   = NULL;
     PD_ELE_T            *pPulledElement;
     TRDP_ERR_T          err             = TRDP_NO_ERR;
-    TRDP_ERR_T          resultCode      = TRDP_NO_ERR;
     UINT32              recSize         = TRDP_MAX_PD_PACKET_SIZE;
-    int                 informUser      = 0;
+    int                 informUser      = FALSE;
     TRDP_ADDRESSES_T    subAddresses    = { 0u, 0u, 0u, 0u, 0u, 0u};
 
     /*  Get the packet from the wire:  */
@@ -529,94 +529,113 @@ TRDP_ERR_T  trdp_pdReceive (
         vos_printLog(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr),
                         vos_ntohl(pNewFrame->frameHead.comId));
         */
+        err = TRDP_NOSUB_ERR;
     }
     else
     {
-        UINT32 newSeqCnt = vos_ntohl(pNewFrameHead->sequenceCounter);
-        /* Save the source IP address of the received packet */
-        pExistingElement->lastSrcIP = subAddresses.srcIpAddr;
-        /* Save the real destination of the received packet (own IP or MC group) */
-        pExistingElement->addr.destIpAddr = subAddresses.destIpAddr;
-
-        if (newSeqCnt == 0u)  /* restarted or new sender */
+        /*  We check for local communication
+         or if etbTopoCnt and opTrnTopoCnt of the subscription are zero or match */
+        if (((subAddresses.etbTopoCnt == 0) && (subAddresses.opTrnTopoCnt == 0))
+            ||
+            trdp_validTopoCounters(subAddresses.etbTopoCnt,
+                                      subAddresses.opTrnTopoCnt,
+                                      pExistingElement->addr.etbTopoCnt,
+                                      pExistingElement->addr.opTrnTopoCnt))
         {
-            trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr,
-                                      (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType));
-        }
+            UINT32 newSeqCnt = vos_ntohl(pNewFrameHead->sequenceCounter);
+            /* Save the source IP address of the received packet */
+            pExistingElement->lastSrcIP = subAddresses.srcIpAddr;
+            /* Save the real destination of the received packet (own IP or MC group) */
+            pExistingElement->addr.destIpAddr = subAddresses.destIpAddr;
 
-        /* find sender in our list */
-        switch (trdp_checkSequenceCounter(pExistingElement,
-                                          newSeqCnt,
-                                          subAddresses.srcIpAddr,
-                                          (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType)))
-        {
-           case 0:                      /* Sequence counter is valid (at least 1 higher than previous one) */
-               break;
-           case -1:                     /* List overflow */
-               return TRDP_MEM_ERR;
-           case 1:
-               vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
-                                subAddresses.srcIpAddr), vos_ntohl(pNewFrameHead->comId));
-               return TRDP_NO_ERR;      /* Ignore packet, too old or duplicate */
-        }
 
-        if ((newSeqCnt > 0u) && (newSeqCnt > (pExistingElement->curSeqCnt + 1u)))
-        {
-            pExistingElement->numMissed += newSeqCnt - pExistingElement->curSeqCnt - 1u;
-        }
-        else if (pExistingElement->curSeqCnt > newSeqCnt)
-        {
-            pExistingElement->numMissed += UINT32_MAX - pExistingElement->curSeqCnt + newSeqCnt;
-        }
-
-        /* Store last received sequence counter here, too (pd_get et. al. may access it).   */
-        pExistingElement->curSeqCnt = vos_ntohl(pNewFrameHead->sequenceCounter);
-
-        /*  This might have not been set!   */
-        pExistingElement->dataSize  = vos_ntohl(pNewFrameHead->datasetLength);
-        pExistingElement->grossSize = trdp_packetSizePD(pExistingElement->dataSize);
-
-        /*  Has the data changed?   */
-        if (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
-        {
-            if ((pExistingElement->pktFlags & TRDP_FLAGS_FORCE_CB) ||
-                (pExistingElement->privFlags & TRDP_TIMED_OUT))
+            if (newSeqCnt == 0u)  /* restarted or new sender */
             {
-                informUser = 1;                 /* Inform user anyway */
+                trdp_resetSequenceCounter(pExistingElement, subAddresses.srcIpAddr,
+                                          (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType));
             }
-            else
+
+            /* find sender in our list */
+            switch (trdp_checkSequenceCounter(pExistingElement,
+                                              newSeqCnt,
+                                              subAddresses.srcIpAddr,
+                                              (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType)))
             {
-                informUser = memcmp(appHandle->pNewFrame->data,
-                                    pExistingElement->pFrame->data,
-                                    pExistingElement->dataSize);
+               case 0:                      /* Sequence counter is valid (at least 1 higher than previous one) */
+                   break;
+               case -1:                     /* List overflow */
+                   return TRDP_MEM_ERR;
+               case 1:
+                   vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
+                                    subAddresses.srcIpAddr), vos_ntohl(pNewFrameHead->comId));
+                   return TRDP_NO_ERR;      /* Ignore packet, too old or duplicate */
+            }
+
+            if ((newSeqCnt > 0u) && (newSeqCnt > (pExistingElement->curSeqCnt + 1u)))
+            {
+                pExistingElement->numMissed += newSeqCnt - pExistingElement->curSeqCnt - 1u;
+            }
+            else if (pExistingElement->curSeqCnt > newSeqCnt)
+            {
+                pExistingElement->numMissed += UINT32_MAX - pExistingElement->curSeqCnt + newSeqCnt;
+            }
+
+            /* Store last received sequence counter here, too (pd_get et. al. may access it).   */
+            pExistingElement->curSeqCnt = vos_ntohl(pNewFrameHead->sequenceCounter);
+
+            /*  This might have not been set!   */
+            pExistingElement->dataSize  = vos_ntohl(pNewFrameHead->datasetLength);
+            pExistingElement->grossSize = trdp_packetSizePD(pExistingElement->dataSize);
+
+            /*  Has the data changed?   */
+            if (pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
+            {
+                if ((pExistingElement->pktFlags & TRDP_FLAGS_FORCE_CB) ||
+                    (pExistingElement->privFlags & TRDP_TIMED_OUT))
+                {
+                    informUser = 1;                 /* Inform user anyway */
+                }
+                else
+                {
+                    informUser = memcmp(appHandle->pNewFrame->data,
+                                        pExistingElement->pFrame->data,
+                                        pExistingElement->dataSize);
+                }
+            }
+
+            /*  Get the current time and compute the next time this packet should be received.  */
+            vos_getTime(&pExistingElement->timeToGo);
+            vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
+
+            /*  Update some statistics  */
+            pExistingElement->numRxTx++;
+            pExistingElement->lastErr   = TRDP_NO_ERR;
+            pExistingElement->privFlags =
+                (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_TIMED_OUT);
+
+            /* mark the data as valid */
+            pExistingElement->privFlags =
+                (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_INVALID_DATA);
+
+            /*  remove the old one, insert the new one  */
+            /*  -> always swap the frame pointers              */
+            {
+                PD_PACKET_T *pTemp = pExistingElement->pFrame;
+                pExistingElement->pFrame    = appHandle->pNewFrame;
+                appHandle->pNewFrame        = pTemp;
             }
         }
-
-        /*  Get the current time and compute the next time this packet should be received.  */
-        vos_getTime(&pExistingElement->timeToGo);
-        vos_addTime(&pExistingElement->timeToGo, &pExistingElement->interval);
-
-        /*  Update some statistics  */
-        pExistingElement->numRxTx++;
-        pExistingElement->lastErr   = TRDP_NO_ERR;
-        pExistingElement->privFlags =
-            (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_TIMED_OUT);
-
-        /* mark the data as valid */
-        pExistingElement->privFlags =
-            (TRDP_PRIV_FLAGS_T) (pExistingElement->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_INVALID_DATA);
-
-        /*  remove the old one, insert the new one  */
-        /*  -> always swap the frame pointers              */
+        else
         {
-            PD_PACKET_T *pTemp = pExistingElement->pFrame;
-            pExistingElement->pFrame    = appHandle->pNewFrame;
-            appHandle->pNewFrame        = pTemp;
+            appHandle->stats.pd.numTopoErr++;
+            pExistingElement->lastErr   = TRDP_TOPO_ERR;
+            err = TRDP_TOPO_ERR;
+            informUser = TRUE;
         }
     }
 
-    if (pExistingElement != NULL &&
-        informUser)
+    if ((pExistingElement != NULL) &&
+        (informUser == TRUE))
     {
         /*  If a callback was provided, call it now */
         if ((pExistingElement->pktFlags & TRDP_FLAGS_CALLBACK)
@@ -634,7 +653,7 @@ TRDP_ERR_T  trdp_pdReceive (
             theMessage.replyComId   = vos_ntohl(pExistingElement->pFrame->frameHead.replyComId);
             theMessage.replyIpAddr  = vos_ntohl(pExistingElement->pFrame->frameHead.replyIpAddress);
             theMessage.pUserRef     = pExistingElement->pUserRef; /* User reference given with the local subscribe? */
-            theMessage.resultCode   = resultCode;
+            theMessage.resultCode   = err;
 
             pExistingElement->pfCbFunction(appHandle->pdDefault.pRefCon,
                                            appHandle,
@@ -643,7 +662,7 @@ TRDP_ERR_T  trdp_pdReceive (
                                            vos_ntohl(pExistingElement->pFrame->frameHead.datasetLength));
         }
     }
-    return TRDP_NO_ERR;
+    return err;
 }
 
 /******************************************************************************/

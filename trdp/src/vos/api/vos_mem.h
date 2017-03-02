@@ -71,7 +71,7 @@ typedef enum
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
  the overal size of the used memory allocation area is larger. */
 
-#define VOS_MEM_BLOCKSIZES  {32, 48, 128, 180, 256, 512, 1024, 1480, 2048, \
+#define VOS_MEM_BLOCKSIZES  {34, 48, 128, 180, 256, 512, 1024, 1480, 2048, \
                              4096, 11520, 16384, 32768, 65536, 131072}
 
 /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
