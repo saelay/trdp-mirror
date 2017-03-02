@@ -126,7 +126,7 @@ end:                                                                          \
         test_deinit(&gSession1 ,&gSession2);                \
                                                                               \
         if (gFailed) {                                                         \
-            fprintf(gFp, "\n###########  FAILED!  ###############\n"); }      \
+            fprintf(gFp, "\n###########  FAILED!  ###############\nlasterr = %d", err); }      \
         else{                                                                 \
             fprintf(gFp, "\n-----------  Success  ---------------\n"); }      \
                                                                               \
@@ -367,7 +367,7 @@ void test_deinit (
  */
 int test1 (int argc, char *argv[])
 {
-    PREPARE("Basic PD publish and subscribe, polling (#128 ComId = 0)", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("Basic PD publish and subscribe, polling (#128 ComId = 0)", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -489,7 +489,7 @@ static void test2PDcallBack (
 
 int test2 (int argc, char *argv[])
 {
-    PREPARE("Publish & Subscribe, Callback", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("Publish & Subscribe, Callback", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -552,7 +552,7 @@ int test2 (int argc, char *argv[])
  */
 int test3 (int argc, char *argv[])
 {
-    PREPARE("Ticket #140: tlp_get reports immediately TRDP_TIMEOUT_ERR", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("Ticket #140: tlp_get reports immediately TRDP_TIMEOUT_ERR", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -619,7 +619,7 @@ int test3 (int argc, char *argv[])
  */
 int test4 (int argc, char *argv[])
 {
-    PREPARE("", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -717,7 +717,7 @@ end:
 
 int test5 (int argc, char *argv[])
 {
-    PREPARE("MD Request - Reply - Confirm, #149", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -763,7 +763,7 @@ int test5 (int argc, char *argv[])
  */
 int test6 (int argc, char *argv[])
 {
-    PREPARE("MD Request - Reply - Confirm, #149", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
+    PREPARE("MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -812,7 +812,7 @@ int test6 (int argc, char *argv[])
  */
 int test7 (int argc, char *argv[])
 {
-    PREPARE("MD Notify no sessionID #127", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
+    PREPARE("MD Notify no sessionID #127", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -848,14 +848,14 @@ int test7 (int argc, char *argv[])
 }
 
 /**********************************************************************************************************************/
-/** PD publish and subscribe
+/** test8
  *
  *  @retval         0        no error
  *  @retval         1        some error
  */
 int test8 (int argc, char *argv[])
 {
-    PREPARE("PD publish and subscribe multicast", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -875,12 +875,12 @@ int test8 (int argc, char *argv[])
  */
 int test9 (int argc, char *argv[])
 {
-    PREPARE1("Memory test"); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
+    PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-   }
+    }
 
     /* ------------------------- test code ends here --------------------------- */
 
@@ -896,7 +896,7 @@ int test9 (int argc, char *argv[])
  */
 int test10 (int argc, char *argv[])
 {
-    PREPARE1("Version test"); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
+    PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -919,7 +919,7 @@ int test10 (int argc, char *argv[])
  */
 int test11 (int argc, char *argv[])
 {
-    PREPARE("MD Request - Reply - Confirm with marshalling", "hostsfile.txt"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -951,7 +951,7 @@ int test11 (int argc, char *argv[])
 int test12 (int argc, char *argv[])
 {
     /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
-    PREPARE_COM("TRDP_SDK.IVVS.002, tac_openAppSession: default configs, marshalling on");
+    PREPARE_COM("");
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -970,7 +970,7 @@ int test12 (int argc, char *argv[])
  */
 int test13 (int argc, char *argv[])
 {
-    PREPARE1("XML test"); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
+    PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
     
     /* ------------------------- test code starts here --------------------------- */
     
@@ -994,10 +994,10 @@ int test13 (int argc, char *argv[])
 test_func_t *testArray[] =
 {
     NULL,
-/*    test1,
+    test1,
     test2,
     test3,
-    test4,*/
+    test4,
     test5,
     test6,
     test7,

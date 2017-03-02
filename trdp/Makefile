@@ -128,7 +128,7 @@ libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
 example:	outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/sendData
 
-test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle $(OUTDIR)/inaugTest
+test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle $(OUTDIR)/inaugTest $(OUTDIR)/localtest
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test $(OUTDIR)/pd_md_responder $(OUTDIR)/testSub
 
@@ -211,6 +211,14 @@ $(OUTDIR)/getStats:   diverse/getStats.c  $(OUTDIR)/libtrdp.a
 			$(CC) test/diverse/getStats.c \
 			    -ltrdp \
 			    $(LDFLAGS) $(CFLAGS) $(INCLUDES) \
+			    -o $@
+			$(STRIP) $@
+
+$(OUTDIR)/localtest:   localtest/api_test.c  $(OUTDIR)/libtrdp.a
+			@echo ' ### Building local loop test tool $(@F)'
+			$(CC) test/localtest/api_test.c \
+			    -ltrdp \
+			    $(LDFLAGS) $(CFLAGS) -Wno-unused-variable $(INCLUDES) \
 			    -o $@
 			$(STRIP) $@
 
