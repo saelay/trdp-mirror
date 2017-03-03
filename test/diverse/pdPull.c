@@ -42,12 +42,12 @@
 #include "vos_mem.h"
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY     64000
-#define PREALLOCATE         {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
+#define RESERVED_MEMORY     64000u
+#define PREALLOCATE         {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 1u, 1u, 0u, 0u, 0u, 0u}
 
-#define APP_VERSION         "0.0.1.0"
+#define APP_VERSION         "0.0.2.0"
 
-UINT32  gComID          = 1000;
+UINT32  gComID          = 1000u;
 int     gKeepOnRunning  = TRUE;
 
 /**********************************************************************************************************************/
@@ -57,11 +57,11 @@ void print_data (UINT8 *pData, UINT32 len)
     int     ascii = -1;
 
     printf("\n--------------------\n");
-    for (i = 0; i < len; i++)
+    for (i = 0u; i < len; i++)
     {
-        if (i % 16 == 0)
+        if (i % 16u == 0u)
         {
-            if (ascii >= 0)
+            if (ascii >= 0u)
             {
                 printf("   ");
                 for (j = ascii; j < ascii + 16; j++)
@@ -113,12 +113,15 @@ void dbgOut (
     const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
-    printf("%s %s %s:%d %s",
-           pTime,
-           catStr[category],
-           pFile,
-           LineNumber,
-           pMsgStr);
+    if (category != VOS_LOG_DBG)
+    {
+        printf("%s %s %s:%d %s",
+               pTime,
+               catStr[category],
+               pFile,
+               LineNumber,
+               pMsgStr);
+    }
 }
 
 /**********************************************************************************************************************/
@@ -178,18 +181,19 @@ int main (int argc, char * *argv)
     TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
-                                               (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_MARSHALL), 10000000,
-                                               TRDP_TO_SET_TO_ZERO, 0};
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0u, 0u},
+                                               (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_MARSHALL), 10000000u,
+                                               TRDP_TO_SET_TO_ZERO, 0u};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, PREALLOCATE};
-    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0u, 0u, TRDP_OPTION_BLOCK};
 
-    int     rv = 0;
+    int     rv      = 0;
     int     ip[4];
-    UINT32  destIP  = 0;
-    UINT32  replyIP = 0;
-    UINT32  ownIP   = 0;
-    int     count   = 0, i;
+    UINT32  destIP  = VOS_INADDR_ANY;
+    UINT32  replyIP = VOS_INADDR_ANY;
+    UINT32  ownIP   = VOS_INADDR_ANY;
+    int     count   = 0;
+    int     i;
     int     ch;
 
     if (argc <= 1)
@@ -273,7 +277,7 @@ int main (int argc, char * *argv)
     /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&appHandle,
                         ownIP,
-                        0,                                 /* use default IP addresses */
+                        VOS_INADDR_ANY,                    /* use default IP addresses */
                         NULL,                              /* no Marshalling    */
                         &pdConfiguration, NULL,            /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
@@ -288,12 +292,12 @@ int main (int argc, char * *argv)
                         &subHandle,                    /*    our subscription identifier            */
                         NULL, NULL,
                         gComID,                        /*    ComID                                  */
-                        0,                             /*    topocount: local consist only          */
-                        0,
-                        0,                             /*    Source IP filter                       */
+                        0u,                            /*    topocounts: local consist only         */
+                        0u,
+                        VOS_INADDR_ANY,                /*    Source IP filter                       */
                         replyIP,                       /*    Default destination    (or MC Group)   */
                         TRDP_FLAGS_DEFAULT,            /*    packet flags */
-                        0,                             /*    Time out in us                         */
+                        0u,                            /*    Time out in us                         */
                         TRDP_TO_SET_TO_ZERO);          /*    delete invalid data    on timeout      */
 
     if (err != TRDP_NO_ERR)
@@ -304,7 +308,8 @@ int main (int argc, char * *argv)
     }
 
     /*    Request PD        */
-    err = tlp_request(appHandle, subHandle, gComID, 0, 0, 0, destIP, 0, TRDP_FLAGS_NONE, 0, NULL, 0, gComID, replyIP);
+    err = tlp_request(appHandle, subHandle, gComID, 0u, 0u, VOS_INADDR_ANY, destIP,
+                      0u, TRDP_FLAGS_NONE, 0u, NULL, 0u, gComID, replyIP);
 
     if (err != TRDP_NO_ERR)
     {
@@ -322,7 +327,7 @@ int main (int argc, char * *argv)
         fd_set  rfds;
         INT32   noOfDesc;
         struct timeval  tv;
-        struct timeval  max_tv = {5, 0};
+        struct timeval  max_tv = {5u, 0};
 
         /*
          Prepare the file descriptor set for the select call.
@@ -355,7 +360,7 @@ int main (int argc, char * *argv)
          what ever comes first.
          */
 
-        rv = select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
+        rv = vos_select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
 
         /*
          Check for overdue PDs (sending and receiving)
@@ -413,15 +418,15 @@ int main (int argc, char * *argv)
             err = tlp_request(appHandle,
                               subHandle,
                               gComID,
-                              0,
-                              0,
-                              0,
+                              0u,
+                              0u,
+                              VOS_INADDR_ANY,
                               destIP,
-                              0,
+                              0u,
                               TRDP_FLAGS_NONE,
-                              0,
+                              0u,
                               NULL,
-                              0,
+                              0u,
                               gComID,
                               replyIP);
 
