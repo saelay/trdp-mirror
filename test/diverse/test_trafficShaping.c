@@ -273,10 +273,10 @@ int main (int argc, char *argv[])
      */
     while (1)
     {
-        fd_set  rfds;
-        INT32   noDesc;
-        struct timeval  tv;
-        struct timeval  max_tv = {0, 10000};
+        fd_set		rfds;
+        INT32		noDesc;
+        VOS_TIME_T  tv;
+        VOS_TIME_T  max_tv = {0, 10000};
         
         /*
          Prepare the file descriptor set for the select call.
