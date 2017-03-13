@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-03-13: Ticket #154 ComIds and DSIds literals (#define TRDP_...) in trdp_proto.h too long
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2016-11-09: Default PD/MD parameter defines moved from trdp_private.h
@@ -108,9 +109,9 @@
 /**                          TRDP reserved COMIDs in the range 1 ... 1000                                            */
 /**********************************************************************************************************************/
 
-#define TRDP_ETBCTRL_COMID                              ETB_CTRL_COMID
-#define TRDP_CSTINFO_COMID                              CSTINFO_COMID
-#define TRDP_CSTINFOCTRL_COMID                          CSTINFOCTRL_COMID
+#define TRDP_ETBCTRL_COMID                              1u
+#define TRDP_CSTINFO_COMID                              2u
+#define TRDP_CSTINFOCTRL_COMID                          3u
 
 #define TRDP_COMID_ECHO                                 10u
 
@@ -134,31 +135,32 @@
 #define TRDP_CONFTEST_ECHO_REPLY_COMID                  87u
 #define TRDP_CONFTEST_REVERSE_ECHO_COMID                88u
 
-#define TRDP_TTDB_OP_TRAIN_DIR_STATUS_INFO_COMID        TTDB_STATUS_COMID
-#define TRDP_TTDB_OP_TRAIN_DIR_INFO_COMID               TTDB_OP_DIR_INFO_COMID
-#define TRDP_TTDB_TRAIN_DIR_INFO_REQUEST_COMID          TTDB_TRN_DIR_REQ_COMID
-#define TRDP_TTDB_TRAIN_DIR_INFO_REPLY_COMID            TTDB_TRN_DIR_REP_COMID
-#define TRDP_TTDB_STATIC_CONSIST_INFO_REQUEST_COMID     TTDB_STAT_CST_REQ_COMID
-#define TRDP_TTDB_STATIC_CONSIST_INFO_REPLY_COMID       TTDB_STAT_CST_REP_COMID
-#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REQUEST_COMID  TTDB_NET_DIR_REQ_COMID
-#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REPLY_COMID    TTDB_NET_DIR_REP_COMID
-#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REQUEST_COMID       TTDB_OP_DIR_INFO_REQ_COMID
-#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REPLY_COMID         TTDB_OP_DIR_INFO_REP_COMID
-#define TRDP_TTDB_READ_COMPLETE_REQUEST_COMID           TTDB_READ_CMPLT_REQ_COMID
-#define TRDP_TTDB_READ_COMPLETE_REPLY_COMID             TTDB_READ_CMPLT_REP_COMID
+#define TRDP_TTDB_OP_TRN_DIR_STAT_INF_COMID             100u
+#define TRDP_TTDB_OP_TRN_DIR_INF_COMID                  101u
+#define TRDP_TTDB_TRN_DIR_INF_REQ_COMID                 102u
+#define TRDP_TTDB_TRN_DIR_INF_REP_COMID                 103u
+//#define TRDP_TTDB_STATIC_CONSIST_INFO_RE
+#define TRDP_TTDB_STATIC_CST_INF_REQ_COMID              104u
+#define TRDP_TTDB_STATIC_CST_INF_REP_COMID              105u
+#define TRDP_TTDB_TRN_NET_DIR_INF_REQ_COMID             106u
+#define TRDP_TTDB_TRN_NET_DIR_INF_REP_COMID             107u
+#define TRDP_TTDB_OP_TRN_DIR_INF_REQ_COMID              108u
+#define TRDP_TTDB_OP_TRN_DIR_INF_REP_COMID              109u
+#define TRDP_TTDB_READ_CMPL_REQ_COMID                   110u
+#define TRDP_TTDB_READ_CMPL_REP_COMID                   111u
 
-#define TRDP_ECSP_CTRL_COMID         	                ECSP_CTRL_COMID    /* Etb control message               */
-#define TRDP_ECSP_STAT_COMID	                        ECSP_STATUS_COMID    /* Etb status message                */
-#define TRDP_ECSP_CONF_REQUEST_COMID                    ECSP_CONF_REQ_COMID    /* ECSP confirmation/correction request message */
-#define TRDP_ECSP_CONF_REPLY_COMID                      ECSP_CONF_REP_COMID    /* ECSP confirmation/correction reply message */
+#define TRDP_ECSP_CTRL_COMID                            120u    /* Etb control message               */
+#define TRDP_ECSP_STAT_COMID	                        121u    /* Etb status message                */
+#define TRDP_ECSP_CONF_REQ_COMID                        122u    /* ECSP confirmation/correction request message */
+#define TRDP_ECSP_CONF_REP_COMID                        123u    /* ECSP confirmation/correction reply message */
 
-#define TRDP_ETBN_CTRL_REQUEST_COMID         	        ETBN_CTRL_REQ_COMID
-#define TRDP_ETBN_STATUS_REPLY_COMID	                ETBN_CTRL_REP_COMID
-#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REQUEST_COMID  ETBN_TRN_NET_DIR_REQ_COMID
-#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REPLY_COMID    ETBN_TRN_NET_DIR_REP_COMID
+#define TRDP_ETBN_CTRL_REQ_COMID         	            130u
+#define TRDP_ETBN_STATUS_REP_COMID	                    131u
+#define TRDP_ETBN_TRN_NET_DIR_INF_REQ_COMID             132u
+#define TRDP_ETBN_TRN_NET_DIR_INF_REP_COMID             133u
 
-#define TRDP_DNS_REQUEST_COMID                          TCN_DNS_REQ_COMID
-#define TRDP_DNS_REPLY_COMID                            TCN_DNS_REP_COMID
+#define TRDP_DNS_REQUEST_COMID                          140u
+#define TRDP_DNS_REPLY_COMID                            141u
 
 #define TRDP_TEST_COMID                                 1000u
 
@@ -189,39 +191,39 @@
 
 #define TRDP_CONFTEST_DSID                              80u
 #define TRDP_CONFTEST_STATUS_DSID                       81u
-#define TRDP_CONFTEST_CONF_REQUEST_DSID                 82u
-#define TRDP_CONFTEST_CONF_REPLY_DSID                   83u
-#define TRDP_CONFTEST_OPTRAIN_REQUEST_DSID              84u
-#define TRDP_CONFTEST_OPTRAIN_REPLY_DSID                85u
-#define TRDP_CONFTEST_ECHO_REQUEST_DSID                 86u
-#define TRDP_CONFTEST_ECHO_REPLY_DSID                   87u
+#define TRDP_CONFTEST_CONF_REQ_DSID                     82u
+#define TRDP_CONFTEST_CONF_REP_DSID                     83u
+#define TRDP_CONFTEST_OPTRN_REQ_DSID                    84u
+#define TRDP_CONFTEST_OPTRN_REP_DSID                    85u
+#define TRDP_CONFTEST_ECHO_REQ_DSID                     86u
+#define TRDP_CONFTEST_ECHO_REP_DSID                     87u
 #define TRDP_CONFTEST_REVERSE_ECHO_DSID                 88u
 
-#define TRDP_TTDB_OP_TRAIN_DIR_STATUS_INFO_DSID         100u
-#define TRDP_TTDB_OP_TRAIN_DIR_INFO_DSID                101u
-#define TRDP_TTDB_TRAIN_DIR_INFO_REQUEST_DSID           102u
-#define TRDP_TTDB_TRAIN_DIR_INFO_REPLY_DSID             103u
-#define TRDP_TTDB_STATIC_CONSIST_INFO_REQUEST_DSID      104u
-#define TRDP_TTDB_STATIC_CONSIST_INFO_REPLY_DSID        105u
-#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REQUEST_DSID   106u
-#define TRDP_TTDB_TRAIN_NETWORK_DIR_INFO_REPLY_DSID     107u
-#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REQUEST_DSID        108u
-#define TRDP_TTDB_OP_TRAIN_DIR_INFO_REPLY_DSID          109u
-#define TRDP_TTDB_READ_COMPLETE_REQUEST_DSID            110u
-#define TRDP_TTDB_READ_COMPLETE_REPLY_DSID              111u
+#define TRDP_TTDB_OP_TRN_DIR_STAT_INF_DSID              100u
+#define TRDP_TTDB_OP_TRN_DIR_INF_DSID                   101u
+#define TRDP_TTDB_TRN_DIR_INF_REQ_DSID                  102u
+#define TRDP_TTDB_TRN_DIR_INF_REP_DSID                  103u
+#define TRDP_TTDB_STAT_CST_INF_REQ_DSID                 104u
+#define TRDP_TTDB_STAT_CST_INF_REP_DSID                 105u
+#define TRDP_TTDB_TRN_NET_DIR_INF_REQ_DSID              106u
+#define TRDP_TTDB_TRN_NET_DIR_INF_REP_DSID              107u
+#define TRDP_TTDB_OP_TRN_DIR_INF_REQ_DSID               108u
+#define TRDP_TTDB_OP_TRN_DIR_INF_REP_DSID               109u
+#define TRDP_TTDB_READ_CMPL_REQ_DSID                    110u
+#define TRDP_TTDB_READ_CMPL_REP_DSID                    111u
 
 #define TRDP_ECSP_CTRL_DSID         	                120u    /* Etb control message               */
 #define TRDP_ECSP_STAT_DSID	                            121u    /* Etb status message                */
-#define TRDP_ECSP_CONF_REQUEST_DSID                     122u    /* ECSP confirmation/correction request message */
-#define TRDP_ECSP_CONF_REPLY_DSID                       123u    /* ECSP confirmation/correction reply message */
+#define TRDP_ECSP_CONF_REQ_DSID                         122u    /* ECSP confirmation/correction request message */
+#define TRDP_ECSP_CONF_REP_DSID                         123u    /* ECSP confirmation/correction reply message */
 
-#define TRDP_ETBN_CTRL_REQUEST_DSID         	        130u
-#define TRDP_ETBN_STATUS_REPLY_DSID	                    131u
-#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REQUEST_DSID   132u
-#define TRDP_ETBN_TRAIN_NETWORK_DIR_INFO_REPLY_DSID     133u
+#define TRDP_ETBN_CTRL_REQ_DSID         	            130u
+#define TRDP_ETBN_STATUS_REP_DSID	                    131u
+#define TRDP_ETBN_TRN_NET_DIR_INF_REQ_DSID              132u
+#define TRDP_ETBN_TRN_NET_DIR_INF_REP_DSID              133u
 
-#define TRDP_DNS_REQUEST_DSID                           140u
-#define TRDP_DNS_REPLY_DSID                             141u
+#define TRDP_DNS_REQ_DSID                               140u
+#define TRDP_DNS_REP_DSID                               141u
 
 #define TRDP_NEST1_TEST_DSID                            990u
 #define TRDP_NEST2_TEST_DSID                            991u
