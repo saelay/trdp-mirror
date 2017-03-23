@@ -241,7 +241,7 @@ EXT_DECL TRDP_ERR_T tau_requestEcspConfirm ( TRDP_APP_SESSION_T         appHandl
                             pUserRef,                       /* pUserRef */
                             pfCbFunction,                   /* callback function */
                             &sessionId,                     /* pSessionId */
-                            TRDP_ECSP_CONF_REQUEST_COMID,   /* comId */
+                            TRDP_ECSP_CONF_REQ_COMID,       /* comId */
                             0,                              /* etbTopoCnt */
                             0,                              /* opTrnTopoCnt */
                             appHandle->realIP,              /* srcIpAddr */
