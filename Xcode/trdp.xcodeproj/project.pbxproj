@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
+		08CBAF7A1E842A6D00809853 /* Makefile-build */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 08CBAF7B1E842A6D00809853 /* Build configuration list for PBXAggregateTarget "Makefile-build" */;
+			buildPhases = (
+				08CBAF7E1E842AD200809853 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Makefile-build";
+			productName = "Makefile-build";
+		};
 		7366AD9C16B7CC6B0068A893 /* All */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 7366ADA316B7CCA90068A893 /* Build configuration list for PBXAggregateTarget "All" */;
@@ -68,7 +79,6 @@
 		08594B241B70DC260066EA06 /* vos_private.h in Headers */ = {isa = PBXBuildFile; fileRef = 7327CA871656AB080020536A /* vos_private.h */; };
 		08594B251B70DC3A0066EA06 /* trdp_if_light.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F29150777B00046E0AC /* trdp_if_light.h */; };
 		08594B261B70DC3D0066EA06 /* trdp_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F2A150777B00046E0AC /* trdp_types.h */; };
-		08594B271B70DC450066EA06 /* trdp_proto.h in Headers */ = {isa = PBXBuildFile; fileRef = 735BAD15172EC38900837D0E /* trdp_proto.h */; };
 		08594B341B70E9DF0066EA06 /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B321B70E9DF0066EA06 /* vos_mem.c */; };
 		08594B351B70E9DF0066EA06 /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B321B70E9DF0066EA06 /* vos_mem.c */; };
 		08594B361B70E9DF0066EA06 /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B331B70E9DF0066EA06 /* vos_utils.c */; };
@@ -167,7 +177,6 @@
 		73591F811B986C7900B758F0 /* tau_marshall.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F457C9152DE1FE00D1C522 /* tau_marshall.h */; };
 		73591F821B986C7900B758F0 /* vos_shared_mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 73F5A53A16A41A2000335006 /* vos_shared_mem.h */; };
 		73591F831B986C7900B758F0 /* tau_ctrl.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E601913CCC50020A6EA /* tau_ctrl.h */; };
-		73591F841B986C7900B758F0 /* trdp_proto.h in Headers */ = {isa = PBXBuildFile; fileRef = 735BAD15172EC38900837D0E /* trdp_proto.h */; };
 		73591F851B986C7900B758F0 /* tau_dnr.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A00E611913CCC50020A6EA /* tau_dnr.h */; };
 		73591F871B986C7900B758F0 /* vos_sock.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E052721513537C0058D590 /* vos_sock.c */; };
 		73591F881B986C7900B758F0 /* vos_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E0535C1513685D0058D590 /* vos_thread.c */; };
@@ -180,7 +189,6 @@
 		73591F911B986C7900B758F0 /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B321B70E9DF0066EA06 /* vos_mem.c */; };
 		73591F921B986C7900B758F0 /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B331B70E9DF0066EA06 /* vos_utils.c */; };
 		735BACDE172E67CD00837D0E /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
-		735BAD16172EC38900837D0E /* trdp_proto.h in Headers */ = {isa = PBXBuildFile; fileRef = 735BAD15172EC38900837D0E /* trdp_proto.h */; };
 		73603CED175CBE79004608BD /* libtrdp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2AAC046055464E500DB518D /* libtrdp.a */; };
 		73603CF6175CBE9A004608BD /* trdp-md-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7367955D17202EBE003C68ED /* trdp-md-test.c */; };
 		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
@@ -653,7 +661,7 @@
 		08014D0B16483EAD0065AADD /* SenderDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SenderDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		08014D22164840020065AADD /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		08014D23164840020065AADD /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
-		08014D26164840030065AADD /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
+		08014D26164840030065AADD /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		08014D28164840030065AADD /* MainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
 		08014D29164840030065AADD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		08014D2A164840030065AADD /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -736,7 +744,6 @@
 		7359DE151C6CC8EB0009487B /* vtest.c */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.c; name = vtest.c; path = ../test/diverse/vtest.c; sourceTree = "<group>"; tabWidth = 4; };
 		7359DE161C6CC8EB0009487B /* vtest.h */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.c.h; name = vtest.h; path = ../test/diverse/vtest.h; sourceTree = "<group>"; tabWidth = 4; };
 		735BAD12172EC1AB00837D0E /* memory.xls */ = {isa = PBXFileReference; lastKnownFileType = file; path = memory.xls; sourceTree = "<group>"; };
-		735BAD15172EC38900837D0E /* trdp_proto.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = trdp_proto.h; sourceTree = "<group>"; tabWidth = 4; };
 		73603CF2175CBE79004608BD /* md-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "md-test"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7366AC6116B68C100068A893 /* example.xml */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = text.xml; path = example.xml; sourceTree = "<group>"; tabWidth = 4; };
 		7366AC6216B68C100068A893 /* interoperability_test.xml */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = text.xml; path = interoperability_test.xml; sourceTree = "<group>"; tabWidth = 4; };
@@ -1331,7 +1338,6 @@
 				7367954617202D5D003C68ED /* tau_tti.h */,
 				73F457CB152DE1FE00D1C522 /* tau_xml.h */,
 				73821F29150777B00046E0AC /* trdp_if_light.h */,
-				735BAD15172EC38900837D0E /* trdp_proto.h */,
 				73821F2A150777B00046E0AC /* trdp_types.h */,
 				08594B2A1B70E0A20066EA06 /* trdp-config.xsd */,
 			);
@@ -1542,7 +1548,6 @@
 				73591F811B986C7900B758F0 /* tau_marshall.h in Headers */,
 				73591F821B986C7900B758F0 /* vos_shared_mem.h in Headers */,
 				73591F831B986C7900B758F0 /* tau_ctrl.h in Headers */,
-				73591F841B986C7900B758F0 /* trdp_proto.h in Headers */,
 				73591F851B986C7900B758F0 /* tau_dnr.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1552,7 +1557,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				08594B261B70DC3D0066EA06 /* trdp_types.h in Headers */,
-				08594B271B70DC450066EA06 /* trdp_proto.h in Headers */,
 				08594B251B70DC3A0066EA06 /* trdp_if_light.h in Headers */,
 				08594B241B70DC260066EA06 /* vos_private.h in Headers */,
 				08594B1F1B70DC120066EA06 /* vos_utils.h in Headers */,
@@ -1588,7 +1592,6 @@
 				7327CA6016555BEA0020536A /* tau_marshall.h in Headers */,
 				73F5A53B16A41A2000335006 /* vos_shared_mem.h in Headers */,
 				73A00E621913CCC50020A6EA /* tau_ctrl.h in Headers */,
-				735BAD16172EC38900837D0E /* trdp_proto.h in Headers */,
 				73A00E631913CCC50020A6EA /* tau_dnr.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2108,7 +2111,13 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0830;
+				TargetAttributes = {
+					08CBAF7A1E842A6D00809853 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "trdp" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -2154,6 +2163,7 @@
 				73D7FDDF1CA1A6A700E52ACC /* sendData */,
 				08A327BC1E51FE2700B03846 /* test_local_loop */,
 				08A53DA71E5DAA4700CCCBC8 /* test_pdxml */,
+				08CBAF7A1E842A6D00809853 /* Makefile-build */,
 			);
 		};
 /* End PBXProject section */
@@ -2174,6 +2184,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		08CBAF7E1E842AD200809853 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\n# Start Make\n\ncd ..\nmake OSX_X86_config\nmake clean\nmake all\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		08014D0816483EAD0065AADD /* Sources */ = {
@@ -2735,7 +2761,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2766,7 +2791,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2864,6 +2888,22 @@
 			};
 			name = Release;
 		};
+		08CBAF7C1E842A6D00809853 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		08CBAF7D1E842A6D00809853 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = Release;
+		};
 		1DEB91EC08733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2933,7 +2973,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
@@ -2966,7 +3006,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
 				SDKROOT = macosx;
@@ -3353,7 +3393,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
@@ -3389,7 +3428,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
@@ -3916,6 +3954,15 @@
 			buildConfigurations = (
 				08A53DB01E5DAA4700CCCBC8 /* Debug */,
 				08A53DB11E5DAA4700CCCBC8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		08CBAF7B1E842A6D00809853 /* Build configuration list for PBXAggregateTarget "Makefile-build" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08CBAF7C1E842A6D00809853 /* Debug */,
+				08CBAF7D1E842A6D00809853 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

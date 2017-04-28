@@ -22,6 +22,7 @@
  *
  * $Id$
  *
+ *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-03-13: Ticket #154 ComIds and DSIds literals (#define TRDP_...) in trdp_proto.h too long
  *      BL 2017-02-10: Ticket #129 Found a bug which yields wrong output params and potentially segfaults
  *      BL 2017-02-08: Ticket #142 Compiler warnings / MISRA-C 2012 issues
@@ -39,7 +40,6 @@
 #include "trdp_utils.h"
 #include "tau_marshall.h"
 #include "tau_tti.h"
-#include "iec61375-2-3.h"
 #include "vos_sock.h"
 #include "tau_dnr.h"
 

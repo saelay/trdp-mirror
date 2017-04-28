@@ -290,6 +290,22 @@ void usage (const char *appName)
 }
 
 /**********************************************************************************************************************/
+/** Find 2 interface IPs in the range 10.0.x.y
+ *  to be used for ping-pong testing
+ *  @param
+ */
+void iface_init (
+    TRDP_IP_ADDR_T          *pIP1,
+    TRDP_IP_ADDR_T          *pIP2)
+{
+    if ((*pIP1 == VOS_INADDR_ANY) && (*pIP2 == VOS_INADDR_ANY))
+    {
+        /* find suitable addresses if not set */
+        
+    }
+}
+
+/**********************************************************************************************************************/
 /** common initialisation
  *
  *  @retval         application session handle

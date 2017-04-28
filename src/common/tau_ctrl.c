@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *
  */
 
@@ -29,7 +30,6 @@
 #include "trdp_types.h"
 #include "trdp_utils.h"
 #include "trdp_if_light.h"
-#include "trdp_proto.h"
 #include "tau_ctrl.h"
 
 /**********************************************************************************************************************

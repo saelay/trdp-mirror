@@ -16,6 +16,7 @@
  *      
  * $Id$
  *
+ *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-02-28: Ticket #140 TRDP_TIMER_FOREVER -> 
  *      BL 2017-02-28: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2015-08-31: Ticket #94: "beQuiet" removed
@@ -32,7 +33,6 @@
  */
 
 #include "trdp_types.h"
-#include "trdp_proto.h"
 #include "vos_thread.h"
 #include "vos_sock.h"
 
@@ -49,7 +49,7 @@
 #define TRDP_EVOLUTION          0u
 #endif
 
-#define TRDP_TIMER_GRANULARITY  10000u                                    /**< granularity in us                      */
+#define TRDP_TIMER_GRANULARITY              10000u                        /**< granularity in us                      */
 
 #define TRDP_DEBUG_DEFAULT_FILE_SIZE        65536u                        /**< Default maximum size of log file       */
 
@@ -67,14 +67,14 @@
 /** Internal MD state */
 typedef enum
 {
-    TRDP_ST_NONE = 0u,                  /**< neutral value                                        */
+    TRDP_ST_NONE = 0u,                     /**< neutral value                                        */
 
     TRDP_ST_TX_NOTIFY_ARM       = 1u,      /**< ready to send notify MD                              */
     TRDP_ST_TX_REQUEST_ARM      = 2u,      /**< ready to send request MD                             */
     TRDP_ST_TX_REPLY_ARM        = 3u,      /**< ready to send reply MD                               */
     TRDP_ST_TX_REPLYQUERY_ARM   = 4u,      /**< ready to send reply with confirm request MD          */
     TRDP_ST_TX_CONFIRM_ARM      = 5u,      /**< ready to send confirm MD                             */
-    TRDP_ST_RX_READY = 6,                 /**< armed listener                                       */
+    TRDP_ST_RX_READY = 6,                  /**< armed listener                                       */
 
     TRDP_ST_TX_REQUEST_W4REPLY  = 7u,      /**< request sent, wait for reply                         */
     TRDP_ST_RX_REPLYQUERY_W4C   = 8u,      /**< reply send, with confirm request MD                  */

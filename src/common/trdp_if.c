@@ -371,7 +371,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
-        int retries;
+        unsigned int retries;
 
         pSession->pNext = sSession;
         sSession        = pSession;
@@ -1941,7 +1941,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 {
                     vos_getTime(&pSubPD->timeToGo);
                     vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
-                    pSubPD->privFlags ^= ~TRDP_TIMED_OUT;   /* Reset time out flag (#151) */
+                    pSubPD->privFlags ^= (unsigned)~TRDP_TIMED_OUT;   /* Reset time out flag (#151) */
                 }
             }
         }
