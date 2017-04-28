@@ -340,7 +340,7 @@ int main (int argc, char *argv[])
         if (outputBuffer != NULL && strlen((char *)outputBuffer) == 0)
         {
             sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
-            outputBufferSize = strlen((char *)outputBuffer);
+            outputBufferSize = (int) strlen((char *)outputBuffer);
         }
 
         err = tlp_put(appHandle, pubHandle, outputBuffer, outputBufferSize);

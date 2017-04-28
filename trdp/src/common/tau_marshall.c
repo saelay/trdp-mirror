@@ -1095,7 +1095,7 @@ EXT_DECL TRDP_ERR_T tau_marshall (
 
     err = marshallDs(&info, pDataset);
 
-    *pDestSize = info.pDst - pDest;
+    *pDestSize = (UINT32) (info.pDst - pDest);
 
     return err;
 }
@@ -1168,7 +1168,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
 
     err = unmarshallDs(&info, pDataset);
 
-    *pDestSize = info.pDst - pDest;
+    *pDestSize = (UINT32) (info.pDst - pDest);
 
     return err;
 }
@@ -1242,7 +1242,7 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
 
     err = marshallDs(&info, pDataset);
 
-    *pDestSize = info.pDst - pDest;
+    *pDestSize = (UINT32) (info.pDst - pDest);
 
     return err;
 }
@@ -1315,7 +1315,7 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
 
     err = unmarshallDs(&info, pDataset);
 
-    *pDestSize = info.pDst - pDest;
+    *pDestSize = (UINT32) (info.pDst - pDest);
 
     return err;
 }

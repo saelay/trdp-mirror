@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
@@ -37,7 +38,7 @@
 #include "vos_types.h"
 #include "vos_mem.h"
 #include "vos_sock.h"
-#include "trdp_proto.h"
+#include "iec61375-2-3.h"
 
 #ifdef __cplusplus
 extern "C" {
