@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  */
 
 #ifndef VOS_MEM_H
@@ -42,8 +43,8 @@ extern "C" {
 #define __cdecl
 #endif
 
-#define VOS_MEM_MAX_PREALLOCATE     10  /*<< Max blocks to pre-allocate */
-#define VOS_MEM_NBLOCKSIZES         15  /*<< No of pre-defined block sizes */
+#define VOS_MEM_MAX_PREALLOCATE     10u  /**< Max blocks to pre-allocate */
+#define VOS_MEM_NBLOCKSIZES         15u  /**< No of pre-defined block sizes */
 
 /** Queue policy matching pthread/Posix defines    */
 typedef enum
@@ -58,26 +59,26 @@ typedef enum
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
     the overal size of the used memory allocation area is larger. */
 
-#define VOS_MEM_BLOCKSIZES  {48, 72, 128, 180, 256, 512, 1024, 1480, 2048, 4096, \
-                             11520, 16384, 32768, 65536, 131072}
+#define VOS_MEM_BLOCKSIZES  {48u, 72u, 128u, 180u, 256u, 512u, 1024u, 1480u, 2048u, 4096u, \
+                             11520u, 16384u, 32768u, 65536u, 131072u}
 
 /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
    Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
 
-#define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 10, 0, 2, 1, 0, 2, 0, 0}
+#define VOS_MEM_PREALLOCATE  {0u, 0u, 0u, 0u, 0u, 0u, 0u, 10u, 0u, 2u, 1u, 0u, 2u, 0u, 0u}
 
 #else /* Small systems, PD only */
 
 /** We internally allocate memory always by these block sizes. The largest available block is 524288 Bytes, provided
  the overal size of the used memory allocation area is larger. */
 
-#define VOS_MEM_BLOCKSIZES  {34, 48, 128, 180, 256, 512, 1024, 1480, 2048, \
-                             4096, 11520, 16384, 32768, 65536, 131072}
+#define VOS_MEM_BLOCKSIZES  {34u, 48u, 128u, 180u, 256u, 512u, 1024u, 1480u, 2048u, \
+                             4096u, 11520u, 16384u, 32768u, 65536u, 131072u}
 
 /** Default pre-allocation of free memory blocks. To avoid problems with too many small blocks and no large one.
  Specify how many of each block size that should be pre-allocated (and freed!) to pre-segment the memory area. */
 
-#define VOS_MEM_PREALLOCATE  {0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
+#define VOS_MEM_PREALLOCATE  {0u, 0u, 0u, 0u, 0u, 0u, 0u, 4u, 0u, 0u, 0u, 0u, 0u, 0u, 0u}
 
 #endif
 
@@ -247,9 +248,9 @@ EXT_DECL INT32 vos_strnicmp (
 /**********************************************************************************************************************/
 /** String copy with length limitation.
  *
- *  @param[in]      pStrDst       Destination string
- *  @param[in]      pStrSrc       Null terminated string to copy
- *  @param[in]      count         Maximum number of characters to copy
+ *  @param[in]      pStr1       Destination string
+ *  @param[in]      pStr2       Null terminated string to copy
+ *  @param[in]      count       Maximum number of characters to copy
  *
  *  @retval         none
  */
@@ -262,9 +263,9 @@ EXT_DECL void vos_strncpy (
 /**********************************************************************************************************************/
 /** String concatenation with length limitation.
  *
- *  @param[in]      pStrDst       Destination string
- *  @param[in]      count         Size of destination buffer
- *  @param[in]      pStrSrc       Null terminated string to append
+ *  @param[in]      pStrDst     Destination string
+ *  @param[in]      count       Size of destination buffer
+ *  @param[in]      pStrSrc     Null terminated string to append
  *
  *  @retval         none
  */

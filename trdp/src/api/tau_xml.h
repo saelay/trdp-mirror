@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, flag enums -> defines
  *      BL 2016-02-11: Ticket #102: Custom XML parser, libxml2 not needed anymore
  */
 
@@ -139,18 +140,18 @@ typedef struct
 
 /** Control for debug output format on application level.
  */
-typedef enum
-{
-    TRDP_DBG_DEFAULT    = 0,   /**< Printout default  */
-    TRDP_DBG_OFF        = 0x01, /**< Printout off  */
-    TRDP_DBG_ERR        = 0x02, /**< Printout error */
-    TRDP_DBG_WARN       = 0x04, /**< Printout warning and error */
-    TRDP_DBG_INFO       = 0x08, /**< Printout info, warning and error */
-    TRDP_DBG_DBG        = 0x10, /**< Printout debug, info, warning and error */
-    TRDP_DBG_TIME       = 0x20, /**< Printout timestamp */
-    TRDP_DBG_LOC        = 0x40, /**< Printout file name and line */
-    TRDP_DBG_CAT        = 0x80 /**< Printout category (DBG, INFO, WARN, ERR) */
-} TRDP_DBG_OPTION_T;
+    
+#define TRDP_DBG_DEFAULT    0,      /**< Printout default  */
+#define TRDP_DBG_OFF        0x01    /**< Printout off  */
+#define TRDP_DBG_ERR        0x02    /**< Printout error */
+#define TRDP_DBG_WARN       0x04    /**< Printout warning and error */
+#define TRDP_DBG_INFO       0x08    /**< Printout info, warning and error */
+#define TRDP_DBG_DBG        0x10    /**< Printout debug, info, warning and error */
+#define TRDP_DBG_TIME       0x20    /**< Printout timestamp */
+#define TRDP_DBG_LOC        0x40    /**< Printout file name and line */
+#define TRDP_DBG_CAT        0x80    /**< Printout category (DBG, INFO, WARN, ERR) */
+
+typedef UINT8 TRDP_DBG_OPTION_T;
 
 
 /** Control for debug output device/file on application level.

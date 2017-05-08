@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #148 Wrong element used in trdp_mdCheckTimeouts() to invoke the callback
  *      BL 2017-02-10: Ticket #138 Erroneous closing of receive md socket
@@ -366,8 +367,8 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
 /**********************************************************************************************************************/
 /** Handle and manage the time out and communication state of a given MD_ELE_T
  *
- *  @param[inout]   pElement        pointer to MD_ELE_T to get handled
- *  @param[out]     pAppHandle      pointer to application session
+ *  @param[in,out]  pElement        pointer to MD_ELE_T to get handled
+ *  @param[out]     appHandle       pointer to application session
  *  @param[out]     pResult         pointer to qualified result code
  *
  *  @retval         TRUE            timeout expired
@@ -532,7 +533,7 @@ static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T *pElement, TRDP_SESSION_PT ap
  *  Details the resulting MD_ELE_T* with respective values for the msg-type for further handling in trdp_mdRecv
  *
  *  @param[in]      appHandle           session pointer
- *  @param[in]      sockIndex           index of the socket to read from
+ *  @param[in]      pMdItemHeader       index of the socket to read from
  *
  *  @retval         MD_ELE_T*           on success: pointer to matching item in recv queue
  *                                      on error  : NULL
@@ -773,7 +774,7 @@ static void trdp_mdSetSessionTimeout (
     if (NULL != pMDSession)
     {
         vos_getTime(&pMDSession->timeToGo);
-        if ((pMDSession->interval.tv_sec == 0xFFFFFFFFU) && (pMDSession->interval.tv_usec == 999999))
+        if ((pMDSession->interval.tv_sec == (time_t) -1) && (pMDSession->interval.tv_usec == 999999))
         {
             /* bypass calculation in case of infinity desired from user */
             pMDSession->timeToGo.tv_sec     = pMDSession->interval.tv_sec;
@@ -1487,7 +1488,7 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
  *  @param[in]      isTCP           TCP ?
  *  @param[in]      sockIndex       socket index
  *  @param[in]      pH              Header of the incoming message
- *  @param[in ]     state           listener state to be set
+ *  @param[in]      state           listener state to be set
  *  @param[out]     pIterMD         Pointer to MD element handle to be returned
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -1672,10 +1673,10 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         if ((vos_ntohl(pH->replyTimeout) == 0) && (vos_ntohs(pH->msgType) == TRDP_MSG_MR))
         {
             /* Timeout compliance with Table A.17 */
-            iterMD->interval.tv_sec     = 0xFFFFFFFFU;
+            iterMD->interval.tv_sec     = -1;
             iterMD->interval.tv_usec    = 999999;
             /* Use extreme caution with infinite timeouts! */
-            iterMD->timeToGo.tv_sec     = 0xFFFFFFFFU;
+            iterMD->timeToGo.tv_sec     = -1;
             iterMD->timeToGo.tv_usec    = 999999;
             /* needs to be set this way to avoid wrap around */
         }
@@ -2867,7 +2868,7 @@ void  trdp_mdCheckTimeouts (
                 && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
                 && (appHandle->iface[lIndex].usage == 0)
                 && (appHandle->iface[lIndex].rcvMostly == FALSE)
-                && ((appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec > 0u)
+                && ((appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_sec > 0)
                     || (appHandle->iface[lIndex].tcpParams.connectionTimeout.tv_usec > 0)))
             {
                 if (0 > vos_cmpTime(&appHandle->iface[lIndex].tcpParams.connectionTimeout, &now))
@@ -2999,7 +3000,7 @@ static TRDP_ERR_T trdp_mdConnectSocket (TRDP_APP_SESSION_T      appHandle,
  *
  *  @param[in]      msgType             TRDP message type
  *  @param[in]      replyStatus         Info for requester about application errors
- *  @param[in]      mdTimeout           time out in us
+ *  @param[in]      mdTimeOut           time out in us
  *  @param[in]      sequenceCounter     sequence counter for packet (usually zero for callers)
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -3383,7 +3384,7 @@ TRDP_ERR_T trdp_mdCall (
         }
 
         /* This condition is used to deicriminate the infinite timeout for Mr */
-        if ((msgType == TRDP_MSG_MR) && (replyTimeout == TDRP_MD_INFINITE_TIME))
+        if ((msgType == TRDP_MSG_MR) && (replyTimeout == (UINT32) TDRP_MD_INFINITE_TIME))
         {
             /* add the infinity requirement from table A.17 */
             pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than

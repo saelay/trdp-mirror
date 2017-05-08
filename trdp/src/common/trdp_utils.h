@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Doxygen comment errors
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
 
@@ -209,9 +210,9 @@ UINT32 trdp_packetSizeMD (
  *  Note: The standard demands that sequenceCounter is managed per comID/msgType at each publisher,
  *        but shall be the same for redundant telegrams (subnet/srcIP).
  *
- *  @param[in]      comId           comID to look for
+ *  @param[in]      comID           comID to look for
  *  @param[in]      msgType         PD/MD type
- *  @param[in]      srcIpAddr       Source IP address
+ *  @param[in]      srcIP           Source IP address
  *
  *  @retval            return the sequence number
  */

@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings
  *      BL 2017-02-27: #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-08-17: parentheses added (compiler warning)
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -242,7 +243,7 @@ static void vos_printStructSizes ()
  *  @retval        VOS_INTEGRATION_ERR or VOS_NO_ERR
  */
 
-VOS_ERR_T vos_initRuntimeConsts (void)
+static VOS_ERR_T vos_initRuntimeConsts (void)
 {
 #ifdef DEBUG
     VOS_ERR_T   err                     = VOS_INTEGRATION_ERR;
@@ -408,7 +409,7 @@ VOS_ERR_T vos_init (
  *  Should be called last after TRDP stack/application does not use any VOS function anymore.
  *
  */
-EXT_DECL void vos_terminate ()
+EXT_DECL void vos_terminate (void)
 {
     vos_sockTerm();
     vos_threadTerm();

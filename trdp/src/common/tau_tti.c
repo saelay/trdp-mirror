@@ -22,6 +22,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-03-13: Ticket #154 ComIds and DSIds literals (#define TRDP_...) in trdp_proto.h too long
  *      BL 2017-02-10: Ticket #129 Found a bug which yields wrong output params and potentially segfaults
@@ -77,6 +78,11 @@ static void ttiRequestTTDBdata (TRDP_APP_SESSION_T  appHandle,
                                 UINT32              comID,
                                 const TRDP_UUID_T   cstUUID);
 
+static void ttiGetUUIDfromLabel (
+                          TRDP_APP_SESSION_T  appHandle,
+                          TRDP_UUID_T         cstUUID,
+                          const TRDP_LABEL_T  cstLabel);
+
 static TRDP_IP_ADDR_T ipFromURI (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_URI_HOST_T     uri)
@@ -94,7 +100,7 @@ static TRDP_IP_ADDR_T ipFromURI (
  *      first one in the consist and its name matches.
  *      Note: The first vehicle in a consist has the same ID as the consist it is belonging to (5.3.3.2.5)
  */
-void ttiGetUUIDfromLabel (
+static void ttiGetUUIDfromLabel (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_UUID_T         cstUUID,
     const TRDP_LABEL_T  cstLabel)
@@ -124,7 +130,7 @@ void ttiGetUUIDfromLabel (
     memset(cstUUID, 0, sizeof(TRDP_UUID_T));
 }
 
-BOOL8   ttiIsOwnCstInfo (
+static BOOL8   ttiIsOwnCstInfo (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_CONSIST_INFO_T *pTelegram)
 {
@@ -611,11 +617,11 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
                       &appHandle->pTTDB->pd100SubHandle,
                       userAction, ttiPDCallback,
                       TRDP_TTDB_OP_TRN_DIR_STAT_INF_COMID,
-                      0, 0,
+                      0u, 0u,
                       VOS_INADDR_ANY,
                       vos_dottedIP(TTDB_STATUS_DEST_IP),
-                      TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB,
-                      TTDB_STATUS_TO * 1000,
+                      (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB),
+                      TTDB_STATUS_TO * 1000u,
                       TRDP_TO_SET_TO_ZERO) != TRDP_NO_ERR)
     {
         vos_memFree(appHandle->pTTDB);

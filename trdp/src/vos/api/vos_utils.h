@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2016-03-10: Ticket #114 SC-32
  *      BL 2014-02-28: Ticket #25: CRC32 calculation is not according IEEE802.3
@@ -179,9 +180,9 @@ EXT_DECL UINT32 vos_crc32 (
 /** Compute crc32 according to IEC 61375-2-3 B.7
  *  Note: Returned CRC is inverted
  *
- *  @param[in]          crc         Initial value.
- *  @param[in,out]      pData       Pointer to data.
- *  @param[in]          dataLen     length in bytes of data.
+ *  @param[in]          crc             Initial value.
+ *  @param[in,out]      pData           Pointer to data.
+ *  @param[in]          dataLen         length in bytes of data.
  *  @retval             crc32 according to IEC 61375-2-3
  */
 
@@ -194,10 +195,10 @@ EXT_DECL UINT32 vos_sc32 (
 /** Initialize the vos library.
  *  This is used to set the output function for all VOS error and debug output.
  *
- *  @param[in]        *pRefCon            user context
- *  @param[in]        *pDebugOutput       pointer to debug output function
- *  @retval           VOS_NO_ERR          no error
- *  @retval           VOS_INIT_ERR        unsupported
+ *  @param[in]        pRefCon           user context
+ *  @param[in]        pDebugOutput      pointer to debug output function
+ *  @retval           VOS_NO_ERR        no error
+ *  @retval           VOS_INIT_ERR      unsupported
  */
 
 EXT_DECL VOS_ERR_T vos_init (
@@ -210,7 +211,7 @@ EXT_DECL VOS_ERR_T vos_init (
  *
  */
 
-EXT_DECL void vos_terminate ();
+EXT_DECL void vos_terminate (void);
 
 /**********************************************************************************************************************/
 /** Return a human readable version representation.

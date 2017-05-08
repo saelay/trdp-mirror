@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *
  */
  
@@ -404,7 +405,7 @@ EXT_DECL void vos_clearTime (
 /** Add the second to the first time stamp, return sum in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          pAdd            Pointer to time value
  */
 
@@ -429,7 +430,7 @@ EXT_DECL void vos_addTime (
 /** Subtract the second from the first time stamp, return diff in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          pSub            Pointer to time value
  */
 
@@ -454,7 +455,7 @@ EXT_DECL void vos_subTime (
 /** Divide the first time value by the second, return quotient in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          divisor         Divisor
  */
 
@@ -484,7 +485,7 @@ EXT_DECL void vos_divTime (
 /** Multiply the first time by the second, return product in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          mul             Factor
  */
 
@@ -512,7 +513,7 @@ EXT_DECL void vos_mulTime (
 /** Compare the second from the first time stamp, return diff in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          pCmp            Pointer to time value to compare
  *  @retval             0               pTime == pCmp
  *  @retval             -1              pTime < pCmp

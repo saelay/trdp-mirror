@@ -18,6 +18,8 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
+ *
  */
 
 #ifndef TAU_TTI_TYPES_H
@@ -41,8 +43,8 @@ extern "C" {
 #define __cdecl
 #endif
 
-#define TRDP_MAX_CST_CNT 63                 /**< max number of consists per train */
-#define TRDP_MAX_VEH_CNT 63                 /**< max number of vehicles per train */
+#define TRDP_MAX_CST_CNT 63u                 /**< max number of consists per train */
+#define TRDP_MAX_VEH_CNT 63u                 /**< max number of vehicles per train */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -304,11 +306,11 @@ typedef struct
                                                  '00'B = not known (corrected vehicle)
                                                  '01'B = same as operational train direction
                                                  '10'B = inverse to operational train direction */
-    UINT8                   trnCstNo;       /*< sequence number of consist in train
+    UINT8                   trnCstNo;       /**< sequence number of consist in train
                                                  with vehicle 01 being the first vehicle in ETB reference
                                                  direction 1 as defined in IEC61375-2-5,
                                                  value range: 1..63, 0 = inserted by correction */
-    UINT8                   reserved01;     /*< reserved for future use (= 0) */
+    UINT8                   reserved01;     /**< reserved for future use (= 0) */
 } GNU_PACKED TRDP_OP_CONSIST_T;
 
 

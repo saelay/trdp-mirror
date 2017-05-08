@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #142 Compiler warnings / MISRA-C 2012 issues
@@ -175,15 +176,15 @@ typedef enum
 
 
 /** Various flags for PD and MD packets    */
-typedef enum
-{
-    TRDP_FLAGS_DEFAULT  = 0u,        /**< Default value defined in tlc_openDession will be taken     */
-    TRDP_FLAGS_NONE     = 0x01u,     /**< No flags set                                               */
-    TRDP_FLAGS_MARSHALL = 0x02u,     /**< Optional marshalling/unmarshalling in TRDP stack           */
-    TRDP_FLAGS_CALLBACK = 0x04u,     /**< Use of callback function                                   */
-    TRDP_FLAGS_TCP      = 0x08u,     /**< Use TCP for message data                                   */
-    TRDP_FLAGS_FORCE_CB = 0x10u      /**< Force a callback for every received packet                 */
-} TRDP_FLAGS_T;
+
+#define TRDP_FLAGS_DEFAULT  0u          /**< Default value defined in tlc_openDession will be taken     */
+#define TRDP_FLAGS_NONE     0x01u       /**< No flags set                                               */
+#define TRDP_FLAGS_MARSHALL 0x02u       /**< Optional marshalling/unmarshalling in TRDP stack           */
+#define TRDP_FLAGS_CALLBACK 0x04u       /**< Use of callback function                                   */
+#define TRDP_FLAGS_TCP      0x08u       /**< Use TCP for message data                                   */
+#define TRDP_FLAGS_FORCE_CB 0x10u       /**< Force a callback for every received packet                 */
+
+typedef UINT8   TRDP_FLAGS_T;
 
 
 /** Redundancy states */
@@ -445,7 +446,7 @@ typedef struct
     UINT32              userRef;    /**< User reference if used */
     UINT32              timeout;    /**< Time-out value in us. 0 = No time-out supervision */
     TRDP_ERR_T          status;     /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
-    TRDP_TO_BEHAVIOR_T  toBehav;    /**< Behavior at time-out. Set data to zero / keep last value */
+    UINT32              toBehav;    /**< Behavior at time-out. Set data to zero / keep last value */
     UINT32              numRecv;    /**< Number of packets received for this subscription */
     UINT32              numMissed;  /**< number of packets skipped for this subscription */
 } TRDP_SUBS_STATISTICS_T;
@@ -479,7 +480,7 @@ typedef struct
 typedef struct
 {
     UINT32              id;    /**< Redundant Id */
-    TRDP_RED_STATE_T    state; /**< Redundant state.Leader or Follower */
+    UINT32              state; /**< Redundant state.Leader or Follower */
 } TRDP_RED_STATISTICS_T;
 
 
@@ -514,13 +515,13 @@ typedef VOS_LOG_T TRDP_LOG_T;
 /** Function type for marshalling .
  *  The function must know about the dataset's alignment etc.
  *
- *  @param[in]        *pRefCon      pointer to user context
+ *  @param[in]        pRefCon       pointer to user context
  *  @param[in]        comId         ComId to identify the structure out of a configuration
- *  @param[in]        *pSrc         pointer to received original message
+ *  @param[in]        pSrc          pointer to received original message
  *  @param[in]        srcSize       size of the source buffer
- *  @param[in]        *pDst         pointer to a buffer for the treated message
- *  @param[in,out]    *pDstSize     size of the provide buffer / size of the treated message
- *  @param[in,out]    *ppCachedDS   pointer to pointer of cached dataset
+ *  @param[in]        pDst          pointer to a buffer for the treated message
+ *  @param[in,out]    pDstSize      size of the provide buffer / size of the treated message
+ *  @param[in,out]    ppCachedDS    pointer to pointer of cached dataset
  *
  *  @retval         TRDP_NO_ERR        no error
  *  @retval         TRDP_MEM_ERR    provided buffer to small
@@ -542,13 +543,13 @@ typedef TRDP_ERR_T (*TRDP_MARSHALL_T)(
 /**    Function type for unmarshalling.
  * The function must know about the dataset's alignment etc.
  *
- *  @param[in]        *pRefCon      pointer to user context
+ *  @param[in]        pRefCon      pointer to user context
  *  @param[in]        comId         ComId to identify the structure out of a configuration
- *  @param[in]        *pSrc         pointer to received original message
+ *  @param[in]        pSrc         pointer to received original message
  *  @param[in]        srcSize       data length from TRDP packet header
- *  @param[in]        *pDst         pointer to a buffer for the treated message
- *  @param[in,out]    *pDstSize     size of the provide buffer / size of the treated message
- *  @param[in,out]    *ppCachedDS   pointer to pointer of cached dataset
+ *  @param[in]        pDst         pointer to a buffer for the treated message
+ *  @param[in,out]    pDstSize     size of the provide buffer / size of the treated message
+ *  @param[in,out]    ppCachedDS   pointer to pointer of cached dataset
  *
  *  @retval         TRDP_NO_ERR        no error
  *  @retval         TRDP_MEM_ERR    provide buffer to small
@@ -579,11 +580,11 @@ typedef struct
 /**********************************************************************************************************************/
 /**    Callback for receiving indications, timeouts, releases, responses.
  *
- *  @param[in]    *pRefCon   pointer to user context
- *  @param[in]    appHandle  application handle returned by tlc_openSession
- *  @param[in]    *pMsg      pointer to received message information
- *  @param[in]    *pData     pointer to received data
- *  @param[in]    dataSize   size of received data pointer to received data
+ *  @param[in]    pRefCon       pointer to user context
+ *  @param[in]    appHandle     application handle returned by tlc_openSession
+ *  @param[in]    pMsg          pointer to received message information
+ *  @param[in]    pData         pointer to received data
+ *  @param[in]    dataSize      size of received data pointer to received data
  */
 typedef void (*TRDP_PD_CALLBACK_T)(
     void                    *pRefCon,
@@ -610,11 +611,11 @@ typedef struct
 /**********************************************************************************************************************/
 /**    Callback for receiving indications, timeouts, releases, responses.
  *
- *  @param[in]    appHandle  handle returned also by tlc_init
- *  @param[in]    *pRefCon   pointer to user context
- *  @param[in]    *pMsg      pointer to received message information
- *  @param[in]    *pData     pointer to received data
- *  @param[in]    dataSize   size of received data pointer to received data
+ *  @param[in]    appHandle     handle returned also by tlc_init
+ *  @param[in]    pRefCon       pointer to user context
+ *  @param[in]    pMsg          pointer to received message information
+ *  @param[in]    pData         pointer to received data
+ *  @param[in]    dataSize      size of received data pointer to received data
  */
 typedef void (*TRDP_MD_CALLBACK_T)(
     void                    *pRefCon,
@@ -661,20 +662,19 @@ typedef struct
 /**********************************************************************************************************************/
 /** Various flags/general TRDP options for library initialization
  */
-typedef enum
-{
-    TRDP_OPTION_NONE    = 0u,
-    TRDP_OPTION_BLOCK   = 0x01u,                 /**< Default: Use nonblocking I/O calls, polling necessary
+    
+#define TRDP_OPTION_NONE            0u
+#define TRDP_OPTION_BLOCK           0x01u       /**< Default: Use nonblocking I/O calls, polling necessary
                                                   Set: Read calls will block, use select()                  */
-    TRDP_OPTION_TRAFFIC_SHAPING = 0x02u,         /**< Use traffic shaping - distribute packet sending
+#define TRDP_OPTION_TRAFFIC_SHAPING 0x02u       /**< Use traffic shaping - distribute packet sending
                                                   Default: OFF                                              */
-    TRDP_OPTION_NO_REUSE_ADDR   = 0x04u,         /**< Do not allow re-use of address/port (-> no multihoming)
+#define TRDP_OPTION_NO_REUSE_ADDR   0x04u       /**< Do not allow re-use of address/port (-> no multihoming)
                                                   Default: Allow                                            */
-    TRDP_OPTION_NO_MC_LOOP_BACK = 0x08u,         /**< Do not allow loop back of multicast traffic
+#define TRDP_OPTION_NO_MC_LOOP_BACK 0x08u       /**< Do not allow loop back of multicast traffic
                                                   Default: Allow                                            */
-    TRDP_OPTION_NO_UDP_CHK      = 0x10u          /**< Suppress UDP CRC generation
+#define TRDP_OPTION_NO_UDP_CHK      0x10u       /**< Suppress UDP CRC generation
                                                   Default: Compute UDP CRC                                  */
-} TRDP_OPTION_T;
+typedef UINT8 TRDP_OPTION_T;
 
 /**********************************************************************************************************************/
 /** Various flags/general TRDP options for library initialization

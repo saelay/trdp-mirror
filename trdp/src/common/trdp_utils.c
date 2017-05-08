@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, static definitions
  *      BL 2017-03-01: Ticket #136 PD topography counter with faulty behavior
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-01: Setting correct multicast TTL for PDs
@@ -45,12 +46,21 @@
  */
 static INT32 sCurrentMaxSocketCnt = 0;
 
+/***********************************************************************************************************************
+ *   Local Functions
+ */
+static void printSocketUsage (TRDP_SOCKETS_T iface[]);
+static BOOL8 trdp_SockIsJoined (const TRDP_IP_ADDR_T mcList[VOS_MAX_MULTICAST_CNT], TRDP_IP_ADDR_T mcGroup);
+static BOOL8 trdp_SockAddJoin (TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT], TRDP_IP_ADDR_T  mcGroup);
+static BOOL8 trdp_SockDelJoin (TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT], TRDP_IP_ADDR_T  mcGroup);
+
 /**********************************************************************************************************************/
 /** Debug socket usage output
  *
- *  @param[in]      iface[]            List of sockets
+ *  @param[in]      iface            List of sockets
+ *
  */
-void printSocketUsage (
+static void printSocketUsage (
     TRDP_SOCKETS_T iface[])
 {
     INT32 lIndex = 0;
@@ -75,13 +85,13 @@ void printSocketUsage (
 /**********************************************************************************************************************/
 /** Check if a mc group is in the list
  *
- *  @param[in]      mcList[]            List of multicast groups
+ *  @param[in]      mcList              List of multicast groups
  *  @param[in]      mcGroup             multicast group
  *
  *  @retval         1           if found
  *                  0           if not found
  */
-BOOL8 trdp_SockIsJoined (
+static BOOL8 trdp_SockIsJoined (
     const TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T          mcGroup)
 {
@@ -98,13 +108,13 @@ BOOL8 trdp_SockIsJoined (
 /**********************************************************************************************************************/
 /** Add mc group to the list
  *
- *  @param[in]      mcList[]            List of multicast groups
- *  @param[in]      mcGroup             multicast group
+ *  @param[in]      mcList          List of multicast groups
+ *  @param[in]      mcGroup         multicast group
  *
  *  @retval         1           if added
  *                  0           if list is full
  */
-BOOL8 trdp_SockAddJoin (
+static BOOL8 trdp_SockAddJoin (
     TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T  mcGroup)
 {
@@ -125,13 +135,13 @@ BOOL8 trdp_SockAddJoin (
 /**********************************************************************************************************************/
 /** remove mc group from the list
  *
- *  @param[in]      mcList[]            List of multicast groups
- *  @param[in]      mcGroup             multicast group
+ *  @param[in]      mcList        List of multicast groups
+ *  @param[in]      mcGroup         multicast group
  *
  *  @retval         1           if deleted
  *                  0           was not in list
  */
-BOOL8 trdp_SockDelJoin (
+static BOOL8 trdp_SockDelJoin (
     TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T  mcGroup)
 {

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2015-11-20: Compiler warnings fixed (lines 392 + 393)
  *      BL 2014-08-25: Ticket #51: change underlying function for vos_dottedIP
@@ -84,6 +85,9 @@ struct ifreq    gIfr;
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
  */
+
+BOOL8 vos_getMacAddress (UINT8 *pMacAddr, const char  *pIfName);
+VOS_ERR_T vos_sockSetBuffer (INT32 sock);
 
 /**********************************************************************************************************************/
 /** Get the MAC address for a named interface.
@@ -1011,7 +1015,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
 
         if (sendSize >= 0)
         {
-            *pSize += sendSize;
+            *pSize += (UINT32) sendSize;
         }
 
         if (sendSize == -1 && errno == EWOULDBLOCK)
@@ -1423,7 +1427,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
         {
             bufferSize  -= (size_t) sendSize;
             pBuffer     += sendSize;
-            *pSize      += sendSize;
+            *pSize      += (UINT32) sendSize;
         }
         if (sendSize == -1 && errno == EWOULDBLOCK)
         {
@@ -1493,7 +1497,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
         {
             bufferSize  -= (size_t) rcvSize;
             pBuffer     += rcvSize;
-            *pSize      += rcvSize;
+            *pSize      += (UINT32) rcvSize;
         }
 
         if (rcvSize == -1 && errno == EWOULDBLOCK)
