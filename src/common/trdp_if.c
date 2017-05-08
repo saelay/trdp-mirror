@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, local prototypes added
  *      BL 2017-03-02: Ticket #151 tlp_request: timeout-flag is not cleared
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-10: Ticket #137 tlc_closeSession should close the tcp socket used for md communication
@@ -81,12 +82,13 @@ static TRDP_APP_SESSION_T   sSession        = NULL;
 static VOS_MUTEX_T          sSessionMutex   = NULL;
 static BOOL8 sInited = FALSE;
 
-
 /******************************************************************************
  * LOCAL FUNCTIONS
  */
 
-
+BOOL8 trdp_isValidSession (TRDP_APP_SESSION_T pSessionHandle);
+TRDP_APP_SESSION_T *trdp_sessionQueue (void);
+    
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
  */

@@ -66,8 +66,8 @@ typedef struct pd_demo_pkt
 PD_PKT_T    gPubPackets[MAX_NO_OF_PKTS];
 PD_PKT_T    gSubPackets[MAX_NO_OF_PKTS];
 
-UINT32      gOwnIP  = 0;
-UINT32      gDestIP = 0xEF000000;
+UINT32      gOwnIP  = 0u;
+UINT32      gDestIP = 0xEF000000u;
 
 const UINT8 cDemoData[] = " "
     "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
@@ -211,7 +211,7 @@ int main (int argc, char * *argv)
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     int     rv = 0;
-    int     ip[4];
+    unsigned int     ip[4];
     int     ch,i;
     UINT32  comId_In = SUBSCRIBE_COMID_BASE, comId_Out = PUBLISH_COMID_BASE;
 
@@ -254,7 +254,7 @@ int main (int argc, char * *argv)
                     usage(argv[0]);
                     exit(1);
                 }
-                gOwnIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+                gOwnIP = (ip[3] << 24u) | (ip[2] << 16u) | (ip[1] << 8u) | ip[0];
                 break;
             }
             case 't':
@@ -317,7 +317,7 @@ int main (int argc, char * *argv)
     {
         err = tlp_subscribe(appHandle,                  /*    our application identifier           */
                             &gSubPackets[i].subHandle,  /*    our subscription identifier          */
-                            (const void *) i,           /*    user reference                       */
+                            (const void *) &i,           /*    user reference                       */
                             NULL,                       /*    callback function                    */
                             gSubPackets[i].comID,       /*    ComID                                */
                             0,                          /*    topocount: local consist only        */

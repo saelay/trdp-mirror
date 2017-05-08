@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-08: Ticket #124 tau_dnr: Cache keeps etbTopoCount only
  *      BL 2015-12-14: Ticket #8: DNR client
@@ -165,7 +166,7 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
         }
         else
         {
-            pName[p++] = *pReader;
+            pName[p++] = (CHAR8) *pReader;
         }
 
         pReader = pReader + 1u;
@@ -187,7 +188,7 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
 
     for (i = 0; (i < (int)strlen((const char *)pName)) && (i < (int)(TAU_MAX_NAME_SIZE - 1u)); i++)
     {
-        p = pName[i];
+        p = (unsigned int) pName[i];
         for (j = 0; j < (int)p; j++)
         {
             pName[i]    = pName[i + 1];
@@ -219,10 +220,10 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
     {
         if (pHost[i] == '.')
         {
-            *pDns++ = i - lock;
+            *pDns++ = (UINT8) (i - lock);
             for (; lock < i; lock++)
             {
-                *pDns++ = pHost[lock];
+                *pDns++ = (UINT8) pHost[lock];
             }
             lock++;
         }
@@ -453,7 +454,7 @@ static void parseResponse (
                 *pIP_addr = VOS_INADDR_ANY;
             }
 
-            *pIP_addr = pReader[0] << 24u | pReader[1] << 16u | pReader[2] << 8u | pReader[3];
+            *pIP_addr = (TRDP_IP_ADDR_T) ((pReader[0] << 24u) | (pReader[1] << 16u) | (pReader[2] << 8u) | pReader[3]);
             vos_printLog(VOS_LOG_INFO, "%s -> 0x%08x\n", name, *pIP_addr);
 
             pReader = pReader + vos_ntohs(answers[i].resource->data_len);

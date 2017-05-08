@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-05-04: Ticket #117: PD Status packet is not sent on request
@@ -482,10 +483,10 @@ void    trdp_UpdateStats (
         vos_printLog(VOS_LOG_ERROR, "vos_memCount() failed (Err: %d)\n", ret);
     }
 
-    appHandle->stats.pd.numMissed = 0;
+    appHandle->stats.pd.numMissed = 0u;
 
     /*  Count our subscriptions */
-    for (lIndex = 0, iter = appHandle->pRcvQueue; iter != NULL; lIndex++, iter = iter->pNext)
+    for (lIndex = 0u, iter = appHandle->pRcvQueue; iter != NULL; lIndex++, iter = iter->pNext)
     {
         appHandle->stats.pd.numMissed += iter->numMissed;
     }
@@ -493,7 +494,7 @@ void    trdp_UpdateStats (
     appHandle->stats.pd.numSubs = lIndex;
 
     /*  Count our publishers */
-    for (lIndex = 0, iter = appHandle->pSndQueue; iter != NULL; lIndex++, iter = iter->pNext)
+    for (lIndex = 0u, iter = appHandle->pSndQueue; iter != NULL; lIndex++, iter = iter->pNext)
     {
         ;
     }
@@ -501,12 +502,12 @@ void    trdp_UpdateStats (
     appHandle->stats.pd.numPub = lIndex;
 
     /*  Count our joins */
-    appHandle->stats.numJoin = 0;
-    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+    appHandle->stats.numJoin = 0u;
+    for (lIndex = 0u; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
     {
-        for (llIndex = 0; llIndex < VOS_MAX_MULTICAST_CNT; llIndex++)
+        for (llIndex = 0u; llIndex < VOS_MAX_MULTICAST_CNT; llIndex++)
         {
-            if (appHandle->iface[lIndex].mcGroups[llIndex] != 0)
+            if (appHandle->iface[lIndex].mcGroups[llIndex] != 0u)
             {
                 appHandle->stats.numJoin++;
             }
@@ -526,7 +527,7 @@ void    trdp_pdPrepareStats (
     PD_ELE_T            *pPacket)
 {
     TRDP_STATISTICS_T *pData;
-    int i;
+    unsigned int i;
 
     if (pPacket == NULL || appHandle == NULL)
     {
@@ -541,8 +542,8 @@ void    trdp_pdPrepareStats (
 
     /*  Fill in the values  */
     pData->version = vos_htonl(appHandle->stats.version);
-    pData->timeStamp.tv_sec     = (UINT32)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_sec);
-    pData->timeStamp.tv_usec    = (INT32)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_usec);
+    pData->timeStamp.tv_sec     = (time_t)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_sec);
+    pData->timeStamp.tv_usec    = (suseconds_t)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_usec);
     pData->upTime           = vos_htonl(appHandle->stats.upTime);
     pData->statisticTime    = vos_htonl(appHandle->stats.statisticTime);
     pData->ownIpAddr        = vos_htonl(appHandle->stats.ownIpAddr);

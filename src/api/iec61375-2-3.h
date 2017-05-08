@@ -93,7 +93,7 @@
 
 
 /**  Definitions for time out behaviour accd. table A.17 */
-#define TDRP_MD_INFINITE_TIME               0xFFFFFFFFu
+#define TDRP_MD_INFINITE_TIME               (-1)
 
 /**  Default MD communication parameters   */
 #define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000u                    /**< [us] default reply timeout 5s          */
@@ -437,48 +437,5 @@ typedef UINT16 TRDP_MSG_T;
 #define TRDP_NEST4_TEST_DSID                            993u
 
 #define TRDP_TEST_DSID                                  1000u
-
-
-#ifdef WIN32
-#pragma pack(push, 1)
-#endif
-
-/** TRDP process data header - network order and alignment    */
-typedef struct
-{
-    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
-    UINT16  protocolVersion;                    /**< fix value for compatibility (set by the API)           */
-    UINT16  msgType;                            /**< of datagram: PD Request (0x5072) or PD_MSG (0x5064)    */
-    UINT32  comId;                              /**< set by user: unique id                                 */
-    UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
-    UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
-    UINT32  datasetLength;                      /**< length of the data to transmit 0...1432                */
-    UINT32  reserved;                           /**< before used for ladder support                         */
-    UINT32  replyComId;                         /**< used in PD request                                     */
-    UINT32  replyIpAddress;                     /**< used for PD request                                    */
-    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
-} GNU_PACKED PD_HEADER_T;
-
-/** TRDP message data header - network order and alignment    */
-typedef struct
-{
-    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
-    UINT16  protocolVersion;                    /**< fix value for compatibility                            */
-    UINT16  msgType;                            /**< of datagram: Mn, Mr, Mp, Mq, Mc or Me                  */
-    UINT32  comId;                              /**< set by user: unique id                                 */
-    UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
-    UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
-    UINT32  datasetLength;                      /**< defined by user: length of data to transmit            */
-    INT32   replyStatus;                        /**< 0 = OK                                                 */
-    UINT8   sessionID[16u];                     /**< UUID as a byte stream                                  */
-    UINT32  replyTimeout;                       /**< in us                                                  */
-    UINT8   sourceURI[32u];                     /**< User part of URI                                       */
-    UINT8   destinationURI[32u];                /**< User part of URI                                       */
-    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
-} GNU_PACKED MD_HEADER_T;
-
-#ifdef WIN32
-#pragma pack(pop)
-#endif
 
 #endif

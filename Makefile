@@ -9,6 +9,7 @@
 #// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013-2016. All rights reserved.
 #//
+#//	BL 2017-05-08: 64 bit OSX config added
 #// BL 2016-02-11: Ticket #88 Cleanup makefiles, remove dependencies on external libraries
 
 
@@ -428,6 +429,7 @@ help:
 	@echo "  * LINUX_PPC_config             - Building for Linux on PowerPC using eglibc compiler (603 core)" >&2
 	@echo "  * LINUX_ARM_OTN_config         - Building for Linux on Xscale" >&2
 	@echo "  * OSX_X86_config               - Native (X86) build for OS X" >&2
+	@echo "  * OSX_X86_64_config            - Native (X86) build for OS X 64Bit" >&2
 	@echo "  * QNX_X86_config               - Native (X86) build for QNX" >&2	
 	@echo "  * VXWORKS_KMODE_PPC_config     - Building for VXWORKS kernel mode for PowerPC (experimental)" >&2
 	@echo " " >&2

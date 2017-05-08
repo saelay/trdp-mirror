@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Doxygen comment errors
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *
  */
@@ -263,14 +264,12 @@ typedef UINT8 VOS_IP6_ADDR_T[16];
  *  The function will be called for logging and error message output. The user can decide, what kind of info will
  *    be logged by filtering the category.
  *
- *  @param[in]        *pRefCon      pointer to user context
+ *  @param[in]        pRefCon       pointer to user context
  *  @param[in]        category      Log category (Error, Warning, Info etc.)
  *  @param[in]        pTime         pointer to NULL-terminated string of time stamp
  *  @param[in]        pFile         pointer to NULL-terminated string of source module
  *  @param[in]        LineNumber    Line number
  *  @param[in]        pMsgStr       pointer to NULL-terminated string
- *
- *  @retval           none
  *
  */
 

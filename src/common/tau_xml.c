@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings (static definitions)
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -185,7 +186,8 @@ static void setDefaultInterfaceValues (
     }
 }
 
-void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
+#ifdef DEBUG
+static void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
 {
     UINT32  i;
     UINT32  j;
@@ -228,9 +230,10 @@ void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
     }
     printf( "---------------------------------\n");
 }
+#endif
 
 /**********************************************************************************************************************/
-TRDP_ERR_T readTelegramDef (
+static TRDP_ERR_T readTelegramDef (
     XML_HANDLE_T        *pXML,
     TRDP_EXCHG_PAR_T    *pExchgParam)
 {
@@ -649,7 +652,7 @@ TRDP_ERR_T readTelegramDef (
 }
 
 /**********************************************************************************************************************/
-TRDP_ERR_T readXmlDatasetMap (
+static TRDP_ERR_T readXmlDatasetMap (
     XML_HANDLE_T            *pXML,
     UINT32                  *pNumComId,
     TRDP_COMID_DSID_MAP_T   * *ppComIdDsIdMap)
@@ -738,7 +741,7 @@ TRDP_ERR_T readXmlDatasetMap (
 }
 
 /**********************************************************************************************************************/
-TRDP_ERR_T readXmlDatasets (
+static TRDP_ERR_T readXmlDatasets (
     XML_HANDLE_T        *pXML,
     UINT32              *pNumDataset,
     papTRDP_DATASET_T   papDataset)

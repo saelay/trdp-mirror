@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-02-10: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
  *      BL 2017-02-08: Stacksize computation enhanced
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -68,7 +69,7 @@ int             vosThreadInitialised = FALSE;
  *  LOCALS
  */
 #ifdef __APPLE__
-int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
+static int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
 {
     /* sem_timedwait() is not supported by DARWIN / Mac OS X!  */
     /* This is a very simple replacement - only suitable for debugging/testing!!!
@@ -134,15 +135,15 @@ int sem_init (sem_t *pSema, int flags, unsigned int mode)
  *  @retval         void
  */
 
-#define NSECS_PER_USEC  1000
+#define NSECS_PER_USEC  1000u
 #define USECS_PER_MSEC  1000u
-#define MSECS_PER_SEC   1000
+#define MSECS_PER_SEC   1000u
 
 /* This define holds the max amount os seconds to get stored in 32bit holding micro seconds        */
 /* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
 /* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */
 /* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */
-#define MAXSEC_FOR_USECPRESENTATION  4293U
+#define MAXSEC_FOR_USECPRESENTATION  4293
 
 EXT_DECL void vos_cyclicThread (
     UINT32              interval,
@@ -164,8 +165,8 @@ EXT_DECL void vos_cyclicThread (
         /* check if UINT32 fits to hold the waiting time value */
         if (afterCall.tv_sec <= MAXSEC_FOR_USECPRESENTATION)
         {
-            /*           sec to usec conversion                               value normalized from 0 .. 999999*/
-            execTime = ((UINT32) (afterCall.tv_sec * MSECS_PER_SEC * USECS_PER_MSEC) + (UINT32)afterCall.tv_usec);
+            /*           sec to usec conversion value normalized from 0 .. 999999*/
+            execTime = ((UINT32) ((UINT32)afterCall.tv_sec * MSECS_PER_SEC * USECS_PER_MSEC) + (UINT32)afterCall.tv_usec);
             if (execTime > interval)
             {
                 /*severe error: cyclic task time violated*/
@@ -589,7 +590,7 @@ EXT_DECL void vos_clearTime (
 /** Add the second to the first time stamp, return sum in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          pAdd            Pointer to time value
  */
 
@@ -614,7 +615,7 @@ EXT_DECL void vos_addTime (
 /** Subtract the second from the first time stamp, return diff in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          pSub            Pointer to time value
  */
 
@@ -639,7 +640,7 @@ EXT_DECL void vos_subTime (
 /** Divide the first time value by the second, return quotient in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          divisor         Divisor
  */
 
@@ -655,13 +656,13 @@ EXT_DECL void vos_divTime (
     {
         UINT32 temp;
 
-        temp = pTime->tv_sec % divisor;
+        temp = (UINT32) pTime->tv_sec % divisor;
         pTime->tv_sec /= divisor;
         if (temp > 0u)
         {
-            pTime->tv_usec += temp * 1000000;
+            pTime->tv_usec += (suseconds_t) (temp * 1000000u);
         }
-        pTime->tv_usec /= (INT32)divisor;
+        pTime->tv_usec /= (suseconds_t)divisor;
     }
 }
 
@@ -669,7 +670,7 @@ EXT_DECL void vos_divTime (
 /** Multiply the first time by the second, return product in first
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          mul             Factor
  */
 
@@ -697,7 +698,7 @@ EXT_DECL void vos_mulTime (
 /** Compare the second to the first time stamp
  *
  *
- *  @param[in, out]     pTime           Pointer to time value
+ *  @param[in,out]      pTime           Pointer to time value
  *  @param[in]          pCmp            Pointer to time value to compare
  *  @retval             0               pTime == pCmp
  *  @retval             -1              pTime < pCmp
@@ -1202,7 +1203,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         VOS_TIME_T waitTimeVos = {0u, 0};
         vos_getTime(&waitTimeVos);
         waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
-        waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * NSECS_PER_USEC;
+        waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * (suseconds_t) NSECS_PER_USEC;
 #else
         clock_gettime(CLOCK_REALTIME, &waitTimeSpec);
 #endif
@@ -1220,10 +1221,10 @@ EXT_DECL VOS_ERR_T vos_semaTake (
             waitTimeSpec.tv_nsec += timeout * NSECS_PER_USEC;
         }
         /* Carry if tv_nsec > 1.000.000.000 */
-        if (waitTimeSpec.tv_nsec >= NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC)
+        if (waitTimeSpec.tv_nsec >= (long) (NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC))
         {
             waitTimeSpec.tv_sec++;
-            waitTimeSpec.tv_nsec -= NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC;
+            waitTimeSpec.tv_nsec -= (long) (NSECS_PER_USEC * USECS_PER_MSEC * MSECS_PER_SEC);
         }
         else
         {

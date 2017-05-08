@@ -16,7 +16,8 @@
  *      
  * $Id$
  *
- *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
+ *      BL 2017-05-08: Compiler warnings: enum flags to #defines
+ *      BL 2017-05-08: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h and here
  *      BL 2017-02-28: Ticket #140 TRDP_TIMER_FOREVER -> 
  *      BL 2017-02-28: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2015-08-31: Ticket #94: "beQuiet" removed
@@ -83,29 +84,29 @@ typedef enum
     TRDP_ST_TX_REQ_W4AP_CONFIRM = 10u,     /**< reply conf. rq. tx, wait for application conf send   */
     TRDP_ST_RX_REPLY_SENT       = 11u,     /**< reply sent    */
 
-    TRDP_ST_RX_NOTIFY_RECEIVED  = 12u,     /**< notification received, wait for application to accept    */
+    TRDP_ST_RX_NOTIFY_RECEIVED  = 12u,     /**< notification received, wait for application to accept   */
     TRDP_ST_TX_REPLY_RECEIVED   = 13u,     /**< reply received    */
     TRDP_ST_RX_CONF_RECEIVED    = 14u      /**< confirmation received  */
 } TRDP_MD_ELE_ST_T;
 
 /** Internal flags for packets    */
-typedef enum
-{
-    TRDP_PRIV_NONE      = 0u,
-    TRDP_MC_JOINT       = 0x1u,
-    TRDP_TIMED_OUT      = 0x2u,              /**< if set, inform the user                                */
-    TRDP_INVALID_DATA   = 0x4u,              /**< if set, inform the user                                */
-    TRDP_REQ_2B_SENT    = 0x8u,              /**< if set, the request needs to be sent                   */
-    TRDP_PULL_SUB       = 0x10u,             /**< if set, its a PULL subscription                        */
-    TRDP_REDUNDANT      = 0x20u              /**< if set, packet should not be sent (redundant           */
-} TRDP_PRIV_FLAGS_T;
+
+#define TRDP_PRIV_NONE          0u
+#define TRDP_MC_JOINT           0x1u
+#define TRDP_TIMED_OUT          0x2u        /**< if set, inform the user                                */
+#define TRDP_INVALID_DATA       0x4u        /**< if set, inform the user                                */
+#define TRDP_REQ_2B_SENT        0x8u        /**< if set, the request needs to be sent                   */
+#define TRDP_PULL_SUB           0x10u       /**< if set, its a PULL subscription                        */
+#define TRDP_REDUNDANT          0x20u       /**< if set, packet should not be sent (redundant           */
+
+typedef UINT8   TRDP_PRIV_FLAGS_T;
 
 /** Socket usage    */
 typedef enum
 {
-    TRDP_SOCK_PD        = 0u,                /**< Socket is used for UDP process data                    */
-    TRDP_SOCK_MD_UDP    = 1u,                /**< Socket is used for UDP message data                    */
-    TRDP_SOCK_MD_TCP    = 2u                 /**< Socket is used for TCP message data                    */
+    TRDP_SOCK_PD        = 0u,               /**< Socket is used for UDP process data                    */
+    TRDP_SOCK_MD_UDP    = 1u,               /**< Socket is used for UDP message data                    */
+    TRDP_SOCK_MD_TCP    = 2u                /**< Socket is used for TCP message data                    */
 } TRDP_SOCK_TYPE_T;
 
 /** Hidden handle definition, used as unique addressing item    */
@@ -163,6 +164,40 @@ typedef struct TRDP_SOCKETS
 #ifdef WIN32
 #pragma pack(push, 1)
 #endif
+
+/** TRDP process data header - network order and alignment    */
+typedef struct
+{
+    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
+    UINT16  protocolVersion;                    /**< fix value for compatibility (set by the API)           */
+    UINT16  msgType;                            /**< of datagram: PD Request (0x5072) or PD_MSG (0x5064)    */
+    UINT32  comId;                              /**< set by user: unique id                                 */
+    UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
+    UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
+    UINT32  datasetLength;                      /**< length of the data to transmit 0...1432                */
+    UINT32  reserved;                           /**< before used for ladder support                         */
+    UINT32  replyComId;                         /**< used in PD request                                     */
+    UINT32  replyIpAddress;                     /**< used for PD request                                    */
+    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
+} GNU_PACKED PD_HEADER_T;
+
+/** TRDP message data header - network order and alignment    */
+typedef struct
+{
+    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
+    UINT16  protocolVersion;                    /**< fix value for compatibility                            */
+    UINT16  msgType;                            /**< of datagram: Mn, Mr, Mp, Mq, Mc or Me                  */
+    UINT32  comId;                              /**< set by user: unique id                                 */
+    UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
+    UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
+    UINT32  datasetLength;                      /**< defined by user: length of data to transmit            */
+    INT32   replyStatus;                        /**< 0 = OK                                                 */
+    UINT8   sessionID[16u];                     /**< UUID as a byte stream                                  */
+    UINT32  replyTimeout;                       /**< in us                                                  */
+    UINT8   sourceURI[32u];                     /**< User part of URI                                       */
+    UINT8   destinationURI[32u];                /**< User part of URI                                       */
+    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
+} GNU_PACKED MD_HEADER_T;
 
 /** TRDP PD packet    */
 typedef struct
