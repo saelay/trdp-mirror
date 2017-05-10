@@ -293,6 +293,11 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
     const char *file = strrchr(pFile, '/');
     fprintf(stderr, "%s %s:%d %s",
             cat[category], file ? file + 1 : pFile, line, pMsgStr);
+    if (pLogFile != NULL)
+    {
+        fprintf(pLogFile, "%s %s:%d %s",
+            cat[category], file ? file + 1 : pFile, line, pMsgStr);
+    }
 #endif
 }
 
