@@ -23,7 +23,7 @@
                <sdt-parameter smi1="1234" udv="56" rx-period="100" tx-period="1000" />
            </source>
            <destination id="10" uri="dev03.car01.cst01.lTrain" name="Another_connection">
-	<sdt-parameter smi1="2345" udv="67" rx-period="100" tx-period="500" />
+                <sdt-parameter smi1="2345" udv="67" rx-period="100" tx-period="500" />
            </destination>
          </telegram>
          <telegram name="demo" com-id="40010" data-set-id="40010" >
