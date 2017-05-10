@@ -684,7 +684,7 @@ typedef struct
     TRDP_LABEL_T    hostName;       /**< Host name  */
     TRDP_LABEL_T    leaderName;     /**< Leader name dependant on redundancy concept   */
     UINT32          cycleTime;      /**< TRDP main process cycle time in us  */
-    UINT32          priority;       /**< TRDP main process cycle time (0-255, 0=default, 255=highest)   */
+    UINT32          priority;       /**< TRDP main process priority (0-255, 0=default, 255=highest)   */
     TRDP_OPTION_T   options;        /**< TRDP options */
 } TRDP_PROCESS_CONFIG_T;
 
