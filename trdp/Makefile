@@ -441,7 +441,7 @@ help:
 	@echo "Then call 'make' or 'make all' to build everything. Contents of target all marked below" >&2
 	@echo "in the 'Other builds:' list with #" >&2
 	@echo "To build debug binaries, append 'DEBUG=TRUE' to the make command " >&2
-	@echo "To include message data support, append 'MD_SUPPORT=1' to the make command " >&2
+	@echo "To exclude message data support, append 'MD_SUPPORT=0' to the make command " >&2
 	@echo " " >&2
 	@echo "Other builds:" >&2
 	@echo "  * make test      # build the test server application" >&2
