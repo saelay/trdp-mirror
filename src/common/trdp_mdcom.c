@@ -774,7 +774,7 @@ static void trdp_mdSetSessionTimeout (
     if (NULL != pMDSession)
     {
         vos_getTime(&pMDSession->timeToGo);
-        if ((pMDSession->interval.tv_sec == (time_t) -1) && (pMDSession->interval.tv_usec == 999999))
+        if ((pMDSession->interval.tv_sec == (time_t) TDRP_MD_INFINITE_TIME) && (pMDSession->interval.tv_usec == TDRP_MD_MAX_USEC_TIME))
         {
             /* bypass calculation in case of infinity desired from user */
             pMDSession->timeToGo.tv_sec     = pMDSession->interval.tv_sec;
@@ -1673,11 +1673,11 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         if ((vos_ntohl(pH->replyTimeout) == 0) && (vos_ntohs(pH->msgType) == TRDP_MSG_MR))
         {
             /* Timeout compliance with Table A.17 */
-            iterMD->interval.tv_sec     = -1;
-            iterMD->interval.tv_usec    = 999999;
+            iterMD->interval.tv_sec     = TDRP_MD_INFINITE_TIME;
+            iterMD->interval.tv_usec    = TDRP_MD_MAX_USEC_TIME;
             /* Use extreme caution with infinite timeouts! */
-            iterMD->timeToGo.tv_sec     = -1;
-            iterMD->timeToGo.tv_usec    = 999999;
+            iterMD->timeToGo.tv_sec     = TDRP_MD_INFINITE_TIME;
+            iterMD->timeToGo.tv_usec    = TDRP_MD_MAX_USEC_TIME;
             /* needs to be set this way to avoid wrap around */
         }
         else
@@ -3388,8 +3388,8 @@ TRDP_ERR_T trdp_mdCall (
         {
             /* add the infinity requirement from table A.17 */
             pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
-                                                                 a century */
-            pSenderElement->interval.tv_usec    = 999999;    /* max upper limit for micro seconds below 1 second */
+                                                                             a century */
+            pSenderElement->interval.tv_usec    = TDRP_MD_MAX_USEC_TIME; /* max upper limit for micro seconds below 1 second */
             timeoutWire = 0U; /* the table A.17 representation of infinity, only applicable for Mr! */
         }
         else
