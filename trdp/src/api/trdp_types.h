@@ -186,6 +186,7 @@ typedef enum
 
 typedef UINT8   TRDP_FLAGS_T;
 
+typedef UINT16  TRDP_MSG_T;
 
 /** Redundancy states */
 typedef enum
