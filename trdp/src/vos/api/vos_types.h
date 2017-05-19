@@ -225,6 +225,7 @@ typedef struct
  *      Assume 32 Bit system, if not defined
  */
 #ifndef _STRUCT_TIMEVAL
+typedef INT32 suseconds_t;
 typedef struct
 {
     UINT32  tv_sec;         /**< full seconds                                     */
