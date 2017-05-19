@@ -12,8 +12,28 @@
 --- Module:   ..\..\src\common\trdp_if.c (C)
 
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
+                                                     _
+        if ((pMDSession->interval.tv_sec == (time_t) TDRP_MD_INFINITE_TIME) && (pMDSession->interval.tv_usec == TDRP_MD_MAX_USEC_TIME))
+..\..\src\common\trdp_mdcom.c(777) : Warning 650: Constant '-1' out of range
+    for operator '=='
+                                          _
+            iterMD->interval.tv_sec     = TDRP_MD_INFINITE_TIME;
+..\..\src\common\trdp_mdcom.c(1676) : Warning 569: Loss of information
+    (assignment) (64 bits to 32 bits)
+                                          _
+            iterMD->timeToGo.tv_sec     = TDRP_MD_INFINITE_TIME;
+..\..\src\common\trdp_mdcom.c(1679) : Warning 569: Loss of information
+    (assignment) (64 bits to 32 bits)
+                                                  _
+            pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
+..\..\src\common\trdp_mdcom.c(3390) : Warning 569: Loss of information
+    (assignment) (64 bits to 32 bits)
 
 --- Module:   ..\..\src\common\trdp_pdcom.c (C)
+                   _
+                   default:
+..\..\src\common\trdp_pdcom.c(856) : Warning 616: control flows into
+    case/default [MISRA Rule 61]
 
 --- Module:   ..\..\src\common\trdp_utils.c (C)
 
@@ -26,7 +46,7 @@
 --- Module:   ..\..\src\common\tau_xml.c (C)
                                    _
     p = strstr(tokenList, pTypeStr);
-..\..\src\common\tau_xml.c(75) : Warning 605: Increase in pointer capability
+..\..\src\common\tau_xml.c(80) : Warning 605: Increase in pointer capability
     (assignment)
 
 --- Module:   ..\..\src\common\tau_ctrl.c (C)
@@ -35,6 +55,9 @@
 ..\..\src\common\tau_ctrl.c(243) : Warning 545: Suspicious use of &
 
 --- Module:   ..\..\src\common\tau_dnr.c (C)
+                                   _
+        p = (unsigned int) pName[i];
+..\..\src\common\tau_dnr.c(191) : Warning 571: Suspicious cast
 
 --- Module:   ..\..\src\common\tau_tti.c (C)
 
@@ -44,24 +67,64 @@
 
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
 
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 995: vos_strncpy([16], [124], 16)
+..\..\src\vos\common\vos_mem.c(735) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 735; file ..\..\src\common\tau_xml.c:
+    line 995]
+..\..\src\vos\common\vos_mem.c(735) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(995) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 995: vos_strncpy([16], [124], 16)
+..\..\src\vos\common\vos_mem.c(737) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 737; file ..\..\src\common\tau_xml.c:
+    line 995]
+..\..\src\vos\common\vos_mem.c(737) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(995) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1429: vos_strncpy([128], [124], 128)
+..\..\src\vos\common\vos_mem.c(735) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 735; file ..\..\src\common\tau_xml.c:
+    line 1429]
+..\..\src\vos\common\vos_mem.c(735) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(1429) : Info 831: Reference cited in prior message
+
+During Specific Walk:
+  File ..\..\src\common\tau_xml.c line 1429: vos_strncpy([128], [124], 128)
+..\..\src\vos\common\vos_mem.c(737) : Warning 415: Likely access of
+    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
+    file ..\..\src\vos\common\vos_mem.c: line 737; file ..\..\src\common\tau_xml.c:
+    line 1429]
+..\..\src\vos\common\vos_mem.c(737) : Info 831: Reference cited in prior
+    message
+..\..\src\common\tau_xml.c(1429) : Info 831: Reference cited in prior message
+
 --- Module:   ..\..\src\vos\windows\vos_thread.c (C)
 
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 1102: vos_sockReceiveTCP(?, [0]?,
+  File ..\..\src\common\trdp_mdcom.c line 1145: vos_sockReceiveTCP(?, [0]?,
     [1])
-..\..\src\vos\windows\vos_sock.c(1567) : Warning 662: Possible creation of
+..\..\src\vos\windows\vos_sock.c(1570) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1564, 1567; file
-    ..\..\src\common\trdp_mdcom.c: lines 1078, 1101]
-..\..\src\vos\windows\vos_sock.c(1564) : Info 831: Reference cited in prior
-    message
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1567, 1570; file
+    ..\..\src\common\trdp_mdcom.c: lines 1121, 1144]
 ..\..\src\vos\windows\vos_sock.c(1567) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1078) : Info 831: Reference cited in prior
+..\..\src\vos\windows\vos_sock.c(1570) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1101) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1121) : Info 831: Reference cited in prior
+    message
+..\..\src\common\trdp_mdcom.c(1144) : Info 831: Reference cited in prior
     message
 
 --- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)
@@ -87,24 +150,24 @@ During Specific Walk:
 --- Module:   ..\..\src\common\tau_dnr.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\tau_dnr.c line 379: changetoDnsNameFormat([1488], [67])
-..\..\src\common\tau_dnr.c(218) : Warning 676: Possibly negative subscript (-1)
-    in operator '[' [Reference: file ..\..\src\common\tau_dnr.c: lines 211,
-    216, 218, 379]
-..\..\src\common\tau_dnr.c(211) : Info 831: Reference cited in prior message
-..\..\src\common\tau_dnr.c(216) : Info 831: Reference cited in prior message
-..\..\src\common\tau_dnr.c(218) : Info 831: Reference cited in prior message
-..\..\src\common\tau_dnr.c(379) : Info 831: Reference cited in prior message
+  File ..\..\src\common\tau_dnr.c line 391: changetoDnsNameFormat([1488], [67])
+..\..\src\common\tau_dnr.c(226) : Warning 676: Possibly negative subscript (-1)
+    in operator '[' [Reference: file ..\..\src\common\tau_dnr.c: lines 219,
+    224, 226, 391]
+..\..\src\common\tau_dnr.c(219) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(224) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(226) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(391) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\common\tau_tti.c (C)
 
 --- Global Wrap-up
 
-Warning 526: Symbol '__alignof()' (line 125, file ..\..\src\common\tau_marshall.c)
+Warning 526: Symbol '__alignof()' (line 129, file ..\..\src\common\tau_marshall.c)
     not defined
-..\..\src\common\tau_marshall.c(125) : Info 830: Location cited in prior
+..\..\src\common\tau_marshall.c(129) : Info 830: Location cited in prior
     message
 Warning 628: no argument information provided for function '__alignof()' (line
-    125, file ..\..\src\common\tau_marshall.c)
-..\..\src\common\tau_marshall.c(125) : Info 830: Location cited in prior
+    129, file ..\..\src\common\tau_marshall.c)
+..\..\src\common\tau_marshall.c(129) : Info 830: Location cited in prior
     message
