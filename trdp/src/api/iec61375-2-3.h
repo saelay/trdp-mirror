@@ -94,6 +94,7 @@
 
 /**  Definitions for time out behaviour accd. table A.17 */
 #define TDRP_MD_INFINITE_TIME               (-1)
+#define TDRP_MD_MAX_USEC_TIME               (999999)
 
 /**  Default MD communication parameters   */
 #define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000u                    /**< [us] default reply timeout 5s          */
