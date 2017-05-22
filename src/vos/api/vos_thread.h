@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
 
 #ifndef VOS_THREAD_H
@@ -260,7 +261,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
  */
 
 EXT_DECL void vos_getTime (
-    VOS_TIME_T *pTime);
+    VOS_TIMEVAL_T *pTime);
 
 
 /**********************************************************************************************************************/
@@ -283,7 +284,7 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (
  */
 
 EXT_DECL void vos_clearTime (
-    VOS_TIME_T *pTime);
+    VOS_TIMEVAL_T *pTime);
 
 /**********************************************************************************************************************/
 /** Add the second to the first time stamp, return sum in first
@@ -294,8 +295,8 @@ EXT_DECL void vos_clearTime (
  */
 
 EXT_DECL void vos_addTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pAdd);
+    VOS_TIMEVAL_T       *pTime,
+    const VOS_TIMEVAL_T *pAdd);
 
 /**********************************************************************************************************************/
 /** Subtract the second from the first time stamp, return diff in first
@@ -306,8 +307,8 @@ EXT_DECL void vos_addTime (
  */
 
 EXT_DECL void vos_subTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pSub);
+    VOS_TIMEVAL_T       *pTime,
+    const VOS_TIMEVAL_T *pSub);
 
 /**********************************************************************************************************************/
 /** Compare the second from the first time stamp, return diff in first
@@ -321,8 +322,8 @@ EXT_DECL void vos_subTime (
  */
 
 EXT_DECL INT32 vos_cmpTime (
-    const VOS_TIME_T    *pTime,
-    const VOS_TIME_T    *pCmp);
+    const VOS_TIMEVAL_T *pTime,
+    const VOS_TIMEVAL_T *pCmp);
 
 /**********************************************************************************************************************/
 /** Divide the first time by the second, return quotient in first
@@ -333,8 +334,8 @@ EXT_DECL INT32 vos_cmpTime (
  */
 
 EXT_DECL void vos_divTime (
-    VOS_TIME_T  *pTime,
-    UINT32      divisor);
+    VOS_TIMEVAL_T   *pTime,
+    UINT32          divisor);
 
 /**********************************************************************************************************************/
 /** Multiply the first time by the second, return product in first
@@ -345,8 +346,8 @@ EXT_DECL void vos_divTime (
 */
 
 EXT_DECL void vos_mulTime (
-    VOS_TIME_T  *pTime,
-    UINT32      mul);
+    VOS_TIMEVAL_T   *pTime,
+    UINT32          mul);
 
 /**********************************************************************************************************************/
 /** Get a universal unique identifier according to RFC 4122 time based version.

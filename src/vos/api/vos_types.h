@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Doxygen comment errors
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *
@@ -224,18 +225,7 @@ typedef struct
  *      Relative or absolute date, depending on usage
  *      Assume 32 Bit system, if not defined
  */
-#ifndef _STRUCT_TIMEVAL
-typedef INT32 suseconds_t;
-typedef struct
-{
-    UINT32  tv_sec;         /**< full seconds                                     */
-    INT32   tv_usec;        /**< Micro seconds (max. value 999999)                */
-} VOS_TIME_T;
-
-#else
-typedef struct timeval VOS_TIME_T;
-
-#endif
+typedef struct timeval VOS_TIMEVAL_T;
 
 #ifndef TIMEDATE32
 #define TIMEDATE32  UINT32
@@ -250,7 +240,11 @@ typedef struct
 #endif
 
 #ifndef TIMEDATE64
-#define TIMEDATE64  VOS_TIME_T
+typedef struct
+{
+    UINT32  tv_sec;         /**< full seconds                                     */
+    INT32   tv_usec;        /**< Micro seconds (max. value 999999)                */
+} TIMEDATE64;
 #endif
 
 typedef UINT32 VOS_IP4_ADDR_T;

@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *     AHW 2017-05-22: Ticket #159 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
@@ -148,7 +149,7 @@ typedef enum
 /**    Timer value compatible with timeval / select.
  * Relative or absolute date, depending on usage
  */
-typedef VOS_TIME_T TRDP_TIME_T;
+typedef VOS_TIMEVAL_T TRDP_TIME_T;
 
 /**    File descriptor set compatible with fd_set / select.
  */
