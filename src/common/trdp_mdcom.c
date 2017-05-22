@@ -20,7 +20,7 @@
  * $Id$
  *
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
- *     AHW 2017-05-22: Ticket #159 Infinit timeout at TRDB level is 0 acc. standard
+ *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #148 Wrong element used in trdp_mdCheckTimeouts() to invoke the callback

@@ -16,7 +16,7 @@
  *
  * $Id$
  *
- *     AHW 2017-05-22: Ticket #159 Infinit timeout at TRDB level is 0 acc. standard
+ *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, local prototypes added
  *      BL 2017-03-02: Ticket #151 tlp_request: timeout-flag is not cleared
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
