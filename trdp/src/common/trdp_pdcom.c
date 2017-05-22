@@ -853,7 +853,9 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                    case TRDP_TIMEOUT_ERR:
                        result   = err;
                        logType  = VOS_LOG_WARNING;
-                   default:
+                       vos_printLog(logType, "trdp_pdReceive() failed (Err: %d)\n", err);
+					   break;
+				   default:
                        vos_printLog(logType, "trdp_pdReceive() failed (Err: %d)\n", err);
                        break;
 
