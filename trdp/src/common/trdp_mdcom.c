@@ -774,7 +774,7 @@ static void trdp_mdSetSessionTimeout (
     if (NULL != pMDSession)
     {
         vos_getTime(&pMDSession->timeToGo);
-        if ((pMDSession->interval.tv_sec == (time_t) TDRP_MD_INFINITE_TIME) && (pMDSession->interval.tv_usec == TDRP_MD_MAX_USEC_TIME))
+        if ((pMDSession->interval.tv_sec == TDRP_MD_INFINITE_TIME) && (pMDSession->interval.tv_usec == TDRP_MD_INFINITE_USEC_TIME))
         {
             /* bypass calculation in case of infinity desired from user */
             pMDSession->timeToGo.tv_sec     = pMDSession->interval.tv_sec;
@@ -1101,7 +1101,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
         if ( appHandle->uncompletedTCP[socketIndex] == NULL || appHandle->uncompletedTCP[socketIndex]->pPacket == NULL )
         {
             /* Get the rest of the message length */
-            dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength);
+            dataSize = vos_ntohl(pElement->pPacket->frameHead   .datasetLength);
 
             readDataSize        = dataSize;
             pElement->dataSize  = dataSize;
@@ -1672,12 +1672,12 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         /* timeout value */
         if ((vos_ntohl(pH->replyTimeout) == 0) && (vos_ntohs(pH->msgType) == TRDP_MSG_MR))
         {
-            /* Timeout compliance with Table A.17 */
+            /* Timeout compliance with Table A.18 */
             iterMD->interval.tv_sec     = TDRP_MD_INFINITE_TIME;
-            iterMD->interval.tv_usec    = TDRP_MD_MAX_USEC_TIME;
+            iterMD->interval.tv_usec    = TDRP_MD_INFINITE_USEC_TIME;
             /* Use extreme caution with infinite timeouts! */
             iterMD->timeToGo.tv_sec     = TDRP_MD_INFINITE_TIME;
-            iterMD->timeToGo.tv_usec    = TDRP_MD_MAX_USEC_TIME;
+            iterMD->timeToGo.tv_usec    = TDRP_MD_INFINITE_USEC_TIME;
             /* needs to be set this way to avoid wrap around */
         }
         else
@@ -3384,13 +3384,13 @@ TRDP_ERR_T trdp_mdCall (
         }
 
         /* This condition is used to deicriminate the infinite timeout for Mr */
-        if ((msgType == TRDP_MSG_MR) && (replyTimeout == (UINT32) TDRP_MD_INFINITE_TIME))
+        if ((msgType == TRDP_MSG_MR) && (replyTimeout == TDRP_MD_INFINITE_TIME))
         {
-            /* add the infinity requirement from table A.17 */
+            /* add the infinity requirement from table A.18 */
             pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
                                                                              a century */
-            pSenderElement->interval.tv_usec    = TDRP_MD_MAX_USEC_TIME; /* max upper limit for micro seconds below 1 second */
-            timeoutWire = 0U; /* the table A.17 representation of infinity, only applicable for Mr! */
+            pSenderElement->interval.tv_usec    = TDRP_MD_INFINITE_USEC_TIME; /* max upper limit for micro seconds below 1 second */
+            timeoutWire = 0U; /* the table A.18 representation of infinity, only applicable for Mr! */
         }
         else
         {
@@ -3438,7 +3438,7 @@ TRDP_ERR_T trdp_mdCall (
             {
                 trdp_mdDetailSenderPacket(msgType,
                                           replyStatus,
-                                          timeoutWire, /* holds the wire values accd. table A.17 */
+                                          timeoutWire, /* holds the wire values accd. table A.18 */
                                           0, /* initial sequenceCounter is always 0 */
                                           pData,
                                           dataSize,
