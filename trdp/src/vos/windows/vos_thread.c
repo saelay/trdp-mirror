@@ -11,12 +11,13 @@
  * @author          Bernd Loehr, NewTec GmbH
  *
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  */
 
@@ -85,26 +86,26 @@ pthread_t       threadHandle[VOS_MAX_THREAD_CNT];
 
 /* This define holds the max amount os seconds to get stored in 32bit holding micro seconds        */
 /* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
-/* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */ 
-/* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */ 
-#define MAXSEC_FOR_USECPRESENTATION 4293U
+/* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */
+/* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */
+#define MAXSEC_FOR_USECPRESENTATION  4293U
 
 void vos_cyclicThread (
     UINT32              interval,
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
-    VOS_TIME_T priorCall;
-    VOS_TIME_T afterCall;
-    UINT32 execTime;
-    UINT32 waitingTime;
+    VOS_TIMEVAL_T   priorCall;
+    VOS_TIMEVAL_T   afterCall;
+    UINT32          execTime;
+    UINT32          waitingTime;
     for (;; )
     {
         vos_getTime(&priorCall);  /* get initial time */
         pFunction(pArguments);    /* perform thread function */
         vos_getTime(&afterCall);  /* get time after function ghas returned */
         /* subtract in the pattern after - prior to get the runtime of function() */
-        vos_subTime(&afterCall,&priorCall);
+        vos_subTime(&afterCall, &priorCall);
         /* afterCall holds now the time difference within a structure not compatible with interval */
         /* check if UINT32 fits to hold the waiting time value */
         if (afterCall.tv_sec <= MAXSEC_FOR_USECPRESENTATION)
@@ -124,7 +125,7 @@ void vos_cyclicThread (
             {
                 waitingTime = interval - execTime;
             }
-        } 
+        }
         else
         {
             /* seems a very critical overflow has happened - or simply a misconfiguration */
@@ -138,7 +139,7 @@ void vos_cyclicThread (
         (void) vos_threadDelay(waitingTime);
         pthread_testcancel();
     }
-} 
+}
 
 /**********************************************************************************************************************/
 /** Initialize the thread library.
@@ -245,8 +246,8 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (interval > 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "%s cyclic threads not implemented yet\n",
-                   pName);
+                     "%s cyclic threads not implemented yet\n",
+                     pName);
         return VOS_INIT_ERR;
     }
 
@@ -255,9 +256,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (retCode != 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "%s pthread_attr_init() failed (Err:%d)\n",
-                   pName,
-                   retCode );
+                     "%s pthread_attr_init() failed (Err:%d)\n",
+                     pName,
+                     retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -340,9 +341,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (retCode != 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "%s pthread_create() failed (Err:%d)\n",
-                   pName,
-                   retCode );
+                     "%s pthread_create() failed (Err:%d)\n",
+                     pName,
+                     retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -388,8 +389,8 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
     if (retCode != 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "pthread_cancel() failed (Err:%d)\n",
-                   retCode );
+                     "pthread_cancel() failed (Err:%d)\n",
+                     retCode );
         return VOS_THREAD_ERR;
     }
     else
@@ -467,7 +468,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
  */
 
 EXT_DECL void vos_getTime (
-    VOS_TIME_T *pTime)
+    VOS_TIMEVAL_T *pTime)
 {
     struct __timeb32 curTime;
 
@@ -535,7 +536,7 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
  */
 
 EXT_DECL void vos_clearTime (
-    VOS_TIME_T *pTime)
+    VOS_TIMEVAL_T *pTime)
 {
     if (pTime == NULL)
     {
@@ -556,8 +557,8 @@ EXT_DECL void vos_clearTime (
  */
 
 EXT_DECL void vos_addTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pAdd)
+    VOS_TIMEVAL_T       *pTime,
+    const VOS_TIMEVAL_T *pAdd)
 {
     if (pTime == NULL || pAdd == NULL)
     {
@@ -585,8 +586,8 @@ EXT_DECL void vos_addTime (
  */
 
 EXT_DECL void vos_subTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pSub)
+    VOS_TIMEVAL_T       *pTime,
+    const VOS_TIMEVAL_T *pSub)
 {
     if (pTime == NULL || pSub == NULL)
     {
@@ -616,8 +617,8 @@ EXT_DECL void vos_subTime (
  */
 
 EXT_DECL void vos_divTime (
-    VOS_TIME_T  *pTime,
-    UINT32      divisor)
+    VOS_TIMEVAL_T   *pTime,
+    UINT32          divisor)
 {
     if (pTime == NULL || divisor == 0)
     {
@@ -646,8 +647,8 @@ EXT_DECL void vos_divTime (
  */
 
 EXT_DECL void vos_mulTime (
-    VOS_TIME_T  *pTime,
-    UINT32      mul)
+    VOS_TIMEVAL_T   *pTime,
+    UINT32          mul)
 {
     if (pTime == NULL)
     {
@@ -677,8 +678,8 @@ EXT_DECL void vos_mulTime (
  */
 
 EXT_DECL INT32 vos_cmpTime (
-    const VOS_TIME_T    *pTime,
-    const VOS_TIME_T    *pCmp)
+    const VOS_TIMEVAL_T *pTime,
+    const VOS_TIMEVAL_T *pCmp)
 {
     if (pTime == NULL || pCmp == NULL)
     {
@@ -707,7 +708,7 @@ EXT_DECL void vos_getUuid (
 {
     /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1;
-    VOS_TIME_T      current;
+    VOS_TIMEVAL_T   current;
     VOS_ERR_T       ret;
 
     vos_getTime(&current);
@@ -870,8 +871,8 @@ EXT_DECL void vos_mutexDelete (
         else
         {
             vos_printLog(VOS_LOG_ERROR,
-                       "Can not destroy Mutex (pthread err=%d)\n",
-                       err);
+                         "Can not destroy Mutex (pthread err=%d)\n",
+                         err);
         }
     }
 }
@@ -931,8 +932,8 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     if (err != 0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "Unable to lock Mutex (pthread err=%d)\n",
-                   err);
+                     "Unable to lock Mutex (pthread err=%d)\n",
+                     err);
         return VOS_MUTEX_ERR;
     }
 
@@ -968,8 +969,8 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     if (err == EINVAL)
     {
         vos_printLog(VOS_LOG_ERROR,
-                   "Unable to trylock Mutex (pthread err=%d)\n",
-                   err);
+                     "Unable to trylock Mutex (pthread err=%d)\n",
+                     err);
         return VOS_MUTEX_ERR;
     }
 
@@ -1001,8 +1002,8 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
         if (err != 0)
         {
             vos_printLog(VOS_LOG_ERROR,
-                       "Unable to unlock Mutex (pthread err=%d)\n",
-                       err);
+                         "Unable to unlock Mutex (pthread err=%d)\n",
+                         err);
             return VOS_MUTEX_ERR;
         }
     }
@@ -1128,7 +1129,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
 {
     INT32           err             = (INT32) NULL;
     VOS_ERR_T       retVal          = VOS_SEMA_ERR;
-    VOS_TIME_T      waitTimeVos     = {(UINT32) NULL, (UINT32) NULL};
+    VOS_TIMEVAL_T   waitTimeVos     = {(UINT32) NULL, (UINT32) NULL};
     struct timespec waitTimeSpec    = {(UINT32) NULL, (UINT32) NULL};
 
     /* Check parameter */
@@ -1145,7 +1146,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     else if (timeout == VOS_SEMA_WAIT_FOREVER)
     {
         /* Take Semaphore, block until Semaphore becomes available */
-         err = sem_wait((sem_t *)sema);
+        err = sem_wait((sem_t *)sema);
     }
     else
     {

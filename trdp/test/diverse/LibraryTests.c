@@ -14,6 +14,7 @@
  *
  * $Id: LibraryTests.cpp 729 2013-04-30 15:19:14Z aweiss $
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
 
 /*******************************************************************************
@@ -48,8 +49,8 @@
 
 int testTimeCompare()
 {
-    VOS_TIME_T time1 = { 1 /*sec */, 2 /* usec */ };
-    VOS_TIME_T time2 = { 1 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time1 = { 1 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time2 = { 1 /*sec */, 2 /* usec */ };
     /* time 1 and time 2 should be equal */
     if (vos_cmpTime(&time1, &time2) != 0)
         return 1;
@@ -128,8 +129,8 @@ int testTimeCompare()
 
 int testTimeAdd()
 {
-    VOS_TIME_T time = { 1 /*sec */, 0 /* usec */ };
-    VOS_TIME_T add =  { 0 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time = { 1 /*sec */, 0 /* usec */ };
+    VOS_TIMEVAL_T add =  { 0 /*sec */, 2 /* usec */ };
 
     vos_addTime(&time, &add);
     if (time.tv_sec != 1 || time.tv_usec != 2)
@@ -162,8 +163,8 @@ int testTimeAdd()
 
 int testTimeSubs()
 {
-    VOS_TIME_T time = { 1 /*sec */, 4 /* usec */ };
-    VOS_TIME_T subs =  { 0 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time = { 1 /*sec */, 4 /* usec */ };
+    VOS_TIMEVAL_T subs =  { 0 /*sec */, 2 /* usec */ };
 
     vos_subTime(&time, &subs);
     if (time.tv_sec != 1 || time.tv_usec != 2)

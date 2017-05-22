@@ -68,9 +68,9 @@ void print_stats (
     TRDP_VERSION_T trdp;
 
     trdp.ver    = (UINT8) pData->version;
-    trdp.rel    = (UINT8) pData->version << 8;
-    trdp.upd    = (UINT8) pData->version << 16;
-    trdp.evo    = (UINT8) pData->version << 24;
+    trdp.rel    = (UINT8) (pData->version << 8);
+    trdp.upd    = (UINT8) (pData->version << 16);
+    trdp.evo    = (UINT8) (pData->version << 24);
 
     printf("\n----------------------------------------------------------------------------------------------------\n");
     printf("version:            %d.%d.%d.%d\n",

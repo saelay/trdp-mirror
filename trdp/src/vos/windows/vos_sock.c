@@ -17,6 +17,7 @@
  *
  * $Id$*
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
 
 #ifndef WIN32
@@ -479,11 +480,11 @@ EXT_DECL BOOL8 vos_netIfUp (
  */
 
 EXT_DECL INT32 vos_select (
-    INT32       highDesc,
-    VOS_FDS_T   *pReadableFD,
-    VOS_FDS_T   *pWriteableFD,
-    VOS_FDS_T   *pErrorFD,
-    VOS_TIME_T  *pTimeOut)
+    INT32           highDesc,
+    VOS_FDS_T       *pReadableFD,
+    VOS_FDS_T       *pWriteableFD,
+    VOS_FDS_T       *pErrorFD,
+    VOS_TIMEVAL_T   *pTimeOut)
 {
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);
@@ -1372,23 +1373,23 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
 
             switch (err)
             {
-                /*Accept return -1 and err = EWOULDBLOCK,
-                when there is no more connection requests.*/
-                case WSAEWOULDBLOCK:
-                {
-                    *pSock = connFd;
-                    return VOS_NO_ERR;
-                }
-                case WSAEINTR:         break;
-                case WSAECONNABORTED:  break;
+               /*Accept return -1 and err = EWOULDBLOCK,
+               when there is no more connection requests.*/
+               case WSAEWOULDBLOCK:
+               {
+                   *pSock = connFd;
+                   return VOS_NO_ERR;
+               }
+               case WSAEINTR:         break;
+               case WSAECONNABORTED:  break;
 #if defined (WSAEPROTO)
-                case WSAEPROTO:        break;
+               case WSAEPROTO:        break;
 #endif
-                default:
-                {
-                    vos_printLog(VOS_LOG_ERROR, "accept() failed (socket: %d, err: %d)", *pSock, err);
-                    return VOS_UNKNOWN_ERR;
-                }
+               default:
+               {
+                   vos_printLog(VOS_LOG_ERROR, "accept() failed (socket: %d, err: %d)", *pSock, err);
+                   return VOS_UNKNOWN_ERR;
+               }
             }
         }
         else

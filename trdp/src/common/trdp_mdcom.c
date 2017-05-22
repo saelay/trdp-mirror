@@ -19,12 +19,13 @@
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *     AHW 2017-05-22: Ticket #159 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #148 Wrong element used in trdp_mdCheckTimeouts() to invoke the callback
  *      BL 2017-02-10: Ticket #138 Erroneous closing of receive md socket
- *      BL 2017-02-10: Ticket #142 Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-10: Ticket #142 Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-07-09: Ticket #127 MD notify message: Invalid session identifier
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-03-10: Ticket #115 MD: Missing parameter pktFlags in tlm_reply() and tlm_replyQuery()
@@ -68,8 +69,8 @@
  */
 
 static const UINT32 cMinimumMDSize = 1480u;                            /**< Initial size for message data received */
-static const UINT8  cEmptySession[TRDP_SESS_ID_SIZE];                 /**< Empty sessionID to compare             */
-static const TRDP_MD_INFO_T cTrdp_md_info_default = {0};
+static const UINT8  cEmptySession[TRDP_SESS_ID_SIZE];                  /**< Empty sessionID to compare             */
+static const TRDP_MD_INFO_T cTrdp_md_info_default;
 
 /***********************************************************************************************************************
  *   Local Functions
@@ -85,9 +86,9 @@ static TRDP_ERR_T   trdp_mdLookupElement (MD_ELE_T                  *pinitialMdE
                                           const TRDP_UUID_T         pSessionId,
                                           MD_ELE_T                  * *pretrievedMdElement);
 
-static void         trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
-                                           const TRDP_SESSION_PT    appHandle,
-                                           const TRDP_ERR_T         resultCode);
+static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
+                                   const TRDP_SESSION_PT    appHandle,
+                                   const TRDP_ERR_T         resultCode);
 static BOOL8        trdp_mdTimeOutStateHandler ( MD_ELE_T           *pElement,
                                                  TRDP_SESSION_PT    appHandle,
                                                  TRDP_ERR_T         *pResult);
@@ -162,28 +163,28 @@ static void trdp_mdFillStateElement (const TRDP_MSG_T msgType, MD_ELE_T *pMdElem
 {
     switch (msgType)
     {
-        case TRDP_MSG_MN:
-            pMdElement->stateEle = TRDP_ST_TX_NOTIFY_ARM;
-            break;
-        case TRDP_MSG_MR:
-            pMdElement->stateEle = TRDP_ST_TX_REQUEST_ARM;
-            break;
-        case TRDP_MSG_MP:
-            pMdElement->stateEle = TRDP_ST_TX_REPLY_ARM;
-            break;
-        case TRDP_MSG_MQ:
-            pMdElement->stateEle = TRDP_ST_TX_REPLYQUERY_ARM;
-            break;
-        case TRDP_MSG_MC:
-            pMdElement->stateEle = TRDP_ST_TX_CONFIRM_ARM;
-            break;
-        case TRDP_MSG_ME:
-            /* The Me message is similar to Mp in terms of lifetime and caller side handling */
-            pMdElement->stateEle = TRDP_ST_TX_REPLY_ARM;
-            break;
-        default:
-            pMdElement->stateEle = TRDP_ST_TX_NOTIFY_ARM;
-            break;
+       case TRDP_MSG_MN:
+           pMdElement->stateEle = TRDP_ST_TX_NOTIFY_ARM;
+           break;
+       case TRDP_MSG_MR:
+           pMdElement->stateEle = TRDP_ST_TX_REQUEST_ARM;
+           break;
+       case TRDP_MSG_MP:
+           pMdElement->stateEle = TRDP_ST_TX_REPLY_ARM;
+           break;
+       case TRDP_MSG_MQ:
+           pMdElement->stateEle = TRDP_ST_TX_REPLYQUERY_ARM;
+           break;
+       case TRDP_MSG_MC:
+           pMdElement->stateEle = TRDP_ST_TX_CONFIRM_ARM;
+           break;
+       case TRDP_MSG_ME:
+           /* The Me message is similar to Mp in terms of lifetime and caller side handling */
+           pMdElement->stateEle = TRDP_ST_TX_REPLY_ARM;
+           break;
+       default:
+           pMdElement->stateEle = TRDP_ST_TX_NOTIFY_ARM;
+           break;
     }
 }
 
@@ -336,7 +337,7 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
     /* theMessage.pUserRef     = appHandle->mdDefault.pRefCon; */
     theMessage.resultCode = resultCode;
 
-    if ( (resultCode == TRDP_NO_ERR) && (pMdItem->pPacket != NULL))
+    if ((resultCode == TRDP_NO_ERR) && (pMdItem->pPacket != NULL))
     {
         theMessage.comId        = vos_ntohl(pMdItem->pPacket->frameHead.comId);
         theMessage.etbTopoCnt   = vos_ntohl(pMdItem->pPacket->frameHead.etbTopoCnt);
@@ -381,149 +382,149 @@ static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T *pElement, TRDP_SESSION_PT ap
     /* timeout on queue ? */
     switch ( pElement->stateEle )
     {
-        case TRDP_ST_RX_REQ_W4AP_REPLY:    /* Replier waiting for reply from application */
-        case TRDP_ST_TX_REQ_W4AP_CONFIRM:  /* Caller waiting for a confirmation/reply from application */
-            /* Application confirm/reply timeout, stop session, notify application */
-            pElement->morituri  = TRUE;
-            hasTimedOut         = TRUE;
+       case TRDP_ST_RX_REQ_W4AP_REPLY:     /* Replier waiting for reply from application */
+       case TRDP_ST_TX_REQ_W4AP_CONFIRM:   /* Caller waiting for a confirmation/reply from application */
+           /* Application confirm/reply timeout, stop session, notify application */
+           pElement->morituri   = TRUE;
+           hasTimedOut          = TRUE;
 
-            if ( pElement->stateEle == TRDP_ST_TX_REQ_W4AP_CONFIRM )
-            {
-                vos_printLogStr(VOS_LOG_ERROR, "MD application confirm timeout\n");
-                *pResult = TRDP_APP_CONFIRMTO_ERR;
-            }
-            else
-            {
-                vos_printLogStr(VOS_LOG_ERROR, "MD application reply timeout\n");
-                *pResult = TRDP_APP_REPLYTO_ERR;
-            }
-            break;
+           if ( pElement->stateEle == TRDP_ST_TX_REQ_W4AP_CONFIRM )
+           {
+               vos_printLogStr(VOS_LOG_ERROR, "MD application confirm timeout\n");
+               *pResult = TRDP_APP_CONFIRMTO_ERR;
+           }
+           else
+           {
+               vos_printLogStr(VOS_LOG_ERROR, "MD application reply timeout\n");
+               *pResult = TRDP_APP_REPLYTO_ERR;
+           }
+           break;
 
-        case TRDP_ST_TX_REQUEST_W4REPLY: /* Waiting for Reply/ReplyQuery reception and Confirm sent */
-            /* TCP handling*/
-            if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
-            {
-                vos_printLogStr(VOS_LOG_INFO, "TCP MD reply/confirm timeout\n");
-                pElement->morituri  = TRUE;
-                hasTimedOut         = TRUE;
-                *pResult = TRDP_REPLYTO_ERR;
+       case TRDP_ST_TX_REQUEST_W4REPLY:  /* Waiting for Reply/ReplyQuery reception and Confirm sent */
+           /* TCP handling*/
+           if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
+           {
+               vos_printLogStr(VOS_LOG_INFO, "TCP MD reply/confirm timeout\n");
+               pElement->morituri   = TRUE;
+               hasTimedOut          = TRUE;
+               *pResult = TRDP_REPLYTO_ERR;
 
-                appHandle->stats.tcpMd.numReplyTimeout++;
-            }
-            else
-            {
-                /*UDP handling*/
-                /* Manage Reply/ReplyQuery reception */
-                if ( pElement->morituri == FALSE )
-                {
-                    /* Session is in reception phase */
-                    /* Check for Reply timeout */
-                    vos_printLogStr(VOS_LOG_INFO, "UDP MD reply/confirm timeout\n");
-                    /* The retransmission condition is accd. IEC61375-2-3 A.7.7.1: */
-                    /* - UDP only       */
-                    /* - Unicast Caller */
-                    /* - Only 1 Replier */
-                    if ((pElement->numExpReplies == 1U)
-                        &&
-                        (pElement->numRetries < pElement->numRetriesMax)
-                        &&
-                        (pElement->pPacket != NULL))
-                    {
-                        vos_printLogStr(VOS_LOG_INFO, "UDP MD start retransmission\n");
-                        /* Retransmission will occur upon resetting the state of  */
-                        /* this MD_ELE_T item to TRDP_ST_TX_REQUEST_ARM, for ref- */
-                        /* erence check the trdp_mdSend function                  */
-                        pElement->stateEle = TRDP_ST_TX_REQUEST_ARM;
-                        /* Increment the retry counter */
-                        pElement->numRetries++;
-                        /* Increment sequence counter in network order of course */
-                        pElement->pPacket->frameHead.sequenceCounter =
-                            vos_htonl((vos_ntohl(pElement->pPacket->frameHead.sequenceCounter) + 1));
-                        /* Store new sequence counter within the management info */
-                        /* Set new time out value */
-                        vos_addTime(&pElement->timeToGo, &pElement->interval);
-                        /* update the frame header CRC also */
-                        trdp_mdUpdatePacket(pElement);
-                        /* ready to proceed - will be handled by trdp_mdSend run- */
-                        /* ning within its own loop triggered cyclically.         */
-                        hasTimedOut = FALSE;
-                    }
-                    else
-                    {
-                        /* Reply timeout, stop Reply/ReplyQuery reception, notify application */
-                        pElement->morituri  = TRUE;
-                        hasTimedOut         = TRUE;
-                        *pResult = TRDP_REPLYTO_ERR;
-                    }
-                    /* Statistics */
-                    appHandle->stats.udpMd.numReplyTimeout++;
-                }
+               appHandle->stats.tcpMd.numReplyTimeout++;
+           }
+           else
+           {
+               /*UDP handling*/
+               /* Manage Reply/ReplyQuery reception */
+               if ( pElement->morituri == FALSE )
+               {
+                   /* Session is in reception phase */
+                   /* Check for Reply timeout */
+                   vos_printLogStr(VOS_LOG_INFO, "UDP MD reply/confirm timeout\n");
+                   /* The retransmission condition is accd. IEC61375-2-3 A.7.7.1: */
+                   /* - UDP only       */
+                   /* - Unicast Caller */
+                   /* - Only 1 Replier */
+                   if ((pElement->numExpReplies == 1U)
+                       &&
+                       (pElement->numRetries < pElement->numRetriesMax)
+                       &&
+                       (pElement->pPacket != NULL))
+                   {
+                       vos_printLogStr(VOS_LOG_INFO, "UDP MD start retransmission\n");
+                       /* Retransmission will occur upon resetting the state of  */
+                       /* this MD_ELE_T item to TRDP_ST_TX_REQUEST_ARM, for ref- */
+                       /* erence check the trdp_mdSend function                  */
+                       pElement->stateEle = TRDP_ST_TX_REQUEST_ARM;
+                       /* Increment the retry counter */
+                       pElement->numRetries++;
+                       /* Increment sequence counter in network order of course */
+                       pElement->pPacket->frameHead.sequenceCounter =
+                           vos_htonl((vos_ntohl(pElement->pPacket->frameHead.sequenceCounter) + 1));
+                       /* Store new sequence counter within the management info */
+                       /* Set new time out value */
+                       vos_addTime(&pElement->timeToGo, &pElement->interval);
+                       /* update the frame header CRC also */
+                       trdp_mdUpdatePacket(pElement);
+                       /* ready to proceed - will be handled by trdp_mdSend run- */
+                       /* ning within its own loop triggered cyclically.         */
+                       hasTimedOut = FALSE;
+                   }
+                   else
+                   {
+                       /* Reply timeout, stop Reply/ReplyQuery reception, notify application */
+                       pElement->morituri   = TRUE;
+                       hasTimedOut          = TRUE;
+                       *pResult = TRDP_REPLYTO_ERR;
+                   }
+                   /* Statistics */
+                   appHandle->stats.udpMd.numReplyTimeout++;
+               }
 
-                /* Manage send Confirm if no repetition */
-                if ( pElement->stateEle != TRDP_ST_TX_REQUEST_ARM )
-                {
-                    if ((pElement->numRepliesQuery == 0u)
-                        ||
-                        (pElement->numRepliesQuery <= pElement->numConfirmSent))
-                    {
-                        /* All Confirm required by received ReplyQuery are sent */
-                        pElement->morituri = TRUE;
-                    }
-                    else
-                    {
-                        /* Check for pending Confirm timeout (handled in each single listener) */
-                        if ( pElement->numRepliesQuery <= (pElement->numConfirmSent + pElement->numConfirmTimeout))
-                        {
-                            /* Callback execution require to indicate send done with some Confirm Timeout */
-                            pElement->morituri  = TRUE;
-                            hasTimedOut         = TRUE;
-                            *pResult = TRDP_REQCONFIRMTO_ERR;
-                        }
-                    }
-                }
-            }
-            break;
-        case TRDP_ST_RX_REPLYQUERY_W4C: /* Reply query timeout raised, stop waiting for confirmation, notify application
+               /* Manage send Confirm if no repetition */
+               if ( pElement->stateEle != TRDP_ST_TX_REQUEST_ARM )
+               {
+                   if ((pElement->numRepliesQuery == 0u)
+                       ||
+                       (pElement->numRepliesQuery <= pElement->numConfirmSent))
+                   {
+                       /* All Confirm required by received ReplyQuery are sent */
+                       pElement->morituri = TRUE;
+                   }
+                   else
+                   {
+                       /* Check for pending Confirm timeout (handled in each single listener) */
+                       if ( pElement->numRepliesQuery <= (pElement->numConfirmSent + pElement->numConfirmTimeout))
+                       {
+                           /* Callback execution require to indicate send done with some Confirm Timeout */
+                           pElement->morituri   = TRUE;
+                           hasTimedOut          = TRUE;
+                           *pResult = TRDP_REQCONFIRMTO_ERR;
+                       }
+                   }
+               }
+           }
+           break;
+       case TRDP_ST_RX_REPLYQUERY_W4C:  /* Reply query timeout raised, stop waiting for confirmation, notify application
                                           */
-            pElement->morituri  = TRUE;
-            hasTimedOut         = TRUE;
-            *pResult = TRDP_CONFIRMTO_ERR;
-            /* Statistics */
-            if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
-            {
-                appHandle->stats.tcpMd.numConfirmTimeout++;
-            }
-            else
-            {
-                appHandle->stats.udpMd.numConfirmTimeout++;
-            }
-            break;
-        case TRDP_ST_TX_REPLY_RECEIVED:
-            /* kill session silently since only one TCP reply possible */
-            if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
-            {
-                pElement->morituri = TRUE;
-            }
-            else
-            {
-                /* kill session if # of replies is undefined or not all expected replies have been received */
-                if ((pElement->numExpReplies == 0u)
-                    ||
-                    (pElement->numReplies < pElement->numExpReplies))
-                {
-                    pElement->morituri  = TRUE;
-                    hasTimedOut         = TRUE;
-                    *pResult = TRDP_REPLYTO_ERR;
-                }
-                else
-                {
-                    /* kill session silently if number of expected replies have been received  */
-                    pElement->morituri = TRUE;
-                }
-            }
-            break;
-        default:
-            break;
+           pElement->morituri   = TRUE;
+           hasTimedOut          = TRUE;
+           *pResult = TRDP_CONFIRMTO_ERR;
+           /* Statistics */
+           if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
+           {
+               appHandle->stats.tcpMd.numConfirmTimeout++;
+           }
+           else
+           {
+               appHandle->stats.udpMd.numConfirmTimeout++;
+           }
+           break;
+       case TRDP_ST_TX_REPLY_RECEIVED:
+           /* kill session silently since only one TCP reply possible */
+           if ((pElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
+           {
+               pElement->morituri = TRUE;
+           }
+           else
+           {
+               /* kill session if # of replies is undefined or not all expected replies have been received */
+               if ((pElement->numExpReplies == 0u)
+                   ||
+                   (pElement->numReplies < pElement->numExpReplies))
+               {
+                   pElement->morituri   = TRUE;
+                   hasTimedOut          = TRUE;
+                   *pResult = TRDP_REPLYTO_ERR;
+               }
+               else
+               {
+                   /* kill session silently if number of expected replies have been received  */
+                   pElement->morituri = TRUE;
+               }
+           }
+           break;
+       default:
+           break;
     }
     return hasTimedOut;
 }
@@ -775,7 +776,8 @@ static void trdp_mdSetSessionTimeout (
     if (NULL != pMDSession)
     {
         vos_getTime(&pMDSession->timeToGo);
-        if ((pMDSession->interval.tv_sec == TDRP_MD_INFINITE_TIME) && (pMDSession->interval.tv_usec == TDRP_MD_INFINITE_USEC_TIME))
+        if ((pMDSession->interval.tv_sec == TDRP_MD_INFINITE_TIME) &&
+            (pMDSession->interval.tv_usec == TDRP_MD_INFINITE_USEC_TIME))
         {
             /* bypass calculation in case of infinity desired from user */
             pMDSession->timeToGo.tv_sec     = pMDSession->interval.tv_sec;
@@ -858,23 +860,23 @@ static TRDP_ERR_T trdp_mdCheck (TRDP_SESSION_PT appHandle,
         TRDP_MSG_T l_msgType = (TRDP_MSG_T) vos_ntohs(pPacket->msgType);
         switch (l_msgType)
         {
-            /* valid message type ident */
-            case TRDP_MSG_MN:
-            case TRDP_MSG_MR:
-            case TRDP_MSG_MP:
-            case TRDP_MSG_MQ:
-            case TRDP_MSG_MC:
-            case TRDP_MSG_ME:
-            {}
-             break;
-            /* invalid codes */
-            default:
-            {
-                vos_printLog(VOS_LOG_ERROR, "MDframe type error, received %c%c\n",
-                             (char)(l_msgType >> 8), (char)(l_msgType & 0xFF));
-                err = TRDP_WIRE_ERR;
-            }
+           /* valid message type ident */
+           case TRDP_MSG_MN:
+           case TRDP_MSG_MR:
+           case TRDP_MSG_MP:
+           case TRDP_MSG_MQ:
+           case TRDP_MSG_MC:
+           case TRDP_MSG_ME:
+           {}
             break;
+           /* invalid codes */
+           default:
+           {
+               vos_printLog(VOS_LOG_ERROR, "MDframe type error, received %c%c\n",
+                            (char)(l_msgType >> 8), (char)(l_msgType & 0xFF));
+               err = TRDP_WIRE_ERR;
+           }
+           break;
         }
     }
 
@@ -1102,7 +1104,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
         if ( appHandle->uncompletedTCP[socketIndex] == NULL || appHandle->uncompletedTCP[socketIndex]->pPacket == NULL )
         {
             /* Get the rest of the message length */
-            dataSize = vos_ntohl(pElement->pPacket->frameHead   .datasetLength);
+            dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength);
 
             readDataSize        = dataSize;
             pElement->dataSize  = dataSize;
@@ -1157,20 +1159,20 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
     /* If the Header is incomplete, the data size will be "0". Otherwise it will be calculated. */
     switch ( err )
     {
-        case TRDP_NODATA_ERR:
-            vos_printLog(VOS_LOG_INFO, "vos_sockReceiveTCP - No data at socket %u\n", mdSock);
-            return TRDP_NODATA_ERR;
-        case TRDP_BLOCK_ERR:
-            if (((pElement->pktFlags & TRDP_FLAGS_TCP) != 0) && (readSize == 0u))
-            {
-                return TRDP_BLOCK_ERR;
-            }
-            break;
-        case TRDP_NO_ERR:
-            break;
-        default:
-            vos_printLog(VOS_LOG_ERROR, "vos_sockReceiveTCP failed (Err: %d, Sock: %u)\n", err, mdSock);
-            return err;
+       case TRDP_NODATA_ERR:
+           vos_printLog(VOS_LOG_INFO, "vos_sockReceiveTCP - No data at socket %u\n", mdSock);
+           return TRDP_NODATA_ERR;
+       case TRDP_BLOCK_ERR:
+           if (((pElement->pktFlags & TRDP_FLAGS_TCP) != 0) && (readSize == 0u))
+           {
+               return TRDP_BLOCK_ERR;
+           }
+           break;
+       case TRDP_NO_ERR:
+           break;
+       default:
+           vos_printLog(VOS_LOG_ERROR, "vos_sockReceiveTCP failed (Err: %d, Sock: %u)\n", err, mdSock);
+           return err;
     }
     /* All the data (Header + Data) stored in the uncompletedTCP[] array */
     /* Check if it's necessary to read some data */
@@ -1392,16 +1394,16 @@ static TRDP_ERR_T trdp_mdRecvUDPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
     /* If the Header is incomplete, the data size will be "0". Otherwise it will be calculated. */
     switch ( err )
     {
-        case TRDP_NODATA_ERR:
-            vos_printLog(VOS_LOG_INFO, "vos_sockReceiveUDP - No data at socket %u\n", mdSock);
-            return TRDP_NODATA_ERR;
-        case TRDP_BLOCK_ERR:
-            return TRDP_BLOCK_ERR;
-        case TRDP_NO_ERR:
-            break;
-        default:
-            vos_printLog(VOS_LOG_ERROR, "vos_sockReceiveUDP failed (Err: %d, Sock: %u)\n", err, mdSock);
-            return err;
+       case TRDP_NODATA_ERR:
+           vos_printLog(VOS_LOG_INFO, "vos_sockReceiveUDP - No data at socket %u\n", mdSock);
+           return TRDP_NODATA_ERR;
+       case TRDP_BLOCK_ERR:
+           return TRDP_BLOCK_ERR;
+       case TRDP_NO_ERR:
+           break;
+       default:
+           vos_printLog(VOS_LOG_ERROR, "vos_sockReceiveUDP failed (Err: %d, Sock: %u)\n", err, mdSock);
+           return err;
     }
     return TRDP_NO_ERR;
 }
@@ -1457,20 +1459,20 @@ static TRDP_ERR_T  trdp_mdRecvPacket (
     /* according the trdp_mdCheck result                 */
     switch (err)
     {
-        case TRDP_NO_ERR:
-            pElementStatistics->numRcv++;
-            break;
-        case TRDP_CRC_ERR:
-            pElementStatistics->numCrcErr++;
-            break;
-        case TRDP_WIRE_ERR:
-            pElementStatistics->numProtErr++;
-            break;
-        case TRDP_TOPO_ERR:
-            pElementStatistics->numTopoErr++;
-            break;
-        default:
-            ;
+       case TRDP_NO_ERR:
+           pElementStatistics->numRcv++;
+           break;
+       case TRDP_CRC_ERR:
+           pElementStatistics->numCrcErr++;
+           break;
+       case TRDP_WIRE_ERR:
+           pElementStatistics->numProtErr++;
+           break;
+       case TRDP_TOPO_ERR:
+           pElementStatistics->numTopoErr++;
+           break;
+       default:
+           ;
     }
 
     if (err != TRDP_NO_ERR)
@@ -1691,7 +1693,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         /* save session Id and sequence counter for next steps */
         memcpy(iterMD->sessionID, pH->sessionID, TRDP_SESS_ID_SIZE);
         /* save source URI for reply */
-        vos_strncpy(iterMD->srcURI, (CHAR8*) pH->sourceURI, TRDP_MAX_URI_USER_LEN);
+        vos_strncpy(iterMD->srcURI, (CHAR8 *) pH->sourceURI, TRDP_MAX_URI_USER_LEN);
     }
     else
     {
@@ -1953,45 +1955,45 @@ static TRDP_ERR_T  trdp_mdRecv (
     /*  Depending on message type, we take appropriate measures */
     switch ( vos_ntohs(pH->msgType))
     {
-        /* Find a listener and create a new rcvQueue entry  */
-        case TRDP_MSG_MN:
-            state = TRDP_ST_RX_NOTIFY_RECEIVED;
-        /* FALL THRU    */
-        case TRDP_MSG_MR:
-            /* Search for existing session (in case it is a repeated request)  */
-            /* This is kind of error detection/comm issue remedy functionality */
-            /* running ahead of further logic */
-            result = trdp_mdHandleRequest(appHandle,
-                                          isTCP,
-                                          sockIndex,
-                                          pH,
-                                          state,
-                                          &iterMD);
+       /* Find a listener and create a new rcvQueue entry  */
+       case TRDP_MSG_MN:
+           state = TRDP_ST_RX_NOTIFY_RECEIVED;
+       /* FALL THRU    */
+       case TRDP_MSG_MR:
+           /* Search for existing session (in case it is a repeated request)  */
+           /* This is kind of error detection/comm issue remedy functionality */
+           /* running ahead of further logic */
+           result = trdp_mdHandleRequest(appHandle,
+                                         isTCP,
+                                         sockIndex,
+                                         pH,
+                                         state,
+                                         &iterMD);
 
-            /* handle the various result values here */
-            if ((iterMD == NULL) && (result == TRDP_NO_ERR))
-            {
-                /* this is a discard action, not needing further acitvities */
-                return TRDP_NO_ERR;
-            }
-            else
-            {
-                /* simplified: return in any other case of error */
-                if (result != TRDP_NO_ERR)
-                {
-                    return result;
-                }
-            }
-            break;
-        case TRDP_MSG_MC:
-        case TRDP_MSG_MQ:
-        case TRDP_MSG_MP:
-        case TRDP_MSG_ME:
-            iterMD = trdp_mdHandleConfirmReply(appHandle, pH);
-            break;
-        default:
-            /* Shall never get here! */
-            break;
+           /* handle the various result values here */
+           if ((iterMD == NULL) && (result == TRDP_NO_ERR))
+           {
+               /* this is a discard action, not needing further acitvities */
+               return TRDP_NO_ERR;
+           }
+           else
+           {
+               /* simplified: return in any other case of error */
+               if (result != TRDP_NO_ERR)
+               {
+                   return result;
+               }
+           }
+           break;
+       case TRDP_MSG_MC:
+       case TRDP_MSG_MQ:
+       case TRDP_MSG_MP:
+       case TRDP_MSG_ME:
+           iterMD = trdp_mdHandleConfirmReply(appHandle, pH);
+           break;
+       default:
+           /* Shall never get here! */
+           break;
     }
 
     /* Inform user  */
@@ -2128,25 +2130,25 @@ TRDP_ERR_T  trdp_mdSend (
 
         switch (iterMD->stateEle)
         {
-            case TRDP_ST_TX_NOTIFY_ARM:
-                dotx = 1;
-                break;
-            case TRDP_ST_TX_REQUEST_ARM:
-                dotx        = 1;
-                nextstate   = TRDP_ST_TX_REQUEST_W4REPLY;
-                break;
-            case TRDP_ST_TX_REPLY_ARM:
-                dotx = 1;
-                break;
-            case TRDP_ST_TX_REPLYQUERY_ARM:
-                dotx        = 1;
-                nextstate   = TRDP_ST_RX_REPLYQUERY_W4C;
-                break;
-            case TRDP_ST_TX_CONFIRM_ARM:
-                dotx = 1;
-                break;
-            default:
-                break;
+           case TRDP_ST_TX_NOTIFY_ARM:
+               dotx = 1;
+               break;
+           case TRDP_ST_TX_REQUEST_ARM:
+               dotx         = 1;
+               nextstate    = TRDP_ST_TX_REQUEST_W4REPLY;
+               break;
+           case TRDP_ST_TX_REPLY_ARM:
+               dotx = 1;
+               break;
+           case TRDP_ST_TX_REPLYQUERY_ARM:
+               dotx         = 1;
+               nextstate    = TRDP_ST_RX_REPLYQUERY_W4C;
+               break;
+           case TRDP_ST_TX_CONFIRM_ARM:
+               dotx = 1;
+               break;
+           default:
+               break;
         }
         if (dotx)
         {
@@ -2267,38 +2269,38 @@ TRDP_ERR_T  trdp_mdSend (
 
                         switch (iterMD->stateEle)
                         {
-                            case TRDP_ST_TX_CONFIRM_ARM:
-                            {
-                                iterMD->numConfirmSent++;
-                                if (
-                                    (iterMD->numExpReplies != 0u)
-                                    && ((iterMD->numRepliesQuery + iterMD->numReplies) >= iterMD->numExpReplies)
-                                    && (iterMD->numConfirmSent >= iterMD->numRepliesQuery))
-                                {
-                                    iterMD->morituri = TRUE;
-                                }
-                                else
-                                {
-                                    /* not yet all replies received OR not yet all confirmations sent */
-                                    if (iterMD->numConfirmSent < iterMD->numRepliesQuery)
-                                    {
-                                        nextstate = TRDP_ST_TX_REQ_W4AP_CONFIRM;
-                                    }
-                                    else
-                                    {
-                                        nextstate = TRDP_ST_TX_REQUEST_W4REPLY;
-                                    }
-                                }
-                            }
-                            break;
-                            case TRDP_ST_TX_NOTIFY_ARM:
-                            case TRDP_ST_TX_REPLY_ARM:
-                            {
-                                iterMD->morituri = TRUE;
-                            }
-                            break;
-                            default:
-                                ;
+                           case TRDP_ST_TX_CONFIRM_ARM:
+                           {
+                               iterMD->numConfirmSent++;
+                               if (
+                                   (iterMD->numExpReplies != 0u)
+                                   && ((iterMD->numRepliesQuery + iterMD->numReplies) >= iterMD->numExpReplies)
+                                   && (iterMD->numConfirmSent >= iterMD->numRepliesQuery))
+                               {
+                                   iterMD->morituri = TRUE;
+                               }
+                               else
+                               {
+                                   /* not yet all replies received OR not yet all confirmations sent */
+                                   if (iterMD->numConfirmSent < iterMD->numRepliesQuery)
+                                   {
+                                       nextstate = TRDP_ST_TX_REQ_W4AP_CONFIRM;
+                                   }
+                                   else
+                                   {
+                                       nextstate = TRDP_ST_TX_REQUEST_W4REPLY;
+                                   }
+                               }
+                           }
+                           break;
+                           case TRDP_ST_TX_NOTIFY_ARM:
+                           case TRDP_ST_TX_REPLY_ARM:
+                           {
+                               iterMD->morituri = TRUE;
+                           }
+                           break;
+                           default:
+                               ;
                         }
                         iterMD->stateEle = nextstate;
                     }
@@ -2515,7 +2517,7 @@ void  trdp_mdCheckListenSocks (
     if (pRfds == NULL)
     {
         /* polling mode */
-        VOS_TIME_T timeOut = {0u, 1000};     /* at least 1 ms */
+        VOS_TIMEVAL_T timeOut = {0u, 1000};     /* at least 1 ms */
         FD_ZERO((fd_set *)&rfds);
 
         /* Add the listen_sd in the file descriptor */
@@ -3033,7 +3035,7 @@ static void trdp_mdDetailSenderPacket (const TRDP_MSG_T         msgType,
     pSenderElement->pPacket->frameHead.opTrnTopoCnt     = vos_htonl(pSenderElement->addr.opTrnTopoCnt);
     pSenderElement->pPacket->frameHead.datasetLength    = vos_htonl(pSenderElement->dataSize);
     pSenderElement->pPacket->frameHead.replyStatus      = (INT32) vos_htonl((UINT32)replyStatus);
-    
+
     /* MD notifications should not send UUID (#127) */
     if (msgType == TRDP_MSG_MN)
     {
@@ -3050,13 +3052,13 @@ static void trdp_mdDetailSenderPacket (const TRDP_MSG_T         msgType,
     if ( srcURI != NULL )
     {
         memset((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, 0, TRDP_MAX_URI_USER_LEN);
-        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, srcURI, strlen((char*)srcURI));
+        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.sourceURI, srcURI, strlen((char *)srcURI));
     }
 
     if ( destURI != NULL )
     {
         memset((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI, 0, TRDP_MAX_URI_USER_LEN);
-        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI, destURI, strlen((char*)destURI));
+        memcpy((CHAR8 *) pSenderElement->pPacket->frameHead.destinationURI, destURI, strlen((char *)destURI));
     }
     if ( pData != NULL )
     {
@@ -3159,7 +3161,7 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T           msgType,
                                     pSessionId,
                                     &pSenderElement);
 
-        if ( (TRDP_NO_ERR == errv) && (NULL != pSenderElement) )
+        if ((TRDP_NO_ERR == errv) && (NULL != pSenderElement))
         {
 
             if ( NULL != pSenderElement->pPacket )
@@ -3390,7 +3392,8 @@ TRDP_ERR_T trdp_mdCall (
             /* add the infinity requirement from table A.18 */
             pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
                                                                              a century */
-            pSenderElement->interval.tv_usec    = TDRP_MD_INFINITE_USEC_TIME; /* max upper limit for micro seconds below 1 second */
+            pSenderElement->interval.tv_usec    = TDRP_MD_INFINITE_USEC_TIME; /* max upper limit for micro seconds below
+                                                                                1 second */
             timeoutWire = 0U; /* the table A.18 representation of infinity, only applicable for Mr! */
         }
         else

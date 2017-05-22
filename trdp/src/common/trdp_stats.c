@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -450,23 +451,24 @@ EXT_DECL TRDP_ERR_T tlc_getJoinStatistics (
 void    trdp_UpdateStats (
     TRDP_APP_SESSION_T appHandle)
 {
-    PD_ELE_T    *iter;
-    UINT16      lIndex, llIndex;
-    VOS_ERR_T   ret;
-    VOS_TIME_T  temp;
-    TIMEDATE32  diff;
+    PD_ELE_T        *iter;
+    UINT16          lIndex, llIndex;
+    VOS_ERR_T       ret;
+    VOS_TIMEVAL_T   temp, temp2;
+    TIMEDATE32      diff;
 
     /*  Get a new time stamp    */
-    vos_getTime(&appHandle->stats.timeStamp);
+    vos_getTime(&temp2);
 
     /*  Compute uptime */
-    temp = appHandle->stats.timeStamp;
+    temp.tv_sec     = temp2.tv_sec;
+    temp.tv_usec    = temp2.tv_usec;
     vos_subTime(&temp, &appHandle->initTime);
 
     /*  Compute statistics from old uptime and old statistics values by maintaining the offset */
-    diff = appHandle->stats.upTime - appHandle->stats.statisticTime;
+    diff = appHandle->stats.upTime - (TIMEDATE32) temp2.tv_sec;
     appHandle->stats.upTime         = (TIMEDATE32) temp.tv_sec;         /* will never be up for more than 139 years! */
-    appHandle->stats.statisticTime  = (TIMEDATE32) temp.tv_sec - diff;  /* round down */
+    appHandle->stats.statisticTime  = (TIMEDATE32)temp.tv_sec - diff;  /* round down */
 
 
     /*  Update memory statsp    */
@@ -526,8 +528,8 @@ void    trdp_pdPrepareStats (
     TRDP_APP_SESSION_T  appHandle,
     PD_ELE_T            *pPacket)
 {
-    TRDP_STATISTICS_T *pData;
-    unsigned int i;
+    TRDP_STATISTICS_T   *pData;
+    unsigned int        i;
 
     if (pPacket == NULL || appHandle == NULL)
     {
@@ -542,8 +544,8 @@ void    trdp_pdPrepareStats (
 
     /*  Fill in the values  */
     pData->version = vos_htonl(appHandle->stats.version);
-    pData->timeStamp.tv_sec     = (time_t)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_sec);
-    pData->timeStamp.tv_usec    = (suseconds_t)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_usec);
+    pData->timeStamp.tv_sec     = (UINT32)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_sec);
+    pData->timeStamp.tv_usec    = (INT32)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_usec);
     pData->upTime           = vos_htonl(appHandle->stats.upTime);
     pData->statisticTime    = vos_htonl(appHandle->stats.statisticTime);
     pData->ownIpAddr        = vos_htonl(appHandle->stats.ownIpAddr);

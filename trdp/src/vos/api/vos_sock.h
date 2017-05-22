@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
 
 #ifndef VOS_SOCK_H
@@ -70,10 +71,10 @@ extern "C" {
 #else
 
 #ifndef VOS_MAX_SOCKET_CNT
-#define VOS_MAX_SOCKET_CNT      4   /**< The maximum number of concurrent usable sockets per application session */
+#define VOS_MAX_SOCKET_CNT  4       /**< The maximum number of concurrent usable sockets per application session */
 #endif
 #ifndef VOS_MAX_MULTICAST_CNT
-#define VOS_MAX_MULTICAST_CNT   5   /**< The maximum number of multicast groups one socket can join              */
+#define VOS_MAX_MULTICAST_CNT  5    /**< The maximum number of multicast groups one socket can join              */
 #endif
 
 #endif
@@ -242,8 +243,8 @@ EXT_DECL VOS_ERR_T vos_getInterfaces(
  *  @retval         TRUE            interface is up and ready
  *                  FALSE           interface is down / not ready
  */
-EXT_DECL BOOL8 vos_netIfUp(
-    VOS_IP4_ADDR_T  ifAddress);
+EXT_DECL BOOL8 vos_netIfUp (
+    VOS_IP4_ADDR_T ifAddress);
 
 /**********************************************************************************************************************/
 /** select function.
@@ -260,11 +261,11 @@ EXT_DECL BOOL8 vos_netIfUp(
  */
 
 EXT_DECL INT32 vos_select (
-    INT32       highDesc,
-    VOS_FDS_T   *pReadableFD,
-    VOS_FDS_T   *pWriteableFD,
-    VOS_FDS_T   *pErrorFD,
-    VOS_TIME_T  *pTimeOut);
+    INT32           highDesc,
+    VOS_FDS_T       *pReadableFD,
+    VOS_FDS_T       *pWriteableFD,
+    VOS_FDS_T       *pErrorFD,
+    VOS_TIMEVAL_T   *pTimeOut);
 
 /*    Sockets    */
 
@@ -455,7 +456,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT32  *pSrcIPAddr,
     UINT16  *pSrcIPPort,
     UINT32  *pDstIPAddr,
-    BOOL8    peek);
+    BOOL8   peek);
 
 /**********************************************************************************************************************/
 /** Bind a socket to an address and port.
@@ -598,9 +599,9 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
  *
  *  @retval         Address to bind to
  */
-EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr( VOS_IP4_ADDR_T   srcIP,
-                                               VOS_IP4_ADDR_T   mcGroup,
-                                               VOS_IP4_ADDR_T   rcvMostly);
+EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr ( VOS_IP4_ADDR_T  srcIP,
+                                                VOS_IP4_ADDR_T  mcGroup,
+                                                VOS_IP4_ADDR_T  rcvMostly);
 
 #ifdef __cplusplus
 }

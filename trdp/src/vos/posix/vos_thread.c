@@ -16,8 +16,9 @@
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
- *      BL 2017-02-10: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-10: Ticket #142: Compiler warnings / MISRA-C 2012 issues
  *      BL 2017-02-08: Stacksize computation enhanced
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
@@ -74,12 +75,12 @@ static int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
     /* sem_timedwait() is not supported by DARWIN / Mac OS X!  */
     /* This is a very simple replacement - only suitable for debugging/testing!!!
        It will fail if there are more than 2 threads waiting... */
-    VOS_TIME_T now, timeOut;
+    VOS_TIMEVAL_T now, timeOut;
 
     timeOut.tv_sec  = abs_timeout->tv_sec;
     timeOut.tv_usec = (__darwin_suseconds_t) abs_timeout->tv_nsec * 1000;
 
-    for (;;)
+    for (;; )
     {
         if (sem_trywait(sem) == 0)
         {
@@ -150,10 +151,10 @@ EXT_DECL void vos_cyclicThread (
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
-    VOS_TIME_T  priorCall;
-    VOS_TIME_T  afterCall;
-    UINT32      execTime;
-    UINT32      waitingTime;
+    VOS_TIMEVAL_T   priorCall;
+    VOS_TIMEVAL_T   afterCall;
+    UINT32          execTime;
+    UINT32          waitingTime;
     for (;; )
     {
         vos_getTime(&priorCall);  /* get initial time */
@@ -166,7 +167,8 @@ EXT_DECL void vos_cyclicThread (
         if (afterCall.tv_sec <= MAXSEC_FOR_USECPRESENTATION)
         {
             /*           sec to usec conversion value normalized from 0 .. 999999*/
-            execTime = ((UINT32) ((UINT32)afterCall.tv_sec * MSECS_PER_SEC * USECS_PER_MSEC) + (UINT32)afterCall.tv_usec);
+            execTime =
+                ((UINT32) ((UINT32)afterCall.tv_sec * MSECS_PER_SEC * USECS_PER_MSEC) + (UINT32)afterCall.tv_usec);
             if (execTime > interval)
             {
                 /*severe error: cyclic task time violated*/
@@ -254,10 +256,10 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     VOS_THREAD_FUNC_T       pFunction,
     void                    *pArguments)
 {
-    pthread_t           hThread;
+    pthread_t   hThread;
     pthread_attr_t      threadAttrib;
     struct sched_param  schedParam;  /* scheduling priority */
-    int retCode;
+    int         retCode;
 
     if (!vosThreadInitialised)
     {
@@ -283,14 +285,14 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         return VOS_THREAD_ERR;
     }
 
-   /* Set the stack size */
-   if (stackSize > PTHREAD_STACK_MIN)
-   {
-      if (stackSize % (UINT32)getpagesize() > 0u)
-      {
-         stackSize = ((stackSize / (UINT32)getpagesize()) + 1u) * (UINT32)getpagesize();
-      }
-      retCode = pthread_attr_setstacksize(&threadAttrib, (size_t) stackSize);
+    /* Set the stack size */
+    if (stackSize > PTHREAD_STACK_MIN)
+    {
+        if (stackSize % (UINT32)getpagesize() > 0u)
+        {
+            stackSize = ((stackSize / (UINT32)getpagesize()) + 1u) * (UINT32)getpagesize();
+        }
+        retCode = pthread_attr_setstacksize(&threadAttrib, (size_t) stackSize);
     }
     else
     {
@@ -500,7 +502,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
  */
 
 EXT_DECL void vos_getTime (
-    VOS_TIME_T *pTime)
+    VOS_TIMEVAL_T *pTime)
 {
     struct timeval myTime;
 
@@ -524,7 +526,7 @@ EXT_DECL void vos_getTime (
 
         (void)clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
-        myTime.tv_sec   = currentTime.tv_sec;         \
+        myTime.tv_sec   = currentTime.tv_sec;               \
         myTime.tv_usec  = (int) currentTime.tv_nsec / 1000; \
 
 #endif
@@ -554,13 +556,13 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
     if (curTimeTM != NULL)
     {
         (void)sprintf(pTimeString, "%04d%02d%02d-%02d:%02d:%02d.%03ld ",
-                curTimeTM->tm_year + 1900,
-                curTimeTM->tm_mon + 1,
-                curTimeTM->tm_mday,
-                curTimeTM->tm_hour,
-                curTimeTM->tm_min,
-                curTimeTM->tm_sec,
-                (long) curTime.tv_usec / 1000L);
+                      curTimeTM->tm_year + 1900,
+                      curTimeTM->tm_mon + 1,
+                      curTimeTM->tm_mday,
+                      curTimeTM->tm_hour,
+                      curTimeTM->tm_min,
+                      curTimeTM->tm_sec,
+                      (long) curTime.tv_usec / 1000L);
     }
     return pTimeString;
 }
@@ -574,7 +576,7 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
  */
 
 EXT_DECL void vos_clearTime (
-    VOS_TIME_T *pTime)
+    VOS_TIMEVAL_T *pTime)
 {
     if (pTime == NULL)
     {
@@ -595,8 +597,8 @@ EXT_DECL void vos_clearTime (
  */
 
 EXT_DECL void vos_addTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pAdd)
+    VOS_TIMEVAL_T       *pTime,
+    const VOS_TIMEVAL_T *pAdd)
 {
     if ((pTime == NULL) || (pAdd == NULL))
     {
@@ -604,7 +606,7 @@ EXT_DECL void vos_addTime (
     }
     else
     {
-        VOS_TIME_T ltime;
+        VOS_TIMEVAL_T ltime;
 
         timeradd(pTime, pAdd, &ltime);
         *pTime = ltime;
@@ -620,8 +622,8 @@ EXT_DECL void vos_addTime (
  */
 
 EXT_DECL void vos_subTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pSub)
+    VOS_TIMEVAL_T       *pTime,
+    const VOS_TIMEVAL_T *pSub)
 {
     if ((pTime == NULL) || (pSub == NULL))
     {
@@ -629,7 +631,7 @@ EXT_DECL void vos_subTime (
     }
     else
     {
-        VOS_TIME_T ltime;
+        VOS_TIMEVAL_T ltime;
 
         timersub(pTime, pSub, &ltime);
         *pTime = ltime;
@@ -645,8 +647,8 @@ EXT_DECL void vos_subTime (
  */
 
 EXT_DECL void vos_divTime (
-    VOS_TIME_T  *pTime,
-    UINT32      divisor)
+    VOS_TIMEVAL_T   *pTime,
+    UINT32          divisor)
 {
     if ((pTime == NULL) || (divisor == 0u))
     {
@@ -675,8 +677,8 @@ EXT_DECL void vos_divTime (
  */
 
 EXT_DECL void vos_mulTime (
-    VOS_TIME_T  *pTime,
-    UINT32      mul)
+    VOS_TIMEVAL_T   *pTime,
+    UINT32          mul)
 {
     if (pTime == NULL)
     {
@@ -706,8 +708,8 @@ EXT_DECL void vos_mulTime (
  */
 
 EXT_DECL INT32 vos_cmpTime (
-    const VOS_TIME_T    *pTime,
-    const VOS_TIME_T    *pCmp)
+    const VOS_TIMEVAL_T *pTime,
+    const VOS_TIMEVAL_T *pCmp)
 {
     if ((pTime == NULL) || (pCmp == NULL))
     {
@@ -739,7 +741,7 @@ EXT_DECL void vos_getUuid (
 #else
     /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1u;
-    VOS_TIME_T      current;
+    VOS_TIMEVAL_T   current;
     VOS_ERR_T       ret;
 
     vos_getTime(&current);
@@ -1176,9 +1178,9 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     VOS_SEMA_T  sema,
     UINT32      timeout)
 {
-    int             rc              = 0;
-    VOS_ERR_T       retVal          = VOS_SEMA_ERR;
-    struct timespec waitTimeSpec    = {0u, 0};
+    int rc = 0;
+    VOS_ERR_T       retVal = VOS_SEMA_ERR;
+    struct timespec waitTimeSpec = {0u, 0};
 
     /* Check parameter */
     if (sema == NULL)
@@ -1200,7 +1202,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     {
         /* Get time and convert it to timespec format */
 #ifdef __APPLE__
-        VOS_TIME_T waitTimeVos = {0u, 0};
+        VOS_TIMEVAL_T waitTimeVos = {0u, 0};
         vos_getTime(&waitTimeVos);
         waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
         waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * (suseconds_t) NSECS_PER_USEC;

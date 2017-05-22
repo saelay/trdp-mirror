@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-02-08: Ticket #134 Example trdp-xmlpd-test crash due to zero elemSize
  *      BL 2015-12-14: Ticket #97  trdp-xmlpd-test.c subscribed telegram issue.
  *
@@ -930,7 +931,7 @@ void processData()
 {
     TRDP_ERR_T result;
     UINT32 i;
-    VOS_TIME_T now, delay, nextData, nextCycle, dataPeriod, cyclePeriod;
+    VOS_TIMEVAL_T now, delay, nextData, nextCycle, dataPeriod, cyclePeriod;
     BOOL8 bDataPeriod = FALSE;
     UINT32 dataSize;
 

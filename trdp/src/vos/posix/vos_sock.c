@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2015-11-20: Compiler warnings fixed (lines 392 + 393)
@@ -86,8 +87,9 @@ struct ifreq    gIfr;
  * LOCAL FUNCTIONS
  */
 
-BOOL8 vos_getMacAddress (UINT8 *pMacAddr, const char  *pIfName);
-VOS_ERR_T vos_sockSetBuffer (INT32 sock);
+BOOL8       vos_getMacAddress (UINT8        *pMacAddr,
+                               const char   *pIfName);
+VOS_ERR_T   vos_sockSetBuffer (INT32 sock);
 
 /**********************************************************************************************************************/
 /** Get the MAC address for a named interface.
@@ -350,11 +352,11 @@ EXT_DECL BOOL8 vos_isMulticast (
  */
 
 EXT_DECL INT32 vos_select (
-    INT32       highDesc,
-    VOS_FDS_T   *pReadableFD,
-    VOS_FDS_T   *pWriteableFD,
-    VOS_FDS_T   *pErrorFD,
-    VOS_TIME_T  *pTimeOut)
+    INT32           highDesc,
+    VOS_FDS_T       *pReadableFD,
+    VOS_FDS_T       *pWriteableFD,
+    VOS_FDS_T       *pErrorFD,
+    VOS_TIMEVAL_T   *pTimeOut)
 {
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);
@@ -1303,28 +1305,28 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
         {
             switch (errno)
             {
-                /*Accept return -1 and errno = EWOULDBLOCK,
-                when there is no more connection requests.*/
-                case EWOULDBLOCK:
-                {
-                    *pSock = connFd;
-                    return VOS_NO_ERR;
-                }
-                case EINTR:         break;
-                case ECONNABORTED:  break;
+               /*Accept return -1 and errno = EWOULDBLOCK,
+               when there is no more connection requests.*/
+               case EWOULDBLOCK:
+               {
+                   *pSock = connFd;
+                   return VOS_NO_ERR;
+               }
+               case EINTR:         break;
+               case ECONNABORTED:  break;
 #if defined (EPROTO)
-                case EPROTO:        break;
+               case EPROTO:        break;
 #endif
-                default:
-                {
-                    char buff[VOS_MAX_ERR_STR_SIZE];
-                    STRING_ERR(buff);
-                    vos_printLog(VOS_LOG_ERROR,
-                                 "accept() listenFd(%d) failed (Err: %s)\n",
-                                 *pSock,
-                                 buff);
-                    return VOS_UNKNOWN_ERR;
-                }
+               default:
+               {
+                   char buff[VOS_MAX_ERR_STR_SIZE];
+                   STRING_ERR(buff);
+                   vos_printLog(VOS_LOG_ERROR,
+                                "accept() listenFd(%d) failed (Err: %s)\n",
+                                *pSock,
+                                buff);
+                   return VOS_UNKNOWN_ERR;
+               }
             }
         }
         else
