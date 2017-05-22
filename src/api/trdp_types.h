@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *     AHW 2017-05-22: Ticket #159 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
@@ -177,12 +178,14 @@ typedef enum
 
 /** Various flags for PD and MD packets    */
 
-#define TRDP_FLAGS_DEFAULT  0u          /**< Default value defined in tlc_openDession will be taken     */
-#define TRDP_FLAGS_NONE     0x01u       /**< No flags set                                               */
-#define TRDP_FLAGS_MARSHALL 0x02u       /**< Optional marshalling/unmarshalling in TRDP stack           */
-#define TRDP_FLAGS_CALLBACK 0x04u       /**< Use of callback function                                   */
-#define TRDP_FLAGS_TCP      0x08u       /**< Use TCP for message data                                   */
-#define TRDP_FLAGS_FORCE_CB 0x10u       /**< Force a callback for every received packet                 */
+#define TRDP_FLAGS_DEFAULT    0u          /**< Default value defined in tlc_openDession will be taken     */
+#define TRDP_FLAGS_NONE       0x01u       /**< No flags set                                               */
+#define TRDP_FLAGS_MARSHALL   0x02u       /**< Optional marshalling/unmarshalling in TRDP stack           */
+#define TRDP_FLAGS_CALLBACK   0x04u       /**< Use of callback function                                   */
+#define TRDP_FLAGS_TCP        0x08u       /**< Use TCP for message data                                   */
+#define TRDP_FLAGS_FORCE_CB   0x10u       /**< Force a callback for every received packet                 */
+
+#define TRDP_INFINITE_TIMEOUT 0xffffffffu /**< Infinite reply timeout									  */
 
 typedef UINT8   TRDP_FLAGS_T;
 
