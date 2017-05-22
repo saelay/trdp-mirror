@@ -91,9 +91,9 @@
 #define TRDP_SESS_ID_SIZE                   16u                         /**< Session ID (UUID) size in MD header    */
 #define TRDP_DEST_URI_SIZE                  32u                         /**< max. Dest URI size in MD header        */
 
-
-/**  Definitions for time out behaviour accd. table A.17 */
-#define TDRP_MD_INFINITE_TIME               (-1)
+/**  Definitions for time out behaviour accd. table A.18 */
+#define TDRP_MD_INFINITE_TIME               (0)
+#define TDRP_MD_INFINITE_USEC_TIME          (0)
 #define TDRP_MD_MAX_USEC_TIME               (999999)
 
 /**  Default MD communication parameters   */
