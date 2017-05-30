@@ -16,9 +16,9 @@
  *
  * $Id$
  *
+ *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
  *      BL 2015-11-24: Accessor for IP address of session
  *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
- *
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  */
 
@@ -815,33 +815,6 @@ TRDP_ERR_T tlm_replyQuery (
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize );
-
-
-/**********************************************************************************************************************/
-/** Send a MD reply message.
- *  Send a MD error reply message after receiving an request
- *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
- *
- *  @param[in]      appHandle           the handle returned by tlc_openSession
- *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      comId               ComId for reply
- *  @param[in]      replyStatus         Info for requester about stack errors
- *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
- *
- *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR        out of memory
- *  @retval         TRDP_NO_SESSION_ERR no such session
- *  @retval         TRDP_NOINIT_ERR     handle invalid
- */
-TRDP_ERR_T tlm_replyErr (
-    TRDP_APP_SESSION_T      appHandle,
-    const TRDP_UUID_T       *pSessionId,
-    UINT32                  comId,
-    TRDP_REPLY_STATUS_T     replyStatus,
-    const TRDP_SEND_PARAM_T *pSendParam);
-
-#endif /* MD_SUPPORT    */
 
 
 /*******************************************************************************
