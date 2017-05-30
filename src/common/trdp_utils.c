@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-05-08: Ticket #126 Opened UDP socket is not released if join or bind failed in trdp_requestSocket()
  *      BL 2017-05-08: Compiler warnings, static definitions
  *      BL 2017-03-01: Ticket #136 PD topography counter with faulty behavior
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -732,7 +733,7 @@ TRDP_ERR_T  trdp_requestSocket (
         if (useSocket != VOS_INVALID_SOCKET)
         {
             iface[lIndex].sock  = useSocket;
-            iface[lIndex].usage = 0;         /* Mark as used */
+            iface[lIndex].usage = 1;         /* Mark as used */
             *pIndex = lIndex;
             return err;
         }
@@ -829,7 +830,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
                 else
                 {
-                    iface[lIndex].usage = 0;
+                    iface[lIndex].usage = 1;
                     *pIndex = lIndex;
                 }
 
@@ -842,6 +843,12 @@ TRDP_ERR_T  trdp_requestSocket (
                 *pIndex = TRDP_INVALID_SOCKET_INDEX;
                 err     = TRDP_SOCK_ERR;
                 break;
+        }
+
+        if (err != TRDP_NO_ERR)
+        {
+            /* Release socket in case of error */
+            trdp_releaseSocket(iface, lIndex, 0, FALSE);
         }
     }
     else
