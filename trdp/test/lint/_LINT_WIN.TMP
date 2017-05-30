@@ -12,28 +12,8 @@
 --- Module:   ..\..\src\common\trdp_if.c (C)
 
 --- Module:   ..\..\src\common\trdp_mdcom.c (C)
-                                                     _
-        if ((pMDSession->interval.tv_sec == (time_t) TDRP_MD_INFINITE_TIME) && (pMDSession->interval.tv_usec == TDRP_MD_MAX_USEC_TIME))
-..\..\src\common\trdp_mdcom.c(777) : Warning 650: Constant '-1' out of range
-    for operator '=='
-                                          _
-            iterMD->interval.tv_sec     = TDRP_MD_INFINITE_TIME;
-..\..\src\common\trdp_mdcom.c(1676) : Warning 569: Loss of information
-    (assignment) (64 bits to 32 bits)
-                                          _
-            iterMD->timeToGo.tv_sec     = TDRP_MD_INFINITE_TIME;
-..\..\src\common\trdp_mdcom.c(1679) : Warning 569: Loss of information
-    (assignment) (64 bits to 32 bits)
-                                                  _
-            pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
-..\..\src\common\trdp_mdcom.c(3390) : Warning 569: Loss of information
-    (assignment) (64 bits to 32 bits)
 
 --- Module:   ..\..\src\common\trdp_pdcom.c (C)
-                   _
-                   default:
-..\..\src\common\trdp_pdcom.c(856) : Warning 616: control flows into
-    case/default [MISRA Rule 61]
 
 --- Module:   ..\..\src\common\trdp_utils.c (C)
 
@@ -112,19 +92,19 @@ During Specific Walk:
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 1145: vos_sockReceiveTCP(?, [0]?,
+  File ..\..\src\common\trdp_mdcom.c line 1148: vos_sockReceiveTCP(?, [0]?,
     [1])
-..\..\src\vos\windows\vos_sock.c(1570) : Warning 662: Possible creation of
+..\..\src\vos\windows\vos_sock.c(1571) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1567, 1570; file
-    ..\..\src\common\trdp_mdcom.c: lines 1121, 1144]
-..\..\src\vos\windows\vos_sock.c(1567) : Info 831: Reference cited in prior
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1568, 1571; file
+    ..\..\src\common\trdp_mdcom.c: lines 1124, 1147]
+..\..\src\vos\windows\vos_sock.c(1568) : Info 831: Reference cited in prior
     message
-..\..\src\vos\windows\vos_sock.c(1570) : Info 831: Reference cited in prior
+..\..\src\vos\windows\vos_sock.c(1571) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1121) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1124) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1144) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1147) : Info 831: Reference cited in prior
     message
 
 --- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)

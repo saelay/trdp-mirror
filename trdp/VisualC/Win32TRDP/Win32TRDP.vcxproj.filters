@@ -46,6 +46,7 @@
     <ClCompile Include="..\..\src\common\trdp_mdcom.c">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\trdp_xml.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resources\pthread\pthread.h">
@@ -123,12 +124,9 @@
     <ClInclude Include="..\..\src\api\tau_ctrl_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\api\trdp_proto.h">
+    <ClInclude Include="..\..\src\api\iec61375-2-3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Win32TRDP.rc" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
