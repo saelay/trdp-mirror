@@ -88,7 +88,7 @@ pthread_t       threadHandle[VOS_MAX_THREAD_CNT];
 /* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
 /* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */
 /* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */
-#define MAXSEC_FOR_USECPRESENTATION  4293U
+#define MAXSEC_FOR_USECPRESENTATION  4293
 
 void vos_cyclicThread (
     UINT32              interval,
@@ -620,7 +620,7 @@ EXT_DECL void vos_divTime (
     VOS_TIMEVAL_T   *pTime,
     UINT32          divisor)
 {
-    if (pTime == NULL || divisor == 0)
+    if ((pTime == NULL) || (divisor == 0)) /*lint !e573 mix of signed and unsigned */
     {
         vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
@@ -628,13 +628,13 @@ EXT_DECL void vos_divTime (
     {
         UINT32 temp;
 
-        temp = pTime->tv_sec % divisor;
-        pTime->tv_sec /= divisor;
+        temp = pTime->tv_sec % divisor;  /*lint !e573 mix of signed and unsigned */
+        pTime->tv_sec /= divisor;        /*lint !e573 mix of signed and unsigned */
         if (temp > 0)
         {
             pTime->tv_usec += temp * 1000000;
         }
-        pTime->tv_usec /= divisor;  /*lint !e573 mix of signed and unsigned */
+        pTime->tv_usec /= divisor;      /*lint !e573 mix of signed and unsigned */
     }
 }
 

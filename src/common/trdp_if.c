@@ -2557,12 +2557,13 @@ TRDP_ERR_T tlm_request (
     {
         return TRDP_PARAM_ERR;
     }
+
     if ( replyTimeout == 0U )
     {
         mdTimeOut = appHandle->mdDefault.confirmTimeout;
-	}
-	else if ( replyTimeout == TRDP_INFINITE_TIMEOUT)
-	{
+    }
+    else if ( replyTimeout == TRDP_INFINITE_TIMEOUT)
+    {
         mdTimeOut = 0;
     }
     else
