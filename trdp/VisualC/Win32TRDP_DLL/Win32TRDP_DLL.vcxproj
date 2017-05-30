@@ -100,13 +100,13 @@
     <ClCompile Include="..\..\src\vos\windows\vos_thread.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\api\iec61375-2-3.h" />
     <ClInclude Include="..\..\src\api\tau_ctrl.h" />
     <ClInclude Include="..\..\src\api\tau_dnr.h" />
     <ClInclude Include="..\..\src\api\tau_marshall.h" />
     <ClInclude Include="..\..\src\api\tau_tti.h" />
     <ClInclude Include="..\..\src\api\tau_xml.h" />
     <ClInclude Include="..\..\src\api\trdp_if_light.h" />
-    <ClInclude Include="..\..\src\api\trdp_proto.h" />
     <ClInclude Include="..\..\src\api\trdp_types.h" />
     <ClInclude Include="..\..\src\common\trdp_if.h" />
     <ClInclude Include="..\..\src\common\trdp_mdcom.h" />

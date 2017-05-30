@@ -114,12 +114,12 @@
     <ClInclude Include="..\..\resources\pthread\pthread.h" />
     <ClInclude Include="..\..\resources\pthread\sched.h" />
     <ClInclude Include="..\..\resources\pthread\semaphore.h" />
+    <ClInclude Include="..\..\src\api\iec61375-2-3.h" />
     <ClInclude Include="..\..\src\api\tau_ctrl.h" />
     <ClInclude Include="..\..\src\api\tau_ctrl_types.h" />
     <ClInclude Include="..\..\src\api\tau_dnr.h" />
     <ClInclude Include="..\..\src\api\tau_tti.h" />
     <ClInclude Include="..\..\src\api\tau_tti_types.h" />
-    <ClInclude Include="..\..\src\api\trdp_proto.h" />
     <ClInclude Include="..\..\src\common\trdp_if.h" />
     <ClInclude Include="..\..\src\common\trdp_mdcom.h" />
     <ClInclude Include="..\..\src\common\trdp_pdcom.h" />
