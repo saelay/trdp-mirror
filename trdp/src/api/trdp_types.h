@@ -302,9 +302,9 @@ typedef enum
     TRDP_REAL32     = 12u,  /**< Floating point real, 32 bit       */
     TRDP_REAL64     = 13u,  /**< Floating point real, 64 bit       */
     TRDP_TIMEDATE32 = 14u,  /**< 32 bit UNIX time  */
-    TRDP_TIMEDATE48 = 15u,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks)  */
-    TRDP_TIMEDATE64 = 16u,  /**< 32 bit UNIX time + 32 bit microseconds (== struct timeval) */
-    TRDP_TYPE_MAX   = 30u   /**< Values greater are considered nested datasets */
+    TRDP_TIMEDATE48 = 15u,  /**< 48 bit TCN time (32 bit UNIX time and 16 bit ticks) */
+    TRDP_TIMEDATE64 = 16u,  /**< 32 bit UNIX time + 32 bit microseconds              */
+    TRDP_TYPE_MAX   = 30u   /**< Values greater are considered nested datasets       */
 } TRDP_DATA_TYPE_T;
 
 #define TRDP_BOOL8          TRDP_BITSET8 /**< 1 bit relevant
