@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *
  */
@@ -90,8 +91,8 @@ void vos_cyclicThread (
     VOS_THREAD_FUNC_T   pFunction,
     void                *pArguments)
 {
-    VOS_TIME_T priorCall;
-    VOS_TIME_T afterCall;
+    VOS_TIMEVAL_T priorCall;
+    VOS_TIMEVAL_T afterCall;
     UINT32 execTime;
     UINT32 waitingTime;
     for (;; )
@@ -330,7 +331,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
  */
 
 EXT_DECL void vos_getTime (
-    VOS_TIME_T *pTime)
+    VOS_TIMEVAL_T *pTime)
 {
     struct timespec myTime = {(time_t)NULL,(long)NULL};
     
@@ -389,7 +390,7 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
  */
 
 EXT_DECL void vos_clearTime (
-    VOS_TIME_T *pTime)
+    VOS_TIMEVAL_T *pTime)
 {
     if (pTime == NULL)
     {
@@ -410,8 +411,8 @@ EXT_DECL void vos_clearTime (
  */
 
 EXT_DECL void vos_addTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pAdd)
+    VOS_TIMEVAL_T          *pTime,
+    const VOS_TIMEVAL_T    *pAdd)
 {
     if ( (pTime == NULL) || (pAdd == NULL) )
     {
@@ -419,7 +420,7 @@ EXT_DECL void vos_addTime (
     }
     else
     {
-        VOS_TIME_T ltime;
+        VOS_TIMEVAL_T ltime;
 
         timeradd(pTime, pAdd, &ltime);
         *pTime = ltime;
@@ -435,8 +436,8 @@ EXT_DECL void vos_addTime (
  */
 
 EXT_DECL void vos_subTime (
-    VOS_TIME_T          *pTime,
-    const VOS_TIME_T    *pSub)
+    VOS_TIMEVAL_T          *pTime,
+    const VOS_TIMEVAL_T    *pSub)
 {
     if ( (pTime == NULL) || (pSub == NULL) )
     {
@@ -444,7 +445,7 @@ EXT_DECL void vos_subTime (
     }
     else
     {
-        VOS_TIME_T ltime;
+        VOS_TIMEVAL_T ltime;
 
         timersub(pTime, pSub, &ltime);
         *pTime = ltime;
@@ -460,7 +461,7 @@ EXT_DECL void vos_subTime (
  */
 
 EXT_DECL void vos_divTime (
-    VOS_TIME_T  *pTime,
+    VOS_TIMEVAL_T  *pTime,
     UINT32      divisor)
 {
     if ( (pTime == NULL) || (divisor == 0) )
@@ -490,7 +491,7 @@ EXT_DECL void vos_divTime (
  */
 
 EXT_DECL void vos_mulTime (
-    VOS_TIME_T  *pTime,
+    VOS_TIMEVAL_T  *pTime,
     UINT32      mul)
 {
     if (pTime == NULL)
@@ -521,8 +522,8 @@ EXT_DECL void vos_mulTime (
  */
 
 EXT_DECL INT32 vos_cmpTime (
-    const VOS_TIME_T    *pTime,
-    const VOS_TIME_T    *pCmp)
+    const VOS_TIMEVAL_T    *pTime,
+    const VOS_TIMEVAL_T    *pCmp)
 {
     if (pTime == NULL || pCmp == NULL)
     {
@@ -551,7 +552,7 @@ EXT_DECL void vos_getUuid (
 {
     /*  Manually creating a UUID from time stamp and MAC address  */
     static UINT16   count = 1;
-    VOS_TIME_T      current;
+    VOS_TIMEVAL_T      current;
     VOS_ERR_T       ret;
 
     vos_getTime(&current);

@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
 
 #ifndef VXWORKS
@@ -277,7 +278,7 @@ EXT_DECL INT32 vos_select (
     VOS_FDS_T   *pReadableFD,
     VOS_FDS_T   *pWriteableFD,
     VOS_FDS_T   *pErrorFD,
-    VOS_TIME_T  *pTimeOut)
+    VOS_TIMEVAL_T  *pTimeOut)
 {
     return select(highDesc, (fd_set *) pReadableFD, (fd_set *) pWriteableFD,
                   (fd_set *) pErrorFD, (struct timeval *) pTimeOut);
