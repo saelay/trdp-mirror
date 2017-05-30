@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, local prototypes added
  *      BL 2017-03-02: Ticket #151 tlp_request: timeout-flag is not cleared
@@ -3044,50 +3045,6 @@ TRDP_ERR_T tlm_replyQuery (
                         pSendParam,
                         pData,
                         dataSize);
-}
-
-
-/**********************************************************************************************************************/
-/** Send a MD reply error message.
- *  Send a MD error reply error message after receiving an request
- *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
- *
- *  @param[in]      appHandle           the handle returned by tlc_init
- *  @param[in]      pSessionId          Session ID returned by indication
- *  @param[in]      replyStatus         Info for requester about stack errors
- *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
- *
- *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_PARAM_ERR      parameter error
- *  @retval         TRDP_MEM_ERR        out of memory
- *  @retval         TRDP_NO_SESSION_ERR no such session
- *  @retval         TRDP_NOINIT_ERR     handle invalid
- */
-TRDP_ERR_T tlm_replyErr (
-    TRDP_APP_SESSION_T      appHandle,
-    const TRDP_UUID_T       *pSessionId,
-    UINT32                  comId,
-    TRDP_REPLY_STATUS_T     replyStatus,
-    const TRDP_SEND_PARAM_T *pSendParam)
-{
-    if (!trdp_isValidSession(appHandle))
-    {
-        return TRDP_NOINIT_ERR;
-    }
-    if (pSessionId == NULL)
-    {
-        return TRDP_PARAM_ERR;
-    }
-
-    return trdp_mdReply(TRDP_MSG_MP,
-                        appHandle,
-                        (UINT8 *)pSessionId,
-                        comId,
-                        0u,
-                        replyStatus,
-                        pSendParam,
-                        NULL,
-                        0u);
 }
 
 
