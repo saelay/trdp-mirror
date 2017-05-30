@@ -816,6 +816,8 @@ TRDP_ERR_T tlm_replyQuery (
     const UINT8             *pData,
     UINT32                  dataSize );
 
+#endif /* MD_SUPPORT    */
+
 
 /*******************************************************************************
 
