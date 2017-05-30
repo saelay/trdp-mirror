@@ -67,8 +67,8 @@ MEM_ERR_T L3_test_mem_queue()
     VOS_ERR_T res = VOS_NO_ERR;
     UINT8 *pData;
     UINT32 size;
-    VOS_TIME_T timeout = {0,20000};
-    VOS_TIME_T startTime, endTime;
+    VOS_TIMEVAL_T timeout = {0,20000};
+    VOS_TIMEVAL_T startTime, endTime;
 
     printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] start...\n");
     res = vos_queueCreate(VOS_QUEUE_POLICY_FIFO,3,&qHandle);
@@ -445,7 +445,7 @@ THREAD_ERR_T L3_test_thread_init()
     TEST_ARGS_THREAD arg1;
     TEST_ARGS_THREAD arg2;
     VOS_SEMA_T sema;
-    VOS_TIME_T startTime, endTime;
+    VOS_TIMEVAL_T startTime, endTime;
     BOOL8 both_finished = FALSE;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_INIT] start...\n");
@@ -826,7 +826,7 @@ THREAD_ERR_T L3_test_thread_init()
 
 THREAD_ERR_T L3_test_thread_getTime()
 {
-    VOS_TIME_T sysTime;
+    VOS_TIMEVAL_T sysTime;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_GETTIME] start...\n");
     vos_getTime(&sysTime);
@@ -848,8 +848,8 @@ THREAD_ERR_T L3_test_thread_getTimeStamp()
 
 THREAD_ERR_T L3_test_thread_addTime()
 {
-    VOS_TIME_T time = { 1 /*sec */, 0 /* usec */ };
-    VOS_TIME_T add =  { 0 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time = { 1 /*sec */, 0 /* usec */ };
+    VOS_TIMEVAL_T add =  { 0 /*sec */, 2 /* usec */ };
     THREAD_ERR_T retVal = THREAD_NO_ERR;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_ADDTIME] start...\n");
@@ -888,8 +888,8 @@ THREAD_ERR_T L3_test_thread_addTime()
 
 THREAD_ERR_T L3_test_thread_subTime()
 {
-    VOS_TIME_T time = { 1 /*sec */, 4 /* usec */ };
-    VOS_TIME_T subs =  { 0 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time = { 1 /*sec */, 4 /* usec */ };
+    VOS_TIMEVAL_T subs =  { 0 /*sec */, 2 /* usec */ };
     THREAD_ERR_T retVal = THREAD_NO_ERR;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_SUBTIME] start...\n");
@@ -929,7 +929,7 @@ THREAD_ERR_T L3_test_thread_subTime()
 
 THREAD_ERR_T L3_test_thread_mulTime()
 {
-    VOS_TIME_T time = { 2 /*sec */, 4 /* usec */ };
+    VOS_TIMEVAL_T time = { 2 /*sec */, 4 /* usec */ };
     UINT32 mul =  0;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
 
@@ -978,7 +978,7 @@ THREAD_ERR_T L3_test_thread_mulTime()
 
 THREAD_ERR_T L3_test_thread_divTime()
 {
-    VOS_TIME_T time = { 5 /*sec */, 4 /* usec */ };
+    VOS_TIMEVAL_T time = { 5 /*sec */, 4 /* usec */ };
     UINT32 div = 1;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
 
@@ -1019,8 +1019,8 @@ THREAD_ERR_T L3_test_thread_divTime()
 
 THREAD_ERR_T L3_test_thread_cmpTime()
 {
-    VOS_TIME_T time1 = { 1 /*sec */, 2 /* usec */ };
-    VOS_TIME_T time2 = { 1 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time1 = { 1 /*sec */, 2 /* usec */ };
+    VOS_TIMEVAL_T time2 = { 1 /*sec */, 2 /* usec */ };
     THREAD_ERR_T retVal = THREAD_NO_ERR;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_CMPTIME] start...\n");
@@ -1128,7 +1128,7 @@ THREAD_ERR_T L3_test_thread_cmpTime()
 
 THREAD_ERR_T L3_test_thread_clearTime()
 {
-    VOS_TIME_T timeVar;
+    VOS_TIMEVAL_T timeVar;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
     timeVar.tv_sec = 123;
     timeVar.tv_usec = 456;
@@ -1232,10 +1232,10 @@ THREAD_ERR_T L3_test_thread_sema()
 {
     /* create take give delete */
     VOS_SEMA_T sema;
-    VOS_TIME_T startTime, endTime;
+    VOS_TIMEVAL_T startTime, endTime;
     VOS_ERR_T res = VOS_NO_ERR;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
-    VOS_TIME_T timeout = {0,20000};
+    VOS_TIMEVAL_T timeout = {0,20000};
     INT32 ret = 0;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_SEMA] start...\n");
