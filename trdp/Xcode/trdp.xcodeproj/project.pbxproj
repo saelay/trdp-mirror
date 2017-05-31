@@ -693,6 +693,7 @@
 		08A53DB21E5DAA4700CCCBC8 /* test_pdxml */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_pdxml; sourceTree = BUILT_PRODUCTS_DIR; };
 		08CE2171164A6E130038151B /* trdp_reserved.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trdp_reserved.h; path = marshalling/trdp_reserved.h; sourceTree = "<group>"; };
 		08CE2172164A6E130038151B /* trdp_reserved.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trdp_reserved.c; path = marshalling/trdp_reserved.c; sourceTree = "<group>"; };
+		08D9D5D51EDDA32C00EE2FA0 /* TAUL_PD */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TAUL_PD; sourceTree = "<group>"; };
 		7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = tau_cstinfo.c; sourceTree = "<group>"; tabWidth = 4; };
 		730B42A81C650ECB00A92265 /* trdp_xml.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = trdp_xml.c; sourceTree = "<group>"; tabWidth = 4; };
 		730B42A91C650ECB00A92265 /* trdp_xml.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = trdp_xml.h; sourceTree = "<group>"; tabWidth = 4; };
@@ -1373,6 +1374,7 @@
 		73821F3B150777B00046E0AC /* example */ = {
 			isa = PBXGroup;
 			children = (
+				08D9D5D51EDDA32C00EE2FA0 /* TAUL_PD */,
 				08014D1D16483FC50065AADD /* SenderDemo */,
 				738220021508E3710046E0AC /* echoPolling.c */,
 				73821F3C150777B00046E0AC /* echoSelect.c */,
