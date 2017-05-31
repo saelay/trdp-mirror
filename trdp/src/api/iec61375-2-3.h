@@ -22,7 +22,7 @@
  *
  *      BL 2017-03-13: Ticket #154 ComIds and DSIds literals (#define TRDP_...) in trdp_proto.h too long
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
- *      BL 2017-02-08: Ticket #142: Compiler warnings /​ MISRA-C 2012 issues
+ *      BL 2017-02-08: Ticket #142: Compiler warnings / MISRA-C 2012 issues
  *      BL 2016-11-09: Default PD/MD parameter defines moved from trdp_private.h
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
@@ -37,7 +37,7 @@
 
 /*
  TCN-URI (host part)               Scope       IP address      Description
- ￼
+ 
  grpAll.aVeh.lCst.lClTrn.lTrn      D           239.192.0.0     broadcast to all end devices
  within the local consist.
                                                 NOTE 1: 239.255/16 is defined as CN multicast range in IEC61375-2- 5)
