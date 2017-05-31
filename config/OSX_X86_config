@@ -15,7 +15,7 @@ TARGET_VOS = posix
 TARGET_OS = POSIX
 TCPREFIX = 
 TCPOSTFIX = 
-DOXYPATH = /Applications/Doxygen/Doxygen.app/Contents/Resources/
+DOXYPATH = /Applications/Doxygen.app/Contents/Resources/
 
 CFLAGS += -Wall -m32 -fno-builtin -fsigned-char -pthread -fPIC -D__USE_BSD -D_DARWIN_C_SOURCE -DPOSIX -DL_ENDIAN
-INCPATH += -I /usr/include/libxml2 -I /usr/include/uuid
+INCPATH += -I /usr/include/uuid
