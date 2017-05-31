@@ -248,16 +248,16 @@ EXT_DECL INT32 vos_strnicmp (
 /**********************************************************************************************************************/
 /** String copy with length limitation.
  *
- *  @param[in]      pStr1       Destination string
- *  @param[in]      pStr2       Null terminated string to copy
+ *  @param[in]      pStrDst     Destination string
+ *  @param[in]      pStrSrc     Null terminated string to copy
  *  @param[in]      count       Maximum number of characters to copy
  *
  *  @retval         none
  */
 
 EXT_DECL void vos_strncpy (
-    CHAR8       *pStr1,
-    const CHAR8 *pStr2,
+    CHAR8       *pStrDst,
+    const CHAR8 *pStrSrc,
     UINT32      count );
 
 /**********************************************************************************************************************/
