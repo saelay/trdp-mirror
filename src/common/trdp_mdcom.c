@@ -1035,7 +1035,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
     pElement->dataSize = 0u;
 
     /* Fill destination address */
-    pElement->addr.detIpAddr = appHandle->realIP;
+    pElement->addr.destIpAddr = appHandle->realIP;
 
     /* Find the socket index */
     for ( socketIndex = 0u; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++ )
