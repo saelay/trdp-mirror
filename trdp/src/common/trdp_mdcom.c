@@ -1034,6 +1034,9 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
      * Once it is known, the message complete data size will be saved*/
     pElement->dataSize = 0u;
 
+    /* Fill destination address */
+    pElement->addr.detIpAddr = appHandle->realIP;
+
     /* Find the socket index */
     for ( socketIndex = 0u; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++ )
     {
