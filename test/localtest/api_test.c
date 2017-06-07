@@ -283,7 +283,7 @@ void usage (const char *appName)
            "-o <own IP address> (default 10.0.1.100)\n"
            "-i <second IP address> (default 10.0.1.101)\n"
            "-t <destination MC> (default 239.0.1.1)\n"
-           "-m number of test to run (1...n, 0 = run all tests)\n"
+           "-m number of test to run (1...n, default 0 = run all tests)\n"
            "-v print version and quit\n"
            "-h this list\n"
            );
@@ -753,10 +753,15 @@ void  test5CBFunction (
     TRDP_ERR_T      err;
     TRDP_URI_USER_T srcURI =  "12345678901234567890123456789012";   // 32 chars
     
-    if ((pMsg->msgType == TRDP_MSG_MR) &&
+    if (pMsg->resultCode == TRDP_REPLYTO_ERR)
+    {
+        fprintf(gFp, "->> Reply timed out (ComId %u)\n", pMsg->comId);
+        gFailed = 1;
+    }
+    else if ((pMsg->msgType == TRDP_MSG_MR) &&
         (pMsg->comId == TEST5_STRING_COMID))
     {
-        if (pMsg->resultCode == TRDP_REPLYTO_ERR)
+        if (pMsg->resultCode == TRDP_TIMEOUT_ERR)
         {
             fprintf(gFp, "->> Request timed out (ComId %u)\n", pMsg->comId);
             gFailed = 1;
@@ -829,19 +834,19 @@ int test5 (int argc, char *argv[])
         TRDP_URI_USER_T     srcURI   = "12345678901234567890123456789012";   // 32 chars
 
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
-                              TEST5_STRING_COMID, 0u, 0u, 0u, TRDP_FLAGS_CALLBACK, destURI1);
+                              TEST5_STRING_COMID, 0u, 0u, 0u, TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, destURI1);
         IF_ERROR("tlm_addListener");
-        fprintf(gFp, "->> MD Listener set up\n");
+        fprintf(gFp, "->> MD TCP Listener set up\n");
         
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
-                          TRDP_FLAGS_CALLBACK, 1u, 1000000u, 1u, NULL,
+                          TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, 1u, NULL,
                           (UINT8*)TEST5_STRING_REQUEST, strlen(TEST5_STRING_REQUEST),
                           srcURI, destURI2);
         
         IF_ERROR("tlm_request");
-        fprintf(gFp, "->> MD Request sent\n");
+        fprintf(gFp, "->> MD TCP Request sent\n");
         
         vos_threadDelay(2000000u);
         
@@ -1180,15 +1185,15 @@ test_func_t *testArray[] =
  */
 int main (int argc, char *argv[])
 {
-    int     ch;
-    int     ip[4];
-    UINT32  testNo = 0;
+    int             ch;
+    unsigned int    ip[4];
+    UINT32          testNo = 0;
 
-    if (argc <= 1)
-    {
-        usage(argv[0]);
-        return 1;
-    }
+//    if (argc <= 1)
+//    {
+//        usage(argv[0]);
+//        return 1;
+//    }
 
     if (gFp == NULL)
     {
