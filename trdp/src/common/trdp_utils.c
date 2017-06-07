@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-07: Undoing setting of usage (came in with #126 fix!)
  *      BL 2017-05-08: Ticket #126 Opened UDP socket is not released if join or bind failed in trdp_requestSocket()
  *      BL 2017-05-08: Compiler warnings, static definitions
  *      BL 2017-03-01: Ticket #136 PD topography counter with faulty behavior
@@ -759,7 +760,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
                 else
                 {
-                    iface[lIndex].usage = 1;
+                    iface[lIndex].usage = 0;
                     *pIndex = lIndex;
 
                     if (rcvMostly)
@@ -829,7 +830,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
                 else
                 {
-                    iface[lIndex].usage = 1;
+                    iface[lIndex].usage = 0;
                     *pIndex = lIndex;
                 }
 
