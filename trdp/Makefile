@@ -128,7 +128,7 @@ outdir:
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
-example:	outdir $(OUTDIR)/receiveSelect $(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/sendData
+example:	$(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/sendData
 
 test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle $(OUTDIR)/inaugTest $(OUTDIR)/localtest $(OUTDIR)/pdPull
 
@@ -160,14 +160,6 @@ $(OUTDIR)/libtrdp.a:		$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
 #
 ###############################################################################
 				  
-$(OUTDIR)/receiveSelect:  echoSelect.c  $(OUTDIR)/libtrdp.a
-			@echo ' ### Building application $(@F)'
-			$(CC) example/echoSelect.c \
-				$(CFLAGS) $(INCLUDES) -o $@\
-				-ltrdp \
-			    $(LDFLAGS)
-			$(STRIP) $@
-
 $(OUTDIR)/cmdlineSelect:  echoSelectcmdline.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
 			$(CC) example/echoSelectcmdline.c \
