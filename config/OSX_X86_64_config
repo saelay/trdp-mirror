@@ -18,4 +18,5 @@ TCPOSTFIX =
 DOXYPATH = /Applications/Doxygen.app/Contents/Resources/
 
 CFLAGS += -Wall -m64 -fno-builtin -fsigned-char -pthread -fPIC -D__USE_BSD -D_DARWIN_C_SOURCE -DPOSIX -DL_ENDIAN
+CFLAGS += -Wno-unused-label -Wno-unused-function -Wno-int-to-void-pointer-cast
 INCPATH += -I /usr/include/uuid

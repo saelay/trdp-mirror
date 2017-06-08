@@ -165,7 +165,7 @@ end:                                                                          \
  *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
-void dbgOut (
+static void dbgOut (
     void        *pRefCon,
     TRDP_LOG_T  category,
     const CHAR8 *pTime,
@@ -202,7 +202,7 @@ void dbgOut (
  *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
-void trdp_loop (void* pArg)
+static void trdp_loop (void* pArg)
 {
     TRDP_THREAD_SESSION_T  *pSession = (TRDP_THREAD_SESSION_T*) pArg;
     /*
@@ -274,7 +274,7 @@ void trdp_loop (void* pArg)
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
-void usage (const char *appName)
+static void usage (const char *appName)
 {
     printf("Usage of %s\n", appName);
     printf("Run defined test suite on a single machine using two application sessions.\n"
@@ -294,7 +294,7 @@ void usage (const char *appName)
  *  to be used for ping-pong testing
  *  @param
  */
-void iface_init (
+static void iface_init (
     TRDP_IP_ADDR_T          *pIP1,
     TRDP_IP_ADDR_T          *pIP2)
 {
@@ -310,7 +310,7 @@ void iface_init (
  *
  *  @retval         application session handle
  */
-TRDP_APP_SESSION_T test_init (
+static TRDP_APP_SESSION_T test_init (
     TRDP_PRINT_DBG_T        dbgout,
     TRDP_THREAD_SESSION_T   *pSession,
     const char              *name)
@@ -343,7 +343,7 @@ TRDP_APP_SESSION_T test_init (
  *  @retval         0        no error
  *  @retval         1        some error
  */
-void test_deinit (
+static void test_deinit (
     TRDP_THREAD_SESSION_T   *pSession1,
     TRDP_THREAD_SESSION_T   *pSession2)
 {
@@ -381,7 +381,7 @@ void test_deinit (
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test1 (int argc, char *argv[])
+static int test1 (int argc, char *argv[])
 {
     PREPARE("Basic PD publish and subscribe, polling (#128 ComId = 0)", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -503,7 +503,7 @@ static void test2PDcallBack (
     }
 }
 
-int test2 (int argc, char *argv[])
+static int test2 (int argc, char *argv[])
 {
     PREPARE("Publish & Subscribe, Callback", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -566,7 +566,7 @@ int test2 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test3 (int argc, char *argv[])
+static int test3 (int argc, char *argv[])
 {
     PREPARE("Ticket #140: tlp_get reports immediately TRDP_TIMEOUT_ERR", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -633,7 +633,7 @@ int test3 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test4 (int argc, char *argv[])
+static int test4 (int argc, char *argv[])
 {
     PREPARE("#153 (two PDs on one pull request", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -743,7 +743,7 @@ int test4 (int argc, char *argv[])
 #define                 TEST5_STRING_REQUEST     "Requesting data"
 #define                 TEST5_STRING_REPLY       "Data transmission succeded"
         
-void  test5CBFunction (
+static void  test5CBFunction (
     void                    *pRefCon,
     TRDP_APP_SESSION_T      appHandle,
     const TRDP_MD_INFO_T    *pMsg,
@@ -820,7 +820,7 @@ end:
     return;
 }
 
-int test5 (int argc, char *argv[])
+static int test5 (int argc, char *argv[])
 {
     PREPARE("MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -866,7 +866,7 @@ int test5 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test6 (int argc, char *argv[])
+static int test6 (int argc, char *argv[])
 {
     PREPARE("MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
 
@@ -915,7 +915,7 @@ int test6 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test7 (int argc, char *argv[])
+static int test7 (int argc, char *argv[])
 {
     PREPARE("MD Notify no sessionID #127", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
 
@@ -958,7 +958,7 @@ int test7 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test8 (int argc, char *argv[])
+static int test8 (int argc, char *argv[])
 {
     PREPARE("#153 (two PDs on one pull request? Receiver only", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -1044,7 +1044,7 @@ int test8 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test9 (int argc, char *argv[])
+static int test9 (int argc, char *argv[])
 {
     PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
 
@@ -1065,7 +1065,7 @@ int test9 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test10 (int argc, char *argv[])
+static int test10 (int argc, char *argv[])
 {
     PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
 
@@ -1088,7 +1088,7 @@ int test10 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test11 (int argc, char *argv[])
+static int test11 (int argc, char *argv[])
 {
     PREPARE("", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -1113,7 +1113,7 @@ int test11 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test12 (int argc, char *argv[])
+static int test12 (int argc, char *argv[])
 {
     /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
     PREPARE_COM("");
@@ -1133,7 +1133,7 @@ int test12 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-int test13 (int argc, char *argv[])
+static int test13 (int argc, char *argv[])
 {
     PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
     
@@ -1167,9 +1167,9 @@ test_func_t *testArray[] =
     test6,
     test7,
     test8,
-/*    test9,
+    //test9,
     test10,
-    test11,
+    /*test11,
     test12,
     test13,*/
     NULL

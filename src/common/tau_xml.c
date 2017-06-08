@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-08: Compiler warning (unused dbgPrint)
  *      BL 2017-05-08: Compiler warnings (static definitions)
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-27: Ticket #142 Compiler warnings / MISRA-C 2012 issues
@@ -43,6 +44,8 @@
 /*******************************************************************************
  * DEFINES
  */
+
+//#define LIST_EXCH_PARAMS  1                                       /**< To list XML Exchange parameters        */
 
 /*  Default SDT values  */
 #ifndef TRDP_SDT_DEFAULT_SMI2
@@ -186,7 +189,7 @@ static void setDefaultInterfaceValues (
     }
 }
 
-#ifdef DEBUG
+#ifdef LIST_EXCH_PARAMS
 static void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
 {
     UINT32  i;
@@ -1212,7 +1215,9 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                         {
                             trdp_XMLEnter(pDocHnd->pXmlDocument);
                             result = readTelegramDef(pDocHnd->pXmlDocument, &(*ppExchgPar)[idx]);
-                            /* dbgPrint(1, &(*ppExchgPar)[idx]); */
+#ifdef LIST_EXCH_PARAMS
+                            dbgPrint(1, &(*ppExchgPar)[idx]);
+#endif
                             trdp_XMLLeave(pDocHnd->pXmlDocument);
                             if (result != TRDP_NO_ERR)
                             {
