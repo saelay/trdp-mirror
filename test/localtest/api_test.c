@@ -6,6 +6,8 @@
  *
  * @details         Extensible test suite working on multihoming / dual interface. Basic functionality and
  *                  regression tests can easily be appended to an array.
+ *                  This code is work in progress and can be used verify changes additionally to the standard
+ *                  PD and MD tests.
  *
  * @note            Project: TRDP
  *
@@ -59,6 +61,169 @@ typedef struct
 
 TRDP_THREAD_SESSION_T gSession1 = {NULL, 0x0A000164u, 0, 0};
 TRDP_THREAD_SESSION_T gSession2 = {NULL, 0x0A000165u, 0, 0};
+
+/* Data buffers to play with (Content is borrowed from Douglas Adams, "The Hitchhiker's Guide to the Galaxy") */
+static uint8_t dataBuffer1[64*1024] = {
+    
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
+    "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
+    "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
+    "Many were increasingly of the opinion that they’d all made a big mistake in coming down from the trees in the first place. And some said that even the trees had been a bad move, and that no one should ever have left the oceans.\n"
+    "And then, one Thursday, nearly two thousand years after one man had been nailed to a tree for saying how great it would be to be nice to people for a change, one girl sitting on her own in a small cafe in Rickmansworth suddenly realized what it was that had been going wrong all this time, and she finally knew how the world could be made a good and happy place. This time it was right, it would work, and no one would have to get nailed to anything.\n"
+    "Sadly, however, before she could get to a phone to tell anyone about it, a terribly stupid catastrophe occurred, and the idea was lost forever.\n"
+    "This is not her story.\n"
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+    
+};
+
+static uint8_t dataBuffer2[64*1024] = {
+    "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
+    "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
+    "Nevertheless, a wholly remarkable book.\n"
+    "In fact it was probably the most remarkable book ever to come out of the great publishing houses of Ursa Minor – of which no Earthman had ever heard either.\n"
+    "Not only is it a wholly remarkable book, it is also a highly successful one – more popular than the Celestial Home Care Omnibus, better selling than Fifty More Things to do in Zero Gravity, and more controversial than Oolon Colluphid’s trilogy of philosophical blockbusters Where God Went Wrong, Some More of God’s Greatest Mistakes and Who is this God Person Anyway?\n"
+    "In many of the more relaxed civilizations on the Outer Eastern Rim of the Galaxy, the Hitchhiker’s Guide has already supplanted the great Encyclopedia Galactica as the standard repository of all knowledge and wisdom, for though it has many omissions and contains much that is apocryphal, or at least wildly inaccurate, it scores over the older, more pedestrian work in two important respects.\n"
+    "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
+    "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
+    "It begins with a house.\n"
+};
+
 
 /**********************************************************************************************************************/
 /*  Macro to initialize the library and open two sessions                                                             */
@@ -740,8 +905,8 @@ static int test4 (int argc, char *argv[])
  */
 
 #define                 TEST5_STRING_COMID       1000u
-#define                 TEST5_STRING_REQUEST     "Requesting data"
-#define                 TEST5_STRING_REPLY       "Data transmission succeded"
+#define                 TEST5_STRING_REQUEST     &dataBuffer1 //"Requesting data"
+#define                 TEST5_STRING_REPLY       &dataBuffer2 //"Data transmission succeded"
         
 static void  test5CBFunction (
     void                    *pRefCon,
@@ -768,7 +933,7 @@ static void  test5CBFunction (
         }
         else
         {
-            fprintf(gFp, "->> Request received (%s)\n", pData);
+            //fprintf(gFp, "->> Request received (%s)\n", pData);
             if (memcmp(srcURI, pMsg->srcUserURI, 32u) != 0)
             {
                 gFailed = 1;
@@ -776,7 +941,7 @@ static void  test5CBFunction (
             }
             fprintf(gFp, "->> Sending reply\n");
             err = tlm_replyQuery(appHandle, &pMsg->sessionId, TEST5_STRING_COMID, 0u, 500000u, NULL,
-                             (UINT8*)TEST5_STRING_REPLY, strlen(TEST5_STRING_REPLY));
+                             (UINT8*)TEST5_STRING_REPLY, 63*1024/*strlen(TEST5_STRING_REPLY)*/);
 
             IF_ERROR("tlm_reply");
         }
@@ -785,7 +950,7 @@ static void  test5CBFunction (
     else if ((pMsg->msgType == TRDP_MSG_MQ) &&
              (pMsg->comId == TEST5_STRING_COMID))
     {
-        fprintf(gFp, "->> Reply received (%s)\n", pData);
+        //fprintf(gFp, "->> Reply received (%s)\n", pData);
         fprintf(gFp, "->> Sending confirmation\n");
         err = tlm_confirm(appHandle, &pMsg->sessionId, 0u, NULL);
         
@@ -822,7 +987,7 @@ end:
 
 static int test5 (int argc, char *argv[])
 {
-    PREPARE("MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("TCP MD Request - Reply - Confirm, #149, #160", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -835,26 +1000,39 @@ static int test5 (int argc, char *argv[])
 
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
                               TEST5_STRING_COMID, 0u, 0u, 0u, TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, destURI1);
-        IF_ERROR("tlm_addListener");
-        fprintf(gFp, "->> MD TCP Listener set up\n");
+        IF_ERROR("tlm_addListener1");
+        fprintf(gFp, "->> MD TCP Listener1 set up\n");
         
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
                           TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, 1u, NULL,
-                          (UINT8*)TEST5_STRING_REQUEST, strlen(TEST5_STRING_REQUEST),
+                          (UINT8*)TEST5_STRING_REQUEST, 63*1024/*strlen(TEST5_STRING_REQUEST)*/,
                           srcURI, destURI2);
         
-        IF_ERROR("tlm_request");
-        fprintf(gFp, "->> MD TCP Request sent\n");
+        IF_ERROR("tlm_request1");
+        fprintf(gFp, "->> MD TCP Request1 sent\n");
+        
+        vos_threadDelay(2000000u);
+        
+        
+        err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
+                          TEST5_STRING_COMID, 0u, 0u,
+                          0u, gSession2.ifaceIP,
+                          TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, 1u, NULL,
+                          (UINT8*)TEST5_STRING_REQUEST, 63*1024/*strlen(TEST5_STRING_REQUEST)*/,
+                          srcURI, destURI2);
+        
+        IF_ERROR("tlm_request2");
+        fprintf(gFp, "->> MD TCP Request2 sent\n");
         
         vos_threadDelay(2000000u);
         
         err = tlm_delListener (appHandle2, listenHandle);
-        IF_ERROR("tlm_delListener");
+        IF_ERROR("tlm_delListener2");
     }
-
-    /* ------------------------- test code ends here --------------------------- */
+    
+   /* ------------------------- test code ends here --------------------------- */
 
 
     CLEANUP;
@@ -868,7 +1046,7 @@ static int test5 (int argc, char *argv[])
  */
 static int test6 (int argc, char *argv[])
 {
-    PREPARE("MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
+    PREPARE("UDP MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -917,7 +1095,7 @@ static int test6 (int argc, char *argv[])
  */
 static int test7 (int argc, char *argv[])
 {
-    PREPARE("MD Notify no sessionID #127", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
+    PREPARE("UDP MD Notify no sessionID #127", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
@@ -1004,21 +1182,24 @@ static int test8 (int argc, char *argv[])
             TRDP_PD_INFO_T  pdInfo;
             
             usleep(100000u);
-            
+
             err = tlp_get(gSession2.appHandle, subHandle, &pdInfo, (UINT8 *) data2, &dataSize2);
             if (err == TRDP_NODATA_ERR)
             {
+                fprintf(gFp, ".");
                 continue;
             }
             
             if (err == TRDP_TIMEOUT_ERR)
             {
+                fprintf(gFp, ".");
+                fflush(gFp);
                 continue;
             }
             
             if (err != TRDP_NO_ERR)
             {
-                fprintf(gFp, "### tlp_get error: %d\n", err);
+                fprintf(gFp, "\n### tlp_get error: %d\n", err);
                 
                 gFailed = 1;
                 goto end;
@@ -1026,7 +1207,7 @@ static int test8 (int argc, char *argv[])
             }
             else
             {
-                fprintf(gFp, "received data from pull: %s (seq: %u, size: %u)\n", data2, pdInfo.seqCount, dataSize2);
+                fprintf(gFp, "\nreceived data from pull: %s (seq: %u, size: %u)\n", data2, pdInfo.seqCount, dataSize2);
                 gFailed = 0;
                 goto end;
             }
@@ -1167,9 +1348,9 @@ test_func_t *testArray[] =
     test6,
     test7,
     test8,
-    //test9,
+    /*test9,
     test10,
-    /*test11,
+    test11,
     test12,
     test13,*/
     NULL

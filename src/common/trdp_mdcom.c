@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-28: Ticket #160: Receiving fragmented TCP packets
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
@@ -2761,40 +2762,41 @@ void  trdp_mdCheckListenSocks (
                                                                       */
             err = trdp_mdRecv(appHandle, (UINT32) lIndex);
 
-            /* The receive message is incomplete */
-            if (err == TRDP_PACKET_ERR && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
+            if (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
             {
-                vos_printLogStr(VOS_LOG_INFO, "Incomplete TCP MD received \n");
-            }
+                /* The receive message is incomplete */
+                if (err == TRDP_PACKET_ERR)
+                {
+                    vos_printLogStr(VOS_LOG_INFO, "Incomplete TCP MD received \n");
+                }
+                /* A packet error on TCP should not lead to closing of the connection!
+                     The following if-clauses were converted to else-if to prevent a false error handling (Ticket #160) */
+                /* Check if the socket has been closed in the other corner */
+                else if (err == TRDP_NODATA_ERR)
+                {
+                    vos_printLog(VOS_LOG_INFO,
+                                 "The socket has been closed in the other corner (Corner Ip: %s, Socket: %d)\n",
+                                 vos_ipDotted(appHandle->iface[lIndex].tcpParams.cornerIp),
+                                 appHandle->iface[lIndex].sock);
 
-            /* Check if the socket has been closed in the other corner */
-            if (err == TRDP_NODATA_ERR && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
-            {
-                vos_printLog(VOS_LOG_INFO,
-                             "The socket has been closed in the other corner (Corner Ip: %s, Socket: %d)\n",
-                             vos_ipDotted(appHandle->iface[lIndex].tcpParams.cornerIp),
-                             appHandle->iface[lIndex].sock);
+                    appHandle->iface[lIndex].tcpParams.morituri = TRUE;
 
-                appHandle->iface[lIndex].tcpParams.morituri = TRUE;
+                    trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
+                }
+                /* Check if the socket has been closed in the other corner */
+                else if ((err == TRDP_CRC_ERR) ||
+                         (err == TRDP_WIRE_ERR) ||
+                         (err == TRDP_TOPO_ERR))
+                {
+                    vos_printLog(VOS_LOG_WARNING,
+                                 "Closing TCP connection, out of sync (Corner Ip: %s, Socket: %d)\n",
+                                 vos_ipDotted(appHandle->iface[lIndex].tcpParams.cornerIp),
+                                 appHandle->iface[lIndex].sock);
 
-                trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
-            }
+                    appHandle->iface[lIndex].tcpParams.morituri = TRUE;
 
-            /* Check if the socket has been closed in the other corner */
-            if ((err == TRDP_CRC_ERR ||
-                 err == TRDP_WIRE_ERR ||
-                 err == TRDP_TOPO_ERR ||
-                 err == TRDP_PACKET_ERR)
-                && appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
-            {
-                vos_printLog(VOS_LOG_INFO,
-                             "Closing TCP connection, out of sync (Corner Ip: %s, Socket: %d)\n",
-                             vos_ipDotted(appHandle->iface[lIndex].tcpParams.cornerIp),
-                             appHandle->iface[lIndex].sock);
-
-                appHandle->iface[lIndex].tcpParams.morituri = TRUE;
-
-                trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
+                    trdp_mdCloseSessions(appHandle, TRDP_INVALID_SOCKET_INDEX, VOS_INVALID_SOCKET, TRUE);
+                }
             }
         }
     }
