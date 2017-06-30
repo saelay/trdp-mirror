@@ -10,12 +10,13 @@
  *
  * @author          Petr Cvachoucek, UniControls
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright UniControls, a.s., 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
 #include <stdio.h>
@@ -139,27 +140,54 @@ TRDP_MD_CONFIG_T        mdcfg;
 TRDP_PROCESS_CONFIG_T   proccfg;
 
 const unsigned          tick = 10;      /* 10 msec tick */
-char    *buf;                           /* send buffer */
-int     rescode = 0;                    /* test result code */
-Options opts;                           /* test options */
-Status  sts;                            /* test status */
-Queue   queue;                          /* request/indication queue */
+char        *buf;                       /* send buffer */
+int         rescode = 0;                /* test result code */
+Options     opts;                       /* test options */
+Status      sts;                        /* test status */
+Queue       queue;                      /* request/indication queue */
 
 /* --- function prototypes ----------------------------------------------------- */
 
-void    setup_listeners ();
-void    exec_next_test ();
-void    print_status ();
-void    send_msg (TRDP_MD_INFO_T    *msg,
-                  TRDP_FLAGS_T      flags);
-void    recv_msg (const TRDP_MD_INFO_T  *msg,
-                  UINT8                 *data,
-                  UINT32                size);
-void    reply (const TRDP_MD_INFO_T *msg,
-               TRDP_MSG_T           type,
-               TRDP_FLAGS_T         flags);
-void    confirm (const TRDP_MD_INFO_T   *msg,
-                 TRDP_FLAGS_T           flags);
+void        setup_listeners (void);
+void        exec_next_test (void);
+void        print_status (void);
+void        send_msg (TRDP_MD_INFO_T    *msg,
+                      TRDP_FLAGS_T      flags);
+void        recv_msg (const TRDP_MD_INFO_T  *msg,
+                      UINT8                 *data,
+                      UINT32                size);
+void        reply (const TRDP_MD_INFO_T *msg,
+                   TRDP_MSG_T           type,
+                   TRDP_FLAGS_T         flags);
+void        confirm (const TRDP_MD_INFO_T   *msg,
+                     TRDP_FLAGS_T           flags);
+const char  *get_result_string (TRDP_ERR_T err);
+const char  *get_msg_type_str (TRDP_MSG_T type);
+void        print_log (void         *pRefCon,
+                       VOS_LOG_T    category,
+                       const CHAR8  *pTime,
+                       const CHAR8  *pFile,
+                       UINT16       line,
+                       const CHAR8  *pMsgStr);
+void    _set_color_red (void);
+void    _set_color_green (void);
+void    _set_color_blue (void);
+void    _set_color_default (void);
+void    _sleep_msec (int msec);
+void    print (int          type,
+               const char   *fmt,
+               ...);
+void    enqueue (Code           code,
+                 int            param,
+                 TRDP_MD_INFO_T *msg,
+                 TRDP_FLAGS_T   flags);
+void    dequeue (void);
+int     process_data (void);
+void    md_callback (void                   *ref,
+                     TRDP_APP_SESSION_T     apph,
+                     const TRDP_MD_INFO_T   *msg,
+                     UINT8                  *data,
+                     UINT32                 size);
 
 /* --- convert trdp error code to string --------------------------------------- */
 
@@ -169,84 +197,84 @@ const char *get_result_string (TRDP_ERR_T err)
 
     switch (err)
     {
-        case TRDP_NO_ERR:
-            return "TRDP_NO_ERR (no error)";
-        case TRDP_PARAM_ERR:
-            return "TRDP_PARAM_ERR (parameter missing or out of range)";
-        case TRDP_INIT_ERR:
-            return "TRDP_INIT_ERR (call without valid initialization)";
-        case TRDP_NOINIT_ERR:
-            return "TRDP_NOINIT_ERR (call with invalid handle)";
-        case TRDP_TIMEOUT_ERR:
-            return "TRDP_TIMEOUT_ERR (timeout)";
-        case TRDP_NODATA_ERR:
-            return "TRDP_NODATA_ERR (non blocking mode: no data received)";
-        case TRDP_SOCK_ERR:
-            return "TRDP_SOCK_ERR (socket error / option not supported)";
-        case TRDP_IO_ERR:
-            return "TRDP_IO_ERR (socket IO error, data can't be received/sent)";
-        case TRDP_MEM_ERR:
-            return "TRDP_MEM_ERR (no more memory available)";
-        case TRDP_SEMA_ERR:
-            return "TRDP_SEMA_ERR (semaphore not available)";
-        case TRDP_QUEUE_ERR:
-            return "TRDP_QUEUE_ERR (queue empty)";
-        case TRDP_QUEUE_FULL_ERR:
-            return "TRDP_QUEUE_FULL_ERR (queue full)";
-        case TRDP_MUTEX_ERR:
-            return "TRDP_MUTEX_ERR (mutex not available)";
-        case TRDP_THREAD_ERR:
-            return "TRDP_THREAD_ERR (thread error)";
-        case TRDP_BLOCK_ERR:
-            return "TRDP_BLOCK_ERR (system call would have blocked in blocking mode)";
-        case TRDP_INTEGRATION_ERR:
-            return "TRDP_INTEGRATION_ERR (alignment or endianess for selected target wrong)";
-        case TRDP_NOCONN_ERR:
-            return "TRDP_NOCONN:ERR (No TCP connection)";
-        case TRDP_NOSESSION_ERR:
-            return "TRDP_NOSESSION_ERR (no such session)";
-        case TRDP_SESSION_ABORT_ERR:
-            return "TRDP_SESSION_ABORT_ERR (session aborted)";
-        case TRDP_NOSUB_ERR:
-            return "TRDP_NOSUB_ERR (no subscriber)";
-        case TRDP_NOPUB_ERR:
-            return "TRDP_NOPUB_ERR (no publisher)";
-        case TRDP_NOLIST_ERR:
-            return "TRDP_NOLIST_ERR (no listener)";
-        case TRDP_CRC_ERR:
-            return "TRDP_CRC_ERR (wrong CRC)";
-        case TRDP_WIRE_ERR:
-            return "TRDP_WIRE_ERR (wire error)";
-        case TRDP_TOPO_ERR:
-            return "TRDP_TOPO_ERR (invalid topo count)";
-        case TRDP_COMID_ERR:
-            return "TRDP_COMID_ERR (unknown comid)";
-        case TRDP_STATE_ERR:
-            return "TRDP_STATE_ERR (call in wrong state)";
-        case TRDP_APP_TIMEOUT_ERR:
-            return "TRDP_APP_TIMEOUT_ERR (application timeout)";
-        case TRDP_APP_REPLYTO_ERR:
-            return "TRDP_APP_REPLYTO_ERR (application reply sent timeout)";
-        case TRDP_APP_CONFIRMTO_ERR:
-            return "TRDP_APP_CONFIRMTO_ERR (application confirm sent timeout)";
-        case TRDP_REPLYTO_ERR:
-            return "TRDP_REPLYTO_ERR (protocol reply timeout)";
-        case TRDP_CONFIRMTO_ERR:
-            return "TRDP_CONFIRMTO_ERR (protocol confirm timeout)";
-        case TRDP_REQCONFIRMTO_ERR:
-            return "TRDP_REQCONFIRMTO_ERR (protocol confirm timeout (request sender)";
-        case TRDP_PACKET_ERR:
-            return "TRDP_PACKET_ERR (Incomplete message data packet)";
-        case TRDP_UNRESOLVED_ERR:
-            return "TRDP_UNRESOLVED_ERR (URI was not resolved error)";
-        case TRDP_XML_PARSER_ERR:
-            return "TRDP_XML_PARSER_ERR (error while parsing XML file)";
-        case TRDP_INUSE_ERR:
-            return "TRDP_INUSE_ERR (Resource is in use error)";
-        case TRDP_MARSHALLING_ERR:
-            return "TRDP_MARSHALLING_ERR (Mismatch between source size and dataset size)";
-        case TRDP_UNKNOWN_ERR:
-            return "TRDP_UNKNOWN_ERR (unspecified error)";
+       case TRDP_NO_ERR:
+           return "TRDP_NO_ERR (no error)";
+       case TRDP_PARAM_ERR:
+           return "TRDP_PARAM_ERR (parameter missing or out of range)";
+       case TRDP_INIT_ERR:
+           return "TRDP_INIT_ERR (call without valid initialization)";
+       case TRDP_NOINIT_ERR:
+           return "TRDP_NOINIT_ERR (call with invalid handle)";
+       case TRDP_TIMEOUT_ERR:
+           return "TRDP_TIMEOUT_ERR (timeout)";
+       case TRDP_NODATA_ERR:
+           return "TRDP_NODATA_ERR (non blocking mode: no data received)";
+       case TRDP_SOCK_ERR:
+           return "TRDP_SOCK_ERR (socket error / option not supported)";
+       case TRDP_IO_ERR:
+           return "TRDP_IO_ERR (socket IO error, data can't be received/sent)";
+       case TRDP_MEM_ERR:
+           return "TRDP_MEM_ERR (no more memory available)";
+       case TRDP_SEMA_ERR:
+           return "TRDP_SEMA_ERR (semaphore not available)";
+       case TRDP_QUEUE_ERR:
+           return "TRDP_QUEUE_ERR (queue empty)";
+       case TRDP_QUEUE_FULL_ERR:
+           return "TRDP_QUEUE_FULL_ERR (queue full)";
+       case TRDP_MUTEX_ERR:
+           return "TRDP_MUTEX_ERR (mutex not available)";
+       case TRDP_THREAD_ERR:
+           return "TRDP_THREAD_ERR (thread error)";
+       case TRDP_BLOCK_ERR:
+           return "TRDP_BLOCK_ERR (system call would have blocked in blocking mode)";
+       case TRDP_INTEGRATION_ERR:
+           return "TRDP_INTEGRATION_ERR (alignment or endianess for selected target wrong)";
+       case TRDP_NOCONN_ERR:
+           return "TRDP_NOCONN:ERR (No TCP connection)";
+       case TRDP_NOSESSION_ERR:
+           return "TRDP_NOSESSION_ERR (no such session)";
+       case TRDP_SESSION_ABORT_ERR:
+           return "TRDP_SESSION_ABORT_ERR (session aborted)";
+       case TRDP_NOSUB_ERR:
+           return "TRDP_NOSUB_ERR (no subscriber)";
+       case TRDP_NOPUB_ERR:
+           return "TRDP_NOPUB_ERR (no publisher)";
+       case TRDP_NOLIST_ERR:
+           return "TRDP_NOLIST_ERR (no listener)";
+       case TRDP_CRC_ERR:
+           return "TRDP_CRC_ERR (wrong CRC)";
+       case TRDP_WIRE_ERR:
+           return "TRDP_WIRE_ERR (wire error)";
+       case TRDP_TOPO_ERR:
+           return "TRDP_TOPO_ERR (invalid topo count)";
+       case TRDP_COMID_ERR:
+           return "TRDP_COMID_ERR (unknown comid)";
+       case TRDP_STATE_ERR:
+           return "TRDP_STATE_ERR (call in wrong state)";
+       case TRDP_APP_TIMEOUT_ERR:
+           return "TRDP_APP_TIMEOUT_ERR (application timeout)";
+       case TRDP_APP_REPLYTO_ERR:
+           return "TRDP_APP_REPLYTO_ERR (application reply sent timeout)";
+       case TRDP_APP_CONFIRMTO_ERR:
+           return "TRDP_APP_CONFIRMTO_ERR (application confirm sent timeout)";
+       case TRDP_REPLYTO_ERR:
+           return "TRDP_REPLYTO_ERR (protocol reply timeout)";
+       case TRDP_CONFIRMTO_ERR:
+           return "TRDP_CONFIRMTO_ERR (protocol confirm timeout)";
+       case TRDP_REQCONFIRMTO_ERR:
+           return "TRDP_REQCONFIRMTO_ERR (protocol confirm timeout (request sender)";
+       case TRDP_PACKET_ERR:
+           return "TRDP_PACKET_ERR (Incomplete message data packet)";
+       case TRDP_UNRESOLVED_ERR:
+           return "TRDP_UNRESOLVED_ERR (URI was not resolved error)";
+       case TRDP_XML_PARSER_ERR:
+           return "TRDP_XML_PARSER_ERR (error while parsing XML file)";
+       case TRDP_INUSE_ERR:
+           return "TRDP_INUSE_ERR (Resource is in use error)";
+       case TRDP_MARSHALLING_ERR:
+           return "TRDP_MARSHALLING_ERR (Mismatch between source size and dataset size)";
+       case TRDP_UNKNOWN_ERR:
+           return "TRDP_UNKNOWN_ERR (unspecified error)";
     }
     sprintf(buf, "unknown error (%d)", err);
     return buf;
@@ -258,12 +286,12 @@ const char *get_msg_type_str (TRDP_MSG_T type)
 {
     switch (type)
     {
-        case TRDP_MSG_MN: return "notification";
-        case TRDP_MSG_MR: return "request";
-        case TRDP_MSG_MP: return "reply";
-        case TRDP_MSG_MQ: return "reply w/cfm";
-        case TRDP_MSG_MC: return "confirm";
-        default:;
+       case TRDP_MSG_MN: return "notification";
+       case TRDP_MSG_MR: return "request";
+       case TRDP_MSG_MP: return "reply";
+       case TRDP_MSG_MQ: return "reply w/cfm";
+       case TRDP_MSG_MC: return "confirm";
+       default:;
     }
     return "?";
 }
@@ -296,7 +324,7 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
     if (pLogFile != NULL)
     {
         fprintf(pLogFile, "%s %s:%d %s",
-            cat[category], file ? file + 1 : pFile, line, pMsgStr);
+                cat[category], file ? file + 1 : pFile, line, pMsgStr);
     }
 #endif
 }
@@ -404,33 +432,33 @@ void print (int type, const char *fmt, ...)
 
     switch (type)
     {
-        case -1:
-            printf("\n!!! : ");
-            break;
-        case -2:
-            printf("<== : ");
-            fflush(stdout);
-            _set_color_green();
-            break;
-        case -3:
-            printf("<== : ");
-            fflush(stdout);
-            _set_color_red();
-            break;
-        case -4:
-            printf("!!! : ");
-            fflush(stdout);
-            _set_color_red();
-            break;
-        case 0:
-            printf("    : ");
-            break;
-        case 1:
-            printf("--> : ");
-            break;
-        case 2:
-            printf("<-- : ");
-            break;
+       case -1:
+           printf("\n!!! : ");
+           break;
+       case -2:
+           printf("<== : ");
+           fflush(stdout);
+           _set_color_green();
+           break;
+       case -3:
+           printf("<== : ");
+           fflush(stdout);
+           _set_color_red();
+           break;
+       case -4:
+           printf("!!! : ");
+           fflush(stdout);
+           _set_color_red();
+           break;
+       case 0:
+           printf("    : ");
+           break;
+       case 1:
+           printf("--> : ");
+           break;
+       case 2:
+           printf("<-- : ");
+           break;
     }
     va_start(args, fmt);
     vprintf(fmt, args);
@@ -479,55 +507,55 @@ int process_data ()
     {
         switch (queue.head->code)
         {
-            case REQ_WAIT:
-                /* decrement wait time */
-                if ((unsigned) queue.head->param > tick)
-                {
-                    queue.head->param -= tick;
-                    return 1;
-                }
-                /* wait finished, dequeue request */
-                dequeue();
-                return 1;
+           case REQ_WAIT:
+               /* decrement wait time */
+               if ((unsigned) queue.head->param > tick)
+               {
+                   queue.head->param -= tick;
+                   return 1;
+               }
+               /* wait finished, dequeue request */
+               dequeue();
+               return 1;
 
-            case REQ_NEXT:
-                /* dequeue request */
-                dequeue();
-                /* execute next test */
-                exec_next_test();
-                break;
+           case REQ_NEXT:
+               /* dequeue request */
+               dequeue();
+               /* execute next test */
+               exec_next_test();
+               break;
 
-            case REQ_DONE:
-                /* time elapsed from test begin */
-                vos_getTime(&sts.tend);
-                vos_subTime(&sts.tend, &sts.tbeg);
-                /* call finished */
-                print(queue.head->param, "call done - %u.%03u sec",
-                      sts.tend.tv_sec, sts.tend.tv_usec / 1000);
-                /* dequeue request */
-                dequeue();
-                /* execute next test */
-                enqueue(REQ_WAIT, 1000, NULL, TRDP_FLAGS_DEFAULT);
-                enqueue(REQ_NEXT, 0, NULL, TRDP_FLAGS_DEFAULT);
-                break;
+           case REQ_DONE:
+               /* time elapsed from test begin */
+               vos_getTime(&sts.tend);
+               vos_subTime(&sts.tend, &sts.tbeg);
+               /* call finished */
+               print(queue.head->param, "call done - %u.%03u sec",
+                     sts.tend.tv_sec, sts.tend.tv_usec / 1000);
+               /* dequeue request */
+               dequeue();
+               /* execute next test */
+               enqueue(REQ_WAIT, 1000, NULL, TRDP_FLAGS_DEFAULT);
+               enqueue(REQ_NEXT, 0, NULL, TRDP_FLAGS_DEFAULT);
+               break;
 
-            case REQ_SEND:
-                /* send message */
-                send_msg(&queue.head->msg, queue.head->flags);
-                /* dequeue request */
-                dequeue();
-                break;
+           case REQ_SEND:
+               /* send message */
+               send_msg(&queue.head->msg, queue.head->flags);
+               /* dequeue request */
+               dequeue();
+               break;
 
-            case REQ_EXIT:
-                /* exit test */
-                return 0;
+           case REQ_EXIT:
+               /* exit test */
+               return 0;
 
-            case REQ_STATUS:
-                /* dequeue request */
-                dequeue();
-                /* print test status */
-                print_status();
-                break;
+           case REQ_STATUS:
+               /* dequeue request */
+               dequeue();
+               /* print test status */
+               print_status();
+               break;
         }
     }
 
@@ -579,35 +607,35 @@ void md_callback (void *ref, TRDP_APP_SESSION_T apph,
     /* check result code */
     switch (msg->resultCode)
     {
-        case TRDP_NO_ERR:
-            /* mesage received */
-            recv_msg(msg, data, size);
-            break;
+       case TRDP_NO_ERR:
+           /* mesage received */
+           recv_msg(msg, data, size);
+           break;
 
-        case TRDP_REPLYTO_ERR:
-        case TRDP_TIMEOUT_ERR:
-            /* reply doesn't arrived */
-            print(-4, "error %s", get_result_string(msg->resultCode));
-            switch (sts.test)
-            {
-                case TST_REQREP_TCP:
-                case TST_REQREP_UCAST:
-                case TST_REQREP_MCAST_1:
-                case TST_REQREPCFM_TCP:
-                case TST_REQREPCFM_UCAST:
-                case TST_REQREPCFM_MCAST_1:
-                    enqueue(REQ_DONE, -3, NULL, TRDP_FLAGS_DEFAULT);
-                    break;
-                case TST_REQREP_MCAST_N:
-                case TST_REQREPCFM_MCAST_N:
-                    enqueue(REQ_DONE, -2, NULL, TRDP_FLAGS_DEFAULT);
-                    break;
-            }
-            break;
+       case TRDP_REPLYTO_ERR:
+       case TRDP_TIMEOUT_ERR:
+           /* reply doesn't arrived */
+           print(-4, "error %s", get_result_string(msg->resultCode));
+           switch (sts.test)
+           {
+              case TST_REQREP_TCP:
+              case TST_REQREP_UCAST:
+              case TST_REQREP_MCAST_1:
+              case TST_REQREPCFM_TCP:
+              case TST_REQREPCFM_UCAST:
+              case TST_REQREPCFM_MCAST_1:
+                  enqueue(REQ_DONE, -3, NULL, TRDP_FLAGS_DEFAULT);
+                  break;
+              case TST_REQREP_MCAST_N:
+              case TST_REQREPCFM_MCAST_N:
+                  enqueue(REQ_DONE, -2, NULL, TRDP_FLAGS_DEFAULT);
+                  break;
+           }
+           break;
 
-        default:
-            print(-4, "error %s", get_result_string(msg->resultCode));
-            break;
+       default:
+           print(-4, "error %s", get_result_string(msg->resultCode));
+           break;
     }
 }
 
@@ -727,14 +755,14 @@ int main (int argc, char *argv[])
 
     switch (opts.mode)
     {
-        case MODE_CALLER:
-            /* begin testing */
-            exec_next_test();
-            break;
-        case MODE_REPLIER:
-            /* setup listeners */
-            setup_listeners();
-            break;
+       case MODE_CALLER:
+           /* begin testing */
+           exec_next_test();
+           break;
+       case MODE_REPLIER:
+           /* setup listeners */
+           setup_listeners();
+           break;
     }
 
     /* main test loop */
@@ -782,158 +810,158 @@ void exec_next_test ()
 
     switch (sts.test)
     {
-        case TST_NOTIFY_TCP:
-            /* notification - TCP */
-            if ((opts.groups & TST_TCP) && (opts.groups & TST_NOTIFY))
-            {
-                print(-1, "TEST %d -- notification - TCP", sts.test);
-                msg.msgType         = TRDP_MSG_MN;
-                msg.comId           = TST_NOTIFY_TCP * 1000;
-                msg.destIpAddr      = opts.dstip;
-                msg.numExpReplies   = 0;
-                flags = (TRDP_FLAGS_T) (flags | TRDP_FLAGS_TCP);
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_NOTIFY_UCAST:
-            /* notification - unicast */
-            if ((opts.groups & TST_UCAST) && (opts.groups & TST_NOTIFY))
-            {
-                print(-1, "TEST %d -- notification - UDP - unicast", sts.test);
-                msg.msgType         = TRDP_MSG_MN;
-                msg.comId           = TST_NOTIFY_UCAST * 1000;
-                msg.destIpAddr      = opts.dstip;
-                msg.numExpReplies   = 0;
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_NOTIFY_MCAST:
-            /* notification - multicast */
-            if ((opts.groups & TST_MCAST) && (opts.groups & TST_NOTIFY))
-            {
-                print(-1, "TEST %d -- notification - UDP - multicast", sts.test);
-                msg.msgType         = TRDP_MSG_MN;
-                msg.comId           = TST_NOTIFY_MCAST * 1000;
-                msg.destIpAddr      = opts.mcgrp;
-                msg.numExpReplies   = 0;
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREP_TCP:
-            /* request/reply - TCP */
-            if ((opts.groups & TST_TCP) && (opts.groups & TST_REQREP))
-            {
-                print(-1, "TEST %d -- request/reply - TCP", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREP_TCP * 1000;
-                msg.destIpAddr      = opts.dstip;
-                msg.numExpReplies   = 1;
-                flags = (TRDP_FLAGS_T) (flags | TRDP_FLAGS_TCP);
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREP_UCAST:
-            /* request/reply - unicast */
-            if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREP))
-            {
-                print(-1, "TEST %d -- request/reply - UDP - unicast", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREP_UCAST * 1000;
-                msg.destIpAddr      = opts.dstip;
-                msg.numExpReplies   = 1;
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREP_MCAST_1:
-            /* request/reply - multicast (1 reply) */
-            if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREP))
-            {
-                print(-1, "TEST %d "
-                      "-- request/reply - UDP - multicast - 1 reply", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREP_MCAST_1 * 1000;
-                msg.destIpAddr      = opts.mcgrp;
-                msg.numExpReplies   = 1;
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREP_MCAST_N:
-            /* request/reply - multicast (? replies) */
-            if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREP))
-            {
-                print(-1, "TEST %d "
-                      "-- request/reply - UDP - multicast - ? replies", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREP_MCAST_N * 1000;
-                msg.destIpAddr      = opts.mcgrp;
-                msg.numExpReplies   = 0;
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREPCFM_TCP:
-            /* request/reply/confirm - TCP */
-            if ((opts.groups & TST_TCP) && (opts.groups & TST_REQREPCFM))
-            {
-                print(-1, "TEST %d -- request/reply/confirm - TCP", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREPCFM_TCP * 1000;
-                msg.destIpAddr      = opts.dstip;
-                msg.numExpReplies   = 1;
-                flags = (TRDP_FLAGS_T) (flags | TRDP_FLAGS_TCP);
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREPCFM_UCAST:
-            /* request/reply/confirm - unicast */
-            if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREPCFM))
-            {
-                print(-1, "TEST %d -- request/reply/confirm - UDP - unicast", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREPCFM_UCAST * 1000;
-                msg.destIpAddr      = opts.dstip;
-                msg.numExpReplies   = 1;
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREPCFM_MCAST_1:
-            /* request/reply/confirm - multicast (1 reply) */
-            if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREPCFM))
-            {
-                print(-1, "TEST %d "
-                      "-- request/reply/confirm - UDP - multicast - 1 reply", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREPCFM_MCAST_1 * 1000;
-                msg.destIpAddr      = opts.mcgrp;
-                msg.numExpReplies   = 1;
-                break;
-            }
-            ++sts.test;
-        /* fall through */
-        case TST_REQREPCFM_MCAST_N:
-            /* request/reply/confirm - multicast (? reps.) */
-            if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREPCFM))
-            {
-                print(-1, "TEST %d "
-                      "-- request/reply/confirm - UDP - multicast - ? replies", sts.test);
-                msg.msgType         = TRDP_MSG_MR;
-                msg.comId           = TST_REQREPCFM_MCAST_N * 1000;
-                msg.destIpAddr      = opts.mcgrp;
-                msg.numExpReplies   = 0;
-                break;
-            }
-        /* fall through */
-        default:
-            exec_next_test();
-            return;
+       case TST_NOTIFY_TCP:
+           /* notification - TCP */
+           if ((opts.groups & TST_TCP) && (opts.groups & TST_NOTIFY))
+           {
+               print(-1, "TEST %d -- notification - TCP", sts.test);
+               msg.msgType          = TRDP_MSG_MN;
+               msg.comId            = TST_NOTIFY_TCP * 1000;
+               msg.destIpAddr       = opts.dstip;
+               msg.numExpReplies    = 0;
+               flags = (TRDP_FLAGS_T) (flags | TRDP_FLAGS_TCP);
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_NOTIFY_UCAST:
+           /* notification - unicast */
+           if ((opts.groups & TST_UCAST) && (opts.groups & TST_NOTIFY))
+           {
+               print(-1, "TEST %d -- notification - UDP - unicast", sts.test);
+               msg.msgType          = TRDP_MSG_MN;
+               msg.comId            = TST_NOTIFY_UCAST * 1000;
+               msg.destIpAddr       = opts.dstip;
+               msg.numExpReplies    = 0;
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_NOTIFY_MCAST:
+           /* notification - multicast */
+           if ((opts.groups & TST_MCAST) && (opts.groups & TST_NOTIFY))
+           {
+               print(-1, "TEST %d -- notification - UDP - multicast", sts.test);
+               msg.msgType          = TRDP_MSG_MN;
+               msg.comId            = TST_NOTIFY_MCAST * 1000;
+               msg.destIpAddr       = opts.mcgrp;
+               msg.numExpReplies    = 0;
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREP_TCP:
+           /* request/reply - TCP */
+           if ((opts.groups & TST_TCP) && (opts.groups & TST_REQREP))
+           {
+               print(-1, "TEST %d -- request/reply - TCP", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREP_TCP * 1000;
+               msg.destIpAddr       = opts.dstip;
+               msg.numExpReplies    = 1;
+               flags = (TRDP_FLAGS_T) (flags | TRDP_FLAGS_TCP);
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREP_UCAST:
+           /* request/reply - unicast */
+           if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREP))
+           {
+               print(-1, "TEST %d -- request/reply - UDP - unicast", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREP_UCAST * 1000;
+               msg.destIpAddr       = opts.dstip;
+               msg.numExpReplies    = 1;
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREP_MCAST_1:
+           /* request/reply - multicast (1 reply) */
+           if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREP))
+           {
+               print(-1, "TEST %d "
+                     "-- request/reply - UDP - multicast - 1 reply", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREP_MCAST_1 * 1000;
+               msg.destIpAddr       = opts.mcgrp;
+               msg.numExpReplies    = 1;
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREP_MCAST_N:
+           /* request/reply - multicast (? replies) */
+           if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREP))
+           {
+               print(-1, "TEST %d "
+                     "-- request/reply - UDP - multicast - ? replies", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREP_MCAST_N * 1000;
+               msg.destIpAddr       = opts.mcgrp;
+               msg.numExpReplies    = 0;
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREPCFM_TCP:
+           /* request/reply/confirm - TCP */
+           if ((opts.groups & TST_TCP) && (opts.groups & TST_REQREPCFM))
+           {
+               print(-1, "TEST %d -- request/reply/confirm - TCP", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREPCFM_TCP * 1000;
+               msg.destIpAddr       = opts.dstip;
+               msg.numExpReplies    = 1;
+               flags = (TRDP_FLAGS_T) (flags | TRDP_FLAGS_TCP);
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREPCFM_UCAST:
+           /* request/reply/confirm - unicast */
+           if ((opts.groups & TST_UCAST) && (opts.groups & TST_REQREPCFM))
+           {
+               print(-1, "TEST %d -- request/reply/confirm - UDP - unicast", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREPCFM_UCAST * 1000;
+               msg.destIpAddr       = opts.dstip;
+               msg.numExpReplies    = 1;
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREPCFM_MCAST_1:
+           /* request/reply/confirm - multicast (1 reply) */
+           if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREPCFM))
+           {
+               print(-1, "TEST %d "
+                     "-- request/reply/confirm - UDP - multicast - 1 reply", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREPCFM_MCAST_1 * 1000;
+               msg.destIpAddr       = opts.mcgrp;
+               msg.numExpReplies    = 1;
+               break;
+           }
+           ++sts.test;
+       /* fall through */
+       case TST_REQREPCFM_MCAST_N:
+           /* request/reply/confirm - multicast (? reps.) */
+           if ((opts.groups & TST_MCAST) && (opts.groups & TST_REQREPCFM))
+           {
+               print(-1, "TEST %d "
+                     "-- request/reply/confirm - UDP - multicast - ? replies", sts.test);
+               msg.msgType          = TRDP_MSG_MR;
+               msg.comId            = TST_REQREPCFM_MCAST_N * 1000;
+               msg.destIpAddr       = opts.mcgrp;
+               msg.numExpReplies    = 0;
+               break;
+           }
+       /* fall through */
+       default:
+           exec_next_test();
+           return;
     }
 
     /* enqueue request */
@@ -1074,131 +1102,131 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
     /* depending on message type */
     switch (msg->msgType)
     {
-        case TRDP_MSG_MN:
-            /* prepare data to send buffer */
-            snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
-                     opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
-            print(0, "%s", buf);
-            /* send notification */
-            err = tlm_notify(
-                    apph,                           /* session handle */
-                    (void *) sts.test,              /* user reference */
-                    NULL,                           /* callback function */
-                    msg->comId,                     /* comid */
-                    msg->etbTopoCnt,                /* topo */
-                    msg->opTrnTopoCnt,              /* topo */
-                    msg->srcIpAddr,                 /* source IP address */
-                    msg->destIpAddr,                /* destination IP address */
-                    flags,                          /* flags */
-                    NULL,                           /* send parameters */
-                    (UINT8 *) buf,                  /* dataset buffer */
-                    opts.msgsz,                     /* dataset size */
-                    msg->srcUserURI,                    /* source URI */
-                    msg->destUserURI);                  /* destination URI */
-            /* check for errors */
-            if (err != TRDP_NO_ERR)
-            {
-                /* failure */
-                print(-4, "tlm_notify call error %s", get_result_string(err));
-            }
-            break;
+       case TRDP_MSG_MN:
+           /* prepare data to send buffer */
+           snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
+                    opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
+           print(0, "%s", buf);
+           /* send notification */
+           err = tlm_notify(
+                   apph,                            /* session handle */
+                   (void *) (long)sts.test,         /* user reference */
+                   NULL,                            /* callback function */
+                   msg->comId,                      /* comid */
+                   msg->etbTopoCnt,                 /* topo */
+                   msg->opTrnTopoCnt,               /* topo */
+                   msg->srcIpAddr,                  /* source IP address */
+                   msg->destIpAddr,                 /* destination IP address */
+                   flags,                           /* flags */
+                   NULL,                            /* send parameters */
+                   (UINT8 *) buf,                   /* dataset buffer */
+                   opts.msgsz,                      /* dataset size */
+                   msg->srcUserURI,                 /* source URI */
+                   msg->destUserURI);               /* destination URI */
+           /* check for errors */
+           if (err != TRDP_NO_ERR)
+           {
+               /* failure */
+               print(-4, "tlm_notify call error %s", get_result_string(err));
+           }
+           break;
 
-        case TRDP_MSG_MR:
-            /* prepare data to send buffer */
-            snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
-                     opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
-            print(0, "%s", buf);
-            /* send request */
-            err = tlm_request(
-                    apph,                           /* session handle */
-                    (void *) sts.test,              /* user reference */
-                    NULL,                           /* callback function */
-                    &uuid,                          /* session id */
-                    msg->comId,                     /* comid */
-                    msg->etbTopoCnt,                /* topo */
-                    msg->opTrnTopoCnt,              /* topo */
-                    msg->srcIpAddr,                 /* source IP address */
-                    msg->destIpAddr,                /* destination IP address */
-                    flags,                          /* flags */
-                    msg->numExpReplies,             /* number of expected replies */
-                    opts.tmo * 1000,                /* reply timeout [usec] */
-                    2,                              /* maxNumRetries */
-                    NULL,                           /* send parameters */
-                    (UINT8 *) buf,                  /* dataset buffer */
-                    opts.msgsz,                     /* dataset size */
-                    msg->srcUserURI,                    /* source URI */
-                    msg->destUserURI);                  /* destination URI */
-            /* check for errors */
-            if (err != TRDP_NO_ERR)
-            {
-                /* failure */
-                print(-4, "tlm_request call error %s", get_result_string(err));
-            }
-            break;
+       case TRDP_MSG_MR:
+           /* prepare data to send buffer */
+           snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
+                    opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
+           print(0, "%s", buf);
+           /* send request */
+           err = tlm_request(
+                   apph,                            /* session handle */
+                   (void *) (long) sts.test,        /* user reference */
+                   NULL,                            /* callback function */
+                   &uuid,                           /* session id */
+                   msg->comId,                      /* comid */
+                   msg->etbTopoCnt,                 /* topo */
+                   msg->opTrnTopoCnt,               /* topo */
+                   msg->srcIpAddr,                  /* source IP address */
+                   msg->destIpAddr,                 /* destination IP address */
+                   flags,                           /* flags */
+                   msg->numExpReplies,              /* number of expected replies */
+                   opts.tmo * 1000,                 /* reply timeout [usec] */
+                   2,                               /* maxNumRetries */
+                   NULL,                            /* send parameters */
+                   (UINT8 *) buf,                   /* dataset buffer */
+                   opts.msgsz,                      /* dataset size */
+                   msg->srcUserURI,                 /* source URI */
+                   msg->destUserURI);               /* destination URI */
+           /* check for errors */
+           if (err != TRDP_NO_ERR)
+           {
+               /* failure */
+               print(-4, "tlm_request call error %s", get_result_string(err));
+           }
+           break;
 
-        case TRDP_MSG_MP:
-            /* prepare data to send buffer */
-            snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
-                     opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
-            print(0, "%s", buf);
-            /* send reply */
-            err = tlm_reply(
-                    apph,                           /* session handle */
-                    (const TRDP_UUID_T *) &msg->sessionId,               /* session id */
-                    msg->comId,                     /* comid */
-                    0,                              /* user status */
-                    NULL,                           /* send parameters */
-                    (UINT8 *) buf,                  /* dataset buffer */
-                    opts.msgsz);                    /* dataset size */
-            /* check for errors */
-            if (err != TRDP_NO_ERR)
-            {
-                /* failure */
-                print(-4, "tlm_reply call error %s", get_result_string(err));
-            }
-            break;
+       case TRDP_MSG_MP:
+           /* prepare data to send buffer */
+           snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
+                    opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
+           print(0, "%s", buf);
+           /* send reply */
+           err = tlm_reply(
+                   apph,                            /* session handle */
+                   (const TRDP_UUID_T *) &msg->sessionId,                /* session id */
+                   msg->comId,                      /* comid */
+                   0,                               /* user status */
+                   NULL,                            /* send parameters */
+                   (UINT8 *) buf,                   /* dataset buffer */
+                   opts.msgsz);                     /* dataset size */
+           /* check for errors */
+           if (err != TRDP_NO_ERR)
+           {
+               /* failure */
+               print(-4, "tlm_reply call error %s", get_result_string(err));
+           }
+           break;
 
-        case TRDP_MSG_MQ:
-            /* prepare data to send buffer */
-            snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
-                     opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
-            print(0, "%s", buf);
-            /* send reply */
-            err = tlm_replyQuery(
-                    apph,                           /* session handle */
-                    (const TRDP_UUID_T *) &msg->sessionId, /* session id */
-                    msg->comId,                     /* comid */
-                    0,                              /* user status */
-                    opts.tmo * 1000,                /* confirm timeout */
-                    NULL,                           /* send parameters */
-                    (UINT8 *) buf,                  /* dataset buffer */
-                    opts.msgsz);                    /* dataset size */
+       case TRDP_MSG_MQ:
+           /* prepare data to send buffer */
+           snprintf(buf, opts.msgsz, "<%u:%ub:%#x> ... %d (%s)", msg->comId,
+                    opts.msgsz, 0, sts.counter++, get_msg_type_str(msg->msgType));
+           print(0, "%s", buf);
+           /* send reply */
+           err = tlm_replyQuery(
+                   apph,                            /* session handle */
+                   (const TRDP_UUID_T *) &msg->sessionId,  /* session id */
+                   msg->comId,                      /* comid */
+                   0,                               /* user status */
+                   opts.tmo * 1000,                 /* confirm timeout */
+                   NULL,                            /* send parameters */
+                   (UINT8 *) buf,                   /* dataset buffer */
+                   opts.msgsz);                     /* dataset size */
 
-            /* check for errors */
-            if (err != TRDP_NO_ERR)
-            {
-                /* failure */
-                print(-4, "tlm_replyQuery call error %s", get_result_string(err));
-            }
-            break;
+           /* check for errors */
+           if (err != TRDP_NO_ERR)
+           {
+               /* failure */
+               print(-4, "tlm_replyQuery call error %s", get_result_string(err));
+           }
+           break;
 
-        case TRDP_MSG_MC:
-            /* send confirm */
-            err = tlm_confirm(
-                    apph,                           /* session handle */
-                    (const TRDP_UUID_T *) &msg->sessionId, /* session id */
-                    msg->replyStatus,               /* reply status */
-                    NULL);                          /* send parameters */
+       case TRDP_MSG_MC:
+           /* send confirm */
+           err = tlm_confirm(
+                   apph,                            /* session handle */
+                   (const TRDP_UUID_T *) &msg->sessionId,  /* session id */
+                   (UINT16) msg->replyStatus,       /* reply status */
+                   NULL);                           /* send parameters */
 
-            /* check for errors */
-            if (err != TRDP_NO_ERR)
-            {
-                /* failure */
-                print(-4, "tlm_confirm call error %s", get_result_string(err));
-            }
-            break;
+           /* check for errors */
+           if (err != TRDP_NO_ERR)
+           {
+               /* failure */
+               print(-4, "tlm_confirm call error %s", get_result_string(err));
+           }
+           break;
 
-        default:;
+       default:;
     }
 }
 
@@ -1218,67 +1246,67 @@ void recv_msg (const TRDP_MD_INFO_T *msg, UINT8 *data, UINT32 size)
     /* depending on message type */
     switch (msg->msgType)
     {
-        case TRDP_MSG_MN:
-            /* notification received */
-            break;
+       case TRDP_MSG_MN:
+           /* notification received */
+           break;
 
-        case TRDP_MSG_MR:
-            /* request received */
-            switch (msg->comId / 1000)
-            {
-                case TST_REQREP_TCP:
-                case TST_REQREP_UCAST:
-                case TST_REQREP_MCAST_1:
-                case TST_REQREP_MCAST_N:
-                    reply(msg, TRDP_MSG_MP, TRDP_FLAGS_CALLBACK);
-                    break;
-                case TST_REQREPCFM_TCP:
-                case TST_REQREPCFM_UCAST:
-                case TST_REQREPCFM_MCAST_1:
-                case TST_REQREPCFM_MCAST_N:
-                    reply(msg, TRDP_MSG_MQ, TRDP_FLAGS_CALLBACK);
-                    break;
-            }
-            break;
+       case TRDP_MSG_MR:
+           /* request received */
+           switch (msg->comId / 1000)
+           {
+              case TST_REQREP_TCP:
+              case TST_REQREP_UCAST:
+              case TST_REQREP_MCAST_1:
+              case TST_REQREP_MCAST_N:
+                  reply(msg, TRDP_MSG_MP, TRDP_FLAGS_CALLBACK);
+                  break;
+              case TST_REQREPCFM_TCP:
+              case TST_REQREPCFM_UCAST:
+              case TST_REQREPCFM_MCAST_1:
+              case TST_REQREPCFM_MCAST_N:
+                  reply(msg, TRDP_MSG_MQ, TRDP_FLAGS_CALLBACK);
+                  break;
+           }
+           break;
 
-        case TRDP_MSG_MP:
-            /* reply received */
-            switch (sts.test)
-            {
-                case TST_REQREP_TCP:
-                case TST_REQREP_UCAST:
-                case TST_REQREP_MCAST_1:
-                    /* call finished */
-                    enqueue(REQ_DONE, -2, NULL, TRDP_FLAGS_DEFAULT);
-                    break;
-            }
-            break;
+       case TRDP_MSG_MP:
+           /* reply received */
+           switch (sts.test)
+           {
+              case TST_REQREP_TCP:
+              case TST_REQREP_UCAST:
+              case TST_REQREP_MCAST_1:
+                  /* call finished */
+                  enqueue(REQ_DONE, -2, NULL, TRDP_FLAGS_DEFAULT);
+                  break;
+           }
+           break;
 
-        case TRDP_MSG_MQ:
-            /* reply, confirm required */
-            if (sts.test == TST_REQREPCFM_TCP)
-            {
-                confirm(msg, TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP);
-            }
-            else
-            {
-                confirm(msg, TRDP_FLAGS_CALLBACK);
-            }
-            switch (sts.test)
-            {
-                case TST_REQREPCFM_TCP:
-                case TST_REQREPCFM_UCAST:
-                case TST_REQREPCFM_MCAST_1:
-                    /* call finished */
-                    enqueue(REQ_DONE, -2, NULL, TRDP_FLAGS_DEFAULT);
-                    break;
-            }
-            break;
+       case TRDP_MSG_MQ:
+           /* reply, confirm required */
+           if (sts.test == TST_REQREPCFM_TCP)
+           {
+               confirm(msg, TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP);
+           }
+           else
+           {
+               confirm(msg, TRDP_FLAGS_CALLBACK);
+           }
+           switch (sts.test)
+           {
+              case TST_REQREPCFM_TCP:
+              case TST_REQREPCFM_UCAST:
+              case TST_REQREPCFM_MCAST_1:
+                  /* call finished */
+                  enqueue(REQ_DONE, -2, NULL, TRDP_FLAGS_DEFAULT);
+                  break;
+           }
+           break;
 
-        case TRDP_MSG_MC:
-            /* confirm received */
-            break;
+       case TRDP_MSG_MC:
+           /* confirm received */
+           break;
 
-        default:;
+       default:;
     }
 }

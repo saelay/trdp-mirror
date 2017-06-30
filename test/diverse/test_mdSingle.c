@@ -14,6 +14,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
 /***********************************************************************************************************************
@@ -94,6 +95,14 @@ const UINT8     cDemoData[] = " "
     "It begins with a house.\n";
 
 UINT8 gBuffer[64 * 1024];
+
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void dbgOut (void *, TRDP_LOG_T , const CHAR8 *, const CHAR8 *, UINT16 , const CHAR8 *);
+void usage (const char *);
+void myPDcallBack (void *, TRDP_APP_SESSION_T,const TRDP_PD_INFO_T *, UINT8 *, UINT32 );
+void mdCallback (void *, TRDP_APP_SESSION_T, const TRDP_MD_INFO_T *, UINT8 *, UINT32 );
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -295,19 +304,19 @@ void dbgOut (
  */
 int main (int argc, char *argv[])
 {
-    int ip[4];
+    unsigned int ip[4];
     TRDP_MD_CONFIG_T        mdConfiguration =
-    {mdCallback, &sSessionData, {0, 64}, TRDP_FLAGS_CALLBACK, 1000000, 1000000, 1000000, 17225, 17225};
+    {mdCallback, &sSessionData, {0u, 64u, 0u}, TRDP_FLAGS_CALLBACK, 1000000u, 1000000u, 1000000u, 1000000u, 17225u, 17225u, 10};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     VOS_IF_REC_T            interfaces[MAX_IF];
     BOOL8                   lastRun = FALSE;
 
     int             rv          = 0;
-    UINT32          destIP      = 0;
-    UINT32          counter     = 0;
-    UINT32          expReplies  = 1;
-    UINT32          delay       = 1000;
+    UINT32          destIP      = 0u;
+    UINT32          counter     = 0u;
+    UINT32          expReplies  = 1u;
+    UINT32          delay       = 1000u;
     TRDP_FLAGS_T    flags       = TRDP_FLAGS_CALLBACK; /* default settings: callback and UDP */
     int             ch;
 
@@ -548,7 +557,7 @@ int main (int argc, char *argv[])
         }
         else
         {
-            vos_threadDelay((UINT32)(tv.tv_sec * 1000000u) + tv.tv_usec);
+            vos_threadDelay((UINT32)(tv.tv_sec * 1000000) + (UINT32) tv.tv_usec);
             rv = 0;
 
 

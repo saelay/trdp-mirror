@@ -48,6 +48,7 @@
  * DEFINITIONS
  */
 
+#define NO_OF_ERROR_STRINGS  52u
 
 /***********************************************************************************************************************
  * GLOBALS
@@ -208,8 +209,54 @@ static const UINT32 sc32_table[256] PROGMEM =
     0x70629EDFU, 0x84CE65CCU, 0x6D9793EAU, 0x993B68F9U
 };
 
+#if MD_SUPPORT
+const CHAR8         *cErrStrings[NO_OF_ERROR_STRINGS] PROGMEM =
+{
+    "TRDP_NO_ERR (no error)",                                           /**< No error                                 */
+    "TRDP_PARAM_ERR (parameter missing or out of range)",               /**< Parameter missing or out of range        */
+    "TRDP_INIT_ERR (call without valid initialization)",                /**< Call without valid initialization        */
+    "TRDP_NOINIT_ERR (call with invalid handle)",                       /**< Call with invalid handle                 */
+    "TRDP_TIMEOUT_ERR (timeout)",                                       /**< Timout                                   */
+    "TRDP_NODATA_ERR (non blocking mode: no data received)",            /**< Non blocking mode: no data received      */
+    "TRDP_SOCK_ERR (socket error / option not supported)",              /**< Socket error / option not supported      */
+    "TRDP_IO_ERR (socket IO error, data can't be received/sent)", /**< Socket IO error, data can't be received/sent   */
+    "TRDP_MEM_ERR (no more memory available)",                          /**< No more memory available                 */
+    "TRDP_SEMA_ERR (semaphore not available)",                          /**< Semaphore not available                  */
+    "TRDP_QUEUE_ERR (queue empty)",                                     /**< Queue empty                              */
+    "TRDP_QUEUE_FULL_ERR (queue full)",                                 /**< Queue full                               */
+    "TRDP_MUTEX_ERR (mutex not available)",                             /**< Mutex not available                      */
+    "TRDP_THREAD_ERR (thread error)",                                   /**< Thread error                             */
+    "TRDP_BLOCK_ERR (system call would have blocked)",          /**< System call would have blocked in blocking mode  */
+    "TRDP_INTEGRATION_ERR (alignment or endianess wrong)",      /**< Alignment or endianess for selected target wrong */
+    "TRDP_NOCONN_ERR (No TCP connection)",                              /**< No TCP connection                        */
+    "", "", "", "", "", "", "", "", "", "", "", "", "",
+    "TRDP_NOSESSION_ERR (no such session)",                             /**< No such session                          */
+    "TRDP_SESSION_ABORT_ERR (session aborted)",                         /**< Session aborted                          */
+    "TRDP_NOSUB_ERR (no subscriber)",                                   /**< No subscriber                            */
+    "TRDP_NOPUB_ERR (no publisher)",                                    /**< No publisher                             */
+    "TRDP_NOLIST_ERR (no listener)",                                    /**< No listener                              */
+    "TRDP_CRC_ERR (wrong CRC)",                                         /**< Wrong CRC                                */
+    "TRDP_WIRE_ERR (wire error)",                                       /**< Wire                                     */
+    "TRDP_TOPO_ERR (invalid topo count)",                               /**< Invalid topo count                       */
+    "TRDP_COMID_ERR (unknown comid)",                                   /**< Unknown ComId                            */
+    "TRDP_STATE_ERR (call in wrong state)",                             /**< Call in wrong state                      */
+    "TRDP_APP_TIMEOUT_ERR (application timeout)",                       /**< Application Timeout                      */
+    "TRDP_APP_REPLYTO_ERR (application reply sent timeout)",            /**< Application Reply Sent Timeout           */
+    "TRDP_APP_CONFIRMTO_ERR (application confirm sent timeout)",        /**< Application Confirm Sent Timeout         */
+    "TRDP_REPLYTO_ERR (protocol reply timeout)",                        /**< Protocol Reply Timeout                   */
+    "TRDP_CONFIRMTO_ERR (protocol confirm timeout)",                    /**< Protocol Confirm Timeout                 */
+    "TRDP_REQCONFIRMTO_ERR (protocol confirm timeout (request sender)", /**< Protocol Confirm Timeout (Request sender)*/
+    "TRDP_PACKET_ERR (Incomplete message data packet)",                 /**< Incomplete message data packet           */
+    "TRDP_UNRESOLVED_ERR (URI was not resolved)",                       /**< DNR: address could not be resolved       */
+    "TRDP_XML_PARSER_ERR (error while parsing XML file)",               /**< Returned by the tau_xml subsystem        */
+    "TRDP_INUSE_ERR (Resource is in use)",                              /**< Resource is still in use                 */
+    "TRDP_MARSHALLING_ERR (Mismatch between source and dataset size)",  /**< Source size exceeded, dataset mismatch   */
+    "TRDP_UNKNOWN_ERR (Unspecified error)"                              /**< Unspecified error                        */
+};
+#endif
+
 #ifdef DEBUG
-static BOOL8        sIsBigEndian = FALSE;
+static BOOL8 sIsBigEndian = FALSE;
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -494,4 +541,28 @@ const char *vos_getVersionString (void)
 EXT_DECL const VOS_VERSION_T *vos_getVersion (void)
 {
     return &vosVersion;
+}
+
+/**********************************************************************************************************************/
+/** Return a human readable error representation.
+ *
+ *  @param[in]          error             The TRDP or VOS error code
+ *
+ *  @retval             const string pointer to error string
+ */
+EXT_DECL const CHAR8 *vos_getErrorString (VOS_ERR_T error)
+{
+    static char buf[64u];
+#if MD_SUPPORT
+    UINT32      index = (UINT32)((int)error * (-1));
+
+    if (index < NO_OF_ERROR_STRINGS)
+    {
+        return pgm_read_dword(&cErrStrings[index]);
+    }
+    vos_snprintf(buf, 64u, "%s (%d)", pgm_read_dword(&cErrStrings[NO_OF_ERROR_STRINGS - 1u]), error);
+#else
+    vos_snprintf(buf, 64u, "(%d)", error);
+#endif
+    return buf;
 }

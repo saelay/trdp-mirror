@@ -52,18 +52,18 @@ extern void *gRefCon;
 
 /** This is a helper define for separating a path in debug output */
 #ifdef WIN32
-#define VOS_DIR_SEP       '\\'
+#define VOS_DIR_SEP     '\\'
 #else
-#define VOS_DIR_SEP       '/'
+#define VOS_DIR_SEP     '/'
 #endif
-   
+
 /** Safe printf function */
 #ifdef WIN32
     #define vos_snprintf(str, size, format, ...) \
     _snprintf_s(str, size, _TRUNCATE, format, __VA_ARGS__)
 #elif defined(__clang__)
    #define vos_snprintf(str, size, format, ...) \
-   snprintf(str, size, format, __VA_ARGS__)
+    snprintf(str, size, format, __VA_ARGS__)
 #else
     #define vos_snprintf(str, size, format, args ...) \
     snprintf(str, size, format, ## args)
@@ -88,12 +88,12 @@ extern void *gRefCon;
      }                                                                         \
     }
 #elif defined(__clang__)
-    #define vos_printLog(level, format, ...)                      \
-    {if (gPDebugFunction != NULL)                                 \
-     {   char str[VOS_MAX_PRNT_STR_SIZE];                         \
-         (void)snprintf(str, sizeof(str), format, __VA_ARGS__);  \
-         vos_printLogStr(level, str);                             \
-     }                                                            \
+    #define vos_printLog(level, format, ...)                    \
+    {if (gPDebugFunction != NULL)                               \
+     {   char str[VOS_MAX_PRNT_STR_SIZE];                       \
+         (void)snprintf(str, sizeof(str), format, __VA_ARGS__); \
+         vos_printLogStr(level, str);                           \
+     }                                                          \
     }
 #else
     #define vos_printLog(level, format, args ...)            \
@@ -102,7 +102,7 @@ extern void *gRefCon;
          (void) snprintf(str, sizeof(str), format, ## args); \
          vos_printLogStr(level, str);                        \
      }                                                       \
-   }
+    }
 #endif
 
 
@@ -136,22 +136,22 @@ extern void *gRefCon;
 #endif
 #endif
 
-#define Swap32(val)     (UINT32)(((0xFF000000u & (UINT32)val) >> 24u) | \
-                                 ((0x00FF0000u & (UINT32)val) >> 8u)  | \
-                                 ((0x0000FF00u & (UINT32)val) << 8u)  | \
-                                 ((0x000000FFu & (UINT32)val) << 24u))
-    
+#define Swap32(val)  (UINT32)(((0xFF000000u & (UINT32)val) >> 24u) | \
+                              ((0x00FF0000u & (UINT32)val) >> 8u)  | \
+                              ((0x0000FF00u & (UINT32)val) << 8u)  | \
+                              ((0x000000FFu & (UINT32)val) << 24u))
+
 #ifdef B_ENDIAN
 /** introduce byte swapping on big endian machines needed for CRC handling */
-#define MAKE_LE(a)      Swap32(a)
+#define MAKE_LE(a)  Swap32(a)
 #else
 #ifdef L_ENDIAN
-#define MAKE_LE(a)      (a)
+#define MAKE_LE(a)  (a)
 #else
 #error "Endianess undefined!"
 #endif
 #endif
-    
+
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -229,8 +229,18 @@ EXT_DECL const CHAR8 *vos_getVersionString (void);
  *  @retval            const VOS_VERSION_T
  */
 EXT_DECL const VOS_VERSION_T *vos_getVersion (void);
-    
-    
+
+/**********************************************************************************************************************/
+/** Return a human readable error representation.
+ *
+ *  @param[in]          error            The TRDP or VOS error code
+ *
+ *  @retval             const string pointer to error string
+ */
+
+EXT_DECL const CHAR8 *vos_getErrorString (VOS_ERR_T error);
+
+
 
 #ifdef __cplusplus
 }

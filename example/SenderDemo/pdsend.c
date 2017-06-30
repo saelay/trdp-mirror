@@ -112,7 +112,7 @@ static  void mdCallback(
  *  @param[in]		pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
-void dbgOut (
+static void dbgOut (
     void        *pRefCon,
     TRDP_LOG_T  category,
     const CHAR8 *pTime,
@@ -168,7 +168,7 @@ void pd_updateSubscriber (int index)
 /******************************************************************************/
 void pd_stop (int redundant)
 {
-    tlp_setRedundant(gAppHandle, 0, redundant);
+    tlp_setRedundant(gAppHandle, 0, (BOOL8)redundant);
 }
 
 
@@ -183,10 +183,10 @@ int pd_init (
     uint32_t    comID,
     uint32_t    interval)
 {
-    TRDP_PD_CONFIG_T        pdConfiguration = {pdCallBack, NULL, {0, 0},
+    TRDP_PD_CONFIG_T        pdConfiguration = {pdCallBack, NULL, {0, 0, 0},
                                                TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 0};
-    TRDP_MD_CONFIG_T        mdConfiguration = {mdCallback, NULL, {0, 0},
-                                                TRDP_FLAGS_CALLBACK, 5000000, 5000000, 5000000, 0, 0, 2};
+    TRDP_MD_CONFIG_T        mdConfiguration = {mdCallback, NULL, {0, 0, 0},
+                                                TRDP_FLAGS_CALLBACK, 5000000, 5000000, 5000000, 0, 0, 2, 10};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, 100000, {}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
 
@@ -297,16 +297,16 @@ void pd_updateData (
     memcpy(gDataBuffer, pData, dataSize);
     gDataSize = dataSize;
     gDataChanged++;
-    tlp_setRedundant(gAppHandle, 0, gIsActive);
+    tlp_setRedundant(gAppHandle, 0, (BOOL8) gIsActive);
 }
 
 /******************************************************************************/
-uint32_t  gray2hex (uint32_t in)
+static uint32_t  gray2hex (uint32_t in)
 {
     static uint32_t last    = 0;
     uint32_t        ar[]    = {2, 0, 8, 0xc, 4, 6, 0xE};
-
-    for (int i = 0; i < 7; i++)
+    unsigned int i;
+    for (i = 0; i < 7; i++)
     {
         if(ar[i] == in)
         {
@@ -355,7 +355,7 @@ void pd_sub (
 PD_RECEIVE_PACKET_T *pd_get (
     int index)
 {
-    if (index < 0 || index >= sizeof(gRec) / sizeof(PD_RECEIVE_PACKET_T))
+    if (index < 0 || index >= (int) (sizeof(gRec) / sizeof(PD_RECEIVE_PACKET_T)))
     {
         return NULL;
     }
@@ -370,7 +370,7 @@ PD_RECEIVE_PACKET_T *pd_get (
  *  @param[in]      valid			flag for timeouts
  *  @retval         none
  */
-void pd_getData (int index, uint8_t *data, int invalid)
+static void pd_getData (int index, uint8_t *data, int invalid)
 {
     gRec[index].invalid = invalid;
     if (!invalid && data != NULL)
@@ -642,7 +642,7 @@ void pdCallBack (
 
 
 /******************************************************************************/
-int pd_loop2 ()
+int pd_loop2 (void)
 {
     /* INT32           pd_fd = 0; */
     TRDP_ERR_T  err;

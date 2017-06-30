@@ -14,6 +14,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
 
@@ -77,15 +78,21 @@ typedef struct testData {
 #define NoOfPackets        8
 TESTDATA_T    gPD[NoOfPackets] = 
 {
-    1001, 1000000, 1000,
-    1002, 100000, 1000,
-    1003, 100000, 1000,
-    1004, 2000000, 1000,
-    1005, 30000, 1000,
-    1006, 30000, 1000,
-    1007, 50000, 1000,
-    1008, 5000000, 1000
+    {1001, 1000000, 1000},
+    {1002, 100000, 1000},
+    {1003, 100000, 1000},
+    {1004, 2000000, 1000},
+    {1005, 30000, 1000},
+    {1006, 30000, 1000},
+    {1007, 50000, 1000},
+    {1008, 5000000, 1000}
 };
+
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void dbgOut (void *, TRDP_LOG_T , const CHAR8 *, const CHAR8 *, UINT16 , const CHAR8 *);
+void usage (const char *);
 
 /* Print a sensible usage message */
 void usage (const char *appName)
@@ -148,13 +155,13 @@ int main (int argc, char *argv[])
     TRDP_APP_SESSION_T  appHandle;  /*    Our identifier to the library instance    */
     TRDP_PUB_T          pubHandle;  /*    Our identifier to the publication    */
     TRDP_ERR_T          err;
-    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000, TRDP_TO_SET_TO_ZERO};
+    TRDP_PD_CONFIG_T    pdConfiguration = {NULL, NULL, {0u, 64u, 0u}, TRDP_FLAGS_NONE, 1000u, TRDP_TO_SET_TO_ZERO, 17224};
     TRDP_MEM_CONFIG_T   dynamicConfig = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK | TRDP_OPTION_TRAFFIC_SHAPING};
     
     int                 rv = 0;
-    UINT32              destIP = 0;
-    UINT32              ownIP = 0;
+    UINT32              destIP = 0u;
+    UINT32              ownIP = 0u;
 
     /*    Generate some data, that we want to send, when nothing was specified. */
     UINT8               *outputBuffer;
@@ -318,8 +325,13 @@ int main (int argc, char *argv[])
          The callback function will be called from within the tlc_process
          function (in it's context and thread)!
          */
-        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
-        
+        err = tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        if (err != TRDP_NO_ERR)
+        {
+            printf("tlc_process error\n");
+            break;
+        }
+
         /* Handle other ready descriptors... */
         if (rv > 0)
         {

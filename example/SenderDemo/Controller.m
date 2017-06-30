@@ -49,7 +49,7 @@ extern int gIsActive;
 - (IBAction)slider1:(id)sender 
 {
 	uint32_t	val = (uint32_t)[sender intValue];
-	[sliderField1 setIntValue:val];
+	[sliderField1 setIntValue:(int)val];
 	dataArray[3] = htonl(val);
 	dataChanged = true;
 	pd_updateData((uint8_t*)dataArray, sizeof(dataArray));
@@ -57,7 +57,7 @@ extern int gIsActive;
 - (IBAction)slider2:(id)sender 
 {
 	uint32_t	val = (uint32_t)[sender intValue];
-	[sliderField2 setIntValue:val];
+	[sliderField2 setIntValue:(int)val];
 	dataArray[4] = htonl(val);
 	dataChanged = true;
 	pd_updateData((uint8_t*)dataArray, sizeof(dataArray));
@@ -171,8 +171,7 @@ extern int gIsActive;
 {
     // set the color to blue (waiting for reply)
     [MDrecColor setColor:[NSColor blueColor]];
-    
-    if (md_request((char*)[[MDipAddress stringValue]UTF8String], [MDcomID intValue], (char*) [[MDOutMessage stringValue] UTF8String]) != 0)
+    if (md_request((char*)[[MDipAddress stringValue]UTF8String], (uint32_t) [MDcomID intValue], (char*) [[MDOutMessage stringValue] UTF8String]) != 0)
     {
         // set the color to blue (error while sending)
         [MDrecColor setColor:[NSColor orangeColor]];
@@ -229,7 +228,7 @@ extern int gIsActive;
         {
             [rec1Color setColor:[NSColor greenColor]];
         }
-        [rec1Count setIntValue:current->counter];
+        [rec1Count setIntValue:(int)current->counter];
         [rec1Message setStringValue:[NSString stringWithUTF8String:(const char*)current->message]];
         current->changed = 0;
     }
@@ -245,7 +244,7 @@ extern int gIsActive;
         {
             [rec2Color setColor:[NSColor greenColor]];
         }
-        [rec2Count setIntValue:current->counter];
+        [rec2Count setIntValue:(int)current->counter];
         [rec2Message setStringValue:[NSString stringWithUTF8String:(const char*)current->message]];
         current->changed = 0;
     }
@@ -261,7 +260,7 @@ extern int gIsActive;
         {
             [rec3Color setColor:[NSColor greenColor]];
         }
-        [rec3Count setIntValue:current->counter];
+        [rec3Count setIntValue:(int)current->counter];
         [rec3Message setStringValue:[NSString stringWithUTF8String:(const char*)current->message]];
         current->changed = 0;
     }
@@ -277,7 +276,7 @@ extern int gIsActive;
         {
             [rec4Color setColor:[NSColor greenColor]];
         }
-        [rec4Count setIntValue:current->counter];
+        [rec4Count setIntValue:(int)current->counter];
         [rec4Message setStringValue:[NSString stringWithUTF8String:(const char*)current->message]];
         current->changed = 0;
     }
@@ -293,7 +292,7 @@ extern int gIsActive;
         {
             [rec5Color setColor:[NSColor greenColor]];
         }
-        [rec5Bar setIntValue:current->counter];
+        [rec5Bar setIntValue:(int)current->counter];
         current->changed = 0;
     }
     
@@ -309,7 +308,7 @@ extern int gIsActive;
         else
         {
             [MDrecColor setColor:[NSColor greenColor]];
-        	[MRcomID setIntValue:mdCurrent->comID];
+        	[MRcomID setIntValue:(int)mdCurrent->comID];
         	[MRinMessage setStringValue:[NSString stringWithUTF8String:(const char*)mdCurrent->message]];
         }
         mdCurrent->changed = 0;
@@ -320,7 +319,7 @@ extern int gIsActive;
 #if 1
 - (void)doViewUpdates
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    //NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
     printf("doViewUpdates\n");
 	
@@ -330,7 +329,7 @@ extern int gIsActive;
         [self timerFired:nil];
     }
     
-    [pool release];
+    //[pool release];
 }
 #endif
 
