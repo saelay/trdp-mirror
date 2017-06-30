@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 #include <stdio.h>
 #include <string.h>
@@ -34,12 +35,12 @@ TRDP_DATASET_T  gDataSet1990 =
         {
             TRDP_UINT8,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_CHAR8,
             16,
-            NULL
+            0,0,0,NULL
         }
     }
 };
@@ -53,12 +54,12 @@ TRDP_DATASET_T  gDataSet1991 =
         {
             TRDP_UINT8,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             1990,
             1,
-            NULL
+            0,0,0,NULL
         }
     }
 };
@@ -72,12 +73,12 @@ TRDP_DATASET_T  gDataSet1992 =
         {
             TRDP_UINT8,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             1991,
             1,
-            NULL
+            0,0,0,NULL
         }
     }
 };
@@ -91,12 +92,12 @@ TRDP_DATASET_T  gDataSet1993 =
         {
             TRDP_UINT8,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             1992,
             1,
-            NULL
+            0,0,0,NULL
         }
     }
 };
@@ -110,327 +111,327 @@ TRDP_DATASET_T  gDataSet1000 =
         {
             TRDP_BOOL8,         /*    data type         */
             1,                  /*    no of elements    */
-            NULL                /*    cache             */
+            0,0,0,NULL          /*    cache             */
         },                      /* size = 1 */
         {
             TRDP_CHAR8,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 2 */
         {
             TRDP_UTF16,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 4 */
         {
             TRDP_INT8,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 5 */
         {
             TRDP_INT16,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 7 */
         {
             TRDP_INT32,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 11 */
         {
             TRDP_INT64,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 19 */
         {
             TRDP_UINT8,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 20 */
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 22 */
         {
             TRDP_UINT32,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 26 */
         {
             TRDP_UINT64,    /* 10    */
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 34 */
         {
             TRDP_REAL32,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 38 */
         {
             TRDP_REAL64,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 46 */
         {
             TRDP_TIMEDATE32,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 50 */
         {
             TRDP_TIMEDATE48,
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 56 */
         {
             TRDP_TIMEDATE64,        /* 15    */
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 64 */
         {    /* 16    */
             TRDP_BOOL8,         /*    data type        */
             4,                  /*    no of elements    */
-            NULL
+            0,0,0,NULL
         },                      /* size = 68 */
         {
             TRDP_CHAR8,
             16,
-            NULL
+            0,0,0,NULL
         },                      /* size = 84 */
         {
             TRDP_UTF16,
             16,
-            NULL
+            0,0,0,NULL
         },                      /* size = 116 */
         {
             TRDP_INT8,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 120 */
         {
             TRDP_INT16,    /* 20    */
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 128 */
         {
             TRDP_INT32,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 144 */
         {
             TRDP_INT64,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 176 */
         {
             TRDP_UINT8,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 180 */
         {
             TRDP_UINT16,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 188 */
         {
             TRDP_UINT32,        /* 25    */
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 204 */
         {
             TRDP_UINT64,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 236 */
         {
             TRDP_REAL32,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 252 */
         {
             TRDP_REAL64,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 284 */
         {
             TRDP_TIMEDATE32,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 300 */
         {
             TRDP_TIMEDATE48,    /* 30    */
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 324 */
         {
             TRDP_TIMEDATE64,
             4,
-            NULL
+            0,0,0,NULL
         },                      /* size = 356 */
         {
             TRDP_UINT16,    /* 32    */
             1,
-            NULL
+            0,0,0,NULL
         },                      /* size = 358 */
         {
             TRDP_BOOL8,   /*    data type        */
             0,               /*    no of elements    */
-            NULL
+            0,0,0,NULL
         },                      /* size = 362 for current test! */
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_CHAR8,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UTF16,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_INT8,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_INT16,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_INT32,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_INT64,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT8,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT32,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT64,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_REAL32,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_REAL64,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_TIMEDATE32,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_TIMEDATE48,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_TIMEDATE64,
             0,
-            NULL
+            0,0,0,NULL
         },
         {
             1993,
             1,
-            NULL
+            0,0,0,NULL
         }
     }
 };
@@ -439,22 +440,22 @@ TRDP_DATASET_T  gDataSet1001 =
 {
     1001,       /*    dataset/com ID  */
     0,          /*    reserved        */
-    3,         /*    No of elements, var size    */
+    3,          /*    No of elements, var size    */
     {           /*    TRDP_DATASET_ELEMENT_T[]    */
         {
             TRDP_TIMEDATE64,    /*    Array    */
             4,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT16,        /*    Size of variable dataset    */
             1,
-            NULL
+            0,0,0,NULL
         },
         {
             TRDP_UINT8,
             0,
-            NULL
+            0,0,0,NULL
         }
     }
 };
@@ -578,13 +579,13 @@ struct myDataSet1000
     0.12345678,
     0x12345678,
     {0x12345678, 0x9ABC},            /* 14    */
-    {0x12345678, 0x9ABCDEF0},
+    {(INT32)0x12345678, (INT32)0x9ABCDEF0},
     {1, 0, 1, 0},                   /* BOOL8 array fixed size */
     "Hello old World",
     {0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037, 0x0038, 0x0039, 0x0040, 0x0041, 0x0042, 0x0043,
      0x0044, 0},
     {0x12, 0x34, 0x55, 0x78},
-    {0x1234, 0x5678, 0x9ABC, 0xDEF0},    /* index == 20    */
+    {(INT16)0x1234, (INT16)0x5678, (INT16)0x9ABC, (INT16)0xDEF0},    /* index == 20    */
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     {0x123456789ABCDEF1, 0x123456789ABCDEF2, 0x123456789ABCDEF3, 0x123456789ABCDEF4},
     {0x01, 0x23, 0x45, 0x67},
@@ -595,7 +596,7 @@ struct myDataSet1000
     {0.12345671, 0.12345672, 0.12345673, 0.12345674},
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},
     {{0x12345671, 0x89A1}, {0x12345672, 0x89A2}, {0x12345673, 0x89A3}, {0x12345674, 0x89A4}},
-    {{0x12345671, 0x89ABCDE1}, {0x12345672, 0x89ABCDE2}, {0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
+    {{(INT32)0x12345671, (INT32)0x89ABCDE1}, {(INT32)0x12345672, (INT32)0x89ABCDE2}, {(INT32)0x12345673, (INT32)0x89ABCDE3}, {(INT32)0x12345674, (INT32)0x89ABCDE4}},
     4,                                /* 32    */
     {1, 0, 1, 0},                    /* BOOL8 array var size */
     16,
@@ -606,7 +607,7 @@ struct myDataSet1000
     4,
     {0x12, 0x34, 0x55, 0x78},
     4,
-    {0x1234, 0x5678, 0x9ABC, 0xDEF0},
+    {0x1234, 0x5678, (INT16)0x9ABC, (INT16)0xDEF0},
     4,
     {0x12345671, 0x12345672, 0x12345673, 0x12345674},    /* 43    */
     4,
@@ -628,7 +629,7 @@ struct myDataSet1000
     4,
     {{0x12345671, 0x89A1}, {0x12345672, 0x89A2}, {0x12345673, 0x89A3}, {0x12345674, 0x89A4}},
     4,
-    {{0x12345671, 0x89ABCDE1}, {0x12345672, 0x89ABCDE2}, {0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
+    {{(INT32)0x12345671, (INT32)0x89ABCDE1}, {(INT32)0x12345672, (INT32)0x89ABCDE2}, {(INT32)0x12345673, (INT32)0x89ABCDE3}, {(INT32)0x12345674, (INT32)0x89ABCDE4}},
     {1, {2, {3, {4, "Nested Datasets"}}}}
 };
 
@@ -639,7 +640,7 @@ struct myDataSet1001
     UINT8       array[4];
 } gMyDataSet1001 =
 {
-    {{0x12345671, 0x89ABCDE1}, {0x12345672, 0x89ABCDE2}, {0x12345673, 0x89ABCDE3}, {0x12345674, 0x89ABCDE4}},
+    {{(INT32)0x12345671, (INT32)0x89ABCDE1}, {(INT32)0x12345672, (INT32)0x89ABCDE2}, {(INT32)0x12345673, (INT32)0x89ABCDE3}, {(INT32)0x12345674, (INT32)0x89ABCDE4}},
     4,
     {1, 0, 1, 0}                       /* UINT8 array var size */
 };

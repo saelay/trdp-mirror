@@ -14,6 +14,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
 /***********************************************************************************************************************
@@ -87,12 +88,30 @@ const UINT8 cDemoData[] = " "
     "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
     "It begins with a house.\n";
 
+/***********************************************************************************************************************
+ * Prototypes
+ */
+void    myPDcallBack (void                  *pRefCon,
+                      TRDP_APP_SESSION_T    appHandle,
+                      const TRDP_PD_INFO_T  *pMsg,
+                      UINT8                 *pData,
+                      UINT32                dataSize);
+void dbgOut (void           *pRefCon,
+             TRDP_LOG_T     category,
+             const CHAR8    *pTime,
+             const CHAR8    *pFile,
+             UINT16         LineNumber,
+             const CHAR8    *pMsgStr);
+void    usage (const char *appName);
+void initPacketList (UINT32  pubBaseComId,
+                     UINT32  subBaseComId);
+
 void initPacketList (
     UINT32  pubBaseComId,
     UINT32  subBaseComId)
 {
-    int i;
-    for (i = 0; i < MAX_NO_OF_PKTS; i++)
+    unsigned int i;
+    for (i = 0u; i < MAX_NO_OF_PKTS; i++)
     {
         gPubPackets[i].pubHandle    = 0;
         gPubPackets[i].subHandle    = 0;
@@ -206,7 +225,7 @@ int main (int argc, char * *argv)
 {
     TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0, 0}, TRDP_FLAGS_CALLBACK,
                                                10000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};

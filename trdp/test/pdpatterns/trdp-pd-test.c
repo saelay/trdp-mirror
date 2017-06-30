@@ -16,6 +16,8 @@
  *
  * $Id: trdp_reserved.c 898 2013-06-05 15:19:20Z 97025 $
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
+ *
  */
 
 #include <stdio.h>
@@ -79,13 +81,20 @@ unsigned cycle = 0;
 Port ports[64];                     /* array of ports          */
 int nports = 0;                     /* number of ports         */
 
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void gen_push_ports_master(UINT32 comid, UINT32 echoid);
+void gen_pull_ports_slave(UINT32 reqid, UINT32 repid);
+void gen_push_ports_slave(UINT32 comid, UINT32 echoid);
+
 /* --- generate PUSH ports ---------------------------------------------------*/
 
 void gen_push_ports_master(UINT32 comid, UINT32 echoid)
 {
     Port src, snk;
     int num = nports;
-    int a, sz, per;
+    UINT32  a, sz, per;
     
     printf("- generating PUSH ports (master side) ... ");
 
@@ -103,12 +112,12 @@ void gen_push_ports_master(UINT32 comid, UINT32 echoid)
         {   /* for all cycle periods */
             for (per = 0; per < 2; ++per)
             {   /* comid  */
-                src.comid = comid + 100*a+40*(per+1)+3*(sz+1);
-                snk.comid = echoid + 100*a+40*(per+1)+3*(sz+1);
+                src.comid = comid + 100u *a+40*(per+1)+3*(sz+1);
+                snk.comid = echoid + 100u *a+40*(per+1)+3*(sz+1);
                 /* dataset size */
-                src.size = snk.size = size[sz];
+                src.size = snk.size = (UINT32) size[sz];
                 /* period [usec] */
-                src.cycle = 1000 * period[per];
+                src.cycle = (UINT32) 1000u * (UINT32)period[per];
                 /* addresses */
                 if (!a)
                 {   /* unicast address */
@@ -136,7 +145,7 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
 {
     Port src, snk;
     int num = nports;
-    int a, sz, per;
+    UINT32 a, sz, per;
 
     printf("- generating PUSH ports (slave side) ... ");
 
@@ -157,9 +166,9 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
                 src.comid = echoid + 100*a+40*(per+1)+3*(sz+1);
                 snk.comid = comid + 100*a+40*(per+1)+3*(sz+1);
                 /* dataset size */
-                src.size = snk.size = size[sz];
+                src.size = snk.size = (UINT32) size[sz];
                 /* period [usec] */
-                src.cycle = 1000 * period[per];
+                src.cycle = (UINT32) (1000 * period[per]);
                 /* addresses */
                 if (!a)
                 {   /* unicast address */
@@ -185,11 +194,11 @@ void gen_push_ports_slave(UINT32 comid, UINT32 echoid)
 
 /* --- generate PULL ports ---------------------------------------------------*/
 
-void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
+static void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
 {
     Port req, rep;
     int num = nports;
-    int a, sz;
+    UINT32  a, sz;
 
     printf("- generating PULL ports (master side) ... ");
 
@@ -207,8 +216,8 @@ void gen_pull_ports_master(UINT32 reqid, UINT32 repid)
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
             /* dataset size */
-            req.size = size[sz];
-            rep.size = size[sz + 1];
+            req.size = (UINT32) size[sz];
+            rep.size = (UINT32) size[sz + 1];
             /* addresses */
             if (!a)
             {   /* unicast address */
@@ -242,7 +251,7 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
 {
     Port req, rep;
     int num = nports;
-    int a, sz;
+    UINT32 a, sz;
 
     printf("- generating PULL ports (slave side) ... ");
 
@@ -261,8 +270,8 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
             req.comid = reqid + 100*a + 3*(sz+1);
             rep.comid = repid + 100*a + 3*(sz+1);
             /* dataset size */
-            req.size = size[sz];
-            rep.size = size[sz + 1];
+            req.size = (UINT32) size[sz];
+            rep.size = (UINT32) size[sz + 1];
             /* addresses */
             if (!a)
             {   /* unicast address */
@@ -290,7 +299,7 @@ void gen_pull_ports_slave(UINT32 reqid, UINT32 repid)
 
 /* --- setup ports -----------------------------------------------------------*/
 
-void setup_ports()
+static void setup_ports()
 {
     int i;
     printf("- setup ports:\n");
@@ -377,7 +386,7 @@ void setup_ports()
 
 /* --- convert trdp error code to string -------------------------------------*/
 
-const char * get_result_string(int ret)
+static const char * get_result_string(int ret)
 {
     static char buf[128];
 
@@ -532,17 +541,17 @@ int snprintf(char * str, size_t size, const char * format, ...)
 
 #elif defined (POSIX)
 
-void cursor_home()
+static void cursor_home()
 {
     printf("\033" "[H");
 }
 
-void clear_screen()
+static void clear_screen()
 {
     printf("\033" "[H" "\033" "[2J");
 }
 
-int _get_term_size(int * w, int * h)
+static int _get_term_size(int * w, int * h)
 {
     struct winsize ws;
     int ret = ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
@@ -555,27 +564,27 @@ int _get_term_size(int * w, int * h)
     return ret;
 }
 
-void _set_color_red()
+static void _set_color_red()
 {
     printf("\033" "[0;1;31m");
 }
 
-void _set_color_green()
+static void _set_color_green()
 {
     printf("\033" "[0;1;32m");
 }
 
-void _set_color_blue()
+static void _set_color_blue()
 {
     printf("\033" "[0;1;34m");
 }
 
-void _set_color_default()
+static void _set_color_default()
 {
     printf("\033" "[0m");
 }
 
-void _sleep_msec(int msec)
+static void _sleep_msec(int msec)
 {
     struct timespec ts;
     ts.tv_sec = msec / 1000;
@@ -638,11 +647,12 @@ void _sleep_msec(int msec)
 
 /* --- test data processing --------------------------------------------------*/
 
-void process_data()
+static void process_data()
 {
     static int w = 80;
     int _w, _h;
-    int i, n;
+    int i;
+    unsigned n;
     /* get terminal size */
     if (_get_term_size(&_w, &_h) == 0)
     {   /* changed width? */
@@ -759,7 +769,7 @@ void process_data()
 
 /* --- poll received data ----------------------------------------------------*/
 
-void poll_data()
+static void poll_data()
 {
     TRDP_PD_INFO_T pdi;
     int i;
@@ -779,7 +789,7 @@ void poll_data()
 
 static FILE *pLogFile;
 
-void printLog(
+static void printLog(
     void        *pRefCon,
     VOS_LOG_T   category,
     const CHAR8 *pTime,

@@ -14,6 +14,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
 /***********************************************************************************************************************
@@ -48,6 +49,17 @@
 #define RESERVED_MEMORY  1000000
 
 CHAR8 gBuffer[32];
+
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void dbgOut (void *,
+             TRDP_LOG_T,
+             const  CHAR8 *,
+             const  CHAR8 *,
+             UINT16,
+             const  CHAR8 *);
+void usage (const char *);
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -103,68 +115,69 @@ void usage (const char *appName)
  */
 int main (int argc, char *argv[])
 {
-    int                     ip[4];
+    unsigned int    ip[4];
     TRDP_APP_SESSION_T      appHandle; /*    Our identifier to the library instance    */
     TRDP_SUB_T              subHandle; /*    Our identifier to the publication         */
-    UINT32                  comId = PD_COMID;
-    TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000000, TRDP_TO_SET_TO_ZERO, 0};
+    UINT32          comId = PD_COMID;
+    TRDP_ERR_T err;
+    TRDP_PD_CONFIG_T        pdConfiguration =
+    {NULL, NULL, {0u, 64u, 0u}, TRDP_FLAGS_NONE, 1000000u, TRDP_TO_SET_TO_ZERO, 0u};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
-    UINT32                  ownIP   = 0;
-    UINT32                  dstIP   = 0;
-    int                     rv      = 0;
+    UINT32  ownIP   = 0u;
+    UINT32  dstIP   = 0u;
+    int     rv      = 0;
 
-    int                     ch;
-    TRDP_PD_INFO_T          myPDInfo;
-    UINT32                  receivedSize;
+    int     ch;
+    TRDP_PD_INFO_T myPDInfo;
+    UINT32  receivedSize;
 
     while ((ch = getopt(argc, argv, "o:m:h?vc:")) != -1)
     {
         switch (ch)
         {
-            case 'o':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'm':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                dstIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'c':
-            {   /*  read comId    */
-                if (sscanf(optarg, "%u",
-                           &comId) < 1)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                break;
-            }
-            case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n",
-                       argv[0], APP_VERSION, __DATE__, __TIME__);
-                exit(0);
-                break;
-            case 'h':
-            case '?':
-            default:
-                usage(argv[0]);
-                return 1;
+           case 'o':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'm':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               dstIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'c':
+           {    /*  read comId    */
+               if (sscanf(optarg, "%u",
+                          &comId) < 1)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               break;
+           }
+           case 'v':    /*  version */
+               printf("%s: Version %s\t(%s - %s)\n",
+                      argv[0], APP_VERSION, __DATE__, __TIME__);
+               exit(0);
+               break;
+           case 'h':
+           case '?':
+           default:
+               usage(argv[0]);
+               return 1;
         }
     }
 
@@ -218,9 +231,9 @@ int main (int argc, char *argv[])
      */
     while (1)
     {
-        TRDP_FDS_T          rfds;
-        INT32               noDesc;
-        TRDP_TIME_T         tv      = {0, 0};
+        TRDP_FDS_T rfds;
+        INT32 noDesc;
+        TRDP_TIME_T tv = {0, 0};
         const TRDP_TIME_T   max_tv  = {10, 0};
         const TRDP_TIME_T   min_tv  = {0, 10000};
 
@@ -279,7 +292,12 @@ int main (int argc, char *argv[])
          The callback function will be called from within the tlc_process
          function (in it's context and thread)!
          */
-        tlc_process(appHandle, &rfds, &rv);
+        err = tlc_process(appHandle, &rfds, &rv);
+        if (err != TRDP_NO_ERR)
+        {
+            printf("tlc_process error\n");
+            break;
+        }
 
         /* Handle other ready descriptors... */
         if (rv > 0)

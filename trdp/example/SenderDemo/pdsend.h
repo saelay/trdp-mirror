@@ -68,7 +68,7 @@ int pd_init (
 	uint32_t	comID,
 	uint32_t	interval);
 
-void pd_deinit ();
+void pd_deinit (void);
 
 void pd_stop (int redundant);
 
@@ -85,12 +85,12 @@ void setInterval (uint32_t interval);
 void setIPRec (int index, const char* ipAddr);
 void setComIDRec (int index, uint32_t comID);
 
-int pd_loop2 ();
+int pd_loop2 (void);
 
 // MD requester
 //void md_changeListener(uint32_t, uint32_t);
 void md_listen(MD_RECEIVE_PACKET_T*);
 int md_request (const char* ipAddr, uint32_t, char*);
-MD_RECEIVE_PACKET_T* md_get ();
+MD_RECEIVE_PACKET_T* md_get (void);
 
 

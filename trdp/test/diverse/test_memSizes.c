@@ -14,6 +14,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
 /***********************************************************************************************************************
@@ -38,18 +39,18 @@
 
 /* Some sample comId definitions    */
 
-#define PUBLISH_INTERVAL    100000
-#define SUBSCRIBE_TIMEOUT   10000000
-#define DATASIZE_SMALL      4
-#define DATASIZE_MEDIUM     128
+#define PUBLISH_INTERVAL    100000u
+#define SUBSCRIBE_TIMEOUT   10000000u
+#define DATASIZE_SMALL      4u
+#define DATASIZE_MEDIUM     128u
 #define DATASIZE_LARGE      TRDP_MAX_PD_DATA_SIZE
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY     1000000
+#define RESERVED_MEMORY     1000000u
 
 #define APP_VERSION         "0.1"
 
-#define MAX_NO_OF_PKTS      1
+#define MAX_NO_OF_PKTS      1u
 
 typedef struct pd_demo_pkt
 {
@@ -99,11 +100,21 @@ const UINT8 cDemoData[] = " "
     "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
     "It begins with a house.\n";
 
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void dbgOut (void *, TRDP_LOG_T , const CHAR8 *, const CHAR8 *, UINT16 , const CHAR8 *);
+void usage (const char *);
+void myPDcallBack (void *, TRDP_APP_SESSION_T,const TRDP_PD_INFO_T *, UINT8 *, UINT32 );
+void initPacketList (UINT32  pubBaseComId, UINT32  subBaseComId);
+
+
 void initPacketList (
     UINT32  pubBaseComId,
     UINT32  subBaseComId)
 {
-    for (int i = 0; i < MAX_NO_OF_PKTS; i++)
+    unsigned int i;
+    for (i = 0u; i < MAX_NO_OF_PKTS; i++)
     {
         memcpy(gPubPackets[i].data, cDemoData, gPubPackets[i].dataSize);
         memset(gSubPackets[i].data, 0, TRDP_MAX_PD_DATA_SIZE);
@@ -202,12 +213,13 @@ int main (int argc, char * *argv)
 {
     TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
-                                               10000000, TRDP_TO_SET_TO_ZERO, 0};
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0u, 0u, 0u}, TRDP_FLAGS_CALLBACK,
+                                               10000000u, TRDP_TO_SET_TO_ZERO, 0u};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {}};
-    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0u, 0u, TRDP_OPTION_BLOCK};
     int rv = 0;
     int ch;
+    unsigned int ip[4], i;
 /*    UINT32  comId_In = SUBSCRIBE_COMID_BASE, comId_Out = PUBLISH_COMID_BASE; */
 
     /****** Parsing the command line arguments */
@@ -216,7 +228,6 @@ int main (int argc, char * *argv)
     {
         switch (ch)
         {
-            int ip[4];
             case 'o':
             {   /*  read ip    */
                 if (sscanf(optarg, "%u.%u.%u.%u",
@@ -285,16 +296,16 @@ int main (int argc, char * *argv)
 
     initPacketList(0, 0);
 
-    for (int i = 0; i < MAX_NO_OF_PKTS; i++)
+    for (i = 0u; i < MAX_NO_OF_PKTS; i++)
     {
         printf("Subscribing dataSize: %u Bytes\n", gSubPackets[i].dataSize);
         err = tlp_subscribe(appHandle,                  /*    our application identifier           */
                             &gSubPackets[i].subHandle,  /*    our subscription identifier          */
                             NULL, NULL,
                             gSubPackets[i].comID,       /*    ComID                                */
-                            0,                          /*    topocount: local consist only        */
-                            0,
-                            0,                          /*    Source to expect packets from        */
+                            0u,                          /*    topocount: local consist only        */
+                            0u,
+                            0u,                          /*    Source to expect packets from        */
                             gSubPackets[i].addr,        /*    Default destination    (or MC Group) */
                             TRDP_FLAGS_CALLBACK,        /*    packet flags                         */
                             gSubPackets[i].time,        /*    Time out in us                       */
@@ -313,12 +324,12 @@ int main (int argc, char * *argv)
         err = tlp_publish(appHandle,                    /*    our application identifier    */
                           &gPubPackets[i].pubHandle,    /*    our pulication identifier     */
                           gPubPackets[i].comID,         /*    ComID to send                 */
-                          0,                            /*    local consist only            */
-                          0,
-                          0,                            /*    default source IP             */
+                          0u,                            /*    local consist only            */
+                          0u,
+                          0u,                            /*    default source IP             */
                           gPubPackets[i].addr,          /*    where to send to              */
                           gPubPackets[i].time,          /*    Cycle time in ms              */
-                          0,                            /*    not redundant                 */
+                          0u,                            /*    not redundant                 */
                           TRDP_FLAGS_CALLBACK,          /*    Use callback for errors       */
                           NULL,                         /*    default qos and ttl           */
                           gPubPackets[i].dataSize ? gPubPackets[i].data : NULL,      /*    initial data*/
@@ -343,7 +354,7 @@ int main (int argc, char * *argv)
         VOS_FDS_T       rfds;
         INT32           noOfDesc;
         TRDP_TIME_T     tv;
-        TRDP_TIME_T     max_tv = {0, 100000};
+        TRDP_TIME_T     max_tv = {0u, 100000};
 
         /*
          Prepare the file descriptor set for the select call.
@@ -412,6 +423,7 @@ int main (int argc, char * *argv)
         {
             printf("tlc_process returned error\n");
             rv = 1;
+            break;
         }
 
         /* Display received information */
@@ -429,7 +441,7 @@ int main (int argc, char * *argv)
     /*
      *    We always clean up behind us!
      */
-    for (int i = 0; i < MAX_NO_OF_PKTS; i++)
+    for (i = 0u; i < MAX_NO_OF_PKTS; i++)
     {
         tlp_unpublish(appHandle, gPubPackets[i].pubHandle);
         tlp_unsubscribe(appHandle, gSubPackets[i].subHandle);

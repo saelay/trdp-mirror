@@ -14,6 +14,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
 /***********************************************************************************************************************
@@ -40,13 +41,29 @@
  */
 #define APP_VERSION     "1.2"
 
-#define DATA_MAX        1000
+#define DATA_MAX        1000u
 
-#define PD_COMID        1000
-#define PD_COMID_CYCLE  1000000             /* in us (1000000 = 1 sec) */
+#define PD_COMID        1000u
+#define PD_COMID_CYCLE  1000000u             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory    */
-#define RESERVED_MEMORY  160000
+#define RESERVED_MEMORY  160000u
+
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void dbgOut (void *,
+             TRDP_LOG_T,
+             const  CHAR8 *,
+             const  CHAR8 *,
+             UINT16,
+             const  CHAR8 *);
+void    usage (const char *);
+void    myPDcallBack (void *,
+                      TRDP_APP_SESSION_T,
+                      const TRDP_PD_INFO_T *,
+                      UINT8 *,
+                      UINT32 );
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -101,27 +118,28 @@ void usage (const char *appName)
  */
 int main (int argc, char *argv[])
 {
-    int                     ip[4];
+    unsigned int            ip[4];
     INT32                   hugeCounter = 0;
     TRDP_APP_SESSION_T      appHandle; /*    Our identifier to the library instance    */
     TRDP_PUB_T              pubHandle; /*    Our identifier to the publication         */
     UINT32                  comId       = PD_COMID;
     UINT32                  cycleTime   = PD_COMID_CYCLE;
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000000, TRDP_TO_SET_TO_ZERO, 0};
+    TRDP_PD_CONFIG_T        pdConfiguration =
+    {NULL, NULL, {0u, 64u, 0u}, TRDP_FLAGS_NONE, 1000000u, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-    UINT32                  ownIP   = 0;
-    int                     rv      = 0;
-    UINT32                  destIP  = 0;
+    UINT32                  ownIP           = 0u;
+    int rv = 0;
+    UINT32                  destIP = 0u;
 
     /*    Generate some data, that we want to send, when nothing was specified. */
     UINT8                   *outputBuffer;
     UINT8                   exampleData[DATA_MAX]   = "Hello World";
-    int                     outputBufferSize        = 32;
+    UINT32                  outputBufferSize        = 32u;
 
     UINT8                   data[DATA_MAX];
-    int                     ch;
+    int ch;
 
     outputBuffer = exampleData;
 
@@ -135,85 +153,85 @@ int main (int argc, char *argv[])
     {
         switch (ch)
         {
-            case 'o':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'c':
-            {   /*  read comId    */
-                if (sscanf(optarg, "%u",
-                           &comId) < 1)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                break;
-            }
-            case 's':
-            {   /*  read cycle time    */
-                if (sscanf(optarg, "%u",
-                           &cycleTime) < 1)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                break;
-            }
-            case 't':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'e':
-            {
-                outputBuffer        = NULL;
-                outputBufferSize    = 0;
-            }
-            break;
-            case 'd':
-            {   /*  data    */
-                char    c;
-                int     dataSize = 0;
-                do
-                {
-                    c = optarg[dataSize];
-                    dataSize++;
-                }
-                while (c != '\0');
+           case 'o':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'c':
+           {    /*  read comId    */
+               if (sscanf(optarg, "%u",
+                          &comId) < 1)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               break;
+           }
+           case 's':
+           {    /*  read cycle time    */
+               if (sscanf(optarg, "%u",
+                          &cycleTime) < 1)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               break;
+           }
+           case 't':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'e':
+           {
+               outputBuffer     = NULL;
+               outputBufferSize = 0;
+           }
+           break;
+           case 'd':
+           {    /*  data    */
+               char     c;
+               UINT32   dataSize = 0u;
+               do
+               {
+                   c = optarg[dataSize];
+                   dataSize++;
+               }
+               while (c != '\0');
 
-                if (dataSize >= DATA_MAX)
-                {
-                    fprintf(stderr, "The data is too long\n");
-                    return 1;
-                }
-                memcpy(data, optarg, dataSize);
-                outputBuffer        = data; /* move the pointer to the new data */
-                outputBufferSize    = dataSize;
-                break;
-            }
-            case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n",
-                       argv[0], APP_VERSION, __DATE__, __TIME__);
-                exit(0);
-                break;
-            case 'h':
-            case '?':
-            default:
-                usage(argv[0]);
-                return 1;
+               if (dataSize >= DATA_MAX)
+               {
+                   fprintf(stderr, "The data is too long\n");
+                   return 1;
+               }
+               memcpy(data, optarg, dataSize);
+               outputBuffer     = data;     /* move the pointer to the new data */
+               outputBufferSize = dataSize;
+               break;
+           }
+           case 'v':    /*  version */
+               printf("%s: Version %s\t(%s - %s)\n",
+                      argv[0], APP_VERSION, __DATE__, __TIME__);
+               exit(0);
+               break;
+           case 'h':
+           case '?':
+           default:
+               usage(argv[0]);
+               return 1;
         }
     }
 
@@ -340,7 +358,7 @@ int main (int argc, char *argv[])
         if (outputBuffer != NULL && strlen((char *)outputBuffer) == 0)
         {
             sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
-            outputBufferSize = (int) strlen((char *)outputBuffer);
+            outputBufferSize = (UINT32) strlen((char *)outputBuffer);
         }
 
         err = tlp_put(appHandle, pubHandle, outputBuffer, outputBufferSize);

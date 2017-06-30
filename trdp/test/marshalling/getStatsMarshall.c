@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *
  */
@@ -192,14 +193,33 @@ extern TRDP_COMID_DSID_MAP_T    gComIdMap[];
 extern TRDP_DATASET_T           *gDataSets[];
 extern const UINT32             cNoOfDatasets;
 
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void dbgOut (void *,
+             TRDP_LOG_T,
+             const  CHAR8 *,
+             const  CHAR8 *,
+             UINT16,
+             const  CHAR8 *);
+void    usage (const char *);
+void    myPDcallBack (void *,
+                      TRDP_APP_SESSION_T,
+                      const TRDP_PD_INFO_T *,
+                      UINT8 *,
+                      UINT32 );
+void print_stats (TRDP_STATISTICS_T *);
+
+
+/**********************************************************************************************************************/
 void print_stats (
     TRDP_STATISTICS_T *pData)
 {
-    int i;
+    unsigned int i;
 
     printf("\n--------------------\n");
     printf("version:        %u\n", pData->version);
-    printf("timestamp:      %ld:%u\n", pData->timeStamp.tv_sec, pData->timeStamp.tv_usec);
+    printf("timestamp:      %ld:%u\n", (long) pData->timeStamp.tv_sec, pData->timeStamp.tv_usec);
     printf("upTime:         %u\n", pData->upTime);
     printf("statisticTime:  %u\n", pData->statisticTime);
     printf("ownIpAddr:      %u\n", pData->ownIpAddr);
@@ -215,13 +235,13 @@ void print_stats (
     printf("mem.numFreeErr:     %u\n", pData->mem.numFreeErr);
 
     printf("mem.allocBlockSizes: ");
-    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    for (i = 0u; i < VOS_MEM_NBLOCKSIZES; i++)
     {
         printf("%u, ", pData->mem.blockSize[i]);
     }
 
     printf("\nmem.usedBlockSize:   ");
-    for (i = 0; i < VOS_MEM_NBLOCKSIZES; i++)
+    for (i = 0u; i < VOS_MEM_NBLOCKSIZES; i++)
     {
         printf("%u, ", pData->mem.usedBlockSize[i]);
     }
@@ -307,31 +327,31 @@ void myPDcallBack (
     /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
-        case TRDP_NO_ERR:
-            printf("ComID %d received\n", pMsg->comId);
-            if (pData)
-            {
-                if (pMsg->comId == 12)
-                {
-                    tau_unmarshall(NULL, pMsg->comId, pData, dataSize, (UINT8 *) &gBuffer, &dataSize, NULL);
-                    print_stats(&gBuffer);
-                    gKeepOnRunning = FALSE;
-                }
-            }
-            break;
+       case TRDP_NO_ERR:
+           printf("ComID %d received\n", pMsg->comId);
+           if (pData)
+           {
+               if (pMsg->comId == 12)
+               {
+                   tau_unmarshall(NULL, pMsg->comId, pData, dataSize, (UINT8 *) &gBuffer, &dataSize, NULL);
+                   print_stats(&gBuffer);
+                   gKeepOnRunning = FALSE;
+               }
+           }
+           break;
 
-        case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept    */
-            printf("Packet timed out (ComID %d, SrcIP: %s)\n",
-                   pMsg->comId,
-                   vos_ipDotted(pMsg->srcIpAddr));
-            memset(&gBuffer, 0, sizeof(gBuffer));
-            break;
-        default:
-            printf("Error on packet received (ComID %d), err = %d\n",
-                   pMsg->comId,
-                   pMsg->resultCode);
-            break;
+       case TRDP_TIMEOUT_ERR:
+           /* The application can decide here if old data shall be invalidated or kept    */
+           printf("Packet timed out (ComID %d, SrcIP: %s)\n",
+                  pMsg->comId,
+                  vos_ipDotted(pMsg->srcIpAddr));
+           memset(&gBuffer, 0, sizeof(gBuffer));
+           break;
+       default:
+           printf("Error on packet received (ComID %d), err = %d\n",
+                  pMsg->comId,
+                  pMsg->resultCode);
+           break;
     }
 }
 
@@ -346,15 +366,15 @@ int main (int argc, char * *argv)
     TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0},
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0, 0},
                                                TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     TRDP_MARSHALL_CONFIG_T  marshall        = {NULL, tau_unmarshall, 0};
 
-    int     rv = 0;
-    int     ch;
-    int     ip[4];
+    int rv = 0;
+    int ch;
+    unsigned int            ip[4];
     UINT32  destIP  = 0;
     UINT32  ownIP   = 0;
     UINT32  replyIP = 0;
@@ -370,45 +390,45 @@ int main (int argc, char * *argv)
     {
         switch (ch)
         {
-            case 't':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'o':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'r':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                replyIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
-                exit(0);
-                break;
-            case 'h':
-            case '?':
-            default:
-                usage(argv[0]);
-                return 1;
+           case 't':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'o':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'r':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u", &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               replyIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'v':    /*  version */
+               printf("%s: Version %s\t(%s - %s)\n", argv[0], APP_VERSION, __DATE__, __TIME__);
+               exit(0);
+               break;
+           case 'h':
+           case '?':
+           default:
+               usage(argv[0]);
+               return 1;
         }
     }
 

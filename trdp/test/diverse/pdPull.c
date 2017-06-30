@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  *      BL 2014-06-02: oversized data changed
  */
 
@@ -50,6 +51,14 @@
 UINT32  gComID          = 1000u;
 int     gKeepOnRunning  = TRUE;
 
+/***********************************************************************************************************************
+ * PROTOTYPES
+ */
+void dbgOut (void *, TRDP_LOG_T , const CHAR8 *, const CHAR8 *, UINT16 , const CHAR8 *);
+void usage (const char *);
+void myPDcallBack (void *, TRDP_APP_SESSION_T,const TRDP_PD_INFO_T *, UINT8 *, UINT32 );
+void print_data (UINT8 *pData, UINT32 len);
+
 /**********************************************************************************************************************/
 void print_data (UINT8 *pData, UINT32 len)
 {
@@ -61,15 +70,15 @@ void print_data (UINT8 *pData, UINT32 len)
     {
         if (i % 16u == 0u)
         {
-            if (ascii >= 0u)
+            if (ascii >= 0)
             {
                 printf("   ");
-                for (j = ascii; j < ascii + 16; j++)
+                for (j = (UINT32)ascii; j < (UINT32) ascii + 16; j++)
                 {
                     putc(isprint(pData[j]) ? pData[j] : '.', stdout);
                 }
             }
-            ascii = i;
+            ascii = (int) i;
             printf("\n%03x: ", i);
         }
         printf(" %02hhx", pData[i]);
@@ -181,19 +190,19 @@ int main (int argc, char * *argv)
     TRDP_APP_SESSION_T      appHandle;  /*    Our identifier to the library instance    */
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0u, 0u},
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0u, 0u, 0u},
                                                (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_MARSHALL), 10000000u,
                                                TRDP_TO_SET_TO_ZERO, 0u};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, PREALLOCATE};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0u, 0u, TRDP_OPTION_BLOCK};
 
     int     rv      = 0;
-    int     ip[4];
+    unsigned int     ip[4];
     UINT32  destIP  = VOS_INADDR_ANY;
     UINT32  replyIP = VOS_INADDR_ANY;
     UINT32  ownIP   = VOS_INADDR_ANY;
     int     count   = 0;
-    int     i;
+    unsigned int     i;
     int     ch;
 
     if (argc <= 1)

@@ -10,12 +10,13 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$*
  *
+ *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
 
@@ -57,6 +58,13 @@
 UINT8   gMemoryArea[RESERVED_MEMORY];
 
 CHAR8   gBuffer[32] = "Hello World";
+
+void    dbgOut (void        *pRefCon,
+                TRDP_LOG_T  category,
+                const CHAR8 *pTime,
+                const CHAR8 *pFile,
+                UINT16      LineNumber,
+                const CHAR8 *pMsgStr);
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -100,7 +108,7 @@ int main (int argc, char * *argv)
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_PUB_T              pubHandle;  /*    Our identifier to the publication    */
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 0}, TRDP_FLAGS_NONE,
+    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 0, 0}, TRDP_FLAGS_NONE,
                                                10000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
@@ -170,7 +178,7 @@ int main (int argc, char * *argv)
                         NULL,                       /*    default qos and ttl               */
                         (UINT8 *)gBuffer,           /*    initial data                      */
                         sizeof(gBuffer)             /*    data size                         */
-                        ); 
+                        );
 
 
     if (err != TRDP_NO_ERR)
@@ -201,7 +209,7 @@ int main (int argc, char * *argv)
                 Just put us to sleep.
                 We can use VOS (Virtual Operating System) functions as well. It will make our code more portable...
              */
-            vos_threadDelay(tv.tv_usec / 1000);
+            vos_threadDelay((UINT32) tv.tv_usec / 1000);
         }
 
         /*
@@ -213,7 +221,12 @@ int main (int argc, char * *argv)
             function (in it's context and thread)!
          */
 
-        tlc_process(appHandle, NULL, NULL);
+        err = tlc_process(appHandle, NULL, NULL);
+        if (err != TRDP_NO_ERR)
+        {
+            printf("tlc_process error\n");
+            break;
+        }
 
         /*
             Get the subscribed telegram.
