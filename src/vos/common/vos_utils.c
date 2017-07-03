@@ -560,7 +560,7 @@ EXT_DECL const CHAR8 *vos_getErrorString (VOS_ERR_T error)
     {
         return pgm_read_dword(&cErrStrings[index]);
     }
-    vos_snprintf(buf, 64u, "%s (%d)", pgm_read_dword(&cErrStrings[NO_OF_ERROR_STRINGS - 1u]), error);
+    (void) vos_snprintf(buf, 64u, "%s (%d)", pgm_read_dword(&cErrStrings[NO_OF_ERROR_STRINGS - 1u]), error);
 #else
     vos_snprintf(buf, 64u, "(%d)", error);
 #endif
