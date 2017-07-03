@@ -26,7 +26,7 @@
 --- Module:   ..\..\src\common\tau_xml.c (C)
                                    _
     p = strstr(tokenList, pTypeStr);
-..\..\src\common\tau_xml.c(80) : Warning 605: Increase in pointer capability
+..\..\src\common\tau_xml.c(83) : Warning 605: Increase in pointer capability
     (assignment)
 
 --- Module:   ..\..\src\common\tau_ctrl.c (C)
@@ -48,63 +48,63 @@
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 995: vos_strncpy([16], [124], 16)
+  File ..\..\src\common\tau_xml.c line 998: vos_strncpy([16], [124], 16)
 ..\..\src\vos\common\vos_mem.c(735) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
     file ..\..\src\vos\common\vos_mem.c: line 735; file ..\..\src\common\tau_xml.c:
-    line 995]
+    line 998]
 ..\..\src\vos\common\vos_mem.c(735) : Info 831: Reference cited in prior
     message
-..\..\src\common\tau_xml.c(995) : Info 831: Reference cited in prior message
+..\..\src\common\tau_xml.c(998) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 995: vos_strncpy([16], [124], 16)
+  File ..\..\src\common\tau_xml.c line 998: vos_strncpy([16], [124], 16)
 ..\..\src\vos\common\vos_mem.c(737) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
     file ..\..\src\vos\common\vos_mem.c: line 737; file ..\..\src\common\tau_xml.c:
-    line 995]
+    line 998]
 ..\..\src\vos\common\vos_mem.c(737) : Info 831: Reference cited in prior
     message
-..\..\src\common\tau_xml.c(995) : Info 831: Reference cited in prior message
+..\..\src\common\tau_xml.c(998) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 1429: vos_strncpy([128], [124], 128)
+  File ..\..\src\common\tau_xml.c line 1434: vos_strncpy([128], [124], 128)
 ..\..\src\vos\common\vos_mem.c(735) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
     file ..\..\src\vos\common\vos_mem.c: line 735; file ..\..\src\common\tau_xml.c:
-    line 1429]
+    line 1434]
 ..\..\src\vos\common\vos_mem.c(735) : Info 831: Reference cited in prior
     message
-..\..\src\common\tau_xml.c(1429) : Info 831: Reference cited in prior message
+..\..\src\common\tau_xml.c(1434) : Info 831: Reference cited in prior message
 
 During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 1429: vos_strncpy([128], [124], 128)
+  File ..\..\src\common\tau_xml.c line 1434: vos_strncpy([128], [124], 128)
 ..\..\src\vos\common\vos_mem.c(737) : Warning 415: Likely access of
     out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
     file ..\..\src\vos\common\vos_mem.c: line 737; file ..\..\src\common\tau_xml.c:
-    line 1429]
+    line 1434]
 ..\..\src\vos\common\vos_mem.c(737) : Info 831: Reference cited in prior
     message
-..\..\src\common\tau_xml.c(1429) : Info 831: Reference cited in prior message
+..\..\src\common\tau_xml.c(1434) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\vos\windows\vos_thread.c (C)
 
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 1148: vos_sockReceiveTCP(?, [0]?,
+  File ..\..\src\common\trdp_mdcom.c line 1152: vos_sockReceiveTCP(?, [0]?,
     [1])
 ..\..\src\vos\windows\vos_sock.c(1571) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
     [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1568, 1571; file
-    ..\..\src\common\trdp_mdcom.c: lines 1124, 1147]
+    ..\..\src\common\trdp_mdcom.c: lines 1128, 1151]
 ..\..\src\vos\windows\vos_sock.c(1568) : Info 831: Reference cited in prior
     message
 ..\..\src\vos\windows\vos_sock.c(1571) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1124) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1128) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1147) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1151) : Info 831: Reference cited in prior
     message
 
 --- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)
