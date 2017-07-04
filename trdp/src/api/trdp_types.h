@@ -91,12 +91,12 @@ extern "C" {
 /* for example: IP-Addr 10.0.8.35 translated to (10 * << 24) + (0 * << 16) + (8 << 8) + 35 */
 typedef VOS_IP4_ADDR_T TRDP_IP_ADDR_T;
 
-typedef CHAR8 TRDP_LABEL_T[TRDP_MAX_LABEL_LEN];
-typedef CHAR8 TRDP_URI_T[TRDP_MAX_URI_LEN];
+typedef CHAR8 TRDP_LABEL_T[TRDP_MAX_LABEL_LEN + 1];
+typedef CHAR8 TRDP_URI_T[TRDP_MAX_URI_LEN + 1];
 typedef CHAR8 TRDP_URI_HOST_T[TRDP_MAX_URI_HOST_LEN + 1];
 typedef CHAR8 TRDP_URI_USER_T[TRDP_MAX_URI_USER_LEN + 1];
 
-typedef CHAR8 TRDP_FILE_NAME_T[TRDP_MAX_FILE_NAME_LEN];
+typedef CHAR8 TRDP_FILE_NAME_T[TRDP_MAX_FILE_NAME_LEN + 1];
 
 /** Version information */
 typedef VOS_VERSION_T TRDP_VERSION_T;   /* TRDP_VERSION_T is identical to VOS_VERSION_T now  */

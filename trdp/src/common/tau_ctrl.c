@@ -240,7 +240,7 @@ EXT_DECL TRDP_ERR_T tau_requestEcspConfirm ( TRDP_APP_SESSION_T         appHandl
         return tlm_request( appHandle,                      /* appHandle */
                             pUserRef,                       /* pUserRef */
                             pfCbFunction,                   /* callback function */
-                            &sessionId,                     /* pSessionId */
+                            &sessionId, /*lint !e545 Return of UINT8 array */  /* pSessionId */
                             TRDP_ECSP_CONF_REQ_COMID,       /* comId */
                             0,                              /* etbTopoCnt */
                             0,                              /* opTrnTopoCnt */

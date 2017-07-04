@@ -188,7 +188,7 @@ static CHAR8 *readName (UINT8 *pReader, UINT8 *pBuffer, UINT32 *pCount, CHAR8 *p
 
     for (i = 0; (i < (int)strlen((const char *)pName)) && (i < (int)(TAU_MAX_NAME_SIZE - 1u)); i++)
     {
-        p = (unsigned int) pName[i];
+        p = (unsigned int) pName[i];    /*lint !e571 Suspicious cast? Not clear! */
         for (j = 0; j < (int)p; j++)
         {
             pName[i]    = pName[i + 1];
@@ -281,7 +281,7 @@ static TRDP_ERR_T readHostsFile (
             {
                 UINT32  start       = 0u;
                 UINT32  index       = 0u;
-                UINT32  maxIndex    = strlen(line);
+                UINT32  maxIndex    = (UINT32) strlen(line);
 
                 /* Skip empty lines, comment lines */
                 if (line[index] == '#' ||
