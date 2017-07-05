@@ -1588,7 +1588,6 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         /* Indicate that this call can not get replied due to receiver count limitation  */
         (void)trdp_mdSendME(appHandle, pH, TRDP_REPLY_NO_MEM_REPL);
         /* return to calling routine without performing any receiver action */
-        iterMD = (MD_ELE_T *)NULL;
         return result;
     }
 
@@ -1846,7 +1845,7 @@ static TRDP_ERR_T trdp_mdSendME (TRDP_SESSION_PT appHandle, MD_HEADER_T *pH, INT
         vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
         errv = TRDP_MUTEX_ERR;
     }*/
-    return errv;
+    return errv;    /*lint !e438 unused pSenderElement */
 }
 
 /**********************************************************************************************************************/
@@ -3254,7 +3253,7 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T           msgType,
         vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
     }
 
-    return errv;
+    return errv;    /*lint !e438 unused pSenderElement */
 }
 
 /**********************************************************************************************************************/
@@ -3478,7 +3477,7 @@ TRDP_ERR_T trdp_mdCall (
         vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
     }
 
-    return errv;
+    return errv;    /*lint !e438 unused pSenderElement */
 }
 
 
@@ -3607,5 +3606,5 @@ TRDP_ERR_T trdp_mdConfirm (
     {
         vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() failed\n");
     }
-    return errv;
+    return errv;    /*lint !e438 unused pSenderElement */
 }

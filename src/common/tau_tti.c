@@ -358,18 +358,18 @@ static void ttiStoreCstInfo (
     }
     else
     {
-        UINT32 index;
+        UINT32 l_index;
         curEntry = 1;
         /* check if already loaded */
-        for (index = 1; index < TRDP_MAX_CST_CNT; index++)
+        for (l_index = 1; l_index < TRDP_MAX_CST_CNT; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                appHandle->pTTDB->cstInfo[index]->cstTopoCnt != 0 &&
-                memcmp(appHandle->pTTDB->cstInfo[index]->cstUUID, pTelegram->cstUUID, sizeof(TRDP_UUID_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                appHandle->pTTDB->cstInfo[l_index]->cstTopoCnt != 0 &&
+                memcmp(appHandle->pTTDB->cstInfo[l_index]->cstUUID, pTelegram->cstUUID, sizeof(TRDP_UUID_T)) == 0)
             {
-                vos_memFree(appHandle->pTTDB->cstInfo[index]);
-                appHandle->pTTDB->cstInfo[index] = NULL;
-                curEntry = index;
+                vos_memFree(appHandle->pTTDB->cstInfo[l_index]);
+                appHandle->pTTDB->cstInfo[l_index] = NULL;
+                curEntry = l_index;
                 break;
             }
         }
@@ -793,7 +793,7 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
     TRDP_CONSIST_INFO_T *pCstInfo,
     TRDP_UUID_T const   cstUUID)
 {
-    UINT32 index;
+    UINT32 l_index;
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
         pCstInfo == NULL)
@@ -803,24 +803,24 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
 
     if (cstUUID == NULL)
     {
-        index = 0;
+        l_index = 0;
     }
     else
     {
         /* find the consist in our cache list */
-        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                memcmp(appHandle->pTTDB->cstInfo[index]->cstUUID, cstUUID, sizeof(TRDP_UUID_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                memcmp(appHandle->pTTDB->cstInfo[l_index]->cstUUID, cstUUID, sizeof(TRDP_UUID_T)) == 0)
             {
                 break;
             }
         }
     }
-    if (index < TTI_CACHED_CONSISTS &&
-        appHandle->pTTDB->cstInfo[index] != NULL)
+    if (l_index < TTI_CACHED_CONSISTS &&
+        appHandle->pTTDB->cstInfo[l_index] != NULL)
     {
-        memcpy(pCstInfo, appHandle->pTTDB->cstInfo[index], appHandle->pTTDB->cstSize[index]);
+        memcpy(pCstInfo, appHandle->pTTDB->cstInfo[l_index], appHandle->pTTDB->cstSize[l_index]);
     }
     else    /* not found, get it and return directly */
     {
@@ -965,7 +965,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
     UINT16              *pCstVehCnt,
     const TRDP_LABEL_T  pCstLabel)
 {
-    UINT32 index;
+    UINT32 l_index;
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
         pCstVehCnt == NULL)
@@ -975,23 +975,23 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
 
     if (pCstLabel == NULL)
     {
-        index = 0;
+        l_index = 0;
     }
     else
     {
         /* find the consist in our cache list */
-        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
             {
                 break;
             }
         }
     }
-    if (index < TTI_CACHED_CONSISTS)
+    if (l_index < TTI_CACHED_CONSISTS)
     {
-        *pCstVehCnt = vos_ntohs(appHandle->pTTDB->cstInfo[index]->vehCnt);
+        *pCstVehCnt = vos_ntohs(appHandle->pTTDB->cstInfo[l_index]->vehCnt);
     }
     else    /* not found, get it and return directly */
     {
@@ -1021,7 +1021,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
     UINT16              *pCstFctCnt,
     const TRDP_LABEL_T  pCstLabel)
 {
-    UINT32 index;
+    UINT32 l_index;
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
         pCstFctCnt == NULL)
@@ -1031,23 +1031,23 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
 
     if (pCstLabel == NULL)
     {
-        index = 0;
+        l_index = 0;
     }
     else
     {
         /* find the consist in our cache list */
-        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
             {
                 break;
             }
         }
     }
-    if (index < TTI_CACHED_CONSISTS)
+    if (l_index < TTI_CACHED_CONSISTS)
     {
-        *pCstFctCnt = vos_ntohs(appHandle->pTTDB->cstInfo[index]->fctCnt);
+        *pCstFctCnt = vos_ntohs(appHandle->pTTDB->cstInfo[l_index]->fctCnt);
     }
     else    /* not found, get it and return directly */
     {
@@ -1082,7 +1082,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
     const TRDP_LABEL_T      pCstLabel,
     UINT16                  maxFctCnt)
 {
-    UINT32 index, index2;
+    UINT32 l_index, l_index2;
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
         pFctInfo == NULL ||
@@ -1093,27 +1093,27 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
 
     if (pCstLabel == NULL)
     {
-        index = 0;
+        l_index = 0;
     }
     else
     {
         /* find the consist in our cache list */
-        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
             {
                 break;
             }
         }
     }
-    if (index < TTI_CACHED_CONSISTS)
+    if (l_index < TTI_CACHED_CONSISTS)
     {
-        for (index2 = 0; index2 < vos_ntohs(appHandle->pTTDB->cstInfo[index]->fctCnt) &&
-             index2 < maxFctCnt; ++index2)
+        for (l_index2 = 0; l_index2 < vos_ntohs(appHandle->pTTDB->cstInfo[l_index]->fctCnt) &&
+             l_index2 < maxFctCnt; ++l_index2)
         {
-            pFctInfo[index2]        = appHandle->pTTDB->cstInfo[index]->pFctInfoList[index2];
-            pFctInfo[index2].fctId  = vos_ntohs(pFctInfo[index2].fctId);
+            pFctInfo[l_index2]        = appHandle->pTTDB->cstInfo[l_index]->pFctInfoList[l_index2];
+            pFctInfo[l_index2].fctId  = vos_ntohs(pFctInfo[l_index2].fctId);
         }
     }
     else    /* not found, get it and return directly */
@@ -1146,7 +1146,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
     const TRDP_LABEL_T  pVehLabel,
     const TRDP_LABEL_T  pCstLabel)
 {
-    UINT32 index, index2;
+    UINT32 l_index, l_index2;
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
         pVehInfo == NULL)
@@ -1156,29 +1156,29 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
 
     if (pCstLabel == NULL)
     {
-        index = 0;
+        l_index = 0;
     }
     else
     {
         /* find the consist in our cache list */
-        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
             {
                 break;
             }
         }
     }
-    if (index < TTI_CACHED_CONSISTS)
+    if (l_index < TTI_CACHED_CONSISTS)
     {
-        for (index2 = 0; index2 < vos_ntohs(appHandle->pTTDB->cstInfo[index]->vehCnt); ++index2)
+        for (l_index2 = 0; l_index2 < vos_ntohs(appHandle->pTTDB->cstInfo[l_index]->vehCnt); ++l_index2)
         {
             if (pVehLabel == NULL ||
-                vos_strnicmp(pVehLabel, appHandle->pTTDB->cstInfo[index]->pVehInfoList[index2].vehId,
+                vos_strnicmp(pVehLabel, appHandle->pTTDB->cstInfo[l_index]->pVehInfoList[l_index2].vehId,
                              sizeof(TRDP_LABEL_T)) == 0)
             {
-                *pVehInfo = appHandle->pTTDB->cstInfo[index]->pVehInfoList[index2];
+                *pVehInfo = appHandle->pTTDB->cstInfo[l_index]->pVehInfoList[l_index2];
             }
         }
     }
@@ -1210,7 +1210,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
     TRDP_CONSIST_INFO_T *pCstInfo,
     const TRDP_LABEL_T  pCstLabel)
 {
-    UINT32 index;
+    UINT32 l_index;
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
         pCstInfo == NULL)
@@ -1220,23 +1220,23 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
 
     if (pCstLabel == NULL)
     {
-        index = 0;
+        l_index = 0;
     }
     else
     {
         /* find the consist in our cache list */
-        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
             {
                 break;
             }
         }
     }
-    if (index < TTI_CACHED_CONSISTS)
+    if (l_index < TTI_CACHED_CONSISTS)
     {
-        *pCstInfo           = *appHandle->pTTDB->cstInfo[index];
+        *pCstInfo           = *appHandle->pTTDB->cstInfo[l_index];
         pCstInfo->etbCnt    = vos_ntohs(pCstInfo->etbCnt);
         pCstInfo->vehCnt    = vos_ntohs(pCstInfo->vehCnt);
         pCstInfo->fctCnt    = vos_ntohs(pCstInfo->fctCnt);
@@ -1281,7 +1281,7 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     TRDP_LABEL_T        pVehLabel,
     TRDP_LABEL_T        pCstLabel)
 {
-    UINT32 index, index2, index3;
+    UINT32 l_index, l_index2, l_index3;
 
     if (appHandle == NULL ||
         appHandle->pTTDB == NULL ||
@@ -1296,38 +1296,38 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
 
     if (pCstLabel == NULL)
     {
-        index = 0;
+        l_index = 0;
     }
     else
     {
         /* find the consist in our cache list */
-        for (index = 0; index < TTI_CACHED_CONSISTS; index++)
+        for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
-            if (appHandle->pTTDB->cstInfo[index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+            if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
             {
                 break;
             }
         }
     }
-    if (index < TTI_CACHED_CONSISTS)
+    if (l_index < TTI_CACHED_CONSISTS)
     {
         /* Search the vehicles in the OP_TRAIN_DIR for a matching vehID */
 
-        for (index2 = 0; index2 < appHandle->pTTDB->opTrnDir.opCstCnt; index2++)
+        for (l_index2 = 0; l_index2 < appHandle->pTTDB->opTrnDir.opCstCnt; l_index2++)
         {
-            if (vos_strnicmp((CHAR8 *) appHandle->pTTDB->opTrnDir.opCstList[index2].cstUUID,
-                             (CHAR8 *) appHandle->pTTDB->cstInfo[index]->cstUUID, sizeof(TRDP_UUID_T)) == 0)
+            if (vos_strnicmp((CHAR8 *) appHandle->pTTDB->opTrnDir.opCstList[l_index2].cstUUID,
+                             (CHAR8 *) appHandle->pTTDB->cstInfo[l_index]->cstUUID, sizeof(TRDP_UUID_T)) == 0)
             {
                 /* consist found   */
-                *pCstOrient = appHandle->pTTDB->opTrnDir.opCstList[index2].opCstOrient;
+                *pCstOrient = appHandle->pTTDB->opTrnDir.opCstList[l_index2].opCstOrient;
 
-                for (index3 = 0; index3 < appHandle->pTTDB->opTrnDir.opVehCnt; index3++)
+                for (l_index3 = 0; l_index3 < appHandle->pTTDB->opTrnDir.opVehCnt; l_index3++)
                 {
-                    if (appHandle->pTTDB->opTrnDir.opVehList[index3].ownOpCstNo ==
-                        appHandle->pTTDB->opTrnDir.opCstList[index2].opCstNo)
+                    if (appHandle->pTTDB->opTrnDir.opVehList[l_index3].ownOpCstNo ==
+                        appHandle->pTTDB->opTrnDir.opCstList[l_index2].opCstNo)
                     {
-                        *pVehOrient = appHandle->pTTDB->opTrnDir.opVehList[index3].vehOrient;
+                        *pVehOrient = appHandle->pTTDB->opTrnDir.opVehList[l_index3].vehOrient;
                         return TRDP_NO_ERR;
                     }
                 }

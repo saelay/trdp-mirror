@@ -1066,19 +1066,19 @@ void trdp_resetSequenceCounter (
     TRDP_IP_ADDR_T  srcIP,
     TRDP_MSG_T      msgType)
 {
-    int index;
+    int l_index;
 
     if (pElement == NULL || pElement->pSeqCntList == NULL)
     {
         return;
     }
     /* Loop over entries */
-    for (index = 0; index < pElement->pSeqCntList->curNoOfEntries; ++index)
+    for (l_index = 0; l_index < pElement->pSeqCntList->curNoOfEntries; ++l_index)
     {
-        if (srcIP == pElement->pSeqCntList->seq[index].srcIpAddr &&
-            msgType == pElement->pSeqCntList->seq[index].msgType)
+        if (srcIP == pElement->pSeqCntList->seq[l_index].srcIpAddr &&
+            msgType == pElement->pSeqCntList->seq[l_index].msgType)
         {
-            pElement->pSeqCntList->seq[index].lastSeqCnt = 0;
+            pElement->pSeqCntList->seq[l_index].lastSeqCnt = 0;
         }
     }
 }
@@ -1105,7 +1105,7 @@ int trdp_checkSequenceCounter (
     TRDP_IP_ADDR_T  srcIP,
     TRDP_MSG_T      msgType)
 {
-    int index;
+    int l_index;
 
     if (pElement == NULL)
     {
@@ -1127,24 +1127,24 @@ int trdp_checkSequenceCounter (
         pElement->pSeqCntList->curNoOfEntries   = 0;
     }
     /* Loop over entries */
-    for (index = 0; index < pElement->pSeqCntList->curNoOfEntries; ++index)
+    for (l_index = 0; l_index < pElement->pSeqCntList->curNoOfEntries; ++l_index)
     {
-        if (srcIP == pElement->pSeqCntList->seq[index].srcIpAddr &&
-            msgType == pElement->pSeqCntList->seq[index].msgType)
+        if (srcIP == pElement->pSeqCntList->seq[l_index].srcIpAddr &&
+            msgType == pElement->pSeqCntList->seq[l_index].msgType)
         {
             /*        Is this packet a duplicate?    */
-            if (pElement->pSeqCntList->seq[index].lastSeqCnt == 0 ||    /* first time after timeout */
-                sequenceCounter != pElement->pSeqCntList->seq[index].lastSeqCnt)
+            if (pElement->pSeqCntList->seq[l_index].lastSeqCnt == 0 ||    /* first time after timeout */
+                sequenceCounter != pElement->pSeqCntList->seq[l_index].lastSeqCnt)
             {
 /*
                   vos_printLog(VOS_LOG_DBG,
                                "Rcv sequence: %u    last seq: %u\n",
                                sequenceCounter,
-                               pElement->pSeqCntList->seq[index].lastSeqCnt);
+                               pElement->pSeqCntList->seq[l_index].lastSeqCnt);
                   vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(
                                    srcIP), pElement->addr.comId);
  */
-                pElement->pSeqCntList->seq[index].lastSeqCnt = sequenceCounter;
+                pElement->pSeqCntList->seq[l_index].lastSeqCnt = sequenceCounter;
                 return 0;
             }
             else
@@ -1152,7 +1152,7 @@ int trdp_checkSequenceCounter (
                 vos_printLog(VOS_LOG_DBG,
                              "Rcv sequence: %u    last seq: %u\n",
                              sequenceCounter,
-                             pElement->pSeqCntList->seq[index].lastSeqCnt);
+                             pElement->pSeqCntList->seq[l_index].lastSeqCnt);
                 vos_printLog(VOS_LOG_DBG, "-> duplicated PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
                                  srcIP), pElement->addr.comId);
                 return 1;

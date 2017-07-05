@@ -28,7 +28,7 @@
  * INCLUDES
  */
 
-#include <stdio.h>
+#include <stdio.h>  /*lint !e451 missing guard in std-header */
 
 #include "trdp_private.h"
 #include "vos_utils.h"
