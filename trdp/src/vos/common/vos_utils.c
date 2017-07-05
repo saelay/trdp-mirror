@@ -554,11 +554,11 @@ EXT_DECL const CHAR8 *vos_getErrorString (VOS_ERR_T error)
 {
     static char buf[64u];
 #if MD_SUPPORT
-    UINT32      index = (UINT32)((int)error * (-1));
+    UINT32      l_index = (UINT32)((int)error * (-1));
 
-    if (index < NO_OF_ERROR_STRINGS)
+    if (l_index < NO_OF_ERROR_STRINGS)
     {
-        return pgm_read_dword(&cErrStrings[index]);
+        return pgm_read_dword(&cErrStrings[l_index]);
     }
     (void) vos_snprintf(buf, 64u, "%s (%d)", pgm_read_dword(&cErrStrings[NO_OF_ERROR_STRINGS - 1u]), error);
 #else

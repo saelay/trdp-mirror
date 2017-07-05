@@ -277,12 +277,12 @@ EXT_DECL TRDP_ERR_T tlc_getUdpListStatistics (
         return TRDP_NOINIT_ERR;
     }
 
-    if (pNumList == NULL || pStatistics == NULL || *pNumList == 0)
+    if ((pNumList == NULL) || (pStatistics == NULL) || (*pNumList == 0u))
     {
         return TRDP_PARAM_ERR;
     }
 
-    for (lIndex = 0; lIndex < *pNumList && pIter != NULL; pIter = pIter->pNext)
+    for (lIndex = 0; (lIndex < *pNumList) && (pIter != NULL); pIter = pIter->pNext) /*lint !e443: clause irregularity OK */
     {
         if ((pIter->pktFlags & TRDP_FLAGS_TCP) == 0)
         {
@@ -330,7 +330,7 @@ EXT_DECL TRDP_ERR_T tlc_getTcpListStatistics (
         return TRDP_PARAM_ERR;
     }
 
-    for (lIndex = 0; lIndex < *pNumList && pIter != NULL; pIter = pIter->pNext)
+    for (lIndex = 0; lIndex < *pNumList && pIter != NULL; pIter = pIter->pNext) /*lint !e443: clause irregularity OK */
     {
         if ((pIter->pktFlags & TRDP_FLAGS_TCP) != 0)
         {

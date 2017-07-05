@@ -40,3 +40,5 @@ au-misra.lnt
 -emacro((530,526,628,516,78,26,10,155,1055),ALIGNOF) // due to definition of internal used __alignof
 -e655   // bit-wise operation uses (compatible) enum's
 -e641   // Converting enum to int
+-e586   // Deprecated snprintf
+-e451   // Repeated includes

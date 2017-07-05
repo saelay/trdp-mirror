@@ -241,7 +241,7 @@ EXT_DECL VOS_ERR_T vos_memInit (
     {
         if (pMemoryArea == NULL)                    /* We must allocate memory from the heap once   */
         {
-            gMem.pArea = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development
+            gMem.pArea = (UINT8 *) malloc(size);    /*lint !e421 !e586 optional use of heap memory for debugging/development
                                                       */
             if (gMem.pArea == NULL)
             {
@@ -333,7 +333,7 @@ EXT_DECL void vos_memDelete (
     vos_mutexLocalDelete(&gMem.mutex);
     if (gMem.wasMalloced && gMem.pArea != NULL)
     {
-        free(gMem.pArea);    /*lint !e421 optional use of heap memory for debugging/development */
+        free(gMem.pArea);    /*lint !e421 !e586 optional use of heap memory for debugging/development */
     }
     memset(&gMem, 0, sizeof(gMem));
 }
@@ -363,7 +363,7 @@ EXT_DECL UINT8 *vos_memAlloc (
     /*    Use standard heap memory    */
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
-        UINT8 *p = (UINT8 *) malloc(size);    /*lint !e421 optional use of heap memory for debugging/development */
+        UINT8 *p = (UINT8 *) malloc(size);    /*lint !e421 !e586 optional use of heap memory for debugging/development */
         if (p != NULL)
         {
             memset(p, 0, size);
@@ -512,7 +512,7 @@ EXT_DECL void vos_memFree (void *pMemBlock)
     if (gMem.memSize == 0 && gMem.pArea == NULL)
     {
         vos_printLog(VOS_LOG_DBG, "vos_memFree() %p\n", pMemBlock);
-        free(pMemBlock);    /*lint !e421 optional use of heap memory for debugging/development */
+        free(pMemBlock);    /*lint !e421 !e586 optional use of heap memory for debugging/development */
         return;
     }
 
@@ -658,7 +658,7 @@ EXT_DECL void vos_qsort (
         const   void *,
         const   void *))
 {
-    qsort(pBuf, num, size, compare);
+    qsort(pBuf, num, size, compare);/*lint !e586 why? */
 }
 
 
@@ -687,7 +687,7 @@ EXT_DECL void *vos_bsearch (
         const   void *,
         const   void *))
 {
-    return bsearch(pKey, pBuf, num, size, compare);
+    return bsearch(pKey, pBuf, num, size, compare);/*lint !e586 why? */
 }
 
 
@@ -736,7 +736,7 @@ EXT_DECL void vos_strncpy (
     (void) strncpy_s((char *)pStrDst, (size_t)(count + 1), (const char *)pStrSrc, (size_t) count);
     pStrDst[count] = character;
 #else
-    (void) strncpy((char *)pStrDst, (const char *)pStrSrc, (size_t) count);
+    (void) strncpy((char *)pStrDst, (const char *)pStrSrc, (size_t) count); /*lint !e920: return value not used */
 #endif
 }
 
@@ -758,7 +758,7 @@ EXT_DECL void vos_strncat (
 #ifdef WIN32
     (void) strcat_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc);
 #else
-    (void) strncat((char *)pStrDst, (const char *)pStrSrc, (size_t) count);
+    (void) strncat((char *)pStrDst, (const char *)pStrSrc, (size_t) count); /*lint !e920: return value not used */
 #endif
 }
 

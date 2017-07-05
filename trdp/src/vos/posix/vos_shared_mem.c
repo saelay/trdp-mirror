@@ -106,7 +106,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
         return ret;
     }
     /* Get Shared Memory Stats */
-    fstat(fd, &sharedMemoryStat);
+    (void) fstat(fd, &sharedMemoryStat);
     if (sharedMemoryStat.st_size != (off_t )*pSize)
     {
         vos_printLogStr(VOS_LOG_ERROR, "Shared Memory Size failed\n");
@@ -114,7 +114,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     }
 
     /* Mapping Shared Memory */
-    *ppMemoryArea = mmap(NULL, (size_t) sharedMemoryStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    *ppMemoryArea = (UINT8*) mmap(NULL, (size_t) sharedMemoryStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (*ppMemoryArea == MAP_FAILED)
     {
         vos_printLogStr(VOS_LOG_ERROR, "Shared Memory memory-mapping failed\n");

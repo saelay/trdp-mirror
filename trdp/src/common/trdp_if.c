@@ -1996,7 +1996,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     UINT32              timeout,
     TRDP_TO_BEHAVIOR_T  toBehavior)
 {
-    PD_ELE_T    *newPD = NULL;
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
@@ -2072,6 +2071,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
         if (ret == TRDP_NO_ERR)
         {
+            PD_ELE_T            *newPD;
+
             /*    buffer size is PD_ELEMENT plus max. payload size    */
 
             /*    Allocate a buffer for this kind of packets    */
@@ -2140,7 +2141,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     *pSubHandle = (TRDP_SUB_T) newPD;
                 }
             }
-        }
+        } /*lint !e438 unused newPD */
     }
 
     if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)

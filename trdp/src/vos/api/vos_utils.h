@@ -31,7 +31,7 @@
  */
 
 #include <stdio.h>
-#include <stddef.h>
+#include <stddef.h> /*lint !e451 standard include guard missing */
 #include "vos_types.h"
 
 #ifdef __cplusplus
@@ -66,7 +66,7 @@ extern void *gRefCon;
     snprintf(str, size, format, __VA_ARGS__)
 #else
     #define vos_snprintf(str, size, format, args ...) \
-    snprintf(str, size, format, ## args)
+    snprintf(str, size, format, ## args)    /*lint !e586 logging output needed */
 #endif
 
 /** Debug output macro without formatting options */

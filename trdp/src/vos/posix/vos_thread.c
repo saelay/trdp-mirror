@@ -58,7 +58,7 @@
  */
 
 #ifndef PTHREAD_MUTEX_RECURSIVE
-#define PTHREAD_MUTEX_RECURSIVE  PTHREAD_MUTEX_RECURSIVE_NP
+#define PTHREAD_MUTEX_RECURSIVE  PTHREAD_MUTEX_RECURSIVE_NP     /*lint !e652 Does Lint ignore the #ifndef ? */
 #endif
 
 const size_t    cDefaultStackSize   = 4u * PTHREAD_STACK_MIN;
@@ -659,7 +659,7 @@ EXT_DECL void vos_divTime (
         UINT32 temp;
 
         temp = (UINT32) pTime->tv_sec % divisor;
-        pTime->tv_sec /= divisor;
+        pTime->tv_sec /= divisor; /*lint !e573 Signed/unsigned mix OK */
         if (temp > 0u)
         {
             pTime->tv_usec += (suseconds_t) (temp * 1000000u);
@@ -963,11 +963,11 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     if (err != 0)
     {
         vos_printLog(VOS_LOG_ERROR, "Unable to lock Mutex (pthread err=%d)\n", err);
-        return VOS_MUTEX_ERR;
+        return VOS_MUTEX_ERR;   /*lint !e454 was not locked! */
     }
 
-    return VOS_NO_ERR;
-}
+    return VOS_NO_ERR;   /*lint !e454 was locked */
+}/*lint !e454 was locked */
 
 
 /**********************************************************************************************************************/
@@ -1025,15 +1025,15 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
     {
         int err;
 
-        err = pthread_mutex_unlock((pthread_mutex_t *)&pMutex->mutexId);
+        err = pthread_mutex_unlock((pthread_mutex_t *)&pMutex->mutexId);   /*lint !e455 was not unlocked */
         if (err != 0)
         {
             vos_printLog(VOS_LOG_ERROR, "Unable to unlock Mutex (pthread err=%d)\n", err);
-            return VOS_MUTEX_ERR;
+            return VOS_MUTEX_ERR;   /*lint !e455 was not unlocked */
         }
     }
 
-    return VOS_NO_ERR;
+    return VOS_NO_ERR;   /*lint !e455 was not unlocked */
 }
 
 
@@ -1207,7 +1207,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
         waitTimeSpec.tv_sec     = waitTimeVos.tv_sec;
         waitTimeSpec.tv_nsec    = waitTimeVos.tv_usec * (suseconds_t) NSECS_PER_USEC;
 #else
-        clock_gettime(CLOCK_REALTIME, &waitTimeSpec);
+        (void) clock_gettime(CLOCK_REALTIME, &waitTimeSpec);
 #endif
 
         /* add offset */

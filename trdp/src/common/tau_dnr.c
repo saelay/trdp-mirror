@@ -88,7 +88,7 @@ typedef struct tau_dnr_query
 typedef struct R_DATA
 {
     UINT16  type;
-    UINT16  class;
+    UINT16  rclass;
     UINT32  ttl;
     UINT16  data_len;
 } GNU_PACKED TAU_R_DATA_T;
@@ -233,7 +233,7 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 
 static int compareURI ( const void *arg1, const void *arg2 )
 {
-    return vos_strnicmp(arg1, arg2, TRDP_MAX_URI_HOST_LEN);
+    return vos_strnicmp((const CHAR8 *)arg1, (const CHAR8 *)arg2, TRDP_MAX_URI_HOST_LEN);
 }
 
 static void printDNRcache (TAU_DNR_DATA_T *pDNR)
@@ -280,47 +280,47 @@ static TRDP_ERR_T readHostsFile (
             if (fgets(line, TAU_MAX_HOSTS_LINE_LENGTH, fp) != NULL)
             {
                 UINT32  start       = 0u;
-                UINT32  index       = 0u;
+                UINT32  l_index       = 0u;
                 UINT32  maxIndex    = (UINT32) strlen(line);
 
                 /* Skip empty lines, comment lines */
-                if (line[index] == '#' ||
-                    line[index] == '\0' ||
-                    iscntrl(line[index]))
+                if (line[l_index] == '#' ||
+                    line[l_index] == '\0' ||
+                    iscntrl(line[l_index]))
                 {
                     continue;
                 }
 
                 /* Try to get IP */
-                pDNR->cache[pDNR->noOfCachedEntries].ipAddr = vos_dottedIP(&line[index]);
+                pDNR->cache[pDNR->noOfCachedEntries].ipAddr = vos_dottedIP(&line[l_index]);
 
                 if (pDNR->cache[pDNR->noOfCachedEntries].ipAddr == VOS_INADDR_ANY)
                 {
                     continue;
                 }
                 /* now skip the address */
-                while (index < maxIndex && (isdigit(line[index]) || ispunct(line[index])))
+                while (l_index < maxIndex && (isdigit(line[l_index]) || ispunct(line[l_index])))
                 {
-                    index++;
+                    l_index++;
                 }
 
                 /* skip the space between IP and URI */
-                while (index < maxIndex && isspace(line[index]))
+                while (l_index < maxIndex && isspace(line[l_index]))
                 {
-                    index++;
+                    l_index++;
                 }
 
                 /* remember start of URI */
-                start = index;
+                start = l_index;
 
                 /* remember start of URI */
-                while (index < maxIndex && !isspace(line[index]) && !iscntrl(line[index]) && line[index] != '#')
+                while (l_index < maxIndex && !isspace(line[l_index]) && !iscntrl(line[l_index]) && line[l_index] != '#')
                 {
-                    index++;
+                    l_index++;
                 }
-                if (index < maxIndex)
+                if (l_index < maxIndex)
                 {
-                    vos_strncpy(pDNR->cache[pDNR->noOfCachedEntries].uri, &line[start], index - start);
+                    vos_strncpy(pDNR->cache[pDNR->noOfCachedEntries].uri, &line[start], l_index - start);
                 }
                 /* increment only if entry is valid */
                 if (strlen(pDNR->cache[pDNR->noOfCachedEntries].uri) > 0u)
@@ -335,14 +335,14 @@ static TRDP_ERR_T readHostsFile (
         vos_printLog(VOS_LOG_DBG, "readHostsFile: %d entries processed\n", pDNR->noOfCachedEntries);
         vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
         fclose(fp);
+        printDNRcache(pDNR);
         err = TRDP_NO_ERR;
     }
     else
     {
         vos_printLogStr(VOS_LOG_ERROR, "readHostsFile: Not found!\n");
     }
-    printDNRcache(pDNR);
-    return err;
+    return err; /*lint !e481 !e480 call states and execution paths? */
 }
 
 /**********************************************************************************************************************/
@@ -438,7 +438,7 @@ static void parseResponse (
 
     for (i = 0u; i < vos_ntohs(dns->ans_count); i++)
     {
-        (void) readName(pReader, pPacket, &skip, name);
+        (void) readName(pReader, pPacket, &skip, name);     /*lint !e920 cast to void */
         pReader += skip;
 
         answers[i].resource = (TAU_R_DATA_T *)(pReader);
@@ -611,11 +611,11 @@ static void updateDNSentry (
         tv.tv_usec  = 0;
 
         FD_ZERO(&rfds);
-        FD_SET(my_socket, &rfds);
+        FD_SET(my_socket, &rfds); /*lint !e573 Signed/unsigned mix in std-header */
 
         rv = vos_select(my_socket + 1, &rfds, NULL, NULL, &tv);
 
-        if (rv > 0 && FD_ISSET(my_socket, &rfds))
+        if (rv > 0 && FD_ISSET(my_socket, &rfds)) /*lint !e573 Signed/unsigned mix in std-header */
         {
             /* Clear our packet buffer  */
             memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
@@ -623,7 +623,7 @@ static void updateDNSentry (
             /* Get what was announced */
             (void) vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
 
-            FD_CLR(my_socket, &rfds);
+            FD_CLR(my_socket, &rfds); /*lint !e573 !e502 Signed/unsigned mix in std-header */
 
             if (size == 0u)
             {

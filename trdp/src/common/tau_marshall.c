@@ -119,7 +119,7 @@ static INLINE void unpackedCopy64 (
 #if __BIG_ENDIAN__ || __ARMEB__ || __AARCH64EB__ || __MIPSEB__
 {
     UINT32  size    = noOfItems * sizeof(UINT64);
-    UINT8   *pDst8  = alignePtr(*ppDst, ALIGNOF(UINT64));
+    UINT8   *pDst8  = (UINT8 *) alignePtr(*ppDst, ALIGNOF(UINT64));
     memcpy(pDst8, *ppSrc, size);
     *ppSrc  = (UINT8 *) *ppSrc + size;
     *ppDst  = (UINT8 *) pDst8 + size;
