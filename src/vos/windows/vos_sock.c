@@ -1549,7 +1549,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
     UINT32  *pSize)
 {
     int rcvSize     = 0;
-    int bufferSize  = (size_t) *pSize;
+    int bufferSize  = (int) *pSize;
     int err         = 0;
 
     *pSize = 0;
