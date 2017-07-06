@@ -24,20 +24,10 @@
 --- Module:   ..\..\src\common\trdp_xml.c (C)
 
 --- Module:   ..\..\src\common\tau_xml.c (C)
-                                   _
-    p = strstr(tokenList, pTypeStr);
-..\..\src\common\tau_xml.c(83) : Warning 605: Increase in pointer capability
-    (assignment)
 
 --- Module:   ..\..\src\common\tau_ctrl.c (C)
-                                      _
-                            &sessionId,                     /* pSessionId */
-..\..\src\common\tau_ctrl.c(243) : Warning 545: Suspicious use of &
 
 --- Module:   ..\..\src\common\tau_dnr.c (C)
-                                   _
-        p = (unsigned int) pName[i];
-..\..\src\common\tau_dnr.c(191) : Warning 571: Suspicious cast
 
 --- Module:   ..\..\src\common\tau_tti.c (C)
 
@@ -46,46 +36,6 @@
 --- Module:   ..\..\src\vos\common\vos_utils.c (C)
 
 --- Module:   ..\..\src\vos\common\vos_mem.c (C)
-
-During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 998: vos_strncpy([16], [124], 16)
-..\..\src\vos\common\vos_mem.c(735) : Warning 415: Likely access of
-    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 735; file ..\..\src\common\tau_xml.c:
-    line 998]
-..\..\src\vos\common\vos_mem.c(735) : Info 831: Reference cited in prior
-    message
-..\..\src\common\tau_xml.c(998) : Info 831: Reference cited in prior message
-
-During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 998: vos_strncpy([16], [124], 16)
-..\..\src\vos\common\vos_mem.c(737) : Warning 415: Likely access of
-    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 737; file ..\..\src\common\tau_xml.c:
-    line 998]
-..\..\src\vos\common\vos_mem.c(737) : Info 831: Reference cited in prior
-    message
-..\..\src\common\tau_xml.c(998) : Info 831: Reference cited in prior message
-
-During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 1434: vos_strncpy([128], [124], 128)
-..\..\src\vos\common\vos_mem.c(735) : Warning 415: Likely access of
-    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 735; file ..\..\src\common\tau_xml.c:
-    line 1434]
-..\..\src\vos\common\vos_mem.c(735) : Info 831: Reference cited in prior
-    message
-..\..\src\common\tau_xml.c(1434) : Info 831: Reference cited in prior message
-
-During Specific Walk:
-  File ..\..\src\common\tau_xml.c line 1434: vos_strncpy([128], [124], 128)
-..\..\src\vos\common\vos_mem.c(737) : Warning 415: Likely access of
-    out-of-bounds pointer (1 beyond end of data) by operator '[' [Reference:
-    file ..\..\src\vos\common\vos_mem.c: line 737; file ..\..\src\common\tau_xml.c:
-    line 1434]
-..\..\src\vos\common\vos_mem.c(737) : Info 831: Reference cited in prior
-    message
-..\..\src\common\tau_xml.c(1434) : Info 831: Reference cited in prior message
 
 --- Module:   ..\..\src\vos\windows\vos_thread.c (C)
 
