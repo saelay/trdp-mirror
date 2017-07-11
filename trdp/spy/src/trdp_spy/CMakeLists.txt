@@ -1,31 +1,37 @@
 # CMakeLists.txt
 #
-# $Id: CMakeLists.txt $
+# Wireshark - Network traffic analyzer
+# By Gerald Combs <gerald@wireshark.org>
+# Copyright 1998 Gerald Combs
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-project(trdp-wireshark-plugin C)
+# Debug Output activate:
+set ( CMAKE_VERBOSE_MAKEFILE true )
 
-cmake_minimum_required(VERSION 2.6)  
-set(CMAKE_BACKWARDS_COMPATIBILITY 2.6)  
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../cmake/modules)  
-set(CMAKE_INSTALL_LIBDIR ~/.wireshark)
+include(WiresharkPlugin)
 
-INCLUDE(UseMakeDissectorReg)  
+# Plugin name and version info (major minor micro extra)
+set_module_info(trdp_spy 1 3 0 0)
 
-set(GLIB2_MIN_VERSION 2.4.0)  
-
-find_package(GLIB2)  
-include_directories (${GLIB2_INCLUDE_DIRS})  
-
-find_package(Wireshark)  
-include_directories (${WIRESHARK_INCLUDE_DIRS})  
-
-set(LINK_MODE_LIB SHARED)  
-set(LINK_MODE_MODULE MODULE)  
+#find_package(Qt5Xml)
 
 set(DISSECTOR_SRC
-	packet-trdp_spy.c
-	parsebody.c
+    packet-trdp_spy.cpp
+	trdp_env.cpp
 )
 
 set(PLUGIN_FILES
@@ -37,11 +43,11 @@ set(CLEAN_FILES
 	${PLUGIN_FILES}
 )
 
-if (WERROR)
+if (WERROR_COMMON_FLAGS)
 	set_source_files_properties(
 		${CLEAN_FILES}
 		PROPERTIES
-		COMPILE_FLAGS -Werror
+		COMPILE_FLAGS ${WERROR_COMMON_FLAGS}
 	)
 endif()
 
@@ -52,16 +58,23 @@ register_dissector_files(plugin.c
 	${DISSECTOR_SRC}
 )
 
-add_library(trdp_spy ${LINK_MODE_MODULE}
-	${PLUGIN_FILES}
-)
-set_target_properties(trdp_spy PROPERTIES PREFIX "")
-set_target_properties(trdp_spy PROPERTIES LINK_FLAGS "${WS_LINK_FLAGS}")
+add_plugin_library(trdp_spy)
 
-target_link_libraries(trdp_spy epan)
+#target_link_libraries(trdp_spy epan Qt5::Xml)
 
 install(TARGETS trdp_spy
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/@CPACK_PACKAGE_NAME@/plugins/${CPACK_PACKAGE_VERSION} NAMELINK_SKIP
 	RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/@CPACK_PACKAGE_NAME@/plugins/${CPACK_PACKAGE_VERSION}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/@CPACK_PACKAGE_NAME@/plugins/${CPACK_PACKAGE_VERSION}
+)
+
+file(GLOB DISSECTOR_HEADERS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.h")
+CHECKAPI(
+	NAME
+	  trdp_spy
+	SWITCHES
+	  -g abort -g termoutput -build
+	SOURCES
+	  ${DISSECTOR_SRC}
+	  ${DISSECTOR_HEADERS}
 )

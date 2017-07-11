@@ -143,6 +143,7 @@
  * @{
  */
 
+#ifdef DOXYGEN
 
 /** @fn void proto_register_trdp (void)
  *
@@ -169,27 +170,6 @@ void proto_register_trdp (void);
  */
 void proto_reg_handoff_trdp(void);
 
-
-
-/** @fn guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level)
- *
- * @brief
- * Extract all information from the userdata (uses the parsebody module for unmarshalling)
- *
- * @param tvb               buffer
- * @param packet            info for the packet
- * @param tree              to which the information are added
- * @param trdpRootNode      Root node of the view of an TRDP packet (Necessary, as this function will be called recursively)
- * @param trdp_spy_comid    the already extracted comId
- * @param offset            where the userdata starts in the TRDP packet
- * @param length            Amount of bytes, that are transported for the users
- * @param flag_dataset      on 0, the comId will be searched, on > 0 trdp_spy_comid will be interpreted as a dataset id
- * @param dataset_level     is set to 0 for the beginning
- *
- * @return the actual offset in the packet
- */
-guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree *trdp_spy_tree, proto_tree *trdpRootNode, guint32 trdp_spy_comid, guint32 offset, guint length, guint8 flag_dataset, guint8 dataset_level);
-
 /**@fn void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree)
  *
  * @brief
@@ -202,5 +182,7 @@ guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, proto_tree 
  * @return nothing
  */
 void dissect_trdp(tvbuff_t *tvb, packet_info *pinfo, proto_tree *tree);
+
+#endif
 
 /** @} */
