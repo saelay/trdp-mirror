@@ -5,7 +5,7 @@
 #endif
 
 /* Name of package */
-#define PACKAGE "trdp_spy"
+#define PACKAGE "trdp_test"
 
 
 #ifdef VERSION
@@ -13,6 +13,6 @@
 #endif
 
 /* Version number of package */
-#define VERSION "0.2.0 RC1"
+#define VERSION "1.3.0"
 
 

@@ -52,6 +52,8 @@
 
 #define TRDP_DEFAULT_UDPTCP_MD_PORT 17225   /*< Default port address for Message data (MD) communication */
 #define TRDP_DEFAULT_UDP_PD_PORT    17224   /*< Default port address for Process data (PD) communication */
+#define TRDP_DEFAULT_STR_PD_PORT    "17224"
+#define TRDP_DEFAULT_STR_MD_PORT    "17225"
 
 #define PROTO_TAG_TRDP          "TRDP"
 #define PROTO_NAME_TRDP         "Train Real Time Data Protocol"
@@ -91,36 +93,23 @@
  * TYPEDEFS
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*******************************************************************************
  * GLOBAL FUNCTIONS
  */
 
-
-/** @fn guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs)
- *
- * @brief Compute crc32 according to IEEE802.3.
- *
- * @note Returned CRC is inverted
- *
- * @param[in] buf   Input buffer
- * @param[in] len   Length of input buffer
- * @param[in] fcs   Initial (seed) value for the FCS calculation
- *
- * @return Calculated fcs value
- */
 guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs);
 
-/** @fn guint8 trdp_dissect_width(guint32 type)
- * @brief Lookup table for length of the standard types.
- * The width of an element in bytes.
- * Extracted from table3 at TCN-TRDP2-D-BOM-011-19.
- *
- * @param[in] type			the numeric representation of a type
- *
- * @return the width in byte of one element of the given type
- */
 guint8 trdp_dissect_width(guint32 type);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif
 

@@ -1,13 +1,12 @@
 TRDP SPY
 ----------------------------------
 Requirements:
-Wireshark version 1.8.3
+Wireshark version 2.2.7
 
 Features:
-1. User data interpretation support
-2. support available for SDTv2
+1. TRDP header parser
 
 Installation Instruction:
-Copy packet-trdp_spy.so into plugin directory
+Copy trdp_spy.so into plugin directory
 Set in Edit/Preferences/TRDP your specific trdp_config.xml.
 This is needed to interpret the transmitted user data.
