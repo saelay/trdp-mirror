@@ -640,6 +640,8 @@
 		08594B381B70EA0E0066EA06 /* windows */ = {isa = PBXFileReference; lastKnownFileType = folder; path = windows; sourceTree = "<group>"; };
 		08594B391B70EA1D0066EA06 /* integrity */ = {isa = PBXFileReference; lastKnownFileType = folder; path = integrity; sourceTree = "<group>"; };
 		08594B3A1B70EA3F0066EA06 /* VisualC */ = {isa = PBXFileReference; lastKnownFileType = folder; name = VisualC; path = ../VisualC; sourceTree = "<group>"; };
+		0867899C1F0CE3D7009D1B8F /* lint */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lint; sourceTree = "<group>"; };
+		088397771F06A2A4003A8C6F /* pdsend_example.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = pdsend_example.xml; sourceTree = "<group>"; };
 		08A327B91E51FDD400B03846 /* api_test.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = api_test.c; sourceTree = "<group>"; };
 		08A327BA1E51FDD400B03846 /* hostsfile.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = hostsfile.txt; sourceTree = "<group>"; };
 		08A327BB1E51FDD400B03846 /* test6.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = test6.xml; sourceTree = "<group>"; };
@@ -1190,6 +1192,7 @@
 				7366AC6F16B68C920068A893 /* device1.xml */,
 				7366AC7016B68C920068A893 /* device2.xml */,
 				7366AC7116B68C920068A893 /* example.xml */,
+				088397771F06A2A4003A8C6F /* pdsend_example.xml */,
 				7366AC7216B68C920068A893 /* readme.txt */,
 				7366AC7316B68C920068A893 /* trdp-xmlpd-test.c */,
 				7366AC7416B68C920068A893 /* trdp-xmlprint-test.c */,
@@ -1333,6 +1336,7 @@
 			isa = PBXGroup;
 			children = (
 				7366AC6716B68C570068A893 /* lint */,
+				0867899C1F0CE3D7009D1B8F /* lint */,
 				08A327B51E51FBC600B03846 /* localtest */,
 				73CE24581733F28100314E1C /* diverse */,
 				73CE245C1733F38A00314E1C /* marshalling */,
@@ -2656,7 +2660,7 @@
 				INFOPLIST_FILE = ../example/SenderDemo/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = "-DPOSIX";
 				OTHER_LDFLAGS = "";
@@ -2680,7 +2684,7 @@
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "SenderDemo-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-framework",
