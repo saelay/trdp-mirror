@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-07-12: Ticket #164 Fix for #151 (operator '&' instead of xor)
  *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, local prototypes added
@@ -1945,7 +1946,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
                 {
                     vos_getTime(&pSubPD->timeToGo);
                     vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
-                    pSubPD->privFlags ^= (unsigned)~TRDP_TIMED_OUT;   /* Reset time out flag (#151) */
+                    pSubPD->privFlags &= (unsigned)~TRDP_TIMED_OUT;   /* Reset time out flag (#151) */
                 }
             }
         }
