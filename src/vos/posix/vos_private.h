@@ -43,7 +43,7 @@ extern "C" {
 #ifndef VOS_VERSION
 #define VOS_VERSION            1u
 #define VOS_RELEASE            0u
-#define VOS_UPDATE             2u
+#define VOS_UPDATE             3u
 #define VOS_EVOLUTION          0u
 #endif
 

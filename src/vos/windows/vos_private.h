@@ -38,10 +38,10 @@ extern "C" {
  * DEFINES
  */
 
-#define VOS_VERSION            1
-#define VOS_RELEASE            0
-#define VOS_UPDATE             1
-#define VOS_EVOLUTION          0
+#define VOS_VERSION            1u
+#define VOS_RELEASE            0u
+#define VOS_UPDATE             2u
+#define VOS_EVOLUTION          0u
 
 struct VOS_MUTEX
 {
