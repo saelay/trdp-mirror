@@ -46,7 +46,7 @@
 #ifndef TRDP_VERSION
 #define TRDP_VERSION            1u
 #define TRDP_RELEASE            3u
-#define TRDP_UPDATE             2u
+#define TRDP_UPDATE             3u
 #define TRDP_EVOLUTION          0u
 #endif
 
