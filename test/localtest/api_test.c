@@ -36,6 +36,7 @@
 #endif
 
 #include "trdp_if_light.h"
+#include "vos_sock.h"
 
 
 /***********************************************************************************************************************
@@ -59,8 +60,8 @@ typedef struct
     
 } TRDP_THREAD_SESSION_T;
 
-TRDP_THREAD_SESSION_T gSession1 = {NULL, 0x0A000164u, 0, 0};
-TRDP_THREAD_SESSION_T gSession2 = {NULL, 0x0A000165u, 0, 0};
+TRDP_THREAD_SESSION_T gSession1 = {NULL, 0x0A000264u, 0, 0};
+TRDP_THREAD_SESSION_T gSession2 = {NULL, 0x0A000265u, 0, 0};
 
 /* Data buffers to play with (Content is borrowed from Douglas Adams, "The Hitchhiker's Guide to the Galaxy") */
 static uint8_t dataBuffer1[64*1024] = {
@@ -463,7 +464,7 @@ static void iface_init (
     TRDP_IP_ADDR_T          *pIP1,
     TRDP_IP_ADDR_T          *pIP2)
 {
-    if ((*pIP1 == VOS_INADDR_ANY) && (*pIP2 == VOS_INADDR_ANY))
+    if ((*pIP1 == 0) && (*pIP2 == 0))
     {
         /* find suitable addresses if not set */
         
@@ -1227,15 +1228,98 @@ static int test8 (int argc, char *argv[])
  */
 static int test9 (int argc, char *argv[])
 {
-    PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
+    PREPARE("Send and receive many telegrams, to check time optimisations", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
+#define TEST9_NO_OF_TELEGRAMS   200u
+#define TEST9_COMID     10000u
+#define TEST9_INTERVAL  100000u
+#define TEST9_TIMEOUT   (TEST9_INTERVAL * 3)
+#define TEST9_DATA      "Hello World!"
+#define TEST9_DATA_LEN  16u
+
+        TRDP_PUB_T      pubHandle[TEST9_NO_OF_TELEGRAMS];
+        TRDP_SUB_T      subHandle[TEST9_NO_OF_TELEGRAMS];
+        unsigned int    i;
+
+        for (i = 0; i < TEST9_NO_OF_TELEGRAMS; i++)
+        {
+            /*    Session1 Install all publishers    */
+
+            err = tlp_publish(gSession1.appHandle, &pubHandle[i], TEST9_COMID + i, 0u, 0u,
+                              0u,
+                              gSession2.ifaceIP,                              /* Destination */
+                              TEST9_INTERVAL,
+                              0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8*) TEST9_DATA, TEST9_DATA_LEN);
+
+            IF_ERROR("tlp_publish");
+            err = tlp_subscribe(gSession2.appHandle, &subHandle[i], NULL, NULL,
+                            TEST9_COMID + i, 0u, 0u,
+                            gSession1.ifaceIP,
+                            0u,                            /* MC group */
+                            TRDP_FLAGS_NONE, TEST9_TIMEOUT, TRDP_TO_DEFAULT);
+
+
+            IF_ERROR("tlp_subscribe");
+
+        }
+
+        fprintf(gFp, "\nInitialized %u publishers & subscribers!\n", i);
+
+        /*
+         Enter the main processing loop.
+         */
+        int counter = 0;
+        while (counter++ < 600)         /* 60 seconds */
+        {
+            char            data2[1432u];
+            UINT32          dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T  pdInfo;
+
+
+            for (i = 0; i < TEST9_NO_OF_TELEGRAMS; i++)
+            {
+                sprintf(data2, "--ComId %08u", i);
+                (void) tlp_put(gSession1.appHandle, pubHandle[i], (UINT8 *) data2, TEST9_DATA_LEN);
+
+                /*    Wait for answer   */
+                usleep(100000u);
+
+                err = tlp_get(gSession2.appHandle, subHandle[i], &pdInfo, (UINT8 *) data2, &dataSize2);
+                if (err == TRDP_NODATA_ERR)
+                {
+                    //fprintf(gFp, ".");
+                    continue;
+                }
+
+                if (err == TRDP_TIMEOUT_ERR)
+                {
+                    //fprintf(gFp, ".");
+                    //fflush(gFp);
+                    continue;
+                }
+
+                if (err != TRDP_NO_ERR)
+                {
+                    fprintf(gFp, "\n### tlp_get error: %d\n", err);
+
+                    gFailed = 1;
+                    goto end;
+
+                }
+                else
+                {
+                    //fprintf(gFp, "\nreceived data from pull: %s (seq: %u, size: %u)\n", data2, pdInfo.seqCount, dataSize2);
+                    gFailed = 0;
+                    //goto end;
+                }
+            }
+        }
     }
 
     /* ------------------------- test code ends here --------------------------- */
-
 
     CLEANUP;
 }
@@ -1348,8 +1432,8 @@ test_func_t *testArray[] =
     test6,
     test7,
     test8,
-    /*test9,
-    test10,
+    test9,
+    /*test10,
     test11,
     test12,
     test13,*/
