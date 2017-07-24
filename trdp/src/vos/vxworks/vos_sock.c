@@ -218,9 +218,9 @@ EXT_DECL UINT32 vos_dottedIP (
     struct in_addr addr;
     /* vxWorks does not regard the const qualifier for first parameter */
     /* casting to non const, helps to get rid of compiler noise        */
-    if (inet_aton((CHAR8*)pDottedIP, &addr) <= 0)
+    if (inet_aton((CHAR8*)pDottedIP, &addr) != OK)
     {
-        return 0;   /* Prevent returning broadcast address on error */
+        return VOS_INADDR_ANY;   /* Prevent returning broadcast address on error */
     }
     else
     {
