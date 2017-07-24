@@ -37,6 +37,7 @@
 #include <fcntl.h>
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+#include <ws2def.h>
 #include <MSWSock.h>
 #include <lm.h>
 #include <iphlpapi.h>
@@ -218,11 +219,10 @@ EXT_DECL UINT32 vos_dottedIP (
     /* indicate conversion errors, therefore zero has   */
     /* to be returned in order to have similar behavior */
     /* as by using inet_aton                            */
-    if ((conversionResult == VOS_INADDR_ANY)
-        ||
-        (conversionResult == VOS_INADDR_ANY))
+    if (    (conversionResult == INADDR_ANY)
+         || (conversionResult == INADDR_NONE))
     {
-        return 0;
+        return VOS_INADDR_ANY;
     }
     else
     {
