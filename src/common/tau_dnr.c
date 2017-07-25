@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-07-25: Ticket #125: tau_dnr: TCN DNS support missing
  *      BL 2017-05-08: Compiler warnings
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
  *      BL 2017-02-08: Ticket #124 tau_dnr: Cache keeps etbTopoCount only
@@ -30,8 +31,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "tau_tti.h"                        /* needed for TRDP_SHORT_VERSION */
 #include "tau_dnr.h"
+#include "tau_dnr_types.h"
 #include "trdp_utils.h"
+#include "trdp_if_light.h"
 #include "vos_mem.h"
 #include "vos_sock.h"
 
@@ -49,6 +53,7 @@
 #define TAU_DNS_TIME_OUT_LONG       10u     /**< Timeout in seconds for DNS server reply, if no hosts file provided   */
 #define TAU_DNS_TIME_OUT_SHORT      1u      /**< Timeout in seconds for DNS server reply, if hosts file was provided  */
 
+#define TAU_MAX_HOST_URI_LEN        80u     /**< Including EOS! */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -65,11 +70,12 @@ typedef struct tau_dnr_cache
 
 typedef struct tau_dnr_data
 {
-    TRDP_IP_ADDR_T  dnsIpAddr;
-    UINT16          dnsPort;
-    UINT16          timeout;
-    UINT32          noOfCachedEntries;
-    TAU_DNR_ENTRY_T cache[TAU_MAX_NO_CACHE_ENTRY];
+    TRDP_IP_ADDR_T  dnsIpAddr;                      /**< IP address of the resolver                 */
+    UINT16          dnsPort;                        /**< 53 for standard DNS or 17225 for TCN-DNS   */
+    UINT8           timeout;                        /**< timeout for requests (in seconds)          */
+    TRDP_DNR_OPTS_T useTCN_DNS;                     /**< how to use TCN DNR                         */
+    UINT32          noOfCachedEntries;              /**< no of items currently in the cache         */
+    TAU_DNR_ENTRY_T cache[TAU_MAX_NO_CACHE_ENTRY];  /**< if != 0 use TCN DNS as resolver            */
 } TAU_DNR_DATA_T;
 
 typedef struct tau_dnr_query
@@ -84,7 +90,10 @@ typedef struct tau_dnr_query
 } TAU_DNR_QUERY_T;
 
 /* Constant sized fields of the resource record structure */
+#ifdef WIN32
 #pragma pack(push, 1)
+#endif
+
 typedef struct R_DATA
 {
     UINT16  type;
@@ -93,7 +102,7 @@ typedef struct R_DATA
     UINT16  data_len;
 } GNU_PACKED TAU_R_DATA_T;
 
-/* DNS header structure */
+/** DNS header structure */
 typedef struct DNS_HEADER
 {
     UINT16  id;                 /* identification number */
@@ -104,7 +113,12 @@ typedef struct DNS_HEADER
     UINT16  auth_count;         /* number of authority entries */
     UINT16  add_count;          /* number of resource entries */
 }  GNU_PACKED TAU_DNS_HEADER_T;
+
+
+#ifdef WIN32
 #pragma pack(pop)
+#endif
+
 
 /* Pointers to resource record contents */
 typedef struct RES_RECORD
@@ -125,6 +139,7 @@ typedef struct QUESTION
 /***********************************************************************************************************************
  *   Locals
  */
+
 
 #pragma mark ----------------------- Local -----------------------------
 
@@ -620,6 +635,7 @@ static void updateDNSentry (
             /* Clear our packet buffer  */
             memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
             size = TAU_MAX_DNS_BUFFER_SIZE;
+
             /* Get what was announced */
             (void) vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
 
@@ -629,10 +645,13 @@ static void updateDNSentry (
             {
                 continue;       /* Try again, if there was no data */
             }
+
             /*  Get and convert response */
             parseResponse(packetBuffer, size, id, querySize, &ip_addr);
 
-            if (pTemp != NULL && ip_addr != VOS_INADDR_ANY)
+            if ((pTemp != NULL) &&
+                (ip_addr != VOS_INADDR_ANY) &&
+                (pTemp->fixedEntry == FALSE))
             {
                 /* Overwrite outdated entry */
                 pTemp->ipAddr       = ip_addr;
@@ -646,7 +665,8 @@ static void updateDNSentry (
 
                 if (cacheEntry >= TAU_MAX_NO_CACHE_ENTRY)   /* Cache is full! */
                 {
-                    cacheEntry = 0u;                         /* Overwrite first */
+                    cacheEntry = 0u;                        /* Overwrite first */
+                    // tbd: cacheEntry = cacheGetOldest();
                 }
                 else
                 {
@@ -658,6 +678,7 @@ static void updateDNSentry (
                 pDNR->cache[cacheEntry].ipAddr          = ip_addr;
                 pDNR->cache[cacheEntry].etbTopoCnt      = appHandle->etbTopoCnt;
                 pDNR->cache[cacheEntry].opTrnTopoCnt    = appHandle->opTrnTopoCnt;
+                pDNR->cache[cacheEntry].fixedEntry      = FALSE;
 
                 /* Sort the entries to get faster hits  */
                 vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
@@ -675,6 +696,332 @@ exit:
     return;
 }
 
+/**********************************************************************************************************************/
+/**    Build the request payload
+ *
+ *  @param[in]      pDNR            Reference Context
+ *  @param[in]      pRequest        Handle returned by tlc_openSession()
+ *  @param[out]     pSize           Pointer to Message Info
+ *
+ */
+static void buildRequest (
+    TRDP_APP_SESSION_T  appHandle,
+	TAU_DNR_DATA_T      *pDNR,
+    TRDP_DNS_REQUEST_T  *pRequest,
+    UINT32              *pSize)
+{
+    UINT32  cacheEntry;
+
+    /* Prepare header */
+    memset(pRequest, 0u, sizeof(TRDP_DNS_REQUEST_T));  /*  pRequest->tcnUriCnt = 0; */
+    pRequest->version.ver = 1u;
+    vos_strncpy(pRequest->deviceName, appHandle->stats.hostName, TRDP_MAX_LABEL_LEN);
+    pRequest->etbTopoCnt = appHandle->etbTopoCnt;
+    pRequest->opTrnTopoCnt = appHandle->opTrnTopoCnt;
+    pRequest->etbId = 255u;            /* don't care */
+
+    /* Walk over the cache entries */
+    for (cacheEntry = 0u; (cacheEntry < pDNR->noOfCachedEntries) && (pRequest->tcnUriCnt < 255u); cacheEntry++)
+    {
+        /* Needs update? No, if it is a fixed entry (hostsfile) or it is a consist local adress */
+        if ((pDNR->cache[cacheEntry].fixedEntry == TRUE) ||
+            ((pDNR->cache[cacheEntry].ipAddr != 0u) &&
+             (pDNR->cache[cacheEntry].etbTopoCnt == 0u) && (pDNR->cache[cacheEntry].opTrnTopoCnt == 0u)))
+        {
+            continue;
+        }
+        /* Needs update? Only when there is no address or the topocounts do not match */
+        else if ((pDNR->cache[cacheEntry].ipAddr == 0u) ||
+            ((pDNR->cache[cacheEntry].etbTopoCnt != appHandle->etbTopoCnt) ||
+            (pDNR->cache[cacheEntry].opTrnTopoCnt != appHandle->opTrnTopoCnt)))
+        {
+            /* Make sure the string is not longer than 79 chars (+ trailing zero) */
+            vos_strncpy(pRequest->tcnUriList[pRequest->tcnUriCnt].tcnUriStr, pDNR->cache[cacheEntry].uri, TAU_MAX_HOST_URI_LEN - 1u);
+            pRequest->tcnUriCnt++;
+        }
+    }
+    /* tbd: add SDT trailer
+       TRDP_ETB_CTRL_VDP_T   *pSafetyTrail = (TRDP_ETB_CTRL_VDP_T*)&pRequest->tcnUriList[pRequest->tcnUriCnt];
+       sdt_validate(pRequest, pSafetyTrail);
+     */
+    *pSize = sizeof(TRDP_DNS_REQUEST_T) - (255u - pRequest->tcnUriCnt) * sizeof(TCN_URI_T);
+}
+
+/**********************************************************************************************************************/
+/**    Add an entry to the DNS cache to be resolved
+ *
+ *  @param[in]      appHandle       Session context
+ *  @param[in]      pDNR            DNR context
+ *  @param[in]      pURI            URI to add
+ *
+ *
+ */
+static void addEntry (
+	TRDP_APP_SESSION_T  appHandle,
+    TAU_DNR_DATA_T      *pDNR,
+    const CHAR8         *pURI)
+{
+    /* It's a new one, update our cache */
+    UINT32 cacheEntry = pDNR->noOfCachedEntries;
+
+    if (cacheEntry >= TAU_MAX_NO_CACHE_ENTRY)   /* Cache is full! */
+    {
+        cacheEntry = 0u;                        /* Overwrite first */
+        // tbd: cacheEntry = cacheGetOldest();
+    }
+    else
+    {
+        pDNR->noOfCachedEntries++;
+    }
+
+    /* Position found, store everything */
+    vos_strncpy(pDNR->cache[cacheEntry].uri, pURI, TAU_MAX_HOST_URI_LEN);
+    pDNR->cache[cacheEntry].ipAddr          = 0u;
+    pDNR->cache[cacheEntry].etbTopoCnt      = appHandle->etbTopoCnt;
+    pDNR->cache[cacheEntry].opTrnTopoCnt    = appHandle->opTrnTopoCnt;
+    pDNR->cache[cacheEntry].fixedEntry      = FALSE;
+
+    /* Sort the entries to get faster hits  */
+    vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
+}
+
+/**********************************************************************************************************************/
+/**    Parse the reply payload and update the DNS cache
+ *
+ *  @param[in]      pDNR            DNR context
+ *  @param[in]      pReply          Handle returned by tlc_openSession()
+ *  @param[in]      size            Pointer to Message Info
+ *
+ *
+ */
+static void parseUpdateTCNResponse (
+                                    TAU_DNR_DATA_T      *pDNR,
+                                    TRDP_DNS_REPLY_T    *pReply,
+                                    UINT32              size)
+{
+    UINT32  i;
+    TAU_DNR_ENTRY_T *pTemp;
+
+    for (i = 0u; i < pReply->tcnUriCnt; i++)
+    {
+        if (pReply->tcnUriList[i].resolvState != -1)
+        {
+            pTemp = (TAU_DNR_ENTRY_T *) vos_bsearch(pReply->tcnUriList[i].tcnUriStr,
+                                                pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T),
+                                                compareURI);
+            if (pTemp != NULL)
+            {
+                /* Position found, store everything */
+                vos_strncpy(pTemp->uri, pReply->tcnUriList[i].tcnUriStr, TAU_MAX_URI_SIZE);
+                pTemp->ipAddr          = vos_ntohl(pReply->tcnUriList[i].tcnUriIpAddr);
+                pTemp->etbTopoCnt      = vos_ntohl(pReply->etbTopoCnt);
+                pTemp->opTrnTopoCnt    = vos_ntohl(pReply->opTrnTopoCnt);
+                pTemp->fixedEntry      = FALSE;
+                if (pTemp->ipAddr == VOS_INADDR_ANY)
+                {
+                    vos_printLog(VOS_LOG_WARNING, "%s resolved to INADDR_ANY\n", pReply->tcnUriList[i].tcnUriStr);
+                }
+            }
+            else
+            {
+                vos_printLog(VOS_LOG_INFO, "%s was not asked for!\n", pReply->tcnUriList[i].tcnUriStr);
+            }
+        }
+        else
+        {
+            vos_printLog(VOS_LOG_WARNING, "%s could not be resolved\n", pReply->tcnUriList[i].tcnUriStr);
+        }
+    }
+    /* Sort the entries to get faster hits  */
+    vos_qsort(pDNR->cache, pDNR->noOfCachedEntries, sizeof(TAU_DNR_ENTRY_T), compareURI);
+}
+
+/**********************************************************************************************************************/
+/**    MD Callback for the TCN-DNS Reply
+ *
+ *  @param[in]      pRefCon             Reference Context
+ *  @param[in]      appHandle           Handle returned by tlc_openSession()
+ *  @param[in]      pMsg                Pointer to Message Info
+ *  @param[in]      pData               Pointer to received payload
+ *  @param[in]      dataSize            Size of payload
+ *
+*
+ */
+static void dnrMDCallback (
+    void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
+    const TRDP_MD_INFO_T    *pMsg,
+    UINT8                   *pData,
+	UINT32                  dataSize)
+{
+
+    if ((appHandle == NULL) ||
+         (pData == NULL) ||
+         (dataSize == 0u) ||
+         (pMsg == NULL))
+    {
+         return;
+    }
+
+    /* we await TCN-DNS reply */
+    if ((pMsg->comId == TCN_DNS_REP_COMID) &&
+        (pMsg->resultCode == TRDP_NO_ERR))
+    {
+        VOS_SEMA_T      *pDnsSema = (VOS_SEMA_T*) pMsg->pUserRef;
+
+        /* tbd: Is packet valid? */
+        // if (sdt_isvalid(appHandle, pData, dataSize)) ...
+
+        /* update the cache */
+        parseUpdateTCNResponse((TAU_DNR_DATA_T *) appHandle->pUser, (TRDP_DNS_REPLY_T *)pData, dataSize);
+
+        (void) vos_semaGive(*pDnsSema);
+    }
+    else
+    {
+        vos_printLog(VOS_LOG_WARNING, "dnrMDCallback error (resultCode = %d)\n", pMsg->resultCode);
+    }
+}
+
+/**********************************************************************************************************************/
+/**    Query the TCN-DNS server for the addresses
+ *
+ *  @param[in]      appHandle           Handle returned by tlc_openSession()
+ *  @param[in]      pTemp               Last entry which was invalid, can be NULL
+ *  @param[in]      pUri                Pointer to host name
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_INIT_ERR   initialisation error
+ *
+ */
+static void updateTCNDNSentry (
+    TRDP_APP_SESSION_T  appHandle,
+    TAU_DNR_ENTRY_T     *pTemp,
+	const CHAR8         *pUri)
+{
+    TRDP_ERR_T      err;
+    UINT32          querySize;
+	TAU_DNR_DATA_T  *pDNR   = (TAU_DNR_DATA_T *) appHandle->pUser;
+    VOS_SEMA_T      dnsSema;
+    unsigned int    i;
+
+    static UINT8 sTCN_DNS_Buffer[sizeof(TRDP_DNS_REQUEST_T)];
+
+    TRDP_DNS_REQUEST_T  *pDNS_REQ = (TRDP_DNS_REQUEST_T *)sTCN_DNS_Buffer;
+    TRDP_UUID_T         sessionId;
+
+    /* Create semaphore */
+    err = (TRDP_ERR_T) vos_semaCreate(&dnsSema, VOS_SEMA_EMPTY);
+
+    if (err != VOS_NO_ERR)
+    {
+        vos_printLogStr(VOS_LOG_ERROR, "updateTCNDNSentry failed to get semaphore\n");
+        return;
+    }
+
+    /* Is this URI already in the cache? If not, add it! Eventually remove the oldest  */
+
+    if (pTemp == NULL)
+    {
+        addEntry(appHandle, pDNR, pUri);
+    }
+    /* build the request telegram with all possible outdated entries */
+
+    buildRequest(appHandle, pDNR, pDNS_REQ, &querySize);
+
+    if (querySize == 0u)
+    {
+        vos_printLogStr(VOS_LOG_ERROR, "updateTCNDNSentry failed to send request\n");
+        goto exit;
+    }
+    /* send the MD request */
+
+    err = tlm_request(appHandle, &dnsSema, dnrMDCallback, &sessionId, TCN_DNS_REQ_COMID,
+                        0u, 0u,
+                        VOS_INADDR_ANY, pDNR->dnsIpAddr,
+                        TRDP_FLAGS_CALLBACK,
+                        1u,
+                        TCN_DNS_REQ_TO_US,
+                        1u,
+                        NULL,
+                        sTCN_DNS_Buffer,
+                        querySize,
+                        NULL,
+                        NULL);
+    if (err != TRDP_NO_ERR)
+    {
+        vos_printLogStr(VOS_LOG_ERROR, "updateTCNDNSentry failed to send request\n");
+        goto exit;
+    }
+
+    /* how do we get the reply? */
+    if (pDNR->useTCN_DNS == TRDP_DNR_OWN_THREAD)
+    {
+        /* we must call tlc_process on our own, if we run single threaded */
+
+        (void) tlc_process(appHandle, NULL, NULL);   /* force sending message data */
+
+        for (i = 0; i < 2; i++)
+        {
+
+            /* switch context for the reply */
+
+            TRDP_FDS_T          rfds;
+            INT32               noDesc;
+            TRDP_TIME_T         tv = {0, 0};
+            const TRDP_TIME_T   max_tv  = {0, 100000};
+            INT32               rv;
+
+            FD_ZERO(&rfds);
+
+            tlc_getInterval(appHandle, &tv, &rfds, &noDesc);
+
+            if (vos_cmpTime(&tv, &max_tv) > 0)
+            {
+                tv = max_tv;
+            }
+
+            rv = vos_select(noDesc + 1, &rfds, NULL, NULL, &tv);
+
+            err = tlc_process(appHandle, &rfds, &rv);
+
+            /* wait 1s for the reply */
+
+            if (vos_semaTake(dnsSema, TCN_DNS_REQ_TO_US) == VOS_NO_ERR)
+            {
+                /* reply arrived */
+                break;
+            }
+            else
+            {
+                /* reply timed out */
+                vos_printLogStr(VOS_LOG_WARNING, "TCN-DNS request timed out!\n");
+                continue;
+            }
+        }
+    }
+    else /* We can assume that there is a communication thread running. Just go to sleep and wait for the semaphore! */
+    {
+        if (vos_semaTake(dnsSema, TCN_DNS_REQ_TO_US) == VOS_NO_ERR)
+        {
+            /* reply arrived */
+        }
+        else
+        {
+            vos_printLogStr(VOS_LOG_WARNING, "TCN-DNS request timed out!\n");
+            /* reply timed out */
+        }
+    }
+
+    /* kill the session to avoid dangeling semaphore */
+    (void) tlm_abortSession(appHandle, &sessionId);
+
+exit:
+    vos_semaDelete(dnsSema);
+    return;
+}
+
 #pragma mark ----------------------- Public -----------------------------
 
 /***********************************************************************************************************************
@@ -682,26 +1029,35 @@ exit:
  */
 
 /**********************************************************************************************************************/
-/**    Function to init DNR
+/** Function to init the DNR subsystem
+ *  Initialize the DNR resolver. Depending on the supplied options, three operational modes are supported:
+ *  1. TRDP_DNR_COMMON_THREAD (default)
+ *      Expect tlc_process running in a different, separate thread
+ *  2. TRDP_DNR_OWN_THREAD
+ *      For single threaded systems only! Internally call tlc_process()
+ *  3. TRDP_DNR_STANDARD_DNS
+ *      Use standard DNS instead of TCN-DNS.
+ *  Default dnsPort (= 0) for TCN-DNS is 17225, for standard DNS it is 53.
  *
- *  @param[in]      appHandle           Handle returned by tlc_openSession()
- *  @param[in]      dnsIpAddr           IP address of DNS server (default 10.0.0.1)
- *  @param[in]      dnsPort             Port of DNS server (default 53)
- *  @param[in]      pHostsFileName      Optional hosts file name as ECSP replacement
+ *  @param[in]      appHandle       Handle returned by tlc_openSession().
+ *  @param[in]      dnsIpAddr       DNS/ECSP IP address.
+ *  @param[in]      dnsPort         DNS port number.
+ *  @param[in]      pHostsFileName  Optional host file name as ECSP replacement/addition.
+ *  @param[in]      dnsOptions      Use existing thread (recommended), use own tlc_process loop or use standard DNS
  *
  *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_PARAM_ERR  Parameter error
  *  @retval         TRDP_INIT_ERR   initialisation error
  *
  */
 EXT_DECL TRDP_ERR_T tau_initDnr (
-    TRDP_APP_SESSION_T  appHandle,
-    TRDP_IP_ADDR_T      dnsIpAddr,
-    UINT16              dnsPort,
-    const CHAR8         *pHostsFileName)
+                                 TRDP_APP_SESSION_T  appHandle,
+                                 TRDP_IP_ADDR_T      dnsIpAddr,
+                                 UINT16              dnsPort,
+                                 const CHAR8         *pHostsFileName,
+                                 TRDP_DNR_OPTS_T     dnsOptions)
 {
     TRDP_ERR_T      err = TRDP_NO_ERR;
-    TAU_DNR_DATA_T  *pDNR; /**< default DNR/ECSP settings  */
+    TAU_DNR_DATA_T  *pDNR;      /**< default DNR/ECSP settings  */
 
     if (appHandle == NULL)
     {
@@ -717,11 +1073,22 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     /* save to application session */
     appHandle->pUser = pDNR;
 
-    pDNR->dnsIpAddr = (dnsIpAddr == 0u) ? 0x0a000001u : dnsIpAddr;
-    pDNR->dnsPort   = (dnsPort == 0u) ? 53u : dnsPort;
+    pDNR->dnsIpAddr     = (dnsIpAddr == 0u) ? 0x0a000001u : dnsIpAddr;
+
+    /* Set default ports */
+    if (dnsOptions == TRDP_DNR_STANDARD_DNS)
+    {
+        pDNR->dnsPort   = (dnsPort == 0u) ? 53u : dnsPort;
+    }
+    else
+    {
+        pDNR->dnsPort   = (dnsPort == 0u) ? 17225u : dnsPort;
+    }
+
+    pDNR->useTCN_DNS = dnsOptions;
 
     /* Get locally defined hosts */
-    if (pHostsFileName != NULL && strlen(pHostsFileName) > 0)
+    if ((pHostsFileName != NULL) && (strlen(pHostsFileName) > 0))
     {
         err = readHostsFile(pDNR, pHostsFileName);
         pDNR->timeout = TAU_DNS_TIME_OUT_SHORT;
@@ -910,15 +1277,21 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
              (pTemp->etbTopoCnt == appHandle->etbTopoCnt) ||                    /* Do the topocounts match? */
              (pTemp->opTrnTopoCnt == appHandle->opTrnTopoCnt) ||
              ((appHandle->etbTopoCnt == 0u) && (appHandle->opTrnTopoCnt == 0u))   /* Or do we not care?       */
-            )
-            )
+            ))
         {
             *pAddr = pTemp->ipAddr;
             return TRDP_NO_ERR;
         }
         else    /* address is not known or out of date (topocounts differ)  */
         {
-            updateDNSentry(appHandle, pTemp, pUri);
+            if (pDNR->useTCN_DNS != 0)
+            {
+                updateTCNDNSentry(appHandle, pTemp, pUri);   /* Update everything, at least this URI */
+            }
+            else
+            {
+                updateDNSentry(appHandle, pTemp, pUri);
+            }
             /* try resolving again... */
         }
     }

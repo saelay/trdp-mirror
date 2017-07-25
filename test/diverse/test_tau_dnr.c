@@ -10,10 +10,11 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *          Copyright NewTec GmbH, 2017. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2017-07-25: Testing TCN-DNS for Ticket #125: tau_dnr: TCN DNS support missing
  */
 
 /*******************************************************************************
@@ -39,7 +40,7 @@
 
 #include "trdp_if_light.h"
 #include "tau_dnr.h"
-//#include "vos_sock.h"
+#include "vos_sock.h"
 
 /*******************************************************************************
  * DEFINES
@@ -53,6 +54,8 @@
 #endif
 
 #define PATH_TO_HOSTSFILE   "hosts_example"
+#define OWN_IP              vos_dottedIP("10.0.2.101")
+#define DNS_SERVER          vos_dottedIP("10.0.1.1")
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -65,7 +68,7 @@
  *  @param[in]      pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
-void dbgOut (
+static void dbgOut (
              void        *pRefCon,
              TRDP_LOG_T  category,
              const CHAR8 *pTime,
@@ -75,20 +78,20 @@ void dbgOut (
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
     
-    if (category == VOS_LOG_ERROR || category == VOS_LOG_INFO)
+    if (category != VOS_LOG_DBG)
     {
         CHAR8 *pStr = (strrchr(pFile, '/') == NULL)? strrchr(pFile, '\\') + 1 : strrchr(pFile, '/') + 1;
         printf("%s %s %s:%d %s",
            pTime,
            catStr[category],
-           (pStr == NULL ? pFile : pStr + 1),
+           (pStr == NULL) ? pFile : pStr,
            LineNumber,
            pMsgStr);
     }
 }
 
 /**********************************************************************************************************************/
-int testNetwork()
+static int testNetwork()
 {
     UINT8 MAC[6];
     int i;
@@ -128,7 +131,9 @@ int testNetwork()
 
 /**********************************************************************************************************************/
 
-int test_tau_init()
+static int test_tau_init(
+    TRDP_IP_ADDR_T  ownIP,
+    TRDP_IP_ADDR_T  dnsServerIP)
 {
     TRDP_APP_SESSION_T      appHandle; /*    Our identifier to the library instance    */
     TRDP_ERR_T              err;
@@ -144,7 +149,7 @@ int test_tau_init()
     }
     
     /*    Open a session  */
-    if (tlc_openSession(&appHandle, 0, 0,   /* use default IP addresses         */
+    if (tlc_openSession(&appHandle, ownIP, 0,   /* use default IP addresses         */
                         NULL,               /* no Marshalling                   */
                         NULL, NULL,         /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
@@ -153,7 +158,7 @@ int test_tau_init()
         return 1;
     }
 
-    err = tau_initDnr (appHandle, 0x0A400002, 0, PATH_TO_HOSTSFILE);
+    err = tau_initDnr (appHandle, dnsServerIP, 0, NULL /*PATH_TO_HOSTSFILE*/, TRDP_DNR_OWN_THREAD);
 //    err = tau_initDnr (appHandle, 0, 0, PATH_TO_HOSTSFILE);
     if (err != TRDP_NO_ERR)
     {
@@ -212,7 +217,7 @@ exit_label:
 int main(int argc, char *argv[])
 {
     printf("Starting test_tau_init\n");
-    if (test_tau_init())
+    if (test_tau_init(OWN_IP, DNS_SERVER))
     {
         printf("*** tau_init test failed\n");
         return 1;
