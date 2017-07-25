@@ -168,8 +168,8 @@
 /** ETB Control telegram                                                                                            */
 
 #define ETB_CTRL_COMID                      1u
-#define ETB_CTRL_CYC                        500u                                    /**< 0.5s                       */
-#define ETB_CTRL_TO                         3000u                                   /**< 3s                         */
+#define ETB_CTRL_CYC                        500u                                    /**< [ms] 0.5s                       */
+#define ETB_CTRL_TO                         3000u                                   /**< [ms]3s                         */
 #define ETB_CTRL_DEST_URI                   "grpECSP.anyVeh.aCst.aClTrn.lTrn"
 #define ETB_CTRL_DEST_IP                    "239.193.0.1"
 #define ETB_CTRL_DS                         "ETBCTRL_TELEGRAM"
@@ -217,8 +217,8 @@
 /** TTDB manager telegram PD                                                                                        */
 
 #define TTDB_STATUS_COMID                   100u
-#define TTDB_STATUS_CYC                     1000u                                   /**< Push                       */
-#define TTDB_STATUS_TO                      5000u                                   /**< 5s                         */
+#define TTDB_STATUS_CYC                     1000u                                   /**< [ms] Push                       */
+#define TTDB_STATUS_TO                      5000u                                   /**< [ms] 5s                         */
 #define TTDB_STATUS_SMI                     100u
 #define TTDB_STATUS_USER_DATA_VER           0x0100u
 #define TTDB_STATUS_DEST_URI                "grpAll.aVeh.lCst.lClTrn.lTrn"
@@ -252,7 +252,7 @@
 #define TTDB_STAT_CST_REQ_COMID             104u                                    /**< MD request                 */
 #define TTDB_STAT_CST_REQ_URI               "devECSP.anyVeh.lCst.lClTrn.lTrn"
 #define TTDB_STAT_CST_REQ_DS                "TTDB_STATIC_CONSIST_INFO_REQUEST"
-#define TTDB_STAT_CST_REQ_TO                3000u                                   /**< 3s timeout                 */
+#define TTDB_STAT_CST_REQ_TO                3000u                                   /**< [ms] 3s timeout                 */
 #define TRDP_TTDB_STATIC_CST_INF_REQ_COMID  TTDB_STAT_CST_REQ_COMID
 
 #define TTDB_STAT_CST_REP_COMID             105u
@@ -264,7 +264,7 @@
 #define TTDB_NET_DIR_REQ_COMID              106u                                    /**< MD request                 */
 #define TTDB_NET_DIR_REQ_URI                "devECSP.anyVeh.lCst"
 #define TTDB_NET_DIR_REQ_DS                 "TTDB_TRAIN_NETWORK_DIRECTORY_INFO_REQUEST"
-#define TTDB_NET_DIR_REQ_TO                 3000u                                   /**< 3s timeout                 */
+#define TTDB_NET_DIR_REQ_TO                 3000u                                   /**< [ms] 3s timeout                 */
 #define TRDP_TTDB_TRN_NET_DIR_INF_REQ_COMID TTDB_NET_DIR_REQ_COMID
 
 #define TTDB_NET_DIR_REP_COMID              107u                                    /**< MD reply                   */
@@ -275,7 +275,7 @@
 
 #define TTDB_OP_DIR_INFO_REQ_COMID          108u
 #define TTDB_OP_DIR_INFO_REQ_URI            "devECSP.anyVeh.lCst"
-#define TTDB_OP_DIR_INFO_REQ_TO             3000u                                   /**< 3s timeout                 */
+#define TTDB_OP_DIR_INFO_REQ_TO             3000u                                   /**< [ms] 3s timeout                 */
 #define TRDP_TTDB_OP_TRN_DIR_INF_REQ_COMID  TTDB_OP_DIR_INFO_REQ_COMID
 
 #define TTDB_OP_DIR_INFO_REP_COMID          109u
@@ -287,7 +287,7 @@
 #define TTDB_READ_CMPLT_REQ_COMID           110u
 #define TTDB_READ_CMPLT_REQ_URI             "devECSP.anyVeh.lCst"
 #define TTDB_READ_CMPLT_REQ_DS              "TTDB_READ_COMPLETE_REQUEST"            /**< ETBx                       */
-#define TTDB_READ_CMPLT_REQ_TO              3000u                                   /**< 3s timeout                 */
+#define TTDB_READ_CMPLT_REQ_TO              3000u                                   /**< [ms] 3s timeout                 */
 #define TRDP_TTDB_READ_CMPL_REQ_COMID       TTDB_READ_CMPLT_REQ_COMID
 
 #define TTDB_READ_CMPLT_REP_COMID           111u                                    /**< MD reply                   */
@@ -298,8 +298,8 @@
 
 #define ECSP_CTRL_COMID                     120u
 #define ECSP_CTRL_SMI                       120u
-#define ECSP_CTRL_CYC                       1000u                                   /**< 1s                         */
-#define ECSP_CTRL_TO                        5000u                                   /**< 5s                         */
+#define ECSP_CTRL_CYC                       1000u                                   /**< [ms] 1s                         */
+#define ECSP_CTRL_TO                        5000u                                   /**< [ms] 5s                         */
 #define ECSP_CTRL_DEST_URI                  "devECSP.anyVeh.lCst.lClTrn.lTrn"       /**< 10.0.0.1                   */
 #define ECSP_CTRL_DS                        "ECSP_CTRL"
 #define TRDP_ECSP_CTRL_COMID                ECSP_CTRL_COMID                         /**< Etb control message        */
@@ -308,8 +308,8 @@
 
 #define ECSP_STATUS_COMID                   121u
 #define ECSP_STATUS_SMI                     121u
-#define ECSP_STATUS_CYC                     1000u                                   /**< 1s                         */
-#define ECSP_STATUS_TO                      5000u                                   /**< 5s                         */
+#define ECSP_STATUS_CYC                     1000u                                   /**< [ms] 1s                         */
+#define ECSP_STATUS_TO                      5000u                                   /**< [ms] 5s                         */
 #define ECSP_STATUS_DEST_URI                "devECSC.anyVeh.lCst.lClTrn.lTrn"       /**< 10.0.0.100                 */
 #define ECSP_STATUS_DS                      "ECSP_STATUS"
 #define TRDP_ECSP_STAT_COMID                ECSP_STATUS_COMID                       /* Etb status message           */
@@ -318,14 +318,14 @@
 
 #define ECSP_CONF_REQ_COMID                 122u
 #define ECSP_CONF_REQ_SMI                   122u
-#define ECSP_CONF_REQ_TO                    3000u
+#define ECSP_CONF_REQ_TO                    3000u                                   /**< [ms]  */
 #define ECSP_CONF_REQ_URI                   "devECSP.anyVeh.lCst.lClTrn.lTrn"       /**< 10.0.0.1                   */
 #define ECSP_CONF_REQ_DS                    "ECSP_CONF_REQUEST"
 #define TRDP_ECSP_CONF_REQ_COMID            ECSP_CONF_REQ_COMID     /* ECSP confirmation/correction request message */
 
 #define ECSP_CONF_REP_COMID                 123u
 #define ECSP_CONF_REP_SMI                   123u
-#define ECSP_CONF_REP_TO                    3000u
+#define ECSP_CONF_REP_TO                    3000u                                   /**< [ms]  */
 #define ECSP_CONF_REP_DS                    "ECSP_CONF_REPLY"
 #define TRDP_ECSP_CONF_REP_COMID            ECSP_CONF_REP_COMID     /* ECSP confirmation/correction reply message   */
 
@@ -334,7 +334,7 @@
 #define ETBN_CTRL_REQ_COMID                 130u
 #define ETBN_CTRL_REQ_SMI                   130u
 #define ETBN_CTRL_REQ_DS                    "ETBN_CTRL"                             /**< ETBx                       */
-#define ETBN_CTRL_REQ_TO                    3000u                                   /**< 3s timeout                 */
+#define ETBN_CTRL_REQ_TO                    3000u                                   /**< [ms] 3s timeout                 */
 #define TRDP_ETBN_CTRL_REQ_COMID            ETBN_CTRL_REQ_COMID
 
 #define ETBN_CTRL_REP_COMID                 131u
@@ -346,7 +346,7 @@
 
 #define ETBN_TRN_NET_DIR_REQ_COMID          132u
 #define ETBN_TRN_NET_DIR_REQ_SMI            132u
-#define ETBN_TRN_NET_DIR_REQ_TO             3000u                                   /**< 3s timeout                 */
+#define ETBN_TRN_NET_DIR_REQ_TO             3000u                                   /**< [ms] 3s timeout                 */
 #define TRDP_ETBN_TRN_NET_DIR_INF_REQ_COMID ETBN_TRN_NET_DIR_REQ_COMID
 
 #define ETBN_TRN_NET_DIR_REP_COMID          133u
@@ -359,7 +359,8 @@
 
 #define TCN_DNS_REQ_COMID                   140u
 #define TCN_DNS_REQ_SMI                     140u
-#define TCN_DNS_REQ_TO                      3000u                                   /**< 3s timeout                 */
+#define TCN_DNS_REQ_TO                      3000u                                   /**< [ms] 3s timeout                 */
+#define TCN_DNS_REQ_TO_US                   3000000u                                /**< [us] 3s timeout                 */
 #define TCN_DNS_REQ_DS                      "DNS_REQUEST"
 #define TCN_DNS_REQ_URI                     "devDNS.anyVeh.lCst.lClTrn.lTrn"
 #define TRDP_DNS_REQUEST_COMID              TCN_DNS_REQ_COMID
