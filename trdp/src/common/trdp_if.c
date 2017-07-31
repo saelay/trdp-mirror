@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-07-31: Ticket #168 Unnecessary multicast Join on tlp_publish()
  *      BL 2017-07-12: Ticket #164 Fix for #151 (operator '&' instead of xor)
  *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
@@ -1289,7 +1290,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         appHandle->pdDefault.port,
                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
                         (srcIpAddr == VOS_INADDR_ANY) ? appHandle->realIP : srcIpAddr,
-                        pubHandle.mcGroup,
+                        0u,
                         TRDP_SOCK_PD,
                         appHandle->option,
                         FALSE,
