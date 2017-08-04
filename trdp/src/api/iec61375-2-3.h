@@ -160,6 +160,9 @@
 #define TRDP_MSG_MC                         0x4D63u                 /**< 'Mc' MD Confirm                            */
 #define TRDP_MSG_ME                         0x4D65u                 /**< 'Me' MD Error                              */
 
+#define ETB0_ALL_END_DEVICES_URI            "grpAll.aVeh.aCst.aClTrn.lTrn"
+#define ETB0_ALL_END_DEVICES_IP             "239.193.0.0"           /**< from Table 22  */
+
 /**********************************************************************************************************************/
 /**                          Reserved COMIDs in the range 1 ... 1000                                                  */
 /**********************************************************************************************************************/
