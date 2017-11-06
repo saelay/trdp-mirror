@@ -13,6 +13,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-11-05: Ticket #174 Max. number of retries of a MD request needs to be checked
  *     AHW 2017-05-22: Ticket #159 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-02-08: Ticket #142: Compiler warnings / MISRA-C 2012 issues
@@ -104,7 +105,7 @@
 #define TRDP_MD_DEFAULT_SENDING_TIMEOUT     5000000u                    /**< [us] Socket sending time out 5s        */
 #define TRDP_MD_DEFAULT_QOS                 3u
 #define TRDP_MD_DEFAULT_TTL                 64u
-#define TRDP_MD_DEFAULT_RETRIES             3u
+#define TRDP_MD_DEFAULT_RETRIES             2u
 #define TRDP_MD_DEFAULT_SEND_PARAM          {TRDP_MD_DEFAULT_QOS, TRDP_MD_DEFAULT_TTL, TRDP_MD_DEFAULT_RETRIES}
 #define TRDP_MD_MAX_NUM_SESSIONS            1000u
 
@@ -129,6 +130,7 @@
 #define TRDP_MAX_MD_PACKET_SIZE             (TRDP_MAX_MD_DATA_SIZE + sizeof(MD_HEADER_T))
 
 /** Maximum values    */
+#define TRDP_MAX_MD_RETRIES                 2u
 
 #define TRDP_MAX_LABEL_LEN                  16u                         /**< label length incl. terminating '0'     */
 

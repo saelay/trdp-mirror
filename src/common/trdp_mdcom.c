@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-11-05: Ticket #174 Max. number of retries of a MD request needs to be checked
  *      BL 2017-06-28: Ticket #160: Receiving fragmented TCP packets
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
@@ -3314,9 +3315,8 @@ TRDP_ERR_T trdp_mdCall (
     UINT32      timeoutWire = 0U;
 
     /*check for valid values within msgType*/
-    if ((msgType != TRDP_MSG_MR)
-        &&
-        (msgType != TRDP_MSG_MN))
+    if (    ((msgType != TRDP_MSG_MR) && (msgType != TRDP_MSG_MN))
+		 || (maxNumRetries > TRDP_MAX_MD_RETRIES))
     {
         return TRDP_PARAM_ERR;
     }
