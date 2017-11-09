@@ -615,7 +615,7 @@ static int test1 (int argc, char *argv[])
 
             if (err != TRDP_NO_ERR)
             {
-                vos_printLog(VOS_LOG_INFO, "### tlp_get error: %s\n", vos_getErrorString(err));
+                vos_printLog(VOS_LOG_INFO, "### tlp_get error: %s\n", vos_getErrorString((VOS_ERR_T)err));
                 
                 gFailed = 1;
                 //goto end;
@@ -914,8 +914,8 @@ static int test4 (int argc, char *argv[])
  */
 
 #define                 TEST5_STRING_COMID       1000u
-#define                 TEST5_STRING_REQUEST     &dataBuffer1 //"Requesting data"
-#define                 TEST5_STRING_REPLY       &dataBuffer2 //"Data transmission succeded"
+#define                 TEST5_STRING_REQUEST     (char*)&dataBuffer1 //"Requesting data"
+#define                 TEST5_STRING_REPLY       (char*)&dataBuffer2 //"Data transmission succeded"
         
 static void  test5CBFunction (
     void                    *pRefCon,
@@ -1075,7 +1075,7 @@ static int test6 (int argc, char *argv[])
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
                           TRDP_FLAGS_CALLBACK, 1u, 1000000u, NULL,
-                          (UINT8*)TEST5_STRING_REQUEST, strlen(TEST5_STRING_REQUEST),
+                          (UINT8*)TEST5_STRING_REQUEST, (UINT32) strlen(TEST5_STRING_REQUEST),
                           srcURI, destURI2);
         
         IF_ERROR("tlm_request");
@@ -1118,7 +1118,7 @@ static int test7 (int argc, char *argv[])
         
         err = tlm_notify(appHandle1, NULL, test5CBFunction, TEST5_STRING_COMID, 0u, 0u, 0u,
                          gSession2.ifaceIP, TRDP_FLAGS_CALLBACK, NULL,
-                         (UINT8*)TEST5_STRING_REQUEST, strlen(TEST5_STRING_REQUEST), NULL, NULL );
+                         (UINT8*)TEST5_STRING_REQUEST, (UINT32) strlen(TEST5_STRING_REQUEST), NULL, NULL );
         
         
         IF_ERROR("tlm_notify");

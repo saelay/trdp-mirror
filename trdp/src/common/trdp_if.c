@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-09: Ticket #171 Wrong socket binding for multicast request messages
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-07-31: Ticket #168 Unnecessary multicast Join on tlp_publish()
  *      BL 2017-07-12: Ticket #164 Fix for #151 (operator '&' instead of xor)
@@ -1261,6 +1262,12 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     {
         TRDP_ADDRESSES_T pubHandle;
 
+        /* Ticket #171: srcIP should be set if there are more than one interface */
+        if (srcIpAddr == VOS_INADDR_ANY)
+        {
+            srcIpAddr = appHandle->realIP;
+        }
+
         /* initialize pubHandle */
         pubHandle.comId         = comId;
         pubHandle.destIpAddr    = destIpAddr;
@@ -1297,7 +1304,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
                         appHandle->iface,
                         appHandle->pdDefault.port,
                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
-                        (srcIpAddr == VOS_INADDR_ANY) ? appHandle->realIP : srcIpAddr,
+                        srcIpAddr,
                         0u,
                         TRDP_SOCK_PD,
                         appHandle->option,
@@ -1840,6 +1847,12 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
     if ( ret == TRDP_NO_ERR)
     {
+        /* Ticket #171: srcIP should be set if there are more than one interface */
+        if (srcIpAddr == VOS_INADDR_ANY)
+        {
+            srcIpAddr = appHandle->realIP;
+        }
+
         {
             TRDP_ADDRESSES_T addr;
 
