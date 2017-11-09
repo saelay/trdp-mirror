@@ -135,7 +135,6 @@ static void manageMDCall(TRDP_APP_SESSION_T appSession,
                               TRDP_FLAGS_DEFAULT,
                               1,
                               timeOut,
-                              2, /* number of retries */
                               NULL,
                               pData,
                               datasize,

@@ -422,7 +422,6 @@ int md_request(const char* targetIP, uint32_t comID, char* pMessage)
                 vos_dottedIP(targetIP), TRDP_FLAGS_CALLBACK,
                 1u,              //  Expected replies
                 0u,              //  reply timeout
-                3u,              //  number of replies
                 NULL,           //  send parameters
                 (const UINT8*) pMessage,
                 (UINT32) strlen(pMessage),

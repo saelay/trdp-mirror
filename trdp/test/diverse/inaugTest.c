@@ -636,7 +636,7 @@ int main (int argc, char * *argv)
                     {
                         case 'r':
                             printf("sending MD request to %s\n", vos_ipDotted(gDestMC1));
-                            tlm_request(gAppHandle, NULL, &myMDcallBack, &gMDPacket.sessionId, gMDPacket.comID, 0, 0, 0, gMDPacket.addr, TRDP_FLAGS_CALLBACK, 1, 10000000, 3, NULL, cDemoData, sizeof(cDemoData), NULL, NULL);
+                            tlm_request(gAppHandle, NULL, &myMDcallBack, &gMDPacket.sessionId, gMDPacket.comID, 0, 0, 0, gMDPacket.addr, TRDP_FLAGS_CALLBACK, 1, 10000000, NULL, cDemoData, sizeof(cDemoData), NULL, NULL);
                             break;
                         case 'q':
                             gRun = FALSE;
