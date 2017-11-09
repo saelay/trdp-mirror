@@ -984,7 +984,7 @@ static void updateTCNDNSentry (
 
             rv = vos_select(noDesc + 1, &rfds, NULL, NULL, &tv);
 
-            err = tlc_process(appHandle, &rfds, &rv);
+            (void) tlc_process(appHandle, &rfds, &rv);
 
             /* wait 1s for the reply */
 
