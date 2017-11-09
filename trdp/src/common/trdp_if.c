@@ -16,7 +16,7 @@
  *
  * $Id$
  *
- *     AHW 2017-11-05: Ticket #174 Max. number of retries of a MD request needs to be checked
+ *     AHW 2017-11-05: Ticket #179 Max. number of retries of a MD request needs to be checked
  *      BL 2017-07-31: Ticket #168 Unnecessary multicast Join on tlp_publish()
  *      BL 2017-07-12: Ticket #164 Fix for #151 (operator '&' instead of xor)
  *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
