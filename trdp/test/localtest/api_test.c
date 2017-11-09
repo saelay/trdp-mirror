@@ -37,6 +37,7 @@
 
 #include "trdp_if_light.h"
 #include "vos_sock.h"
+#include "vos_utils.h"
 
 
 /***********************************************************************************************************************
@@ -46,7 +47,7 @@
 
 typedef int (test_func_t)(int argc, char *argv[]);
 
-UINT32          gDestMC = 0xEF000101u;
+UINT32          gDestMC = 0xEF000202u;
 int             gFailed;
 
 static FILE     *gFp    = NULL;
@@ -292,7 +293,7 @@ end:                                                                          \
         test_deinit(&gSession1 ,&gSession2);                \
                                                                               \
         if (gFailed) {                                                         \
-            fprintf(gFp, "\n###########  FAILED!  ###############\nlasterr = %d", err); }      \
+            fprintf(gFp, "\n###########  FAILED!  ###############\nlasterr = %d\n", err); }      \
         else{                                                                 \
             fprintf(gFp, "\n-----------  Success  ---------------\n"); }      \
                                                                               \
@@ -380,8 +381,8 @@ static void trdp_loop (void* pArg)
         INT32       noDesc;
         INT32       rv;
         TRDP_TIME_T  tv;
-        TRDP_TIME_T  max_tv = {0u, 100000};
-        TRDP_TIME_T  min_tv = {0u, 10000};
+        TRDP_TIME_T  max_tv = {0u, 20000};
+        TRDP_TIME_T  min_tv = {0u, 5000};
         
         /*
          Prepare the file descriptor set for the select call.
@@ -483,6 +484,11 @@ static TRDP_APP_SESSION_T test_init (
 {
     TRDP_ERR_T          err     = TRDP_NO_ERR;
     pSession->appHandle = NULL;
+    TRDP_PROCESS_CONFIG_T     processConfig = {"me",    /* Host name  */
+                                                "",     /* Leader name dependant on redundancy concept   */
+                                                5000,   /* TRDP main process cycle time in us  */
+                                                0,      /* TRDP main process priority (0-255, 0=default, 255=highest) */
+                                                TRDP_OPTION_BLOCK};
     
     if (dbgout != NULL)
     {
@@ -491,7 +497,7 @@ static TRDP_APP_SESSION_T test_init (
     }
     if (err == TRDP_NO_ERR)                 /* We ignore double init here */
     {
-        tlc_openSession(&pSession->appHandle, pSession->ifaceIP, 0u, NULL, NULL, NULL, NULL);
+        tlc_openSession(&pSession->appHandle, pSession->ifaceIP, 0u, NULL, NULL, NULL, NULL/*&processConfig*/);
         /* On error the handle will be NULL... */
     }
     
@@ -560,7 +566,7 @@ static int test1 (int argc, char *argv[])
 #define TEST1_COMID     0u
 #define TEST1_INTERVAL  100000u
 #define TEST1_DATA      "Hello World!"
-#define TEST1_DATA_LEN  16u
+#define TEST1_DATA_LEN  24u
 
         /*    Copy the packet into the internal send queue, prepare for sending.    */
 
@@ -568,7 +574,7 @@ static int test1 (int argc, char *argv[])
                           0u, //gSession1.ifaceIP,                   /* Source */
                           gSession2.ifaceIP,//gDestMC,               /* Destination */
                           TEST1_INTERVAL,
-                          0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8*) TEST1_DATA, TEST1_DATA_LEN);
+                          0u, TRDP_FLAGS_DEFAULT, NULL, NULL, TEST1_DATA_LEN);
         
         IF_ERROR("tlp_publish");
 
@@ -597,9 +603,11 @@ static int test1 (int argc, char *argv[])
             err = tlp_put(gSession1.appHandle, pubHandle, (UINT8 *) data1, (UINT32) strlen(data1));
             IF_ERROR("tap_put");
 
-            usleep(100000u);
+            vos_threadDelay(100000);
 
             err = tlp_get(gSession2.appHandle, subHandle, &pdInfo, (UINT8 *) data2, &dataSize2);
+
+
             if (err == TRDP_NODATA_ERR)
             {
                 continue;
@@ -607,10 +615,10 @@ static int test1 (int argc, char *argv[])
 
             if (err != TRDP_NO_ERR)
             {
-                fprintf(gFp, "### tlp_get error: %d\n", err);
+                vos_printLog(VOS_LOG_INFO, "### tlp_get error: %s\n", vos_getErrorString(err));
                 
                 gFailed = 1;
-                goto end;
+                //goto end;
                 
             }
             else
@@ -1007,7 +1015,7 @@ static int test5 (int argc, char *argv[])
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
-                          TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, 1u, NULL,
+                          TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
                           (UINT8*)TEST5_STRING_REQUEST, 63*1024/*strlen(TEST5_STRING_REQUEST)*/,
                           srcURI, destURI2);
         
@@ -1020,7 +1028,7 @@ static int test5 (int argc, char *argv[])
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
-                          TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, 1u, NULL,
+                          TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
                           (UINT8*)TEST5_STRING_REQUEST, 63*1024/*strlen(TEST5_STRING_REQUEST)*/,
                           srcURI, destURI2);
         
@@ -1066,7 +1074,7 @@ static int test6 (int argc, char *argv[])
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
-                          TRDP_FLAGS_CALLBACK, 1u, 1000000u, 1u, NULL,
+                          TRDP_FLAGS_CALLBACK, 1u, 1000000u, NULL,
                           (UINT8*)TEST5_STRING_REQUEST, strlen(TEST5_STRING_REQUEST),
                           srcURI, destURI2);
         
@@ -1272,7 +1280,7 @@ static int test9 (int argc, char *argv[])
          Enter the main processing loop.
          */
         int counter = 0;
-        while (counter++ < 600)         /* 60 seconds */
+        while (counter++ < 60)         /* 60 seconds */
         {
             char            data2[1432u];
             UINT32          dataSize2 = sizeof(data2);
@@ -1433,8 +1441,8 @@ test_func_t *testArray[] =
     test7,
     test8,
     test9,
-    /*test10,
-    test11,
+    test10,
+    /*test11,
     test12,
     test13,*/
     NULL
