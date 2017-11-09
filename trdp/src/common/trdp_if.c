@@ -573,6 +573,13 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
             pSession->mdDefault.sendParam.ttl = pMdDefault->sendParam.ttl;
         }
 
+		 if ((pSession->mdDefault.sendParam.retries == TRDP_MD_DEFAULT_RETRIES) &&
+            (pMdDefault->sendParam.retries != TRDP_MD_DEFAULT_RETRIES) &&
+            (pMdDefault->sendParam.retries <= TRDP_MAX_MD_RETRIES))
+        {
+            pSession->mdDefault.sendParam.retries = pMdDefault->sendParam.retries;
+        }
+
         if ((pMdDefault->flags != TRDP_FLAGS_DEFAULT) &&
             (!(pMdDefault->flags & TRDP_FLAGS_NONE)))
         {

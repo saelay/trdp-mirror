@@ -3316,7 +3316,7 @@ TRDP_ERR_T trdp_mdCall (
 
 	/*check for valid values within msgType*/
     if (    ((msgType != TRDP_MSG_MR) && (msgType != TRDP_MSG_MN))
-		 || (pSendParam->retries > TRDP_MAX_MD_RETRIES))
+		 || ((pSendParam != NULL) && (pSendParam->retries > TRDP_MAX_MD_RETRIES)))
     {
         return TRDP_PARAM_ERR;
     }
@@ -3360,7 +3360,7 @@ TRDP_ERR_T trdp_mdCall (
             &&
             (vos_isMulticast(destIpAddr) == FALSE))  /* no multicast addr used    */
         {
-			pSenderElement->numRetriesMax = ((pSendParam != NULL) ? pSendParam->retries : &appHandle->mdDefault.sendParam.retries);
+			pSenderElement->numRetriesMax = ((pSendParam != NULL) ? pSendParam->retries : appHandle->mdDefault.sendParam.retries);
         } /* no else needed as memset has set all memory to zero */
           /* Prepare element data */
         pSenderElement->addr.comId          = comId;
