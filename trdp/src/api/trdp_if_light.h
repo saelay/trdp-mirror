@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
  *      BL 2015-11-24: Accessor for IP address of session
  *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
@@ -613,7 +614,6 @@ EXT_DECL TRDP_ERR_T tlm_notify (
  *  @param[in]      pktFlags            OPTIONS: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
  *  @param[in]      numReplies          number of expected replies, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
- *  @param[in]      maxNumRetries       maximum number of retries (0 ... 2)
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -638,7 +638,6 @@ EXT_DECL TRDP_ERR_T tlm_request (
     TRDP_FLAGS_T            pktFlags,
     UINT32                  numReplies,
     UINT32                  replyTimeout,
-    UINT32                  maxNumRetries,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,

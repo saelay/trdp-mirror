@@ -22,6 +22,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *      BL 2017-03-13: Ticket #154 ComIds and DSIds literals (#define TRDP_...) in trdp_proto.h too long
@@ -529,7 +530,7 @@ static void ttiRequestTTDBdata (
            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_OP_DIR_INFO_REQ_COMID, appHandle->etbTopoCnt,
                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
                                                                     TTDB_OP_DIR_INFO_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                              TTDB_OP_DIR_INFO_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+                              TTDB_OP_DIR_INFO_REQ_TO, NULL, &param, sizeof(param), NULL, NULL);
            /* Make sure the request is sent: */
        }
        break;
@@ -539,7 +540,7 @@ static void ttiRequestTTDBdata (
            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_TRN_DIR_REQ_COMID, appHandle->etbTopoCnt,
                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
                                                                     TTDB_TRN_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                              TTDB_TRN_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+                              TTDB_TRN_DIR_REQ_TO, NULL, &param, sizeof(param), NULL, NULL);
        }
        break;
        case TTDB_NET_DIR_REQ_COMID:
@@ -548,7 +549,7 @@ static void ttiRequestTTDBdata (
            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_NET_DIR_REQ_COMID, appHandle->etbTopoCnt,
                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
                                                                     TTDB_NET_DIR_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                              TTDB_NET_DIR_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+                              TTDB_NET_DIR_REQ_TO, NULL, &param, sizeof(param), NULL, NULL);
        }
        break;
        case TTDB_READ_CMPLT_REQ_COMID:
@@ -557,7 +558,7 @@ static void ttiRequestTTDBdata (
            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_READ_CMPLT_REQ_COMID, appHandle->etbTopoCnt,
                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
                                                                     TTDB_READ_CMPLT_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                              TTDB_READ_CMPLT_REQ_TO, 0, NULL, &param, sizeof(param), NULL, NULL);
+                              TTDB_READ_CMPLT_REQ_TO, NULL, &param, sizeof(param), NULL, NULL);
        }
        break;
        case TTDB_STAT_CST_REQ_COMID:
@@ -565,7 +566,7 @@ static void ttiRequestTTDBdata (
            (void) tlm_request(appHandle, NULL, ttiMDCallback, NULL, TTDB_STAT_CST_REQ_COMID, appHandle->etbTopoCnt,
                               appHandle->opTrnTopoCnt, 0, ipFromURI(appHandle,
                                                                     TTDB_STAT_CST_REQ_URI), TRDP_FLAGS_CALLBACK, 1,
-                              TTDB_STAT_CST_REQ_TO, 0, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
+                              TTDB_STAT_CST_REQ_TO, NULL, cstUUID, sizeof(TRDP_UUID_T), NULL, NULL);
        }
        break;
 

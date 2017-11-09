@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
  *
  */
@@ -249,7 +250,6 @@ EXT_DECL TRDP_ERR_T tau_requestEcspConfirm ( TRDP_APP_SESSION_T         appHandl
                             TRDP_FLAGS_NONE,                /* pktFlags */
                             1,                              /* numReplies */
                             ECSP_CONF_REPLY_TIMEOUT,        /* replyTimeout */
-                            0,                              /* maxNumRetries */
                             NULL,                           /* pSendParam */
                             (const UINT8 *) &pEcspConfRequest,
                             sizeof(TRDP_ECSP_CONF_REQUEST_T),

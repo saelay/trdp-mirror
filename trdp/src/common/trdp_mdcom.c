@@ -20,7 +20,7 @@
  * $Id$
  *
  *      BL 2017-11-09: Ticket #174: Receiving fragmented TCP packets
- *     AHW 2017-11-05: Ticket #179 Max. number of retries of a MD request needs to be checked
+ *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-06-28: Ticket #160: Receiving fragmented TCP packets
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
@@ -3278,7 +3278,6 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T           msgType,
  *  @param[in]      numExpReplies       number of expected replies, 0 if unknown
  *  @param[in]      replyTimeout        timeout for reply
  *  @param[in]      replyStatus         status to be returned
- *  @param[in]      maxNumRetries       maximum number of retries (0 ... 2)
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
  *  @param[in]      pData               pointer to packet data / dataset
  *  @param[in]      dataSize            size of packet data
@@ -3304,7 +3303,6 @@ TRDP_ERR_T trdp_mdCall (
     UINT32                  numExpReplies,
     UINT32                  replyTimeout,
     INT32                   replyStatus,
-    UINT32                  maxNumRetries,
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize,
@@ -3316,9 +3314,9 @@ TRDP_ERR_T trdp_mdCall (
 
     UINT32      timeoutWire = 0U;
 
-    /*check for valid values within msgType*/
+	/*check for valid values within msgType*/
     if (    ((msgType != TRDP_MSG_MR) && (msgType != TRDP_MSG_MN))
-		 || (maxNumRetries > TRDP_MAX_MD_RETRIES))
+		 || (pSendParam->retries > TRDP_MAX_MD_RETRIES))
     {
         return TRDP_PARAM_ERR;
     }
@@ -3362,7 +3360,7 @@ TRDP_ERR_T trdp_mdCall (
             &&
             (vos_isMulticast(destIpAddr) == FALSE))  /* no multicast addr used    */
         {
-            pSenderElement->numRetriesMax = maxNumRetries;
+			pSenderElement->numRetriesMax = ((pSendParam != NULL) ? pSendParam->retries : &appHandle->mdDefault.sendParam.retries);
         } /* no else needed as memset has set all memory to zero */
           /* Prepare element data */
         pSenderElement->addr.comId          = comId;
@@ -3372,12 +3370,12 @@ TRDP_ERR_T trdp_mdCall (
         pSenderElement->addr.opTrnTopoCnt   = opTrnTopoCnt;
         pSenderElement->addr.mcGroup        = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0u;
         pSenderElement->privFlags           = TRDP_PRIV_NONE;
-        pSenderElement->dataSize    = dataSize;
-        pSenderElement->grossSize   = trdp_packetSizeMD(dataSize);
-        pSenderElement->sendSize    = 0u;
-        pSenderElement->numReplies  = 0u;
-        pSenderElement->pCachedDS   = NULL;
-        pSenderElement->morituri    = FALSE;
+        pSenderElement->dataSize			= dataSize;
+        pSenderElement->grossSize			= trdp_packetSizeMD(dataSize);
+        pSenderElement->sendSize			= 0u;
+        pSenderElement->numReplies			= 0u;
+        pSenderElement->pCachedDS			= NULL;
+        pSenderElement->morituri			= FALSE;
         if ( msgType == TRDP_MSG_MR )
         {
             /* Multiple replies expected only for multicast */
@@ -3415,7 +3413,7 @@ TRDP_ERR_T trdp_mdCall (
         trdp_mdSetSessionTimeout(pSenderElement);
 
         errv = trdp_mdConnectSocket(appHandle,
-                                    pSendParam,
+                                    (pSendParam != NULL) ? pSendParam : (&appHandle->mdDefault.sendParam),
                                     srcIpAddr,
                                     destIpAddr,
                                     TRUE,

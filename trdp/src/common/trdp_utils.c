@@ -1007,11 +1007,11 @@ void  trdp_releaseSocket (
 
                 if (iface[lIndex].usage <= 0)
                 {
-                    iface[lIndex].usage = 0;
-
                     /* Start the socket connection timeout */
                     TRDP_TIME_T tmpt_interval, tmpt_now;
 
+                    iface[lIndex].usage = 0;
+					
                     vos_printLog(VOS_LOG_INFO,
                                  "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
                                  iface[lIndex].sock);

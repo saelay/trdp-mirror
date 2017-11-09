@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *                     Ticket #47: Protocol change: no FCS for data part of telegrams
  */
@@ -117,7 +118,6 @@ TRDP_ERR_T trdp_mdCall (const TRDP_MSG_T        msgType,
                         UINT32                  numExpReplies,
                         UINT32                  replyTimeout,
                         INT32                   replyStatus,
-                        UINT32                  maxNumRetries,
                         const TRDP_SEND_PARAM_T *pSendParam,
                         const UINT8             *pData,
                         UINT32                  dataSize,

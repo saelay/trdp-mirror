@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-07-25: Ticket #125: tau_dnr: TCN DNS support missing
  *      BL 2017-05-08: Compiler warnings
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
@@ -943,7 +944,6 @@ static void updateTCNDNSentry (
                         TRDP_FLAGS_CALLBACK,
                         1u,
                         TCN_DNS_REQ_TO_US,
-                        1u,
                         NULL,
                         sTCN_DNS_Buffer,
                         querySize,
