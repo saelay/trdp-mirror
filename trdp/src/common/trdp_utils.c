@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2017-11-06: Ticket #178 trdp_releaseSocket does not cleanup tcpParams
+ *      BL 2017-11-06: Ticket #174 Socket is closed, even if in use
  *      BL 2017-06-07: Undoing setting of usage (came in with #126 fix!)
  *      BL 2017-05-08: Ticket #126 Opened UDP socket is not released if join or bind failed in trdp_requestSocket()
  *      BL 2017-05-08: Compiler warnings, static definitions
@@ -51,10 +53,13 @@ static INT32 sCurrentMaxSocketCnt = 0;
 /***********************************************************************************************************************
  *   Local Functions
  */
-static void printSocketUsage (TRDP_SOCKETS_T iface[]);
-static BOOL8 trdp_SockIsJoined (const TRDP_IP_ADDR_T mcList[VOS_MAX_MULTICAST_CNT], TRDP_IP_ADDR_T mcGroup);
-static BOOL8 trdp_SockAddJoin (TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT], TRDP_IP_ADDR_T  mcGroup);
-static BOOL8 trdp_SockDelJoin (TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT], TRDP_IP_ADDR_T  mcGroup);
+static void     printSocketUsage (TRDP_SOCKETS_T iface[]);
+static BOOL8    trdp_SockIsJoined (const TRDP_IP_ADDR_T mcList[VOS_MAX_MULTICAST_CNT],
+                                   TRDP_IP_ADDR_T       mcGroup);
+static BOOL8    trdp_SockAddJoin (TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
+                                  TRDP_IP_ADDR_T    mcGroup);
+static BOOL8    trdp_SockDelJoin (TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
+                                  TRDP_IP_ADDR_T    mcGroup);
 
 /**********************************************************************************************************************/
 /** Debug socket usage output
@@ -80,6 +85,7 @@ static void printSocketUsage (
         vos_printLog(VOS_LOG_DBG, "iface[%u].sendParam.qos = %u\n", lIndex, iface[lIndex].sendParam.qos);
         vos_printLog(VOS_LOG_DBG, "iface[%u].sendParam.ttl = %u\n", lIndex, iface[lIndex].sendParam.ttl);
         vos_printLog(VOS_LOG_DBG, "iface[%u].rcvMostly = %u\n", lIndex, iface[lIndex].rcvMostly);
+        vos_printLog(VOS_LOG_DBG, "iface[%u].usage = %d\n", lIndex, iface[lIndex].usage);
     }
     vos_printLogStr(VOS_LOG_DBG, "----------------------------\n\n");
 }
@@ -670,7 +676,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
                 if (err != TRDP_NO_ERR)
                 {
-                   /* Avoid to excessive error reporting:
+                    /* Avoid to excessive error reporting:
                     vos_printLog(VOS_LOG_WARNING, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
                 }
             }
@@ -679,8 +685,11 @@ TRDP_ERR_T  trdp_requestSocket (
             /* Use that socket */
             *pIndex = lIndex;
 
-            if ((usage != TRDP_SOCK_MD_TCP)
-                || ((usage == TRDP_SOCK_MD_TCP) && (iface[lIndex].usage > -1)))
+            /*  Ticket #174: Usage should always be counted up, except
+             if there was an error (multicast IF) */
+            if (err == TRDP_NO_ERR)
+/*          if ((usage != TRDP_SOCK_MD_TCP)
+                || ((usage == TRDP_SOCK_MD_TCP) && (iface[lIndex].usage > -1))) */
             {
                 iface[lIndex].usage++;
             }
@@ -717,6 +726,12 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[lIndex].tcpParams.connectionTimeout.tv_usec   = 0;
         iface[lIndex].tcpParams.cornerIp    = cornerIp;
         iface[lIndex].tcpParams.sendNotOk   = FALSE;
+        iface[lIndex].usage                 = 0;
+        iface[lIndex].tcpParams.notSend     = FALSE;
+        iface[lIndex].tcpParams.morituri    = FALSE;
+        iface[lIndex].tcpParams.sendingTimeout.tv_sec   = 0;
+        iface[lIndex].tcpParams.sendingTimeout.tv_usec  = 0;
+
 
         /* Add to the file desc only if it's an accepted socket */
         if (rcvMostly == TRUE)
@@ -749,100 +764,100 @@ TRDP_ERR_T  trdp_requestSocket (
 
         switch (usage)
         {
-            case TRDP_SOCK_MD_UDP:
-                sock_options.nonBlocking = TRUE; /* MD UDP sockets are always non blocking because they are polled */
-            case TRDP_SOCK_PD:
-                err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[lIndex].sock, &sock_options);
-                if (err != TRDP_NO_ERR)
-                {
-                    vos_printLog(VOS_LOG_ERROR, "vos_sockOpenUDP failed! (Err: %d)\n", err);
-                    *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                }
-                else
-                {
-                    iface[lIndex].usage = 0;
-                    *pIndex = lIndex;
+           case TRDP_SOCK_MD_UDP:
+               sock_options.nonBlocking = TRUE;  /* MD UDP sockets are always non blocking because they are polled */
+           case TRDP_SOCK_PD:
+               err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[lIndex].sock, &sock_options);
+               if (err != TRDP_NO_ERR)
+               {
+                   vos_printLog(VOS_LOG_ERROR, "vos_sockOpenUDP failed! (Err: %d)\n", err);
+                   *pIndex = TRDP_INVALID_SOCKET_INDEX;
+               }
+               else
+               {
+                   iface[lIndex].usage = 1;
+                   *pIndex = lIndex;
 
-                    if (rcvMostly)
-                    {
-                        /*  Only bind to local IP if we are not a multicast listener  */
-                        if (0 == mcGroup)
-                        {
-                            err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, port);
-                        }
-                        else
-                        {
-                            err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, 0 /*mcGroup*/, port);
-                        }
+                   if (rcvMostly)
+                   {
+                       /*  Only bind to local IP if we are not a multicast listener  */
+                       if (0 == mcGroup)
+                       {
+                           err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, port);
+                       }
+                       else
+                       {
+                           err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, 0 /*mcGroup*/, port);
+                       }
 
-                        if (err != TRDP_NO_ERR)
-                        {
-                            vos_printLog(VOS_LOG_ERROR, "vos_sockBind() for UDP rcv failed! (Err: %d)\n", err);
-                            *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                            break;
-                        }
+                       if (err != TRDP_NO_ERR)
+                       {
+                           vos_printLog(VOS_LOG_ERROR, "vos_sockBind() for UDP rcv failed! (Err: %d)\n", err);
+                           *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                           break;
+                       }
 
-                        if (0 != mcGroup)
-                        {
+                       if (0 != mcGroup)
+                       {
 
-                            err = (TRDP_ERR_T) vos_sockJoinMC(iface[lIndex].sock, mcGroup, srcIP);
-                            if (err != TRDP_NO_ERR)
-                            {
-                                vos_printLog(VOS_LOG_ERROR, "vos_sockJoinMC() for UDP rcv failed! (Err: %d)\n", err);
-                                *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                                break;
-                            }
-                            else
-                            {
-                                if (trdp_SockAddJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
-                                {
-                                    vos_printLogStr(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
-                                }
-                            }
-                        }
-                    }
-                    else if (iface[lIndex].bindAddr != 0)
-                    {
-                        (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
-                    }
+                           err = (TRDP_ERR_T) vos_sockJoinMC(iface[lIndex].sock, mcGroup, srcIP);
+                           if (err != TRDP_NO_ERR)
+                           {
+                               vos_printLog(VOS_LOG_ERROR, "vos_sockJoinMC() for UDP rcv failed! (Err: %d)\n", err);
+                               *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                               break;
+                           }
+                           else
+                           {
+                               if (trdp_SockAddJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
+                               {
+                                   vos_printLogStr(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
+                               }
+                           }
+                       }
+                   }
+                   else if (iface[lIndex].bindAddr != 0)
+                   {
+                       (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
+                   }
 
-                    /*    Multicast sender shall be bound to an interface    */
-                    if (iface[lIndex].bindAddr != 0 && !vos_isMulticast(iface[lIndex].bindAddr))
-                    {
-                        err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
-                        if (err != TRDP_NO_ERR)
-                        {
+                   /*    Multicast sender shall be bound to an interface    */
+                   if (iface[lIndex].bindAddr != 0 && !vos_isMulticast(iface[lIndex].bindAddr))
+                   {
+                       err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
+                       if (err != TRDP_NO_ERR)
+                       {
                            /* Avoid to excessive error reporting:
                             vos_printLog(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
-                            *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                            break;
-                        }
-                    }
+                           *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                           break;
+                       }
+                   }
 
-                }
-                break;
-            case TRDP_SOCK_MD_TCP:
-                err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[lIndex].sock, &sock_options);
-                if (err != TRDP_NO_ERR)
-                {
-                    vos_printLog(VOS_LOG_ERROR, "vos_sockOpenTCP() failed! (Err: %d)\n", err);
-                    *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                }
-                else
-                {
-                    iface[lIndex].usage = 0;
-                    *pIndex = lIndex;
-                }
+               }
+               break;
+           case TRDP_SOCK_MD_TCP:
+               err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[lIndex].sock, &sock_options);
+               if (err != TRDP_NO_ERR)
+               {
+                   vos_printLog(VOS_LOG_ERROR, "vos_sockOpenTCP() failed! (Err: %d)\n", err);
+                   *pIndex = TRDP_INVALID_SOCKET_INDEX;
+               }
+               else
+               {
+                   iface[lIndex].usage = 1;
+                   *pIndex = lIndex;
+               }
 
-                if (iface[lIndex].bindAddr != 0)
-                {
-                    (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
-                }
-                break;
-            default:
-                *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                err     = TRDP_SOCK_ERR;
-                break;
+               if (iface[lIndex].bindAddr != 0)
+               {
+                   (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
+               }
+               break;
+           default:
+               *pIndex  = TRDP_INVALID_SOCKET_INDEX;
+               err      = TRDP_SOCK_ERR;
+               break;
         }
 
         if (err != TRDP_NO_ERR)
@@ -966,6 +981,8 @@ void  trdp_releaseSocket (
 
                 if (iface[lIndex].usage <= 0)
                 {
+                    iface[lIndex].usage = 0;
+
                     /* Start the socket connection timeout */
                     TRDP_TIME_T tmpt_interval, tmpt_now;
 
@@ -1136,14 +1153,14 @@ int trdp_checkSequenceCounter (
             if (pElement->pSeqCntList->seq[l_index].lastSeqCnt == 0 ||    /* first time after timeout */
                 sequenceCounter != pElement->pSeqCntList->seq[l_index].lastSeqCnt)
             {
-/*
-                  vos_printLog(VOS_LOG_DBG,
-                               "Rcv sequence: %u    last seq: %u\n",
-                               sequenceCounter,
-                               pElement->pSeqCntList->seq[l_index].lastSeqCnt);
-                  vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(
-                                   srcIP), pElement->addr.comId);
- */
+                /*
+                 vos_printLog(VOS_LOG_DBG,
+                 "Rcv sequence: %u    last seq: %u\n",
+                 sequenceCounter,
+                 pElement->pSeqCntList->seq[l_index].lastSeqCnt);
+                 vos_printLog(VOS_LOG_DBG, "-> new PD data found (SrcIp: %s comId %u)\n", vos_ipDotted(
+                 srcIP), pElement->addr.comId);
+                 */
                 pElement->pSeqCntList->seq[l_index].lastSeqCnt = sequenceCounter;
                 return 0;
             }
