@@ -365,7 +365,7 @@ int main (int argc, char * *argv)
          Compute the min. timeout value for select and return descriptors to wait for.
          This way we can guarantee that PDs are sent in time...
          */
-        err = tlc_getInterval(appHandle,
+        (void) tlc_getInterval(appHandle,
                               &tv,
                               &rfds,
                               &noOfDesc);
