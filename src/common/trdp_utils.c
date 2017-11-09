@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-09: Ticket #181/182 Missing padding bytes in user dataset of PD/MD-PDU
  *      BL 2017-11-06: Ticket #178 trdp_releaseSocket does not cleanup tcpParams
  *      BL 2017-11-06: Ticket #174 Socket is closed, even if in use
  *      BL 2017-06-07: Undoing setting of usage (came in with #126 fix!)
@@ -176,7 +177,7 @@ static BOOL8 trdp_SockDelJoin (
 /**********************************************************************************************************************/
 /** Get the packet size from the raw data size
  *
- *  @param[in]      dataSize            net data size
+ *  @param[in]      dataSize            net data size (without padding)
  *
  *  @retval         packet size         the size of the complete packet to
  *                                      be sent or received
@@ -184,14 +185,26 @@ static BOOL8 trdp_SockDelJoin (
 UINT32 trdp_packetSizePD (
     UINT32 dataSize)
 {
-    return sizeof(PD_HEADER_T) + dataSize;
-}
+    UINT32 packetSize = sizeof(PD_HEADER_T) + dataSize ;
 
+    if (0 == dataSize)
+    {
+        /* Packet consists of header only  */
+        return sizeof(PD_HEADER_T);
+    }
+    /*  padding to 4 */
+    if ((dataSize & 0x3) > 0)
+    {
+        packetSize += 4 - dataSize % 4;
+    }
+
+    return packetSize;
+}
 
 /**********************************************************************************************************************/
 /** Get the packet size from the raw data size
  *
- *  @param[in]      dataSize            net data size
+ *  @param[in]      dataSize            net data size (without padding)
  *
  *  @retval         packet size         the size of the complete packet to
  *                                      be sent or received
@@ -199,7 +212,20 @@ UINT32 trdp_packetSizePD (
 UINT32 trdp_packetSizeMD (
     UINT32 dataSize)
 {
-    return sizeof(MD_HEADER_T) + dataSize;
+    UINT32 packetSize = sizeof(MD_HEADER_T) + dataSize;
+
+    if (0 == dataSize)
+    {
+        /* Packet consists of header only  */
+        return sizeof(MD_HEADER_T);
+    }
+    /*  padding to 4 */
+    if ((dataSize & 0x3) > 0)
+    {
+        packetSize += 4 - dataSize % 4;
+    }
+
+    return packetSize;
 }
 
 /**********************************************************************************************************************/
