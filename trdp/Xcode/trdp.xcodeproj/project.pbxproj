@@ -7,6 +7,36 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
+		088A7A281FB20479008D95EF /* All copy */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 088A7A511FB20479008D95EF /* Build configuration list for PBXAggregateTarget "All copy" */;
+			buildPhases = (
+			);
+			dependencies = (
+				088A7A291FB20479008D95EF /* PBXTargetDependency */,
+				088A7A2B1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A2D1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A2F1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A311FB20479008D95EF /* PBXTargetDependency */,
+				088A7A331FB20479008D95EF /* PBXTargetDependency */,
+				088A7A351FB20479008D95EF /* PBXTargetDependency */,
+				088A7A371FB20479008D95EF /* PBXTargetDependency */,
+				088A7A391FB20479008D95EF /* PBXTargetDependency */,
+				088A7A3B1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A3D1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A3F1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A411FB20479008D95EF /* PBXTargetDependency */,
+				088A7A431FB20479008D95EF /* PBXTargetDependency */,
+				088A7A451FB20479008D95EF /* PBXTargetDependency */,
+				088A7A471FB20479008D95EF /* PBXTargetDependency */,
+				088A7A491FB20479008D95EF /* PBXTargetDependency */,
+				088A7A4B1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A4D1FB20479008D95EF /* PBXTargetDependency */,
+				088A7A4F1FB20479008D95EF /* PBXTargetDependency */,
+			);
+			name = "All copy";
+			productName = All;
+		};
 		08CBAF7A1E842A6D00809853 /* Makefile-build */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 08CBAF7B1E842A6D00809853 /* Build configuration list for PBXAggregateTarget "Makefile-build" */;
@@ -252,6 +282,146 @@
 			proxyType = 1;
 			remoteGlobalIDString = 73603CE7175CBE79004608BD;
 			remoteInfo = "md-test";
+		};
+		088A7A2A1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73591F6F1B986C7900B758F0;
+			remoteInfo = trdp64Posix;
+		};
+		088A7A2C1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
+		088A7A2E1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7384E6F2172987CE00830413;
+			remoteInfo = "trdp PDonly";
+		};
+		088A7A301FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7382200B1508E9FA0046E0AC;
+			remoteInfo = receivePolling;
+		};
+		088A7A321FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73F2D2341518C6F200BA962A;
+			remoteInfo = sendHello;
+		};
+		088A7A341FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73517C4116BBFD5300DB5208;
+			remoteInfo = receiveHello;
+		};
+		088A7A361FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7381BE571643FB1A003BC539;
+			remoteInfo = selectcmd;
+		};
+		088A7A381FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 08014D0A16483EAD0065AADD;
+			remoteInfo = SenderDemo;
+		};
+		088A7A3A1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 737B18BD15D9015800724FEF;
+			remoteInfo = test_marshalling;
+		};
+		088A7A3C1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7381BEFE16442C4B003BC539;
+			remoteInfo = getStatsMarshall;
+		};
+		088A7A3E1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 732D2785162DBD1D009D7857;
+			remoteInfo = getStats;
+		};
+		088A7A401FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7336144B165BBF5B00A70D3D;
+			remoteInfo = test_traffic;
+		};
+		088A7A421FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 730DAF9C16A07B5B0019B4D0;
+			remoteInfo = "pd-test";
+		};
+		088A7A441FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73603CE7175CBE79004608BD;
+			remoteInfo = "md-test";
+		};
+		088A7A461FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7322486C16A97D5400148295;
+			remoteInfo = "crc-check";
+		};
+		088A7A481FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73FD2F1616C1683F00626293;
+			remoteInfo = test_mdRequestReply;
+		};
+		088A7A4A1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7331A5611715AB1F00270642;
+			remoteInfo = pd_md_responder;
+		};
+		088A7A4C1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73F5F9A6171C392B0087C6B7;
+			remoteInfo = pdpull;
+		};
+		088A7A4E1FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7384E6B9172952D300830413;
+			remoteInfo = test_memSizes;
+		};
+		088A7A501FB20479008D95EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 734091AE1765D8A100CFCE5B;
+			remoteInfo = testSubscribe;
 		};
 		08A327BE1E51FE2700B03846 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -744,7 +914,7 @@
 		73821F2A150777B00046E0AC /* trdp_types.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_types.h; sourceTree = "<group>"; tabWidth = 4; };
 		73821F2F150777B00046E0AC /* trdp_if.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_if.c; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 0; };
 		73821F30150777B00046E0AC /* trdp_mdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_mdcom.c; sourceTree = "<group>"; tabWidth = 4; xcLanguageSpecificationIdentifier = xcode.lang.c; };
-		73821F31150777B00046E0AC /* trdp_mdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_mdcom.h; sourceTree = "<group>"; tabWidth = 4; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		73821F31150777B00046E0AC /* trdp_mdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_mdcom.h; sourceTree = "<group>"; tabWidth = 4; };
 		73821F34150777B00046E0AC /* trdp_pdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_pdcom.c; sourceTree = "<group>"; tabWidth = 4; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		73821F35150777B00046E0AC /* trdp_pdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = trdp_pdcom.h; sourceTree = "<group>"; tabWidth = 4; };
 		73821F36150777B00046E0AC /* trdp_private.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_private.h; sourceTree = "<group>"; tabWidth = 4; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -2054,6 +2224,7 @@
 				08A327BC1E51FE2700B03846 /* test_local_loop */,
 				08A53DA71E5DAA4700CCCBC8 /* test_pdxml */,
 				08CBAF7A1E842A6D00809853 /* Makefile-build */,
+				088A7A281FB20479008D95EF /* All copy */,
 			);
 		};
 /* End PBXProject section */
@@ -2383,6 +2554,106 @@
 			target = 73603CE7175CBE79004608BD /* md-test */;
 			targetProxy = 08594B411B70F2810066EA06 /* PBXContainerItemProxy */;
 		};
+		088A7A291FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73591F6F1B986C7900B758F0 /* trdp64Posix */;
+			targetProxy = 088A7A2A1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A2B1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 088A7A2C1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A2D1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7384E6F2172987CE00830413 /* trdp PDonly */;
+			targetProxy = 088A7A2E1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A2F1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7382200B1508E9FA0046E0AC /* echoPolling */;
+			targetProxy = 088A7A301FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A311FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73F2D2341518C6F200BA962A /* sendHello */;
+			targetProxy = 088A7A321FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A331FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73517C4116BBFD5300DB5208 /* receiveHello */;
+			targetProxy = 088A7A341FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A351FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7381BE571643FB1A003BC539 /* echoSelectcmdline */;
+			targetProxy = 088A7A361FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A371FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 08014D0A16483EAD0065AADD /* SenderDemo */;
+			targetProxy = 088A7A381FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A391FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 737B18BD15D9015800724FEF /* test_marshalling */;
+			targetProxy = 088A7A3A1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A3B1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7381BEFE16442C4B003BC539 /* test_getStatsMarshalled */;
+			targetProxy = 088A7A3C1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A3D1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 732D2785162DBD1D009D7857 /* test_getStats */;
+			targetProxy = 088A7A3E1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A3F1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7336144B165BBF5B00A70D3D /* test_shaping */;
+			targetProxy = 088A7A401FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A411FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 730DAF9C16A07B5B0019B4D0 /* pd-test */;
+			targetProxy = 088A7A421FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A431FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73603CE7175CBE79004608BD /* md-test */;
+			targetProxy = 088A7A441FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A451FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7322486C16A97D5400148295 /* test_crc-check */;
+			targetProxy = 088A7A461FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A471FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73FD2F1616C1683F00626293 /* test_mdSingle */;
+			targetProxy = 088A7A481FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A491FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7331A5611715AB1F00270642 /* pd_md_responder */;
+			targetProxy = 088A7A4A1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A4B1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73F5F9A6171C392B0087C6B7 /* test_pdpull */;
+			targetProxy = 088A7A4C1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A4D1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7384E6B9172952D300830413 /* test_memSizes */;
+			targetProxy = 088A7A4E1FB20479008D95EF /* PBXContainerItemProxy */;
+		};
+		088A7A4F1FB20479008D95EF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 734091AE1765D8A100CFCE5B /* testSubscribe */;
+			targetProxy = 088A7A501FB20479008D95EF /* PBXContainerItemProxy */;
+		};
 		08A327BD1E51FE2700B03846 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
@@ -2644,14 +2915,14 @@
 				INFOPLIST_FILE = ../example/SenderDemo/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CFLAGS = "-DPOSIX";
 				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 			};
 			name = Debug;
 		};
@@ -2668,7 +2939,7 @@
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "SenderDemo-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2679,7 +2950,30 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		088A7A521FB20479008D95EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		088A7A531FB20479008D95EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2733,7 +3027,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2749,7 +3043,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PREBINDING = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				ZERO_LINK = NO;
@@ -2783,7 +3077,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
@@ -2791,7 +3085,7 @@
 					"-DDEBUG",
 				);
 				PRODUCT_NAME = trdp;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -2805,14 +3099,14 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
 					"-DL_ENDIAN",
 				);
 				PRODUCT_NAME = trdp;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Release;
@@ -2859,7 +3153,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				SYMROOT = output/osx_x86/dbg;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -2905,7 +3199,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				SYMROOT = output/osx_x86/rls;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -3031,7 +3325,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 			};
 			name = Debug;
 		};
@@ -3046,7 +3340,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -3160,7 +3454,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = pd_md_responder;
@@ -3176,7 +3470,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PREBINDING = NO;
 				PRODUCT_NAME = pd_md_responder;
 				ZERO_LINK = NO;
@@ -3226,7 +3520,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
@@ -3245,7 +3539,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PREBINDING = NO;
 				PRODUCT_NAME = receiveHello;
 				ZERO_LINK = NO;
@@ -3312,9 +3606,10 @@
 					"-DPOSIX",
 					"-DL_ENDIAN",
 					"-DDEBUG",
+					"-D_DARWIN_C_SOURCE",
 				);
 				PRODUCT_NAME = trdp64;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				VALID_ARCHS = x86_64;
 			};
@@ -3345,9 +3640,10 @@
 					"-DMD_SUPPORT=1",
 					"-DPOSIX",
 					"-DL_ENDIAN",
+					"-D_DARWIN_C_SOURCE",
 				);
 				PRODUCT_NAME = trdp64;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				VALID_ARCHS = x86_64;
 			};
@@ -3392,7 +3688,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_NAME = All;
 			};
 			name = Debug;
@@ -3403,7 +3699,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_NAME = All;
 				ZERO_LINK = NO;
 			};
@@ -3573,7 +3869,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"-DPOSIX",
 					"-DDEBUG",
@@ -3593,7 +3889,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = (
 					"-DL_ENDIAN",
 					"-DPOSIX",
@@ -3623,7 +3919,7 @@
 				);
 				PREBINDING = YES;
 				PRODUCT_NAME = trdpPDonly;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -3645,7 +3941,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = trdpPDonly;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.12;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				ZERO_LINK = NO;
 			};
@@ -3678,7 +3974,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "-DPOSIX";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -3692,7 +3988,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				ZERO_LINK = NO;
 			};
@@ -3737,7 +4033,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = pdpull;
@@ -3753,7 +4049,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PREBINDING = NO;
 				PRODUCT_NAME = pdpull;
 				ZERO_LINK = NO;
@@ -3770,7 +4066,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_CFLAGS = "-DPOSIX";
 				PREBINDING = NO;
 				PRODUCT_NAME = test_mdRequestReply;
@@ -3786,7 +4082,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PREBINDING = NO;
 				PRODUCT_NAME = test_mdRequestReply;
 				ZERO_LINK = NO;
@@ -3801,6 +4097,15 @@
 			buildConfigurations = (
 				08014D0E16483EAE0065AADD /* Debug */,
 				08014D0F16483EAE0065AADD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		088A7A511FB20479008D95EF /* Build configuration list for PBXAggregateTarget "All copy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				088A7A521FB20479008D95EF /* Debug */,
+				088A7A531FB20479008D95EF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

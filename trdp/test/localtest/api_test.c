@@ -340,10 +340,10 @@ static void dbgOut (
     UINT16      lineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   Appl:"};
 
 
-    if (category != VOS_LOG_DBG && category != VOS_LOG_INFO)
+    if ((category == VOS_LOG_USR) || (category != VOS_LOG_DBG && category != VOS_LOG_INFO))
     {
         fprintf(gFp, "%s %s %s:%d %s",
                 strrchr(pTime, '-') + 1,
@@ -1363,11 +1363,98 @@ static int test10 (int argc, char *argv[])
  */
 static int test11 (int argc, char *argv[])
 {
-    PREPARE("", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("babbling idiot :-)", "-"); /* allocates appHandle1, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
+    /* from Ticket #172:
+     In case of PD Pull Multipoint-to-Point, when a PD Pull Request message is sent and the device is registered in the MC group it sends the request to, then the stack has two behaviours:
+     It receives the request it sent to itself (ok) but then replies with a 'Pr' message
+     It will endlessly start sending messages
+     Given the following setup:
+     - The device has the IP address 172.16.4.21
+     - Subscribed to ComId 2000, destination MC 239.0.0.10
+     - Subscribed to ComId 1000, destination 172.16.4.21
+     - Request ComId 1000, destination 239.0.0.10, reply ComId 1000, replyIp 172.16.4.21 */
+
     {
+        TRDP_SUB_T      pubHandle1;
+        TRDP_SUB_T      subHandle0;
+        TRDP_SUB_T      subHandle1;
+        TRDP_SUB_T      subHandle2;
+
+#define TEST11_COMID_2000       2000u
+#define TEST11_COMID_2000_DEST  0xEF00000Au
+#define TEST11_COMID_1000       1000u
+#define TEST11_COMID_1000_SRC   gSession1.ifaceIP
+#define TEST11_COMID_1000_DEST  0xEF00000Au
+
+
+#define TEST11_INTERVAL  100000u
+#define TEST11_DATA      "Hello World!"
+#define TEST11_DATA_LEN  24u
+
+        err = tlp_publish(gSession2.appHandle, &pubHandle1,
+                          TEST11_COMID_1000, 0u, 0u,
+                          0u,
+                          TEST11_COMID_1000_DEST,
+                          0u, 0u, TRDP_FLAGS_DEFAULT, NULL,
+                          (UINT8*)TEST11_DATA, 12u);
+
+
+
+        IF_ERROR("tlp_publish");
+
+        err = tlp_subscribe(gSession2.appHandle, &subHandle0, NULL, NULL,
+                            TEST11_COMID_1000, 0u, 0u,
+                            0u,//gSession2.ifaceIP,                  /* Source */
+                            TEST11_COMID_1000_DEST,                  /* Destination */
+                            TRDP_FLAGS_DEFAULT, 0u, TRDP_TO_DEFAULT);
+
+
+        IF_ERROR("tlp_subscribe1");
+
+        err = tlp_subscribe(gSession1.appHandle, &subHandle1, NULL, NULL,
+                            TEST11_COMID_2000, 0u, 0u,
+                            0u,//gSession1.ifaceIP,                  /* Source */
+                            TEST11_COMID_2000_DEST,                  /* Destination */
+                            TRDP_FLAGS_DEFAULT, 0u, TRDP_TO_DEFAULT);
+
+
+        IF_ERROR("tlp_subscribe1");
+
+        err = tlp_subscribe(gSession1.appHandle, &subHandle2, NULL, NULL,
+                            TEST11_COMID_1000, 0u, 0u,
+                            0u,//TEST11_COMID_1000_SRC,             /* Source filter*/
+                            0u,                                     /* Destination unicast */
+                            TRDP_FLAGS_DEFAULT, 0u, TRDP_TO_DEFAULT);
+
+
+        IF_ERROR("tlp_subscribe2");
+
+        err = tlp_request(gSession1.appHandle, subHandle2, TEST11_COMID_1000, 0u, 0u,
+                          0u,
+                          TEST11_COMID_1000_DEST, 0u, TRDP_FLAGS_NONE, NULL, NULL, 0u,
+                          TEST11_COMID_1000, TEST11_COMID_1000_SRC);
+
+        IF_ERROR("tlp_request");
+
+        int counter = 100;
+        while (counter--)
+        {
+            TRDP_PD_INFO_T pdInfo;
+            UINT8 buffer[TRDP_MAX_PD_DATA_SIZE];
+            UINT32 dataSize = TRDP_MAX_PD_DATA_SIZE;
+            vos_threadDelay(20000);
+            err = tlp_get(gSession1.appHandle, subHandle2, &pdInfo, buffer, &dataSize);
+            if (err == TRDP_NO_ERR)
+            {
+                vos_printLog(VOS_LOG_USR, "Rec. Seq: %u Typ: %c%c\n", pdInfo.seqCount, pdInfo.msgType >> 8, pdInfo.msgType & 0xFF);
+                vos_printLog(VOS_LOG_USR, "Data: %*s\n", dataSize, buffer);
+                break;
+            }
+        }
+        IF_ERROR("tlp_get");
     }
 
     /* ------------------------- test code ends here --------------------------- */
@@ -1440,10 +1527,10 @@ test_func_t *testArray[] =
     test6,
     test7,
     test8,
-    test9,
+    //test9,
     test10,
-    /*test11,
-    test12,
+    test11,
+    /*test12,
     test13,*/
     NULL
 };
