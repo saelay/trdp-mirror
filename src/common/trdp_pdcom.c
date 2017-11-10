@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
  *      BL 2017-07-24: Ticket #166 Bug in trdp_pdReceive for "if data has changed"
  *      BL 2017-03-01: Ticket #136 PD topography counter with faulty behavior
  *      BL 2017-02-27: Ticket #146 On Timeout, PD Callback is always called with no data/datasize == 0
@@ -283,22 +284,17 @@ TRDP_ERR_T trdp_pdGet (
 TRDP_ERR_T  trdp_pdSendQueued (
     TRDP_SESSION_PT appHandle)
 {
-    PD_ELE_T    *iterPD = NULL;
+    PD_ELE_T    *iterPD = appHandle->pSndQueue;
     TRDP_TIME_T now;
     TRDP_ERR_T  err = TRDP_NO_ERR;
 
     vos_clearTime(&appHandle->nextJob);
 
     /*    Find the packet which has to be sent next:    */
-    for (iterPD = appHandle->pSndQueue; iterPD != NULL; iterPD = iterPD->pNext)
+    while (iterPD != NULL)
     {
         /*    Get the current time    */
         vos_getTime(&now);
-
-        if (err != TRDP_NO_ERR)
-        {
-            continue;
-        }
 
         /*  Is this a cyclic packet and
          due to sent?
@@ -376,7 +372,31 @@ TRDP_ERR_T  trdp_pdSendQueued (
 
             /* Reset "immediate" flag for request or requested packet */
             iterPD->privFlags = (TRDP_PRIV_FLAGS_T) (iterPD->privFlags & ~(TRDP_PRIV_FLAGS_T)TRDP_REQ_2B_SENT);
+
+            /* remove one shot messages after they have been sent */
+            if (iterPD->pFrame->frameHead.msgType == vos_htons(TRDP_MSG_PR))    /* Ticket #172: remove element */
+            {
+                PD_ELE_T *pTemp;
+                /* Decrease the socket ref */
+                trdp_releaseSocket(appHandle->iface, iterPD->socketIdx, 0u, FALSE);
+                /* Save next element */
+                pTemp = iterPD->pNext;
+                /* Remove current element */
+                trdp_queueDelElement(&appHandle->pSndQueue, iterPD);
+                iterPD->magic = 0u;
+                if (iterPD->pSeqCntList != NULL)
+                {
+                    vos_memFree(iterPD->pSeqCntList);
+                }
+                vos_memFree(iterPD->pFrame);
+                vos_memFree(iterPD);
+
+                /* pre-set next element */
+                iterPD = pTemp;
+                continue;
+            }
         }
+        iterPD = iterPD->pNext;
     }
     return err;
 }
@@ -539,9 +559,9 @@ TRDP_ERR_T  trdp_pdReceive (
         if (((subAddresses.etbTopoCnt == 0) && (subAddresses.opTrnTopoCnt == 0))
             ||
             trdp_validTopoCounters(subAddresses.etbTopoCnt,
-                                      subAddresses.opTrnTopoCnt,
-                                      pExistingElement->addr.etbTopoCnt,
-                                      pExistingElement->addr.opTrnTopoCnt))
+                                   subAddresses.opTrnTopoCnt,
+                                   pExistingElement->addr.etbTopoCnt,
+                                   pExistingElement->addr.opTrnTopoCnt))
         {
             UINT32 newSeqCnt = vos_ntohl(pNewFrameHead->sequenceCounter);
             /* Save the source IP address of the received packet */
@@ -597,8 +617,8 @@ TRDP_ERR_T  trdp_pdReceive (
                     informUser = TRUE;                 /* Inform user anyway */
                 }
                 else if (0 != memcmp(appHandle->pNewFrame->data,
-                                        pExistingElement->pFrame->data,
-                                        pExistingElement->dataSize))
+                                     pExistingElement->pFrame->data,
+                                     pExistingElement->dataSize))
                 {
                     informUser = TRUE;
                 }
@@ -629,9 +649,9 @@ TRDP_ERR_T  trdp_pdReceive (
         else
         {
             appHandle->stats.pd.numTopoErr++;
-            pExistingElement->lastErr   = TRDP_TOPO_ERR;
-            err = TRDP_TOPO_ERR;
-            informUser = TRUE;
+            pExistingElement->lastErr = TRDP_TOPO_ERR;
+            err         = TRDP_TOPO_ERR;
+            informUser  = TRUE;
         }
     }
 
@@ -852,14 +872,11 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                        break;
                    case TRDP_TOPO_ERR:
                    case TRDP_TIMEOUT_ERR:
+                   default:
                        result   = err;
                        logType  = VOS_LOG_WARNING;
                        vos_printLog(logType, "trdp_pdReceive() failed (Err: %d)\n", err);
-					   break;
-				   default:
-                       vos_printLog(logType, "trdp_pdReceive() failed (Err: %d)\n", err);
                        break;
-
                 }
                 (*pCount)--;
                 FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds); /*lint !e502 !e573 signed/unsigned division

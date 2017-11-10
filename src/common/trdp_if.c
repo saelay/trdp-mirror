@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
+ *      BL 2017-11-10: return error in resultCode of tlp_get()
  *      BL 2017-11-09: Ticket #171 Wrong socket binding for multicast request messages
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-07-31: Ticket #168 Unnecessary multicast Join on tlp_publish()
@@ -94,7 +96,7 @@ static BOOL8 sInited = FALSE;
 
 BOOL8 trdp_isValidSession (TRDP_APP_SESSION_T pSessionHandle);
 TRDP_APP_SESSION_T *trdp_sessionQueue (void);
-    
+
 /***********************************************************************************************************************
  * GLOBAL FUNCTIONS
  */
@@ -313,11 +315,11 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     pSession->pdDefault.sendParam.ttl   = TRDP_PD_DEFAULT_TTL;
 
 #if MD_SUPPORT
-    pSession->mdDefault.pfCbFunction        = NULL;
-    pSession->mdDefault.pRefCon             = NULL;
-    pSession->mdDefault.confirmTimeout      = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
-    pSession->mdDefault.connectTimeout      = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
-    pSession->mdDefault.replyTimeout        = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
+    pSession->mdDefault.pfCbFunction    = NULL;
+    pSession->mdDefault.pRefCon         = NULL;
+    pSession->mdDefault.confirmTimeout  = TRDP_MD_DEFAULT_CONFIRM_TIMEOUT;
+    pSession->mdDefault.connectTimeout  = TRDP_MD_DEFAULT_CONNECTION_TIMEOUT;
+    pSession->mdDefault.replyTimeout    = TRDP_MD_DEFAULT_REPLY_TIMEOUT;
     pSession->mdDefault.flags               = TRDP_FLAGS_NONE;
     pSession->mdDefault.udpPort             = TRDP_MD_UDP_PORT;
     pSession->mdDefault.tcpPort             = TRDP_MD_TCP_PORT;
@@ -574,7 +576,7 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
             pSession->mdDefault.sendParam.ttl = pMdDefault->sendParam.ttl;
         }
 
-		 if ((pSession->mdDefault.sendParam.retries == TRDP_MD_DEFAULT_RETRIES) &&
+        if ((pSession->mdDefault.sendParam.retries == TRDP_MD_DEFAULT_RETRIES) &&
             (pMdDefault->sendParam.retries != TRDP_MD_DEFAULT_RETRIES) &&
             (pMdDefault->sendParam.retries <= TRDP_MAX_MD_RETRIES))
         {
@@ -1819,7 +1821,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     UINT32                  replyComId,
     TRDP_IP_ADDR_T          replyIpAddr)
 {
-    TRDP_ERR_T  ret = TRDP_NO_ERR;
+    TRDP_ERR_T  ret             = TRDP_NO_ERR;
     PD_ELE_T    *pSubPD         = (PD_ELE_T *) subHandle;
     PD_ELE_T    *pReqElement    = NULL;
 
@@ -1847,129 +1849,125 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
     if ( ret == TRDP_NO_ERR)
     {
+        TRDP_ADDRESSES_T addr;
+
         /* Ticket #171: srcIP should be set if there are more than one interface */
         if (srcIpAddr == VOS_INADDR_ANY)
         {
             srcIpAddr = appHandle->realIP;
         }
 
+        addr.comId      = comId;
+        addr.srcIpAddr  = srcIpAddr;
+        addr.destIpAddr = destIpAddr;
+        addr.mcGroup    = (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
+
+        /*    Do not look for former request element anymore.
+              We always create a new send queue entry now and have it removed in pd_sendQueued...
+                Handling for Ticket #172!
+         */
+
+        /*  Get a new element   */
+        pReqElement = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
+
+        if (pReqElement == NULL)
         {
-            TRDP_ADDRESSES_T addr;
+            ret = TRDP_MEM_ERR;
+        }
+        else
+        {
+            vos_printLog(VOS_LOG_INFO,
+                         "PD Request (comId: %u) getting new element %p\n",
+                         comId,
+                         (void *)pReqElement);
+            /*
+                Compute the overal packet size
+             */
+            pReqElement->dataSize   = dataSize;
+            pReqElement->grossSize  = trdp_packetSizePD(dataSize);
+            pReqElement->pFrame     = (PD_PACKET_T *) vos_memAlloc(pReqElement->grossSize);
 
-            addr.comId      = comId;
-            addr.srcIpAddr  = srcIpAddr;
-            addr.destIpAddr = destIpAddr;
-            addr.mcGroup    = (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
-
-            /*    Look for former request element    */
-            pReqElement = trdp_queueFindPubAddr(appHandle->pSndQueue, &addr);
-
-            if ( pReqElement == NULL)
+            if (pReqElement->pFrame == NULL)
             {
+                vos_memFree(pReqElement);
+                pReqElement = NULL;
+            }
+            else
+            {
+                /*    Get a socket    */
+                ret = trdp_requestSocket(appHandle->iface,
+                                         appHandle->pdDefault.port,
+                                         (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
+                                         srcIpAddr,
+                                         0u,
+                                         TRDP_SOCK_PD,
+                                         appHandle->option,
+                                         FALSE,
+                                         -1,
+                                         &pReqElement->socketIdx,
+                                         0u);
 
-                /*  This is the first time, get a new element   */
-                pReqElement = (PD_ELE_T *) vos_memAlloc(sizeof(PD_ELE_T));
-
-                if (pReqElement == NULL)
+                if (ret != TRDP_NO_ERR)
                 {
-                    ret = TRDP_MEM_ERR;
+                    vos_memFree(pReqElement->pFrame);
+                    vos_memFree(pReqElement);
+                    pReqElement = NULL;
                 }
                 else
                 {
-                    vos_printLog(VOS_LOG_INFO,
-                                 "PD Request (comId: %u) getting new element %p\n",
-                                 comId,
-                                 (void *)pReqElement);
-                    /*
-                        Compute the overal packet size
-                     */
-                    pReqElement->dataSize   = dataSize;
-                    pReqElement->grossSize  = trdp_packetSizePD(dataSize);
-                    pReqElement->pFrame     = (PD_PACKET_T *) vos_memAlloc(pReqElement->grossSize);
+                    /*  Mark this element as a PD PULL Request.  Request will be sent on tlc_process time.    */
+                    vos_clearTime(&pReqElement->interval);
+                    vos_clearTime(&pReqElement->timeToGo);
 
-                    if (pReqElement->pFrame == NULL)
-                    {
-                        vos_memFree(pReqElement);
-                        pReqElement = NULL;
-                    }
-                    else
-                    {
-                        /*    Get a socket    */
-                        ret = trdp_requestSocket(appHandle->iface,
-                                                 appHandle->pdDefault.port,
-                                                 (pSendParam != NULL) ? pSendParam : &appHandle->pdDefault.sendParam,
-                                                 srcIpAddr,
-                                                 0u,
-                                                 TRDP_SOCK_PD,
-                                                 appHandle->option,
-                                                 FALSE,
-                                                 -1,
-                                                 &pReqElement->socketIdx,
-                                                 0u);
-
-                        if (ret != TRDP_NO_ERR)
-                        {
-                            vos_memFree(pReqElement->pFrame);
-                            vos_memFree(pReqElement);
-                            pReqElement = NULL;
-                        }
-                        else
-                        {
-                            /*  Mark this element as a PD PULL.  Request will be sent on tlc_process time.    */
-                            vos_clearTime(&pReqElement->interval);
-                            vos_clearTime(&pReqElement->timeToGo);
-
-                            /*  Update the internal data */
-                            pReqElement->addr.comId         = comId;
-                            pReqElement->addr.destIpAddr    = destIpAddr;
-                            pReqElement->addr.srcIpAddr     = srcIpAddr;
-                            pReqElement->addr.mcGroup       =
-                                (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
-                            pReqElement->pktFlags =
-                                (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
-                            pReqElement->magic = TRDP_MAGIC_PUB_HNDL_VALUE;
-                            /*  Find a possible redundant entry in one of the other sessions and sync
-                                the sequence counter! curSeqCnt holds the last sent sequence counter,
-                                therefore set the value initially to -1, it will be incremented when sending... */
-                            pReqElement->curSeqCnt = trdp_getSeqCnt(pReqElement->addr.comId,
-                                                                    TRDP_MSG_PR, pReqElement->addr.srcIpAddr) - 1;
-                            /*    Enter this request into the send queue.    */
-                            trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
-                        }
-                    }
+                    /*  Update the internal data */
+                    pReqElement->addr.comId         = comId;
+                    pReqElement->addr.destIpAddr    = destIpAddr;
+                    pReqElement->addr.srcIpAddr     = srcIpAddr;
+                    pReqElement->addr.mcGroup       =
+                        (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
+                    pReqElement->pktFlags =
+                        (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->pdDefault.flags : pktFlags;
+                    pReqElement->magic = TRDP_MAGIC_PUB_HNDL_VALUE;
+                    /*  Find a possible redundant entry in one of the other sessions and sync
+                        the sequence counter! curSeqCnt holds the last sent sequence counter,
+                        therefore set the value initially to -1, it will be incremented when sending... */
+                    pReqElement->curSeqCnt = trdp_getSeqCnt(pReqElement->addr.comId,
+                                                            TRDP_MSG_PR, pReqElement->addr.srcIpAddr) - 1;
+                    /*    Enter this request into the send queue.    */
+                    trdp_queueInsFirst(&appHandle->pSndQueue, pReqElement);
                 }
             }
+        }
 
-            if (ret == TRDP_NO_ERR && pReqElement != NULL)
+        if (ret == TRDP_NO_ERR && pReqElement != NULL)
+        {
+
+            if (replyComId == 0u)
             {
+                replyComId = pSubPD->addr.comId;
+            }
 
-                if (replyComId == 0u)
-                {
-                    replyComId = pSubPD->addr.comId;
-                }
+            pReqElement->addr.destIpAddr    = destIpAddr;
+            pReqElement->addr.srcIpAddr     = srcIpAddr;
+            pReqElement->addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
 
-                pReqElement->addr.destIpAddr    = destIpAddr;
-                pReqElement->addr.srcIpAddr     = srcIpAddr;
-                pReqElement->addr.mcGroup       = (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
+            /*    Compute the header fields */
+            trdp_pdInit(pReqElement, TRDP_MSG_PR, etbTopoCnt, opTrnTopoCnt, replyComId, replyIpAddr);
 
-                /*    Compute the header fields */
-                trdp_pdInit(pReqElement, TRDP_MSG_PR, etbTopoCnt, opTrnTopoCnt, replyComId, replyIpAddr);
+            /*  Copy data only if available! */
+            if ((NULL != pData) && (0u < dataSize))
+            {
+                ret = tlp_put(appHandle, (TRDP_PUB_T) pReqElement, pData, dataSize);
+            }
+            /*  This flag triggers sending in tlc_process (one shot)  */
+            pReqElement->privFlags |= TRDP_REQ_2B_SENT;
 
-                /*  Copy data only if available! */
-                if ((NULL != pData) && (0u < dataSize))
-                {
-                    ret = tlp_put(appHandle, (TRDP_PUB_T) pReqElement, pData, dataSize);
-                }
-                /*  This flag triggers sending in tlc_process (one shot)  */
-                pReqElement->privFlags |= TRDP_REQ_2B_SENT;
-
-                /*    Set the current time and start time out of subscribed packet  */
-                if (timerisset(&pSubPD->interval))
-                {
-                    vos_getTime(&pSubPD->timeToGo);
-                    vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
-                    pSubPD->privFlags &= (unsigned)~TRDP_TIMED_OUT;   /* Reset time out flag (#151) */
-                }
+            /*    Set the current time and start time out of subscribed packet  */
+            if (timerisset(&pSubPD->interval))
+            {
+                vos_getTime(&pSubPD->timeToGo);
+                vos_addTime(&pSubPD->timeToGo, &pSubPD->interval);
+                pSubPD->privFlags &= (unsigned)~TRDP_TIMED_OUT;   /* Reset time out flag (#151) */
             }
         }
 
@@ -2022,7 +2020,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TIME_T         now;
     TRDP_ERR_T          ret = TRDP_NO_ERR;
     TRDP_ADDRESSES_T    subHandle;
-    INT32       lIndex;
+    INT32 lIndex;
 
     /*    Check params    */
     if (pSubHandle == NULL)
@@ -2094,7 +2092,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
         if (ret == TRDP_NO_ERR)
         {
-            PD_ELE_T            *newPD;
+            PD_ELE_T *newPD;
 
             /*    buffer size is PD_ELEMENT plus max. payload size    */
 
@@ -2424,7 +2422,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 
         if (pPdInfo != NULL)
         {
-            pPdInfo->comId = pElement->addr.comId;
+            pPdInfo->comId          = pElement->addr.comId;
             pPdInfo->srcIpAddr      = pElement->lastSrcIP;
             pPdInfo->destIpAddr     = pElement->addr.destIpAddr;
             pPdInfo->etbTopoCnt     = vos_ntohl(pElement->pFrame->frameHead.etbTopoCnt);
@@ -2435,7 +2433,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
             pPdInfo->replyComId     = vos_ntohl(pElement->pFrame->frameHead.replyComId);
             pPdInfo->replyIpAddr    = vos_ntohl(pElement->pFrame->frameHead.replyIpAddress);
             pPdInfo->pUserRef       = pElement->pUserRef;
-            pPdInfo->resultCode     = TRDP_NO_ERR;
+            pPdInfo->resultCode     = ret;
         }
 
         if (vos_mutexUnlock(appHandle->mutex) != VOS_NO_ERR)
@@ -2574,8 +2572,8 @@ TRDP_ERR_T tlm_request (
     {
         return TRDP_NOINIT_ERR;
     }
-    if (   ((pData == NULL) && (dataSize != 0u)) 
-		|| (dataSize > TRDP_MAX_MD_DATA_SIZE) )
+    if (((pData == NULL) && (dataSize != 0u))
+        || (dataSize > TRDP_MAX_MD_DATA_SIZE))
     {
         return TRDP_PARAM_ERR;
     }
@@ -2660,8 +2658,8 @@ TRDP_ERR_T tlm_addListener (
     TRDP_FLAGS_T            pktFlags,
     const TRDP_URI_USER_T   destURI)
 {
-    TRDP_ERR_T      errv = TRDP_NO_ERR;
-    MD_LIS_ELE_T    *pNewElement = NULL;
+    TRDP_ERR_T      errv            = TRDP_NO_ERR;
+    MD_LIS_ELE_T    *pNewElement    = NULL;
 
     if (!trdp_isValidSession(appHandle))
     {
@@ -2696,7 +2694,7 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->pNext = NULL;
 
                 /* caller parameters saved into instance */
-                pNewElement->pUserRef = pUserRef;
+                pNewElement->pUserRef           = pUserRef;
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.etbTopoCnt    = etbTopoCnt;
                 pNewElement->addr.opTrnTopoCnt  = opTrnTopoCnt;
@@ -2749,8 +2747,8 @@ TRDP_ERR_T tlm_addListener (
                 else
                 {
                     /* Insert into list */
-                    pNewElement->pNext = appHandle->pMDListenQueue;
-                    appHandle->pMDListenQueue = pNewElement;
+                    pNewElement->pNext          = appHandle->pMDListenQueue;
+                    appHandle->pMDListenQueue   = pNewElement;
 
                     /* Statistics */
                     if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) != 0)
