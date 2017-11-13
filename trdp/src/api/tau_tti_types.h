@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *
  */
@@ -106,7 +107,7 @@ typedef struct
 /** function/device information structure */
 typedef struct
 {
-    TRDP_LABEL_T            fctName;        /**< function device or group label */
+    TRDP_NET_LABEL_T        fctName;        /**< function device or group label */
     UINT16                  fctId;          /**< host identification of the function
                                                  device or group as defined in
                                                  IEC 61375-2-5, application defined. 
@@ -125,10 +126,10 @@ typedef struct
 /** vehicle information structure */
 typedef struct
 {
-    TRDP_LABEL_T            vehId;          /**< vehicle identifier label,application defined
+    TRDP_NET_LABEL_T        vehId;          /**< vehicle identifier label,application defined
                                                  (e.g. UIC vehicle identification number) 
                                                  vehId of vehicle with vehNo==1 is used also as cstId */
-    TRDP_LABEL_T            vehType;        /**< vehicle type,application defined */
+    TRDP_NET_LABEL_T        vehType;        /**< vehicle type,application defined */
     UINT8                   vehOrient;      /**< vehicle orientation
                                                  '01'B = same as consist direction
                                                  '10'B = inverse to consist direction */
@@ -151,9 +152,9 @@ typedef struct
                                                  2 = closed train
                                                  3 = closed train consist */
     UINT8                   reserved01;     /**< reserved for future use (= 0) */
-    TRDP_LABEL_T            cstId;          /**< application defined consist identifier, e.g. UIC identifier */
-    TRDP_LABEL_T            cstType;        /**< consist type, application defined */
-    TRDP_LABEL_T            cstOwner;       /**< consist owner, e.g. "trenitalia.it", "sncf.fr", "db.de" */
+    TRDP_NET_LABEL_T        cstId;          /**< application defined consist identifier, e.g. UIC identifier */
+    TRDP_NET_LABEL_T        cstType;        /**< consist type, application defined */
+    TRDP_NET_LABEL_T        cstOwner;       /**< consist owner, e.g. "trenitalia.it", "sncf.fr", "db.de" */
     TRDP_UUID_T             cstUUID;        /**< consist UUID  */
     UINT32                  reserved02;     /**< reserved for future use (= 0) */
     TRDP_PROP_T             cstProp;        /**< static consist properties */
@@ -273,7 +274,7 @@ typedef struct
 /** Operational vehicle structure */
 typedef struct
 {
-    TRDP_LABEL_T            vehId;          /**< Unique vehicle identifier, application defined (e.g. UIC Identifier) */
+    TRDP_NET_LABEL_T        vehId;          /**< Unique vehicle identifier, application defined (e.g. UIC Identifier) */
     UINT8                   opVehNo;        /**< operational vehicle sequence number in train
                                                  value range 1..63 */
     ANTIVALENT8             isLead;         /**< vehicle is leading */
@@ -330,9 +331,9 @@ typedef struct
     UINT8                   opTrnDirState;  /**< Operational train directory status:
                                                  '01'B == invalid, '10'B == valid, '100'B == shared */
     UINT8                   reserved03;     /**< reserved for future use (= 0) */
-    TRDP_LABEL_T            trnId;          /**< train identifier, application defined
+    TRDP_NET_LABEL_T        trnId;          /**< train identifier, application defined
                                                  (e.g. 'ICE75', 'IC346'), informal */
-    TRDP_LABEL_T            trnOperator;    /**< train operator, e.g. 'trenitalia.it', informal */
+    TRDP_NET_LABEL_T        trnOperator;    /**< train operator, e.g. 'trenitalia.it', informal */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter
                                                  set to 0 if opTrnDirState == invalid */
     UINT32                  crc;            /**< sc-32 computed over record (seed value: 'FFFFFFFF'H) */

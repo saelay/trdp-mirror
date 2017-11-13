@@ -22,6 +22,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
@@ -113,7 +114,7 @@ static void ttiGetUUIDfromLabel (
 
     for (i = 0u; i < appHandle->pTTDB->opTrnDir.opVehCnt; i++)
     {
-        if (vos_strnicmp(appHandle->pTTDB->opTrnDir.opVehList[i].vehId, cstLabel, sizeof(TRDP_LABEL_T)) == 0)
+        if (vos_strnicmp(appHandle->pTTDB->opTrnDir.opVehList[i].vehId, cstLabel, sizeof(TRDP_NET_LABEL_T)) == 0)
         {
             /* vehicle found, is it the first in the consist?   */
             UINT8 opCstNo = appHandle->pTTDB->opTrnDir.opVehList[i].ownOpCstNo;
@@ -837,10 +838,10 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
  *
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     pOpTrDirState   Pointer to an operational train directory state structure to be returned.
- *  @param[out]     pOpTrDir        Pointer to an operational train directory structure to be returned.
- *  @param[out]     pTrDir          Pointer to a train directory structure to be returned.
- *  @param[out]     pTrNetDir       Pointer to a train network directory structure to be returned.
+ *  @param[out]     pOpTrnDirState   Pointer to an operational train directory state structure to be returned.
+ *  @param[out]     pOpTrnDir        Pointer to an operational train directory structure to be returned.
+ *  @param[out]     pTrnDir          Pointer to a train directory structure to be returned.
+ *  @param[out]     pTrnNetDir       Pointer to a train network directory structure to be returned.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_PARAM_ERR  Parameter error
@@ -984,7 +985,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
         for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
             if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_NET_LABEL_T)) == 0)
             {
                 break;
             }
@@ -1040,7 +1041,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
         for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
             if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_NET_LABEL_T)) == 0)
             {
                 break;
             }
@@ -1102,7 +1103,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
         for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
             if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_NET_LABEL_T)) == 0)
             {
                 break;
             }
@@ -1165,7 +1166,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
         for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
             if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_NET_LABEL_T)) == 0)
             {
                 break;
             }
@@ -1177,7 +1178,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
         {
             if (pVehLabel == NULL ||
                 vos_strnicmp(pVehLabel, appHandle->pTTDB->cstInfo[l_index]->pVehInfoList[l_index2].vehId,
-                             sizeof(TRDP_LABEL_T)) == 0)
+                             sizeof(TRDP_NET_LABEL_T)) == 0)
             {
                 *pVehInfo = appHandle->pTTDB->cstInfo[l_index]->pVehInfoList[l_index2];
             }
@@ -1229,7 +1230,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
         for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
             if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_NET_LABEL_T)) == 0)
             {
                 break;
             }
@@ -1305,7 +1306,7 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
         for (l_index = 0; l_index < TTI_CACHED_CONSISTS; l_index++)
         {
             if (appHandle->pTTDB->cstInfo[l_index] != NULL &&
-                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_LABEL_T)) == 0)
+                vos_strnicmp(appHandle->pTTDB->cstInfo[l_index]->cstId, pCstLabel, sizeof(TRDP_NET_LABEL_T)) == 0)
             {
                 break;
             }
