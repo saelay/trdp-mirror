@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
@@ -92,6 +93,9 @@ extern "C" {
 typedef VOS_IP4_ADDR_T TRDP_IP_ADDR_T;
 
 typedef CHAR8 TRDP_LABEL_T[TRDP_MAX_LABEL_LEN + 1];
+
+typedef CHAR8 TRDP_NET_LABEL_T[TRDP_MAX_LABEL_LEN];         /**< Definition for usage in network packets,
+                                                                not necessarily \0 terminated! */
 typedef CHAR8 TRDP_URI_T[TRDP_MAX_URI_LEN + 1];
 typedef CHAR8 TRDP_URI_HOST_T[TRDP_MAX_URI_HOST_LEN + 1];
 typedef CHAR8 TRDP_URI_USER_T[TRDP_MAX_URI_USER_LEN + 1];
@@ -426,8 +430,8 @@ typedef struct
     TIMEDATE64              timeStamp;    /**< actual time stamp */
     TIMEDATE32              upTime;       /**< time in sec since last initialisation */
     TIMEDATE32              statisticTime; /**< time in sec since last reset of statistics */
-    TRDP_LABEL_T            hostName;     /**< host name */
-    TRDP_LABEL_T            leaderName;   /**< leader host name */
+    TRDP_NET_LABEL_T        hostName;     /**< host name */
+    TRDP_NET_LABEL_T        leaderName;   /**< leader host name */
     TRDP_IP_ADDR_T          ownIpAddr;    /**< own IP address */
     TRDP_IP_ADDR_T          leaderIpAddr; /**< leader IP address */
     UINT32                  processPrio;  /**< priority of TRDP process */

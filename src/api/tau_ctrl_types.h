@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
  *      BL 2017-03-09: Ticket #131 errata: Last change undone (leadVehOfCst defined in corrigendum)
  *      BL 2017-02-09: Ticket #131 TRDP_ECSP_CTRL_T in the tau_ctrl_types.h should not include the leadVehOfCst field
  */
@@ -122,7 +123,7 @@ typedef struct
                                                     0 = not defined
                                                     1 = first vehicle in consist in direction 1
                                                     2 = second vehicle etc.                                         */
-    TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
+    TRDP_NET_LABEL_T        deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT8                   inhibit;        /**< inauguration inhibit
                                                     0 = no inhibit request
                                                     1 = inhibit request                                             */
@@ -210,7 +211,7 @@ typedef struct
 							                    1 = confirmation/correction request
  							                    2 = un-confirmation request                                         */
     UINT8                   reserved01;     /**< reserved (=0)                                                      */
-    TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
+    TRDP_NET_LABEL_T        deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT32                  opTrnTopoCnt;   /**< operational train topocounter value of the operational 
                                                  train directory the correction is based on                         */
     UINT16                  reserved02;     /**<  reserved (=0)                                                     */
@@ -231,7 +232,7 @@ typedef struct
                                                  0 = correctly stored 
                                                  1 = not stored                                                     */ 
     UINT8                   reserved01;     /**< reserved (=0)                                                      */
-    TRDP_LABEL_T            deviceName;     /**< function device of ECSC which sends the telegram                   */
+    TRDP_NET_LABEL_T        deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT32                  reqSafetyCode;  /**< SC-32 value of the request message                                 */
     TRDP_ETB_CTRL_VDP_T     safetyTrail;    /**< ETBCTRL-VDP trailer, parameter 'safeSequCount' == 0
                                                  completely set to 0 == not used                                    */
@@ -242,7 +243,7 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT16                  reserved01;     /**< reserved (=0)                                                      */
-    TRDP_LABEL_T            deviceName;     /**< function device of ED which sends the telegram                     */
+    TRDP_NET_LABEL_T        deviceName;     /**< function device of ED which sends the telegram                     */
     UINT8                   inhibit;        /**< ETBN inhibit
                                                  0 = no action (keep old state)
                                                  1 = no inhibit request
@@ -268,7 +269,7 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */ 
     UINT16                  reserved01;     /**< reserved (=0)                                                      */
-    TRDP_LABEL_T            deviceName;     /**< function device of ED which sends the telegram                     */
+    TRDP_NET_LABEL_T        deviceName;     /**< function device of ED which sends the telegram                     */
     UINT8                   etbnState;      /**< state indication of the (active) ETBN
                                                  0 = ETBN not operational(initial value)
                                                  1 = ETBN in operation                                              */
