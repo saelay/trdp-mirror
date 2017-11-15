@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-09: Ticket #174: Receiving fragmented TCP packets
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-06-28: Ticket #160: Receiving fragmented TCP packets
@@ -696,7 +697,7 @@ static void trdp_mdCloseSessions (
     /* Check all the sockets */
     if (checkAllSockets == TRUE)
     {
-        trdp_releaseSocket(appHandle->iface, TRDP_INVALID_SOCKET_INDEX, 0, checkAllSockets);
+        trdp_releaseSocket(appHandle->iface, TRDP_INVALID_SOCKET_INDEX, 0, checkAllSockets, VOS_INADDR_ANY);
     }
 
     iterMD = appHandle->pMDSndQueue;
@@ -705,7 +706,8 @@ static void trdp_mdCloseSessions (
     {
         if (TRUE == iterMD->morituri)
         {
-            trdp_releaseSocket(appHandle->iface, iterMD->socketIdx, appHandle->mdDefault.connectTimeout, FALSE);
+            trdp_releaseSocket(appHandle->iface, iterMD->socketIdx, appHandle->mdDefault.connectTimeout,
+                               FALSE, VOS_INADDR_ANY);
             trdp_MDqueueDelElement(&appHandle->pMDSndQueue, iterMD);
             vos_printLog(VOS_LOG_INFO, "Freeing %s MD caller session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
                          iterMD->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
@@ -729,7 +731,8 @@ static void trdp_mdCloseSessions (
         {
             if (0 != (iterMD->pktFlags & TRDP_FLAGS_TCP))
             {
-                trdp_releaseSocket(appHandle->iface, iterMD->socketIdx, appHandle->mdDefault.connectTimeout, FALSE);
+                trdp_releaseSocket(appHandle->iface, iterMD->socketIdx, appHandle->mdDefault.connectTimeout,
+                                   FALSE, VOS_INADDR_ANY);
             }
             trdp_MDqueueDelElement(&appHandle->pMDRcvQueue, iterMD);
             vos_printLog(VOS_LOG_INFO, "Freeing MD %s replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",

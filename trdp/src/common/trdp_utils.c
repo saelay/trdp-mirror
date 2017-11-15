@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-15: Ticket #175 PD: Handling of sequence counter
  *      BL 2017-11-09: Ticket #181/182 Missing padding bytes in user dataset of PD/MD-PDU
 *       BL 2017-11-06: Ticket #178 trdp_releaseSocket does not cleanup tcpParams
@@ -174,6 +175,46 @@ static BOOL8 trdp_SockDelJoin (
  *   Globals
  */
 
+/**********************************************************************************************************************/
+/** Check an MC group not used by other sockets / subscribers/ listeners
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in]      mcGroup             multicast group to look for
+ *
+ *  @retval         multi cast group if unused
+ *                  VOS_INADDR_ANY if used
+ */
+TRDP_IP_ADDR_T trdp_findMCjoins(
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_IP_ADDR_T      mcGroup)
+{
+    int         used = FALSE;
+    PD_ELE_T    *pIter;
+    for (pIter = appHandle->pRcvQueue; pIter != NULL; pIter = pIter->pNext)
+    {
+        if ((pIter->addr.mcGroup != VOS_INADDR_ANY) &&
+            (pIter->addr.mcGroup == mcGroup))
+        {
+            used = TRUE;
+            break;
+        }
+    }
+    #if MD_SUPPORT
+    {
+        MD_LIS_ELE_T    *pMDIter;
+        for (pMDIter = appHandle->pMDListenQueue; pMDIter != NULL; pMDIter = pMDIter->pNext)
+        {
+            if ((pMDIter->addr.mcGroup != VOS_INADDR_ANY) &&
+                (pMDIter->addr.mcGroup == mcGroup))
+            {
+                used = TRUE;
+                break;
+            }
+        }
+    }
+    #endif
+    return (used == TRUE)? VOS_INADDR_ANY : mcGroup;
+}
 
 /**********************************************************************************************************************/
 /** Get the packet size from the raw data size
@@ -888,7 +929,7 @@ TRDP_ERR_T  trdp_requestSocket (
         if (err != TRDP_NO_ERR)
         {
             /* Release socket in case of error */
-            trdp_releaseSocket(iface, lIndex, 0, FALSE);
+            trdp_releaseSocket(iface, lIndex, 0, FALSE, VOS_INADDR_ANY);
         }
     }
     else
@@ -909,13 +950,15 @@ TRDP_ERR_T  trdp_requestSocket (
  *  @param[in]      lIndex          index of socket to release
  *  @param[in]      connectTimeout  time out
  *  @param[in]      checkAll        release all TCP pending sockets
+ *  @param[in]      mcGroupUsed     release MC group subscription
  *
  */
 void  trdp_releaseSocket (
     TRDP_SOCKETS_T  iface[],
     INT32           lIndex,
     UINT32          connectTimeout,
-    BOOL8           checkAll)
+    BOOL8           checkAll,
+    TRDP_IP_ADDR_T  mcGroupUsed)
 {
     TRDP_ERR_T err = TRDP_PARAM_ERR;
 
@@ -990,6 +1033,21 @@ void  trdp_releaseSocket (
                 }
                 iface[lIndex].sock = VOS_INVALID_SOCKET;
             }
+            else if (mcGroupUsed != VOS_INADDR_ANY) /* Check for MC usage (close socket will unjoin MC anyway) */
+            {
+                /* remove MC group from socket list:
+                    we do that only if the caller is the only user of this MC group on this socket! */
+                if (trdp_SockDelJoin(iface[lIndex].mcGroups, mcGroupUsed) == FALSE)
+                {
+                    vos_printLogStr(VOS_LOG_WARNING, "trdp_SockDelJoin() failed!\n");
+                }
+                else    /* and unjoin MC group */
+                {
+                    vos_sockLeaveMC(iface[lIndex].sock, mcGroupUsed, iface[lIndex].bindAddr);
+                }
+            }
+            else
+                ;
         }
 #if MD_SUPPORT
         else /* TCP socket */

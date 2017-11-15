@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
  *      BL 2017-11-10: return error in resultCode of tlp_get()
  *      BL 2017-11-09: Ticket #171 Wrong socket binding for multicast request messages
@@ -720,7 +721,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     PD_ELE_T *pNext = pSession->pSndQueue->pNext;
 
                     /*  UnPublish our packets   */
-                    trdp_releaseSocket(appHandle->iface, pSession->pSndQueue->socketIdx, 0, FALSE);
+                    trdp_releaseSocket(appHandle->iface, pSession->pSndQueue->socketIdx, 0, FALSE, VOS_INADDR_ANY);
 
                     if (pSession->pSndQueue->pSeqCntList != NULL)
                     {
@@ -729,7 +730,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     vos_memFree(pSession->pSndQueue->pFrame);
 
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx, 0, FALSE);
+                    trdp_releaseSocket(pSession->iface, pSession->pSndQueue->socketIdx, 0, FALSE, VOS_INADDR_ANY);
 
                     vos_memFree(pSession->pSndQueue);
                     pSession->pSndQueue = pNext;
@@ -741,7 +742,7 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
 
                     /*  UnPublish our statistics packet   */
                     /*    Only close socket if not used anymore    */
-                    trdp_releaseSocket(pSession->iface, pSession->pRcvQueue->socketIdx, 0, FALSE);
+                    trdp_releaseSocket(pSession->iface, pSession->pRcvQueue->socketIdx, 0, FALSE, VOS_INADDR_ANY);
                     if (pSession->pRcvQueue->pSeqCntList != NULL)
                     {
                         vos_memFree(pSession->pRcvQueue->pSeqCntList);
@@ -774,7 +775,8 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     trdp_releaseSocket(pSession->iface,
                                        pSession->pMDSndQueue->socketIdx,
                                        pSession->mdDefault.connectTimeout,
-                                       FALSE);
+                                       FALSE,
+                                       VOS_INADDR_ANY);
                     trdp_mdFreeSession(pSession->pMDSndQueue);
                     pSession->pMDSndQueue = pNext;
                 }
@@ -787,7 +789,8 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                     trdp_releaseSocket(pSession->iface,
                                        pSession->pMDRcvQueue->socketIdx,
                                        pSession->mdDefault.connectTimeout,
-                                       FALSE);
+                                       FALSE,
+                                       VOS_INADDR_ANY);
                     trdp_mdFreeSession(pSession->pMDRcvQueue);
                     pSession->pMDRcvQueue = pNext;
                 }
@@ -802,7 +805,8 @@ EXT_DECL TRDP_ERR_T tlc_closeSession (
                         trdp_releaseSocket(pSession->iface,
                                            pSession->pMDListenQueue->socketIdx,
                                            pSession->mdDefault.connectTimeout,
-                                           FALSE);
+                                           FALSE,
+                                           VOS_INADDR_ANY);
                     }
                     vos_memFree(pSession->pMDListenQueue);
                     pSession->pMDListenQueue = pNext;
@@ -1523,7 +1527,7 @@ TRDP_ERR_T  tlp_unpublish (
     {
         /*    Remove from queue?    */
         trdp_queueDelElement(&appHandle->pSndQueue, pElement);
-        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0u, FALSE);
+        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0u, FALSE, VOS_INADDR_ANY);
         pElement->magic = 0u;
         if (pElement->pSeqCntList != NULL)
         {
@@ -2102,7 +2106,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
             if (newPD == NULL)
             {
                 ret = TRDP_MEM_ERR;
-                trdp_releaseSocket(appHandle->iface, lIndex, 0u, FALSE);
+                trdp_releaseSocket(appHandle->iface, lIndex, 0u, FALSE, VOS_INADDR_ANY);
             }
             else
             {
@@ -2212,9 +2216,15 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
     if (ret == TRDP_NO_ERR)
     {
+        TRDP_IP_ADDR_T  mcGroup = pElement->addr.mcGroup;
         /*    Remove from queue?    */
         trdp_queueDelElement(&appHandle->pRcvQueue, pElement);
-        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0u, FALSE);
+        /*    if we subscribed to an MC-group, check if anyone else did too: */
+        if (mcGroup != VOS_INADDR_ANY)
+        {
+            mcGroup = trdp_findMCjoins(appHandle, mcGroup);
+        }
+        trdp_releaseSocket(appHandle->iface, pElement->socketIdx, 0u, FALSE, mcGroup);
         pElement->magic = 0u;
         if (pElement->pFrame != NULL)
         {
@@ -2293,8 +2303,9 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
         /* For multicast subscriptions, we might need to change the socket joins */
         if (subHandle->addr.mcGroup != destIpAddr)
         {
-            /*  Find the correct socket    */
-            trdp_releaseSocket(appHandle->iface, subHandle->socketIdx, 0u, FALSE);
+            /*  Find the correct socket
+             Release old usage first, we unsubscribe to the former MC group, because it is not valid anymore */
+            trdp_releaseSocket(appHandle->iface, subHandle->socketIdx, 0u, FALSE, subHandle->addr.mcGroup);
             ret = trdp_requestSocket(appHandle->iface,
                                      appHandle->pdDefault.port,
                                      &appHandle->pdDefault.sendParam,
@@ -2846,7 +2857,12 @@ TRDP_ERR_T tlm_delListener (
             /* cleanup instance */
             if (pDelete->socketIdx != -1)
             {
-                trdp_releaseSocket(appHandle->iface, pDelete->socketIdx, appHandle->mdDefault.connectTimeout, FALSE);
+                TRDP_IP_ADDR_T  mcGroup = VOS_INADDR_ANY;
+                if (pDelete->addr.mcGroup != VOS_INADDR_ANY)
+                {
+                    mcGroup = trdp_findMCjoins(appHandle, pDelete->addr.mcGroup);
+                }
+                trdp_releaseSocket(appHandle->iface, pDelete->socketIdx, appHandle->mdDefault.connectTimeout, FALSE, mcGroup);
             }
             /* free memory space for element */
             vos_memFree(pDelete);
@@ -2922,7 +2938,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
             pListener->addr.mcGroup != mcDestIpAddr)                /* nor if there's no change in group */
         {
             /*  Find the correct socket    */
-            trdp_releaseSocket(appHandle->iface, pListener->socketIdx, 0u, FALSE);
+            trdp_releaseSocket(appHandle->iface, pListener->socketIdx, 0u, FALSE, mcDestIpAddr);
             ret = trdp_requestSocket(appHandle->iface,
                                      appHandle->mdDefault.udpPort,
                                      &appHandle->mdDefault.sendParam,
