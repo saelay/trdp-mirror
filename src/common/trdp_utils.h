@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-05-08: Doxygen comment errors
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
@@ -129,6 +130,19 @@ void trdp_resetSequenceCounter (
     TRDP_IP_ADDR_T  srcIP,
     TRDP_MSG_T      msgType);
 
+/**********************************************************************************************************************/
+/** Check an MC group not used by other sockets / subscribers/ listeners
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[in]      mcGroup             multicast group to look for
+ *
+ *  @retval         multi cast group if unused
+ *                  VOS_INADDR_ANY if used
+ */
+TRDP_IP_ADDR_T trdp_findMCjoins(
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_IP_ADDR_T      mcGroup);
+
 /*********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
  *
@@ -168,6 +182,7 @@ TRDP_ERR_T trdp_requestSocket(
  *  @param[in]      lIndex          index of socket to release
  *  @param[in]      connectTimeout  timeout value
  *  @param[in]      checkAll        release all TCP pending sockets
+ *  @param[in]      mcGroupUsed     release MC group subscription
  *
  */
 
@@ -175,7 +190,8 @@ void trdp_releaseSocket(
     TRDP_SOCKETS_T iface[],
     INT32 lIndex,
     UINT32 connectTimeout,
-    BOOL8 checkAll);
+    BOOL8 checkAll,
+    TRDP_IP_ADDR_T  mcGroupUsed);
 
 
 /*********************************************************************************************************************/

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
  *      BL 2017-07-24: Ticket #166 Bug in trdp_pdReceive for "if data has changed"
  *      BL 2017-03-01: Ticket #136 PD topography counter with faulty behavior
@@ -378,7 +379,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
             {
                 PD_ELE_T *pTemp;
                 /* Decrease the socket ref */
-                trdp_releaseSocket(appHandle->iface, iterPD->socketIdx, 0u, FALSE);
+                trdp_releaseSocket(appHandle->iface, iterPD->socketIdx, 0u, FALSE, VOS_INADDR_ANY);
                 /* Save next element */
                 pTemp = iterPD->pNext;
                 /* Remove current element */
