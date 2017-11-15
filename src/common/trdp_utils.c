@@ -16,8 +16,9 @@
  *
  * $Id$
  *
+ *      BL 2017-11-15: Ticket #175 PD: Handling of sequence counter
  *      BL 2017-11-09: Ticket #181/182 Missing padding bytes in user dataset of PD/MD-PDU
- *      BL 2017-11-06: Ticket #178 trdp_releaseSocket does not cleanup tcpParams
+*       BL 2017-11-06: Ticket #178 trdp_releaseSocket does not cleanup tcpParams
  *      BL 2017-11-06: Ticket #174 Socket is closed, even if in use
  *      BL 2017-06-07: Undoing setting of usage (came in with #126 fix!)
  *      BL 2017-05-08: Ticket #126 Opened UDP socket is not released if join or bind failed in trdp_requestSocket()
@@ -185,7 +186,7 @@ static BOOL8 trdp_SockDelJoin (
 UINT32 trdp_packetSizePD (
     UINT32 dataSize)
 {
-    UINT32 packetSize = sizeof(PD_HEADER_T) + dataSize ;
+    UINT32 packetSize = sizeof(PD_HEADER_T) + dataSize;
 
     if (0 == dataSize)
     {
@@ -714,8 +715,6 @@ TRDP_ERR_T  trdp_requestSocket (
             /*  Ticket #174: Usage should always be counted up, except
              if there was an error (multicast IF) */
             if (err == TRDP_NO_ERR)
-/*          if ((usage != TRDP_SOCK_MD_TCP)
-                || ((usage == TRDP_SOCK_MD_TCP) && (iface[lIndex].usage > -1))) */
             {
                 iface[lIndex].usage++;
             }
@@ -752,7 +751,7 @@ TRDP_ERR_T  trdp_requestSocket (
         iface[lIndex].tcpParams.connectionTimeout.tv_usec   = 0;
         iface[lIndex].tcpParams.cornerIp    = cornerIp;
         iface[lIndex].tcpParams.sendNotOk   = FALSE;
-        iface[lIndex].usage                 = 0;
+        iface[lIndex].usage = 0;
         iface[lIndex].tcpParams.notSend     = FALSE;
         iface[lIndex].tcpParams.morituri    = FALSE;
         iface[lIndex].tcpParams.sendingTimeout.tv_sec   = 0;
@@ -1011,7 +1010,7 @@ void  trdp_releaseSocket (
                     TRDP_TIME_T tmpt_interval, tmpt_now;
 
                     iface[lIndex].usage = 0;
-					
+
                     vos_printLog(VOS_LOG_INFO,
                                  "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
                                  iface[lIndex].sock);
@@ -1083,12 +1082,7 @@ UINT32  trdp_getSeqCnt (
             pSession = pSession->pNext;
         }
     }
-#if MD_SUPPORT
-    else
-    {
-        /* #error */
-    }
-#endif
+
     return 0;   /*    Not found, initial value is zero    */
 }
 
@@ -1138,7 +1132,7 @@ void trdp_resetSequenceCounter (
  *  @param[in]      msgType             type of the message
  *
  *  @retval         0 - no duplicate
- *                  1 - duplicate sequence counter
+ *                  1 - duplicate or old sequence counter
  *                 -1 - memory error
  */
 
@@ -1177,7 +1171,7 @@ int trdp_checkSequenceCounter (
         {
             /*        Is this packet a duplicate?    */
             if (pElement->pSeqCntList->seq[l_index].lastSeqCnt == 0 ||    /* first time after timeout */
-                sequenceCounter != pElement->pSeqCntList->seq[l_index].lastSeqCnt)
+                sequenceCounter > pElement->pSeqCntList->seq[l_index].lastSeqCnt)
             {
                 /*
                  vos_printLog(VOS_LOG_DBG,
