@@ -37,12 +37,12 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION         "1.1"
+#define APP_VERSION         "1.4"
 
 #define DATA_MAX            1432
 #define CYCLE_MIN           10000
 
-#define PD_DEF_COMID        1000
+#define PD_DEF_COMID        0
 #define PD_DEF_COMID_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 #define PD_DEF_DATASIZE     1000
 
@@ -70,7 +70,7 @@ void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
     printf("%s %s %s:%d %s",
            strrchr(pTime, '-') + 1,
            catStr[category],
@@ -87,7 +87,7 @@ void usage (const char *appName)
            "Arguments are:\n"
            "-o <own IP address> (default INADDR_ANY)\n"
            "-t <target IP address>\n"
-           "-c <comId> (default 1000)\n"
+           "-c <comId> (default 0)\n"
            "-s <cycle time> (default 1000000 [us])\n"
            "-d <datasize> (default 1000 Bytes)\n"
            "-V verbose\n"
@@ -230,7 +230,7 @@ int main (int argc, char *argv[])
                         &pdConfiguration, NULL, /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
     {
-        printf("Initialization error\n");
+        vos_printLogStr(VOS_LOG_USR, "Initialization error\n");
         return 1;
     }
 
@@ -254,12 +254,12 @@ int main (int argc, char *argv[])
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd error\n");
+        vos_printLogStr(VOS_LOG_ERROR, "prep pd error\n");
         tlc_terminate();
         return 1;
     }
 
-    printf("running...\n");
+    vos_printLogStr(VOS_LOG_USR, "running...\n");
 
     /*
        Enter the main processing loop.
@@ -327,7 +327,7 @@ int main (int argc, char *argv[])
         err = tlp_put(appHandle, pubHandle, gData, dataSize);
         if (err != TRDP_NO_ERR)
         {
-            printf("put pd error\n");
+            vos_printLogStr(VOS_LOG_USR, "put pd error\n");
             rv = 1;
             break;
         }

@@ -76,7 +76,7 @@ static void dbgOut (
              UINT16      LineNumber,
              const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
     
     if (category != VOS_LOG_DBG)
     {
@@ -98,9 +98,19 @@ static int testNetwork()
     VOS_ERR_T ret;
     memset(MAC, 0, sizeof(MAC)); // clean the memory
     ret = vos_sockInit();
-    
+    if (ret != VOS_NO_ERR)
+    {
+        printf("vos_sockInit error %d \n", ret);
+        return 1;
+    }
+
     ret = vos_sockGetMAC(MAC);
-    
+    if (ret != VOS_NO_ERR)
+    {
+        printf("vos_sockGetMAC error %d \n", ret);
+        return 1;
+    }
+
     printf("Got MAC %.2X:%.2X:%.2X:%.2X:%.2X:%.2X\n", MAC[0],
            MAC[1],
            MAC[2],

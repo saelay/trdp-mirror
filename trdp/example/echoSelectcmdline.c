@@ -36,6 +36,7 @@
 
 #include "trdp_if_light.h"
 #include "vos_thread.h"
+#include "vos_utils.h"
 
 /* Some sample comId definitions    */
 
@@ -48,7 +49,7 @@
 /* We use dynamic memory    */
 #define RESERVED_MEMORY     1000000
 
-#define APP_VERSION         "0.08"
+#define APP_VERSION         "1.4"
 
 #define GBUFFER_SIZE        128
 CHAR8   gBuffer[GBUFFER_SIZE]       = "Hello World";
@@ -89,7 +90,7 @@ void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
     printf("%s %s %s:%d %s",
            pTime,
            catStr[category],
@@ -120,7 +121,7 @@ void myPDcallBack (
     switch (pMsg->resultCode)
     {
        case TRDP_NO_ERR:
-           printf("> ComID %d received\n", pMsg->comId);
+           vos_printLog(VOS_LOG_USR, "> ComID %d received\n", pMsg->comId);
            if (pData)
            {
                memcpy(gInputBuffer, pData,
@@ -131,13 +132,13 @@ void myPDcallBack (
 
        case TRDP_TIMEOUT_ERR:
            /* The application can decide here if old data shall be invalidated or kept    */
-           printf("> Packet timed out (ComID %d, SrcIP: %s)\n",
+           vos_printLog(VOS_LOG_USR, "> Packet timed out (ComID %d, SrcIP: %s)\n",
                   pMsg->comId,
                   vos_ipDotted(pMsg->srcIpAddr));
            memset(gBuffer, 0, GBUFFER_SIZE);
            break;
        default:
-           printf("> Error on packet received (ComID %d), err = %d\n",
+           vos_printLog(VOS_LOG_USR, "> Error on packet received (ComID %d), err = %d\n",
                   pMsg->comId,
                   pMsg->resultCode);
            break;
@@ -272,7 +273,7 @@ int main (int argc, char * *argv)
                         &pdConfiguration, NULL,     /* system defaults for PD and MD      */
                         &processConfig) != TRDP_NO_ERR)
     {
-        printf("Initialization error\n");
+        vos_printLogStr(VOS_LOG_USR, "Initialization error\n");
         return 1;
     }
 
@@ -294,7 +295,7 @@ int main (int argc, char * *argv)
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd receive error\n");
+        vos_printLogStr(VOS_LOG_USR, "prep pd receive error\n");
         tlc_terminate();
         return 1;
     }
@@ -319,7 +320,7 @@ int main (int argc, char * *argv)
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd publish error\n");
+        vos_printLogStr(VOS_LOG_USR, "prep pd publish error\n");
         tlc_terminate();
         return 1;
     }
@@ -368,7 +369,7 @@ int main (int argc, char * *argv)
 
         rv = select((int)noOfDesc + 1, &rfds, NULL, NULL, &tv);
 
-        printf("Pending events: %d\n", rv);
+        vos_printLog(VOS_LOG_USR, "Pending events: %d\n", rv);
         /*
             Check for overdue PDs (sending and receiving)
             Send any PDs if it's time...
@@ -386,11 +387,11 @@ int main (int argc, char * *argv)
          */
         if (rv > 0)
         {
-            printf("other descriptors were ready\n");
+            vos_printLogStr(VOS_LOG_USR, "other descriptors were ready\n");
         }
         else
         {
-            /* printf("looping...\n"); */
+            /* vos_printLogStr(VOS_LOG_USR, "looping...\n"); */
         }
 
         /* Update the information, that is sent */
@@ -398,7 +399,7 @@ int main (int argc, char * *argv)
         err = tlp_put(appHandle, pubHandle, (const UINT8 *) gBuffer, GBUFFER_SIZE);
         if (err != TRDP_NO_ERR)
         {
-            printf("put pd error\n");
+            vos_printLogStr(VOS_LOG_USR, "put pd error\n");
             rv = 1;
             break;
         }
@@ -407,7 +408,7 @@ int main (int argc, char * *argv)
         if (gInputBuffer[0] > 0) /* FIXME Better solution would be: global flag, that is set in the callback function to
                                     indicate new data */
         {
-            printf("# %s ", gInputBuffer);
+            vos_printLog(VOS_LOG_USR, "# %s ", gInputBuffer);
             memset(gInputBuffer, 0, sizeof(gInputBuffer));
         }
     }   /*    Bottom of while-loop    */

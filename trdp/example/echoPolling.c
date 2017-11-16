@@ -36,25 +36,26 @@
 
 #include "trdp_if.h"
 #include "vos_thread.h"
+#include "vos_utils.h"
 
 /* Some sample comId definitions    */
 
 /* Expect receiving:    */
-#define PD_COMID1               1000
-#define PD_COMID1_CYCLE         1000000
-#define PD_COMID1_TIMEOUT       3000000         /* 3 s    */
-#define PD_COMID1_DATA_SIZE     32
-#define PD_COMID1_SRC_IP        0x0             /*    Sender's IP: 10.0.0.100        */
+#define PD_COMID1               1000u
+#define PD_COMID1_CYCLE         1000000u
+#define PD_COMID1_TIMEOUT       3000000u         /* 3 s    */
+#define PD_COMID1_DATA_SIZE     32u
+#define PD_COMID1_SRC_IP        0x0u             /*    Sender's IP        */
 
 /* Send as echo:    */
-#define PD_COMID2               2001
-#define PD_COMID2_CYCLE         100000
-#define PD_COMID2_TIMEOUT       1200000
-#define PD_COMID2_DATA_SIZE     32
+#define PD_COMID2               2001u
+#define PD_COMID2_CYCLE         100000u
+#define PD_COMID2_TIMEOUT       1200000u
+#define PD_COMID2_DATA_SIZE     32u
 #define PD_COMID2_DST_IP        PD_COMID1_SRC_IP
 
 /* We use static memory    */
-#define RESERVED_MEMORY  1000000
+#define RESERVED_MEMORY  1000000u
 UINT8   gMemoryArea[RESERVED_MEMORY];
 
 CHAR8   gBuffer[32] = "Hello World";
@@ -85,7 +86,7 @@ void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
     printf("%s %s %s:%d %s",
            pTime,
            catStr[category],
@@ -108,10 +109,10 @@ int main (int argc, char * *argv)
     TRDP_SUB_T              subHandle;  /*    Our identifier to the subscription    */
     TRDP_PUB_T              pubHandle;  /*    Our identifier to the publication    */
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 0, 0}, TRDP_FLAGS_NONE,
-                                               10000000, TRDP_TO_SET_TO_ZERO, 0};
-    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
-    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_NONE};
+    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0u, 0u, 0u}, TRDP_FLAGS_NONE,
+                                               10000000u, TRDP_TO_SET_TO_ZERO, 0u};
+    TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0u}};
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0u, 0u, TRDP_OPTION_NONE};
 
     TRDP_PD_INFO_T          myPDInfo;
     UINT32  receivedSize;
@@ -129,12 +130,12 @@ int main (int argc, char * *argv)
 
     /*    Init the library for non-blocking operation    */
     if (tlc_openSession(&appHandle,
-                        0, 0,                       /* use default IP address/interface */
+                        0u, 0u,                       /* use default IP address/interface */
                         NULL,                       /* no Marshalling                    */
                         &pdConfiguration, NULL,     /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
     {
-        printf("Initialization error\n");
+        vos_printLogStr(VOS_LOG_USR, "Initialization error\n");
         return 1;
     }
 
@@ -158,7 +159,7 @@ int main (int argc, char * *argv)
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd receive error\n");
+        vos_printLogStr(VOS_LOG_USR, "prep pd receive error\n");
         tlc_terminate();
         return 1;
     }
@@ -168,12 +169,12 @@ int main (int argc, char * *argv)
     err = tlp_publish(  appHandle,                  /*    our application identifier        */
                         &pubHandle,                 /*    our pulication identifier         */
                         PD_COMID2,                  /*    ComID to send                     */
-                        0,                          /*    local consist only                */
-                        0,
-                        0,                          /*    default source IP                 */
+                        0u,                          /*    local consist only                */
+                        0u,
+                        0u,                          /*    default source IP                 */
                         PD_COMID2_DST_IP,           /*    where to send to                  */
                         PD_COMID2_CYCLE,            /*    Cycle time in us                  */
-                        0,                          /*    not redundant                     */
+                        0u,                          /*    not redundant                     */
                         TRDP_FLAGS_NONE,            /*    Don't use callback for errors     */
                         NULL,                       /*    default qos and ttl               */
                         (UINT8 *)gBuffer,           /*    initial data                      */
@@ -183,7 +184,7 @@ int main (int argc, char * *argv)
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd publish error\n");
+        vos_printLogStr(VOS_LOG_USR, "prep pd publish error\n");
         tlc_terminate();
         return 1;
     }
@@ -224,8 +225,7 @@ int main (int argc, char * *argv)
         err = tlc_process(appHandle, NULL, NULL);
         if (err != TRDP_NO_ERR)
         {
-            printf("tlc_process error\n");
-            break;
+            vos_printLog(VOS_LOG_USR, "tlc_process returned: %s\n", vos_getErrorString((VOS_ERR_T)err));
         }
 
         /*
@@ -245,13 +245,13 @@ int main (int argc, char * *argv)
 
         if (err == TRDP_TIMEOUT_ERR)
         {
-            printf("Packet timed out (ComID %d, SrcIP: %u)\n",
+            vos_printLog(VOS_LOG_USR, "Packet timed out (ComID %d, SrcIP: %u)\n",
                    myPDInfo.comId,
                    myPDInfo.srcIpAddr);
         }
         else if (err == TRDP_NO_ERR)
         {
-            printf("Packet updated (ComID %d, SrcIP: %u)\nData: %s",
+            vos_printLog(VOS_LOG_USR, "Packet updated (ComID %d, SrcIP: %u)\nData: %s",
                    myPDInfo.comId,
                    myPDInfo.srcIpAddr,
                    gBuffer);
@@ -265,7 +265,7 @@ int main (int argc, char * *argv)
         }
         else
         {
-            printf("Error on packet received (ComID %d), err = %d\n",
+            vos_printLog(VOS_LOG_USR, "Error on packet received (ComID %d), err = %d\n",
                    myPDInfo.comId,
                    err);
         }
@@ -274,7 +274,7 @@ int main (int argc, char * *argv)
             Do other stuff here
          */
 
-        printf("looping...\n");
+        vos_printLogStr(VOS_LOG_USR, "looping...\n");
 
     }   /*    Bottom of while-loop    */
 
@@ -284,6 +284,7 @@ int main (int argc, char * *argv)
 
     tlp_unpublish(appHandle, pubHandle);
     tlp_unsubscribe(appHandle, subHandle);
+    tlc_closeSession(appHandle);
 
     tlc_terminate();
 

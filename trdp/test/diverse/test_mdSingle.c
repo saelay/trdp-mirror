@@ -286,7 +286,7 @@ void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"*Err:", "Warn:", " Inf:", " Dbg:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
 
     printf("%s %s %16s:%-4d %s",
            strrchr(pTime, '-') + 1,
