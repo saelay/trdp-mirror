@@ -39,11 +39,11 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.2"
+#define APP_VERSION     "1.4"
 
-#define DATA_MAX        1000u
+#define DATA_MAX        1432u
 
-#define PD_COMID        1000u
+#define PD_COMID        0u
 #define PD_COMID_CYCLE  1000000u             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory    */
@@ -84,7 +84,7 @@ void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
     printf("%s %s %s:%d %s",
            strrchr(pTime, '-') + 1,
            catStr[category],
@@ -101,7 +101,7 @@ void usage (const char *appName)
            "Arguments are:\n"
            "-o <own IP address> (default INADDR_ANY)\n"
            "-t <target IP address>\n"
-           "-c <comId> (default 1000)\n"
+           "-c <comId> (default 0)\n"
            "-s <cycle time> (default 1000000 [us])\n"
            "-e send empty request\n"
            "-d <custom string to send> (default: 'Hello World')\n"
@@ -258,7 +258,7 @@ int main (int argc, char *argv[])
                         &pdConfiguration, NULL, /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
     {
-        printf("Initialization error\n");
+        vos_printLogStr(VOS_LOG_USR, "Initialization error\n");
         return 1;
     }
 
@@ -282,7 +282,7 @@ int main (int argc, char *argv[])
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd error\n");
+        vos_printLogStr(VOS_LOG_USR, "prep pd error\n");
         tlc_terminate();
         return 1;
     }
@@ -347,11 +347,11 @@ int main (int argc, char *argv[])
         /* Handle other ready descriptors... */
         if (rv > 0)
         {
-            printf("other descriptors were ready\n");
+            vos_printLogStr(VOS_LOG_USR, "other descriptors were ready\n");
         }
         else
         {
-            printf(".");
+            fprintf(stdout, ".");
             fflush(stdout);
         }
 
@@ -364,7 +364,7 @@ int main (int argc, char *argv[])
         err = tlp_put(appHandle, pubHandle, outputBuffer, outputBufferSize);
         if (err != TRDP_NO_ERR)
         {
-            printf("put pd error\n");
+            vos_printLogStr(VOS_LOG_ERROR, "put pd error\n");
             rv = 1;
             break;
         }

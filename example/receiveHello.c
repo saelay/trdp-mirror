@@ -38,11 +38,11 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION     "1.3"
+#define APP_VERSION     "1.4"
 
-#define DATA_MAX        1000
+#define DATA_MAX        1432
 
-#define PD_COMID        1000
+#define PD_COMID        0
 #define PD_COMID_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 
 /* We use dynamic memory    */
@@ -80,7 +80,7 @@ void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
 
     if (category != VOS_LOG_DBG)
     {
@@ -99,9 +99,9 @@ void usage (const char *appName)
     printf("Usage of %s\n", appName);
     printf("This tool receives PD messages from an ED.\n"
            "Arguments are:\n"
-           "-o <own IP address> (default INADDR_ANY)\n"
-           "-m <multicast group IP> (default none)\n"
-           "-c <comId> (default 1000)\n"
+           "-o <own IP address> (default: default interface)\n"
+           "-m <multicast group IP> (default: none)\n"
+           "-c <comId> (default 0)\n"
            "-v print version and quit\n"
            );
 }
@@ -197,7 +197,7 @@ int main (int argc, char *argv[])
                         &pdConfiguration, NULL, /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
     {
-        printf("Initialization error\n");
+        vos_printLogStr(VOS_LOG_USR, "Initialization error\n");
         return 1;
     }
 
@@ -221,7 +221,7 @@ int main (int argc, char *argv[])
 
     if (err != TRDP_NO_ERR)
     {
-        printf("prep pd receive error\n");
+        vos_printLogStr(VOS_LOG_ERROR, "prep pd receive error\n");
         tlc_terminate();
         return 1;
     }
@@ -234,7 +234,7 @@ int main (int argc, char *argv[])
         TRDP_FDS_T rfds;
         INT32 noDesc;
         TRDP_TIME_T tv = {0, 0};
-        const TRDP_TIME_T   max_tv  = {10, 0};
+        const TRDP_TIME_T   max_tv  = {1, 0};
         const TRDP_TIME_T   min_tv  = {0, 10000};
 
         /*
@@ -295,14 +295,14 @@ int main (int argc, char *argv[])
         err = tlc_process(appHandle, &rfds, &rv);
         if (err != TRDP_NO_ERR)
         {
-            printf("tlc_process error\n");
-            break;
+            /* Ignore return errors! */
+            vos_printLog(VOS_LOG_USR, "tlc_process error: %s\n", vos_getErrorString((VOS_ERR_T)err));
         }
 
         /* Handle other ready descriptors... */
         if (rv > 0)
         {
-            printf("other descriptors were ready\n");
+            vos_printLogStr(VOS_LOG_USR, "other descriptors were ready\n");
         }
         else
         {
@@ -325,23 +325,23 @@ int main (int argc, char *argv[])
         if ((TRDP_NO_ERR == err)
             && (receivedSize > 0))
         {
-            printf("\nMessage reveived:\n");
-            printf("Type = %c%c, ", myPDInfo.msgType >> 8, myPDInfo.msgType & 0xFF);
-            printf("Seq  = %u, ", myPDInfo.seqCount);
-            printf("with %d Bytes:\n", receivedSize);
-            printf("   %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx\n",
+            vos_printLogStr(VOS_LOG_USR, "\nMessage reveived:\n");
+            vos_printLog(VOS_LOG_USR, "Type = %c%c, ", myPDInfo.msgType >> 8, myPDInfo.msgType & 0xFF);
+            vos_printLog(VOS_LOG_USR, "Seq  = %u, ", myPDInfo.seqCount);
+            vos_printLog(VOS_LOG_USR, "with %d Bytes:\n", receivedSize);
+            vos_printLog(VOS_LOG_USR, "   %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx\n",
                    gBuffer[0], gBuffer[1], gBuffer[2], gBuffer[3],
                    gBuffer[4], gBuffer[5], gBuffer[6], gBuffer[7]);
-            printf("   %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx\n",
+            vos_printLog(VOS_LOG_USR, "   %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx %02hhx\n",
                    gBuffer[8], gBuffer[9], gBuffer[10], gBuffer[11],
                    gBuffer[12], gBuffer[13], gBuffer[14], gBuffer[15]);
-            printf("%s\n", gBuffer);
+            vos_printLog(VOS_LOG_USR, "%s\n", gBuffer);
         }
         else if (TRDP_NO_ERR == err)
         {
-            printf("\nMessage reveived:\n");
-            printf("Type = %c%c - ", myPDInfo.msgType >> 8, myPDInfo.msgType & 0xFF);
-            printf("Seq  = %u\n", myPDInfo.seqCount);
+            vos_printLogStr(VOS_LOG_USR, "\nMessage reveived:\n");
+            vos_printLog(VOS_LOG_USR, "Type = %c%c - ", myPDInfo.msgType >> 8, myPDInfo.msgType & 0xFF);
+            vos_printLog(VOS_LOG_USR, "Seq  = %u\n", myPDInfo.seqCount);
         }
         else if (TRDP_TIMEOUT_ERR == err)
         {
