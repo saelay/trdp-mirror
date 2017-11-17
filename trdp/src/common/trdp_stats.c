@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
@@ -232,17 +233,17 @@ EXT_DECL TRDP_ERR_T tlc_getPubStatistics (
     /*  Loop over our subscriptions, but do not exceed user supplied buffers!    */
     for (lIndex = 0, iter = appHandle->pSndQueue; lIndex < *pNumPub && iter != NULL; lIndex++, iter = iter->pNext)
     {
-        pStatistics[lIndex].comId       = iter->addr.comId;     /* Published ComId                                   */
-        pStatistics[lIndex].destAddr    = iter->addr.destIpAddr; /* IP address of destination for this publishing.    */
-        pStatistics[lIndex].redId       = appHandle->redID;     /* Redundancy group id                               */
+        pStatistics[lIndex].comId       = iter->addr.comId;         /* Published ComId                                */
+        pStatistics[lIndex].destAddr    = iter->addr.destIpAddr;    /* IP address of destination for this publishing. */
+        pStatistics[lIndex].redId       = iter->redId;              /* Redundancy group id                            */
         pStatistics[lIndex].redState    = (iter->privFlags & TRDP_REDUNDANT) ? 1 : 0; /* Redundancy state:
                                                                                         1 = Follower
-                                                                                        0 = Leader                 */
+                                                                                        0 = Leader                  */
 
         pStatistics[lIndex].cycle = (UINT32) iter->interval.tv_usec + (UINT32)iter->interval.tv_sec * 1000000;
         /* Interval/cycle in us. 0 = No time-out supervision */
-        pStatistics[lIndex].numSend = iter->numRxTx;            /* Number of packets sent for this publisher.        */
-        pStatistics[lIndex].numPut  = iter->updPkts;            /* Updated packets (via put)                         */
+        pStatistics[lIndex].numSend = iter->numRxTx;            /* Number of packets sent for this publisher.       */
+        pStatistics[lIndex].numPut  = iter->updPkts;            /* Updated packets (via put)                        */
     }
     if (lIndex >= *pNumPub && iter != NULL)
     {
