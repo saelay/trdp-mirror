@@ -16,7 +16,8 @@
  *      
  * $Id$
  *
- *      BL 2017-11-17: Ticket #169 Encapsulate declaration of packed structures within a macro
+ *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
+ *      BL 2017-11-17: undone: Ticket #169 Encapsulate declaration of packed structures within a macro
  *      BL 2017-05-08: Compiler warnings: enum flags to #defines
  *      BL 2017-05-08: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h and here
  *      BL 2017-02-28: Ticket #140 TRDP_TIMER_FOREVER -> 
@@ -162,12 +163,12 @@ typedef struct TRDP_SOCKETS
     TRDP_IP_ADDR_T      mcGroups[VOS_MAX_MULTICAST_CNT]; /**< List of multicast addresses for this socket */
 } TRDP_SOCKETS_T;
 
-//#ifdef WIN32
-//#pragma pack(push, 1)
-//#endif
+#ifdef WIN32
+#pragma pack(push, 1)
+#endif
 
 /** TRDP process data header - network order and alignment    */
-VOS_PACKED(
+typedef struct
 {
     UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
     UINT16  protocolVersion;                    /**< fix value for compatibility (set by the API)           */
@@ -180,10 +181,10 @@ VOS_PACKED(
     UINT32  replyComId;                         /**< used in PD request                                     */
     UINT32  replyIpAddress;                     /**< used for PD request                                    */
     UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
-} , PD_HEADER_T);
+} GNU_PACKED PD_HEADER_T;
 
 /** TRDP message data header - network order and alignment    */
-VOS_PACKED(
+typedef struct
 {
     UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
     UINT16  protocolVersion;                    /**< fix value for compatibility                            */
@@ -198,22 +199,26 @@ VOS_PACKED(
     UINT8   sourceURI[32u];                     /**< User part of URI                                       */
     UINT8   destinationURI[32u];                /**< User part of URI                                       */
     UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
-} , MD_HEADER_T);
+} GNU_PACKED MD_HEADER_T;
 
 /** TRDP PD packet    */
-VOS_PACKED(
+typedef struct
 {
     PD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
     UINT8       data[TRDP_MAX_PD_DATA_SIZE];    /**< data ready to be sent or received (with CRCs)          */
-} , PD_PACKET_T);
+} GNU_PACKED PD_PACKET_T;
 
 #if MD_SUPPORT
 /** TRDP MD packet    */
-VOS_PACKED(
+typedef struct
 {
     MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
     UINT8       data[TRDP_MAX_MD_DATA_SIZE];    /**< data ready to be sent or received (with CRCs)          */
-} , MD_PACKET_T);
+} GNU_PACKED MD_PACKET_T;
+#endif
+
+#ifdef WIN32
+#pragma pack(pop)
 #endif
 
 /** Queue element for PD packets to send or receive    */
@@ -326,7 +331,6 @@ typedef struct TRDP_SESSION
     VOS_MUTEX_T             mutex;              /**< protect this session                                   */
     TRDP_IP_ADDR_T          realIP;             /**< Real IP address                                        */
     TRDP_IP_ADDR_T          virtualIP;          /**< Virtual IP address                                     */
-    UINT32                  redID;              /**< redundant comId                                        */
     UINT32                  etbTopoCnt;         /**< current valid topocount or zero                        */
     UINT32                  opTrnTopoCnt;       /**< current valid topocount or zero                        */
     TRDP_TIME_T             nextJob;            /**< Store for next select interval                         */
