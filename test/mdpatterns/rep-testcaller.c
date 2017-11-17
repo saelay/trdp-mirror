@@ -300,7 +300,7 @@ int main(int argc, char** argv)
 
     TRDP_MD_CONFIG_T mdConfiguration = {mdCallback, 
                                         NULL, 
-                                        {0, 0},
+                                        {3, 64, 2},
                                         TRDP_FLAGS_CALLBACK, 
                                         1000000, 
                                         1000000, 
