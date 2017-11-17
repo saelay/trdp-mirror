@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-17: Ticket #169 Encapsulate declaration of packed structures within a macro
  *      BL 2017-11-10: Additional log type: VOS_LOG_USR
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Doxygen comment errors
@@ -168,6 +169,24 @@ typedef double REAL64;
 /* Assert Minimum alignment (packed) for structure elements for GNU Compiler. */
       #define GNU_PACKED  __attribute__ ((__packed__))
    #endif
+#endif
+
+/*  Alternative handling of packed structs (Ticket #169)
+    Compiler dependent alignment macros    */
+#if defined (__clang__)
+    #define VOS_PACKED(member, name) \
+        struct __attribute__ ((__packed__)) name member; \
+        typedef struct name name
+#elif defined (__GNUC__)
+    #define VOS_PACKED(member, name) \
+        struct GNU_PACKED name member; \
+        typedef struct name name
+#elif defined (WIN32)
+    #define VOS_PACKED(member, name) \
+        #pragma pack(push, 1) \
+        struct name member; \
+        #pragma pack(pop) \
+        typedef struct name name
 #endif
 
 
