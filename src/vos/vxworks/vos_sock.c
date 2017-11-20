@@ -373,7 +373,6 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
 EXT_DECL BOOL8 vos_netIfUp(
     VOS_IP4_ADDR_T  ifAddress)
 {
-    // tbd
     return TRUE;
 }
 
@@ -637,9 +636,9 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (pOptions->ttl_multicast > 0)
         {
-            sockOptValue = pOptions->ttl_multicast;
-            if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&sockOptValue,
-                           sizeof(sockOptValue)) == -1)
+            char ttlMulticastOptValue = (pOptions->ttl_multicast & 0x000000FF);
+            if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &ttlMulticastOptValue,
+                           sizeof(ttlMulticastOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
                 STRING_ERR(buff);
