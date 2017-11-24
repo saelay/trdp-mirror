@@ -400,7 +400,7 @@ int main (int argc, char * *argv)
          function (in it's context and thread)!
          */
 
-        err = tlc_process(appHandle, &rfds, &rv);
+        (void) tlc_process(appHandle, &rfds, &rv);
 
         /*
          Handle other ready descriptors...
@@ -419,12 +419,6 @@ int main (int argc, char * *argv)
          sprintf((char *)gBuffer, "Ping for the %dth. time.", hugeCounter++);
          err = tlp_put(appHandle, pubHandle, (const UINT8 *) gBuffer, GBUFFER_SIZE);
          */
-        if (err != TRDP_NO_ERR)
-        {
-            printf("tlc_process returned error\n");
-            rv = 1;
-            break;
-        }
 
         /* Display received information */
         /*

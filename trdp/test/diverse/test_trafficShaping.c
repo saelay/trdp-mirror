@@ -325,12 +325,7 @@ int main (int argc, char *argv[])
          The callback function will be called from within the tlc_process
          function (in it's context and thread)!
          */
-        err = tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
-        if (err != TRDP_NO_ERR)
-        {
-            printf("tlc_process error\n");
-            break;
-        }
+        (void) tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 
         /* Handle other ready descriptors... */
         if (rv > 0)

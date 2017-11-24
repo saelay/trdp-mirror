@@ -553,7 +553,7 @@ int main (int argc, char *argv[])
                 what ever comes first.
             */
             rv = vos_select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
-            tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
+            (void) tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
         }
         else
         {
@@ -570,7 +570,7 @@ int main (int argc, char *argv[])
                 The callback function will be called from within the tlc_process
                 function (in it's context and thread)!
             */
-            tlc_process(sSessionData.appHandle, NULL, NULL);
+            (void) tlc_process(sSessionData.appHandle, NULL, NULL);
         }
 
         /* Handle other ready descriptors... */
