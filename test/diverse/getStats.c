@@ -447,7 +447,7 @@ int main (int argc, char * *argv)
             function (in it's context and thread)!
          */
 
-        tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
+        (void) tlc_process(appHandle, (TRDP_FDS_T *) &rfds, &rv);
 
         /*
            Handle other ready descriptors...

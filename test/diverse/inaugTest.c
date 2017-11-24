@@ -679,7 +679,6 @@ int main (int argc, char * *argv)
         {
             fprintf(stderr, "tlc_process error\n");
             rv = 1;
-            break;
         }
 
     }   /*    Bottom of while-loop    */

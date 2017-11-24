@@ -292,12 +292,7 @@ int main (int argc, char *argv[])
          The callback function will be called from within the tlc_process
          function (in it's context and thread)!
          */
-        err = tlc_process(appHandle, &rfds, &rv);
-        if (err != TRDP_NO_ERR)
-        {
-            /* Ignore return errors! */
-            vos_printLog(VOS_LOG_USR, "tlc_process error: %s\n", vos_getErrorString((VOS_ERR_T)err));
-        }
+        (void) tlc_process(appHandle, &rfds, &rv);
 
         /* Handle other ready descriptors... */
         if (rv > 0)

@@ -342,7 +342,7 @@ int main (int argc, char *argv[])
            The callback function will be called from within the tlc_process
            function (in it's context and thread)!
          */
-        tlc_process(appHandle, &rfds, &rv);
+        (void) tlc_process(appHandle, &rfds, &rv);
 
         /* Handle other ready descriptors... */
         if (rv > 0)

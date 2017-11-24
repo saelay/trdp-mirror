@@ -459,7 +459,6 @@ int main (int argc, char * *argv)
         {
             printf("tlc_process error\n");
             rv = 1;
-            break;
         }
 
         /* Display received information */
