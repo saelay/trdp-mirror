@@ -256,16 +256,16 @@ static uint8_t dataBuffer2[64*1024] = {
 /*  Macro to initialize the library and open one session                                                              */
 /**********************************************************************************************************************/
 #define PREPARE1(a)                                                             \
-    gFailed = 0;                                                             \
+    gFailed = 0;                                                                \
     TRDP_ERR_T      err         = TRDP_NO_ERR;                                  \
-    TRDP_APP_SESSION_T   appHandle1  = NULL, appHandle2 = NULL;                      \
+    TRDP_APP_SESSION_T   appHandle1  = NULL;                                    \
     {                                                                           \
         gFullLog = FALSE;                                                       \
         fprintf(gFp, "\n---- Start of %s (%s) ---------\n\n", __FUNCTION__, a); \
-        appHandle1 = test_init(dbgOut, &gSession1, "");                      \
+        appHandle1 = test_init(dbgOut, &gSession1, "");                         \
         if (appHandle1 == NULL)                                                 \
         {                                                                       \
-            gFailed = 1;                                                         \
+            gFailed = 1;                                                        \
             goto end;                                                           \
         }                                                                       \
     }
@@ -274,13 +274,13 @@ static uint8_t dataBuffer2[64*1024] = {
 /**********************************************************************************************************************/
 /*  Macro to initialize common function testing                                                                       */
 /**********************************************************************************************************************/
-#define PREPARE_COM(a)                                                    \
-    gFailed = 0;                                                       \
-    TRDP_ERR_T err = TRDP_NO_ERR;                                         \
-    {                                                                     \
-                                                                          \
-        printf("\n---- Start of %s (%s) ---------\n\n", __FUNCTION__, a); \
-                                                                          \
+#define PREPARE_COM(a)                                                      \
+    gFailed = 0;                                                            \
+    TRDP_ERR_T err = TRDP_NO_ERR;                                           \
+    {                                                                       \
+                                                                            \
+        printf("\n---- Start of %s (%s) ---------\n\n", __FUNCTION__, a);   \
+                                                                            \
     }
 
 
@@ -288,12 +288,12 @@ static uint8_t dataBuffer2[64*1024] = {
 /**********************************************************************************************************************/
 /*  Macro to terminate the library and close two sessions                                                             */
 /**********************************************************************************************************************/
-#define CLEANUP                                                               \
-end:                                                                          \
-    {                                                                         \
-        test_deinit(&gSession1 ,&gSession2);                \
-                                                                              \
-        if (gFailed) {                                                         \
+#define CLEANUP                                                                 \
+end:                                                                            \
+    {                                                                           \
+        test_deinit(&gSession1 ,&gSession2);                                    \
+                                                                                \
+        if (gFailed) {                                                          \
             fprintf(gFp, "\n###########  FAILED!  ###############\nlasterr = %d\n", err); }      \
         else{                                                                 \
             fprintf(gFp, "\n-----------  Success  ---------------\n"); }      \
@@ -491,12 +491,7 @@ static TRDP_APP_SESSION_T test_init (
 {
     TRDP_ERR_T          err     = TRDP_NO_ERR;
     pSession->appHandle = NULL;
-    TRDP_PROCESS_CONFIG_T     processConfig = {"me",    /* Host name  */
-                                                "",     /* Leader name dependant on redundancy concept   */
-                                                5000,   /* TRDP main process cycle time in us  */
-                                                0,      /* TRDP main process priority (0-255, 0=default, 255=highest) */
-                                                TRDP_OPTION_BLOCK};
-    
+
     if (dbgout != NULL)
     {
         /* for debugging & testing we use dynamic memory allocation (heap) */
@@ -504,7 +499,7 @@ static TRDP_APP_SESSION_T test_init (
     }
     if (err == TRDP_NO_ERR)                 /* We ignore double init here */
     {
-        tlc_openSession(&pSession->appHandle, pSession->ifaceIP, 0u, NULL, NULL, NULL, NULL/*&processConfig*/);
+        tlc_openSession(&pSession->appHandle, pSession->ifaceIP, 0u, NULL, NULL, NULL, NULL);
         /* On error the handle will be NULL... */
     }
     
@@ -1015,7 +1010,10 @@ static int test5 (int argc, char *argv[])
         TRDP_URI_USER_T     srcURI   = "12345678901234567890123456789012";   // 32 chars
 
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
-                              TEST5_STRING_COMID, 0u, 0u, 0u, TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, destURI1);
+                              TRUE,
+                              TEST5_STRING_COMID, 0u, 0u, 0u,
+                              VOS_INADDR_ANY, VOS_INADDR_ANY,
+                              TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, NULL, destURI1);
         IF_ERROR("tlm_addListener1");
         fprintf(gFp, "->> MD TCP Listener1 set up\n");
         
@@ -1074,7 +1072,9 @@ static int test6 (int argc, char *argv[])
         TRDP_URI_USER_T     srcURI   = "12345678901234567890123456789012";   // 32 chars
         
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
-                              TEST5_STRING_COMID, 0u, 0u, 0u, TRDP_FLAGS_CALLBACK, destURI1);
+                              TRUE,
+                              TEST5_STRING_COMID, 0u, 0u, 0u,
+                              VOS_INADDR_ANY, VOS_INADDR_ANY, TRDP_FLAGS_CALLBACK, NULL, destURI1);
         IF_ERROR("tlm_addListener");
         fprintf(gFp, "->> MD Listener set up\n");
         
@@ -1119,7 +1119,9 @@ static int test7 (int argc, char *argv[])
         TRDP_LIS_T          listenHandle;
         
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
-                              TEST5_STRING_COMID, 0u, 0u, 0u, TRDP_FLAGS_CALLBACK, NULL);
+                              TRUE,
+                              TEST5_STRING_COMID, 0u, 0u, 0u, VOS_INADDR_ANY, VOS_INADDR_ANY, TRDP_FLAGS_CALLBACK,
+                              NULL, NULL);
         IF_ERROR("tlm_addListener");
         fprintf(gFp, "->> MD Listener set up\n");
         

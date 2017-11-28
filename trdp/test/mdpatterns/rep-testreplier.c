@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  *
  * $Id:  $
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *
  */  
  
@@ -243,15 +244,15 @@ int main(int argc, char** argv)
     int              rv;
     TRDP_MD_CONFIG_T mdConfiguration = {mdCallback, 
                                         NULL, 
-                                        {0, 0},
+                                        {0u, 0u, 0u},
                                         TRDP_FLAGS_CALLBACK, 
-                                        1000000, 
-                                        1000000, 
-                                        1000000, 
-                                        1000000, 
-                                        17225, 
-                                        0, 
-                                        20};/*have some space for sessions*/
+                                        1000000u,
+                                        1000000u,
+                                        1000000u,
+                                        1000000u,
+                                        17225u,
+                                        0u,
+                                        20u};/*have some space for sessions*/
     TRDP_PROCESS_CONFIG_T   processConfig   = {"MD_REPLIER", "", 0, 0, TRDP_OPTION_BLOCK};
 
     printf("TRDP message data repetition test program REPLIER, version 0\n");
@@ -290,12 +291,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MR_COMID, 
-                          0, 
-                          0,
-                          0, 
-                          TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
+                          TRDP_FLAGS_CALLBACK,
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -306,12 +309,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MR_MP_COMID, 
-                          0, 
-                          0,
-                          0, 
-                          TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
+                          TRDP_FLAGS_CALLBACK,
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -322,12 +327,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MR_TOPOX_COMID, 
-                          0, 
-                          0,
-                          0, 
-                          TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
+                          TRDP_FLAGS_CALLBACK,
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -338,12 +345,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MR_INF_COMID, 
-                          0, 
-                          0,
-                          0, 
-                          TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
+                          TRDP_FLAGS_CALLBACK,
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {

@@ -16,6 +16,7 @@
  *      
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
  *      BL 2017-11-17: undone: Ticket #169 Encapsulate declaration of packed structures within a macro
  *      BL 2017-05-08: Compiler warnings: enum flags to #defines
@@ -100,6 +101,7 @@ typedef enum
 #define TRDP_REQ_2B_SENT        0x8u        /**< if set, the request needs to be sent                   */
 #define TRDP_PULL_SUB           0x10u       /**< if set, its a PULL subscription                        */
 #define TRDP_REDUNDANT          0x20u       /**< if set, packet should not be sent (redundant)          */
+#define TRDP_CHECK_COMID        0x40u       /**< if set, do filter comId (addListener)                  */
 
 typedef UINT8   TRDP_PRIV_FLAGS_T;
 
@@ -115,7 +117,8 @@ typedef enum
 typedef struct TRDP_HANDLE
 {
     UINT32          comId;                              /**< comId for packets to send/receive          */
-    TRDP_IP_ADDR_T  srcIpAddr;                          /**< source IP for PD                           */
+    TRDP_IP_ADDR_T  srcIpAddr;                          /**< source IP for PD/MD                        */
+    TRDP_IP_ADDR_T  srcIpAddr2;                         /**< second source IP for PD/MD                 */
     TRDP_IP_ADDR_T  destIpAddr;                         /**< destination IP for PD                      */
     TRDP_IP_ADDR_T  mcGroup;                            /**< multicast group to join for PD             */
     UINT32          etbTopoCnt;                         /**< etb topocount belongs to addressing item   */
@@ -263,6 +266,7 @@ typedef struct MD_LIS_ELE
     TRDP_PRIV_FLAGS_T   privFlags;              /**< private flags                                          */
     TRDP_FLAGS_T        pktFlags;               /**< flags                                                  */
     const void          *pUserRef;              /**< user reference for call_back                           */
+    TRDP_URI_USER_T     srcURI;
     TRDP_URI_USER_T     destURI;
     INT32               socketIdx;              /**< index into the socket list                             */
     TRDP_MD_CALLBACK_T  pfCbFunction;           /**< Pointer to MD callback function                        */

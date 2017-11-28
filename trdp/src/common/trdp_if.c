@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
@@ -978,7 +979,7 @@ EXT_DECL const TRDP_VERSION_T *tlc_getVersion (void)
 /**********************************************************************************************************************/
 /** Do not send non-redundant PDs when we are follower.
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      redId               will be set for all ComID's with the given redId, 0 to change for all redId
  *  @param[in]      leader              TRUE if we send
  *
@@ -1041,7 +1042,7 @@ TRDP_ERR_T tlp_setRedundant (
 /** Get status of redundant ComIds.
  *  Only the status of the first redundancy group entry is returned will be returned!
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      redId               will be returned for all ComID's with the given redId
  *  @param[in,out]  pLeader             TRUE if we're sending this redundancy group (leader)
  *
@@ -1138,7 +1139,7 @@ EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
  *
  *    This value is used for validating outgoing and incoming packets only!
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @param[in]      opTrnTopoCnt        New operational topocount value
  */
 EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
@@ -1192,7 +1193,7 @@ EXT_DECL UINT32 tlc_getETBTopoCount (TRDP_APP_SESSION_T appHandle)
  *
  *    This value is used for validating outgoing and incoming packets only!
  *
- *  @param[in]      appHandle           The handle returned by tlc_init
+ *  @param[in]      appHandle           The handle returned by tlc_openSession
  *
  *  @retval         opTrnTopoCnt        New operational topocount value
  */
@@ -1423,7 +1424,7 @@ EXT_DECL TRDP_ERR_T tlp_publish (
 /** Prepare for sending PD messages.
  *  Reinitialize and queue a PD message, it will be send when tlc_publish has been called
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pubHandle           handle for related unpublish
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -2217,7 +2218,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
     ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
     if (ret == TRDP_NO_ERR)
     {
-        TRDP_IP_ADDR_T  mcGroup = pElement->addr.mcGroup;
+        TRDP_IP_ADDR_T mcGroup = pElement->addr.mcGroup;
         /*    Remove from queue?    */
         trdp_queueDelElement(&appHandle->pRcvQueue, pElement);
         /*    if we subscribed to an MC-group, check if anyone else did too: */
@@ -2251,7 +2252,7 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
 /** Reprepare for receiving PD messages.
  *  Resubscribe to a specific PD ComID and source IP
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      subHandle           handle for this subscription
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -2462,7 +2463,7 @@ EXT_DECL TRDP_ERR_T tlp_get (
 /** Initiate sending MD notification message.
  *  Send a MD notification message
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[in]      comId               comId of packet to be sent
@@ -2535,7 +2536,7 @@ TRDP_ERR_T tlm_notify (
 /** Initiate sending MD request message.
  *  Send a MD request message
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pUserRef            user supplied value returned with reply
  *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
  *  @param[out]     pSessionId          return session ID
@@ -2641,33 +2642,40 @@ TRDP_ERR_T tlm_request (
 /** Subscribe to MD messages.
  *  Add a listener to TRDP to get notified when messages are received
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pListenHandle       Handle for this listener returned
  *  @param[in]      pUserRef            user supplied value returned with received message
  *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
+ *  @param[in]      comIdListener       set TRUE if comId shall be observed
  *  @param[in]      comId               comId to be observed
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr1          Source IP address, lower address in case of address range, set to 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set to 0 if not used
  *  @param[in]      mcDestIpAddr        multicast group to listen on
- *  @param[in]      pktFlags            OPTION:
- *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL
- *  @param[in]      destURI             only functional group of destination URI
- *
+ *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL
+ *  @param[in]      srcURI              only functional group of source URI, set to NULL if not used
+ *  @param[in]      destURI             only functional group of destination URI, set to NULL if not used
+
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        out of memory
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
-TRDP_ERR_T tlm_addListener (
+EXT_DECL TRDP_ERR_T  tlm_addListener (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_LIS_T              *pListenHandle,
     const void              *pUserRef,
     TRDP_MD_CALLBACK_T      pfCbFunction,
+    BOOL8                   comIdListener,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
+    TRDP_IP_ADDR_T          srcIpAddr1,
+    TRDP_IP_ADDR_T          srcIpAddr2,
     TRDP_IP_ADDR_T          mcDestIpAddr,
     TRDP_FLAGS_T            pktFlags,
+    const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI)
 {
     TRDP_ERR_T      errv            = TRDP_NO_ERR;
@@ -2710,17 +2718,24 @@ TRDP_ERR_T tlm_addListener (
                 pNewElement->addr.comId         = comId;
                 pNewElement->addr.etbTopoCnt    = etbTopoCnt;
                 pNewElement->addr.opTrnTopoCnt  = opTrnTopoCnt;
+                pNewElement->addr.srcIpAddr     = srcIpAddr1;
+                pNewElement->addr.srcIpAddr2    = srcIpAddr2;       /* if != 0 then range! */
                 pNewElement->addr.destIpAddr    = 0u;
                 pNewElement->pktFlags           = pktFlags;
                 pNewElement->pfCbFunction       =
                     (pfCbFunction == NULL) ? appHandle->mdDefault.pfCbFunction : pfCbFunction;
+
+                /* Ticket #180: additional parameters for addListener & reAddListener */
+                if (NULL != srcURI)
+                {
+                    vos_strncpy(pNewElement->srcURI, srcURI, TRDP_MAX_URI_USER_LEN);
+                }
 
                 /* 2013-02-06 BL: Check for zero pointer  */
                 if (NULL != destURI)
                 {
                     vos_strncpy(pNewElement->destURI, destURI, TRDP_MAX_URI_USER_LEN);
                 }
-
                 if (vos_isMulticast(mcDestIpAddr))
                 {
                     pNewElement->addr.mcGroup   = mcDestIpAddr;     /* Set multicast group address */
@@ -2729,6 +2744,12 @@ TRDP_ERR_T tlm_addListener (
                 else
                 {
                     pNewElement->addr.mcGroup = 0u;
+                }
+
+                /* Ignore comId ? */
+                if (comIdListener != FALSE)
+                {
+                    pNewElement->privFlags |= TRDP_CHECK_COMID;
                 }
 
                 if ((pNewElement->pktFlags & TRDP_FLAGS_TCP) == 0)
@@ -2803,7 +2824,7 @@ TRDP_ERR_T tlm_addListener (
 /** Remove Listener.
  *
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     listenHandle        Handle for this listener
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -2858,12 +2879,16 @@ TRDP_ERR_T tlm_delListener (
             /* cleanup instance */
             if (pDelete->socketIdx != -1)
             {
-                TRDP_IP_ADDR_T  mcGroup = VOS_INADDR_ANY;
+                TRDP_IP_ADDR_T mcGroup = VOS_INADDR_ANY;
                 if (pDelete->addr.mcGroup != VOS_INADDR_ANY)
                 {
                     mcGroup = trdp_findMCjoins(appHandle, pDelete->addr.mcGroup);
                 }
-                trdp_releaseSocket(appHandle->iface, pDelete->socketIdx, appHandle->mdDefault.connectTimeout, FALSE, mcGroup);
+                trdp_releaseSocket(appHandle->iface,
+                                   pDelete->socketIdx,
+                                   appHandle->mdDefault.connectTimeout,
+                                   FALSE,
+                                   mcGroup);
             }
             /* free memory space for element */
             vos_memFree(pDelete);
@@ -2893,10 +2918,12 @@ TRDP_ERR_T tlm_delListener (
 /** Resubscribe to MD messages.
  *  Readd a listener after topoCount changes to get notified when messages are received
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     listenHandle        Handle for this listener
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr1          Source IP address, lower address in case of address range, set to 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set to 0 if not used
  *  @param[in]      mcDestIpAddr        multicast group to listen on
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -2909,6 +2936,8 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
     TRDP_LIS_T          listenHandle,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
+    TRDP_IP_ADDR_T      srcIpAddr1,
+    TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      mcDestIpAddr /* multiple destId handled in layer above */)
 {
     TRDP_ERR_T      ret         = TRDP_NO_ERR;
@@ -2964,6 +2993,8 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
             pListener->addr.etbTopoCnt      = etbTopoCnt;
             pListener->addr.opTrnTopoCnt    = opTrnTopoCnt;
             pListener->addr.mcGroup         = mcDestIpAddr;
+            pListener->addr.srcIpAddr       = srcIpAddr1;
+            pListener->addr.srcIpAddr2      = srcIpAddr2;
         }
     }
 
@@ -2982,7 +3013,7 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
  *  Send a MD reply message after receiving an request
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by indication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      userStatus          Info for requester about application errors
@@ -3030,7 +3061,7 @@ TRDP_ERR_T tlm_reply (
  *  Send a MD reply query message after receiving a request and ask for confirmation.
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by indication
  *  @param[in]      comId               comId of packet to be sent
  *  @param[in]      userStatus          Info for requester about application errors
@@ -3090,7 +3121,7 @@ TRDP_ERR_T tlm_replyQuery (
  *  Send a MD confirmation message
  *  User reference, source and destination IP addresses as well as topo counts and packet flags are taken from the session
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by request
  *  @param[in]      userStatus          Info for requester about application errors
  *  @param[in]      pSendParam          Pointer to send parameters, NULL to use default send parameters
@@ -3118,7 +3149,7 @@ TRDP_ERR_T tlm_confirm (
 /** Cancel an open session.
  *  Abort an open session; any pending messages will be dropped
  *
- *  @param[in]      appHandle           the handle returned by tlc_init
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      pSessionId          Session ID returned by request
  *
  *  @retval         TRDP_NO_ERR         no error

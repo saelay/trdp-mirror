@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  *
  * $Id:  $
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *
  */ 
 
@@ -350,12 +351,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MQ_COMID, 
-                          0, 
-                          0,
-                          0, 
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
                           TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -368,12 +371,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MP_COMID, 
-                          0, 
-                          0,
-                          0, 
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
                           TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -386,12 +391,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MP_TOPOX_COMID, 
-                          0, 
-                          0,
-                          0, 
-                          TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
+                          TRDP_FLAGS_CALLBACK,
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -404,12 +411,14 @@ int main(int argc, char** argv)
                           &listenHandle, 
                           NULL,
                           NULL,
+                          TRUE,
                           CALLTEST_MQ_INF_COMID, 
-                          0, 
-                          0,
-                          0, 
+                          0u,
+                          0u,
+                          VOS_INADDR_ANY,
+                          VOS_INADDR_ANY, VOS_INADDR_ANY,
                           TRDP_FLAGS_CALLBACK, 
-                          NULL);
+                          NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {

@@ -62,7 +62,7 @@ UINT8 gData[DATA_MAX];
  *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
-void dbgOut (
+static void dbgOut (
     void        *pRefCon,
     TRDP_LOG_T  category,
     const CHAR8 *pTime,
@@ -80,7 +80,7 @@ void dbgOut (
 }
 
 /* Print a sensible usage message */
-void usage (const char *appName)
+static void usage (const char *appName)
 {
     printf("Usage of %s\n", appName);
     printf("This tool sends PD messages with serialized data.\n"
@@ -104,19 +104,19 @@ void usage (const char *appName)
  */
 int main (int argc, char *argv[])
 {
-    int                     ip[4];
+    unsigned int            ip[4];
     TRDP_APP_SESSION_T      appHandle; /*    Our identifier to the library instance    */
     TRDP_PUB_T              pubHandle; /*    Our identifier to the publication         */
     UINT32                  comId       = PD_DEF_COMID;
     UINT32                  cycleTime   = PD_DEF_COMID_CYCLE;
     UINT32                  dataSize    = PD_DEF_DATASIZE;
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0, 64}, TRDP_FLAGS_NONE, 1000000, TRDP_TO_SET_TO_ZERO, 0};
+    TRDP_PD_CONFIG_T        pdConfiguration = {NULL, NULL, {0u, 64u, 0u}, TRDP_FLAGS_NONE, 1000000u, TRDP_TO_SET_TO_ZERO, 0u};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
-    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-    UINT32                  ownIP   = 0;
+    TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0u, 0u, TRDP_OPTION_BLOCK};
+    UINT32                  ownIP   = 0u;
     int                     rv      = 0;
-    UINT32                  destIP  = 0;
+    UINT32                  destIP  = 0u;
     int                     verbose = 0;
     int                     ch, i;
 
