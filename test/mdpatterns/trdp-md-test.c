@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
@@ -994,11 +995,15 @@ void setup_listeners ()
                 &lsnrh,                             /* listener handle */
                 (void *) TST_TCP,                   /* user reference */
                 NULL,                               /* callback function */
-                0,                                  /* comid (0 .. take all) */
-                0,                                  /* topo */
-                0,                                  /* topo */
+                FALSE,                              /* no comId listener */
+                0u,                                 /* comid (0 .. take all) */
+                0u,                                 /* topo */
+                0u,                                 /* topo */
                 opts.srcip,                         /* destination IP address */
+                VOS_INADDR_ANY,
+                VOS_INADDR_ANY,
                 (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP), /* flags */
+                NULL,
                 opts.uri);                          /* destination URI */
         /* check for errors */
         if (err != TRDP_NO_ERR)
@@ -1015,11 +1020,15 @@ void setup_listeners ()
                 &lsnrh,                             /* listener handle */
                 (void *) TST_UCAST,                 /* user reference */
                 NULL,                               /* callback function */
-                0,                                  /* comid (0 .. take all) */
-                0,                                  /* topo */
-                0,                                  /* topo */
+                FALSE,                              /* no comId listener */
+                0u,                                 /* comid (0 .. take all) */
+                0u,                                 /* topo */
+                0u,                                 /* topo */
+                VOS_INADDR_ANY,
+                VOS_INADDR_ANY,
                 opts.srcip,                         /* destination IP address */
                 TRDP_FLAGS_CALLBACK,                /* flags */
+                NULL,
                 opts.uri);                          /* destination URI */
         /* check for errors */
         if (err != TRDP_NO_ERR)
@@ -1036,11 +1045,15 @@ void setup_listeners ()
                 &lsnrh,                             /* listener handle */
                 (void *) TST_MCAST,                 /* user reference */
                 NULL,                               /* callback function */
-                0,                                  /* comid (0 .. take all) */
-                0,                                  /* topo */
-                0,                                  /* topo */
+                FALSE,                              /* no comId listener */
+                0u,                                  /* comid (0 .. take all) */
+                0u,                                  /* topo */
+                0u,                                  /* topo */
+                VOS_INADDR_ANY,
+                VOS_INADDR_ANY,
                 opts.mcgrp,                         /* destination IP address */
                 TRDP_FLAGS_CALLBACK,                /* flags */
+                NULL,
                 opts.uri);                          /* destination URI */
         /* check for errors */
         if (err != TRDP_NO_ERR)

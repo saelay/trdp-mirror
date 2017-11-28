@@ -120,7 +120,7 @@ static void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:"};
+    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
     printf("%s %s %s:%d %s",
            pTime,
            catStr[category],
@@ -395,12 +395,15 @@ void md_listen (
             gAppHandle,                                 /*	our application identifier			*/
     		&recPacket->lisHandle,                      /*	listener handle          			*/
     		NULL,  NULL,                                /*  user ref                            */
+            TRUE,                                       /*  comID listener                      */
     		recPacket->comID,							/*	ComID								*/
-    		0,             								/*	topocount: local consist only		*/
-            0,
-    		0,											/*  any source address                  */
+    		0u,             						    /*	topocounts: local consist only		*/
+            0u,
+    		VOS_INADDR_ANY,                             /*  any source address                  */
+            VOS_INADDR_ANY,                             /*  any source address                  */
+            VOS_INADDR_ANY,                             /*  any dest address                    */
     		TRDP_FLAGS_CALLBACK,                        /*  use callbacks                       */
-    		NULL);
+    		NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -717,7 +720,7 @@ int pd_loop2 (void)
              function (in it's context and thread)!
          */
 
-        tlc_process(gAppHandle, (TRDP_FDS_T *) &rfds, &rv);
+        (void) tlc_process(gAppHandle, (TRDP_FDS_T *) &rfds, &rv);
 
         /* Handle other ready descriptors... */
 

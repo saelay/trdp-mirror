@@ -495,15 +495,17 @@ int main (int argc, char *argv[])
     if (sSessionData.sResponder == TRUE)
     {
         printf("add listener\n");
-        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, NULL, sSessionData.sComID, 0, 0, destIP,
-                            flags, NULL) != TRDP_NO_ERR)
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, NULL, TRUE, sSessionData.sComID,
+                            0u, 0u, VOS_INADDR_ANY, VOS_INADDR_ANY, destIP,
+                            flags, NULL, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error (TCP)\n");
             return 1;
         }
         printf("add listener\n");
-        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, NULL, sSessionData.sComID, 0, 0, destIP,
-                            flags &= ~TRDP_FLAGS_TCP, NULL) != TRDP_NO_ERR)
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, NULL, TRUE, sSessionData.sComID,
+                            0u, 0u, VOS_INADDR_ANY, VOS_INADDR_ANY, destIP,
+                            flags &= ~TRDP_FLAGS_TCP, NULL, NULL) != TRDP_NO_ERR)
         {
             printf("tlm_addListener error (UDP)\n");
             return 1;

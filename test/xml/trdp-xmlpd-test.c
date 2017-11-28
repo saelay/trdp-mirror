@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-02-08: Ticket #134 Example trdp-xmlpd-test crash due to zero elemSize
  *      BL 2015-12-14: Ticket #97  trdp-xmlpd-test.c subscribed telegram issue.
@@ -167,19 +168,19 @@ void setColorDefault()
 
 #else
 /*  Linux implementation  */
-void clearScreen()
+static void clearScreen()
 {
     printf("\033" "[H" "\033" "[2J");
 }
-void setColorRed()
+static void setColorRed()
 {
     printf("\033" "[0;1;31m");
 }
-void setColorGreen()
+static void setColorGreen()
 {
     printf("\033" "[0;1;32m");
 }
-void setColorDefault()
+static void setColorDefault()
 {
     printf("\033" "[0m");
 }
@@ -231,7 +232,7 @@ static void dbgOut (
 /*********************************************************************************************************************/
 /** Convert provided TRDP error code to string
  */
-const char * getResultString(TRDP_ERR_T ret)
+static const char * getResultString(TRDP_ERR_T ret)
 {
     static char buf[128];
 
@@ -927,7 +928,7 @@ static TRDP_ERR_T configureSessions(TRDP_XML_DOC_HANDLE_T *pDocHnd)
  *    receive data using tpl_get
  *    print all sent and received data
  */
-void processData()
+static void processData()
 {
     TRDP_ERR_T result;
     UINT32 i;
@@ -1038,7 +1039,7 @@ void processData()
         if (vos_cmpTime(&now, &nextCycle) < 0)
         {
             vos_subTime(&delay, &now);
-            vos_threadDelay(delay.tv_sec * 1000000 + delay.tv_usec);
+            vos_threadDelay((UINT32) (delay.tv_sec * 1000000u + delay.tv_usec));
         }
     }
 }

@@ -91,7 +91,7 @@
 #define TRDP_PROTO_VER                      0x0100u                     /**< Protocol version                       */
 #define TRDP_PROTOCOL_VERSION_CHECK_MASK    0xFF00u                     /**< Version check, two digits are relevant */
 #define TRDP_SESS_ID_SIZE                   16u                         /**< Session ID (UUID) size in MD header    */
-#define TRDP_DEST_URI_SIZE                  32u                         /**< max. Dest URI size in MD header        */
+#define TRDP_USR_URI_SIZE                   32u                         /**< max. User URI size in MD header        */
 
 /**  Definitions for time out behaviour accd. table A.18 */
 #define TDRP_MD_INFINITE_TIME               (0)

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
  *      BL 2015-11-24: Accessor for IP address of session
@@ -184,9 +185,9 @@ EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              etbTopoCnt);
 
-EXT_DECL UINT32 tlc_getETBTopoCount (
-    TRDP_APP_SESSION_T  appHandle);
-    
+EXT_DECL UINT32     tlc_getETBTopoCount (
+    TRDP_APP_SESSION_T appHandle);
+
 /**********************************************************************************************************************/
 /** Set new operational train topocount for direction/orientation sensitive communication.
  *
@@ -199,7 +200,7 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
     TRDP_APP_SESSION_T  appHandle,
     UINT32              opTrnTopoCnt);
 
-EXT_DECL UINT32 tlc_getOpTrainTopoCount (
+EXT_DECL UINT32     tlc_getOpTrainTopoCount (
     TRDP_APP_SESSION_T  appHandle);
 
 /**********************************************************************************************************************/
@@ -263,7 +264,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *
  *  @retval         realIP
  */
-EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T   appHandle);
+EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T     appHandle);
 
 /*******************************************************************************
    PD specific functions
@@ -692,13 +693,17 @@ EXT_DECL TRDP_ERR_T tlm_abortSession (
  *  @param[out]     pListenHandle       Handle for this listener returned
  *  @param[in]      pUserRef            user supplied value returned with received message
  *  @param[in]      pfCbFunction        Pointer to listener specific callback function, NULL to use default function
+ *  @param[in]      comIdListener       set TRUE if comId shall be observed
  *  @param[in]      comId               comId to be observed
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr1          Source IP address, lower address in case of address range, set 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set to 0 if not used
  *  @param[in]      mcDestIpAddr        multicast group to listen on
  *  @param[in]      pktFlags            OPTION: TRDP_FLAGS_DEFAULT, TRDP_FLAGS_MARSHALL, TRDP_PLAGS_TCP
- *  @param[in]      destURI             only functional group of destination URI
- *
+ *  @param[in]      srcURI              only functional group of source URI, set 0 if not used
+ *  @param[in]      destURI             only functional group of destination URI, set 0 if not used
+
  *  @retval         TRDP_NO_ERR         no error
  *  @retval         TRDP_PARAM_ERR      parameter error
  *  @retval         TRDP_MEM_ERR        out of memory
@@ -709,13 +714,16 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
     TRDP_LIS_T              *pListenHandle,
     const void              *pUserRef,
     TRDP_MD_CALLBACK_T      pfCbFunction,
-    UINT32                  comId,        /* muliple ComID handled in layer above  */
+    BOOL8                   comIdListener,
+    UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
-    TRDP_IP_ADDR_T          mcDestIpAddr, /* multiple destId handled in layer above */
+    TRDP_IP_ADDR_T          srcIpAddr1,
+    TRDP_IP_ADDR_T          srcIpAddr2,
+    TRDP_IP_ADDR_T          mcDestIpAddr,
     TRDP_FLAGS_T            pktFlags,
+    const TRDP_URI_USER_T   srcURI,
     const TRDP_URI_USER_T   destURI);
-
 
 /**********************************************************************************************************************/
 /** Resubscribe to MD messages.
@@ -725,6 +733,8 @@ EXT_DECL TRDP_ERR_T tlm_addListener (
  *  @param[out]     listenHandle        Handle for this listener
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr           Source IP address, lower address in case of address range, set 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set 0 if not used
  *  @param[in]      mcDestIpAddr        multicast group to listen on
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -737,6 +747,8 @@ EXT_DECL TRDP_ERR_T tlm_readdListener (
     TRDP_LIS_T          listenHandle,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
+    TRDP_IP_ADDR_T      srcIpAddr,
+    TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      mcDestIpAddr /* multiple destId handled in layer above */);
 
 

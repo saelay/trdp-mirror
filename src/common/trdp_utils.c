@@ -16,10 +16,11 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-15: Ticket #175 PD: Handling of sequence counter
  *      BL 2017-11-09: Ticket #181/182 Missing padding bytes in user dataset of PD/MD-PDU
-*       BL 2017-11-06: Ticket #178 trdp_releaseSocket does not cleanup tcpParams
+ *      BL 2017-11-06: Ticket #178 trdp_releaseSocket does not cleanup tcpParams
  *      BL 2017-11-06: Ticket #174 Socket is closed, even if in use
  *      BL 2017-06-07: Undoing setting of usage (came in with #126 fix!)
  *      BL 2017-05-08: Ticket #126 Opened UDP socket is not released if join or bind failed in trdp_requestSocket()
@@ -1298,5 +1299,29 @@ int trdp_checkSequenceCounter (
 
 BOOL8 trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T destUri)
 {
-    return (vos_strnicmp(listUri, destUri, TRDP_DEST_URI_SIZE) == 0);
+    return (vos_strnicmp(listUri, destUri, TRDP_USR_URI_SIZE) == 0);
+}
+
+/**********************************************************************************************************************/
+/** Check if received IP is in addressing range of listener's IPs.
+ *
+ *  @param[in]      receivedSrcIP           Received IP address
+ *  @param[in]      listenedSourceIPlow     Lower bound IP
+ *  @param[in]      listenedSourceIPhigh    Upper bound IP
+ *
+ *  @retval         FALSE - not in addressing range
+ *  @retval         TRUE  - received IP is in addressing range of listener
+ */
+
+BOOL8 trdp_isInIPrange(TRDP_IP_ADDR_T   receivedSrcIP,
+                       TRDP_IP_ADDR_T   listenedSourceIPlow,
+                       TRDP_IP_ADDR_T   listenedSourceIPhigh)
+{
+    if ((receivedSrcIP == VOS_INADDR_ANY) ||
+        (listenedSourceIPlow == VOS_INADDR_ANY) ||
+        (listenedSourceIPhigh == VOS_INADDR_ANY))
+    {
+        return FALSE;
+    }
+    return (receivedSrcIP >= listenedSourceIPlow) && (receivedSrcIP <= listenedSourceIPhigh);
 }

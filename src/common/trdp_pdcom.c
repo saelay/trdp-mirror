@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
  *      BL 2017-07-24: Ticket #166 Bug in trdp_pdReceive for "if data has changed"
@@ -430,7 +431,7 @@ TRDP_ERR_T  trdp_pdReceive (
     TRDP_ERR_T          err             = TRDP_NO_ERR;
     UINT32              recSize         = TRDP_MAX_PD_PACKET_SIZE;
     int                 informUser      = FALSE;
-    TRDP_ADDRESSES_T    subAddresses    = { 0u, 0u, 0u, 0u, 0u, 0u};
+    TRDP_ADDRESSES_T    subAddresses    = { 0u, 0u, 0u, 0u, 0u, 0u, 0u};
 
     /*  Get the packet from the wire:  */
     err = (TRDP_ERR_T) vos_sockReceiveUDP(sock,

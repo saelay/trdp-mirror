@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-09: Ticket #174: Receiving fragmented TCP packets
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
@@ -1597,82 +1598,115 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
     }
 
     iterMD = NULL; /* reset item for the actual lookup task */
+
     /* search for existing listener */
     for ( iterListener = appHandle->pMDListenQueue; iterListener != NULL;
           iterListener = iterListener->pNext )
     {
-        if ( iterListener->socketIdx != TRDP_INVALID_SOCKET_INDEX
-             &&
-             isTCP == TRUE )
+        if ((iterListener->socketIdx != TRDP_INVALID_SOCKET_INDEX) &&
+            (isTCP == TRUE))
         {
             continue;
         }
+
+        /* Ticket #180: Do the filtering as the standard demands */
+
+        /* If comID does not match but should, continue */
+        if (((iterListener->privFlags & TRDP_CHECK_COMID) != 0) &&
+            (vos_ntohl(pH->comId) != iterListener->addr.comId))
+        {
+            continue;
+        }
+
+        /* check the source URI if set  */
+        if ((iterListener->srcURI[0] != 0) &&
+            (!trdp_isAddressed (iterListener->srcURI, (CHAR8*) pH->sourceURI)))
+        {
+            continue;
+        }
+
+        /* check the destination URI if set  */
+        if ((iterListener->destURI[0] != 0) &&
+            (!trdp_isAddressed (iterListener->destURI, (CHAR8*) pH->destinationURI)))
+        {
+            continue;
+        }
+
+        /* check topocounts before comparing source or destination IP addresses! */
+        /* Step 1: here we need to check the topccounts */
+        /* in case of train communication (topo counters != zero) check topo validity of recvd message and */
+        /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                     */
+        if (((pH->etbTopoCnt != 0u) || (pH->opTrnTopoCnt != 0u))
+            && (!trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
+                                      vos_ntohl(pH->opTrnTopoCnt),
+                                      iterListener->addr.etbTopoCnt,
+                                      iterListener->addr.opTrnTopoCnt)))
+        {
+            continue;
+        }
+
         /* If multicast address is set, but does not match, we go to the next listener (if any) */
-        if ( iterListener->addr.mcGroup != 0u
-             &&
-             iterListener->addr.mcGroup != appHandle->pMDRcvEle->addr.destIpAddr )
+        if ((iterListener->addr.mcGroup != 0u)            &&
+            (iterListener->addr.mcGroup != appHandle->pMDRcvEle->addr.destIpAddr))
         {
             /* no IP match for unicast addressing */
             continue;
         }
 
-        if ((iterListener->destURI[0] == 0 &&  /* ComId listener ?    */
-             vos_ntohl(pH->comId) == iterListener->addr.comId)
-            ||
-            (iterListener->destURI[0] != 0 &&  /* URI listener   */
-             vos_strnicmp((CHAR8 *) iterListener->destURI,
-                          (CHAR8 *) pH->destinationURI,
-                          TRDP_DEST_URI_SIZE) == 0))
+        /* if source IP given (and no range) */
+        if ((iterListener->addr.srcIpAddr2 == 0) &&
+            (iterListener->addr.srcIpAddr != 0) &&
+            (iterListener->addr.srcIpAddr != appHandle->pMDRcvEle->addr.srcIpAddr))
         {
-            /* Step 1: here we need to check the topccounts */
-            /* in case of train communication (topo counters != zero) check topo validity of recvd message and */
-            /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                    */
-            if (((pH->etbTopoCnt == 0u) && (pH->opTrnTopoCnt == 0u))
-                || trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
-                                           vos_ntohl(pH->opTrnTopoCnt),
-                                           iterListener->addr.etbTopoCnt,
-                                           iterListener->addr.opTrnTopoCnt))
+            continue;
+        }
+
+        /* if source IP given and is within given IP range */
+        if ((iterListener->addr.srcIpAddr != 0) &&
+            (iterListener->addr.srcIpAddr2 != 0) &&
+            (!trdp_isInIPrange(appHandle->pMDRcvEle->addr.srcIpAddr,
+                               iterListener->addr.srcIpAddr,
+                               iterListener->addr.srcIpAddr2)))
+        {
+            continue;
+        }
+
+        /* If we come here, it is the right listener! */
+        {
+            /* We found a listener, set some values for this new session  */
+            iterMD = appHandle->pMDRcvEle;
+            iterMD->pUserRef            = iterListener->pUserRef;
+            iterMD->pfCbFunction        = iterListener->pfCbFunction;
+            iterMD->stateEle            = state;
+            iterMD->addr.etbTopoCnt     = iterListener->addr.etbTopoCnt;
+            iterMD->addr.opTrnTopoCnt   = iterListener->addr.opTrnTopoCnt;
+            iterMD->pktFlags            = iterListener->pktFlags;           /* BL: This was missing! */
+
+
+            /* Count this Request/Notification as new session */
+            iterListener->numSessions++;
+
+            if ( iterListener->socketIdx == TRDP_INVALID_SOCKET_INDEX ) /* On TCP, listeners have no socket
+               assigned  */
             {
-                /* We found a listener, set some values for this new session  */
-                iterMD = appHandle->pMDRcvEle;
-                iterMD->pUserRef            = iterListener->pUserRef;
-                iterMD->pfCbFunction        = iterListener->pfCbFunction;
-                iterMD->stateEle            = state;
-                iterMD->addr.etbTopoCnt     = iterListener->addr.etbTopoCnt;
-                iterMD->addr.opTrnTopoCnt   = iterListener->addr.opTrnTopoCnt;
-                iterMD->pktFlags            = iterListener->pktFlags;           /* BL: This was missing! */
-
-
-                /* Count this Request/Notification as new session */
-                iterListener->numSessions++;
-
-                if ( iterListener->socketIdx == TRDP_INVALID_SOCKET_INDEX ) /* On TCP, listeners have no socket
-                   assigned  */
-                {
-                    iterMD->socketIdx = (INT32) sockIndex;
-                }
-                else
-                {
-                    iterMD->socketIdx = iterListener->socketIdx;
-                }
-
-                trdp_MDqueueInsFirst(&appHandle->pMDRcvQueue, iterMD);
-
-                appHandle->pMDRcvEle = NULL;
-
-                vos_printLog(VOS_LOG_INFO,
-                             "Creating %s MD replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
-                             iterMD->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
-                             pH->sessionID[0], pH->sessionID[1], pH->sessionID[2],
-                             pH->sessionID[3], pH->sessionID[4], pH->sessionID[5],
-                             pH->sessionID[6], pH->sessionID[7]);
-                break;
+                iterMD->socketIdx = (INT32) sockIndex;
             }
             else
             {
-                /* wrong topo count, this listener must be updated (re-added) */
-                continue;
+                iterMD->socketIdx = iterListener->socketIdx;
             }
+
+            trdp_MDqueueInsFirst(&appHandle->pMDRcvQueue, iterMD);
+
+            appHandle->pMDRcvEle = NULL;
+
+            vos_printLog(VOS_LOG_INFO,
+                         "Creating %s MD replier session '%02x%02x%02x%02x%02x%02x%02x%02x'\n",
+                         iterMD->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
+                         pH->sessionID[0], pH->sessionID[1], pH->sessionID[2],
+                         pH->sessionID[3], pH->sessionID[4], pH->sessionID[5],
+                         pH->sessionID[6], pH->sessionID[7]);
+            break;
         }
     }
     if ( NULL != iterMD )

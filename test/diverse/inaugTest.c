@@ -101,7 +101,7 @@ const UINT8 cDemoData[] = " "
     "It begins with a house.\n";
 
 /**********************************************************************************************************************/
-void initPacketList ()
+static void initPacketList ()
 {
     gPubPacket.handle    = 0;
     gPubPacket.comID        = PUBLISH_COMID;
@@ -126,7 +126,7 @@ void initPacketList ()
 }
 
 /**********************************************************************************************************************/
-void publishPD(
+static void publishPD(
     PD_PKT_T    *pdData)
 {
     TRDP_ERR_T  err;
@@ -167,7 +167,7 @@ void publishPD(
 }
 
 /**********************************************************************************************************************/
-void subscribePD(
+static void subscribePD(
                PD_PKT_T    *pdData)
 {
     TRDP_ERR_T  err;
@@ -207,7 +207,7 @@ void subscribePD(
 }
 
 /**********************************************************************************************************************/
-void listenMD(
+static void listenMD(
 PD_PKT_T    *mdData)
 {
     TRDP_ERR_T  err;
@@ -219,11 +219,15 @@ PD_PKT_T    *mdData)
                             (TRDP_LIS_T*)&mdData->handle,   /*    our subscription identifier       */
                             NULL,                           /*    user reference                    */
                             NULL,                           /*    callback function                 */
+                            TRUE,
                             mdData->comID,                  /*    ComID                             */
-                            0,                              /*    etbTopoCnt: local consist only    */
-                            0,                              /*    opTrnTopoCnt                      */
-                            0,                              /*    Default destination (or MC Group) */
+                            0u,                             /*    etbTopoCnt: local consist only    */
+                            0u,                             /*    opTrnTopoCnt                      */
+                            0u,                             /*    Default destination (or MC Group) */
+                            VOS_INADDR_ANY,
+                            VOS_INADDR_ANY,
                             TRDP_FLAGS_CALLBACK,            /*    packet flags                      */
+                            NULL,
                             NULL);
         
     }
@@ -231,9 +235,11 @@ PD_PKT_T    *mdData)
     {
         err = tlm_readdListener(gAppHandle,                 /*    our application identifier        */
                               (TRDP_LIS_T)mdData->handle,   /*    our subscription identifier       */
-                              0,                            /*    etbTopoCnt: local consist only    */
-                              0,                            /*    opTrnTopoCnt                      */
-                              0);                           /*    Default destination (or MC Group) */
+                              0u,                           /*    etbTopoCnt: local consist only    */
+                              0u,                           /*    opTrnTopoCnt                      */
+                              VOS_INADDR_ANY,
+                              VOS_INADDR_ANY,
+                              VOS_INADDR_ANY);              /*    Default destination (or MC Group) */
         printf("readdListener to %s\n", vos_ipDotted(mdData->addr));
         
     }
@@ -256,7 +262,7 @@ PD_PKT_T    *mdData)
  *  @param[in]      pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
-void dbgOut (
+static void dbgOut (
              void        *pRefCon,
              TRDP_LOG_T  category,
              const CHAR8 *pTime,
@@ -284,7 +290,7 @@ void dbgOut (
  *  @param[in]      dataSize        pointer to data size
  *  @retval         none
  */
-void myPDcallBack (
+static void myPDcallBack (
     void                    *pRefCon,
     TRDP_APP_SESSION_T      appHandle,
     const TRDP_PD_INFO_T    *pMsg,
@@ -329,7 +335,7 @@ void myPDcallBack (
  *  @param[in]      dataSize        pointer to data size
  *  @retval         none
  */
-void myMDcallBack (
+static void myMDcallBack (
                    void                    *pRefCon,
                    TRDP_APP_SESSION_T      appHandle,
                    const TRDP_MD_INFO_T    *pMsg,
@@ -365,7 +371,7 @@ void myMDcallBack (
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
 /**********************************************************************************************************************/
-void usage (const char *appName)
+static void usage (const char *appName)
 {
     printf("Usage of %s\n", appName);
     printf("This tool sends and receives PD & MD messages with a simulated inauguration.\n"
@@ -419,15 +425,15 @@ void usage (const char *appName)
 int main (int argc, char * *argv)
 {
     TRDP_ERR_T              err;
-    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+    TRDP_PD_CONFIG_T        pdConfiguration = {myPDcallBack, NULL, {0, 0, 0}, TRDP_FLAGS_CALLBACK,
                                                 10000000, TRDP_TO_SET_TO_ZERO, 0};
-    TRDP_MD_CONFIG_T        mdConfiguration = {myMDcallBack, NULL, {0, 0}, TRDP_FLAGS_CALLBACK,
+    TRDP_MD_CONFIG_T        mdConfiguration = {myMDcallBack, NULL, {0, 0, 0}, TRDP_FLAGS_CALLBACK,
                                                 10000000, 10000000, 10000000, 10000000, 0, 0, 5};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
-    int     rv = 0;
-    int     ip[4];
-    int     ch;
+    int             rv = 0;
+    unsigned int    ip[4];
+    int             ch;
 
     /****** Parsing the command line arguments */
     if (argc <= 1)
@@ -623,12 +629,12 @@ int main (int argc, char * *argv)
             //printf("other descriptors were ready (rv = %d)\n", rv);
             if (FD_ISSET(STDIN_FILENO, &rfds))
             {
-                int nread;
+                ssize_t nread;
                 UINT32  addr;
                 UINT8 buffer[256];
                 int i;
                 ioctl(STDIN_FILENO,FIONREAD, &nread);
-                nread = read(STDIN_FILENO, buffer, nread);
+                nread = read(STDIN_FILENO, buffer, (size_t) nread);
                 buffer[nread] = 0;
                 for (i = 0; buffer[i] != 0; i++)
                 {

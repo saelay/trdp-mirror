@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-05-08: Doxygen comment errors
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -282,5 +283,20 @@ BOOL8 trdp_validTopoCounters (
     UINT32  opTrnTopoCnt,
     UINT32  etbTopoCntFilter,
     UINT32  opTrnTopoCntFilter);
+
+/**********************************************************************************************************************/
+/** Check if received IP is in addressing range of listener's IPs.
+ *
+ *  @param[in]      receivedSrcIP           Received IP address
+ *  @param[in]      listenedSourceIPlow     Lower bound IP
+ *  @param[in]      listenedSourceIPhigh    Upper bound IP
+ *
+ *  @retval         FALSE - not in addressing range
+ *  @retval         TRUE  - received IP is in addressing range of listener
+ */
+
+BOOL8 trdp_isInIPrange(TRDP_IP_ADDR_T   receivedSrcIP,
+                       TRDP_IP_ADDR_T   listenedSourceIPlow,
+                       TRDP_IP_ADDR_T   listenedSourceIPhigh);
 
 #endif
