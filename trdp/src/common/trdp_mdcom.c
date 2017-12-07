@@ -2393,11 +2393,10 @@ TRDP_ERR_T  trdp_mdSend (
                                     {
                                         trdp_mdInvokeCallback(iterMD_find, appHandle, TRDP_TIMEOUT_ERR);
                                     }
+                                    /* Close the socket */
+                                    appHandle->iface[iterMD->socketIdx].tcpParams.morituri = TRUE;
                                 }
                             }
-
-                            /* Close the socket */
-                            appHandle->iface[iterMD->socketIdx].tcpParams.morituri = TRUE;
                         }
                     }
                 }
