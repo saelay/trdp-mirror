@@ -41,7 +41,7 @@ extern "C" {
 * The FCS-32 generator polynomial:
 *  x**0 + x**1 + x**2 + x**4 + x**5 + x**7 + x**8 + x**10 + x**11 + x**12 + x**16 + x**22 + x**23 + x**26 + x**32.
 */
-static const guint32 fcstab[256] =
+static const quint32 fcstab[256] =
 {
       0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
       0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -109,9 +109,9 @@ static const guint32 fcstab[256] =
       0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs)
+quint32 trdp_fcs32(const quint8 buf[], quint32 len, quint32 fcs)
 {
-    guint32 i;
+    quint32 i;
 
     for (i=0; i < len; i++)
     {
@@ -121,30 +121,30 @@ guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs)
 }
 
 
-guint8 trdp_dissect_width(guint32 type)
+quint8 trdp_dissect_width(quint32 type)
 {
 	switch(type)
 		{
-		case 1: //BOOL8	    1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
-		case 2: //CHAR8		2	char, can be used also as UTF8
-		case 4: //INT8		4	Signed integer, 8 bit
-		case 8: //UINT8		8	Unsigned integer, 8 bit
+        case TRDP_BOOL8:      //BOOL8	    1	=UINT8, 1 bit relevant (equal to zero -> false, not equal to zero -> true)
+        case TRDP_CHAR8:      //CHAR8		2	char, can be used also as UTF8
+        case TRDP_INT8:       //INT8		4	Signed integer, 8 bit
+        case TRDP_UINT8:      //UINT8		8	Unsigned integer, 8 bit
 			return 1;
-		case 3: //UTF16		3	Unicode UTF-16 character
-		case 5: //INT16		5	Signed integer, 16 bit
-		case 9: //UINT16		9	Unsigned integer, 16 bit
+        case TRDP_UTF16:      //UTF16		3	Unicode UTF-16 character
+        case TRDP_INT16:      //INT16		5	Signed integer, 16 bit
+        case TRDP_UINT16:     //UINT16		9	Unsigned integer, 16 bit
 			return 2;
-		case 6: //INT32		6	Signed integer, 32 bit
-		case 10: //UINT32		10	Unsigned integer, 32 bit
-		case 12: //REAL32		12	Floating point real, 32 bit
-		case 14: //TIMEDATE32	15	32 bit UNIX time
+        case TRDP_INT32:      //INT32		6	Signed integer, 32 bit
+        case TRDP_UINT32:     //UINT32		10	Unsigned integer, 32 bit
+        case TRDP_REAL32:     //REAL32		12	Floating point real, 32 bit
+        case TRDP_TIMEDATE32: //TIMEDATE32	15	32 bit UNIX time
 			return 4;
-		case 7: //INT64		7	Signed integer, 64 bit
-		case 11: //UINT64		11	Unsigned integer, 64 bit
-		case 13: //REAL64		13	Floating point real, 64 bit
-		case 16: //TIMEDATE64	17	32 bit seconds and 32 bit microseconds
+        case TRDP_INT64:      //INT64		7	Signed integer, 64 bit
+        case TRDP_UINT64:     //UINT64		11	Unsigned integer, 64 bit
+        case TRDP_REAL64:     //REAL64		13	Floating point real, 64 bit
+        case TRDP_TIMEDATE64: //TIMEDATE64	17	32 bit seconds and 32 bit microseconds
 			return 8;
-		case 15: //TIMEDATE48	16	48 bit TCN time (32 bit seconds and 16 bit ticks)
+        case TRDP_TIMEDATE48: //TIMEDATE48	16	48 bit TCN time (32 bit seconds and 16 bit ticks)
 			return 6;
 		default:
 			return 0;

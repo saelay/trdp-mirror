@@ -18,20 +18,34 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
+cmake_minimum_required(VERSION 2.8.3)
+
+add_definitions(-DPRINT_DEBUG)
 
 # Debug Output activate:
 set ( CMAKE_VERBOSE_MAKEFILE true )
 
+# Find the QtWidgets library
+find_package(Qt5Xml)
+
+# Add the include directories for the Qt 5 Widgets module to
+# the compile lines.
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+
 include(WiresharkPlugin)
 
+# Add compiler flags for building executables (-fPIE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+
 # Plugin name and version info (major minor micro extra)
-set_module_info(trdp_spy 1 3 0 0)
+set_module_info(trdp_spy 1 3 0 1)
 
 #find_package(Qt5Xml)
 
 set(DISSECTOR_SRC
     packet-trdp_spy.cpp
-	trdp_env.cpp
+    trdp_env.cpp
+    trdpConfigHandler.cpp
 )
 
 set(PLUGIN_FILES
@@ -60,7 +74,7 @@ register_dissector_files(plugin.c
 
 add_plugin_library(trdp_spy)
 
-#target_link_libraries(trdp_spy epan Qt5::Xml)
+target_link_libraries(trdp_spy epan Qt5::Xml)
 
 install(TARGETS trdp_spy
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/@CPACK_PACKAGE_NAME@/plugins/${CPACK_PACKAGE_VERSION} NAMELINK_SKIP

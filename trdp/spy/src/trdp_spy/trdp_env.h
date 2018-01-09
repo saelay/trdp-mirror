@@ -26,8 +26,7 @@
 /*******************************************************************************
  * INCLUDES
  */
-#include <string.h>
-#include <glib.h>
+#include <QtGlobal>
 
 /*******************************************************************************
  * DEFINES
@@ -49,6 +48,8 @@
 #define TRDP_TIMEDATE32	14	/**< 32 bit UNIX time */
 #define TRDP_TIMEDATE48	15	/**< 48 bit TCN time (32 bit seconds and 16 bit ticks) */
 #define TRDP_TIMEDATE64	16	/**< 32 bit seconds and 32 bit microseconds */
+
+#define TRDP_STANDARDTYPE_MAX    TRDP_TIMEDATE64 /**< The last standard data type */
 
 #define TRDP_DEFAULT_UDPTCP_MD_PORT 17225   /*< Default port address for Message data (MD) communication */
 #define TRDP_DEFAULT_UDP_PD_PORT    17224   /*< Default port address for Process data (PD) communication */
@@ -101,9 +102,14 @@ extern "C" {
  * GLOBAL FUNCTIONS
  */
 
-guint32 trdp_fcs32(const guint8 buf[], guint32 len, guint32 fcs);
+quint32 trdp_fcs32(const quint8 buf[], quint32 len, quint32 fcs);
 
-guint8 trdp_dissect_width(guint32 type);
+/** Calculate the width in bytes for a given type
+ * @brief trdp_dissect_width
+ * @param type  the requested type, where the width shall be returned
+ * @return <code>0</code>, on unkown types
+ */
+quint8 trdp_dissect_width(quint32 type);
 
 
 #ifdef __cplusplus
