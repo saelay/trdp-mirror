@@ -14,7 +14,8 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  *
- * $Id:  $
+ * $Id: $
+ *      BL 2018-01-29: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *
  */ 
@@ -505,7 +506,7 @@ int main(int argc, char** argv)
                      &callFlagIN,
                      0,
                      0,
-                     TDRP_MD_INFINITE_TIME);
+                     TRDP_MD_INFINITE_TIME);
 
         if ((switchTopoDiffOnOff % 10) < 6 )
         {

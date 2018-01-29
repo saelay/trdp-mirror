@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2018-01-29: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-09: Ticket #174: Receiving fragmented TCP packets
@@ -783,8 +784,8 @@ static void trdp_mdSetSessionTimeout (
     if (NULL != pMDSession)
     {
         vos_getTime(&pMDSession->timeToGo);
-        if ((pMDSession->interval.tv_sec == TDRP_MD_INFINITE_TIME) &&
-            (pMDSession->interval.tv_usec == TDRP_MD_INFINITE_USEC_TIME))
+        if ((pMDSession->interval.tv_sec == TRDP_MD_INFINITE_TIME) &&
+            (pMDSession->interval.tv_usec == TRDP_MD_INFINITE_USEC_TIME))
         {
             /* bypass calculation in case of infinity desired from user */
             pMDSession->timeToGo.tv_sec     = pMDSession->interval.tv_sec;
@@ -1718,11 +1719,11 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         if ((vos_ntohl(pH->replyTimeout) == 0) && (vos_ntohs(pH->msgType) == TRDP_MSG_MR))
         {
             /* Timeout compliance with Table A.18 */
-            iterMD->interval.tv_sec     = TDRP_MD_INFINITE_TIME;
-            iterMD->interval.tv_usec    = TDRP_MD_INFINITE_USEC_TIME;
+            iterMD->interval.tv_sec     = TRDP_MD_INFINITE_TIME;
+            iterMD->interval.tv_usec    = TRDP_MD_INFINITE_USEC_TIME;
             /* Use extreme caution with infinite timeouts! */
-            iterMD->timeToGo.tv_sec     = TDRP_MD_INFINITE_TIME;
-            iterMD->timeToGo.tv_usec    = TDRP_MD_INFINITE_USEC_TIME;
+            iterMD->timeToGo.tv_sec     = TRDP_MD_INFINITE_TIME;
+            iterMD->timeToGo.tv_usec    = TRDP_MD_INFINITE_USEC_TIME;
             /* needs to be set this way to avoid wrap around */
         }
         else
@@ -3427,12 +3428,12 @@ TRDP_ERR_T trdp_mdCall (
         }
 
         /* This condition is used to deicriminate the infinite timeout for Mr */
-        if ((msgType == TRDP_MSG_MR) && (replyTimeout == TDRP_MD_INFINITE_TIME))
+        if ((msgType == TRDP_MSG_MR) && (replyTimeout == TRDP_MD_INFINITE_TIME))
         {
             /* add the infinity requirement from table A.18 */
-            pSenderElement->interval.tv_sec     = TDRP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
+            pSenderElement->interval.tv_sec     = TRDP_MD_INFINITE_TIME; /* let alone this setting gives a timeout way longer than
                                                                              a century */
-            pSenderElement->interval.tv_usec    = TDRP_MD_INFINITE_USEC_TIME; /* max upper limit for micro seconds below
+            pSenderElement->interval.tv_usec    = TRDP_MD_INFINITE_USEC_TIME; /* max upper limit for micro seconds below
                                                                                 1 second */
             timeoutWire = 0U; /* the table A.18 representation of infinity, only applicable for Mr! */
         }
