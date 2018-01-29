@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-01-29: Ticket #186 Potential SEGFAULT in case of PD timeout
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
@@ -777,21 +778,22 @@ void trdp_pdHandleTimeOuts (
             if (iterPD->pfCbFunction != NULL)
             {
                 TRDP_PD_INFO_T theMessage;
+                memset(&theMessage, 0, sizeof(TRDP_PD_INFO_T));
                 theMessage.comId        = iterPD->addr.comId;
                 theMessage.srcIpAddr    = iterPD->addr.srcIpAddr;
                 theMessage.destIpAddr   = iterPD->addr.destIpAddr;
-                theMessage.etbTopoCnt   = vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt);
-                theMessage.opTrnTopoCnt = vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt);
-                theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
-                theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
-                theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
-                theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
-                theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
                 theMessage.pUserRef     = iterPD->pUserRef;
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
-
                 if (iterPD->pFrame != NULL)
                 {
+                    theMessage.etbTopoCnt   = vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt);
+                    theMessage.opTrnTopoCnt = vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt);
+                    theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
+                    theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
+                    theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
+                    theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
+                    theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
+
                     iterPD->pfCbFunction(appHandle->pdDefault.pRefCon,
                                          appHandle,
                                          &theMessage,
