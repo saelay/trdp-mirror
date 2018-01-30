@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-01-30: Ticket #189 timeout-value not parsed in tau_xml
  *      BL 2017-06-08: Compiler warning (unused dbgPrint)
  *      BL 2017-05-08: Compiler warnings (static definitions)
  *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
@@ -1097,6 +1098,10 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                                         pPdConfig->flags    |= TRDP_FLAGS_FORCE_CB;
                                         pPdConfig->flags    &= (TRDP_FLAGS_T) ~TRDP_FLAGS_NONE;
                                     }
+                                }
+                                else if (vos_strnicmp(attribute, "timeout-value", MAX_TOK_LEN) == 0)
+                                {
+                                    pPdConfig->timeout = (UINT32) valueInt;
                                 }
                                 else if (vos_strnicmp(attribute, "port", MAX_TOK_LEN) == 0)
                                 {
