@@ -67,7 +67,7 @@ PD_RECEIVE_PACKET_T gStatusData = {
  */
 void    dbgOut (void *, TRDP_LOG_T, const  CHAR8 *, const  CHAR8 *, UINT16, const  CHAR8 *);
 void    usage (const char *);
-void    pdCallBack (void *, TRDP_APP_SESSION_T, const TRDP_PD_INFO_T *, UINT8 *, UINT32 dataSize);
+void    pdCallBack (void *, TRDP_APP_SESSION_T, const TRDP_PD_INFO_T *, UINT8 *, UINT32);
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -88,14 +88,14 @@ void dbgOut (
              UINT16      LineNumber,
              const CHAR8 *pMsgStr)
 {
-    const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
-
+    const char  *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
+    CHAR8       *pF = strrchr(pFile, VOS_DIR_SEP);
     if (category != VOS_LOG_DBG)
     {
         printf("%s %s %s:%d %s",
                pTime,
                catStr[category],
-               strrchr(pFile, VOS_DIR_SEP) + 1,
+               (pF == NULL)? "" : pF + 1,
                LineNumber,
                pMsgStr);
     }
@@ -204,7 +204,9 @@ void pdCallBack (
 }
 
 
+/**********************************************************************************************************************/
 /* Print a sensible usage message */
+/**********************************************************************************************************************/
 void usage (const char *appName)
 {
     printf("Usage of %s\n", appName);
@@ -267,7 +269,7 @@ int main (int argc, char * *argv)
     }
 
     /*    Init the library for callback operation    (PD only) */
-    if (tlc_init(dbgOut,                           /* actually printf    */
+    if (tlc_init(dbgOut,                            /* actually printf    */
                  NULL,
                  NULL                               /* Use heap memory    */
                  ) != TRDP_NO_ERR)
@@ -278,7 +280,7 @@ int main (int argc, char * *argv)
 
     /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&appHandle,
-                        ownIP, 0,                   /* == 0: use default interface  */
+                        ownIP, VOS_INADDR_ANY,      /* == 0: use default interface  */
                         NULL,                       /* no Marshalling                     */
                         &pdConfiguration, NULL,     /* system defaults for PD and MD      */
                         &processConfig) != TRDP_NO_ERR)
@@ -290,16 +292,17 @@ int main (int argc, char * *argv)
     /*    Subscribe to status PD        */
 
 
-    err = tlp_subscribe( appHandle,                 /*    our application identifier            */
-                         &subHandle,                /*    our subscription identifier           */
-                         NULL, NULL,                /*    userRef & callback function           */
-                         NTTS_STATUS_COMID,         /*    ComID                                 */
-                         0, 0,                      /*    topocounts: local consist only        */
-                         VOS_INADDR_ANY,            /*    Source to expect packets from         */
-                         vos_dottedIP(STATUS_IP_DEST),  /*   Default destination (or MC Group)  */
+    err = tlp_subscribe( appHandle,                 /*    our application identifier                            */
+                         &subHandle,                /*    our subscription identifier                           */
+                         NULL, NULL,                /*    userRef & callback function                           */
+                         NTTS_STATUS_COMID,         /*    ComID                                                 */
+                         0u, 0u,                    /*    topocounts: local consist only                        */
+                         //0x0a400b03, 0x0a400b04,          /*    Testing #190 Source to expect packets from    */
+                         VOS_INADDR_ANY, VOS_INADDR_ANY,    /*    Source to expect packets from                 */
+                         vos_dottedIP(STATUS_IP_DEST),      /*   Default destination (or MC Group)              */
                          TRDP_FLAGS_DEFAULT,
-                         NTTS_STATUS_TIMEOUT,       /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO);      /*  delete invalid data    on timeout       */
+                         NTTS_STATUS_TIMEOUT,       /*    Time out in us                                        */
+                         TRDP_TO_SET_TO_ZERO);      /*  delete invalid data    on timeout                       */
 
     if (err != TRDP_NO_ERR)
     {
