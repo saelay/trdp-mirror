@@ -745,8 +745,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     {
         int err = WSAGetLastError();
 
-        err = err; /* for lint */
-        vos_printLog(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n");
+        vos_printLog(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n", err);
         return VOS_PARAM_ERR;
     }
     return VOS_NO_ERR;
