@@ -621,7 +621,7 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
                       userAction, ttiPDCallback,
                       TRDP_TTDB_OP_TRN_DIR_STAT_INF_COMID,
                       0u, 0u,
-                      VOS_INADDR_ANY,
+                      VOS_INADDR_ANY, VOS_INADDR_ANY,
                       vos_dottedIP(TTDB_STATUS_DEST_IP),
                       (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB),
                       TTDB_STATUS_TO * 1000u,

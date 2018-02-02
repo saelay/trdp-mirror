@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-11-15: Ticket #175 PD: Handling of sequence counter
@@ -360,10 +361,20 @@ PD_ELE_T *trdp_queueFindSubAddr (
     for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
     {
         /*  We match if src/dst/mc address is zero or matches */
-        if ((iterPD->addr.comId == addr->comId)
-            && ((iterPD->addr.srcIpAddr == 0) || (iterPD->addr.srcIpAddr == addr->srcIpAddr)))
+        if (iterPD->addr.comId == addr->comId)
         {
-            return iterPD;
+            if ((iterPD->addr.srcIpAddr == VOS_INADDR_ANY) || (iterPD->addr.srcIpAddr == addr->srcIpAddr))
+            {
+                return iterPD;
+            }
+            /* Check for IP range */
+            if (iterPD->addr.srcIpAddr2 != VOS_INADDR_ANY)
+            {
+                if ((addr->srcIpAddr >= iterPD->addr.srcIpAddr) &&
+                    (addr->srcIpAddr <= iterPD->addr.srcIpAddr2))
+                return iterPD;
+            }
+
         }
     }
     return NULL;
@@ -1121,9 +1132,9 @@ UINT32  trdp_getSeqCnt (
     }
 
     /*    For process data look at the PD send queue only    */
-    if (TRDP_MSG_PD == msgType ||
-        TRDP_MSG_PP == msgType ||
-        TRDP_MSG_PR == msgType)
+    if ((TRDP_MSG_PD == msgType) ||
+        (TRDP_MSG_PP == msgType) ||
+        (TRDP_MSG_PR == msgType))
     {
         /*    Loop thru all sessions    */
         while (pSession)
@@ -1131,8 +1142,8 @@ UINT32  trdp_getSeqCnt (
             pSendElement = pSession->pSndQueue;
             while (pSendElement)
             {
-                if (pSendElement->addr.comId == comId &&
-                    (srcIpAddr == 0 || pSendElement->addr.srcIpAddr != srcIpAddr))
+                if ((pSendElement->addr.comId == comId) &&
+                    ((srcIpAddr == 0) || (pSendElement->addr.srcIpAddr != srcIpAddr)))
                 {
                     return pSendElement->curSeqCnt;
                 }
@@ -1171,8 +1182,8 @@ void trdp_resetSequenceCounter (
     /* Loop over entries */
     for (l_index = 0; l_index < pElement->pSeqCntList->curNoOfEntries; ++l_index)
     {
-        if (srcIP == pElement->pSeqCntList->seq[l_index].srcIpAddr &&
-            msgType == pElement->pSeqCntList->seq[l_index].msgType)
+        if ((srcIP == pElement->pSeqCntList->seq[l_index].srcIpAddr) &&
+            (msgType == pElement->pSeqCntList->seq[l_index].msgType))
         {
             pElement->pSeqCntList->seq[l_index].lastSeqCnt = 0;
         }
@@ -1225,12 +1236,12 @@ int trdp_checkSequenceCounter (
     /* Loop over entries */
     for (l_index = 0; l_index < pElement->pSeqCntList->curNoOfEntries; ++l_index)
     {
-        if (srcIP == pElement->pSeqCntList->seq[l_index].srcIpAddr &&
-            msgType == pElement->pSeqCntList->seq[l_index].msgType)
+        if ((srcIP == pElement->pSeqCntList->seq[l_index].srcIpAddr) &&
+            (msgType == pElement->pSeqCntList->seq[l_index].msgType))
         {
             /*        Is this packet a duplicate?    */
-            if (pElement->pSeqCntList->seq[l_index].lastSeqCnt == 0 ||    /* first time after timeout */
-                sequenceCounter > pElement->pSeqCntList->seq[l_index].lastSeqCnt)
+            if ((pElement->pSeqCntList->seq[l_index].lastSeqCnt == 0) ||    /* first time after timeout */
+                (sequenceCounter > pElement->pSeqCntList->seq[l_index].lastSeqCnt))
             {
                 /*
                  vos_printLog(VOS_LOG_DBG,

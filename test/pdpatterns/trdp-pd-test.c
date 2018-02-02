@@ -370,6 +370,7 @@ static void setup_ports()
                 0,                  /* topo counter     */
                 0,
                 p->src,             /* source address   */
+                VOS_INADDR_ANY,
                 p->dst,             /* destination address    */
                 TRDP_FLAGS_NONE,    /* No flags set     */
                 p->timeout,             /* timeout [usec]   */

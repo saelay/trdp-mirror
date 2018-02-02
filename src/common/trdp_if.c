@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
@@ -426,7 +427,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                                 TRDP_STATISTICS_PULL_COMID, /*    ComID                         */
                                 0u,                     /*    etbtopocount: local consist only  */
                                 0u,                     /*    optrntopocount                    */
-                                0u,                     /*    Source IP filter                  */
+                                0u, 0u,                 /*    Source IP filters                  */
                                 0u,                     /*    Default destination (or MC Group) */
                                 TRDP_FLAGS_NONE,        /*    packet flags                      */
                                 TRDP_TIMER_FOREVER,     /*    Time out in us                    */
@@ -1997,7 +1998,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      comId               comId of packet to receive
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr           IP for source filtering, set 0 if not used
+ *  @param[in]      srcIpAddr1          Source IP address, lower address in case of address range, set to 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set to 0 if not used
  *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
  *  @param[in]      destIpAddr          IP address to join
@@ -2017,7 +2019,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     UINT32              comId,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
-    TRDP_IP_ADDR_T      srcIpAddr,
+    TRDP_IP_ADDR_T      srcIpAddr1,
+    TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      destIpAddr,
     TRDP_FLAGS_T        pktFlags,
     UINT32              timeout,
@@ -2056,7 +2059,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
     /*  Create an addressing item   */
     subHandle.comId         = comId;
-    subHandle.srcIpAddr     = srcIpAddr;
+    subHandle.srcIpAddr     = srcIpAddr1;
+    subHandle.srcIpAddr2    = srcIpAddr2;
     subHandle.destIpAddr    = destIpAddr;
     subHandle.opTrnTopoCnt  = 0u;            /* Do not compare topocounts  */
     subHandle.etbTopoCnt    = 0u;
@@ -2134,7 +2138,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     }
 
                     newPD->addr.comId       = comId;
-                    newPD->addr.srcIpAddr   = srcIpAddr;
+                    newPD->addr.srcIpAddr   = srcIpAddr1;
+                    newPD->addr.srcIpAddr2  = srcIpAddr2;
                     newPD->addr.destIpAddr  = destIpAddr;
                     newPD->interval.tv_sec  = timeout / 1000000u;
                     newPD->interval.tv_usec = timeout % 1000000u;
@@ -2256,7 +2261,8 @@ EXT_DECL TRDP_ERR_T tlp_unsubscribe (
  *  @param[in]      subHandle           handle for this subscription
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr           IP for source filtering, set 0 if not used
+ *  @param[in]      srcIpAddr1          Source IP address, lower address in case of address range, set to 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set to 0 if not used
  *  @param[in]      destIpAddr          IP address to join
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -2270,7 +2276,8 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
     TRDP_SUB_T          subHandle,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
-    TRDP_IP_ADDR_T      srcIpAddr,
+    TRDP_IP_ADDR_T      srcIpAddr1,
+    TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      destIpAddr)
 {
     TRDP_ERR_T ret = TRDP_NO_ERR;
@@ -2294,7 +2301,8 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
     }
 
     /*  Change the addressing item   */
-    subHandle->addr.srcIpAddr   = srcIpAddr;
+    subHandle->addr.srcIpAddr   = srcIpAddr1;
+    subHandle->addr.srcIpAddr2   = srcIpAddr2;
     subHandle->addr.destIpAddr  = destIpAddr;
 
     subHandle->addr.etbTopoCnt      = etbTopoCnt;

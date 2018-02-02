@@ -341,7 +341,8 @@ int main (int argc, char * *argv)
                             gSubPackets[i].comID,       /*    ComID                                */
                             0,                          /*    topocount: local consist only        */
                             0,
-                            0,                          /*    Source to expect packets from        */
+                            VOS_INADDR_ANY,             /*    Source to expect packets from        */
+                            VOS_INADDR_ANY,
                             gSubPackets[i].addr,        /*    Default destination    (or MC Group) */
                             TRDP_FLAGS_CALLBACK,        /*    packet flags                         */
                             gSubPackets[i].time,        /*    Time out in us                       */

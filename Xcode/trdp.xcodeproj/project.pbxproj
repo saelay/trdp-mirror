@@ -115,6 +115,8 @@
 		08A327C81E51FE6800B03846 /* api_test.c in Sources */ = {isa = PBXBuildFile; fileRef = 08A327B91E51FDD400B03846 /* api_test.c */; };
 		08A53DAE1E5DAA4700CCCBC8 /* libtrdp64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73591F971B986C7900B758F0 /* libtrdp64.a */; };
 		08A53DB31E5DAA6400CCCBC8 /* trdp-xmlpd-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7366AC7316B68C920068A893 /* trdp-xmlpd-test.c */; };
+		08BFF29620247236005E2AB8 /* libtrdp64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73591F971B986C7900B758F0 /* libtrdp64.a */; };
+		08BFF29C2024759D005E2AB8 /* sourceFiltering.c in Sources */ = {isa = PBXBuildFile; fileRef = 08BFF29B2024759D005E2AB8 /* sourceFiltering.c */; };
 		08C44FE21F2231B400AB84EF /* tau_dnr_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 08C44FE11F2231B300AB84EF /* tau_dnr_types.h */; };
 		08C44FE31F2231B400AB84EF /* tau_dnr_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 08C44FE11F2231B300AB84EF /* tau_dnr_types.h */; };
 		08CE20721649613C0038151B /* trdp_pdcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F35150777B00046E0AC /* trdp_pdcom.h */; };
@@ -454,6 +456,13 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = "trdp Posix";
 		};
+		08BFF2942024722E005E2AB8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73591F6F1B986C7900B758F0;
+			remoteInfo = trdp64Posix;
+		};
 		730C15BE1B95A5480075D7F3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -751,6 +760,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		08BFF28B20247203005E2AB8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		08D51C11200FB6F8004319B6 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -850,6 +868,10 @@
 		08A327BB1E51FDD400B03846 /* test6.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = test6.xml; sourceTree = "<group>"; };
 		08A327C71E51FE2700B03846 /* test_local_loop */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_local_loop; sourceTree = BUILT_PRODUCTS_DIR; };
 		08A53DB21E5DAA4700CCCBC8 /* test_pdxml */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_pdxml; sourceTree = BUILT_PRODUCTS_DIR; };
+		08BFF28D20247203005E2AB8 /* sourceFiltering */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sourceFiltering; sourceTree = BUILT_PRODUCTS_DIR; };
+		08BFF28F20247203005E2AB8 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		08BFF29A2024759D005E2AB8 /* NTT_CommonHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NTT_CommonHeader.h; sourceTree = "<group>"; };
+		08BFF29B2024759D005E2AB8 /* sourceFiltering.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sourceFiltering.c; sourceTree = "<group>"; };
 		08C44FE11F2231B300AB84EF /* tau_dnr_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_dnr_types.h; sourceTree = "<group>"; };
 		08CE2171164A6E130038151B /* trdp_reserved.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trdp_reserved.h; path = marshalling/trdp_reserved.h; sourceTree = "<group>"; };
 		08CE2172164A6E130038151B /* trdp_reserved.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trdp_reserved.c; path = marshalling/trdp_reserved.c; sourceTree = "<group>"; };
@@ -1019,6 +1041,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				08A53DAE1E5DAA4700CCCBC8 /* libtrdp64.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08BFF28A20247203005E2AB8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08BFF29620247236005E2AB8 /* libtrdp64.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1286,6 +1316,23 @@
 			path = localtest;
 			sourceTree = "<group>";
 		};
+		08BFF28E20247203005E2AB8 /* sourceFiltering */ = {
+			isa = PBXGroup;
+			children = (
+				08BFF28F20247203005E2AB8 /* main.c */,
+			);
+			path = sourceFiltering;
+			sourceTree = "<group>";
+		};
+		08BFF2992024759D005E2AB8 /* sourceFilter */ = {
+			isa = PBXGroup;
+			children = (
+				08BFF29A2024759D005E2AB8 /* NTT_CommonHeader.h */,
+				08BFF29B2024759D005E2AB8 /* sourceFiltering.c */,
+			);
+			path = sourceFilter;
+			sourceTree = "<group>";
+		};
 		08FB7794FE84155DC02AAC07 /* trdp */ = {
 			isa = PBXGroup;
 			children = (
@@ -1311,6 +1358,7 @@
 				08594B081B6FB3E80066EA06 /* example */,
 				08594B101B70D6EE0066EA06 /* resources */,
 				08594B3A1B70EA3F0066EA06 /* VisualC */,
+				08BFF28E20247203005E2AB8 /* sourceFiltering */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				73D452731D90301F00CEF20D /* Frameworks */,
 			);
@@ -1349,6 +1397,7 @@
 				08A327C71E51FE2700B03846 /* test_local_loop */,
 				08A53DB21E5DAA4700CCCBC8 /* test_pdxml */,
 				08D51C13200FB6F8004319B6 /* libtrdp64iOS.a */,
+				08BFF28D20247203005E2AB8 /* sourceFiltering */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1497,6 +1546,7 @@
 			children = (
 				08D9D5D51EDDA32C00EE2FA0 /* TAUL_PD */,
 				08014D1D16483FC50065AADD /* SenderDemo */,
+				08BFF2992024759D005E2AB8 /* sourceFilter */,
 				738220021508E3710046E0AC /* echoPolling.c */,
 				7381BE511643FAC4003BC539 /* echoCallback.c */,
 				7366AC6116B68C100068A893 /* example.xml */,
@@ -1790,6 +1840,24 @@
 			name = test_pdxml;
 			productName = pdpull;
 			productReference = 08A53DB21E5DAA4700CCCBC8 /* test_pdxml */;
+			productType = "com.apple.product-type.tool";
+		};
+		08BFF28C20247203005E2AB8 /* sourceFiltering */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 08BFF29320247203005E2AB8 /* Build configuration list for PBXNativeTarget "sourceFiltering" */;
+			buildPhases = (
+				08BFF28920247203005E2AB8 /* Sources */,
+				08BFF28A20247203005E2AB8 /* Frameworks */,
+				08BFF28B20247203005E2AB8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				08BFF2952024722E005E2AB8 /* PBXTargetDependency */,
+			);
+			name = sourceFiltering;
+			productName = sourceFiltering;
+			productReference = 08BFF28D20247203005E2AB8 /* sourceFiltering */;
 			productType = "com.apple.product-type.tool";
 		};
 		08D51C12200FB6F8004319B6 /* trdp iOS */ = {
@@ -2236,6 +2304,10 @@
 			attributes = {
 				LastUpgradeCheck = 0900;
 				TargetAttributes = {
+					08BFF28C20247203005E2AB8 = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
 					08CBAF7A1E842A6D00809853 = {
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
@@ -2293,6 +2365,7 @@
 				08A53DA71E5DAA4700CCCBC8 /* test_pdxml */,
 				08CBAF7A1E842A6D00809853 /* Makefile-build */,
 				088A7A281FB20479008D95EF /* All copy */,
+				08BFF28C20247203005E2AB8 /* sourceFiltering */,
 			);
 		};
 /* End PBXProject section */
@@ -2354,6 +2427,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				08A53DB31E5DAA6400CCCBC8 /* trdp-xmlpd-test.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08BFF28920247203005E2AB8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08BFF29C2024759D005E2AB8 /* sourceFiltering.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2756,6 +2837,11 @@
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
 			targetProxy = 08A53DA91E5DAA4700CCCBC8 /* PBXContainerItemProxy */;
 		};
+		08BFF2952024722E005E2AB8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73591F6F1B986C7900B758F0 /* trdp64Posix */;
+			targetProxy = 08BFF2942024722E005E2AB8 /* PBXContainerItemProxy */;
+		};
 		730C15BD1B95A5480075D7F3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D2AAC045055464E500DB518D /* trdp Posix */;
@@ -3142,6 +3228,70 @@
 			};
 			name = Release;
 		};
+		08BFF29120247203005E2AB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		08BFF29220247203005E2AB8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		08CBAF7C1E842A6D00809853 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3330,7 +3480,10 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "-DL_ENDIAN";
+				OTHER_CFLAGS = (
+					"-DL_ENDIAN",
+					"-DPOSIX",
+				);
 				SDKROOT = macosx;
 				SYMROOT = output/osx_x86/dbg;
 				USER_HEADER_SEARCH_PATHS = "";
@@ -3377,7 +3530,10 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "-DL_ENDIAN";
+				OTHER_CFLAGS = (
+					"-DL_ENDIAN",
+					"-DPOSIX",
+				);
 				SDKROOT = macosx;
 				SYMROOT = output/osx_x86/rls;
 				USER_HEADER_SEARCH_PATHS = "";
@@ -4303,6 +4459,15 @@
 			buildConfigurations = (
 				08A53DB01E5DAA4700CCCBC8 /* Debug */,
 				08A53DB11E5DAA4700CCCBC8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		08BFF29320247203005E2AB8 /* Build configuration list for PBXNativeTarget "sourceFiltering" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08BFF29120247203005E2AB8 /* Debug */,
+				08BFF29220247203005E2AB8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
