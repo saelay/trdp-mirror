@@ -304,6 +304,11 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
                 const CHAR8 *pFile, UINT16 line, const CHAR8 *pMsgStr)
 {
     static const char *cat[] = { "ERR", "WAR", "INF", "DBG" };
+
+    if (category == VOS_LOG_DBG)
+    {
+        return;
+    }
 #ifdef _WIN32
     if (pLogFile == NULL)
     {

@@ -1,10 +1,10 @@
 /**********************************************************************************************************************/
 /**
- * @file            echoSelect.c
+ * @file            echoCallback.c
  *
  * @brief           Demo echoing application for TRDP
  *
- * @details         Receive and send process data, single threaded using select() and heap memory
+ * @details         Receive and send process data, single threaded using callback and heap memory
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -12,10 +12,11 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
+ *          Copyright NewTec GmbH, 2018. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2018-02-02: Example renamed: cmdLineSelect -> echoCallback
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
