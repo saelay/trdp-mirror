@@ -303,9 +303,9 @@ int main (int argc, char * *argv)
                             &gSubPackets[i].subHandle,  /*    our subscription identifier          */
                             NULL, NULL,
                             gSubPackets[i].comID,       /*    ComID                                */
-                            0u,                          /*    topocount: local consist only        */
+                            0u,                         /*    topocount: local consist only        */
                             0u,
-                            0u,                          /*    Source to expect packets from        */
+                            VOS_INADDR_ANY, VOS_INADDR_ANY,  /*    Source to expect packets from   */
                             gSubPackets[i].addr,        /*    Default destination    (or MC Group) */
                             TRDP_FLAGS_CALLBACK,        /*    packet flags                         */
                             gSubPackets[i].time,        /*    Time out in us                       */

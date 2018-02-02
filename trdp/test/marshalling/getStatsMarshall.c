@@ -470,7 +470,7 @@ int main (int argc, char * *argv)
                          TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                 */
                          0,                             /*    topocount: local consist only         */
                          0,
-                         0,                             /*    Source IP filter                      */
+                         VOS_INADDR_ANY,VOS_INADDR_ANY, /*    Source IP filter                      */
                          replyIP,                       /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_DEFAULT,
                          PD_COMID1_TIMEOUT,             /*    Time out in us                        */

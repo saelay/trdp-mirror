@@ -340,7 +340,7 @@ void pd_sub (
             0,                                          /*	topocount: local consist only		*/
             0,
             vos_dottedIP(recPacket->srcIP),             /*	Source IP filter 1					*/
-            0,
+            VOS_INADDR_ANY, 0,
             0x0,                                        /*	Default destination	(or MC Group)   */
             recPacket->timeout,                         /*	Time out in us						*/
             TRDP_TO_SET_TO_ZERO);                       /*  delete invalid data	on timeout      */

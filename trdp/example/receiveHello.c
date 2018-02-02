@@ -212,11 +212,11 @@ int main (int argc, char *argv[])
                          comId,                     /*    ComID                                 */
                          0,                         /*    etbTopoCnt: local consist only        */
                          0,                         /*    opTopoCnt                             */
-                         0,                         /*    Source IP filter                      */
+                         VOS_INADDR_ANY, VOS_INADDR_ANY,    /*    Source IP filter              */
                          dstIP,                     /*    Default destination    (or MC Group)  */
-                         0,                         /*    TRDP flags                            */
+                         TRDP_FLAGS_DEFAULT,        /*    TRDP flags                            */
                          PD_COMID_CYCLE * 3,        /*    Time out in us                        */
-                         TRDP_TO_SET_TO_ZERO       /*    delete invalid data on timeout        */
+                         TRDP_TO_SET_TO_ZERO        /*    delete invalid data on timeout        */
                          );
 
     if (err != TRDP_NO_ERR)

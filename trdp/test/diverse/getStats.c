@@ -353,15 +353,15 @@ int main (int argc, char * *argv)
     err = tlp_subscribe( appHandle,                     /*    our application identifier             */
                          &subHandle,                    /*    our subscription identifier            */
                          NULL,                          /*    user reference                         */
-                         myPDcallBack,                          /*    callback function                      */
+                         myPDcallBack,                  /*    callback function                      */
                          TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                  */
-                         0,                             /*    topocount: local consist only          */
-                         0,
-                         0,                             /*    Source IP filter                       */
+                         0, 0,                          /*    topocount: local consist only          */
+                         VOS_INADDR_ANY,                /*    source IP 1                           */
+                         VOS_INADDR_ANY,                /*    Source IP filter                       */
                          replyIP,                       /*    Default destination    (or MC Group)   */
                          TRDP_FLAGS_DEFAULT,            /*    packet flags */
                          PD_COMID1_TIMEOUT,             /*    Time out in us                         */
-                         TRDP_TO_SET_TO_ZERO);           /*    delete invalid data    on timeout      */
+                         TRDP_TO_SET_TO_ZERO);          /*    delete invalid data    on timeout      */
 
     if (err != TRDP_NO_ERR)
     {

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
@@ -460,8 +461,8 @@ EXT_DECL TRDP_ERR_T tlp_request (
  *  @param[in]      comId               comId of packet to receive
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr           IP for source filtering, set 0 if not used
- *                                      Used e.g. for source filtering of redundant devices.
+ *  @param[in]      srcIpAddr1          Source IP address, lower address in case of address range, set to 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set to 0 if not used
  *  @param[in]      destIpAddr          IP address to join
  *  @param[in]      pktFlags            OPTION:
  *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
@@ -481,7 +482,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     UINT32              comId,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
-    TRDP_IP_ADDR_T      srcIpAddr,
+    TRDP_IP_ADDR_T      srcIpAddr1,
+    TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      destIpAddr,
     TRDP_FLAGS_T        pktFlags,
     UINT32              timeout,
@@ -496,7 +498,8 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
  *  @param[in]      subHandle           handle for this subscription
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr           IP for source filtering, set 0 if not used
+ *  @param[in]      srcIpAddr1          IP for source filtering, set 0 if not used
+ *  @param[in]      srcIpAddr2          IP for source filtering range, set 0 if not used
  *  @param[in]      destIpAddr          IP address to join
  *
  *  @retval         TRDP_NO_ERR         no error
@@ -509,7 +512,8 @@ EXT_DECL TRDP_ERR_T tlp_resubscribe (
     TRDP_SUB_T          subHandle,
     UINT32              etbTopoCnt,
     UINT32              opTrnTopoCnt,
-    TRDP_IP_ADDR_T      srcIpAddr,
+    TRDP_IP_ADDR_T      srcIpAddr1,
+    TRDP_IP_ADDR_T      srcIpAddr2,
     TRDP_IP_ADDR_T      destIpAddr);
 
 

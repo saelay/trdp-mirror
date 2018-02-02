@@ -303,7 +303,7 @@ int main (int argc, char * *argv)
                         gComID,                        /*    ComID                                  */
                         0u,                            /*    topocounts: local consist only         */
                         0u,
-                        VOS_INADDR_ANY,                /*    Source IP filter                       */
+                        VOS_INADDR_ANY, VOS_INADDR_ANY, /*    Source IP filter                       */
                         replyIP,                       /*    Default destination    (or MC Group)   */
                         TRDP_FLAGS_DEFAULT,            /*    packet flags */
                         0u,                            /*    Time out in us                         */

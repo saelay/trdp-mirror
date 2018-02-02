@@ -151,8 +151,9 @@ int main (int argc, char * *argv)
                          0,                         /*    etbTopocount: local consist only     */
                          0,                         /*    opTopocount: local consist only      */
                          PD_COMID1_SRC_IP,          /*    Source IP filter                     */
-                         0,                         /*    source IP 1                          */
-                         0,                         /*    Default destination IP (or MC Group) */
+                         VOS_INADDR_ANY,            /*    source IP 1                          */
+                         VOS_INADDR_ANY,            /*    Default destination IP (or MC Group) */
+                         TRDP_FLAGS_DEFAULT,        /*    Flags                                */
                          PD_COMID1_TIMEOUT,         /*    Time out in us                       */
                          TRDP_TO_SET_TO_ZERO);      /*    delete invalid data on timeout       */
 

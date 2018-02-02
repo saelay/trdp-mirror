@@ -288,11 +288,12 @@ int main (int argc, char * *argv)
                          comId_In,                  /*    ComID                                */
                          0,                         /*    topocount: local consist only        */
                          0,
-                         destIP,                    /*  Source to expect packets from          */
-                         0,
-                         0,                         /*    Default destination    (or MC Group) */
+                         VOS_INADDR_ANY,            /*    source IP 1                          */
+                         VOS_INADDR_ANY,            /*     */
+                         destIP,                    /*    Default destination IP (or MC Group) */
+                         TRDP_FLAGS_DEFAULT,        /*   */
                          PD_COMID1_TIMEOUT,         /*    Time out in us                       */
-                         TRDP_TO_SET_TO_ZERO);      /*  delete invalid data    on timeout      */
+                         TRDP_TO_SET_TO_ZERO);      /*    delete invalid data    on timeout    */
 
     if (err != TRDP_NO_ERR)
     {
