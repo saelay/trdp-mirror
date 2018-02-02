@@ -1182,14 +1182,14 @@ int main (int argc, char *argv[])
 	                         &subHandleNet1ComId1,      /* our subscription identifier */
 	                         &OFFSET_ADDRESS3, NULL     /* user referece value = offsetAddress */
 	                         PD_COMID1,                 /* ComID */
-	                         0,                         /* topocount: local consist only */
+	                         0, 0,                      /* topocount: local consist only */
 	                         PD_COMID1_SUB_SRC_IP1,     /* Source IP filter */
 	                         0,                         /* Source IP filter2 : no used */
 	                         PD_COMID1_SUB_DST_IP1,     /* Default destination	(or MC Group) */
 	                         TRDP_FLAGS_DEFAULT,        /* Option */
 	                         PD_COMID1_TIMEOUT,         /* Time out in us	*/
-	                         TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
-	                         dataSet1Size);             /* net data size */
+	                         TRDP_TO_SET_TO_ZERO       /* delete invalid data on timeout */
+	                         );
 	    if (err != TRDP_NO_ERR)
 	    {
 	    	 vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
@@ -1211,14 +1211,14 @@ int main (int argc, char *argv[])
 							 &subHandleNet1ComId2,      /* our subscription identifier  */
 							 &OFFSET_ADDRESS4, NULL,    /* user referece value = offsetAddress */
 							 PD_COMID2,                 /* ComID */
-							 0,                         /* topocount: local consist only    */
+							 0, 0,                      /* topocount: local consist only    */
 							 PD_COMID2_SUB_SRC_IP1,     /* Source IP filter */
 							 0,                         /* Source IP filter2 : no used  */
 							 PD_COMID2_SUB_DST_IP1,     /* Default destination	(or MC Group) */
 							 TRDP_FLAGS_DEFAULT,        /* Option */
 							 PD_COMID2_TIMEOUT,         /* Time out in us	*/
-							 TRDP_TO_SET_TO_ZERO,       /* delete invalid data on timeout */
-							 dataSet2Size);             /* net data size */
+							 TRDP_TO_SET_TO_ZERO       /* delete invalid data on timeout */
+							 );
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
@@ -1247,14 +1247,14 @@ int main (int argc, char *argv[])
 								 &subHandleNet2ComId1,      /* our subscription identifier */
 								 &OFFSET_ADDRESS3, NULL,    /* user referece value = offsetAddress */
 								 PD_COMID1,                	/* ComID */
-								 0,                        	/* topocount: local consist only */
+								 0, 0,                     	/* topocount: local consist only */
 								 PD_COMID1_SUB_SRC_IP2,    	/* Source IP filter */
 								 0,                        	/* Source IP filter2 : no used */
 								 PD_COMID1_SUB_DST_IP2,    	/* Default destination	(or MC Group) */
 								 TRDP_FLAGS_DEFAULT,			/* Option */
 								 PD_COMID1_TIMEOUT,        	/* Time out in us	*/
-								 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
-								 dataSet1Size);        		/* net data size */
+								 TRDP_TO_SET_TO_ZERO      	/* delete invalid data on timeout */
+								 );
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");
@@ -1282,8 +1282,8 @@ int main (int argc, char *argv[])
 								 PD_COMID2_SUB_DST_IP2,    	/* Default destination	(or MC Group) */
 								 TRDP_FLAGS_DEFAULT,			/* Option */
 								 PD_COMID2_TIMEOUT,        	/* Time out in us	*/
-								 TRDP_TO_SET_TO_ZERO,      	/* delete invalid data on timeout */
-								 dataSet2Size);     			/* net data size */
+								 TRDP_TO_SET_TO_ZERO     	/* delete invalid data on timeout */
+								 );
 			if (err != TRDP_NO_ERR)
 			{
 				vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id2 pd receive error\n");

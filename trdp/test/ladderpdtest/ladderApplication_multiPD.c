@@ -1688,14 +1688,14 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 							 &pPdThreadParameter->subHandleNet1ComId1,                          /* our subscription identifier */
 							 &pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS3,	NULL,       /* user referece value = offsetAddress */
 							 pPdThreadParameter->pPdCommandValue->PD_SUB_COMID1,                /* ComID */
-							 0,                                                                 /* topocount: local consist only */
+							 0, 0,                                                               /* topocount: local consist only */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_SRC_IP1,        /* Source IP filter */
 							 0,                                                                 /* Source IP filter2 : no used */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_DST_IP1,        /* Default destination	(or MC Group) */
 							 0,                                                                 /* Option */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,            /* Time out in us	*/
-							 TRDP_TO_SET_TO_ZERO,                                               /* delete invalid data on timeout */
-							 pdDataSetSize);                                                    /* net data size */
+							 TRDP_TO_SET_TO_ZERO                                               /* delete invalid data on timeout */
+							 );
 		if (err != TRDP_NO_ERR)
 		{
 			vos_printLog(VOS_LOG_ERROR, "prep  Sub-network Id1 pd receive error\n");
@@ -1712,14 +1712,14 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 							 &pPdThreadParameter->subHandleNet2ComId1,                          /* our subscription identifier */
 							 &pPdThreadParameter->pPdCommandValue->OFFSET_ADDRESS3, NULL,       /* user referece value = offsetAddress */
 							 pPdThreadParameter->pPdCommandValue->PD_SUB_COMID1,                /* ComID */
-							 0,                        											/* topocount: local consist only */
+							 0, 0,                     											/* topocount: local consist only */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_SRC_IP2,		/* Source IP filter */
 							 0,                        											/* Source IP filter2 : no used */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_SUB_DST_IP2,        /* Default destination	(or MC Group) */
 							 0,                                                                 /* Option */
 							 pPdThreadParameter->pPdCommandValue->PD_COMID1_TIMEOUT,            /* Time out in us	*/
-							 TRDP_TO_SET_TO_ZERO,                                               /* delete invalid data on timeout */
-							 pdDataSetSize);                                                    /* net data size */
+							 TRDP_TO_SET_TO_ZERO                                                /* delete invalid data on timeout */
+							 );
 
 		if (err != TRDP_NO_ERR)
 		{

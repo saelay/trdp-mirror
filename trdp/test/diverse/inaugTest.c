@@ -181,7 +181,7 @@ static void subscribePD(
                             pdData->comID,                  /*    ComID                             */
                             0,                              /*    etbTopoCnt: local consist only    */
                             0,                              /*    opTrnTopoCnt                      */
-                            pdData->addr,                   /*    Source to expect packets from     */
+                            pdData->addr, 0,                /*    Source to expect packets from     */
                             0,                              /*    Default destination (or MC Group) */
                             TRDP_FLAGS_CALLBACK,            /*    packet flags                      */
                             pdData->time,                   /*    Time out in us                    */
@@ -194,7 +194,7 @@ static void subscribePD(
                             (TRDP_SUB_T)pdData->handle,     /*    our subscription identifier       */
                             0,                              /*    etbTopoCnt: local consist only    */
                             0,                              /*    opTrnTopoCnt                      */
-                            pdData->addr,                   /*    Source to expect packets from     */
+                            pdData->addr, 0,                /*    Source to expect packets from     */
                             0);                             /*    Default destination (or MC Group) */
         printf("resubscribe to %s\n", vos_ipDotted(pdData->addr));
         
