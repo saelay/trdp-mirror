@@ -104,7 +104,7 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
                          TRDP_ECSP_STAT_COMID,      /*    ComID                                 */
                          0,                         /*    ecnTopoCounter                        */
                          0,                         /*    opTopoCounter                         */
-                         0,                         /*    Source IP filter                      */
+                         0, 0,                      /*    Source IP filter                      */
                          appHandle->realIP,         /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_MARSHALL,       /*    packet flags - UDP, no call back      */
                          ECSP_STAT_TIMEOUT,         /*    Time out in us                        */
