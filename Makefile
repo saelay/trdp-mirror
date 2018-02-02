@@ -9,6 +9,7 @@
 #// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013-2016. All rights reserved.
 #//
+#//	BL 2018-02-02: Example renamed: cmdLineSelect -> echoCallback
 #//	BL 2017-05-30: 64 bit Linux X86 config added
 #//	BL 2017-05-08: 64 bit OSX config added
 #// BL 2016-02-11: Ticket #88 Cleanup makefiles, remove dependencies on external libraries
@@ -128,7 +129,7 @@ outdir:
 
 libtrdp:	outdir $(OUTDIR)/libtrdp.a
 
-example:	$(OUTDIR)/cmdlineSelect $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/sendData
+example:	$(OUTDIR)/echoCallback $(OUTDIR)/receivePolling $(OUTDIR)/sendHello $(OUTDIR)/receiveHello $(OUTDIR)/sendData
 
 test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle $(OUTDIR)/inaugTest $(OUTDIR)/localtest $(OUTDIR)/pdPull
 
@@ -160,9 +161,9 @@ $(OUTDIR)/libtrdp.a:		$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))
 #
 ###############################################################################
 				  
-$(OUTDIR)/cmdlineSelect:  echoSelectcmdline.c  $(OUTDIR)/libtrdp.a
+$(OUTDIR)/echoCallback:  echoCallback.c  $(OUTDIR)/libtrdp.a
 			@echo ' ### Building application $(@F)'
-			$(CC) example/echoSelectcmdline.c \
+			$(CC) example/echoCallback.c \
 				$(CFLAGS) $(INCLUDES) -o $@\
 				-ltrdp \
 			    $(LDFLAGS) 

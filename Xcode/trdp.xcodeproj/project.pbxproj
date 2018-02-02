@@ -121,6 +121,23 @@
 		08CE2082164962BB0038151B /* trdp_mdcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F31150777B00046E0AC /* trdp_mdcom.h */; };
 		08CE2085164962BE0038151B /* trdp_mdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F30150777B00046E0AC /* trdp_mdcom.c */; };
 		08CE2192164A91B30038151B /* trdp_reserved.c in Sources */ = {isa = PBXBuildFile; fileRef = 08CE2172164A6E130038151B /* trdp_reserved.c */; };
+		08D51C22200FB810004319B6 /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B321B70E9DF0066EA06 /* vos_mem.c */; };
+		08D51C23200FB810004319B6 /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B331B70E9DF0066EA06 /* vos_utils.c */; };
+		08D51C25200FB810004319B6 /* vos_sock.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E052721513537C0058D590 /* vos_sock.c */; };
+		08D51C26200FB810004319B6 /* vos_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E0535C1513685D0058D590 /* vos_thread.c */; };
+		08D51C27200FB810004319B6 /* vos_shared_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 73F5A50C16A408DC00335006 /* vos_shared_mem.c */; };
+		08D51C33200FB810004319B6 /* tau_ctrl.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB11917D5CF003F9A87 /* tau_ctrl.c */; };
+		08D51C34200FB810004319B6 /* tau_dnr.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D71BB21917D5CF003F9A87 /* tau_dnr.c */; };
+		08D51C35200FB810004319B6 /* tau_tti.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B281B70DFBD0066EA06 /* tau_tti.c */; };
+		08D51C36200FB810004319B6 /* tau_cstinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */; };
+		08D51C37200FB810004319B6 /* tau_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* tau_marshall.c */; };
+		08D51C38200FB810004319B6 /* tau_xml.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B291B70DFD20066EA06 /* tau_xml.c */; };
+		08D51C39200FB810004319B6 /* trdp_if.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F2F150777B00046E0AC /* trdp_if.c */; };
+		08D51C3B200FB810004319B6 /* trdp_mdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F30150777B00046E0AC /* trdp_mdcom.c */; };
+		08D51C3D200FB810004319B6 /* trdp_pdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F34150777B00046E0AC /* trdp_pdcom.c */; };
+		08D51C40200FB810004319B6 /* trdp_stats.c in Sources */ = {isa = PBXBuildFile; fileRef = 7387F506157795FE00DBAB73 /* trdp_stats.c */; };
+		08D51C42200FB810004319B6 /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
+		08D51C44200FB810004319B6 /* trdp_xml.c in Sources */ = {isa = PBXBuildFile; fileRef = 730B42A81C650ECB00A92265 /* trdp_xml.c */; };
 		08EA9EDA1EE990EE00BC653A /* trdp_mdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F30150777B00046E0AC /* trdp_mdcom.c */; };
 		73080FE517A91716003DAE84 /* tau_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* tau_marshall.c */; settings = {COMPILER_FLAGS = "-DL_ENDIAN"; }; };
 		7308114C17ABF8C9003DAE84 /* test_marshalling.c in Sources */ = {isa = PBXBuildFile; fileRef = 737B18CE15D901F000724FEF /* test_marshalling.c */; };
@@ -208,7 +225,7 @@
 		73591F921B986C7900B758F0 /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B331B70E9DF0066EA06 /* vos_utils.c */; };
 		73603CF6175CBE9A004608BD /* trdp-md-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7367955D17202EBE003C68ED /* trdp-md-test.c */; };
 		7373E4B0157CE42C0084966B /* trdp_if.h in Headers */ = {isa = PBXBuildFile; fileRef = 7373E4AF157CE42C0084966B /* trdp_if.h */; };
-		7381BE5C1643FB36003BC539 /* echoSelectcmdline.c in Sources */ = {isa = PBXBuildFile; fileRef = 7381BE511643FAC4003BC539 /* echoSelectcmdline.c */; };
+		7381BE5C1643FB36003BC539 /* echoCallback.c in Sources */ = {isa = PBXBuildFile; fileRef = 7381BE511643FAC4003BC539 /* echoCallback.c */; };
 		7381BF0516442C90003BC539 /* getStatsMarshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 7381BEF916442C14003BC539 /* getStatsMarshall.c */; };
 		73821FB51508DC780046E0AC /* trdp_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F2A150777B00046E0AC /* trdp_types.h */; };
 		73821FB61508DC790046E0AC /* trdp_if_light.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F29150777B00046E0AC /* trdp_if_light.h */; };
@@ -734,6 +751,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		08D51C11200FB6F8004319B6 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		730C15D61B95CED50075D7F3 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -799,6 +825,11 @@
 		08014D31164840030065AADD /* NewTec.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = NewTec.png; sourceTree = "<group>"; };
 		08014D32164840030065AADD /* Siemens.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Siemens.png; sourceTree = "<group>"; };
 		08014D33164840030065AADD /* SenderDemo_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SenderDemo_Prefix.pch; sourceTree = "<group>"; };
+		08090EE62018D86600CE518D /* readme-makefile.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = "readme-makefile.txt"; path = "../readme-makefile.txt"; sourceTree = "<group>"; };
+		082B3C06201F64F00061DF17 /* Makefile_TAUL */ = {isa = PBXFileReference; lastKnownFileType = text; name = Makefile_TAUL; path = ../Makefile_TAUL; sourceTree = "<group>"; };
+		082B3C07201F64F00061DF17 /* Makefile_TAUL_library */ = {isa = PBXFileReference; lastKnownFileType = text; name = Makefile_TAUL_library; path = ../Makefile_TAUL_library; sourceTree = "<group>"; };
+		082B3C08201F64F00061DF17 /* Makefile_TAUL_library_APP */ = {isa = PBXFileReference; lastKnownFileType = text; name = Makefile_TAUL_library_APP; path = ../Makefile_TAUL_library_APP; sourceTree = "<group>"; };
+		082B3C09201F66EE0061DF17 /* ladder */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ladder; path = ../ladder; sourceTree = "<group>"; };
 		08594B061B6FAC160066EA06 /* spy */ = {isa = PBXFileReference; lastKnownFileType = folder; name = spy; path = ../spy; sourceTree = "<group>"; };
 		08594B071B6FB24E0066EA06 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; name = config; path = ../config; sourceTree = "<group>"; };
 		08594B081B6FB3E80066EA06 /* example */ = {isa = PBXFileReference; lastKnownFileType = folder; name = example; path = ../example; sourceTree = "<group>"; };
@@ -822,6 +853,7 @@
 		08C44FE11F2231B300AB84EF /* tau_dnr_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_dnr_types.h; sourceTree = "<group>"; };
 		08CE2171164A6E130038151B /* trdp_reserved.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trdp_reserved.h; path = marshalling/trdp_reserved.h; sourceTree = "<group>"; };
 		08CE2172164A6E130038151B /* trdp_reserved.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trdp_reserved.c; path = marshalling/trdp_reserved.c; sourceTree = "<group>"; };
+		08D51C13200FB6F8004319B6 /* libtrdp64iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtrdp64iOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		08D9D5D51EDDA32C00EE2FA0 /* TAUL_PD */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TAUL_PD; sourceTree = "<group>"; };
 		7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = tau_cstinfo.c; sourceTree = "<group>"; tabWidth = 4; };
 		730B42A81C650ECB00A92265 /* trdp_xml.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = trdp_xml.c; sourceTree = "<group>"; tabWidth = 4; };
@@ -906,7 +938,7 @@
 		7373E4AF157CE42C0084966B /* trdp_if.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = trdp_if.h; sourceTree = "<group>"; tabWidth = 4; };
 		737B18BE15D9015800724FEF /* test_marshalling */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_marshalling; sourceTree = BUILT_PRODUCTS_DIR; };
 		737B18CE15D901F000724FEF /* test_marshalling.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = test_marshalling.c; path = marshalling/test_marshalling.c; sourceTree = "<group>"; };
-		7381BE511643FAC4003BC539 /* echoSelectcmdline.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = echoSelectcmdline.c; sourceTree = "<group>"; tabWidth = 4; };
+		7381BE511643FAC4003BC539 /* echoCallback.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = echoCallback.c; sourceTree = "<group>"; tabWidth = 4; };
 		7381BE581643FB1A003BC539 /* selectcmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = selectcmd; sourceTree = BUILT_PRODUCTS_DIR; };
 		7381BEF916442C14003BC539 /* getStatsMarshall.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = getStatsMarshall.c; path = marshalling/getStatsMarshall.c; sourceTree = "<group>"; };
 		7381BEFF16442C4B003BC539 /* getStatsMarshall */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = getStatsMarshall; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -987,6 +1019,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				08A53DAE1E5DAA4700CCCBC8 /* libtrdp64.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08D51C10200FB6F8004319B6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1252,17 +1291,22 @@
 			children = (
 				73E051EF15123F600058D590 /* Doxyfile */,
 				7387F6441578FDCC00DBAB73 /* readme.txt */,
+				08090EE62018D86600CE518D /* readme-makefile.txt */,
 				73E4978516CE981E00045EFA /* Deviation Request.txt */,
 				73E051F015123F690058D590 /* Makefile */,
 				7334C1411742783700CA739C /* Makefile_Ladder */,
 				7334C1421742783700CA739C /* Makefile_MDLadder */,
 				7334C1431742783700CA739C /* Makefile_SE */,
+				082B3C06201F64F00061DF17 /* Makefile_TAUL */,
+				082B3C07201F64F00061DF17 /* Makefile_TAUL_library */,
+				082B3C08201F64F00061DF17 /* Makefile_TAUL_library_APP */,
 				73CBA1AD19548350006648EE /* rules.mk */,
 				08594B071B6FB24E0066EA06 /* config */,
 				73821F27150777B00046E0AC /* src */,
 				73821F3B150777B00046E0AC /* example */,
 				73821F42150777D30046E0AC /* doc */,
 				73821F7C150777D40046E0AC /* test */,
+				082B3C09201F66EE0061DF17 /* ladder */,
 				08594B061B6FAC160066EA06 /* spy */,
 				08594B081B6FB3E80066EA06 /* example */,
 				08594B101B70D6EE0066EA06 /* resources */,
@@ -1304,6 +1348,7 @@
 				73D7FDE91CA1A6A700E52ACC /* sendData */,
 				08A327C71E51FE2700B03846 /* test_local_loop */,
 				08A53DB21E5DAA4700CCCBC8 /* test_pdxml */,
+				08D51C13200FB6F8004319B6 /* libtrdp64iOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1453,7 +1498,7 @@
 				08D9D5D51EDDA32C00EE2FA0 /* TAUL_PD */,
 				08014D1D16483FC50065AADD /* SenderDemo */,
 				738220021508E3710046E0AC /* echoPolling.c */,
-				7381BE511643FAC4003BC539 /* echoSelectcmdline.c */,
+				7381BE511643FAC4003BC539 /* echoCallback.c */,
 				7366AC6116B68C100068A893 /* example.xml */,
 				7366AC6216B68C100068A893 /* interoperability_test.xml */,
 				73517C4A16BBFDA800DB5208 /* receiveHello.c */,
@@ -1746,6 +1791,23 @@
 			productName = pdpull;
 			productReference = 08A53DB21E5DAA4700CCCBC8 /* test_pdxml */;
 			productType = "com.apple.product-type.tool";
+		};
+		08D51C12200FB6F8004319B6 /* trdp iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 08D51C19200FB6F9004319B6 /* Build configuration list for PBXNativeTarget "trdp iOS" */;
+			buildPhases = (
+				08D51C0F200FB6F8004319B6 /* Sources */,
+				08D51C10200FB6F8004319B6 /* Frameworks */,
+				08D51C11200FB6F8004319B6 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "trdp iOS";
+			productName = trdpiOS;
+			productReference = 08D51C13200FB6F8004319B6 /* libtrdp64iOS.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 		730C15BC1B95A5480075D7F3 /* test_library */ = {
 			isa = PBXNativeTarget;
@@ -2178,6 +2240,11 @@
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
 					};
+					08D51C12200FB6F8004319B6 = {
+						CreatedOnToolsVersion = 9.2;
+						DevelopmentTeam = SCVQQGGS52;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "trdp" */;
@@ -2197,6 +2264,7 @@
 				D2AAC045055464E500DB518D /* trdp Posix */,
 				73591F6F1B986C7900B758F0 /* trdp64Posix */,
 				7384E6F2172987CE00830413 /* trdp PDonly */,
+				08D51C12200FB6F8004319B6 /* trdp iOS */,
 				7382200B1508E9FA0046E0AC /* echoPolling */,
 				73F2D2341518C6F200BA962A /* sendHello */,
 				73517C4116BBFD5300DB5208 /* receiveHello */,
@@ -2286,6 +2354,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				08A53DB31E5DAA6400CCCBC8 /* trdp-xmlpd-test.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08D51C0F200FB6F8004319B6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08D51C22200FB810004319B6 /* vos_mem.c in Sources */,
+				08D51C23200FB810004319B6 /* vos_utils.c in Sources */,
+				08D51C25200FB810004319B6 /* vos_sock.c in Sources */,
+				08D51C26200FB810004319B6 /* vos_thread.c in Sources */,
+				08D51C27200FB810004319B6 /* vos_shared_mem.c in Sources */,
+				08D51C33200FB810004319B6 /* tau_ctrl.c in Sources */,
+				08D51C34200FB810004319B6 /* tau_dnr.c in Sources */,
+				08D51C35200FB810004319B6 /* tau_tti.c in Sources */,
+				08D51C36200FB810004319B6 /* tau_cstinfo.c in Sources */,
+				08D51C37200FB810004319B6 /* tau_marshall.c in Sources */,
+				08D51C38200FB810004319B6 /* tau_xml.c in Sources */,
+				08D51C39200FB810004319B6 /* trdp_if.c in Sources */,
+				08D51C3B200FB810004319B6 /* trdp_mdcom.c in Sources */,
+				08D51C3D200FB810004319B6 /* trdp_pdcom.c in Sources */,
+				08D51C40200FB810004319B6 /* trdp_stats.c in Sources */,
+				08D51C42200FB810004319B6 /* trdp_utils.c in Sources */,
+				08D51C44200FB810004319B6 /* trdp_xml.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2421,7 +2513,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7381BE5C1643FB36003BC539 /* echoSelectcmdline.c in Sources */,
+				7381BE5C1643FB36003BC539 /* echoCallback.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2922,7 +3014,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -2950,7 +3042,7 @@
 				PREBINDING = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.newtec.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = SenderDemo;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -3066,6 +3158,91 @@
 			};
 			name = Release;
 		};
+		08D51C1A200FB6F9004319B6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = SCVQQGGS52;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_CFLAGS = (
+					"-DL_ENDIAN",
+					"-DPOSIX",
+					"-DMD_SUPPORT=1",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = trdp64iOS;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		08D51C1B200FB6F9004319B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = SCVQQGGS52;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CFLAGS = (
+					"-DL_ENDIAN",
+					"-DPOSIX",
+					"-DMD_SUPPORT=1",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = trdp64iOS;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		1DEB91EC08733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3085,7 +3262,7 @@
 					"-DDEBUG",
 				);
 				PRODUCT_NAME = trdp;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -3106,7 +3283,7 @@
 					"-DL_ENDIAN",
 				);
 				PRODUCT_NAME = trdp;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Release;
@@ -3150,10 +3327,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				SYMROOT = output/osx_x86/dbg;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -3196,10 +3374,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DL_ENDIAN";
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				SYMROOT = output/osx_x86/rls;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -3609,7 +3788,7 @@
 					"-D_DARWIN_C_SOURCE",
 				);
 				PRODUCT_NAME = trdp64;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				VALID_ARCHS = x86_64;
 			};
@@ -3643,7 +3822,7 @@
 					"-D_DARWIN_C_SOURCE",
 				);
 				PRODUCT_NAME = trdp64;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				VALID_ARCHS = x86_64;
 			};
@@ -3919,7 +4098,7 @@
 				);
 				PREBINDING = YES;
 				PRODUCT_NAME = trdpPDonly;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 			};
 			name = Debug;
@@ -3941,7 +4120,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = trdpPDonly;
-				SDKROOT = macosx10.12;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "../src/api ../src/vos/api ../src/api ../src/vos/posix ../src/common";
 				ZERO_LINK = NO;
 			};
@@ -4133,6 +4312,15 @@
 			buildConfigurations = (
 				08CBAF7C1E842A6D00809853 /* Debug */,
 				08CBAF7D1E842A6D00809853 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		08D51C19200FB6F9004319B6 /* Build configuration list for PBXNativeTarget "trdp iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08D51C1A200FB6F9004319B6 /* Debug */,
+				08D51C1B200FB6F9004319B6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

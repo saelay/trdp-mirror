@@ -1063,6 +1063,8 @@ int main(int argc, char * argv[])
     }
     pFileName = argv[1];
 
+    vos_memInit(NULL, 20000, NULL);
+
     /*  Prepare XML document    */
     result = tau_prepareXmlDoc(pFileName, &docHnd);
     if (result != TRDP_NO_ERR)

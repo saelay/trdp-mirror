@@ -338,7 +338,7 @@ extern int gIsActive;
 	dataChanged = false;
 	[NSThread detachNewThreadSelector:@selector(doIt) toTarget:self withObject:self];
 
-#if 1
+#if 0
     // Create timer for updating the receive views with NSThread
 	[NSThread detachNewThreadSelector:@selector(doViewUpdates) toTarget:self withObject:self];
 #else
