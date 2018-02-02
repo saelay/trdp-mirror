@@ -1752,7 +1752,7 @@ TRDP_ERR_T subscribeTelegram (
                     pSubscribeTelegram->comId,                                      /* ComID */
                     pSubscribeTelegram->etbTopoCount,                               /* ETB topocount to use, 0 if consist local communication */
                     pSubscribeTelegram->opTrnTopoCount,                             /* operational topocount, != 0 for orientation/direction sensitive communication */
-                    pSubscribeTelegram->srcIpAddr,                                 /* Source IP filter */
+                    pSubscribeTelegram->srcIpAddr, 0,                                /* Source IP filter */
                     pSubscribeTelegram->dstIpAddr,                                  /* Default destination  (or MC Group) */
                     pSubscribeTelegram->pPdParameter->flags,                        /* Option */
                     pSubscribeTelegram->pPdParameter->timeout,                  /* Time out in us   */
