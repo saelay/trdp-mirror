@@ -870,6 +870,7 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                 {
                    case TRDP_NO_ERR:
                        break;
+                   case TRDP_NOSUB_ERR:         /* missing subscription should not lead to extensive error output */
                    case TRDP_BLOCK_ERR:
                    case TRDP_NODATA_ERR:
                        result = err;
