@@ -18,6 +18,7 @@
  *
  * $Id: api_test.c 41539 2016-03-11 18:01:25Z bloehr $
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  */
 
 
@@ -572,7 +573,7 @@ static int test1 (int argc, char *argv[])
 
         /*    Copy the packet into the internal send queue, prepare for sending.    */
 
-        err = tlp_publish(gSession1.appHandle, &pubHandle, TEST1_COMID, 0u, 0u,
+        err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST1_COMID, 0u, 0u,
                           0u, //gSession1.ifaceIP,                   /* Source */
                           gSession2.ifaceIP,//gDestMC,               /* Destination */
                           TEST1_INTERVAL,
@@ -696,7 +697,7 @@ static int test2 (int argc, char *argv[])
         
         /*    Copy the packet into the internal send queue, prepare for sending.    */
         
-        err = tlp_publish(gSession1.appHandle, &pubHandle, TEST2_COMID, 0u, 0u,
+        err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST2_COMID, 0u, 0u,
                           0u, //gSession1.ifaceIP,                   /* Source */
                           gSession2.ifaceIP,//gDestMC,               /* Destination */
                           TEST2_INTERVAL,
@@ -836,7 +837,7 @@ static int test4 (int argc, char *argv[])
             
             IF_ERROR("tlp_subscribe");
 
-            err = tlp_publish(gSession1.appHandle, &pubHandle, TEST4_COMID, 0u, 0u,
+            err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST4_COMID, 0u, 0u,
                               0u,
                               gDestMC,                              /* Destination */
                               0u,
@@ -1180,7 +1181,7 @@ static int test8 (int argc, char *argv[])
         
         IF_ERROR("tlp_subscribe");
         
-        err = tlp_publish(gSession1.appHandle, &pubHandle, TEST8_COMID, 0u, 0u,
+        err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST8_COMID, 0u, 0u,
                           0u,
                           gDestMC,                              /* Destination */
                           0u,
@@ -1265,7 +1266,8 @@ static int test9 (int argc, char *argv[])
         {
             /*    Session1 Install all publishers    */
 
-            err = tlp_publish(gSession1.appHandle, &pubHandle[i], TEST9_COMID + i, 0u, 0u,
+            err = tlp_publish(gSession1.appHandle, &pubHandle[i], NULL, NULL,
+                              TEST9_COMID + i, 0u, 0u,
                               0u,
                               gSession2.ifaceIP,                              /* Destination */
                               TEST9_INTERVAL,
@@ -1403,7 +1405,7 @@ static int test11 (int argc, char *argv[])
 #define TEST11_DATA      "Hello World!"
 #define TEST11_DATA_LEN  24u
 
-        err = tlp_publish(gSession2.appHandle, &pubHandle1,
+        err = tlp_publish(gSession2.appHandle, &pubHandle1, NULL, NULL,
                           TEST11_COMID_1000, 0u, 0u,
                           0u,
                           TEST11_COMID_1000_DEST,
@@ -1511,7 +1513,7 @@ static int test12 (int argc, char *argv[])
 
         /*    Copy the packet into the internal send queue, prepare for sending.    */
 
-        err = tlp_publish(gSession1.appHandle, &pubHandle, TEST12_COMID1, 0u, 0u,
+        err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST12_COMID1, 0u, 0u,
                           0u, //gSession1.ifaceIP,                   /* Source */
                           TEST12_MCDEST3,                           /* Destination */
                           TEST12_INTERVAL,

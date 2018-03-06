@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  */
 
 /*******************************************************************************
@@ -280,7 +281,7 @@ void pd_updatePublisher (int active)
     }
     if (active)
     {
-        err = tlp_publish(gAppHandle, &gPubHandle, gComID, 0, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
+        err = tlp_publish(gAppHandle, &gPubHandle, NULL, NULL, gComID, 0, 0, 0, vos_dottedIP(gTargetIP), gInterval, 0,
                           TRDP_FLAGS_NONE, NULL, gDataBuffer, (UINT32) gDataSize);
         if (err != TRDP_NO_ERR)
         {

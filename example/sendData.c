@@ -14,6 +14,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  */
 
 /***********************************************************************************************************************
@@ -238,6 +239,7 @@ int main (int argc, char *argv[])
     /*    If we change the data, just re-publish it    */
     err = tlp_publish(  appHandle,                  /*    our application identifier    */
                         &pubHandle,                 /*    our pulication identifier     */
+                        NULL, NULL,
                         comId,                      /*    ComID to send                 */
                         0,                          /*    local consist only            */
                         0,

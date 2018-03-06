@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 
@@ -169,13 +170,14 @@ int main (int argc, char * *argv)
 
     err = tlp_publish(  appHandle,                  /*    our application identifier        */
                         &pubHandle,                 /*    our pulication identifier         */
+                        NULL, NULL,
                         PD_COMID2,                  /*    ComID to send                     */
-                        0u,                          /*    local consist only                */
+                        0u,                         /*    local consist only                */
                         0u,
-                        0u,                          /*    default source IP                 */
+                        0u,                         /*    default source IP                 */
                         PD_COMID2_DST_IP,           /*    where to send to                  */
                         PD_COMID2_CYCLE,            /*    Cycle time in us                  */
-                        0u,                          /*    not redundant                     */
+                        0u,                         /*    not redundant                     */
                         TRDP_FLAGS_NONE,            /*    Don't use callback for errors     */
                         NULL,                       /*    default qos and ttl               */
                         (UINT8 *)gBuffer,           /*    initial data                      */
