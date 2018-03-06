@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
 
@@ -182,6 +183,28 @@ EXT_DECL UINT32 vos_htonl (
 
 EXT_DECL UINT32 vos_ntohl (
     UINT32 val);
+
+/**********************************************************************************************************************/
+/** Byte swapping 8å Bytes.
+ *
+ *  @param[in]          val             Initial value.
+ *
+ *  @retval             swapped value
+ */
+
+EXT_DECL UINT64 vos_htonll (
+    UINT64 val);
+
+/**********************************************************************************************************************/
+/** Byte swapping 8 Bytes.
+ *
+ *  @param[in]          val             Initial value.
+ *
+ *  @retval             swapped value
+ */
+
+EXT_DECL UINT64 vos_ntohll (
+    UINT64 val);
 
 /**********************************************************************************************************************/
 /** Convert IP address from dotted dec. to !host! endianess
