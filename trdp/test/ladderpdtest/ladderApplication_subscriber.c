@@ -13,10 +13,13 @@
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
- * $Id$
+ * $Id:$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  */
+
 #ifdef TRDP_OPTION_LADDER
+
 /***********************************************************************************************************************
  * INCLUDES
  */
@@ -1240,6 +1243,7 @@ int main (int argc, char *argv[])
 		/*	Sub-network Id1 ComID1 Publish */
 		err = tlp_publish(  appHandle,					/* our application identifier */
 							&pubHandleNet1ComId1,		/* our publication identifier */
+                            NULL, NULL,
 							PD_COMID1,						/* ComID to send */
 							0,								/* local consist only */
 							subnetId1Address,				/* default source IP */
@@ -1275,6 +1279,7 @@ int main (int argc, char *argv[])
 		/*	Sub-network Id1 ComID2 Publish */
 		err = tlp_publish(  appHandle,					/* our application identifier */
 							&pubHandleNet1ComId2,		/* our publication identifier */
+                            NULL, NULL,
 							PD_COMID2,						/* ComID to send */
 							0,								/* local consist only */
 							subnetId1Address,				/* default source IP */
@@ -1314,6 +1319,7 @@ int main (int argc, char *argv[])
 			/*	Sub-network Id2 ComID1 Publish */
 			err = tlp_publish(  appHandle2,					/* our application identifier */
 								&pubHandleNet2ComId1,		/* our publication identifier */
+                                NULL, NULL,
 								PD_COMID1,						/* ComID to send */
 								0,								/* local consist only */
 								subnetId2Address,				/* default source IP */
@@ -1349,6 +1355,7 @@ int main (int argc, char *argv[])
 			/*	Sub-network Id2 ComID2 Publish */
 			err = tlp_publish(  appHandle2,					/* our application identifier */
 								&pubHandleNet2ComId2,		/* our publication identifier */
+                                NULL, NULL, 
 								PD_COMID2,						/* ComID to send */
 								0,								/* local consist only */
 								subnetId2Address,				/* default source IP */

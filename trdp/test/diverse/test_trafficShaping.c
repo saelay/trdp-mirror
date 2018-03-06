@@ -252,19 +252,20 @@ int main (int argc, char *argv[])
         
         /*    Copy the packet into the internal send queue, prepare for sending.    */
         /*    If we change the data, just re-publish it    */
-        err = tlp_publish(  appHandle,                /*    our application identifier    */
-                          &pubHandle,                 /*    our pulication identifier    */
+        err = tlp_publish(  appHandle,                /*    our application identifier      */
+                          &pubHandle,                 /*    our pulication identifier       */
+                          NULL, NULL,
                           gPD[i].comID,
-                          0,                          /*    local consist only            */
+                          0,                          /*    local consist only              */
                           0,
-                          0,                          /*    default source IP            */
-                          destIP,                     /*    where to send to            */
-                          gPD[i].cycle,               /*    Cycle time in us            */
-                          0,                          /*    not redundant                */
-                          TRDP_FLAGS_NONE,            /*    Use callback for errors        */
-                          NULL,                       /*    default qos and ttl            */
-                          (UINT8 *)outputBuffer,      /*    initial data                */
-                          gPD[i].size);               /*    no ladder                    */
+                          0,                          /*    default source IP               */
+                          destIP,                     /*    where to send to                */
+                          gPD[i].cycle,               /*    Cycle time in us                */
+                          0,                          /*    not redundant                   */
+                          TRDP_FLAGS_NONE,            /*    Use callback for errors         */
+                          NULL,                       /*    default qos and ttl             */
+                          (UINT8 *)outputBuffer,      /*    initial data                    */
+                          gPD[i].size);               /*    no ladder                       */
         
         
         if (err != TRDP_NO_ERR)

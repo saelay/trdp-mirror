@@ -323,13 +323,14 @@ int main (int argc, char * *argv)
         printf("Publishing dataSize: %u Bytes\n", gSubPackets[i].dataSize);
         err = tlp_publish(appHandle,                    /*    our application identifier    */
                           &gPubPackets[i].pubHandle,    /*    our pulication identifier     */
+                          NULL, NULL,
                           gPubPackets[i].comID,         /*    ComID to send                 */
-                          0u,                            /*    local consist only            */
+                          0u,                           /*    local consist only            */
                           0u,
-                          0u,                            /*    default source IP             */
+                          0u,                           /*    default source IP             */
                           gPubPackets[i].addr,          /*    where to send to              */
                           gPubPackets[i].time,          /*    Cycle time in ms              */
-                          0u,                            /*    not redundant                 */
+                          0u,                           /*    not redundant                 */
                           TRDP_FLAGS_CALLBACK,          /*    Use callback for errors       */
                           NULL,                         /*    default qos and ttl           */
                           gPubPackets[i].dataSize ? gPubPackets[i].data : NULL,      /*    initial data*/

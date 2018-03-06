@@ -14,8 +14,9 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Toshiba Corporation, Japan, 2013. All rights reserved.
  *
- * $Id$
+ * $Id:$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  */
 #ifdef TRDP_OPTION_LADDER
 /***********************************************************************************************************************
@@ -1960,6 +1961,7 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 			/*	Sub-network Id1 Publish */
 			err = tlp_publish(  appHandle,															/* our application identifier */
 								&pPdThreadParameter->pubHandleNet1ComId1,												/* our pulication identifier */
+                                NULL, NULL,
 								pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
 								0,																	/* local consist only */
 								subnetId1Address,													/* default source IP */
@@ -1984,6 +1986,7 @@ PD_APP_ERR_TYPE trdp_pdApplicationInitialize (PD_THREAD_PARAMETER *pPdThreadPara
 			/*	Sub-network Id2 Publish */
 			err = tlp_publish(  appHandle2,					    								/* our application identifier */
 								&pPdThreadParameter->pubHandleNet2ComId1,												/* our pulication identifier */
+                                NULL, NULL, 
 								pPdThreadParameter->pPdCommandValue->PD_PUB_COMID1,				/* ComID to send */
 								0,																	/* local consist only */
 								subnetId2Address,			    									/* default source IP */

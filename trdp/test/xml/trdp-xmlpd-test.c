@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-02-08: Ticket #134 Example trdp-xmlpd-test crash due to zero elemSize
@@ -679,7 +680,8 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
 
         /*  Publish the telegram    */
         result = tlp_publish(
-            pPubTlg->sessionhandle, &pPubTlg->pubHandle, pExchgPar->comId, 
+            pPubTlg->sessionhandle, &pPubTlg->pubHandle, NULL, NULL,
+            pExchgPar->comId, 
             0, 0, 0, destIP, interval, redId, flags, pSendParam, 
             (UINT8 *)pPubTlg->dataset.buffer, pPubTlg->dataset.size);
         if (result != TRDP_NO_ERR)

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
@@ -277,6 +278,8 @@ EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T     appHandle);
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[out]     pPubHandle          returned handle for related re/unpublish
+ *  @param[in]      pUserRef            user supplied value returned within the info structure of callback function
+ *  @param[in]      pfCbFunction        Pointer to pre-send callback function, NULL if not used
  *  @param[in]      comId               comId of packet to send
  *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
  *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
@@ -298,6 +301,8 @@ EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T     appHandle);
 EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_PUB_T              *pPubHandle,
+    const void              *pUserRef,
+    TRDP_PD_CALLBACK_T      pfCbFunction,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,

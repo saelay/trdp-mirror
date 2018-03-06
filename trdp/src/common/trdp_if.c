@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
@@ -396,6 +397,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
             /*  Publish our statistics packet   */
             ret = tlp_publish(pSession,                 /*    our application identifier    */
                               &dummyPubHndl,            /*    our pulication identifier     */
+                              NULL, NULL,
                               TRDP_GLOBAL_STATISTICS_COMID, /*    ComID to send                 */
                               0u,                       /*    local consist only            */
                               0u,                       /*    no orient/direction info      */
@@ -1212,30 +1214,33 @@ EXT_DECL UINT32 tlc_getOpTrainTopoCount (
 /** Prepare for sending PD messages.
  *  Queue a PD message, it will be send when tlc_publish has been called
  *
- *  @param[in]      appHandle            the handle returned by tlc_openSession
- *  @param[out]     pPubHandle           returned handle for related unprepare
- *  @param[in]      comId                comId of packet to send
- *  @param[in]      etbTopoCnt           ETB topocount to use, 0 if consist local communication
- *  @param[in]      opTrnTopoCnt         operational topocount, != 0 for orientation/direction sensitive communication
- *  @param[in]      srcIpAddr            own IP address, 0 - srcIP will be set by the stack
- *  @param[in]      destIpAddr           where to send the packet to
- *  @param[in]      interval             frequency of PD packet (>= 10ms) in usec, 0 if PD PULL
- *  @param[in]      redId                0 - Non-redundant, > 0 valid redundancy group
- *  @param[in]      pktFlags             OPTION:
- *                                       TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
- *  @param[in]      pSendParam           optional pointer to send parameter, NULL - default parameters are used
- *  @param[in]      pData                pointer to data packet / dataset, NULL if sending starts later with tlp_put()
- *  @param[in]      dataSize             size of data packet > 0 and <= TRDP_MAX_PD_DATA_SIZE
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[out]     pPubHandle          returned handle for related re/unpublish
+ *  @param[in]      pUserRef            user supplied value returned within the info structure of callback function
+ *  @param[in]      pfCbFunction        Pointer to pre-send callback function, NULL if not used
+ *  @param[in]      comId               comId of packet to send
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr          where to send the packet to
+ *  @param[in]      interval            frequency of PD packet (>= 10ms) in usec
+ *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
+ *  @param[in]      pktFlags            OPTION:
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
+ *  @param[in]      pData               pointer to data packet / dataset, NULL if sending starts later with tlp_put()
+ *  @param[in]      dataSize            size of data packet >= 0 and <= TRDP_MAX_PD_DATA_SIZE
  *
- *  @retval         TRDP_NO_ERR          no error
- *  @retval         TRDP_PARAM_ERR       parameter error
- *  @retval         TRDP_MEM_ERR         could not insert (out of memory)
- *  @retval         TRDP_NOINIT_ERR      handle invalid
- *  @retval         TRDP_NOPUB_ERR       Already published
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not insert (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlp_publish (
     TRDP_APP_SESSION_T      appHandle,
     TRDP_PUB_T              *pPubHandle,
+    const void              *pUserRef,
+    TRDP_PD_CALLBACK_T      pfCbFunction,
     UINT32                  comId,
     UINT32                  etbTopoCnt,
     UINT32                  opTrnTopoCnt,
@@ -1368,6 +1373,8 @@ EXT_DECL TRDP_ERR_T tlp_publish (
             pNewElement->redId          = redId;
             pNewElement->pCachedDS      = NULL;
             pNewElement->magic          = TRDP_MAGIC_PUB_HNDL_VALUE;
+            pNewElement->pUserRef       = pUserRef;
+            pNewElement->pfCbFunction   = pfCbFunction;
 
             /*  Find a possible redundant entry in one of the other sessions and sync the sequence counter!
              curSeqCnt holds the last sent sequence counter, therefore set the value initially to -1,

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  *      BL 2018-02-02: Example renamed: cmdLineSelect -> echoCallback
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
@@ -269,7 +270,7 @@ int main (int argc, char * *argv)
 
     /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&appHandle,
-                        ownIP, 0,                   /* use default IP addresses           */
+                        ownIP, 0u,                  /* use default IP addresses           */
                         NULL,                       /* no Marshalling                     */
                         &pdConfiguration, NULL,     /* system defaults for PD and MD      */
                         &processConfig) != TRDP_NO_ERR)
@@ -286,8 +287,8 @@ int main (int argc, char * *argv)
                          &subHandle,                /*    our subscription identifier          */
                          NULL, NULL,                /*    userRef & callback function          */
                          comId_In,                  /*    ComID                                */
-                         0,                         /*    topocount: local consist only        */
-                         0,
+                         0u,                        /*    topocount: local consist only        */
+                         0u,
                          VOS_INADDR_ANY,            /*    source IP 1                          */
                          VOS_INADDR_ANY,            /*     */
                          destIP,                    /*    Default destination IP (or MC Group) */
@@ -306,13 +307,14 @@ int main (int argc, char * *argv)
 
     err = tlp_publish(  appHandle,                  /*    our application identifier    */
                         &pubHandle,                 /*    our pulication identifier     */
+                        NULL, NULL,
                         comId_Out,                  /*    ComID to send                 */
-                        0,                          /*    local consist only            */
-                        0,
-                        0,                          /*    default source IP             */
+                        0u,                         /*    local consist only            */
+                        0u,
+                        0u,                         /*    default source IP             */
                         destIP,                     /*    where to send to              */
                         PD_COMID1_CYCLE,            /*    Cycle time in ms              */
-                        0,                          /*    not redundant                 */
+                        0u,                         /*    not redundant                 */
                         TRDP_FLAGS_CALLBACK,        /*    Use callback for errors       */
                         NULL,                       /*    default qos and ttl           */
                         (UINT8 *)gBuffer,           /*    initial data                  */
