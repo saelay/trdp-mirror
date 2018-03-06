@@ -16,7 +16,7 @@
  * @remarks         Copyright NewTec GmbH, 2017.
  *                  All rights reserved.
  *
- * $Id: api_test.c 41539 2016-03-11 18:01:25Z bloehr $
+ * $Id$
  *
  *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  */
@@ -1624,19 +1624,97 @@ static int test12 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
+#define TEST13_COMID     0u
+#define TEST13_INTERVAL  100000u
+#define TEST13_DATA      "Hello World!"
+#define TEST13_DATA_LEN  24u
+
+/* Callback incrementer function */
+static void cbIncrement (
+     void                    *pRefCon,
+     TRDP_APP_SESSION_T      appHandle,
+     const TRDP_PD_INFO_T    *pMsg,
+     UINT8                   *pData,
+      INT32                  dataSize)
+{
+    static unsigned long counter = 0;
+    if (dataSize > 18)
+    {
+        sprintf((char*)pData, "Counting up: %08lu", counter++);
+    }
+}
+
 static int test13 (int argc, char *argv[])
 {
-    PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
-    
+    PREPARE("PD publish and subscribe, auto increment using new 1.4 callback function", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+
     /* ------------------------- test code starts here --------------------------- */
-    
+
     {
-        
+        TRDP_PUB_T      pubHandle;
+        TRDP_SUB_T      subHandle;
+
+        /*    Copy the packet into the internal send queue, prepare for sending.    */
+
+        err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, (TRDP_PD_CALLBACK_T) cbIncrement, TEST13_COMID, 0u, 0u,
+                          0u, //gSession1.ifaceIP,                   /* Source */
+                          gSession2.ifaceIP,//gDestMC,               /* Destination */
+                          TEST13_INTERVAL,
+                          0u, TRDP_FLAGS_DEFAULT, NULL, NULL, TEST13_DATA_LEN);
+
+        IF_ERROR("tlp_publish");
+
+        err = tlp_subscribe(gSession2.appHandle, &subHandle, NULL, NULL,
+                            TEST13_COMID, 0u, 0u,
+                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
+                            0u,//gDestMC,                            /* Destination */
+                            TRDP_FLAGS_DEFAULT, TEST13_INTERVAL * 3, TRDP_TO_DEFAULT);
+
+
+        IF_ERROR("tlp_subscribe");
+
+        /* We need to call put once to start the transmission! */
+
+        (void) tlp_put(gSession1.appHandle, pubHandle, TEST13_DATA, TEST13_DATA_LEN);
+
+        /*
+         Enter the main processing loop.
+         */
+        int counter = 0;
+        while (counter++ < 50)         /* 5 seconds */
+        {
+            char            data2[1432u];
+            UINT32          dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T  pdInfo;
+
+            vos_threadDelay(500000);
+
+            err = tlp_get(gSession2.appHandle, subHandle, &pdInfo, (UINT8 *) data2, &dataSize2);
+
+
+            if (err == TRDP_NODATA_ERR)
+            {
+                continue;
+            }
+
+            if (err != TRDP_NO_ERR)
+            {
+                vos_printLog(VOS_LOG_INFO, "### tlp_get error: %s\n", vos_getErrorString((VOS_ERR_T)err));
+
+                gFailed = 1;
+                //goto end;
+
+            }
+            else
+            {
+                fprintf(gFp, "Receiving (seq: %u): %s\n", pdInfo.seqCount, data2);
+            }
+        }
     }
-    
+
+
     /* ------------------------- test code ends here --------------------------- */
-    
-    
+
     CLEANUP;
 }
 
@@ -1662,7 +1740,7 @@ test_func_t *testArray[] =
     //test10,
     //test11,
     test12,
-    //test13,
+    test13,
     NULL
 };
 
