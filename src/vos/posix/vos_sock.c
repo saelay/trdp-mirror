@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -278,6 +279,18 @@ EXT_DECL UINT32 vos_ntohl (
     UINT32 val)
 {
     return ntohl(val);
+}
+
+EXT_DECL UINT64 vos_htonll (
+                           UINT64 val)
+{
+    return htonll(val);
+}
+
+EXT_DECL UINT64 vos_ntohll (
+                           UINT64 val)
+{
+    return ntohll(val);
 }
 
 /**********************************************************************************************************************/
