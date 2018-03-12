@@ -51,6 +51,7 @@
 
 #ifdef __linux
 #   include <linux/if.h>
+#   include <byteswap.h>
 #else
 #   include <net/if.h>
 #endif
@@ -282,15 +283,31 @@ EXT_DECL UINT32 vos_ntohl (
 }
 
 EXT_DECL UINT64 vos_htonll (
-                           UINT64 val)
+    UINT64 val)
 {
+#ifdef __linux
+#   ifdef L_ENDIAN
+    return bswap_64(val);
+#   else
+    return val;
+#   endif
+#else
     return htonll(val);
+#endif
 }
 
 EXT_DECL UINT64 vos_ntohll (
-                           UINT64 val)
+    UINT64 val)
 {
+#ifdef __linux
+#   ifdef L_ENDIAN
+    return bswap_64(val);
+#   else
+    return val;
+#   endif
+#else
     return ntohll(val);
+#endif
 }
 
 /**********************************************************************************************************************/
