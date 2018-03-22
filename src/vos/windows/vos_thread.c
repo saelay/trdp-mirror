@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  */
@@ -474,7 +475,7 @@ EXT_DECL void vos_getTime (
 
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -540,7 +541,7 @@ EXT_DECL void vos_clearTime (
 {
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -562,7 +563,7 @@ EXT_DECL void vos_addTime (
 {
     if (pTime == NULL || pAdd == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -591,7 +592,7 @@ EXT_DECL void vos_subTime (
 {
     if (pTime == NULL || pSub == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -622,7 +623,7 @@ EXT_DECL void vos_divTime (
 {
     if ((pTime == NULL) || (divisor == 0)) /*lint !e573 mix of signed and unsigned */
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -652,7 +653,7 @@ EXT_DECL void vos_mulTime (
 {
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -856,7 +857,7 @@ EXT_DECL void vos_mutexDelete (
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
     }
     else
     {
@@ -889,7 +890,7 @@ void vos_mutexLocalDelete (
 {
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR invalid parameter");
     }
     else
     {
@@ -991,7 +992,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
     if (pMutex == NULL || pMutex->magicNo != cMutextMagic)
     {
 
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR invalid parameter");
         return VOS_PARAM_ERR;
     }
     else
@@ -1034,12 +1035,12 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     /*Check parameters*/
     if (pSema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
         retVal = VOS_PARAM_ERR;
     }
     else
@@ -1057,7 +1058,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         if (ret != (int)NULL)
         {
             /*Semaphore init failed*/
-            vos_printLog(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
             retVal = VOS_SEMA_ERR;
         }
         else
@@ -1086,7 +1087,7 @@ EXT_DECL void vos_semaDelete (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
     }
     else
     {
@@ -1098,7 +1099,7 @@ EXT_DECL void vos_semaDelete (
             if (ret != (INT32) NULL)
             {
                 /* Error destroying Semaphore */
-                vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
+                vos_printLogStr(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
             }
             else
             {
@@ -1135,7 +1136,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         retVal = VOS_PARAM_ERR;
     }
     else if (timeout == (UINT32) NULL)
@@ -1213,7 +1214,7 @@ EXT_DECL void vos_semaGive (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
     }
     else
     {
@@ -1226,7 +1227,7 @@ EXT_DECL void vos_semaGive (
         else
         {
             /* Could not release Semaphore */
-            vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
         }
     }
     return;

@@ -1,23 +1,24 @@
 /**********************************************************************************************************************/
 /**
-* @file            windows/vos_shared_mem.c
-*
-* @brief           Shared Memory functions
-*
-* @details         OS abstraction of Shared memory access and control
-*
-* @note            Project: TCNOpen TRDP prototype stack
-*
-* @author          Kazumasa Aiba, TOSHIBA
-*
-*
+ * @file            windows/vos_shared_mem.c
+ *
+ * @brief           Shared Memory functions
+ *
+ * @details         OS abstraction of Shared memory access and control
+ *
+ * @note            Project: TCNOpen TRDP prototype stack
+ *
+ * @author          Kazumasa Aiba, TOSHIBA
+ *
+ *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id: vos_sock.c 253 2013-01-07 13:48:40Z aweiss $*
-*
-*/
+ *
+ *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
+ */
 
 /***********************************************************************************************************************
 * INCLUDES
@@ -93,7 +94,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
 
     if ((pKey == NULL) || (pSize == (UINT32*)NULL) || (*pSize == (UINT32)NULL))
     {
-        vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
     else
@@ -101,7 +102,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
         shMemName = (TCHAR*) vos_memAlloc((strlen(pKey) + 1) * sizeof(TCHAR));
         if (shMemName == NULL)
         {
-            vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
+            vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
             retVal = VOS_MEM_ERR;
         }
         else
@@ -110,7 +111,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
             err = mbstowcs_s(&convertedChars, shMemName, strlen(pKey) + 1, pKey, _TRUNCATE);
             if (err != (errno_t)NULL)
             {
-                vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not convert CHAR8 to TCHAR\n");
+                vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not convert CHAR8 to TCHAR\n");
                 retVal = VOS_UNKNOWN_ERR;
             }
             else
@@ -118,7 +119,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
                 (*pHandle) = (VOS_SHRD_T) vos_memAlloc(sizeof(struct VOS_SHRD));
                 if (*pHandle == NULL)
                 {
-                    vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
+                    vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
                     retVal = VOS_MEM_ERR;
                 }
                 else
@@ -172,7 +173,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
                             (*pHandle)->sharedMemoryName = (CHAR8*)vos_memAlloc((strlen(pKey)+1)*sizeof(CHAR8));
                             if ((*pHandle)->sharedMemoryName == NULL)
                             {
-                                vos_printLog(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not alloc memory\n");
+                                vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not alloc memory\n");
                                 retVal = VOS_MEM_ERR;
                             }
                             else
@@ -222,7 +223,7 @@ EXT_DECL VOS_ERR_T vos_sharedClose (
     if ((pMemoryArea == NULL)
         || (handle->fd == NULL))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_sharedClose() ERROR Invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_sharedClose() ERROR Invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
     else

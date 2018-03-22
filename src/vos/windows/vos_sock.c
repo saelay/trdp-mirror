@@ -17,6 +17,7 @@
  *
  * $Id$*
  *
+ *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
@@ -233,13 +234,21 @@ EXT_DECL UINT32 vos_ntohl (
 EXT_DECL UINT64 vos_htonll (
     UINT64 val)
 {
-    return htonll(val);
+#   ifdef L_ENDIAN
+    return _byteswap_uint64(val);
+#   else
+    return val;
+#   endif
 }
 
 EXT_DECL UINT64 vos_ntohll (
     UINT64 val)
 {
-    return ntohll(val);
+#   ifdef L_ENDIAN
+    return _byteswap_uint64(val);
+#   else
+    return val;
+#   endif
 }
 
 /**********************************************************************************************************************/
@@ -391,7 +400,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     pIfTable = (MIB_IFTABLE *) vos_memAlloc(sizeof (MIB_IFTABLE));
     if (pIfTable == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Error allocating memory\n");
+        vos_printLogStr(VOS_LOG_ERROR, "Error allocating memory\n");
         return (VOS_MEM_ERR);
     }
 
@@ -403,7 +412,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
         pIfTable = (MIB_IFTABLE *) vos_memAlloc(dwSize);
         if (pIfTable == NULL)
         {
-            vos_printLog(VOS_LOG_ERROR, "Error allocating memory\n");
+            vos_printLogStr(VOS_LOG_ERROR, "Error allocating memory\n");
             return (VOS_MEM_ERR);
         }
     }
@@ -421,7 +430,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
 
             if (pIfRow == NULL)
             {
-                vos_printLog(VOS_LOG_ERROR, "Error allocating memory\n");
+                vos_printLogStr(VOS_LOG_ERROR, "Error allocating memory\n");
                 if (pIfTable != NULL)
                 {
                     vos_memFree(pIfTable);
@@ -593,7 +602,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 
     if (pMAC == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -693,7 +702,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     if (pSock == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -743,7 +752,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if (pSock == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 

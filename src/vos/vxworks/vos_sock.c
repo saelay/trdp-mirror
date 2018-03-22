@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
@@ -459,7 +460,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 {
    if (pMAC == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -498,7 +499,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     if (pSock == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
@@ -549,7 +550,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if (pSock == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
         return VOS_PARAM_ERR;
     }
 
