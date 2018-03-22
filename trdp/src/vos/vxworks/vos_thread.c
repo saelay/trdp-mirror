@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *
@@ -337,7 +338,7 @@ EXT_DECL void vos_getTime (
     
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -394,7 +395,7 @@ EXT_DECL void vos_clearTime (
 {
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -416,7 +417,7 @@ EXT_DECL void vos_addTime (
 {
     if ( (pTime == NULL) || (pAdd == NULL) )
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -441,7 +442,7 @@ EXT_DECL void vos_subTime (
 {
     if ( (pTime == NULL) || (pSub == NULL) )
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer\n");
     }
     else
     {
@@ -466,7 +467,7 @@ EXT_DECL void vos_divTime (
 {
     if ( (pTime == NULL) || (divisor == 0) )
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -496,7 +497,7 @@ EXT_DECL void vos_mulTime (
 {
     if (pTime == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "ERROR NULL pointer/parameter\n");
     }
     else
     {
@@ -618,7 +619,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
         }
         else
         {  
-            vos_printLog(VOS_LOG_ERROR, "Can not create Mutex\n");
+            vos_printLogStr(VOS_LOG_ERROR, "Can not create Mutex\n");
             vos_memFree(*pMutex);
             result = VOS_MUTEX_ERR;
         }
@@ -658,7 +659,7 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
         }
         else
         {  
-            vos_printLog(VOS_LOG_ERROR, "Can not create Mutex\n");
+            vos_printLogStr(VOS_LOG_ERROR, "Can not create Mutex\n");
             result = VOS_MUTEX_ERR;
         }
     }
@@ -680,12 +681,12 @@ EXT_DECL void vos_mutexDelete (
     {
         /* NULL pointer indicates a problem from the caller side, or a severe */
         /* issue in overall pointer handling - can not get discriminated here */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR NULL pointer");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexDelete() ERROR NULL pointer");
     }
     else if (pMutex->magicNo != cMutextMagic)
     {
         /* no magic number indicates a problem within the mutex handling */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR no magic");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexDelete() ERROR no magic");
     }
     else
     {  
@@ -720,12 +721,12 @@ EXT_DECL void vos_mutexLocalDelete (
     {
         /* NULL pointer indicates a problem from the caller side, or a severe */
         /* issue in overall pointer handling - can not get discriminated here */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR NULL pointer");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR NULL pointer");
     }
     else if (pMutex->magicNo != cMutextMagic)
     {
         /* no magic number indicates a problem within the mutex handling */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR no magic");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexLocalDelete() ERROR no magic");
     }
     else
     { 
@@ -765,13 +766,13 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     {
         /* NULL pointer indicates a problem from the caller side, or a severe */
         /* issue in overall pointer handling - can not get discriminated here */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() ERROR NULL pointer");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexLock() ERROR NULL pointer");
         result = VOS_PARAM_ERR;
     }
     else if (pMutex->magicNo != cMutextMagic)
     {
         /* no magic number indicates a problem within the mutex handling */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() ERROR no magic");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexLock() ERROR no magic");
         result = VOS_PARAM_ERR;
     }
     else
@@ -809,13 +810,13 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     {
         /* NULL pointer indicates a problem from the caller side, or a severe */
         /* issue in overall pointer handling - can not get discriminated here */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexTryLock() ERROR NULL pointer");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexTryLock() ERROR NULL pointer");
         result = VOS_PARAM_ERR;
     }
     else if (pMutex->magicNo != cMutextMagic)
     {
         /* no magic number indicates a problem within the mutex handling */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexTryLock() ERROR no magic");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexTryLock() ERROR no magic");
         result = VOS_PARAM_ERR;
     }
     else
@@ -851,13 +852,13 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
     {
         /* NULL pointer indicates a problem from the caller side, or a severe */
         /* issue in overall pointer handling - can not get discriminated here */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR NULL pointer");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR NULL pointer");
         result = VOS_PARAM_ERR;
     }
     else if (pMutex->magicNo != cMutextMagic)
     {
         /* no magic number indicates a problem within the mutex handling */
-        vos_printLog(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR no magic");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_mutexUnlock() ERROR no magic");
         result = VOS_PARAM_ERR;       
     }
     else
@@ -896,12 +897,12 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     /*Check parameters*/
     if (pSema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter pSema == NULL\n");
         result = VOS_PARAM_ERR;
     }
     else if ((initialState != VOS_SEMA_EMPTY) && (initialState != VOS_SEMA_FULL))
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_SemaCreate() ERROR invalid parameter initialState\n");
         result = VOS_PARAM_ERR;
     }
     else
@@ -913,7 +914,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
         if (*pSema == NULL)
         {
             /*Semaphore init failed*/
-            vos_printLog(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
             result = VOS_SEMA_ERR;
         }
     }
@@ -933,7 +934,7 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaDelete() ERROR invalid parameter\n");
     }
     else
     {
@@ -944,7 +945,7 @@ EXT_DECL void vos_semaDelete (VOS_SEMA_T sema)
         if (errVal == ERROR)
         {
             /* Error destroying Semaphore */
-            vos_printLog(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
+            vos_printLogStr(VOS_LOG_ERROR, "vos_semaDelete() ERROR CloseHandle failed\n");
         }
     }
     return;
@@ -971,7 +972,7 @@ EXT_DECL VOS_ERR_T vos_semaTake (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaTake() ERROR invalid parameter 'sema' == NULL\n");
         result = VOS_PARAM_ERR;
     }
     else 
@@ -1019,7 +1020,7 @@ EXT_DECL void vos_semaGive (
     /* Check parameter */
     if (sema == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
+        vos_printLogStr(VOS_LOG_ERROR, "vos_semaGive() ERROR invalid parameter 'sema' == NULL\n");
     }
     else
     {

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  */
 
 #ifndef VXWORKS
@@ -98,7 +99,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
     *pHandle = (VOS_SHRD_T) vos_memAlloc(sizeof (struct VOS_SHRD));
     if (*pHandle == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Shared Memory Handle create failed\n");
+        vos_printLogStr(VOS_LOG_ERROR, "Shared Memory Handle create failed\n");
         return ret;
     }
     else
