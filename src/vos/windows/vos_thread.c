@@ -37,7 +37,7 @@
 #include <errno.h>
 #include <sys/timeb.h>
 #include <time.h>
-#include <pthread.h>
+#include "pthread.h"
 #include <semaphore.h>
 #include <string.h>
 
@@ -187,7 +187,11 @@ pthread_t *vos_getFreeThreadHandle (void)
 
         for (i = 0; i < sizeof(threadHandle) / sizeof(pthread_t); i++)
         {
+#ifdef PTW32_VERSION
             if (threadHandle[i].p == NULL)
+#else /*PTW32_VERSION*/
+            if ((threadHandle[i]) == 0)
+#endif /*PTW32_VERSION*/
             {
                 return (&threadHandle[i]);
             }
@@ -484,7 +488,15 @@ EXT_DECL void vos_getTime (
     }
     else
     {
+#ifdef __GNUC__
+    #ifdef MINGW_HAS_SECURE_API
+        if (_ftime_s( &curTime ) == 0)
+    #else /*MINGW_HAS_SECURE_API*/
+        if (_ftime( &curTime ) == 0)
+    #endif  /*MINGW_HAS_SECURE_API*/
+#else /*__GNUC__*/
         if (_ftime32_s( &curTime ) == 0)
+#endif /*__GNUC__*/
         {
             pTime->tv_sec   = curTime.time;
             pTime->tv_usec  = curTime.millitm * 1000;
@@ -513,7 +525,15 @@ EXT_DECL const CHAR8 *vos_getTimeStamp (void)
 
     memset(timeString, 0, sizeof(timeString));
 
-    if (_ftime32_s( &curTime ) == 0)
+#ifdef __GNUC__
+    #ifdef MINGW_HAS_SECURE_API
+        if (_ftime_s( &curTime ) == 0)
+    #else /*MINGW_HAS_SECURE_API*/
+        if (_ftime( &curTime ) == 0)
+    #endif  /*MINGW_HAS_SECURE_API*/
+#else /*__GNUC__*/
+        if (_ftime32_s( &curTime ) == 0)
+#endif /*__GNUC__*/
     {
         if (_localtime32_s(&curTimeTM, &curTime.time) == 0)
         {

@@ -1058,8 +1058,7 @@ void  trdp_releaseSocket (
                     vos_sockLeaveMC(iface[lIndex].sock, mcGroupUsed, iface[lIndex].bindAddr);
                 }
             }
-            else
-                ;
+            else {}
         }
 #if MD_SUPPORT
         else /* TCP socket */
