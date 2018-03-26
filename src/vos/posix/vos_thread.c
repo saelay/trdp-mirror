@@ -437,8 +437,13 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
     int policy;
     struct sched_param param;
 
-    retValue = pthread_getschedparam((pthread_t)thread, &policy, &param);
-
+    /* Validate the thread id. sig=0 will not kill the thread but will check if the thread is valid.*/
+    retValue = pthread_kill (*(pthread_t *)thread, 0);
+    if (0 == retValue)
+    {
+        /* the thread does exist. */
+        retValue = pthread_getschedparam(*(pthread_t *)thread, &policy, &param);
+    }
     return (retValue == 0 ? VOS_NO_ERR : VOS_PARAM_ERR);
 }
 
