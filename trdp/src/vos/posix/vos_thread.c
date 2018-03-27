@@ -40,6 +40,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <sched.h>
+#include <signal.h>
 
 #ifdef __APPLE__
 #include <uuid/uuid.h>
