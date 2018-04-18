@@ -366,7 +366,7 @@ typedef struct
     UINT8                   reserved06;     /**< reserved for future use (= 0) */
     UINT8                   opVehCnt;
                                             /**< number of vehicles in train (1..63) */
-    TRDP_OP_VEHICLE_T       opVehList[TRDP_MAX_CST_CNT];    /**< operational vehicle list starting with op. vehicle #1
+    TRDP_OP_VEHICLE_T       opVehList[TRDP_MAX_VEH_CNT];    /**< operational vehicle list starting with op. vehicle #1
                                                              Note: This is a variable size array, only opCstCnt array elements
                                                              are present        */
     UINT32                  opTrnTopoCnt;   /**< operational train topology counter 
