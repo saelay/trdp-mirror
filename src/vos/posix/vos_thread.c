@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-04-18: Ticket #195: Invalid thread handle (SEGFAULT)
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
  *      BL 2017-02-10: Ticket #142: Compiler warnings / MISRA-C 2012 issues
@@ -40,7 +41,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <sched.h>
-#include <signal.h>
 
 #ifdef __APPLE__
 #include <uuid/uuid.h>
@@ -257,7 +257,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     VOS_THREAD_FUNC_T       pFunction,
     void                    *pArguments)
 {
-    pthread_t   hThread;
+    pthread_t           hThread;
     pthread_attr_t      threadAttrib;
     struct sched_param  schedParam;  /* scheduling priority */
     int         retCode;
@@ -265,6 +265,11 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     if (!vosThreadInitialised)
     {
         return VOS_INIT_ERR;
+    }
+
+    if ((pThread == NULL) || (pName == NULL))
+    {
+        return VOS_PARAM_ERR;
     }
 
     if (interval > 0u)
@@ -438,13 +443,8 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
     int policy;
     struct sched_param param;
 
-    /* Validate the thread id. sig=0 will not kill the thread but will check if the thread is valid.*/
-    retValue = pthread_kill (*(pthread_t *)thread, 0);
-    if (0 == retValue)
-    {
-        /* the thread does exist. */
-        retValue = pthread_getschedparam(*(pthread_t *)thread, &policy, &param);
-    }
+    retValue = pthread_getschedparam((pthread_t)thread, &policy, &param);
+
     return (retValue == 0 ? VOS_NO_ERR : VOS_PARAM_ERR);
 }
 

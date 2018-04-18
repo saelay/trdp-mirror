@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-04-18: MD notify: pass optional cb pointer to mdsend
  *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
@@ -2527,7 +2528,7 @@ TRDP_ERR_T tlm_notify (
                TRDP_MSG_MN,                            /* notify without reply */
                appHandle,
                pUserRef,
-               NULL,                                   /* callback function */
+               pfCbFunction,                           /* callback function */
                NULL,                                   /* no return session id?
                                                           useful to abort send while waiting of output queue */
                comId,
