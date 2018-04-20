@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-04-20: Ticket #196 setRedundant with redId = 0 stops all publishers
  *      BL 2018-04-18: MD notify: pass optional cb pointer to mdsend
  *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
  *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
@@ -1008,8 +1009,8 @@ TRDP_ERR_T tlp_setRedundant (
             /*    Set the redundancy flag for every PD with the specified ID */
             for (iterPD = appHandle->pSndQueue; NULL != iterPD; iterPD = iterPD->pNext)
             {
-                if (iterPD->redId == redId ||       /* packet redundant ID matches                      */
-                    (iterPD->redId && 0 == redId))  /* all set redundant ID are targeted if redId == 0  */
+                if ((iterPD->redId != 0u) && (iterPD->redId == redId) ||       /* packet redundant ID matches       */
+                    ((iterPD->redId != 0u) && (0u == redId)))   /* all set redundant ID are targeted if redId == 0  */
                 {
                     if (TRUE == leader)
                     {
