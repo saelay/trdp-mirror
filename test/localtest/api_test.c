@@ -1675,7 +1675,7 @@ static int test13 (int argc, char *argv[])
 
         /* We need to call put once to start the transmission! */
 
-        (void) tlp_put(gSession1.appHandle, pubHandle, TEST13_DATA, TEST13_DATA_LEN);
+        (void) tlp_put(gSession1.appHandle, pubHandle, (UINT8*)TEST13_DATA, TEST13_DATA_LEN);
 
         /*
          Enter the main processing loop.
@@ -1719,6 +1719,120 @@ static int test13 (int argc, char *argv[])
 }
 
 
+/**********************************************************************************************************************/
+/** test14
+ *
+ *  @retval         0        no error
+ *  @retval         1        some error
+ */
+static UINT32   gTest14CBCounter = 0;
+
+static void test14PDcallBack (
+                             void                    *pRefCon,
+                             TRDP_APP_SESSION_T      appHandle,
+                             const TRDP_PD_INFO_T    *pMsg,
+                             UINT8                   *pData,
+                             UINT32                  dataSize)
+{
+    void * pSentdata = (void*) pMsg->pUserRef;
+
+    gTest14CBCounter++;
+
+    /*    Check why we have been called    */
+    switch (pMsg->resultCode)
+    {
+        case TRDP_NO_ERR:
+            if ((pSentdata != NULL) && (pData != NULL) && (memcmp(pData, pSentdata, dataSize) == 0))
+            {
+                fprintf(gFp, "received data matches (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
+            }
+            else
+            {
+                fprintf(gFp, "some data received (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
+            }
+            break;
+
+        case TRDP_TIMEOUT_ERR:
+            /* The application can decide here if old data shall be invalidated or kept    */
+            fprintf(gFp, "Packet timed out (ComId %d, SrcIP: %s)\n",
+                    pMsg->comId,
+                    vos_ipDotted(pMsg->srcIpAddr));
+            break;
+        default:
+            fprintf(gFp, "Error on packet received (ComId %d), err = %d\n",
+                    pMsg->comId,
+                    pMsg->resultCode);
+            break;
+    }
+}
+
+static int test14 (int argc, char *argv[])
+{
+    PREPARE("Publish & Subscribe, Callback", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+
+    /* ------------------------- test code starts here --------------------------- */
+
+    {
+        TRDP_PUB_T      pubHandle;
+        TRDP_SUB_T      subHandle;
+        char            data1[1432u];
+
+        gTest14CBCounter = 0;
+
+#define TEST14_COMID     1000u
+#define TEST14_INTERVAL  100000u
+#define TEST14_DATA      "Hello World!"
+
+#define TEST14_LOOP      TEST14_INTERVAL
+#define TEST14_WAIT      600000u
+
+        /*    Copy the packet into the internal send queue, prepare for sending.    */
+
+        err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST14_COMID, 0u, 0u,
+                          0u, //gSession1.ifaceIP,                   /* Source */
+                          gSession2.ifaceIP,//gDestMC,               /* Destination */
+                          TEST14_INTERVAL,
+                          0u, TRDP_FLAGS_DEFAULT, NULL, NULL, 0u);
+
+        IF_ERROR("tlp_publish");
+
+        err = tlp_subscribe(gSession2.appHandle, &subHandle, data1, test14PDcallBack,
+                            TEST14_COMID, 0u, 0u,
+                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
+                            0u,//gDestMC,                            /* Destination */
+                            TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB, TEST14_INTERVAL * 3, TRDP_TO_DEFAULT);
+
+
+        IF_ERROR("tlp_subscribe");
+
+        /*
+         Enter the main processing loop.
+         */
+        int counter = 0;
+        while (counter < 5)         /* 0.5 seconds */
+        {
+
+            sprintf(data1, "Just a Counter: %08d", counter++);
+
+            err = tlp_put(gSession1.appHandle, pubHandle, (UINT8 *) data1, (UINT32) strlen(data1));
+            IF_ERROR("tap_put");
+
+            vos_threadDelay(TEST14_LOOP);
+
+        }
+
+        /* test if no of callbacks equals no of sent packets (bug report Bryce Jensen) */
+        /* wait a bit */
+        vos_threadDelay(TEST14_WAIT);
+        fprintf(gFp, "%u max. expected, %u callbacks received\n", (counter * TEST14_LOOP + TEST14_WAIT)/ TEST14_INTERVAL, gTest14CBCounter);
+    }
+
+    /* ------------------------- test code ends here --------------------------- */
+
+
+    CLEANUP;
+}
+
 
 
 
@@ -1736,11 +1850,12 @@ test_func_t *testArray[] =
     test6,
     test7,
     test8,
-    //test9,
-    //test10,
-    //test11,
+    test9,
+    test10,
+    test11,
     test12,
     test13,
+    test14,
     NULL
 };
 
@@ -1757,12 +1872,6 @@ int main (int argc, char *argv[])
     int             ch;
     unsigned int    ip[4];
     UINT32          testNo = 0;
-
-//    if (argc <= 1)
-//    {
-//        usage(argv[0]);
-//        return 1;
-//    }
 
     if (gFp == NULL)
     {
