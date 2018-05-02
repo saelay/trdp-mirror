@@ -97,7 +97,7 @@
 /**  Definitions for time out behaviour accd. table A.18 */
 #define TRDP_MD_INFINITE_TIME               (0)
 #define TRDP_MD_INFINITE_USEC_TIME          (0)
-#define TDRP_MD_MAX_USEC_TIME               (999999)
+#define TRDP_MD_MAX_USEC_TIME               (999999)
 
 /**  Default MD communication parameters   */
 #define TRDP_MD_DEFAULT_REPLY_TIMEOUT       5000000u                    /**< [us] default reply timeout 5s          */
@@ -148,7 +148,7 @@
 #define TRDP_MAX_URI_LEN        ((6u * TRDP_MAX_LABEL_LEN) + 8u)    /**< URI length excl. terminating '0'
                                                                                             and 1 padding   byte    */
 #define TRDP_MAX_FILE_NAME_LEN              128u                    /**< path and file name length incl. terminating '0'*/
-#define TDRP_VAR_SIZE                       0u                      /**< Variable size dataset                      */
+#define TRDP_VAR_SIZE                       0u                      /**< Variable size dataset                      */
 
 /** Message Types    */
 

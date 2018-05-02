@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14109" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="101300" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14109"/>
         <capability name="box content view" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -524,7 +524,7 @@
             </items>
         </menu>
         <window title="TRDP Visual Device Test" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="371">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <rect key="contentRect" x="376" y="173" width="887" height="660"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1028"/>
             <value key="minSize" type="size" width="887" height="660"/>
@@ -532,9 +532,9 @@
                 <rect key="frame" x="0.0" y="0.0" width="887" height="660"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <box autoresizesSubviews="NO" borderType="line" title="PD Receiver 1" id="532">
+                    <box borderType="line" title="PD Receiver 1" id="532">
                         <rect key="frame" x="468" y="555" width="402" height="97"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                         <view key="contentView" id="BbX-K1-p7P">
                             <rect key="frame" x="1" y="1" width="400" height="81"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -622,7 +622,7 @@
                                 </textField>
                                 <colorWell bordered="NO" id="555">
                                     <rect key="frame" x="347" y="47" width="35" height="23"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMinY="YES"/>
                                     <color key="color" red="1" green="0.75544607640000005" blue="0.25546240809999998" alpha="1" colorSpace="calibratedRGB"/>
                                 </colorWell>
                             </subviews>
@@ -991,7 +991,7 @@
                     </box>
                     <box autoresizesSubviews="NO" borderType="line" title="PD Sender" id="646">
                         <rect key="frame" x="17" y="431" width="442" height="221"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES"/>
                         <view key="contentView" id="c2e-Oi-feR">
                             <rect key="frame" x="1" y="1" width="440" height="205"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1183,7 +1183,7 @@
                     </box>
                     <box autoresizesSubviews="NO" borderType="line" title="MD Sender" id="706">
                         <rect key="frame" x="17" y="245" width="442" height="142"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
                         <view key="contentView" id="091-qY-a6Q">
                             <rect key="frame" x="1" y="1" width="440" height="126"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1284,7 +1284,7 @@
                                 </textField>
                                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="757">
                                     <rect key="frame" x="296" y="15" width="126" height="22"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="765">
                                         <font key="font" metaFont="system"/>
                                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
@@ -1311,7 +1311,7 @@
                                 </textField>
                                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="760">
                                     <rect key="frame" x="296" y="41" width="126" height="22"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="761">
                                         <numberFormatter key="formatter" formatterBehavior="default10_4" usesGroupingSeparator="NO" groupingSize="0" minimumIntegerDigits="0" maximumIntegerDigits="42" id="762"/>
                                         <font key="font" metaFont="system"/>
@@ -1321,7 +1321,7 @@
                                 </textField>
                                 <colorWell bordered="NO" id="767">
                                     <rect key="frame" x="387" y="93" width="35" height="23"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
                                     <color key="color" red="1" green="0.75544607640000005" blue="0.25546240809999998" alpha="1" colorSpace="calibratedRGB"/>
                                 </colorWell>
                             </subviews>
@@ -1329,7 +1329,7 @@
                     </box>
                     <box autoresizesSubviews="NO" boxType="custom" titlePosition="noTitle" id="656">
                         <rect key="frame" x="20" y="148" width="436" height="77"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" heightSizable="YES"/>
                         <view key="contentView" id="rVp-7T-lxW">
                             <rect key="frame" x="1" y="1" width="434" height="75"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1341,7 +1341,7 @@
                                 </imageView>
                                 <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="YES" id="462">
                                     <rect key="frame" x="1" y="27" width="315" height="21"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="TRDP Visual Device" id="463">
                                         <font key="font" metaFont="system" size="17"/>
                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -1382,7 +1382,7 @@
                     </scrollView>
                     <button horizontalHuggingPriority="750" verticalHuggingPriority="750" id="789">
                         <rect key="frame" x="20" y="119" width="13" height="13"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="disclosureTriangle" bezelStyle="disclosure" imagePosition="above" alignment="left" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="790">
                             <behavior key="behavior" pushIn="YES" changeBackground="YES" changeGray="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
@@ -1390,6 +1390,7 @@
                     </button>
                 </subviews>
             </view>
+            <point key="canvasLocation" x="131.5" y="-271"/>
         </window>
         <customObject id="420" customClass="NSFontManager"/>
         <customObject id="464" customClass="Controller">
