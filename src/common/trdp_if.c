@@ -1009,8 +1009,10 @@ TRDP_ERR_T tlp_setRedundant (
             /*    Set the redundancy flag for every PD with the specified ID */
             for (iterPD = appHandle->pSndQueue; NULL != iterPD; iterPD = iterPD->pNext)
             {
-                if ((iterPD->redId != 0u) && (iterPD->redId == redId) ||       /* packet redundant ID matches       */
-                    ((iterPD->redId != 0u) && (0u == redId)))   /* all set redundant ID are targeted if redId == 0  */
+                if ((0u != iterPD->redId)                           /* packet has redundant ID       */
+                    &&
+                    ((0u == redId) || (iterPD->redId == redId)))    /* all set redundant ID are targeted if redId == 0
+                                                                      or packet redundant ID matches       */
                 {
                     if (TRUE == leader)
                     {
@@ -1045,14 +1047,14 @@ TRDP_ERR_T tlp_setRedundant (
 
 /**********************************************************************************************************************/
 /** Get status of redundant ComIds.
- *  Only the status of the first redundancy group entry is returned will be returned!
+ *  Only the status of the first found redundancy group entry will be returned!
  *
  *  @param[in]      appHandle           the handle returned by tlc_openSession
  *  @param[in]      redId               will be returned for all ComID's with the given redId
  *  @param[in,out]  pLeader             TRUE if we're sending this redundancy group (leader)
  *
  *  @retval         TRDP_NO_ERR         no error
- *  @retval         TRDP_PARAM_ERR      parameter error / redId not existing
+ *  @retval         TRDP_PARAM_ERR      redId invalid or not existing
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlp_getRedundant (
@@ -1063,7 +1065,7 @@ EXT_DECL TRDP_ERR_T tlp_getRedundant (
     TRDP_ERR_T  ret = TRDP_NOINIT_ERR;
     PD_ELE_T    *iterPD;
 
-    if (pLeader == NULL)
+    if ((pLeader == NULL) || (redId == 0u))
     {
         return TRDP_PARAM_ERR;
     }
@@ -1146,6 +1148,9 @@ EXT_DECL TRDP_ERR_T tlc_setETBTopoCount (
  *
  *  @param[in]      appHandle           The handle returned by tlc_openSession
  *  @param[in]      opTrnTopoCnt        New operational topocount value
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
 EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
     TRDP_APP_SESSION_T  appHandle,
@@ -1190,7 +1195,7 @@ EXT_DECL UINT32 tlc_getETBTopoCount (TRDP_APP_SESSION_T appHandle)
     {
         return appHandle->etbTopoCnt;
     }
-    return 0;
+    return 0u;
 }
 
 /**********************************************************************************************************************/
@@ -1209,7 +1214,7 @@ EXT_DECL UINT32 tlc_getOpTrainTopoCount (
     {
         return appHandle->opTrnTopoCnt;
     }
-    return 0;
+    return 0u;
 }
 
 /**********************************************************************************************************************/

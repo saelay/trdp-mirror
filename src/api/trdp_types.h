@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
@@ -322,7 +323,7 @@ struct TRDP_DATASET;
 typedef struct
 {
     UINT32              type;           /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000   */
-    UINT32              size;           /**< Number of items or TDRP_VAR_SIZE (0)                       */
+    UINT32              size;           /**< Number of items or TRDP_VAR_SIZE (0)                       */
     CHAR8               *unit;          /**< Unit text for visualisation                                */
     REAL32              scale;          /**< Factor for visualisation                                   */
     INT32               offset;         /**< Offset for visualisation   (val = scale * x + offset)      */

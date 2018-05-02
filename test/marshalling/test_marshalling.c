@@ -16,14 +16,12 @@
  *
  * $Id$
  *
+ *      BL 2018-04-27: Testing ticket #197
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
 #include <stdio.h>
 #include <string.h>
 #include "tau_marshall.h"
-
-#define TEST_COMID  1000
-
 
 /*    Test data sets    */
 TRDP_DATASET_T  gDataSet1990 =
@@ -460,6 +458,54 @@ TRDP_DATASET_T  gDataSet1001 =
     }
 };
 
+TRDP_DATASET_T  gDataSet2002 =
+{
+    2002,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    3,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
+        {
+            TRDP_CHAR8,
+            1,
+            0,0,0,NULL
+        },
+        {
+            TRDP_INT32,
+            1,
+            0,0,0,NULL
+        },
+        {
+            TRDP_INT32,
+            1,
+            0,0,0,NULL
+        }
+    }
+};
+
+TRDP_DATASET_T  gDataSet2003 =
+{
+    2003,       /*    dataset/com ID  */
+    0,          /*    reserved        */
+    3,          /*    No of elements, var size    */
+    {           /*    TRDP_DATASET_ELEMENT_T[]    */
+        {
+            TRDP_UINT32,
+            1,
+            0,0,0,NULL
+        },
+        {
+            TRDP_INT32,
+            1,
+            0,0,0,NULL
+        },
+        {
+            2002,
+            1,
+            0,0,0,NULL
+        }
+    }
+};
+
 /*    Will be sorted by tau_initMarshall    */
 TRDP_DATASET_T  *gDataSets[] =
 {
@@ -468,7 +514,9 @@ TRDP_DATASET_T  *gDataSets[] =
     &gDataSet1990,
     &gDataSet1991,
     &gDataSet1992,
-    &gDataSet1993
+    &gDataSet1993,
+    &gDataSet2002,
+    &gDataSet2003
 };
 
 struct myDataSet1990
@@ -645,38 +693,52 @@ struct myDataSet1001
     {1, 0, 1, 0}                       /* UINT8 array var size */
 };
 
+/* Test ticket #197 */
+struct DS2 {
+    CHAR8 a1;
+    INT32 b1;
+    INT32 c1;
+} gMyDataSet2002  =
+{
+    'a', 0x12345678, 0x23456789
+};
+
+struct myDataSet2003 {
+    UINT32 a;
+    INT32 b;
+    struct DS2 c;
+} gMyDataSet2003  =
+{
+    0x12345678, -1, {0,0,0}
+};
 
 TRDP_COMID_DSID_MAP_T   gComIdMap[] =
 {
     {1000, 1000},
-    {1001, 1001}
+    {1001, 1001},
+    {2003, 2003}
 };
 
-UINT8 gDstDataBuffer[1500];
+UINT8   gDstDataBuffer[1500];
+UINT32  *gpRefCon = NULL;
+
 struct myDataSet1000    gMyDataSet1000Copy;
 struct myDataSet1001    gMyDataSet1001Copy;
+struct myDataSet2003    gMyDataSet2003Copy;
 
 /***********************************************************************************************************************
     Test marshalling and unmarshalling of test dataset
 ***********************************************************************************************************************/
-int main ()
+static int test1()
 {
-    UINT32      *refCon;
     TRDP_ERR_T  err;
     UINT32      compSize    = 0;
     UINT32      bufSize     = 0;
     UINT32      bufSize2;
 
-    err = tau_initMarshall((void *)&refCon, 2, gComIdMap, 6, gDataSets);
-
-    if (err != TRDP_NO_ERR)
-    {
-        printf("tau_initMarshall returns error %d\n", err);
-        return 1;
-    }
 
     /*    Compute size of marshalled data */
-    err = tau_calcDatasetSizeByComId(refCon, 1000, (UINT8 *) &gMyDataSet1000, sizeof(gMyDataSet1000), &compSize, NULL);
+    err = tau_calcDatasetSizeByComId(gpRefCon, 1000, (UINT8 *) &gMyDataSet1000, sizeof(gMyDataSet1000), &compSize, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -698,7 +760,7 @@ int main ()
     bufSize = compSize;
     memset(gDstDataBuffer, 0, bufSize);
 
-    err = tau_marshall(refCon, 1000, (UINT8 *) &gMyDataSet1000, sizeof(gMyDataSet1000), gDstDataBuffer, &bufSize, NULL);
+    err = tau_marshall(gpRefCon, 1000, (UINT8 *) &gMyDataSet1000, sizeof(gMyDataSet1000), gDstDataBuffer, &bufSize, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -720,7 +782,7 @@ int main ()
     bufSize2 = sizeof(gMyDataSet1000Copy);
     memset(&gMyDataSet1000Copy, 0, bufSize2);
 
-    err = tau_unmarshall(refCon, 1000, gDstDataBuffer, bufSize, (UINT8 *) &gMyDataSet1000Copy, &bufSize2, NULL);
+    err = tau_unmarshall(gpRefCon, 1000, gDstDataBuffer, bufSize, (UINT8 *) &gMyDataSet1000Copy, &bufSize2, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -741,3 +803,92 @@ int main ()
 
     return 0;
 }
+
+static int test2()
+{
+    TRDP_ERR_T  err;
+    UINT32      compSize    = 0;
+    UINT32      bufSize     = 0;
+    UINT32      bufSize2;
+
+    gMyDataSet2003.c = gMyDataSet2002;
+
+    /*    Compute size of marshalled data */
+    err = tau_calcDatasetSizeByComId(gpRefCon, 2003, (UINT8 *) &gMyDataSet2003, sizeof(gMyDataSet2003), &compSize, NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tau_calcDatasetSizeByComId returns error %d\n", err);
+        return 1;
+    }
+
+    printf("Precomputed size of marshalled dataset for ComId %d is %u...\n", 2003, compSize);
+
+    if (compSize <= sizeof(gMyDataSet2003))
+    {
+        printf("...seems OK!\n");
+    }
+    else
+    {
+        printf("...### Precomputed size is wrong (> %lu which is sizeof(ds) )!\n", sizeof(gMyDataSet2003));
+    }
+
+    bufSize = compSize;
+    memset(gDstDataBuffer, 0, bufSize);
+
+    err = tau_marshall(gpRefCon, 2003, (UINT8 *) &gMyDataSet2003, sizeof(gMyDataSet2003), gDstDataBuffer, &bufSize, NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tau_marshall returns error %d\n", err);
+        return 1;
+    }
+
+    printf("Marshalled size of dataset for ComId %d is %u\n", 2003, bufSize);
+
+    if (compSize <= sizeof(gMyDataSet2003))
+    {
+        printf("...seems OK!\n");
+    }
+    else
+    {
+        printf("...### Marshalled size is different!\n");
+    }
+
+    bufSize2 = sizeof(gMyDataSet2003Copy);
+    memset(&gMyDataSet2003Copy, 0, bufSize2);
+
+    err = tau_unmarshall(gpRefCon, 2003, gDstDataBuffer, bufSize, (UINT8 *) &gMyDataSet2003Copy, &bufSize2, NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tau_unmarshall returns error %d\n", err);
+        return 1;
+    }
+
+    if (memcmp(&gMyDataSet2003, &gMyDataSet2003Copy, sizeof(gMyDataSet2003)) != 0)
+    {
+        printf("Something's wrong in the state of Marshalling!\n");
+        return 1;
+
+    }
+    else
+    {
+        printf("Marshalling and Unmarshalling data matched!\n");
+    }
+
+    return 0;
+}
+
+/******/
+int main ()
+{
+    TRDP_ERR_T  err;
+
+    err = tau_initMarshall((void *)&gpRefCon, sizeof(gComIdMap)/sizeof(TRDP_COMID_DSID_MAP_T), gComIdMap, 8, gDataSets);
+
+    //test1();
+    test2();
+    return 0;
+}
+
