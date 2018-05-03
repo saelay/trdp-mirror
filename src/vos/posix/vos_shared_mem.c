@@ -16,6 +16,7 @@
  *
  * $Id: vos_mem.h 282 2013-01-11 07:08:44Z 97029 $
  *
+ *      BL 2018-05-03: Ticket #193 Unused parameter warnings
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */
 
@@ -154,6 +155,8 @@ EXT_DECL VOS_ERR_T vos_sharedClose (
     VOS_SHRD_T  handle,
     const UINT8 *pMemoryArea)
 {
+    pMemoryArea = pMemoryArea;
+
     if (close(handle->fd) == -1)
     {
         vos_printLogStr(VOS_LOG_ERROR, "Shared Memory file close failed\n");

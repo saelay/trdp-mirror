@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings
@@ -224,11 +225,11 @@ VOS_ERR_T vos_sockSetBuffer (INT32 sock)
         if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, option_len) == -1)
         {
             (void)getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&optval, &option_len);
-            vos_printLog(VOS_LOG_WARNING, "Send buffer size out of limit (max: %u)\n", optval);
+            vos_printLog(VOS_LOG_WARNING, "Send buffer size out of limit (max: %d)\n", optval);
             return VOS_SOCK_ERR;
         }
     }
-    vos_printLog(VOS_LOG_INFO, "Send buffer limit = %u\n", optval);
+    vos_printLog(VOS_LOG_INFO, "Send buffer limit = %d\n", optval);
 
     (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
     if (optval < TRDP_SOCKBUF_SIZE)
@@ -237,11 +238,11 @@ VOS_ERR_T vos_sockSetBuffer (INT32 sock)
         if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, option_len) == -1)
         {
             (void)getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&optval, &option_len);
-            vos_printLog(VOS_LOG_WARNING, "Recv buffer size out of limit (max: %u)\n", optval);
+            vos_printLog(VOS_LOG_WARNING, "Recv buffer size out of limit (max: %d)\n", optval);
             return VOS_SOCK_ERR;
         }
     }
-    vos_printLog(VOS_LOG_INFO, "Recv buffer limit = %u\n", optval);
+    vos_printLog(VOS_LOG_INFO, "Recv buffer limit = %d\n", optval);
 
     return VOS_NO_ERR;
 }
@@ -345,8 +346,11 @@ EXT_DECL const CHAR8 *vos_ipDotted (
 {
     static CHAR8 dotted[16];
 
-    (void)snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u", (ipAddress >> 24), ((ipAddress >> 16) & 0xFF),
-                   ((ipAddress >> 8) & 0xFF), (ipAddress & 0xFF));
+    (void)snprintf(dotted, sizeof(dotted), "%u.%u.%u.%u",
+                   (unsigned int)(ipAddress >> 24),
+                   (unsigned int)((ipAddress >> 16) & 0xFF),
+                   (unsigned int)((ipAddress >> 8) & 0xFF),
+                   (unsigned int)(ipAddress & 0xFF));
 
     return dotted;
 }
@@ -438,20 +442,20 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                 }
                 vos_printLog(VOS_LOG_INFO, "IP-Addr for '%s': %u.%u.%u.%u\n",
                              ifAddrs[count].name,
-                             (ifAddrs[count].ipAddr >> 24) & 0xFF,
-                             (ifAddrs[count].ipAddr >> 16) & 0xFF,
-                             (ifAddrs[count].ipAddr >> 8)  & 0xFF,
-                             ifAddrs[count].ipAddr        & 0xFF);
+                             (unsigned int)(ifAddrs[count].ipAddr >> 24) & 0xFF,
+                             (unsigned int)(ifAddrs[count].ipAddr >> 16) & 0xFF,
+                             (unsigned int)(ifAddrs[count].ipAddr >> 8)  & 0xFF,
+                             (unsigned int)(ifAddrs[count].ipAddr        & 0xFF));
                 if (vos_getMacAddress(ifAddrs[count].mac, ifAddrs[count].name) == TRUE)
                 {
                     vos_printLog(VOS_LOG_INFO, "Mac-Addr for '%s': %02x:%02x:%02x:%02x:%02x:%02x\n",
                                  ifAddrs[count].name,
-                                 ifAddrs[count].mac[0],
-                                 ifAddrs[count].mac[1],
-                                 ifAddrs[count].mac[2],
-                                 ifAddrs[count].mac[3],
-                                 ifAddrs[count].mac[4],
-                                 ifAddrs[count].mac[5]);
+                                 (unsigned int)ifAddrs[count].mac[0],
+                                 (unsigned int)ifAddrs[count].mac[1],
+                                 (unsigned int)ifAddrs[count].mac[2],
+                                 (unsigned int)ifAddrs[count].mac[3],
+                                 (unsigned int)ifAddrs[count].mac[4],
+                                 (unsigned int)ifAddrs[count].mac[5]);
                 }
                 if (cursor->ifa_flags & IFF_RUNNING)
                 {
@@ -568,7 +572,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
 {
     if (pMAC == NULL)
     {
-        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error\n");
         return VOS_PARAM_ERR;
     }
 
@@ -607,7 +611,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     if (pSock == NULL)
     {
-        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error\n");
         return VOS_PARAM_ERR;
     }
 
@@ -629,7 +633,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
 
     *pSock = (INT32) sock;
 
-    vos_printLog(VOS_LOG_DBG, "vos_sockOpenUDP: socket()=%d success\n", sock);
+    vos_printLog(VOS_LOG_DBG, "vos_sockOpenUDP: socket()=%d success\n", (int)sock);
     return VOS_NO_ERR;
 }
 
@@ -659,7 +663,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     if (pSock == NULL)
     {
-        vos_printLogStr(VOS_LOG_ERROR, "Parameter error");
+        vos_printLogStr(VOS_LOG_ERROR, "Parameter error\n");
         return VOS_PARAM_ERR;
     }
 
@@ -680,7 +684,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
 
     *pSock = (INT32) sock;
 
-    vos_printLog(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", sock);
+    vos_printLog(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", (int)sock);
     return VOS_NO_ERR;
 }
 
@@ -699,13 +703,13 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     if (close(sock) == -1)
     {
         vos_printLog(VOS_LOG_ERROR,
-                     "vos_sockClose(%d) called with unknown descriptor\n", sock);
+                     "vos_sockClose(%d) called with unknown descriptor\n", (int)sock);
         return VOS_PARAM_ERR;
     }
     else
     {
         vos_printLog(VOS_LOG_DBG,
-                     "vos_sockClose(%d) okay\n", sock);
+                     "vos_sockClose(%d) okay\n", (int)sock);
     }
 
     return VOS_NO_ERR;
@@ -1062,7 +1066,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
         char buff[VOS_MAX_ERR_STR_SIZE];
         STRING_ERR(buff);
         vos_printLog(VOS_LOG_ERROR, "sendto() to %s:%u failed (Err: %s)\n",
-                     inet_ntoa(destAddr.sin_addr), port, buff);
+                     inet_ntoa(destAddr.sin_addr), (unsigned int)port, buff);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -1353,7 +1357,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
                    STRING_ERR(buff);
                    vos_printLog(VOS_LOG_ERROR,
                                 "accept() listenFd(%d) failed (Err: %s)\n",
-                                *pSock,
+                                (int)*pSock,
                                 buff);
                    return VOS_UNKNOWN_ERR;
                }

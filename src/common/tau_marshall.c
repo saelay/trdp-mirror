@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-03: Ticket #193 Unused parameter warnings
  *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-05-08: Compiler warnings, MISRA-C
  *      BL 2017-05-08: Ticket #156 Recursion counter never decremented (+ compiler warnings, MISRA)
@@ -1012,6 +1013,8 @@ EXT_DECL TRDP_ERR_T tau_initMarshall (
 {
     UINT32 i, j;
 
+    ppRefCon = ppRefCon;
+
     if ((pDataset == NULL) || (numDataSet == 0u) || (numComId == 0u) || (pComIdDsIdMap == 0u))
     {
         return TRDP_PARAM_ERR;
@@ -1074,6 +1077,8 @@ EXT_DECL TRDP_ERR_T tau_marshall (
     TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
+
+    pRefCon = pRefCon;
 
     if ((0u == comId) || (NULL == pSrc) || (NULL == pDest) || (NULL == pDestSize) || (0u == *pDestSize))
     {
@@ -1147,6 +1152,8 @@ EXT_DECL TRDP_ERR_T tau_unmarshall (
     TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
+
+    pRefCon = pRefCon;
 
     if ((0u == comId) || (NULL == pSrc) || (NULL == pDest) || (NULL == pDestSize) || (0u == *pDestSize))
     {
@@ -1222,6 +1229,8 @@ EXT_DECL TRDP_ERR_T tau_marshallDs (
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
+    pRefCon = pRefCon;
+
     if ((0u == dsId) || (NULL == pSrc) || (NULL == pDest) || (NULL == pDestSize) || (0u == *pDestSize))
     {
         return TRDP_PARAM_ERR;
@@ -1295,6 +1304,8 @@ EXT_DECL TRDP_ERR_T tau_unmarshallDs (
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
+    pRefCon = pRefCon;
+
     if ((0u == dsId) || (NULL == pSrc) || (NULL == pDest) || (NULL == pDestSize) || (0u == *pDestSize))
     {
         return TRDP_PARAM_ERR;
@@ -1367,6 +1378,8 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
 
+    pRefCon = pRefCon;
+
     if ((0u == dsId) || (NULL == pSrc) || (NULL == pDestSize))
     {
         return TRDP_PARAM_ERR;
@@ -1436,6 +1449,8 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
     TRDP_ERR_T          err;
     TRDP_DATASET_T      *pDataset;
     TAU_MARSHALL_INFO_T info;
+
+    pRefCon = pRefCon;
 
     if ((0u == comId) || (NULL == pSrc) || (NULL == pDestSize))
     {

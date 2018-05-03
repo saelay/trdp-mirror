@@ -173,6 +173,8 @@ static void ttiPDCallback (
     int         changed         = 0;
     VOS_SEMA_T  waitForInaug    = (VOS_SEMA_T) pMsg->pUserRef;
 
+    pRefCon = pRefCon;
+
     if (pMsg->comId == TTDB_STATUS_COMID)
     {
         if ((pMsg->resultCode == TRDP_NO_ERR) &&
@@ -508,9 +510,9 @@ static void ttiMDCallback (
 }
 
 /**********************************************************************************************************************/
-/**    Function called on reception of process data
+/**    Function to request TTDB data from ECSP
  *
- *  Handle and process incoming data, update our data store
+ *  Request update of our data store
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[in]      comID           Communication ID of request
@@ -586,12 +588,12 @@ static void ttiRequestTTDBdata (
 /**********************************************************************************************************************/
 /**    Function to init TTI access
  *
- *  Subscribe to necessary process data for correct ECSP handling
+ *  Subscribe to necessary process data for correct ECSP handling, further calls need DNS!
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
  *  @param[in]      userAction      Semaphore to fire if inauguration took place.
- *  @param[in]      ecspIpAddr      ECSP IP address.
- *  @param[in]      hostsFileName   Optional host file name as ECSP replacement.
+ *  @param[in]      ecspIpAddr      ECSP IP address. Currently not used.
+ *  @param[in]      hostsFileName   Optional host file name as ECSP replacement. Currently not implemented.
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error
@@ -607,6 +609,9 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
     {
         return TRDP_INIT_ERR;
     }
+
+    ecspIpAddr = ecspIpAddr;
+    hostsFileName = hostsFileName;
 
     appHandle->pTTDB = (TAU_TTDB_T *) vos_memAlloc(sizeof(TAU_TTDB_T));
     if (appHandle->pTTDB == NULL)
@@ -1272,7 +1277,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
  *                                   '00'B = not known (corrected vehicle)
  *                                   '01'B = same as operational train direction
  *                                   '10'B = inverse to operational train direction
- *  @param[in]      pVehLabel       vehLabel = NULL means own vehicle if cstLabel == NULL
+ *  @param[in]      pVehLabel       vehLabel = NULL means own vehicle if cstLabel == NULL, currently ignored.
  *  @param[in]      pCstLabel       cstLabel = NULL means own consist
  *
  *  @retval         TRDP_NO_ERR     no error
@@ -1295,6 +1300,8 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     {
         return TRDP_PARAM_ERR;
     }
+
+    pVehLabel = pVehLabel;
 
     *pVehOrient = 0;
     *pCstOrient = 0;
