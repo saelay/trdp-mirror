@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-04-18: Ticket #195: Invalid thread handle (SEGFAULT)
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings, doxygen comment errors
@@ -108,6 +109,8 @@ static int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
 */
 int sem_init (sem_t *pSema, int flags, unsigned int mode)
 {
+#pragma unused (flags)
+    
     pSema = sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)mode);
     if (pSema == SEM_FAILED)
     {
@@ -176,8 +179,8 @@ EXT_DECL void vos_cyclicThread (
                 waitingTime = 0U;
                 /* Log the runtime violation */
                 vos_printLog(VOS_LOG_ERROR,
-                             "cyclic thread with interval %d usec was running  %d usec\n",
-                             interval, execTime);
+                             "cyclic thread with interval %u usec was running  %u usec\n",
+                             (unsigned int)interval, (unsigned int)execTime);
             }
             else
             {
@@ -191,8 +194,8 @@ EXT_DECL void vos_cyclicThread (
             waitingTime = 0U;
             /* Have this value range violation logged */
             vos_printLog(VOS_LOG_ERROR,
-                         "cyclic thread with interval %d usec exceeded time out by running %ld sec\n",
-                         interval, afterCall.tv_sec);
+                         "cyclic thread with interval %u usec exceeded time out by running %ld sec\n",
+                         (unsigned int)interval, (long)afterCall.tv_sec);
         }
         (void) vos_threadDelay(waitingTime);
         pthread_testcancel();
@@ -289,7 +292,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         vos_printLog(VOS_LOG_ERROR,
                      "%s pthread_attr_init() failed (Err:%d)\n",
                      pName,
-                     retCode );
+                     (int)retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -313,7 +316,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             VOS_LOG_ERROR,
             "%s pthread_attr_setstacksize() failed (Err:%d)\n",
             pName,
-            retCode );
+            (int)retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -326,7 +329,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             VOS_LOG_ERROR,
             "%s pthread_attr_setdetachstate() failed (Err:%d)\n",
             pName,
-            retCode );
+            (int)retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -340,8 +343,8 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
                 VOS_LOG_ERROR,
                 "%s pthread_attr_setschedpolicy(%d) failed (Err:%d)\n",
                 pName,
-                policy,
-                retCode );
+                (int)policy,
+                (int)retCode );
             return VOS_THREAD_ERR;
         }
     }
@@ -355,8 +358,8 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             VOS_LOG_ERROR,
             "%s pthread_attr_setschedparam/priority(%d) failed (Err:%d)\n",
             pName,
-            priority,
-            retCode );
+            (int)priority,
+            (int)retCode );
         /*return VOS_THREAD_ERR; */
     }
 
@@ -369,7 +372,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             VOS_LOG_ERROR,
             "%s pthread_attr_setinheritsched() failed (Err:%d)\n",
             pName,
-            retCode );
+            (int)retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -382,7 +385,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         vos_printLog(VOS_LOG_ERROR,
                      "%s pthread_create() failed (Err:%d)\n",
                      pName,
-                     retCode );
+                     (int)retCode );
         return VOS_THREAD_ERR;
     }
 
@@ -396,7 +399,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
             VOS_LOG_ERROR,
             "%s pthread_attr_destroy() failed (Err:%d)\n",
             pName,
-            retCode );
+            (int)retCode );
         return VOS_THREAD_ERR;
     }
     return VOS_NO_ERR;
@@ -422,7 +425,7 @@ EXT_DECL VOS_ERR_T vos_threadTerminate (
     {
         vos_printLog(VOS_LOG_ERROR,
                      "pthread_cancel() failed (Err:%d)\n",
-                     retCode );
+                     (int)retCode );
         return VOS_THREAD_ERR;
     }
     return VOS_NO_ERR;
@@ -772,7 +775,7 @@ EXT_DECL void vos_getUuid (
     ret = vos_sockGetMAC(&pUuID[10]);
     if (ret != VOS_NO_ERR)
     {
-        vos_printLog(VOS_LOG_ERROR, "vos_sockGetMAC() failed (Err:%d)\n", ret);
+        vos_printLog(VOS_LOG_ERROR, "vos_sockGetMAC() failed (Err:%d)\n", (int)ret);
     }
 #endif
 }
@@ -828,7 +831,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
     }
     else
     {
-        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", (int)err);
         vos_memFree(*pMutex);
         *pMutex = NULL;
         return VOS_MUTEX_ERR;
@@ -876,7 +879,7 @@ EXT_DECL VOS_ERR_T vos_mutexLocalCreate (
     }
     else
     {
-        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", (int)err);
         return VOS_MUTEX_ERR;
     }
 
@@ -910,7 +913,7 @@ EXT_DECL void vos_mutexDelete (
         }
         else
         {
-            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", (int)err);
         }
     }
 }
@@ -941,7 +944,7 @@ EXT_DECL void vos_mutexLocalDelete (
         }
         else
         {
-            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "Can not destroy Mutex (pthread err=%d)\n", (int)err);
         }
     }
 }
@@ -970,7 +973,7 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     err = pthread_mutex_lock((pthread_mutex_t *)&pMutex->mutexId);
     if (err != 0)
     {
-        vos_printLog(VOS_LOG_ERROR, "Unable to lock Mutex (pthread err=%d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "Unable to lock Mutex (pthread err=%d)\n", (int)err);
         return VOS_MUTEX_ERR;   /*lint !e454 was not locked! */
     }
 
@@ -1005,7 +1008,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     }
     if (err == EINVAL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Unable to trylock Mutex (pthread err=%d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "Unable to trylock Mutex (pthread err=%d)\n", (int)err);
         return VOS_MUTEX_ERR;
     }
 
@@ -1036,7 +1039,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock (
         err = pthread_mutex_unlock((pthread_mutex_t *)&pMutex->mutexId);   /*lint !e455 was not unlocked */
         if (err != 0)
         {
-            vos_printLog(VOS_LOG_ERROR, "Unable to unlock Mutex (pthread err=%d)\n", err);
+            vos_printLog(VOS_LOG_ERROR, "Unable to unlock Mutex (pthread err=%d)\n", (int)err);
             return VOS_MUTEX_ERR;   /*lint !e455 was not unlocked */
         }
     }

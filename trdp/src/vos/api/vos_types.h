@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-03: no inline if < C99
  *      BL 2017-11-17: Undone: Ticket #169 Encapsulate declaration of packed structures within a macro
  *      BL 2017-11-10: Additional log type: VOS_LOG_USR
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
@@ -133,15 +134,19 @@ typedef double REAL64;
 
 /** inline macros  */
 #ifndef INLINE
-#ifdef WIN32
-    #define INLINE  _inline
-#elif defined (VXWORKS)
-    #define INLINE  __inline__
-#elif defined(__GNUC__)
-    #define INLINE  inline
-#else
-    #define INLINE  inline
-#endif
+    #ifdef WIN32
+        #define INLINE  _inline
+    #elif defined (VXWORKS)
+        #define INLINE  __inline__
+    #elif defined(__GNUC__)
+        #ifdef __GNUC_STDC_INLINE__
+            #define INLINE  inline
+        #else
+            #define INLINE
+        #endif
+    #else
+        #define INLINE  inline
+    #endif
 #endif
 
 #ifndef TRUE
@@ -206,7 +211,7 @@ typedef enum
     VOS_LOG_WARNING = 1,        /**< This is a warning                        */
     VOS_LOG_INFO    = 2,        /**< This is an info                          */
     VOS_LOG_DBG     = 3,        /**< This is a debug info                     */
-    VOS_LOG_USR     = 4,        /**< This is a user info                      */
+    VOS_LOG_USR     = 4         /**< This is a user info                      */
 } VOS_LOG_T;
 
 #ifdef _UUID_T

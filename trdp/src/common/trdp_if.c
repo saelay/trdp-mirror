@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-03: Ticket #199 Setting redId on tlp_request() has no effect
  *      BL 2018-04-20: Ticket #196 setRedundant with redId = 0 stops all publishers
  *      BL 2018-04-18: MD notify: pass optional cb pointer to mdsend
  *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
@@ -1865,6 +1866,16 @@ EXT_DECL TRDP_ERR_T tlp_request (
         return TRDP_NOINIT_ERR;
     }
 
+    if (0 != redId)                 /* look for pending redundancy for that group */
+    {
+        BOOL8 isLeader = TRUE;
+
+        ret = tlp_getRedundant(appHandle, redId, &isLeader);
+        if ((ret == TRDP_NO_ERR) && (FALSE == isLeader))
+        {
+            return TRDP_NO_ERR;
+        }
+    }
     /*    Reserve mutual access    */
     ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
 
@@ -1942,6 +1953,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
                     /*  Update the internal data */
                     pReqElement->addr.comId         = comId;
+                    pReqElement->redId              = redId;
                     pReqElement->addr.destIpAddr    = destIpAddr;
                     pReqElement->addr.srcIpAddr     = srcIpAddr;
                     pReqElement->addr.mcGroup       =
@@ -2615,7 +2627,7 @@ TRDP_ERR_T tlm_request (
 
     if ( replyTimeout == 0U )
     {
-        mdTimeOut = appHandle->mdDefault.confirmTimeout;
+        mdTimeOut = appHandle->mdDefault.replyTimeout;
     }
     else if ( replyTimeout == TRDP_INFINITE_TIMEOUT)
     {
