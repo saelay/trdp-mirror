@@ -4,7 +4,7 @@ Requirements:
 Wireshark version 2.2.7
 
 Features:
-1. TRDP header parser
+1. User data interpretation support
 
 Installation Instruction:
 Copy trdp_spy.so into plugin directory

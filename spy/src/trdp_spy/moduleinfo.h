@@ -5,7 +5,7 @@
 #endif
 
 /* Name of package */
-#define PACKAGE "trdp_test"
+#define PACKAGE "trdp_spy"
 
 
 #ifdef VERSION

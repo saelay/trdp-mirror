@@ -102,10 +102,25 @@ extern "C" {
  * GLOBAL FUNCTIONS
  */
 
+/** @fn quint32 trdp_fcs32(const quint8 buf[], quint32 len, quint32 fcs)
+ *
+ * @brief Compute crc32 according to IEEE802.3.
+ *
+ * @note Returned CRC is inverted
+ *
+ * @param[in] buf   Input buffer
+ * @param[in] len   Length of input buffer
+ * @param[in] fcs   Initial (seed) value for the FCS calculation
+ *
+ * @return Calculated fcs value
+ */
 quint32 trdp_fcs32(const quint8 buf[], quint32 len, quint32 fcs);
 
-/** Calculate the width in bytes for a given type
- * @brief trdp_dissect_width
+/**@fn quint8 trdp_dissect_width(quint32 type);
+ * @brief Lookup table for length of the standard types.
+ * The width of an element in bytes.
+ * Extracted from table3 at TCN-TRDP2-D-BOM-011-19.
+ * @brief Calculate the width in bytes for a given type
  * @param type  the requested type, where the width shall be returned
  * @return <code>0</code>, on unkown types
  */
