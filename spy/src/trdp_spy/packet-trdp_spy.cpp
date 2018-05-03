@@ -369,7 +369,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
     {
 	Element el = iterator.next();
 
-        PRNT(printf("[%d, %5x] Offset %5d ----> Element: type=%2d %s\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level, (unsigned int) gActualNode /* FIXME debug has to be removed */,
+        PRNT(printf("[%d] Offset %5d ----> Element: type=%2d %s\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level,
                      offset, el.type, (el.typeName.length() > 0) ? el.typeName.toLatin1().data() : "", el.name.toLatin1().data(), el.array_size, el.unit.toLatin1().data(), el.scale, el.offset));
 
         value8u = 0; // flag, if there was a dynamic list found
