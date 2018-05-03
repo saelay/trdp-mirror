@@ -16,8 +16,8 @@ S E T U P
 Download the source code from wireshark for the project's homepage [1].
 Follow the build instructions for the used operating system [2].
 
-Copy the trdp_spy folder into the "plugins" subfolder of your wireshark source directory.
-Copy CMakeListsCustom.txt into the root of the wirshark sources, (next to the plugins folder).
+*Copy* the *trdp_spy* folder into the "plugins" subfolder of your wireshark source directory.
+*Copy CMakeListsCustom.txt* into the root of the wirshark sources, (next to the plugins folder).
 
 
 
@@ -51,4 +51,4 @@ $ cmake ../wireshark-2.2.7/
 $ make
 
 Hint: The following packages where installed on ubuntu: 
-$ sudo apt install qttools5-dev qttools5-dev-tools libqt5svg5-dev qtmultimedia5-dev cmake libkrb5-dev heimdal-libkrb5-dev byacc flex libpcap-dev
+$ sudo apt install qttools5-dev qttools5-dev-tools libqt5svg5-dev qtmultimedia5-dev cmake libkrb5-dev libkrb5-26-heimdal byacc flex libpcap-dev
