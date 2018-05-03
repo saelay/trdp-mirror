@@ -272,6 +272,8 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         return VOS_PARAM_ERR;
     }
 
+    *pThread = NULL;
+    
     if (interval > 0u)
     {
         vos_printLog(VOS_LOG_ERROR,
