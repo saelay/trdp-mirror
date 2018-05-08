@@ -923,7 +923,7 @@ static void updateTCNDNSentry (
     /* Create semaphore */
     err = (TRDP_ERR_T) vos_semaCreate(&dnsSema, VOS_SEMA_EMPTY);
 
-    if (err != VOS_NO_ERR)
+    if (err != TRDP_NO_ERR)
     {
         vos_printLogStr(VOS_LOG_ERROR, "updateTCNDNSentry failed to get semaphore\n");
         return;

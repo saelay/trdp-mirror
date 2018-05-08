@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-01-30: Ticket #189 timeout-value not parsed in tau_xml
  *      BL 2017-06-08: Compiler warning (unused dbgPrint)
  *      BL 2017-05-08: Compiler warnings (static definitions)
@@ -46,7 +47,9 @@
  * DEFINES
  */
 
-//#define LIST_EXCH_PARAMS  1                                       /**< To list XML Exchange parameters        */
+/*
+ #define LIST_EXCH_PARAMS  1                                       / **< To list XML Exchange parameters        * /
+*/
 
 /*  Default SDT values  */
 #ifndef TRDP_SDT_DEFAULT_SMI2
@@ -200,34 +203,34 @@ static void dbgPrint (UINT32 num, TRDP_EXCHG_PAR_T *pArray)
     for (i = 0u; i < num; ++i)
     {
         printf( "%u:  %u / %u / %u / %u\n", i,
-                pArray[i].comId,
-                pArray[i].comParId,
-                pArray[i].datasetId,
-                pArray[i].type);
+                (unsigned int)pArray[i].comId,
+                (unsigned int)pArray[i].comParId,
+                (unsigned int)pArray[i].datasetId,
+                (unsigned int)pArray[i].type);
         if (pArray[i].pMdPar != NULL)
         {
             printf( "MD flags: %u reply timeout: %u\n",
-                    pArray[i].pMdPar->flags,
-                    pArray[i].pMdPar->replyTimeout);
+                    (unsigned int)pArray[i].pMdPar->flags,
+                    (unsigned int)pArray[i].pMdPar->replyTimeout);
         }
 
         if (pArray[i].pPdPar != NULL)
         {
             printf( "PD flags: %u cycle: %u timeout: %u\n",
-                    pArray[i].pPdPar->flags,
-                    pArray[i].pPdPar->cycle,
-                    pArray[i].pPdPar->timeout);
+                    (unsigned int)pArray[i].pPdPar->flags,
+                    (unsigned int)pArray[i].pPdPar->cycle,
+                    (unsigned int)pArray[i].pPdPar->timeout);
         }
         for (j = 0u; j < pArray[i].destCnt; ++j)
         {
             printf( "Dest Id: %u URI: %s\n",
-                    pArray[i].pDest[j].id,
+                    (unsigned int)pArray[i].pDest[j].id,
                     *pArray[i].pDest[j].pUriHost);
         }
         for (j = 0u; j < pArray[i].srcCnt; ++j)
         {
             printf( "Src Id: %u URI1: %s URI2: %s\n",
-                    pArray[i].pSrc[j].id,
+                    (unsigned int)pArray[i].pSrc[j].id,
                     *pArray[i].pSrc[j].pUriHost1,
                     (*pArray[i].pSrc[j].pUriHost2 != NULL) ? *pArray[i].pSrc[j].pUriHost2 : "---");
         }
@@ -423,7 +426,7 @@ static TRDP_ERR_T readTelegramDef (
                 if (pExchgParam->pSrc == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                 countSrc * sizeof(TRDP_SRC_T));
+                                 (unsigned long) (countSrc * sizeof(TRDP_SRC_T)));
                     return TRDP_MEM_ERR;
                 }
                 pExchgParam->srcCnt = countSrc;
@@ -447,7 +450,7 @@ static TRDP_ERR_T readTelegramDef (
                         {
                             vos_printLog(VOS_LOG_ERROR,
                                          "%u Bytes failed to allocate while reading XML source definitions!\n",
-                                         TRDP_MAX_URI_USER_LEN + 1u);
+                                         (unsigned int) (TRDP_MAX_URI_USER_LEN + 1u));
                             return TRDP_MEM_ERR;
                         }
                         memcpy(pSrc->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
@@ -463,7 +466,7 @@ static TRDP_ERR_T readTelegramDef (
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                     strlen(p) + 1u);
+                                     (unsigned long) (strlen(p) + 1u));
                         return TRDP_MEM_ERR;
                     }
                     vos_strncpy((char *)pSrc->pUriHost1, p, (UINT32) strlen(p) + 1u);
@@ -478,7 +481,7 @@ static TRDP_ERR_T readTelegramDef (
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                     strlen(p) + 1u);
+                                     (unsigned long) (strlen(p) + 1u));
                         return TRDP_MEM_ERR;
                     }
                     vos_strncpy((char *)pSrc->pUriHost2, p, (UINT32)  strlen(p) + 1u);
@@ -494,7 +497,7 @@ static TRDP_ERR_T readTelegramDef (
                 if (pSrc->pSdtPar == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                 sizeof(TRDP_SDT_PAR_T));
+                                 (unsigned long) sizeof(TRDP_SDT_PAR_T));
                     return TRDP_MEM_ERR;
                 }
 
@@ -549,7 +552,7 @@ static TRDP_ERR_T readTelegramDef (
                 if (pExchgParam->pDest == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                 countDst * sizeof(TRDP_DEST_T));
+                                 (unsigned long) (countDst * sizeof(TRDP_DEST_T)));
                     return TRDP_MEM_ERR;
                 }
                 pExchgParam->destCnt = countDst;
@@ -573,7 +576,7 @@ static TRDP_ERR_T readTelegramDef (
                         {
                             vos_printLog(VOS_LOG_ERROR,
                                          "%u Bytes failed to allocate while reading XML source definitions!\n",
-                                         TRDP_MAX_URI_USER_LEN + 1);
+                                         (unsigned int) (TRDP_MAX_URI_USER_LEN + 1));
                             return TRDP_MEM_ERR;
                         }
                         memcpy(pDest->pUriUser, p, p - value);  /* Trailing zero by vos_memAlloc    */
@@ -589,7 +592,7 @@ static TRDP_ERR_T readTelegramDef (
                     {
                         vos_printLog(VOS_LOG_ERROR,
                                      "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                     strlen(p) + 1u);
+                                     (unsigned long) (strlen(p) + 1u));
                         return TRDP_MEM_ERR;
                     }
                     vos_strncpy((char *)pDest->pUriHost, p, (UINT32) strlen(p) + 1u);
@@ -605,7 +608,7 @@ static TRDP_ERR_T readTelegramDef (
                 if (pDest->pSdtPar == NULL)
                 {
                     vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML source definitions!\n",
-                                 sizeof(TRDP_SDT_PAR_T));
+                                 (unsigned long) sizeof(TRDP_SDT_PAR_T));
                     return TRDP_MEM_ERR;
                 }
 
@@ -695,7 +698,7 @@ static TRDP_ERR_T readXmlDatasetMap (
             if (*ppComIdDsIdMap == NULL)
             {
                 vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while creating XML dataset map!\n",
-                             count * sizeof(TRDP_COMID_DSID_MAP_T));
+                             (unsigned long) (count * sizeof(TRDP_COMID_DSID_MAP_T)));
                 return TRDP_MEM_ERR;
             }
             *pNumComId = count;
@@ -778,7 +781,7 @@ static TRDP_ERR_T readXmlDatasets (
             if (papDataset == NULL)
             {
                 vos_printLog(VOS_LOG_ERROR, "%lu Bytes failed to allocate while reading XML telegram definitions!\n",
-                             count * sizeof(apTRDP_DATASET_T));
+                             (unsigned long) (count * sizeof(apTRDP_DATASET_T)));
                 return TRDP_MEM_ERR;
             }
 
@@ -799,7 +802,7 @@ static TRDP_ERR_T readXmlDatasets (
                 {
                     vos_printLog(VOS_LOG_ERROR,
                                  "%lu Bytes failed to allocate while reading XML telegram definitions!\n",
-                                 count * sizeof(TRDP_DATASET_ELEMENT_T) + sizeof(TRDP_DATASET_T));
+                                 (unsigned long) (count * sizeof(TRDP_DATASET_ELEMENT_T) + sizeof(TRDP_DATASET_T)));
                     return TRDP_MEM_ERR;
                 }
 
@@ -1055,7 +1058,7 @@ EXT_DECL TRDP_ERR_T tau_readXmlInterfaceConfig (
                         {
                             vos_printLog(VOS_LOG_ERROR,
                                          "%lu Bytes failed to allocate while reading XML telegram definitions!\n",
-                                         count * sizeof(TRDP_EXCHG_PAR_T));
+                                         (unsigned long) (count * sizeof(TRDP_EXCHG_PAR_T)));
                             return TRDP_MEM_ERR;
                         }
                     }
