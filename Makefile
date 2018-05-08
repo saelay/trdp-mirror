@@ -7,12 +7,13 @@
 #//
 #// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
 #// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-#// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013-2016. All rights reserved.
+#// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013-2018. All rights reserved.
 #//
+#//	BL 2018-05-08: YOCTO / ARM7 configuration added
 #//	BL 2018-02-02: Example renamed: cmdLineSelect -> echoCallback
 #//	BL 2017-05-30: 64 bit Linux X86 config added
 #//	BL 2017-05-08: 64 bit OSX config added
-#// BL 2016-02-11: Ticket #88 Cleanup makefiles, remove dependencies on external libraries
+#// 	BL 2016-02-11: Ticket #88 Cleanup makefiles, remove dependencies on external libraries
 
 
 #// Support for POSIX and VXWORKS, set buildsettings and config first!
@@ -135,7 +136,7 @@ test:		outdir $(OUTDIR)/getStats $(OUTDIR)/vostest $(OUTDIR)/test_mdSingle $(OUT
 
 pdtest:		outdir $(OUTDIR)/trdp-pd-test $(OUTDIR)/pd_md_responder $(OUTDIR)/testSub
 
-mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/trdp-md-reptestcaller $(OUTDIR)/trdp-md-reptestreplier
+mdtest:		outdir $(OUTDIR)/trdp-md-test $(OUTDIR)/trdp-md-reptestcaller $(OUTDIR)/trdp-md-reptestreplier #$(OUTDIR)/mdTest4
 
 vtests:		outdir $(OUTDIR)/vtest
 
@@ -426,10 +427,11 @@ help:
 	@echo "BUILD TARGETS FOR TRDP" >&2
 	@echo "Load one of the configurations below with 'make <configuration>' first:" >&2 
 	@echo "  " >&2
-	@echo "  * LINUX_config					- Native build for Linux (uses host gcc regardless of 32/64 bit)" >&2
+	@echo "  * LINUX_config                 - Native build for Linux (uses host gcc regardless of 32/64 bit)" >&2
 	@echo "  * LINUX_X86_config             - Native build for Linux (Little Endian, uses host gcc 32Bit)" >&2
 	@echo "  * LINUX_X86_64_config          - Native build for Linux (Little Endian, uses host gcc 64Bit)" >&2
 	@echo "  * LINUX_PPC_config             - Building for Linux on PowerPC using eglibc compiler (603 core)" >&2
+	@echo "  * LINUX_imx7_config            - Building for Linux on ARM7/imx7 using YOCTO toolchain" >&2
 	@echo "  * OSX_X86_config               - Native (X86) build for OS X 32Bit" >&2
 	@echo "  * OSX_X86_64_config            - Native (X86) build for OS X 64Bit" >&2
 	@echo "  * QNX_X86_config               - Native (X86) build for QNX" >&2	
