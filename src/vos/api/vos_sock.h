@@ -46,6 +46,8 @@
 #elif defined(POSIX)
 #include <sys/select.h>
 #include <netinet/in.h>
+#elif defined(ESP32)
+#include "lwip/sockets.h"
 #else
 #include "vos_private.h"
 #endif
