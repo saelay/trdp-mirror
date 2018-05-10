@@ -97,7 +97,7 @@ typedef unsigned char ANTIVALENT8;
 
 #else
 
-#warning "Using default standard types - target not defined!"
+/* #warning "Using compiler default standard types" */
 
 #include <stdint.h>
 

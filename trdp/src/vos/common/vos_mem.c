@@ -43,10 +43,14 @@
 #ifdef POSIX
 #include <strings.h>
 #include <unistd.h>
-#include "pthread.h"
+#include <pthread.h>
 #endif
 
 #ifdef WIN32
+#include <pthread.h>
+#endif
+
+#ifdef ESP32
 #include <pthread.h>
 #endif
 

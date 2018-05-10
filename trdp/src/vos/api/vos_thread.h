@@ -27,6 +27,9 @@
  */
 
 #include "vos_types.h"
+#ifdef ESP32
+#include <sys/time.h>
+#endif
 #ifdef VXWORKS
 #include "vos_private.h"
 #include "time.h"
