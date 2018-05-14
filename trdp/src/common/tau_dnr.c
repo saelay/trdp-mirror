@@ -711,7 +711,7 @@ exit:
  */
 static void buildRequest (
     TRDP_APP_SESSION_T  appHandle,
-	TAU_DNR_DATA_T      *pDNR,
+    TAU_DNR_DATA_T      *pDNR,
     TRDP_DNS_REQUEST_T  *pRequest,
     UINT32              *pSize)
 {
@@ -762,7 +762,7 @@ static void buildRequest (
  *
  */
 static void addEntry (
-	TRDP_APP_SESSION_T  appHandle,
+    TRDP_APP_SESSION_T  appHandle,
     TAU_DNR_DATA_T      *pDNR,
     const CHAR8         *pURI)
 {
@@ -859,7 +859,7 @@ static void dnrMDCallback (
     TRDP_APP_SESSION_T      appHandle,
     const TRDP_MD_INFO_T    *pMsg,
     UINT8                   *pData,
-	UINT32                  dataSize)
+    UINT32                  dataSize)
 {
 
     if ((appHandle == NULL) ||
@@ -907,11 +907,11 @@ static void dnrMDCallback (
 static void updateTCNDNSentry (
     TRDP_APP_SESSION_T  appHandle,
     TAU_DNR_ENTRY_T     *pTemp,
-	const CHAR8         *pUri)
+    const CHAR8         *pUri)
 {
     TRDP_ERR_T      err;
     UINT32          querySize;
-	TAU_DNR_DATA_T  *pDNR   = (TAU_DNR_DATA_T *) appHandle->pUser;
+    TAU_DNR_DATA_T  *pDNR   = (TAU_DNR_DATA_T *) appHandle->pUser;
     VOS_SEMA_T      dnsSema;
     unsigned int    i;
 

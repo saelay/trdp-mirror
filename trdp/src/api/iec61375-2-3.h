@@ -426,12 +426,12 @@
 #define TRDP_TTDB_READ_CMPL_REP_DSID                    111u
 
 #define TRDP_ECSP_CTRL_DSID                             120u
-#define TRDP_ECSP_STAT_DSID	                            121u
+#define TRDP_ECSP_STAT_DSID                             121u
 #define TRDP_ECSP_CONF_REQ_DSID                         122u
 #define TRDP_ECSP_CONF_REP_DSID                         123u
 
 #define TRDP_ETBN_CTRL_REQ_DSID                         130u
-#define TRDP_ETBN_STATUS_REP_DSID	                    131u
+#define TRDP_ETBN_STATUS_REP_DSID                       131u
 #define TRDP_ETBN_TRN_NET_DIR_INF_REQ_DSID              132u
 #define TRDP_ETBN_TRN_NET_DIR_INF_REP_DSID              133u
 

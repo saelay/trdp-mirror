@@ -24,12 +24,12 @@
 @interface Controller : NSResponder {
 
     // PD Sender:
-	IBOutlet	id	textField;
-	IBOutlet	id	sliderField1;
-	IBOutlet	id	sliderField2;
-	IBOutlet	id	ipAddress;
-	IBOutlet	id	comID;
-	IBOutlet	id	interval;
+    IBOutlet    id    textField;
+    IBOutlet    id    sliderField1;
+    IBOutlet    id    sliderField2;
+    IBOutlet    id    ipAddress;
+    IBOutlet    id    comID;
+    IBOutlet    id    interval;
 
     // PD Receiver:
     IBOutlet    id  rec1IP;
@@ -58,21 +58,21 @@
     IBOutlet    id  rec5Bar;
     
     // MD Sender:
-	IBOutlet	id	MDOutMessage;
-	IBOutlet	id	MDcomID;
-	IBOutlet	id	MRinMessage;
-	IBOutlet	id	MDipAddress;
-	IBOutlet	id	MRcomID;
-	IBOutlet	id	MDrecColor;
+    IBOutlet    id    MDOutMessage;
+    IBOutlet    id    MDcomID;
+    IBOutlet    id    MRinMessage;
+    IBOutlet    id    MDipAddress;
+    IBOutlet    id    MRcomID;
+    IBOutlet    id    MDrecColor;
     
-	IBOutlet	id	MsgView;
+    IBOutlet    id    MsgView;
     
-	Boolean	isActive;
-	
-	NSTimer *timer;
-	
-	uint32_t	dataArray[5];
-	Boolean		dataChanged;
+    Boolean    isActive;
+    
+    NSTimer *timer;
+    
+    uint32_t    dataArray[5];
+    Boolean        dataChanged;
 }
 
 - (IBAction) button1:(id)sender;

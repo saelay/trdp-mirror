@@ -1,22 +1,22 @@
 /**********************************************************************************************************************/
 /**
- * @file	mdTest4.c
+ * @file    mdTest4.c
  *
- * @brief	UDPMDCom teat application
+ * @brief    UDPMDCom teat application
  *
- * @details	Test application. In Testmode 1 start transactions, in Testmode 2 and 3 respond to transactions.
+ * @details    Test application. In Testmode 1 start transactions, in Testmode 2 and 3 respond to transactions.
  *
- * @note	Project: TCNOpen TRDP prototype stack
- *		Version 0.0: s.pachera (FAR).
- *			First issues, derived from mdTest0001.c example application.
- *			Add basic multicast test for Notify, Request and Reply without confirmation
- *			Removed log 2 file support, no more needed
- *		Version 0.1: s.pachera (FAR).
- *			Add statistics counters support, use and example listener statistics print
+ * @note    Project: TCNOpen TRDP prototype stack
+ *        Version 0.0: s.pachera (FAR).
+ *            First issues, derived from mdTest0001.c example application.
+ *            Add basic multicast test for Notify, Request and Reply without confirmation
+ *            Removed log 2 file support, no more needed
+ *        Version 0.1: s.pachera (FAR).
+ *            Add statistics counters support, use and example listener statistics print
  *      Version 0.2: d.quagreda (SE).
  *          select mode
  *
- * @author	Simone Pachera  (FAR Systems)
+ * @author    Simone Pachera  (FAR Systems)
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -40,7 +40,7 @@
 #include <memory.h>
 #include <unistd.h>
 #include <sys/select.h>
-#include <mqueue.h>
+//#include <mqueue.h>
 #include <time.h>
 
 // Suppor for log library
@@ -73,8 +73,8 @@
 
 typedef struct
 {
-	int code;
-	char * name;
+    int code;
+    char * name;
 } trdp_err_st_t;
 
 static const trdp_err_st_t trdp_err_st_v[] = {
@@ -118,31 +118,31 @@ static const trdp_err_st_t trdp_err_st_v[] = {
 
 static const char * trdp_get_strerr(const int eri)
 {
-	int i;
-	for(i = 0; i < (sizeof(trdp_err_st_v) / sizeof(trdp_err_st_v[0])); i++)
-	{
-		if (eri == trdp_err_st_v[i].code)
-			return trdp_err_st_v[i].name;
-	}
-	return "?";
+    int i;
+    for(i = 0; i < (sizeof(trdp_err_st_v) / sizeof(trdp_err_st_v[0])); i++)
+    {
+        if (eri == trdp_err_st_v[i].code)
+            return trdp_err_st_v[i].name;
+    }
+    return "?";
 }
 
 static const char * trdp_get_msgtype(const int cdm)
 {
-	switch(cdm)
-	{
-		case TRDP_MSG_PD: return "Pd:Data";
-		case TRDP_MSG_PP: return "Pp:Pull";
-		case TRDP_MSG_PR: return "Pr:Request";
-		case TRDP_MSG_PE: return "Pe:Error";
-		case TRDP_MSG_MN: return "Mn:Notify";
-		case TRDP_MSG_MR: return "Mr:Request";
-		case TRDP_MSG_MP: return "Mp:Reply";
-		case TRDP_MSG_MQ: return "Mq:Query";
-		case TRDP_MSG_MC: return "Mc:Confirm";
-		case TRDP_MSG_ME: return "Me:Error";
-		default: return "?";
-	}
+    switch(cdm)
+    {
+        case TRDP_MSG_PD: return "Pd:Data";
+        case TRDP_MSG_PP: return "Pp:Pull";
+        case TRDP_MSG_PR: return "Pr:Request";
+        case TRDP_MSG_PE: return "Pe:Error";
+        case TRDP_MSG_MN: return "Mn:Notify";
+        case TRDP_MSG_MR: return "Mr:Request";
+        case TRDP_MSG_MP: return "Mp:Reply";
+        case TRDP_MSG_MQ: return "Mq:Query";
+        case TRDP_MSG_MC: return "Mc:Confirm";
+        case TRDP_MSG_ME: return "Me:Error";
+        default: return "?";
+    }
 }
 
 /* message queue trdp to application */
@@ -229,8 +229,8 @@ getmyipaddress()
             {
                 char *addr = inet_ntoa(sa->sin_addr);
                 printf("Interface: %s\tAddress: %s\n", ifap->ifa_name, addr);
-				
-				g_ip4_mine = ntohl(sa->sin_addr.s_addr);
+                
+                g_ip4_mine = ntohl(sa->sin_addr.s_addr);
             }
         }
     }
@@ -292,11 +292,11 @@ static int rx_test_fsm_state = 0;
 // Convert an IP address to string
 char * miscIpToString(int ipAdd, char *strTmp)
 {
-	struct in_addr ia;
-	ia.s_addr = htonl(ipAdd);
-	char *s = inet_ntoa(ia);
-	strcpy(strTmp,s);
-	return strTmp;
+    struct in_addr ia;
+    ia.s_addr = htonl(ipAdd);
+    char *s = inet_ntoa(ia);
+    strcpy(strTmp,s);
+    return strTmp;
 }
 
 // Convert Session to String
@@ -337,7 +337,7 @@ char *miscUriToString(const CHAR8 *p, char *strTmp)
 // TODO
 char *miscMem2String(const void *p, const int l, char *strTmp)
 {
-	strTmp[0]=0;
+    strTmp[0]=0;
     /*
        if (p != NULL || l > 0)
        {
@@ -610,18 +610,9 @@ static int testConfirmSend(trdp_apl_cbenv_t msg)
     // Send confirm
     errv = tlm_confirm(
         appHandle,
-        (void *) 0x1100CAFE,
         (const TRDP_UUID_T *) &msg.Msg.sessionId,
-        msg.Msg.comId,
-        msg.Msg.topoCount,
-        0,    /* own IP address from trdp stack */
-        msg.Msg.srcIpAddr, /* destination IP */
-        0,         // pktFlags
         0,         //  userStatus
-        0,         // replystatus
-        NULL,      // send param
-        msg.Msg.destURI,
-        msg.Msg.srcURI
+        NULL       // send param
         );
 
     //
@@ -632,7 +623,7 @@ static int testConfirmSend(trdp_apl_cbenv_t msg)
     }
 
     // LOG
-    printf( "testConfirmSend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr, strIp));
+    printf( "testConfirmSend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.etbTopoCnt, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr, strIp));
 
     return 0;
 }
@@ -643,22 +634,16 @@ static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
     TRDP_ERR_T errv;
     char       strIp[16];
 
+
     // Send reply
     errv = tlm_reply(
         appHandle,
-        (void *) 0x2000CAFE,
         (const TRDP_UUID_T*)&(msg.Msg.sessionId),
-        msg.Msg.topoCount,
         msg.Msg.comId,
-        0,    /* own IP address from trdp stack */
-        msg.Msg.srcIpAddr, /* destination IP */
-        0,         /* pktFlags */
         0,         /*  userStatus */
         NULL,      /* send param */
         (UINT8 *) &mdTestData,
-        sizeof(mdTestData),
-        msg.Msg.destURI,
-        msg.Msg.srcURI
+        sizeof(mdTestData)
         );
 
     //
@@ -669,7 +654,7 @@ static int testReplySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData)
     }
 
     // LOG
-    printf( "testReplySend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr,strIp));
+    printf( "testReplySend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.etbTopoCnt, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr,strIp));
 
     return 0;
 }
@@ -683,20 +668,13 @@ static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData
     // Send reply query
     errv = tlm_replyQuery(
         appHandle,
-        (void *) 0x2000CAFE,
         (const TRDP_UUID_T*)&(msg.Msg.sessionId),
-        msg.Msg.topoCount,
         msg.Msg.comId,
-        0,    /* own IP address from trdp stack */
-        msg.Msg.srcIpAddr, /* destination IP */
-        0,               /* pktFlags */
         0,               /*  userStatus */
         2 * 1000 * 1000, /* confirm timeout */
         NULL,            /* send param */
         (UINT8 *) &mdTestData,
-        sizeof(mdTestData),
-        msg.Msg.destURI,
-        msg.Msg.srcURI
+        sizeof(mdTestData)
         );
 
     //
@@ -707,7 +685,7 @@ static int testReplyQuerySend(trdp_apl_cbenv_t msg, TRDP_MD_TEST_DS_T mdTestData
     }
 
     // LOG
-    printf( "testReplyQuerySend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.topoCount, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr,strIp));
+    printf( "testReplyQuerySend(): comID = %u, topoCount = %u, dstIP = x%08X = %s\n", msg.Msg.comId, msg.Msg.etbTopoCnt, msg.Msg.srcIpAddr, miscIpToString(msg.Msg.srcIpAddr,strIp));
 
     return 0;
 }
@@ -737,14 +715,14 @@ static void queue_procricz()
         printf( "protVersion       = %d\n", msg.Msg.protVersion);
         printf( "msgType           = x%04X:%s\n", msg.Msg.msgType, trdp_get_msgtype(msg.Msg.msgType));
         printf( "comId             = %d\n", msg.Msg.comId);
-        printf( "topoCount         = %d\n", msg.Msg.topoCount);
+        printf( "topoCount         = %d\n", msg.Msg.etbTopoCnt);
         printf( "userStatus        = %d\n", msg.Msg.userStatus);
         printf( "replyStatus       = %d\n", msg.Msg.replyStatus);
         printf( "sessionId         = ");
         print_session(msg.Msg.sessionId);
         printf( "replyTimeout      = %d\n", msg.Msg.replyTimeout);
-        printf( "destURI           = ");      print_uri(msg.Msg.destURI); printf( "\n");
-        printf( "srcURI            = ");      print_uri(msg.Msg.srcURI); printf( "\n");
+        printf( "destURI           = ");      print_uri(msg.Msg.destUserURI); printf( "\n");
+        printf( "srcURI            = ");      print_uri(msg.Msg.srcUserURI); printf( "\n");
         /* CS 20130712: Struct members used here do not exist since trdp_types #854
          * printf( "numRetriesMax     = %d\n", msg.Msg.numRetriesMax);
          * printf( "numRetries        = %d\n", msg.Msg.numRetries);
@@ -1611,7 +1589,7 @@ static void queue_procricz()
                     testReplyQSendID++;
                     mdTestData1.cnt = vos_htonl(testReplyQSendID);
                     sprintf(mdTestData1.testId, "MD ReplyQ test");
-					
+                    
                     testReplyQuerySend(msg, mdTestData1);
 
                     printf( "%s: ReplyQuery sent\n", strTstName);
@@ -1936,13 +1914,13 @@ static void queue_procricz()
 
     // Increment current FSM state
     rx_test_fsm_state++;
-	
-	// free message data buffer
-	if (NULL != msg.pData)
-	{
-		free(msg.pData);
-		msg.pData = NULL;
-	}
+    
+    // free message data buffer
+    if (NULL != msg.pData)
+    {
+        free(msg.pData);
+        msg.pData = NULL;
+    }
 }
 
 // call back function for message data
@@ -1962,23 +1940,23 @@ static void md_indication(
         fwd.Msg      = *pMsg;
         fwd.pData    = pData;
         fwd.dataSize = dataSize;
-		
-		if (pData != NULL && dataSize > 0)
-		{
-			fwd.pData = malloc(dataSize);
-			if (NULL == fwd.pData)
-			{
-				perror("malloc()");
-				exit(EXIT_FAILURE);
-			}
-			memcpy(fwd.pData,pData,dataSize);
-			fwd.dataSize = dataSize;
-		}
-		else
-		{
-			fwd.pData    = NULL;
-			fwd.dataSize = 0;
-		}
+        
+        if (pData != NULL && dataSize > 0)
+        {
+            fwd.pData = malloc(dataSize);
+            if (NULL == fwd.pData)
+            {
+                perror("malloc()");
+                exit(EXIT_FAILURE);
+            }
+            memcpy(fwd.pData,pData,dataSize);
+            fwd.dataSize = dataSize;
+        }
+        else
+        {
+            fwd.pData    = NULL;
+            fwd.dataSize = 0;
+        }
         queue_sendmessage(&fwd);
     }
 }
@@ -1997,7 +1975,7 @@ static int test_initialize()
     mem_config.p    = NULL;
     mem_config.size = HEAP_MEMORY_SIZE;
 
-    //	MD config
+    //    MD config
     memset(&md_config, 0, sizeof(md_config));
     md_config.pfCbFunction      = md_indication;
     md_config.pRefCon           = (void *) 0x12345678;
@@ -2017,11 +1995,11 @@ static int test_initialize()
     md_config.udpPort        = TRDP_MD_UDP_PORT;
     md_config.tcpPort        = TRDP_MD_UDP_PORT;
 
-    /*	Init the library  */
+    /*    Init the library  */
     errv = tlc_init(
         private_debug_printf,                   /* debug print function */
         NULL,
-        &mem_config                             /* Use application supplied memory	*/
+        &mem_config                             /* Use application supplied memory    */
         );
 
     if (errv != TRDP_NO_ERR)
@@ -2031,15 +2009,15 @@ static int test_initialize()
     }
 
 
-    /*	Open a session  */
+    /*    Open a session  */
     errv = tlc_openSession(
-        &appHandle,             // TRDP_APP_SESSION_T			*pAppHandle
-        g_ip4_mine,             // TRDP_IP_ADDR_T				ownIpAddr
-        0,                      // TRDP_IP_ADDR_T				leaderIpAddr
-        NULL,                   // TRDP_MARSHALL_CONFIG_T		*pMarshall
-        NULL,                   // const TRDP_PD_CONFIG_T		*pPdDefault
-        &md_config,             // const TRDP_MD_CONFIG_T		*pMdDefault
-        &processConfig          // const TRDP_PROCESS_CONFIG_T	*pProcessConfig
+        &appHandle,             // TRDP_APP_SESSION_T            *pAppHandle
+        g_ip4_mine,             // TRDP_IP_ADDR_T                ownIpAddr
+        0,                      // TRDP_IP_ADDR_T                leaderIpAddr
+        NULL,                   // TRDP_MARSHALL_CONFIG_T        *pMarshall
+        NULL,                   // const TRDP_PD_CONFIG_T        *pPdDefault
+        &md_config,             // const TRDP_MD_CONFIG_T        *pMdDefault
+        &processConfig          // const TRDP_PROCESS_CONFIG_T    *pProcessConfig
         );
 
     if (errv != TRDP_NO_ERR)
@@ -2077,12 +2055,13 @@ static int testNotifySend(
     errv = tlm_notify(
         appHandle,
         (void *) 0x1000CAFE, /* user ref */
+        NULL,
         comId,
-        topoCount,
-        0,    /* own IP address from trdp stack */
-        vos_htonl(ipDst), /* destination IP */
-        0,    /* flags */
-        NULL, /* default send param */
+        topoCount, 0u,
+        0,          /* own IP address from trdp stack */
+        ipDst,      /* destination IP */
+        0,          /* flags */
+        NULL,       /* default send param */
         (UINT8 *) &mdTestData,
         sizeof(mdTestData),
         sourceURI,
@@ -2131,7 +2110,7 @@ static int testRequestSend(
         NULL,
         &session,
         comId,               /* comId */
-        topoCount,           /* topoCount */
+        topoCount, 0u,          /* topoCount */
         0,                   /* own IP address from trdp stack */
         vos_htonl(ipDst),
         0,                   /* flags */
@@ -2159,39 +2138,39 @@ static int testRequestSend(
 
 static double timeconvs(const TRDP_TIME_T *t)
 {
-	if (t == NULL) return 0;
-	return (double)t->tv_sec + (double)t->tv_usec / 1.0e6;
+    if (t == NULL) return 0;
+    return (double)t->tv_sec + (double)t->tv_usec / 1.0e6;
 }
 
 static void dumpMDlist(const char *name, MD_ELE_T *itm)
 {
-	if (name != NULL && itm != NULL)
-	{
-		int id=0;
-		printf("list: %s\n",name);
-		while(itm != NULL)
-		{
-			printf("[%d]: stateEle=%d morituri=%d interval=%g timeToGo=%g\n",
-				id,
-				itm->stateEle,
-				itm->morituri,
-				timeconvs(&itm->interval),
-				timeconvs(&itm->timeToGo)
-				);
-			printf("\n");
-			
-			itm=itm->pNext;
-			id++;
-		}
-	}
+    if (name != NULL && itm != NULL)
+    {
+        int id=0;
+        printf("list: %s\n",name);
+        while(itm != NULL)
+        {
+            printf("[%d]: stateEle=%d morituri=%d interval=%g timeToGo=%g\n",
+                id,
+                itm->stateEle,
+                itm->morituri,
+                timeconvs(&itm->interval),
+                timeconvs(&itm->timeToGo)
+                );
+            printf("\n");
+            
+            itm=itm->pNext;
+            id++;
+        }
+    }
 }
 
 static void dumpMDcontext()
 {
-	if (NULL == appHandle) return;
-	dumpMDlist("pMDSndQueue",appHandle->pMDSndQueue);
-	dumpMDlist("pMDRcvQueue",appHandle->pMDRcvQueue);
-	dumpMDlist("pMDRcvEle",appHandle->pMDRcvEle);
+    if (NULL == appHandle) return;
+    dumpMDlist("pMDSndQueue",appHandle->pMDSndQueue);
+    dumpMDlist("pMDRcvQueue",appHandle->pMDRcvQueue);
+    dumpMDlist("pMDRcvEle",appHandle->pMDRcvEle);
 }
 
 
@@ -2270,22 +2249,22 @@ static void exec_cmd(const int cliCmd)
         printf("    numSend          : %d\n", appHandle->stats.udpMd.numSend);
         printf("\n");
     }
-	
-	// inspect
-	if (cliCmd == '^')
-	{
-		dumpMDcontext();
-	}
+    
+    // inspect
+    if (cliCmd == '^')
+    {
+        dumpMDcontext();
+    }
 
     // Help
     if (cliCmd == 'h')
     {
-		// Help
-		printf("Commands:\n");
-		printf("h) Print menu comands\n");
-		printf("^) Display MD queue context\n");
-		printf("s) Print UDMPDcom statistics\n");
-			
+        // Help
+        printf("Commands:\n");
+        printf("h) Print menu comands\n");
+        printf("^) Display MD queue context\n");
+        printf("s) Print UDMPDcom statistics\n");
+            
         if (x_testmode == 1)
         {
             // Help
@@ -2400,14 +2379,18 @@ static int testAddListener(
     const TRDP_URI_USER_T destURI)
 {
     TRDP_ERR_T errv;
+
     errv = tlm_addListener(
         appHandle,
         &lisHandle,
         pUserRef,
+        NULL,
+        TRUE,
         comId,
+        0u, 0u,
+        vos_htonl(destIpAddr), 0u, 0u,
         0,
-        vos_htonl(destIpAddr),
-        0,
+        NULL,
         destURI);
     if (errv != TRDP_NO_ERR)
     {
@@ -2660,7 +2643,7 @@ int main(int argc, char * argv[])
     x_ip4_mc_02 = TRDP_IP4_ADDR(225, 0, 0, 6);
     x_period    = 100;    // Defaul main loop period
     x_testmode  = 1;
-	
+    
     // Process command line parameters
     for (i = 1; i < argc; i++)
     {
@@ -2703,10 +2686,10 @@ int main(int argc, char * argv[])
         cmdlinerr(argc, argv);
         exit(EXIT_FAILURE);
     }
-	
-	
-	// get my ip address
-	getmyipaddress();
+    
+    
+    // get my ip address
+    getmyipaddress();
 
 
     //printf( "MD_HEADER_T size: %u\n", sizeof(MD_HEADER_T));
