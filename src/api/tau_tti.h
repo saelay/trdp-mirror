@@ -72,7 +72,7 @@ extern "C" {
  *
  */
 EXT_DECL TRDP_ERR_T tau_initTTIaccess (
-	TRDP_APP_SESSION_T  appHandle,
+    TRDP_APP_SESSION_T  appHandle,
     VOS_SEMA_T          userAction,
     TRDP_IP_ADDR_T      ecspIpAddr,
     CHAR8               *hostsFileName);
@@ -101,7 +101,7 @@ EXT_DECL void tau_deInitTTI (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getOpTrDirectory (
-	TRDP_APP_SESSION_T                 appHandle,
+    TRDP_APP_SESSION_T                 appHandle,
     TRDP_OP_TRAIN_DIR_STATE_T         *pOpTrDirState,
     TRDP_OP_TRAIN_DIR_T               *pOpTrDir);
 
@@ -134,7 +134,7 @@ EXT_DECL TRDP_ERR_T tau_getOpTrnDirectoryStatusInfo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTrDirectory (
-	TRDP_APP_SESSION_T                 appHandle,
+    TRDP_APP_SESSION_T                 appHandle,
     TRDP_TRAIN_DIR_T                  *pTrDir);
 
 
@@ -151,8 +151,8 @@ EXT_DECL TRDP_ERR_T tau_getTrDirectory (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
-	TRDP_APP_SESSION_T                      appHandle,
-	TRDP_CONSIST_INFO_T                    *pCstInfo,
+    TRDP_APP_SESSION_T                      appHandle,
+    TRDP_CONSIST_INFO_T                    *pCstInfo,
     TRDP_UUID_T                      const  cstUUID);
 
 
@@ -171,7 +171,7 @@ EXT_DECL TRDP_ERR_T tau_getStaticCstInfo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTTI (
-	TRDP_APP_SESSION_T                 appHandle,
+    TRDP_APP_SESSION_T                 appHandle,
     TRDP_OP_TRAIN_DIR_STATE_T   *pOpTrnDirState,
     TRDP_OP_TRAIN_DIR_T         *pOpTrnDir,
     TRDP_TRAIN_DIR_T            *pTrnDir,
@@ -190,7 +190,7 @@ EXT_DECL TRDP_ERR_T tau_getTTI (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTrnCstCnt (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT16              *pTrnCstCnt);
 
 
@@ -206,7 +206,7 @@ EXT_DECL TRDP_ERR_T tau_getTrnCstCnt (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getTrnVehCnt (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT16              *pTrnVehCnt);
 
 
@@ -223,7 +223,7 @@ EXT_DECL TRDP_ERR_T tau_getTrnVehCnt (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT16              *pCstVehCnt,
     const TRDP_LABEL_T   pCstLabel);
 
@@ -241,7 +241,7 @@ EXT_DECL TRDP_ERR_T tau_getCstVehCnt (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT16              *pCstFctCnt,
     const TRDP_LABEL_T   pCstLabel);
 
@@ -263,7 +263,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctCnt (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
-	TRDP_APP_SESSION_T      appHandle,
+    TRDP_APP_SESSION_T      appHandle,
     TRDP_FUNCTION_INFO_T   *pFctInfo,
     const TRDP_LABEL_T      pCstLabel,
     UINT16                  maxFctCnt);
@@ -283,7 +283,7 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getVehInfo (
-	TRDP_APP_SESSION_T      appHandle,
+    TRDP_APP_SESSION_T      appHandle,
     TRDP_VEHICLE_INFO_T    *pVehInfo,
     const TRDP_LABEL_T      pVehLabel,
     const TRDP_LABEL_T      pCstLabel);
@@ -302,7 +302,7 @@ EXT_DECL TRDP_ERR_T tau_getVehInfo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getCstInfo (
-	TRDP_APP_SESSION_T      appHandle,
+    TRDP_APP_SESSION_T      appHandle,
     TRDP_CONSIST_INFO_T    *pCstInfo,
     const TRDP_LABEL_T      pCstLabel);
 
@@ -330,7 +330,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_getVehOrient (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT8               *pVehOrient,
     UINT8               *pCstOrient,
     TRDP_LABEL_T        pVehLabel,

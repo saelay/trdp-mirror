@@ -53,7 +53,7 @@ extern "C" {
 typedef struct
 {
     UINT8                   trnVehNo;       /**< vehicle sequence number within the train
- 	                                             with vehicle 01 being the first vehicle
+                                                  with vehicle 01 being the first vehicle
                                                  in ETB reference direction 1 as defined in IEC61375-2-5
                                                  value range: 0..63
                                                  a value of 0 indicates that this vehicle
@@ -208,8 +208,8 @@ typedef struct
 {
     TRDP_SHORT_VERSION_T    version;        /**< telegram version information, main_version = 1, sub_version = 0    */
     UINT8                   command;        /**< confirmation order
-							                    1 = confirmation/correction request
- 							                    2 = un-confirmation request                                         */
+                                                1 = confirmation/correction request
+                                                 2 = un-confirmation request                                         */
     UINT8                   reserved01;     /**< reserved (=0)                                                      */
     TRDP_NET_LABEL_T        deviceName;     /**< function device of ECSC which sends the telegram                   */
     UINT32                  opTrnTopoCnt;   /**< operational train topocounter value of the operational 

@@ -191,7 +191,7 @@ typedef enum
 #define TRDP_FLAGS_TCP        0x08u       /**< Use TCP for message data                                   */
 #define TRDP_FLAGS_FORCE_CB   0x10u       /**< Force a callback for every received packet                 */
 
-#define TRDP_INFINITE_TIMEOUT 0xffffffffu /**< Infinite reply timeout									  */
+#define TRDP_INFINITE_TIMEOUT 0xffffffffu /**< Infinite reply timeout                                      */
 
 typedef UINT8   TRDP_FLAGS_T;
 

@@ -78,7 +78,7 @@ typedef enum TRDP_DNR_OPTS {
  *
  */
 EXT_DECL TRDP_ERR_T tau_initDnr (
-	TRDP_APP_SESSION_T  appHandle,
+    TRDP_APP_SESSION_T  appHandle,
     TRDP_IP_ADDR_T      dnsIpAddr,
     UINT16              dnsPort,
     const CHAR8         *pHostsFileName,
@@ -124,7 +124,7 @@ EXT_DECL TRDP_DNR_STATE_T tau_DNRstatus (TRDP_APP_SESSION_T  appHandle);
  *
  */
 EXT_DECL TRDP_ERR_T tau_getOwnIds (
-   	TRDP_APP_SESSION_T   appHandle,
+       TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         devId,       
     TRDP_LABEL_T         vehId,       
     TRDP_LABEL_T         cstId);
@@ -141,7 +141,7 @@ EXT_DECL TRDP_ERR_T tau_getOwnIds (
  *
  */
 EXT_DECL  TRDP_IP_ADDR_T tau_getOwnAddr (
-    	TRDP_APP_SESSION_T   appHandle);   
+        TRDP_APP_SESSION_T   appHandle);
 
 
 /**********************************************************************************************************************/
@@ -159,8 +159,8 @@ EXT_DECL  TRDP_IP_ADDR_T tau_getOwnAddr (
  *
  */
 EXT_DECL TRDP_ERR_T tau_uri2Addr (
-	TRDP_APP_SESSION_T   appHandle,
-	TRDP_IP_ADDR_T      *pAddr,
+    TRDP_APP_SESSION_T   appHandle,
+    TRDP_IP_ADDR_T      *pAddr,
     const TRDP_URI_T     pUri);
 
 
@@ -179,7 +179,7 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2Uri (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_URI_HOST_T      pUri,
     TRDP_IP_ADDR_T       addr);  
 
@@ -201,7 +201,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
  *
  */
 EXT_DECL TRDP_ERR_T tau_label2Ids (
-	TRDP_APP_SESSION_T    appHandle,
+    TRDP_APP_SESSION_T    appHandle,
     TRDP_LABEL_T          vehId,
     TRDP_LABEL_T          cstId,
     const TRDP_LABEL_T    vehLabel,
@@ -224,7 +224,7 @@ EXT_DECL TRDP_ERR_T tau_label2Ids (
  *
  */
 EXT_DECL TRDP_ERR_T tau_label2TcnVehNo (
-	TRDP_APP_SESSION_T    appHandle,
+    TRDP_APP_SESSION_T    appHandle,
     UINT8                *pTcnVehNo,
     UINT8                *pTcnCstNo,
     const TRDP_LABEL_T    vehLabel,
@@ -246,7 +246,7 @@ EXT_DECL TRDP_ERR_T tau_label2TcnVehNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_label2OpVehNo (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT8               *pOpVehNo,
     const TRDP_LABEL_T   vehLabel, 
     const TRDP_LABEL_T   cstLabel);  
@@ -270,7 +270,7 @@ EXT_DECL TRDP_ERR_T tau_label2OpVehNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_tcnVehNo2Ids (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         vehId,  
     TRDP_LABEL_T         cstId,  
     const UINT8          tcnVehNo,
@@ -292,7 +292,7 @@ EXT_DECL TRDP_ERR_T tau_tcnVehNo2Ids (
  *
  */
 EXT_DECL TRDP_ERR_T tau_opVehNo2Ids (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         vehId,  
     TRDP_LABEL_T         cstId,  
     const UINT8          opVehNo); 
@@ -316,7 +316,7 @@ EXT_DECL TRDP_ERR_T tau_opVehNo2Ids (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2Ids (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         vehId,  
     TRDP_LABEL_T         cstId, 
     const TRDP_IP_ADDR_T ipAddr);
@@ -336,7 +336,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Ids (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2TcnVehNo (
-	TRDP_APP_SESSION_T    appHandle,
+    TRDP_APP_SESSION_T    appHandle,
     UINT8                *pTcnVehNo, 
     UINT8                *pTcnCstNo,
     const TRDP_IP_ADDR_T  ipAddr);
@@ -356,7 +356,7 @@ EXT_DECL TRDP_ERR_T tau_addr2TcnVehNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2OpVehNo (
-	TRDP_APP_SESSION_T    appHandle,
+    TRDP_APP_SESSION_T    appHandle,
     UINT8                *pOpVehNo, 
     const TRDP_IP_ADDR_T  ipAddr);
 
@@ -380,7 +380,7 @@ EXT_DECL TRDP_ERR_T tau_addr2OpVehNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_tcnCstNo2CstId     (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         cstId,     
     const UINT8          tcnCstNo);
 
@@ -397,7 +397,7 @@ EXT_DECL TRDP_ERR_T tau_tcnCstNo2CstId     (
  *
  */
 EXT_DECL TRDP_ERR_T tau_opCstNo2CstId     (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         cstId,     
     const UINT8          opCstNo);
 
@@ -417,7 +417,7 @@ EXT_DECL TRDP_ERR_T tau_opCstNo2CstId     (
  *
  */
 EXT_DECL TRDP_ERR_T tau_label2CstId (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         cstId,
     const TRDP_LABEL_T   vehLabel,
     const TRDP_LABEL_T   cstLabel); 
@@ -436,7 +436,7 @@ EXT_DECL TRDP_ERR_T tau_label2CstId (
  *
  */
 EXT_DECL TRDP_ERR_T tau_label2TcnCstNo (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT8               *pTcnCstNo,
     const TRDP_LABEL_T   vehLabel);
 
@@ -454,7 +454,7 @@ EXT_DECL TRDP_ERR_T tau_label2TcnCstNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_label2OpCstNo (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     UINT8               *pOpCstNo,
     const TRDP_LABEL_T   vehLabel);
 
@@ -474,7 +474,7 @@ EXT_DECL TRDP_ERR_T tau_label2OpCstNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2CstId      (
-	TRDP_APP_SESSION_T   appHandle,
+    TRDP_APP_SESSION_T   appHandle,
     TRDP_LABEL_T         cstId,     
     const TRDP_IP_ADDR_T ipAddr);
 
@@ -492,7 +492,7 @@ EXT_DECL TRDP_ERR_T tau_addr2CstId      (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2TcnCstNo (
-	TRDP_APP_SESSION_T    appHandle,
+    TRDP_APP_SESSION_T    appHandle,
     UINT8                *pTcnCstNo,
     const TRDP_IP_ADDR_T  ipAddr);
   
@@ -510,8 +510,8 @@ EXT_DECL TRDP_ERR_T tau_addr2TcnCstNo (
  *
  */
 EXT_DECL TRDP_ERR_T tau_addr2OpCstNo (
-	TRDP_APP_SESSION_T    appHandle,
-	UINT8				 *pOpCstNo,
+    TRDP_APP_SESSION_T    appHandle,
+    UINT8                 *pOpCstNo,
     const TRDP_IP_ADDR_T  ipAddr);
 
 /* ---------------------------------------------------------------------------- */

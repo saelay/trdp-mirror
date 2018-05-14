@@ -42,7 +42,7 @@
 #define PD_COMID2        10002
 #define PD_COMID2_CYCLE  1000000             /* in us (1000000 = 1 sec) */
 #define PD_COMID1_SRC_IP2 "10.64.12.135"
-#define PD_COMID_MC		 "239.0.0.1"
+#define PD_COMID_MC       "239.0.0.1"
 
 /* We use dynamic memory    */
 #define RESERVED_MEMORY  100000
@@ -111,7 +111,7 @@ void myPDcallBack (
             printf("\nComID %d received\n", pMsg->comId);
             if (pData)
             {
-            	printf("Data: %s\n", pData);
+                printf("Data: %s\n", pData);
             }
             break;
 

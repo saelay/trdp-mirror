@@ -225,7 +225,7 @@ static  void mdCallback(
             break;
         case TRDP_REPLYTO_ERR:
         case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept	*/
+            /* The application can decide here if old data shall be invalidated or kept */
             printf("Packet timed out (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
             if (pMsg->comId == CALLTEST_MR_COMID)
             {
@@ -340,7 +340,7 @@ int main(int argc, char** argv)
                         0,                        
                         NULL,                     
                         NULL, 
-                        &mdConfiguration,		
+                        &mdConfiguration,
                         &processConfig) != TRDP_NO_ERR)
     {
         printf("TRDP OpenSession error\n");

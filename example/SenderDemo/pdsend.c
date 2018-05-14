@@ -69,9 +69,9 @@ UINT8       gDataBuffer[MAX_PAYLOAD_SIZE] =
     0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
     0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
-};      /*	Buffer for our PD data	*/
+};      /*    Buffer for our PD data    */
 
-size_t      gDataSize   = 20;       /* Size of test data			*/
+size_t      gDataSize   = 20;       /* Size of test data            */
 uint32_t    gComID      = PD_COMID0;
 uint32_t    gInterval   = PD_COMID0_CYCLE;
 char        gTargetIP[16];
@@ -79,8 +79,8 @@ int         gDataChanged    = 1;
 int         gIsActive       = 1;
 int32_t     gRecFD          = 0;
 
-TRDP_APP_SESSION_T  gAppHandle;             /*	Our identifier to the library instance	*/
-TRDP_PUB_T          gPubHandle;             /*	Our identifier to the publication	*/
+TRDP_APP_SESSION_T  gAppHandle;             /*    Our identifier to the library instance    */
+TRDP_PUB_T          gPubHandle;             /*    Our identifier to the publication    */
 
 MD_RECEIVE_PACKET_T gMessageData;
 
@@ -105,12 +105,12 @@ static  void mdCallback(
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
  *
- *  @param[in]      pRefCon			user supplied context pointer
- *  @param[in]		category		Log category (Error, Warning, Info etc.)
- *  @param[in]		pTime			pointer to NULL-terminated string of time stamp
- *  @param[in]		pFile			pointer to NULL-terminated string of source module
- *  @param[in]		LineNumber		line
- *  @param[in]		pMsgStr         pointer to NULL-terminated string
+ *  @param[in]      pRefCon            user supplied context pointer
+ *  @param[in]        category        Log category (Error, Warning, Info etc.)
+ *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
+ *  @param[in]        pFile            pointer to NULL-terminated string of source module
+ *  @param[in]        LineNumber        line
+ *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
 static void dbgOut (
@@ -176,8 +176,8 @@ void pd_stop (int redundant)
 /******************************************************************************/
 /** pd_init
  *
- *  @retval         0		no error
- *  @retval         1		some error
+ *  @retval         0        no error
+ *  @retval         1        some error
  */
 int pd_init (
     const char  *pDestAddress,
@@ -199,28 +199,28 @@ int pd_init (
     gInterval   = interval;
 
 
-    /*	Init the library for dynamic operation	(PD only) */
-    if (tlc_init(dbgOut,                            /* actually printf	*/
+    /*    Init the library for dynamic operation    (PD only) */
+    if (tlc_init(dbgOut,                            /* actually printf    */
                  NULL,
-                 &dynamicConfig                    /* Use application supplied memory	*/
+                 &dynamicConfig                    /* Use application supplied memory    */
                  ) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
 
-    /*	Open a session for callback operation	(PD only) */
+    /*    Open a session for callback operation    (PD only) */
     if (tlc_openSession(&gAppHandle,
                         0, 0,                              /* use default IP addresses */
-                        NULL,                              /* no Marshalling	*/
-                        &pdConfiguration, &mdConfiguration,            /* system defaults for PD and MD	*/
+                        NULL,                              /* no Marshalling    */
+                        &pdConfiguration, &mdConfiguration,            /* system defaults for PD and MD    */
                         &processConfig) != TRDP_NO_ERR)
     {
         printf("Initialization error\n");
         return 1;
     }
 
-    /*	Subscribe to control PDs		*/
+    /*    Subscribe to control PDs        */
 
     pd_sub(&gRec[0]);
     pd_sub(&gRec[1]);
@@ -240,7 +240,7 @@ int pd_init (
     gMessageData.lisHandle = NULL;
     memset(gMessageData.sessionId, 0, 16);
     gMessageData.comID = 2000;
-	//gMessageData.timeout;
+    //gMessageData.timeout;
     gMessageData.srcIP[0] = 0;
     gMessageData.message[0] = 0;
     gMessageData.msgsize = 64;
@@ -257,7 +257,7 @@ int pd_init (
 void pd_deinit ()
 {
     /*
-     *	We always clean up behind us!
+     *    We always clean up behind us!
      */
 
     tlp_unpublish(gAppHandle, gPubHandle);
@@ -334,17 +334,17 @@ void pd_sub (
     }
 
     TRDP_ERR_T err = tlp_subscribe(
-            gAppHandle,                                 /*	our application identifier			*/
-            &recPacket->subHandle,                      /*	our subscription identifier			*/
+            gAppHandle,                                 /*    our application identifier            */
+            &recPacket->subHandle,                      /*    our subscription identifier            */
             NULL, NULL,
-            recPacket->comID,                           /*	ComID								*/
-            0,                                          /*	topocount: local consist only		*/
+            recPacket->comID,                           /*    ComID                                */
+            0,                                          /*    topocount: local consist only        */
             0,
-            vos_dottedIP(recPacket->srcIP),             /*	Source IP filter 1					*/
+            vos_dottedIP(recPacket->srcIP),             /*    Source IP filter 1                    */
             VOS_INADDR_ANY, 0,
-            0x0,                                        /*	Default destination	(or MC Group)   */
-            recPacket->timeout,                         /*	Time out in us						*/
-            TRDP_TO_SET_TO_ZERO);                       /*  delete invalid data	on timeout      */
+            0x0,                                        /*    Default destination    (or MC Group)   */
+            recPacket->timeout,                         /*    Time out in us                        */
+            TRDP_TO_SET_TO_ZERO);                       /*  delete invalid data    on timeout      */
 
     if (err != TRDP_NO_ERR)
     {
@@ -367,8 +367,8 @@ PD_RECEIVE_PACKET_T *pd_get (
 /** Kind of specialized marshalling!
  *
  *  @param[in]      index           into our subscription array
- *  @param[in]      data			pointer to received data
- *  @param[in]      valid			flag for timeouts
+ *  @param[in]      data            pointer to received data
+ *  @param[in]      valid            flag for timeouts
  *  @retval         none
  */
 static void pd_getData (int index, uint8_t *data, int invalid)
@@ -393,18 +393,18 @@ void md_listen (
         recPacket->lisHandle = NULL;
     }
     TRDP_ERR_T err = tlm_addListener(
-            gAppHandle,                                 /*	our application identifier			*/
-    		&recPacket->lisHandle,                      /*	listener handle          			*/
-    		NULL,  NULL,                                /*  user ref                            */
+            gAppHandle,                                 /*    our application identifier            */
+            &recPacket->lisHandle,                      /*    listener handle                      */
+            NULL,  NULL,                                /*  user ref                            */
             TRUE,                                       /*  comID listener                      */
-    		recPacket->comID,							/*	ComID								*/
-    		0u,             						    /*	topocounts: local consist only		*/
+            recPacket->comID,                            /*    ComID                                */
+            0u,                                         /*    topocounts: local consist only        */
             0u,
-    		VOS_INADDR_ANY,                             /*  any source address                  */
+            VOS_INADDR_ANY,                             /*  any source address                  */
             VOS_INADDR_ANY,                             /*  any source address                  */
             VOS_INADDR_ANY,                             /*  any dest address                    */
-    		TRDP_FLAGS_CALLBACK,                        /*  use callbacks                       */
-    		NULL, NULL);
+            TRDP_FLAGS_CALLBACK,                        /*  use callbacks                       */
+            NULL, NULL);
 
     if (err != TRDP_NO_ERR)
     {
@@ -443,8 +443,8 @@ MD_RECEIVE_PACKET_T* md_get()
 /******************************************************************************/
 /** callback routine for receiving TRDP traffic
  *
- *  @param[in]      pCallerRef		user supplied context pointer
- *  @param[in]      pMsg			pointer to message block
+ *  @param[in]      pCallerRef        user supplied context pointer
+ *  @param[in]      pMsg            pointer to message block
  *  @retval         none
  */
 void pdCallBack (
@@ -454,7 +454,7 @@ void pdCallBack (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-    /*	Check why we have been called	*/
+    /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
@@ -511,7 +511,7 @@ void pdCallBack (
             break;
 
         case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept	*/
+            /* The application can decide here if old data shall be invalidated or kept    */
             printf("Packet timed out (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
 
             switch (pMsg->comId)
@@ -564,8 +564,8 @@ void pdCallBack (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-	TRDP_ERR_T	err;
-    /*	Check why we have been called	*/
+    TRDP_ERR_T    err;
+    /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
@@ -573,10 +573,10 @@ void pdCallBack (
             
             if (pMsg->msgType == TRDP_MSG_MR)
             {
-            	/* Send reply	*/
+                /* Send reply    */
                 err = tlm_reply(appHandle, &pMsg->sessionId, gMessageData.comID, 0, NULL, (UINT8*)"Maleikum Salam", 16);
                 //err = tlm_reply (appHandle, pRefCon, &pMsg->sessionId, 0, 0, gMessageData.comID, pMsg->srcIpAddr, pMsg->srcIpAddr,
-    			//			TRDP_FLAGS_CALLBACK, 0, NULL, (UINT8*)"Maleikum Salam", 16, NULL, NULL);
+                //            TRDP_FLAGS_CALLBACK, 0, NULL, (UINT8*)"Maleikum Salam", 16, NULL, NULL);
                 if (err != TRDP_NO_ERR)
                 {
                     printf("Error repling data (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
@@ -585,10 +585,10 @@ void pdCallBack (
                 {
                     gMessageData.invalid = 0;
                     gMessageData.changed = 1;
-				}
+                }
             }
             else if (pMsg->msgType == TRDP_MSG_MP &&
-            		pData && dataSize > 0 && dataSize <= 64)
+                    pData && dataSize > 0 && dataSize <= 64)
             {
                 gMessageData.comID = pMsg->comId;
                 memcpy(gMessageData.message, pData, dataSize);
@@ -612,30 +612,30 @@ void pdCallBack (
             if (memcmp(gMessageData.sessionId, pMsg->sessionId, sizeof(gMessageData.sessionId)) == 0)
             {
                 printf("Session timed out (UUID: %02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n",
-                		pMsg->sessionId[0],
-                		pMsg->sessionId[1],
-                		pMsg->sessionId[2],
-                		pMsg->sessionId[3],
-                		pMsg->sessionId[4],
-                		pMsg->sessionId[5],
-                		pMsg->sessionId[6],
-                		pMsg->sessionId[7],
-                		pMsg->sessionId[8],
-                		pMsg->sessionId[9],
-                		pMsg->sessionId[10],
-                		pMsg->sessionId[11],
-                		pMsg->sessionId[12],
-                		pMsg->sessionId[13],
-                		pMsg->sessionId[14],
-                		pMsg->sessionId[15]
+                        pMsg->sessionId[0],
+                        pMsg->sessionId[1],
+                        pMsg->sessionId[2],
+                        pMsg->sessionId[3],
+                        pMsg->sessionId[4],
+                        pMsg->sessionId[5],
+                        pMsg->sessionId[6],
+                        pMsg->sessionId[7],
+                        pMsg->sessionId[8],
+                        pMsg->sessionId[9],
+                        pMsg->sessionId[10],
+                        pMsg->sessionId[11],
+                        pMsg->sessionId[12],
+                        pMsg->sessionId[13],
+                        pMsg->sessionId[14],
+                        pMsg->sessionId[15]
                         );
- 				gMessageData.message[0] = 0;
+                 gMessageData.message[0] = 0;
                 gMessageData.msgsize = 0;
                 gMessageData.replies = 0;
                 gMessageData.changed = 1;
-				gMessageData.invalid = 1;
+                gMessageData.invalid = 1;
             }
-            /* The application can decide here if old data shall be invalidated or kept	*/
+            /* The application can decide here if old data shall be invalidated or kept    */
             printf("Packet timed out (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
 
         default:
@@ -665,8 +665,8 @@ int pd_loop2 (void)
 
         if (gDataChanged && gPubHandle != NULL)
         {
-            /*	Copy the packet into the internal send queue, prepare for sending.
-                If we change the data, just re-publish it	*/
+            /*    Copy the packet into the internal send queue, prepare for sending.
+                If we change the data, just re-publish it    */
 
             err = tlp_put(gAppHandle, gPubHandle, gDataBuffer, (UINT32) gDataSize);
 
@@ -695,10 +695,10 @@ int pd_loop2 (void)
         tlc_getInterval(gAppHandle, &tv, (TRDP_FDS_T *) &rfds, &noDesc);
 
         /*
-         	The wait time for select must consider cycle times and timeouts of
-         	the PD packets received or sent.
-         	If we need to poll something faster than the lowest PD cycle,
-         	we need to set the maximum time out our self.
+             The wait time for select must consider cycle times and timeouts of
+             the PD packets received or sent.
+             If we need to poll something faster than the lowest PD cycle,
+             we need to set the maximum time out our self.
          */
         if (vos_cmpTime(&tv, &max_tv) > 0)
         {
@@ -706,8 +706,8 @@ int pd_loop2 (void)
         }
 
         /*
-         	Select() will wait for ready descriptors or time out,
-         	what ever comes first.
+             Select() will wait for ready descriptors or time out,
+             what ever comes first.
          */
         rv = vos_select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
 

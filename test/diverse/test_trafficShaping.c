@@ -282,8 +282,8 @@ int main (int argc, char *argv[])
      */
     while (1)
     {
-        fd_set		rfds;
-        INT32		noDesc;
+        fd_set        rfds;
+        INT32        noDesc;
         VOS_TIMEVAL_T  tv;
         VOS_TIMEVAL_T  max_tv = {0, 10000};
         

@@ -99,10 +99,10 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
 /** Routine to put some statistics into the reply message in ASCII
  *  via tcpdump/wireshark no special further code is needed to read these.
  *
- *  @param[out]     data		buffer of reply message
- *  @param[in]      appHandle	the handle returned by tlc_init
- *  @param[in]      countMQ		counter for tlm_replyQuery calls
- *  @param[in]      countMP		counter for tlm_reply calls
+ *  @param[out]     data        buffer of reply message
+ *  @param[in]      appHandle    the handle returned by tlc_init
+ *  @param[in]      countMQ        counter for tlm_replyQuery calls
+ *  @param[in]      countMP        counter for tlm_reply calls
  *  @retval         none
  */
 static void prepareData(char* data, TRDP_APP_SESSION_T appHandle, UINT32 countMQ, UINT32 countMP)
@@ -141,7 +141,7 @@ static  void mdCallback(
 {   
     static UINT32 countMQ = 0;
     static UINT32 countMP = 0;
-    TRDP_ERR_T	err;
+    TRDP_ERR_T    err;
     switch (pMsg->resultCode)
     {
         case TRDP_NO_ERR:
@@ -217,7 +217,7 @@ static  void mdCallback(
             break;
         case TRDP_REPLYTO_ERR:
         case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept	*/
+            /* The application can decide here if old data shall be invalidated or kept    */
             printf("Packet timed out (ComID %d, SrcIP: %s)\n", pMsg->comId, vos_ipDotted(pMsg->srcIpAddr));
             break;
         case TRDP_CONFIRMTO_ERR:
@@ -275,13 +275,13 @@ int main(int argc, char** argv)
     }
     err = tlc_init(print_log, NULL, NULL);
 
-    /*	Open a session for callback operation	(MD only) */
+    /*    Open a session for callback operation    (MD only) */
     if (tlc_openSession(&appSessionReplier,
                         replierIP, 
                         0,                        
                         NULL,                     
                         NULL, 
-                        &mdConfiguration,		
+                        &mdConfiguration,        
                         &processConfig) != TRDP_NO_ERR)
     {
         printf("OpenSession error\n");

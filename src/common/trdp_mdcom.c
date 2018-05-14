@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-14: Ticket #200 Notify 'sender element' fields, set twice
  *      BL 2018-01-29: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
@@ -95,9 +96,9 @@ static TRDP_ERR_T   trdp_mdLookupElement (MD_ELE_T                  *pinitialMdE
 static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
                                    const TRDP_SESSION_PT    appHandle,
                                    const TRDP_ERR_T         resultCode);
-static BOOL8        trdp_mdTimeOutStateHandler ( MD_ELE_T           *pElement,
-                                                 TRDP_SESSION_PT    appHandle,
-                                                 TRDP_ERR_T         *pResult);
+static BOOL8 trdp_mdTimeOutStateHandler ( MD_ELE_T          *pElement,
+                                          TRDP_SESSION_PT   appHandle,
+                                          TRDP_ERR_T        *pResult);
 static MD_ELE_T     *trdp_mdHandleConfirmReply (TRDP_APP_SESSION_T  appHandle,
                                                 MD_HEADER_T         *pMdItemHeader);
 
@@ -331,7 +332,7 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
         theMessage.userStatus   = 0u;
         theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
     }
-    theMessage.destIpAddr           = pMdItem->addr.destIpAddr;
+    theMessage.destIpAddr = pMdItem->addr.destIpAddr;
     theMessage.numExpReplies        = pMdItem->numExpReplies;
     theMessage.pUserRef             = pMdItem->pUserRef;
     theMessage.numReplies           = pMdItem->numReplies;
@@ -1126,7 +1127,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, INT32 mdSock,
             size        = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
             dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength);
 
-            pElement->dataSize = dataSize;
+            pElement->dataSize  = dataSize;
             dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
             readDataSize    = dataSize;
         }
@@ -1515,7 +1516,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
                                         TRDP_MD_ELE_ST_T    state,
                                         MD_ELE_T            * *pIterMD)
 {
-    UINT32          numOfReceivers  = 0u;
+    UINT32          numOfReceivers = 0u;
     MD_LIS_ELE_T    *iterListener   = NULL;
     TRDP_ERR_T      result          = TRDP_NO_ERR;
     MD_ELE_T        *iterMD         = NULL;
@@ -1621,14 +1622,14 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
 
         /* check the source URI if set  */
         if ((iterListener->srcURI[0] != 0) &&
-            (!trdp_isAddressed (iterListener->srcURI, (CHAR8*) pH->sourceURI)))
+            (!trdp_isAddressed(iterListener->srcURI, (CHAR8 *) pH->sourceURI)))
         {
             continue;
         }
 
         /* check the destination URI if set  */
         if ((iterListener->destURI[0] != 0) &&
-            (!trdp_isAddressed (iterListener->destURI, (CHAR8*) pH->destinationURI)))
+            (!trdp_isAddressed(iterListener->destURI, (CHAR8 *) pH->destinationURI)))
         {
             continue;
         }
@@ -1639,15 +1640,15 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         /* recv queue item by matching the etbTopoCnt and opTrnTopoCnt                                     */
         if (((pH->etbTopoCnt != 0u) || (pH->opTrnTopoCnt != 0u))
             && (!trdp_validTopoCounters( vos_ntohl(pH->etbTopoCnt),
-                                      vos_ntohl(pH->opTrnTopoCnt),
-                                      iterListener->addr.etbTopoCnt,
-                                      iterListener->addr.opTrnTopoCnt)))
+                                         vos_ntohl(pH->opTrnTopoCnt),
+                                         iterListener->addr.etbTopoCnt,
+                                         iterListener->addr.opTrnTopoCnt)))
         {
             continue;
         }
 
         /* If multicast address is set, but does not match, we go to the next listener (if any) */
-        if ((iterListener->addr.mcGroup != 0u)            &&
+        if ((iterListener->addr.mcGroup != 0u) &&
             (iterListener->addr.mcGroup != appHandle->pMDRcvEle->addr.destIpAddr))
         {
             /* no IP match for unicast addressing */
@@ -1675,7 +1676,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         /* If we come here, it is the right listener! */
         {
             /* We found a listener, set some values for this new session  */
-            iterMD = appHandle->pMDRcvEle;
+            iterMD                      = appHandle->pMDRcvEle;
             iterMD->pUserRef            = iterListener->pUserRef;
             iterMD->pfCbFunction        = iterListener->pfCbFunction;
             iterMD->stateEle            = state;
@@ -1908,12 +1909,12 @@ static TRDP_ERR_T  trdp_mdRecv (
     TRDP_SESSION_PT appHandle,
     UINT32          sockIndex)
 {
-    TRDP_ERR_T          result          = TRDP_NO_ERR;
+    TRDP_ERR_T          result = TRDP_NO_ERR;
     TRDP_ERR_T          resForCallback  = TRDP_NO_ERR;
     MD_HEADER_T         *pH     = NULL;
     MD_ELE_T            *iterMD = NULL;
     TRDP_MD_ELE_ST_T    state;
-    BOOL8 isTCP = FALSE;
+    BOOL8               isTCP = FALSE;
 
     if (appHandle == NULL)
     {
@@ -3351,9 +3352,9 @@ TRDP_ERR_T trdp_mdCall (
 
     UINT32      timeoutWire = 0U;
 
-	/*check for valid values within msgType*/
-    if (    ((msgType != TRDP_MSG_MR) && (msgType != TRDP_MSG_MN))
-		 || ((pSendParam != NULL) && (pSendParam->retries > TRDP_MAX_MD_RETRIES)))
+    /*check for valid values within msgType*/
+    if (((msgType != TRDP_MSG_MR) && (msgType != TRDP_MSG_MN))
+        || ((pSendParam != NULL) && (pSendParam->retries > TRDP_MAX_MD_RETRIES)))
     {
         return TRDP_PARAM_ERR;
     }
@@ -3377,8 +3378,6 @@ TRDP_ERR_T trdp_mdCall (
     if ( NULL != pSenderElement )
     {
         memset(pSenderElement, 0, sizeof(MD_ELE_T));
-        pSenderElement->dataSize    = dataSize;
-        pSenderElement->grossSize   = trdp_packetSizeMD(dataSize);
         pSenderElement->socketIdx   = TRDP_INVALID_SOCKET_INDEX;
         pSenderElement->pktFlags    =
             (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
@@ -3397,7 +3396,8 @@ TRDP_ERR_T trdp_mdCall (
             &&
             (vos_isMulticast(destIpAddr) == FALSE))  /* no multicast addr used    */
         {
-			pSenderElement->numRetriesMax = ((pSendParam != NULL) ? pSendParam->retries : appHandle->mdDefault.sendParam.retries);
+            pSenderElement->numRetriesMax =
+                ((pSendParam != NULL) ? pSendParam->retries : appHandle->mdDefault.sendParam.retries);
         } /* no else needed as memset has set all memory to zero */
           /* Prepare element data */
         pSenderElement->addr.comId          = comId;
@@ -3407,12 +3407,12 @@ TRDP_ERR_T trdp_mdCall (
         pSenderElement->addr.opTrnTopoCnt   = opTrnTopoCnt;
         pSenderElement->addr.mcGroup        = (vos_isMulticast(destIpAddr)) ? destIpAddr : 0u;
         pSenderElement->privFlags           = TRDP_PRIV_NONE;
-        pSenderElement->dataSize			= dataSize;
-        pSenderElement->grossSize			= trdp_packetSizeMD(dataSize);
-        pSenderElement->sendSize			= 0u;
-        pSenderElement->numReplies			= 0u;
-        pSenderElement->pCachedDS			= NULL;
-        pSenderElement->morituri			= FALSE;
+        pSenderElement->dataSize            = dataSize;
+        pSenderElement->grossSize           = trdp_packetSizeMD(dataSize);
+        pSenderElement->sendSize            = 0u;
+        pSenderElement->numReplies          = 0u;
+        pSenderElement->pCachedDS           = NULL;
+        pSenderElement->morituri            = FALSE;
         if ( msgType == TRDP_MSG_MR )
         {
             /* Multiple replies expected only for multicast */
