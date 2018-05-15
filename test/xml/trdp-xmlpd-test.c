@@ -287,6 +287,8 @@ static const char * getResultString(TRDP_ERR_T ret)
         return "TRDP_STATE_ERR (call in wrong state)";
     case TRDP_APP_TIMEOUT_ERR:
         return "TRDP_APPTIMEOUT_ERR (application timeout)";
+    case TRDP_MARSHALLING_ERR:
+        return "TRDP_MARSHALLING_ERR (alignment problem)";
     case TRDP_UNKNOWN_ERR:
         return "TRDP_UNKNOWN_ERR (unspecified error)";
     default:
@@ -678,6 +680,16 @@ static TRDP_ERR_T publishTelegram(UINT32 ifcIdx, TRDP_EXCHG_PAR_T * pExchgPar)
             return TRDP_PARAM_ERR;
         }
 
+        /* For debugging: initialize the data buffer */
+        if (0)
+        {
+            UINT32  j;
+            UINT8   *pBuf;
+            for (j = 0, pBuf = (UINT8 *)pPubTlg->dataset.buffer; j < pPubTlg->dataset.size; j++)
+            {
+                *pBuf++ = j & 0xFF;
+            }
+        }
         /*  Publish the telegram    */
         result = tlp_publish(
             pPubTlg->sessionhandle, &pPubTlg->pubHandle, NULL, NULL,

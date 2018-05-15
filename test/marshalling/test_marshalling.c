@@ -705,7 +705,8 @@ struct DS2 {
 
 struct myDataSet2003 {
     UINT32 a;
-    INT32 b;
+    //INT32 b;
+    CHAR8 b;
     struct DS2 c;
 } gMyDataSet2003  =
 {
