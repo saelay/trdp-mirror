@@ -243,11 +243,11 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         return VOS_INIT_ERR;
     }
 
-	if ((pThread == NULL) || (pName == NULL))
+    if ((pThread == NULL) || (pName == NULL))
     {
         return VOS_PARAM_ERR;
     }
-	*pThread = NULL;
+    *pThread = NULL;
 
     if ((pThreadHandle = vos_getFreeThreadHandle()) == NULL)
     {
