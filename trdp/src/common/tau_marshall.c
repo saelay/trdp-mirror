@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-15: Wrong source size/range should not lead to marshalling error, check discarded
  *      BL 2018-05-03: Ticket #193 Unused parameter warnings
  *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-05-08: Compiler warnings, MISRA-C
@@ -563,9 +564,9 @@ static TRDP_ERR_T marshallDs (
         }
     }
 
-    if (pInfo->pSrc > pInfo->pSrcEnd)
+    if (pInfo->pSrc > pInfo->pSrcEnd ) /* Maybe one alignement bejond - do not erratically issue error! */
     {
-        return TRDP_MARSHALLING_ERR;
+        vos_printLogStr(VOS_LOG_WARNING, "Marshalling read beyond source area. Wrong Dataset size provided?\n");
     }
 
     /* Decrement recursion counter. Note: Recursion counter will not decrement in case of error */
