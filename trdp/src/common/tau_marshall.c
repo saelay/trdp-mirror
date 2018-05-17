@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-05-17: Ticket #197 Incorrect Marshalling/Unmarshalling for nested datasets
  *      BL 2018-05-15: Wrong source size/range should not lead to marshalling error, check discarded
  *      BL 2018-05-03: Ticket #193 Unused parameter warnings
  *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
@@ -59,6 +60,7 @@ typedef struct
 typedef struct
 {
     UINT8 a;
+    UINT32 b;
 } STRUCT_T;
 
 typedef struct
@@ -77,10 +79,13 @@ typedef struct
  */
 
 static TRDP_COMID_DSID_MAP_T    *sComIdDsIdMap = NULL;
-static UINT32 sNumComId = 0u;
+static UINT32                   sNumComId = 0u;
 
 static TRDP_DATASET_T           * *sDataSets = NULL;
-static UINT32 sNumEntries = 0u;
+static UINT32                   sNumEntries = 0u;
+
+/** List of byte sizes for standard TCMS types */
+static const UINT8              cSizeOfBasicTypes[] = {1,1,1,2,1,2,4,8,1,2,4,8,4,8,4,4,4};
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -91,7 +96,7 @@ static UINT32 sNumEntries = 0u;
  *
  *
  *  @param[in]      pSrc            Pointer to align
- *  @param[in]      alignment       0, 1, 2, 4, 8
+ *  @param[in]      alignment       1, 2, 4, 8
  *
  *  @retval         aligned pointer
  */
@@ -347,6 +352,40 @@ static TRDP_DATASET_T *findDs (
     return NULL;
 }
 
+/**********************************************************************************************************************/
+/**    Return the size of the largest member of this dataset.
+ *
+ *  @param[in]      pDataset        Pointer to one dataset
+ *
+ *  @retval         1,2,4,8
+ *
+ */
+static UINT8 maxSizeOfDSMember (
+    TRDP_DATASET_T      *pDataset)
+{
+    UINT16  lIndex;
+    UINT8   maxSize = 1;
+
+    if (pDataset != NULL)
+    {
+        /*    Loop over all datasets in the array    */
+        for (lIndex = 0u; lIndex < pDataset->numElement; ++lIndex)
+        {
+            if (pDataset->pElement[lIndex].type <= TRDP_TIMEDATE64)
+            {
+                if (maxSize < cSizeOfBasicTypes[pDataset->pElement[lIndex].type])
+                {
+                    maxSize = cSizeOfBasicTypes[pDataset->pElement[lIndex].type];
+                }
+            }
+            else    /* recurse if nested dataset */
+            {
+                maxSize = maxSizeOfDSMember(findDs(pDataset->pElement[lIndex].type));
+            }
+        }
+    }
+    return maxSize;
+}
 
 /**********************************************************************************************************************/
 /**    Marshall one dataset.
@@ -378,8 +417,13 @@ static TRDP_ERR_T marshallDs (
         return TRDP_STATE_ERR;
     }
 
-    /*    Align on struct boundary first    */
-    pSrc = alignePtr(pInfo->pSrc, ALIGNOF(STRUCT_T));
+    /*  Align on struct boundary first   */
+    /*  Regarding Ticket #197:
+        This is a weak determination of structure alignment!
+            "A struct is always aligned to the largest type’s alignment requirements"
+        Only, at this point we do need to know the size of the largest member to follow! */
+
+    pSrc = alignePtr(pInfo->pSrc, maxSizeOfDSMember(pDataset));
 
     /*    Loop over all datasets in the array    */
     for (lIndex = 0u; (lIndex < pDataset->numElement) && (pInfo->pSrcEnd > pInfo->pSrc); ++lIndex)
@@ -606,6 +650,8 @@ static TRDP_ERR_T unmarshallDs (
         return TRDP_STATE_ERR;
     }
 
+    pDst = alignePtr(pInfo->pDst, maxSizeOfDSMember(pDataset));
+
     /*    Loop over all datasets in the array    */
     for (lIndex = 0u; (lIndex < pDataset->numElement) && (pInfo->pSrcEnd > pInfo->pSrc); ++lIndex)
     {
@@ -826,6 +872,8 @@ static TRDP_ERR_T size_unmarshall (
     {
         return TRDP_STATE_ERR;
     }
+
+    pDst = alignePtr(pInfo->pDst, maxSizeOfDSMember(pDataset));
 
     /*    Loop over all datasets in the array    */
     for (lIndex = 0u; (lIndex < pDataset->numElement) && (pInfo->pSrcEnd > pInfo->pSrc); ++lIndex)
