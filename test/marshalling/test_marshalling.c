@@ -494,7 +494,7 @@ TRDP_DATASET_T  gDataSet2003 =
             0,0,0,NULL
         },
         {
-            TRDP_INT32,
+            TRDP_CHAR8, //TRDP_INT32,
             1,
             0,0,0,NULL
         },
@@ -814,28 +814,11 @@ static int test2()
 
     gMyDataSet2003.c = gMyDataSet2002;
 
-    /*    Compute size of marshalled data */
-    err = tau_calcDatasetSizeByComId(gpRefCon, 2003, (UINT8 *) &gMyDataSet2003, sizeof(gMyDataSet2003), &compSize, NULL);
+    /*  size of dataset in memory */
+    printf("sizeof(gMyDataSet2003): %lu\n", sizeof(gMyDataSet2003));
 
-    if (err != TRDP_NO_ERR)
-    {
-        printf("tau_calcDatasetSizeByComId returns error %d\n", err);
-        return 1;
-    }
-
-    printf("Precomputed size of marshalled dataset for ComId %d is %u...\n", 2003, compSize);
-
-    if (compSize <= sizeof(gMyDataSet2003))
-    {
-        printf("...seems OK!\n");
-    }
-    else
-    {
-        printf("...### Precomputed size is wrong (> %lu which is sizeof(ds) )!\n", sizeof(gMyDataSet2003));
-    }
-
-    bufSize = compSize;
-    memset(gDstDataBuffer, 0, bufSize);
+    bufSize = sizeof(gDstDataBuffer);
+    memset(gDstDataBuffer, 0, sizeof(gDstDataBuffer));
 
     err = tau_marshall(gpRefCon, 2003, (UINT8 *) &gMyDataSet2003, sizeof(gMyDataSet2003), gDstDataBuffer, &bufSize, NULL);
 
@@ -847,13 +830,24 @@ static int test2()
 
     printf("Marshalled size of dataset for ComId %d is %u\n", 2003, bufSize);
 
-    if (compSize <= sizeof(gMyDataSet2003))
+    /*    Compute size of unmarshalled data */
+    err = tau_calcDatasetSizeByComId(gpRefCon, 2003, (UINT8 *) &gMyDataSet2003, sizeof(gMyDataSet2003), &compSize, NULL);
+
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tau_calcDatasetSizeByComId returns error %d\n", err);
+        return 1;
+    }
+
+    printf("Precomputed size of unmarshalled dataset for ComId %d is %u...\n", 2003, compSize);
+
+    if (compSize == sizeof(gMyDataSet2003))
     {
         printf("...seems OK!\n");
     }
     else
     {
-        printf("...### Marshalled size is different!\n");
+        printf("...### Precomputed size is wrong (%u != %lu which is sizeof(ds) )!\n", (unsigned int)compSize, sizeof(gMyDataSet2003));
     }
 
     bufSize2 = sizeof(gMyDataSet2003Copy);
@@ -865,6 +859,13 @@ static int test2()
     {
         printf("tau_unmarshall returns error %d\n", err);
         return 1;
+    }
+
+    if (bufSize2 != sizeof(gMyDataSet2003))
+    {
+        printf("...### Computed size is wrong (%u != %lu which is sizeof(ds) )!\n", (unsigned int)compSize, sizeof(gMyDataSet2003));
+        return 1;
+
     }
 
     if (memcmp(&gMyDataSet2003, &gMyDataSet2003Copy, sizeof(gMyDataSet2003)) != 0)
@@ -889,7 +890,6 @@ int main ()
     err = tau_initMarshall((void *)&gpRefCon, sizeof(gComIdMap)/sizeof(TRDP_COMID_DSID_MAP_T), gComIdMap, 8, gDataSets);
 
     //test1();
-    test2();
-    return 0;
+    return test2();
 }
 
