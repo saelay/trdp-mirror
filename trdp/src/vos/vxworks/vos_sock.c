@@ -212,7 +212,7 @@ UINT64 ntohll(UINT64 value) {return htonll(value); }
 EXT_DECL UINT16 vos_htons (
     UINT16 val)
 {
-	return htons(val);
+    return htons(val);
 }
 
 EXT_DECL UINT16 vos_ntohs (
@@ -1526,7 +1526,7 @@ EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr( VOS_IP4_ADDR_T   srcIP,
                                                VOS_IP4_ADDR_T   mcGroup,
                                                VOS_IP4_ADDR_T   rcvMostly)
 {
-	/* On Linux, binding to an interface address will prevent receiving of MCs! */ 
+    /* On Linux, binding to an interface address will prevent receiving of MCs! */ 
     if (vos_isMulticast(mcGroup) && rcvMostly)
     {
         return 0;
