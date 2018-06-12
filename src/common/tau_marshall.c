@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      SW 2018-06-12: Ticket #203 Incorrect unmarshalling of datasets containing TIMEDATE64 array
  *      BL 2018-05-17: Ticket #197 Incorrect Marshalling/Unmarshalling for nested datasets
  *      BL 2018-05-15: Wrong source size/range should not lead to marshalling error, check discarded
  *      BL 2018-05-03: Ticket #193 Unused parameter warnings
@@ -807,8 +808,8 @@ static TRDP_ERR_T unmarshallDs (
                         *pDst32 += ((UINT32)(*pSrc++)) << 8u;
                         *pDst32 += *pSrc++;
                         pDst32++;
+                        pDst = (UINT8 *) pDst32;
                     }
-                    pDst = (UINT8 *) pDst32;
                     break;
                 }
                 case TRDP_INT64:
