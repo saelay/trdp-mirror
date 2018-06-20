@@ -15,8 +15,9 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
- * $Id: vos_sock.c 253 2013-01-07 13:48:40Z aweiss $*
+ * $Id$*
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  */
 
@@ -89,17 +90,17 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
 {
     TCHAR *shMemName = NULL;
     VOS_ERR_T retVal = VOS_UNKNOWN_ERR;
-    size_t convertedChars = (size_t)NULL;
-    errno_t err = (errno_t)NULL;
+    size_t convertedChars = 0u;
+    errno_t err = 0;
 
-    if ((pKey == NULL) || (pSize == (UINT32*)NULL) || (*pSize == (UINT32)NULL))
+    if ((pKey == NULL) || (pSize == NULL) || (*pSize == 0u))
     {
         vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Invalid parameter\n");
         retVal = VOS_PARAM_ERR;
     }
     else
     {
-        shMemName = (TCHAR*) vos_memAlloc((strlen(pKey) + 1) * sizeof(TCHAR));
+        shMemName = (TCHAR*) vos_memAlloc((UINT32) (strlen(pKey) + 1) * sizeof(TCHAR));
         if (shMemName == NULL)
         {
             vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not allocate memory\n");
@@ -109,7 +110,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
         {
             /* CHAR8 to TCHAR (Unicode) */
             err = mbstowcs_s(&convertedChars, shMemName, strlen(pKey) + 1, pKey, _TRUNCATE);
-            if (err != (errno_t)NULL)
+            if (err != 0)
             {
                 vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not convert CHAR8 to TCHAR\n");
                 retVal = VOS_UNKNOWN_ERR;
@@ -170,7 +171,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
                         }
                         else
                         {
-                            (*pHandle)->sharedMemoryName = (CHAR8*)vos_memAlloc((strlen(pKey)+1)*sizeof(CHAR8));
+                            (*pHandle)->sharedMemoryName = (CHAR8*)vos_memAlloc((UINT32) ((strlen(pKey)+1)*sizeof(CHAR8)));
                             if ((*pHandle)->sharedMemoryName == NULL)
                             {
                                 vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not alloc memory\n");
@@ -178,7 +179,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
                             }
                             else
                             {
-                                vos_strncpy((*pHandle)->sharedMemoryName,pKey,strlen(pKey)+1);
+                                vos_strncpy((*pHandle)->sharedMemoryName,pKey, (UINT32) (strlen(pKey) + 1));
                                 retVal = VOS_NO_ERR;
                             }
                         }
@@ -193,7 +194,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
         vos_memFree(shMemName);
         if (retVal != VOS_NO_ERR)
         {
-            *pSize = (UINT32)NULL;
+            *pSize = 0u;
         }
         else
         {

@@ -18,6 +18,7 @@
  * $Id$
  *
  * Changes:
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-02-10: Debug print: tabs before size output
  *      BL 2012-12-03: ID 1: "using uninitialized PD_ELE_T.pullIpAddress variable"
@@ -47,7 +48,9 @@
 #endif
 
 #ifdef WIN32
+#ifndef _WIN64
 #include <pthread.h>
+#endif
 #endif
 
 #ifdef ESP32
@@ -136,7 +139,7 @@ struct VOS_QUEUE_ELEM
     UINT32  size;
 };
 
-/* Forward declaration, Mutex size is target dependant! */
+/* Forward declaration, Mutex size is target dependent! */
 VOS_ERR_T       vos_mutexLocalCreate (struct VOS_MUTEX *pMutex);
 void            vos_mutexLocalDelete (struct VOS_MUTEX *pMutex);
 

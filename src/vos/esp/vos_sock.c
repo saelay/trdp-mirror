@@ -14,8 +14,9 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright 2018. All rights reserved.
  *
- * $Id: $
+ * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *
  */
 
@@ -160,7 +161,7 @@ EXT_DECL BOOL8 vos_isMulticast (
  */
 
 EXT_DECL INT32 vos_select (
-    INT32           highDesc,
+    SOCKET           highDesc,
     VOS_FDS_T       *pReadableFD,
     VOS_FDS_T       *pWriteableFD,
     VOS_FDS_T       *pErrorFD,
@@ -288,7 +289,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenUDP (
-    INT32                   *pSock,
+    SOCKET                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sock;
@@ -319,7 +320,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_SOCK_ERR;
     }
     
-    *pSock = (INT32) sock;
+    *pSock = (SOCKET) sock;
     
     vos_printLog(VOS_LOG_DBG, "vos_sockOpenUDP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
@@ -339,7 +340,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenTCP (
-    INT32                   *pSock,
+    SOCKET                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sock;
@@ -361,7 +362,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         return VOS_SOCK_ERR;
     }
 
-    *pSock = (INT32) sock;
+    *pSock = (SOCKET) sock;
 
     vos_printLog(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", sock);
     return VOS_NO_ERR;
@@ -377,7 +378,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockClose (
-    INT32 sock)
+    SOCKET sock)
 {
     if (close(sock) == -1)
     {
@@ -406,7 +407,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSetOptions (
-    INT32                   sock,
+    SOCKET                   sock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sockOptValue = 0;
@@ -541,7 +542,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
  */
 
 EXT_DECL VOS_ERR_T vos_sockJoinMC (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcAddress,
     UINT32  ipAddress)
 {
@@ -626,7 +627,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockLeaveMC (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcAddress,
     UINT32  ipAddress)
 {
@@ -694,7 +695,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
-    INT32       sock,
+    SOCKET       sock,
     const UINT8 *pBuffer,
     UINT32      *pSize,
     UINT32      ipAddress,
@@ -776,7 +777,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
-    INT32   sock,
+    SOCKET   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
     UINT32  *pSrcIPAddr,
@@ -974,7 +975,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockBind (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  ipAddress,
     UINT16  port)
 {
@@ -1022,7 +1023,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
  */
 
 EXT_DECL VOS_ERR_T vos_sockListen (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  backlog)
 {
     if (sock == -1)
@@ -1049,8 +1050,8 @@ EXT_DECL VOS_ERR_T vos_sockListen (
  */
 
 EXT_DECL VOS_ERR_T vos_sockAccept (
-    INT32   sock,
-    INT32   *pSock,
+    SOCKET   sock,
+    SOCKET   *pSock,
     UINT32  *pIPAddress,
     UINT16  *pPort)
 {
@@ -1071,7 +1072,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
  */
 
 EXT_DECL VOS_ERR_T vos_sockConnect (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  ipAddress,
     UINT16  port)
 {
@@ -1094,7 +1095,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
-    INT32       sock,
+    SOCKET       sock,
     const UINT8 *pBuffer,
     UINT32      *pSize)
 {
@@ -1121,7 +1122,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
-    INT32   sock,
+    SOCKET   sock,
     UINT8   *pBuffer,
     UINT32  *pSize)
 {
@@ -1139,7 +1140,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  *  @retval         VOS_SOCK_ERR                option not supported
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcIfAddress)
 {
     VOS_ERR_T           result = VOS_NO_ERR;

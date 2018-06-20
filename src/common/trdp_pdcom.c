@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-01-29: Ticket #186 Potential SEGFAULT in case of PD timeout
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
@@ -446,7 +447,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
  */
 TRDP_ERR_T  trdp_pdReceive (
     TRDP_SESSION_PT appHandle,
-    INT32           sock)
+    SOCKET          sock)
 {
     PD_HEADER_T         *pNewFrameHead      = &appHandle->pNewFrame->frameHead;
     PD_ELE_T            *pExistingElement   = NULL;
@@ -752,7 +753,7 @@ void trdp_pdCheckPending (
                                                                                        in macro */
             if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
             {
-                *pNoDesc = appHandle->iface[iterPD->socketIdx].sock;
+                *pNoDesc = (INT32) appHandle->iface[iterPD->socketIdx].sock;
             }
         }
     }
@@ -1009,7 +1010,7 @@ TRDP_ERR_T trdp_pdCheck (
  *  @retval         TRDP_IO_ERR
  */
 TRDP_ERR_T  trdp_pdSend (
-    INT32       pdSock,
+    SOCKET      pdSock,
     PD_ELE_T    *pPacket,
     UINT16      port)
 {

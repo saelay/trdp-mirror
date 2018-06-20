@@ -14,8 +14,9 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright TOSHIBA, Japan, 2013.
  *
- * $Id: vos_mem.h 282 2013-01-11 07:08:44Z 97029 $
+ * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-05-03: Ticket #193 Unused parameter warnings
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  */

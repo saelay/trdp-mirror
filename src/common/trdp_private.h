@@ -16,6 +16,7 @@
  *      
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
  *      BL 2017-11-17: undone: Ticket #169 Encapsulate declaration of packed structures within a macro
@@ -156,7 +157,7 @@ typedef struct TRDP_SOCKET_TCP
 /** Socket item    */
 typedef struct TRDP_SOCKETS
 {
-    INT32               sock;                            /**< vos socket descriptor to use                */
+    SOCKET              sock;                            /**< vos socket descriptor to use                */
     TRDP_IP_ADDR_T      bindAddr;                        /**< Defines the interface to use                */
     TRDP_SEND_PARAM_T   sendParam;                       /**< Send parameters                             */
     TRDP_SOCK_TYPE_T    type;                            /**< Usage of this socket                        */
@@ -320,8 +321,8 @@ typedef struct MD_ELE
 /**    TCP file descriptor parameters   */
 typedef struct
 {
-    INT32   listen_sd;          /**< TCP general socket listening connection requests   */
-    INT32   max_sd;             /**< Maximum socket number in the file descriptor   */
+    SOCKET	listen_sd;          /**< TCP general socket listening connection requests   */
+    SOCKET  max_sd;             /**< Maximum socket number in the file descriptor   */
     /* fd_set  master_set;         / **< Local file descriptor   * / */
 } TRDP_TCP_FD_T;
 #endif

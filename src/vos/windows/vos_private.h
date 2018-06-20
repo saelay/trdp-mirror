@@ -14,8 +14,9 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
- * $Id$*
+ * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  */
 
 #ifndef VOS_PRIVATE_H
@@ -25,7 +26,11 @@
  * INCLUDES
  */
 
+#ifndef _WIN64
 #include <pthread.h>
+#else
+#include <WinBase.h>
+#endif
 
 #include "vos_types.h"
 #include "vos_thread.h"
@@ -39,10 +44,27 @@ extern "C" {
  */
 
 #define VOS_VERSION            1u
-#define VOS_RELEASE            0u
-#define VOS_UPDATE             2u
+#define VOS_RELEASE            1u
+#define VOS_UPDATE             0u
 #define VOS_EVOLUTION          0u
 
+#ifdef _WIN64
+
+#define MAX_SEM_COUNT           10
+
+struct VOS_MUTEX
+{
+    UINT32      magicNo;
+    HANDLE		mutexId;
+};
+
+struct VOS_SEMA
+{
+    HANDLE semaphore;
+};
+
+#else
+    
 struct VOS_MUTEX
 {
     UINT32          magicNo;
@@ -53,6 +75,7 @@ struct VOS_SEMA
 {
     struct sem_t_ *semaphore;
 };
+#endif
 
 struct VOS_SHRD
 {
