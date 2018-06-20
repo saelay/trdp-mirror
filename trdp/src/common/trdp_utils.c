@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
@@ -83,7 +84,7 @@ static void printSocketUsage (
         {
             continue;
         }
-        vos_printLog(VOS_LOG_DBG, "iface[%u].sock = %u\n", lIndex, iface[lIndex].sock);
+        vos_printLog(VOS_LOG_DBG, "iface[%u].sock = %d\n", lIndex, (int) iface[lIndex].sock);
         vos_printLog(VOS_LOG_DBG, "iface[%u].bindAddr = %x\n", lIndex, iface[lIndex].bindAddr);
         vos_printLog(VOS_LOG_DBG, "iface[%u].type = %s \n", lIndex, (iface[lIndex].type == 0 ? "PD_UDP" :
                                                                      (iface[lIndex].type == 1 ? "MD_UDP" : "MD_TCP")));
@@ -687,12 +688,13 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
     BOOL8                   rcvMostly,
-    INT32                   useSocket,
+	SOCKET                  useSocket,
     INT32                   *pIndex,
     TRDP_IP_ADDR_T          cornerIp)
 {
     VOS_SOCK_OPT_T  sock_options;
-    INT32           lIndex, emptySock = VOS_INVALID_SOCKET;
+	INT32           lIndex;
+	INT32			emptySockIdx = -1;	/* was emptySock, renamed to avoid confusion */
     TRDP_ERR_T      err         = TRDP_NO_ERR;
     TRDP_IP_ADDR_T  bindAddr    = vos_determineBindAddr(srcIP, mcGroup, rcvMostly);
 
@@ -774,20 +776,20 @@ TRDP_ERR_T  trdp_requestSocket (
 
             return err;
         }
-        else if (iface[lIndex].sock == VOS_INVALID_SOCKET && emptySock == VOS_INVALID_SOCKET)
+        else if ((iface[lIndex].sock == VOS_INVALID_SOCKET) && (emptySockIdx == -1))
         {
             /* Remember the first empty slot */
-            emptySock = lIndex;
+			emptySockIdx = lIndex;
         }
     }
 
     /* Not found, create a new socket entry */
     if (lIndex < VOS_MAX_SOCKET_CNT)
     {
-        if ((emptySock != VOS_INVALID_SOCKET)
-            && (lIndex != emptySock))
+        if ((emptySockIdx != -1)
+            && (lIndex != emptySockIdx))
         {
-            lIndex = emptySock;
+            lIndex = emptySockIdx;
         }
         else
         {
@@ -988,7 +990,7 @@ void  trdp_releaseSocket (
         {
             if (iface[lIndex].tcpParams.morituri == TRUE)
             {
-                vos_printLog(VOS_LOG_INFO, "The socket (Num = %d) will be closed\n", iface[lIndex].sock);
+                vos_printLog(VOS_LOG_INFO, "The socket (Num = %d) will be closed\n", (int) iface[lIndex].sock);
 
                 err = (TRDP_ERR_T) vos_sockClose(iface[lIndex].sock);
                 if (err != TRDP_NO_ERR)
@@ -999,7 +1001,7 @@ void  trdp_releaseSocket (
                 /* Delete the socket from the iface */
                 vos_printLog(VOS_LOG_INFO,
                              "Deleting socket from the iface (Sock: %d, lIndex: %d)\n",
-                             iface[lIndex].sock, lIndex);
+                             (int) iface[lIndex].sock, lIndex);
                 iface[lIndex].sock = TRDP_INVALID_SOCKET_INDEX;
                 iface[lIndex].sendParam.qos = 0;
                 iface[lIndex].sendParam.ttl = 0;
@@ -1026,7 +1028,7 @@ void  trdp_releaseSocket (
         {
             vos_printLog(VOS_LOG_DBG,
                          "Decrement the socket %d usage = %d\n",
-                         iface[lIndex].sock,
+                         (int) iface[lIndex].sock,
                          iface[lIndex].usage);
             iface[lIndex].usage--;
 
@@ -1041,7 +1043,7 @@ void  trdp_releaseSocket (
                 }
                 else
                 {
-                    vos_printLog(VOS_LOG_DBG, "Closed socket %d\n", iface[lIndex].sock);
+                    vos_printLog(VOS_LOG_DBG, "Closed socket %d\n", (int) iface[lIndex].sock);
                 }
                 iface[lIndex].sock = VOS_INVALID_SOCKET;
             }
@@ -1068,7 +1070,7 @@ void  trdp_releaseSocket (
             {
                 vos_printLog(VOS_LOG_DBG,
                              "Decrement the socket %d usage = %d\n",
-                             iface[lIndex].sock,
+							 (int) iface[lIndex].sock,
                              iface[lIndex].usage);
 
                 iface[lIndex].usage--;
@@ -1082,7 +1084,7 @@ void  trdp_releaseSocket (
 
                     vos_printLog(VOS_LOG_INFO,
                                  "The Socket (Num = %d usage=0) ConnectionTimeout will be started\n",
-                                 iface[lIndex].sock);
+                                 (int) iface[lIndex].sock);
 
                     tmpt_interval.tv_sec    = connectTimeout / 1000000;
                     tmpt_interval.tv_usec   = connectTimeout % 1000000;

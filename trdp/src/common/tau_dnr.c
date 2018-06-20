@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-05-03: Ticket #193 Unused parameter warnings
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
  *      BL 2017-07-25: Ticket #125: tau_dnr: TCN DNS support missing
@@ -377,7 +378,7 @@ static TRDP_ERR_T readHostsFile (
  */
 static TRDP_ERR_T createSendQuery (
     TAU_DNR_DATA_T  *pDNR,
-    INT32           sock,
+    SOCKET           sock,
     const CHAR8     *pUri,
     UINT16          id,
     UINT32          *pSize)
@@ -593,13 +594,13 @@ static void updateDNSentry (
     TAU_DNR_ENTRY_T     *pTemp,
     const CHAR8         *pUri)
 {
-    INT32           my_socket;
+    SOCKET          my_socket;
     VOS_ERR_T       err;
     UINT8           packetBuffer[TAU_MAX_DNS_BUFFER_SIZE];
     UINT32          size;
     UINT32          querySize;
     VOS_SOCK_OPT_T  opts;
-    UINT16          id      = (UINT16) ((UINT32)appHandle & 0xFFFFu);
+    UINT16          id      = (UINT16) ((UINT16) appHandle & 0xFFFFu);
     TAU_DNR_DATA_T  *pDNR   = (TAU_DNR_DATA_T *) appHandle->pUser;
     TRDP_IP_ADDR_T  ip_addr = VOS_INADDR_ANY;
 

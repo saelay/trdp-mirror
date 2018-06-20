@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  */
@@ -108,6 +109,10 @@ extern "C" {
 #define VOS_INADDR_ANY      INADDR_ANY
 
 #define VOS_DEFAULT_IFACE   cDefaultIface
+
+#if !defined(SOCKET) && !defined(_WIN64)
+#define SOCKET          INT32
+#endif
 
 extern const CHAR8 *cDefaultIface;
 
@@ -286,7 +291,7 @@ EXT_DECL BOOL8 vos_netIfUp (
  */
 
 EXT_DECL INT32 vos_select (
-    INT32           highDesc,
+    SOCKET          highDesc,
     VOS_FDS_T       *pReadableFD,
     VOS_FDS_T       *pWriteableFD,
     VOS_FDS_T       *pErrorFD,
@@ -341,7 +346,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC(
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenUDP (
-    INT32                   *pSock,
+    SOCKET                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions);
 
 /**********************************************************************************************************************/
@@ -358,7 +363,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenTCP (
-    INT32                   *pSock,
+    SOCKET                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions);
 
 /**********************************************************************************************************************/
@@ -372,7 +377,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockClose (
-    INT32 sock);
+    SOCKET sock);
 
 /**********************************************************************************************************************/
 /** Set socket options.
@@ -386,7 +391,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSetOptions (
-    INT32                   sock,
+    SOCKET                   sock,
     const VOS_SOCK_OPT_T    *pOptions);
 
 /**********************************************************************************************************************/
@@ -403,7 +408,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
  */
 
 EXT_DECL VOS_ERR_T vos_sockJoinMC (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcAddress,
     UINT32  ipAddress);
 
@@ -423,7 +428,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockLeaveMC (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcAddress,
     UINT32  ipAddress);
 
@@ -444,7 +449,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
-    INT32       sock,
+    SOCKET       sock,
     const UINT8 *pBuffer,
     UINT32      *pSize,
     UINT32      ipAddress,
@@ -475,7 +480,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
-    INT32   sock,
+    SOCKET   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
     UINT32  *pSrcIPAddr,
@@ -498,7 +503,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockBind (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  ipAddress,
     UINT16  port);
 
@@ -516,7 +521,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
  */
 
 EXT_DECL VOS_ERR_T vos_sockListen (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  backlog);
 
 /**********************************************************************************************************************/
@@ -535,8 +540,8 @@ EXT_DECL VOS_ERR_T vos_sockListen (
  */
 
 EXT_DECL VOS_ERR_T vos_sockAccept (
-    INT32   sock,
-    INT32   *pSock,
+    SOCKET   sock,
+    SOCKET   *pSock,
     UINT32  *pIPAddress,
     UINT16  *pPort);
 
@@ -554,7 +559,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
  */
 
 EXT_DECL VOS_ERR_T vos_sockConnect (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  ipAddress,
     UINT16  port);
 
@@ -574,7 +579,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
-    INT32       sock,
+    SOCKET       sock,
     const UINT8 *pBuffer,
     UINT32      *pSize);
 
@@ -598,7 +603,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
-    INT32   sock,
+    SOCKET   sock,
     UINT8   *pBuffer,
     UINT32  *pSize);
 
@@ -612,7 +617,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  *  @retval         VOS_PARAM_ERR              sock descriptor unknown, parameter error
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcIfAddress);
 
 

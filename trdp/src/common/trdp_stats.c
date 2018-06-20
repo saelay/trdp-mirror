@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
  *      BL 2017-05-08: Compiler warnings
@@ -182,8 +183,8 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[lIndex].comId       = iter->addr.comId;     /* Subscribed ComId            */
         pStatistics[lIndex].joinedAddr  = iter->addr.mcGroup;   /* Joined IP address           */
         pStatistics[lIndex].filterAddr  = iter->addr.srcIpAddr; /* Filter IP address           */
-        pStatistics[lIndex].callBack    = (UINT32) iter->pfCbFunction;  /* call back function if used      */
-        pStatistics[lIndex].userRef     = (UINT32) iter->pUserRef;      /* user reference function if used */
+        pStatistics[lIndex].callBack    = (iter->pfCbFunction == NULL)? 0 : 1;      /* > 0 if call back function is used */
+        pStatistics[lIndex].userRef     = (iter->pUserRef == NULL) ? 0 : 1;         /* > 0 if user reference if used  */
         pStatistics[lIndex].timeout     = (UINT32) iter->interval.tv_usec + (UINT32) iter->interval.tv_sec * 1000000;
         /* Time-out value in us. 0 = No time-out supervision  */
         pStatistics[lIndex].toBehav     = iter->toBehavior;     /* Behavior at time-out    */
@@ -290,8 +291,8 @@ EXT_DECL TRDP_ERR_T tlc_getUdpListStatistics (
             vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN);
             pStatistics->comId          = pIter->addr.comId;
             pStatistics->joinedAddr     = pIter->addr.mcGroup;
-            pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
-            pStatistics->userRef        = (UINT32) pIter->pUserRef;
+            pStatistics->callBack       = (pIter->pfCbFunction == NULL) ? 0 : 1;      /* > 0 if call back function is used */
+            pStatistics->userRef        = (pIter->pUserRef == NULL) ? 0 : 1;         /* > 0 if user reference if used  */
             pStatistics->numSessions    = pIter->numSessions;
             pStatistics++;
             lIndex++;
@@ -338,8 +339,8 @@ EXT_DECL TRDP_ERR_T tlc_getTcpListStatistics (
             vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN);
             pStatistics->comId          = pIter->addr.comId;
             pStatistics->joinedAddr     = pIter->addr.mcGroup;
-            pStatistics->callBack       = (UINT32) pIter->pfCbFunction;
-            pStatistics->userRef        = (UINT32) pIter->pUserRef;
+            pStatistics->callBack       = (pIter->pfCbFunction == NULL) ? 0 : 1;      /* > 0 if call back function is used */
+            pStatistics->userRef        = (pIter->pUserRef == NULL) ? 0 : 1;         /* > 0 if user reference if used  */
             pStatistics->numSessions    = pIter->numSessions;
             pStatistics++;
             lIndex++;

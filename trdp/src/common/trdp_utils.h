@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
  *      BL 2017-05-08: Doxygen comment errors
@@ -172,7 +173,7 @@ TRDP_ERR_T trdp_requestSocket(
     TRDP_SOCK_TYPE_T usage,
     TRDP_OPTION_T options,
     BOOL8 rcvMostly,
-    INT32 useSocket,
+    SOCKET useSocket,
     INT32                   * pIndex,
     TRDP_IP_ADDR_T cornerIp);
 

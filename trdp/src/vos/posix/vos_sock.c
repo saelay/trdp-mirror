@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
@@ -92,7 +93,7 @@ struct ifreq    gIfr;
 
 BOOL8       vos_getMacAddress (UINT8        *pMacAddr,
                                const char   *pIfName);
-VOS_ERR_T   vos_sockSetBuffer (INT32 sock);
+VOS_ERR_T   vos_sockSetBuffer (SOCKET sock);
 
 /**********************************************************************************************************************/
 /** Get the MAC address for a named interface.
@@ -213,7 +214,7 @@ BOOL8 vos_getMacAddress (
  *  @retval         VOS_NO_ERR       no error
  *  @retval         VOS_SOCK_ERR     buffer size can't be set
  */
-VOS_ERR_T vos_sockSetBuffer (INT32 sock)
+VOS_ERR_T vos_sockSetBuffer (SOCKET sock)
 {
     int         optval      = 0;
     socklen_t   option_len  = sizeof(optval);
@@ -386,7 +387,7 @@ EXT_DECL BOOL8 vos_isMulticast (
  */
 
 EXT_DECL INT32 vos_select (
-    INT32           highDesc,
+    SOCKET           highDesc,
     VOS_FDS_T       *pReadableFD,
     VOS_FDS_T       *pWriteableFD,
     VOS_FDS_T       *pErrorFD,
@@ -599,7 +600,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenUDP (
-    INT32                   *pSock,
+    SOCKET                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sock;
@@ -631,7 +632,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
         return VOS_SOCK_ERR;
     }
 
-    *pSock = (INT32) sock;
+    *pSock = (SOCKET) sock;
 
     vos_printLog(VOS_LOG_DBG, "vos_sockOpenUDP: socket()=%d success\n", (int)sock);
     return VOS_NO_ERR;
@@ -651,7 +652,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenTCP (
-    INT32                   *pSock,
+    SOCKET                   *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sock;
@@ -682,7 +683,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         return VOS_SOCK_ERR;
     }
 
-    *pSock = (INT32) sock;
+    *pSock = (SOCKET) sock;
 
     vos_printLog(VOS_LOG_INFO, "vos_sockOpenTCP: socket()=%d success\n", (int)sock);
     return VOS_NO_ERR;
@@ -698,7 +699,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockClose (
-    INT32 sock)
+    SOCKET sock)
 {
     if (close(sock) == -1)
     {
@@ -727,7 +728,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSetOptions (
-    INT32                   sock,
+    SOCKET                   sock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sockOptValue = 0;
@@ -862,7 +863,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
  */
 
 EXT_DECL VOS_ERR_T vos_sockJoinMC (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcAddress,
     UINT32  ipAddress)
 {
@@ -947,7 +948,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockLeaveMC (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcAddress,
     UINT32  ipAddress)
 {
@@ -1015,7 +1016,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
-    INT32       sock,
+    SOCKET       sock,
     const UINT8 *pBuffer,
     UINT32      *pSize,
     UINT32      ipAddress,
@@ -1097,7 +1098,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
-    INT32   sock,
+    SOCKET   sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
     UINT32  *pSrcIPAddr,
@@ -1229,7 +1230,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockBind (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  ipAddress,
     UINT16  port)
 {
@@ -1277,7 +1278,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
  */
 
 EXT_DECL VOS_ERR_T vos_sockListen (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  backlog)
 {
     if (sock == -1)
@@ -1311,8 +1312,8 @@ EXT_DECL VOS_ERR_T vos_sockListen (
  */
 
 EXT_DECL VOS_ERR_T vos_sockAccept (
-    INT32   sock,
-    INT32   *pSock,
+    SOCKET   sock,
+    SOCKET   *pSock,
     UINT32  *pIPAddress,
     UINT16  *pPort)
 {
@@ -1388,7 +1389,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
  */
 
 EXT_DECL VOS_ERR_T vos_sockConnect (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  ipAddress,
     UINT16  port)
 {
@@ -1440,7 +1441,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
-    INT32       sock,
+    SOCKET       sock,
     const UINT8 *pBuffer,
     UINT32      *pSize)
 {
@@ -1512,7 +1513,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
-    INT32   sock,
+    SOCKET   sock,
     UINT8   *pBuffer,
     UINT32  *pSize)
 {
@@ -1592,7 +1593,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  *  @retval         VOS_SOCK_ERR                option not supported
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-    INT32   sock,
+    SOCKET   sock,
     UINT32  mcIfAddress)
 {
     struct sockaddr_in  multicastIFAddress;
