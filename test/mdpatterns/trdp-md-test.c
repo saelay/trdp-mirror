@@ -99,7 +99,7 @@ typedef struct
 /* test status */
 typedef struct
 {
-    int         test;                   /* test type executed */
+    uintptr_t   test;                   /* test type executed */
     unsigned    err[TST_END];           /* errors counter */
     unsigned    counter;                /* test counter */
     TRDP_TIME_T tbeg;                   /* test begin time */
@@ -598,13 +598,13 @@ void print_status ()
 void md_callback (void *ref, TRDP_APP_SESSION_T apph,
                   const TRDP_MD_INFO_T *msg, UINT8 *data, UINT32 size)
 {
-    int test;
+    uintptr_t test;
 
     print(0, "md_callback(%p, %p, %p, %p, %u) - ref %p",
           ref, apph, msg, data, size, (msg != NULL ? msg->pUserRef : 0));
 
     /* test number is encoded into user reference */
-    test = (int) (msg ? msg->pUserRef : 0);
+    test = (uintptr_t) (msg ? msg->pUserRef : 0);
     /* verify the callback is related to currently executed test */
     if (msg == NULL || (opts.mode == MODE_CALLER && test != sts.test))
     {
@@ -1134,7 +1134,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
            /* send notification */
            err = tlm_notify(
                    apph,                            /* session handle */
-                   (void *) (long)sts.test,         /* user reference */
+                   (void *) sts.test,               /* user reference */
                    NULL,                            /* callback function */
                    msg->comId,                      /* comid */
                    msg->etbTopoCnt,                 /* topo */
@@ -1163,7 +1163,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
            /* send request */
            err = tlm_request(
                    apph,                            /* session handle */
-                   (void *) (long) sts.test,        /* user reference */
+                   (void *) sts.test,        /* user reference */
                    NULL,                            /* callback function */
                    &uuid,                           /* session id */
                    msg->comId,                      /* comid */
