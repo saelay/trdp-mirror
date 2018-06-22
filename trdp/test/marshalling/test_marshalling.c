@@ -755,7 +755,7 @@ static int test1()
     }
     else
     {
-        printf("...### Precomputed size is wrong (> %lu which is sizeof(ds) )!\n", sizeof(gMyDataSet1000));
+        printf("...### Precomputed size is wrong (> %lu which is sizeof(ds) )!\n", (unsigned long) sizeof(gMyDataSet1000));
     }
 
     bufSize = compSize;
@@ -815,7 +815,7 @@ static int test2()
     gMyDataSet2003.c = gMyDataSet2002;
 
     /*  size of dataset in memory */
-    printf("sizeof(gMyDataSet2003): %lu\n", sizeof(gMyDataSet2003));
+    printf("sizeof(gMyDataSet2003): %lu\n", (unsigned long) sizeof(gMyDataSet2003));
 
     bufSize = sizeof(gDstDataBuffer);
     memset(gDstDataBuffer, 0, sizeof(gDstDataBuffer));
@@ -839,7 +839,7 @@ static int test2()
         return 1;
     }
 
-    printf("Precomputed size of unmarshalled dataset for ComId %d is %u...\n", 2003, compSize);
+    printf("Precomputed size of unmarshalled dataset for ComId %d is %u...\n", 2003, (unsigned int) compSize);
 
     if (compSize == sizeof(gMyDataSet2003))
     {
@@ -847,7 +847,7 @@ static int test2()
     }
     else
     {
-        printf("...### Precomputed size is wrong (%u != %lu which is sizeof(ds) )!\n", (unsigned int)compSize, sizeof(gMyDataSet2003));
+        printf("...### Precomputed size is wrong (%u != %lu which is sizeof(ds) )!\n", (unsigned int)compSize, (unsigned long)sizeof(gMyDataSet2003));
     }
 
     bufSize2 = sizeof(gMyDataSet2003Copy);
@@ -863,7 +863,7 @@ static int test2()
 
     if (bufSize2 != sizeof(gMyDataSet2003))
     {
-        printf("...### Computed size is wrong (%u != %lu which is sizeof(ds) )!\n", (unsigned int)compSize, sizeof(gMyDataSet2003));
+        printf("...### Computed size is wrong (%u != %lu which is sizeof(ds) )!\n", (unsigned int)compSize, (unsigned long) sizeof(gMyDataSet2003));
         return 1;
 
     }
