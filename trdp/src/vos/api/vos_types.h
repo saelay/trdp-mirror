@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-05-03: no inline if < C99
  *      BL 2017-11-17: Undone: Ticket #169 Encapsulate declaration of packed structures within a macro
  *      BL 2017-11-10: Additional log type: VOS_LOG_USR
@@ -201,6 +202,7 @@ typedef enum
     VOS_BLOCK_ERR       = -14,  /**< System call would have blocked in blocking mode */
     VOS_INTEGRATION_ERR = -15,  /**< Alignment or endianess for selected target wrong */
     VOS_NOCONN_ERR      = -16,  /**< No TCP connection                               */
+    VOS_INUSE_ERR       = -49,  /**< Resource is still in use                        */
     VOS_UNKNOWN_ERR     = -99   /**< Unknown error                                   */
 } VOS_ERR_T;
 

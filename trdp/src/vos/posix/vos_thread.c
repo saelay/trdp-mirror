@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-04-18: Ticket #195: Invalid thread handle (SEGFAULT)
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
@@ -1004,7 +1005,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     err = pthread_mutex_trylock((pthread_mutex_t *)&pMutex->mutexId);
     if (err == EBUSY)
     {
-        return VOS_MUTEX_ERR;
+        return VOS_INUSE_ERR;
     }
     if (err == EINVAL)
     {
