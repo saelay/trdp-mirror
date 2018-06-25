@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-25: Ticket #201 tlp_setRedundant return value if redId is 0
  *      BL 2018-06-12: Ticket #204 tlp_publish should take default callback function
  *      BL 2018-05-03: Ticket #199 Setting redId on tlp_request() has no effect
  *      BL 2018-04-20: Ticket #196 setRedundant with redId = 0 stops all publishers
@@ -1031,7 +1032,7 @@ TRDP_ERR_T tlp_setRedundant (
             /*  It would lead to an error, if the user tries to change the redundancy on a non-existant group, because
              the leadership state is recorded in the PD send queue! If there is no published comID with a certain
              redId, it would never be set... */
-            if (FALSE == found)
+            if ((FALSE == found) && (0u != redId))
             {
                 vos_printLogStr(VOS_LOG_ERROR, "Redundant ID not found\n");
                 ret = TRDP_PARAM_ERR;

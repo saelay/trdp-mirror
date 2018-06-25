@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-05-03: Ticket #195: Invalid thread handle (SEGFAULT)
  *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
@@ -838,7 +839,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
         errVal = semTake(pMutex->mutexId, NO_WAIT);
         if (errVal == ERROR)
         {
-            result = VOS_MUTEX_ERR;
+            result = VOS_INUSE_ERR;     /* Shouldn't there be a distinction between timeout and a real error? */
         }
         /* potentially a check of errno may be needed here */
     }

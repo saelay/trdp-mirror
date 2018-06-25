@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
@@ -1001,7 +1002,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     err = pthread_mutex_trylock(&pMutex->mutexId);
     if (err == EBUSY)
     {
-        return VOS_MUTEX_ERR;
+        return VOS_INUSE_ERR;
     }
     if (err == EINVAL)
     {

@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  */
 
@@ -50,7 +51,7 @@ const UINT32    cMutextMagic        = 0x1234FEDC;
 #define USECS_PER_MSEC  1000u
 #define MSECS_PER_SEC   1000u
 
-/* This define holds the max amount os seconds to get stored in 32bit holding micro seconds        */
+/* This define holds the max amount of seconds to get stored in 32bit holding micro seconds        */
 /* It is the result when using the common time struct with tv_sec and tv_usec as on a 32 bit value */
 /* so far 0..999999 gets used for the tv_usec field as per definition, then 0xFFF0BDC0 usec        */
 /* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */
@@ -789,13 +790,15 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     switch (dwWaitResult)
     {
        case WAIT_OBJECT_0:
-           return VOS_NO_ERR;
-       case WAIT_FAILED:
+            return VOS_NO_ERR;
+        case WAIT_FAILED:
            vos_printLog(VOS_LOG_ERROR,
                         "Unable to trylock Mutex (Mutex err=%d)\n",
                         GetLastError());
            return VOS_MUTEX_ERR;
+       case WAIT_TIMEOUT:
        case WAIT_ABANDONED:
+           return VOS_INUSE_ERR;
        default:
            return VOS_MUTEX_ERR;
     }

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  */
 
@@ -926,7 +927,7 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock (
     err = pthread_mutex_trylock((pthread_mutex_t *)&pMutex->mutexId);
     if (err == EBUSY)
     {
-        return VOS_MUTEX_ERR;
+        return VOS_INUSE_ERR;
     }
     if (err == EINVAL)
     {
