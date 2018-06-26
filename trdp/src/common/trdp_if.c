@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      SW 2018-06-26: Ticket #205 tlm_addListener() does not acknowledge TRDP_FLAGS_DEFAULT flag
  *      BL 2018-06-25: Ticket #201 tlp_setRedundant return value if redId is 0
  *      BL 2018-06-12: Ticket #204 tlp_publish should take default callback function
  *      BL 2018-05-03: Ticket #199 Setting redId on tlp_request() has no effect
@@ -2740,6 +2741,9 @@ EXT_DECL TRDP_ERR_T  tlm_addListener (
 
     /* mutex protected */
     {
+        /* Replace pktFlags with default values if required */
+        pktFlags = (pktFlags == TRDP_FLAGS_DEFAULT) ? appHandle->mdDefault.flags : pktFlags;
+
         /* Make sure that there is a TCP listener socket */
         if ((pktFlags & TRDP_FLAGS_TCP) != 0)
         {
