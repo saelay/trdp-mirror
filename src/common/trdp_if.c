@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-06-29: Default settings handling / compiler warnings
  *      SW 2018-06-26: Ticket #205 tlm_addListener() does not acknowledge TRDP_FLAGS_DEFAULT flag
  *      BL 2018-06-25: Ticket #201 tlp_setRedundant return value if redId is 0
  *      BL 2018-06-12: Ticket #204 tlp_publish should take default callback function
@@ -520,6 +521,7 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
             (!(pPdDefault->flags & TRDP_FLAGS_NONE)))
         {
             pSession->pdDefault.flags |= pPdDefault->flags;
+            pSession->pdDefault.flags &= ~TRDP_FLAGS_NONE;     /* clear TRDP_FLAGS_NONE */
         }
 
         if ((pSession->pdDefault.port == TRDP_PD_UDP_PORT) &&
@@ -599,6 +601,7 @@ EXT_DECL TRDP_ERR_T tlc_configSession (
             (!(pMdDefault->flags & TRDP_FLAGS_NONE)))
         {
             pSession->mdDefault.flags |= pMdDefault->flags;
+            pSession->mdDefault.flags &= ~TRDP_FLAGS_NONE;     /* clear TRDP_FLAGS_NONE */
         }
 
         /* check whether default values needed or not */
@@ -1894,18 +1897,11 @@ EXT_DECL TRDP_ERR_T tlp_request (
 
     if ( ret == TRDP_NO_ERR)
     {
-        TRDP_ADDRESSES_T addr;
-
-        /* Ticket #171: srcIP should be set if there are more than one interface */
+        /* Ticket #171: srcIP should be set if there is more than one interface */
         if (srcIpAddr == VOS_INADDR_ANY)
         {
             srcIpAddr = appHandle->realIP;
         }
-
-        addr.comId      = comId;
-        addr.srcIpAddr  = srcIpAddr;
-        addr.destIpAddr = destIpAddr;
-        addr.mcGroup    = (vos_isMulticast(destIpAddr) == 1) ? destIpAddr : VOS_INADDR_ANY;
 
         /*    Do not look for former request element anymore.
               We always create a new send queue entry now and have it removed in pd_sendQueued...
