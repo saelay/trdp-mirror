@@ -368,7 +368,7 @@ PD_RECEIVE_PACKET_T *pd_get (
  *
  *  @param[in]      index           into our subscription array
  *  @param[in]      data            pointer to received data
- *  @param[in]      valid            flag for timeouts
+ *  @param[in]      invalid         flag for timeouts
  *  @retval         none
  */
 static void pd_getData (int index, uint8_t *data, int invalid)

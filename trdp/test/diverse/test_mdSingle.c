@@ -8,9 +8,8 @@
  *
  * @author          Bernd Loehr, NewTec GmbH
  *
- * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+ * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  *
  * $Id$
  *
@@ -37,7 +36,7 @@
 /***********************************************************************************************************************
  * DEFINITIONS
  */
-#define APP_VERSION         "1.0"
+#define APP_VERSION         "1.4"
 
 #define DATA_MAX            1000
 
@@ -57,24 +56,24 @@ typedef struct testData
 
 typedef struct sSessionData
 {
-    BOOL8                sResponder;
-    BOOL8                sConfirmRequested;
-    BOOL8                sNotifyOnly;
-    BOOL8                sOnlyOnce;
-    BOOL8                sExitAfterReply;
-    BOOL8                sLoop;
-    BOOL8                sNoData;
+    BOOL8               sResponder;
+    BOOL8               sConfirmRequested;
+    BOOL8               sNotifyOnly;
+    BOOL8               sOnlyOnce;
+    BOOL8               sExitAfterReply;
+    BOOL8               sLoop;
+    BOOL8               sNoData;
     UINT32              sComID;
-    TRDP_APP_SESSION_T  appHandle;          /*    Our identifier to the library instance    */
-    TRDP_LIS_T          listenHandle1;       /*    Our identifier to the publication         */
-    TRDP_LIS_T          listenHandle2;       /*    Our identifier to the publication         */
-    int                 sBlockingMode;      /*    TRUE if select shall be used              */
+    TRDP_APP_SESSION_T  appHandle;              /*    Our identifier to the library instance    */
+    TRDP_LIS_T          listenUDP;          /*    Our identifier to the publication         */
+    TRDP_LIS_T          listenTCP;          /*    Our identifier to the publication         */
+    BOOL8               sBlockingMode;          /*    TRUE if select shall be used              */
     UINT32              sDataSize;
 } SESSION_DATA_T;
 
 SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE, 0};
 
-UINT32          ownIP = 0;
+UINT32          ownIP = 0u;
 
 const UINT8     cDemoData[] = " "
     "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
@@ -99,10 +98,23 @@ UINT8 gBuffer[64 * 1024];
 /***********************************************************************************************************************
  * PROTOTYPES
  */
-void dbgOut (void *, TRDP_LOG_T , const CHAR8 *, const CHAR8 *, UINT16 , const CHAR8 *);
-void usage (const char *);
-void myPDcallBack (void *, TRDP_APP_SESSION_T,const TRDP_PD_INFO_T *, UINT8 *, UINT32 );
-void mdCallback (void *, TRDP_APP_SESSION_T, const TRDP_MD_INFO_T *, UINT8 *, UINT32 );
+void dbgOut (void *,
+             TRDP_LOG_T,
+             const  CHAR8 *,
+             const  CHAR8 *,
+             UINT16,
+             const  CHAR8 *);
+void    usage (const char *);
+void    myPDcallBack (void *,
+                      TRDP_APP_SESSION_T,
+                      const TRDP_PD_INFO_T *,
+                      UINT8 *,
+                      UINT32 );
+void mdCallback (void *,
+                 TRDP_APP_SESSION_T,
+                 const TRDP_MD_INFO_T *,
+                 UINT8 *,
+                 UINT32 );
 
 /**********************************************************************************************************************/
 /* Print a sensible usage message */
@@ -110,12 +122,12 @@ void usage (const char *appName)
 {
     printf("%s: Version %s\t(%s - %s)\n", appName, APP_VERSION, __DATE__, __TIME__);
     printf("Usage of %s\n", appName);
-    printf("This tool sends MD messages to an ED.\n"
+    printf("This tool either sends MD messages or acts as a responder.\n"
            "Arguments are:\n"
            "-o <own IP address>    in dotted decimal\n"
            "-t <target IP address> in dotted decimal\n"
-           "-p <TCP|UDP>           protocol to communicate with\n"
-           "-d <n>                 additional main loop delay in us (default 1ms)\n"
+           "-p <TCP|UDP>           protocol to communicate with (default UDP)\n"
+           "-d <n>                 timeout in us for expected reply (default 2s)\n"
            "-e <n>                 expected replies\n"
            "-r                     be responder\n"
            "-c                     respond with confirmation\n"
@@ -144,125 +156,131 @@ void mdCallback (void                   *pRefCon,
                  UINT32                 dataSize)
 {
     TRDP_ERR_T      err         = TRDP_NO_ERR;
-    SESSION_DATA_T  *myGlobals  = (SESSION_DATA_T *) pRefCon;
+    SESSION_DATA_T  *myGlobals  = (SESSION_DATA_T *) pMsg->pUserRef;
 
     /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
-        case TRDP_NO_ERR:
+       case TRDP_NO_ERR:
 
-            switch (pMsg->msgType)
-            {
-                case  TRDP_MSG_MN:      /**< 'Mn' MD Notification (Request without reply)    */
-                    printf("<- MD Notification %u\n", pMsg->comId);
-                    if (NULL != pData && dataSize > 0)
-                    {
-                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
-                    }
-                    break;
-                case  TRDP_MSG_MR:      /**< 'Mr' MD Request with reply                      */
-                    printf("<- MR Request with reply %u\n", pMsg->comId);
-                    if (NULL != pData && dataSize > 0)
-                    {
-                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
-                    }
-                    if (sSessionData.sConfirmRequested)
-                    {
-                        printf("-> sending reply with query\n");
-                        err = tlm_replyQuery(myGlobals->appHandle, 
-                                            &pMsg->sessionId,
-                                             pMsg->comId,
-                                             0,
-                                             10000000,
-                                             NULL,
-                                             (UINT8 *) "I'm fine, how are you?", 
-                                             23);
-                    }
-                    else
-                    {
-                        printf("-> sending reply\n");
-                        err = tlm_reply(myGlobals->appHandle, 
-                                        &pMsg->sessionId,
-                                        pMsg->comId,
-                                        0,
-                                        NULL,
-                                        (UINT8 *) "I'm fine, thanx!",
-                                        17);
-                    }
-                    if (err != TRDP_NO_ERR)
-                    {
-                        printf("tlm_reply/Query returned error %d\n", err);
-                    }
-                    break;
-                case  TRDP_MSG_MP:      /**< 'Mp' MD Reply without confirmation              */
-                    printf("<- MR Reply received %u\n", pMsg->comId);
-                    if (NULL != pData && dataSize > 0)
-                    {
-                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
-                    }
-                    if (sSessionData.sExitAfterReply == TRUE)
-                    {
-                        sSessionData.sLoop = FALSE;
-                    }
-                    break;
-                case  TRDP_MSG_MQ:      /**< 'Mq' MD Reply with confirmation                 */
-                    printf("<- MR Reply with confirmation received %u\n", pMsg->comId);
-                    if (NULL != pData && dataSize > 0)
-                    {
-                        printf("   Data[%uB]: %.80s...\n", dataSize, pData);
-                    }
-                    printf("-> sending confirmation\n");
-                    err = tlm_confirm(myGlobals->appHandle, 
-                                      (const TRDP_UUID_T *) &pMsg->sessionId,
+           switch (pMsg->msgType)
+           {
+              case  TRDP_MSG_MN:        /**< 'Mn' MD Notification (Request without reply)    */
+                  vos_printLog(VOS_LOG_USR, "<- MD Notification %u\n", pMsg->comId);
+                  if (NULL != pData && dataSize > 0)
+                  {
+                      vos_printLog(VOS_LOG_USR, "   Data[%uB]: %.80s...\n", dataSize, pData);
+                  }
+                  break;
+              case  TRDP_MSG_MR:        /**< 'Mr' MD Request with reply                      */
+                  vos_printLog(VOS_LOG_USR, "<- MR Request with reply %u\n", pMsg->comId);
+                  if (NULL != pData && dataSize > 0)
+                  {
+                      vos_printLog(VOS_LOG_USR, "   Data[%uB]: %.80s...\n", dataSize, pData);
+                  }
+                  if (sSessionData.sConfirmRequested)
+                  {
+                      vos_printLogStr(VOS_LOG_USR, "-> sending reply with query\n");
+                      err = tlm_replyQuery(myGlobals->appHandle,
+                                           &pMsg->sessionId,
+                                           pMsg->comId,
+                                           0,
+                                           10000000,
+                                           NULL,
+                                           (UINT8 *) "I'm fine, how are you?",
+                                           23);
+                  }
+                  else
+                  {
+                      vos_printLogStr(VOS_LOG_USR, "-> sending reply\n");
+                      err = tlm_reply(myGlobals->appHandle,
+                                      &pMsg->sessionId,
+                                      pMsg->comId,
                                       0,
-                                      NULL);
-                    if (err != TRDP_NO_ERR)
-                    {
-                        printf("tlm_confirm returned error %d\n", err);
-                    }
-                    if (sSessionData.sExitAfterReply == TRUE)
-                    {
-                        sSessionData.sLoop = FALSE;
-                    }
-                    break;
-                case  TRDP_MSG_MC:      /**< 'Mc' MD Confirm                                 */
-                    printf("<- MR Confirmation received %u\n", pMsg->comId);
-                    if (sSessionData.sExitAfterReply == TRUE)
-                    {
-                        sSessionData.sLoop = FALSE;
-                    }
-                    break;
-                case  TRDP_MSG_ME:      /**< 'Me' MD Error                                   */
-                default:
-                    break;
-            }
-            break;
+                                      NULL,
+                                      (UINT8 *) "I'm fine, thanx!",
+                                      17);
+                  }
+                  if (err != TRDP_NO_ERR)
+                  {
+                      vos_printLog(VOS_LOG_USR, "tlm_reply/Query returned error %d\n", err);
+                  }
+                  break;
+              case  TRDP_MSG_MP:        /**< 'Mp' MD Reply without confirmation              */
+                  vos_printLog(VOS_LOG_USR, "<- MR Reply received %u\n", pMsg->comId);
+                  if (NULL != pData && dataSize > 0)
+                  {
+                      vos_printLog(VOS_LOG_USR, "   Data[%uB]: %.80s...\n", dataSize, pData);
+                  }
+                  if (sSessionData.sExitAfterReply == TRUE)
+                  {
+                      sSessionData.sLoop = FALSE;
+                  }
+                  break;
+              case  TRDP_MSG_MQ:        /**< 'Mq' MD Reply with confirmation                 */
+                  vos_printLog(VOS_LOG_USR, "<- MR Reply with confirmation received %u\n", pMsg->comId);
+                  if (NULL != pData && dataSize > 0)
+                  {
+                      vos_printLog(VOS_LOG_USR, "   Data[%uB]: %.80s...\n", dataSize, pData);
+                  }
+                  vos_printLogStr(VOS_LOG_USR, "-> sending confirmation\n");
+                  err = tlm_confirm(myGlobals->appHandle,
+                                    (const TRDP_UUID_T *) &pMsg->sessionId,
+                                    0,
+                                    NULL);
+                  if (err != TRDP_NO_ERR)
+                  {
+                      vos_printLog(VOS_LOG_USR, "tlm_confirm returned error %d\n", err);
+                  }
+                  if (sSessionData.sExitAfterReply == TRUE)
+                  {
+                      sSessionData.sLoop = FALSE;
+                  }
+                  break;
+              case  TRDP_MSG_MC:        /**< 'Mc' MD Confirm                                 */
+                  vos_printLog(VOS_LOG_USR, "<- MR Confirmation received %u\n", pMsg->comId);
+                  if (sSessionData.sExitAfterReply == TRUE)
+                  {
+                      sSessionData.sLoop = FALSE;
+                  }
+                  break;
+              case  TRDP_MSG_ME:        /**< 'Me' MD Error                                   */
+                  vos_printLog(VOS_LOG_USR, "<- ME received %u\n", pMsg->comId);
+                  if (sSessionData.sExitAfterReply == TRUE)
+                  {
+                      sSessionData.sLoop = FALSE;
+                  }
+                  break;
+              default:
+                  break;
+           }
+           break;
 
-        case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept    */
-            printf("Packet timed out (ComID %d, SrcIP: %s)\n",
-                   pMsg->comId,
-                   vos_ipDotted(pMsg->srcIpAddr));
-            break;
-        case TRDP_REPLYTO_ERR:
-            printf("No Reply within time out for ComID %d, destIP: %s\n",
-                   pMsg->comId,
-                   vos_ipDotted(pMsg->destIpAddr));
-            sSessionData.sLoop = FALSE;
-            break;
-        case TRDP_CONFIRMTO_ERR:
-        case TRDP_REQCONFIRMTO_ERR:
-            printf("No Confirmation within time out for ComID %d, destIP: %s\n",
-                   pMsg->comId,
-                   vos_ipDotted(pMsg->destIpAddr));
-            sSessionData.sLoop = FALSE;
-            break;
-        default:
-            printf("Error on packet received (ComID %d), err = %d\n",
-                   pMsg->comId,
-                   pMsg->resultCode);
-            sSessionData.sLoop = FALSE;
-            break;
+       case TRDP_TIMEOUT_ERR:
+           /* The application can decide here if old data shall be invalidated or kept    */
+           vos_printLog(VOS_LOG_USR, "### Packet timed out (ComID %d, SrcIP: %s)\n",
+                        pMsg->comId,
+                        vos_ipDotted(pMsg->srcIpAddr));
+           break;
+       case TRDP_REPLYTO_ERR:
+           vos_printLog(VOS_LOG_USR, "### No Reply within time out for ComID %d, destIP: %s\n",
+                        pMsg->comId,
+                        vos_ipDotted(pMsg->destIpAddr));
+           sSessionData.sLoop = FALSE;
+           break;
+       case TRDP_CONFIRMTO_ERR:
+       case TRDP_REQCONFIRMTO_ERR:
+           vos_printLog(VOS_LOG_USR, "### No Confirmation within time out for ComID %d, destIP: %s\n",
+                        pMsg->comId,
+                        vos_ipDotted(pMsg->destIpAddr));
+           sSessionData.sLoop = FALSE;
+           break;
+       default:
+           vos_printLog(VOS_LOG_USR, "### Error on packet received (ComID %d), err = %d\n",
+                        pMsg->comId,
+                        pMsg->resultCode);
+           sSessionData.sLoop = FALSE;
+           break;
     }
 }
 
@@ -288,13 +306,19 @@ void dbgOut (
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
 
-    printf("%s %s %16s:%-4d %s",
-           strrchr(pTime, '-') + 1,
-           catStr[category],
-           strrchr(pFile, VOS_DIR_SEP) + 1,
-           LineNumber,
-           pMsgStr);
+    if (category != VOS_LOG_DBG)
+    {
+        if ((category != VOS_LOG_INFO) ||
+            (strstr(pFile, "vos_sock.c") == NULL))
+        {
+            printf("%s %s %s",
+                   strrchr(pTime, '-') + 1,
+                   catStr[category],
+                   pMsgStr);
+        }
+    }
 }
+
 
 /**********************************************************************************************************************/
 /** main entry
@@ -306,17 +330,19 @@ int main (int argc, char *argv[])
 {
     unsigned int ip[4];
     TRDP_MD_CONFIG_T        mdConfiguration =
-    {mdCallback, &sSessionData, {0u, 64u, 0u}, TRDP_FLAGS_CALLBACK, 1000000u, 1000000u, 1000000u, 1000000u, 17225u, 17225u, 10};
+    {mdCallback, &sSessionData,
+     {0u, 64u, 0u}, TRDP_FLAGS_CALLBACK, 1000000u, 1000000u, 1000000u, 1000000u, 17225u, 17225u, 10};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     VOS_IF_REC_T            interfaces[MAX_IF];
-    BOOL8                   lastRun = FALSE;
+    BOOL8           lastRun = FALSE;
+    TRDP_ERR_T      err     = TRDP_NO_ERR;
 
-    int             rv          = 0;
+    int             rv = 0;
     UINT32          destIP      = 0u;
     UINT32          counter     = 0u;
     UINT32          expReplies  = 1u;
-    UINT32          delay       = 1000u;
+    UINT32          delay       = 2000000u;
     TRDP_FLAGS_T    flags       = TRDP_FLAGS_CALLBACK; /* default settings: callback and UDP */
     int             ch;
 
@@ -330,123 +356,123 @@ int main (int argc, char *argv[])
     {
         switch (ch)
         {
-            case 'o':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    return 1;
-                }
-                ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 't':
-            {   /*  read ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    return 1;
-                }
-                destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'p':
-            {   /*  determine protocol    */
-                if (strcmp(optarg, "TCP") == 0)
-                {
-                    flags |= TRDP_FLAGS_TCP;
-                    /* mdConfiguration.flags |= TRDP_FLAGS_TCP; */
-                }
-                else if (strcmp(optarg, "UDP") == 0)
-                {}
-                else
-                {
-                    usage(argv[0]);
-                    return 1;
-                }
-                break;
-            }
-            case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n",
-                       argv[0], APP_VERSION, __DATE__, __TIME__);
-                return 0;
-                break;
-            case 'r':
-            {
-                sSessionData.sResponder = TRUE;
-                break;
-            }
-            case 'l':
-            {   /*  used data size   */
-                if (sscanf(optarg, "%u", &sSessionData.sDataSize ) < 1)
-                {
-                    usage(argv[0]);
-                    return 1;
-                }
-                break;
-            }
-            case 'c':
-            {
-                sSessionData.sConfirmRequested = TRUE;
-                break;
-            }
-            case 'n':
-            {
-                sSessionData.sNotifyOnly = TRUE;
-                break;
-            }
-            case 'd':
-            {   /*  delay between notify/request   */
-                if (sscanf(optarg, "%u", &delay ) < 1)
-                {
-                    usage(argv[0]);
-                    return 1;
-                }
-                break;
-            }
-            case 'e':
-            {   /*  expected replies   */
-                if (sscanf(optarg, "%u", &expReplies ) < 1)
-                {
-                    usage(argv[0]);
-                    return 1;
-                }
-                break;
-            }
-            case 'b':
-            {   /*  use non blocking    */
-                if (sscanf(optarg, "%d", &sSessionData.sBlockingMode ) < 1)
-                {
-                    usage(argv[0]);
-                    return 1;
-                }
-                if (sSessionData.sBlockingMode == FALSE)
-                {
-                    processConfig.options &= ~TRDP_OPTION_BLOCK;
-                }
-                else
-                {
-                    processConfig.options |= TRDP_OPTION_BLOCK;
-                }
-                break;
-            }
-            case '0':
-            {
-                sSessionData.sNoData = TRUE;
-                break;
-            }
-            case '1':
-            {
-                sSessionData.sOnlyOnce = TRUE;
-                break;
-            }
-            case 'h':
-            case '?':
-            default:
-                usage(argv[0]);
-                return 1;
+           case 'o':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   return 1;
+               }
+               ownIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 't':
+           {    /*  read ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   return 1;
+               }
+               destIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'p':
+           {    /*  determine protocol    */
+               if (strcmp(optarg, "TCP") == 0)
+               {
+                   flags |= TRDP_FLAGS_TCP;
+                   /* mdConfiguration.flags |= TRDP_FLAGS_TCP; */
+               }
+               else if (strcmp(optarg, "UDP") == 0)
+               {}
+               else
+               {
+                   usage(argv[0]);
+                   return 1;
+               }
+               break;
+           }
+           case 'v':    /*  version */
+               printf("%s: Version %s\t(%s - %s)\n",
+                      argv[0], APP_VERSION, __DATE__, __TIME__);
+               return 0;
+               break;
+           case 'r':
+           {
+               sSessionData.sResponder = TRUE;
+               break;
+           }
+           case 'l':
+           {    /*  used data size   */
+               if (sscanf(optarg, "%u", &sSessionData.sDataSize ) < 1)
+               {
+                   usage(argv[0]);
+                   return 1;
+               }
+               break;
+           }
+           case 'c':
+           {
+               sSessionData.sConfirmRequested = TRUE;
+               break;
+           }
+           case 'n':
+           {
+               sSessionData.sNotifyOnly = TRUE;
+               break;
+           }
+           case 'd':
+           {    /*  timeout / delay for request/reply   */
+               if (sscanf(optarg, "%u", &delay ) < 1)
+               {
+                   usage(argv[0]);
+                   return 1;
+               }
+               break;
+           }
+           case 'e':
+           {    /*  expected replies   */
+               if (sscanf(optarg, "%u", &expReplies ) < 1)
+               {
+                   usage(argv[0]);
+                   return 1;
+               }
+               break;
+           }
+           case 'b':
+           {    /*  use non blocking    */
+               if (sscanf(optarg, "%hhd", &sSessionData.sBlockingMode ) < 1)
+               {
+                   usage(argv[0]);
+                   return 1;
+               }
+               if (sSessionData.sBlockingMode == FALSE)
+               {
+                   processConfig.options &= ~TRDP_OPTION_BLOCK;
+               }
+               else
+               {
+                   processConfig.options |= TRDP_OPTION_BLOCK;
+               }
+               break;
+           }
+           case '0':
+           {
+               sSessionData.sNoData = TRUE;
+               break;
+           }
+           case '1':
+           {
+               sSessionData.sOnlyOnce = TRUE;
+               break;
+           }
+           case 'h':
+           case '?':
+           default:
+               usage(argv[0]);
+               return 1;
         }
     }
 
@@ -464,7 +490,7 @@ int main (int argc, char *argv[])
                  NULL,
                  &dynamicConfig) != TRDP_NO_ERR)  /* Use application supplied memory    */
     {
-        printf("tlc_init error\n");
+        fprintf(stderr, "tlc_init error\n");
         return 1;
     }
 
@@ -473,12 +499,12 @@ int main (int argc, char *argv[])
         UINT32 availableIfaces = MAX_IF;
         if (vos_getInterfaces(&availableIfaces, interfaces) == VOS_NO_ERR)
         {
-            printf("%u IP interfaces found\n", availableIfaces);
+            vos_printLog(VOS_LOG_USR, "%u IP interfaces found\n", availableIfaces);
         }
     }
 
     /*    Open a session  */
-    printf("open session\n");
+    vos_printLogStr(VOS_LOG_USR, "opening session...\n");
     if (tlc_openSession(&sSessionData.appHandle,
                         ownIP,
                         0,                         /* use default IP address    */
@@ -487,27 +513,31 @@ int main (int argc, char *argv[])
                         &mdConfiguration,    /* system defaults for PD    */
                         &processConfig) != TRDP_NO_ERR)
     {
-        printf("tlc_openSession error\n");
+        vos_printLogStr(VOS_LOG_ERROR, "tlc_openSession error\n");
         return 1;
     }
 
     /*    Set up a listener  */
     if (sSessionData.sResponder == TRUE)
     {
-        printf("add listener\n");
-        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle1, NULL, NULL, TRUE, sSessionData.sComID,
+        vos_printLogStr(VOS_LOG_USR, "add UDP listener\n");
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenUDP,
+                            &sSessionData, mdCallback,
+                            TRUE, sSessionData.sComID,
                             0u, 0u, VOS_INADDR_ANY, VOS_INADDR_ANY, destIP,
-                            flags, NULL, NULL) != TRDP_NO_ERR)
+                            TRDP_FLAGS_CALLBACK, NULL, NULL) != TRDP_NO_ERR)
         {
-            printf("tlm_addListener error (TCP)\n");
+            vos_printLogStr(VOS_LOG_ERROR, "tlm_addListener error (TCP)\n");
             return 1;
         }
-        printf("add listener\n");
-        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenHandle2, NULL, NULL, TRUE, sSessionData.sComID,
+        vos_printLogStr(VOS_LOG_USR, "add TCP listener\n");
+        if (tlm_addListener(sSessionData.appHandle, &sSessionData.listenTCP,
+                            &sSessionData, mdCallback,
+                            TRUE, sSessionData.sComID,
                             0u, 0u, VOS_INADDR_ANY, VOS_INADDR_ANY, destIP,
-                            flags &= ~TRDP_FLAGS_TCP, NULL, NULL) != TRDP_NO_ERR)
+                            TRDP_FLAGS_TCP | TRDP_FLAGS_CALLBACK, NULL, NULL) != TRDP_NO_ERR)
         {
-            printf("tlm_addListener error (UDP)\n");
+            vos_printLogStr(VOS_LOG_ERROR, "tlm_addListener error (UDP)\n");
             return 1;
         }
     }
@@ -520,7 +550,7 @@ int main (int argc, char *argv[])
         fd_set      rfds;
         INT32       noDesc  = 0;
         TRDP_TIME_T tv      = {0, 0};
-        TRDP_TIME_T max_tv  = {1, 0};           /* 1 second  */
+        TRDP_TIME_T max_tv  = {0, 100000};           /* 0.1 second  */
 
         if (sSessionData.sBlockingMode == TRUE)
         {
@@ -548,6 +578,7 @@ int main (int argc, char *argv[])
             tv = max_tv;
         }
 
+        /* vos_printLog(VOS_LOG_USR, "descriptors to check: 0x%04x\n", rfds.fds_bits[0]); */
         if (sSessionData.sBlockingMode == TRUE)
         {
             /*
@@ -555,6 +586,7 @@ int main (int argc, char *argv[])
                 what ever comes first.
             */
             rv = vos_select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
+            /* vos_printLog(VOS_LOG_USR, "descriptors ready: 0x%04x\n", rfds.fds_bits[0]); */
             (void) tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
         }
         else
@@ -562,11 +594,10 @@ int main (int argc, char *argv[])
             vos_threadDelay((UINT32)(tv.tv_sec * 1000000) + (UINT32) tv.tv_usec);
             rv = 0;
 
-
             /*
-                Check for overdue PDs (sending and receiving)
-                Send any pending PDs if it's time...
-                Detect missing PDs...
+                Check for overdue MDs (sending and receiving)
+                Send any pending MDs...
+                Detect missing MDs...
                 'rv' will be updated to show the handled events, if there are
                 more than one...
                 The callback function will be called from within the tlc_process
@@ -585,25 +616,24 @@ int main (int argc, char *argv[])
             if (counter++ == 100)
             {
                 counter = 0;
-                printf("...\n");
+                vos_printLogStr(VOS_LOG_USR, "...\n");
                 fflush(stdout);
             }
         }
 
         if (lastRun == TRUE)
         {
-            //sSessionData.sLoop = FALSE;
+            sSessionData.sLoop = FALSE;
         }
-
-        else if (sSessionData.sResponder == FALSE && sSessionData.sExitAfterReply == FALSE)
+        else if ((sSessionData.sResponder == FALSE) && (sSessionData.sExitAfterReply == FALSE))
         {
             TRDP_UUID_T sessionId;
-            UINT32         i, j;
+            UINT32      i, j;
 
-            printf("\n");
+            vos_printLogStr(VOS_LOG_USR, "\n");
             if (sSessionData.sNotifyOnly)
             {
-                printf("-> sending MR Notification %u\n", sSessionData.sComID);
+                vos_printLog(VOS_LOG_USR, "-> sending MR Notification %u\n", sSessionData.sComID);
 
                 if (sSessionData.sNoData == TRUE)
                 {
@@ -633,38 +663,54 @@ int main (int argc, char *argv[])
                             j = 0;
                         }
                     }
-                    tlm_notify( sSessionData.appHandle,
-                                &sSessionData,
-                                NULL,
-                                sSessionData.sComID,
-                                0,
-                                0,
-                                ownIP,
-                                destIP,
-                                flags,
-                                NULL,
-                                (const UINT8 *) gBuffer,
-                                sSessionData.sDataSize,
-                                0,
-                                0);
+                    err = tlm_notify( sSessionData.appHandle,
+                                      &sSessionData,
+                                      mdCallback,
+                                      sSessionData.sComID,
+                                      0,
+                                      0,
+                                      ownIP,
+                                      destIP,
+                                      flags,
+                                      NULL,
+                                      (const UINT8 *) gBuffer,
+                                      sSessionData.sDataSize,
+                                      0,
+                                      0);
 
                 }
                 else
                 {
-                    tlm_notify(sSessionData.appHandle, &sSessionData, NULL, sSessionData.sComID, 0, 0, ownIP,
-                               destIP, flags, NULL, (const UINT8 *) "Hello, World", 13, 0, 0);
+                    err = tlm_notify(sSessionData.appHandle,
+                                     &sSessionData,
+                                     mdCallback,
+                                     sSessionData.sComID,
+                                     0,
+                                     0,
+                                     ownIP,
+                                     destIP,
+                                     flags,
+                                     NULL,
+                                     (const UINT8 *) "Hello, World",
+                                     13,
+                                     0,
+                                     0);
 
                 }
-
+                if (err != TRDP_NO_ERR)
+                {
+                    vos_printLog(VOS_LOG_USR, "tlm_notify failed (err = %d)\n", err);
+                }
             }
             else
             {
-                printf("-> sending MR Request with reply %u\n", sSessionData.sComID);
+                vos_printLog(VOS_LOG_USR, "-> sending MR Request with reply %u\n", sSessionData.sComID);
                 if (sSessionData.sNoData == TRUE)
                 {
 
-                    tlm_request(sSessionData.appHandle, &sSessionData, NULL, &sessionId, sSessionData.sComID, 0, 0, ownIP,
-                                destIP, flags, expReplies, 0, NULL, NULL, 0, 0, 0);
+                    err = tlm_request(sSessionData.appHandle, &sSessionData, mdCallback, &sessionId,
+                                      sSessionData.sComID, 0u, 0u, ownIP,
+                                      destIP, flags, expReplies, delay, NULL, NULL, 0u, NULL, NULL);
 
                 }
                 else if (sSessionData.sDataSize > 0)
@@ -677,29 +723,49 @@ int main (int argc, char *argv[])
                             j = 0;
                         }
                     }
-                    tlm_request(sSessionData.appHandle,
-                                &sSessionData,
-                                NULL,
-                                &sessionId,
-                                sSessionData.sComID,
-                                0,
-                                0,
-                                ownIP,
-                                destIP,
-                                flags,
-                                expReplies,
-                                0,
-                                NULL,
-                                (const UINT8 *) gBuffer,
-                                sSessionData.sDataSize,
-                                0,
-                                0);
+                    err = tlm_request(sSessionData.appHandle,
+                                      &sSessionData,
+                                      mdCallback,
+                                      &sessionId,
+                                      sSessionData.sComID,
+                                      0,
+                                      0,
+                                      ownIP,
+                                      destIP,
+                                      flags,
+                                      expReplies,
+                                      delay,
+                                      NULL,
+                                      (const UINT8 *) gBuffer,
+                                      sSessionData.sDataSize,
+                                      0,
+                                      0);
 
                 }
                 else
                 {
-                    tlm_request(sSessionData.appHandle, &sSessionData, NULL, &sessionId, sSessionData.sComID, 0, 0, ownIP,
-                                destIP, flags, expReplies, 0, NULL, (const UINT8 *) "How are you?", 13, 0, 0);
+                    err = tlm_request(sSessionData.appHandle,
+                                      &sSessionData,
+                                      mdCallback,
+                                      &sessionId,
+                                      sSessionData.sComID,
+                                      0,
+                                      0,
+                                      ownIP,
+                                      destIP,
+                                      flags,
+                                      expReplies,
+                                      delay,
+                                      NULL,
+                                      (const UINT8 *) "How are you?",
+                                      13,
+                                      0,
+                                      0);
+                }
+
+                if (err != TRDP_NO_ERR)
+                {
+                    vos_printLog(VOS_LOG_USR, "tlm_request failed (err = %d)\n", err);
                 }
             }
 
@@ -708,21 +774,22 @@ int main (int argc, char *argv[])
                 lastRun = TRUE;
             }
 
-            printf("\n");
+            sSessionData.sExitAfterReply = TRUE;
+
 
             /* additional delay */
-            vos_threadDelay(delay);
-
+            vos_printLogStr(VOS_LOG_USR, "waiting for an answer...\n");
         }
     }
 
+    vos_printLogStr(VOS_LOG_USR, "-> finishing.\n");
     /*
      *    We always clean up behind us!
      */
     if (sSessionData.sResponder == TRUE)
     {
-        tlm_delListener(sSessionData.appHandle, sSessionData.listenHandle1);
-        tlm_delListener(sSessionData.appHandle, sSessionData.listenHandle2);
+        tlm_delListener(sSessionData.appHandle, sSessionData.listenUDP);
+        tlm_delListener(sSessionData.appHandle, sSessionData.listenTCP);
     }
 
     tlc_closeSession(sSessionData.appHandle);

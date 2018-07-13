@@ -61,8 +61,8 @@ typedef struct
 /* structure type definitions for alignment calculation */
 typedef struct
 {
-    UINT8 a;
-    UINT32 b;
+    UINT8   a;
+    UINT32  b;
 } STRUCT_T;
 
 typedef struct
@@ -81,13 +81,13 @@ typedef struct
  */
 
 static TRDP_COMID_DSID_MAP_T    *sComIdDsIdMap = NULL;
-static UINT32                   sNumComId = 0u;
+static UINT32 sNumComId = 0u;
 
 static TRDP_DATASET_T           * *sDataSets = NULL;
-static UINT32                   sNumEntries = 0u;
+static UINT32       sNumEntries = 0u;
 
 /** List of byte sizes for standard TCMS types */
-static const UINT8              cSizeOfBasicTypes[] = {1,1,1,2,1,2,4,8,1,2,4,8,4,8,4,4,4};
+static const UINT8  cSizeOfBasicTypes[] = {1, 1, 1, 2, 1, 2, 4, 8, 1, 2, 4, 8, 4, 8, 4, 4, 4};
 
 /***********************************************************************************************************************
  * LOCAL FUNCTIONS
@@ -363,7 +363,7 @@ static TRDP_DATASET_T *findDs (
  *
  */
 static UINT8 maxSizeOfDSMember (
-    TRDP_DATASET_T      *pDataset)
+    TRDP_DATASET_T *pDataset)
 {
     UINT16  lIndex;
     UINT8   maxSize = 1;
@@ -422,7 +422,7 @@ static TRDP_ERR_T marshallDs (
     /*  Align on struct boundary first   */
     /*  Regarding Ticket #197:
         This is a weak determination of structure alignment!
-            "A struct is always aligned to the largest type’s alignment requirements"
+            "A struct is always aligned to the largest types alignment requirements"
         Only, at this point we do need to know the size of the largest member to follow! */
 
     pSrc = alignePtr(pInfo->pSrc, maxSizeOfDSMember(pDataset));
@@ -470,139 +470,139 @@ static TRDP_ERR_T marshallDs (
         {
             switch (pDataset->pElement[lIndex].type)
             {
-                case TRDP_BOOL8:
-                case TRDP_CHAR8:
-                case TRDP_INT8:
-                case TRDP_UINT8:
-                {
-                    /*    possible variable source size    */
-                    var_size = *pSrc;
+               case TRDP_BOOL8:
+               case TRDP_CHAR8:
+               case TRDP_INT8:
+               case TRDP_UINT8:
+               {
+                   /*    possible variable source size    */
+                   var_size = *pSrc;
 
-                    if ((pDst + noOfItems) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if ((pDst + noOfItems) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        *pDst++ = *pSrc++;
-                    }
-                    break;
-                }
-                case TRDP_UTF16:
-                case TRDP_INT16:
-                case TRDP_UINT16:
-                {
-                    UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
+                   while (noOfItems-- > 0u)
+                   {
+                       *pDst++ = *pSrc++;
+                   }
+                   break;
+               }
+               case TRDP_UTF16:
+               case TRDP_INT16:
+               case TRDP_UINT16:
+               {
+                   UINT16 *pSrc16 = (UINT16 *) alignePtr(pSrc, ALIGNOF(UINT16));
 
-                    /*    possible variable source size    */
-                    var_size = *pSrc16;
+                   /*    possible variable source size    */
+                   var_size = *pSrc16;
 
-                    if ((pDst + noOfItems * 2) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if ((pDst + noOfItems * 2) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        *pDst++ = (UINT8) (*pSrc16 >> 8u);
-                        *pDst++ = (UINT8) (*pSrc16 & 0xFFu);
-                        pSrc16++;
-                    }
-                    pSrc = (UINT8 *) pSrc16;
-                    break;
-                }
-                case TRDP_INT32:
-                case TRDP_UINT32:
-                case TRDP_REAL32:
-                case TRDP_TIMEDATE32:
-                {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
+                   while (noOfItems-- > 0u)
+                   {
+                       *pDst++  = (UINT8) (*pSrc16 >> 8u);
+                       *pDst++  = (UINT8) (*pSrc16 & 0xFFu);
+                       pSrc16++;
+                   }
+                   pSrc = (UINT8 *) pSrc16;
+                   break;
+               }
+               case TRDP_INT32:
+               case TRDP_UINT32:
+               case TRDP_REAL32:
+               case TRDP_TIMEDATE32:
+               {
+                   UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(UINT32));
 
-                    /*    possible variable source size    */
-                    var_size = *pSrc32;
+                   /*    possible variable source size    */
+                   var_size = *pSrc32;
 
-                    if ((pDst + noOfItems * 4) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if ((pDst + noOfItems * 4) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        *pDst++ = (UINT8) (*pSrc32 >> 24u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8u);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFFu);
-                        pSrc32++;
-                    }
-                    pSrc = (UINT8 *) pSrc32;
-                    break;
-                }
-                case TRDP_TIMEDATE64:
-                {
-                    UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
+                   while (noOfItems-- > 0u)
+                   {
+                       *pDst++  = (UINT8) (*pSrc32 >> 24u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 16u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 8u);
+                       *pDst++  = (UINT8) (*pSrc32 & 0xFFu);
+                       pSrc32++;
+                   }
+                   pSrc = (UINT8 *) pSrc32;
+                   break;
+               }
+               case TRDP_TIMEDATE64:
+               {
+                   UINT32 *pSrc32 = (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE64_STRUCT_T));
 
-                    if ((pDst + noOfItems * 8u) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if ((pDst + noOfItems * 8u) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        *pDst++ = (UINT8) (*pSrc32 >> 24u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8u);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFFu);
-                        pSrc32++;
-                        *pDst++ = (UINT8) (*pSrc32 >> 24u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8u);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFFu);
-                        pSrc32++;
-                    }
-                    pSrc = (UINT8 *) pSrc32;
-                    break;
-                }
-                case TRDP_TIMEDATE48:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT32  *pSrc32;
-                    UINT16  *pSrc16;
+                   while (noOfItems-- > 0u)
+                   {
+                       *pDst++  = (UINT8) (*pSrc32 >> 24u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 16u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 8u);
+                       *pDst++  = (UINT8) (*pSrc32 & 0xFFu);
+                       pSrc32++;
+                       *pDst++  = (UINT8) (*pSrc32 >> 24u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 16u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 8u);
+                       *pDst++  = (UINT8) (*pSrc32 & 0xFFu);
+                       pSrc32++;
+                   }
+                   pSrc = (UINT8 *) pSrc32;
+                   break;
+               }
+               case TRDP_TIMEDATE48:
+               {
+                   /*    This is not a base type but a structure    */
+                   UINT32   *pSrc32;
+                   UINT16   *pSrc16;
 
-                    if (pDst + noOfItems * 6u > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if (pDst + noOfItems * 6u > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pSrc32 =
-                            (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        *pDst++ = (UINT8) (*pSrc32 >> 24u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 16u);
-                        *pDst++ = (UINT8) (*pSrc32 >> 8u);
-                        *pDst++ = (UINT8) (*pSrc32 & 0xFFu);
-                        pSrc32++;
-                        pSrc16  = (UINT16 *) alignePtr((UINT8 *) pSrc32, ALIGNOF(UINT16));
-                        *pDst++ = (UINT8) (*pSrc16 >> 8u);
-                        *pDst++ = (UINT8) (*pSrc16 & 0xFFu);
-                        pSrc32++;
-                        pSrc = (UINT8 *) pSrc32;
-                    }
-                    break;
-                }
-                case TRDP_INT64:
-                case TRDP_UINT64:
-                case TRDP_REAL64:
-                    if ((pDst + noOfItems * 8u) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   while (noOfItems-- > 0u)
+                   {
+                       pSrc32 =
+                           (UINT32 *) alignePtr(pSrc, ALIGNOF(TIMEDATE48_STRUCT_T));
+                       *pDst++  = (UINT8) (*pSrc32 >> 24u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 16u);
+                       *pDst++  = (UINT8) (*pSrc32 >> 8u);
+                       *pDst++  = (UINT8) (*pSrc32 & 0xFFu);
+                       pSrc32++;
+                       pSrc16   = (UINT16 *) alignePtr((UINT8 *) pSrc32, ALIGNOF(UINT16));
+                       *pDst++  = (UINT8) (*pSrc16 >> 8u);
+                       *pDst++  = (UINT8) (*pSrc16 & 0xFFu);
+                       pSrc32++;
+                       pSrc = (UINT8 *) pSrc32;
+                   }
+                   break;
+               }
+               case TRDP_INT64:
+               case TRDP_UINT64:
+               case TRDP_REAL64:
+                   if ((pDst + noOfItems * 8u) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    packedCopy64(&pSrc, &pDst, noOfItems);
-                    break;
-                default:
-                    break;
+                   packedCopy64(&pSrc, &pDst, noOfItems);
+                   break;
+               default:
+                   break;
             }
             /* Update info structure if we need to! (was issue #137) */
             pInfo->pDst = pDst;
@@ -617,7 +617,7 @@ static TRDP_ERR_T marshallDs (
 
     /* Decrement recursion counter. Note: Recursion counter will not decrement in case of error */
     pInfo->level--;
-    
+
     return TRDP_NO_ERR;
 }
 
@@ -695,138 +695,138 @@ static TRDP_ERR_T unmarshallDs (
         {
             switch (pDataset->pElement[lIndex].type)
             {
-                case TRDP_BOOL8:
-                case TRDP_CHAR8:
-                case TRDP_INT8:
-                case TRDP_UINT8:
-                {
-                    if ((pDst + noOfItems) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+               case TRDP_BOOL8:
+               case TRDP_CHAR8:
+               case TRDP_INT8:
+               case TRDP_UINT8:
+               {
+                   if ((pDst + noOfItems) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        var_size    = *pSrc++;
-                        *pDst++     = (UINT8) var_size;
-                    }
-                    break;
-                }
-                case TRDP_UTF16:
-                case TRDP_INT16:
-                case TRDP_UINT16:
-                {
-                    UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
+                   while (noOfItems-- > 0u)
+                   {
+                       var_size = *pSrc++;
+                       *pDst++  = (UINT8) var_size;
+                   }
+                   break;
+               }
+               case TRDP_UTF16:
+               case TRDP_INT16:
+               case TRDP_UINT16:
+               {
+                   UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
 
-                    if ((pDst + noOfItems * 2u) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if ((pDst + noOfItems * 2u) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        *pDst16 = (UINT16) (*pSrc++ << 8u);
-                        *pDst16 += *pSrc++;
-                        /*    possible variable source size    */
-                        var_size = *pDst16;
-                        pDst16++;
-                    }
-                    pDst = (UINT8 *) pDst16;
-                    break;
-                }
-                case TRDP_INT32:
-                case TRDP_UINT32:
-                case TRDP_REAL32:
-                case TRDP_TIMEDATE32:
-                {
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
+                   while (noOfItems-- > 0u)
+                   {
+                       *pDst16  = (UINT16) (*pSrc++ << 8u);
+                       *pDst16  += *pSrc++;
+                       /*    possible variable source size    */
+                       var_size = *pDst16;
+                       pDst16++;
+                   }
+                   pDst = (UINT8 *) pDst16;
+                   break;
+               }
+               case TRDP_INT32:
+               case TRDP_UINT32:
+               case TRDP_REAL32:
+               case TRDP_TIMEDATE32:
+               {
+                   UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
 
-                    if ((pDst + noOfItems * 4u) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if ((pDst + noOfItems * 4u) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0)
-                    {
-                        *pDst32     = ((UINT32)(*pSrc++)) << 24u;
-                        *pDst32     += ((UINT32)(*pSrc++)) << 16u;
-                        *pDst32     += ((UINT32)(*pSrc++)) << 8u;
-                        *pDst32     += *pSrc++;
-                        var_size    = *pDst32;
-                        pDst32++;
-                    }
-                    pDst = (UINT8 *) pDst32;
-                    break;
-                }
-                case TRDP_TIMEDATE48:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT32  *pDst32;
-                    UINT16  *pDst16;
+                   while (noOfItems-- > 0)
+                   {
+                       *pDst32  = ((UINT32)(*pSrc++)) << 24u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 16u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 8u;
+                       *pDst32  += *pSrc++;
+                       var_size = *pDst32;
+                       pDst32++;
+                   }
+                   pDst = (UINT8 *) pDst32;
+                   break;
+               }
+               case TRDP_TIMEDATE48:
+               {
+                   /*    This is not a base type but a structure    */
+                   UINT32   *pDst32;
+                   UINT16   *pDst16;
 
-                    if (pDst + noOfItems * 6u > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if (pDst + noOfItems * 6u > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0)
-                    {
-                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        *pDst32 = ((UINT32)(*pSrc++)) << 24u;
-                        *pDst32 += ((UINT32)(*pSrc++)) << 16u;
-                        *pDst32 += ((UINT32)(*pSrc++)) << 8u;
-                        *pDst32 += *pSrc++;
-                        pDst32++;
-                        pDst16  = (UINT16 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT16));
-                        *pDst16 = (UINT16) (*pSrc++ << 8u);
-                        *pDst16 += *pSrc++;
-                        pDst32++;
-                        pDst = (UINT8 *) pDst32;
-                    }
-                    break;
-                }
-                case TRDP_TIMEDATE64:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT32 *pDst32 = (UINT32 *) pDst;
+                   while (noOfItems-- > 0)
+                   {
+                       pDst32   = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+                       *pDst32  = ((UINT32)(*pSrc++)) << 24u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 16u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 8u;
+                       *pDst32  += *pSrc++;
+                       pDst32++;
+                       pDst16   = (UINT16 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT16));
+                       *pDst16  = (UINT16) (*pSrc++ << 8u);
+                       *pDst16  += *pSrc++;
+                       pDst32++;
+                       pDst = (UINT8 *) pDst32;
+                   }
+                   break;
+               }
+               case TRDP_TIMEDATE64:
+               {
+                   /*    This is not a base type but a structure    */
+                   UINT32 *pDst32;
 
-                    if ((pDst + noOfItems * 8u) > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   if ((pDst + noOfItems * 8u) > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
-                        *pDst32 = ((UINT32)(*pSrc++)) << 24u;
-                        *pDst32 += ((UINT32)(*pSrc++)) << 16u;
-                        *pDst32 += ((UINT32)(*pSrc++)) << 8u;
-                        *pDst32 += *pSrc++;
-                        pDst32++;
-                        pDst32  = (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
-                        *pDst32 = ((UINT32)(*pSrc++)) << 24u;
-                        *pDst32 += ((UINT32)(*pSrc++)) << 16u;
-                        *pDst32 += ((UINT32)(*pSrc++)) << 8u;
-                        *pDst32 += *pSrc++;
-                        pDst32++;
-                        pDst = (UINT8 *) pDst32;
-                    }
-                    break;
-                }
-                case TRDP_INT64:
-                case TRDP_UINT64:
-                case TRDP_REAL64:
-                {
-                    if (pDst + noOfItems * 8u > pInfo->pDstEnd)
-                    {
-                        return TRDP_PARAM_ERR;
-                    }
+                   while (noOfItems-- > 0u)
+                   {
+                       pDst32   = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
+                       *pDst32  = ((UINT32)(*pSrc++)) << 24u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 16u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 8u;
+                       *pDst32  += *pSrc++;
+                       pDst32++;
+                       pDst32   = (UINT32 *) alignePtr((UINT8 *)pDst32, ALIGNOF(UINT32));
+                       *pDst32  = ((UINT32)(*pSrc++)) << 24u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 16u;
+                       *pDst32  += ((UINT32)(*pSrc++)) << 8u;
+                       *pDst32  += *pSrc++;
+                       pDst32++;
+                       pDst = (UINT8 *) pDst32;
+                   }
+                   break;
+               }
+               case TRDP_INT64:
+               case TRDP_UINT64:
+               case TRDP_REAL64:
+               {
+                   if (pDst + noOfItems * 8u > pInfo->pDstEnd)
+                   {
+                       return TRDP_PARAM_ERR;
+                   }
 
-                    unpackedCopy64((UINT8 * *) &pSrc, &pDst, noOfItems);
-                    break;
-                }
-                default:
-                    break;
+                   unpackedCopy64((UINT8 * *) &pSrc, &pDst, noOfItems);
+                   break;
+               }
+               default:
+                   break;
             }
             pInfo->pDst = pDst;
             pInfo->pSrc = pSrc;
@@ -840,7 +840,7 @@ static TRDP_ERR_T unmarshallDs (
 
     /* Decrement recursion counter. Note: Recursion counter will not decrement in case of error */
     pInfo->level--;
-    
+
     return TRDP_NO_ERR;
 }
 
@@ -866,7 +866,7 @@ static TRDP_ERR_T size_unmarshall (
     UINT16      lIndex;
     UINT32      var_size    = 0u;
     UINT8       *pSrc       = pInfo->pSrc;
-    UINT8       *pDst       = pInfo->pDst;
+    UINT8       *pDst;
 
     /* Restrict recursion */
     pInfo->level++;
@@ -919,101 +919,101 @@ static TRDP_ERR_T size_unmarshall (
         {
             switch (pDataset->pElement[lIndex].type)
             {
-                case TRDP_BOOL8:
-                case TRDP_CHAR8:
-                case TRDP_INT8:
-                case TRDP_UINT8:
-                {
-                    /*    possible variable source size    */
-                    var_size = *pSrc;
+               case TRDP_BOOL8:
+               case TRDP_CHAR8:
+               case TRDP_INT8:
+               case TRDP_UINT8:
+               {
+                   /*    possible variable source size    */
+                   var_size = *pSrc;
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pDst++;
-                        pSrc++;
-                    }
-                    break;
-                }
-                case TRDP_UTF16:
-                case TRDP_INT16:
-                case TRDP_UINT16:
-                {
-                    UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
+                   while (noOfItems-- > 0u)
+                   {
+                       pDst++;
+                       pSrc++;
+                   }
+                   break;
+               }
+               case TRDP_UTF16:
+               case TRDP_INT16:
+               case TRDP_UINT16:
+               {
+                   UINT16 *pDst16 = (UINT16 *) alignePtr(pDst, ALIGNOF(UINT16));
 
-                    /*    possible variable source size    */
-                    var_size = *(UINT16 *)pSrc;
+                   /*    possible variable source size    */
+                   var_size = *(UINT16 *)pSrc;
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pDst16++;
-                        pSrc += 2u;
-                    }
-                    pDst = (UINT8 *) pDst16;
-                    break;
-                }
-                case TRDP_INT32:
-                case TRDP_UINT32:
-                case TRDP_REAL32:
-                case TRDP_TIMEDATE32:
-                {
-                    UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
+                   while (noOfItems-- > 0u)
+                   {
+                       pDst16++;
+                       pSrc += 2u;
+                   }
+                   pDst = (UINT8 *) pDst16;
+                   break;
+               }
+               case TRDP_INT32:
+               case TRDP_UINT32:
+               case TRDP_REAL32:
+               case TRDP_TIMEDATE32:
+               {
+                   UINT32 *pDst32 = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT32));
 
-                    /*    possible variable source size    */
-                    var_size = *(UINT32 *)pSrc;
+                   /*    possible variable source size    */
+                   var_size = *(UINT32 *)pSrc;
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pSrc += 4u;
-                        pDst32++;
-                    }
-                    pDst = (UINT8 *) pDst32;
-                    break;
-                }
-                case TRDP_TIMEDATE48:
-                {
-                    /*    This is not a base type but a structure    */
-                    UINT16 *pDst16;
+                   while (noOfItems-- > 0u)
+                   {
+                       pSrc += 4u;
+                       pDst32++;
+                   }
+                   pDst = (UINT8 *) pDst32;
+                   break;
+               }
+               case TRDP_TIMEDATE48:
+               {
+                   /*    This is not a base type but a structure    */
+                   UINT16 *pDst16;
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pDst16  = (UINT16 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
-                        pDst16  += 3u;
-                        pSrc    += 6u;
-                        pDst    = (UINT8 *) pDst16;
-                    }
-                    break;
-                }
-                case TRDP_TIMEDATE64:
-                {
-                    UINT32 *pDst32;
+                   while (noOfItems-- > 0u)
+                   {
+                       pDst16   = (UINT16 *) alignePtr(pDst, ALIGNOF(TIMEDATE48_STRUCT_T));
+                       pDst16   += 3u;
+                       pSrc     += 6u;
+                       pDst     = (UINT8 *) pDst16;
+                   }
+                   break;
+               }
+               case TRDP_TIMEDATE64:
+               {
+                   UINT32 *pDst32;
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
-                        pSrc    += 8u;
-                        pDst32++;
-                        pDst32  = (UINT32 *) alignePtr((UINT8 *) pDst32, ALIGNOF(UINT32));
-                        pDst    = (UINT8 *) pDst32++;
-                    }
-                    break;
-                }
-                case TRDP_INT64:
-                case TRDP_UINT64:
-                case TRDP_REAL64:
-                {
-                    UINT32 *pDst32;
+                   while (noOfItems-- > 0u)
+                   {
+                       pDst32   = (UINT32 *) alignePtr(pDst, ALIGNOF(TIMEDATE64_STRUCT_T));
+                       pSrc     += 8u;
+                       pDst32++;
+                       pDst32   = (UINT32 *) alignePtr((UINT8 *) pDst32, ALIGNOF(UINT32));
+                       pDst     = (UINT8 *) pDst32++;
+                   }
+                   break;
+               }
+               case TRDP_INT64:
+               case TRDP_UINT64:
+               case TRDP_REAL64:
+               {
+                   UINT32 *pDst32;
 
-                    while (noOfItems-- > 0u)
-                    {
-                        pDst32  = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT64));
-                        pSrc    += 8u;
-                        pDst32  += 2u;
-                        pDst    = (UINT8 *) pDst32;
-                    }
-                    break;
-                }
-                default:
-                    break;
+                   while (noOfItems-- > 0u)
+                   {
+                       pDst32   = (UINT32 *) alignePtr(pDst, ALIGNOF(UINT64));
+                       pSrc     += 8u;
+                       pDst32   += 2u;
+                       pDst     = (UINT8 *) pDst32;
+                   }
+                   break;
+               }
+               default:
+                   break;
             }
 
             /* Update info structure if we need to! (was issue #137) */
@@ -1463,7 +1463,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSize (
 
     err = size_unmarshall(&info, pDataset);
 
-    *pDestSize = (UINT32) (info.pDst - (UINT8*)NULL);
+    *pDestSize = (UINT32) (info.pDst - (UINT8 *)NULL);
 
     return err;
 }
@@ -1535,7 +1535,7 @@ EXT_DECL TRDP_ERR_T tau_calcDatasetSizeByComId (
 
     err = size_unmarshall(&info, pDataset);
 
-    *pDestSize = (UINT32) (info.pDst - (UINT8*)NULL);
+    *pDestSize = (UINT32) (info.pDst - (UINT8 *)NULL);
 
     return err;
 }

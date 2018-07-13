@@ -308,7 +308,7 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
 
     if (category == VOS_LOG_DBG)
     {
-        return;
+        /* return; */
     }
 #ifdef _WIN32
     if (pLogFile == NULL)
@@ -442,7 +442,7 @@ void print (int type, const char *fmt, ...)
     switch (type)
     {
        case -1:
-           printf("\n!!! : ");
+           printf("\n\n!!! : ");
            break;
        case -2:
            printf("<== : ");
@@ -783,7 +783,7 @@ int main (int argc, char *argv[])
         FD_ZERO(&rfds);
         noOfDesc = 0;
         tlc_getInterval(apph, &tv, &rfds, &noOfDesc);
-        rv = select(noOfDesc + 1, &rfds, NULL, NULL, &tv_null);
+        rv = vos_select(noOfDesc + 1, &rfds, NULL, NULL, &tv_null);
         tlc_process(apph, &rfds, &rv);
         /* wait a while */
         _sleep_msec(tick);
@@ -1007,7 +1007,8 @@ void setup_listeners ()
                 0u,                                 /* comid (0 .. take all) */
                 0u,                                 /* topo */
                 0u,                                 /* topo */
-                opts.srcip,                         /* destination IP address */
+                /*   opts.srcip,                         / * destination IP address (is source of listener) * / */
+                opts.dstip,                         /* destination IP address (is source of listener) */
                 VOS_INADDR_ANY,
                 VOS_INADDR_ANY,
                 (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP), /* flags */
@@ -1088,6 +1089,11 @@ void reply (const TRDP_MD_INFO_T *request, TRDP_MSG_T type, TRDP_FLAGS_T flags)
     strcpy(reply.destUserURI, request->srcUserURI);
     strcpy(reply.srcUserURI, request->destUserURI);
 
+    if (flags & TRDP_FLAGS_TCP)
+    {
+
+        printf("replying TCP\n");
+    }
     /* enqueue confirm */
     enqueue(REQ_SEND, 0, &reply, flags);
 }

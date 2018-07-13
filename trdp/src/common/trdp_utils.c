@@ -187,7 +187,7 @@ static BOOL8 trdp_SockDelJoin (
  *  @retval         multi cast group if unused
  *                  VOS_INADDR_ANY if used
  */
-TRDP_IP_ADDR_T trdp_findMCjoins(
+TRDP_IP_ADDR_T trdp_findMCjoins (
     TRDP_APP_SESSION_T  appHandle,
     TRDP_IP_ADDR_T      mcGroup)
 {
@@ -204,7 +204,7 @@ TRDP_IP_ADDR_T trdp_findMCjoins(
     }
     #if MD_SUPPORT
     {
-        MD_LIS_ELE_T    *pMDIter;
+        MD_LIS_ELE_T *pMDIter;
         for (pMDIter = appHandle->pMDListenQueue; pMDIter != NULL; pMDIter = pMDIter->pNext)
         {
             if ((pMDIter->addr.mcGroup != VOS_INADDR_ANY) &&
@@ -216,7 +216,7 @@ TRDP_IP_ADDR_T trdp_findMCjoins(
         }
     }
     #endif
-    return (used == TRUE)? VOS_INADDR_ANY : mcGroup;
+    return (used == TRUE) ? VOS_INADDR_ANY : mcGroup;
 }
 
 /**********************************************************************************************************************/
@@ -373,7 +373,9 @@ PD_ELE_T *trdp_queueFindSubAddr (
             {
                 if ((addr->srcIpAddr >= iterPD->addr.srcIpAddr) &&
                     (addr->srcIpAddr <= iterPD->addr.srcIpAddr2))
-                return iterPD;
+                {
+                    return iterPD;
+                }
             }
 
         }
@@ -688,13 +690,13 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_SOCK_TYPE_T        usage,
     TRDP_OPTION_T           options,
     BOOL8                   rcvMostly,
-	SOCKET                  useSocket,
+    SOCKET                  useSocket,
     INT32                   *pIndex,
     TRDP_IP_ADDR_T          cornerIp)
 {
     VOS_SOCK_OPT_T  sock_options;
-	INT32           lIndex;
-	INT32			emptySockIdx = -1;	/* was emptySock, renamed to avoid confusion */
+    INT32           lIndex;
+    INT32           emptySockIdx = -1;  /* was emptySock, renamed to avoid confusion */
     TRDP_ERR_T      err         = TRDP_NO_ERR;
     TRDP_IP_ADDR_T  bindAddr    = vos_determineBindAddr(srcIP, mcGroup, rcvMostly);
 
@@ -718,7 +720,8 @@ TRDP_ERR_T  trdp_requestSocket (
             /* Use that socket */
             *pIndex = lIndex;
             iface[lIndex].usage++;
-            return TRDP_NO_ERR;
+            err = TRDP_NO_ERR;
+            goto err_exit;
         }
         else if ((iface[lIndex].sock != VOS_INVALID_SOCKET)
                  && (iface[lIndex].bindAddr == bindAddr)
@@ -774,12 +777,12 @@ TRDP_ERR_T  trdp_requestSocket (
                 iface[lIndex].usage++;
             }
 
-            return err;
+            goto err_exit;
         }
         else if ((iface[lIndex].sock == VOS_INVALID_SOCKET) && (emptySockIdx == -1))
         {
             /* Remember the first empty slot */
-			emptySockIdx = lIndex;
+            emptySockIdx = lIndex;
         }
     }
 
@@ -831,7 +834,7 @@ TRDP_ERR_T  trdp_requestSocket (
             iface[lIndex].sock  = useSocket;
             iface[lIndex].usage = 1;         /* Mark as used */
             *pIndex = lIndex;
-            return err;
+            goto err_exit;
         }
 
         sock_options.qos    = params->qos;
@@ -951,6 +954,8 @@ TRDP_ERR_T  trdp_requestSocket (
         err = TRDP_MEM_ERR;
     }
 
+err_exit:
+
     printSocketUsage(iface);
 
     return err;
@@ -1060,7 +1065,8 @@ void  trdp_releaseSocket (
                     vos_sockLeaveMC(iface[lIndex].sock, mcGroupUsed, iface[lIndex].bindAddr);
                 }
             }
-            else {}
+            else
+            {}
         }
 #if MD_SUPPORT
         else /* TCP socket */
@@ -1070,7 +1076,7 @@ void  trdp_releaseSocket (
             {
                 vos_printLog(VOS_LOG_DBG,
                              "Decrement the socket %d usage = %d\n",
-							 (int) iface[lIndex].sock,
+                             (int) iface[lIndex].sock,
                              iface[lIndex].usage);
 
                 iface[lIndex].usage--;
@@ -1325,9 +1331,9 @@ BOOL8 trdp_isAddressed (const TRDP_URI_USER_T listUri, const TRDP_URI_USER_T des
  *  @retval         TRUE  - received IP is in addressing range of listener
  */
 
-BOOL8 trdp_isInIPrange(TRDP_IP_ADDR_T   receivedSrcIP,
-                       TRDP_IP_ADDR_T   listenedSourceIPlow,
-                       TRDP_IP_ADDR_T   listenedSourceIPhigh)
+BOOL8 trdp_isInIPrange (TRDP_IP_ADDR_T  receivedSrcIP,
+                        TRDP_IP_ADDR_T  listenedSourceIPlow,
+                        TRDP_IP_ADDR_T  listenedSourceIPhigh)
 {
     if ((receivedSrcIP == VOS_INADDR_ANY) ||
         (listenedSourceIPlow == VOS_INADDR_ANY) ||
