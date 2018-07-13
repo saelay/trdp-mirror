@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-07-13: Ticket #208: VOS socket options: QoS/ToS field priority handling needs update
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-03-06: 64Bit endian swap added
@@ -387,7 +388,7 @@ EXT_DECL BOOL8 vos_isMulticast (
  */
 
 EXT_DECL INT32 vos_select (
-    SOCKET           highDesc,
+    SOCKET          highDesc,
     VOS_FDS_T       *pReadableFD,
     VOS_FDS_T       *pWriteableFD,
     VOS_FDS_T       *pErrorFD,
@@ -600,7 +601,7 @@ EXT_DECL VOS_ERR_T vos_sockGetMAC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenUDP (
-    SOCKET                   *pSock,
+    SOCKET                  *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sock;
@@ -652,7 +653,7 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockOpenTCP (
-    SOCKET                   *pSock,
+    SOCKET                  *pSock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sock;
@@ -728,7 +729,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSetOptions (
-    SOCKET                   sock,
+    SOCKET                  sock,
     const VOS_SOCK_OPT_T    *pOptions)
 {
     int sockOptValue = 0;
@@ -768,15 +769,36 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (pOptions->qos > 0 && pOptions->qos < 8)
         {
-            /* The QoS value (0-7) is mapped to MSB bits 7-5, bit 2 is set for local use */
-            sockOptValue = (int) ((pOptions->qos << 5) | 4);
-            if (setsockopt(sock, IPPROTO_IP, IP_TOS, &sockOptValue,
+            /* The QoS value (0-7) was mapped to MSB bits 7-5, bit 2 was set for local use.
+             TOS field is deprecated and has been succeeded by RFC 2474 and RFC 3168. Usage depends on IP-routers.
+             This field is now called the "DS" (Differentiated Services) field and the upper 6 bits contain
+             a value called the "DSCP" (Differentiated Services Code Point).
+             QoS as priority value is now mapped to DSCP values and the Explicit Congestion Notification (ECN)
+             is set to 0 */
+
+            /* old:
+             sockOptValue = (int) ((pOptions->qos << 5) | 4);
+             New: */
+            const int dscpMap[] = {0, 8, 18, 24, 34, 40, 48, 56};
+            sockOptValue = (int) dscpMap[pOptions->qos];
+            if (setsockopt(sock, IPPROTO_IP, IP_TOS, (char *)&sockOptValue,
                            sizeof(sockOptValue)) == -1)
             {
                 char buff[VOS_MAX_ERR_STR_SIZE];
                 STRING_ERR(buff);
-                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_TOS failed (Err: %s)\n", buff);
+                vos_printLog(VOS_LOG_WARNING, "setsockopt() IP_TOS failed (Err: %s)\n", buff);
             }
+#ifdef SO_PRIORITY
+            /* if available (and the used socket is tagged) set the VLAN PCP field as well. */
+            sockOptValue = (int) pOptions->qos;
+            if (setsockopt(sock, SOL_SOCKET, SO_PRIORITY, &sockOptValue,
+                           sizeof(sockOptValue)) == -1)
+            {
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                STRING_ERR(buff);
+                vos_printLog(VOS_LOG_WARNING, "setsockopt() SO_PRIORITY failed (Err: %s)\n", buff);
+            }
+#endif
         }
         if (pOptions->ttl > 0)
         {
@@ -863,7 +885,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
  */
 
 EXT_DECL VOS_ERR_T vos_sockJoinMC (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT32  mcAddress,
     UINT32  ipAddress)
 {
@@ -948,7 +970,7 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockLeaveMC (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT32  mcAddress,
     UINT32  ipAddress)
 {
@@ -1016,7 +1038,7 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendUDP (
-    SOCKET       sock,
+    SOCKET      sock,
     const UINT8 *pBuffer,
     UINT32      *pSize,
     UINT32      ipAddress,
@@ -1098,7 +1120,7 @@ EXT_DECL VOS_ERR_T vos_sockSendUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT8   *pBuffer,
     UINT32  *pSize,
     UINT32  *pSrcIPAddr,
@@ -1230,7 +1252,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockBind (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT32  ipAddress,
     UINT16  port)
 {
@@ -1278,7 +1300,7 @@ EXT_DECL VOS_ERR_T vos_sockBind (
  */
 
 EXT_DECL VOS_ERR_T vos_sockListen (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT32  backlog)
 {
     if (sock == -1)
@@ -1312,8 +1334,8 @@ EXT_DECL VOS_ERR_T vos_sockListen (
  */
 
 EXT_DECL VOS_ERR_T vos_sockAccept (
-    SOCKET   sock,
-    SOCKET   *pSock,
+    SOCKET  sock,
+    SOCKET  *pSock,
     UINT32  *pIPAddress,
     UINT16  *pPort)
 {
@@ -1389,7 +1411,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
  */
 
 EXT_DECL VOS_ERR_T vos_sockConnect (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT32  ipAddress,
     UINT16  port)
 {
@@ -1412,6 +1434,9 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
             || (errno == EWOULDBLOCK)
             || (errno == EALREADY))
         {
+            char buff[VOS_MAX_ERR_STR_SIZE];
+            STRING_ERR(buff);
+            vos_printLog(VOS_LOG_WARNING, "connect() problem: %s\n", buff);
             return VOS_BLOCK_ERR;
         }
         else if (errno != EISCONN)
@@ -1420,6 +1445,12 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
             STRING_ERR(buff);
             vos_printLog(VOS_LOG_WARNING, "connect() failed (Err: %s)\n", buff);
             return VOS_IO_ERR;
+        }
+        else
+        {
+            char buff[VOS_MAX_ERR_STR_SIZE];
+            STRING_ERR(buff);
+            vos_printLog(VOS_LOG_DBG, "connect() %d: %s\n", (int) sock, buff);
         }
     }
     return VOS_NO_ERR;
@@ -1441,7 +1472,7 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
  */
 
 EXT_DECL VOS_ERR_T vos_sockSendTCP (
-    SOCKET       sock,
+    SOCKET      sock,
     const UINT8 *pBuffer,
     UINT32      *pSize)
 {
@@ -1513,7 +1544,7 @@ EXT_DECL VOS_ERR_T vos_sockSendTCP (
  */
 
 EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT8   *pBuffer,
     UINT32  *pSize)
 {
@@ -1535,6 +1566,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
             bufferSize  -= (size_t) rcvSize;
             pBuffer     += rcvSize;
             *pSize      += (UINT32) rcvSize;
+            vos_printLog(VOS_LOG_DBG, "received %lu bytes (Socket: %d)\n", (unsigned long)rcvSize, (int) sock);
         }
 
         if (rcvSize == -1 && errno == EWOULDBLOCK)
@@ -1593,7 +1625,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveTCP (
  *  @retval         VOS_SOCK_ERR                option not supported
  */
 EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
-    SOCKET   sock,
+    SOCKET  sock,
     UINT32  mcIfAddress)
 {
     struct sockaddr_in  multicastIFAddress;
