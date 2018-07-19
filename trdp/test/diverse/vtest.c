@@ -294,9 +294,10 @@ VOS_THREAD_FUNC_T testSend(void* arguments)
     VOS_SEMA_T queueSema = arg1->queueSema;
     VOS_SEMA_T printSema = arg1->printSema;
     VOS_SEMA_T helpSema = arg1->helpSema;
-    int threadID = taskIdSelf();
+    VOS_THREAD_T threadID;
     VOS_ERR_T res = VOS_UNKNOWN_ERR;
     VOS_ERR_T retVal = VOS_NO_ERR;
+    (void) vos_threadSelf(&threadID);
 
     res = vos_semaTake(printSema,0xffffffff);
     if (res != VOS_NO_ERR)
@@ -365,8 +366,9 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
     VOS_SEMA_T helpSema = arg1->helpSema;
     VOS_ERR_T res = VOS_UNKNOWN_ERR;
     VOS_ERR_T retVal = VOS_NO_ERR;
-    int threadID = taskIdSelf();
+    VOS_THREAD_T threadID;
     struct timespec waitTime = arg1->delay;
+    (void) vos_threadSelf(&threadID);
 
 #ifdef WIN32
     printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld start\n",(long int)threadID.p);

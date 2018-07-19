@@ -182,7 +182,6 @@
     <ClCompile Include="..\..\src\vos\windows\vos_thread.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\resources\pthread\pthread.h" />
     <ClInclude Include="..\..\resources\pthread\sched.h" />
     <ClInclude Include="..\..\resources\pthread\semaphore.h" />
     <ClInclude Include="..\..\src\api\iec61375-2-3.h" />

@@ -257,6 +257,17 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
     UINT32 delay);
 
 /**********************************************************************************************************************/
+/** Return thread handle of calling task
+ *
+ *  @param[out]     pThread         pointer to thread handle
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ */
+
+EXT_DECL VOS_ERR_T vos_threadSelf (
+    VOS_THREAD_T *pThread);
+
+/**********************************************************************************************************************/
 /** Return the current time in sec and us
  *
  *

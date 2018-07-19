@@ -304,7 +304,26 @@ EXT_DECL VOS_ERR_T vos_threadIsActive (
     return (errVal == OK ? VOS_NO_ERR : VOS_PARAM_ERR);
 }
 
+/**********************************************************************************************************************/
+/** Return thread handle of calling task
+ *
+ *  @param[out]     pThread         pointer to thread handle
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ */
 
+EXT_DECL VOS_ERR_T vos_threadSelf (
+    VOS_THREAD_T *pThread)
+{
+    if (pThread == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
+
+    *pThread = (VOS_THREAD_T) taskIdSelf;
+
+    return VOS_NO_ERR;
+}
 
 /**********************************************************************************************************************/
 /*  Timers                                                                                                            */
