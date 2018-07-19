@@ -51,9 +51,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\resources\pthread\pthread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\resources\pthread\sched.h">
       <Filter>Header Files</Filter>
     </ClInclude>

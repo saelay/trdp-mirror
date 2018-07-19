@@ -769,6 +769,31 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
         }
         if (pOptions->qos > 0 && pOptions->qos < 8)
         {
+#ifdef SO_NET_SERVICE_TYPE
+            /* Darwin/BSD: Depending on socket typ, sets the layer 2 priority as well.
+             NET_SERVICE_TYPE_BE    0  Best effort
+             NET_SERVICE_TYPE_BK    1  Background system initiated
+             NET_SERVICE_TYPE_SIG   2  Signaling
+             NET_SERVICE_TYPE_VI    3  Interactive Video
+             NET_SERVICE_TYPE_VO    4  Interactive Voice
+             NET_SERVICE_TYPE_RV    5  Responsive Multimedia Audio/Video
+             NET_SERVICE_TYPE_AV    6  Multimedia Audio/Video Streaming
+             NET_SERVICE_TYPE_OAM   7  Operations, Administration, and Management
+             NET_SERVICE_TYPE_RD    8  Responsive Data
+             */
+            sockOptValue = (int) pOptions->qos + 1;
+            if (sockOptValue == 1) /* Best effort and background share same priority */
+            {
+                sockOptValue = 0;
+            }
+            if (setsockopt(sock, SOL_SOCKET, SO_NET_SERVICE_TYPE, &sockOptValue,
+                           sizeof(sockOptValue)) == -1)
+            {
+                char buff[VOS_MAX_ERR_STR_SIZE];
+                STRING_ERR(buff);
+                vos_printLog(VOS_LOG_WARNING, "setsockopt() SO_NET_SERVICE_TYPE failed (Err: %s)\n", buff);
+            }
+#else
             /* The QoS value (0-7) was mapped to MSB bits 7-5, bit 2 was set for local use.
              TOS field is deprecated and has been succeeded by RFC 2474 and RFC 3168. Usage depends on IP-routers.
              This field is now called the "DS" (Differentiated Services) field and the upper 6 bits contain
@@ -776,9 +801,9 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
              QoS as priority value is now mapped to DSCP values and the Explicit Congestion Notification (ECN)
              is set to 0 */
 
-            /* old:
-             sockOptValue = (int) ((pOptions->qos << 5) | 4);
-             New: */
+            /*  old:
+                sockOptValue = (int) ((pOptions->qos << 5) | 4);
+                New: */
             const int dscpMap[] = {0, 8, 18, 24, 34, 40, 48, 56};
             sockOptValue = (int) dscpMap[pOptions->qos];
             if (setsockopt(sock, IPPROTO_IP, IP_TOS, (char *)&sockOptValue,
@@ -788,6 +813,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
                 STRING_ERR(buff);
                 vos_printLog(VOS_LOG_WARNING, "setsockopt() IP_TOS failed (Err: %s)\n", buff);
             }
+#endif
+
 #ifdef SO_PRIORITY
             /* if available (and the used socket is tagged) set the VLAN PCP field as well. */
             sockOptValue = (int) pOptions->qos;

@@ -1623,11 +1623,11 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
             continue;
         }
 
-        /* Ticket #206: TCP requests should use TCP listeners only
+        /* Ticket #206: TCP requests should use TCP listeners only */
         if ((iterListener->pktFlags & TRDP_FLAGS_TCP) && (isTCP == FALSE))
         {
             continue;
-        }*/
+        }
 
         /* Ticket #180: Do the filtering as the standard demands */
 
