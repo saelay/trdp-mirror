@@ -17,6 +17,8 @@
  *
  * $Id$*
  *
+ *      SB 2018-07-20: Ticket #209: vos_getInterfaces returning incorrect "name" and "linkState" on windows (requires
+ *                                  at least windows vista now).
  *      BL 2018-07-13: Ticket #208: VOS socket options: QoS/ToS field priority handling needs update
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
@@ -41,7 +43,6 @@
 #include <fcntl.h>
 #include <winsock2.h>
 #include <Ws2tcpip.h>
-#include <ws2def.h>
 #include <MSWSock.h>
 #include <lm.h>
 #include <iphlpapi.h>
@@ -335,14 +336,13 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
 {
     UINT8               *buf            = NULL;
     UINT32              bufLen          = 0u;
-    PIP_ADAPTER_INFO    pAdapterList    = NULL;
-    PIP_ADAPTER_INFO    pAdapter        = NULL;
+    PIP_ADAPTER_ADDRESSES    pAdapterList    = NULL;
+    PIP_ADAPTER_ADDRESSES   pAdapter        = NULL;
+    PIP_ADAPTER_UNICAST_ADDRESS pAddress = NULL;
     UINT32              err         = 0u;
     UINT32              addrCnt     = 0u;
-    DWORD               dwSize      = 0;
-    DWORD               dwRetVal    = 0;
-    MIB_IFTABLE         *pIfTable;
     VOS_ERR_T           retVal = VOS_NO_ERR;
+    UINT32              netMask     = 0u;
 
     if ((pAddrCnt == NULL)
         || (ifAddrs == NULL))
@@ -350,16 +350,16 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
         return VOS_PARAM_ERR;
     }
     /* determine required buffer size, therefore no error check */
-    err = GetAdaptersInfo(pAdapterList, (PULONG)&bufLen);
+    err = GetAdaptersAddresses(AF_INET, 0, NULL, pAdapterList, (PULONG)&bufLen);
     buf = vos_memAlloc(bufLen);
     if (buf == NULL)
     {
         return VOS_MEM_ERR;
     }
-    pAdapterList = (PIP_ADAPTER_INFO) buf;
+    pAdapterList = (PIP_ADAPTER_ADDRESSES) buf;
 
     /* get the actual data we want */
-    err = GetAdaptersInfo(pAdapterList, (PULONG)&bufLen);
+    err = GetAdaptersAddresses(AF_INET,0,NULL, pAdapterList, (PULONG)&bufLen);
     if (err != NO_ERROR)
     {
         vos_printLog(VOS_LOG_ERROR, "GetAdaptersInfo failed (Err: %d)\n", err);
@@ -371,133 +371,64 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
     /* Iterate adapter list */
     while (pAdapter != NULL)
     {
+        UINT8 i = 0;
         /* Only consider ethernet adapters (no loopback adapters etc.) */
-        if (pAdapter->Type == MIB_IF_TYPE_ETHERNET)
+        if (pAdapter->IfType == MIB_IF_TYPE_ETHERNET)
         {
-            /* store interface information if address will fit into output array */
-            if (addrCnt < *pAddrCnt)
+            pAddress = pAdapter->FirstUnicastAddress;
+            while (pAddress != NULL)
             {
-                /* Store IP address */
-                ifAddrs[addrCnt].ipAddr = vos_dottedIP(pAdapter->IpAddressList.IpAddress.String);
-                /* Store MAC address */
-                if (pAdapter->AddressLength != sizeof(ifAddrs[addrCnt].mac))
+                /* store interface information if address will fit into output array */
+                if (addrCnt < *pAddrCnt)
                 {
-                    memset(ifAddrs[addrCnt].mac, 0, sizeof(ifAddrs[addrCnt].mac));
+                    /* Store IP address */
+                    PSOCKADDR_IN pSockAddress = NULL;
+                    pSockAddress = (PSOCKADDR_IN)pAddress->Address.lpSockaddr;
+                    if (pSockAddress->sin_family == AF_INET)
+                    {
+                        ifAddrs[addrCnt].ipAddr = vos_dottedIP(inet_ntoa(pSockAddress->sin_addr));
+                    }
+                    /* Store MAC address */
+                    if (pAdapter->PhysicalAddressLength != sizeof(ifAddrs[addrCnt].mac))
+                    {
+                        memset(ifAddrs[addrCnt].mac, 0, sizeof(ifAddrs[addrCnt].mac));
+                    }
+                    else
+                    {
+                        memcpy(ifAddrs[addrCnt].mac, pAdapter->PhysicalAddress, sizeof(ifAddrs[addrCnt].mac));
+                    }
+                    /* Store adapter name */
+                    for (i = 0; i < sizeof(ifAddrs[addrCnt].name); i++)
+                    {
+                        ifAddrs[addrCnt].name[i] = (CHAR8)pAdapter->Description[i];
+                    }
+
+                    /* Store subnet mask */
+                    netMask = 0;
+                    for (i = 0; (i < pAddress->OnLinkPrefixLength) && (i < 32); i++ )
+                    {
+                        netMask += 1 << (31 - i);
+                    }
+                    ifAddrs[addrCnt].netMask = netMask;
+                    /* Store link state */
+                    if (pAdapter->OperStatus == IfOperStatusUp)
+                    {
+                        ifAddrs[addrCnt].linkState = 1;
+                    }
+                    else
+                    {
+                        ifAddrs[addrCnt].linkState = 0;
+                    }
+                    /* increment number of addresses stored */
+                    addrCnt++;
+                    pAddress = pAddress->Next;
                 }
-                else
-                {
-                    memcpy(ifAddrs[addrCnt].mac, pAdapter->Address, sizeof(ifAddrs[addrCnt].mac));
-                }
-                /* Store adapter name */
-                (void) strncpy_s(ifAddrs[addrCnt].name, sizeof(ifAddrs[addrCnt].name), pAdapter->AdapterName, _TRUNCATE);
-                /* Store subnet mask */
-                ifAddrs[addrCnt].netMask = vos_dottedIP(pAdapter->IpAddressList.IpMask.String);
-                /* increment number of addresses stored */
-                addrCnt++;
             }
         }
         pAdapter = pAdapter->Next;
     }
     *pAddrCnt = addrCnt;
     vos_memFree(buf);
-
-    /* get link/up down information from interface table */
-    pIfTable = (MIB_IFTABLE *) vos_memAlloc(sizeof (MIB_IFTABLE));
-    if (pIfTable == NULL)
-    {
-        vos_printLogStr(VOS_LOG_ERROR, "Error allocating memory\n");
-        return (VOS_MEM_ERR);
-    }
-
-    /* Make an initial call to GetIfTable to get the necessary size into dwSize */
-    dwSize = sizeof (MIB_IFTABLE);
-    if (GetIfTable(pIfTable, &dwSize, 0) == ERROR_INSUFFICIENT_BUFFER)
-    {
-        vos_memFree(pIfTable);
-        pIfTable = (MIB_IFTABLE *) vos_memAlloc(dwSize);
-        if (pIfTable == NULL)
-        {
-            vos_printLogStr(VOS_LOG_ERROR, "Error allocating memory\n");
-            return (VOS_MEM_ERR);
-        }
-    }
-
-    /* Make a second call to GetIfTable to get the actual data we want.*/
-    if ((dwRetVal = GetIfTable(pIfTable, &dwSize, 0)) == NO_ERROR)
-    {
-        if (pIfTable->dwNumEntries > 0)
-        {
-            MIB_IFROW       *pIfRow;
-            unsigned int    i, j;
-
-
-            pIfRow = (MIB_IFROW *) vos_memAlloc(sizeof (MIB_IFROW));
-
-            if (pIfRow == NULL)
-            {
-                vos_printLogStr(VOS_LOG_ERROR, "Error allocating memory\n");
-                if (pIfTable != NULL)
-                {
-                    vos_memFree(pIfTable);
-                    pIfTable = NULL;
-                }
-                return (VOS_MEM_ERR);
-            }
-
-            for (i = 0; i < pIfTable->dwNumEntries; i++)
-            {
-                pIfRow->dwIndex = pIfTable->table[i].dwIndex;
-                if ((dwRetVal = GetIfEntry(pIfRow)) == NO_ERROR)
-                {
-                    UINT8   physAddr[VOS_MAC_SIZE];
-                    BOOL8   mismatch;
-
-                    for (j = 0; (j < pIfRow->dwPhysAddrLen) && (j < VOS_MAC_SIZE); j++)
-                    {
-                        physAddr[j] = (UINT8) pIfRow->bPhysAddr[j];
-                    }
-
-                    for (addrCnt = 0; addrCnt < *pAddrCnt; addrCnt++)
-                    {
-                        mismatch = FALSE;
-
-                        for (j = 0; j < VOS_MAC_SIZE; j++)
-                        {
-                            if (ifAddrs[addrCnt].mac[j] != physAddr[j])
-                            {
-                                mismatch = TRUE;
-                            }
-                        }
-
-                        if (mismatch == FALSE)
-                        {
-                            for (j = 0; j < VOS_MAX_IF_NAME_SIZE - 1; j++)
-                            {
-                                ifAddrs[addrCnt].name[j] = pIfRow->bDescr[j];
-                            }
-                            ifAddrs[addrCnt].name[VOS_MAX_IF_NAME_SIZE - 1] = '\0';
-                            if (pIfRow->dwOperStatus == IF_OPER_STATUS_OPERATIONAL)
-                            {
-                                ifAddrs[addrCnt].linkState = TRUE;
-                            }
-                            else
-                            {
-                                ifAddrs[addrCnt].linkState = FALSE;
-                            }
-                        }
-                    }
-                }
-            }
-
-            vos_memFree(pIfRow);
-        }
-        else
-        {
-            vos_printLog(VOS_LOG_ERROR, "\tGetIfTable failed with error: %ld\n", dwRetVal);
-        }
-    }
-
-    vos_memFree(pIfTable);
 
     return retVal;
 }
