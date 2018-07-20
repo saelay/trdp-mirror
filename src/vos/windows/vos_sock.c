@@ -402,6 +402,7 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                     {
                         ifAddrs[addrCnt].name[i] = (CHAR8)pAdapter->Description[i];
                     }
+                    ifAddrs[addrCnt].name[VOS_MAX_IF_NAME_SIZE - 1] = '\0';
 
                     /* Store subnet mask */
                     netMask = 0;
@@ -413,11 +414,11 @@ EXT_DECL VOS_ERR_T vos_getInterfaces (
                     /* Store link state */
                     if (pAdapter->OperStatus == IfOperStatusUp)
                     {
-                        ifAddrs[addrCnt].linkState = 1;
+                        ifAddrs[addrCnt].linkState = TRUE;
                     }
                     else
                     {
-                        ifAddrs[addrCnt].linkState = 0;
+                        ifAddrs[addrCnt].linkState = FALSE;
                     }
                     /* increment number of addresses stored */
                     addrCnt++;
