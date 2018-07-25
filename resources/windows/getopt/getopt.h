@@ -6,10 +6,10 @@ AT&T Public License
 Code given out at the 1985 UNIFORUM conference in Dallas.  
 */
 
-#ifdef __GNUC__
+#ifdef POSIX
 #include <getopt.h>
 #endif
-#ifndef __GNUC__
+#ifndef POSIX
 
 #ifndef _WINGETOPT_H_
 #define _WINGETOPT_H_
