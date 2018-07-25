@@ -681,11 +681,20 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
         return VOS_PARAM_ERR;
     }
 
-    hMutex = CreateMutex(NULL, TRUE, NULL);
+    if (*pMutex == NULL)
+    {
+        *pMutex = (VOS_MUTEX_T) vos_memAlloc(sizeof (struct VOS_MUTEX));
+    }
+    if (*pMutex == NULL)
+    {
+        return VOS_MEM_ERR;
+    }
+
+    hMutex = CreateMutex(NULL, FALSE, NULL);
 
     if (hMutex == NULL)
     {
-        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(pthread err=%d)\n", err);
+        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(winthread err=%d)\n", err);
         return VOS_MUTEX_ERR;
     }
 
@@ -709,7 +718,26 @@ EXT_DECL VOS_ERR_T vos_mutexCreate (
 VOS_ERR_T vos_mutexLocalCreate (
     struct VOS_MUTEX *pMutex)
 {
-    return vos_mutexCreate(&pMutex);
+    int     err = 0;
+    HANDLE  hMutex;
+
+    if (pMutex == NULL)
+    {
+        return VOS_PARAM_ERR;
+    }
+
+    hMutex = CreateMutex(NULL, FALSE, NULL);
+
+    if (hMutex == NULL)
+    {
+        vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(winthread err=%d)\n", err);
+        return VOS_MUTEX_ERR;
+    }
+
+    pMutex->mutexId  = hMutex;
+    pMutex->magicNo  = cMutextMagic;
+
+    return VOS_NO_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -775,10 +803,11 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
 
     dwWaitResult = WaitForSingleObject(pMutex->mutexId,    /* handle to mutex */
                                        INFINITE);  /* no time-out interval */
+
     if (dwWaitResult != WAIT_OBJECT_0)
     {
         vos_printLog(VOS_LOG_ERROR,
-                     "Unable to lock Mutex (pthread err=%d)\n",
+                     "Unable to lock Mutex (winthread err=%d)\n",
                      GetLastError());
         return VOS_MUTEX_ERR;
     }
@@ -889,6 +918,15 @@ EXT_DECL VOS_ERR_T vos_semaCreate (
     {
         /* Parameters are OK
            Create a semaphore with initial and max counts of MAX_SEM_COUNT */
+
+        if (*pSema == NULL)
+        {
+            *pSema = (VOS_SEMA_T) vos_memAlloc(sizeof (VOS_SEMA_T));
+        }
+        if (*pSema == NULL)
+        {
+            return VOS_MEM_ERR;
+        }
 
         (*pSema)->semaphore = CreateSemaphore(
                 NULL,                                 /* default security attributes */
