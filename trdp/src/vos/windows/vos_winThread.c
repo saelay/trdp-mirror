@@ -17,6 +17,8 @@
  *
  * $Id$
  *
+ *      BL 2018-08-06: CloseHandle succeeds with return value != 0
+ *      SB 2018-07-25: vos_mutexLocalCreate mem allocation fixed
  *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  */
@@ -756,7 +758,7 @@ EXT_DECL void vos_mutexDelete (
     }
     else
     {
-        if (CloseHandle(pMutex->mutexId) == 0)
+        if (CloseHandle(pMutex->mutexId) != 0)
         {
             pMutex->magicNo = 0;
         }
