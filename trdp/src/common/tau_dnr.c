@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2018-08-07: Ticket #183 tau_getOwnIds declared but not defined
+ *      BL 2018-08-06: Ticket #210 IF condition for DNS Options incorrect in tau_uri2Addr()
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-05-03: Ticket #193 Unused parameter warnings
  *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
@@ -1164,29 +1166,6 @@ EXT_DECL TRDP_DNR_STATE_T tau_DNRstatus (
     return TRDP_DNR_NOT_AVAILABLE;
 }
 
-/**********************************************************************************************************************/
-/**    Who am I ?.
- *  Realizes a kind of 'Who am I' function. It is used to determine the own identifiers (i.e. the own labels),
- *  which may be used as host part of the own fully qualified domain name.
- *
- *  @param[in]      appHandle       Handle returned by tlc_openSession()
- *  @param[out]     devId           Returns the device label (host name)
- *  @param[out]     vehId           Returns the vehicle label
- *  @param[out]     cstId           Returns the consist label
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *
- */
-EXT_DECL TRDP_ERR_T tau_getOwnIds (
-    TRDP_APP_SESSION_T  appHandle,
-    TRDP_LABEL_T        devId,
-    TRDP_LABEL_T        vehId,
-    TRDP_LABEL_T        cstId)
-{
-    return TRDP_PARAM_ERR;
-}
-
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /**********************************************************************************************************************/
@@ -1293,7 +1272,7 @@ EXT_DECL TRDP_ERR_T tau_uri2Addr (
         }
         else    /* address is not known or out of date (topocounts differ)  */
         {
-            if (pDNR->useTCN_DNS != 0)
+            if (pDNR->useTCN_DNS != TRDP_DNR_STANDARD_DNS)
             {
                 updateTCNDNSentry(appHandle, pTemp, pUri);   /* Update everything, at least this URI */
             }

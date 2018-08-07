@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2018-08-07: Ticket #183 tau_getOwnIds moved here
  *      BL 2016-02-18: Ticket #7: Add train topology information support
  */
 
@@ -58,6 +59,20 @@ extern "C" {
 /**********************************************************************************************************************/
 /*    Train configuration information access                                                                          */
 /**********************************************************************************************************************/
+
+/*
+    How to get the own consist's UUID
+
+    When using SDTv2 with TRDP, the application needs to know the consist's UUID the SDT telegram is originated,
+    at least it should know its own consist properties. To get that UUID, an application needs to perform several steps:
+    1. Subscribe to and get the PD 100 telegram (contains the TTDB_OP_TRAIN_DIRECTORY_STATUS_INFO)
+    2. From that telegram use the field 'ownTrnCstNo' (1...63)
+    3. Request the TRAIN_NETWORK_DIRECTORY from the ECSP (MD 106 TTDB_TRAIN_NETWORK_DIRECTORY_INFO_REQUEST for ETB0)
+    4. Use the 'ownTrnCstNo' as index into trnNetDir array to get cstUUID from the TRAIN_NETWORK_DIRECTORY_ENTRY
+    5. With that UUID one can get more info from the TTDB, e.g. get the CONSIST_INFO
+    by MD 104 TTDB_STATIC_CONSIST_INFO_REQUEST...
+*/
+
 
 /**********************************************************************************************************************/
 /**    Function to init TTI access
@@ -336,6 +351,26 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     TRDP_LABEL_T        pVehLabel,
     TRDP_LABEL_T        pCstLabel);
 
+/**********************************************************************************************************************/
+/**    Who am I ?.
+ *  Realizes a kind of 'Who am I' function. It is used to determine the own identifiers (i.e. the own labels),
+ *  which may be used as host part of the own fully qualified domain name.
+ *
+ *  @param[in]      appHandle       Handle returned by tlc_openSession()
+ *  @param[out]     pDevId          Returns the device label (host name)
+ *  @param[out]     pVehId          Returns the vehicle label
+ *  @param[out]     pCstId          Returns the consist label
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_NODATA_ERR Data currently not available, call again
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_getOwnIds (
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_LABEL_T        *pDevId,
+    TRDP_LABEL_T        *pVehId,
+    TRDP_LABEL_T        *pCstId);
 
 
 #ifdef __cplusplus
