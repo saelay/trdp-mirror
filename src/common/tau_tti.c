@@ -10,6 +10,9 @@
  *                  ECSP plus the own consist info.
  *                  This data is automatically updated if an inauguration is detected. Additional consist infos are
  *                  requested on demand, only.
+ *                  Because of the asynchronous behavior of the TTI subsystem, most functions in tau_tti.c may return
+ *                  TRDP_NODATA_ERR on first invocation.
+ *                  They should be called again after 1...3 seconds (3s is the timeout for most MD replies).
  *
  *
  * @note            Project: TCNOpen TRDP prototype stack
@@ -22,6 +25,7 @@
  *
  * $Id$
  *
+ *      BL 2018-08-07: Ticket #183 tau_getOwnIds declared but not defined
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
@@ -755,7 +759,7 @@ EXT_DECL TRDP_ERR_T tau_getOpTrnDirectoryStatusInfo (
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the operational train directory.
+/**    Function to retrieve the train directory.
  *
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
@@ -788,7 +792,7 @@ EXT_DECL TRDP_ERR_T tau_getTrDirectory (
 
 
 /**********************************************************************************************************************/
-/**    Function to retrieve the operational train directory.
+/**    Function to retrieve the consist info.
  *
  *
  *  @param[in]      appHandle       Handle returned by tlc_openSession().
@@ -1356,3 +1360,84 @@ EXT_DECL TRDP_ERR_T tau_getVehOrient (
     }
     return TRDP_NO_ERR;
 }
+
+/**********************************************************************************************************************/
+/**    Who am I ?.
+ *  Realizes a kind of 'Who am I' function. It is used to determine the own identifiers (i.e. the own labels),
+ *  which may be used as host part of the own fully qualified domain name.
+ *
+ *  @param[in]      appHandle       Handle returned by tlc_openSession()
+ *  @param[out]     pDevId          Returns the device label (host name)
+ *  @param[out]     pVehId          Returns the vehicle label
+ *  @param[out]     pCstId          Returns the consist label
+ *
+ *  @retval         TRDP_NO_ERR     no error
+ *  @retval         TRDP_PARAM_ERR  Parameter error
+ *  @retval         TRDP_NODATA_ERR Data currently not available, call again
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_getOwnIds (
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_LABEL_T        *pDevId,
+    TRDP_LABEL_T        *pVehId,
+    TRDP_LABEL_T        *pCstId)
+{
+    if (appHandle == NULL ||
+        appHandle->pTTDB == NULL)
+    {
+        return TRDP_PARAM_ERR;
+    }
+    /* if not already there, get the network directory */
+    if ((appHandle->pTTDB->trnNetDir.entryCnt == 0) ||
+        (appHandle->pTTDB->opTrnState.ownTrnCstNo == 0))            /* from PD 100  */
+    {    /* not found, get it and return immediately */
+        ttiRequestTTDBdata(appHandle, TTDB_NET_DIR_REQ_COMID, NULL);
+       return TRDP_NODATA_ERR;
+    }
+
+    /* if not already there, get the consist info for our consist */
+    if (appHandle->pTTDB->noOfCachedCst == 0)                 /* own Consist info  */
+    {    /* not found, get it and return immediately */
+        ttiRequestTTDBdata(appHandle, TRDP_TTDB_STATIC_CST_INF_REQ_COMID,
+                           appHandle->pTTDB->trnNetDir.trnNetDir[appHandle->pTTDB->opTrnState.ownTrnCstNo - 1].cstUUID);
+        return TRDP_NODATA_ERR;
+    }
+
+    /* here we should have all the infos we need to fullfill the request */
+
+    if (pDevId != NULL)
+    {
+        unsigned int index;
+        /* deduct our device / function ID from our IP address */
+        UINT16  ownIP = (UINT16) (appHandle->realIP & 0x00000FFF);
+        /* Problem: What if it is not set? Default interface is 0! */
+
+        /* we traverse the consist info's functions */
+        for (index = 0; index < appHandle->pTTDB->cstInfo[0]->fctCnt; index++)
+        {
+            if (ownIP == appHandle->pTTDB->cstInfo[0]->pFctInfoList[index].fctId)
+            {
+                /* Get the name */
+                if (pDevId != NULL)
+                {
+                    memcpy(pDevId, appHandle->pTTDB->cstInfo[0]->pFctInfoList[index].fctName, TRDP_MAX_LABEL_LEN);
+                }
+
+                /* Get the vehicle name this device is in */
+                if (pVehId != NULL)
+                {
+                    UINT8 vehNo = appHandle->pTTDB->cstInfo[0]->pFctInfoList[index].cstVehNo;
+                    memcpy(pVehId, appHandle->pTTDB->cstInfo[0]->pVehInfoList[vehNo].vehId, TRDP_MAX_LABEL_LEN);
+                }
+                break;
+            }
+        }
+    }
+    /* Get the consist label (UIC identifier) */
+    if (pCstId != NULL)
+    {
+        memcpy(pCstId, appHandle->pTTDB->cstInfo[0]->cstId, TRDP_MAX_LABEL_LEN);
+    }
+    return TRDP_NO_ERR;
+}
+

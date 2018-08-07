@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2018-08-07: Ticket #183 tau_getOwnIds moved here
  *      BL 2017-07-25: Ticket #125: tau_dnr: TCN DNS support missing
  *      BL 2015-12-14: Ticket #8: DNR client
  */
@@ -109,26 +110,6 @@ EXT_DECL void tau_deInitDnr (
  */
 EXT_DECL TRDP_DNR_STATE_T tau_DNRstatus (TRDP_APP_SESSION_T  appHandle);
 
-/**********************************************************************************************************************/
-/**    Who am I ?.
- *  Realizes a kind of 'Who am I' function. It is used to determine the own identifiers (i.e. the own labels),
- *  which may be used as host part of the own fully qualified domain name.
- *
- *  @param[in]      appHandle       Handle returned by tlc_openSession().
- *  @param[out]     devId           Returns the device label (host name)
- *  @param[out]     vehId           Returns the vehicle label
- *  @param[out]     cstId           Returns the consist label
- *
- *  @retval         TRDP_NO_ERR     no error
- *  @retval         TRDP_PARAM_ERR  Parameter error
- *
- */
-EXT_DECL TRDP_ERR_T tau_getOwnIds (
-       TRDP_APP_SESSION_T   appHandle,
-    TRDP_LABEL_T         devId,       
-    TRDP_LABEL_T         vehId,       
-    TRDP_LABEL_T         cstId);
-      
 
 /* ---------------------------------------------------------------------------- */
 
