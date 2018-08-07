@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-08-07: Ticket #207 tlp_put() and variable dataSize
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-01-29: Ticket #186 Potential SEGFAULT in case of PD timeout
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
@@ -180,8 +181,10 @@ TRDP_ERR_T trdp_pdPut (
 
         if (!(pPacket->pktFlags & TRDP_FLAGS_MARSHALL) || (marshall == NULL))
         {
+
             /* We must check the packet size! */
-            if (dataSize > TRDP_MAX_PD_DATA_SIZE)
+            if ((dataSize > TRDP_MAX_PD_DATA_SIZE) ||
+                ((pPacket->dataSize != 0u) && (dataSize != pPacket->dataSize)))   /* Ticket #207: datasize differs */
             {
                 return TRDP_PARAM_ERR;
             }
