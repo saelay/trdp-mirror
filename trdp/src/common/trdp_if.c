@@ -416,7 +416,8 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                               NULL,                     /*    default qos and ttl           */
                               NULL,                     /*    initial data                  */
                               sizeof(TRDP_STATISTICS_T));
-            if (ret == TRDP_SOCK_ERR)
+            if ((ret == TRDP_SOCK_ERR) &&
+                (ownIpAddr == VOS_INADDR_ANY))          /*  do not wait if own IP was set (but invalid)    */
             {
                 (void) vos_threadDelay(1000000u);
             }

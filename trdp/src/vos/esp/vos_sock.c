@@ -829,7 +829,7 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
         {
             if (pDstIPAddr != NULL)
             {
-                vos_printLogStr(VOS_LOG_WARNING, "destination IP not supported\n");
+                vos_printLogStr(VOS_LOG_DBG, "destination IP not supported\n");
             }
 
             if (pSrcIPAddr != NULL)
