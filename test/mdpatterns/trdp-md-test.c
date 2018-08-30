@@ -1007,10 +1007,9 @@ void setup_listeners ()
                 0u,                                 /* comid (0 .. take all) */
                 0u,                                 /* topo */
                 0u,                                 /* topo */
-                /*   opts.srcip,                         / * destination IP address (is source of listener) * / */
-                opts.dstip,                         /* destination IP address (is source of listener) */
                 VOS_INADDR_ANY,
                 VOS_INADDR_ANY,
+                opts.srcip,                         /* destination IP address (is source of listener) */
                 (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP), /* flags */
                 NULL,
                 opts.uri);                          /* destination URI */
