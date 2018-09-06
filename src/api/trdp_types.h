@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
@@ -184,18 +185,18 @@ typedef enum
 
 /** Various flags for PD and MD packets    */
 
-#define TRDP_FLAGS_DEFAULT    0u          /**< Default value defined in tlc_openDession will be taken     */
-#define TRDP_FLAGS_NONE       0x01u       /**< No flags set                                               */
-#define TRDP_FLAGS_MARSHALL   0x02u       /**< Optional marshalling/unmarshalling in TRDP stack           */
-#define TRDP_FLAGS_CALLBACK   0x04u       /**< Use of callback function                                   */
-#define TRDP_FLAGS_TCP        0x08u       /**< Use TCP for message data                                   */
-#define TRDP_FLAGS_FORCE_CB   0x10u       /**< Force a callback for every received packet                 */
+#define TRDP_FLAGS_DEFAULT      0u        /**< Default value defined in tlc_openDession will be taken     */
+#define TRDP_FLAGS_NONE         0x01u     /**< No flags set                                               */
+#define TRDP_FLAGS_MARSHALL     0x02u     /**< Optional marshalling/unmarshalling in TRDP stack           */
+#define TRDP_FLAGS_CALLBACK     0x04u     /**< Use of callback function                                   */
+#define TRDP_FLAGS_TCP          0x08u     /**< Use TCP for message data                                   */
+#define TRDP_FLAGS_FORCE_CB     0x10u     /**< Force a callback for every received packet                 */
 
-#define TRDP_INFINITE_TIMEOUT 0xffffffffu /**< Infinite reply timeout                                      */
+#define TRDP_INFINITE_TIMEOUT   0xffffffffu /**< Infinite reply timeout                                      */
 
-typedef UINT8   TRDP_FLAGS_T;
+typedef UINT8 TRDP_FLAGS_T;
 
-typedef UINT16  TRDP_MSG_T;
+typedef UINT16 TRDP_MSG_T;
 
 /** Redundancy states */
 typedef enum
@@ -213,7 +214,7 @@ typedef enum
 } TRDP_TO_BEHAVIOR_T;
 
 #define TRDP_TIMER_FOREVER  0xffffffff      /**< No time out for subscription                        */
-    
+
 /**    Process data info from received telegram; allows the application to generate responses.
  *
  * Note: Not all fields are relevant for each message type!
@@ -324,6 +325,7 @@ typedef struct
 {
     UINT32              type;           /**< Data type (TRDP_DATA_TYPE_T 1...99) or dataset id > 1000   */
     UINT32              size;           /**< Number of items or TRDP_VAR_SIZE (0)                       */
+    CHAR8               *name;          /**< Name param, on special request (Ticket #211)               */
     CHAR8               *unit;          /**< Unit text for visualisation                                */
     REAL32              scale;          /**< Factor for visualisation                                   */
     INT32               offset;         /**< Offset for visualisation   (val = scale * x + offset)      */
@@ -448,17 +450,17 @@ typedef struct
 /** Table containing particular PD subscription information. */
 typedef struct
 {
-    UINT32              comId;      /**< Subscribed ComId      */
-    TRDP_IP_ADDR_T      joinedAddr; /**< Joined IP address   */
-    TRDP_IP_ADDR_T      filterAddr; /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0
+    UINT32          comId;          /**< Subscribed ComId      */
+    TRDP_IP_ADDR_T  joinedAddr;     /**< Joined IP address   */
+    TRDP_IP_ADDR_T  filterAddr;     /**< Filter IP address, i.e IP address of the sender for this subscription, 0.0.0.0
                                             in case all senders. */
-    UINT32              callBack;   /**< call back function if used */
-    UINT32              userRef;    /**< User reference if used */
-    UINT32              timeout;    /**< Time-out value in us. 0 = No time-out supervision */
-    TRDP_ERR_T          status;     /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
-    UINT32              toBehav;    /**< Behavior at time-out. Set data to zero / keep last value */
-    UINT32              numRecv;    /**< Number of packets received for this subscription */
-    UINT32              numMissed;  /**< number of packets skipped for this subscription */
+    UINT32          callBack;       /**< call back function if used */
+    UINT32          userRef;        /**< User reference if used */
+    UINT32          timeout;        /**< Time-out value in us. 0 = No time-out supervision */
+    TRDP_ERR_T      status;         /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
+    UINT32          toBehav;        /**< Behavior at time-out. Set data to zero / keep last value */
+    UINT32          numRecv;        /**< Number of packets received for this subscription */
+    UINT32          numMissed;      /**< number of packets skipped for this subscription */
 } TRDP_SUBS_STATISTICS_T;
 
 /** Table containing particular PD publishing information. */
@@ -489,8 +491,8 @@ typedef struct
 /** A table containing PD redundant group information */
 typedef struct
 {
-    UINT32              id;    /**< Redundant Id */
-    UINT32              state; /**< Redundant state.Leader or Follower */
+    UINT32  id;                /**< Redundant Id */
+    UINT32  state;             /**< Redundant state.Leader or Follower */
 } TRDP_RED_STATISTICS_T;
 
 
@@ -672,17 +674,17 @@ typedef struct
 /**********************************************************************************************************************/
 /** Various flags/general TRDP options for library initialization
  */
-    
-#define TRDP_OPTION_NONE            0u
-#define TRDP_OPTION_BLOCK           0x01u       /**< Default: Use nonblocking I/O calls, polling necessary
+
+#define TRDP_OPTION_NONE                0u
+#define TRDP_OPTION_BLOCK               0x01u   /**< Default: Use nonblocking I/O calls, polling necessary
                                                   Set: Read calls will block, use select()                  */
-#define TRDP_OPTION_TRAFFIC_SHAPING 0x02u       /**< Use traffic shaping - distribute packet sending
+#define TRDP_OPTION_TRAFFIC_SHAPING     0x02u   /**< Use traffic shaping - distribute packet sending
                                                   Default: OFF                                              */
-#define TRDP_OPTION_NO_REUSE_ADDR   0x04u       /**< Do not allow re-use of address/port (-> no multihoming)
+#define TRDP_OPTION_NO_REUSE_ADDR       0x04u   /**< Do not allow re-use of address/port (-> no multihoming)
                                                   Default: Allow                                            */
-#define TRDP_OPTION_NO_MC_LOOP_BACK 0x08u       /**< Do not allow loop back of multicast traffic
+#define TRDP_OPTION_NO_MC_LOOP_BACK     0x08u   /**< Do not allow loop back of multicast traffic
                                                   Default: Allow                                            */
-#define TRDP_OPTION_NO_UDP_CHK      0x10u       /**< Suppress UDP CRC generation
+#define TRDP_OPTION_NO_UDP_CHK          0x10u   /**< Suppress UDP CRC generation
                                                   Default: Compute UDP CRC                                  */
 typedef UINT8 TRDP_OPTION_T;
 

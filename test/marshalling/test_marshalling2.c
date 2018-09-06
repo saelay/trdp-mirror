@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  */
 
 #include <stdio.h>
@@ -71,22 +72,22 @@ TRDP_DATASET_T gDataSet2001 =
     0,          /*    reserved        */
     16,         /*    No of TRDP_DATASET_ELEMENT_T    */
     { /* data type,  no of elements, reserved pointer */
-        { TRDP_BOOL8, 1, NULL},
-        { TRDP_CHAR8, 1, NULL},
-        { TRDP_UTF16, 1, NULL },
-        { TRDP_INT8, 1, NULL },
-        { TRDP_INT16, 1, NULL },
-        { TRDP_INT32, 1, NULL },
-        { TRDP_INT64, 1, NULL },
-        { TRDP_UINT8, 1, NULL },
-        { TRDP_UINT16, 1, NULL },
-        { TRDP_UINT32, 1, NULL },
-        { TRDP_UINT64, 1, NULL },
-        { TRDP_REAL32, 1, NULL },
-        { TRDP_REAL64, 1, NULL },
-        { TRDP_TIMEDATE32, 1, NULL },
-        { TRDP_TIMEDATE48, 1, NULL },
-        { TRDP_TIMEDATE64, 1, NULL }
+        { TRDP_BOOL8, 1, NULL, NULL, 0, 0, NULL},
+        { TRDP_CHAR8, 1, NULL, NULL, 0, 0, NULL},
+        { TRDP_UTF16, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_INT8, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_INT16, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_INT32, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_INT64, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_UINT8, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_UINT16, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_UINT32, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_UINT64, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_REAL32, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_REAL64, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_TIMEDATE32, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_TIMEDATE48, 1, NULL, NULL, 0, 0, NULL },
+        { TRDP_TIMEDATE64, 1, NULL, NULL, 0, 0, NULL }
     }
 };
 
@@ -112,12 +113,12 @@ TRDP_DATASET_T  gDataSet2002 =
         {
             2001,
             2,
-            NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_INT16,
             64,
-            NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };

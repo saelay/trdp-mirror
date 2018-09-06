@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *
@@ -84,17 +85,23 @@ TRDP_DATASET_T  gMemStatisticsDS =
         {
             TRDP_UINT32,
             6,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_UINT32,
             15,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_UINT32,
             15,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         }
     }
 };
@@ -108,7 +115,9 @@ TRDP_DATASET_T  gPDStatisticsDS =
         {
             TRDP_UINT32,
             13,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         }
     }
 };
@@ -122,7 +131,9 @@ TRDP_DATASET_T  gMDStatisticsDS =
         {
             TRDP_UINT32,
             13,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         }
     }
 };
@@ -136,42 +147,58 @@ TRDP_DATASET_T  gStatisticsDS =
         {
             TRDP_UINT32,
             1,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_TIMEDATE64,
             1,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_TIMEDATE32,
             2,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_CHAR8,
             16,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_CHAR8,
             16,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_MEM_STATS_DS_ID,
             1,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_PD_STATS_DS_ID,
             1,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
         {
             TRDP_MD_STATS_DS_ID,
             1,
-            NULL
+            NULL,
+            NULL,
+            0, 0, NULL
         },
     }
 };

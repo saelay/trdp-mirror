@@ -46,13 +46,13 @@
  */
 #define APP_VERSION  "1.0"
 
-typedef int (test_func_t)(int argc, char *argv[]);
+typedef int (test_func_t)(void);
 
-UINT32          gDestMC = 0xEF000202u;
-int             gFailed;
-int             gFullLog = FALSE;
+UINT32      gDestMC = 0xEF000202u;
+int         gFailed;
+int         gFullLog = FALSE;
 
-static FILE     *gFp    = NULL;
+static FILE *gFp = NULL;
 
 typedef struct
 {
@@ -60,15 +60,16 @@ typedef struct
     TRDP_IP_ADDR_T      ifaceIP;
     int                 threadRun;
     VOS_THREAD_T        threadId;
-    
+
 } TRDP_THREAD_SESSION_T;
 
-TRDP_THREAD_SESSION_T gSession1 = {NULL, 0x0A000264u, 0, 0};
-TRDP_THREAD_SESSION_T gSession2 = {NULL, 0x0A000265u, 0, 0};
+TRDP_THREAD_SESSION_T   gSession1 = {NULL, 0x0A000264u, 0, 0};
+TRDP_THREAD_SESSION_T   gSession2 = {NULL, 0x0A000265u, 0, 0};
 
 /* Data buffers to play with (Content is borrowed from Douglas Adams, "The Hitchhiker's Guide to the Galaxy") */
-static uint8_t dataBuffer1[64*1024] = {
-    
+static uint8_t          dataBuffer1[64 * 1024] =
+{
+
     "Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.\n"
     "This planet has – or rather had – a problem, which was this: most of the people on it were unhappy for pretty much of the time. Many solutions were suggested for this problem, but most of these were largely concerned with the movements of small green pieces of paper, which is odd because on the whole it wasn’t the small green pieces of paper that were unhappy.\n"
     "And so the problem remained; lots of the people were mean, and most of them were miserable, even the ones with digital watches.\n"
@@ -213,10 +214,11 @@ static uint8_t dataBuffer1[64*1024] = {
     "First, it is slightly cheaper; and secondly it has the words Don’t Panic inscribed in large friendly letters on its cover.\n"
     "But the story of this terrible, stupid Thursday, the story of its extraordi- nary consequences, and the story of how these consequences are inextricably intertwined with this remarkable book begins very simply.\n"
     "It begins with a house.\n"
-    
+
 };
 
-static uint8_t dataBuffer2[64*1024] = {
+static uint8_t          dataBuffer2[64 * 1024] =
+{
     "But it is the story of that terrible stupid catastrophe and some of its consequences.\n"
     "It is also the story of a book, a book called The Hitchhiker’s Guide to the Galaxy – not an Earth book, never published on Earth, and until the terrible catastrophe occurred, never seen or heard of by any Earthman.\n"
     "Nevertheless, a wholly remarkable book.\n"
@@ -232,23 +234,23 @@ static uint8_t dataBuffer2[64*1024] = {
 /**********************************************************************************************************************/
 /*  Macro to initialize the library and open two sessions                                                             */
 /**********************************************************************************************************************/
-#define PREPARE(a,b)                                                            \
+#define PREPARE(a, b)                                                           \
     gFailed = 0;                                                                \
-    TRDP_ERR_T      err         = TRDP_NO_ERR;                                  \
-    TRDP_APP_SESSION_T   appHandle1  = NULL, appHandle2 = NULL;                      \
+    TRDP_ERR_T err = TRDP_NO_ERR;                                               \
+    TRDP_APP_SESSION_T appHandle1 = NULL, appHandle2 = NULL;                    \
     {                                                                           \
-        gFullLog = FALSE;                                                        \
+        gFullLog = FALSE;                                                       \
         fprintf(gFp, "\n---- Start of %s (%s) ---------\n\n", __FUNCTION__, a); \
-        appHandle1 = test_init(dbgOut, &gSession1, (b));                      \
+        appHandle1 = test_init(dbgOut, &gSession1, (b));                        \
         if (appHandle1 == NULL)                                                 \
         {                                                                       \
-            gFailed = 1;                                                         \
+            gFailed = 1;                                                        \
             goto end;                                                           \
         }                                                                       \
-        appHandle2 = test_init(NULL, &gSession2, (b));                        \
+        appHandle2 = test_init(NULL, &gSession2, (b));                          \
         if (appHandle2 == NULL)                                                 \
         {                                                                       \
-            gFailed = 1;                                                         \
+            gFailed = 1;                                                        \
             goto end;                                                           \
         }                                                                       \
     }
@@ -258,8 +260,8 @@ static uint8_t dataBuffer2[64*1024] = {
 /**********************************************************************************************************************/
 #define PREPARE1(a)                                                             \
     gFailed = 0;                                                                \
-    TRDP_ERR_T      err         = TRDP_NO_ERR;                                  \
-    TRDP_APP_SESSION_T   appHandle1  = NULL;                                    \
+    TRDP_ERR_T err = TRDP_NO_ERR;                                               \
+    TRDP_APP_SESSION_T appHandle1 = NULL;                                       \
     {                                                                           \
         gFullLog = FALSE;                                                       \
         fprintf(gFp, "\n---- Start of %s (%s) ---------\n\n", __FUNCTION__, a); \
@@ -275,13 +277,13 @@ static uint8_t dataBuffer2[64*1024] = {
 /**********************************************************************************************************************/
 /*  Macro to initialize common function testing                                                                       */
 /**********************************************************************************************************************/
-#define PREPARE_COM(a)                                                      \
-    gFailed = 0;                                                            \
-    TRDP_ERR_T err = TRDP_NO_ERR;                                           \
-    {                                                                       \
-                                                                            \
-        printf("\n---- Start of %s (%s) ---------\n\n", __FUNCTION__, a);   \
-                                                                            \
+#define PREPARE_COM(a)                                                    \
+    gFailed = 0;                                                          \
+    TRDP_ERR_T err = TRDP_NO_ERR;                                         \
+    {                                                                     \
+                                                                          \
+        printf("\n---- Start of %s (%s) ---------\n\n", __FUNCTION__, a); \
+                                                                          \
     }
 
 
@@ -289,45 +291,45 @@ static uint8_t dataBuffer2[64*1024] = {
 /**********************************************************************************************************************/
 /*  Macro to terminate the library and close two sessions                                                             */
 /**********************************************************************************************************************/
-#define CLEANUP                                                                 \
-end:                                                                            \
-    {                                                                           \
-        test_deinit(&gSession1 ,&gSession2);                                    \
-                                                                                \
-        if (gFailed) {                                                          \
-            fprintf(gFp, "\n###########  FAILED!  ###############\nlasterr = %d\n", err); }      \
-        else{                                                                 \
-            fprintf(gFp, "\n-----------  Success  ---------------\n"); }      \
-                                                                              \
-        fprintf(gFp, "--------- End of %s --------------\n\n", __FUNCTION__); \
-                                                                              \
-        return gFailed;                                                        \
+#define CLEANUP                                                                             \
+end:                                                                                        \
+    {                                                                                       \
+        test_deinit(&gSession1, &gSession2);                                                \
+                                                                                            \
+        if (gFailed) {                                                                      \
+            fprintf(gFp, "\n###########  FAILED!  ###############\nlasterr = %d\n", err); } \
+        else{                                                                               \
+            fprintf(gFp, "\n-----------  Success  ---------------\n"); }                    \
+                                                                                            \
+        fprintf(gFp, "--------- End of %s --------------\n\n", __FUNCTION__);               \
+                                                                                            \
+        return gFailed;                                                                     \
     }
 
 /**********************************************************************************************************************/
 /*  Macro to check for error and terminate the test                                                                   */
 /**********************************************************************************************************************/
-#define IF_ERROR(message)                                   \
-    if (err != TRDP_NO_ERR)                                 \
-    {                                                       \
+#define IF_ERROR(message)                                                                           \
+    if (err != TRDP_NO_ERR)                                                                         \
+    {                                                                                               \
         fprintf(gFp, "### %s (error: %d, %s)\n", message, err, vos_getErrorString((VOS_ERR_T)err)); \
-        gFailed = 1;                                         \
-        goto end;                                           \
+        gFailed = 1;                                                                                \
+        goto end;                                                                                   \
     }
 
 /**********************************************************************************************************************/
 /*  Macro to terminate the test                                                                                       */
 /**********************************************************************************************************************/
-#define FAILED(message)                 \
-    fprintf(gFp, "### %s\n", message);  \
-    gFailed = 1;                        \
-    goto end;                           \
+#define FAILED(message)                \
+    fprintf(gFp, "### %s\n", message); \
+    gFailed = 1;                       \
+    goto end;                          \
 
 /**********************************************************************************************************************/
 /*  Macro to terminate the test                                                                                       */
 /**********************************************************************************************************************/
-#define FULL_LOG(true_false)            \
-{ gFullLog = (true_false); }            \
+#define FULL_LOG(true_false)     \
+    { gFullLog = (true_false); } \
 
 /**********************************************************************************************************************/
 /** callback routine for TRDP logging/error output
@@ -360,9 +362,9 @@ static void dbgOut (
                 lineNumber,
                 pMsgStr);
     }
-    //else if (strstr(pMsgStr, "vos_mem") != NULL)
+    /* else if (strstr(pMsgStr, "vos_mem") != NULL) */
     {
-        //fprintf(gFp, "### %s", pMsgStr);
+        /* fprintf(gFp, "### %s", pMsgStr); */
     }
 }
 
@@ -377,9 +379,9 @@ static void dbgOut (
  *  @param[in]        pMsgStr         pointer to NULL-terminated string
  *  @retval         none
  */
-static void trdp_loop (void* pArg)
+static void trdp_loop (void *pArg)
 {
-    TRDP_THREAD_SESSION_T  *pSession = (TRDP_THREAD_SESSION_T*) pArg;
+    TRDP_THREAD_SESSION_T *pSession = (TRDP_THREAD_SESSION_T *) pArg;
     /*
         Enter the main processing loop.
      */
@@ -388,23 +390,23 @@ static void trdp_loop (void* pArg)
         TRDP_FDS_T  rfds;
         INT32       noDesc;
         INT32       rv;
-        TRDP_TIME_T  tv;
-        TRDP_TIME_T  max_tv = {0u, 20000};
-        TRDP_TIME_T  min_tv = {0u, 5000};
-        
+        TRDP_TIME_T tv;
+        TRDP_TIME_T max_tv  = {0u, 20000};
+        TRDP_TIME_T min_tv  = {0u, 5000};
+
         /*
          Prepare the file descriptor set for the select call.
          Additional descriptors can be added here.
          */
         FD_ZERO(&rfds);
-        
+
         /*
          Compute the min. timeout value for select.
          This way we can guarantee that PDs are sent in time
          with minimum CPU load and minimum jitter.
          */
         (void)tlc_getInterval(pSession->appHandle, &tv, (TRDP_FDS_T *) &rfds, &noDesc);
-        
+
         /*
          The wait time for select must consider cycle times and timeouts of
          the PD packets received or sent.
@@ -415,7 +417,7 @@ static void trdp_loop (void* pArg)
         {
             tv = max_tv;
         }
-        
+
         if (vos_cmpTime(&tv, &min_tv) < 0)
         {
             tv = min_tv;
@@ -425,7 +427,7 @@ static void trdp_loop (void* pArg)
          what ever comes first.
          */
         rv = vos_select(noDesc + 1, &rfds, NULL, NULL, &tv);
-        
+
         /*
          Check for overdue PDs (sending and receiving)
          Send any pending PDs if it's time...
@@ -436,7 +438,7 @@ static void trdp_loop (void* pArg)
          function (in it's context and thread)!
          */
         (void) tlc_process(pSession->appHandle, &rfds, &rv);
-        
+
     }
 
     /*
@@ -470,13 +472,13 @@ static void usage (const char *appName)
  *  @param
  */
 static void iface_init (
-    TRDP_IP_ADDR_T          *pIP1,
-    TRDP_IP_ADDR_T          *pIP2)
+    TRDP_IP_ADDR_T  *pIP1,
+    TRDP_IP_ADDR_T  *pIP2)
 {
     if ((*pIP1 == 0) && (*pIP2 == 0))
     {
         /* find suitable addresses if not set */
-        
+
     }
 }
 
@@ -490,7 +492,7 @@ static TRDP_APP_SESSION_T test_init (
     TRDP_THREAD_SESSION_T   *pSession,
     const char              *name)
 {
-    TRDP_ERR_T          err     = TRDP_NO_ERR;
+    TRDP_ERR_T err = TRDP_NO_ERR;
     pSession->appHandle = NULL;
 
     if (dbgout != NULL)
@@ -503,11 +505,11 @@ static TRDP_APP_SESSION_T test_init (
         tlc_openSession(&pSession->appHandle, pSession->ifaceIP, 0u, NULL, NULL, NULL, NULL);
         /* On error the handle will be NULL... */
     }
-    
+
     if (err == TRDP_NO_ERR)
     {
         (void) vos_threadCreate(&pSession->threadId, name, VOS_THREAD_POLICY_OTHER, 0u, 0u, 0u,
-                               trdp_loop, pSession);
+                                trdp_loop, pSession);
     }
     return pSession->appHandle;
 }
@@ -556,15 +558,16 @@ static void test_deinit (
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test1 (int argc, char *argv[])
+static int test1 ()
 {
-    PREPARE("Basic PD publish and subscribe, polling (#128 ComId = 0)", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("Basic PD publish and subscribe, polling (#128 ComId = 0)", "test"); /* allocates appHandle1, appHandle2,
+                                                                                   failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_PUB_T      pubHandle;
-        TRDP_SUB_T      subHandle;
+        TRDP_PUB_T  pubHandle;
+        TRDP_SUB_T  subHandle;
 
 #define TEST1_COMID     0u
 #define TEST1_INTERVAL  100000u
@@ -574,19 +577,19 @@ static int test1 (int argc, char *argv[])
         /*    Copy the packet into the internal send queue, prepare for sending.    */
 
         err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST1_COMID, 0u, 0u,
-                          0u, //gSession1.ifaceIP,                   /* Source */
-                          gSession2.ifaceIP,//gDestMC,               /* Destination */
+                          0u, /* gSession1.ifaceIP,                   / * Source * / */
+                          gSession2.ifaceIP, /* gDestMC,               / * Destination * / */
                           TEST1_INTERVAL,
                           0u, TRDP_FLAGS_DEFAULT, NULL, NULL, TEST1_DATA_LEN);
-        
+
         IF_ERROR("tlp_publish");
 
         err = tlp_subscribe(gSession2.appHandle, &subHandle, NULL, NULL,
                             TEST1_COMID, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            0u,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            0u, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_DEFAULT, TEST1_INTERVAL * 3, TRDP_TO_DEFAULT);
-        
+
 
         IF_ERROR("tlp_subscribe");
 
@@ -596,10 +599,10 @@ static int test1 (int argc, char *argv[])
         int counter = 0;
         while (counter < 50)         /* 5 seconds */
         {
-            char            data1[1432u];
-            char            data2[1432u];
-            UINT32          dataSize2 = sizeof(data2);
-            TRDP_PD_INFO_T  pdInfo;
+            char    data1[1432u];
+            char    data2[1432u];
+            UINT32  dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T pdInfo;
 
             sprintf(data1, "Just a Counter: %08d", counter++);
 
@@ -619,10 +622,10 @@ static int test1 (int argc, char *argv[])
             if (err != TRDP_NO_ERR)
             {
                 vos_printLog(VOS_LOG_INFO, "### tlp_get error: %s\n", vos_getErrorString((VOS_ERR_T)err));
-                
+
                 gFailed = 1;
-                //goto end;
-                
+                /* goto end; */
+
             }
             else
             {
@@ -648,86 +651,86 @@ static int test1 (int argc, char *argv[])
  */
 
 static void test2PDcallBack (
-                   void                    *pRefCon,
-                   TRDP_APP_SESSION_T      appHandle,
-                   const TRDP_PD_INFO_T    *pMsg,
-                   UINT8                   *pData,
-                   UINT32                  dataSize)
+    void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
+    const TRDP_PD_INFO_T    *pMsg,
+    UINT8                   *pData,
+    UINT32                  dataSize)
 {
-    void * pSentdata = (void*) pMsg->pUserRef;
+    void *pSentdata = (void *) pMsg->pUserRef;
 
     /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
-        case TRDP_NO_ERR:
-            if ((pSentdata != NULL) && (pData != NULL) && (memcmp(pData, pSentdata, dataSize) == 0))
-            {
-                fprintf(gFp, "received data matches (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
-            }
-            break;
-            
-        case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept    */
-            fprintf(gFp, "Packet timed out (ComId %d, SrcIP: %s)\n",
+       case TRDP_NO_ERR:
+           if ((pSentdata != NULL) && (pData != NULL) && (memcmp(pData, pSentdata, dataSize) == 0))
+           {
+               fprintf(gFp, "received data matches (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
+           }
+           break;
+
+       case TRDP_TIMEOUT_ERR:
+           /* The application can decide here if old data shall be invalidated or kept    */
+           fprintf(gFp, "Packet timed out (ComId %d, SrcIP: %s)\n",
                    pMsg->comId,
                    vos_ipDotted(pMsg->srcIpAddr));
-            break;
-        default:
-            fprintf(gFp, "Error on packet received (ComId %d), err = %d\n",
+           break;
+       default:
+           fprintf(gFp, "Error on packet received (ComId %d), err = %d\n",
                    pMsg->comId,
                    pMsg->resultCode);
-            break;
+           break;
     }
 }
 
-static int test2 (int argc, char *argv[])
+static int test2 ()
 {
     PREPARE("Publish & Subscribe, Callback", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_PUB_T      pubHandle;
-        TRDP_SUB_T      subHandle;
-        char            data1[1432u];
-        
+        TRDP_PUB_T  pubHandle;
+        TRDP_SUB_T  subHandle;
+        char        data1[1432u];
+
 #define TEST2_COMID     1000u
 #define TEST2_INTERVAL  100000u
 #define TEST2_DATA      "Hello World!"
-        
+
         /*    Copy the packet into the internal send queue, prepare for sending.    */
-        
+
         err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST2_COMID, 0u, 0u,
-                          0u, //gSession1.ifaceIP,                   /* Source */
-                          gSession2.ifaceIP,//gDestMC,               /* Destination */
+                          0u, /* gSession1.ifaceIP,                   / * Source * / */
+                          gSession2.ifaceIP, /* gDestMC,               / * Destination * / */
                           TEST2_INTERVAL,
                           0u, TRDP_FLAGS_DEFAULT, NULL, NULL, 0u);
-        
+
         IF_ERROR("tlp_publish");
-        
+
         err = tlp_subscribe(gSession2.appHandle, &subHandle, data1, test2PDcallBack,
                             TEST2_COMID, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            0u,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            0u, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_CALLBACK, TEST2_INTERVAL * 3, TRDP_TO_DEFAULT);
-        
-        
+
+
         IF_ERROR("tlp_subscribe");
-        
+
         /*
          Enter the main processing loop.
          */
         int counter = 0;
         while (counter < 5)         /* 0.5 seconds */
         {
-            
+
             sprintf(data1, "Just a Counter: %08d", counter++);
-            
+
             err = tlp_put(gSession1.appHandle, pubHandle, (UINT8 *) data1, (UINT32) strlen(data1));
             IF_ERROR("tap_put");
-            
+
             usleep(100000u);
-            
+
         }
     }
 
@@ -743,40 +746,41 @@ static int test2 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test3 (int argc, char *argv[])
+static int test3 ()
 {
-    PREPARE("Ticket #140: tlp_get reports immediately TRDP_TIMEOUT_ERR", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("Ticket #140: tlp_get reports immediately TRDP_TIMEOUT_ERR", "test"); /* allocates appHandle1, appHandle2,
+                                                                                    failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_SUB_T      subHandle;
-        
+        TRDP_SUB_T subHandle;
+
 #define TEST3_COMID     1000u
 #define TEST3_INTERVAL  100000u
-        
-        
+
+
         err = tlp_subscribe(gSession2.appHandle, &subHandle, NULL, NULL,
                             TEST3_COMID, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            0u,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            0u, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_DEFAULT, TRDP_TIMER_FOREVER, TRDP_TO_DEFAULT);
-        
-        
+
+
         IF_ERROR("tlp_subscribe");
-        
+
         /*
          Enter the main processing loop.
          */
         int counter = 0;
         while (counter++ < 50)         /* 5 seconds */
         {
-            char            data2[1432u];
-            UINT32          dataSize2 = sizeof(data2);
-            TRDP_PD_INFO_T  pdInfo;
-            
+            char    data2[1432u];
+            UINT32  dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T pdInfo;
+
             usleep(TEST3_INTERVAL);
-            
+
             err = tlp_get(gSession2.appHandle, subHandle, &pdInfo, (UINT8 *) data2, &dataSize2);
             if (err == TRDP_NODATA_ERR)
             {
@@ -784,14 +788,14 @@ static int test3 (int argc, char *argv[])
                 fflush(gFp);
                 continue;
             }
-            
+
             if (err != TRDP_NO_ERR)
             {
                 fprintf(gFp, "\n### tlp_get error: %d\n", err);
-                
+
                 gFailed = 1;
                 goto end;
-                
+
             }
 
         }
@@ -810,7 +814,7 @@ static int test3 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test4 (int argc, char *argv[])
+static int test4 ()
 {
     PREPARE("#153 (two PDs on one pull request", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
@@ -818,47 +822,47 @@ static int test4 (int argc, char *argv[])
 
     {
         {
-            TRDP_PUB_T      pubHandle;
-            TRDP_SUB_T      subHandle;
-            
+            TRDP_PUB_T  pubHandle;
+            TRDP_SUB_T  subHandle;
+
 #define TEST4_COMID     1000u
 #define TEST4_INTERVAL  100000u
 #define TEST4_DATA      "Hello World!"
 #define TEST4_DATA_LEN  16u
-            
+
             /*    Session1 Install subscriber and publisher for PULL (interval = 0).    */
-            
+
             err = tlp_subscribe(gSession1.appHandle, &subHandle, NULL, NULL,
                                 TEST4_COMID, 0u, 0u,
                                 0u, 0u,
                                 gDestMC,                            /* MC group */
                                 TRDP_FLAGS_NONE, 0, TRDP_TO_DEFAULT);
-            
-            
+
+
             IF_ERROR("tlp_subscribe");
 
             err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST4_COMID, 0u, 0u,
                               0u,
                               gDestMC,                              /* Destination */
                               0u,
-                              0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8*) TEST4_DATA, TEST4_DATA_LEN);
-            
+                              0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8 *) TEST4_DATA, TEST4_DATA_LEN);
+
             IF_ERROR("tlp_publish");
 
             /*    Session2 Install subscriber and do a request for PULL.    */
-            
+
             err = tlp_subscribe(gSession2.appHandle, &subHandle, NULL, NULL,
                                 TEST4_COMID, 0u, 0u,
                                 0u, 0u,                                 /* Source */
                                 gDestMC,                            /* Destination */
                                 TRDP_FLAGS_DEFAULT, TEST4_INTERVAL * 3, TRDP_TO_DEFAULT);
-            
-            
+
+
             IF_ERROR("tlp_subscribe");
-            
+
             err = tlp_request(gSession2.appHandle, subHandle,
                               TEST4_COMID, 0u, 0u, gSession2.ifaceIP, gSession1.ifaceIP,
-                              0u, TRDP_FLAGS_NONE, NULL , NULL , 0u, TEST4_COMID, gDestMC);
+                              0u, TRDP_FLAGS_NONE, NULL, NULL, 0u, TEST4_COMID, gDestMC);
 
             IF_ERROR("tlp_request");
 
@@ -868,18 +872,18 @@ static int test4 (int argc, char *argv[])
             int counter = 0;
             while (counter++ < 50)         /* 5 seconds */
             {
-                char            data2[1432u];
-                UINT32          dataSize2 = sizeof(data2);
-                TRDP_PD_INFO_T  pdInfo;
-                
+                char    data2[1432u];
+                UINT32  dataSize2 = sizeof(data2);
+                TRDP_PD_INFO_T pdInfo;
+
                 usleep(100000u);
-                
+
                 err = tlp_get(gSession2.appHandle, subHandle, &pdInfo, (UINT8 *) data2, &dataSize2);
                 if (err == TRDP_NODATA_ERR)
                 {
                     continue;
                 }
-                
+
                 if (err == TRDP_TIMEOUT_ERR)
                 {
                     continue;
@@ -888,10 +892,10 @@ static int test4 (int argc, char *argv[])
                 if (err != TRDP_NO_ERR)
                 {
                     fprintf(gFp, "### tlp_get error: %d\n", err);
-                    
+
                     gFailed = 1;
                     goto end;
-                    
+
                 }
                 else
                 {
@@ -916,10 +920,10 @@ static int test4 (int argc, char *argv[])
  *  @retval         1        some error
  */
 
-#define                 TEST5_STRING_COMID       1000u
-#define                 TEST5_STRING_REQUEST     (char*)&dataBuffer1 //"Requesting data"
-#define                 TEST5_STRING_REPLY       (char*)&dataBuffer2 //"Data transmission succeded"
-        
+#define                 TEST5_STRING_COMID      1000u
+#define                 TEST5_STRING_REQUEST    (char *)&dataBuffer1 /* "Requesting data" */
+#define                 TEST5_STRING_REPLY      (char *)&dataBuffer2 /* "Data transmission succeded" */
+
 static void  test5CBFunction (
     void                    *pRefCon,
     TRDP_APP_SESSION_T      appHandle,
@@ -927,16 +931,16 @@ static void  test5CBFunction (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-    TRDP_ERR_T      err;
-    TRDP_URI_USER_T srcURI =  "12345678901234567890123456789012";   // 32 chars
-    
+    TRDP_ERR_T err;
+    TRDP_URI_USER_T srcURI = "12345678901234567890123456789012";    /* 32 chars */
+
     if (pMsg->resultCode == TRDP_REPLYTO_ERR)
     {
         fprintf(gFp, "->> Reply timed out (ComId %u)\n", pMsg->comId);
         gFailed = 1;
     }
     else if ((pMsg->msgType == TRDP_MSG_MR) &&
-        (pMsg->comId == TEST5_STRING_COMID))
+             (pMsg->comId == TEST5_STRING_COMID))
     {
         if (pMsg->resultCode == TRDP_TIMEOUT_ERR)
         {
@@ -945,7 +949,7 @@ static void  test5CBFunction (
         }
         else
         {
-            //fprintf(gFp, "->> Request received (%s)\n", pData);
+            /* fprintf(gFp, "->> Request received (%s)\n", pData); */
             if (memcmp(srcURI, pMsg->srcUserURI, 32u) != 0)
             {
                 gFailed = 1;
@@ -953,23 +957,20 @@ static void  test5CBFunction (
             }
             fprintf(gFp, "->> Sending reply\n");
             err = tlm_replyQuery(appHandle, &pMsg->sessionId, TEST5_STRING_COMID, 0u, 500000u, NULL,
-                             (UINT8*)TEST5_STRING_REPLY, 63*1024/*strlen(TEST5_STRING_REPLY)*/);
+                                 (UINT8 *)TEST5_STRING_REPLY, 63 * 1024 /*strlen(TEST5_STRING_REPLY)*/);
 
             IF_ERROR("tlm_reply");
         }
     }
-    
     else if ((pMsg->msgType == TRDP_MSG_MQ) &&
              (pMsg->comId == TEST5_STRING_COMID))
     {
-        //fprintf(gFp, "->> Reply received (%s)\n", pData);
+        fprintf(gFp, "->> Reply received (%s)\n", pData);
         fprintf(gFp, "->> Sending confirmation\n");
         err = tlm_confirm(appHandle, &pMsg->sessionId, 0u, NULL);
-        
+
         IF_ERROR("tlm_confirm");
     }
-    
-    
     else if (pMsg->msgType == TRDP_MSG_MC)
     {
         fprintf(gFp, "->> Confirmation received (status = %u)\n", pMsg->userStatus);
@@ -977,7 +978,7 @@ static void  test5CBFunction (
     else if ((pMsg->msgType == TRDP_MSG_MN) &&
              (pMsg->comId == TEST5_STRING_COMID))
     {
-        if (strlen((char*)pMsg->sessionId) > 0)
+        if (strlen((char *)pMsg->sessionId) > 0)
         {
             gFailed = 1;
             fprintf(gFp, "#### ->> Notification received, sessionID = %16s\n", pMsg->sessionId);
@@ -997,18 +998,19 @@ end:
     return;
 }
 
-static int test5 (int argc, char *argv[])
+static int test5 ()
 {
-    PREPARE("TCP MD Request - Reply - Confirm, #149, #160", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("TCP MD Request - Reply - Confirm, #149, #160", "test"); /* allocates appHandle1, appHandle2, failed = 0,
+                                                                       err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_UUID_T         sessionId1;
-        TRDP_LIS_T          listenHandle;
-        TRDP_URI_USER_T     destURI1 = "12345678901234567890123456789012";   // 32 chars
-        TRDP_URI_USER_T     destURI2 = "12345678901234567890123456789012";   // 32 chars
-        TRDP_URI_USER_T     srcURI   = "12345678901234567890123456789012";   // 32 chars
+        TRDP_UUID_T sessionId1;
+        TRDP_LIS_T listenHandle;
+        TRDP_URI_USER_T destURI1    = "12345678901234567890123456789012";    /* 32 chars */
+        TRDP_URI_USER_T destURI2    = "12345678901234567890123456789012";    /* 32 chars */
+        TRDP_URI_USER_T srcURI      = "12345678901234567890123456789012";    /* 32 chars */
 
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
                               TRUE,
@@ -1017,37 +1019,37 @@ static int test5 (int argc, char *argv[])
                               TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, NULL, destURI1);
         IF_ERROR("tlm_addListener1");
         fprintf(gFp, "->> MD TCP Listener1 set up\n");
-        
+
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
                           TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
-                          (UINT8*)TEST5_STRING_REQUEST, 63*1024/*strlen(TEST5_STRING_REQUEST)*/,
+                          (UINT8 *)TEST5_STRING_REQUEST, 63 * 1024 /*strlen(TEST5_STRING_REQUEST)*/,
                           srcURI, destURI2);
-        
+
         IF_ERROR("tlm_request1");
         fprintf(gFp, "->> MD TCP Request1 sent\n");
-        
+
         vos_threadDelay(2000000u);
-        
-        
+
+
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
                           TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
-                          (UINT8*)TEST5_STRING_REQUEST, 63*1024/*strlen(TEST5_STRING_REQUEST)*/,
+                          (UINT8 *)TEST5_STRING_REQUEST, 63 * 1024 /*strlen(TEST5_STRING_REQUEST)*/,
                           srcURI, destURI2);
-        
+
         IF_ERROR("tlm_request2");
         fprintf(gFp, "->> MD TCP Request2 sent\n");
-        
+
         vos_threadDelay(2000000u);
-        
-        err = tlm_delListener (appHandle2, listenHandle);
+
+        err = tlm_delListener(appHandle2, listenHandle);
         IF_ERROR("tlm_delListener2");
     }
-    
-   /* ------------------------- test code ends here --------------------------- */
+
+    /* ------------------------- test code ends here --------------------------- */
 
 
     CLEANUP;
@@ -1059,42 +1061,43 @@ static int test5 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test6 (int argc, char *argv[])
+static int test6 ()
 {
-    PREPARE("UDP MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
+    PREPARE("UDP MD Request - Reply - Confirm, #149", "test"); /* allocates appHandle1, appHandle2, failed = 0, err =
+                                                                 TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_UUID_T         sessionId1;
-        TRDP_LIS_T          listenHandle;
-        TRDP_URI_USER_T     destURI1 = "12345678901234567890123456789012";   // 32 chars
-        TRDP_URI_USER_T     destURI2 = "1234567890123456789012345678901";   // 32 chars
-        TRDP_URI_USER_T     srcURI   = "12345678901234567890123456789012";   // 32 chars
-        
+        TRDP_UUID_T sessionId1;
+        TRDP_LIS_T listenHandle;
+        TRDP_URI_USER_T destURI1    = "12345678901234567890123456789012";    /* 32 chars */
+        TRDP_URI_USER_T destURI2    = "1234567890123456789012345678901";    /* 32 chars */
+        TRDP_URI_USER_T srcURI      = "12345678901234567890123456789012";    /* 32 chars */
+
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
                               TRUE,
                               TEST5_STRING_COMID, 0u, 0u, 0u,
                               VOS_INADDR_ANY, VOS_INADDR_ANY, TRDP_FLAGS_CALLBACK, NULL, destURI1);
         IF_ERROR("tlm_addListener");
         fprintf(gFp, "->> MD Listener set up\n");
-        
+
         err = tlm_request(appHandle1, NULL, test5CBFunction, &sessionId1,
                           TEST5_STRING_COMID, 0u, 0u,
                           0u, gSession2.ifaceIP,
                           TRDP_FLAGS_CALLBACK, 1u, 1000000u, NULL,
-                          (UINT8*)TEST5_STRING_REQUEST, (UINT32) strlen(TEST5_STRING_REQUEST),
+                          (UINT8 *)TEST5_STRING_REQUEST, (UINT32) strlen(TEST5_STRING_REQUEST),
                           srcURI, destURI2);
-        
+
         IF_ERROR("tlm_request");
         fprintf(gFp, "->> MD Request sent\n");
-        
+
         vos_threadDelay(5000000u);
 
         /* Test expects to fail because of wrong destURI2, must timeout... */
         gFailed ^= gFailed;
-        
-        err = tlm_delListener (appHandle2, listenHandle);
+
+        err = tlm_delListener(appHandle2, listenHandle);
         IF_ERROR("tlm_delListener");
     }
 
@@ -1110,36 +1113,37 @@ static int test6 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test7 (int argc, char *argv[])
+static int test7 ()
 {
-    PREPARE("UDP MD Notify no sessionID #127", "test"); /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
+    PREPARE("UDP MD Notify no sessionID #127", "test"); /* allocates appHandle1, appHandle2, failed = 0, err =
+                                                          TRDP_NO_ERR */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_LIS_T          listenHandle;
-        
+        TRDP_LIS_T listenHandle;
+
         err = tlm_addListener(appHandle2, &listenHandle, NULL, test5CBFunction,
                               TRUE,
                               TEST5_STRING_COMID, 0u, 0u, 0u, VOS_INADDR_ANY, VOS_INADDR_ANY, TRDP_FLAGS_CALLBACK,
                               NULL, NULL);
         IF_ERROR("tlm_addListener");
         fprintf(gFp, "->> MD Listener set up\n");
-        
+
         err = tlm_notify(appHandle1, NULL, test5CBFunction, TEST5_STRING_COMID, 0u, 0u, 0u,
                          gSession2.ifaceIP, TRDP_FLAGS_CALLBACK, NULL,
-                         (UINT8*)TEST5_STRING_REQUEST, (UINT32) strlen(TEST5_STRING_REQUEST), NULL, NULL );
-        
-        
+                         (UINT8 *)TEST5_STRING_REQUEST, (UINT32) strlen(TEST5_STRING_REQUEST), NULL, NULL );
+
+
         IF_ERROR("tlm_notify");
         fprintf(gFp, "->> MD Request sent\n");
-        
+
         vos_threadDelay(5000000u);
-        
+
         /* Test expects to fail because of wrong destURI2, must timeout... */
         gFailed ^= gFailed;
-        
-        err = tlm_delListener (appHandle2, listenHandle);
+
+        err = tlm_delListener(appHandle2, listenHandle);
         IF_ERROR("tlm_delListener");
     }
 
@@ -1155,51 +1159,52 @@ static int test7 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test8 (int argc, char *argv[])
+static int test8 ()
 {
-    PREPARE("#153 (two PDs on one pull request? Receiver only", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("#153 (two PDs on one pull request? Receiver only", "test"); /* allocates appHandle1, appHandle2, failed =
+                                                                           0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_PUB_T      pubHandle;
-        TRDP_SUB_T      subHandle;
-        
+        TRDP_PUB_T pubHandle;
+        TRDP_SUB_T subHandle;
+
 #define TEST8_COMID     1000u
 #define TEST8_INTERVAL  100000u
 #define TEST8_DATA      "Hello World!"
 #define TEST8_DATA_LEN  16u
-        
+
         /*    Session1 Install subscriber and publisher for PULL (interval = 0).    */
-        
+
         err = tlp_subscribe(gSession1.appHandle, &subHandle, NULL, NULL,
                             TEST8_COMID, 0u, 0u,
                             0u, 0u,
                             gDestMC,                            /* MC group */
                             TRDP_FLAGS_NONE, 0, TRDP_TO_DEFAULT);
-        
-        
+
+
         IF_ERROR("tlp_subscribe");
-        
+
         err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST8_COMID, 0u, 0u,
                           0u,
                           gDestMC,                              /* Destination */
                           0u,
-                          0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8*) TEST8_DATA, TEST8_DATA_LEN);
-        
+                          0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8 *) TEST8_DATA, TEST8_DATA_LEN);
+
         IF_ERROR("tlp_publish");
-        
-        
+
+
         /*
          Enter the main processing loop.
          */
         int counter = 0;
         while (counter++ < 600)         /* 60 seconds */
         {
-            char            data2[1432u];
-            UINT32          dataSize2 = sizeof(data2);
-            TRDP_PD_INFO_T  pdInfo;
-            
+            char data2[1432u];
+            UINT32 dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T pdInfo;
+
             usleep(100000u);
 
             err = tlp_get(gSession2.appHandle, subHandle, &pdInfo, (UINT8 *) data2, &dataSize2);
@@ -1208,21 +1213,21 @@ static int test8 (int argc, char *argv[])
                 fprintf(gFp, ".");
                 continue;
             }
-            
+
             if (err == TRDP_TIMEOUT_ERR)
             {
                 fprintf(gFp, ".");
                 fflush(gFp);
                 continue;
             }
-            
+
             if (err != TRDP_NO_ERR)
             {
                 fprintf(gFp, "\n### tlp_get error: %d\n", err);
-                
+
                 gFailed = 1;
                 goto end;
-                
+
             }
             else
             {
@@ -1244,23 +1249,24 @@ static int test8 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test9 (int argc, char *argv[])
+static int test9 ()
 {
-    PREPARE("Send and receive many telegrams, to check time optimisations", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("Send and receive many telegrams, to check time optimisations", "test"); /* allocates appHandle1,
+                                                                                       appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
 #define TEST9_NO_OF_TELEGRAMS   200u
-#define TEST9_COMID     10000u
-#define TEST9_INTERVAL  100000u
-#define TEST9_TIMEOUT   (TEST9_INTERVAL * 3)
-#define TEST9_DATA      "Hello World!"
-#define TEST9_DATA_LEN  16u
+#define TEST9_COMID             10000u
+#define TEST9_INTERVAL          100000u
+#define TEST9_TIMEOUT           (TEST9_INTERVAL * 3)
+#define TEST9_DATA              "Hello World!"
+#define TEST9_DATA_LEN          16u
 
-        TRDP_PUB_T      pubHandle[TEST9_NO_OF_TELEGRAMS];
-        TRDP_SUB_T      subHandle[TEST9_NO_OF_TELEGRAMS];
-        unsigned int    i;
+        TRDP_PUB_T pubHandle[TEST9_NO_OF_TELEGRAMS];
+        TRDP_SUB_T subHandle[TEST9_NO_OF_TELEGRAMS];
+        unsigned int i;
 
         for (i = 0; i < TEST9_NO_OF_TELEGRAMS; i++)
         {
@@ -1271,14 +1277,14 @@ static int test9 (int argc, char *argv[])
                               0u,
                               gSession2.ifaceIP,                              /* Destination */
                               TEST9_INTERVAL,
-                              0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8*) TEST9_DATA, TEST9_DATA_LEN);
+                              0u, TRDP_FLAGS_DEFAULT, NULL, (UINT8 *) TEST9_DATA, TEST9_DATA_LEN);
 
             IF_ERROR("tlp_publish");
             err = tlp_subscribe(gSession2.appHandle, &subHandle[i], NULL, NULL,
-                            TEST9_COMID + i, 0u, 0u,
-                            gSession1.ifaceIP,
-                            0u, 0u,                            /* MC group */
-                            TRDP_FLAGS_NONE, TEST9_TIMEOUT, TRDP_TO_DEFAULT);
+                                TEST9_COMID + i, 0u, 0u,
+                                gSession1.ifaceIP,
+                                0u, 0u,                        /* MC group */
+                                TRDP_FLAGS_NONE, TEST9_TIMEOUT, TRDP_TO_DEFAULT);
 
 
             IF_ERROR("tlp_subscribe");
@@ -1291,11 +1297,11 @@ static int test9 (int argc, char *argv[])
          Enter the main processing loop.
          */
         int counter = 0;
-        while (counter++ < 60)         /* 60 seconds */
+        while (counter++ < 10)         /* 1 * TEST9_NO_OF_TELEGRAMS seconds -> 200s */
         {
-            char            data2[1432u];
-            UINT32          dataSize2 = sizeof(data2);
-            TRDP_PD_INFO_T  pdInfo;
+            char data2[1432u];
+            UINT32 dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T pdInfo;
 
 
             for (i = 0; i < TEST9_NO_OF_TELEGRAMS; i++)
@@ -1309,14 +1315,16 @@ static int test9 (int argc, char *argv[])
                 err = tlp_get(gSession2.appHandle, subHandle[i], &pdInfo, (UINT8 *) data2, &dataSize2);
                 if (err == TRDP_NODATA_ERR)
                 {
-                    //fprintf(gFp, ".");
+                    /* fprintf(gFp, "."); */
                     continue;
                 }
 
                 if (err == TRDP_TIMEOUT_ERR)
                 {
-                    //fprintf(gFp, ".");
-                    //fflush(gFp);
+                    /*
+                       fprintf(gFp, ".");
+                       fflush(gFp);
+                     */
                     continue;
                 }
 
@@ -1330,9 +1338,10 @@ static int test9 (int argc, char *argv[])
                 }
                 else
                 {
-                    //fprintf(gFp, "\nreceived data from pull: %s (seq: %u, size: %u)\n", data2, pdInfo.seqCount, dataSize2);
+                    /* fprintf(gFp, "\nreceived data from pull: %s (seq: %u, size: %u)\n", data2, pdInfo.seqCount,
+                       dataSize2); */
                     gFailed = 0;
-                    //goto end;
+                    /* goto end; */
                 }
             }
         }
@@ -1349,7 +1358,7 @@ static int test9 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test10 (int argc, char *argv[])
+static int test10 ()
 {
     PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
 
@@ -1372,7 +1381,7 @@ static int test10 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test11 (int argc, char *argv[])
+static int test11 ()
 {
     PREPARE("babbling idiot :-)", "-"); /* allocates appHandle1, failed = 0, err */
 
@@ -1389,10 +1398,10 @@ static int test11 (int argc, char *argv[])
      - Request ComId 1000, destination 239.0.0.10, reply ComId 1000, replyIp 172.16.4.21 */
 
     {
-        TRDP_SUB_T      pubHandle1;
-        TRDP_SUB_T      subHandle0;
-        TRDP_SUB_T      subHandle1;
-        TRDP_SUB_T      subHandle2;
+        TRDP_SUB_T pubHandle1;
+        TRDP_SUB_T subHandle0;
+        TRDP_SUB_T subHandle1;
+        TRDP_SUB_T subHandle2;
 
 #define TEST11_COMID_2000       2000u
 #define TEST11_COMID_2000_DEST  0xEF00000Au
@@ -1401,16 +1410,16 @@ static int test11 (int argc, char *argv[])
 #define TEST11_COMID_1000_DEST  0xEF00000Au
 
 
-#define TEST11_INTERVAL  100000u
-#define TEST11_DATA      "Hello World!"
-#define TEST11_DATA_LEN  24u
+#define TEST11_INTERVAL     100000u
+#define TEST11_DATA         "Hello World!"
+#define TEST11_DATA_LEN     24u
 
         err = tlp_publish(gSession2.appHandle, &pubHandle1, NULL, NULL,
                           TEST11_COMID_1000, 0u, 0u,
                           0u,
                           TEST11_COMID_1000_DEST,
                           0u, 0u, TRDP_FLAGS_DEFAULT, NULL,
-                          (UINT8*)TEST11_DATA, 12u);
+                          (UINT8 *)TEST11_DATA, 12u);
 
 
 
@@ -1418,7 +1427,7 @@ static int test11 (int argc, char *argv[])
 
         err = tlp_subscribe(gSession2.appHandle, &subHandle0, NULL, NULL,
                             TEST11_COMID_1000, 0u, 0u,
-                            0u, 0u,//gSession2.ifaceIP,                  /* Source */
+                            0u, 0u, /* gSession2.ifaceIP,                  / * Source * / */
                             TEST11_COMID_1000_DEST,                  /* Destination */
                             TRDP_FLAGS_DEFAULT, 0u, TRDP_TO_DEFAULT);
 
@@ -1427,7 +1436,7 @@ static int test11 (int argc, char *argv[])
 
         err = tlp_subscribe(gSession1.appHandle, &subHandle1, NULL, NULL,
                             TEST11_COMID_2000, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
                             TEST11_COMID_2000_DEST,                  /* Destination */
                             TRDP_FLAGS_DEFAULT, 0u, TRDP_TO_DEFAULT);
 
@@ -1436,7 +1445,7 @@ static int test11 (int argc, char *argv[])
 
         err = tlp_subscribe(gSession1.appHandle, &subHandle2, NULL, NULL,
                             TEST11_COMID_1000, 0u, 0u,
-                            0u, 0u,//TEST11_COMID_1000_SRC,             /* Source filter*/
+                            0u, 0u, /* TEST11_COMID_1000_SRC,             / * Source filter* / */
                             0u,                                     /* Destination unicast */
                             TRDP_FLAGS_DEFAULT, 0u, TRDP_TO_DEFAULT);
 
@@ -1460,7 +1469,11 @@ static int test11 (int argc, char *argv[])
             err = tlp_get(gSession1.appHandle, subHandle2, &pdInfo, buffer, &dataSize);
             if (err == TRDP_NO_ERR)
             {
-                vos_printLog(VOS_LOG_USR, "Rec. Seq: %u Typ: %c%c\n", pdInfo.seqCount, pdInfo.msgType >> 8, pdInfo.msgType & 0xFF);
+                vos_printLog(VOS_LOG_USR,
+                             "Rec. Seq: %u Typ: %c%c\n",
+                             pdInfo.seqCount,
+                             pdInfo.msgType >> 8,
+                             pdInfo.msgType & 0xFF);
                 vos_printLog(VOS_LOG_USR, "Data: %*s\n", dataSize, buffer);
                 break;
             }
@@ -1484,7 +1497,7 @@ static int test11 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static int test12 (int argc, char *argv[])
+static int test12 ()
 {
     /* allocates appHandle1, appHandle2, failed = 0, err = TRDP_NO_ERR */
     PREPARE("testing unsubscribe and unjoin", "");
@@ -1492,11 +1505,11 @@ static int test12 (int argc, char *argv[])
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_PUB_T      pubHandle;
-        TRDP_SUB_T      subHandle1;
-        TRDP_SUB_T      subHandle2;
-        TRDP_SUB_T      subHandle3;
-        TRDP_SUB_T      subHandle4;
+        TRDP_PUB_T pubHandle;
+        TRDP_SUB_T subHandle1;
+        TRDP_SUB_T subHandle2;
+        TRDP_SUB_T subHandle3;
+        TRDP_SUB_T subHandle4;
 
 #define TEST12_COMID1       10001u
 #define TEST12_COMID2       10002u
@@ -1514,7 +1527,7 @@ static int test12 (int argc, char *argv[])
         /*    Copy the packet into the internal send queue, prepare for sending.    */
 
         err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST12_COMID1, 0u, 0u,
-                          0u, //gSession1.ifaceIP,                   /* Source */
+                          0u, /* gSession1.ifaceIP,                   / * Source * / */
                           TEST12_MCDEST3,                           /* Destination */
                           TEST12_INTERVAL,
                           0u, TRDP_FLAGS_DEFAULT, NULL, NULL, TEST12_DATA_LEN);
@@ -1523,29 +1536,29 @@ static int test12 (int argc, char *argv[])
 
         err = tlp_subscribe(gSession2.appHandle, &subHandle1, NULL, NULL,
                             TEST12_COMID1, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            TEST12_MCDEST1,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            TEST12_MCDEST1, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_DEFAULT, TEST12_INTERVAL * 3, TRDP_TO_DEFAULT);
 
         IF_ERROR("tlp_subscribe1");
         err = tlp_subscribe(gSession2.appHandle, &subHandle2, NULL, NULL,
                             TEST12_COMID2, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            TEST12_MCDEST2,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            TEST12_MCDEST2, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_DEFAULT, TEST12_INTERVAL * 3, TRDP_TO_DEFAULT);
 
         IF_ERROR("tlp_subscribe2");
         err = tlp_subscribe(gSession2.appHandle, &subHandle3, NULL, NULL,
                             TEST12_COMID3, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            TEST12_MCDEST3,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            TEST12_MCDEST3, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_DEFAULT, TEST12_INTERVAL * 3, TRDP_TO_DEFAULT);
 
         IF_ERROR("tlp_subscribe3");
         err = tlp_subscribe(gSession2.appHandle, &subHandle4, NULL, NULL,
                             TEST12_COMID4, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            TEST12_MCDEST2,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            TEST12_MCDEST2, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_DEFAULT, TEST12_INTERVAL * 3, TRDP_TO_DEFAULT);
 
         IF_ERROR("tlp_subscribe4");
@@ -1556,10 +1569,10 @@ static int test12 (int argc, char *argv[])
         int counter = 0;
         while (counter < 10)         /* 1 second */
         {
-            char            data1[1432u];
-            char            data2[1432u];
-            UINT32          dataSize2 = sizeof(data2);
-            TRDP_PD_INFO_T  pdInfo;
+            char data1[1432u];
+            char data2[1432u];
+            UINT32 dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T pdInfo;
 
             sprintf(data1, "Just a Counter: %08d", counter++);
 
@@ -1609,7 +1622,9 @@ static int test12 (int argc, char *argv[])
         err = tlp_unsubscribe(gSession2.appHandle, subHandle1);
         IF_ERROR("tlp_unsubscribe1");
         FULL_LOG(FALSE);         /* switch off debug & info log */
-        vos_printLog(VOS_LOG_USR, "Check log manually whether unjoining %s occured after unsubscribing 4\n", vos_ipDotted(TEST12_MCDEST2));
+        vos_printLog(VOS_LOG_USR,
+                     "Check log manually whether unjoining %s occured after unsubscribing 4\n",
+                     vos_ipDotted(TEST12_MCDEST2));
 
     }
 
@@ -1624,41 +1639,44 @@ static int test12 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-#define TEST13_COMID     0u
-#define TEST13_INTERVAL  100000u
-#define TEST13_DATA      "Hello World!"
-#define TEST13_DATA_LEN  24u
+#define TEST13_COMID        0u
+#define TEST13_INTERVAL     100000u
+#define TEST13_DATA         "Hello World!"
+#define TEST13_DATA_LEN     24u
 
 /* Callback incrementer function */
 static void cbIncrement (
-     void                    *pRefCon,
-     TRDP_APP_SESSION_T      appHandle,
-     const TRDP_PD_INFO_T    *pMsg,
-     UINT8                   *pData,
-      INT32                  dataSize)
+    void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
+    const TRDP_PD_INFO_T    *pMsg,
+    UINT8                   *pData,
+    INT32                   dataSize)
 {
     static unsigned long counter = 0;
     if (dataSize > 18)
     {
-        sprintf((char*)pData, "Counting up: %08lu", counter++);
+        sprintf((char *)pData, "Counting up: %08lu", counter++);
     }
 }
 
-static int test13 (int argc, char *argv[])
+static int test13 ()
 {
-    PREPARE("PD publish and subscribe, auto increment using new 1.4 callback function", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+    PREPARE("PD publish and subscribe, auto increment using new 1.4 callback function", "test"); /* allocates
+                                                                                                   appHandle1,
+                                                                                                   appHandle2, failed =
+                                                                                                   0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_PUB_T      pubHandle;
-        TRDP_SUB_T      subHandle;
+        TRDP_PUB_T pubHandle;
+        TRDP_SUB_T subHandle;
 
         /*    Copy the packet into the internal send queue, prepare for sending.    */
 
         err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, (TRDP_PD_CALLBACK_T) cbIncrement, TEST13_COMID, 0u, 0u,
-                          0u, //gSession1.ifaceIP,                   /* Source */
-                          gSession2.ifaceIP,//gDestMC,               /* Destination */
+                          0u, /* gSession1.ifaceIP,                   / * Source * / */
+                          gSession2.ifaceIP, /* gDestMC,               / * Destination * / */
                           TEST13_INTERVAL,
                           0u, TRDP_FLAGS_DEFAULT, NULL, NULL, TEST13_DATA_LEN);
 
@@ -1666,8 +1684,8 @@ static int test13 (int argc, char *argv[])
 
         err = tlp_subscribe(gSession2.appHandle, &subHandle, NULL, NULL,
                             TEST13_COMID, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            0u,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            0u, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_DEFAULT, TEST13_INTERVAL * 3, TRDP_TO_DEFAULT);
 
 
@@ -1675,7 +1693,7 @@ static int test13 (int argc, char *argv[])
 
         /* We need to call put once to start the transmission! */
 
-        (void) tlp_put(gSession1.appHandle, pubHandle, (UINT8*)TEST13_DATA, TEST13_DATA_LEN);
+        (void) tlp_put(gSession1.appHandle, pubHandle, (UINT8 *)TEST13_DATA, TEST13_DATA_LEN);
 
         /*
          Enter the main processing loop.
@@ -1683,9 +1701,9 @@ static int test13 (int argc, char *argv[])
         int counter = 0;
         while (counter++ < 50)         /* 5 seconds */
         {
-            char            data2[1432u];
-            UINT32          dataSize2 = sizeof(data2);
-            TRDP_PD_INFO_T  pdInfo;
+            char data2[1432u];
+            UINT32 dataSize2 = sizeof(data2);
+            TRDP_PD_INFO_T pdInfo;
 
             vos_threadDelay(500000);
 
@@ -1702,7 +1720,7 @@ static int test13 (int argc, char *argv[])
                 vos_printLog(VOS_LOG_INFO, "### tlp_get error: %s\n", vos_getErrorString((VOS_ERR_T)err));
 
                 gFailed = 1;
-                //goto end;
+                /* goto end; */
 
             }
             else
@@ -1725,72 +1743,72 @@ static int test13 (int argc, char *argv[])
  *  @retval         0        no error
  *  @retval         1        some error
  */
-static UINT32   gTest14CBCounter = 0;
+static UINT32 gTest14CBCounter = 0;
 
 static void test14PDcallBack (
-                             void                    *pRefCon,
-                             TRDP_APP_SESSION_T      appHandle,
-                             const TRDP_PD_INFO_T    *pMsg,
-                             UINT8                   *pData,
-                             UINT32                  dataSize)
+    void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
+    const TRDP_PD_INFO_T    *pMsg,
+    UINT8                   *pData,
+    UINT32                  dataSize)
 {
-    void * pSentdata = (void*) pMsg->pUserRef;
+    void *pSentdata = (void *) pMsg->pUserRef;
 
     gTest14CBCounter++;
 
     /*    Check why we have been called    */
     switch (pMsg->resultCode)
     {
-        case TRDP_NO_ERR:
-            if ((pSentdata != NULL) && (pData != NULL) && (memcmp(pData, pSentdata, dataSize) == 0))
-            {
-                fprintf(gFp, "received data matches (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
-            }
-            else
-            {
-                fprintf(gFp, "some data received (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
-            }
-            break;
+       case TRDP_NO_ERR:
+           if ((pSentdata != NULL) && (pData != NULL) && (memcmp(pData, pSentdata, dataSize) == 0))
+           {
+               fprintf(gFp, "received data matches (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
+           }
+           else
+           {
+               fprintf(gFp, "some data received (seq: %u, size: %u)\n", pMsg->seqCount, dataSize);
+           }
+           break;
 
-        case TRDP_TIMEOUT_ERR:
-            /* The application can decide here if old data shall be invalidated or kept    */
-            fprintf(gFp, "Packet timed out (ComId %d, SrcIP: %s)\n",
-                    pMsg->comId,
-                    vos_ipDotted(pMsg->srcIpAddr));
-            break;
-        default:
-            fprintf(gFp, "Error on packet received (ComId %d), err = %d\n",
-                    pMsg->comId,
-                    pMsg->resultCode);
-            break;
+       case TRDP_TIMEOUT_ERR:
+           /* The application can decide here if old data shall be invalidated or kept    */
+           fprintf(gFp, "Packet timed out (ComId %d, SrcIP: %s)\n",
+                   pMsg->comId,
+                   vos_ipDotted(pMsg->srcIpAddr));
+           break;
+       default:
+           fprintf(gFp, "Error on packet received (ComId %d), err = %d\n",
+                   pMsg->comId,
+                   pMsg->resultCode);
+           break;
     }
 }
 
-static int test14 (int argc, char *argv[])
+static int test14 ()
 {
     PREPARE("Publish & Subscribe, Callback", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
 
     /* ------------------------- test code starts here --------------------------- */
 
     {
-        TRDP_PUB_T      pubHandle;
-        TRDP_SUB_T      subHandle;
-        char            data1[1432u];
+        TRDP_PUB_T pubHandle;
+        TRDP_SUB_T subHandle;
+        char data1[1432u];
 
         gTest14CBCounter = 0;
 
-#define TEST14_COMID     1000u
-#define TEST14_INTERVAL  100000u
-#define TEST14_DATA      "Hello World!"
+#define TEST14_COMID        1000u
+#define TEST14_INTERVAL     100000u
+#define TEST14_DATA         "Hello World!"
 
-#define TEST14_LOOP      TEST14_INTERVAL
-#define TEST14_WAIT      600000u
+#define TEST14_LOOP         TEST14_INTERVAL
+#define TEST14_WAIT         600000u
 
         /*    Copy the packet into the internal send queue, prepare for sending.    */
 
         err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST14_COMID, 0u, 0u,
-                          0u, //gSession1.ifaceIP,                   /* Source */
-                          gSession2.ifaceIP,//gDestMC,               /* Destination */
+                          0u, /* gSession1.ifaceIP,                   / * Source * / */
+                          gSession2.ifaceIP, /* gDestMC,               / * Destination * / */
                           TEST14_INTERVAL,
                           0u, TRDP_FLAGS_DEFAULT, NULL, NULL, 0u);
 
@@ -1798,8 +1816,8 @@ static int test14 (int argc, char *argv[])
 
         err = tlp_subscribe(gSession2.appHandle, &subHandle, data1, test14PDcallBack,
                             TEST14_COMID, 0u, 0u,
-                            0u, 0u,//gSession1.ifaceIP,                  /* Source */
-                            0u,//gDestMC,                            /* Destination */
+                            0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
+                            0u, /* gDestMC,                            / * Destination * / */
                             TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB, TEST14_INTERVAL * 3, TRDP_TO_DEFAULT);
 
 
@@ -1824,7 +1842,168 @@ static int test14 (int argc, char *argv[])
         /* test if no of callbacks equals no of sent packets (bug report Bryce Jensen) */
         /* wait a bit */
         vos_threadDelay(TEST14_WAIT);
-        fprintf(gFp, "%u max. expected, %u callbacks received\n", (counter * TEST14_LOOP + TEST14_WAIT)/ TEST14_INTERVAL, gTest14CBCounter);
+        fprintf(gFp,
+                "%u max. expected, %u callbacks received\n",
+                (counter * TEST14_LOOP + TEST14_WAIT) / TEST14_INTERVAL,
+                gTest14CBCounter);
+    }
+
+    /* ------------------------- test code ends here --------------------------- */
+
+
+    CLEANUP;
+}
+
+/**********************************************************************************************************************/
+/** test15 MD Request - Reply / Reuse of TCP connection
+ *
+ *  @retval         0        no error
+ *  @retval         1        some error
+ */
+
+#define                 TEST15_STRING_COMID     1000u
+#define                 TEST15_STRING_REQUEST   (char *)&dataBuffer1  /* "Requesting data" */
+#define                 TEST15_STRING_REPLY     (char *)&dataBuffer2  /* "Data transmission succeded" */
+
+static void  test15CBFunction (
+    void                    *pRefCon,
+    TRDP_APP_SESSION_T      appHandle,
+    const TRDP_MD_INFO_T    *pMsg,
+    UINT8                   *pData,
+    UINT32                  dataSize)
+{
+    TRDP_ERR_T err;
+    TRDP_URI_USER_T srcURI = "12345678901234567890123456789012";    /* 32 chars */
+
+    if (pMsg->resultCode == TRDP_REPLYTO_ERR)
+    {
+        fprintf(gFp, "->> Reply timed out (ComId %u)\n", pMsg->comId);
+        gFailed = 1;
+    }
+    else if ((pMsg->msgType == TRDP_MSG_MR) &&
+             (pMsg->comId == TEST15_STRING_COMID))
+    {
+        if (pMsg->resultCode == TRDP_TIMEOUT_ERR)
+        {
+            fprintf(gFp, "->> Request timed out (ComId %u)\n", pMsg->comId);
+            gFailed = 1;
+        }
+        else
+        {
+            /* fprintf(gFp, "->> Request received (%s)\n", pData); */
+            if (memcmp(srcURI, pMsg->srcUserURI, 32u) != 0)
+            {
+                gFailed = 1;
+                fprintf(gFp, "## srcUserURI wrong\n");
+            }
+            fprintf(gFp, "->> Sending reply\n");
+            err = tlm_replyQuery(appHandle, &pMsg->sessionId, TEST15_STRING_COMID, 0u, 500000u, NULL,
+                                 (UINT8 *)TEST15_STRING_REPLY, 63 * 1024 /*strlen(TEST5_STRING_REPLY)*/);
+
+            IF_ERROR("tlm_reply");
+        }
+    }
+    else if ((pMsg->msgType == TRDP_MSG_MQ) &&
+             (pMsg->comId == TEST15_STRING_COMID))
+    {
+        fprintf(gFp, "->> Reply received (%.80s...)\n", pData);
+        fprintf(gFp, "->> Sending confirmation\n");
+        err = tlm_confirm(appHandle, &pMsg->sessionId, 0u, NULL);
+
+        IF_ERROR("tlm_confirm");
+    }
+    else if (pMsg->msgType == TRDP_MSG_MC)
+    {
+        fprintf(gFp, "->> Confirmation received (status = %u)\n", pMsg->userStatus);
+    }
+    else if ((pMsg->msgType == TRDP_MSG_MN) &&
+             (pMsg->comId == TEST15_STRING_COMID))
+    {
+        if (strlen((char *)pMsg->sessionId) > 0)
+        {
+            gFailed = 1;
+            fprintf(gFp, "#### ->> Notification received, sessionID = %16s\n", pMsg->sessionId);
+        }
+        else
+        {
+            gFailed = 0;
+            fprintf(gFp, "->> Notification received, sessionID == 0\n");
+        }
+    }
+    else
+    {
+        fprintf(gFp, "->> Unsolicited Message received (type = %0xhx)\n", pMsg->msgType);
+        gFailed = 1;
+    }
+end:
+    return;
+}
+
+static int test15 ()
+{
+    PREPARE("TCP MD Request - Reply - Confirm, #206", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+
+    /* ------------------------- test code starts here --------------------------- */
+
+    {
+        int i;
+        TRDP_UUID_T sessionId1;
+        TRDP_LIS_T listenHandle;
+        TRDP_URI_USER_T destURI1    = "12345678901234567890123456789012";    /* 32 chars */
+        TRDP_URI_USER_T destURI2    = "12345678901234567890123456789012";    /* 32 chars */
+        TRDP_URI_USER_T srcURI      = "12345678901234567890123456789012";    /* 32 chars */
+
+        gFullLog = TRUE;
+
+        err = tlm_addListener(appHandle2, &listenHandle, NULL, test15CBFunction,
+                              TRUE,
+                              TEST5_STRING_COMID, 0u, 0u, 0u,
+                              VOS_INADDR_ANY, VOS_INADDR_ANY,
+                              TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, NULL, destURI1);
+        IF_ERROR("tlm_addListener1");
+        fprintf(gFp, "->> MD TCP Listener1 set up\n");
+
+        /* try to connect (request) some data */
+        for (i = 0; i < 10; i++)
+        {
+            err = tlm_request(appHandle1, NULL, test15CBFunction, &sessionId1,
+                              TEST5_STRING_COMID, 0u, 0u,
+                              0u, gSession2.ifaceIP,
+                              TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
+                              (UINT8 *)TEST5_STRING_REQUEST, 63 * 1024 /*strlen(TEST5_STRING_REQUEST)*/,
+                              srcURI, destURI2);
+
+            IF_ERROR("tlm_request1");
+            fprintf(gFp, "->> MD TCP Request1 sent\n");
+
+            vos_threadDelay(500000u);
+        }
+
+        fprintf(gFp, "Waiting for connection close... \n");
+        /* Wait until listener connection times out */
+        vos_threadDelay(6000000u);
+
+        /* now try to connect again */
+        for (i = 0; i < 10; i++)
+        {
+            err = tlm_request(appHandle1, NULL, test15CBFunction, &sessionId1,
+                              TEST5_STRING_COMID, 0u, 0u,
+                              0u, gSession2.ifaceIP,
+                              TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
+                              (UINT8 *)TEST5_STRING_REQUEST, 63 * 1024 /*strlen(TEST5_STRING_REQUEST)*/,
+                              srcURI, destURI2);
+
+            IF_ERROR("tlm_request2");
+            fprintf(gFp, "->> MD TCP Request2 sent\n");
+
+            vos_threadDelay(500000u);
+        }
+
+        err = tlm_delListener(appHandle2, listenHandle);
+        IF_ERROR("tlm_delListener2");
+
+        gFullLog = FALSE;
+
     }
 
     /* ------------------------- test code ends here --------------------------- */
@@ -1849,13 +2028,16 @@ test_func_t *testArray[] =
     test5,
     test6,
     test7,
-    test8,
-    test9,
+    /*
+       test8,
+       test9,
+     */
     test10,
     test11,
     test12,
     test13,
     test14,
+    test15,
     NULL
 };
 
@@ -1869,9 +2051,9 @@ test_func_t *testArray[] =
  */
 int main (int argc, char *argv[])
 {
-    int             ch;
-    unsigned int    ip[4];
-    UINT32          testNo = 0;
+    int ch;
+    unsigned int ip[4];
+    UINT32 testNo = 0;
 
     if (gFp == NULL)
     {
@@ -1883,60 +2065,60 @@ int main (int argc, char *argv[])
     {
         switch (ch)
         {
-            case 'o':
-            {   /*  read primary ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                gSession1.ifaceIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'i':
-            {   /*  read alternate ip    */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                gSession2.ifaceIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 't':
-            {   /*  read target ip (MC)   */
-                if (sscanf(optarg, "%u.%u.%u.%u",
-                           &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                gDestMC = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
-                break;
-            }
-            case 'm':
-            {   /*  read test number    */
-                if (sscanf(optarg, "%u",
-                           &testNo) < 1)
-                {
-                    usage(argv[0]);
-                    exit(1);
-                }
-                break;
-            }
-            case 'v':   /*  version */
-                printf("%s: Version %s\t(%s - %s)\n",
-                       argv[0], APP_VERSION, __DATE__, __TIME__);
-                printf("No. of tests: %lu\n", sizeof(testArray) / sizeof(void *) - 2);
-                exit(0);
-                break;
-            case 'h':
-            case '?':
-            default:
-                usage(argv[0]);
-                return 1;
+           case 'o':
+           {    /*  read primary ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               gSession1.ifaceIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'i':
+           {    /*  read alternate ip    */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               gSession2.ifaceIP = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 't':
+           {    /*  read target ip (MC)   */
+               if (sscanf(optarg, "%u.%u.%u.%u",
+                          &ip[3], &ip[2], &ip[1], &ip[0]) < 4)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               gDestMC = (ip[3] << 24) | (ip[2] << 16) | (ip[1] << 8) | ip[0];
+               break;
+           }
+           case 'm':
+           {    /*  read test number    */
+               if (sscanf(optarg, "%u",
+                          &testNo) < 1)
+               {
+                   usage(argv[0]);
+                   exit(1);
+               }
+               break;
+           }
+           case 'v':    /*  version */
+               printf("%s: Version %s\t(%s - %s)\n",
+                      argv[0], APP_VERSION, __DATE__, __TIME__);
+               printf("No. of tests: %lu\n", sizeof(testArray) / sizeof(void *) - 2);
+               exit(0);
+               break;
+           case 'h':
+           case '?':
+           default:
+               usage(argv[0]);
+               return 1;
         }
     }
 
@@ -1953,7 +2135,7 @@ int main (int argc, char *argv[])
             int i, ret = 0;
             for (i = 1; testArray[i] != NULL; ++i)
             {
-                ret += testArray[i](argc, argv);
+                ret += testArray[i]();
             }
             if (ret == 0)
             {
@@ -1967,5 +2149,5 @@ int main (int argc, char *argv[])
         }
     }
 
-    return testArray[testNo](argc, argv);
+    return testArray[testNo]();
 }
