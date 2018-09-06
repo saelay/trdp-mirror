@@ -72,7 +72,7 @@ typedef struct sSessionData
     UINT32              sDataSize;
 } SESSION_DATA_T;
 
-SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE, 0};
+SESSION_DATA_T  sSessionData = {FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, MD_COMID1, NULL, NULL, NULL, TRUE, 0u};
 
 UINT32          ownIP = 0u;
 

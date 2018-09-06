@@ -137,7 +137,7 @@ int main (int argc, char *argv[])
     /*    Generate some data, that we want to send, when nothing was specified. */
     UINT8                   *outputBuffer;
     UINT8                   exampleData[DATA_MAX]   = "Hello World";
-    UINT32                  outputBufferSize        = 32u;
+    UINT32                  outputBufferSize        = 24u;
 
     UINT8                   data[DATA_MAX];
     int ch;
@@ -357,7 +357,7 @@ int main (int argc, char *argv[])
             fflush(stdout);
         }
 
-        if (outputBuffer != NULL && strlen((char *)outputBuffer) == 0)
+        if (outputBuffer != NULL && strlen((char *)outputBuffer) != 0)
         {
             sprintf((char *)outputBuffer, "Just a Counter: %08d", hugeCounter++);
             outputBufferSize = (UINT32) strlen((char *)outputBuffer);

@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2018-04-27: Testing ticket #197
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  */
@@ -33,12 +34,12 @@ TRDP_DATASET_T  gDataSet1990 =
         {
             TRDP_UINT8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_CHAR8,
             16,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };
@@ -52,12 +53,12 @@ TRDP_DATASET_T  gDataSet1991 =
         {
             TRDP_UINT8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             1990,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };
@@ -71,12 +72,12 @@ TRDP_DATASET_T  gDataSet1992 =
         {
             TRDP_UINT8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             1991,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };
@@ -90,12 +91,12 @@ TRDP_DATASET_T  gDataSet1993 =
         {
             TRDP_UINT8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             1992,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };
@@ -109,327 +110,327 @@ TRDP_DATASET_T  gDataSet1000 =
         {
             TRDP_BOOL8,         /*    data type         */
             1,                  /*    no of elements    */
-            0,0,0,NULL          /*    cache             */
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 1 */
         {
             TRDP_CHAR8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 2 */
         {
             TRDP_UTF16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 4 */
         {
             TRDP_INT8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 5 */
         {
             TRDP_INT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 7 */
         {
             TRDP_INT32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 11 */
         {
             TRDP_INT64,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 19 */
         {
             TRDP_UINT8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 20 */
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 22 */
         {
             TRDP_UINT32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 26 */
         {
             TRDP_UINT64,    /* 10    */
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 34 */
         {
             TRDP_REAL32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 38 */
         {
             TRDP_REAL64,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 46 */
         {
             TRDP_TIMEDATE32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 50 */
         {
             TRDP_TIMEDATE48,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 56 */
         {
             TRDP_TIMEDATE64,        /* 15    */
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 64 */
         {    /* 16    */
             TRDP_BOOL8,         /*    data type        */
             4,                  /*    no of elements    */
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 68 */
         {
             TRDP_CHAR8,
             16,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 84 */
         {
             TRDP_UTF16,
             16,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 116 */
         {
             TRDP_INT8,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 120 */
         {
             TRDP_INT16,    /* 20    */
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 128 */
         {
             TRDP_INT32,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 144 */
         {
             TRDP_INT64,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 176 */
         {
             TRDP_UINT8,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 180 */
         {
             TRDP_UINT16,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 188 */
         {
             TRDP_UINT32,        /* 25    */
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 204 */
         {
             TRDP_UINT64,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 236 */
         {
             TRDP_REAL32,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 252 */
         {
             TRDP_REAL64,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 284 */
         {
             TRDP_TIMEDATE32,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 300 */
         {
             TRDP_TIMEDATE48,    /* 30    */
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 324 */
         {
             TRDP_TIMEDATE64,
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 356 */
         {
             TRDP_UINT16,    /* 32    */
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 358 */
         {
             TRDP_BOOL8,   /*    data type        */
             0,               /*    no of elements    */
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },                      /* size = 362 for current test! */
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_CHAR8,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UTF16,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_INT8,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_INT16,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_INT32,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_INT64,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT8,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT32,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT64,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_REAL32,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_REAL64,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_TIMEDATE32,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_TIMEDATE48,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_TIMEDATE64,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             1993,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };
@@ -443,17 +444,17 @@ TRDP_DATASET_T  gDataSet1001 =
         {
             TRDP_TIMEDATE64,    /*    Array    */
             4,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT16,        /*    Size of variable dataset    */
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_UINT8,
             0,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };
@@ -467,17 +468,17 @@ TRDP_DATASET_T  gDataSet2002 =
         {
             TRDP_CHAR8,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_INT32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_INT32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };
@@ -491,17 +492,17 @@ TRDP_DATASET_T  gDataSet2003 =
         {
             TRDP_UINT32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             TRDP_CHAR8, //TRDP_INT32,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         },
         {
             2002,
             1,
-            0,0,0,NULL
+            NULL, NULL, 0, 0, NULL
         }
     }
 };

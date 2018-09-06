@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-01-30: Ticket #189 timeout-value not parsed in tau_xml
  *      BL 2017-06-08: Compiler warning (unused dbgPrint)
@@ -84,7 +85,7 @@ static TRDP_DATA_TYPE_T string2type (const CHAR8 *pTypeStr)
         "01 BITSET8 01 BOOL8 01 ANTIVALENT8 02 CHAR8 02 UTF8 03 UTF16 04 INT8 05 INT16 06 INT32 07 INT64 08 UINT8"
         " 09 UINT16 10 UINT32 11 UINT64 12 REAL32 13 REAL64 14 TIMEDATE32 15 TIMEDATE48 16 TIMEDATE64";
 
-    p = (CHAR8*) strstr(tokenList, pTypeStr);
+    p = (CHAR8 *) strstr(tokenList, pTypeStr);
     if (p != NULL)
     {
         return (TRDP_DATA_TYPE_T) strtol(p - 3u, NULL, 10);
@@ -842,6 +843,15 @@ static TRDP_ERR_T readXmlDatasets (
                                 return TRDP_MEM_ERR;
                             }
                             vos_strncpy((*papDataset)[idx]->pElement[i].unit, value, (UINT32) strlen(value) + 1u);
+                        }
+                        else if (vos_strnicmp(attribute, "name", MAX_TOK_LEN) == 0)
+                        {
+                            (*papDataset)[idx]->pElement[i].name = (CHAR8 *) vos_memAlloc((UINT32) strlen(value) + 1u);
+                            if ((*papDataset)[idx]->pElement[i].name == NULL)
+                            {
+                                return TRDP_MEM_ERR;
+                            }
+                            vos_strncpy((*papDataset)[idx]->pElement[i].name, value, (UINT32) strlen(value) + 1u);
                         }
                         else if (vos_strnicmp(attribute, "scale", MAX_TOK_LEN) == 0)
                         {
@@ -1618,6 +1628,7 @@ EXT_DECL void tau_freeXmlDatasetConfig (
     if (numComId > 0u && pComIdDsIdMap != NULL)
     {
         vos_memFree(pComIdDsIdMap);
+        pComIdDsIdMap = NULL;
     }
 
     /*  Dataset definitions   */
@@ -1630,10 +1641,18 @@ EXT_DECL void tau_freeXmlDatasetConfig (
                 if (ppDataset[i]->pElement[j].unit != NULL)
                 {
                     vos_memFree(ppDataset[i]->pElement[j].unit);
+                    ppDataset[i]->pElement[j].unit = NULL;
+                }
+                if (ppDataset[i]->pElement[j].name != NULL)
+                {
+                    vos_memFree(ppDataset[i]->pElement[j].name);
+                    ppDataset[i]->pElement[j].name = NULL;
                 }
             }
             vos_memFree(ppDataset[i]);
+            ppDataset[i] = NULL;
         }
         vos_memFree(ppDataset);
+        ppDataset = NULL;
     }
 }
