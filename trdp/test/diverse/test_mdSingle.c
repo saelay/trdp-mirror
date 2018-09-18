@@ -121,9 +121,10 @@ void mdCallback (void *,
 /* Print wait message */
 void printSelParams(int noDesc, VOS_FDS_T *pReadableFD, VOS_TIMEVAL_T   *pTimeOut)
 {
+    int i;
     char myStr[256] = "";
     char *pStr = myStr;
-    for (int i = 0; i < noDesc; i++)
+    for (i = 0; i < noDesc; i++)
     {
         if (FD_ISSET(i, pReadableFD))
         {
@@ -516,11 +517,13 @@ int main (int argc, char *argv[])
     /*  Output available interfaces (in debug output)  */
     {
         UINT32 availableIfaces = MAX_IF;
+        int i;
+
         if (vos_getInterfaces(&availableIfaces, interfaces) == VOS_NO_ERR)
         {
             vos_printLog(VOS_LOG_USR, "%u IP interfaces found\n", availableIfaces);
         }
-        for (int i = 0; i < availableIfaces; i++)
+        for (i = 0; i < availableIfaces; i++)
         {
             if (interfaces[i].ipAddr == ownIP)
             {
