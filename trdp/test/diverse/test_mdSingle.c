@@ -118,6 +118,23 @@ void mdCallback (void *,
                  UINT32 );
 
 /**********************************************************************************************************************/
+/* Print wait message */
+void printSelParams(int noDesc, VOS_FDS_T *pReadableFD, VOS_TIMEVAL_T   *pTimeOut)
+{
+    char myStr[256] = "";
+    char *pStr = myStr;
+    for (int i = 0; i < noDesc; i++)
+    {
+        if (FD_ISSET(i, pReadableFD))
+        {
+            sprintf(pStr, "%d ", i);
+            pStr += strlen(pStr);
+        }
+    }
+    vos_printLog(VOS_LOG_USR, "Waiting for sockets %s and/or timeout %ld.%d\n", myStr, pTimeOut->tv_sec, pTimeOut->tv_usec * 1000);
+}
+
+/**********************************************************************************************************************/
 /* Print a sensible usage message */
 void usage (const char *appName)
 {
@@ -503,10 +520,17 @@ int main (int argc, char *argv[])
         {
             vos_printLog(VOS_LOG_USR, "%u IP interfaces found\n", availableIfaces);
         }
+        for (int i = 0; i < availableIfaces; i++)
+        {
+            if (interfaces[i].ipAddr == ownIP)
+            {
+                /*    Open a session  */
+                vos_printLog(VOS_LOG_USR, "opening session on %s\n", interfaces[i].name);
+                break;
+            }
+        }
     }
 
-    /*    Open a session  */
-    vos_printLogStr(VOS_LOG_USR, "opening session...\n");
     if (tlc_openSession(&sSessionData.appHandle,
                         ownIP,
                         0,                         /* use default IP address    */
@@ -590,7 +614,7 @@ int main (int argc, char *argv[])
                 what ever comes first.
             */
             rv = vos_select((int)noDesc + 1, &rfds, NULL, NULL, &tv);
-            /* vos_printLog(VOS_LOG_USR, "descriptors ready: 0x%04x\n", rfds.fds_bits[0]); */
+            /* vos_printLog(VOS_LOG_USR, "%d descriptors ready: 0x%04x\n", rv, rfds.fds_bits[0]); */
             (void) tlc_process(sSessionData.appHandle, (TRDP_FDS_T *) &rfds, &rv);
         }
         else
