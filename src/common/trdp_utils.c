@@ -84,14 +84,13 @@ static void printSocketUsage (
         {
             continue;
         }
-        vos_printLog(VOS_LOG_DBG, "iface[%u].sock = %d\n", lIndex, (int) iface[lIndex].sock);
-        vos_printLog(VOS_LOG_DBG, "iface[%u].bindAddr = %x\n", lIndex, iface[lIndex].bindAddr);
-        vos_printLog(VOS_LOG_DBG, "iface[%u].type = %s \n", lIndex, (iface[lIndex].type == 0 ? "PD_UDP" :
+        vos_printLog(VOS_LOG_DBG, "iface[%d].sock = %d\n", lIndex, (int) iface[lIndex].sock);
+        vos_printLog(VOS_LOG_DBG, "iface[%d].bindAddr = %x\n", lIndex, iface[lIndex].bindAddr);
+        vos_printLog(VOS_LOG_DBG, "iface[%d].type = %s \n", lIndex, (iface[lIndex].type == 0 ? "PD_UDP" :
                                                                      (iface[lIndex].type == 1 ? "MD_UDP" : "MD_TCP")));
-        vos_printLog(VOS_LOG_DBG, "iface[%u].sendParam.qos = %u\n", lIndex, iface[lIndex].sendParam.qos);
-        vos_printLog(VOS_LOG_DBG, "iface[%u].sendParam.ttl = %u\n", lIndex, iface[lIndex].sendParam.ttl);
-        vos_printLog(VOS_LOG_DBG, "iface[%u].rcvMostly = %u\n", lIndex, iface[lIndex].rcvMostly);
-        vos_printLog(VOS_LOG_DBG, "iface[%u].usage = %d\n", lIndex, iface[lIndex].usage);
+        vos_printLog(VOS_LOG_DBG, "iface[%d].sendParam.qos = %u, ttl = %u\n", lIndex, (unsigned) iface[lIndex].sendParam.qos, (unsigned) iface[lIndex].sendParam.ttl);
+        vos_printLog(VOS_LOG_DBG, "iface[%d].rcvMostly = %u\n", lIndex, (unsigned) iface[lIndex].rcvMostly);
+        vos_printLog(VOS_LOG_DBG, "iface[%d].usage = %d\n", lIndex, iface[lIndex].usage);
     }
     vos_printLogStr(VOS_LOG_DBG, "----------------------------\n\n");
 }

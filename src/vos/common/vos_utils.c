@@ -489,12 +489,11 @@ UINT32 vos_crc32 (
 
 /**********************************************************************************************************************/
 /** Compute crc32 according to IEC 61375-2-3 B.7
- *  Note: Returned CRC is inverted
  *
  *  @param[in]          crc         Initial value.
  *  @param[in,out]      pData       Pointer to data.
  *  @param[in]          dataLen     length in bytes of data.
- *  @retval             crc32 according to IEC 61375-2-3
+ *  @retval             sc32 according to IEC 61375-2-3
  */
 
 UINT32 vos_sc32 (
