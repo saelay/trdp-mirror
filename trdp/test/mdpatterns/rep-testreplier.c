@@ -66,7 +66,7 @@ static char               dataMQ[0x1000];
 static char               dataMP[0x1000];
 
 /* --- debug log --------------------------------------------------------------- */
-#ifdef _WIN32
+#if (defined (WIN32) || defined (WIN64))
 static FILE *pLogFile;
 #endif
 
@@ -74,7 +74,7 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
                 const CHAR8 *pFile, UINT16 line, const CHAR8 *pMsgStr)
 {
     static const char *cat[] = { "ERR", "WAR", "INF", "DBG" };
-#ifdef _WIN32
+#if (defined (WIN32) || defined (WIN64))
     if (pLogFile == NULL)
     {
         char        buf[1024];

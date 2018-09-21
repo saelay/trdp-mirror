@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef _WIN32
+#if (defined (WIN32) || defined (WIN64))
 #include <winsock2.h>
 #endif
 #include "vos_sock.h"

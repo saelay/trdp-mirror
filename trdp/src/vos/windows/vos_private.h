@@ -26,10 +26,10 @@
  * INCLUDES
  */
 
-#ifndef _WIN64
-#include <pthread.h>
-#else
+#if (defined (WIN32) || defined (WIN64))
 #include <WinBase.h>
+#else
+#include <pthread.h>
 #endif
 
 #include "vos_types.h"
@@ -48,7 +48,7 @@ extern "C" {
 #define VOS_UPDATE             0u
 #define VOS_EVOLUTION          0u
 
-#ifdef _WIN64
+#if (defined (WIN32) || defined (WIN64))
 
 #define MAX_SEM_COUNT           10
 

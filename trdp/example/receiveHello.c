@@ -27,7 +27,7 @@
 #if defined (POSIX)
 #include <unistd.h>
 #include <sys/select.h>
-#elif defined (WIN32)
+#elif (defined (WIN32) || defined (WIN64))
 #include "getopt.h"
 #endif
 

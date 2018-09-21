@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#if defined (_WIN32)
+#if (defined (WIN32) || defined (WIN64))
 #pragma warning (disable: 4200)
 #endif
 
@@ -310,7 +310,7 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
     {
         /* return; */
     }
-#ifdef _WIN32
+#if (defined (WIN32) || defined (WIN64))
     if (pLogFile == NULL)
     {
         char        buf[1024];
@@ -338,7 +338,7 @@ void print_log (void *pRefCon, VOS_LOG_T category, const CHAR8 *pTime,
 
 /* --- platform helper functions ----------------------------------------------- */
 
-#if defined (WIN32)
+#if (defined (WIN32) || defined (WIN64))
 
 void _set_color_red ()
 {
@@ -369,7 +369,7 @@ void _sleep_msec (int msec)
     Sleep(msec);
 }
 
-#ifndef WIN32
+#if (!defined (WIN32) && !defined (WIN64))
 int snprintf (char *str, size_t size, const char *format, ...)
 {
     va_list args;

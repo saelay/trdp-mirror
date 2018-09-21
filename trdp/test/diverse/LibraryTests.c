@@ -22,7 +22,7 @@
  */
 
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 // include also stuff, needed for window
 //#include "stdafx.h"
 #include <winsock2.h>

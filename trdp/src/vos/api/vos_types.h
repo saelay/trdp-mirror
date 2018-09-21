@@ -41,7 +41,7 @@ extern "C" {
  * DEFINES
  */
 
-#if defined(WIN32)
+#if (defined (WIN32) || defined (WIN64))
 
 #include <stdint.h>
 
@@ -121,7 +121,7 @@ typedef double REAL64;
 #endif
 
 /*    Special handling for Windows DLLs    */
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
     #ifdef DLL_EXPORT
         #define EXT_DECL    __declspec(dllexport)
     #elif DLL_IMPORT
@@ -135,7 +135,7 @@ typedef double REAL64;
 
 /** inline macros  */
 #ifndef INLINE
-    #ifdef WIN32
+    #if (defined (WIN32) || defined (WIN64))
         #define INLINE  _inline
     #elif defined (VXWORKS)
         #define INLINE  __inline__

@@ -54,7 +54,7 @@ extern "C" {
 /** Timeout value to wait forever for a semaphore */
 #define VOS_SEMA_WAIT_FOREVER  0xFFFFFFFFU
 
-#ifdef WIN32
+#if (defined(WIN32) || defined(WIN64))
 #include <winsock2.h>
 #else
 #ifndef timerisset

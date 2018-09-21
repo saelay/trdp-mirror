@@ -21,7 +21,7 @@
 /***********************************************************************************************************************
  * INCLUDES
  */
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #ifdef DLL_EXPORT
 
 #define WIN32_LEAN_AND_MEAN

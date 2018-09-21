@@ -25,9 +25,9 @@
 * INCLUDES
 */
 
-#ifndef WIN32
+#if (!defined (WIN32) && !defined (WIN64))
 #error \
-    "You are trying to compile the WIN32 implementation of vos_shared_mem.c - either define WIN32 or exclude this file!"
+    "You are trying to compile the Windows implementation of vos_shared_mem.c - either define WIN32 or WIN64 or exclude this file!"
 #endif
 
 #include <stdio.h>

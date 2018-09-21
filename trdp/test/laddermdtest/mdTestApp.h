@@ -87,11 +87,6 @@ extern "C" {
 /* MD Request (Mr) sessionId(UUID) Table Size Max */
 #define REQUEST_SESSIONID_TABLE_MAX				1000
 
-/* Convert into IP address from number */
-#define TRDP_IP4_ADDR(a,b,c,d) ( (am_big_endian()) ? \
-	((UINT32)((d) & 0xFF) << 24) | ((UINT32)((c) & 0xFF) << 16) | ((UINT32)((b) & 0xFF) << 8) | ((UINT32)((a) & 0xFF)) : \
-	((UINT32)((a) & 0xFF) << 24) | ((UINT32)((b) & 0xFF) << 16) | ((UINT32)((c) & 0xFF) << 8) | ((UINT32)((d) & 0xFF)))
-
 /* MD Transfer Request ComId */
 #define COMID_INCREMENT_DATA		0x200006
 #define COMID_FIXED_DATA1			0x200001		/* Single Packet */

@@ -47,12 +47,6 @@
 #include <pthread.h>
 #endif
 
-#ifdef WIN32
-#ifndef _WIN64
-#include <pthread.h>
-#endif
-#endif
-
 #ifdef ESP32
 #include <pthread.h>
 #endif
@@ -715,7 +709,7 @@ EXT_DECL INT32 vos_strnicmp (
     const CHAR8 *pStr2,
     UINT32      count )
 {
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
     return (INT32) _strnicmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
 #else
     return (INT32) strncasecmp((const char *)pStr1, (const char *)pStr2, (size_t) count);
@@ -738,7 +732,7 @@ EXT_DECL void vos_strncpy (
     const CHAR8 *pStrSrc,
     UINT32      count )
 {
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
     CHAR8 character = pStrDst[count];
     (void) strncpy_s((char *)pStrDst, (size_t)(count + 1), (const char *)pStrSrc, (size_t) count);
     pStrDst[count] = character;
@@ -762,7 +756,7 @@ EXT_DECL void vos_strncat (
     UINT32      count,
     const CHAR8 *pStrSrc)
 {
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
     (void) strcat_s((char *)pStrDst, (size_t) count, (const char *)pStrSrc);
 #else
     (void) strncat((char *)pStrDst, (const char *)pStrSrc, (size_t) count); /*lint !e920: return value not used */

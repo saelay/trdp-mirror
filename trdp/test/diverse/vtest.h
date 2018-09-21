@@ -28,16 +28,26 @@
 #define OUTPUT_DETAILS OUTPUT_FULL
 #define N_ITERATIONS 1
 
-#define printOut(lvl,format, args...) {if (lvl <= OUTPUT_DETAILS) \
-    {(void) printf(format, ## args);}};
+#if (defined (WIN32) || defined (WIN64))
+#define printOut(lvl, format, ...) \
+    { if (lvl <= OUTPUT_DETAILS) \
+    { (void) printf(format, __VA_ARGS__);}};
+#elif defined(__clang__)
+#define vos_snprintf(str, size, format, ...) \
+    { if (lvl <= OUTPUT_DETAILS) \
+    { (void) printf(format, __VA_ARGS__);}};
+#else
+#define vos_snprintf(lvl, format, args ...) \
+    { if (lvl <= OUTPUT_DETAILS) \
+    { (void) printf(format, ## args);}};    /*lint !e586 logging output needed */
+#endif
 
 #define IF_IP "53.191.121.40"
 #define DEST_IP "53.191.121.73"
 #define MC_IP "238.0.0.1"
 #define MC_IF "53.191.121.40"
-#define PORT_PD 20548
-#define PORT_MD 20550
-#ifdef WIN32
+
+#if (defined (WIN32) || defined (WIN64))
     #define THREAD_POLICY VOS_THREAD_POLICY_OTHER
 #endif
 #ifdef VXWORKS
@@ -137,7 +147,7 @@ typedef struct arg_struct_thread {
     VOS_SEMA_T queueSema;
     VOS_SEMA_T printSema;
     VOS_SEMA_T helpSema;
-    struct timespec delay;
+	VOS_TIMEVAL_T delay;
     VOS_ERR_T result;
 }TEST_ARGS_THREAD;
 

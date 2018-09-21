@@ -42,7 +42,7 @@ extern "C" {
  * TYPEDEFS
  */
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(push, 1)
 #endif
 
@@ -111,7 +111,7 @@ typedef struct TRDP_DNS_REPLY
 
 /* ---------------------------------------------------------------------------- */
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(pop)
 #endif
 
