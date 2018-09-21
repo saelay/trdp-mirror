@@ -67,7 +67,7 @@ extern "C" {
 #endif
 
 /*    Special handling for Windows DLLs    */
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
     #ifdef DLL_EXPORT
         #define EXT_DECL    __declspec(dllexport)
     #elif DLL_IMPORT

@@ -45,7 +45,7 @@ extern "C" {
  * TYPEDEFS
  */
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(push, 1)
 #endif
 
@@ -329,7 +329,7 @@ typedef struct
 } GNU_PACKED TRDP_ETBN_TRAIN_NET_DIR_INFO_REPLY_T;
 
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(pop)
 #endif
 

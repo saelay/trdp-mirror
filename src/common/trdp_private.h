@@ -167,7 +167,7 @@ typedef struct TRDP_SOCKETS
     TRDP_IP_ADDR_T      mcGroups[VOS_MAX_MULTICAST_CNT]; /**< List of multicast addresses for this socket */
 } TRDP_SOCKETS_T;
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(push, 1)
 #endif
 
@@ -221,7 +221,7 @@ typedef struct
 } GNU_PACKED MD_PACKET_T;
 #endif
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(pop)
 #endif
 

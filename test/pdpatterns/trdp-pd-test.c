@@ -453,7 +453,7 @@ static const char * get_result_string(int ret)
 
 /* --- platform helper functions ---------------------------------------------*/
 
-#if defined (WIN32)
+#if (defined (WIN32) || defined (WIN64))
 
 void cursor_home()
 {
@@ -518,7 +518,7 @@ void _sleep_msec(int msec)
     Sleep(msec);
 }
 
-#ifndef WIN32
+#if (!defined (WIN32) && !defined (WIN64))
 int snprintf(char * str, size_t size, const char * format, ...)
 {
     va_list args;

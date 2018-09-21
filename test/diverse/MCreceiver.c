@@ -30,7 +30,7 @@
 #if defined(POSIX)
 #include <unistd.h>
 
-#elif defined (WIN32)
+#elif (defined (WIN32) || defined (WIN64))
 //#include <stdafx.h>
 #endif
 

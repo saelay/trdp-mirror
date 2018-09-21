@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <getopt.h>
-#elif defined (WIN32)
+#elif (defined (WIN32) || defined (WIN64))
 #include "getopt.h"
 #endif
 

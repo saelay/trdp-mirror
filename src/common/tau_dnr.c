@@ -95,7 +95,7 @@ typedef struct tau_dnr_query
 } TAU_DNR_QUERY_T;
 
 /* Constant sized fields of the resource record structure */
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(push, 1)
 #endif
 
@@ -120,7 +120,7 @@ typedef struct DNS_HEADER
 }  GNU_PACKED TAU_DNS_HEADER_T;
 
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(pop)
 #endif
 

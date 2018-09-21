@@ -51,7 +51,7 @@ extern "C" {
  * TYPEDEFS
  */
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(push, 1)
 #endif
 /* moved this typedefinition from trdp_types.h to this place, as it belongs to the  */
@@ -64,7 +64,7 @@ typedef struct
     UINT8   rel;    /**< Release    - incremented for compatible changes   */
 } GNU_PACKED TRDP_SHORT_VERSION_T;
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(pop)
 #endif
 
@@ -194,7 +194,7 @@ typedef struct
 
 
 /** TCN consist structure */
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(push, 1)
 #endif
 
@@ -422,7 +422,7 @@ typedef struct
 
 
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #pragma pack(pop)
 #endif
 

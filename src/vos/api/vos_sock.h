@@ -1,4 +1,4 @@
-/**********************************************************************************************************************/
+﻿/**********************************************************************************************************************/
 /**
  * @file            vos_sock.h
  *
@@ -30,7 +30,7 @@
 
 #include "vos_types.h"
 
-#ifdef WIN32
+#if (defined (WIN32) || defined (WIN64))
 #include <winsock2.h>
 #elif defined(VXWORKS)
 #include "netinet/in.h"
@@ -110,7 +110,7 @@ extern "C" {
 
 #define VOS_DEFAULT_IFACE   cDefaultIface
 
-#if !defined(SOCKET) && !defined(_WIN64)
+#if !defined(SOCKET) && !defined(WIN64)
 #define SOCKET          INT32
 #endif
 

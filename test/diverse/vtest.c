@@ -76,7 +76,7 @@ MEM_ERR_T L3_test_mem_queue()
     res = vos_queueCreate(VOS_QUEUE_POLICY_FIFO,3,&qHandle);
     if (res != VOS_NO_ERR)
     {
-        printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] vos_queueCreate() ERROR: ret: %i, Handle: %x\n",res,(unsigned int)&qHandle);
+        printOut(OUTPUT_ADVANCED,"[MEM_QUEUE] vos_queueCreate() ERROR: ret: %i, Handle: %lx\n",res,(long)&qHandle);
         retVal = MEM_QUEUE_ERR;
     }
     res = vos_queueSend(qHandle,(UINT8*)0x0123,0x12);
@@ -306,10 +306,10 @@ VOS_THREAD_FUNC_T testSend(void* arguments)
         retVal = VOS_SEMA_ERR;
     }
 
-#ifdef WIN32
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld start\n",(long int)threadID.p);
+#if (defined (WIN32) || defined (WIN64))
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %lx start\n",(long)threadID);
 #else
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld start\n",(long int)threadID);
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %lx start\n",(long)threadID);
 #endif
     printOut(OUTPUT_FULL,"[SEND THREAD] Got print, give queue, take gelp, give print\n");
     vos_semaGive(queueSema);
@@ -343,10 +343,10 @@ VOS_THREAD_FUNC_T testSend(void* arguments)
         retVal = VOS_SEMA_ERR;
     }
     printOut(OUTPUT_FULL,"[SEND THREAD] Got queue, queued in, got print\n");
-#ifdef WIN32
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld finished\n",(long int)threadID.p);
+#if (defined (WIN32) || defined (WIN64))
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %lx finished\n",(long)threadID);
 #else
-    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %ld finished\n",(long int)threadID);
+    printOut(OUTPUT_FULL,"[SEND THREAD] Thread %lx finished\n",(long)threadID);
 #endif
     vos_semaGive(printSema);
     vos_semaGive(helpSema);
@@ -367,15 +367,15 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
     VOS_ERR_T res = VOS_UNKNOWN_ERR;
     VOS_ERR_T retVal = VOS_NO_ERR;
     VOS_THREAD_T threadID;
-    struct timespec waitTime = arg1->delay;
+    VOS_TIMEVAL_T waitTime = arg1->delay;
     (void) vos_threadSelf(&threadID);
 
-#ifdef WIN32
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld start\n",(long int)threadID.p);
+#if (defined (WIN32) || defined (WIN64))
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %lx start\n",(long)threadID);
 #else
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld start\n",(long int)threadID);
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %lx start\n",(long)threadID);
 #endif
-    res = vos_threadDelay((UINT32)(waitTime.tv_sec*1000*1000)+((waitTime.tv_nsec)/1000));
+    res = vos_threadDelay((UINT32)(waitTime.tv_sec*1000*1000)+((waitTime.tv_usec)/1000));
     if (res != VOS_NO_ERR)
     {
         printOut(OUTPUT_FULL,"[RECV_THREAD] vos_threadDelay() error\n");
@@ -414,7 +414,7 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
     if (res == 0)
     {
         printOut(OUTPUT_FULL,"[RECV THREAD] recv success \n");
-        printOut(OUTPUT_FULL,"[RECV THREAD] pData: %x\n[RECV THREAD] size: %x\n",(unsigned int)pData,(unsigned int)size);
+        printOut(OUTPUT_FULL,"[RECV THREAD] pData: %lx\n[RECV THREAD] size: %x\n",(long)pData,(unsigned int)size);
     }
     else
     {
@@ -428,10 +428,10 @@ VOS_THREAD_FUNC_T testRecv(void* arguments)
         printOut(OUTPUT_FULL,"[RECV THREAD] Could not take printSema in time\n");
         retVal = VOS_SEMA_ERR;
     }
-#ifdef WIN32
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)threadID.p);
+#if (defined (WIN32) || defined (WIN64))
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %lx finished\n",(long)threadID);
 #else
-    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %ld finished\n",(long int)threadID);
+    printOut(OUTPUT_FULL,"[RECV THREAD] Thread %lx finished\n",(long)threadID);
 #endif
     vos_semaGive(printSema);
     vos_semaGive(helpSema);
@@ -514,9 +514,9 @@ THREAD_ERR_T L3_test_thread_init()
     }
     arg1.helpSema = sema;
     arg2.helpSema = sema;
-    arg1.delay.tv_nsec = 0;
+    arg1.delay.tv_usec = 0;
     arg1.delay.tv_sec = 0;
-    arg2.delay.tv_nsec = 100000000;
+    arg2.delay.tv_usec = 100000000;
     arg2.delay.tv_sec = 0;
     arg1.result = VOS_UNKNOWN_ERR;
     arg2.result = VOS_UNKNOWN_ERR;
@@ -626,7 +626,7 @@ THREAD_ERR_T L3_test_thread_init()
     arg2.helpSema = sema;
     arg1.result = VOS_UNKNOWN_ERR;
     arg2.result = VOS_UNKNOWN_ERR;
-    arg2.delay.tv_nsec = 0;
+    arg2.delay.tv_usec = 0;
     arg2.delay.tv_sec = 0;
     /************************/
     /*  vos_threadCreate()2 */
@@ -752,7 +752,7 @@ THREAD_ERR_T L3_test_thread_init()
     arg1.helpSema = sema;
     arg2.helpSema = sema;
     arg2.delay.tv_sec = 0;
-    arg2.delay.tv_nsec = 10000;
+    arg2.delay.tv_usec = 10000;
     arg1.result = VOS_UNKNOWN_ERR;
     arg2.result = VOS_UNKNOWN_ERR;
     /************************/
@@ -1202,8 +1202,6 @@ THREAD_ERR_T L3_test_thread_mutex()
     VOS_MUTEX_T mutex;
     THREAD_ERR_T retVal = THREAD_NO_ERR;
     VOS_ERR_T res = VOS_NO_ERR;
-    TEST_ARGS_MUTEX arg1;
-    VOS_THREAD_T testLock;
 
     printOut(OUTPUT_ADVANCED,"[THREAD_MUTEX] start...\n");
     res = vos_mutexCreate(&mutex);
@@ -1381,12 +1379,12 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
 {
     SOCK_ERR_T retVal = SOCK_NO_ERR;
     VOS_ERR_T res = VOS_NO_ERR;
-    INT32 sockDesc = 0;
+    SOCKET sockDesc = 0;
     VOS_SOCK_OPT_T sockOpts;
     UINT32 mcIP = vos_dottedIP(MC_IP);
     UINT32 mcIF = vos_dottedIP(MC_IF);
     UINT32 destIP = vos_dottedIP(DEST_IP);
-    UINT32 portPD = PORT_PD; /* according to IEC 61375-2-3 CDV A.2 */
+    UINT32 portPD = TRDP_PD_UDP_PORT; /* according to IEC 61375-2-3 CDV A.2 */
     UINT8 sndBuf = sndBufStartVal;
     UINT8 rcvBuf = 0;
     UINT32 bufSize = cBufSize;
@@ -1402,7 +1400,7 @@ SOCK_ERR_T L3_test_sock_UDPMC(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROL
         printOut(OUTPUT_ADVANCED,"[SOCK_UDPMC] vos_sockOpenUDP() ERROR!\n");
         retVal = SOCK_UDP_MC_ERR;
     }
-    printOut(OUTPUT_FULL,"[SOCK_UDPMC] vos_sockOpenUDP() Open socket %i\n",sockDesc);
+    printOut(OUTPUT_FULL,"[SOCK_UDPMC] vos_sockOpenUDP() Open socket %li\n", (long int) sockDesc);
     /***************/
     /* set options */
     /***************/
@@ -1564,14 +1562,14 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
     VOS_ERR_T res = VOS_NO_ERR;
     SOCK_ERR_T retVal = SOCK_NO_ERR;
     VOS_SOCK_OPT_T sockOpts;
-    INT32 sockDesc = 0;
+    SOCKET sockDesc = 0;
     UINT32 ifIP = vos_dottedIP(IF_IP);
     UINT32 destIP = vos_dottedIP(DEST_IP);
-    UINT32 portPD = PORT_PD; /* according to IEC 61375-2-3 CDV A.2 */
+    UINT32 portPD = TRDP_PD_UDP_PORT; /* according to IEC 61375-2-3 CDV A.2 */
     UINT8 sndBuf = sndBufStartVal;
     UINT8 rcvBuf = 0;
     UINT8 rcvBufExp = rcvBufExpVal;
-    UINT32 srcIP = (UINT32)NULL;
+    UINT32 srcIP = (UINT32)0;
     UINT16 srcPort = 0;
     UINT32 bufSize = cBufSize;
     BOOL8 received = FALSE;
@@ -1587,7 +1585,7 @@ SOCK_ERR_T L3_test_sock_UDP(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST_ROLE_
         printOut(OUTPUT_ADVANCED,"[SOCK_UDP] vos_sockOpenUDP() ERROR!\n");
         retVal = SOCK_UDP_ERR;
     }
-    printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockOpenUDP() Open socket %i\n",sockDesc);
+    printOut(OUTPUT_FULL,"[SOCK_UDP] vos_sockOpenUDP() Open socket %ld\n",(long int) sockDesc);
     /***************/
     /* set options */
     /***************/
@@ -1710,16 +1708,16 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
     VOS_ERR_T res = VOS_NO_ERR;
     SOCK_ERR_T retVal = SOCK_NO_ERR;
     VOS_SOCK_OPT_T sockOpts;
-    INT32 sockDesc = 0;
+    SOCKET sockDesc = 0;
     UINT32 ifIP = vos_dottedIP(IF_IP);
     UINT32 destIP = vos_dottedIP(DEST_IP);
-    UINT32 portPD = PORT_PD; /* according to IEC 61375-2-3 CDV A.2 */
+    UINT32 portPD = TRDP_PD_UDP_PORT; /* according to IEC 61375-2-3 CDV A.2 */
     UINT8 sndBuf = sndBufStartVal;
     UINT8 rcvBuf = 0;
     UINT32 bufSize = cBufSize;
     UINT16 srcPort = 0;
-    UINT32 srcIP = (UINT32)NULL;
-    INT32 newSock = 0;
+    UINT32 srcIP = (UINT32) 0;
+    SOCKET newSock = 0;
     BOOL8 connected = FALSE;
 
     printOut(OUTPUT_ADVANCED,"[SOCK_TCPCLIENT] start...\n");
@@ -1733,7 +1731,7 @@ SOCK_ERR_T L3_test_sock_TCPclient(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         retVal = SOCK_TCP_CLIENT_ERR;
         printOut(OUTPUT_ADVANCED,"[SOCK_TCPCLIENT] Sockopen() Error res = %i\n",res);
     }
-    printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] vos_sockOpenTCP() Open socket %i\n",sockDesc);
+    printOut(OUTPUT_FULL,"[SOCK_TCPCLIENT] vos_sockOpenTCP() Open socket %li\n",(long) sockDesc);
     /***************/
     /* set options */
     /***************/
@@ -1894,13 +1892,13 @@ SOCK_ERR_T L3_test_sock_TCPserver(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
     VOS_ERR_T res = VOS_UNKNOWN_ERR;
     SOCK_ERR_T retVal = SOCK_NO_ERR;
     VOS_SOCK_OPT_T sockOpts;
-    INT32 sockDesc = 0;
-    INT32 newSock = 0;
+    SOCKET sockDesc = 0;
+    SOCKET newSock = 0;
     UINT32 ifIP = vos_dottedIP(IF_IP);
-    UINT32 portPD = PORT_MD; /* according to IEC 61375-2-3 CDV A.2 */
+    UINT32 portPD = TRDP_MD_UDP_PORT; /* according to IEC 61375-2-3 CDV A.2 */
     UINT8 sndBuf = sndBufStartVal;
     UINT8 rcvBuf = 0;
-    UINT32 srcIP = (UINT32)NULL;
+    UINT32 srcIP = (UINT32) 0;
     UINT16 srcPort = 0;
     UINT32 bufSize = cBufSize;
     BOOL8 received = FALSE;
@@ -1918,7 +1916,7 @@ SOCK_ERR_T L3_test_sock_TCPserver(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         retVal = SOCK_TCP_SERVER_ERR;
         printOut(OUTPUT_ADVANCED,"[SOCK_TCPSERVER] vos_sockOpenTCP() ERROR res = %i\n",res);
     }
-    printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockOpenTCP() Open socket %i\n",sockDesc);
+    printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockOpenTCP() Open socket %lx\n",(long)sockDesc);
     /***************/
     /* set options */
     /***************/
@@ -1963,7 +1961,7 @@ SOCK_ERR_T L3_test_sock_TCPserver(UINT8 sndBufStartVal, UINT8 rcvBufExpVal, TEST
         res = vos_sockAccept(sockDesc,&newSock,&srcIP,&srcPort);
         if (res == VOS_NO_ERR)
         {
-            printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockAccept() Connection accepted from %s : %u, Socket %i\n",vos_ipDotted(srcIP),srcPort,newSock);
+            printOut(OUTPUT_FULL,"[SOCK_TCPSERVER] vos_sockAccept() Connection accepted from %s : %u, Socket %lx\n",vos_ipDotted(srcIP),srcPort,(long)newSock);
             connected = TRUE;
         }
         if ((res != VOS_NO_ERR) || (srcIP != srcIP) || (srcPort != portPD))
@@ -2087,8 +2085,8 @@ VOS_THREAD_FUNC_T L3_test_sharedMem_write(void* arguments)
         retVal = VOS_UNKNOWN_ERR;
         printOut(OUTPUT_ADVANCED,"[SHMEM Write] vos_sharedOpen() ERROR\n");
     }
-    printOut(OUTPUT_FULL,"handle->fd = %i\n",handle->fd);
-    printOut(OUTPUT_FULL,"pMemArea = %x\n",(unsigned int)pMemArea);
+    printOut(OUTPUT_FULL,"handle->fd = %lx\n", (long) handle->fd);
+    printOut(OUTPUT_FULL,"pMemArea = %lx\n", (long) pMemArea);
     memcpy(pMemArea,&content,4);
     printOut(OUTPUT_FULL,"*pMemArea = %x\n",*pMemArea);
     res = vos_sharedClose(handle,pMemArea);
@@ -2124,7 +2122,7 @@ VOS_THREAD_FUNC_T L3_test_sharedMem_read(void* arguments)
         printOut(OUTPUT_ADVANCED,"[SHMEM Read] vos_sharedOpen() ERROR\n");
     }
     memcpy(&content,pMemArea,4);
-    printOut(OUTPUT_FULL,"pMemArea = %x\n",(unsigned int)pMemArea);
+    printOut(OUTPUT_FULL,"pMemArea = %lx\n",(long)pMemArea);
     printOut(OUTPUT_FULL,"*pMemArea = %x\n",*pMemArea);
     printOut(OUTPUT_FULL,"content = %x\n",content);
     res = vos_sharedClose(handle,pMemArea);
