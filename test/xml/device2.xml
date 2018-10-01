@@ -71,5 +71,5 @@
         </data-set>
     </data-set-list>
 
-    <debug file-name="trdp.log" file-size="1000000" info="CFDT" level="" />
+    <debug file-name="trdp.log" file-size="1000000" level="E" />
 </device>

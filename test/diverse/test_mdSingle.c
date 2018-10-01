@@ -99,23 +99,11 @@ UINT8 gBuffer[64 * 1024];
 /***********************************************************************************************************************
  * PROTOTYPES
  */
-void dbgOut (void *,
-             TRDP_LOG_T,
-             const  CHAR8 *,
-             const  CHAR8 *,
-             UINT16,
-             const  CHAR8 *);
-void    usage (const char *);
-void    myPDcallBack (void *,
-                      TRDP_APP_SESSION_T,
-                      const TRDP_PD_INFO_T *,
-                      UINT8 *,
-                      UINT32 );
-void mdCallback (void *,
-                 TRDP_APP_SESSION_T,
-                 const TRDP_MD_INFO_T *,
-                 UINT8 *,
-                 UINT32 );
+void dbgOut (void *, TRDP_LOG_T, const  CHAR8 *, const  CHAR8 *, UINT16, const  CHAR8 *);
+void usage (const char *);
+void myPDcallBack (void *, TRDP_APP_SESSION_T, const TRDP_PD_INFO_T *, UINT8 *, UINT32 );
+void mdCallback (void *, TRDP_APP_SESSION_T, const TRDP_MD_INFO_T *, UINT8 *, UINT32 );
+void printSelParams(int noDesc, VOS_FDS_T *pReadableFD, VOS_TIMEVAL_T   *pTimeOut);
 
 /**********************************************************************************************************************/
 /* Print wait message */
