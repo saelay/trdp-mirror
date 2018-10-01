@@ -97,5 +97,5 @@
         </data-set>
     </data-set-list>
 
-    <debug file-name="trdp.log" file-size="1000000" info="DTFC" level="W" />
+    <debug file-name="trdp.log" file-size="1000000" level="W" />
 </device>

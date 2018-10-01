@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-10-01: Some default attribute values for com-parameter tag were missing
  *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
  *      BL 2018-01-30: Ticket #189 timeout-value not parsed in tau_xml
@@ -1493,6 +1494,10 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                     /* Read the com params */
                     for (i = 0u; i < count && trdp_XMLSeekStartTag(pDocHnd->pXmlDocument, "com-parameter") == 0; i++)
                     {
+                        /* Set some defaults */
+                        (*ppComPar)[i].sendParam.ttl = TRDP_MD_DEFAULT_TTL;
+                        (*ppComPar)[i].sendParam.retries = TRDP_MD_DEFAULT_RETRIES;
+
                         while (trdp_XMLGetAttribute(pDocHnd->pXmlDocument, attribute, &valueInt,
                                                     value) == TOK_ATTRIBUTE)
                         {
@@ -1508,12 +1513,10 @@ EXT_DECL TRDP_ERR_T tau_readXmlDeviceConfig (
                             {
                                 (*ppComPar)[i].sendParam.ttl = (UINT8) valueInt;
                             }
-#ifdef TRDP_RETRIES
                             else if (vos_strnicmp(attribute, "retries", MAX_TOK_LEN) == 0)
                             {
                                 (*ppComPar)[i].sendParam.retries = (UINT8) valueInt;
                             }
-#endif
                         }
                     }
                 }
