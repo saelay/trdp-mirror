@@ -763,6 +763,7 @@ EXT_DECL void vos_mutexDelete(
 		if (CloseHandle(pMutex->mutexId) != 0)
 		{
 			pMutex->magicNo = 0;
+			vos_memFree(pMutex);
 		}
 		else
 		{
@@ -782,7 +783,22 @@ EXT_DECL void vos_mutexDelete(
 void vos_mutexLocalDelete(
 	struct VOS_MUTEX *pMutex)
 {
-	vos_mutexDelete(pMutex);
+	if ((pMutex == NULL) || (pMutex->magicNo != cMutextMagic))
+	{
+		vos_printLogStr(VOS_LOG_ERROR, "vos_mutexDelete() ERROR invalid parameter");
+	}
+	else
+	{
+		if (CloseHandle(pMutex->mutexId) != 0)
+		{
+			pMutex->magicNo = 0;
+		}
+		else
+		{
+			vos_printLog(VOS_LOG_ERROR,
+				"Can not destroy Mutex (Mutex error err=%d)\n", GetLastError());
+		}
+	}
 }
 
 /**********************************************************************************************************************/
@@ -925,7 +941,7 @@ EXT_DECL VOS_ERR_T vos_semaCreate(
 
 		if (*pSema == NULL)
 		{
-			*pSema = (VOS_SEMA_T)vos_memAlloc(sizeof(VOS_SEMA_T));
+			*pSema = (VOS_SEMA_T)vos_memAlloc(sizeof(struct VOS_SEMA));
 		}
 		if (*pSema == NULL)
 		{
@@ -972,6 +988,7 @@ EXT_DECL void vos_semaDelete(
 	{
 		/* Check if this is a valid semaphore handle*/
 		CloseHandle(sema->semaphore);
+		vos_memFree(sema);
 	}
 	return;
 }
