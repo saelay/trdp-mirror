@@ -19,7 +19,8 @@
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-03-06: 64Bit endian swap added
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
- */
+ *
+*/
 
 #ifndef VOS_SOCK_H
 #define VOS_SOCK_H
