@@ -48,7 +48,7 @@
  * DEFINITIONS
  */
 
-const size_t    cDefaultStackSize = 16 * 1024;
+const size_t    cDefaultStackSize = 64 * 1024;
 const UINT32    cMutextMagic = 0x1234FEDC;
 
 #define NSECS_PER_USEC  1000u
@@ -221,9 +221,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate(
 
 	hThread = CreateThread(
 		NULL,                                           /* default security attributes */
-		(stackSize == 0) ? cDefaultStackSize : stackSize, /* use default stack size */
-		(LPTHREAD_START_ROUTINE)pFunction,             /* thread function name */
-		(LPVOID)pArguments,                            /* argument to thread function */
+		stackSize,                                      /* use default stack size */
+		(LPTHREAD_START_ROUTINE)pFunction,              /* thread function name */
+		(LPVOID)pArguments,                             /* argument to thread function */
 		0,                                              /* use default creation flags */
 		&threadId);                                     /* returns the thread identifier */
 
@@ -255,6 +255,10 @@ EXT_DECL VOS_ERR_T vos_threadCreate(
 			THREAD_PRIORITY_TIME_CRITICAL };
 
 		(void)SetThreadPriority(hThread, prioMap[priority / 36 - 1]);
+	}
+	else
+	{
+		(void)SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL);
 	}
 
 	*pThread = (VOS_THREAD_T)hThread;
@@ -312,11 +316,14 @@ EXT_DECL VOS_ERR_T vos_threadIsActive(
 	}
 
 	/* Validate the thread id. 0 sig will not kill the thread but will check if the thread is valid.*/
-	if (GetExitCodeThread((HANDLE)thread, &lpExitCode) == 0)
+	if (GetExitCodeThread((HANDLE)thread, &lpExitCode))
 	{
-		return VOS_PARAM_ERR;
+		if (lpExitCode == STILL_ACTIVE)
+		{
+			return VOS_NO_ERR;
+		}
 	}
-	return VOS_NO_ERR;
+	return VOS_PARAM_ERR;
 }
 
 /**********************************************************************************************************************/
@@ -677,7 +684,6 @@ EXT_DECL void vos_getUuid(
 EXT_DECL VOS_ERR_T vos_mutexCreate(
 	VOS_MUTEX_T *pMutex)
 {
-	int     err = 0;
 	HANDLE  hMutex;
 
 	if (pMutex == NULL)
@@ -685,10 +691,8 @@ EXT_DECL VOS_ERR_T vos_mutexCreate(
 		return VOS_PARAM_ERR;
 	}
 
-	if (*pMutex == NULL)
-	{
-		*pMutex = (VOS_MUTEX_T)vos_memAlloc(sizeof(struct VOS_MUTEX));
-	}
+	*pMutex = (VOS_MUTEX_T)vos_memAlloc(sizeof(struct VOS_MUTEX));
+
 	if (*pMutex == NULL)
 	{
 		return VOS_MEM_ERR;
@@ -698,7 +702,7 @@ EXT_DECL VOS_ERR_T vos_mutexCreate(
 
 	if (hMutex == NULL)
 	{
-		vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(winthread err=%d)\n", err);
+		vos_printLog(VOS_LOG_ERROR, "vos_mutexCreate() ERROR %d)\n", GetLastError());
 		return VOS_MUTEX_ERR;
 	}
 
@@ -722,7 +726,6 @@ EXT_DECL VOS_ERR_T vos_mutexCreate(
 VOS_ERR_T vos_mutexLocalCreate(
 	struct VOS_MUTEX *pMutex)
 {
-	int     err = 0;
 	HANDLE  hMutex;
 
 	if (pMutex == NULL)
@@ -734,7 +737,7 @@ VOS_ERR_T vos_mutexLocalCreate(
 
 	if (hMutex == NULL)
 	{
-		vos_printLog(VOS_LOG_ERROR, "Can not create Mutex(winthread err=%d)\n", err);
+		vos_printLog(VOS_LOG_ERROR, "vos_mutexLocalCreate() ERROR %d)\n", GetLastError());
 		return VOS_MUTEX_ERR;
 	}
 
@@ -767,8 +770,7 @@ EXT_DECL void vos_mutexDelete(
 		}
 		else
 		{
-			vos_printLog(VOS_LOG_ERROR,
-				"Can not destroy Mutex (Mutex error err=%d)\n", GetLastError());
+			vos_printLog(VOS_LOG_ERROR,	"vos_mutexDelete() ERROR %d\n", GetLastError());
 		}
 	}
 }
@@ -795,8 +797,7 @@ void vos_mutexLocalDelete(
 		}
 		else
 		{
-			vos_printLog(VOS_LOG_ERROR,
-				"Can not destroy Mutex (Mutex error err=%d)\n", GetLastError());
+			vos_printLog(VOS_LOG_ERROR, "vos_mutexDelete() ERROR %d\n", GetLastError());
 		}
 	}
 }
@@ -824,11 +825,16 @@ EXT_DECL VOS_ERR_T vos_mutexLock(
 	dwWaitResult = WaitForSingleObject(pMutex->mutexId,    /* handle to mutex */
 		INFINITE);  /* no time-out interval */
 
-	if (dwWaitResult != WAIT_OBJECT_0)
+	switch (dwWaitResult)
 	{
-		vos_printLog(VOS_LOG_ERROR,
-			"Unable to lock Mutex (winthread err=%d)\n",
-			GetLastError());
+	case WAIT_OBJECT_0:
+        return VOS_NO_ERR;
+	case WAIT_TIMEOUT:
+	case WAIT_ABANDONED:
+		return VOS_INUSE_ERR;
+	case WAIT_FAILED:
+	default:
+		vos_printLog(VOS_LOG_ERROR, "vos_mutexLock() ERROR %d\n", GetLastError());
 		return VOS_MUTEX_ERR;
 	}
 
@@ -857,19 +863,17 @@ EXT_DECL VOS_ERR_T vos_mutexTryLock(
 
 	dwWaitResult = WaitForSingleObject(pMutex->mutexId,    /* handle to mutex */
 		0u);                 /* no time-out interval */
+
 	switch (dwWaitResult)
 	{
 	case WAIT_OBJECT_0:
 		return VOS_NO_ERR;
-	case WAIT_FAILED:
-		vos_printLog(VOS_LOG_ERROR,
-			"Unable to trylock Mutex (Mutex err=%d)\n",
-			GetLastError());
-		return VOS_MUTEX_ERR;
 	case WAIT_TIMEOUT:
 	case WAIT_ABANDONED:
 		return VOS_INUSE_ERR;
+	case WAIT_FAILED:
 	default:
+		vos_printLog(VOS_LOG_ERROR, "vos_mutexTryLock() ERROR %d\n", GetLastError());
 		return VOS_MUTEX_ERR;
 	}
 
@@ -896,9 +900,7 @@ EXT_DECL VOS_ERR_T vos_mutexUnlock(
 	{
 		if (ReleaseMutex(pMutex->mutexId) == 0)
 		{
-			vos_printLog(VOS_LOG_ERROR,
-				"Unable to unlock Mutex (Mutex err=%d)\n",
-				GetLastError());
+			vos_printLog(VOS_LOG_ERROR, "vos_MutexUnlock() ERROR %d\n", GetLastError());
 			return VOS_MUTEX_ERR;
 		}
 	}
@@ -939,10 +941,8 @@ EXT_DECL VOS_ERR_T vos_semaCreate(
 		/* Parameters are OK
 		Create a semaphore with initial and max counts of MAX_SEM_COUNT */
 
-		if (*pSema == NULL)
-		{
-			*pSema = (VOS_SEMA_T)vos_memAlloc(sizeof(struct VOS_SEMA));
-		}
+		*pSema = (VOS_SEMA_T)vos_memAlloc(sizeof(struct VOS_SEMA));
+
 		if (*pSema == NULL)
 		{
 			return VOS_MEM_ERR;
@@ -956,8 +956,10 @@ EXT_DECL VOS_ERR_T vos_semaCreate(
 
 		if ((*pSema)->semaphore == NULL)
 		{
+			DWORD err = GetLastError();
+
 			/* Semaphore init failed */
-			vos_printLogStr(VOS_LOG_ERROR, "vos_semaCreate() ERROR Semaphore could not be initialized\n");
+			vos_printLog(VOS_LOG_ERROR, "vos_semaCreate() ERROR %d\n", err);
 			retVal = VOS_SEMA_ERR;
 		}
 		else
@@ -1024,14 +1026,17 @@ EXT_DECL VOS_ERR_T vos_semaTake(
 	{
 	case WAIT_OBJECT_0:
 		return VOS_NO_ERR;
-	case WAIT_FAILED:
-		vos_printLog(VOS_LOG_ERROR,
-			"Unable to trylock Mutex (Mutex err=%d)\n",
-			GetLastError());
-		return VOS_SEMA_ERR;
 	case WAIT_TIMEOUT:
+		return VOS_SEMA_ERR;
+	case WAIT_FAILED:
 	default:
+	{
+		DWORD err = GetLastError();
+
+		vos_printLog(VOS_LOG_ERROR, "vos_SemaTake() ERROR %d)\n", err);
+		return VOS_SEMA_ERR;
 		break;
+	}
 	}
 
 	return retVal;
@@ -1049,6 +1054,7 @@ EXT_DECL void vos_semaGive(
 	VOS_SEMA_T sema)
 {
 	LONG previousCount;
+
 	/* Check parameter */
 	if (sema == NULL)
 	{
@@ -1057,14 +1063,12 @@ EXT_DECL void vos_semaGive(
 	else
 	{
 		/* release semaphore */
-		if (ReleaseSemaphore(sema->semaphore, 1, &previousCount) == 0)
+		if (!ReleaseSemaphore(sema->semaphore, 1, &previousCount))
 		{
-			/* Semaphore released */
-		}
-		else
-		{
+			DWORD err = GetLastError();
+
 			/* Could not release Semaphore */
-			vos_printLogStr(VOS_LOG_ERROR, "vos_semaGive() ERROR could not release semaphore\n");
+			vos_printLog(VOS_LOG_ERROR, "vos_semaGive() ERROR %d\n", err);
 		}
 	}
 	return;

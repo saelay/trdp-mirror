@@ -331,7 +331,10 @@ EXT_DECL void vos_memDelete (
     }
 
     /* we will nevertheless clear the memory area because it makes no sence to report to the application... */
-    vos_mutexLocalDelete(&gMem.mutex);
+	if (gMem.mutex.magicNo != 0)
+	{
+		vos_mutexLocalDelete(&gMem.mutex);
+	}
     if (gMem.wasMalloced && gMem.pArea != NULL)
     {
         free(gMem.pArea);    /*lint !e421 !e586 optional use of heap memory for debugging/development */

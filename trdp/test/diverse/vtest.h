@@ -25,28 +25,14 @@
 #define MAXKEYSIZE 25
 #define cBufSize 1
 /* define output detail level */
-#define OUTPUT_DETAILS OUTPUT_FULL
 #define N_ITERATIONS 1
 
-#if (defined (WIN32) || defined (WIN64))
-#define printOut(lvl, format, ...) \
-    { if (lvl <= OUTPUT_DETAILS) \
-    { (void) printf(format, __VA_ARGS__);}};
-#elif defined(__clang__)
-#define vos_snprintf(str, size, format, ...) \
-    { if (lvl <= OUTPUT_DETAILS) \
-    { (void) printf(format, __VA_ARGS__);}};
-#else
-#define vos_snprintf(lvl, format, args ...) \
-    { if (lvl <= OUTPUT_DETAILS) \
-    { (void) printf(format, ## args);}};    /*lint !e586 logging output needed */
-#endif
-
-#define IF_IP "53.191.121.40"
-#define DEST_IP "53.191.121.73"
+/*
+#define IF_IP "10.241.147.128"
+#define DEST_IP "10.241.147.128"
 #define MC_IP "238.0.0.1"
-#define MC_IF "53.191.121.40"
-
+#define MC_IF "10.241.147.128"
+*/
 #if (defined (WIN32) || defined (WIN64))
     #define THREAD_POLICY VOS_THREAD_POLICY_OTHER
 #endif
@@ -123,38 +109,29 @@ typedef enum
     UTILS_ALL_ERR       = 7
 } UTILS_ERR_T;
 
-typedef enum
-{
-    OUTPUT_BASIC    = 0,    /* print basic information only */
-    OUTPUT_ADVANCED = 1,    /* print more / deeper information */
-    OUTPUT_FULL     = 2     /* print all available information */
-} OUTPUT_DETAILS_T;
-
-typedef enum
-{
-    ROLE_MASTER     = 0,
-    ROLE_SLAVE      = 1,
-} TEST_ROLE_T;
-
-/* TODO comment in const CHAR8 *cDefaultIface = "fec0";*/
-/* define communication test identity (Master / Slave) */
-const TEST_ROLE_T TEST_ROLE = ROLE_MASTER;
 UINT32 gTestIP = 0;
 UINT16 gTestPort = 0;
 
+typedef struct {
+	UINT32 srcIP;
+	UINT32 dstIP;
+	UINT32 mcIP;
+	UINT32 mcGrp;
+}TEST_IP_CONFIG_T;
+
+
 typedef struct arg_struct_thread {
     VOS_QUEUE_T queueHeader;
-    VOS_SEMA_T queueSema;
-    VOS_SEMA_T printSema;
-    VOS_SEMA_T helpSema;
+    VOS_SEMA_T sema;
+	VOS_MUTEX_T mutex;
+	TEST_IP_CONFIG_T ipCfg;
+	UINT8 rcvBufExpVal;
+	UINT8 sndBufStartVal;
+	UINT32 rcvBufSize;
+	UINT32 sndBufSize;
 	VOS_TIMEVAL_T delay;
     VOS_ERR_T result;
-}TEST_ARGS_THREAD;
-
-typedef struct arg_struct_mutex{
-    VOS_MUTEX_T mutex;
-    VOS_ERR_T result;
-}TEST_ARGS_MUTEX;
+}TEST_ARGS_THREAD_T;
 
 typedef struct arg_struct_shmem {
     UINT32 size;
@@ -162,7 +139,7 @@ typedef struct arg_struct_shmem {
     CHAR8 key[MAXKEYSIZE];
     VOS_SEMA_T sema;
     VOS_ERR_T result;
-}TEST_ARGS_SHMEM;
+}TEST_ARGS_SHMEM_T;
 
 
 /*
