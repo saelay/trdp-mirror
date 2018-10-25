@@ -116,17 +116,28 @@ INT32 recvmsg (SOCKET sock, struct msghdr *pMessage, int flags)
     int     res         = WSAIoctl(sock, SIO_GET_EXTENSION_FUNCTION_POINTER,
                                    &WSARecvMsg_GUID, sizeof(WSARecvMsg_GUID), &WSARecvMsg,
                                    sizeof(WSARecvMsg), &numBytes, NULL, NULL);
+	if (res)
+	{
+		int err = WSAGetLastError();
 
-    pMessage->dwFlags = flags;
-    res = WSARecvMsg(sock, pMessage, &numBytes, NULL, NULL);
-    if (0 != res)
-    {
-        DWORD err = WSAGetLastError();
-        if (err != WSAEMSGSIZE)
-        {
-            return -1;
-        }
-    }
+		err = err;
+		vos_printLog(VOS_LOG_ERROR, "WSAIoctl() failed (Err: %d)\n", err);
+	}
+	else
+	{
+		pMessage->dwFlags = flags;
+		res = WSARecvMsg(sock, pMessage, &numBytes, NULL, NULL);
+		if (res)
+		{
+			int err = WSAGetLastError();
+
+			if (err != WSAEMSGSIZE)
+			{
+				vos_printLog(VOS_LOG_ERROR, "WSARecvMsg() failed (Err: %d)\n", err);
+				return -1;
+			}
+		}
+	}
     return numBytes;
 }
 
@@ -514,6 +525,7 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 EXT_DECL void vos_sockTerm (void)
 {
     vosSockInitialised = FALSE;
+	WSACleanup();
 }
 
 
@@ -647,12 +659,25 @@ EXT_DECL VOS_ERR_T vos_sockOpenUDP (
     {
         int err = WSAGetLastError();
 
-        err = err; /* for lint */
-        vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
+		err = err; /* for lint */
+		vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
 
-    if ((vos_sockSetOptions(sock, pOptions))
+	/*  Include struct in_pktinfo in the message "ancilliary" control data.
+	This way we can get the destination IP address for received UDP packets */
+	{
+		DWORD optValue = TRUE;
+		if (setsockopt(sock, IPPROTO_IP, IP_PKTINFO, (const char *)&optValue, sizeof(optValue)) == -1)
+		{
+			int err = WSAGetLastError();
+
+			err = err; /* for lint */
+			vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_PKTINFO failed (Err: %d)\n", err);
+		}
+	}
+
+	if ((vos_sockSetOptions(sock, pOptions))
         || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         (void) closesocket(sock);
@@ -693,16 +718,16 @@ EXT_DECL VOS_ERR_T vos_sockOpenTCP (
         return VOS_PARAM_ERR;
     }
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
+    if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET )
     {
         int err = WSAGetLastError();
 
-        err = err; /* for lint */
-        vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
+		err = err; /* for lint */
+		vos_printLog(VOS_LOG_ERROR, "socket() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
 
-    if ((vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
+	if ((vos_sockSetOptions(sock, pOptions) != VOS_NO_ERR)
         || (vos_sockSetBuffer(sock) != VOS_NO_ERR))
     {
         (void) closesocket(sock);
@@ -730,7 +755,7 @@ EXT_DECL VOS_ERR_T vos_sockClose (
     {
         int err = WSAGetLastError();
 
-        vos_printLog(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n", err);
+		vos_printLog(VOS_LOG_ERROR, "closesocket() failed (Err: %d)\n", err);
         return VOS_PARAM_ERR;
     }
     return VOS_NO_ERR;
@@ -755,14 +780,15 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
     {
         if (1 == pOptions->reuseAddrPort)
         {
-            BOOL8 optValue = TRUE;
+            DWORD optValue = TRUE;
 #ifdef SO_REUSEPORT
             if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &sockOptValue,
                            sizeof(sockOptValue)) == SOCKET_ERROR )
             {
                 int err = WSAGetLastError();
 
-                vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (Err: %d)\n", err);
+				err = err; /* for lint */
+				vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_REUSEPORT failed (Err: %d)\n", err);
             }
 #else
             if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&optValue,
@@ -770,21 +796,20 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                err = err; /* for lint */
+				err = err; /* for lint */
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() SO_REUSEADDR failed (Err: %d)\n", err);
             }
 #endif
         }
 
-        if (pOptions->nonBlocking == TRUE)
         {
-            u_long optValue = TRUE;
+            u_long optValue = pOptions->nonBlocking;
 
             if (ioctlsocket(sock, (long) FIONBIO, &optValue) == SOCKET_ERROR)
             {
                 int err = WSAGetLastError();
 
-                err = err; /* for lint */
+				err = err; /* for lint */
                 vos_printLog(VOS_LOG_ERROR, "setsockopt() FIONBIO failed (Err: %d)\n", err);
                 return VOS_SOCK_ERR;
             }
@@ -809,8 +834,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                err = err; /* for lint */
-                vos_printLog(VOS_LOG_WARNING, "setsockopt() IP_TOS failed (Err: %d)\n", err);
+				err = err; /* for lint */
+				vos_printLog(VOS_LOG_WARNING, "setsockopt() IP_TOS failed (Err: %d)\n", err);
             }
 #ifdef SO_PRIORITY
             /* if available (and the used socket is tagged) set the VLAN PCP field as well. */
@@ -820,8 +845,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                err = err; /* for lint */
-                vos_printLog(VOS_LOG_WARNING, "setsockopt() SO_PRIORITY failed (Err: %d)\n", err);
+				err = err; /* for lint */
+				vos_printLog(VOS_LOG_WARNING, "setsockopt() SO_PRIORITY failed (Err: %d)\n", err);
             }
 #endif
         }
@@ -833,8 +858,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                err = err;     /* for lint */
-                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %d)\n", err);
+				err = err; /* for lint */
+				vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_TTL failed (Err: %d)\n", err);
             }
         }
         if (pOptions->ttl_multicast > 0)
@@ -845,8 +870,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                err = err;     /* for lint */
-                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %d)\n", err);
+				err = err; /* for lint */
+				vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_TTL failed (Err: %d)\n", err);
             }
         }
         if (pOptions->no_mc_loop > 0)
@@ -858,8 +883,8 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                err = err;     /* for lint */
-                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", err);
+				err = err; /* for lint */
+				vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", err);
             }
         }
         if (pOptions->no_udp_crc > 0)
@@ -870,25 +895,13 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             {
                 int err = WSAGetLastError();
 
-                err = err;     /* for lint */
-                vos_printLog(VOS_LOG_ERROR, "setsockopt() UDP_CHECKSUM_COVERAGE failed (Err: %d)\n", err);
+				err = err; /* for lint */
+				vos_printLog(VOS_LOG_ERROR, "setsockopt() UDP_CHECKSUM_COVERAGE failed (Err: %d)\n", err);
             }
         }
 
     }
-    /*   This seems to be unsupported on XP (but IP_RECVDSTADDR is defined!)   */
-    /*  Include struct in_pktinfo in the message "ancilliary" control data.
-        This way we can get the destination IP address for received UDP packets */
-    {
-        DWORD optValue = TRUE;
-        if (setsockopt(sock, IPPROTO_IP, IP_PKTINFO, (const char *)&optValue, sizeof(optValue)) == -1)
-        {
-            int err = WSAGetLastError();
-            err = err;     /* for lint */
-            vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_RECVDSTADDR failed (Err: %d)\n", err);
-        }
-    }
-
+ 
     return VOS_NO_ERR;
 }
 
@@ -958,7 +971,8 @@ EXT_DECL VOS_ERR_T vos_sockJoinMC (
             {
                 int err = WSAGetLastError();
 
-                vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", result);
+				err = err; 
+				vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_MULTICAST_LOOP failed (Err: %d)\n", result);
                 result = VOS_SOCK_ERR;
             }
             else
@@ -1022,8 +1036,8 @@ EXT_DECL VOS_ERR_T vos_sockLeaveMC (
         {
             int err = WSAGetLastError();
 
-            err = err;     /* for lint */
-            vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %d)\n", err);
+			err = err; /* for lint */
+			vos_printLog(VOS_LOG_ERROR, "setsockopt() IP_DROP_MEMBERSHIP failed (Err: %d)\n", err);
             result = VOS_SOCK_ERR;
         }
         else
@@ -1296,8 +1310,8 @@ EXT_DECL VOS_ERR_T vos_sockBind (
     {
         int err = WSAGetLastError();
 
-        err = err;     /* for lint */
-        vos_printLog(VOS_LOG_ERROR, "bind() failed (Err: %d)\n", err);
+		err = err; /* for lint */
+		vos_printLog(VOS_LOG_ERROR, "bind() failed (Err: %d)\n", err);
         return VOS_SOCK_ERR;
     }
     return VOS_NO_ERR;
@@ -1327,8 +1341,8 @@ EXT_DECL VOS_ERR_T vos_sockListen (
     {
         int err = WSAGetLastError();
 
-        err = err;     /* for lint */
-        vos_printLog(VOS_LOG_ERROR, "listen() failed (Err: %d)\n", err);
+		err = err; /* for lint */
+		vos_printLog(VOS_LOG_ERROR, "listen() failed (Err: %d)\n", err);
         return VOS_IO_ERR;
     }
     return VOS_NO_ERR;
@@ -1378,7 +1392,7 @@ EXT_DECL VOS_ERR_T vos_sockAccept (
         {
             int err = WSAGetLastError();
 
-            switch (err)
+			switch (err)
             {
                /*Accept return -1 and err = EWOULDBLOCK,
                when there is no more connection requests.*/
@@ -1446,13 +1460,17 @@ EXT_DECL VOS_ERR_T vos_sockConnect (
     {
         int err = WSAGetLastError();
 
-        if ((err == WSAEINPROGRESS)
+		if ((err == WSAEINPROGRESS)
             || (err == WSAEWOULDBLOCK)
             || (err == WSAEALREADY))
         {
             return VOS_BLOCK_ERR;
         }
-        else if (err != WSAEISCONN)
+		else if (err == WSAEISCONN)
+		{
+			return VOS_INUSE_ERR;
+		}
+		else
         {
             vos_printLog(VOS_LOG_WARNING, "connect() failed (Err: %d)\n", err);
             return VOS_IO_ERR;
