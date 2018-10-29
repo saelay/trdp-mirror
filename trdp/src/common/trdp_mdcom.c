@@ -19,6 +19,7 @@
  *
  * $Id$
  *
+ *      SB 2018-10-29: Ticket #216: Message data size and padding wrong if marshalling is used
  *      BL 2018-06-27: Ticket #206 Message data transmission fails for several test cases
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-05-14: Ticket #200 Notify 'sender element' fields, set twice
@@ -3146,6 +3147,8 @@ static void trdp_mdDetailSenderPacket (const TRDP_MSG_T         msgType,
                                                     &destSize,
                                                     &pSenderElement->pCachedDS);
             pSenderElement->pPacket->frameHead.datasetLength = vos_htonl(destSize);
+            pSenderElement->grossSize = trdp_packetSizeMD(destSize);
+            pSenderElement->dataSize = destSize;
         }
         else
         {
