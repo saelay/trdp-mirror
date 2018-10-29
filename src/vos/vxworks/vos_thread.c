@@ -16,6 +16,7 @@
  *
  * $Id$*
  *
+ *      BL 2018-10-29: Ticket #215: use CLOCK_MONOTONIC if available
  *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-05-03: Ticket #195: Invalid thread handle (SEGFAULT)
  *      BL 2018-03-22: Ticket #192: Compiler warnings on Windows (minGW)
@@ -372,7 +373,11 @@ EXT_DECL void vos_getTime (
     else
     {
         /*lint -e(534) ignore return value */
+#ifdef CLOCK_MONOTONIC
+        clock_gettime(CLOCK_MONOTONIC, &myTime);
+#else
         clock_gettime(CLOCK_REALTIME, &myTime);
+#endif
         pTime->tv_sec   = (UINT32) myTime.tv_sec;
         pTime->tv_usec  = (INT32) (myTime.tv_nsec / VOS_NSECS_PER_USEC);
     }
