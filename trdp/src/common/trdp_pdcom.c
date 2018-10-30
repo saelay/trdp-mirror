@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-10-29: Ticket #217 PD Pull requests must be subscribed for
  *      BL 2018-08-07: Ticket #207 tlp_put() and variable dataSize
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-01-29: Ticket #186 Potential SEGFAULT in case of PD timeout
@@ -509,66 +510,6 @@ TRDP_ERR_T  trdp_pdReceive (
     subAddresses.etbTopoCnt     = vos_ntohl(pNewFrameHead->etbTopoCnt);
     subAddresses.opTrnTopoCnt   = vos_ntohl(pNewFrameHead->opTrnTopoCnt);
 
-    /*  It might be a PULL request      */
-    if (vos_ntohs(pNewFrameHead->msgType) == (UINT16) TRDP_MSG_PR)
-    {
-        /*  Handle statistics request  */
-        if (vos_ntohl(pNewFrameHead->comId) == TRDP_STATISTICS_PULL_COMID)
-        {
-            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATISTICS_COMID);
-            if (pPulledElement != NULL)
-            {
-                pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
-                pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrameHead->replyIpAddress);
-
-                trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->etbTopoCnt, appHandle->opTrnTopoCnt, 0u, 0u);
-
-                trdp_pdPrepareStats(appHandle, pPulledElement);
-            }
-            else
-            {
-                vos_printLogStr(VOS_LOG_ERROR, "Statistics request failed, not published!\n");
-            }
-        }
-        else
-        {
-            UINT32 replyComId = vos_ntohl(pNewFrameHead->replyComId);
-
-            if (replyComId == 0u)
-            {
-                replyComId = vos_ntohl(pNewFrameHead->comId);
-            }
-
-            /*  Find requested publish element  */
-            pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, replyComId);
-        }
-
-        if (pPulledElement != NULL)
-        {
-            /*  Set the destination address of the requested telegram either to the replyIp or the source Ip of the
-                requester   */
-
-            if (pNewFrameHead->replyIpAddress != 0u)
-            {
-                pPulledElement->pullIpAddress = vos_ntohl(pNewFrameHead->replyIpAddress);
-            }
-            else
-            {
-                pPulledElement->pullIpAddress = subAddresses.srcIpAddr;
-            }
-
-            /* trigger immediate sending of PD  */
-            pPulledElement->privFlags |= TRDP_REQ_2B_SENT;
-
-            if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
-            {
-                /*  We do not break here, only report error */
-                vos_printLogStr(VOS_LOG_WARNING, "Error sending one or more PD packets\n");
-            }
-
-            informUser = TRUE;
-        }
-    }
 
     /*  Examine subscription queue, are we interested in this PD?   */
     pExistingElement = trdp_queueFindSubAddr(appHandle->pRcvQueue, &subAddresses);
@@ -674,6 +615,68 @@ TRDP_ERR_T  trdp_pdReceive (
                 pExistingElement->pFrame    = appHandle->pNewFrame;
                 appHandle->pNewFrame        = pTemp;
             }
+
+            /*  It might be a PULL request      */
+            if (vos_ntohs(pNewFrameHead->msgType) == (UINT16) TRDP_MSG_PR)
+            {
+                /*  Handle statistics request  */
+                if (vos_ntohl(pNewFrameHead->comId) == TRDP_STATISTICS_PULL_COMID)
+                {
+                    pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATISTICS_COMID);
+                    if (pPulledElement != NULL)
+                    {
+                        pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
+                        pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrameHead->replyIpAddress);
+
+                        trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->etbTopoCnt, appHandle->opTrnTopoCnt, 0u, 0u);
+
+                        trdp_pdPrepareStats(appHandle, pPulledElement);
+                    }
+                    else
+                    {
+                        vos_printLogStr(VOS_LOG_ERROR, "Statistics request failed, not published!\n");
+                    }
+                }
+                else
+                {
+                    UINT32 replyComId = vos_ntohl(pNewFrameHead->replyComId);
+
+                    if (replyComId == 0u)
+                    {
+                        replyComId = vos_ntohl(pNewFrameHead->comId);
+                    }
+
+                    /*  Find requested publish element  */
+                    pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, replyComId);
+                }
+
+                if (pPulledElement != NULL)
+                {
+                    /*  Set the destination address of the requested telegram either to the replyIp or the source Ip of the
+                     requester   */
+
+                    if (pNewFrameHead->replyIpAddress != 0u)
+                    {
+                        pPulledElement->pullIpAddress = vos_ntohl(pNewFrameHead->replyIpAddress);
+                    }
+                    else
+                    {
+                        pPulledElement->pullIpAddress = subAddresses.srcIpAddr;
+                    }
+
+                    /* trigger immediate sending of PD  */
+                    pPulledElement->privFlags |= TRDP_REQ_2B_SENT;
+
+                    if (trdp_pdSendQueued(appHandle) != TRDP_NO_ERR)
+                    {
+                        /*  We do not break here, only report error */
+                        vos_printLogStr(VOS_LOG_WARNING, "Error sending one or more PD packets\n");
+                    }
+
+                    informUser = TRUE;
+                }
+            }
+
         }
         else
         {
