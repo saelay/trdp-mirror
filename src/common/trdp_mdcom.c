@@ -19,6 +19,8 @@
  *
  * $Id$
  *
+ *      BL 2018-11-06: for-loops limited to sCurrentMaxSocketCnt instead VOS_MAX_SOCKET_CNT
+ *      BL 2018-06-27: Ticket #206 Message data transmission fails for several test cases (revisited, size handling restored)
  *      SB 2018-10-29: Ticket #216: Message data size and padding wrong if marshalling is used
  *      BL 2018-06-27: Ticket #206 Message data transmission fails for several test cases
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
@@ -1050,7 +1052,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, SOCKET mdSock
     pElement->addr.destIpAddr = appHandle->realIP;
 
     /* Find the socket index */
-    for ( socketIndex = 0u; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++ )
+    for ( socketIndex = 0u; socketIndex < trdp_getCurrentMaxSocketCnt(); socketIndex++ )
     {
         if ( appHandle->iface[socketIndex].sock == mdSock )
         {
@@ -1058,7 +1060,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, SOCKET mdSock
         }
     }
 
-    if ( socketIndex >= VOS_MAX_SOCKET_CNT )
+    if ( socketIndex >= trdp_getCurrentMaxSocketCnt() )
     {
         vos_printLogStr(VOS_LOG_ERROR, "trdp_mdRecvPacket - Socket index out of range\n");
         return TRDP_UNKNOWN_ERR;
@@ -1121,18 +1123,22 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, SOCKET mdSock
             /* Get the rest of the message length */
             dataSize = vos_ntohl(pElement->pPacket->frameHead.datasetLength);
 
-            readDataSize        = dataSize;
+            readDataSize        = trdp_packetSizeMD(dataSize - sizeof(MD_HEADER_T));
+            pElement->grossSize = trdp_packetSizeMD(dataSize);
             pElement->dataSize  = dataSize;
+            dataSize = pElement->grossSize - sizeof(MD_HEADER_T);
         }
         else
         {
             /* Calculate the data size that is pending to read */
-            size        = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
-            dataSize    = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength);
+            dataSize = vos_ntohl(appHandle->uncompletedTCP[socketIndex]->pPacket->frameHead.datasetLength);
 
             pElement->dataSize  = dataSize;
+            pElement->grossSize = trdp_packetSizeMD(dataSize);
+
+            size = appHandle->uncompletedTCP[socketIndex]->grossSize + readSize;
             dataSize        = dataSize - (size - sizeof(MD_HEADER_T));
-            readDataSize    = dataSize;
+            readDataSize    = dataSize; /* trdp_packetSizeMD(dataSize); */
         }
 
         /* If all the Header is read, check if more memory is needed */
@@ -2459,7 +2465,7 @@ void trdp_mdCheckPending (
         }
     }
 
-    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+    for (lIndex = 0; lIndex < trdp_getCurrentMaxSocketCnt(); lIndex++)
     {
         if ((appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET)
             && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
@@ -2592,7 +2598,7 @@ void  trdp_mdCheckListenSocks (
         }
 
         /* scan for sockets */
-        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+        for (lIndex = 0; lIndex < trdp_getCurrentMaxSocketCnt(); lIndex++)
         {
             if (appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET &&
                 appHandle->iface[lIndex].type != TRDP_SOCK_PD
@@ -2722,7 +2728,7 @@ void  trdp_mdCheckListenSocks (
                     INT32   socketIndex;
                     BOOL8   socketFound = FALSE;
 
-                    for (socketIndex = 0; socketIndex < VOS_MAX_SOCKET_CNT; socketIndex++)
+                    for (socketIndex = 0; socketIndex < trdp_getCurrentMaxSocketCnt(); socketIndex++)
                     {
                         if ((appHandle->iface[socketIndex].sock != VOS_INVALID_SOCKET)
                             && (appHandle->iface[socketIndex].type == TRDP_SOCK_MD_TCP)
@@ -2803,7 +2809,7 @@ void  trdp_mdCheckListenSocks (
     /* Check Receive Data (UDP & TCP) */
     /*  Loop through the socket list and check readiness
         (but only while there are ready descriptors left) */
-    for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+    for (lIndex = 0; lIndex < trdp_getCurrentMaxSocketCnt(); lIndex++)
     {
         if (appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET &&
             appHandle->iface[lIndex].type != TRDP_SOCK_PD &&
@@ -2931,7 +2937,7 @@ void  trdp_mdCheckTimeouts (
     {
         INT32 lIndex;
 
-        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+        for (lIndex = 0; lIndex < trdp_getCurrentMaxSocketCnt(); lIndex++)
         {
             if ((appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET)
                 && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
@@ -2953,7 +2959,7 @@ void  trdp_mdCheckTimeouts (
     {
         INT32 lIndex;
 
-        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+        for (lIndex = 0; lIndex < trdp_getCurrentMaxSocketCnt(); lIndex++)
         {
             if ((appHandle->iface[lIndex].sock != VOS_INVALID_SOCKET)
                 && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)

@@ -16,6 +16,8 @@
  *
  * $Id$
  *
+ *      BL 2018-11-06: for-loops limited to sCurrentMaxSocketCnt instead VOS_MAX_SOCKET_CNT
+ *      BL 2018-11-06: Ticket #219: PD Sequence Counter is not synched correctly
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
@@ -176,6 +178,11 @@ static BOOL8 trdp_SockDelJoin (
 /***********************************************************************************************************************
  *   Globals
  */
+
+UINT32 trdp_getCurrentMaxSocketCnt()
+{
+    return (UINT32)sCurrentMaxSocketCnt;
+}
 
 /**********************************************************************************************************************/
 /** Check an MC group not used by other sockets / subscribers/ listeners
@@ -670,7 +677,7 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  *  @param[in]      params          parameters to use
  *  @param[in]      srcIP           IP to bind to (0 = any address)
  *  @param[in]      mcGroup         MC group to join (0 = do not join)
- *  @param[in]      usage           type and port to bind to (PD, MD/UDP, MD/TCP)
+ *  @param[in]      type            type determines port to bind to (PD, MD/UDP, MD/TCP)
  *  @param[in]      options         blocking/nonblocking
  *  @param[in]      rcvMostly       primarily used for receiving (tbd: bind on sender, too?)
  *  @param[out]     useSocket       socket to use, do not open a new one
@@ -988,7 +995,7 @@ void  trdp_releaseSocket (
     {
         /* Check all the sockets */
         /* Close the morituri = TRUE sockets */
-        for (lIndex = 0; lIndex < VOS_MAX_SOCKET_CNT; lIndex++)
+        for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
         {
             if (iface[lIndex].tcpParams.morituri == TRUE)
             {
@@ -1147,7 +1154,7 @@ UINT32  trdp_getSeqCnt (
             while (pSendElement)
             {
                 if ((pSendElement->addr.comId == comId) &&
-                    ((srcIpAddr == 0) || (pSendElement->addr.srcIpAddr != srcIpAddr)))
+                    ((srcIpAddr == 0) || (pSendElement->addr.srcIpAddr == srcIpAddr)))
                 {
                     return pSendElement->curSeqCnt;
                 }
