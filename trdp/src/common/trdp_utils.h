@@ -97,6 +97,15 @@ void        trdp_MDqueueInsFirst (
 #endif
 
 /*********************************************************************************************************************/
+/** Return the largest number of the socket index
+ *
+ *  @return      maxSocketCount
+ */
+
+UINT32 trdp_getCurrentMaxSocketCnt(void);
+
+
+/*********************************************************************************************************************/
 /** Handle the socket pool: Initialize it
  *
  *  @param[in]      iface          pointer to the socket pool
@@ -145,15 +154,20 @@ TRDP_IP_ADDR_T trdp_findMCjoins(
     TRDP_APP_SESSION_T  appHandle,
     TRDP_IP_ADDR_T      mcGroup);
 
-/*********************************************************************************************************************/
+/**********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
+ *  First we loop through the socket pool and check if there is already a socket
+ *  which would suit us. If a multicast group should be joined, we do that on an otherwise suitable socket - up to 20
+ *  multicast goups can be joined per socket.
+ *  If a socket for multicast publishing is requested, we also use the source IP to determine the interface for outgoing
+ *  multicast traffic.
  *
  *  @param[in,out]  iface           socket pool
  *  @param[in]      port            port to use
  *  @param[in]      params          parameters to use
  *  @param[in]      srcIP           IP to bind to (0 = any address)
  *  @param[in]      mcGroup         MC group to join (0 = do not join)
- *  @param[in]      usage           type and port to bind to
+ *  @param[in]      type            type determines port to bind to (PD, MD/UDP, MD/TCP)
  *  @param[in]      options         blocking/nonblocking
  *  @param[in]      rcvMostly       only used for receiving
  *  @param[out]     useSocket       socket to use, do not open a new one
@@ -170,7 +184,7 @@ TRDP_ERR_T trdp_requestSocket(
     const TRDP_SEND_PARAM_T * params,
     TRDP_IP_ADDR_T srcIP,
     TRDP_IP_ADDR_T mcGroup,
-    TRDP_SOCK_TYPE_T usage,
+    TRDP_SOCK_TYPE_T type,
     TRDP_OPTION_T options,
     BOOL8 rcvMostly,
     SOCKET useSocket,
