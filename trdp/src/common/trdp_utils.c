@@ -699,6 +699,8 @@ TRDP_ERR_T  trdp_requestSocket (
     TRDP_ERR_T      err         = TRDP_NO_ERR;
     TRDP_IP_ADDR_T  bindAddr    = vos_determineBindAddr(srcIP, mcGroup, rcvMostly);
 
+    memset(&sock_options, 0, sizeof(sock_options));
+
     if (iface == NULL || params == NULL || pIndex == NULL)
     {
         return TRDP_PARAM_ERR;
