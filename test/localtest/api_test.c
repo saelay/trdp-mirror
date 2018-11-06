@@ -230,6 +230,13 @@ static uint8_t          dataBuffer2[64 * 1024] =
     "It begins with a house.\n"
 };
 
+static uint8_t          dataBuffer3[64] =
+{
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
+};
 
 /**********************************************************************************************************************/
 /*  Macro to initialize the library and open two sessions                                                             */
@@ -371,12 +378,8 @@ static void dbgOut (
 /**********************************************************************************************************************/
 /** trdp processing loop (thread)
  *
- *  @param[in]      pRefCon            user supplied context pointer
- *  @param[in]        category        Log category (Error, Warning, Info etc.)
- *  @param[in]        pTime            pointer to NULL-terminated string of time stamp
- *  @param[in]        pFile            pointer to NULL-terminated string of source module
- *  @param[in]        lineNumber        line
- *  @param[in]        pMsgStr         pointer to NULL-terminated string
+ *  @param[in]      pArg            user supplied context pointer
+ *
  *  @retval         none
  */
 static void trdp_loop (void *pArg)
@@ -467,24 +470,11 @@ static void usage (const char *appName)
 }
 
 /**********************************************************************************************************************/
-/** Find 2 interface IPs in the range 10.0.x.y
- *  to be used for ping-pong testing
- *  @param
- */
-static void iface_init (
-    TRDP_IP_ADDR_T  *pIP1,
-    TRDP_IP_ADDR_T  *pIP2)
-{
-    if ((*pIP1 == 0) && (*pIP2 == 0))
-    {
-        /* find suitable addresses if not set */
-
-    }
-}
-
-/**********************************************************************************************************************/
 /** common initialisation
  *
+ *  @param[in]      dbgout          pointer to logging function
+ *  @param[in]      pSession        pointer to session
+ *  @param[in]      name            optional name of thread
  *  @retval         application session handle
  */
 static TRDP_APP_SESSION_T test_init (
@@ -1863,7 +1853,10 @@ static int test14 ()
 
 #define                 TEST15_STRING_COMID     1000u
 #define                 TEST15_STRING_REQUEST   (char *)&dataBuffer1  /* "Requesting data" */
+#define                 TEST15_STRING_REQUEST_LEN   32  /* "Requesting data len" */
 #define                 TEST15_STRING_REPLY     (char *)&dataBuffer2  /* "Data transmission succeded" */
+#define                 TEST15_STRING_REPLY_LEN     33    /* "Replying data len" */
+#define                 TEST15_64BYTES          (char *)&dataBuffer3  /* "1...15 * 4" */
 
 static void  test15CBFunction (
     void                    *pRefCon,
@@ -1874,6 +1867,7 @@ static void  test15CBFunction (
 {
     TRDP_ERR_T err;
     TRDP_URI_USER_T srcURI = "12345678901234567890123456789012";    /* 32 chars */
+    CHAR8           *localData = (pData == NULL)? "empty data" : (CHAR8*) pData;
 
     if (pMsg->resultCode == TRDP_REPLYTO_ERR)
     {
@@ -1890,15 +1884,15 @@ static void  test15CBFunction (
         }
         else
         {
-            /* fprintf(gFp, "->> Request received (%s)\n", pData); */
-            if (memcmp(srcURI, pMsg->srcUserURI, 32u) != 0)
-            {
-                gFailed = 1;
-                fprintf(gFp, "## srcUserURI wrong\n");
-            }
-            fprintf(gFp, "->> Sending reply\n");
-            err = tlm_replyQuery(appHandle, &pMsg->sessionId, TEST15_STRING_COMID, 0u, 500000u, NULL,
-                                 (UINT8 *)TEST15_STRING_REPLY, 63 * 1024 /*strlen(TEST5_STRING_REPLY)*/);
+            fprintf(gFp, "<<- Request received (%.16s...)\n", localData);
+//            if (memcmp(srcURI, pMsg->srcUserURI, 32u) != 0)
+//            {
+//                gFailed = 1;
+//                fprintf(gFp, "### srcUserURI wrong\n");
+//            }
+            fprintf(gFp, "->> Sending reply with query (%.16s)\n", (UINT8 *)TEST15_STRING_REPLY);
+            err = tlm_replyQuery(appHandle, &pMsg->sessionId, TEST15_STRING_COMID, 0u, 0u, NULL,
+                                 (UINT8 *)TEST15_STRING_REPLY, TEST15_STRING_REPLY_LEN);
 
             IF_ERROR("tlm_reply");
         }
@@ -1906,7 +1900,7 @@ static void  test15CBFunction (
     else if ((pMsg->msgType == TRDP_MSG_MQ) &&
              (pMsg->comId == TEST15_STRING_COMID))
     {
-        fprintf(gFp, "->> Reply received (%.80s...)\n", pData);
+        fprintf(gFp, "<<- Reply received (%.16s...)\n", localData);
         fprintf(gFp, "->> Sending confirmation\n");
         err = tlm_confirm(appHandle, &pMsg->sessionId, 0u, NULL);
 
@@ -1914,7 +1908,7 @@ static void  test15CBFunction (
     }
     else if (pMsg->msgType == TRDP_MSG_MC)
     {
-        fprintf(gFp, "->> Confirmation received (status = %u)\n", pMsg->userStatus);
+        fprintf(gFp, "<<- Confirmation received (status = %u)\n", pMsg->userStatus);
     }
     else if ((pMsg->msgType == TRDP_MSG_MN) &&
              (pMsg->comId == TEST15_STRING_COMID))
@@ -1932,7 +1926,7 @@ static void  test15CBFunction (
     }
     else
     {
-        fprintf(gFp, "->> Unsolicited Message received (type = %0xhx)\n", pMsg->msgType);
+        fprintf(gFp, "<<- Unsolicited Message received (type = %0xhx)\n", pMsg->msgType);
         gFailed = 1;
     }
 end:
@@ -1961,7 +1955,7 @@ static int test15 ()
                               VOS_INADDR_ANY, VOS_INADDR_ANY,
                               TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, NULL, destURI1);
         IF_ERROR("tlm_addListener1");
-        fprintf(gFp, "->> MD TCP Listener1 set up\n");
+        fprintf(gFp, "<<- MD TCP Listener1 set up\n");
 
         /* try to connect (request) some data */
         for (i = 0; i < 10; i++)
@@ -1970,7 +1964,7 @@ static int test15 ()
                               TEST5_STRING_COMID, 0u, 0u,
                               0u, gSession2.ifaceIP,
                               TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
-                              (UINT8 *)TEST5_STRING_REQUEST, 63 * 1024 /*strlen(TEST5_STRING_REQUEST)*/,
+                              (UINT8 *)TEST15_STRING_REQUEST, TEST15_STRING_REQUEST_LEN,
                               srcURI, destURI2);
 
             IF_ERROR("tlm_request1");
@@ -1979,7 +1973,7 @@ static int test15 ()
             vos_threadDelay(500000u);
         }
 
-        fprintf(gFp, "Waiting for connection close... \n");
+        fprintf(gFp, "Waiting 6s ... \n");
         /* Wait until listener connection times out */
         vos_threadDelay(6000000u);
 
@@ -1990,7 +1984,7 @@ static int test15 ()
                               TEST5_STRING_COMID, 0u, 0u,
                               0u, gSession2.ifaceIP,
                               TRDP_FLAGS_CALLBACK | TRDP_FLAGS_TCP, 1u, 1000000u, NULL,
-                              (UINT8 *)TEST5_STRING_REQUEST, 63 * 1024 /*strlen(TEST5_STRING_REQUEST)*/,
+                              (UINT8 *)TEST15_STRING_REQUEST, TEST15_STRING_REQUEST_LEN,
                               srcURI, destURI2);
 
             IF_ERROR("tlm_request2");
@@ -2012,6 +2006,78 @@ static int test15 ()
     CLEANUP;
 }
 
+static int test16 ()
+{
+    PREPARE("UDP MD Request - Reply - Confirm, #206", "test"); /* allocates appHandle1, appHandle2, failed = 0, err */
+
+    /* ------------------------- test code starts here --------------------------- */
+
+    {
+        int i;
+        TRDP_UUID_T sessionId1;
+        TRDP_LIS_T listenHandle;
+        TRDP_URI_USER_T destURI1    = "12345678901234567890123456789012";    /* 32 chars */
+        TRDP_URI_USER_T destURI2    = "12345678901234567890123456789012";    /* 32 chars */
+        TRDP_URI_USER_T srcURI      = "12345678901234567890123456789012";    /* 32 chars */
+
+        gFullLog = TRUE;
+
+        err = tlm_addListener(appHandle2, &listenHandle, NULL, test15CBFunction,
+                              TRUE,
+                              TEST5_STRING_COMID, 0u, 0u, 0u,
+                              VOS_INADDR_ANY, VOS_INADDR_ANY,
+                              TRDP_FLAGS_CALLBACK, NULL, NULL);
+        IF_ERROR("tlm_addListener1");
+        fprintf(gFp, "->> MD UDP Listener1 set up\n");
+
+        /* try to connect (request) some data */
+        for (i = 0; i < 10; i++)
+        {
+            err = tlm_request(appHandle1, NULL, test15CBFunction, &sessionId1,
+                              TEST5_STRING_COMID, 0u, 0u,
+                              0u, gSession2.ifaceIP,
+                              TRDP_FLAGS_CALLBACK, 1u, 1000000u, NULL,
+                              (UINT8 *)TEST15_STRING_REQUEST, TEST15_STRING_REQUEST_LEN,
+                              NULL, NULL);
+
+            IF_ERROR("tlm_request1");
+            fprintf(gFp, "->> MD UDP Request1 sent\n");
+
+            vos_threadDelay(500000u);
+        }
+
+        fprintf(gFp, "Waiting 6s for connection close... \n");
+        /* Wait until listener connection times out */
+        vos_threadDelay(6000000u);
+
+        /* now try to connect again */
+        for (i = 0; i < 10; i++)
+        {
+            err = tlm_request(appHandle1, NULL, test15CBFunction, &sessionId1,
+                              TEST5_STRING_COMID, 0u, 0u,
+                              0u, gSession2.ifaceIP,
+                              TRDP_FLAGS_CALLBACK, 1u, 1000000u, NULL,
+                              (UINT8 *)TEST15_STRING_REQUEST, TEST15_STRING_REQUEST_LEN,
+                              NULL, NULL);
+
+            IF_ERROR("tlm_request2");
+            fprintf(gFp, "->> MD UDP Request2 sent\n");
+
+            vos_threadDelay(500000u);
+        }
+
+        err = tlm_delListener(appHandle2, listenHandle);
+        IF_ERROR("tlm_delListener2");
+
+        gFullLog = FALSE;
+
+    }
+
+    /* ------------------------- test code ends here --------------------------- */
+
+    CLEANUP;
+}
+
 
 
 
@@ -2021,23 +2087,22 @@ static int test15 ()
 test_func_t *testArray[] =
 {
     NULL,
-    test1,
-    test2,
-    test3,
-    test4,
-    test5,
-    test6,
-    test7,
-    /*
-       test8,
-       test9,
-     */
-    test10,
-    test11,
-    test12,
-    test13,
-    test14,
-    test15,
+    test1,  /* PD publish and subscribe */
+    test2,  /* Publish & Subscribe, Callback */
+    test3,  /* Ticket #140: tlp_get reports immediately TRDP_TIMEOUT_ERR */
+    test4,  /* Ticket #153 (two PDs on one pull request */
+    test5,  /* TCP MD Request - Reply - Confirm, #149, #160 */
+    test6,  /* UDP MD Request - Reply - Confirm, #149 */
+    test7,  /* UDP MD Notify no sessionID #127 */
+    test8,  /* #153 (two PDs on one pull request? Receiver only */
+    test9,  /* Send and receive many telegrams, to check time optimisations */
+    test10,  /* tlc_getVersionString */
+    test11,  /* babbling idiot :-) */
+    test12,  /* testing unsubscribe and unjoin */
+    test13,  /* PD publish and subscribe, auto increment using new 1.4 callback function */
+    test14,  /* Publish & Subscribe, Callback */
+    test15, /* MD Request - Reply / Reuse of TCP connection */
+    test16, /* MD Request - Reply / UDP */
     NULL
 };
 
