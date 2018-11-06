@@ -1995,8 +1995,8 @@ static TRDP_ERR_T  trdp_mdRecv (
     vos_printLog(VOS_LOG_INFO,
                  "Received %s MD packet (type: '%c%c' UUID: %02x%02x%02x%02x%02x%02x%02x%02x Data len: %u)\n",
                  appHandle->pMDRcvEle->pktFlags & TRDP_FLAGS_TCP ? "TCP" : "UDP",
-                 (char)(*(char *)&pH->msgType),
-                 (char)(*((char *)&pH->msgType + 1u)),
+                 (*(char *)&pH->msgType),
+                 (*((char *)&pH->msgType + 1u)),
                  pH->sessionID[0],
                  pH->sessionID[1],
                  pH->sessionID[2],
@@ -2095,6 +2095,8 @@ TRDP_ERR_T trdp_mdGetTCPSocket (
     TRDP_ERR_T      result = TRDP_NO_ERR;
     VOS_SOCK_OPT_T  trdp_sock_opt;
     UINT32          backlog = 10u; /* Backlog = maximum connection atempts if system is busy. */
+
+    memset(&trdp_sock_opt, 0, sizeof(trdp_sock_opt));
 
     if (pSession->tcpFd.listen_sd == VOS_INVALID_SOCKET)     /* First time TCP is used */
     {
@@ -2704,6 +2706,8 @@ void  trdp_mdCheckListenSocks (
 
                 {
                     VOS_SOCK_OPT_T trdp_sock_opt;
+
+                    memset(&trdp_sock_opt, 0, sizeof(trdp_sock_opt));
 
                     trdp_sock_opt.qos   = appHandle->mdDefault.sendParam.qos;
                     trdp_sock_opt.ttl   = appHandle->mdDefault.sendParam.ttl;
