@@ -734,11 +734,8 @@ typedef struct
    \subsection abbreviation_sec Abbreviations and Definitions
 
    -<em> API </em>    Application Programming Interface
-
    -<em> ECN </em>    Ethernet Consist Network
-
    -<em> TRDP </em> Train Real-time Data Protocol
-
    -<em> TCMS </em>    Train Control Management System
 
    \section terminology_sec Terminology
@@ -750,13 +747,11 @@ typedef struct
    for short): These are programs using the API to access the
    services of TRDP.  Programmers developing such applications are
    the main target audience for this documentation.
-
    - <em> TRDP Light Implementations </em> (or just 'TRDP
    implementation'): These are libraries realising the API
    as documented here.  Programmers developing such implementations
    will find useful definitions about syntax and semantics of the
    API wihtin this documentation.
-
    - <em> VOS Subsystem </em> (Virtual Operating System): An OS and hardware
    abstraction layer which offers memory, networking, threading, queues and debug functions.
    The VOS API is documented here.
