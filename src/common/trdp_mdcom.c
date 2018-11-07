@@ -3270,7 +3270,7 @@ TRDP_ERR_T trdp_mdReply (const TRDP_MSG_T           msgType,
 
                 if ( msgType == TRDP_MSG_MQ )
                 {
-                    /* infinite timeouts for confirmation shall not exist */
+                    /* infinite timeouts for confirmation shall not exist, but are possible */
                     pSenderElement->interval.tv_sec     = timeout / 1000000u;
                     pSenderElement->interval.tv_usec    = timeout % 1000000;
                     trdp_mdSetSessionTimeout(pSenderElement);

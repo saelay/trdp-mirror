@@ -3143,13 +3143,17 @@ TRDP_ERR_T tlm_replyQuery (
     {
         return TRDP_PARAM_ERR;
     }
-    if ( confirmTimeout != 0U )
+    if ( confirmTimeout == 0U )
     {
-        mdTimeOut = confirmTimeout;
+        mdTimeOut = appHandle->mdDefault.confirmTimeout;
+    }
+    else if ( confirmTimeout == TRDP_INFINITE_TIMEOUT)
+    {
+        mdTimeOut = 0;
     }
     else
     {
-        mdTimeOut = appHandle->mdDefault.confirmTimeout;
+        mdTimeOut = confirmTimeout;
     }
 
     return trdp_mdReply(TRDP_MSG_MQ,
