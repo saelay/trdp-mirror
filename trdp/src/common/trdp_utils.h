@@ -102,7 +102,7 @@ void        trdp_MDqueueInsFirst (
  *  @return      maxSocketCount
  */
 
-UINT32 trdp_getCurrentMaxSocketCnt(void);
+INT32 trdp_getCurrentMaxSocketCnt(void);
 
 
 /*********************************************************************************************************************/

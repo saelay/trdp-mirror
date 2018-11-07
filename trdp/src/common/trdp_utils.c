@@ -179,9 +179,9 @@ static BOOL8 trdp_SockDelJoin (
  *   Globals
  */
 
-UINT32 trdp_getCurrentMaxSocketCnt()
+INT32 trdp_getCurrentMaxSocketCnt()
 {
-    return (UINT32)sCurrentMaxSocketCnt;
+    return sCurrentMaxSocketCnt;
 }
 
 /**********************************************************************************************************************/

@@ -19,6 +19,8 @@
  *
  * $Id$
  *
+ *      BL 2018-11-07: Ticket #185 MD reply: Infinite timeout wrong handled
+ *      BL 2018-11-07: Ticket #220 Message Data - Different behaviour UDP & TCP
  *      BL 2018-11-06: for-loops limited to sCurrentMaxSocketCnt instead VOS_MAX_SOCKET_CNT
  *      BL 2018-06-27: Ticket #206 Message data transmission fails for several test cases (revisited, size handling restored)
  *      SB 2018-10-29: Ticket #216: Message data size and padding wrong if marshalling is used
@@ -1052,7 +1054,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, SOCKET mdSock
     pElement->addr.destIpAddr = appHandle->realIP;
 
     /* Find the socket index */
-    for ( socketIndex = 0u; socketIndex < trdp_getCurrentMaxSocketCnt(); socketIndex++ )
+    for ( socketIndex = 0u; socketIndex < (UINT32)trdp_getCurrentMaxSocketCnt(); socketIndex++ )
     {
         if ( appHandle->iface[socketIndex].sock == mdSock )
         {
@@ -1060,7 +1062,7 @@ static TRDP_ERR_T trdp_mdRecvTCPPacket (TRDP_SESSION_PT appHandle, SOCKET mdSock
         }
     }
 
-    if ( socketIndex >= trdp_getCurrentMaxSocketCnt() )
+    if ( socketIndex >= (UINT32)trdp_getCurrentMaxSocketCnt() )
     {
         vos_printLogStr(VOS_LOG_ERROR, "trdp_mdRecvPacket - Socket index out of range\n");
         return TRDP_UNKNOWN_ERR;
@@ -2330,9 +2332,13 @@ TRDP_ERR_T  trdp_mdSend (
                         if (nextstate == TRDP_ST_RX_REPLYQUERY_W4C)
                         {
                             /* Update timeout */
-                            vos_getTime(&iterMD->timeToGo);
-                            vos_addTime(&iterMD->timeToGo, &iterMD->interval);
-                            vos_printLogStr(VOS_LOG_INFO, "Setting timeout for confirmation!\n");
+                            if (((iterMD->interval.tv_sec != TRDP_MD_INFINITE_TIME) ||
+                                 (iterMD->interval.tv_usec != TRDP_MD_INFINITE_USEC_TIME)))
+                            {
+                                vos_getTime(&iterMD->timeToGo);
+                                vos_addTime(&iterMD->timeToGo, &iterMD->interval);
+                                vos_printLogStr(VOS_LOG_INFO, "Setting timeout for confirmation!\n");
+                            }
                         }
 
                         switch (iterMD->stateEle)
@@ -2914,7 +2920,9 @@ void  trdp_mdCheckTimeouts (
         }
 
         /* timeToGo is timeout value! */
-        if (0 > vos_cmpTime(&iterMD->timeToGo, &now))     /* timeout overflow */
+        if (((iterMD->interval.tv_sec != TRDP_MD_INFINITE_TIME) ||
+             (iterMD->interval.tv_usec != TRDP_MD_INFINITE_USEC_TIME)) &&
+            (0 > vos_cmpTime(&iterMD->timeToGo, &now)))     /* timeout overflow */
         {
             timeOut = trdp_mdTimeOutStateHandler( iterMD, appHandle, &resultCode);
         }
@@ -3161,15 +3169,9 @@ static void trdp_mdDetailSenderPacket (const TRDP_MSG_T         msgType,
     /* Insert element in send queue */
     if ( TRUE == newSession )
     {
-        if ((pSenderElement->pktFlags & TRDP_FLAGS_TCP) != 0 )
-        {
             trdp_MDqueueAppLast(&appHandle->pMDSndQueue, pSenderElement);
-        }
-        else
-        {
-            trdp_MDqueueInsFirst(&appHandle->pMDSndQueue, pSenderElement);
-        }
     }
+
     vos_printLog(VOS_LOG_INFO,
                  "MD sender element state = %d, msgType=%c%c\n",
                  pSenderElement->stateEle,
