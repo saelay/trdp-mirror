@@ -133,6 +133,8 @@
 		08CE2082164962BB0038151B /* trdp_mdcom.h in Headers */ = {isa = PBXBuildFile; fileRef = 73821F31150777B00046E0AC /* trdp_mdcom.h */; };
 		08CE2085164962BE0038151B /* trdp_mdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F30150777B00046E0AC /* trdp_mdcom.c */; };
 		08CE2192164A91B30038151B /* trdp_reserved.c in Sources */ = {isa = PBXBuildFile; fileRef = 08CE2172164A6E130038151B /* trdp_reserved.c */; };
+		08D1A1D32123082F002B4C7B /* libtrdp64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73591F971B986C7900B758F0 /* libtrdp64.a */; };
+		08D1A1D82123085A002B4C7B /* MCreceiver.c in Sources */ = {isa = PBXBuildFile; fileRef = 08D1A1CC2123074F002B4C7B /* MCreceiver.c */; };
 		08D51C22200FB810004319B6 /* vos_mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B321B70E9DF0066EA06 /* vos_mem.c */; };
 		08D51C23200FB810004319B6 /* vos_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B331B70E9DF0066EA06 /* vos_utils.c */; };
 		08D51C25200FB810004319B6 /* vos_sock.c in Sources */ = {isa = PBXBuildFile; fileRef = 73E052721513537C0058D590 /* vos_sock.c */; };
@@ -151,6 +153,8 @@
 		08D51C42200FB810004319B6 /* trdp_utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F39150777B00046E0AC /* trdp_utils.c */; };
 		08D51C44200FB810004319B6 /* trdp_xml.c in Sources */ = {isa = PBXBuildFile; fileRef = 730B42A81C650ECB00A92265 /* trdp_xml.c */; };
 		08EA9EDA1EE990EE00BC653A /* trdp_mdcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 73821F30150777B00046E0AC /* trdp_mdcom.c */; };
+		08FA81B12176207900A4FF81 /* libtrdp64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73591F971B986C7900B758F0 /* libtrdp64.a */; };
+		08FA81B6217620AF00A4FF81 /* trdp-xmlprint-test.c in Sources */ = {isa = PBXBuildFile; fileRef = 7366AC7416B68C920068A893 /* trdp-xmlprint-test.c */; };
 		73080FE517A91716003DAE84 /* tau_marshall.c in Sources */ = {isa = PBXBuildFile; fileRef = 73D6657A15D3D88700A352D4 /* tau_marshall.c */; settings = {COMPILER_FLAGS = "-DL_ENDIAN"; }; };
 		7308114C17ABF8C9003DAE84 /* test_marshalling.c in Sources */ = {isa = PBXBuildFile; fileRef = 737B18CE15D901F000724FEF /* test_marshalling.c */; };
 		730B42A61C650DFC00A92265 /* tau_xml.c in Sources */ = {isa = PBXBuildFile; fileRef = 08594B291B70DFD20066EA06 /* tau_xml.c */; };
@@ -488,6 +492,20 @@
 			remoteInfo = "trdp Posix";
 		};
 		08BFF2942024722E005E2AB8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73591F6F1B986C7900B758F0;
+			remoteInfo = trdp64Posix;
+		};
+		08D1A1CF2123082F002B4C7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "trdp Posix";
+		};
+		08FA81AD2176207900A4FF81 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
@@ -897,7 +915,6 @@
 		08594B331B70E9DF0066EA06 /* vos_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = vos_utils.c; sourceTree = "<group>"; tabWidth = 4; };
 		08594B381B70EA0E0066EA06 /* windows */ = {isa = PBXFileReference; lastKnownFileType = folder; path = windows; sourceTree = "<group>"; };
 		08594B391B70EA1D0066EA06 /* integrity */ = {isa = PBXFileReference; lastKnownFileType = folder; path = integrity; sourceTree = "<group>"; };
-		08594B3A1B70EA3F0066EA06 /* VisualC */ = {isa = PBXFileReference; lastKnownFileType = folder; name = VisualC; path = ../VisualC; sourceTree = "<group>"; };
 		0867899C1F0CE3D7009D1B8F /* lint */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lint; sourceTree = "<group>"; };
 		088397771F06A2A4003A8C6F /* pdsend_example.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = pdsend_example.xml; sourceTree = "<group>"; };
 		08A327B91E51FDD400B03846 /* api_test.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = api_test.c; sourceTree = "<group>"; };
@@ -913,8 +930,12 @@
 		08C44FE11F2231B300AB84EF /* tau_dnr_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tau_dnr_types.h; sourceTree = "<group>"; };
 		08CE2171164A6E130038151B /* trdp_reserved.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trdp_reserved.h; path = marshalling/trdp_reserved.h; sourceTree = "<group>"; };
 		08CE2172164A6E130038151B /* trdp_reserved.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trdp_reserved.c; path = marshalling/trdp_reserved.c; sourceTree = "<group>"; };
+		08D1A1CC2123074F002B4C7B /* MCreceiver.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = MCreceiver.c; path = ../test/diverse/MCreceiver.c; sourceTree = "<group>"; };
+		08D1A1D72123082F002B4C7B /* mcreceive */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mcreceive; sourceTree = BUILT_PRODUCTS_DIR; };
 		08D51C13200FB6F8004319B6 /* libtrdp64iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtrdp64iOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		08D9D5D51EDDA32C00EE2FA0 /* TAUL_PD */ = {isa = PBXFileReference; lastKnownFileType = folder; path = TAUL_PD; sourceTree = "<group>"; };
+		08FA81B52176207900A4FF81 /* trdp-xmlprint-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "trdp-xmlprint-test"; sourceTree = BUILT_PRODUCTS_DIR; };
+		08FA81C32177310000A4FF81 /* type_test.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; lineEnding = 2; name = type_test.xml; path = ../../../../../../Desktop/type_test.xml; sourceTree = "<group>"; };
 		7303DC7E1BAAB016004C92D9 /* tau_cstinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = tau_cstinfo.c; sourceTree = "<group>"; tabWidth = 4; };
 		730B42A81C650ECB00A92265 /* trdp_xml.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = trdp_xml.c; sourceTree = "<group>"; tabWidth = 4; };
 		730B42A91C650ECB00A92265 /* trdp_xml.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = trdp_xml.h; sourceTree = "<group>"; tabWidth = 4; };
@@ -1007,7 +1028,7 @@
 		73821F2F150777B00046E0AC /* trdp_if.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_if.c; sourceTree = "<group>"; tabWidth = 4; wrapsLines = 0; };
 		73821F30150777B00046E0AC /* trdp_mdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_mdcom.c; sourceTree = "<group>"; tabWidth = 4; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		73821F31150777B00046E0AC /* trdp_mdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_mdcom.h; sourceTree = "<group>"; tabWidth = 4; };
-		73821F34150777B00046E0AC /* trdp_pdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_pdcom.c; sourceTree = "<group>"; tabWidth = 4; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		73821F34150777B00046E0AC /* trdp_pdcom.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = trdp_pdcom.c; sourceTree = "<group>"; tabWidth = 4; };
 		73821F35150777B00046E0AC /* trdp_pdcom.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = trdp_pdcom.h; sourceTree = "<group>"; tabWidth = 4; };
 		73821F36150777B00046E0AC /* trdp_private.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = trdp_private.h; sourceTree = "<group>"; tabWidth = 4; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		73821F39150777B00046E0AC /* trdp_utils.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.c; path = trdp_utils.c; sourceTree = "<group>"; tabWidth = 4; };
@@ -1106,10 +1127,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		08D1A1D22123082F002B4C7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08D1A1D32123082F002B4C7B /* libtrdp64.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		08D51C10200FB6F8004319B6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08FA81B02176207900A4FF81 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08FA81B12176207900A4FF81 /* libtrdp64.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1396,7 +1433,6 @@
 				08594B061B6FAC160066EA06 /* spy */,
 				08594B081B6FB3E80066EA06 /* example */,
 				08594B101B70D6EE0066EA06 /* resources */,
-				08594B3A1B70EA3F0066EA06 /* VisualC */,
 				085323DB20DD5C2C00A29E56 /* VSExpress2015 */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				73D452731D90301F00CEF20D /* Frameworks */,
@@ -1439,6 +1475,8 @@
 				08BFF28D20247203005E2AB8 /* sourceFiltering */,
 				0840586B20A0A57100C2821E /* mdTest4 */,
 				08BC1D9E2100C38D009FC612 /* vtest */,
+				08D1A1D72123082F002B4C7B /* mcreceive */,
+				08FA81B52176207900A4FF81 /* trdp-xmlprint-test */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1481,6 +1519,7 @@
 				7366AC7116B68C920068A893 /* example.xml */,
 				088397771F06A2A4003A8C6F /* pdsend_example.xml */,
 				082938F420935967009A69C9 /* nestedDS.xml */,
+				08FA81C32177310000A4FF81 /* type_test.xml */,
 				7366AC7216B68C920068A893 /* readme.txt */,
 				7366AC7316B68C920068A893 /* trdp-xmlpd-test.c */,
 				7366AC7416B68C920068A893 /* trdp-xmlprint-test.c */,
@@ -1662,6 +1701,7 @@
 				73134A221BCBD8FA00E3BF88 /* inaugTest.c */,
 				739F99F7179FBF96006238E7 /* LibraryTests.c */,
 				7322487F16A97E7900148295 /* crc-test.c */,
+				08D1A1CC2123074F002B4C7B /* MCreceiver.c */,
 				7340919E1765CD2000CFCE5B /* subTest.c */,
 				732D2792162DBD84009D7857 /* getStats.c */,
 				73F5F9A0171C33970087C6B7 /* pdPull.c */,
@@ -1938,6 +1978,23 @@
 			productReference = 08BFF28D20247203005E2AB8 /* sourceFiltering */;
 			productType = "com.apple.product-type.tool";
 		};
+		08D1A1CD2123082F002B4C7B /* mcreceive */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 08D1A1D42123082F002B4C7B /* Build configuration list for PBXNativeTarget "mcreceive" */;
+			buildPhases = (
+				08D1A1D02123082F002B4C7B /* Sources */,
+				08D1A1D22123082F002B4C7B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				08D1A1CE2123082F002B4C7B /* PBXTargetDependency */,
+			);
+			name = mcreceive;
+			productName = sendHello;
+			productReference = 08D1A1D72123082F002B4C7B /* mcreceive */;
+			productType = "com.apple.product-type.tool";
+		};
 		08D51C12200FB6F8004319B6 /* trdp iOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 08D51C19200FB6F9004319B6 /* Build configuration list for PBXNativeTarget "trdp iOS" */;
@@ -1954,6 +2011,23 @@
 			productName = trdpiOS;
 			productReference = 08D51C13200FB6F8004319B6 /* libtrdp64iOS.a */;
 			productType = "com.apple.product-type.library.static";
+		};
+		08FA81AB2176207900A4FF81 /* trdp-xmlprint-test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 08FA81B22176207900A4FF81 /* Build configuration list for PBXNativeTarget "trdp-xmlprint-test" */;
+			buildPhases = (
+				08FA81AE2176207900A4FF81 /* Sources */,
+				08FA81B02176207900A4FF81 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				08FA81AC2176207900A4FF81 /* PBXTargetDependency */,
+			);
+			name = "trdp-xmlprint-test";
+			productName = pdpull;
+			productReference = 08FA81B52176207900A4FF81 /* trdp-xmlprint-test */;
+			productType = "com.apple.product-type.tool";
 		};
 		730C15BC1B95A5480075D7F3 /* test_library */ = {
 			isa = PBXNativeTarget;
@@ -2447,6 +2521,8 @@
 				08BFF28C20247203005E2AB8 /* sourceFiltering */,
 				0840586020A0A57100C2821E /* mdTest4 */,
 				08BC1D942100C38D009FC612 /* vtest */,
+				08D1A1CD2123082F002B4C7B /* mcreceive */,
+				08FA81AB2176207900A4FF81 /* trdp-xmlprint-test */,
 			);
 		};
 /* End PBXProject section */
@@ -2535,6 +2611,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		08D1A1D02123082F002B4C7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08D1A1D82123085A002B4C7B /* MCreceiver.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		08D51C0F200FB6F8004319B6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2556,6 +2640,14 @@
 				08D51C40200FB810004319B6 /* trdp_stats.c in Sources */,
 				08D51C42200FB810004319B6 /* trdp_utils.c in Sources */,
 				08D51C44200FB810004319B6 /* trdp_xml.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		08FA81AE2176207900A4FF81 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				08FA81B6217620AF00A4FF81 /* trdp-xmlprint-test.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2959,6 +3051,16 @@
 			isa = PBXTargetDependency;
 			target = 73591F6F1B986C7900B758F0 /* trdp64Posix */;
 			targetProxy = 08BFF2942024722E005E2AB8 /* PBXContainerItemProxy */;
+		};
+		08D1A1CE2123082F002B4C7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC045055464E500DB518D /* trdp Posix */;
+			targetProxy = 08D1A1CF2123082F002B4C7B /* PBXContainerItemProxy */;
+		};
+		08FA81AC2176207900A4FF81 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73591F6F1B986C7900B758F0 /* trdp64Posix */;
+			targetProxy = 08FA81AD2176207900A4FF81 /* PBXContainerItemProxy */;
 		};
 		730C15BD1B95A5480075D7F3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3502,6 +3604,37 @@
 			};
 			name = Release;
 		};
+		08D1A1D52123082F002B4C7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_CFLAGS = "-DPOSIX";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		08D1A1D62123082F002B4C7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		08D51C1A200FB6F9004319B6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3543,6 +3676,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv7s arm64";
 			};
 			name = Debug;
 		};
@@ -3584,6 +3718,42 @@
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "armv7 armv7s arm64";
+			};
+			name = Release;
+		};
+		08FA81B32176207900A4FF81 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_CFLAGS = "-DPOSIX";
+				PREBINDING = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		08FA81B42176207900A4FF81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PREBINDING = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -3684,7 +3854,7 @@
 				SDKROOT = macosx;
 				SYMROOT = ../bld/output/osx_x86;
 				USER_HEADER_SEARCH_PATHS = "";
-				VALID_ARCHS = x86_64;
+				VALID_ARCHS = "x86_64 arm64 armv7";
 			};
 			name = Debug;
 		};
@@ -3738,7 +3908,7 @@
 				SDKROOT = macosx;
 				SYMROOT = ../bld/output/osx_x86;
 				USER_HEADER_SEARCH_PATHS = "";
-				VALID_ARCHS = x86_64;
+				VALID_ARCHS = "x86_64 arm64 armv7";
 			};
 			name = Release;
 		};
@@ -4745,11 +4915,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		08D1A1D42123082F002B4C7B /* Build configuration list for PBXNativeTarget "mcreceive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08D1A1D52123082F002B4C7B /* Debug */,
+				08D1A1D62123082F002B4C7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		08D51C19200FB6F9004319B6 /* Build configuration list for PBXNativeTarget "trdp iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				08D51C1A200FB6F9004319B6 /* Debug */,
 				08D51C1B200FB6F9004319B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		08FA81B22176207900A4FF81 /* Build configuration list for PBXNativeTarget "trdp-xmlprint-test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08FA81B32176207900A4FF81 /* Debug */,
+				08FA81B42176207900A4FF81 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
