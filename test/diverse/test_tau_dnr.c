@@ -10,10 +10,11 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright NewTec GmbH, 2017. All rights reserved.
+ *          Copyright NewTec GmbH, 2017-2018. All rights reserved.
  *
  * $Id$
  *
+ *      BL 2018-11-09: Testing TCN-DNS for LINT findings in tau_dnr.c
  *      BL 2017-07-25: Testing TCN-DNS for Ticket #125: tau_dnr: TCN DNS support missing
  */
 
@@ -22,8 +23,8 @@
  */
 
 
-#ifdef (defined (WIN32) || defined (WIN64))
-// include also stuff, needed for window
+#if (defined (WIN32) || defined (WIN64))
+// include also stuff, needed for windows
 //#include "stdafx.h"
 #include <winsock2.h>
 #elif POSIX
@@ -54,7 +55,7 @@
 #endif
 
 #define PATH_TO_HOSTSFILE   "hosts_example"
-#define OWN_IP              vos_dottedIP("10.0.2.101")
+#define OWN_IP              vos_dottedIP("10.0.1.101")
 #define DNS_SERVER          vos_dottedIP("10.0.1.1")
 
 /**********************************************************************************************************************/
@@ -192,6 +193,17 @@ static int test_tau_init(
         ret = 0;
     }
     
+    err = tau_uri2Addr(appHandle, &ipAddr, "devECSC.aveh.lCst.lclst.ltrn");
+    if (err != TRDP_NO_ERR)
+    {
+        printf("tau_uri2Addr: devECSC not known\n");
+        goto exit_label;
+    }
+    else
+    {
+        printf("tau_uri2Addr returns: %s\n", vos_ipDotted(ipAddr));
+        ret = 0;
+    }
     err = tau_uri2Addr(appHandle, &ipAddr, "raspi24");
     if (err != TRDP_NO_ERR)
     {
