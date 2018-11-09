@@ -1204,6 +1204,10 @@ EXT_DECL TRDP_IP_ADDR_T tau_getOwnAddr (
                 }
             }
         }
+        else
+        {
+            return appHandle->realIP;
+        }
     }
 
 
