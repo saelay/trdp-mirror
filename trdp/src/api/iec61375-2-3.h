@@ -143,10 +143,9 @@
         to facilitate alignment the size will be increased by 1 byte
  */
 
-#define TRDP_MAX_URI_USER_LEN   (2u * TRDP_MAX_LABEL_LEN)           /**< URI user part excl. terminating '0'        */
-#define TRDP_MAX_URI_HOST_LEN   (4u * TRDP_MAX_LABEL_LEN)           /**< URI host part length excl. terminating '0' */
-#define TRDP_MAX_URI_LEN        ((6u * TRDP_MAX_LABEL_LEN) + 8u)    /**< URI length excl. terminating '0'
-                                                                                            and 1 padding   byte    */
+#define TRDP_MAX_URI_USER_LEN   (2u * TRDP_MAX_LABEL_LEN)           /**< URI user part incl. '.' and terminating '0' */
+#define TRDP_MAX_URI_HOST_LEN   (5u * TRDP_MAX_LABEL_LEN)           /**< URI host part incl. terminating '0'  */
+#define TRDP_MAX_URI_LEN        (7u * TRDP_MAX_LABEL_LEN)           /**< URI length incl. '.', '@' and terminating '0' */
 #define TRDP_MAX_FILE_NAME_LEN              128u                    /**< path and file name length incl. terminating '0'*/
 #define TRDP_VAR_SIZE                       0u                      /**< Variable size dataset                      */
 

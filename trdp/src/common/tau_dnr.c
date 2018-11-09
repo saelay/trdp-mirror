@@ -53,12 +53,9 @@
 #define TAU_MAX_NO_CACHE_ENTRY      50u
 #define TAU_MAX_NO_IF               4u      /**< Default interface should be in the first 4 */
 #define TAU_MAX_DNS_BUFFER_SIZE     1500u   /* if this doesn't suffice, we need to allocate it */
-#define TAU_MAX_URI_SIZE            64u     /* host part only, without user part */
 #define TAU_MAX_NAME_SIZE           256u    /* Allocated on stack */
 #define TAU_DNS_TIME_OUT_LONG       10u     /**< Timeout in seconds for DNS server reply, if no hosts file provided   */
 #define TAU_DNS_TIME_OUT_SHORT      1u      /**< Timeout in seconds for DNS server reply, if hosts file was provided  */
-
-#define TAU_MAX_HOST_URI_LEN        80u     /**< Including EOS! */
 
 /***********************************************************************************************************************
  * TYPEDEFS
@@ -66,7 +63,7 @@
 
 typedef struct tau_dnr_cache
 {
-    CHAR8           uri[TRDP_MAX_URI_HOST_LEN + 1];
+    CHAR8           uri[TRDP_MAX_URI_HOST_LEN];
     TRDP_IP_ADDR_T  ipAddr;
     UINT32          etbTopoCnt;
     UINT32          opTrnTopoCnt;
@@ -234,7 +231,7 @@ static void changetoDnsNameFormat (UINT8 *pDns, CHAR8 *pHost)
 {
     int lock = 0, i;
 
-    vos_strncat(pHost, TAU_MAX_URI_SIZE - 1u, ".");
+    vos_strncat(pHost, TRDP_MAX_URI_HOST_LEN, ".");
 
     for (i = 0; i < (int)strlen((char *)pHost); i++)
     {
@@ -385,7 +382,7 @@ static TRDP_ERR_T createSendQuery (
     UINT16          id,
     UINT32          *pSize)
 {
-    CHAR8               strBuf[TAU_MAX_URI_SIZE + 3u];      /* conversion enlarges this buffer */
+    CHAR8               strBuf[TRDP_MAX_URI_HOST_LEN];      /* conversion enlarges this buffer */
     UINT8               packetBuffer[TAU_MAX_DNS_BUFFER_SIZE + 1u];
     UINT8               *pBuf;
     TAU_DNS_HEADER_T    *pHeader = (TAU_DNS_HEADER_T *) packetBuffer;
@@ -407,7 +404,7 @@ static TRDP_ERR_T createSendQuery (
 
     pBuf = (UINT8 *) (pHeader + 1);
 
-    vos_strncpy((char *)strBuf, pUri, TAU_MAX_URI_SIZE - 1u);
+    vos_strncpy((char *)strBuf, pUri, TRDP_MAX_URI_HOST_LEN-1);
     changetoDnsNameFormat(pBuf, strBuf);
 
     *pSize = (UINT32) strlen((char *)strBuf) + 1u;
@@ -687,7 +684,7 @@ static void updateDNSentry (
                 }
 
                 /* Position found, store everything */
-                vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TAU_MAX_URI_SIZE - 1u);
+                vos_strncpy(pDNR->cache[cacheEntry].uri, pUri, TRDP_MAX_URI_HOST_LEN-1);
                 pDNR->cache[cacheEntry].ipAddr          = ip_addr;
                 pDNR->cache[cacheEntry].etbTopoCnt      = appHandle->etbTopoCnt;
                 pDNR->cache[cacheEntry].opTrnTopoCnt    = appHandle->opTrnTopoCnt;
@@ -728,7 +725,7 @@ static void buildRequest (
     /* Prepare header */
     memset(pRequest, 0u, sizeof(TRDP_DNS_REQUEST_T));  /*  pRequest->tcnUriCnt = 0; */
     pRequest->version.ver = 1u;
-    vos_strncpy(pRequest->deviceName, appHandle->stats.hostName, TRDP_MAX_LABEL_LEN);
+    vos_strncpy(pRequest->deviceName, appHandle->stats.hostName, TRDP_MAX_LABEL_LEN-1);
     pRequest->etbTopoCnt = appHandle->etbTopoCnt;
     pRequest->opTrnTopoCnt = appHandle->opTrnTopoCnt;
     pRequest->etbId = 255u;            /* don't care */
@@ -749,7 +746,7 @@ static void buildRequest (
             (pDNR->cache[cacheEntry].opTrnTopoCnt != appHandle->opTrnTopoCnt)))
         {
             /* Make sure the string is not longer than 79 chars (+ trailing zero) */
-            vos_strncpy(pRequest->tcnUriList[pRequest->tcnUriCnt].tcnUriStr, pDNR->cache[cacheEntry].uri, TAU_MAX_HOST_URI_LEN - 1u);
+            vos_strncpy(pRequest->tcnUriList[pRequest->tcnUriCnt].tcnUriStr, pDNR->cache[cacheEntry].uri, TRDP_MAX_URI_HOST_LEN-1);
             pRequest->tcnUriCnt++;
         }
     }
@@ -788,7 +785,7 @@ static void addEntry (
     }
 
     /* Position found, store everything */
-    vos_strncpy(pDNR->cache[cacheEntry].uri, pURI, TAU_MAX_HOST_URI_LEN);
+    vos_strncpy(pDNR->cache[cacheEntry].uri, pURI, TRDP_MAX_URI_HOST_LEN-1);
     pDNR->cache[cacheEntry].ipAddr          = 0u;
     pDNR->cache[cacheEntry].etbTopoCnt      = appHandle->etbTopoCnt;
     pDNR->cache[cacheEntry].opTrnTopoCnt    = appHandle->opTrnTopoCnt;
@@ -827,7 +824,7 @@ static void parseUpdateTCNResponse (
             if (pTemp != NULL)
             {
                 /* Position found, store everything */
-                vos_strncpy(pTemp->uri, pReply->tcnUriList[i].tcnUriStr, TAU_MAX_URI_SIZE);
+                vos_strncpy(pTemp->uri, pReply->tcnUriList[i].tcnUriStr, TRDP_MAX_URI_HOST_LEN-1);
                 pTemp->ipAddr          = vos_ntohl(pReply->tcnUriList[i].tcnUriIpAddr);
                 pTemp->etbTopoCnt      = vos_ntohl(pReply->etbTopoCnt);
                 pTemp->opTrnTopoCnt    = vos_ntohl(pReply->opTrnTopoCnt);
@@ -1331,7 +1328,7 @@ EXT_DECL TRDP_ERR_T tau_addr2Uri (
                 ((appHandle->etbTopoCnt == 0u) || (pDNR->cache[i].etbTopoCnt == appHandle->etbTopoCnt)) &&
                 ((appHandle->opTrnTopoCnt == 0u) || (pDNR->cache[i].opTrnTopoCnt == appHandle->opTrnTopoCnt)))
             {
-                vos_strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN + 1);
+                vos_strncpy(pUri, pDNR->cache[i].uri, TRDP_MAX_URI_HOST_LEN - 1);
                 return TRDP_NO_ERR;
             }
         }
