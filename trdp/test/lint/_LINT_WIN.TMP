@@ -42,19 +42,19 @@
 --- Module:   ..\..\src\vos\windows\vos_sock.c (C)
 
 During Specific Walk:
-  File ..\..\src\common\trdp_mdcom.c line 1152: vos_sockReceiveTCP(?, [0]?,
+  File ..\..\src\common\trdp_mdcom.c line 1171: vos_sockReceiveTCP(?, [0]?,
     [1])
-..\..\src\vos\windows\vos_sock.c(1571) : Warning 662: Possible creation of
+..\..\src\vos\windows\vos_sock.c(1600) : Warning 662: Possible creation of
     out-of-bounds pointer (2 beyond end of data) by operator 'ptr+=int'
-    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1568, 1571; file
-    ..\..\src\common\trdp_mdcom.c: lines 1128, 1151]
-..\..\src\vos\windows\vos_sock.c(1568) : Info 831: Reference cited in prior
+    [Reference: file ..\..\src\vos\windows\vos_sock.c: lines 1597, 1600; file
+    ..\..\src\common\trdp_mdcom.c: lines 1147, 1170]
+..\..\src\vos\windows\vos_sock.c(1597) : Info 831: Reference cited in prior
     message
-..\..\src\vos\windows\vos_sock.c(1571) : Info 831: Reference cited in prior
+..\..\src\vos\windows\vos_sock.c(1600) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1128) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1147) : Info 831: Reference cited in prior
     message
-..\..\src\common\trdp_mdcom.c(1151) : Info 831: Reference cited in prior
+..\..\src\common\trdp_mdcom.c(1170) : Info 831: Reference cited in prior
     message
 
 --- Module:   ..\..\src\vos\windows\vos_shared_mem.c (C)
@@ -76,3 +76,28 @@ During Specific Walk:
 --- Module:   ..\..\src\common\tau_xml.c (C)
 
 --- Module:   ..\..\src\common\tau_ctrl.c (C)
+
+--- Module:   ..\..\src\common\tau_dnr.c (C)
+
+During Specific Walk:
+  File ..\..\src\common\tau_dnr.c line 408: changetoDnsNameFormat([1488], [80])
+..\..\src\common\tau_dnr.c(243) : Warning 676: Possibly negative subscript (-1)
+    in operator '[' [Reference: file ..\..\src\common\tau_dnr.c: lines 236,
+    241, 243, 408]
+..\..\src\common\tau_dnr.c(236) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(241) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(243) : Info 831: Reference cited in prior message
+..\..\src\common\tau_dnr.c(408) : Info 831: Reference cited in prior message
+
+--- Module:   ..\..\src\common\tau_tti.c (C)
+
+--- Global Wrap-up
+
+Warning 526: Symbol '__alignof()' (line 140, file ..\..\src\common\tau_marshall.c)
+    not defined
+..\..\src\common\tau_marshall.c(140) : Info 830: Location cited in prior
+    message
+Warning 628: no argument information provided for function '__alignof()' (line
+    140, file ..\..\src\common\tau_marshall.c)
+..\..\src\common\tau_marshall.c(140) : Info 830: Location cited in prior
+    message
