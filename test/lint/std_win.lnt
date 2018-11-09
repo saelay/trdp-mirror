@@ -12,9 +12,11 @@ au-misra.lnt
 -i"..\..\src\vos\api"
 -i"..\..\src\vos\common"
 -i"..\..\src\vos\windows"
--i"..\..\resources\windows\pthread\inc"
--i"C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include"
--i"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include"
+
+-i"C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt"
+-i"C:\Program Files (x86)\Windows Kits\8.1\Include\um"
+-i"C:\Program Files (x86)\Windows Kits\8.1\Include\shared"
+-i"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include"
 
 -D__ARMEB__=0
 -D__MIPSEB__=0
@@ -25,7 +27,7 @@ au-misra.lnt
 +macros
 +ppw(warning)
 
-+libdir(C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include)
++libdir(C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include)
 +libdir(C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Include)
 -elib(*)
 -e537   // "Repeated include file 'FileName'"
