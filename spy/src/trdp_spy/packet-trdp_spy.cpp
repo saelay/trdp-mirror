@@ -369,7 +369,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
     {
 	Element el = iterator.next();
 
-        PRNT(printf("[%d] Offset %5d ----> Element: type=%2d %s\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level,
+        PRNT(printf("[%d, %5x] Offset %5d ----> Element: type=%2d %s\tname=%s\tarray-size=%d\tunit=%s\tscale=%f\toffset=%d\n", dataset_level, (unsigned int) gActualNode /* FIXME debug has to be removed */,
                      offset, el.type, (el.typeName.length() > 0) ? el.typeName.toLatin1().data() : "", el.name.toLatin1().data(), el.array_size, el.unit.toLatin1().data(), el.scale, el.offset));
 
         value8u = 0; // flag, if there was a dynamic list found
@@ -385,6 +385,7 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 			if (element_amount == 0) // handle dynamic amount of content
 			{
+				PRNT(printf("[%d, %5x] Offset %5d Dynamic element found\n", dataset_level, (unsigned int) gActualNode /* FIXME debug has to be removed */, offset));
                 value8u = 1;
 
                 /* handle the special elements CHAR8 and UTF16: */
@@ -430,6 +431,11 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
                 }
 
 			}
+			else if (element_amount > 1) // handle array content
+			{
+				value16u = element_amount * trdp_dissect_width(el.type);
+				PRNT(printf("[%d, %5x] Offset %5d Array element found, expect %d elements using %d bytes\n", dataset_level, (unsigned int) gActualNode /* FIXME debug has to be removed */, offset, element_amount, value16u));
+			}
 
             // Appand a new node in the graphical dissector, tree (also the extracted dynamic information, see above are added)
             if ((element_amount > 1  || element_amount == 0) && value8u != 2)
@@ -437,6 +443,8 @@ static guint32 dissect_trdp_generic_body(tvbuff_t *tvb, packet_info *pinfo, prot
 
 		ti = proto_tree_add_subtree_format(trdp_spy_userdata, tvb, offset, value16u, 1 /* second element in ett[] */, NULL, "%s (%d)", el.name.toLatin1().data() , element_amount);
                 userdata_actual = proto_item_add_subtree(ti, ett_trdp_spy_userdata);
+		offset += value16u;
+		continue;
             }
             else if (value8u != 2) /* check, that the dissector tree was not already modified handling dynamic datatypes */
             {
