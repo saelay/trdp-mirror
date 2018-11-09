@@ -1681,7 +1681,11 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
         {
             ret = (TRDP_ERR_T) vos_mutexLock(appHandle->mutex);
 
-            if (ret == TRDP_NO_ERR)
+            if (ret != TRDP_NO_ERR)
+            {
+               vos_printLogStr(VOS_LOG_INFO, "vos_mutexLock() failed\n");
+            }
+            else
             {
                 /*    Get the current time    */
                 vos_getTime(&now);

@@ -602,7 +602,9 @@ static void updateDNSentry (
     UINT32          size;
     UINT32          querySize;
     VOS_SOCK_OPT_T  opts;
-    UINT16          id      = (UINT16) ((UINT16) appHandle & 0xFFFFu);
+    UINT16          id      = (UINT16) (((UINT16) appHandle) & 0xFFFFu);   /*lint !e507 
+                                                                           size incomatibility,
+                                                                           converting 4 byte pointer to 2 byte integral */
     TAU_DNR_DATA_T  *pDNR   = (TAU_DNR_DATA_T *) appHandle->pUser;
     TRDP_IP_ADDR_T  ip_addr = VOS_INADDR_ANY;
 
@@ -634,11 +636,14 @@ static void updateDNSentry (
         tv.tv_usec  = 0;
 
         FD_ZERO(&rfds);
-        FD_SET(my_socket, &rfds); /*lint !e573 Signed/unsigned mix in std-header */
-
+        FD_SET(my_socket, &rfds);      /*lint !e573 !e505
+                                         signed/unsigned division in macro / 
+                                         Redundant left argument to comma */
         rv = vos_select(my_socket + 1, &rfds, NULL, NULL, &tv);
 
-        if (rv > 0 && FD_ISSET(my_socket, &rfds)) /*lint !e573 Signed/unsigned mix in std-header */
+        if (rv > 0 && FD_ISSET(my_socket, &rfds))      /*lint !e573 !e505
+                                                         signed/unsigned division in macro / 
+                                                         Redundant left argument to comma */
         {
             /* Clear our packet buffer  */
             memset(packetBuffer, 0, TAU_MAX_DNS_BUFFER_SIZE);
@@ -647,7 +652,7 @@ static void updateDNSentry (
             /* Get what was announced */
             (void) vos_sockReceiveUDP(my_socket, packetBuffer, &size, &pDNR->dnsIpAddr, &pDNR->dnsPort, NULL, FALSE);
 
-            FD_CLR(my_socket, &rfds); /*lint !e573 !e502 Signed/unsigned mix in std-header */
+            FD_CLR(my_socket, &rfds); /*lint !e573 !e502 !e505 Signed/unsigned mix in std-header */
 
             if (size == 0u)
             {
@@ -949,7 +954,7 @@ static void updateTCNDNSentry (
     }
     /* send the MD request */
 
-    err = tlm_request(appHandle, &dnsSema, dnrMDCallback, &sessionId, TCN_DNS_REQ_COMID,
+    err = tlm_request(appHandle, &dnsSema, dnrMDCallback, &sessionId, TCN_DNS_REQ_COMID,  /*lint !e545 suspicious use of & parameter 4 */
                         0u, 0u,
                         VOS_INADDR_ANY, pDNR->dnsIpAddr,
                         TRDP_FLAGS_CALLBACK,
@@ -986,7 +991,7 @@ static void updateTCNDNSentry (
 
             FD_ZERO(&rfds);
 
-            tlc_getInterval(appHandle, &tv, &rfds, &noDesc);
+            (void) tlc_getInterval(appHandle, &tv, &rfds, &noDesc);
 
             if (vos_cmpTime(&tv, &max_tv) > 0)
             {
@@ -1026,7 +1031,7 @@ static void updateTCNDNSentry (
     }
 
     /* kill the session to avoid dangeling semaphore */
-    (void) tlm_abortSession(appHandle, &sessionId);
+    (void) tlm_abortSession(appHandle, &sessionId); /*lint !e545 suspicious use of & parameter 2 */
 
 exit:
     vos_semaDelete(dnsSema);

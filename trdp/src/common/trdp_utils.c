@@ -1062,11 +1062,14 @@ void  trdp_releaseSocket (
                     we do that only if the caller is the only user of this MC group on this socket! */
                 if (trdp_SockDelJoin(iface[lIndex].mcGroups, mcGroupUsed) == FALSE)
                 {
-                    vos_printLogStr(VOS_LOG_WARNING, "trdp_SockDelJoin() failed!\n");
+                    vos_printLogStr(VOS_LOG_WARNING, "trdp_sockDelJoin() failed!\n");
                 }
                 else    /* and unjoin MC group */
                 {
-                    vos_sockLeaveMC(iface[lIndex].sock, mcGroupUsed, iface[lIndex].bindAddr);
+                   if (vos_sockLeaveMC(iface[lIndex].sock, mcGroupUsed, iface[lIndex].bindAddr) != VOS_NO_ERR)
+                   {
+                      vos_printLogStr(VOS_LOG_WARNING, "trdp_sockLeaveMC() failed!\n");
+                   }
                 }
             }
             else
