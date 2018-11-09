@@ -617,6 +617,7 @@ void md_callback (void *ref, TRDP_APP_SESSION_T apph,
     {
         print(-4, "unexpected callback ! - %s",
               get_result_string(msg != NULL ? msg->resultCode : 0));
+        sts.err[sts.test]++; 
         return;
     }
 
@@ -631,7 +632,7 @@ void md_callback (void *ref, TRDP_APP_SESSION_T apph,
        case TRDP_REPLYTO_ERR:
        case TRDP_TIMEOUT_ERR:
            /* reply doesn't arrived */
-           sts.err[test]++;
+           sts.err[sts.test]++;
            print(-4, "error %s", get_result_string(msg->resultCode));
            switch (sts.test)
            {
@@ -651,8 +652,8 @@ void md_callback (void *ref, TRDP_APP_SESSION_T apph,
            break;
 
        default:
-           sts.err[test]++;
            print(-4, "error %s", get_result_string(msg->resultCode));
+           sts.err[sts.test]++;
            break;
     }
 }
@@ -1050,6 +1051,7 @@ void setup_listeners ()
         {
             /* failure */
             print(-4, "tlm_addListener call error %s", get_result_string(err));
+            sts.err[sts.test]++;
         }
     }
     if (opts.groups & TST_UCAST) /* UDP unicast listener */
@@ -1075,6 +1077,7 @@ void setup_listeners ()
         {
             /* failure */
             print(-4, "tlm_addListener call error %s", get_result_string(err));
+            sts.err[sts.test]++;
         }
     }
     if (opts.groups & TST_MCAST) /* UDP multicast listener */
@@ -1100,6 +1103,7 @@ void setup_listeners ()
         {
             /* failure */
             print(-4, "tlm_addListener call error %s", get_result_string(err));
+            sts.err[sts.test]++;
         }
     }
 }
@@ -1189,6 +1193,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
            {
                /* failure */
                print(-4, "tlm_notify call error %s", get_result_string(err));
+               sts.err[sts.test]++;
            }
            break;
 
@@ -1221,6 +1226,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
            {
                /* failure */
                print(-4, "tlm_request call error %s", get_result_string(err));
+               sts.err[sts.test]++;
            }
            break;
 
@@ -1243,6 +1249,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
            {
                /* failure */
                print(-4, "tlm_reply call error %s", get_result_string(err));
+               sts.err[sts.test]++;
            }
            break;
 
@@ -1267,6 +1274,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
            {
                /* failure */
                print(-4, "tlm_replyQuery call error %s", get_result_string(err));
+               sts.err[sts.test]++;
            }
            break;
 
@@ -1283,6 +1291,7 @@ void send_msg (TRDP_MD_INFO_T *msg, TRDP_FLAGS_T flags)
            {
                /* failure */
                print(-4, "tlm_confirm call error %s", get_result_string(err));
+               sts.err[sts.test]++;
            }
            break;
 
