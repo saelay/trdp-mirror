@@ -750,13 +750,13 @@ void trdp_pdCheckPending (
         /*    Check and set the socket file descriptor, if not already done    */
         if (iterPD->socketIdx != -1 &&
             appHandle->iface[iterPD->socketIdx].sock != -1 &&
-            !FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))     /*lint !e573
-                                                                                            signed/unsigned division
-                                                                                            in macro */
+            !FD_ISSET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc))     /*lint !e573 !e505
+                                                                                          signed/unsigned division in macro / 
+                                                                                          Redundant left argument to comma */
         {
-            FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);   /*lint !e573
-                                                                                       signed/unsigned division
-                                                                                       in macro */
+            FD_SET(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pFileDesc);       /*lint !e573 !e505
+                                                                                          signed/unsigned division in macro / 
+                                                                                          Redundant left argument to comma */
             if (appHandle->iface[iterPD->socketIdx].sock > *pNoDesc)
             {
                 *pNoDesc = (INT32) appHandle->iface[iterPD->socketIdx].sock;
@@ -913,8 +913,8 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
                        break;
                 }
                 (*pCount)--;
-                FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds); /*lint !e502 !e573 signed/unsigned division
-                                                                                     in macro */
+                FD_CLR(appHandle->iface[iterPD->socketIdx].sock, (fd_set *)pRfds); /*lint !e502 !e573 !e505 
+                                                                                     signed/unsigned division in macro */
             }
         }
     }

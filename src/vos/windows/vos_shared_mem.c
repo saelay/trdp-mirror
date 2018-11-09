@@ -109,7 +109,7 @@ EXT_DECL VOS_ERR_T vos_sharedOpen (
         else
         {
             /* CHAR8 to TCHAR (Unicode) */
-            err = mbstowcs_s(&convertedChars, shMemName, strlen(pKey) + 1, pKey, _TRUNCATE);
+            err = mbstowcs_s(&convertedChars, (wchar_t *) shMemName, strlen(pKey) + 1, pKey, _TRUNCATE);
             if (err != 0)
             {
                 vos_printLogStr(VOS_LOG_ERROR,"vos_sharedOpen() ERROR Could not convert CHAR8 to TCHAR\n");

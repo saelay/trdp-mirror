@@ -528,7 +528,7 @@ EXT_DECL VOS_ERR_T vos_sockInit (void)
 EXT_DECL void vos_sockTerm (void)
 {
     vosSockInitialised = FALSE;
-    WSACleanup();
+    (void) WSACleanup();
 }
 
 

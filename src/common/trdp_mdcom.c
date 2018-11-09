@@ -2464,7 +2464,9 @@ void trdp_mdCheckPending (
     /*    Add the socket to the pFileDesc    */
     if (appHandle->tcpFd.listen_sd != VOS_INVALID_SOCKET)
     {
-        FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned division in macro */
+        FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)pFileDesc); /*lint !e573 !e505
+                                                                 signed/unsigned division in macro / 
+                                                                 Redundant left argument to comma */
         if (appHandle->tcpFd.listen_sd > *pNoDesc)
         {
             *pNoDesc = (INT32) appHandle->tcpFd.listen_sd;
@@ -2477,8 +2479,9 @@ void trdp_mdCheckPending (
             && (appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
             && (appHandle->iface[lIndex].tcpParams.addFileDesc == TRUE))
         {
-            FD_SET(appHandle->iface[lIndex].sock, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned division in macro
-                                                                          */
+            FD_SET(appHandle->iface[lIndex].sock, (fd_set *)pFileDesc); /*lint !e573 !e505
+                                                                        signed/unsigned division in macro / 
+                                                                        Redundant left argument to comma */
             if (appHandle->iface[lIndex].sock > *pNoDesc)
             {
                 *pNoDesc = (INT32) appHandle->iface[lIndex].sock;
@@ -2498,13 +2501,13 @@ void trdp_mdCheckPending (
                 || ((appHandle->iface[iterListener->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterListener->socketIdx].tcpParams.addFileDesc == TRUE))))
         {
-            if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573
-                                                                                                  signed/unsigned
-                                                                                                  division in macro */
+            if (!FD_ISSET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573 !e505
+                                                                                                signed/unsigned division in macro / 
+                                                                                                Redundant left argument to comma */
             {
-                FD_SET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573
-                                                                                               signed/unsigned division
-                                                                                               in macro */
+                FD_SET(appHandle->iface[iterListener->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573 !e505
+                                                                                             signed/unsigned division in macro / 
+                                                                                             Redundant left argument to comma */
                 if (appHandle->iface[iterListener->socketIdx].sock > *pNoDesc)
                 {
                     *pNoDesc = (INT32) appHandle->iface[iterListener->socketIdx].sock;
@@ -2523,11 +2526,13 @@ void trdp_mdCheckPending (
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
         {
-            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573 signed/unsigned
-                                                                                            division in macro */
+            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573 !e505
+                                                                                          signed/unsigned division in macro / 
+                                                                                          Redundant left argument to comma */
             {
-                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned
-                                                                                         division in macro */
+                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573 !e505
+                                                                                       signed/unsigned division in macro / 
+                                                                                       Redundant left argument to comma */
                 if (appHandle->iface[iterMD->socketIdx].sock > *pNoDesc)
                 {
                     *pNoDesc = (INT32) appHandle->iface[iterMD->socketIdx].sock;
@@ -2545,11 +2550,13 @@ void trdp_mdCheckPending (
                 || ((appHandle->iface[iterMD->socketIdx].type == TRDP_SOCK_MD_TCP)
                     && (appHandle->iface[iterMD->socketIdx].tcpParams.addFileDesc == TRUE))))
         {
-            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573 signed/unsigned
-                                                                                            division in macro */
+            if (!FD_ISSET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc)) /*lint !e573 !e505
+                                                                                          signed/unsigned division in macro / 
+                                                                                          Redundant left argument to comma */
             {
-                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573 signed/unsigned
-                                                                                         division in macro */
+                FD_SET(appHandle->iface[iterMD->socketIdx].sock, (fd_set *)pFileDesc); /*lint !e573 !e505
+                                                                                       signed/unsigned division in macro / 
+                                                                                       Redundant left argument to comma */
                 if (appHandle->iface[iterMD->socketIdx].sock >= *pNoDesc)
                 {
                     *pNoDesc = (INT32) appHandle->iface[iterMD->socketIdx].sock;
@@ -2596,7 +2603,9 @@ void  trdp_mdCheckListenSocks (
         /* Add the listen_sd in the file descriptor */
         if (appHandle->tcpFd.listen_sd != VOS_INVALID_SOCKET)
         {
-            FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)&rfds); /*lint !e573 signed/unsigned division in macro */
+            FD_SET(appHandle->tcpFd.listen_sd, (fd_set *)&rfds); /*lint !e573 !e505 
+                                                                 signed/unsigned division in macro / 
+                                                                 Redundant left argument to comma */
             if (appHandle->tcpFd.listen_sd > highDesc)
             {
                 highDesc = appHandle->tcpFd.listen_sd;
@@ -2612,8 +2621,9 @@ void  trdp_mdCheckListenSocks (
                     || ((appHandle->iface[lIndex].type == TRDP_SOCK_MD_TCP)
                         && (appHandle->iface[lIndex].tcpParams.addFileDesc == TRUE))))
             {
-                FD_SET(appHandle->iface[lIndex].sock, (fd_set *)&rfds); /*lint !e573 signed/unsigned division in macro
-                                                                          */
+                FD_SET(appHandle->iface[lIndex].sock, (fd_set *)&rfds); /*lint !e573 !e505
+                                                                        signed/unsigned division in macro / 
+                                                                        Redundant left argument to comma */
                 if (highDesc < appHandle->iface[lIndex].sock)
                 {
                     highDesc = appHandle->iface[lIndex].sock;
@@ -2753,13 +2763,13 @@ void  trdp_mdCheckListenSocks (
                                 break;
                             }
 
-                            if (FD_ISSET(appHandle->iface[socketIndex].sock, (fd_set *) pRfds)) /*lint !e573
-                                                                                                  signed/unsigned
-                                                                                                  division in macro */
+                            if (FD_ISSET(appHandle->iface[socketIndex].sock, (fd_set *) pRfds)) /*lint !e573 !e505 
+                                                                                                signed/unsigned division in macro / 
+                                                                                                Redundant left argument to comma */
                             {
                                 /* Decrement the Ready descriptors counter */
                                 (*pCount)--;
-                                FD_CLR(appHandle->iface[socketIndex].sock, (fd_set *) pRfds); /*lint !e502 !e573
+                                FD_CLR(appHandle->iface[socketIndex].sock, (fd_set *) pRfds); /*lint !e502 !e573 !e505
                                                                                                 signed/unsigned division
                                                                                                 in macro */
                             }
@@ -2830,7 +2840,7 @@ void  trdp_mdCheckListenSocks (
                     break;
                 }
             }
-            FD_CLR(appHandle->iface[lIndex].sock, (fd_set *)pRfds); /*lint !e502 !e573 signed/unsigned division in macro
+            FD_CLR(appHandle->iface[lIndex].sock, (fd_set *)pRfds); /*lint !e502 !e573 !e505 signed/unsigned division in macro
                                                                       */
             err = trdp_mdRecv(appHandle, (UINT32) lIndex);
 
