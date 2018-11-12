@@ -95,7 +95,9 @@ bool TrdpConfigHandler::startElement(const QString &namespaceURI, const QString 
             currentComId.comId = comId;
             currentComId.dataset = attributes.value(idxDatasetId).toInt();
             this->mTableComId.insert(comId, currentComId);
+#ifdef PRINT_DEBUG
             qInfo() << "Found tag " << qName << " " << comId << " dataset id " << currentComId.dataset;
+#endif
         }
     } else if (qName.compare(TAG_DATA_SET) == 0) {
         int idxDatasetId = searchIndex(attributes, ATTR_DATASET_ID);

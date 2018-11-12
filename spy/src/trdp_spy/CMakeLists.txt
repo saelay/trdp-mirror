@@ -20,7 +20,8 @@
 #
 cmake_minimum_required(VERSION 2.8.3)
 
-add_definitions(-DPRINT_DEBUG)
+# Debug print lines (for development)
+#add_definitions(-DPRINT_DEBUG)
 
 # Debug Output activate:
 set ( CMAKE_VERBOSE_MAKEFILE true )
