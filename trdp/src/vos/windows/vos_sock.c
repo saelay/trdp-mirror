@@ -134,7 +134,7 @@ INT32 recvmsg (SOCKET sock, struct msghdr *pMessage, int flags)
         if (0 != res)
         {
             DWORD err = WSAGetLastError();
-            if (err != WSAEMSGSIZE)
+            if (err != WSAEWOULDBLOCK)
             {
                 vos_printLog(VOS_LOG_ERROR, "WSARecvMsg() failed (Err: %d)\n", err);
                 return -1;
