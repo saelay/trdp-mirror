@@ -1832,7 +1832,7 @@ static TRDP_ERR_T trdp_mdSendME (TRDP_SESSION_PT appHandle, MD_HEADER_T *pH, INT
             pSenderElement->dataSize        = 0u;
             pSenderElement->grossSize       = trdp_packetSizeMD(0);
             pSenderElement->socketIdx       = TRDP_INVALID_SOCKET_INDEX;
-            pSenderElement->pktFlags        = appHandle->mdDefault.flags;
+            pSenderElement->pktFlags        = mdElement->pktFlags; /* use the senders flagset to be able to deistinguish between TCP and UDP */
             pSenderElement->pfCbFunction    = mdElement->pfCbFunction;
             pSenderElement->privFlags       = TRDP_PRIV_NONE;
             pSenderElement->sendSize        = 0u;
