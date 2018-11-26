@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2018-11-26: Ticket #208: Mapping corrected after complaint (Bit 2 was set for prio 2 & 4)
  *      BL 2018-07-13: Ticket #208: VOS socket options: QoS/ToS field priority handling needs update
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
@@ -804,7 +805,7 @@ EXT_DECL VOS_ERR_T vos_sockSetOptions (
             /*  old:
                 sockOptValue = (int) ((pOptions->qos << 5) | 4);
                 New: */
-            const int dscpMap[] = {0, 8, 18, 24, 34, 40, 48, 56};
+            const int dscpMap[] = {0, 8, 16, 24, 32, 40, 48, 56};
             sockOptValue = (int) dscpMap[pOptions->qos];
             if (setsockopt(sock, IPPROTO_IP, IP_TOS, (char *)&sockOptValue,
                            sizeof(sockOptValue)) == -1)

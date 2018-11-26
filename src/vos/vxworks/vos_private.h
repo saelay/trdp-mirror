@@ -44,7 +44,7 @@ extern "C" {
 #define VOS_VERSION            1u
 #define VOS_RELEASE            0u
 #define VOS_UPDATE             3u
-#define VOS_EVOLUTION          0u
+#define VOS_EVOLUTION          1u
 #endif
 
 struct VOS_MUTEX
