@@ -168,6 +168,7 @@ extern void *gRefCon;
 /**********************************************************************************************************************/
 /** Calculate CRC for the given buffer and length.
  *  For TRDP FCS CRC calculation the CRC32 according to IEEE802.3 with start value 0xffffffff is used.
+ *  Note: Returned CRC is inverted
  *
  *  @param[in]          crc             Initial value.
  *  @param[in,out]      pData           Pointer to data.
@@ -182,7 +183,6 @@ EXT_DECL UINT32 vos_crc32 (
 
 /**********************************************************************************************************************/
 /** Compute crc32 according to IEC 61375-2-3 B.7
- *  Note: Returned CRC is inverted
  *
  *  @param[in]          crc             Initial value.
  *  @param[in,out]      pData           Pointer to data.
