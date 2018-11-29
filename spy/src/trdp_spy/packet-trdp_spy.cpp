@@ -1036,7 +1036,11 @@ void proto_register_trdp(void)
     prefs_register_filename_preference(trdp_spy_module, "configfile",
                                      "TRDP configuration file",
                                      "TRDP configuration file",
-                                     &gbl_trdpDictionary_1);
+                                     &gbl_trdpDictionary_1
+#if VERSION_MAJOR >= 2 && VERSION_MICRO >= 4
+        , false
+#endif
+    );
     prefs_register_uint_preference(trdp_spy_module, "pd.udp.port",
                                    "PD message Port",
                                    "UDP port for PD messages (Default port is " TRDP_DEFAULT_STR_PD_PORT ")", 10 /*base */, &g_pd_port);
