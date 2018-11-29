@@ -136,12 +136,15 @@ INT32 recvmsg (SOCKET sock, struct msghdr *pMessage, int flags)
         {
             DWORD err = WSAGetLastError();
             
-            /* to avoid flooding with error messages */
-            if (err != WSAEWOULDBLOCK)
+            if (err != WSAEMSGSIZE)
             {
-                vos_printLog(VOS_LOG_ERROR, "WSARecvMsg() failed (Err: %d)\n", err);
+               /* to avoid flooding with error messages */
+               if (err != WSAEWOULDBLOCK)
+               {
+                  vos_printLog(VOS_LOG_ERROR, "WSARecvMsg() failed (Err: %d)\n", err);
+               }
+               return -1;
             }
-            return -1;
         }
     }
     return numBytes;
