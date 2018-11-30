@@ -173,7 +173,7 @@ public:
     quint32 calculateTelegramSize(quint32 comId);
     quint32 calculateDatasetSize(quint32 datasetId);
 
-    bool setDynamicSize(void) { mDynamicSizeFound = true;}
+    void setDynamicSize(void) { mDynamicSizeFound = true;}
 private:
     QString xmlconfigFile;
     QString currentText;
