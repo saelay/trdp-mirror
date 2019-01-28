@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-01-23: Ticket #231: XML config from stream buffer
  *      SB 2018-11-07: Ticket #221 readXmlDatasets failed 
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
  *      BL 2016-02-24: missing include (thanks to Robert)
@@ -319,6 +320,47 @@ TRDP_ERR_T trdp_XMLOpen (
     pXML->tagDepthSeek  = 0;
     pXML->error         = TRDP_NO_ERR;
     return TRDP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Opens the XML parsing from a buffer (string stream).
+ *
+ *  @param[in]      pXML        Pointer to local data
+ *  @param[in]      pBuffer     Pointer to XML stream buffer
+ *  @param[in]      bufSize     Size of XML stream buffer
+ *
+ *  @retval         TRDP_IO_ERR
+ */
+TRDP_ERR_T trdp_XMLMemOpen (
+    XML_HANDLE_T    *pXML,
+    char            *pBuffer,
+    size_t          bufSize)
+{
+#ifdef HAS_FMEMOPEN
+    if ((pXML->infile = fmemopen(pBuffer, bufSize, "rb")) == NULL)
+    {
+        vos_printLogStr(VOS_LOG_ERROR, "XML stream could not be opened for reading\n");
+        return TRDP_IO_ERR;
+    }
+
+    pXML->tagDepth      = 0;
+    pXML->tagDepthSeek  = 0;
+    pXML->error         = TRDP_NO_ERR;
+    return TRDP_NO_ERR;
+#else
+    /* Create and open a temporary file */
+    pXML->infile =  tmpfile();              /* Note: Needs admin rights under VISTA!    */
+    if (pXML->infile != NULL)
+    {
+        /* Write to temp file */
+        fprintf(pXML->infile, "%s", pBuffer);
+        /* prepare for reading */
+        trdp_XMLRewind (pXML);
+        return TRDP_NO_ERR;
+    }
+    vos_printLogStr(VOS_LOG_ERROR, "Temporary XML file could not be opened to write\n");
+    return TRDP_IO_ERR;
+#endif
 }
 
 /**********************************************************************************************************************/
