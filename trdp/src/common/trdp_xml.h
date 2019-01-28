@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-01-23: Ticket #231: XML config from stream buffer
  *      BL 2016-02-11: Ticket #102: Replacing libxml2
  *
  */
@@ -81,10 +82,14 @@ typedef struct XML_HANDLE
 
 TRDP_ERR_T  trdp_XMLOpen (XML_HANDLE_T  *pXML,
                           const char    *file);
+
+TRDP_ERR_T  trdp_XMLMemOpen (XML_HANDLE_T   *pXML,
+                             char           *pBuffer,
+                             size_t         bufSize);
+
 void        trdp_XMLClose (XML_HANDLE_T *pXML);
-int         trdp_XMLCountStartTag (
-    XML_HANDLE_T    *pXML,
-    const char      *tag);
+int         trdp_XMLCountStartTag (XML_HANDLE_T    *pXML,
+                                   const char      *tag);
 int         trdp_XMLSeekStartTagAny (XML_HANDLE_T   *pXML,
                                      char           *tag,
                                      int            maxlen);

@@ -18,6 +18,7 @@
  *
  * $Id$
  *
+ *      BL 2019-01-23: Ticket #231: XML config from stream buffer
  *      BL 2017-05-08: Compiler warnings, flag enums -> defines
  *      BL 2016-02-11: Ticket #102: Custom XML parser, libxml2 not needed anymore
  */
@@ -197,6 +198,24 @@ typedef struct
  */
 EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
     const CHAR8             *pFileName,
+    TRDP_XML_DOC_HANDLE_T   *pDocHnd
+    );
+
+/**********************************************************************************************************************/
+/**    Open XML stream, prepare XPath context.
+ *
+ *
+ *  @param[in]      pBuffer             Pointer to the xml configuration stream buffer
+ *  @param[in]      bufSize             Size of the xml configuration stream buffer
+ *  @param[out]     pDocHnd             Pointer to the handle of the parsed XML file
+ *
+ *  @retval         TRDP_NO_ERR       no error
+ *  @retval         TRDP_PARAM_ERR    File does not exist
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_prepareXmlMem (
+    char                    *pBuffer,
+    size_t                  bufSize,
     TRDP_XML_DOC_HANDLE_T   *pDocHnd
     );
 

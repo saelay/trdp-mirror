@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-01-23: Ticket #231: XML config from stream buffer
  *      SB 2018-10-29: Ticket #214 Incorrect parsing of <source> and <destination> elements
  *      BL 2018-10-01: Some default attribute values for com-parameter tag were missing
  *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
@@ -932,6 +933,48 @@ EXT_DECL TRDP_ERR_T tau_prepareXmlDoc (
     if (trdp_XMLOpen(pDocHnd->pXmlDocument, pFileName))
     {
         vos_printLogStr(VOS_LOG_ERROR, "Prepare XML doc: failed to open XML file\n");
+        return TRDP_PARAM_ERR;
+    }
+
+    return TRDP_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/**    Open XML stream, prepare XPath context.
+ *
+ *
+ *  @param[in]      pBuffer             Pointer to the xml configuration stream buffer
+ *  @param[in]      bufSize             Size of the xml configuration stream buffer
+ *  @param[out]     pDocHnd             Pointer to the handle of the parsed XML file
+ *
+ *  @retval         TRDP_NO_ERR       no error
+ *  @retval         TRDP_PARAM_ERR    File does not exist
+ *
+ */
+EXT_DECL TRDP_ERR_T tau_prepareXmlMem (
+    char                    *pBuffer,
+    size_t                  bufSize,
+    TRDP_XML_DOC_HANDLE_T   *pDocHnd)
+{
+    /* Check parameters */
+    if ((pBuffer == NULL) || (bufSize == 0u))
+    {
+        return TRDP_PARAM_ERR;
+    }
+
+    /*  Set handle pointers to NULL */
+    memset(pDocHnd, 0, sizeof(TRDP_XML_DOC_HANDLE_T));
+
+    pDocHnd->pXmlDocument = (XML_HANDLE_T *) vos_memAlloc(sizeof(XML_HANDLE_T));
+    if (pDocHnd->pXmlDocument == NULL)
+    {
+        return TRDP_MEM_ERR;
+    }
+
+    /*  Read XML file  */
+    if (trdp_XMLMemOpen(pDocHnd->pXmlDocument, pBuffer, bufSize))
+    {
+        vos_printLogStr(VOS_LOG_ERROR, "Prepare XML doc: failed to open XML stream\n");
         return TRDP_PARAM_ERR;
     }
 
