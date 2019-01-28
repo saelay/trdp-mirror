@@ -25,6 +25,8 @@
  *
  * $Id$
  *
+ *      BL 2019-01-24: ttiStoreOpTrnDir returns changed flag
+ *      BL 2019-01-24: Missing PD100 -> WARNING (not ERROR) log
  *      BL 2018-08-07: Ticket #183 tau_getOwnIds declared but not defined
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
@@ -192,7 +194,7 @@ static void ttiPDCallback (
             crc = vos_sc32(0xFFFFFFFFu, (const UINT8 *) &pTelegram->state, sizeof(TRDP_OP_TRAIN_DIR_STATE_T) - 4);
             if (crc != vos_ntohl(pTelegram->state.crc))
             {
-                vos_printLog(VOS_LOG_ERROR, "CRC error of received operational status info (%08x != %08x)!\n",
+                vos_printLog(VOS_LOG_WARNING, "CRC error of received operational status info (%08x != %08x)!\n",
                              crc, vos_ntohl(pTelegram->state.crc))
                     (void) tlc_setOpTrainTopoCount(appHandle, 0);
                 return;
@@ -227,7 +229,7 @@ static void ttiPDCallback (
         }
         else if (pMsg->resultCode == TRDP_TIMEOUT_ERR )
         {
-            vos_printLog(VOS_LOG_ERROR, "---> Operational status info timed out! Invalidating topocounts on %p!\n",
+            vos_printLog(VOS_LOG_WARNING, "---> Operational status info timed out! Invalidating topocounts on %p!\n",
                          (void*)appHandle);
 
             if (appHandle->etbTopoCnt != 0u)
@@ -256,19 +258,20 @@ static void ttiPDCallback (
 /**********************************************************************************************************************/
 /*  Functions to convert TTDB network packets into local (static) representation                                      */
 /**********************************************************************************************************************/
-static void ttiStoreOpTrnDir (
+static BOOL8 ttiStoreOpTrnDir (
     TRDP_APP_SESSION_T  appHandle,
     UINT8               *pData)
 {
     TRDP_OP_TRAIN_DIR_T *pTelegram = (TRDP_OP_TRAIN_DIR_T *) pData;
-    UINT32 size;
+    UINT32  size;
+    BOOL8   changedTopoCnt;
 
     /* we have to unpack the data, copy up to OP_CONSIST */
     if (pTelegram->opCstCnt > TRDP_MAX_CST_CNT)
     {
-        vos_printLog(VOS_LOG_ERROR, "Max count of consists of received operational dir exceeded (%d)!\n",
+        vos_printLog(VOS_LOG_WARNING, "Max count of consists of received operational dir exceeded (%d)!\n",
                      pTelegram->opCstCnt);
-        return;
+        return 0;
     }
 
     /* 8 Bytes up to opCstCnt plus number of Consists  */
@@ -280,7 +283,9 @@ static void ttiStoreOpTrnDir (
 
     /* unmarshall manually and update the opTrnTopoCount   */
     appHandle->pTTDB->opTrnDir.opTrnTopoCnt = vos_ntohl(appHandle->pTTDB->opTrnDir.opTrnTopoCnt);
+    changedTopoCnt = (tlc_getOpTrainTopoCount(appHandle) != appHandle->pTTDB->opTrnDir.opTrnTopoCnt);
     (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnDir.opTrnTopoCnt);
+    return changedTopoCnt;
 }
 
 static void ttiStoreTrnDir (
@@ -293,7 +298,7 @@ static void ttiStoreTrnDir (
     /* we have to unpack the data, copy up to CONSIST */
     if (pTelegram->cstCnt > TRDP_MAX_CST_CNT)
     {
-        vos_printLog(VOS_LOG_ERROR, "Max count of consists of received train dir exceeded (%d)!\n",
+        vos_printLog(VOS_LOG_WARNING, "Max count of consists of received train dir exceeded (%d)!\n",
                      pTelegram->cstCnt);
         return;
     }
@@ -326,7 +331,7 @@ static void ttiStoreTrnNetDir (
     appHandle->pTTDB->trnNetDir.entryCnt    = vos_ntohs(pTelegram->entryCnt);
     if (appHandle->pTTDB->trnNetDir.entryCnt > TRDP_MAX_CST_CNT)
     {
-        vos_printLog(VOS_LOG_ERROR, "Max count of consists of received train net dir exceeded (%d)!\n",
+        vos_printLog(VOS_LOG_WARNING, "Max count of consists of received train net dir exceeded (%d)!\n",
                      vos_ntohs(appHandle->pTTDB->trnNetDir.entryCnt));
         return;
     }
@@ -483,7 +488,7 @@ static void ttiMDCallback (
             crc = vos_crc32(0xFFFFFFFF, (const UINT8 *) &pTelegram->state, dataSize - 4);
             if (crc != MAKE_LE(pTelegram->state.crc))
             {
-                vos_printLog(VOS_LOG_ERROR, "CRC error of received operational status info (%08x != %08x)!\n",
+                vos_printLog(VOS_LOG_WARNING, "CRC error of received operational status info (%08x != %08x)!\n",
                              crc, vos_ntohl(pTelegram->state.crc))
                     (void) tlc_setOpTrainTopoCount(appHandle, 0);
                 return;
@@ -497,7 +502,7 @@ static void ttiMDCallback (
             appHandle->pTTDB->opTrnState.state.crc = MAKE_LE(pTelegram->state.crc);
 
             /* handle the other parts of the message    */
-            ttiStoreOpTrnDir(appHandle, (UINT8 *) &pTelegram->opTrnDir);
+            (void) ttiStoreOpTrnDir(appHandle, (UINT8 *) &pTelegram->opTrnDir);
             ttiStoreTrnDir(appHandle, (UINT8 *) &pTelegram->trnDir);
             ttiStoreTrnNetDir(appHandle, (UINT8 *) &pTelegram->trnNetDir);
         }
