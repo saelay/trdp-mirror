@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-01-29: Ticket #232: Write access to XML file
  *      BL 2019-01-23: Ticket #231: XML config from stream buffer
  *      SB 2018-11-07: Ticket #221 readXmlDatasets failed 
  *      BL 2016-07-06: Ticket #122 64Bit compatibility (+ compiler warnings)
@@ -311,7 +312,7 @@ TRDP_ERR_T trdp_XMLOpen (
     XML_HANDLE_T    *pXML,
     const char      *file)
 {
-    if ((pXML->infile = fopen(file, "r+b")) == NULL)
+    if ((pXML->infile = fopen(file, "rb")) == NULL)
     {
         return TRDP_IO_ERR;
     }
