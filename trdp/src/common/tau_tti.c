@@ -25,6 +25,7 @@
  *
  * $Id$
  *
+ *      SB 2019-01-31: fixed reference of waitForInaug semaphore pointer in ttiMDCallback
  *      BL 2019-01-24: ttiStoreOpTrnDir returns changed flag
  *      BL 2019-01-24: Missing PD100 -> WARNING (not ERROR) log
  *      BL 2018-08-07: Ticket #183 tau_getOwnIds declared but not defined
@@ -423,7 +424,7 @@ static void ttiMDCallback (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-    VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pRefCon;
+    VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
 
     if (pMsg->comId == TTDB_OP_DIR_INFO_COMID ||      /* TTDB notification */
         pMsg->comId == TTDB_OP_DIR_INFO_REP_COMID)
