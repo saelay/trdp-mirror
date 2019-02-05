@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
  *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
@@ -190,7 +191,7 @@ EXT_DECL TRDP_ERR_T tlc_getSubsStatistics (
         pStatistics[lIndex].toBehav     = iter->toBehavior;     /* Behavior at time-out    */
         pStatistics[lIndex].numRecv     = iter->numRxTx;        /* Number of packets received for this subscription.  */
         pStatistics[lIndex].numMissed   = iter->numMissed;      /* Number of packets received for this subscription.  */
-        pStatistics[lIndex].status      = iter->lastErr;        /* Receive status information  */
+        pStatistics[lIndex].status      = (UINT32) iter->lastErr;        /* Receive status information  */
     }
     if (lIndex >= *pNumSubs && iter != NULL)
     {
@@ -291,9 +292,10 @@ EXT_DECL TRDP_ERR_T tlc_getUdpListStatistics (
             vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN);
             pStatistics->comId          = pIter->addr.comId;
             pStatistics->joinedAddr     = pIter->addr.mcGroup;
-            pStatistics->callBack       = (pIter->pfCbFunction == NULL) ? 0 : 1;      /* > 0 if call back function is used */
-            pStatistics->userRef        = (pIter->pUserRef == NULL) ? 0 : 1;         /* > 0 if user reference if used  */
-            pStatistics->numSessions    = pIter->numSessions;
+            pStatistics->callBack       = (pIter->pfCbFunction == NULL) ? 0u : 1u;      /* > 0 if call back function is used */
+            pStatistics->userRef        = (pIter->pUserRef == NULL) ? 0u : 1u;         /* > 0 if user reference if used  */
+            pStatistics->queue          = 0u;
+            pStatistics->numRecv        = pIter->numSessions;
             pStatistics++;
             lIndex++;
         }
@@ -339,9 +341,10 @@ EXT_DECL TRDP_ERR_T tlc_getTcpListStatistics (
             vos_strncpy(pStatistics->uri, pIter->destURI, TRDP_MAX_URI_USER_LEN);
             pStatistics->comId          = pIter->addr.comId;
             pStatistics->joinedAddr     = pIter->addr.mcGroup;
-            pStatistics->callBack       = (pIter->pfCbFunction == NULL) ? 0 : 1;      /* > 0 if call back function is used */
-            pStatistics->userRef        = (pIter->pUserRef == NULL) ? 0 : 1;         /* > 0 if user reference if used  */
-            pStatistics->numSessions    = pIter->numSessions;
+            pStatistics->callBack       = (pIter->pfCbFunction == NULL) ? 0u : 1u;      /* > 0 if call back function is used */
+            pStatistics->userRef        = (pIter->pUserRef == NULL) ? 0u : 1u;         /* > 0 if user reference if used  */
+            pStatistics->queue          = 0u;
+            pStatistics->numRecv        = pIter->numSessions;
             pStatistics++;
             lIndex++;
         }
@@ -546,9 +549,8 @@ void    trdp_pdPrepareStats (
 
     /*  Fill in the values  */
     pData->version = vos_htonl(appHandle->stats.version);
-    pData->timeStamp.tv_sec     = (UINT32)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_sec);
-    pData->timeStamp.tv_usec    = (INT32)vos_htonl((UINT32)appHandle->stats.timeStamp.tv_usec);
-    pData->upTime           = vos_htonl(appHandle->stats.upTime);
+    pData->timeStamp        = vos_htonll(appHandle->stats.timeStamp);
+    pData->upTime           = vos_htonl(appHandle->stats.upTime); /* it will make a difference if this is a struct !!! */
     pData->statisticTime    = vos_htonl(appHandle->stats.statisticTime);
     pData->ownIpAddr        = vos_htonl(appHandle->stats.ownIpAddr);
     pData->leaderIpAddr     = vos_htonl(appHandle->stats.leaderIpAddr);

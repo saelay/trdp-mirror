@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-10-29: Ticket #217 PD Pull requests must be subscribed for
  *      BL 2018-08-07: Ticket #207 tlp_put() and variable dataSize
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
@@ -622,10 +623,9 @@ TRDP_ERR_T  trdp_pdReceive (
                 /*  Handle statistics request  */
                 if (vos_ntohl(pNewFrameHead->comId) == TRDP_STATISTICS_PULL_COMID)
                 {
-                    pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATISTICS_COMID);
+                    pPulledElement = trdp_queueFindComId(appHandle->pSndQueue, TRDP_GLOBAL_STATS_REPLY_COMID);
                     if (pPulledElement != NULL)
                     {
-                        pPulledElement->addr.comId      = TRDP_GLOBAL_STATISTICS_COMID;
                         pPulledElement->addr.destIpAddr = vos_ntohl(pNewFrameHead->replyIpAddress);
 
                         trdp_pdInit(pPulledElement, TRDP_MSG_PP, appHandle->etbTopoCnt, appHandle->opTrnTopoCnt, 0u, 0u);
