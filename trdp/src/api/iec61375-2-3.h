@@ -13,6 +13,7 @@
  *
  * $Id$
  *
+ *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds
  *      BL 2018-01-29: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *     AHW 2017-11-05: Ticket #179 Max. number of retries of a MD request needs to be checked
  *     AHW 2017-05-22: Ticket #159 Infinit timeout at TRDB level is 0 acc. standard
@@ -199,7 +200,12 @@
 /** Reserved in Annex D & E                                                                                         */
 #define TRDP_COMID_ECHO                     10u
 
-#define TRDP_STATISTICS_PULL_COMID          31u
+/* There is an ambiguity regarding statistics comIds between Table A.2 and Annex D.3
+ (ComId definitions do not match, Join-Statistics not present in D.3 i.e. */
+
+#define TRDP_STATISTICS_PULL_COMID          31u                                     /**< reserved in Table A.2      */
+
+/* defines from Table A.2:  */
 #define TRDP_STATISTICS_REQUEST_COMID       32u
 #define TRDP_GLOBAL_STATISTICS_COMID        35u
 #define TRDP_SUBS_STATISTICS_COMID          36u
@@ -208,6 +214,23 @@
 #define TRDP_JOIN_STATISTICS_COMID          39u
 #define TRDP_UDP_LIST_STATISTICS_COMID      40u
 #define TRDP_TCP_LIST_STATISTICS_COMID      41u
+
+/* defines as deducted from D.3.2:  */
+
+#define TRDP_GLOBAL_STATS_REQUEST_COMID     30u
+#define TRDP_GLOBAL_STATS_REPLY_COMID       31u                                     /**< reserved in D.3            */
+#define TRDP_SUBS_STATS_REQUEST_COMID       32u
+#define TRDP_SUBS_STATS_REPLY_COMID         33u
+#define TRDP_PUB_STATS_REQUEST_COMID        34u
+#define TRDP_PUB_STATS_REPLY_COMID          35u
+#define TRDP_RED_STATS_REQUEST_COMID        36u
+#define TRDP_RED_STATS_REPLY_COMID          37u
+#define TRDP_UDP_LIST_STATS_REQUEST_COMID   38u
+#define TRDP_UDP_LIST_STATS_REPLY_COMID     39u
+#define TRDP_TCP_LIST_STATS_REQUEST_COMID   40u
+#define TRDP_TCP_LIST_STATS_REPLY_COMID     41u
+
+/* end of variant */
 
 #define TRDP_CONFTEST_COMID                 80u
 #define TRDP_CONFTEST_STATUS_COMID          81u
@@ -384,6 +407,8 @@
 #define TRDP_ETBCTRL_DSID                               1u
 #define TRDP_CSTINFO_DSID                               2u
 #define TRDP_CSTINFOCTRL_DSID                           3u
+
+/* These dataset IDs are not defined in D.3 but can be used in XML config files */
 
 #define TRDP_STATISTICS_REQUEST_DSID                    31u
 #define TRDP_MEM_STATISTICS_DSID                        32u

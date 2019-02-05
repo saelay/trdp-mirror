@@ -71,6 +71,8 @@ static void dbgOut (
     UINT16      LineNumber,
     const CHAR8 *pMsgStr)
 {
+    (void) pRefCon;
+
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
     printf("%s %s %s:%d %s",
            strrchr(pTime, '-') + 1,

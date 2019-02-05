@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds
  *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
@@ -246,7 +247,7 @@ void print_stats (
 
     printf("\n--------------------\n");
     printf("version:        %u\n", pData->version);
-    printf("timestamp:      %ld:%u\n", (long) pData->timeStamp.tv_sec, pData->timeStamp.tv_usec);
+    printf("timestamp:      %llu\n", (long long) pData->timeStamp);
     printf("upTime:         %u\n", pData->upTime);
     printf("statisticTime:  %u\n", pData->statisticTime);
     printf("ownIpAddr:      %u\n", pData->ownIpAddr);
@@ -494,7 +495,7 @@ int main (int argc, char * *argv)
     err = tlp_subscribe( appHandle,                     /*    our application identifier            */
                          &subHandle,                    /*    our subscription identifier           */
                          NULL, NULL,                    /*    userRef & callback function           */
-                         TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                 */
+                         TRDP_GLOBAL_STATS_REPLY_COMID,  /*    ComID                                 */
                          0,                             /*    topocount: local consist only         */
                          0,
                          VOS_INADDR_ANY,VOS_INADDR_ANY, /*    Source IP filter                      */
@@ -523,7 +524,7 @@ int main (int argc, char * *argv)
                       0,
                       NULL,
                       0,
-                      TRDP_GLOBAL_STATISTICS_COMID,
+                      TRDP_GLOBAL_STATS_REPLY_COMID,
                       replyIP);
 
     if (err != TRDP_NO_ERR)

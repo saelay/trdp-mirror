@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-10-09: Ticket #213 ComId 31 subscription removed (<-- undone!)
  *      BL 2018-06-29: Default settings handling / compiler warnings
  *      SW 2018-06-26: Ticket #205 tlm_addListener() does not acknowledge TRDP_FLAGS_DEFAULT flag
@@ -406,7 +407,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
             ret = tlp_publish(pSession,                 /*    our application identifier    */
                               &dummyPubHndl,            /*    our pulication identifier     */
                               NULL, NULL,
-                              TRDP_GLOBAL_STATISTICS_COMID, /*    ComID to send                 */
+                              TRDP_GLOBAL_STATS_REPLY_COMID, /*    ComID to send                 */
                               0u,                       /*    local consist only            */
                               0u,                       /*    no orient/direction info      */
                               0u,                       /*    default source IP             */
@@ -441,7 +442,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                                 0u, 0u,                 /*    Source IP filters                  */
                                 0u,                     /*    Default destination (or MC Group) */
                                 TRDP_FLAGS_NONE,        /*    packet flags                      */
-                                TRDP_TIMER_FOREVER,     /*    Time out in us                    */
+                                TRDP_INFINITE_TIMEOUT,  /*    Time out in us                    */
                                 TRDP_TO_DEFAULT);       /*    delete invalid data on timeout    */
         }
         if (ret == TRDP_NO_ERR)
@@ -2197,7 +2198,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     newPD->pCachedDS    = NULL;
                     newPD->magic        = TRDP_MAGIC_SUB_HNDL_VALUE;
 
-                    if (timeout == TRDP_TIMER_FOREVER)
+                    if (timeout == TRDP_INFINITE_TIMEOUT)
                     {
                         vos_clearTime(&newPD->timeToGo);
                         vos_clearTime(&newPD->interval);

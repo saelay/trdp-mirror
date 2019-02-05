@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  *
  *
+ *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
  *      BL 2017-11-13: Ticket #176 TRDP_LABEL_T breaks field alignment -> TRDP_NET_LABEL_T
@@ -192,7 +193,8 @@ typedef enum
 #define TRDP_FLAGS_TCP          0x08u     /**< Use TCP for message data                                   */
 #define TRDP_FLAGS_FORCE_CB     0x10u     /**< Force a callback for every received packet                 */
 
-#define TRDP_INFINITE_TIMEOUT   0xffffffffu /**< Infinite reply timeout                                      */
+#define TRDP_INFINITE_TIMEOUT   0xffffffffu /**< Infinite reply timeout                                   */
+#define TRDP_DEFAULT_PD_TIMEOUT 100000u     /**< Default PD timeout 100ms from 61375-2-3                  */
 
 typedef UINT8 TRDP_FLAGS_T;
 
@@ -212,8 +214,6 @@ typedef enum
     TRDP_TO_SET_TO_ZERO     = 1u,    /**< If set, data will be reset to zero on time out             */
     TRDP_TO_KEEP_LAST_VALUE = 2u     /**< If set, last received values will be returned              */
 } TRDP_TO_BEHAVIOR_T;
-
-#define TRDP_TIMER_FOREVER  0xffffffff      /**< No time out for subscription                        */
 
 /**    Process data info from received telegram; allows the application to generate responses.
  *
@@ -366,11 +366,15 @@ typedef apTRDP_DATASET_T *papTRDP_DATASET_T;
  *   - Memory usage
  */
 
+#if (defined (WIN32) || defined (WIN64))
+#pragma pack(push, 1)
+#endif
+
 /** Structure containing comId for MD statistics request (ComId 32). */
 typedef struct
 {
     UINT32 comId;                                       /**< ComId to request: 35...41 */
-} TRDP_STATISTICS_REQUEST_T;
+} GNU_PACKED TRDP_STATISTICS_REQUEST_T;
 
 
 /** Structure containing all general memory statistics information. */
@@ -384,7 +388,7 @@ typedef struct
     UINT32  numFreeErr;                                 /**< free errors */
     UINT32  blockSize[VOS_MEM_NBLOCKSIZES];             /**< preallocated memory blocks */
     UINT32  usedBlockSize[VOS_MEM_NBLOCKSIZES];         /**< used memory blocks */
-} TRDP_MEM_STATISTICS_T;
+} GNU_PACKED TRDP_MEM_STATISTICS_T;
 
 
 /** Structure containing all general PD statistics information. */
@@ -404,7 +408,7 @@ typedef struct
     UINT32  numTimeout;       /**< number of PD timeouts */
     UINT32  numSend;          /**< number of sent PD  packets */
     UINT32  numMissed;        /**< number of packets skipped */
-} TRDP_PD_STATISTICS_T;
+} GNU_PACKED TRDP_PD_STATISTICS_T;
 
 
 /** Structure containing all general MD statistics information. */
@@ -423,16 +427,16 @@ typedef struct
     UINT32  numReplyTimeout;       /**< number of reply timeouts */
     UINT32  numConfirmTimeout;     /**< number of confirm timeouts */
     UINT32  numSend;               /**< number of sent MD packets */
-} TRDP_MD_STATISTICS_T;
+} GNU_PACKED TRDP_MD_STATISTICS_T;
 
 
 /** Structure containing all general memory, PD and MD statistics information. */
 typedef struct
 {
     UINT32                  version;      /**< TRDP version  */
-    TIMEDATE64              timeStamp;    /**< actual time stamp */
-    TIMEDATE32              upTime;       /**< time in sec since last initialisation */
-    TIMEDATE32              statisticTime; /**< time in sec since last reset of statistics */
+    UINT64                  timeStamp;    /**< actual time stamp */
+    UINT32                  upTime;       /**< time in sec since last initialisation */
+    UINT32                  statisticTime; /**< time in sec since last reset of statistics */
     TRDP_NET_LABEL_T        hostName;     /**< host name */
     TRDP_NET_LABEL_T        leaderName;   /**< leader host name */
     TRDP_IP_ADDR_T          ownIpAddr;    /**< own IP address */
@@ -445,7 +449,7 @@ typedef struct
     TRDP_PD_STATISTICS_T    pd;           /**< pd statistics */
     TRDP_MD_STATISTICS_T    udpMd;        /**< UDP md statistics */
     TRDP_MD_STATISTICS_T    tcpMd;        /**< TCP md statistics */
-} TRDP_STATISTICS_T;
+} GNU_PACKED TRDP_STATISTICS_T;
 
 /** Table containing particular PD subscription information. */
 typedef struct
@@ -457,11 +461,11 @@ typedef struct
     UINT32          callBack;       /**< call back function if used */
     UINT32          userRef;        /**< User reference if used */
     UINT32          timeout;        /**< Time-out value in us. 0 = No time-out supervision */
-    TRDP_ERR_T      status;         /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
+    UINT32/*TRDP_ERR_T*/      status;         /**< Receive status information TRDP_NO_ERR, TRDP_TIMEOUT_ERR */
     UINT32          toBehav;        /**< Behavior at time-out. Set data to zero / keep last value */
     UINT32          numRecv;        /**< Number of packets received for this subscription */
     UINT32          numMissed;      /**< number of packets skipped for this subscription */
-} TRDP_SUBS_STATISTICS_T;
+} GNU_PACKED TRDP_SUBS_STATISTICS_T;
 
 /** Table containing particular PD publishing information. */
 typedef struct
@@ -473,19 +477,20 @@ typedef struct
     UINT32          redState;   /**< Redundant state.Leader or Follower */
     UINT32          numPut;     /**< Number of packet updates */
     UINT32          numSend;    /**< Number of packets sent out */
-} TRDP_PUB_STATISTICS_T;
+} GNU_PACKED TRDP_PUB_STATISTICS_T;
 
 
 /** Information about a particular MD listener */
 typedef struct
 {
     UINT32          comId;      /**< ComId to listen to */
-    TRDP_URI_USER_T uri;        /**< URI user part to listen to */
+    CHAR8           uri[32];    /**< URI user part to listen to */
     TRDP_IP_ADDR_T  joinedAddr; /**< Joined IP address */
     UINT32          callBack;   /**< Call back function if used */
+    UINT32          queue;      /**< Queue reference if used */
     UINT32          userRef;    /**< User reference if used */
-    UINT32          numSessions; /**< Number of sessions  */
-} TRDP_LIST_STATISTICS_T;
+    UINT32          numRecv;    /**< Number of received packets  */
+} GNU_PACKED TRDP_LIST_STATISTICS_T;
 
 
 /** A table containing PD redundant group information */
@@ -493,7 +498,11 @@ typedef struct
 {
     UINT32  id;                /**< Redundant Id */
     UINT32  state;             /**< Redundant state.Leader or Follower */
-} TRDP_RED_STATISTICS_T;
+} GNU_PACKED TRDP_RED_STATISTICS_T;
+
+#if (defined (WIN32) || defined (WIN64))
+#pragma pack(pop)
+#endif
 
 
 typedef struct TRDP_SESSION *TRDP_APP_SESSION_T;
@@ -686,6 +695,8 @@ typedef struct
                                                   Default: Allow                                            */
 #define TRDP_OPTION_NO_UDP_CHK          0x10u   /**< Suppress UDP CRC generation
                                                   Default: Compute UDP CRC                                  */
+#define TRDP_OPTION_WAIT_FOR_DNR        0x20u   /**< Wait for DNR
+                                                  Default: Don't wait                                       */
 typedef UINT8 TRDP_OPTION_T;
 
 /**********************************************************************************************************************/
@@ -705,7 +716,7 @@ typedef struct
 }
 #endif
 
-/**
+/*
    \mainpage The TRDP Light Library API Specification
 
    \image html TCNOpen.png

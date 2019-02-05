@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds
  *      BL 2017-06-30: Compiler warnings, local prototypes added
  *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
  *
@@ -98,8 +99,7 @@ void print_stats (
            (UINT32) trdp.rel,
            (UINT32) trdp.upd,
            (UINT32) trdp.evo);
-    printf("timestamp:          %u:%u\n", vos_ntohl(pData->timeStamp.tv_sec),
-           vos_ntohl((UINT32) pData->timeStamp.tv_usec));
+    printf("timestamp:          %llu\n", vos_ntohll(pData->timeStamp));
     printf("upTime:             %u\n", vos_ntohl(pData->upTime));
     printf("lastStatReset:      %u\n", vos_ntohl(pData->statisticTime));
     printf("hostName:           %s\n", pData->hostName);
@@ -219,7 +219,7 @@ void myPDcallBack (
                memcpy(&gBuffer, pData,
                       ((sizeof(gBuffer) <
                         dataSize) ? sizeof(gBuffer) : dataSize));
-               if (pMsg->comId == TRDP_GLOBAL_STATISTICS_COMID)
+               if (pMsg->comId == TRDP_STATISTICS_PULL_COMID)
                {
                    print_stats(&gBuffer);
                    gKeepOnRunning = FALSE;
@@ -354,7 +354,7 @@ int main (int argc, char * *argv)
                          &subHandle,                    /*    our subscription identifier            */
                          NULL,                          /*    user reference                         */
                          myPDcallBack,                  /*    callback function                      */
-                         TRDP_GLOBAL_STATISTICS_COMID,  /*    ComID                                  */
+                         TRDP_STATISTICS_PULL_COMID,    /*    ComID                                  */
                          0, 0,                          /*    topocount: local consist only          */
                          VOS_INADDR_ANY,                /*    source IP 1                           */
                          VOS_INADDR_ANY,                /*    Source IP filter                       */
@@ -383,7 +383,7 @@ int main (int argc, char * *argv)
                       0,
                       NULL,
                       0,
-                      TRDP_GLOBAL_STATISTICS_COMID,
+                      TRDP_GLOBAL_STATS_REPLY_COMID,
                       replyIP);
 
     if (err != TRDP_NO_ERR)

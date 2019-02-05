@@ -426,6 +426,8 @@ static void ttiMDCallback (
 {
     VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
 
+    (void) pRefCon;
+    
     if (pMsg->comId == TTDB_OP_DIR_INFO_COMID ||      /* TTDB notification */
         pMsg->comId == TTDB_OP_DIR_INFO_REP_COMID)
     {
