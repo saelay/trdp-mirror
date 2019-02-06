@@ -25,6 +25,7 @@
  *
  * $Id$
  *
+ *      SB 2019-02-06: Added OpTrn topocnt changed log message (PD100), wait in mdCallback only when topocnt changed
  *      SB 2019-01-31: fixed reference of waitForInaug semaphore pointer in ttiMDCallback
  *      BL 2019-01-24: ttiStoreOpTrnDir returns changed flag
  *      BL 2019-01-24: Missing PD100 -> WARNING (not ERROR) log
@@ -223,6 +224,8 @@ static void ttiPDCallback (
 
             if (appHandle->opTrnTopoCnt != appHandle->pTTDB->opTrnState.state.opTrnTopoCnt)
             {
+                vos_printLog(VOS_LOG_INFO, "OpTrn topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
+                             appHandle->opTrnTopoCnt, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt, (void*) appHandle);
                 changed++;
                 (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
             }
@@ -434,10 +437,12 @@ static void ttiMDCallback (
         if (pMsg->resultCode == TRDP_NO_ERR &&
             dataSize <= sizeof(TRDP_OP_TRAIN_DIR_T))
         {
-            ttiStoreOpTrnDir(appHandle, pData);
-            if (waitForInaug != NULL)
+            if (ttiStoreOpTrnDir(appHandle, pData))
             {
-                vos_semaGive(waitForInaug);           /* Signal new inauguration    */
+                if (waitForInaug != NULL)
+                {
+                    vos_semaGive(waitForInaug);           /* Signal new inauguration    */
+                }
             }
         }
     }
