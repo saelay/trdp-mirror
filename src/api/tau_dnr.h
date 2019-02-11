@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      SB 2019-02-11: Ticket #237: tau_initDnr: Parameter waitForDnr to reduce wait times added
  *      BL 2018-08-07: Ticket #183 tau_getOwnIds moved here
  *      BL 2017-07-25: Ticket #125: tau_dnr: TCN DNS support missing
  *      BL 2015-12-14: Ticket #8: DNR client
@@ -74,6 +75,7 @@ typedef enum TRDP_DNR_OPTS {
  *  @param[in]      dnsPort         DNS port number.
  *  @param[in]      pHostsFileName  Optional host file name as ECSP replacement/addition.
  *  @param[in]      dnsOptions      Use existing thread (recommended), use own tlc_process loop or use standard DNS
+ *  @param[in]      waitForDnr      Waits for DNR if true(recommended), doesn't wait for DNR if false(for testing).
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error
@@ -84,7 +86,8 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     TRDP_IP_ADDR_T      dnsIpAddr,
     UINT16              dnsPort,
     const CHAR8         *pHostsFileName,
-    TRDP_DNR_OPTS_T     dnsOptions);
+    TRDP_DNR_OPTS_T     dnsOptions,
+    BOOL8               waitForDnr);
 
 /**********************************************************************************************************************/
 /**    Release any resources allocated by DNR
