@@ -16,6 +16,7 @@
  *
  * $Id$
  *
+ *      SB 2019-02-11: Ticket #237: tau_initDnr: Parameter waitForDnr to reduce wait times added
  *      BL 2018-08-07: Ticket #183 tau_getOwnIds declared but not defined
  *      BL 2018-08-06: Ticket #210 IF condition for DNS Options incorrect in tau_uri2Addr()
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
@@ -1057,6 +1058,7 @@ exit:
  *  @param[in]      dnsPort         DNS port number.
  *  @param[in]      pHostsFileName  Optional host file name as ECSP replacement/addition.
  *  @param[in]      dnsOptions      Use existing thread (recommended), use own tlc_process loop or use standard DNS
+ *  @param[in]      waitForDnr      Waits for DNR if true(recommended), doesn't wait for DNR if false(for testing).
  *
  *  @retval         TRDP_NO_ERR     no error
  *  @retval         TRDP_INIT_ERR   initialisation error
@@ -1067,7 +1069,8 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
                                  TRDP_IP_ADDR_T      dnsIpAddr,
                                  UINT16              dnsPort,
                                  const CHAR8         *pHostsFileName,
-                                 TRDP_DNR_OPTS_T     dnsOptions)
+                                 TRDP_DNR_OPTS_T     dnsOptions,
+                                 BOOL8               waitForDnr)
 {
     TRDP_ERR_T      err = TRDP_NO_ERR;
     TAU_DNR_DATA_T  *pDNR;      /**< default DNR/ECSP settings  */
@@ -1099,18 +1102,27 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     }
 
     pDNR->useTCN_DNS = dnsOptions;
+    pDNR->noOfCachedEntries = 0u;
+    
+    if (waitForDnr > 0)
+    {
+        pDNR->timeout = TAU_DNS_TIME_OUT_LONG;
+    }
+    else
+    {
+        pDNR->timeout = TAU_DNS_TIME_OUT_SHORT;
+    }
 
     /* Get locally defined hosts */
     if ((pHostsFileName != NULL) && (strlen(pHostsFileName) > 0))
     {
-        err = readHostsFile(pDNR, pHostsFileName);
-        pDNR->timeout = TAU_DNS_TIME_OUT_SHORT;
+        /* ignore error if reading hostfile fails */
+        if (readHostsFile(pDNR, pHostsFileName) != TRDP_NO_ERR)
+        {
+            pDNR->timeout = TAU_DNS_TIME_OUT_SHORT;
+        }
     }
-    else
-    {
-        pDNR->noOfCachedEntries = 0u;
-        pDNR->timeout = TAU_DNS_TIME_OUT_LONG;
-    }
+
     return err;
 }
 
