@@ -47,7 +47,7 @@ extern "C" {
 /***********************************************************************************************************************
  * TYPEDEFS
  */
-
+/** DNR state */
 typedef enum TRDP_DNR_STATE {
     TRDP_DNR_UNKNOWN        = 0,
     TRDP_DNR_NOT_AVAILABLE  = 1,
@@ -55,9 +55,10 @@ typedef enum TRDP_DNR_STATE {
     TRDP_DNR_HOSTSFILE      = 3
 } TRDP_DNR_STATE_T;
 
+/**DNR options */
 typedef enum TRDP_DNR_OPTS {
     TRDP_DNR_COMMON_THREAD  = 0,
-    TRDP_DNR_OWN_THREAD     = 1,
+    TRDP_DNR_OWN_THREAD     = 1, /**<For single threaded systems only! Internally call tlc_process() */
     TRDP_DNR_STANDARD_DNS   = 2
 } TRDP_DNR_OPTS_T;
     
