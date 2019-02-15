@@ -165,6 +165,10 @@ extern void *gRefCon;
 #define HAS_FMEMOPEN    1
 #endif
 
+#ifndef MD_SUPPORT
+#define MD_SUPPORT 1
+#endif
+
 /***********************************************************************************************************************
  * TYPEDEFS
  */
