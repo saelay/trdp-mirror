@@ -22,7 +22,8 @@
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2016. All rights reserved.
- *
+ */
+ /*
  * $Id$
  *
  *      SB 2019-02-06: Added OpTrn topocnt changed log message (PD100), wait in mdCallback only when topocnt changed

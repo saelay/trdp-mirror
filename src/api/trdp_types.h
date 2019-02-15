@@ -5,7 +5,7 @@
  * @brief           Typedefs for TRDP communication
  *
  * @details
- *F
+ *
  * @note            Project: TCNOpen TRDP prototype stack
  *
  * @author          Bernd Loehr, NewTec GmbH
@@ -13,8 +13,8 @@
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
- *
- *
+ */
+ /*
  *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
@@ -194,7 +194,7 @@ typedef enum
 #define TRDP_FLAGS_FORCE_CB     0x10u     /**< Force a callback for every received packet                 */
 
 #define TRDP_INFINITE_TIMEOUT   0xffffffffu /**< Infinite reply timeout                                   */
-#define TRDP_DEFAULT_PD_TIMEOUT 100000u     /**< Default PD timeout 100ms from 61375-2-3                  */
+#define TRDP_DEFAULT_PD_TIMEOUT 100000u     /**< Default PD timeout 100ms from 61375-2-3 Table C.7        */
 
 typedef UINT8 TRDP_FLAGS_T;
 
@@ -261,7 +261,7 @@ typedef struct
     BOOL8               aboutToDie;         /**< session is about to die                    */
     UINT32              numRepliesQuery;    /**< number of ReplyQuery received              */
     UINT32              numConfirmSent;     /**< number of Confirm sent                     */
-    UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners */
+    UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners) */
     UINT16              userStatus;         /**< error code, user stat                      */
     TRDP_REPLY_STATUS_T replyStatus;        /**< reply status                               */
     TRDP_UUID_T         sessionId;          /**< for response                               */
@@ -625,7 +625,7 @@ typedef struct
     TRDP_FLAGS_T        flags;                  /**< Default flags for PD packets               */
     UINT32              timeout;                /**< Default timeout in us                      */
     TRDP_TO_BEHAVIOR_T  toBehavior;             /**< Default timeout behavior                  */
-    UINT16              port;                   /**< Port to be used for PD communication       */
+    UINT16              port;                   /**< Port to be used for PD communication (default: 17224)      */
 } TRDP_PD_CONFIG_T;
 
 
@@ -659,8 +659,8 @@ typedef struct
     UINT32              confirmTimeout;         /**< Default confirmation timeout in us         */
     UINT32              connectTimeout;         /**< Default connection timeout in us           */
     UINT32              sendingTimeout;         /**< Default sending timeout in us              */
-    UINT16              udpPort;                /**< Port to be used for UDP MD communication   */
-    UINT16              tcpPort;                /**< Port to be used for TCP MD communication   */
+    UINT16              udpPort;                /**< Port to be used for UDP MD communication (default: 17225)  */
+    UINT16              tcpPort;                /**< Port to be used for TCP MD communication (default: 17225)  */
     UINT32              maxNumSessions;         /**< Maximal number of replier sessions         */
 } TRDP_MD_CONFIG_T;
 
