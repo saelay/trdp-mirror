@@ -17,6 +17,7 @@
  /*
  * $Id$
  *
+ *      BL 2019-02-22: lwip patch: recvfrom to return destIP
  *      BL 2019-01-29: Ticket #233: DSCP Values not standard conform
  *      BL 2018-11-26: Ticket #208: Mapping corrected after complaint (Bit 2 was set for prio 2 & 4)
  *      BL 2018-07-13: Ticket #208: VOS socket options: QoS/ToS field priority handling needs update
@@ -38,6 +39,7 @@
 #include "vos_utils.h"
 #include "vos_sock.h"
 #include "vos_private.h"
+#include <byteswap.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,6 +94,17 @@ EXT_DECL UINT32 vos_ntohl (
 {
     return ntohl(val);
 }
+
+EXT_DECL UINT64 vos_htonll (
+    UINT64 val)
+    {
+#   ifdef L_ENDIAN
+        return __bswap_64(val);
+#   else
+        return val;
+#   endif
+    }
+
 
 /**********************************************************************************************************************/
 /** Convert IP address from dotted dec. to !host! endianess
@@ -815,10 +828,11 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     UINT32  *pDstIPAddr,
     BOOL8   peek)
 {
-#if 1
     struct sockaddr_in si_other;
     int     slen    = sizeof(si_other), rcvSize;
     char    *buf    = (char *) pBuffer;
+    struct sockaddr_in dest;
+    int     dlen = sizeof(dest);
 
     if (sock == -1 || pBuffer == NULL || pSize == NULL)
     {
@@ -828,14 +842,17 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     do
     {
 
-        /* rcvSize = recvmsg(sock, &msg, (peek != 0) ? MSG_PEEK : 0); */
-        rcvSize = recvfrom(sock, buf, *pSize, MSG_DONTWAIT, (struct sockaddr *) &si_other, (socklen_t *)&slen);
+        /* Note: recvfromdest is a call to a patched version of the lwip stack!
+         The original recvfrom version does not provide such a call, neither does it provide the recvmsg() function!
+         */
+        rcvSize = recvfromdest(sock, buf, *pSize, MSG_DONTWAIT, (struct sockaddr *) &si_other, (socklen_t *)&slen,
+                               (struct sockaddr *) &dest, (socklen_t *)&dlen);
 
         if (rcvSize != -1)
         {
             if (pDstIPAddr != NULL)
             {
-                vos_printLogStr(VOS_LOG_DBG, "destination IP not supported\n");
+                *pDstIPAddr = (UINT32)vos_ntohl(dest.sin_addr.s_addr);
             }
 
             if (pSrcIPAddr != NULL)
@@ -879,115 +896,6 @@ EXT_DECL VOS_ERR_T vos_sockReceiveUDP (
     }
     return VOS_NO_ERR;
 
-#else
-    union
-    {
-        struct cmsghdr  cm;
-        char            raw[32];
-    } control_un;
-    struct sockaddr_in  srcAddr;
-    socklen_t           sockLen = sizeof(srcAddr);
-    ssize_t rcvSize = 0;
-    struct msghdr       msg;
-    struct iovec        iov;
-    struct cmsghdr      *cmsg;
-
-    if (sock == -1 || pBuffer == NULL || pSize == NULL)
-    {
-        return VOS_PARAM_ERR;
-    }
-
-    /* clear our address buffers */
-    memset(&msg, 0, sizeof(msg));
-    memset(&control_un, 0, sizeof(control_un));
-
-    /* fill the scatter/gather list with our data buffer */
-    iov.iov_base    = pBuffer;
-    iov.iov_len     = *pSize;
-
-    /* fill the msg block for recvmsg */
-    msg.msg_iov         = &iov;
-    msg.msg_iovlen      = 1;
-    msg.msg_name        = &srcAddr;
-    msg.msg_namelen     = sockLen;
-    msg.msg_control     = &control_un.cm;
-    msg.msg_controllen  = sizeof(control_un);
-
-    *pSize = 0;
-
-    do
-    {
-        rcvSize = recvmsg(sock, &msg, (peek != 0) ? MSG_PEEK : 0);
-
-        if (rcvSize != -1)
-        {
-            if (pDstIPAddr != NULL)
-            {
-                for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL; cmsg = CMSG_NXTHDR(&msg, cmsg))
-                {
-                    #if defined(IP_RECVDSTADDR)
-                    if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == IP_RECVDSTADDR)
-                    {
-                        struct in_addr *pia = (struct in_addr *)CMSG_DATA(cmsg);
-                        *pDstIPAddr = (UINT32)vos_ntohl(pia->s_addr);
-                        /* vos_printLog(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
-                    }
-                    #elif defined(IP_PKTINFO)
-                    if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_PKTINFO)
-                    {
-                        struct in_pktinfo *pia = (struct in_pktinfo *)CMSG_DATA(cmsg);
-                        *pDstIPAddr = (UINT32)vos_ntohl(pia->ipi_addr.s_addr);
-                        /* vos_printLog(VOS_LOG_DBG, "udp message dest IP: %s\n", vos_ipDotted(*pDstIPAddr)); */
-                    }
-                    #endif
-                }
-            }
-
-
-            if (pSrcIPAddr != NULL)
-            {
-                *pSrcIPAddr = (uint32_t) vos_ntohl(srcAddr.sin_addr.s_addr);
-                /* vos_printLog(VOS_LOG_DBG, "udp message source IP: %s\n", vos_ipDotted(*pSrcIPAddr)); */
-            }
-
-            if (pSrcIPPort != NULL)
-            {
-                *pSrcIPPort = (UINT16) vos_ntohs(srcAddr.sin_port);
-            }
-        }
-
-        if (rcvSize == -1 && errno == EWOULDBLOCK)
-        {
-            return VOS_BLOCK_ERR;
-        }
-    }
-    while (rcvSize == -1 && errno == EINTR);
-
-    if (rcvSize == -1)
-    {
-        if (errno == ECONNRESET)
-        {
-            /* ICMP port unreachable received (result of previous send), treat this as no error */
-            return VOS_NO_ERR;
-        }
-        else
-        {
-            char buff[VOS_MAX_ERR_STR_SIZE];
-            STRING_ERR(buff);
-            vos_printLog(VOS_LOG_ERROR, "recvmsg() failed (Err: %s)\n", buff);
-            return VOS_IO_ERR;
-        }
-    }
-    else if (rcvSize == 0)
-    {
-        return VOS_NODATA_ERR;
-    }
-    else
-    {
-        *pSize = (UINT32) rcvSize;  /* We will not expect larger packets (max. size is 64k anyway!) */
-        return VOS_NO_ERR;
-    }
-#endif
 }
 
 /**********************************************************************************************************************/
