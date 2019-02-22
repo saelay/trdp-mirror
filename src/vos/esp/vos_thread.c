@@ -434,10 +434,10 @@ EXT_DECL VOS_ERR_T vos_threadSelf (
 EXT_DECL VOS_ERR_T vos_threadDelay (
     UINT32 delay)
 {
+    TickType_t  xDelay = delay / (1000u * portTICK_PERIOD_MS);
+
     if (delay == 0u)
     {
-        //pthread_testcancel();
-
         /*    yield cpu to other processes   */
         if (sched_yield() != 0)
         {
@@ -445,8 +445,7 @@ EXT_DECL VOS_ERR_T vos_threadDelay (
         }
         return VOS_NO_ERR;
     }
-
-    vTaskDelay(delay);
+    vTaskDelay(xDelay);
     return VOS_NO_ERR;
 }
 
