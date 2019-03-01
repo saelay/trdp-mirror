@@ -20,6 +20,7 @@
  /*
  * $Id$
  *
+ *      SB 2018-03-01: Ticket #241 MDCallback: MsgType and reply status not set correctly
  *      BL 2018-11-07: Ticket #185 MD reply: Infinite timeout wrong handled
  *      BL 2018-11-07: Ticket #220 Message Data - Different behaviour UDP & TCP
  *      BL 2018-11-06: for-loops limited to sCurrentMaxSocketCnt instead VOS_MAX_SOCKET_CNT
@@ -330,6 +331,12 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
         replyStatus = TRDP_REPLY_UNSPECIFIED_ERROR;
     }
 
+    if ((resultCode == TRDP_REPLYTO_ERR) && ((TRDP_REPLY_STATUS_T)replyStatus == TRDP_REPLY_OK))
+    {
+        if (pMdItem->numExpReplies > pMdItem->numReplies) {theMessage.replyStatus = TRDP_REPLY_NOT_ALL_REPLIES;}
+        if (pMdItem->numReplies == 0) {theMessage.replyStatus = TRDP_REPLY_NO_REPLY;}
+    }
+
     if ( replyStatus >= 0 )
     {
         theMessage.userStatus   = (UINT16) replyStatus;
@@ -339,6 +346,7 @@ static void trdp_mdInvokeCallback (const MD_ELE_T           *pMdItem,
     {
         theMessage.userStatus   = 0u;
         theMessage.replyStatus  = (TRDP_REPLY_STATUS_T) replyStatus;
+        theMessage.msgType = TRDP_MSG_ME;
     }
     theMessage.destIpAddr = pMdItem->addr.destIpAddr;
     theMessage.numExpReplies        = pMdItem->numExpReplies;
