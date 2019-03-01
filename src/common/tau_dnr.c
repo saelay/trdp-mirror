@@ -17,6 +17,7 @@
  /*
  * $Id$
  *
+ *      SB 2019-03-01: Ticket #237: tau_initDnr: Fixed comparison of readHostFile return value
  *      SB 2019-02-11: Ticket #237: tau_initDnr: Parameter waitForDnr to reduce wait times added
  *      BL 2018-08-07: Ticket #183 tau_getOwnIds declared but not defined
  *      BL 2018-08-06: Ticket #210 IF condition for DNS Options incorrect in tau_uri2Addr()
@@ -1118,7 +1119,7 @@ EXT_DECL TRDP_ERR_T tau_initDnr (
     if ((pHostsFileName != NULL) && (strlen(pHostsFileName) > 0))
     {
         /* ignore error if reading hostfile fails */
-        if (readHostsFile(pDNR, pHostsFileName) != TRDP_NO_ERR)
+        if (readHostsFile(pDNR, pHostsFileName) == TRDP_NO_ERR)
         {
             pDNR->timeout = TAU_DNS_TIME_OUT_SHORT;
         }
