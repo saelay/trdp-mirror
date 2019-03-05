@@ -311,27 +311,6 @@ int main (int argc, char * *argv)
         return 1;
     }
 
-    /*    Publish status PD        */
-
-
-    err = tlp_publish( appHandle,                 /*    our application identifier                            */
-                        &pubHandle,                /*    our subscription identifier                           */
-                        NULL, NULL,                /*    userRef & callback function                           */
-                        NTTS_STATUS_COMID,         /*    ComID                                                 */
-                        0u, 0u,                    /*    topocounts: local consist only                        */
-                        //0x0a400b03, 0x0a400b04,          /*    Testing #190 Source to expect packets from    */
-                        VOS_INADDR_ANY, VOS_INADDR_ANY,    /*    Source to expect packets from                 */
-                        vos_dottedIP(STATUS_IP_DEST),      /*   Default destination (or MC Group)              */
-                        TRDP_FLAGS_DEFAULT,
-                        NTTS_STATUS_TIMEOUT,       /*    Time out in us                                        */
-                        TRDP_TO_SET_TO_ZERO);      /*  delete invalid data    on timeout                       */
-
-    if (err != TRDP_NO_ERR)
-    {
-        vos_printLogStr(VOS_LOG_USR, "prep pd publish error\n");
-        tlc_terminate();
-        return 1;
-    }
 
     /*
      Enter the main processing loop.
