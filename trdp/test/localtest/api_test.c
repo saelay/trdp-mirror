@@ -40,6 +40,8 @@
 #include "vos_sock.h"
 #include "vos_utils.h"
 
+#include "tau_xml.h"
+#include "vos_shared_mem.h"
 
 /***********************************************************************************************************************
  * DEFINITIONS
@@ -236,6 +238,61 @@ static uint8_t          dataBuffer3[64] =
     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
+};
+
+static char          xmlBuffer[] =
+{
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    "<device xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"trdp-config.xsd\" host-name=\"examplehost\" leader-name=\"leaderhost\" type=\"dummy\">"
+    "<device-configuration memory-size=\"65535\">"
+    "<mem-block-list>"
+    "<mem-block size=\"32\" preallocate=\"512\" />"
+    "<mem-block size=\"72\" preallocate=\"256\"/>"
+    "<mem-block size=\"128\" preallocate=\"256\"/>"
+    "</mem-block-list>"
+    "</device-configuration>"
+    ""
+    "<bus-interface-list>"
+    "<bus-interface network-id=\"1\" name=\"enp0s3:1\" host-ip=\"10.0.1.30\">"
+    "<trdp-process blocking=\"no\" cycle-time=\"100000\" priority=\"80\" traffic-shaping=\"on\" />"
+    "<pd-com-parameter marshall=\"on\" port=\"17224\" qos=\"5\" ttl=\"64\" timeout-value=\"1000000\" validity-behavior=\"zero\" />"
+    "<md-com-parameter udp-port=\"17225\" tcp-port=\"17225\""
+    "confirm-timeout=\"1000000\" connect-timeout=\"60000000\" reply-timeout=\"5000000\""
+    "marshall=\"off\" protocol=\"UDP\" qos=\"3\" retries=\"2\" ttl=\"64\" />"
+    "<telegram name=\"tlg1001\" com-id=\"3000\" data-set-id=\"1001\" com-parameter-id=\"1\">"
+    "<pd-parameter cycle=\"500000\" marshall=\"off\" timeout =\"3000000\" validity-behavior=\"keep\"/>"
+    "<source id=\"1\" uri1=\"239.1.1.2\" >"
+    "<sdt-parameter smi1=\"1234\" udv=\"56\" rx-period=\"500\" tx-period=\"2000\" />"
+    "</source>"
+    "</telegram>"
+    "<telegram name=\"tlg1005\" com-id=\"3001\" data-set-id=\"1001\" com-parameter-id=\"1\">"
+    "<pd-parameter cycle=\"500000\" marshall=\"off\" timeout =\"3000000\" validity-behavior=\"zero\"/>"
+    "<source id=\"1\" uri1=\"239.1.1.2\" />"
+    "</telegram>"
+    "</bus-interface>"
+    "</bus-interface-list>"
+    ""
+    "<mapped-device-list>"
+    "</mapped-device-list>"
+    ""
+    "<com-parameter-list>"
+    "<!--Default PD communication parameters-->"
+    "<com-parameter id=\"1\" qos=\"5\" ttl=\"64\" />"
+    "<!--Default MD communication parameters-->"
+    "<com-parameter id=\"2\" qos=\"3\" ttl=\"64\" />"
+    "<!--Own PD communication parameters-->"
+    "<com-parameter id=\"4\" qos=\"4\" ttl=\"2\" />"
+    "</com-parameter-list>"
+    ""
+    "<data-set-list>"
+    "<data-set name=\"testDS1001\" id=\"1001\">"
+    "<element name=\"r32\" type=\"REAL32\"/>"
+    "<element name=\"r64\" type=\"REAL64\"/>"
+    "</data-set>"
+    "</data-set-list>"
+    ""
+    "<debug file-name=\"trdp.log\" file-size=\"1000000\" info=\"DTFC\" level=\"W\" />"
+    "</device>"
 };
 
 /**********************************************************************************************************************/
@@ -516,13 +573,13 @@ static void test_deinit (
 {
     if (pSession1)
     {
-        pSession1->threadRun = 0;
+        //pSession1->threadRun = 0;
         vos_threadTerminate(pSession1->threadId);
         vos_threadDelay(100000);
     }
     if (pSession2)
     {
-        pSession2->threadRun = 0;
+        //pSession2->threadRun = 0;
         vos_threadTerminate(pSession2->threadId);
         vos_threadDelay(100000);
     }
@@ -754,7 +811,7 @@ static int test3 ()
                             TEST3_COMID, 0u, 0u,
                             0u, 0u, /* gSession1.ifaceIP,                  / * Source * / */
                             0u, /* gDestMC,                            / * Destination * / */
-                            TRDP_FLAGS_DEFAULT, TRDP_TIMER_FOREVER, TRDP_TO_DEFAULT);
+                            TRDP_FLAGS_DEFAULT, TRDP_INFINITE_TIMEOUT, TRDP_TO_DEFAULT);
 
 
         IF_ERROR("tlp_subscribe");
@@ -2078,6 +2135,92 @@ static int test16 ()
     CLEANUP;
 }
 
+/**********************************************************************************************************************/
+/** test17
+ *
+ *  @retval         0        no error
+ *  @retval         1        some error
+ */
+static int test17 ()
+{
+    //PREPARE1(""); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
+
+    /* ------------------------- test code starts here --------------------------- */
+
+    {
+        //err = 0;
+
+        {
+            UINT8   str[] = "123456789";
+            UINT32 result, seed, len = strlen((char*) str);
+            /* CRC of the string "123456789" is 0x1697d06a ??? */
+            seed = 0;
+            result = vos_sc32(seed, str, len);
+            fprintf(gFp, "sc32 of '%s' (seed = %0x) is 0x%08x\n", str, seed, result);
+        }
+        {
+            UINT8   str[] = "123456789";
+            UINT32 result, seed, len = strlen((char*) str);
+            /* CRC of the string "123456789" is 0x1697d06a ??? */
+            seed = 0xFFFFFFFF;
+            result = vos_sc32(seed, str, len);
+            fprintf(gFp, "sc32 of '%s' (seed = %0x) is 0x%08x\n", str, seed, result);
+        }
+
+    }
+
+    /* ------------------------- test code ends here --------------------------- */
+
+
+    //CLEANUP;
+    return 0;
+}
+
+/**********************************************************************************************************************/
+/** test18
+ *
+ *  @retval         0        no error
+ *  @retval         1        some error
+ */
+static int test18 ()
+{
+    PREPARE1("XML test18"); /* allocates appHandle1, failed = 0, err = TRDP_NO_ERR */
+
+    /* ------------------------- test code starts here --------------------------- */
+
+    {
+        /* Try to parse the xmlBuffer (test6.xml in memory): */
+
+        TRDP_XML_DOC_HANDLE_T   docHnd;
+        TRDP_MEM_CONFIG_T       memConfig;
+        TRDP_DBG_CONFIG_T       dbgConfig;
+        UINT32                  numComPar;
+        TRDP_COM_PAR_T          *pComPar;
+        UINT32                  numIfConfig;
+        TRDP_IF_CONFIG_T        *pIfConfig;
+        int i;
+
+        err = tau_prepareXmlMem (xmlBuffer, strlen(xmlBuffer), &docHnd);
+        IF_ERROR("tau_prepareXmlMem");
+
+        err = tau_readXmlDeviceConfig (&docHnd, &memConfig, &dbgConfig, &numComPar, &pComPar, &numIfConfig, &pIfConfig);
+        IF_ERROR("tau_readXmlDeviceConfig");
+
+        for (i = 0; i < numIfConfig; i++)
+        {
+            fprintf (gFp, "interface label: %s\n", pIfConfig[i].ifName);            /**< interface name   */
+            fprintf (gFp, "network ID     : %u\n", pIfConfig[i].networkId);         /**< used network on the device (1...4)   */
+            fprintf (gFp, "host IP        : 0x%08x\n", pIfConfig[i].hostIp);        /**< host IP address   */
+            fprintf (gFp, "leader IP      : 0x%08x\n", pIfConfig[i].leaderIp);      /**< Leader IP address dependant on redundancy concept   */
+        }
+    }
+
+    /* ------------------------- test code ends here --------------------------- */
+
+
+    CLEANUP;
+}
+
 
 
 
@@ -2101,8 +2244,10 @@ test_func_t *testArray[] =
     test12,  /* testing unsubscribe and unjoin */
     test13,  /* PD publish and subscribe, auto increment using new 1.4 callback function */
     test14,  /* Publish & Subscribe, Callback */
-    test15, /* MD Request - Reply / Reuse of TCP connection */
-    test16, /* MD Request - Reply / UDP */
+    test15,     /* MD Request - Reply / Reuse of TCP connection */
+    test16,     /* MD Request - Reply / UDP */
+    test17,     /* CRC */
+    test18,     /* XML stream */
     NULL
 };
 
