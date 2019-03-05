@@ -63,6 +63,10 @@ PD_ELE_T            *trdp_queueFindSubAddr (
     PD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *pAddr);
 
+PD_ELE_T            *trdp_queueFindExistingSub (
+    PD_ELE_T            *pHead,
+    TRDP_ADDRESSES_T    *pAddr);
+
 PD_ELE_T            *trdp_queueFindPubAddr (
     PD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *addr);

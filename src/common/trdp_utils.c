@@ -17,6 +17,7 @@
  /*
  * $Id$
  *
+ *      SB 2019-03-05: Ticket: #243 added function trdp_queueFindExistingSub(), that only returns exact matches
  *      SB 2018-01-17: Ticket: #230 multiple Subscribers with same comId, sourceIPs but different destinationIPs not working
  *      BL 2018-11-06: for-loops limited to sCurrentMaxSocketCnt instead VOS_MAX_SOCKET_CNT
  *      BL 2018-11-06: Ticket #219: PD Sequence Counter is not synched correctly
@@ -392,6 +393,52 @@ PD_ELE_T *trdp_queueFindSubAddr (
     return NULL;
 }
 
+
+/**********************************************************************************************************************/
+/** Return the element with same comId and IP addresses
+ *
+ *  @param[in]      pHead           pointer to head of queue
+ *  @param[in]      addr            Pub/Sub handle (Address, ComID, srcIP & dest IP) to search for
+ *
+ *  @retval         != NULL         pointer to PD element
+ *  @retval         NULL            No PD element found
+ */
+PD_ELE_T *trdp_queueFindExistingSub (
+    PD_ELE_T            *pHead,
+    TRDP_ADDRESSES_T    *addr)
+{
+    PD_ELE_T *iterPD;
+
+    if (pHead == NULL || addr == NULL)
+    {
+        return NULL;
+    }
+
+    for (iterPD = pHead; iterPD != NULL; iterPD = iterPD->pNext)
+    {
+        /*  We match if src/dst/mc address is zero or matches */
+        if (iterPD->addr.comId == addr->comId)
+        {
+            if ((iterPD->addr.srcIpAddr == addr->srcIpAddr)
+                && (iterPD->addr.destIpAddr == addr->destIpAddr))
+            {
+                return iterPD;
+            }
+            /* Check for IP range */
+            if (iterPD->addr.srcIpAddr2 != VOS_INADDR_ANY)
+            {
+                if ((addr->srcIpAddr >= iterPD->addr.srcIpAddr) &&
+                    (addr->srcIpAddr <= iterPD->addr.srcIpAddr2) &&
+                    (iterPD->addr.destIpAddr == addr->destIpAddr))
+                {
+                    return iterPD;
+                }
+            }
+
+        }
+    }
+    return NULL;
+}
 
 /**********************************************************************************************************************/
 /** Delete an element
