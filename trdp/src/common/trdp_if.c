@@ -435,7 +435,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         /*  Subscribe our request packet   */
         if (ret == TRDP_NO_ERR)
         {
-            if ((pProcessConfig->options & TRDP_OPTION_NO_PD_STATS) != 0)
+            if ((pProcessConfig != NULL) && ((pProcessConfig->options & TRDP_OPTION_NO_PD_STATS) != 0))
             {
                 ret = tlp_unpublish(pSession, dummyPubHndl);
             }
