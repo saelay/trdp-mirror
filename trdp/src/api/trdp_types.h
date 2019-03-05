@@ -15,6 +15,7 @@
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
  */
  /*
+ *      SB 2019-03-05: Ticket #243 added TRDP_OPTION_NO_PD_STATS flag to TRDP_OPTION_T
  *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
  *      BL 2018-05-02: Ticket #188 Typo in the TRDP_VAR_SIZE definition
@@ -697,6 +698,8 @@ typedef struct
                                                   Default: Compute UDP CRC                                  */
 #define TRDP_OPTION_WAIT_FOR_DNR        0x20u   /**< Wait for DNR
                                                   Default: Don't wait                                       */
+#define TRDP_OPTION_NO_PD_STATS         0x40u   /**< Suppress PD statistics \
+                                                  Default: Don't suppress                                   */
 typedef UINT8 TRDP_OPTION_T;
 
 /**********************************************************************************************************************/

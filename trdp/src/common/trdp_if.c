@@ -17,6 +17,7 @@
  /*
  * $Id$
  *
+ *      SB 2019-03-05: Ticket #243 Option to turn of ComId 31 subscription, replaced trdp_queueFindSubAddr with trdp_queueFindExistingSub
  *      SB 2019-02-11: Ticket #230 Setting destIpAddr to 0 in tlp_subscribe() if it is not multicast address
  *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-10-09: Ticket #213 ComId 31 subscription removed (<-- undone!)
@@ -434,18 +435,25 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
         /*  Subscribe our request packet   */
         if (ret == TRDP_NO_ERR)
         {
-            ret = tlp_subscribe(pSession,               /*    our application identifier    */
-                                &dummySubHandle,        /*    our subscription identifier   */
-                                NULL,
-                                NULL,
-                                TRDP_STATISTICS_PULL_COMID, /*    ComID                         */
-                                0u,                     /*    etbtopocount: local consist only  */
-                                0u,                     /*    optrntopocount                    */
-                                0u, 0u,                 /*    Source IP filters                  */
-                                0u,                     /*    Default destination (or MC Group) */
-                                TRDP_FLAGS_NONE,        /*    packet flags                      */
-                                TRDP_INFINITE_TIMEOUT,  /*    Time out in us                    */
-                                TRDP_TO_DEFAULT);       /*    delete invalid data on timeout    */
+            if ((pProcessConfig->options & TRDP_OPTION_NO_PD_STATS) != 0)
+            {
+                ret = tlp_unpublish(pSession, dummyPubHndl);
+            }
+            else
+            {
+                ret = tlp_subscribe(pSession,               /*    our application identifier    */
+                                    &dummySubHandle,        /*    our subscription identifier   */
+                                    NULL,
+                                    NULL,
+                                    TRDP_STATISTICS_PULL_COMID, /*    ComID                         */
+                                    0u,                     /*    etbtopocount: local consist only  */
+                                    0u,                     /*    optrntopocount                    */
+                                    0u, 0u,                 /*    Source IP filters                  */
+                                    0u,                     /*    Default destination (or MC Group) */
+                                    TRDP_FLAGS_NONE,        /*    packet flags                      */
+                                    TRDP_INFINITE_TIMEOUT,  /*    Time out in us                    */
+                                    TRDP_TO_DEFAULT);       /*    delete invalid data on timeout    */
+            }
         }
         if (ret == TRDP_NO_ERR)
         {
@@ -2122,7 +2130,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     vos_getTime(&now);
 
     /*    Look for existing element    */
-    if (trdp_queueFindSubAddr(appHandle->pRcvQueue, &subHandle) != NULL)
+    if (trdp_queueFindExistingSub(appHandle->pRcvQueue, &subHandle) != NULL)
     {
         ret = TRDP_NOSUB_ERR;
     }
