@@ -17,6 +17,7 @@
  /*
  * $Id$
  *
+ *      SB 2019-03-06: Ticket: #230/243 added provisions in trdp_queueFindSubAddr() for systems, that return no destination address
  *      SB 2019-03-05: Ticket: #243 added function trdp_queueFindExistingSub(), that only returns exact matches
  *      SB 2018-01-17: Ticket: #230 multiple Subscribers with same comId, sourceIPs but different destinationIPs not working
  *      BL 2018-11-06: for-loops limited to sCurrentMaxSocketCnt instead VOS_MAX_SOCKET_CNT
@@ -374,7 +375,7 @@ PD_ELE_T *trdp_queueFindSubAddr (
         if (iterPD->addr.comId == addr->comId)
         {
             if (((iterPD->addr.srcIpAddr == VOS_INADDR_ANY) || (iterPD->addr.srcIpAddr == addr->srcIpAddr))
-                && ((iterPD->addr.destIpAddr == VOS_INADDR_ANY) || (iterPD->addr.destIpAddr == addr->destIpAddr)))
+                && ((iterPD->addr.destIpAddr == VOS_INADDR_ANY) || (addr->destIpAddr == VOS_INADDR_ANY) || (iterPD->addr.destIpAddr == addr->destIpAddr)))
             {
                 return iterPD;
             }
@@ -383,7 +384,7 @@ PD_ELE_T *trdp_queueFindSubAddr (
             {
                 if ((addr->srcIpAddr >= iterPD->addr.srcIpAddr) &&
                     (addr->srcIpAddr <= iterPD->addr.srcIpAddr2) &&
-                    ((iterPD->addr.destIpAddr == VOS_INADDR_ANY) || (iterPD->addr.destIpAddr == addr->destIpAddr)))
+                    ((iterPD->addr.destIpAddr == VOS_INADDR_ANY) || (addr->destIpAddr == VOS_INADDR_ANY) || (iterPD->addr.destIpAddr == addr->destIpAddr)))
                 {
                     return iterPD;
                 }

@@ -1575,7 +1575,7 @@ static int test12 ()
 
         err = tlp_publish(gSession1.appHandle, &pubHandle, NULL, NULL, TEST12_COMID1, 0u, 0u,
                           0u, /* gSession1.ifaceIP,                   / * Source * / */
-                          TEST12_MCDEST3,                           /* Destination */
+                          TEST12_MCDEST1,                           /* Destination */
                           TEST12_INTERVAL,
                           0u, TRDP_FLAGS_DEFAULT, NULL, NULL, TEST12_DATA_LEN);
 
