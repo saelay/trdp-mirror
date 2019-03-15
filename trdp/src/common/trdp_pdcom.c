@@ -19,6 +19,7 @@
  *
  *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-10-29: Ticket #217 PD Pull requests must be subscribed for
+ *      BL 2018-09-29: Ticket #191 Ready for TSN (PD2 Header)
  *      BL 2018-08-07: Ticket #207 tlp_put() and variable dataSize
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-01-29: Ticket #186 Potential SEGFAULT in case of PD timeout
@@ -87,7 +88,7 @@
  *   Locals
  */
 
-
+#ifndef TRDP_TSN
 /******************************************************************************/
 /** Initialize/construct the packet
  *  Set the header infos
@@ -122,6 +123,7 @@ void    trdp_pdInit (
     pPacket->pFrame->frameHead.replyComId       = vos_htonl(replyComId);
     pPacket->pFrame->frameHead.replyIpAddress   = vos_htonl(replyIpAddress);
 }
+#endif
 
 /******************************************************************************/
 /** Copy data
@@ -306,6 +308,12 @@ TRDP_ERR_T  trdp_pdSendQueued (
         /*    Get the current time    */
         vos_getTime(&now);
 
+        if (iterPD->privFlags & TRDP_IS_TSN)
+        {
+            iterPD = iterPD->pNext;
+            continue;
+        }
+
         /*  Is this a cyclic packet and
          due to sent?
          or is it a PD Request or a requested packet (PULL) ?
@@ -433,6 +441,7 @@ TRDP_ERR_T  trdp_pdSendQueued (
     return err;
 }
 
+#ifndef TRDP_TSN
 /******************************************************************************/
 /** Receiving PD messages
  *  Read the receive socket for arriving PDs, copy the packet to a new PD_ELE_T
@@ -482,26 +491,26 @@ TRDP_ERR_T  trdp_pdReceive (
     /*  Update statistics   */
     switch (err)
     {
-       case TRDP_NO_ERR:
-           appHandle->stats.pd.numRcv++;
-           break;
-       case TRDP_CRC_ERR:
-           appHandle->stats.pd.numCrcErr++;
-           return err;
-       case TRDP_WIRE_ERR:
-           appHandle->stats.pd.numProtErr++;
-           return err;
-       default:
-           return err;
+        case TRDP_NO_ERR:
+            appHandle->stats.pd.numRcv++;
+            break;
+        case TRDP_CRC_ERR:
+            appHandle->stats.pd.numCrcErr++;
+            return err;
+        case TRDP_WIRE_ERR:
+            appHandle->stats.pd.numProtErr++;
+            return err;
+        default:
+            return err;
     }
 
     /* First check incoming packet's topoCount against session topoCounts */
     /* First subscriber check from Table A.5:
-       Actual topography counter values <-> Topography counters of received */
+     Actual topography counter values <-> Topography counters of received */
     if ( !trdp_validTopoCounters( appHandle->etbTopoCnt,
-                                  appHandle->opTrnTopoCnt,
-                                  vos_ntohl(pNewFrameHead->etbTopoCnt),
-                                  vos_ntohl(pNewFrameHead->opTrnTopoCnt)))
+                                 appHandle->opTrnTopoCnt,
+                                 vos_ntohl(pNewFrameHead->etbTopoCnt),
+                                 vos_ntohl(pNewFrameHead->opTrnTopoCnt)))
     {
         appHandle->stats.pd.numTopoErr++;
         return TRDP_TOPO_ERR;
@@ -519,9 +528,9 @@ TRDP_ERR_T  trdp_pdReceive (
     if (pExistingElement == NULL)
     {
         /*
-        vos_printLog(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr),
-                        vos_ntohl(pNewFrame->frameHead.comId));
-        */
+         vos_printLog(VOS_LOG_INFO, "No subscription (SrcIp: %s comId %u)\n", vos_ipDotted(subAddresses.srcIpAddr),
+         vos_ntohl(pNewFrame->frameHead.comId));
+         */
         err = TRDP_NOSUB_ERR;
     }
     else
@@ -554,14 +563,14 @@ TRDP_ERR_T  trdp_pdReceive (
                                               subAddresses.srcIpAddr,
                                               (TRDP_MSG_T) vos_ntohs(pNewFrameHead->msgType)))
             {
-               case 0:                      /* Sequence counter is valid (at least 1 higher than previous one) */
-                   break;
-               case -1:                     /* List overflow */
-                   return TRDP_MEM_ERR;
-               case 1:
-                   vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
-                                    subAddresses.srcIpAddr), vos_ntohl(pNewFrameHead->comId));
-                   return TRDP_NO_ERR;      /* Ignore packet, too old or duplicate */
+                case 0:                      /* Sequence counter is valid (at least 1 higher than previous one) */
+                    break;
+                case -1:                     /* List overflow */
+                    return TRDP_MEM_ERR;
+                case 1:
+                    vos_printLog(VOS_LOG_INFO, "Old PD data ignored (SrcIp: %s comId %u)\n", vos_ipDotted(
+                                                                                                          subAddresses.srcIpAddr), vos_ntohl(pNewFrameHead->comId));
+                    return TRDP_NO_ERR;      /* Ignore packet, too old or duplicate */
             }
 
             if ((newSeqCnt > 0u) && (newSeqCnt > (pExistingElement->curSeqCnt + 1u)))
@@ -718,6 +727,7 @@ TRDP_ERR_T  trdp_pdReceive (
     }
     return err;
 }
+#endif
 
 /******************************************************************************/
 /** Check for pending packets, set FD if non blocking
@@ -816,14 +826,25 @@ void trdp_pdHandleTimeOuts (
                 theMessage.resultCode   = TRDP_TIMEOUT_ERR;
                 if (iterPD->pFrame != NULL)
                 {
-                    theMessage.etbTopoCnt   = vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt);
-                    theMessage.opTrnTopoCnt = vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt);
-                    theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
-                    theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
-                    theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
-                    theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
-                    theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
-
+#ifdef TRDP_TSN
+                    if (iterPD->privFlags & TRDP_IS_TSN)
+                    {
+                        PD2_PACKET_T *pFrame = (PD2_PACKET_T*) iterPD->pFrame;
+                        theMessage.msgType      = (TRDP_MSG_T)pFrame->frameHead.msgType;
+                        theMessage.seqCount     = vos_ntohl(pFrame->frameHead.sequenceCounter);
+                        theMessage.protVersion  = pFrame->frameHead.protocolVersion;
+                    }
+                    else
+#endif
+                    {
+                        theMessage.etbTopoCnt   = vos_ntohl(iterPD->pFrame->frameHead.etbTopoCnt);
+                        theMessage.opTrnTopoCnt = vos_ntohl(iterPD->pFrame->frameHead.opTrnTopoCnt);
+                        theMessage.msgType      = (TRDP_MSG_T) vos_ntohs(iterPD->pFrame->frameHead.msgType);
+                        theMessage.seqCount     = vos_ntohl(iterPD->pFrame->frameHead.sequenceCounter);
+                        theMessage.protVersion  = vos_ntohs(iterPD->pFrame->frameHead.protocolVersion);
+                        theMessage.replyComId   = vos_ntohl(iterPD->pFrame->frameHead.replyComId);
+                        theMessage.replyIpAddr  = vos_ntohl(iterPD->pFrame->frameHead.replyIpAddress);
+                    }
                     iterPD->pfCbFunction(appHandle->pdDefault.pRefCon,
                                          appHandle,
                                          &theMessage,
@@ -922,6 +943,7 @@ TRDP_ERR_T   trdp_pdCheckListenSocks (
     return result;
 }
 
+#ifndef TRDP_TSN
 /******************************************************************************/
 /** Update the header values
  *
@@ -1005,6 +1027,8 @@ TRDP_ERR_T trdp_pdCheck (
     }
     return err;
 }
+#endif
+
 
 /******************************************************************************/
 /** Send one PD packet

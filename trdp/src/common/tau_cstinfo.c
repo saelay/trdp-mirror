@@ -182,7 +182,6 @@ void cstInfoGetCltrCstInfo (
     UINT16  etbCnt  = vos_ntohs(*pSrc);
     UINT16  vehCnt;
     UINT16  fctCnt;
-    // UINT16  cltrCstCnt;
     UINT32  itemSize;
     UINT32  i;
     UINT8   *pCurInfo;
@@ -208,7 +207,6 @@ void cstInfoGetCltrCstInfo (
     }
 
     pSrc        = pCurInfo + itemSize + 2;                      /* pSrc points to cltrCstCnt    */
-    //cltrCstCnt  = vos_ntohs(*(UINT16 *)pSrc);
 
     if (l_index> fctCnt)
     {

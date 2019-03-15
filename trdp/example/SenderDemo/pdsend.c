@@ -184,7 +184,7 @@ int pd_init (
     uint32_t    comID,
     uint32_t    interval)
 {
-    TRDP_PD_CONFIG_T        pdConfiguration = {pdCallBack, NULL, {0, 0, 0},
+    TRDP_PD_CONFIG_T        pdConfiguration = {pdCallBack, NULL, {0, 0, 0, 0u, 0u},
                                                TRDP_FLAGS_CALLBACK, 10000000, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MD_CONFIG_T        mdConfiguration = {mdCallback, NULL, {0, 0, 0},
                                                 TRDP_FLAGS_CALLBACK, 5000000, 5000000, 5000000, 0, 0, 2, 10};

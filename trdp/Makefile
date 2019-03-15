@@ -9,12 +9,13 @@
 #// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013-2018. All rights reserved.
 #//
+#//	BL 2019-03-15: Prepared for TSN
 #//	BL 2019-01-24: Reduce noise
 #//	BL 2018-05-08: YOCTO / ARM7 configuration added
 #//	BL 2018-02-02: Example renamed: cmdLineSelect -> echoCallback
 #//	BL 2017-05-30: 64 bit Linux X86 config added
 #//	BL 2017-05-08: 64 bit OSX config added
-#// 	BL 2016-02-11: Ticket #88 Cleanup makefiles, remove dependencies on external libraries
+#// BL 2016-02-11: Ticket #88 Cleanup makefiles, remove dependencies on external libraries
 
 MAKEFLAGS += --quiet
 
@@ -53,10 +54,16 @@ FLINT = $(LINT_BINPATH)flint
 
 # Set Objects
 VOS_OBJS = vos_utils.o \
-	   vos_sock.o \
 	   vos_mem.o \
 	   vos_thread.o \
 	   vos_shared_mem.o
+
+#include the TSN socket implementation, if needed
+ifneq (,$(findstring TSN,$(CFLAGS)))
+	VOS_OBJS += vos_sockTSN.o # Found
+else
+	VOS_OBJS += vos_sock.o # Not found
+endif
 
 TRDP_OBJS = trdp_pdcom.o \
 	    trdp_utils.o \

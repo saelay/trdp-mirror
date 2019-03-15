@@ -4,7 +4,7 @@
  *
  * @brief           Functions for ECN communication
  *
- * @details
+ * @details         API implementation of TRDP Light
  *
  * @note            Project: TCNOpen TRDP prototype stack
  *
@@ -17,10 +17,12 @@
  /*
  * $Id$
  *
+ *      BL 2019-03-15: Ticket #244 Extend SendParameters to support VLAN Id and TSN
  *      SB 2019-03-05: Ticket #243 Option to turn of ComId 31 subscription, replaced trdp_queueFindSubAddr with trdp_queueFindExistingSub
  *      SB 2019-02-11: Ticket #230 Setting destIpAddr to 0 in tlp_subscribe() if it is not multicast address
  *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-10-09: Ticket #213 ComId 31 subscription removed (<-- undone!)
+ *      BL 2018-09-29: Ticket #191 Ready for TSN (PD2 Header)
  *      BL 2018-06-29: Default settings handling / compiler warnings
  *      SW 2018-06-26: Ticket #205 tlm_addListener() does not acknowledge TRDP_FLAGS_DEFAULT flag
  *      BL 2018-06-25: Ticket #201 tlp_setRedundant return value if redId is 0
@@ -399,6 +401,8 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     else
     {
         unsigned int retries;
+        /* Define standard send parameters to prvent pdpublish to use tsn in case... */
+        TRDP_SEND_PARAM_T   defaultParams = TRDP_PD_DEFAULT_SEND_PARAM;
 
         pSession->pNext = sSession;
         sSession        = pSession;
@@ -418,7 +422,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                               0u,                       /*    Cycle time in ms              */
                               0u,                       /*    not redundant                 */
                               TRDP_FLAGS_NONE,          /*    No callbacks                  */
-                              NULL,                     /*    default qos and ttl           */
+                              &defaultParams,            /*    default qos and ttl           */
                               NULL,                     /*    initial data                  */
                               sizeof(TRDP_STATISTICS_T));
             if ((ret == TRDP_SOCK_ERR) &&
@@ -451,6 +455,9 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                                     0u, 0u,                 /*    Source IP filters                  */
                                     0u,                     /*    Default destination (or MC Group) */
                                     TRDP_FLAGS_NONE,        /*    packet flags                      */
+#ifdef TRDP_TSN
+                                    NULL,
+#endif
                                     TRDP_INFINITE_TIMEOUT,  /*    Time out in us                    */
                                     TRDP_TO_DEFAULT);       /*    delete invalid data on timeout    */
             }
@@ -2039,6 +2046,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     return ret;
 }
 
+#ifndef TRDP_TSN
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages.
  *  Subscribe to a specific PD ComID and source IP.
@@ -2236,7 +2244,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
     return ret;
 }
-
+#endif
 
 /**********************************************************************************************************************/
 /** Stop receiving PD messages.
