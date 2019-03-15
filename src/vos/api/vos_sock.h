@@ -1,4 +1,4 @@
-﻿/**********************************************************************************************************************/
+/**********************************************************************************************************************/
 /**
  * @file            vos_sock.h
  *
@@ -87,7 +87,11 @@ extern "C" {
 
 #define VOS_TTL_MULTICAST       64  /**< The maximum number of hops a multicast packet can take    */
 #ifndef VOS_MAX_IF_NAME_SIZE        /**< The maximum size for the interface name                   */
+#ifdef IFNAMSIZ
+#define VOS_MAX_IF_NAME_SIZE    IFNAMSIZ
+#else
 #define VOS_MAX_IF_NAME_SIZE    16
+#endif
 #endif
 #ifndef VOS_MAX_NUM_IF              /**< The maximum number of IP interface adapters that can be handled by VOS */
 #define VOS_MAX_NUM_IF  8
@@ -131,7 +135,13 @@ typedef struct
     BOOL8   reuseAddrPort;  /**< allow reuse of address and port                    */
     BOOL8   nonBlocking;    /**< use non blocking calls                             */
     BOOL8   no_mc_loop;     /**< no multicast loop back                             */
-    BOOL8   no_udp_crc;     /**< supress udp crc computation                        */
+    BOOL8   no_udp_crc;     /**< supress udp crc computation                       */
+#ifdef TRDP_TSN
+    BOOL8   txTime;         /**< use transmit time on send, if available            */
+    BOOL8   raw;            /**< use raw socket, not for receiver!                  */
+    UINT16  vlanId;
+    CHAR8   ifName[VOS_MAX_IF_NAME_SIZE]; /**< interface name if available          */
+#endif
 } VOS_SOCK_OPT_T;
 
 typedef fd_set VOS_FDS_T;
@@ -143,6 +153,7 @@ typedef struct
     VOS_IP4_ADDR_T  netMask;                    /**< subnet mask                    */
     UINT8           mac[VOS_MAC_SIZE];          /**< interface adapter MAC address  */
     BOOL8           linkState;                  /**< link down (false) / link up (true) */
+//    UINT16          vlanId;
 } VOS_IF_REC_T;
 
 /***********************************************************************************************************************
@@ -634,6 +645,17 @@ EXT_DECL VOS_ERR_T vos_sockSetMulticastIf (
 EXT_DECL VOS_IP4_ADDR_T vos_determineBindAddr ( VOS_IP4_ADDR_T  srcIP,
                                                 VOS_IP4_ADDR_T  mcGroup,
                                                 VOS_IP4_ADDR_T  rcvMostly);
+
+/* Extension for TSN & VLAN support */
+EXT_DECL VOS_ERR_T vos_ifnameFromVlanId (UINT16 vlanId, CHAR8 *pIFaceName);
+EXT_DECL VOS_ERR_T vos_createVlanIF (UINT16 vlanId, UINT8 vlanPriority, CHAR8 *pIFaceName, VOS_IP4_ADDR_T ipAddr);
+EXT_DECL VOS_ERR_T vos_sockOpenTSN (SOCKET *pSock, const VOS_SOCK_OPT_T *pOptions);
+EXT_DECL VOS_ERR_T vos_sockSendTSN (SOCKET sock, const UINT8 *pBuffer, UINT32 *pSize, VOS_IP4_ADDR_T srcIpAddress,
+                                    VOS_IP4_ADDR_T dstIpAddress,UINT16 port, VOS_TIMEVAL_T *pTxTime);
+EXT_DECL VOS_ERR_T vos_sockReceiveTSN (SOCKET sock, UINT8 *pBuffer, UINT32 *pSize, UINT32 *pSrcIPAddr,
+                                       UINT16 *pSrcIPPort, UINT32 *pDstIPAddr, BOOL8 peek);
+EXT_DECL VOS_ERR_T vos_sockBind2IF (SOCKET sock, VOS_IF_REC_T *pIFace, BOOL8 doBind);
+EXT_DECL void vos_sockPrintOptions (SOCKET sock);
 
 #ifdef __cplusplus
 }

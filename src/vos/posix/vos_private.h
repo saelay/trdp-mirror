@@ -45,7 +45,15 @@ extern "C" {
 #define VOS_VERSION            1u
 #define VOS_RELEASE            0u
 #define VOS_UPDATE             3u
-#define VOS_EVOLUTION          1u
+#define VOS_EVOLUTION          2u
+#endif
+
+/* Defines for Linux TSN ready sockets */
+#ifndef SO_TXTIME
+#define SO_TXTIME           61
+#define SCM_TXTIME          SO_TXTIME
+#define SCM_DROP_IF_LATE    62
+#define SCM_CLOCKID         63
 #endif
 
 struct VOS_MUTEX

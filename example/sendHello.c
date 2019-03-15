@@ -127,7 +127,7 @@ int main (int argc, char *argv[])
     UINT32                  cycleTime   = PD_COMID_CYCLE;
     TRDP_ERR_T              err;
     TRDP_PD_CONFIG_T        pdConfiguration =
-    {NULL, NULL, {0u, 64u, 0u}, TRDP_FLAGS_NONE, 1000000u, TRDP_TO_SET_TO_ZERO, 0};
+    {NULL, NULL, TRDP_PD_DEFAULT_SEND_PARAM, TRDP_FLAGS_NONE, 1000000u, TRDP_TO_SET_TO_ZERO, 0};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0, 0, TRDP_OPTION_BLOCK};
     UINT32                  ownIP           = 0u;

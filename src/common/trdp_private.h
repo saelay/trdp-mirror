@@ -14,9 +14,10 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  */
- /*     
+/*
  * $Id$
  *
+ *      BL 2018-09-29: Ticket #191 Ready for TSN (PD2 Header)
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
@@ -104,6 +105,7 @@ typedef enum
 #define TRDP_PULL_SUB           0x10u       /**< if set, its a PULL subscription                        */
 #define TRDP_REDUNDANT          0x20u       /**< if set, packet should not be sent (redundant)          */
 #define TRDP_CHECK_COMID        0x40u       /**< if set, do filter comId (addListener)                  */
+#define TRDP_IS_TSN             0x80u       /**< if set, PD will be sent on trdp_put() only             */
 
 typedef UINT8   TRDP_PRIV_FLAGS_T;
 
@@ -112,7 +114,8 @@ typedef enum
 {
     TRDP_SOCK_PD        = 0u,               /**< Socket is used for UDP process data                    */
     TRDP_SOCK_MD_UDP    = 1u,               /**< Socket is used for UDP message data                    */
-    TRDP_SOCK_MD_TCP    = 2u                /**< Socket is used for TCP message data                    */
+    TRDP_SOCK_MD_TCP    = 2u,               /**< Socket is used for TCP message data                    */
+    TRDP_SOCK_PD_TSN    = 3u,               /**< Socket is used for TSN process data                    */
 } TRDP_SOCK_TYPE_T;
 
 /** Hidden handle definition, used as unique addressing item    */
@@ -182,11 +185,24 @@ typedef struct
     UINT32  etbTopoCnt;                         /**< set by user: ETB to use, '0' for consist local traffic */
     UINT32  opTrnTopoCnt;                       /**< set by user: direction/side critical, '0' if ignored   */
     UINT32  datasetLength;                      /**< length of the data to transmit 0...1432                */
-    UINT32  reserved;                           /**< before used for ladder support                         */
+    UINT32  reserved;                           /**< reserved for ServiceID/InstanceID support                         */
     UINT32  replyComId;                         /**< used in PD request                                     */
     UINT32  replyIpAddress;                     /**< used for PD request                                    */
     UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
 } GNU_PACKED PD_HEADER_T;
+
+/** TRDP TSN process data header - network order and alignment    */
+typedef struct
+{
+    UINT32  sequenceCounter;                    /**< Unique counter (autom incremented)                     */
+    UINT8   protocolVersion;                    /**< fix value for compatibility (= 2)                      */
+    UINT8   msgType;                            /**< MsgType: 0x01 (non-safe), 0x02 (Safe Data),
+                                                          0x03 (for multiple SDTv4 frame), others reserved  */
+    UINT16  datasetLength;                      /**< length of the data to transmit 0...1432                */
+    UINT32  comId;                              /**< set by user: unique id                                 */
+    UINT32  reserved;                           /**< reserved for future use                                */
+    UINT32  frameCheckSum;                      /**< CRC32 of header                                        */
+} GNU_PACKED PD2_HEADER_T;
 
 /** TRDP message data header - network order and alignment    */
 typedef struct
@@ -210,15 +226,23 @@ typedef struct
 typedef struct
 {
     PD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
-    UINT8       data[TRDP_MAX_PD_DATA_SIZE];    /**< data ready to be sent or received (with CRCs)          */
+    UINT8       data[TRDP_MAX_PD_DATA_SIZE];    /**< data ready to be sent or received                      */
 } GNU_PACKED PD_PACKET_T;
+
+#ifdef TRDP_TSN
+typedef struct
+{
+    PD2_HEADER_T    frameHead;                      /**< Packet header in network byte order             */
+    UINT8           data[TRDP_MAX_PD2_DATA_SIZE];   /**< data ready to be sent or received                  */
+} GNU_PACKED PD2_PACKET_T;
+#endif
 
 #if MD_SUPPORT
 /** TRDP MD packet    */
 typedef struct
 {
     MD_HEADER_T frameHead;                      /**< Packet    header in network byte order                 */
-    UINT8       data[TRDP_MAX_MD_DATA_SIZE];    /**< data ready to be sent or received (with CRCs)          */
+    UINT8       data[TRDP_MAX_MD_DATA_SIZE];    /**< data ready to be sent or received                      */
 } GNU_PACKED MD_PACKET_T;
 #endif
 

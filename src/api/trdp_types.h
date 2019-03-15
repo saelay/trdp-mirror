@@ -12,9 +12,11 @@
  *
  * @remarks This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015. All rights reserved.
+ *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2015-2019. All rights reserved.
  */
  /*
+ *      BL 2019-03-15: Ticket #244 Extend SendParameters to support VLAN Id and TSN
+ *      BL 2019-03-15: Ticket #191 Ready for TSN (PD2 Header)
  *      SB 2019-03-05: Ticket #243 added TRDP_OPTION_NO_PD_STATS flag to TRDP_OPTION_T
  *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
  *      BL 2018-09-05: Ticket #211 XML handling: Dataset Name should be stored in TRDP_DATASET_ELEMENT_T
@@ -47,6 +49,10 @@
 #include "vos_mem.h"
 #include "vos_sock.h"
 #include "iec61375-2-3.h"
+
+#ifdef TRDP_TSN                         /**< For future real time extensions    */
+#include "trdp_tsn_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -194,6 +200,10 @@ typedef enum
 #define TRDP_FLAGS_TCP          0x08u     /**< Use TCP for message data                                   */
 #define TRDP_FLAGS_FORCE_CB     0x10u     /**< Force a callback for every received packet                 */
 
+#define TRDP_FLAGS_TSN          0x20u     /**< Hard Real Time PD                                          */
+#define TRDP_FLAGS_TSN_SDT      0x40u     /**< SDT PD                                                     */
+#define TRDP_FLAGS_TSN_MSDT     0x80u     /**< Multi SDT PD                                               */
+
 #define TRDP_INFINITE_TIMEOUT   0xffffffffu /**< Infinite reply timeout                                   */
 #define TRDP_DEFAULT_PD_TIMEOUT 100000u     /**< Default PD timeout 100ms from 61375-2-3 Table C.7        */
 
@@ -262,7 +272,7 @@ typedef struct
     BOOL8               aboutToDie;         /**< session is about to die                    */
     UINT32              numRepliesQuery;    /**< number of ReplyQuery received              */
     UINT32              numConfirmSent;     /**< number of Confirm sent                     */
-    UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners) */
+    UINT32              numConfirmTimeout;  /**< number of Confirm Timeouts (incremented by listeners */
     UINT16              userStatus;         /**< error code, user stat                      */
     TRDP_REPLY_STATUS_T replyStatus;        /**< reply status                               */
     TRDP_UUID_T         sessionId;          /**< for response                               */
@@ -281,9 +291,11 @@ typedef struct
 /**    Quality/type of service and time to live    */
 typedef struct
 {
-    UINT8   qos;       /**< Quality of service (default should be 5 for PD and 3 for MD)  */
-    UINT8   ttl;       /**< Time to live (default should be 64)  */
-    UINT8   retries;   /**< Retries from XML file */
+    UINT8   qos;        /**< Quality of service (default should be 2 for PD and 2 for MD, TSN priority >= 3)  */
+    UINT8   ttl;        /**< Time to live (default should be 64)  */
+    UINT8   retries;    /**< MD Retries from XML file               */
+    BOOL8   tsn;        /**< do not schedule/use TSN socket         */
+    UINT16  vlan;       /**< VLAN Id to be used                     */
 } TRDP_SEND_PARAM_T;
 
 

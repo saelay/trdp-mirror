@@ -110,6 +110,9 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
                          0, 0,                      /*    Source IP filter                      */
                          appHandle->realIP,         /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_MARSHALL,       /*    packet flags - UDP, no call back      */
+#ifdef TRDP_TSN
+                         NULL,
+#endif
                          ECSP_STAT_TIMEOUT,         /*    Time out in us                        */
                          TRDP_TO_SET_TO_ZERO);      /*    delete invalid data on timeout        */
 

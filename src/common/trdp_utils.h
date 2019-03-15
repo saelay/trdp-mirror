@@ -108,6 +108,7 @@ void        trdp_MDqueueInsFirst (
  */
 
 INT32 trdp_getCurrentMaxSocketCnt(void);
+void trdp_setCurrentMaxSocketCnt(INT32 currentMaxSocketCnt);
 
 
 /*********************************************************************************************************************/
@@ -226,6 +227,19 @@ void trdp_releaseSocket(
 
 UINT32 trdp_packetSizePD (
     UINT32 dataSize);
+
+#ifdef TRDP_TSN
+/*********************************************************************************************************************/
+/** Get the TSN packet size from the raw data size
+ *
+ *  @param[in]      dataSize            net data size
+ *
+ *  @retval         packet size         the size of the complete packet to
+ *                                      be sent or received
+ */
+UINT32 trdp_packetSizePD2 (
+    UINT32 dataSize);
+#endif
 
 /*********************************************************************************************************************/
 /** Get the packet size from the raw data size

@@ -379,6 +379,33 @@ EXT_DECL TRDP_ERR_T tlp_put (
     const UINT8         *pData,
     UINT32              dataSize);
 
+#ifdef TRDP_TSN
+/**********************************************************************************************************************/
+/** Update and send process data immediately.
+ *  \brief Only available for TSN enabled version.
+ *  Update previously published data. The new telegram will be sent at txTime, if != 0 and the used interface
+ *  supports TSN.
+ *  Note:   This function is not protected by any mutexes and should not be called while adding or removing any
+ *          publishers, subscribers or sessions!
+ *
+ *  @param[in]      appHandle          the handle returned by tlc_openSession
+ *  @param[in]      pubHandle          the handle returned by publish
+ *  @param[in,out]  pData              pointer to application's data buffer
+ *  @param[in,out]  dataSize           size of data
+ *  @param[in]      pTxTime            when to send (absolute time)
+ *
+ *  @retval         TRDP_NO_ERR        no error
+ *  @retval         TRDP_PARAM_ERR     parameter error on uninitialized parameter or changed dataSize compared to published one
+ *  @retval         TRDP_NOPUB_ERR     not published
+ *  @retval         TRDP_NOINIT_ERR    handle invalid
+ */
+TRDP_ERR_T tlp_putImmediate (
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_PUB_T          pubHandle,
+    const UINT8         *pData,
+    UINT32              dataSize,
+    VOS_TIMEVAL_T       *pTxTime);
+#endif
 
 /**********************************************************************************************************************/
 /** Do not send redundant PD's when we are follower.
@@ -456,7 +483,7 @@ EXT_DECL TRDP_ERR_T tlp_request (
     UINT32                  replyComId,
     TRDP_IP_ADDR_T          replyIpAddr);
 
-
+#ifndef TRDP_TSN
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages.
  *  Subscribe to a specific PD ComID and source IP
@@ -496,6 +523,50 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     UINT32              timeout,
     TRDP_TO_BEHAVIOR_T  toBehavior);
 
+
+#else /* TRDP_TSN */
+
+/**********************************************************************************************************************/
+/** Prepare for receiving PD messages via TSN.
+ *  Same as previous call, but allows defining a virtual interface thru the TRDP_SEND_PARAM_T communication parameters
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[out]     pSubHandle          return a handle for this subscription
+ *  @param[in]      pUserRef            user supplied value returned within the info structure
+ *  @param[in]      pfCbFunction        Pointer to subscriber specific callback function, NULL to use default function
+ *  @param[in]      comId               comId of packet to receive
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr1          Source IP address, lower address in case of address range, set to 0 if not used
+ *  @param[in]      srcIpAddr2          upper address in case of address range, set to 0 if not used
+ *  @param[in]      destIpAddr          IP address to join
+ *  @param[in]      pktFlags            OPTION:
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *  @param[in]      pRecParams          Pointer to Communication parameters (optional, to define VLAN interface)
+ *  @param[in]      timeout             timeout (>= 10ms) in usec
+ *  @param[in]      toBehavior          OPTION: TRDP_TO_DEFAULT, TRDP_TO_SET_TO_ZERO, TRDP_TO_KEEP_LAST_VALUE
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not reserve memory (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlp_subscribe (
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_SUB_T          *pSubHandle,
+    const void          *pUserRef,
+    TRDP_PD_CALLBACK_T  pfCbFunction,
+    UINT32              comId,
+    UINT32              etbTopoCnt,
+    UINT32              opTrnTopoCnt,
+    TRDP_IP_ADDR_T      srcIpAddr1,
+    TRDP_IP_ADDR_T      srcIpAddr2,
+    TRDP_IP_ADDR_T      destIpAddr,
+    TRDP_FLAGS_T        pktFlags,
+    const TRDP_SEND_PARAM_T *pRecParams,
+    UINT32              timeout,
+    TRDP_TO_BEHAVIOR_T  toBehavior);
+#endif
 
 /**********************************************************************************************************************/
 /** Reprepare for receiving PD messages.

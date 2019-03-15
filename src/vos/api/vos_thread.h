@@ -35,6 +35,8 @@
 #include "vos_private.h"
 #include "time.h"
 #include "semaphore.h"
+#else
+#include <time.h>
 #endif
 
 #ifdef __cplusplus
@@ -107,11 +109,15 @@ typedef enum
 {
     VOS_THREAD_POLICY_OTHER = 0,        /*  Default for the target system    */
     VOS_THREAD_POLICY_FIFO,             /*  First come, first serve          */
-    VOS_THREAD_POLICY_RR                /*  Round robin                      */
+    VOS_THREAD_POLICY_RR,               /*  Round robin                      */
+    VOS_THREAD_POLICY_DEADLINE          /*  Global Earliest Deadline First (GEDF)     */
 } VOS_THREAD_POLICY_T;
 
-/** Thread priority range from 1 (highest) to 255 (lowest), 0 default of the target system    */
+/** Thread priority range from 1 (lowest) to 255 (highest), 0 default of the target system    */
 typedef UINT8 VOS_THREAD_PRIORITY_T;
+#define VOS_THREAD_PRIORITY_DEFAULT     0
+#define VOS_THREAD_PRIORITY_LOWEST      1
+#define VOS_THREAD_PRIORITY_HIGHEST     255
 
 /** Thread function definition    */
 typedef void (__cdecl * VOS_THREAD_FUNC_T)(void *pArg);
@@ -190,6 +196,9 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     VOS_THREAD_POLICY_T     policy,
     VOS_THREAD_PRIORITY_T   priority,
     UINT32                  interval,
+#ifdef TRDP_TSN
+    VOS_TIMEVAL_T           *pStartTime, /*  @param[in]      pStartTime        Starting time for cyclic threads */
+#endif
     UINT32                  stackSize,
     VOS_THREAD_FUNC_T       pFunction,
     void                    *pArguments);
@@ -269,7 +278,7 @@ EXT_DECL VOS_ERR_T vos_threadSelf (
     VOS_THREAD_T *pThread);
 
 /**********************************************************************************************************************/
-/** Return the current time in sec and us
+/** Return the current monotonic time in sec and us
  *
  *
  *  @param[out]     pTime            Pointer to time value
@@ -278,6 +287,18 @@ EXT_DECL VOS_ERR_T vos_threadSelf (
 EXT_DECL void vos_getTime (
     VOS_TIMEVAL_T *pTime);
 
+/**********************************************************************************************************************/
+/** Return the current real time in sec and us
+ *
+ *
+ *  @param[out]     pTime            Pointer to time value
+ */
+
+EXT_DECL void vos_getRealTime (
+    VOS_TIMEVAL_T   *pTime);
+
+EXT_DECL void vos_getNanoTime (
+    UINT64          *pTime);
 
 /**********************************************************************************************************************/
 /** Get a time-stamp string.

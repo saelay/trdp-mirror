@@ -22,6 +22,7 @@
  *      SB 2018-01-17: Ticket: #230 multiple Subscribers with same comId, sourceIPs but different destinationIPs not working
  *      BL 2018-11-06: for-loops limited to sCurrentMaxSocketCnt instead VOS_MAX_SOCKET_CNT
  *      BL 2018-11-06: Ticket #219: PD Sequence Counter is not synched correctly
+ *      BL 2018-09-29: Ticket #191 Ready for TSN (PD2 Header)
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
@@ -178,6 +179,35 @@ static BOOL8 trdp_SockDelJoin (
     return FALSE;
 }
 
+#ifdef TRDP_TSN
+static TRDP_IP_ADDR_T trdp_getOwnIP()
+{
+    UINT32          i;
+    UINT32          addrCnt = 2 * VOS_MAX_NUM_IF;
+    VOS_IF_REC_T    localIF[2 * VOS_MAX_NUM_IF];
+    (void) vos_getInterfaces(&addrCnt, localIF);
+    for (i = 0u; i < addrCnt; ++i)
+    {
+        if ((localIF[i].mac[0] ||        /* Take a MAC address as indicator for an ethernet interface */
+            localIF[i].mac[1] ||
+            localIF[i].mac[2] ||
+            localIF[i].mac[3] ||
+            localIF[i].mac[4] ||
+            localIF[i].mac[5])
+            &&
+            (localIF[i].ipAddr != VOS_INADDR_ANY)
+             &&
+            (localIF[i].ipAddr != INADDR_LOOPBACK)
+            )
+        {
+            vos_printLog(VOS_LOG_INFO, "Own IP determined as %s\n", vos_ipDotted(localIF[i].ipAddr));
+            return localIF[i].ipAddr;   /* Could still be unset!    */
+        }
+    }
+    vos_printLogStr(VOS_LOG_WARNING, "Own IP could not be determined!\n");
+    return VOS_INADDR_ANY;
+}
+#endif
 
 /***********************************************************************************************************************
  *   Globals
@@ -186,6 +216,11 @@ static BOOL8 trdp_SockDelJoin (
 INT32 trdp_getCurrentMaxSocketCnt()
 {
     return sCurrentMaxSocketCnt;
+}
+
+void trdp_setCurrentMaxSocketCnt(INT32 currentMaxSocketCnt)
+{
+    sCurrentMaxSocketCnt = currentMaxSocketCnt;
 }
 
 /**********************************************************************************************************************/
@@ -715,6 +750,7 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
     }
 }
 
+#ifndef TRDP_TSN
 /**********************************************************************************************************************/
 /** Handle the socket pool: Request a socket from our socket pool
  *  First we loop through the socket pool and check if there is already a socket
@@ -739,17 +775,17 @@ void trdp_initSockets (TRDP_SOCKETS_T iface[])
  *  @retval         TRDP_PARAM_ERR
  */
 TRDP_ERR_T  trdp_requestSocket (
-    TRDP_SOCKETS_T          iface[],
-    UINT16                  port,
-    const TRDP_SEND_PARAM_T *params,
-    TRDP_IP_ADDR_T          srcIP,
-    TRDP_IP_ADDR_T          mcGroup,
-    TRDP_SOCK_TYPE_T        type,
-    TRDP_OPTION_T           options,
-    BOOL8                   rcvMostly,
-    SOCKET                  useSocket,
-    INT32                   *pIndex,
-    TRDP_IP_ADDR_T          cornerIp)
+                                TRDP_SOCKETS_T          iface[],
+                                UINT16                  port,
+                                const TRDP_SEND_PARAM_T *params,
+                                TRDP_IP_ADDR_T          srcIP,
+                                TRDP_IP_ADDR_T          mcGroup,
+                                TRDP_SOCK_TYPE_T        type,
+                                TRDP_OPTION_T           options,
+                                BOOL8                   rcvMostly,
+                                SOCKET                  useSocket,
+                                INT32                   *pIndex,
+                                TRDP_IP_ADDR_T          cornerIp)
 {
     VOS_SOCK_OPT_T  sock_options;
     INT32           lIndex;
@@ -770,7 +806,7 @@ TRDP_ERR_T  trdp_requestSocket (
      and possibly add that group, if everything else fits.
      We remember already closed sockets on the way to be able to fill up gaps  */
 
-    for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
+    for (lIndex = 0; lIndex < trdp_getCurrentMaxSocketCnt(); lIndex++)
     {
         /*  Check if the wanted socket is already in our list; if yes, increment usage */
         if (useSocket != VOS_INVALID_SOCKET &&
@@ -812,7 +848,7 @@ TRDP_ERR_T  trdp_requestSocket (
                 }
             }
 
-/* add_start TOSHIBA 0306 */
+            /* add_start TOSHIBA 0306 */
             if ((type != TRDP_SOCK_MD_TCP)
                 && (iface[lIndex].bindAddr != 0)
                 && !vos_isMulticast(iface[lIndex].bindAddr))
@@ -821,10 +857,10 @@ TRDP_ERR_T  trdp_requestSocket (
                 if (err != TRDP_NO_ERR)
                 {
                     /* Avoid to excessive error reporting:
-                    vos_printLog(VOS_LOG_WARNING, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
+                     vos_printLog(VOS_LOG_WARNING, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
                 }
             }
-/* add_end TOSHIBA */
+            /* add_end TOSHIBA */
 
             /* Use that socket */
             *pIndex = lIndex;
@@ -855,7 +891,7 @@ TRDP_ERR_T  trdp_requestSocket (
         }
         else
         {
-            sCurrentMaxSocketCnt = lIndex + 1;
+            trdp_setCurrentMaxSocketCnt(lIndex + 1);
         }
 
         iface[lIndex].sock          = VOS_INVALID_SOCKET;
@@ -906,96 +942,96 @@ TRDP_ERR_T  trdp_requestSocket (
 
         switch (type)
         {
-           case TRDP_SOCK_MD_UDP:
-               sock_options.nonBlocking = TRUE;  /* MD UDP sockets are always non blocking because they are polled */
-           case TRDP_SOCK_PD:
-               err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[lIndex].sock, &sock_options);
-               if (err != TRDP_NO_ERR)
-               {
-                   vos_printLog(VOS_LOG_ERROR, "vos_sockOpenUDP failed! (Err: %d)\n", err);
-                   *pIndex = TRDP_INVALID_SOCKET_INDEX;
-               }
-               else
-               {
-                   iface[lIndex].usage = 1;
-                   *pIndex = lIndex;
+            case TRDP_SOCK_MD_UDP:
+                sock_options.nonBlocking = TRUE;  /* MD UDP sockets are always non blocking because they are polled */
+            case TRDP_SOCK_PD:
+                err = (TRDP_ERR_T) vos_sockOpenUDP(&iface[lIndex].sock, &sock_options);
+                if (err != TRDP_NO_ERR)
+                {
+                    vos_printLog(VOS_LOG_ERROR, "vos_sockOpenUDP failed! (Err: %d)\n", err);
+                    *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                }
+                else
+                {
+                    iface[lIndex].usage = 1;
+                    *pIndex = lIndex;
 
-                   if (rcvMostly)
-                   {
-                       /*  Only bind to local IP if we are not a multicast listener  */
-                       if (0 == mcGroup)
-                       {
-                           err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, port);
-                       }
-                       else
-                       {
-                           err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, 0 /*mcGroup*/, port);
-                       }
+                    if (rcvMostly)
+                    {
+                        /*  Only bind to local IP if we are not a multicast listener  */
+                        if (0 == mcGroup)
+                        {
+                            err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, port);
+                        }
+                        else
+                        {
+                            err = (TRDP_ERR_T) vos_sockBind(iface[lIndex].sock, 0 /*mcGroup*/, port);
+                        }
 
-                       if (err != TRDP_NO_ERR)
-                       {
-                           vos_printLog(VOS_LOG_ERROR, "vos_sockBind() for UDP rcv failed! (Err: %d)\n", err);
-                           *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                           break;
-                       }
+                        if (err != TRDP_NO_ERR)
+                        {
+                            vos_printLog(VOS_LOG_ERROR, "vos_sockBind() for UDP rcv failed! (Err: %d)\n", err);
+                            *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                            break;
+                        }
 
-                       if (0 != mcGroup)
-                       {
+                        if (0 != mcGroup)
+                        {
 
-                           err = (TRDP_ERR_T) vos_sockJoinMC(iface[lIndex].sock, mcGroup, srcIP);
-                           if (err != TRDP_NO_ERR)
-                           {
-                               vos_printLog(VOS_LOG_ERROR, "vos_sockJoinMC() for UDP rcv failed! (Err: %d)\n", err);
-                               *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                               break;
-                           }
-                           else
-                           {
-                               if (trdp_SockAddJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
-                               {
-                                   vos_printLogStr(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
-                               }
-                           }
-                       }
-                   }
-                   else if (iface[lIndex].bindAddr != 0)
-                   {
-                       (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
-                   }
+                            err = (TRDP_ERR_T) vos_sockJoinMC(iface[lIndex].sock, mcGroup, srcIP);
+                            if (err != TRDP_NO_ERR)
+                            {
+                                vos_printLog(VOS_LOG_ERROR, "vos_sockJoinMC() for UDP rcv failed! (Err: %d)\n", err);
+                                *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                                break;
+                            }
+                            else
+                            {
+                                if (trdp_SockAddJoin(iface[lIndex].mcGroups, mcGroup) == FALSE)
+                                {
+                                    vos_printLogStr(VOS_LOG_ERROR, "trdp_SockAddJoin() failed!\n");
+                                }
+                            }
+                        }
+                    }
+                    else if (iface[lIndex].bindAddr != 0)
+                    {
+                        (void) vos_sockBind(iface[lIndex].sock, iface[lIndex].bindAddr, 0);
+                    }
 
-                   /*    Multicast sender shall be bound to an interface    */
-                   if (iface[lIndex].bindAddr != 0 && !vos_isMulticast(iface[lIndex].bindAddr))
-                   {
-                       err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
-                       if (err != TRDP_NO_ERR)
-                       {
-                           /* Avoid to excessive error reporting:
-                            vos_printLog(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
-                           *pIndex = TRDP_INVALID_SOCKET_INDEX;
-                           break;
-                       }
-                   }
+                    /*    Multicast sender shall be bound to an interface    */
+                    if (iface[lIndex].bindAddr != 0 && !vos_isMulticast(iface[lIndex].bindAddr))
+                    {
+                        err = (TRDP_ERR_T) vos_sockSetMulticastIf(iface[lIndex].sock, iface[lIndex].bindAddr);
+                        if (err != TRDP_NO_ERR)
+                        {
+                            /* Avoid to excessive error reporting:
+                             vos_printLog(VOS_LOG_ERROR, "vos_sockSetMulticastIf() for UDP snd failed! (Err: %d)\n", err); */
+                            *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                            break;
+                        }
+                    }
 
-               }
-               break;
-           case TRDP_SOCK_MD_TCP:
-               err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[lIndex].sock, &sock_options);
-               if (err != TRDP_NO_ERR)
-               {
-                   vos_printLog(VOS_LOG_ERROR, "vos_sockOpenTCP() failed! (Err: %d)\n", err);
-                   *pIndex = TRDP_INVALID_SOCKET_INDEX;
-               }
-               else
-               {
-                   iface[lIndex].usage = 1;
-                   *pIndex = lIndex;
-               }
+                }
+                break;
+            case TRDP_SOCK_MD_TCP:
+                err = (TRDP_ERR_T) vos_sockOpenTCP(&iface[lIndex].sock, &sock_options);
+                if (err != TRDP_NO_ERR)
+                {
+                    vos_printLog(VOS_LOG_ERROR, "vos_sockOpenTCP() failed! (Err: %d)\n", err);
+                    *pIndex = TRDP_INVALID_SOCKET_INDEX;
+                }
+                else
+                {
+                    iface[lIndex].usage = 1;
+                    *pIndex = lIndex;
+                }
 
-               break;
-           default:
-               *pIndex  = TRDP_INVALID_SOCKET_INDEX;
-               err      = TRDP_SOCK_ERR;
-               break;
+                break;
+            default:
+                *pIndex  = TRDP_INVALID_SOCKET_INDEX;
+                err      = TRDP_SOCK_ERR;
+                break;
         }
 
         if (err != TRDP_NO_ERR)
@@ -1016,6 +1052,7 @@ err_exit:
     return err;
 }
 
+#endif
 
 /**********************************************************************************************************************/
 /** Handle the socket pool: if a received TCP socket is unused, the socket connection timeout is started.
@@ -1046,7 +1083,7 @@ void  trdp_releaseSocket (
     {
         /* Check all the sockets */
         /* Close the morituri = TRUE sockets */
-        for (lIndex = 0; lIndex < sCurrentMaxSocketCnt; lIndex++)
+        for (lIndex = 0; lIndex < trdp_getCurrentMaxSocketCnt(); lIndex++)
         {
             if (iface[lIndex].tcpParams.morituri == TRUE)
             {

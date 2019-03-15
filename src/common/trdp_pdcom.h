@@ -14,9 +14,10 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  */
- /*
+/*
  * $Id$
  *
+ *      BL 2018-09-29: Ticket #191 Ready for TSN (PD2 Header)
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
  *                     Ticket #47: Protocol change: no FCS for data part of telegrams
@@ -63,9 +64,16 @@ TRDP_ERR_T  trdp_pdPut (
     const UINT8     *pData,
     UINT32          dataSize);
 
+#ifdef TRDP_TSN
+TRDP_ERR_T  trdp_pdCheck (
+    PD_HEADER_T *pPacket,
+    UINT32      packetSize,
+    int         *pIsTSN);
+#else
 TRDP_ERR_T  trdp_pdCheck (
     PD_HEADER_T *pPacket,
     UINT32      packetSize);
+#endif
 
 TRDP_ERR_T  trdp_pdSend (
     SOCKET      pdSock,
@@ -81,6 +89,13 @@ TRDP_ERR_T trdp_pdGet (
 
 TRDP_ERR_T  trdp_pdSendQueued (
     TRDP_SESSION_PT appHandle);
+
+#ifdef TRDP_TSN
+TRDP_ERR_T  trdp_pdSendImmediate (
+    TRDP_SESSION_PT appHandle,
+    PD_ELE_T        *pSendPD,
+    VOS_TIMEVAL_T   *pTxTime);
+#endif
 
 TRDP_ERR_T  trdp_pdReceive (
     TRDP_SESSION_PT pSessionHandle,

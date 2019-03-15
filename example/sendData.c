@@ -115,7 +115,7 @@ int main (int argc, char *argv[])
     UINT32          dataSize    = PD_DEF_DATASIZE;
     TRDP_ERR_T err;
     TRDP_PD_CONFIG_T        pdConfiguration =
-    {NULL, NULL, {5u, 48u, 3u}, TRDP_FLAGS_NONE, 1000000u, TRDP_TO_SET_TO_ZERO, 0u};
+    {NULL, NULL, TRDP_PD_DEFAULT_SEND_PARAM, TRDP_FLAGS_NONE, 1000000u, TRDP_TO_SET_TO_ZERO, 0u};
     TRDP_MEM_CONFIG_T       dynamicConfig   = {NULL, RESERVED_MEMORY, {0}};
     TRDP_PROCESS_CONFIG_T   processConfig   = {"Me", "", 0u, 0u, TRDP_OPTION_BLOCK};
     UINT32  ownIP   = 0u;

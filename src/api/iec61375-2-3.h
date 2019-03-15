@@ -116,7 +116,7 @@
 #define TRDP_PD_DEFAULT_QOS                 5u
 #define TRDP_PD_DEFAULT_TTL                 64u
 #define TRDP_PD_DEFAULT_TIMEOUT             100000u                     /**< [us] 100ms default PD timeout          */
-#define TRDP_PD_DEFAULT_SEND_PARAM          {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0u}
+#define TRDP_PD_DEFAULT_SEND_PARAM          {TRDP_PD_DEFAULT_QOS, TRDP_PD_DEFAULT_TTL, 0u, 0u, 0u}
 
 /**  Default TRDP process options    */
 #define TRDP_PROCESS_DEFAULT_CYCLE_TIME     10000u                      /**< [us] 10ms cycle time for TRDP process  */
