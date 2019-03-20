@@ -20,6 +20,7 @@
  /*
  * $Id$
  *
+ *      SB 2019-03-20: Ticket #235 TRDP MD Listener: Additional filter rule for multicast destIpAddr added
  *      SB 2018-03-01: Ticket #241 MDCallback: MsgType and reply status not set correctly
  *      BL 2018-11-07: Ticket #185 MD reply: Infinite timeout wrong handled
  *      BL 2018-11-07: Ticket #220 Message Data - Different behaviour UDP & TCP
@@ -1676,7 +1677,7 @@ static TRDP_ERR_T trdp_mdHandleRequest (TRDP_SESSION_PT     appHandle,
         }
 
         /* If multicast address is set, but does not match, we go to the next listener (if any) */
-        if ((iterListener->addr.mcGroup != 0u) &&
+        if ((iterListener->addr.mcGroup != 0u || vos_isMulticast(appHandle->pMDRcvEle->addr.destIpAddr)) &&
             (iterListener->addr.mcGroup != appHandle->pMDRcvEle->addr.destIpAddr))
         {
             /* no IP match for unicast addressing */
