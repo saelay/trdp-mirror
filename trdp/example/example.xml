@@ -20,7 +20,7 @@
          <telegram name="telegram2" com-id="1002" data-set-id="1002" >
            <pd-parameter cycle="1000000" />
            <source id="1" uri1="dev01.car01.cst01.lTrain" uri2="dev02.car01.cst01" name="test_connection_1">
-               <sdt-parameter smi1="1234" udv="56" rx-period="100" tx-period="1000" />
+               <sdt-parameter smi1="1002" udv="56" rx-period="100" tx-period="1000" />
            </source>
            <destination id="10" uri="dev03.car01.cst01.lTrain" name="Another_connection">
                 <sdt-parameter smi1="2345" udv="67" rx-period="100" tx-period="500" />

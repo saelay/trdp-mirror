@@ -14,19 +14,19 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  */
- /*
- * $Id$
- *
- *
- *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
- *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
- *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
- *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
- *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
- *      BL 2015-11-24: Accessor for IP address of session
- *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
- *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
- */
+/*
+* $Id$
+*
+*
+*      BL 2018-03-06: Ticket #101 Optional callback function on PD send
+*      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
+*      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
+*     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
+*     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
+*      BL 2015-11-24: Accessor for IP address of session
+*      BL 2015-09-04: Ticket #99: refCon for tlc_init()
+*      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
+*/
 
 #ifndef TRDP_IF_LIGHT_H
 #define TRDP_IF_LIGHT_H
@@ -205,7 +205,7 @@ EXT_DECL TRDP_ERR_T tlc_setOpTrainTopoCount (
     UINT32              opTrnTopoCnt);
 
 EXT_DECL UINT32     tlc_getOpTrainTopoCount (
-    TRDP_APP_SESSION_T  appHandle);
+    TRDP_APP_SESSION_T appHandle);
 
 /**********************************************************************************************************************/
 /** Frees the buffer reserved by the TRDP layer.
@@ -268,7 +268,7 @@ EXT_DECL TRDP_ERR_T tlc_process (
  *
  *  @retval         realIP
  */
-EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T     appHandle);
+EXT_DECL TRDP_IP_ADDR_T tlc_getOwnIpAddress (TRDP_APP_SESSION_T appHandle);
 
 /*******************************************************************************
    PD specific functions
@@ -316,6 +316,52 @@ EXT_DECL TRDP_ERR_T tlp_publish (
     const TRDP_SEND_PARAM_T *pSendParam,
     const UINT8             *pData,
     UINT32                  dataSize);
+
+#ifdef TRDP_TSN
+/**********************************************************************************************************************/
+/** Prepare for sending PD messages.
+ *  Queue a PD message, it will be send when tlc_publish has been called
+ *
+ *  @param[in]      appHandle           the handle returned by tlc_openSession
+ *  @param[out]     pPubHandle          returned handle for related re/unpublish
+ *  @param[in]      pUserRef            user supplied value returned within the info structure of callback function
+ *  @param[in]      pfCbFunction        Pointer to pre-send callback function, NULL if not used
+ *  @param[in]      comId               comId of packet to send
+ *  @param[in]      etbTopoCnt          ETB topocount to use, 0 if consist local communication
+ *  @param[in]      opTrnTopoCnt        operational topocount, != 0 for orientation/direction sensitive communication
+ *  @param[in]      srcIpAddr           own IP address, 0 - srcIP will be set by the stack
+ *  @param[in]      destIpAddr          where to send the packet to
+ *  @param[in]      interval            frequency of PD packet (>= 10ms) in usec
+ *  @param[in]      redId               0 - Non-redundant, > 0 valid redundancy group
+ *  @param[in]      pktFlags            OPTION:
+ *                                      TRDP_FLAGS_DEFAULT, TRDP_FLAGS_NONE, TRDP_FLAGS_MARSHALL, TRDP_FLAGS_CALLBACK
+ *                                      TRDP_FLAGS_TSN, ...
+ *  @param[in]      pSendParam          optional pointer to send parameter, NULL - default parameters are used
+ *  @param[in]      pData               pointer to data packet / dataset, NULL if sending starts later with tlp_put()
+ *  @param[in]      dataSize            size of data packet >= 0 and <= TRDP_MAX_PD_DATA_SIZE
+ *
+ *  @retval         TRDP_NO_ERR         no error
+ *  @retval         TRDP_PARAM_ERR      parameter error
+ *  @retval         TRDP_MEM_ERR        could not insert (out of memory)
+ *  @retval         TRDP_NOINIT_ERR     handle invalid
+ */
+EXT_DECL TRDP_ERR_T tlp_publishTSN (
+    TRDP_APP_SESSION_T      appHandle,
+    TRDP_PUB_T              *pPubHandle,
+    const void              *pUserRef,
+    TRDP_PD_CALLBACK_T      pfCbFunction,
+    UINT32                  comId,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
+    TRDP_IP_ADDR_T          srcIpAddr,
+    TRDP_IP_ADDR_T          destIpAddr,
+    UINT32                  interval,
+    UINT32                  redId,
+    TRDP_FLAGS_T            pktFlags,
+    const TRDP_SEND_PARAM_T *pSendParam,
+    const UINT8             *pData,
+    UINT32                  dataSize);
+#endif
 
 /**********************************************************************************************************************/
 /** Prepare for sending PD messages.
@@ -483,7 +529,6 @@ EXT_DECL TRDP_ERR_T tlp_request (
     UINT32                  replyComId,
     TRDP_IP_ADDR_T          replyIpAddr);
 
-#ifndef TRDP_TSN
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages.
  *  Subscribe to a specific PD ComID and source IP
@@ -524,8 +569,7 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
     TRDP_TO_BEHAVIOR_T  toBehavior);
 
 
-#else /* TRDP_TSN */
-
+#ifdef TRDP_TSN
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages via TSN.
  *  Same as previous call, but allows defining a virtual interface thru the TRDP_SEND_PARAM_T communication parameters
@@ -551,21 +595,21 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
  *  @retval         TRDP_MEM_ERR        could not reserve memory (out of memory)
  *  @retval         TRDP_NOINIT_ERR     handle invalid
  */
-EXT_DECL TRDP_ERR_T tlp_subscribe (
-    TRDP_APP_SESSION_T  appHandle,
-    TRDP_SUB_T          *pSubHandle,
-    const void          *pUserRef,
-    TRDP_PD_CALLBACK_T  pfCbFunction,
-    UINT32              comId,
-    UINT32              etbTopoCnt,
-    UINT32              opTrnTopoCnt,
-    TRDP_IP_ADDR_T      srcIpAddr1,
-    TRDP_IP_ADDR_T      srcIpAddr2,
-    TRDP_IP_ADDR_T      destIpAddr,
-    TRDP_FLAGS_T        pktFlags,
+EXT_DECL TRDP_ERR_T tlp_subscribeTSN (
+    TRDP_APP_SESSION_T      appHandle,
+    TRDP_SUB_T              *pSubHandle,
+    const void              *pUserRef,
+    TRDP_PD_CALLBACK_T      pfCbFunction,
+    UINT32                  comId,
+    UINT32                  etbTopoCnt,
+    UINT32                  opTrnTopoCnt,
+    TRDP_IP_ADDR_T          srcIpAddr1,
+    TRDP_IP_ADDR_T          srcIpAddr2,
+    TRDP_IP_ADDR_T          destIpAddr,
+    TRDP_FLAGS_T            pktFlags,
     const TRDP_SEND_PARAM_T *pRecParams,
-    UINT32              timeout,
-    TRDP_TO_BEHAVIOR_T  toBehavior);
+    UINT32                  timeout,
+    TRDP_TO_BEHAVIOR_T      toBehavior);
 #endif
 
 /**********************************************************************************************************************/

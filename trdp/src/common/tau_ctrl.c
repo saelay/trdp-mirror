@@ -14,14 +14,14 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  */
- /*
- * $Id$
- *
- *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
- *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
- *      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
- *
- */
+/*
+* $Id$
+*
+*      BL 2018-03-06: Ticket #101 Optional callback function on PD send
+*     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
+*      BL 2017-04-28: Ticket #155: Kill trdp_proto.h - move definitions to iec61375-2-3.h
+*
+*/
 
 /**********************************************************************************************************************
  * INCLUDES
@@ -110,9 +110,6 @@ EXT_DECL TRDP_ERR_T tau_initEcspCtrl ( TRDP_APP_SESSION_T   appHandle,
                          0, 0,                      /*    Source IP filter                      */
                          appHandle->realIP,         /*    Default destination    (or MC Group)  */
                          TRDP_FLAGS_MARSHALL,       /*    packet flags - UDP, no call back      */
-#ifdef TRDP_TSN
-                         NULL,
-#endif
                          ECSP_STAT_TIMEOUT,         /*    Time out in us                        */
                          TRDP_TO_SET_TO_ZERO);      /*    delete invalid data on timeout        */
 

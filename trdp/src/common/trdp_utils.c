@@ -17,6 +17,7 @@
  /*
  * $Id$
  *
+ *      BL 2019-03-21: Ticket #191 Preparations for TSN (External code)
  *      SB 2019-03-06: Ticket: #230/243 added provisions in trdp_queueFindSubAddr() for systems, that return no destination address
  *      SB 2019-03-05: Ticket: #243 added function trdp_queueFindExistingSub(), that only returns exact matches
  *      SB 2018-01-17: Ticket: #230 multiple Subscribers with same comId, sourceIPs but different destinationIPs not working
@@ -66,12 +67,13 @@ static INT32 sCurrentMaxSocketCnt = 0;
 /***********************************************************************************************************************
  *   Local Functions
  */
-static void     printSocketUsage (TRDP_SOCKETS_T iface[]);
-static BOOL8    trdp_SockIsJoined (const TRDP_IP_ADDR_T mcList[VOS_MAX_MULTICAST_CNT],
+
+void     printSocketUsage (TRDP_SOCKETS_T iface[]);
+BOOL8    trdp_SockIsJoined (const TRDP_IP_ADDR_T mcList[VOS_MAX_MULTICAST_CNT],
                                    TRDP_IP_ADDR_T       mcGroup);
-static BOOL8    trdp_SockAddJoin (TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
+BOOL8    trdp_SockAddJoin (TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
                                   TRDP_IP_ADDR_T    mcGroup);
-static BOOL8    trdp_SockDelJoin (TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
+BOOL8    trdp_SockDelJoin (TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
                                   TRDP_IP_ADDR_T    mcGroup);
 
 /**********************************************************************************************************************/
@@ -80,7 +82,7 @@ static BOOL8    trdp_SockDelJoin (TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT
  *  @param[in]      iface            List of sockets
  *
  */
-static void printSocketUsage (
+void printSocketUsage (
     TRDP_SOCKETS_T iface[])
 {
     INT32 lIndex = 0;
@@ -111,7 +113,7 @@ static void printSocketUsage (
  *  @retval         1           if found
  *                  0           if not found
  */
-static BOOL8 trdp_SockIsJoined (
+BOOL8 trdp_SockIsJoined (
     const TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T          mcGroup)
 {
@@ -134,7 +136,7 @@ static BOOL8 trdp_SockIsJoined (
  *  @retval         1           if added
  *                  0           if list is full
  */
-static BOOL8 trdp_SockAddJoin (
+BOOL8 trdp_SockAddJoin (
     TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T  mcGroup)
 {
@@ -161,7 +163,7 @@ static BOOL8 trdp_SockAddJoin (
  *  @retval         1           if deleted
  *                  0           was not in list
  */
-static BOOL8 trdp_SockDelJoin (
+BOOL8 trdp_SockDelJoin (
     TRDP_IP_ADDR_T  mcList[VOS_MAX_MULTICAST_CNT],
     TRDP_IP_ADDR_T  mcGroup)
 {
@@ -179,8 +181,7 @@ static BOOL8 trdp_SockDelJoin (
     return FALSE;
 }
 
-#ifdef TRDP_TSN
-static TRDP_IP_ADDR_T trdp_getOwnIP()
+TRDP_IP_ADDR_T trdp_getOwnIP()
 {
     UINT32          i;
     UINT32          addrCnt = 2 * VOS_MAX_NUM_IF;
@@ -207,7 +208,6 @@ static TRDP_IP_ADDR_T trdp_getOwnIP()
     vos_printLogStr(VOS_LOG_WARNING, "Own IP could not be determined!\n");
     return VOS_INADDR_ANY;
 }
-#endif
 
 /***********************************************************************************************************************
  *   Globals

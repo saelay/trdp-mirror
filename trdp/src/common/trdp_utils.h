@@ -17,6 +17,7 @@
  /*
  * $Id$
  *
+ *      BL 2019-03-21: Ticket #191 Preparations for TSN (External code)
  *      BL 2018-06-20: Ticket #184: Building with VS 2015: WIN64 and Windows threads (SOCKET instead of INT32)
  *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
  *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
@@ -52,22 +53,38 @@
  * GLOBAL FUNCTIONS
  */
 
-
 extern TRDP_LOG_T   gDebugLevel;
 
-PD_ELE_T            *trdp_queueFindComId (
+void    printSocketUsage (
+    TRDP_SOCKETS_T iface[]);
+
+BOOL8   trdp_SockIsJoined (
+    const TRDP_IP_ADDR_T mcList[VOS_MAX_MULTICAST_CNT],
+    TRDP_IP_ADDR_T       mcGroup);
+
+BOOL8   trdp_SockAddJoin (
+    TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
+    TRDP_IP_ADDR_T    mcGroup);
+
+BOOL8   trdp_SockDelJoin (
+    TRDP_IP_ADDR_T    mcList[VOS_MAX_MULTICAST_CNT],
+    TRDP_IP_ADDR_T    mcGroup);
+
+TRDP_IP_ADDR_T  trdp_getOwnIP(void);
+
+PD_ELE_T    *trdp_queueFindComId (
     PD_ELE_T    *pHead,
     UINT32      comId);
 
-PD_ELE_T            *trdp_queueFindSubAddr (
+PD_ELE_T    *trdp_queueFindSubAddr (
     PD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *pAddr);
 
-PD_ELE_T            *trdp_queueFindExistingSub (
+PD_ELE_T    *trdp_queueFindExistingSub (
     PD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *pAddr);
 
-PD_ELE_T            *trdp_queueFindPubAddr (
+PD_ELE_T    *trdp_queueFindPubAddr (
     PD_ELE_T            *pHead,
     TRDP_ADDRESSES_T    *addr);
 
@@ -102,7 +119,7 @@ void        trdp_MDqueueInsFirst (
 #endif
 
 /*********************************************************************************************************************/
-/** Return the largest number of the socket index
+/** Return/Set the largest number of the socket index
  *
  *  @return      maxSocketCount
  */
@@ -185,17 +202,17 @@ TRDP_IP_ADDR_T trdp_findMCjoins(
  */
 
 TRDP_ERR_T trdp_requestSocket(
-    TRDP_SOCKETS_T iface[],
-    UINT16 port,
-    const TRDP_SEND_PARAM_T * params,
-    TRDP_IP_ADDR_T srcIP,
-    TRDP_IP_ADDR_T mcGroup,
-    TRDP_SOCK_TYPE_T type,
-    TRDP_OPTION_T options,
-    BOOL8 rcvMostly,
-    SOCKET useSocket,
-    INT32                   * pIndex,
-    TRDP_IP_ADDR_T cornerIp);
+    TRDP_SOCKETS_T          iface[],
+    UINT16                  port,
+    const TRDP_SEND_PARAM_T *params,
+    TRDP_IP_ADDR_T          srcIP,
+    TRDP_IP_ADDR_T          mcGroup,
+    TRDP_SOCK_TYPE_T        type,
+    TRDP_OPTION_T           options,
+    BOOL8                   rcvMostly,
+    SOCKET                  useSocket,
+    INT32                   *pIndex,
+    TRDP_IP_ADDR_T          cornerIp);
 
 /*********************************************************************************************************************/
 /** Handle the socket pool: Release a socket from our socket pool
@@ -209,10 +226,10 @@ TRDP_ERR_T trdp_requestSocket(
  */
 
 void trdp_releaseSocket(
-    TRDP_SOCKETS_T iface[],
-    INT32 lIndex,
-    UINT32 connectTimeout,
-    BOOL8 checkAll,
+    TRDP_SOCKETS_T  iface[],
+    INT32           lIndex,
+    UINT32          connectTimeout,
+    BOOL8           checkAll,
     TRDP_IP_ADDR_T  mcGroupUsed);
 
 
@@ -329,8 +346,9 @@ BOOL8 trdp_validTopoCounters (
  *  @retval         TRUE  - received IP is in addressing range of listener
  */
 
-BOOL8 trdp_isInIPrange(TRDP_IP_ADDR_T   receivedSrcIP,
-                       TRDP_IP_ADDR_T   listenedSourceIPlow,
-                       TRDP_IP_ADDR_T   listenedSourceIPhigh);
+BOOL8 trdp_isInIPrange(
+    TRDP_IP_ADDR_T   receivedSrcIP,
+    TRDP_IP_ADDR_T   listenedSourceIPlow,
+    TRDP_IP_ADDR_T   listenedSourceIPhigh);
 
 #endif
