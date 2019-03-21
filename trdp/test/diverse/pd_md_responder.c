@@ -151,11 +151,12 @@ void dbgOut (
              const CHAR8 *pMsgStr)
 {
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
-    
+    CHAR8       *pF = strrchr(pFile, VOS_DIR_SEP);
+
     printf("%s %s %16s:%-4d %s",
            strrchr(pTime, '-') + 1,
            catStr[category],
-           strrchr(pFile, VOS_DIR_SEP) + 1,
+           (pF == NULL)? "" : pF + 1,
            LineNumber,
            pMsgStr);
 }
