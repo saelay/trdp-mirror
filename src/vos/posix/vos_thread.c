@@ -17,6 +17,7 @@
  *
  * $Id$
  *
+ *      BL 2019-03-21: RTE version++
  *      BL 2019-02-19: RTE version
  *      BL 2018-06-25: Ticket #202: vos_mutexTrylock return value
  *      BL 2018-05-03: Ticket #194: Platform independent format specifiers in vos_printLog
@@ -76,64 +77,65 @@ int             vosThreadInitialised = FALSE;
 /* __NR_sched_setattr number */
 #ifndef __NR_sched_setattr
 #ifdef __x86_64__
-#define __NR_sched_setattr      314
+#define __NR_sched_setattr  314
 #endif
 
 #ifdef __i386__
-#define __NR_sched_setattr      351
+#define __NR_sched_setattr  351
 #endif
 
 #ifdef __arm__
-#define __NR_sched_setattr      380
+#define __NR_sched_setattr  380
 #endif
 
 #ifdef __aarch64__
-#define __NR_sched_setattr      274
+#define __NR_sched_setattr  274
 #endif
 #endif
 
 /* __NR_sched_getattr number */
 #ifndef __NR_sched_getattr
 #ifdef __x86_64__
-#define __NR_sched_getattr      315
+#define __NR_sched_getattr  315
 #endif
 
 #ifdef __i386__
-#define __NR_sched_getattr      352
+#define __NR_sched_getattr  352
 #endif
 
 #ifdef __arm__
-#define __NR_sched_getattr      381
+#define __NR_sched_getattr  381
 #endif
 
 #ifdef __aarch64__
-#define __NR_sched_getattr      275
+#define __NR_sched_getattr  275
 #endif
 #endif
 /* Linux scheduler definitions */
-struct sched_attr {
-    uint32_t size;              /* Size of this structure */
-    uint32_t sched_policy;      /* Policy (SCHED_*) */
-    uint64_t sched_flags;       /* Flags */
-    int32_t  sched_nice;        /* Nice value (SCHED_OTHER, SCHED_BATCH) */
-    uint32_t sched_priority;    /* Static priority (SCHED_FIFO, SCHED_RR) */
+struct sched_attr
+{
+    uint32_t    size;           /* Size of this structure */
+    uint32_t    sched_policy;   /* Policy (SCHED_*) */
+    uint64_t    sched_flags;    /* Flags */
+    int32_t     sched_nice;     /* Nice value (SCHED_OTHER, SCHED_BATCH) */
+    uint32_t    sched_priority; /* Static priority (SCHED_FIFO, SCHED_RR) */
     /* Remaining fields are for SCHED_DEADLINE */
-    uint64_t sched_runtime;
-    uint64_t sched_deadline;
-    uint64_t sched_period;
+    uint64_t    sched_runtime;
+    uint64_t    sched_deadline;
+    uint64_t    sched_period;
 };
 
-int sched_setattr(pid_t pid,
-              const struct sched_attr *attr,
-              unsigned int flags)
+int sched_setattr (pid_t                    pid,
+                   const struct sched_attr  *attr,
+                   unsigned int             flags)
 {
     return syscall(__NR_sched_setattr, pid, attr, flags);
 }
 
-int sched_getattr(pid_t pid,
-              struct sched_attr *attr,
-              unsigned int size,
-              unsigned int flags)
+int sched_getattr (pid_t                pid,
+                   struct sched_attr    *attr,
+                   unsigned int         size,
+                   unsigned int         flags)
 {
     return syscall(__NR_sched_getattr, pid, attr, size, flags);
 }
@@ -182,7 +184,7 @@ static int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout)
 int sem_init (sem_t *pSema, int flags, unsigned int mode)
 {
 #pragma unused (flags)
-    
+
     pSema = sem_open("/tmp/trdp.sema", O_CREAT, 0644, (UINT8)mode);
     if (pSema == SEM_FAILED)
     {
@@ -197,11 +199,11 @@ int sem_init (sem_t *pSema, int flags, unsigned int mode)
 /**********************************************************************************************************************/
 /*  Handle fraction overflow
  */
-static void vos_normalize(struct timespec *ts)
+static void vos_normalize (struct timespec *ts)
 {
     while (ts->tv_nsec > 999999999)
     {
-        ts->tv_sec += 1;
+        ts->tv_sec  += 1;
         ts->tv_nsec -= 1000000000;
     }
 }
@@ -234,25 +236,26 @@ static void vos_normalize(struct timespec *ts)
 /* are remaining to represent the seconds, which in turn give 0x10C5 seconds or in decimal 4293    */
 #define MAXSEC_FOR_USECPRESENTATION  4293
 
-typedef struct {
+typedef struct
+{
     const CHAR8         *pName;
     VOS_TIMEVAL_T       startTime;
     UINT32              interval;
     VOS_THREAD_FUNC_T   pFunction;
     void                *pArguments;
 } VOS_THREAD_CYC_T;
- 
+
 static void vos_runCyclicThread (
-    VOS_THREAD_CYC_T    *pParameters)
+    VOS_THREAD_CYC_T *pParameters)
 {
     VOS_TIMEVAL_T       now;
-    VOS_TIMEVAL_T   priorCall;
-    VOS_TIMEVAL_T   afterCall;
-    UINT32          execTime;
-    UINT32          waitingTime;
-    UINT32              interval = pParameters->interval;
-    VOS_THREAD_FUNC_T   pFunction = pParameters->pFunction;
-    void                *pArguments = pParameters->pArguments;
+    VOS_TIMEVAL_T       priorCall;
+    VOS_TIMEVAL_T       afterCall;
+    UINT32              execTime;
+    UINT32              waitingTime;
+    UINT32              interval    = pParameters->interval;
+    VOS_THREAD_FUNC_T   pFunction   = pParameters->pFunction;
+    void *pArguments = pParameters->pArguments;
     VOS_TIMEVAL_T       startTime = pParameters->startTime;
 
 #ifdef SCHED_DEADLINE
@@ -260,23 +263,23 @@ static void vos_runCyclicThread (
     int retCode;
     /* Cyclic tasks are real-time tasks (RTLinux only) */
     {
-        struct sched_attr   rt_attribs;
-        rt_attribs.size = sizeof(struct sched_attr);/* Size of this structure */
-        rt_attribs.sched_policy = SCHED_DEADLINE;   /* Policy (SCHED_*) */
-        rt_attribs.sched_flags = 0u;                /* Flags */
-        rt_attribs.sched_nice = 0;                  /* Nice value (SCHED_OTHER, SCHED_BATCH) */
-        rt_attribs.sched_priority = 0u;             /* Static priority (SCHED_FIFO, SCHED_RR) */
+        struct sched_attr rt_attribs;
+        rt_attribs.size = sizeof(struct sched_attr); /* Size of this structure */
+        rt_attribs.sched_policy     = SCHED_DEADLINE; /* Policy (SCHED_*) */
+        rt_attribs.sched_flags      = 0u;           /* Flags */
+        rt_attribs.sched_nice       = 0;            /* Nice value (SCHED_OTHER, SCHED_BATCH) */
+        rt_attribs.sched_priority   = 0u;           /* Static priority (SCHED_FIFO, SCHED_RR) */
         /* Remaining fields are for SCHED_DEADLINE only */
-        rt_attribs.sched_runtime = pParameters->interval / 4u;
-        rt_attribs.sched_deadline = pParameters->interval / 2u;
-        rt_attribs.sched_period = pParameters->interval;
+        rt_attribs.sched_runtime    = pParameters->interval / 4u;
+        rt_attribs.sched_deadline   = pParameters->interval / 2u;
+        rt_attribs.sched_period     = pParameters->interval;
         retCode = sched_setattr(0, &rt_attribs, 0);
         if (retCode != 0)
         {
             vos_printLog(VOS_LOG_ERROR,
                          "%s sched_setattr for policy %d failed (Err: %d)\n",
                          pParameters->pName,
-                         (int)rt_attribs.sched_policy, 
+                         (int)rt_attribs.sched_policy,
                          (int)errno);
             return VOS_THREAD_ERR;
         }
@@ -291,7 +294,7 @@ static void vos_runCyclicThread (
 
         /* Wait for multiples of interval */
 
-        execTime = ((UINT32)now.tv_usec % interval);
+        execTime    = ((UINT32)now.tv_usec % interval);
         waitingTime = interval - execTime;
         if (waitingTime >= interval)
         {
@@ -306,10 +309,10 @@ static void vos_runCyclicThread (
         vos_getTime(&priorCall);  /* get initial time */
         pFunction(pArguments);    /* perform thread function */
         vos_getTime(&afterCall);  /* get time after function ghas returned */
-        
+
         /* subtract in the pattern after - prior to get the runtime of function() */
         vos_subTime(&afterCall, &priorCall);
-        
+
         /* afterCall holds now the time difference within a structure not compatible with interval */
         /* check if UINT32 fits to hold the waiting time value */
         if (afterCall.tv_sec <= MAXSEC_FOR_USECPRESENTATION)
@@ -331,7 +334,7 @@ static void vos_runCyclicThread (
         {
             /* seems a very critical overflow has happened - or simply a misconfiguration */
             /* as a rough first guess use zero waiting time here */
-            //waitingTime = 0U;
+            /* waitingTime = 0U; */
             /* Have this value range violation logged */
             vos_printLog(VOS_LOG_ERROR,
                          "cyclic thread with interval %u usec exceeded time out by running %ld sec\n",
@@ -368,7 +371,6 @@ EXT_DECL void vos_threadTerm (void)
     vosThreadInitialised = FALSE;
 }
 
-
 /**********************************************************************************************************************/
 /** Create a thread.
  *  Create a thread and return a thread handle for further requests. Not each parameter may be supported by all
@@ -379,7 +381,7 @@ EXT_DECL void vos_threadTerm (void)
  *  @param[in]      policy          Scheduling policy (FIFO, Round Robin or other)
  *  @param[in]      priority        Scheduling priority (1...255 (highest), default 0)
  *  @param[in]      interval        Interval for cyclic threads in us (optional, range 0...999999)
- *  @param[in]      pStartTime       Starting time for cyclic threads
+ *  @param[in]      pStartTime      Starting time for cyclic threads (optional for real time threads)
  *  @param[in]      stackSize       Minimum stacksize, default 0: 16kB
  *  @param[in]      pFunction       Pointer to the thread function
  *  @param[in]      pArguments      Pointer to the thread function parameters
@@ -390,26 +392,21 @@ EXT_DECL void vos_threadTerm (void)
  *  @retval         VOS_THREAD_ERR  thread creation error
  */
 
-EXT_DECL VOS_ERR_T vos_threadCreate (
+EXT_DECL VOS_ERR_T vos_threadCreateSync (
     VOS_THREAD_T            *pThread,
     const CHAR8             *pName,
     VOS_THREAD_POLICY_T     policy,
     VOS_THREAD_PRIORITY_T   priority,
     UINT32                  interval,
-#ifdef TRDP_TSN
     VOS_TIMEVAL_T           *pStartTime,
-#endif
     UINT32                  stackSize,
     VOS_THREAD_FUNC_T       pFunction,
     void                    *pArguments)
 {
-    pthread_t           hThread;
+    pthread_t   hThread;
     pthread_attr_t      threadAttrib;
     struct sched_param  schedParam;  /* scheduling priority */
-    int                 retCode;
-#ifndef TRDP_TSN
-    VOS_TIMEVAL_T       *pStartTime = NULL;
-#endif
+    int         retCode;
 
     if (!vosThreadInitialised)
     {
@@ -422,7 +419,7 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     }
 
     *pThread = NULL;
-    
+
     /* Initialize thread attributes to default values */
     retCode = pthread_attr_init(&threadAttrib);
     if (retCode != 0)
@@ -476,25 +473,25 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     /* Real-time task handling (RTLinux only) */
     if (policy == VOS_THREAD_POLICY_DEADLINE)
     {
-        struct sched_attr   rt_attribs;
-        rt_attribs.size = sizeof(struct sched_attr);/* Size of this structure */
-        rt_attribs.sched_policy = SCHED_DEADLINE;   /* Policy (SCHED_*) */
-        rt_attribs.sched_flags = 0u;                /* Flags */
-        rt_attribs.sched_nice = 0;                  /* Nice value (SCHED_OTHER, SCHED_BATCH) */
-        rt_attribs.sched_priority = 0u;             /* Static priority (SCHED_FIFO, SCHED_RR) */
+        struct sched_attr rt_attribs;
+        rt_attribs.size = sizeof(struct sched_attr); /* Size of this structure */
+        rt_attribs.sched_policy     = SCHED_DEADLINE; /* Policy (SCHED_*) */
+        rt_attribs.sched_flags      = 0u;           /* Flags */
+        rt_attribs.sched_nice       = 0;            /* Nice value (SCHED_OTHER, SCHED_BATCH) */
+        rt_attribs.sched_priority   = 0u;           /* Static priority (SCHED_FIFO, SCHED_RR) */
         /* Remaining fields are for SCHED_DEADLINE only */
-        rt_attribs.sched_runtime = interval;
-        rt_attribs.sched_deadline = interval;
-        rt_attribs.sched_period = interval;
+        rt_attribs.sched_runtime    = interval;
+        rt_attribs.sched_deadline   = interval;
+        rt_attribs.sched_period     = interval;
         retCode = sched_setattr(0, &rt_attribs, 0);
         if (retCode != 0)
         {
             vos_printLog(
-                         VOS_LOG_ERROR,
-                         "%s sched_setattr for policy %d failed (Err: %d)\n",
-                         pName,
-                         (int)rt_attribs.sched_policy,
-                         (int)errno);
+                VOS_LOG_ERROR,
+                "%s sched_setattr for policy %d failed (Err: %d)\n",
+                pName,
+                (int)rt_attribs.sched_policy,
+                (int)errno);
             return VOS_THREAD_ERR;
         }
     }
@@ -518,7 +515,8 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     /* Limit and set the scheduling priority of the thread */
     if (priority > sched_get_priority_max(policy))
     {
-        vos_printLog(VOS_LOG_WARNING, "priority reduced to %d (from demanded %d)\n", (int) sched_get_priority_max(policy), (int) priority);
+        vos_printLog(VOS_LOG_WARNING, "priority reduced to %d (from demanded %d)\n",
+                     (int) sched_get_priority_max(policy), (int) priority);
         priority = (VOS_THREAD_PRIORITY_T) sched_get_priority_max(policy);
     }
     schedParam.sched_priority = priority;
@@ -548,16 +546,16 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     }
     if (interval > 0u)
     {
-        VOS_THREAD_CYC_T    params = {pName, *pStartTime, interval, pFunction, pArguments};
+        VOS_THREAD_CYC_T params = {pName, *pStartTime, interval, pFunction, pArguments};
 
-        /* Create the cyclic thread */
+        /* Create a cyclic thread */
         retCode = pthread_create(&hThread, &threadAttrib, (void *(*)(void *))vos_runCyclicThread, &params);
         vos_threadDelay(10000u);
     }
     else
     {
 
-    /* Create the thread */
+        /* Create the thread */
         retCode = pthread_create(&hThread, &threadAttrib, (void *(*)(void *))pFunction, pArguments);
     }
     if (retCode != 0)
@@ -583,6 +581,41 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
         return VOS_THREAD_ERR;
     }
     return VOS_NO_ERR;
+}
+
+/**********************************************************************************************************************/
+/** Create a thread.
+ *  Create a thread and return a thread handle for further requests. Not each parameter may be supported by all
+ *  target systems!
+ *
+ *  @param[out]     pThread         Pointer to returned thread handle
+ *  @param[in]      pName           Pointer to name of the thread (optional)
+ *  @param[in]      policy          Scheduling policy (FIFO, Round Robin or other)
+ *  @param[in]      priority        Scheduling priority (1...255 (highest), default 0)
+ *  @param[in]      interval        Interval for cyclic threads in us (optional, range 0...999999)
+ *  @param[in]      pStartTime      Starting time for cyclic threads (optional for real time threads)
+ *  @param[in]      stackSize       Minimum stacksize, default 0: 16kB
+ *  @param[in]      pFunction       Pointer to the thread function
+ *  @param[in]      pArguments      Pointer to the thread function parameters
+ *  @retval         VOS_NO_ERR      no error
+ *  @retval         VOS_INIT_ERR    module not initialised
+ *  @retval         VOS_NOINIT_ERR  invalid handle
+ *  @retval         VOS_PARAM_ERR   parameter out of range/invalid
+ *  @retval         VOS_THREAD_ERR  thread creation error
+ */
+
+EXT_DECL VOS_ERR_T vos_threadCreate (
+    VOS_THREAD_T            *pThread,
+    const CHAR8             *pName,
+    VOS_THREAD_POLICY_T     policy,
+    VOS_THREAD_PRIORITY_T   priority,
+    UINT32                  interval,
+    UINT32                  stackSize,
+    VOS_THREAD_FUNC_T       pFunction,
+    void                    *pArguments)
+{
+    return vos_threadCreateSync(pThread, pName, policy, priority, interval,
+                                NULL, stackSize, pFunction, pArguments);
 }
 
 /**********************************************************************************************************************/
@@ -795,7 +828,7 @@ EXT_DECL void vos_getNanoTime (
 
         (void) clock_gettime(CLOCK_REALTIME, &currentTime);
 
-        *pTime   = (uint64_t)currentTime.tv_sec * 1000000000llu + (uint64_t)currentTime.tv_nsec;
+        *pTime = (uint64_t)currentTime.tv_sec * 1000000000llu + (uint64_t)currentTime.tv_nsec;
     }
 }
 #endif
@@ -1231,7 +1264,7 @@ EXT_DECL VOS_ERR_T vos_mutexLock (
     }
 
     return VOS_NO_ERR;   /*lint !e454 was locked */
-}/*lint !e454 was locked */
+} /*lint !e454 was locked */
 
 
 /**********************************************************************************************************************/

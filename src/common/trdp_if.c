@@ -14,65 +14,66 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013. All rights reserved.
  */
- /*
- * $Id$
- *
- *      BL 2019-03-15: Ticket #244 Extend SendParameters to support VLAN Id and TSN
- *      SB 2019-03-05: Ticket #243 Option to turn of ComId 31 subscription, replaced trdp_queueFindSubAddr with trdp_queueFindExistingSub
- *      SB 2019-02-11: Ticket #230 Setting destIpAddr to 0 in tlp_subscribe() if it is not multicast address
- *      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
- *      BL 2018-10-09: Ticket #213 ComId 31 subscription removed (<-- undone!)
- *      BL 2018-09-29: Ticket #191 Ready for TSN (PD2 Header)
- *      BL 2018-06-29: Default settings handling / compiler warnings
- *      SW 2018-06-26: Ticket #205 tlm_addListener() does not acknowledge TRDP_FLAGS_DEFAULT flag
- *      BL 2018-06-25: Ticket #201 tlp_setRedundant return value if redId is 0
- *      BL 2018-06-12: Ticket #204 tlp_publish should take default callback function
- *      BL 2018-05-03: Ticket #199 Setting redId on tlp_request() has no effect
- *      BL 2018-04-20: Ticket #196 setRedundant with redId = 0 stops all publishers
- *      BL 2018-04-18: MD notify: pass optional cb pointer to mdsend
- *      BL 2018-03-06: Ticket #101 Optional callback function on PD send
- *      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
- *      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
- *      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
- *      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
- *      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
- *      BL 2017-11-10: return error in resultCode of tlp_get()
- *      BL 2017-11-09: Ticket #171 Wrong socket binding for multicast request messages
- *     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
- *      BL 2017-07-31: Ticket #168 Unnecessary multicast Join on tlp_publish()
- *      BL 2017-07-12: Ticket #164 Fix for #151 (operator '&' instead of xor)
- *     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
- *     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
- *      BL 2017-05-08: Compiler warnings, local prototypes added
- *      BL 2017-03-02: Ticket #151 tlp_request: timeout-flag is not cleared
- *      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
- *      BL 2017-02-10: Ticket #137 tlc_closeSession should close the tcp socket used for md communication
- *      BL 2017-02-10: Ticket #128 PD: Support of ComId == 0
- *      BL 2017-02-10: Ticket #130 PD Pull: Request is always sent to the same ip address
- *      BL 2017-02-09: Ticket #132  tlp_publish: Check of datasize wrong if using marshaller
- *      BL 2017-02-08: Ticket #142: Compiler warnings / MISRA-C 2012 issues
- *      BL 2017-02-08: Ticket #139: Swap parameter in tlm_reply
- *      BL 2016-07-06: Ticket #122: 64Bit compatibility (+ compiler warnings)
- *      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
- *      BL 2016-06-01: Ticket #119 tlc_getInterval() repeatedly returns 0 after timeout
- *      BL 2016-02-04: Late configuration update/merging
- *      BL 2015-12-22: Mutex optimised in closeSession
- *      BL 2015-12-14: Setter for default configuration added
- *      BL 2015-11-24: Accessor for IP address of session
- *      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
- *      BL 2015-09-04: Ticket #99: refCon for tlc_init()
- *      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
- *      BL 2014-06-03: Do not return error on data-less tlp_request
- *      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
- *                     Removing receive queue on session close added
- *      BL 2014-02-27: Ticket #24: trdp_if.c won't compile without MD_SUPPORT
- *      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
- *      BL 2013-02-01: ID 53: Zero datset size fixed for PD
- *      BL 2013-01-25: ID 20: Redundancy handling fixed
- *      BL 2013-01-08: LADDER: Removed/Changed some ladder specific code in tlp_subscribe()
- *      BL 2012-12-03: ID 1: "using uninitialized PD_ELE_T.pullIpAddress variable"
- *                     ID 2: "uninitialized PD_ELE_T newPD->pNext in tlp_subscribe()"
- */
+/*
+* $Id$
+*
+*      BL 2019-03-21: Ticket #191 Preparations for TSN (External code)
+*      BL 2019-03-15: Ticket #244 Extend SendParameters to support VLAN Id and TSN
+*      SB 2019-03-05: Ticket #243 Option to turn of ComId 31 subscription, replaced trdp_queueFindSubAddr with trdp_queueFindExistingSub
+*      SB 2019-02-11: Ticket #230 Setting destIpAddr to 0 in tlp_subscribe() if it is not multicast address
+*      BL 2019-02-01: Ticket #234 Correcting Statistics ComIds & defines
+*      BL 2018-10-09: Ticket #213 ComId 31 subscription removed (<-- undone!)
+*      BL 2018-09-29: Ticket #191 Ready for TSN (PD2 Header)
+*      BL 2018-06-29: Default settings handling / compiler warnings
+*      SW 2018-06-26: Ticket #205 tlm_addListener() does not acknowledge TRDP_FLAGS_DEFAULT flag
+*      BL 2018-06-25: Ticket #201 tlp_setRedundant return value if redId is 0
+*      BL 2018-06-12: Ticket #204 tlp_publish should take default callback function
+*      BL 2018-05-03: Ticket #199 Setting redId on tlp_request() has no effect
+*      BL 2018-04-20: Ticket #196 setRedundant with redId = 0 stops all publishers
+*      BL 2018-04-18: MD notify: pass optional cb pointer to mdsend
+*      BL 2018-03-06: Ticket #101 Optional callback function on PD send
+*      BL 2018-02-03: Ticket #190 Source filtering (IP-range) for PD subscribe
+*      BL 2017-11-28: Ticket #180 Filtering rules for DestinationURI does not follow the standard
+*      BL 2017-11-17: superfluous session->redID replaced by sndQueue->redId
+*      BL 2017-11-15: Ticket #1   Unjoin on unsubscribe/delListener (finally ;-)
+*      BL 2017-11-10: Ticket #172 Infinite loop of message sending after PD Pull Request when registered in multicast group
+*      BL 2017-11-10: return error in resultCode of tlp_get()
+*      BL 2017-11-09: Ticket #171 Wrong socket binding for multicast request messages
+*     AHW 2017-11-08: Ticket #179 Max. number of retries (part of sendParam) of a MD request needs to be checked
+*      BL 2017-07-31: Ticket #168 Unnecessary multicast Join on tlp_publish()
+*      BL 2017-07-12: Ticket #164 Fix for #151 (operator '&' instead of xor)
+*     AHW 2017-05-30: Ticket #143 tlm_replyErr() only at TRDP level allowed
+*     AHW 2017-05-22: Ticket #158 Infinit timeout at TRDB level is 0 acc. standard
+*      BL 2017-05-08: Compiler warnings, local prototypes added
+*      BL 2017-03-02: Ticket #151 tlp_request: timeout-flag is not cleared
+*      BL 2017-03-01: Ticket #149 SourceUri and DestinationUri don't with 32 characters
+*      BL 2017-02-10: Ticket #137 tlc_closeSession should close the tcp socket used for md communication
+*      BL 2017-02-10: Ticket #128 PD: Support of ComId == 0
+*      BL 2017-02-10: Ticket #130 PD Pull: Request is always sent to the same ip address
+*      BL 2017-02-09: Ticket #132  tlp_publish: Check of datasize wrong if using marshaller
+*      BL 2017-02-08: Ticket #142: Compiler warnings / MISRA-C 2012 issues
+*      BL 2017-02-08: Ticket #139: Swap parameter in tlm_reply
+*      BL 2016-07-06: Ticket #122: 64Bit compatibility (+ compiler warnings)
+*      BL 2016-06-08: Ticket #120: ComIds for statistics changed to proposed 61375 errata
+*      BL 2016-06-01: Ticket #119 tlc_getInterval() repeatedly returns 0 after timeout
+*      BL 2016-02-04: Late configuration update/merging
+*      BL 2015-12-22: Mutex optimised in closeSession
+*      BL 2015-12-14: Setter for default configuration added
+*      BL 2015-11-24: Accessor for IP address of session
+*      BL 2015-11-24: Ticket #104: PD telegrams with no data is never sent
+*      BL 2015-09-04: Ticket #99: refCon for tlc_init()
+*      BL 2014-07-14: Ticket #46: Protocol change: operational topocount needed
+*      BL 2014-06-03: Do not return error on data-less tlp_request
+*      BL 2014-06-02: Ticket #41: Sequence counter handling fixed
+*                     Removing receive queue on session close added
+*      BL 2014-02-27: Ticket #24: trdp_if.c won't compile without MD_SUPPORT
+*      BL 2013-06-24: ID 125: Time-out handling and ready descriptors fixed
+*      BL 2013-02-01: ID 53: Zero datset size fixed for PD
+*      BL 2013-01-25: ID 20: Redundancy handling fixed
+*      BL 2013-01-08: LADDER: Removed/Changed some ladder specific code in tlp_subscribe()
+*      BL 2012-12-03: ID 1: "using uninitialized PD_ELE_T.pullIpAddress variable"
+*                     ID 2: "uninitialized PD_ELE_T newPD->pNext in tlp_subscribe()"
+*/
 
 /***********************************************************************************************************************
  * INCLUDES
@@ -400,7 +401,7 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
     }
     else
     {
-        unsigned int retries;
+        unsigned int        retries;
         /* Define standard send parameters to prvent pdpublish to use tsn in case... */
         TRDP_SEND_PARAM_T   defaultParams = TRDP_PD_DEFAULT_SEND_PARAM;
 
@@ -455,9 +456,6 @@ EXT_DECL TRDP_ERR_T tlc_openSession (
                                     0u, 0u,                 /*    Source IP filters                  */
                                     0u,                     /*    Default destination (or MC Group) */
                                     TRDP_FLAGS_NONE,        /*    packet flags                      */
-#ifdef TRDP_TSN
-                                    NULL,
-#endif
                                     TRDP_INFINITE_TIMEOUT,  /*    Time out in us                    */
                                     TRDP_TO_DEFAULT);       /*    delete invalid data on timeout    */
             }
@@ -1701,7 +1699,7 @@ EXT_DECL TRDP_ERR_T tlc_getInterval (
 
             if (ret != TRDP_NO_ERR)
             {
-               vos_printLogStr(VOS_LOG_INFO, "vos_mutexLock() failed\n");
+                vos_printLogStr(VOS_LOG_INFO, "vos_mutexLock() failed\n");
             }
             else
             {
@@ -2046,7 +2044,6 @@ EXT_DECL TRDP_ERR_T tlp_request (
     return ret;
 }
 
-#ifndef TRDP_TSN
 /**********************************************************************************************************************/
 /** Prepare for receiving PD messages.
  *  Subscribe to a specific PD ComID and source IP.
@@ -2189,13 +2186,13 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
                     /*    Initialize some fields    */
                     if (vos_isMulticast(destIpAddr))
                     {
-                        newPD->addr.mcGroup = destIpAddr;
-                        newPD->privFlags    |= TRDP_MC_JOINT;
+                        newPD->addr.mcGroup     = destIpAddr;
+                        newPD->privFlags        |= TRDP_MC_JOINT;
                         newPD->addr.destIpAddr  = destIpAddr;
                     }
                     else
                     {
-                        newPD->addr.mcGroup = 0u;
+                        newPD->addr.mcGroup     = 0u;
                         newPD->addr.destIpAddr  = 0u;
                     }
 
@@ -2244,7 +2241,6 @@ EXT_DECL TRDP_ERR_T tlp_subscribe (
 
     return ret;
 }
-#endif
 
 /**********************************************************************************************************************/
 /** Stop receiving PD messages.

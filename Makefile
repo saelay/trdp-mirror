@@ -9,7 +9,7 @@
 #// If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #// Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2013-2018. All rights reserved.
 #//
-#//	BL 2019-03-15: Prepared for TSN
+#//	BL 2019-03-21: Prepared for TSN
 #//	BL 2019-01-24: Reduce noise
 #//	BL 2018-05-08: YOCTO / ARM7 configuration added
 #//	BL 2018-02-02: Example renamed: cmdLineSelect -> echoCallback
@@ -35,11 +35,11 @@ CFLAGS += -D$(TARGET_OS)
 
 # Set paths
 INCPATH += -I src/api
-VOS_PATH = -I src/vos/$(TARGET_VOS)
-VOS_INCPATH = -I src/vos/api -I src/common
+VOS_PATH += -I src/vos/$(TARGET_VOS)
+VOS_INCPATH += -I src/vos/api -I src/common
 
-vpath %.c src/common src/vos/common test/udpmdcom src/vos/$(TARGET_VOS) test example test/diverse test/xml
-vpath %.h src/api src/vos/api src/common src/vos/common
+vpath %.c src/common src/vos/common test/udpmdcom src/vos/$(TARGET_VOS) test example test/diverse test/xml $(ADD_SRC)
+vpath %.h src/api src/vos/api src/common src/vos/common $(ADD_INC)
 
 INCLUDES = $(INCPATH) $(VOS_INCPATH) $(VOS_PATH)
 
@@ -60,7 +60,8 @@ VOS_OBJS = vos_utils.o \
 
 #include the TSN socket implementation, if needed
 ifneq (,$(findstring TSN,$(CFLAGS)))
-	VOS_OBJS += vos_sockTSN.o # Found
+	VOS_OBJS += vos_sockTSN.o trdp_tsn.o # Found
+	INCLUDES += -I $(ADD_INC)
 else
 	VOS_OBJS += vos_sock.o # Not found
 endif
@@ -91,7 +92,7 @@ LINT_OBJECTS = trdp_stats.lob\
 	   trdp_mdcom.lob \
 	   trdp_utils.lob \
 	   trdp_if.lob \
-	   trdp_stats.lob     
+	   trdp_stats.lob
 
 # Set LDFLAGS
 LDFLAGS += -L $(OUTDIR)
@@ -156,7 +157,7 @@ xml:		outdir $(OUTDIR)/trdp-xmlprint-test $(OUTDIR)/trdp-xmlpd-test
 %_config:
 	cp -f config/$@ config/config.mk
 
-$(OUTDIR)/%.o: %.c %.h trdp_if_light.h trdp_types.h vos_types.h
+$(OUTDIR)/%.o: %.c trdp_if_light.h trdp_types.h vos_types.h vos_sock.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(OUTDIR)/libtrdp.a:		$(addprefix $(OUTDIR)/,$(notdir $(TRDP_OBJS)))

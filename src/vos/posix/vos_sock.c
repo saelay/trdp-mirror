@@ -37,6 +37,11 @@
     "You are trying to compile the POSIX implementation of vos_sock.c - either define POSIX or exclude this file!"
 #endif
 
+#ifdef TRDP_TSN
+#error \
+    "To build a TSN capable TRDP library another vos_sock implementation is necessary. Sorry!"
+#endif
+
 /***********************************************************************************************************************
  * INCLUDES
  */

@@ -92,9 +92,9 @@ static void ttiRequestTTDBdata (TRDP_APP_SESSION_T  appHandle,
                                 const TRDP_UUID_T   cstUUID);
 
 static void ttiGetUUIDfromLabel (
-                          TRDP_APP_SESSION_T  appHandle,
-                          TRDP_UUID_T         cstUUID,
-                          const TRDP_LABEL_T  cstLabel);
+    TRDP_APP_SESSION_T  appHandle,
+    TRDP_UUID_T         cstUUID,
+    const TRDP_LABEL_T  cstLabel);
 
 static TRDP_IP_ADDR_T ipFromURI (
     TRDP_APP_SESSION_T  appHandle,
@@ -180,8 +180,8 @@ static void ttiPDCallback (
     UINT8                   *pData,
     UINT32                  dataSize)
 {
-    int         changed         = 0;
-    VOS_SEMA_T  waitForInaug    = (VOS_SEMA_T) pMsg->pUserRef;
+    int changed = 0;
+    VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
 
     pRefCon = pRefCon;
 
@@ -218,15 +218,18 @@ static void ttiPDCallback (
             if (appHandle->etbTopoCnt != appHandle->pTTDB->opTrnState.etbTopoCnt)
             {
                 vos_printLog(VOS_LOG_INFO, "ETB topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
-                             appHandle->etbTopoCnt, appHandle->pTTDB->opTrnState.etbTopoCnt, (void*) appHandle);
+                             appHandle->etbTopoCnt, appHandle->pTTDB->opTrnState.etbTopoCnt, (void *) appHandle);
                 changed++;
                 (void) tlc_setETBTopoCount(appHandle, appHandle->pTTDB->opTrnState.etbTopoCnt);
             }
 
             if (appHandle->opTrnTopoCnt != appHandle->pTTDB->opTrnState.state.opTrnTopoCnt)
             {
-                vos_printLog(VOS_LOG_INFO, "OpTrn topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
-                             appHandle->opTrnTopoCnt, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt, (void*) appHandle);
+                vos_printLog(VOS_LOG_INFO,
+                             "OpTrn topocount changed (old: 0x%08x, new: 0x%08x) on %p!\n",
+                             appHandle->opTrnTopoCnt,
+                             appHandle->pTTDB->opTrnState.state.opTrnTopoCnt,
+                             (void *) appHandle);
                 changed++;
                 (void) tlc_setOpTrainTopoCount(appHandle, appHandle->pTTDB->opTrnState.state.opTrnTopoCnt);
             }
@@ -235,7 +238,7 @@ static void ttiPDCallback (
         else if (pMsg->resultCode == TRDP_TIMEOUT_ERR )
         {
             vos_printLog(VOS_LOG_WARNING, "---> Operational status info timed out! Invalidating topocounts on %p!\n",
-                         (void*)appHandle);
+                         (void *)appHandle);
 
             if (appHandle->etbTopoCnt != 0u)
             {
@@ -251,7 +254,7 @@ static void ttiPDCallback (
         else
         {
             vos_printLog(VOS_LOG_INFO, "---> Unsolicited msg received on %p!\n",
-                         (void*)appHandle);
+                         (void *)appHandle);
         }
         if ((changed > 0) && (waitForInaug != NULL))
         {
@@ -431,7 +434,7 @@ static void ttiMDCallback (
     VOS_SEMA_T waitForInaug = (VOS_SEMA_T) pMsg->pUserRef;
 
     (void) pRefCon;
-    
+
     if (pMsg->comId == TTDB_OP_DIR_INFO_COMID ||      /* TTDB notification */
         pMsg->comId == TTDB_OP_DIR_INFO_REP_COMID)
     {
@@ -629,8 +632,8 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
         return TRDP_INIT_ERR;
     }
 
-    ecspIpAddr = ecspIpAddr;
-    hostsFileName = hostsFileName;
+    ecspIpAddr      = ecspIpAddr;
+    hostsFileName   = hostsFileName;
 
     appHandle->pTTDB = (TAU_TTDB_T *) vos_memAlloc(sizeof(TAU_TTDB_T));
     if (appHandle->pTTDB == NULL)
@@ -648,9 +651,6 @@ EXT_DECL TRDP_ERR_T tau_initTTIaccess (
                       VOS_INADDR_ANY, VOS_INADDR_ANY,
                       vos_dottedIP(TTDB_STATUS_DEST_IP),
                       (TRDP_FLAGS_T) (TRDP_FLAGS_CALLBACK | TRDP_FLAGS_FORCE_CB),
-#ifdef TRDP_TSN
-                      NULL,
-#endif
                       TTDB_STATUS_TO * 1000u,
                       TRDP_TO_SET_TO_ZERO) != TRDP_NO_ERR)
     {
@@ -1144,8 +1144,8 @@ EXT_DECL TRDP_ERR_T tau_getCstFctInfo (
         for (l_index2 = 0; l_index2 < vos_ntohs(appHandle->pTTDB->cstInfo[l_index]->fctCnt) &&
              l_index2 < maxFctCnt; ++l_index2)
         {
-            pFctInfo[l_index2]        = appHandle->pTTDB->cstInfo[l_index]->pFctInfoList[l_index2];
-            pFctInfo[l_index2].fctId  = vos_ntohs(pFctInfo[l_index2].fctId);
+            pFctInfo[l_index2] = appHandle->pTTDB->cstInfo[l_index]->pFctInfoList[l_index2];
+            pFctInfo[l_index2].fctId = vos_ntohs(pFctInfo[l_index2].fctId);
         }
     }
     else    /* not found, get it and return directly */
@@ -1268,7 +1268,7 @@ EXT_DECL TRDP_ERR_T tau_getCstInfo (
     }
     if (l_index < TTI_CACHED_CONSISTS)
     {
-        *pCstInfo           = *appHandle->pTTDB->cstInfo[l_index];
+        *pCstInfo = *appHandle->pTTDB->cstInfo[l_index];
         pCstInfo->etbCnt    = vos_ntohs(pCstInfo->etbCnt);
         pCstInfo->vehCnt    = vos_ntohs(pCstInfo->vehCnt);
         pCstInfo->fctCnt    = vos_ntohs(pCstInfo->fctCnt);
@@ -1409,7 +1409,7 @@ EXT_DECL TRDP_ERR_T tau_getOwnIds (
         (appHandle->pTTDB->opTrnState.ownTrnCstNo == 0))            /* from PD 100  */
     {    /* not found, get it and return immediately */
         ttiRequestTTDBdata(appHandle, TTDB_NET_DIR_REQ_COMID, NULL);
-       return TRDP_NODATA_ERR;
+        return TRDP_NODATA_ERR;
     }
 
     /* if not already there, get the consist info for our consist */
@@ -1424,9 +1424,9 @@ EXT_DECL TRDP_ERR_T tau_getOwnIds (
 
     if (pDevId != NULL)
     {
-        unsigned int index;
+        unsigned int    index;
         /* deduct our device / function ID from our IP address */
-        UINT16  ownIP = (UINT16) (appHandle->realIP & 0x00000FFF);
+        UINT16          ownIP = (UINT16) (appHandle->realIP & 0x00000FFF);
         /* Problem: What if it is not set? Default interface is 0! */
 
         /* we traverse the consist info's functions */
@@ -1457,4 +1457,3 @@ EXT_DECL TRDP_ERR_T tau_getOwnIds (
     }
     return TRDP_NO_ERR;
 }
-

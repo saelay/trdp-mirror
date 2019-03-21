@@ -14,11 +14,11 @@
  *          If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *          Copyright Bombardier Transportation Inc. or its subsidiaries and others, 2014. All rights reserved.
  */
- /*
- * $Id$
- *
- *      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
- */
+/*
+* $Id$
+*
+*      BL 2017-05-22: Ticket #122: Addendum for 64Bit compatibility (VOS_TIME_T -> VOS_TIMEVAL_T)
+*/
 
 #ifndef VOS_THREAD_H
 #define VOS_THREAD_H
@@ -180,6 +180,38 @@ EXT_DECL void vos_threadTerm (
  *  @param[in]      policy            Scheduling policy (FIFO, Round Robin or other)
  *  @param[in]      priority          Scheduling priority (1...255 (highest), default 0)
  *  @param[in]      interval          Interval for cyclic threads in us (optional)
+ *  @param[in]      pStartTime        Starting time for cyclic threads
+ *  @param[in]      stackSize         Minimum stacksize, default 0: 16kB
+ *  @param[in]      pFunction         Pointer to the thread function
+ *  @param[in]      pArguments        Pointer to the thread function parameters
+ *
+ *  @retval         VOS_NO_ERR        no error
+ *  @retval         VOS_INIT_ERR      module not initialised
+ *  @retval         VOS_NOINIT_ERR    invalid handle
+ *  @retval         VOS_PARAM_ERR     parameter out of range/invalid
+ */
+
+EXT_DECL VOS_ERR_T vos_threadCreateSync (
+    VOS_THREAD_T            *pThread,
+    const CHAR8             *pName,
+    VOS_THREAD_POLICY_T     policy,
+    VOS_THREAD_PRIORITY_T   priority,
+    UINT32                  interval,
+    VOS_TIMEVAL_T           *pStartTime,
+    UINT32                  stackSize,
+    VOS_THREAD_FUNC_T       pFunction,
+    void                    *pArguments);
+
+/**********************************************************************************************************************/
+/** Create a thread.
+ *  Create a thread and return a thread handle for further requests. Not each parameter may be supported by all
+ *  target systems!
+ *
+ *  @param[out]     pThread           Pointer to returned thread handle
+ *  @param[in]      pName             Pointer to name of the thread (optional)
+ *  @param[in]      policy            Scheduling policy (FIFO, Round Robin or other)
+ *  @param[in]      priority          Scheduling priority (1...255 (highest), default 0)
+ *  @param[in]      interval          Interval for cyclic threads in us (optional)
  *  @param[in]      stackSize         Minimum stacksize, default 0: 16kB
  *  @param[in]      pFunction         Pointer to the thread function
  *  @param[in]      pArguments        Pointer to the thread function parameters
@@ -196,9 +228,6 @@ EXT_DECL VOS_ERR_T vos_threadCreate (
     VOS_THREAD_POLICY_T     policy,
     VOS_THREAD_PRIORITY_T   priority,
     UINT32                  interval,
-#ifdef TRDP_TSN
-    VOS_TIMEVAL_T           *pStartTime, /*  @param[in]      pStartTime        Starting time for cyclic threads */
-#endif
     UINT32                  stackSize,
     VOS_THREAD_FUNC_T       pFunction,
     void                    *pArguments);
@@ -294,11 +323,11 @@ EXT_DECL void vos_getTime (
  *  @param[out]     pTime            Pointer to time value
  */
 
-EXT_DECL void vos_getRealTime (
-    VOS_TIMEVAL_T   *pTime);
+EXT_DECL void   vos_getRealTime (
+    VOS_TIMEVAL_T *pTime);
 
-EXT_DECL void vos_getNanoTime (
-    UINT64          *pTime);
+EXT_DECL void   vos_getNanoTime (
+    UINT64 *pTime);
 
 /**********************************************************************************************************************/
 /** Get a time-stamp string.
