@@ -74,10 +74,11 @@ static void dbgOut (
     (void) pRefCon;
 
     const char *catStr[] = {"**Error:", "Warning:", "   Info:", "  Debug:", "   User:"};
+    CHAR8       *pF = strrchr(pFile, VOS_DIR_SEP);
     printf("%s %s %s:%d %s",
            strrchr(pTime, '-') + 1,
            catStr[category],
-           strrchr(pFile, VOS_DIR_SEP) + 1,
+           (pF == NULL)? "" : pF + 1,
            LineNumber,
            pMsgStr);
 }
