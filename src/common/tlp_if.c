@@ -17,7 +17,6 @@
 /*
 * $Id$
 *
-*      BL 2019-12-06: Ticket #300 Can error message in tlp_setRedundant() be changed to warning?
 *      BL 2019-10-25: Ticket #288 Why is not tlm_reply() exported from the DLL
 *      BL 2019-10-15: Ticket #282 Preset index table size and depth to prevent memory fragmentation
 *      BL 2019-08-23: Possible crash on unsubscribing or unpublishing in High Performance mode
@@ -140,7 +139,7 @@ EXT_DECL TRDP_ERR_T tlp_getInterval (
                 }
                 else    /* if no timeout set, set maximum time to 1000sec   */
                 {
-                    pInterval->tv_sec   = 1u;                               /* 1s if no timeout is set          */
+                    pInterval->tv_sec   = 1u;                               /* 1000s if no timeout is set      */
                     pInterval->tv_usec  = 0;                                /* Application should limit this    */
                 }
             }

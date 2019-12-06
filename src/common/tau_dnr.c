@@ -661,7 +661,7 @@ static void updateDNSentry (
                 if (cacheEntry >= TAU_MAX_NO_CACHE_ENTRY)   /* Cache is full! */
                 {
                     cacheEntry = 0u;                        /* Overwrite first */
-                    /* tbd: cacheEntry = cacheGetOldest(); */
+                    // tbd: cacheEntry = cacheGetOldest();
                 }
                 else
                 {
@@ -762,7 +762,7 @@ static void addEntry (
     if (cacheEntry >= TAU_MAX_NO_CACHE_ENTRY)   /* Cache is full! */
     {
         cacheEntry = 0u;                        /* Overwrite first */
-        /* tbd: cacheEntry = cacheGetOldest(); */
+        // tbd: cacheEntry = cacheGetOldest();
     }
     else
     {
@@ -869,7 +869,7 @@ static void dnrMDCallback (
         VOS_SEMA_T      *pDnsSema = (VOS_SEMA_T*) pMsg->pUserRef;
 
         /* tbd: Is packet valid? */
-        /* if (sdt_isvalid(appHandle, pData, dataSize)) ... */
+        // if (sdt_isvalid(appHandle, pData, dataSize)) ...
 
         /* update the cache */
         parseUpdateTCNResponse((TAU_DNR_DATA_T *) appHandle->pUser, (TRDP_DNS_REPLY_T *)pData, dataSize);
