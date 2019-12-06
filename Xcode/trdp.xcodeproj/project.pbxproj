@@ -721,7 +721,6 @@
 		085323DB20DD5C2C00A29E56 /* VSExpress2015 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = VSExpress2015; path = ../VSExpress2015; sourceTree = "<group>"; };
 		08545AE9230C2288008C3C33 /* trdp-pd-test-fast */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "trdp-pd-test-fast"; sourceTree = BUILT_PRODUCTS_DIR; };
 		08545AEC230C22D9008C3C33 /* trdp-pd-test-fast.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "trdp-pd-test-fast.c"; sourceTree = "<group>"; };
-		085518E523157B080069A5FB /* serviceRegistrySample.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = serviceRegistrySample.c; sourceTree = "<group>"; };
 		085518E623157D080069A5FB /* api_test_3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = api_test_3.c; sourceTree = "<group>"; };
 		085518F123157E540069A5FB /* test_local_loop3 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test_local_loop3; sourceTree = BUILT_PRODUCTS_DIR; };
 		08594B061B6FAC160066EA06 /* spy */ = {isa = PBXFileReference; lastKnownFileType = folder; name = spy; path = ../spy; sourceTree = "<group>"; };
@@ -1282,14 +1281,6 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		085518E423157B080069A5FB /* SRM */ = {
-			isa = PBXGroup;
-			children = (
-				085518E523157B080069A5FB /* serviceRegistrySample.c */,
-			);
-			path = SRM;
-			sourceTree = "<group>";
-		};
 		08594B311B70E9DF0066EA06 /* common */ = {
 			isa = PBXGroup;
 			children = (
@@ -1566,7 +1557,6 @@
 		73821F3B150777B00046E0AC /* example */ = {
 			isa = PBXGroup;
 			children = (
-				085518E423157B080069A5FB /* SRM */,
 				0864C3D72243A37800E091E1 /* TSN */,
 				08D9D5D51EDDA32C00EE2FA0 /* TAUL_PD */,
 				08014D1D16483FC50065AADD /* SenderDemo */,
@@ -4239,7 +4229,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_C_LANGUAGE_STANDARD = c89;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -4296,7 +4286,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_C_LANGUAGE_STANDARD = c89;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;

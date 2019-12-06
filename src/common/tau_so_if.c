@@ -446,6 +446,7 @@ EXT_DECL TRDP_ERR_T tau_getServicesList (
     SRM_SERVICE_ENTRIES_T   *pFilterEntry)
 {
     TRDP_ERR_T      err;
+    VOS_ERR_T       vos_err;
     TAU_CB_BLOCK_T  context = {0, NULL, 0u, TRDP_NO_ERR};
     TRDP_UUID_T     sessionId;
 
@@ -457,7 +458,7 @@ EXT_DECL TRDP_ERR_T tau_getServicesList (
 
     memset(&sessionId, 0u, sizeof(sessionId));
 
-    VOS_ERR_T vos_err = vos_semaCreate(&context.waitForResponse, VOS_SEMA_EMPTY);
+    vos_err = vos_semaCreate(&context.waitForResponse, VOS_SEMA_EMPTY);
     if (vos_err != VOS_NO_ERR)
     {
         err = TRDP_SEMA_ERR;

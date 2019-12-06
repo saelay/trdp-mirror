@@ -139,7 +139,7 @@ EXT_DECL TRDP_ERR_T tlp_getInterval (
                 }
                 else    /* if no timeout set, set maximum time to 1000sec   */
                 {
-                    pInterval->tv_sec   = 1u;                               /* 1000s if no timeout is set      */
+                    pInterval->tv_sec   = 1u;                               /* 1s if no timeout is set          */
                     pInterval->tv_usec  = 0;                                /* Application should limit this    */
                 }
             }

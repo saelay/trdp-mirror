@@ -38,7 +38,7 @@
 #include <pthread.h>
 #include <sched.h>
 
-#ifdef __APPLE__
+#ifdef HAS_UUID
 #include <uuid/uuid.h>
 #else
 #include "vos_sock.h"
@@ -692,7 +692,7 @@ EXT_DECL INT32 vos_cmpTime (
 EXT_DECL void vos_getUuid (
     VOS_UUID_T pUuID)
 {
-#ifdef __APPLE__
+#ifdef HAS_UUID
     uuid_generate_time(pUuID);
 #else
     /*  Manually creating a UUID from time stamp and MAC address  */

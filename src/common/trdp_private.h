@@ -59,7 +59,7 @@
 #ifndef TRDP_VERSION
 #define TRDP_VERSION    2u
 #define TRDP_RELEASE    0u
-#define TRDP_UPDATE     2u
+#define TRDP_UPDATE     3u
 #define TRDP_EVOLUTION  0u
 #endif
 
@@ -148,7 +148,7 @@ typedef enum
     TRDP_SOCK_PD        = 1u,               /**< Socket is used for UDP process data                    */
     TRDP_SOCK_MD_UDP    = 2u,               /**< Socket is used for UDP message data                    */
     TRDP_SOCK_MD_TCP    = 3u,               /**< Socket is used for TCP message data                    */
-    TRDP_SOCK_PD_TSN    = 4u,               /**< Socket is used for TSN process data                    */
+    TRDP_SOCK_PD_TSN    = 4u                /**< Socket is used for TSN process data                    */
 } TRDP_SOCK_TYPE_T;
 
 /** Hidden handle definition, used as unique addressing item    */
